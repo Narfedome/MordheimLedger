@@ -1,6 +1,8 @@
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 using Microsoft.Extensions.Logging;
 
@@ -34,6 +36,12 @@ namespace MordheimLedgerApp
 
             builder.Services.AddSingleton(new AppDatabase(dbPath));
             builder.Services.AddTransient<LoadingService>();
+            builder.Services.AddSingleton<ILibraryService, LibraryService>();
+            builder.Services.AddSingleton<IWarbandService, WarbandService>();
+            builder.Services.AddTransient<WarbandListViewModel>();
+            builder.Services.AddTransient<WarbandListPage>();
+            builder.Services.AddTransient<WarbandDetailViewModel>();
+            builder.Services.AddTransient<WarbandDetailPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

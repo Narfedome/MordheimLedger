@@ -31,5 +31,22 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorEntity>();
         await _db.CreateTableAsync<EquipmentItemEntity>();
         await _db.CreateTableAsync<WarriorEquipmentEntity>();
+
+        // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
+        // nothing the player made is at risk of being duplicated).
+        if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
+            await SeedOfficialContentAsync();
+    }
+
+    private async Task SeedOfficialContentAsync()
+    {
+        var warbandArchetypeEntity = OfficialContentSeed.ReiklanderMercenaries.ToEntity();
+        await _db.InsertAsync(warbandArchetypeEntity);
+
+        foreach (var warriorArchetype in OfficialContentSeed.ReiklanderMercenariesWarriors(warbandArchetypeEntity.Id))
+            await _db.InsertAsync(warriorArchetype.ToEntity());
+
+        foreach (var item in OfficialContentSeed.CoreEquipment)
+            await _db.InsertAsync(item.ToEntity());
     }
 }

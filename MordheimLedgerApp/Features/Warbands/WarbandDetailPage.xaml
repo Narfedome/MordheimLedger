@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MordheimLedgerApp.Features.Warbands"
+             xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+             x:Class="MordheimLedgerApp.Features.Warbands.WarbandDetailPage"
+             x:DataType="vm:WarbandDetailViewModel"
+             Title="{Binding Warband.Name}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Label Grid.Row="0" Margin="12,12,12,0"
+               Text="{Binding Warband.Treasury, StringFormat='Treasury: {0} gc'}"
+               TextColor="{DynamicResource AppTextMuted}"/>
+
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Warriors}" Margin="0,8">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Warrior">
+                    <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                                <Label Grid.Column="1" Text="Hero" TextColor="{DynamicResource AppAccent}"
+                                       IsVisible="{Binding IsHero}"/>
+                                <Label Grid.Column="1" Text="Henchman" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}"/>
+                            </Grid>
+                            <HorizontalStackLayout Spacing="10">
+                                <Label Text="{Binding Movement, StringFormat='M{0}'}" FontSize="12"/>
+                                <Label Text="{Binding WeaponSkill, StringFormat='WS{0}'}" FontSize="12"/>
+                                <Label Text="{Binding BallisticSkill, StringFormat='BS{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Strength, StringFormat='S{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Toughness, StringFormat='T{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Wounds, StringFormat='W{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Initiative, StringFormat='I{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Attacks, StringFormat='A{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Leadership, StringFormat='Ld{0}'}" FontSize="12"/>
+                            </HorizontalStackLayout>
+                            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Cost, StringFormat='Cost: {0}gc'}"/>
+                                        <Span Text="  ·  "/>
+                                        <Span Text="{Binding Experience, StringFormat='XP: {0}'}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Button Grid.Row="2" Text="+ Recruit Warrior" Margin="12" Command="{Binding RecruitWarriorCommand}"/>
+    </Grid>
+</ContentPage>

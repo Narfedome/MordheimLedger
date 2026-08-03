@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -24,6 +25,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private ObservableCollection<Warrior> warriors = new();
 
+    [ObservableProperty]
+    private ObservableCollection<HistoryEntry> historyEntries = new();
+
+    [ObservableProperty]
+    private bool showHistory;
+
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService)
     {
         _warbandService = warbandService;
@@ -43,11 +50,20 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             var loaded = await _warbandService.GetWarriorsAsync(id);
             Warriors = new ObservableCollection<Warrior>(loaded);
+
+            var history = await _warbandService.GetHistoryEntriesAsync(id);
+            HistoryEntries = new ObservableCollection<HistoryEntry>(history);
         });
     }
 
     [RelayCommand]
     private static async Task BackAsync() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
+    private void ShowRoster() => ShowHistory = false;
+
+    [RelayCommand]
+    private void ShowHistoryTab() => ShowHistory = true;
 
     [RelayCommand]
     private async Task RecruitWarriorAsync()
@@ -71,5 +87,82 @@ public partial class WarbandDetailViewModel : BaseViewModel
             var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, _recruitableArchetypes[index], name);
             Warriors.Add(warrior);
         });
+    }
+
+    [RelayCommand]
+    private async Task EndOfGame()
+    {
+        if (Warband is null) return;
+
+        var activeWarriors = Warriors.Where(w => w.Status == WarriorStatus.Active).ToList();
+        if (activeWarriors.Count == 0)
+        {
+            await ShowInfoAsync(Loc["EndOfGameTitle"], Loc["EndOfGameNoWarriors"]);
+            return;
+        }
+
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors);
+        if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
+
+        await Loading.RunAsync(async () =>
+        {
+            var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], dialogViewModel.SelectedResult) };
+
+            if (dialogViewModel.TreasuryFound != 0)
+            {
+                Warband.Treasury += dialogViewModel.TreasuryFound;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryTreasurySentence"], dialogViewModel.TreasuryFound));
+            }
+
+            foreach (var row in dialogViewModel.WarriorRows)
+            {
+                var warrior = row.Warrior;
+                var changed = false;
+
+                if (row.ExperienceGained != 0)
+                {
+                    warrior.Experience += row.ExperienceGained;
+                    sentences.Add(string.Format(Loc["HistoryXpSentence"], warrior.Name, row.ExperienceGained));
+                    changed = true;
+                }
+
+                if (row.Status != warrior.Status)
+                {
+                    warrior.Status = row.Status;
+                    changed = true;
+                    if (warrior.Status == WarriorStatus.Dead)
+                        sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                }
+
+                if (!string.IsNullOrWhiteSpace(row.InjuryResultText))
+                {
+                    warrior.Notes = string.IsNullOrWhiteSpace(warrior.Notes)
+                        ? row.InjuryResultText
+                        : $"{warrior.Notes}\n{row.InjuryResultText}";
+                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
+                    changed = true;
+                }
+
+                if (changed)
+                    await _warbandService.SaveWarriorAsync(warrior);
+            }
+
+            await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
+            await LoadAsync(Warband.Id);
+        });
+    }
+
+    [RelayCommand]
+    private async Task AddNote()
+    {
+        if (Warband is null) return;
+
+        var text = await ShowPromptAsync(Loc["HistoryNotePromptTitle"], Loc["PromptName"]);
+        if (string.IsNullOrWhiteSpace(text)) return;
+
+        await _warbandService.AddHistoryEntryAsync(Warband.Id, text);
+        var history = await _warbandService.GetHistoryEntriesAsync(Warband.Id);
+        HistoryEntries = new ObservableCollection<HistoryEntry>(history);
     }
 }

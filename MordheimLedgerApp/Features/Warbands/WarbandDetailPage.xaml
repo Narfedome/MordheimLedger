@@ -15,7 +15,7 @@
     </Shell.BackButtonBehavior>
 
     <components:WatermarkedLayout>
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
         <header:DetailPageHeaderView Grid.Row="0" x:Name="Header" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
 
         <Label Grid.Row="1" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
@@ -27,7 +27,17 @@
             </Label.FormattedText>
         </Label>
 
-        <CollectionView Grid.Row="2" x:Name="WarriorCollection" ItemsSource="{Binding Warriors}" Margin="0,8">
+        <!-- Roster / Historique : pas de précédent DmTools pour des "onglets" internes à une page de
+             détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab. -->
+        <HorizontalStackLayout Grid.Row="2" Spacing="16" Margin="16,0,16,8">
+            <Button Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
+                    BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
+            <Button Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
+                    BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
+        </HorizontalStackLayout>
+
+        <CollectionView Grid.Row="3" x:Name="WarriorCollection" ItemsSource="{Binding Warriors}" Margin="0,8"
+                        IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Warrior">
                     <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
@@ -67,10 +77,35 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="3" Spacing="10" HorizontalOptions="Center" Margin="0,8">
+        <Grid Grid.Row="3" RowDefinitions="Auto,*" Margin="0,8" IsVisible="{Binding ShowHistory}">
+            <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="16,0,16,8">
+                <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
+                                     Command="{Binding AddNoteCommand}"
+                                     Tooltip="{loc:Loc HistoryAddNote}"/>
+            </HorizontalStackLayout>
+
+            <CollectionView Grid.Row="1" ItemsSource="{Binding HistoryEntries}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:HistoryEntry">
+                        <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Date, StringFormat='{0:g}'}" FontSize="12"
+                                       TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{Binding Text}" LineBreakMode="WordWrap"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+        <HorizontalStackLayout Grid.Row="4" Spacing="10" HorizontalOptions="Center" Margin="0,8">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                  Command="{Binding RecruitWarriorCommand}"
                                  Tooltip="{loc:Loc BtnRecruit}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.FlagCheckered}"
+                                 Command="{Binding EndOfGameCommand}"
+                                 Tooltip="{loc:Loc EndOfGameTitle}"/>
         </HorizontalStackLayout>
     </Grid>
     </components:WatermarkedLayout>

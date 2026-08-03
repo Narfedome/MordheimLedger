@@ -216,4 +216,20 @@ public static class EntityMapping
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity
     };
+
+    public static HistoryEntry ToModel(this HistoryEntryEntity e) => new()
+    {
+        Id = e.Id,
+        WarbandId = e.WarbandId,
+        Date = e.Date,
+        Text = e.Text
+    };
+
+    public static HistoryEntryEntity ToEntity(this HistoryEntry m) => new()
+    {
+        Id = m.Id,
+        WarbandId = m.WarbandId,
+        Date = m.Date,
+        Text = m.Text
+    };
 }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGameDialog"
+               x:DataType="local:EndOfGameDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="380">
+        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <VerticalStackLayout Spacing="16">
+            <Label Text="{loc:Loc EndOfGameTitle}"
+                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                   TextColor="{DynamicResource AppText}"/>
+
+            <Picker Title="{loc:Loc EndOfGameResultPh}"
+                    ItemsSource="{Binding ResultOptions}"
+                    SelectedItem="{Binding SelectedResult}"/>
+            <Entry Text="{Binding TreasuryFound}" Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameTreasuryPh}"/>
+
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                        <Border Style="{StaticResource SectionCardBorderStyle}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding ExperienceGained}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameXpPh}"/>
+                                    <Picker Grid.Column="1" ItemsSource="{Binding StatusOptions}"
+                                            SelectedItem="{Binding SelectedStatusLabel}"/>
+                                </Grid>
+                                <HorizontalStackLayout Spacing="10">
+                                    <CheckBox IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
+                                    <Label Text="{loc:Loc EndOfGameOutOfAction}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="10" IsVisible="{Binding ShowInjuryTools}">
+                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Dice}"
+                                                                  Command="{Binding RollInjuryCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    <Label Text="{Binding InjuryResultText}" VerticalOptions="Center"
+                                           TextColor="{DynamicResource AppTextMuted}"
+                                           LineBreakMode="WordWrap"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="{loc:Loc BtnCancel}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Grid.Column="1"
+                        Text="{loc:Loc BtnSave}"
+                        Command="{Binding SaveCommand}"/>
+            </Grid>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

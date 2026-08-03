@@ -271,4 +271,73 @@
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Miscellaneous Equipment</value>
   </data>
+  <data name="BtnPlay" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="TabRoster" xml:space="preserve">
+    <value>Roster</value>
+  </data>
+  <data name="TabHistory" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="EndOfGameTitle" xml:space="preserve">
+    <value>End of Game</value>
+  </data>
+  <data name="EndOfGameNoWarriors" xml:space="preserve">
+    <value>No active warrior in this warband.</value>
+  </data>
+  <data name="EndOfGameResultPh" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="EndOfGameResultVictory" xml:space="preserve">
+    <value>Victory</value>
+  </data>
+  <data name="EndOfGameResultDefeat" xml:space="preserve">
+    <value>Defeat</value>
+  </data>
+  <data name="EndOfGameResultDraw" xml:space="preserve">
+    <value>Draw</value>
+  </data>
+  <data name="EndOfGameTreasuryPh" xml:space="preserve">
+    <value>Treasury found (gc)</value>
+  </data>
+  <data name="EndOfGameXpPh" xml:space="preserve">
+    <value>XP gained</value>
+  </data>
+  <data name="EndOfGameOutOfAction" xml:space="preserve">
+    <value>Out of action</value>
+  </data>
+  <data name="EndOfGameRoll" xml:space="preserve">
+    <value>Roll</value>
+  </data>
+  <data name="HistoryAddNote" xml:space="preserve">
+    <value>Add a note</value>
+  </data>
+  <data name="HistoryNotePromptTitle" xml:space="preserve">
+    <value>New note</value>
+  </data>
+  <data name="HistoryResultSentence" xml:space="preserve">
+    <value>Battle: {0}.</value>
+  </data>
+  <data name="HistoryTreasurySentence" xml:space="preserve">
+    <value>Treasury: +{0} gc.</value>
+  </data>
+  <data name="HistoryXpSentence" xml:space="preserve">
+    <value>{0} gained {1} XP.</value>
+  </data>
+  <data name="HistoryDeathSentence" xml:space="preserve">
+    <value>{0} died.</value>
+  </data>
+  <data name="HistoryInjurySentence" xml:space="preserve">
+    <value>{0} was taken out of action: {1}</value>
+  </data>
+  <data name="WarriorStatusActive" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="WarriorStatusDead" xml:space="preserve">
+    <value>Dead</value>
+  </data>
+  <data name="WarriorStatusRetired" xml:space="preserve">
+    <value>Retired</value>
+  </data>
 </root>

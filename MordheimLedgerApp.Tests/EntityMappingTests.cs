@@ -223,6 +223,25 @@ public class EntityMappingTests
     }
 
     [Fact]
+    public void HistoryEntry_RoundTrips_ThroughEntity()
+    {
+        var entry = new HistoryEntry
+        {
+            Id = 1,
+            WarbandId = 7,
+            Date = new DateTime(2026, 3, 5, 20, 30, 0),
+            Text = "Battle: Victory. Otto gained 2 XP."
+        };
+
+        var roundTripped = entry.ToEntity().ToModel();
+
+        Assert.Equal(entry.Id, roundTripped.Id);
+        Assert.Equal(entry.WarbandId, roundTripped.WarbandId);
+        Assert.Equal(entry.Date, roundTripped.Date);
+        Assert.Equal(entry.Text, roundTripped.Text);
+    }
+
+    [Fact]
     public void WarriorEquipment_RoundTrips_ThroughEntity()
     {
         var dagger = new EquipmentItem { Id = 3, Name = "Dagger", Category = EquipmentCategory.MeleeWeapon };

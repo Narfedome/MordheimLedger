@@ -20,4 +20,10 @@ public interface IWarbandService
     Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name);
     Task SaveWarriorAsync(Warrior warrior);
     Task DeleteWarriorAsync(int warriorId);
+
+    /// <summary>Most recent first.</summary>
+    Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId);
+
+    /// <summary>Stamps Date = DateTime.Now.</summary>
+    Task AddHistoryEntryAsync(int warbandId, string text);
 }

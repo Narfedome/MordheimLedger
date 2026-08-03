@@ -101,4 +101,21 @@ public class WarbandService : IWarbandService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
     }
+
+    public async Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<HistoryEntryEntity>()
+            .Where(h => h.WarbandId == warbandId)
+            .OrderByDescending(h => h.Date)
+            .ToListAsync();
+        return rows.Select(r => r.ToModel()).ToList();
+    }
+
+    public async Task AddHistoryEntryAsync(int warbandId, string text)
+    {
+        await _db.Initialization;
+        var entry = new HistoryEntry { WarbandId = warbandId, Date = DateTime.Now, Text = text };
+        await _db.Connection.InsertAsync(entry.ToEntity());
+    }
 }

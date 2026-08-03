@@ -271,4 +271,73 @@
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Équipement divers</value>
   </data>
+  <data name="BtnPlay" xml:space="preserve">
+    <value>Jouer</value>
+  </data>
+  <data name="TabRoster" xml:space="preserve">
+    <value>Effectif</value>
+  </data>
+  <data name="TabHistory" xml:space="preserve">
+    <value>Historique</value>
+  </data>
+  <data name="EndOfGameTitle" xml:space="preserve">
+    <value>Fin de partie</value>
+  </data>
+  <data name="EndOfGameNoWarriors" xml:space="preserve">
+    <value>Aucun guerrier actif dans cette bande.</value>
+  </data>
+  <data name="EndOfGameResultPh" xml:space="preserve">
+    <value>Résultat</value>
+  </data>
+  <data name="EndOfGameResultVictory" xml:space="preserve">
+    <value>Victoire</value>
+  </data>
+  <data name="EndOfGameResultDefeat" xml:space="preserve">
+    <value>Défaite</value>
+  </data>
+  <data name="EndOfGameResultDraw" xml:space="preserve">
+    <value>Match nul</value>
+  </data>
+  <data name="EndOfGameTreasuryPh" xml:space="preserve">
+    <value>Trésor trouvé (po)</value>
+  </data>
+  <data name="EndOfGameXpPh" xml:space="preserve">
+    <value>PX gagnés</value>
+  </data>
+  <data name="EndOfGameOutOfAction" xml:space="preserve">
+    <value>Hors de combat</value>
+  </data>
+  <data name="EndOfGameRoll" xml:space="preserve">
+    <value>Tirer</value>
+  </data>
+  <data name="HistoryAddNote" xml:space="preserve">
+    <value>Ajouter une note</value>
+  </data>
+  <data name="HistoryNotePromptTitle" xml:space="preserve">
+    <value>Nouvelle note</value>
+  </data>
+  <data name="HistoryResultSentence" xml:space="preserve">
+    <value>Bataille : {0}.</value>
+  </data>
+  <data name="HistoryTreasurySentence" xml:space="preserve">
+    <value>Trésorerie : +{0} po.</value>
+  </data>
+  <data name="HistoryXpSentence" xml:space="preserve">
+    <value>{0} a gagné {1} PX.</value>
+  </data>
+  <data name="HistoryDeathSentence" xml:space="preserve">
+    <value>{0} est mort.</value>
+  </data>
+  <data name="HistoryInjurySentence" xml:space="preserve">
+    <value>{0} a été mis hors de combat : {1}</value>
+  </data>
+  <data name="WarriorStatusActive" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="WarriorStatusDead" xml:space="preserve">
+    <value>Mort</value>
+  </data>
+  <data name="WarriorStatusRetired" xml:space="preserve">
+    <value>Retiré</value>
+  </data>
 </root>

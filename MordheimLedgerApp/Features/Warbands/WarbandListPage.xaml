@@ -60,9 +60,10 @@
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=OpenWarbandCommand}"
                                             CommandParameter="{Binding .}"/>
                                     </Grid.GestureRecognizers>
-                                    <Label Text="{x:Static icons:SolidFont.ChevronRight}" FontFamily="FontSolid"
-                                           FontSize="{OnIdiom Default=15, Desktop=13}"
-                                           VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Label Text="{loc:Loc BtnPlay}"
+                                           FontSize="{OnIdiom Default=13, Desktop=11}"
+                                           HorizontalOptions="Center" VerticalOptions="Center"
+                                           TextColor="{DynamicResource AppAccent}"/>
                                 </Grid>
                             </Grid>
                         </Border>

@@ -88,11 +88,14 @@
   <data name="BtnAdd" xml:space="preserve">
     <value>Add</value>
   </data>
-  <data name="BtnOpen" xml:space="preserve">
-    <value>Open</value>
+  <data name="BtnRename" xml:space="preserve">
+    <value>Rename</value>
   </data>
   <data name="BtnDelete" xml:space="preserve">
     <value>Delete</value>
+  </data>
+  <data name="DialogRename" xml:space="preserve">
+    <value>Rename</value>
   </data>
   <data name="PromptName" xml:space="preserve">
     <value>Name</value>

@@ -37,9 +37,6 @@ public partial class WarbandListViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectWarband(WarbandRowItem item) => SelectedWarband = item;
-
-    [RelayCommand]
     private async Task LoadWarbandsAsync()
     {
         await Loading.RunAsync(async () =>
@@ -75,10 +72,29 @@ public partial class WarbandListViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task OpenSelectedWarbandAsync()
+    private void SelectWarband(WarbandRowItem item) => SelectedWarband = item;
+
+    // Sélection (corps de la ligne) et ouverture (zone dédiée en bout de ligne, cf. WarbandListPage.xaml)
+    // restent deux gestes distincts, comme SceneTemplate/SelectCommand+LaunchCommand dans CampaignPage
+    // de DmTools - pas de bouton "Ouvrir" dans la barre du bas.
+    [RelayCommand]
+    private async Task OpenWarbandAsync(WarbandRowItem row)
+    {
+        SelectedWarband = row;
+        await Shell.Current.GoToAsync($"{nameof(WarbandDetailPage)}?warbandId={row.Warband.Id}");
+    }
+
+    [RelayCommand]
+    private async Task EditSelectedWarbandAsync()
     {
         if (SelectedWarband is null) return;
-        await Shell.Current.GoToAsync($"{nameof(WarbandDetailPage)}?warbandId={SelectedWarband.Warband.Id}");
+
+        var newName = await ShowPromptAsync(Loc["DialogRename"], Loc["PromptName"], initialValue: SelectedWarband.Name);
+        if (string.IsNullOrWhiteSpace(newName) || newName == SelectedWarband.Name) return;
+
+        SelectedWarband.Warband.Name = newName.Trim();
+        await _warbandService.SaveWarbandAsync(SelectedWarband.Warband);
+        SelectedWarband.NotifyWarbandChanged();
     }
 
     [RelayCommand]
@@ -110,4 +126,10 @@ public partial class WarbandRowItem : ObservableObject
     private bool isSelected;
 
     public WarbandRowItem(Warband warband) => Warband = warband;
+
+    public void NotifyWarbandChanged()
+    {
+        OnPropertyChanged(nameof(Name));
+        OnPropertyChanged(nameof(Treasury));
+    }
 }

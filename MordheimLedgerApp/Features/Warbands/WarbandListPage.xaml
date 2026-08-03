@@ -6,8 +6,7 @@
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandListPage"
-             x:DataType="vm:WarbandListViewModel"
-             Title="{loc:Loc TabWarbands}">
+             x:DataType="vm:WarbandListViewModel">
 
     <Grid Padding="10,0,10,10" RowSpacing="4">
         <Grid.RowDefinitions>
@@ -34,22 +33,36 @@
                          la racine d'un DataTemplate de CollectionView n'est pas fiable sur Windows. -->
                     <Grid Padding="0,0,0,8">
                         <Border Style="{StaticResource RowBorderStyle}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=SelectWarbandCommand}"
-                                    CommandParameter="{Binding .}"/>
-                            </Border.GestureRecognizers>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                     <Setter Property="Stroke" Value="LightSkyBlue"/>
                                 </DataTrigger>
                             </Border.Triggers>
-                            <Grid ColumnDefinitions="*,Auto">
+                            <!-- Sélection (corps de la ligne) et ouverture (chevron en bout de ligne)
+                                 restent deux zones de tap distinctes - cf. SceneTemplate/Select+Launch
+                                 dans CampaignPage de DmTools : le corps ne fait jamais que sélectionner,
+                                 seule la zone dédiée à droite navigue vers le détail. -->
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=SelectWarbandCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Grid.GestureRecognizers>
                                 <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"
                                        FontSize="{DynamicResource AppFontSizeSectionTitle}"
                                        VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
                                 <Label Grid.Column="1" Text="{Binding Treasury, StringFormat='{0} gc'}"
                                        VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid Grid.Column="2" Padding="10,0,0,0">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=OpenWarbandCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Grid.GestureRecognizers>
+                                    <Label Text="{x:Static icons:SolidFont.ChevronRight}" FontFamily="FontSolid"
+                                           FontSize="{OnIdiom Default=15, Desktop=13}"
+                                           VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                </Grid>
                             </Grid>
                         </Border>
                     </Grid>
@@ -61,9 +74,9 @@
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                  Command="{Binding CreateWarbandCommand}"
                                  Tooltip="{loc:Loc BtnAdd}"/>
-            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.DoorOpen}"
-                                 Command="{Binding OpenSelectedWarbandCommand}"
-                                 Tooltip="{loc:Loc BtnOpen}"
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Pen}"
+                                 Command="{Binding EditSelectedWarbandCommand}"
+                                 Tooltip="{loc:Loc BtnRename}"
                                  IsEnabled="{Binding CanModifySelectedWarband}"/>
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Trash}"
                                  Command="{Binding DeleteSelectedWarbandCommand}"

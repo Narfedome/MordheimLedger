@@ -5,8 +5,7 @@
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:palette="clr-namespace:MordheimLedgerApp.Components.PalettePicker"
              x:Class="MordheimLedgerApp.Features.Settings.SettingsPage"
-             x:DataType="local:SettingsViewModel"
-             Title="{loc:Loc TabSettings}">
+             x:DataType="local:SettingsViewModel">
 
     <ScrollView>
         <!-- Cf. DmTools SettingsPage : sur Desktop, une fenêtre large étirait chaque carte de section

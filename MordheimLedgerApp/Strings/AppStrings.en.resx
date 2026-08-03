@@ -340,4 +340,124 @@
   <data name="WarriorStatusRetired" xml:space="preserve">
     <value>Retired</value>
   </data>
+  <data name="EndOfGameRollPh" xml:space="preserve">
+    <value>D66</value>
+  </data>
+  <data name="EndOfGameShowResult" xml:space="preserve">
+    <value>Show result</value>
+  </data>
+  <data name="EndOfGameInvalidRoll" xml:space="preserve">
+    <value>Invalid roll (11 to 66, each digit between 1 and 6).</value>
+  </data>
+  <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
+    <value>Result ({0})</value>
+  </data>
+  <data name="InjurySerious11" xml:space="preserve">
+    <value>Dead. The warrior is lost.</value>
+  </data>
+  <data name="InjurySerious12" xml:space="preserve">
+    <value>Dead. The warrior is lost.</value>
+  </data>
+  <data name="InjurySerious13" xml:space="preserve">
+    <value>Dead. The warrior is lost.</value>
+  </data>
+  <data name="InjurySerious14" xml:space="preserve">
+    <value>Dead. The warrior is lost.</value>
+  </data>
+  <data name="InjurySerious15" xml:space="preserve">
+    <value>Dead. The warrior is lost.</value>
+  </data>
+  <data name="InjurySerious16" xml:space="preserve">
+    <value>Multiple injuries: roll twice more on this table (ignore a further 16).</value>
+  </data>
+  <data name="InjurySerious21" xml:space="preserve">
+    <value>Leg wound: Movement permanently reduced.</value>
+  </data>
+  <data name="InjurySerious22" xml:space="preserve">
+    <value>Arm wound: Strength permanently reduced.</value>
+  </data>
+  <data name="InjurySerious23" xml:space="preserve">
+    <value>Passing madness: misses the next battle.</value>
+  </data>
+  <data name="InjurySerious24" xml:space="preserve">
+    <value>Chest wound: Toughness permanently reduced.</value>
+  </data>
+  <data name="InjurySerious25" xml:space="preserve">
+    <value>Blinded in one eye: Ballistic Skill (or Weapon Skill) permanently reduced.</value>
+  </data>
+  <data name="InjurySerious26" xml:space="preserve">
+    <value>Old battle wound: misses the next battle, unless treated.</value>
+  </data>
+  <data name="InjurySerious31" xml:space="preserve">
+    <value>Nervous condition: must pass a Leadership test to charge from now on.</value>
+  </data>
+  <data name="InjurySerious32" xml:space="preserve">
+    <value>Hardened: nothing this time, immune to the next madness result.</value>
+  </data>
+  <data name="InjurySerious33" xml:space="preserve">
+    <value>Hand injury: Ballistic Skill permanently reduced.</value>
+  </data>
+  <data name="InjurySerious34" xml:space="preserve">
+    <value>Captured by a rival warband: can be freed for a ransom.</value>
+  </data>
+  <data name="InjurySerious35" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious36" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious41" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious42" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious43" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious44" xml:space="preserve">
+    <value>Robbed: loses a random piece of equipment.</value>
+  </data>
+  <data name="InjurySerious45" xml:space="preserve">
+    <value>Survives against all odds: gains 1 Experience point.</value>
+  </data>
+  <data name="InjurySerious46" xml:space="preserve">
+    <value>Bitter enmity toward the warband responsible.</value>
+  </data>
+  <data name="InjurySerious51" xml:space="preserve">
+    <value>Stiff neck: Initiative permanently reduced.</value>
+  </data>
+  <data name="InjurySerious52" xml:space="preserve">
+    <value>Bad leg: Movement permanently reduced.</value>
+  </data>
+  <data name="InjurySerious53" xml:space="preserve">
+    <value>Impressive scars: Leadership reduced, but causes Fear.</value>
+  </data>
+  <data name="InjurySerious54" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious55" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious56" xml:space="preserve">
+    <value>Sold to the pits: the warrior is lost, unless bought back.</value>
+  </data>
+  <data name="InjurySerious61" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious62" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious63" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious64" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious65" xml:space="preserve">
+    <value>Full recovery.</value>
+  </data>
+  <data name="InjurySerious66" xml:space="preserve">
+    <value>Hardened fighter: minor bonus in the next battle.</value>
+  </data>
 </root>

@@ -42,14 +42,22 @@
                                     <CheckBox IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
                                     <Label Text="{loc:Loc EndOfGameOutOfAction}" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="10" IsVisible="{Binding ShowInjuryTools}">
-                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Dice}"
-                                                                  Command="{Binding RollInjuryCommand}"
+                                <!-- Le joueur peut soit laisser l'appli tirer les dés (Dice = jet
+                                     aléatoire + popup de résultat immédiate), soit lancer ses propres
+                                     dés à la table et saisir le score lui-même (Entry + Eye = affiche
+                                     le résultat correspondant sans en tirer un nouveau). -->
+                                <Grid IsVisible="{Binding ShowInjuryTools}" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70"/>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollCommand}"
+                                                                  CommandParameter="{Binding .}"
                                                                   Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                    <Label Text="{Binding InjuryResultText}" VerticalOptions="Center"
-                                           TextColor="{DynamicResource AppTextMuted}"
-                                           LineBreakMode="WordWrap"/>
-                                </HorizontalStackLayout>
+                                    <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryResultCommand}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  Tooltip="{loc:Loc EndOfGameShowResult}"/>
+                                </Grid>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>

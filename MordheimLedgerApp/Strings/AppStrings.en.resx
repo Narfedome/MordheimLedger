@@ -85,6 +85,30 @@
   <data name="TabWarbands" xml:space="preserve">
     <value>Warbands</value>
   </data>
+  <data name="BtnAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="BtnOpen" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="BtnDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="PromptName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="WarbandsNewTitle" xml:space="preserve">
+    <value>New warband</value>
+  </data>
+  <data name="WarbandsChooseType" xml:space="preserve">
+    <value>Choose a warband type</value>
+  </data>
+  <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
+    <value>Empty library</value>
+  </data>
+  <data name="WarbandsEmptyLibraryMessage" xml:space="preserve">
+    <value>No warband type is available yet.</value>
+  </data>
   <data name="TabSettings" xml:space="preserve">
     <value>Settings</value>
   </data>

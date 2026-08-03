@@ -52,6 +52,17 @@
         <Setter Property="Padding" Value="{DynamicResource AppSectionCardPadding}"/>
     </Style>
 
+    <!-- List row (e.g. WarbandListPage): no Margin here (unreliable on a Border that is the root of a
+         CollectionView DataTemplate on Windows) - spacing between rows comes from the enclosing Grid's
+         Padding instead, cf. WarbandListPage.xaml. -->
+    <Style x:Key="RowBorderStyle" TargetType="Border">
+        <Setter Property="StrokeThickness" Value="2"/>
+        <Setter Property="StrokeShape" Value="RoundRectangle 8"/>
+        <Setter Property="Padding" Value="{DynamicResource AppAccordionRowPadding}"/>
+        <Setter Property="MinimumHeightRequest" Value="{DynamicResource AppAccordionRowMinHeight}"/>
+        <Setter Property="Stroke" Value="Grey"/>
+    </Style>
+
     <!-- Secondary button (Cancel/No) for themed popups: outline instead of a solid accent fill -->
     <Style TargetType="Button" x:Key="DialogSecondaryButtonStyle">
         <Setter Property="BackgroundColor" Value="Transparent" />
@@ -258,6 +269,27 @@
         <Setter Property="FontSize" Value="20" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="HorizontalTextAlignment" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="TruncatedLabelStyle">
+        <Setter Property="TextColor" Value="{DynamicResource AppText}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}" />
+        <Setter Property="LineBreakMode" Value="TailTruncation"/>
+        <Setter Property="MaxLines" Value="1"/>
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal" />
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
     </Style>
 
     <Style TargetType="Picker">

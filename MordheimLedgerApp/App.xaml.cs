@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp
 {
@@ -11,6 +11,7 @@ namespace MordheimLedgerApp
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
+            ThemeService.Instance.Initialize();
             return new Window(new AppShell());
         }
     }

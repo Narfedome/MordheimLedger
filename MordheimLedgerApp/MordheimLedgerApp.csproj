@@ -18,6 +18,8 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<!-- MVVMTK0045: partial properties needed for strict WinRT/AOT targets, not a goal here -->
+		<NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
 
 		<!-- Enable XAML source generation for faster build times and improved performance.
 		     This generates C# code from XAML at compile time instead of runtime inflation.
@@ -28,13 +30,15 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>MordheimLedgerApp</ApplicationTitle>
+		<ApplicationTitle>Mordheim Ledger</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.mordheimledgerapp</ApplicationId>
+		<ApplicationId>com.cyrilbezard.mordheimledger</ApplicationId>
 
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<!-- Versions — patch auto-incremented via git at build time, major/minor set by hand -->
+		<AppVersionMajor>0</AppVersionMajor>
+		<AppVersionMinor>1</AppVersionMinor>
+		<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
@@ -66,8 +70,50 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
+		<PackageReference Include="CommunityToolkit.Maui.Core" Version="14.2.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.80" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Strings\AppStrings.resx" />
+	  <EmbeddedResource Update="Strings\AppStrings.en.resx">
+	    <Culture>en</Culture>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\MordheimLedgerApp.Core\MordheimLedgerApp.Core.csproj" />
+	</ItemGroup>
+
+	<!-- Auto-increments the patch version from the git commit count, same mechanism as DmTools
+	     (see MordheimLedgerApp.Core sibling project's notes): the app reads its version at runtime
+	     via AppInfo.Current.VersionString, which reflects exactly what got packaged. -->
+	<Target Name="SetVersionFromGit" BeforeTargets="CoreCompile;_GenerateJavaStubs;GetAssemblyVersion;_GetAndroidPackageName;MauiGeneratePackageAppxManifest;GetAssemblyAttributes">
+		<Exec Command="git rev-list --count HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardOutputImportance="low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="_GitCommitCount" />
+		</Exec>
+		<PropertyGroup Condition="'$(_GitCommitCount)' != ''">
+			<_AppPatch>$(_GitCommitCount.Trim())</_AppPatch>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(_AppPatch)' == ''">
+			<_AppPatch>0</_AppPatch>
+		</PropertyGroup>
+		<PropertyGroup>
+			<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).$(_AppPatch)</ApplicationDisplayVersion>
+		</PropertyGroup>
+		<Message Text="Version: $(ApplicationDisplayVersion)" Importance="high" />
+
+		<ItemGroup Condition="Exists('$(_AndroidStampDirectory)_GenerateJavaStubs.stamp')">
+			<_StampToDelete Include="$(_AndroidStampDirectory)_GenerateJavaStubs.stamp" />
+		</ItemGroup>
+		<ItemGroup Condition="Exists('$(IntermediateOutputPath)mauimanifest.stamp')">
+			<_StampToDelete Include="$(IntermediateOutputPath)mauimanifest.stamp" />
+		</ItemGroup>
+		<Delete Files="@(_StampToDelete)" Condition="'@(_StampToDelete)' != ''" />
+	</Target>
 
 </Project>

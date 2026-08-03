@@ -39,6 +39,11 @@ namespace MordheimLedgerApp.Services
             _themePref = (AppThemePreference)Preferences.Default.Get(ThemePrefKey, (int)AppThemePreference.System);
         }
 
+        // No embedded watermark art yet for any palette (single entry, "Cendre & Wyrdstone") - returns
+        // null until a resource exists, cf. DmTools' ImageSource.FromResource per-palette lookup for
+        // the pattern to extend once art is available (WatermarkedLayout.xaml already wired for it).
+        public ImageSource? WatermarkImageSource => null;
+
         public AppPalette Palette
         {
             get => _palette;
@@ -49,6 +54,7 @@ namespace MordheimLedgerApp.Services
                 Preferences.Default.Set(PaletteKey, (int)value);
                 Apply();
                 ThemeChanged?.Invoke();
+                OnPropertyChanged(nameof(WatermarkImageSource));
             }
         }
 

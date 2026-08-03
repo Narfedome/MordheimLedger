@@ -8,6 +8,7 @@
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandListPage"
              x:DataType="vm:WarbandListViewModel">
 
+    <components:WatermarkedLayout>
     <Grid Padding="10,0,10,10" RowSpacing="4">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -84,4 +85,5 @@
                                  IsEnabled="{Binding CanModifySelectedWarband}"/>
         </HorizontalStackLayout>
     </Grid>
+    </components:WatermarkedLayout>
 </ContentPage>

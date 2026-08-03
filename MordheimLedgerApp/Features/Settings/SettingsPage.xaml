@@ -4,9 +4,11 @@
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Settings"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:palette="clr-namespace:MordheimLedgerApp.Components.PalettePicker"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Settings.SettingsPage"
              x:DataType="local:SettingsViewModel">
 
+    <components:WatermarkedLayout>
     <ScrollView>
         <!-- Cf. DmTools SettingsPage : sur Desktop, une fenêtre large étirait chaque carte de section
              bord à bord - plafonnée et centrée à la place (fait en code-behind, cf. SettingsPage.xaml.cs). -->
@@ -102,4 +104,5 @@
 
         </VerticalStackLayout>
     </ScrollView>
+    </components:WatermarkedLayout>
 </ContentPage>

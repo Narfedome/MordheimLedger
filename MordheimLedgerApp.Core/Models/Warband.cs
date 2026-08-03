@@ -1,15 +1,16 @@
 namespace MordheimLedgerApp.Core.Models;
 
 /// <summary>
-/// A player's warband. WarbandType references a catalog entry (not modeled yet — see roadmap V1)
-/// rather than being an enum, so custom/house-ruled warband types work the same way as official ones.
+/// A player's warband — an instance, never itself "official" content (ContentSource lives on
+/// WarbandArchetype instead). WarbandArchetypeId is where Treasury's starting value came from at
+/// creation; the Warband then evolves independently of it.
 /// </summary>
 public class Warband
 {
     public int Id { get; set; }
+    public int? CampaignId { get; set; }
+    public int WarbandArchetypeId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string WarbandType { get; set; } = string.Empty;
     public int Treasury { get; set; }
-    public bool IsCustom { get; set; }
     public string? Notes { get; set; }
 }

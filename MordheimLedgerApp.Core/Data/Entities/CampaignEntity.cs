@@ -2,18 +2,10 @@ using SQLite;
 
 namespace MordheimLedgerApp.Core.Data.Entities;
 
-public class WarbandEntity
+public class CampaignEntity
 {
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
-
-    [Indexed]
-    public int? CampaignId { get; set; }
-
-    [Indexed]
-    public int WarbandArchetypeId { get; set; }
-
     public string Name { get; set; } = string.Empty;
-    public int Treasury { get; set; }
     public string? Notes { get; set; }
 }

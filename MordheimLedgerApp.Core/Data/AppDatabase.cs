@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Data.Entities;
+using MordheimLedgerApp.Core.Data.Entities.Library;
 using SQLite;
 
 namespace MordheimLedgerApp.Core.Data;
@@ -23,6 +24,12 @@ public class AppDatabase
 
     private async Task InitializeAsync()
     {
+        await _db.CreateTableAsync<CampaignEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeEntity>();
         await _db.CreateTableAsync<WarbandEntity>();
+        await _db.CreateTableAsync<WarriorArchetypeEntity>();
+        await _db.CreateTableAsync<WarriorEntity>();
+        await _db.CreateTableAsync<EquipmentItemEntity>();
+        await _db.CreateTableAsync<WarriorEquipmentEntity>();
     }
 }

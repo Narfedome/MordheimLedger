@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
@@ -12,17 +11,16 @@ public partial class WarbandListViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
 
     [ObservableProperty]
-    private ObservableCollection<WarbandRowItem> warbands = new();
+    private ObservableCollection<WarbandRow> rows = new();
 
-    // Pas de CollectionView.SelectedItem/SelectionMode natif (cf. WarbandListPage.xaml, même raison
-    // que CategoryListPage de DmTools) : sur Android, le fond de sélection natif reste teinté par
-    // colorAccent quel que soit le style posé dessus. SelectedWarband est donc géré à la main via un
-    // TapGestureRecognizer par ligne plutôt que SelectedItem.
+    // Pas de CollectionView.SelectedItem/SelectionMode natif (même raison que CategoryListPage de
+    // DmTools : sur Android, le fond de sélection natif reste teinté par colorAccent quel que soit le
+    // style posé dessus) - IsSelected est porté par la ligne elle-même, cf. SelectionMarkerStyle.
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanModifySelectedWarband))]
-    private WarbandRowItem? selectedWarband;
+    private WarbandRow? selectedRow;
 
-    public bool CanModifySelectedWarband => SelectedWarband is not null;
+    public bool CanModifySelectedWarband => SelectedRow != null;
 
     public WarbandListViewModel(IWarbandService warbandService, ILibraryService libraryService)
     {
@@ -30,7 +28,7 @@ public partial class WarbandListViewModel : BaseViewModel
         _libraryService = libraryService;
     }
 
-    partial void OnSelectedWarbandChanged(WarbandRowItem? oldValue, WarbandRowItem? newValue)
+    partial void OnSelectedRowChanged(WarbandRow? oldValue, WarbandRow? newValue)
     {
         if (oldValue != null) oldValue.IsSelected = false;
         if (newValue != null) newValue.IsSelected = true;
@@ -41,11 +39,14 @@ public partial class WarbandListViewModel : BaseViewModel
     {
         await Loading.RunAsync(async () =>
         {
-            var loaded = await _warbandService.GetWarbandsAsync();
-            Warbands = new ObservableCollection<WarbandRowItem>(loaded.Select(w => new WarbandRowItem(w)));
-            SelectedWarband = null;
+            var warbands = await _warbandService.GetWarbandsAsync();
+            Rows = new ObservableCollection<WarbandRow>(warbands.Select(w => new WarbandRow(w)));
+            SelectedRow = null;
         });
     }
+
+    [RelayCommand]
+    private void Select(WarbandRow row) => SelectedRow = row;
 
     [RelayCommand]
     private async Task CreateWarbandAsync()
@@ -66,70 +67,44 @@ public partial class WarbandListViewModel : BaseViewModel
 
         await Loading.RunAsync(async () =>
         {
-            var warband = await _warbandService.CreateWarbandAsync(name, archetypes[index]);
-            Warbands.Add(new WarbandRowItem(warband));
+            await _warbandService.CreateWarbandAsync(name, archetypes[index]);
+            await LoadWarbandsAsync();
         });
     }
 
+    // Sélection (corps de la ligne) et ouverture (zone dédiée "Jouer" en bout de ligne, cf.
+    // WarbandListPage.xaml) restent deux gestes distincts, comme SceneTemplate/SelectCommand+
+    // LaunchCommand dans CampaignPage de DmTools - pas de bouton "Ouvrir" dans la barre du bas.
     [RelayCommand]
-    private void SelectWarband(WarbandRowItem item) => SelectedWarband = item;
-
-    // Sélection (corps de la ligne) et ouverture (zone dédiée en bout de ligne, cf. WarbandListPage.xaml)
-    // restent deux gestes distincts, comme SceneTemplate/SelectCommand+LaunchCommand dans CampaignPage
-    // de DmTools - pas de bouton "Ouvrir" dans la barre du bas.
-    [RelayCommand]
-    private async Task OpenWarbandAsync(WarbandRowItem row)
+    private async Task OpenWarbandAsync(WarbandRow row)
     {
-        SelectedWarband = row;
+        SelectedRow = row;
         await Shell.Current.GoToAsync($"{nameof(WarbandDetailPage)}?warbandId={row.Warband.Id}");
     }
 
     [RelayCommand]
     private async Task EditSelectedWarbandAsync()
     {
-        if (SelectedWarband is null) return;
+        if (SelectedRow is not { } row) return;
 
-        var newName = await ShowPromptAsync(Loc["DialogRename"], Loc["PromptName"], initialValue: SelectedWarband.Name);
-        if (string.IsNullOrWhiteSpace(newName) || newName == SelectedWarband.Name) return;
+        var newName = await ShowPromptAsync(Loc["DialogRename"], Loc["PromptName"], initialValue: row.Name);
+        if (string.IsNullOrWhiteSpace(newName) || newName == row.Name) return;
 
-        SelectedWarband.Warband.Name = newName.Trim();
-        await _warbandService.SaveWarbandAsync(SelectedWarband.Warband);
-        SelectedWarband.NotifyWarbandChanged();
+        row.Warband.Name = newName.Trim();
+        await _warbandService.SaveWarbandAsync(row.Warband);
+        await LoadWarbandsAsync();
     }
 
     [RelayCommand]
     private async Task DeleteSelectedWarbandAsync()
     {
-        if (SelectedWarband is null) return;
-        if (!await ConfirmDeleteAsync(SelectedWarband.Name)) return;
+        if (SelectedRow is not { } row) return;
+        if (!await ConfirmDeleteAsync(row.Name)) return;
 
         await Loading.RunAsync(async () =>
         {
-            await _warbandService.DeleteWarbandAsync(SelectedWarband.Warband.Id);
-            Warbands.Remove(SelectedWarband);
-            SelectedWarband = null;
+            await _warbandService.DeleteWarbandAsync(row.Warband.Id);
+            await LoadWarbandsAsync();
         });
-    }
-}
-
-// Classe (pas record) : IsSelected doit être un ObservableProperty pilotable à la main pour la
-// bordure de mise en évidence (cf. WarbandListViewModel.OnSelectedWarbandChanged et
-// WarbandListPage.xaml), la sélection native du CollectionView étant évitée.
-public partial class WarbandRowItem : ObservableObject
-{
-    public Warband Warband { get; }
-
-    public string Name => Warband.Name;
-    public int Treasury => Warband.Treasury;
-
-    [ObservableProperty]
-    private bool isSelected;
-
-    public WarbandRowItem(Warband warband) => Warband = warband;
-
-    public void NotifyWarbandChanged()
-    {
-        OnPropertyChanged(nameof(Name));
-        OnPropertyChanged(nameof(Treasury));
     }
 }

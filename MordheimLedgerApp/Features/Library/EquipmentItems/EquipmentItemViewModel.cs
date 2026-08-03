@@ -13,10 +13,12 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private List<EquipmentItem> _allItems = new();
 
     [ObservableProperty]
-    private ObservableCollection<EquipmentItem> equipmentItems = new();
+    private ObservableCollection<EquipmentItemRow> equipmentItems = new();
 
+    // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
+    // SelectableGridItemBorderStyle.
     [ObservableProperty]
-    private EquipmentItem? selectedEquipmentItem;
+    private EquipmentItemRow? selectedRow;
 
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
@@ -42,10 +44,20 @@ public partial class EquipmentItemViewModel : BaseViewModel
             ? _allItems
             : _allItems.Where(i => CategoryLabel(i.Category) == SelectedCategoryLabel).ToList();
 
-        EquipmentItems = new ObservableCollection<EquipmentItem>(filtered);
+        EquipmentItems = new ObservableCollection<EquipmentItemRow>(filtered.Select(i => new EquipmentItemRow(i)));
+        SelectedRow = null;
     }
 
     private string CategoryLabel(EquipmentCategory category) => Loc[$"EquipmentCategory{category}"];
+
+    partial void OnSelectedRowChanged(EquipmentItemRow? oldValue, EquipmentItemRow? newValue)
+    {
+        if (oldValue != null) oldValue.IsSelected = false;
+        if (newValue != null) newValue.IsSelected = true;
+    }
+
+    [RelayCommand]
+    private void Select(EquipmentItemRow row) => SelectedRow = row;
 
     [RelayCommand]
     private async Task SelectCategory()
@@ -75,9 +87,9 @@ public partial class EquipmentItemViewModel : BaseViewModel
     [RelayCommand]
     private async Task Edit()
     {
-        if (SelectedEquipmentItem is null) return;
+        if (SelectedRow is not { } row) return;
 
-        var s = SelectedEquipmentItem;
+        var s = row.Item;
         var copy = new EquipmentItem
         {
             Id = s.Id,
@@ -100,12 +112,11 @@ public partial class EquipmentItemViewModel : BaseViewModel
     [RelayCommand]
     private async Task Delete()
     {
-        if (SelectedEquipmentItem is null) return;
-        if (!await ConfirmDeleteAsync(SelectedEquipmentItem.Name)) return;
+        if (SelectedRow is not { } row) return;
+        if (!await ConfirmDeleteAsync(row.Item.Name)) return;
 
-        await _libraryService.DeleteEquipmentItemAsync(SelectedEquipmentItem.Id);
-        EquipmentItems.Remove(SelectedEquipmentItem);
-        _allItems.Remove(SelectedEquipmentItem);
-        SelectedEquipmentItem = null;
+        await _libraryService.DeleteEquipmentItemAsync(row.Item.Id);
+        _allItems.Remove(row.Item);
+        ApplyFilter();
     }
 }

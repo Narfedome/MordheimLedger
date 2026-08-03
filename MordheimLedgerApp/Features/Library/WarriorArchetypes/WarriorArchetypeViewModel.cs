@@ -20,10 +20,12 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     private string warbandArchetypeName = string.Empty;
 
     [ObservableProperty]
-    private ObservableCollection<WarriorArchetype> warriorArchetypeItems = new();
+    private ObservableCollection<WarriorArchetypeRow> warriorArchetypeItems = new();
 
+    // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
+    // SelectableGridItemBorderStyle.
     [ObservableProperty]
-    private WarriorArchetype? selectedWarriorArchetype;
+    private WarriorArchetypeRow? selectedRow;
 
     public WarriorArchetypeViewModel(ILibraryService libraryService)
     {
@@ -35,11 +37,21 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     private async Task LoadData()
     {
         var items = await _libraryService.GetWarriorArchetypesAsync(WarbandArchetypeId);
-        WarriorArchetypeItems = new ObservableCollection<WarriorArchetype>(items);
+        WarriorArchetypeItems = new ObservableCollection<WarriorArchetypeRow>(items.Select(i => new WarriorArchetypeRow(i)));
+        SelectedRow = null;
+    }
+
+    partial void OnSelectedRowChanged(WarriorArchetypeRow? oldValue, WarriorArchetypeRow? newValue)
+    {
+        if (oldValue != null) oldValue.IsSelected = false;
+        if (newValue != null) newValue.IsSelected = true;
     }
 
     [RelayCommand]
     private static async Task Back() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
+    private void Select(WarriorArchetypeRow row) => SelectedRow = row;
 
     [RelayCommand]
     private async Task Create()
@@ -49,15 +61,15 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarriorArchetypeAsync(newItem);
-        WarriorArchetypeItems.Add(newItem);
+        WarriorArchetypeItems.Add(new WarriorArchetypeRow(newItem));
     }
 
     [RelayCommand]
     private async Task Edit()
     {
-        if (SelectedWarriorArchetype is null) return;
+        if (SelectedRow is not { } row) return;
 
-        var s = SelectedWarriorArchetype;
+        var s = row.Item;
         var copy = new WarriorArchetype
         {
             Id = s.Id,
@@ -90,11 +102,11 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Delete()
     {
-        if (SelectedWarriorArchetype is null) return;
-        if (!await ConfirmDeleteAsync(SelectedWarriorArchetype.Name)) return;
+        if (SelectedRow is not { } row) return;
+        if (!await ConfirmDeleteAsync(row.Item.Name)) return;
 
-        await _libraryService.DeleteWarriorArchetypeAsync(SelectedWarriorArchetype.Id);
-        WarriorArchetypeItems.Remove(SelectedWarriorArchetype);
-        SelectedWarriorArchetype = null;
+        await _libraryService.DeleteWarriorArchetypeAsync(row.Item.Id);
+        WarriorArchetypeItems.Remove(row);
+        SelectedRow = null;
     }
 }

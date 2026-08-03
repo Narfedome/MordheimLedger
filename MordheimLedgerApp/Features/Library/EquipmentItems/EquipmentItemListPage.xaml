@@ -4,8 +4,7 @@
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
-             x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemListPage"
-             Title="{loc:Loc TabTradingPost}">
+             x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemListPage">
 
     <components:WatermarkedLayout>
         <local:EquipmentItemView/>

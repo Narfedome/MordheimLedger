@@ -8,6 +8,43 @@
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandListPage"
              x:DataType="vm:WarbandListViewModel">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Bande : reprend le style "Chapitre" (SessionTemplate) de DmTools - pas de Border, simple
+                 trait de séparation (ChapterDividerStyle), padding AppChapterRowPadding, titre en
+                 italique. Sélection (corps de la ligne) et ouverture (zone "Jouer" en bout de ligne,
+                 largeur fixe façon Launch de SceneTemplate) restent deux zones de tap distinctes - cf.
+                 [[row-select-vs-open-pattern]]. Pas de trésorerie affichée sur la ligne (visible sur la
+                 fiche de détail). -->
+            <DataTemplate x:Key="WarbandTemplate" x:DataType="vm:WarbandRow">
+                <Grid ColumnDefinitions="4,*,70" ColumnSpacing="8"
+                      Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=SelectCommand}"
+                            CommandParameter="{Binding .}"/>
+                    </Grid.GestureRecognizers>
+                    <BoxView Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ChapterDividerStyle}"/>
+                    <BoxView Grid.Column="0" Style="{StaticResource SelectionMarkerStyle}"/>
+                    <Label Grid.Column="1" Text="{Binding Name}" FontAttributes="Italic"
+                           FontSize="{OnIdiom Default=15, Desktop=13}"
+                           VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
+                    <Grid Grid.Column="2">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=OpenWarbandCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </Grid.GestureRecognizers>
+                        <Label Text="{loc:Loc BtnPlay}" FontAttributes="Bold"
+                               FontSize="{OnIdiom Default=15, Desktop=13}"
+                               HorizontalOptions="Center" VerticalOptions="Center"
+                               TextColor="{DynamicResource AppAccent}"/>
+                    </Grid>
+                </Grid>
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <components:WatermarkedLayout>
     <Grid Padding="10,0,10,10" RowSpacing="4">
         <Grid.RowDefinitions>
@@ -21,56 +58,10 @@
                    VerticalOptions="Center" HorizontalOptions="Center"
                    WidthRequest="80" HeightRequest="80"/>
 
-        <!-- SelectionMode="None" (pas de sélection native) : cf. WarbandListViewModel, même raison
-             que CategoryListPage de DmTools (fond de sélection natif Android teinté par colorAccent
-             quel que soit le style posé dessus). SelectedWarband est géré à la main via un
-             TapGestureRecognizer par ligne plutôt que SelectedItem. -->
         <CollectionView Grid.Row="1" x:Name="WarbandCollection"
-                ItemsSource="{Binding Warbands}"
-                SelectionMode="None">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:WarbandRowItem">
-                    <!-- Padding sur ce Grid englobant (pas Margin sur le Border racine) : le Margin de
-                         la racine d'un DataTemplate de CollectionView n'est pas fiable sur Windows. -->
-                    <Grid Padding="0,0,0,8">
-                        <Border Style="{StaticResource RowBorderStyle}">
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                    <Setter Property="Stroke" Value="LightSkyBlue"/>
-                                </DataTrigger>
-                            </Border.Triggers>
-                            <!-- Sélection (corps de la ligne) et ouverture (chevron en bout de ligne)
-                                 restent deux zones de tap distinctes - cf. SceneTemplate/Select+Launch
-                                 dans CampaignPage de DmTools : le corps ne fait jamais que sélectionner,
-                                 seule la zone dédiée à droite navigue vers le détail. -->
-                            <Grid ColumnDefinitions="*,Auto,Auto">
-                                <Grid.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=SelectWarbandCommand}"
-                                        CommandParameter="{Binding .}"/>
-                                </Grid.GestureRecognizers>
-                                <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"
-                                       FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                                       VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
-                                <Label Grid.Column="1" Text="{Binding Treasury, StringFormat='{0} gc'}"
-                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                                <Grid Grid.Column="2" Padding="10,0,0,0">
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=OpenWarbandCommand}"
-                                            CommandParameter="{Binding .}"/>
-                                    </Grid.GestureRecognizers>
-                                    <Label Text="{loc:Loc BtnPlay}"
-                                           FontSize="{OnIdiom Default=13, Desktop=11}"
-                                           HorizontalOptions="Center" VerticalOptions="Center"
-                                           TextColor="{DynamicResource AppAccent}"/>
-                                </Grid>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                ItemsSource="{Binding Rows}"
+                SelectionMode="None"
+                ItemTemplate="{StaticResource WarbandTemplate}"/>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"

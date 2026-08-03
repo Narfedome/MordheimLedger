@@ -63,8 +63,16 @@ icône via `Components/FaIconButton/FaIconButtonView` (`GhostIconButtonStyle` = 
 style implicite = fond accent plein) et `Components/IconTextButton/IconTextButton` (icône + texte
 en une seule zone tappable), portés tels quels depuis DmTools.
 
-**Navigation** : on garde des pages Shell séparées (`Shell.GoToAsync`), pas de pattern accordéon
-mono-page façon `CampaignPage` de DmTools. Par contre, comme `CategoryListPage` de DmTools, les
+**Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
+d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
+système de favoris à 2 groupes "Favoris"/"My Warbands", finalement abandonné le même jour : pas assez
+de valeur pour la complexité ajoutée). La liste reste plate (`ObservableCollection<WarbandRow>`, pas
+de groupes/imbrication), mais garde le style "Chapitre" (`SessionTemplate`) de DmTools plutôt que
+celui de "Scène" pour chaque ligne : pas de card bordée, simple trait de séparation
+(`ChapterDividerStyle`), padding `AppChapterRowPadding`, titre en italique — seule la zone "Jouer" en
+bout de ligne (largeur fixe façon `Launch` de `SceneTemplate`) est reprise du niveau Scène, aux côtés
+du split sélection (corps de ligne) / ouverture (zone "Jouer") de `SceneTemplate`. Comme
+`CategoryListPage` de DmTools, les
 pages "détail" poussées via une route masquent la barre de navigation native
 (`Shell.NavBarIsVisible="False"` + `Shell.BackButtonBehavior IsVisible="False"`) et affichent leur
 propre en-tête via le composant `Components/DetailPageHeader/DetailPageHeaderView` (Title +

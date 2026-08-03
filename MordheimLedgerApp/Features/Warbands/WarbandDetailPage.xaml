@@ -37,37 +37,47 @@
         </HorizontalStackLayout>
 
         <CollectionView Grid.Row="3" x:Name="WarriorCollection" ItemsSource="{Binding Warriors}" Margin="0,8"
+                        SelectionMode="None"
                         IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:Warrior">
-                    <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
+                <DataTemplate x:DataType="vm:WarriorRow">
+                    <!-- Sélection gérée à la main (IsSelected sur la ligne, pas SelectionMode) : un Border
+                         stylé via VisualStateManager (SelectableGridItemBorderStyle, Library) n'empêche
+                         pas Android d'afficher son propre fond de sélection teinté colorAccent par-dessus
+                         - seul le liseré (SelectableCardBorderStyle, DataTrigger sur IsSelected) l'évite. -->
+                    <Border Style="{StaticResource SelectableCardBorderStyle}" Margin="12,6">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=SelectCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="4">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                                <Label Grid.Column="0" Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
                                 <Label Grid.Column="1" Text="Hero" TextColor="{DynamicResource AppAccent}"
-                                       IsVisible="{Binding IsHero}"/>
+                                       IsVisible="{Binding Warrior.IsHero}"/>
                                 <Label Grid.Column="1" Text="Henchman" TextColor="{DynamicResource AppTextMuted}"
-                                       IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}"/>
+                                       IsVisible="{Binding Warrior.IsHero, Converter={StaticResource InverseBoolConverter}}"/>
                             </Grid>
                             <HorizontalStackLayout Spacing="10">
-                                <Label Text="{Binding Movement, StringFormat='M{0}'}" FontSize="12"/>
-                                <Label Text="{Binding WeaponSkill, StringFormat='WS{0}'}" FontSize="12"/>
-                                <Label Text="{Binding BallisticSkill, StringFormat='BS{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Strength, StringFormat='S{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Toughness, StringFormat='T{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Wounds, StringFormat='W{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Initiative, StringFormat='I{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Attacks, StringFormat='A{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Leadership, StringFormat='Ld{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Movement, StringFormat='M{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.WeaponSkill, StringFormat='WS{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.BallisticSkill, StringFormat='BS{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Strength, StringFormat='S{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Toughness, StringFormat='T{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Wounds, StringFormat='W{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Initiative, StringFormat='I{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Attacks, StringFormat='A{0}'}" FontSize="12"/>
+                                <Label Text="{Binding Warrior.Leadership, StringFormat='Ld{0}'}" FontSize="12"/>
                             </HorizontalStackLayout>
                             <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
                                 <Label.FormattedText>
                                     <FormattedString>
                                         <Span Text="{loc:Loc WarriorsCostLabel}"/>
-                                        <Span Text="{Binding Cost, StringFormat=' {0}gc'}"/>
+                                        <Span Text="{Binding Warrior.Cost, StringFormat=' {0}gc'}"/>
                                         <Span Text="  ·  "/>
                                         <Span Text="{loc:Loc WarriorsXpLabel}"/>
-                                        <Span Text="{Binding Experience, StringFormat=' {0}'}"/>
+                                        <Span Text="{Binding Warrior.Experience, StringFormat=' {0}'}"/>
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>

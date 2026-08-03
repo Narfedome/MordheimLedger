@@ -13,10 +13,12 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
 
     [ObservableProperty]
-    private ObservableCollection<WarbandArchetype> warbandArchetypeItems = new();
+    private ObservableCollection<WarbandArchetypeRow> warbandArchetypeItems = new();
 
+    // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
+    // SelectableGridItemBorderStyle.
     [ObservableProperty]
-    private WarbandArchetype? selectedWarbandArchetype;
+    private WarbandArchetypeRow? selectedRow;
 
     public WarbandArchetypeViewModel(ILibraryService libraryService)
     {
@@ -28,8 +30,18 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private async Task LoadData()
     {
         var items = await _libraryService.GetWarbandArchetypesAsync();
-        WarbandArchetypeItems = new ObservableCollection<WarbandArchetype>(items);
+        WarbandArchetypeItems = new ObservableCollection<WarbandArchetypeRow>(items.Select(i => new WarbandArchetypeRow(i)));
+        SelectedRow = null;
     }
+
+    partial void OnSelectedRowChanged(WarbandArchetypeRow? oldValue, WarbandArchetypeRow? newValue)
+    {
+        if (oldValue != null) oldValue.IsSelected = false;
+        if (newValue != null) newValue.IsSelected = true;
+    }
+
+    [RelayCommand]
+    private void Select(WarbandArchetypeRow row) => SelectedRow = row;
 
     [RelayCommand]
     private async Task Create()
@@ -39,23 +51,24 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarbandArchetypeAsync(newItem);
-        WarbandArchetypeItems.Add(newItem);
+        WarbandArchetypeItems.Add(new WarbandArchetypeRow(newItem));
     }
 
     [RelayCommand]
     private async Task Edit()
     {
-        if (SelectedWarbandArchetype is null) return;
+        if (SelectedRow is not { } row) return;
+        var s = row.Item;
 
         var copy = new WarbandArchetype
         {
-            Id = SelectedWarbandArchetype.Id,
-            Name = SelectedWarbandArchetype.Name,
-            Source = SelectedWarbandArchetype.Source,
-            StartingTreasury = SelectedWarbandArchetype.StartingTreasury,
-            MaxWarriors = SelectedWarbandArchetype.MaxWarriors,
-            Description = SelectedWarbandArchetype.Description,
-            ImagePath = SelectedWarbandArchetype.ImagePath
+            Id = s.Id,
+            Name = s.Name,
+            Source = s.Source,
+            StartingTreasury = s.StartingTreasury,
+            MaxWarriors = s.MaxWarriors,
+            Description = s.Description,
+            ImagePath = s.ImagePath
         };
 
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"]);
@@ -68,24 +81,24 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Delete()
     {
-        if (SelectedWarbandArchetype is null) return;
-        if (!await ConfirmDeleteAsync(SelectedWarbandArchetype.Name)) return;
+        if (SelectedRow is not { } row) return;
+        if (!await ConfirmDeleteAsync(row.Item.Name)) return;
 
-        await _libraryService.DeleteWarbandArchetypeAsync(SelectedWarbandArchetype.Id);
-        WarbandArchetypeItems.Remove(SelectedWarbandArchetype);
-        SelectedWarbandArchetype = null;
+        await _libraryService.DeleteWarbandArchetypeAsync(row.Item.Id);
+        WarbandArchetypeItems.Remove(row);
+        SelectedRow = null;
     }
 
     [RelayCommand]
     private async Task ManageWarriors()
     {
-        if (SelectedWarbandArchetype is null) return;
+        if (SelectedRow is not { } row) return;
 
         await Shell.Current.GoToAsync(nameof(WarriorArchetypeListPage),
             new Dictionary<string, object>
             {
-                { "WarbandArchetypeId", SelectedWarbandArchetype.Id },
-                { "WarbandArchetypeName", SelectedWarbandArchetype.Name }
+                { "WarbandArchetypeId", row.Item.Id },
+                { "WarbandArchetypeName", row.Item.Name }
             });
     }
 }

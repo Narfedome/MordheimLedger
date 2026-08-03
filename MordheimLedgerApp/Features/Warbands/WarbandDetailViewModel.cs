@@ -23,7 +23,15 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private Warband? warband;
 
     [ObservableProperty]
-    private ObservableCollection<Warrior> warriors = new();
+    private ObservableCollection<WarriorRow> warriors = new();
+
+    // IsSelected porté par la ligne (SelectionMode="None" sur le CollectionView), pas la sélection
+    // native : constaté à l'usage (screenshot Android) que même un Border stylé via
+    // VisualStateManager (SelectableGridItemBorderStyle, utilisé par la Library) n'empêche pas
+    // Android d'afficher son propre fond de sélection teinté colorAccent par-dessus - seule une
+    // sélection entièrement gérée à la main l'évite, même mécanisme que WarbandRow/WarbandListPage.
+    [ObservableProperty]
+    private WarriorRow? selectedRow;
 
     [ObservableProperty]
     private ObservableCollection<HistoryEntry> historyEntries = new();
@@ -39,6 +47,15 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     partial void OnWarbandIdChanged(int value) => _ = LoadAsync(value);
 
+    partial void OnSelectedRowChanged(WarriorRow? oldValue, WarriorRow? newValue)
+    {
+        if (oldValue != null) oldValue.IsSelected = false;
+        if (newValue != null) newValue.IsSelected = true;
+    }
+
+    [RelayCommand]
+    private void Select(WarriorRow row) => SelectedRow = row;
+
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -49,7 +66,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId);
 
             var loaded = await _warbandService.GetWarriorsAsync(id);
-            Warriors = new ObservableCollection<Warrior>(loaded);
+            Warriors = new ObservableCollection<WarriorRow>(loaded.Select(w => new WarriorRow(w)));
+            SelectedRow = null;
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
@@ -85,7 +103,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         await Loading.RunAsync(async () =>
         {
             var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, _recruitableArchetypes[index], name);
-            Warriors.Add(warrior);
+            Warriors.Add(new WarriorRow(warrior));
         });
     }
 
@@ -94,7 +112,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
-        var activeWarriors = Warriors.Where(w => w.Status == WarriorStatus.Active).ToList();
+        var activeWarriors = Warriors.Select(r => r.Warrior).Where(w => w.Status == WarriorStatus.Active).ToList();
         if (activeWarriors.Count == 0)
         {
             await ShowInfoAsync(Loc["EndOfGameTitle"], Loc["EndOfGameNoWarriors"]);

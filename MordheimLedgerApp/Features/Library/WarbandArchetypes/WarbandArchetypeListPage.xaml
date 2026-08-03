@@ -4,8 +4,7 @@
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.WarbandArchetypes"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
-             x:Class="MordheimLedgerApp.Features.Library.WarbandArchetypes.WarbandArchetypeListPage"
-             Title="{loc:Loc TabLibrary}">
+             x:Class="MordheimLedgerApp.Features.Library.WarbandArchetypes.WarbandArchetypeListPage">
 
     <components:WatermarkedLayout>
         <local:WarbandArchetypeView/>

@@ -22,9 +22,11 @@
     <OnIdiom x:Key="AppDialogCardPadding" x:TypeArguments="x:Double" Phone="20" Tablet="20" Desktop="16" />
     <OnIdiom x:Key="AppSectionCardPadding" x:TypeArguments="x:Double" Phone="16" Tablet="16" Desktop="12" />
 
-    <!-- List row padding/min-height (e.g. RowBorderStyle): touch-sized on Phone/Tablet, tighter on
-         Desktop where rows are clicked with a mouse rather than tapped. -->
-    <OnIdiom x:Key="AppAccordionRowPadding" x:TypeArguments="Thickness" Phone="8,6" Tablet="8,6" Desktop="8,6" />
-    <OnIdiom x:Key="AppAccordionRowMinHeight" x:TypeArguments="x:Double" Phone="52" Tablet="52" Desktop="40" />
+    <!-- WarbandRow (style "Chapitre" façon SessionTemplate de DmTools) : padding de ligne plus
+         compact qu'AppAccordionRowPadding, pas de card autour - cf. WarbandListPage.xaml. Marge
+         gauche présente (contrairement à SessionTemplate, dont le "0" initial laisse la place à
+         l'indentation/poignée d'une ligne imbriquée) puisque la bande est ici de premier niveau, pas
+         nichée sous un groupe. -->
+    <OnIdiom x:Key="AppChapterRowPadding" x:TypeArguments="Thickness" Phone="8,5,8,6" Tablet="8,5,8,6" Desktop="8,3,8,3" />
 
 </ResourceDictionary>

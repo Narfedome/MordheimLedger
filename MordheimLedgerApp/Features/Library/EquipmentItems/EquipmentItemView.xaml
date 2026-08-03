@@ -2,10 +2,11 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemView"
-             xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
-             xmlns:components="clr-namespace:MordheimLedgerApp.Components">
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Name="root">
 
     <Grid Margin="5" RowSpacing="8">
         <Grid.RowDefinitions>
@@ -31,8 +32,7 @@
 
         <CollectionView Grid.Row="1" x:Name="ItemsCollection"
                 ItemsSource="{Binding EquipmentItems}"
-                SelectionMode="Single"
-                SelectedItem="{Binding SelectedEquipmentItem}"
+                SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
                 <components:ResponsiveGridSpanBehavior TileWidth="140"/>
@@ -41,8 +41,28 @@
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:EquipmentItem">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}">
+                <DataTemplate x:DataType="local:EquipmentItemRow">
+                    <!-- Sélection gérée à la main (IsSelected, pas SelectionMode) - reprise mot pour mot
+                         de LibraryTrackView chez DmTools (commit 09c71545a) : BackgroundColor/Stroke
+                         posés en dur sur l'instance (plus besoin du fond translucide, la sélection
+                         native n'est plus utilisée du tout ici), VisualStateGroupList vide pour
+                         neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
+                         empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
+                         le DataTrigger sur IsSelected. -->
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList/>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Stroke" Value="LightSkyBlue"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
                         <Grid WidthRequest="120" HeightRequest="120">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
@@ -50,10 +70,10 @@
                             </Grid.RowDefinitions>
                             <components:LibraryItemImageView
                                 Grid.Row="0"
-                                ImagePath="{Binding ImagePath}"
+                                ImagePath="{Binding Item.ImagePath}"
                                 DefaultGlyph="{x:Static icons:SolidFont.Coins}"
                                 Padding="20" />
-                            <Label Text="{Binding Name}"
+                            <Label Text="{Binding Item.Name}"
                                    Grid.Row="1"
                                    Style="{StaticResource TruncatedLabelStyle}"
                                    HorizontalOptions="Center"
@@ -71,11 +91,11 @@
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Pen}"
                                          Command="{Binding EditCommand}"
                                          Tooltip="{loc:Loc BtnRename}"
-                                         IsEnabled="{Binding SelectedEquipmentItem, Converter={StaticResource IsNotNullConverter}}"/>
+                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Trash}"
                                          Command="{Binding DeleteCommand}"
                                          Tooltip="{loc:Loc BtnDelete}"
-                                         IsEnabled="{Binding SelectedEquipmentItem, Converter={StaticResource IsNotNullConverter}}"/>
+                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
         </HorizontalStackLayout>
 
     </Grid>

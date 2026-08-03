@@ -14,7 +14,6 @@
         <Tab Title="{loc:Loc TabWarbands}"
              Icon="{extensions:FaIcon Glyph={x:Static icons:SolidFont.Users}}">
             <ShellContent
-                Title="{loc:Loc TabWarbands}"
                 ContentTemplate="{DataTemplate warbands:WarbandListPage}"
                 Route="WarbandListPage" />
         </Tab>
@@ -22,7 +21,6 @@
         <Tab Title="{loc:Loc TabSettings}"
              Icon="{extensions:FaIcon Glyph={x:Static icons:SolidFont.Gear}}">
             <ShellContent
-                Title="{loc:Loc TabSettings}"
                 ContentTemplate="{DataTemplate settings:SettingsPage}"
                 Route="SettingsPage" />
         </Tab>

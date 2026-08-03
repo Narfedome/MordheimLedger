@@ -12,4 +12,5 @@ public class WarbandArchetypeEntity
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public string? Description { get; set; }
+    public string? ImagePath { get; set; }
 }

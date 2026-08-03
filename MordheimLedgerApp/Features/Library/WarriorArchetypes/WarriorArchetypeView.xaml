@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Features.Library.WarriorArchetypes.WarriorArchetypeView"
+             xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components">
+
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                           VerticalOptions="Center" HorizontalOptions="Center"
+                           WidthRequest="120" HeightRequest="120"/>
+
+        <CollectionView x:Name="ItemsCollection"
+                ItemsSource="{Binding WarriorArchetypeItems}"
+                SelectionMode="Single"
+                SelectedItem="{Binding SelectedWarriorArchetype}"
+                ItemSizingStrategy="MeasureFirstItem">
+            <CollectionView.Behaviors>
+                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
+            </CollectionView.Behaviors>
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:WarriorArchetype">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}">
+                        <Grid WidthRequest="120" HeightRequest="120">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <components:LibraryItemImageView
+                                Grid.Row="0"
+                                ImagePath="{Binding ImagePath}"
+                                DefaultGlyph="{x:Static icons:SolidFont.UserShield}"
+                                Padding="20" />
+                            <Label Text="{Binding Name}"
+                                   Grid.Row="1"
+                                   Style="{StaticResource TruncatedLabelStyle}"
+                                   HorizontalOptions="Center"
+                                   Margin="5"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
+                                         Command="{Binding CreateCommand}"
+                                         Tooltip="{loc:Loc BtnAdd}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Pen}"
+                                         Command="{Binding EditCommand}"
+                                         Tooltip="{loc:Loc BtnRename}"
+                                         IsEnabled="{Binding SelectedWarriorArchetype, Converter={StaticResource IsNotNullConverter}}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Trash}"
+                                         Command="{Binding DeleteCommand}"
+                                         Tooltip="{loc:Loc BtnDelete}"
+                                         IsEnabled="{Binding SelectedWarriorArchetype, Converter={StaticResource IsNotNullConverter}}"/>
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentView>

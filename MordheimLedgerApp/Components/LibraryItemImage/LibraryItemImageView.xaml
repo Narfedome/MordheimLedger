@@ -1,0 +1,26 @@
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.LibraryItemImageView"
+             x:Name="root">
+
+    <Image>
+        <Image.Source>
+            <Binding Path="ImagePath" Source="{x:Reference root}" TargetNullValue=""/>
+        </Image.Source>
+        <Image.Triggers>
+            <!-- ImagePath vide (pas encore d'art) : repli sur un glyphe FontAwesome. -->
+            <MultiTrigger TargetType="Image">
+                <MultiTrigger.Conditions>
+                    <BindingCondition Binding="{Binding Source={x:Reference root}, Path=ImagePath}" Value=""/>
+                </MultiTrigger.Conditions>
+                <Setter Property="Source">
+                    <Setter.Value>
+                        <FontImageSource FontFamily="{Binding Source={x:Reference root}, Path=FontFamily}"
+                                         Glyph="{Binding Source={x:Reference root}, Path=DefaultGlyph}"
+                                         Color="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
+                    </Setter.Value>
+                </Setter>
+            </MultiTrigger>
+        </Image.Triggers>
+    </Image>
+</ContentView>

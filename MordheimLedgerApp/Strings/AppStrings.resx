@@ -172,4 +172,103 @@
   <data name="WarriorsXpLabel" xml:space="preserve">
     <value>XP :</value>
   </data>
+  <data name="TabLibrary" xml:space="preserve">
+    <value>Bibliothèque</value>
+  </data>
+  <data name="TabTradingPost" xml:space="preserve">
+    <value>Place du Marché</value>
+  </data>
+  <data name="BtnSave" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="LibManageWarriors" xml:space="preserve">
+    <value>Gérer les guerriers</value>
+  </data>
+  <data name="LibDescriptionPh" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="LibFilterAll" xml:space="preserve">
+    <value>Toutes</value>
+  </data>
+  <data name="LibFilterCategory" xml:space="preserve">
+    <value>Filtrer par catégorie</value>
+  </data>
+  <data name="LibStepLabel" xml:space="preserve">
+    <value>Étape {0}/{1}</value>
+  </data>
+  <data name="LibBack" xml:space="preserve">
+    <value>Précédent</value>
+  </data>
+  <data name="LibNext" xml:space="preserve">
+    <value>Suivant</value>
+  </data>
+  <data name="WarbandArchetypeNamePh" xml:space="preserve">
+    <value>Nom de la bande</value>
+  </data>
+  <data name="WarbandArchetypeTreasuryPh" xml:space="preserve">
+    <value>Trésorerie de départ</value>
+  </data>
+  <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
+    <value>Nombre maximum de guerriers</value>
+  </data>
+  <data name="WarbandArchetypeEditTitle" xml:space="preserve">
+    <value>Modifier le type de bande</value>
+  </data>
+  <data name="WarbandArchetypeCreateTitle" xml:space="preserve">
+    <value>Nouveau type de bande</value>
+  </data>
+  <data name="WarriorArchetypeNamePh" xml:space="preserve">
+    <value>Nom du guerrier</value>
+  </data>
+  <data name="WarriorArchetypeIsHero" xml:space="preserve">
+    <value>Hero</value>
+  </data>
+  <data name="WarriorArchetypeCostPh" xml:space="preserve">
+    <value>Coût</value>
+  </data>
+  <data name="WarriorArchetypeMaxCountPh" xml:space="preserve">
+    <value>Nombre maximum</value>
+  </data>
+  <data name="WarriorArchetypeEditTitle" xml:space="preserve">
+    <value>Modifier le type de guerrier</value>
+  </data>
+  <data name="WarriorArchetypeCreateTitle" xml:space="preserve">
+    <value>Nouveau type de guerrier</value>
+  </data>
+  <data name="EquipmentItemNamePh" xml:space="preserve">
+    <value>Nom de l'objet</value>
+  </data>
+  <data name="EquipmentItemCategoryPh" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="EquipmentItemCostPh" xml:space="preserve">
+    <value>Coût</value>
+  </data>
+  <data name="EquipmentItemRarityPh" xml:space="preserve">
+    <value>Rareté</value>
+  </data>
+  <data name="EquipmentItemEditTitle" xml:space="preserve">
+    <value>Modifier l'objet</value>
+  </data>
+  <data name="EquipmentItemCreateTitle" xml:space="preserve">
+    <value>Nouvel objet</value>
+  </data>
+  <data name="EquipmentCategoryMeleeWeapon" xml:space="preserve">
+    <value>Arme de mêlée</value>
+  </data>
+  <data name="EquipmentCategoryMissileWeapon" xml:space="preserve">
+    <value>Arme de tir</value>
+  </data>
+  <data name="EquipmentCategoryBlackPowderWeapon" xml:space="preserve">
+    <value>Arme à poudre noire</value>
+  </data>
+  <data name="EquipmentCategoryAmmunition" xml:space="preserve">
+    <value>Munitions</value>
+  </data>
+  <data name="EquipmentCategoryArmour" xml:space="preserve">
+    <value>Armure</value>
+  </data>
+  <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
+    <value>Équipement divers</value>
+  </data>
 </root>

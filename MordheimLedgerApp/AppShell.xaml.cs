@@ -1,4 +1,5 @@
-﻿using MordheimLedgerApp.Features.Warbands;
+using MordheimLedgerApp.Features.Library.WarriorArchetypes;
+using MordheimLedgerApp.Features.Warbands;
 
 namespace MordheimLedgerApp
 {
@@ -8,6 +9,7 @@ namespace MordheimLedgerApp
         {
             InitializeComponent();
             Routing.RegisterRoute(nameof(WarbandDetailPage), typeof(WarbandDetailPage));
+            Routing.RegisterRoute(nameof(WarriorArchetypeListPage), typeof(WarriorArchetypeListPage));
         }
     }
 }

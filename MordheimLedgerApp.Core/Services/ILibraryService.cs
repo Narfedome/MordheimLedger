@@ -14,4 +14,8 @@ public interface ILibraryService
     Task SaveWarbandArchetypeAsync(WarbandArchetype archetype);
     Task SaveWarriorArchetypeAsync(WarriorArchetype archetype);
     Task SaveEquipmentItemAsync(EquipmentItem item);
+
+    Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
+    Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
+    Task DeleteEquipmentItemAsync(int equipmentItemId);
 }

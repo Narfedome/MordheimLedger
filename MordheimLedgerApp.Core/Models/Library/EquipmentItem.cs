@@ -16,4 +16,7 @@ public class EquipmentItem
 
     public string? Description { get; set; }
     public ContentSource Source { get; set; }
+
+    /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
+    public string ImagePath { get; set; } = string.Empty;
 }

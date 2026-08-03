@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.WarriorArchetypes"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
+             x:Class="MordheimLedgerApp.Features.Library.WarriorArchetypes.WarriorArchetypeListPage"
+             x:DataType="local:WarriorArchetypeViewModel"
+             Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
+
+    <components:WatermarkedLayout>
+        <Grid RowDefinitions="Auto,*">
+            <header:DetailPageHeaderView Grid.Row="0" Title="{Binding WarbandArchetypeName}" BackCommand="{Binding BackCommand}"/>
+            <local:WarriorArchetypeView Grid.Row="1"/>
+        </Grid>
+    </components:WatermarkedLayout>
+</ContentPage>

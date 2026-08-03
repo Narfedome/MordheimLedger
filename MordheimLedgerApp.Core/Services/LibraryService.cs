@@ -87,4 +87,22 @@ public class LibraryService : ILibraryService
         if (existing?.Source == ContentSource.Official) item.Source = ContentSource.Modified;
         await _db.Connection.UpdateAsync(item.ToEntity());
     }
+
+    public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarbandArchetypeEntity>(warbandArchetypeId);
+    }
+
+    public async Task DeleteWarriorArchetypeAsync(int warriorArchetypeId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorArchetypeEntity>(warriorArchetypeId);
+    }
+
+    public async Task DeleteEquipmentItemAsync(int equipmentItemId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<EquipmentItemEntity>(equipmentItemId);
+    }
 }

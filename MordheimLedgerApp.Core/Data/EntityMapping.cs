@@ -39,7 +39,8 @@ public static class EntityMapping
         Source = e.Source,
         StartingTreasury = e.StartingTreasury,
         MaxWarriors = e.MaxWarriors,
-        Description = e.Description
+        Description = e.Description,
+        ImagePath = e.ImagePath ?? string.Empty
     };
 
     public static WarbandArchetypeEntity ToEntity(this WarbandArchetype m) => new()
@@ -49,7 +50,8 @@ public static class EntityMapping
         Source = m.Source,
         StartingTreasury = m.StartingTreasury,
         MaxWarriors = m.MaxWarriors,
-        Description = m.Description
+        Description = m.Description,
+        ImagePath = m.ImagePath
     };
 
     public static WarriorArchetype ToModel(this WarriorArchetypeEntity e) => new()
@@ -70,7 +72,8 @@ public static class EntityMapping
         Initiative = e.Initiative,
         Attacks = e.Attacks,
         Leadership = e.Leadership,
-        Description = e.Description
+        Description = e.Description,
+        ImagePath = e.ImagePath ?? string.Empty
     };
 
     public static WarriorArchetypeEntity ToEntity(this WarriorArchetype m) => new()
@@ -91,7 +94,8 @@ public static class EntityMapping
         Initiative = m.Initiative,
         Attacks = m.Attacks,
         Leadership = m.Leadership,
-        Description = m.Description
+        Description = m.Description,
+        ImagePath = m.ImagePath
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line).</summary>
@@ -134,7 +138,8 @@ public static class EntityMapping
         Cost = e.Cost,
         Rarity = e.Rarity,
         Description = e.Description,
-        Source = e.Source
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty
     };
 
     public static EquipmentItemEntity ToEntity(this EquipmentItem m) => new()
@@ -145,7 +150,8 @@ public static class EntityMapping
         Cost = m.Cost,
         Rarity = m.Rarity,
         Description = m.Description,
-        Source = m.Source
+        Source = m.Source,
+        ImagePath = m.ImagePath
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>

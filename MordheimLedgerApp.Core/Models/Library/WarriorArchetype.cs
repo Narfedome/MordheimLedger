@@ -29,4 +29,7 @@ public class WarriorArchetype
     public int Leadership { get; set; }
 
     public string? Description { get; set; }
+
+    /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
+    public string ImagePath { get; set; } = string.Empty;
 }

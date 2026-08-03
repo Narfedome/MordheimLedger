@@ -5,6 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:warbands="clr-namespace:MordheimLedgerApp.Features.Warbands"
     xmlns:settings="clr-namespace:MordheimLedgerApp.Features.Settings"
+    xmlns:warbandArchetypes="clr-namespace:MordheimLedgerApp.Features.Library.WarbandArchetypes"
+    xmlns:equipmentItems="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
     xmlns:extensions="clr-namespace:MordheimLedgerApp.Extensions"
     xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
     xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
@@ -16,6 +18,20 @@
             <ShellContent
                 ContentTemplate="{DataTemplate warbands:WarbandListPage}"
                 Route="WarbandListPage" />
+        </Tab>
+
+        <Tab Title="{loc:Loc TabLibrary}"
+             Icon="{extensions:FaIcon Glyph={x:Static icons:SolidFont.BookOpen}}">
+            <ShellContent
+                ContentTemplate="{DataTemplate warbandArchetypes:WarbandArchetypeListPage}"
+                Route="WarbandArchetypeListPage" />
+        </Tab>
+
+        <Tab Title="{loc:Loc TabTradingPost}"
+             Icon="{extensions:FaIcon Glyph={x:Static icons:SolidFont.Coins}}">
+            <ShellContent
+                ContentTemplate="{DataTemplate equipmentItems:EquipmentItemListPage}"
+                Route="EquipmentItemListPage" />
         </Tab>
 
         <Tab Title="{loc:Loc TabSettings}"

@@ -13,4 +13,5 @@ public class EquipmentItemEntity
     public int? Rarity { get; set; }
     public string? Description { get; set; }
     public ContentSource Source { get; set; }
+    public string? ImagePath { get; set; }
 }

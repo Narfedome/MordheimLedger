@@ -2,6 +2,9 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.EquipmentItems;
+using MordheimLedgerApp.Features.Library.WarbandArchetypes;
+using MordheimLedgerApp.Features.Library.WarriorArchetypes;
 using MordheimLedgerApp.Features.Settings;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
@@ -49,6 +52,12 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<WarbandDetailPage>();
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<SettingsPage>();
+            builder.Services.AddTransient<WarbandArchetypeViewModel>();
+            builder.Services.AddTransient<WarbandArchetypeListPage>();
+            builder.Services.AddTransient<WarriorArchetypeViewModel>();
+            builder.Services.AddTransient<WarriorArchetypeListPage>();
+            builder.Services.AddTransient<EquipmentItemViewModel>();
+            builder.Services.AddTransient<EquipmentItemListPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

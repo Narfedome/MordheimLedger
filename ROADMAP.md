@@ -17,7 +17,7 @@
 - [x] Services CRUD (`ILibraryService`, `IWarbandService`)
 - [x] Seed d'une première bande officielle (Reiklander Mercenaries) — stats à vérifier contre le livre de règles
 - [x] Écrans de bout en bout : liste de bandes, création, détail/roster, recrutement
-- [ ] Écrans de gestion de la bibliothèque (créer/éditer archétypes et objets)
+- [x] Écrans de gestion de la bibliothèque (créer/éditer archétypes et objets) — Types de Bande (avec Types de Guerrier imbriqués) et Trading Post, tuiles en grille + dialogs Create/Edit (wizard 3 étapes pour les guerriers)
 - [ ] Table des Blessures Graves
 - [ ] Historique de campagne / trésorerie détaillée
 - [ ] Compléter le catalogue au-delà d'une seule bande

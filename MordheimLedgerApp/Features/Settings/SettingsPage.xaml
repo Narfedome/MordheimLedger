@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Settings"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:palette="clr-namespace:MordheimLedgerApp.Components.PalettePicker"
+             x:Class="MordheimLedgerApp.Features.Settings.SettingsPage"
+             x:DataType="local:SettingsViewModel"
+             Title="{loc:Loc TabSettings}">
+
+    <ScrollView>
+        <!-- Cf. DmTools SettingsPage : sur Desktop, une fenêtre large étirait chaque carte de section
+             bord à bord - plafonnée et centrée à la place (fait en code-behind, cf. SettingsPage.xaml.cs). -->
+        <VerticalStackLayout x:Name="ContentStack" Padding="20" Spacing="16">
+
+            <!-- Langue -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <Label Grid.Column="0" Text="{loc:Loc SettingsLanguage}"
+                           VerticalOptions="Center" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    <Button Grid.Column="1"
+                            Text="{Binding SelectedLanguageLabel}"
+                            Command="{Binding SelectLanguageCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{DynamicResource AppAccent}"
+                            FontSize="{OnIdiom Default=15, Desktop=13}"
+                            Padding="8,0"
+                            MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
+                            MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
+                </Grid>
+            </Border>
+
+            <!-- Thème -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <Label Grid.Column="0" Text="{loc:Loc SettingsTheme}"
+                           VerticalOptions="Center" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    <Button Grid.Column="1"
+                            Text="{Binding SelectedThemeOption}"
+                            Command="{Binding SelectThemeCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="{DynamicResource AppAccent}"
+                            FontSize="{OnIdiom Default=15, Desktop=13}"
+                            Padding="8,0"
+                            MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
+                            MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
+                </Grid>
+            </Border>
+
+            <!-- Palette -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="{loc:Loc SettingsPalette}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    <palette:PalettePickerView
+                        SelectedPalette="{Binding SelectedPalette, Mode=TwoWay}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Version -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <Label Grid.Column="0" Text="{loc:Loc SettingsVersion}"
+                           VerticalOptions="Center" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    <Label Grid.Column="1" Text="{Binding AppVersion}"
+                           VerticalOptions="Center"
+                           TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+            </Border>
+
+            <!-- Buy Me a Coffee -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="{loc:Loc SettingsSupportTitle}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1"
+                           Text="{loc:Loc SettingsSupportDesc}"
+                           TextColor="{DynamicResource AppAccent}"
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenCoffeeLinkCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </Border>
+
+            <!-- Signaler un bug -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="{loc:Loc SettingsReportBugTitle}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1"
+                           Text="{loc:Loc SettingsReportBugDesc}"
+                           TextColor="{DynamicResource AppAccent}"
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ReportBugCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

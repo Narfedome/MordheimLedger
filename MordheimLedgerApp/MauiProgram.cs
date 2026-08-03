@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Settings;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 using Microsoft.Extensions.Logging;
@@ -46,6 +47,8 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<WarbandListPage>();
             builder.Services.AddTransient<WarbandDetailViewModel>();
             builder.Services.AddTransient<WarbandDetailPage>();
+            builder.Services.AddTransient<SettingsViewModel>();
+            builder.Services.AddTransient<SettingsPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

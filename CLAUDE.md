@@ -6,8 +6,9 @@ machine/session à l'autre (l'utilisateur développe depuis plusieurs PC).
 
 ## Architecture
 
-Reprend délibérément les patterns du projet sœur **DmTools** (`D:\Dev\perso\DmTools`, même
-auteur, appli MAUI mature) plutôt que de réinventer :
+Reprend délibérément les patterns du projet sœur **DmTools** (`D:\Dev\DmTools` sur cette machine —
+le chemin peut différer sur les autres PC de l'utilisateur, même auteur, appli MAUI mature) plutôt
+que de réinventer :
 
 - `MordheimLedgerApp.Core` (net10.0, **sans dépendance MAUI**) : `Models/` (modèles purs),
   `Data/` (`Entities/` SQLite + `AppDatabase.cs` + `EntityMapping.cs`), `Services/` (CRUD)
@@ -46,8 +47,12 @@ conformité avec le matériel officiel plutôt que traduction.
 
 Même esprit visuel et mêmes interactions que **DmTools** (déjà repris : `BaseViewModel`,
 dialogues, `LocalizationService`/`ThemeService`/`LoadingService`, tokens `Resources/Styles/*`).
-Une seule palette pour l'instant (pas de sélecteur multi-thèmes comme dans DmTools) — grim/cendre
-+ vert wyrdstone en accent, à affiner une fois qu'il y a de vrais écrans à regarder.
+Pour tout ce qui touche à l'UI/au style (layouts, structure des composants, tailles `OnIdiom`
+Windows/Android), reprendre DmTools tel quel plutôt que trimmer ou réinventer — voir l'écran
+Settings (`Features/Settings/`) qui reprend la disposition de DmTools intégralement, y compris le
+sélecteur de palette (`Components/PalettePicker/`, `ThemeService.AppPalette`) même s'il n'expose
+qu'une seule entrée pour l'instant (grim/cendre + vert wyrdstone en accent) — d'autres palettes
+pourront s'ajouter plus tard sans retoucher l'écran.
 
 **Icônes** : polices Font Awesome 7 (Solid/Regular/Brands, `Resources/Fonts/`) + RPG Awesome
 (`rpgawesome-webfont.ttf`) portées depuis DmTools telles quelles, avec leurs classes de glyphes

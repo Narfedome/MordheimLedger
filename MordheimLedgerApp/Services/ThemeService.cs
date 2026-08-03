@@ -11,17 +11,21 @@ namespace MordheimLedgerApp.Services
         Dark = 2
     }
 
-    /// <summary>
-    /// Single placeholder palette (ash/wyrdstone-green) for now — kept as a service rather than
-    /// static XAML colors so a palette picker (like DmTools') can be added later without touching
-    /// every page.
-    /// </summary>
+    // Single entry for now (ash/wyrdstone-green) — same enum + switch-based token lookup as DmTools'
+    // ThemeService so more palettes slot in later without touching Settings or this service's shape.
+    public enum AppPalette
+    {
+        CendreEtWyrdstone = 0
+    }
+
     public class ThemeService : INotifyPropertyChanged
     {
         public static readonly ThemeService Instance = new();
 
+        private const string PaletteKey = "app_palette";
         private const string ThemePrefKey = "app_theme";
 
+        private AppPalette _palette;
         private AppThemePreference _themePref;
 
         public event Action? ThemeChanged;
@@ -31,7 +35,21 @@ namespace MordheimLedgerApp.Services
 
         private ThemeService()
         {
+            _palette = (AppPalette)Preferences.Default.Get(PaletteKey, (int)AppPalette.CendreEtWyrdstone);
             _themePref = (AppThemePreference)Preferences.Default.Get(ThemePrefKey, (int)AppThemePreference.System);
+        }
+
+        public AppPalette Palette
+        {
+            get => _palette;
+            set
+            {
+                if (_palette == value) return;
+                _palette = value;
+                Preferences.Default.Set(PaletteKey, (int)value);
+                Apply();
+                ThemeChanged?.Invoke();
+            }
         }
 
         public AppThemePreference ThemePreference
@@ -78,7 +96,7 @@ namespace MordheimLedgerApp.Services
         public void Apply()
         {
             if (Application.Current?.Resources is null) return;
-            var tokens = GetPaletteTokens(IsDark());
+            var tokens = GetPaletteTokens(_palette, IsDark());
             tokens["AppSurfaceTranslucent"] = tokens["AppSurface"].WithAlpha(0.80f);
             tokens["AppDanger"] = Color.FromArgb("#8B3A3A");
             var res = Application.Current.Resources;
@@ -86,29 +104,40 @@ namespace MordheimLedgerApp.Services
                 res[kv.Key] = kv.Value;
         }
 
-        public Color CurrentAccent => GetPaletteTokens(IsDark()).GetValueOrDefault("AppAccent", Colors.Gray);
-        public Color CurrentAccentSecondary => GetPaletteTokens(IsDark()).GetValueOrDefault("AppAccentSecondary", Colors.Gray);
+        public Color CurrentAccent => GetPaletteTokens(_palette, IsDark()).GetValueOrDefault("AppAccent", Colors.Gray);
+        public Color CurrentAccentSecondary => GetPaletteTokens(_palette, IsDark()).GetValueOrDefault("AppAccentSecondary", Colors.Gray);
 
-        private static Dictionary<string, Color> GetPaletteTokens(bool dark) => dark
-            ? new()
-            {
-                ["AppBackground"]      = Color.FromArgb("#17151A"),
-                ["AppSurface"]         = Color.FromArgb("#241F26"),
-                ["AppAccent"]          = Color.FromArgb("#7FA34F"),
-                ["AppAccentSecondary"] = Color.FromArgb("#5C6B73"),
-                ["AppText"]            = Color.FromArgb("#E8E4D8"),
-                ["AppTextMuted"]       = Color.FromArgb("#948C7E"),
-                ["AppBorder"]          = Color.FromArgb("#35303A"),
-            }
-            : new()
-            {
-                ["AppBackground"]      = Color.FromArgb("#EDE7D9"),
-                ["AppSurface"]         = Color.FromArgb("#F5F1E6"),
-                ["AppAccent"]          = Color.FromArgb("#4F7A34"),
-                ["AppAccentSecondary"] = Color.FromArgb("#3D4A50"),
-                ["AppText"]            = Color.FromArgb("#201C1F"),
-                ["AppTextMuted"]       = Color.FromArgb("#6B6258"),
-                ["AppBorder"]          = Color.FromArgb("#D8D0BC"),
-            };
+        private static Dictionary<string, Color> GetPaletteTokens(AppPalette palette, bool dark) => palette switch
+        {
+            AppPalette.CendreEtWyrdstone => dark
+                ? new()
+                {
+                    ["AppBackground"]      = Color.FromArgb("#17151A"),
+                    ["AppSurface"]         = Color.FromArgb("#241F26"),
+                    ["AppAccent"]          = Color.FromArgb("#7FA34F"),
+                    ["AppAccentSecondary"] = Color.FromArgb("#5C6B73"),
+                    ["AppText"]            = Color.FromArgb("#E8E4D8"),
+                    ["AppTextMuted"]       = Color.FromArgb("#948C7E"),
+                    ["AppBorder"]          = Color.FromArgb("#35303A"),
+                }
+                : new()
+                {
+                    ["AppBackground"]      = Color.FromArgb("#EDE7D9"),
+                    ["AppSurface"]         = Color.FromArgb("#F5F1E6"),
+                    ["AppAccent"]          = Color.FromArgb("#4F7A34"),
+                    ["AppAccentSecondary"] = Color.FromArgb("#3D4A50"),
+                    ["AppText"]            = Color.FromArgb("#201C1F"),
+                    ["AppTextMuted"]       = Color.FromArgb("#6B6258"),
+                    ["AppBorder"]          = Color.FromArgb("#D8D0BC"),
+                },
+
+            _ => new()
+        };
+
+        public static (Color dark, Color light, Color accent) GetPaletteSwatchColors(AppPalette p) => p switch
+        {
+            AppPalette.CendreEtWyrdstone => (Color.FromArgb("#17151A"), Color.FromArgb("#EDE7D9"), Color.FromArgb("#7FA34F")),
+            _                             => (Colors.Black, Colors.White, Colors.Gray)
+        };
     }
 }

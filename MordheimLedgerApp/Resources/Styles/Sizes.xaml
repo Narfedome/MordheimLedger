@@ -7,6 +7,10 @@
          (Android, finger) but oversized with a mouse on Desktop, where apps run closer to 32. -->
     <OnIdiom x:Key="AppMinTouchTarget" x:TypeArguments="x:Double" Phone="44" Tablet="44" Desktop="32" />
 
+    <!-- Smaller touch target for inline text-buttons inside a section card (e.g. Settings rows),
+         where AppMinTouchTarget would look oversized next to a single line of text. -->
+    <OnIdiom x:Key="AppInlineButtonMinSize" x:TypeArguments="x:Double" Phone="36" Tablet="36" Desktop="20" />
+
     <!-- Base and title font sizes: MAUI doesn't map font sizes 1:1 across platforms — the same value
          renders visibly larger on Windows/WinUI than on Android at equivalent density, hence a
          smaller Desktop base. -->

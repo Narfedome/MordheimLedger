@@ -82,4 +82,43 @@
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
   </data>
+  <data name="TabWarbands" xml:space="preserve">
+    <value>Warbands</value>
+  </data>
+  <data name="TabSettings" xml:space="preserve">
+    <value>Paramètres</value>
+  </data>
+  <data name="SettingsLanguage" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="SettingsPalette" xml:space="preserve">
+    <value>Palette</value>
+  </data>
+  <data name="SettingsTheme" xml:space="preserve">
+    <value>Thème</value>
+  </data>
+  <data name="SettingsThemeSystem" xml:space="preserve">
+    <value>Système</value>
+  </data>
+  <data name="SettingsThemeLight" xml:space="preserve">
+    <value>Clair</value>
+  </data>
+  <data name="SettingsThemeDark" xml:space="preserve">
+    <value>Sombre</value>
+  </data>
+  <data name="SettingsVersion" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="SettingsSupportTitle" xml:space="preserve">
+    <value>Soutenir le projet</value>
+  </data>
+  <data name="SettingsSupportDesc" xml:space="preserve">
+    <value>Buy me a coffee</value>
+  </data>
+  <data name="SettingsReportBugTitle" xml:space="preserve">
+    <value>Signaler un bug</value>
+  </data>
+  <data name="SettingsReportBugDesc" xml:space="preserve">
+    <value>Ouvrir le formulaire</value>
+  </data>
 </root>

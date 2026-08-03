@@ -47,6 +47,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private static async Task BackAsync() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
     private async Task RecruitWarriorAsync()
     {
         if (Warband is null) return;

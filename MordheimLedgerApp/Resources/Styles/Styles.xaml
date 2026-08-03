@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:components="clr-namespace:MordheimLedgerApp.Components">
+
+    <!-- Discreet variant of FaIconButtonView (transparent background, muted icon) for a
+         chevron/back button that should blend into the background rather than stand out as a
+         primary action (cf. DetailPageHeaderView). -->
+    <Style x:Key="GhostIconButtonStyle" TargetType="components:FaIconButtonView">
+        <Setter Property="IconBackgroundColor" Value="Transparent"/>
+        <Setter Property="IconColor" Value="{DynamicResource AppTextMuted}"/>
+    </Style>
+
+    <!-- Implicit style (no x:Key): solid accent background by default for any FaIconButtonView that
+         doesn't set its own Style — an explicit Style="{StaticResource GhostIconButtonStyle}" wins over it. -->
+    <Style TargetType="components:FaIconButtonView">
+        <Setter Property="IconBackgroundColor" Value="{DynamicResource AppAccent}"/>
+    </Style>
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{DynamicResource AppAccent}" />

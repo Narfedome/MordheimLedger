@@ -47,8 +47,24 @@ conformité avec le matériel officiel plutôt que traduction.
 Même esprit visuel et mêmes interactions que **DmTools** (déjà repris : `BaseViewModel`,
 dialogues, `LocalizationService`/`ThemeService`/`LoadingService`, tokens `Resources/Styles/*`).
 Une seule palette pour l'instant (pas de sélecteur multi-thèmes comme dans DmTools) — grim/cendre
-+ vert wyrdstone en accent, à affiner une fois qu'il y a de vrais écrans à regarder. Icônes et
-identité visuelle définitive : pas encore tranchées.
++ vert wyrdstone en accent, à affiner une fois qu'il y a de vrais écrans à regarder.
+
+**Icônes** : polices Font Awesome 7 (Solid/Regular/Brands, `Resources/Fonts/`) + RPG Awesome
+(`rpgawesome-webfont.ttf`) portées depuis DmTools telles quelles, avec leurs classes de glyphes
+générées (`Resources/Icons/{Solid,Regular,Brand,Rpg}Font.cs`, ne pas éditer à la main — regénérer
+via IconFont2Code si la police change). Aucune icône gothique/Mordheim-thématique disponible en
+police toute faite : RPG Awesome (armes, crânes, dés...) est le meilleur compromis trouvé. Boutons
+icône via `Components/FaIconButton/FaIconButtonView` (`GhostIconButtonStyle` = fond transparent,
+style implicite = fond accent plein) et `Components/IconTextButton/IconTextButton` (icône + texte
+en une seule zone tappable), portés tels quels depuis DmTools.
+
+**Navigation** : on garde des pages Shell séparées (`Shell.GoToAsync`), pas de pattern accordéon
+mono-page façon `CampaignPage` de DmTools. Par contre, comme `CategoryListPage` de DmTools, les
+pages "détail" poussées via une route masquent la barre de navigation native
+(`Shell.NavBarIsVisible="False"` + `Shell.BackButtonBehavior IsVisible="False"`) et affichent leur
+propre en-tête via le composant `Components/DetailPageHeader/DetailPageHeaderView` (Title +
+BackCommand) — le rendu natif de la barre/flèche retour diverge trop entre plateformes (surtout
+Windows) pour rester cohérent avec le reste du thème.
 
 ## Sources de contenu officiel (voir ROADMAP.md § Sources)
 

@@ -69,6 +69,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiFont Update="Resources\Fonts\Font Awesome 7 Brands-Regular-400.otf">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiFont>
+	  <MauiFont Update="Resources\Fonts\Font Awesome 7 Free-Regular-400.otf">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiFont>
+	  <MauiFont Update="Resources\Fonts\Font Awesome 7 Free-Solid-900.otf">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiFont>
+	  <MauiFont Update="Resources\Fonts\rpgawesome-webfont.ttf">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiFont>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Components\FaIconButton\FaIconButtonView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.0" />
 		<PackageReference Include="CommunityToolkit.Maui.Core" Version="14.2.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />

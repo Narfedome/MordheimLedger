@@ -3,16 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MordheimLedgerApp.Features.Warbands"
              xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+             xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandDetailPage"
              x:DataType="vm:WarbandDetailViewModel"
-             Title="{Binding Warband.Name}">
+             Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        <Label Grid.Row="0" Margin="12,12,12,0"
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <header:DetailPageHeaderView Grid.Row="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
+
+        <Label Grid.Row="1" Margin="16,0,16,8"
                Text="{Binding Warband.Treasury, StringFormat='Treasury: {0} gc'}"
                TextColor="{DynamicResource AppTextMuted}"/>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Warriors}" Margin="0,8">
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Warriors}" Margin="0,8">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Warrior">
                     <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
@@ -50,6 +56,6 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="2" Text="+ Recruit Warrior" Margin="12" Command="{Binding RecruitWarriorCommand}"/>
+        <Button Grid.Row="3" Text="+ Recruit Warrior" Margin="12" Command="{Binding RecruitWarriorCommand}"/>
     </Grid>
 </ContentPage>

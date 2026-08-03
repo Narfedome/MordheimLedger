@@ -55,15 +55,15 @@ public partial class WarbandDetailViewModel : BaseViewModel
         if (Warband is null) return;
         if (_recruitableArchetypes.Count == 0)
         {
-            await ShowInfoAsync("Empty library", "This warband type has no recruitable warrior yet.");
+            await ShowInfoAsync(Loc["WarriorsEmptyLibraryTitle"], Loc["WarriorsEmptyLibraryMessage"]);
             return;
         }
 
         var options = _recruitableArchetypes.Select(a => $"{a.Name} ({a.Cost}gc)").ToArray();
-        var index = await ShowActionSheetIndexAsync("Recruit a warrior", options);
+        var index = await ShowActionSheetIndexAsync(Loc["WarriorsChooseType"], options);
         if (index < 0) return;
 
-        var name = await ShowPromptAsync("Recruit", "Warrior's name", "Name");
+        var name = await ShowPromptAsync(Loc["DialogRecruit"], Loc["PromptName"]);
         if (string.IsNullOrWhiteSpace(name)) return;
 
         await Loading.RunAsync(async () =>

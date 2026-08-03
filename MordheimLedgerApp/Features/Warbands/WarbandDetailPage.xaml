@@ -5,6 +5,8 @@
              xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
              xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandDetailPage"
              x:DataType="vm:WarbandDetailViewModel"
              Shell.NavBarIsVisible="False">
@@ -14,13 +16,18 @@
 
     <components:WatermarkedLayout>
     <Grid RowDefinitions="Auto,Auto,*,Auto">
-        <header:DetailPageHeaderView Grid.Row="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
+        <header:DetailPageHeaderView Grid.Row="0" x:Name="Header" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
 
-        <Label Grid.Row="1" Margin="16,0,16,8"
-               Text="{Binding Warband.Treasury, StringFormat='Treasury: {0} gc'}"
-               TextColor="{DynamicResource AppTextMuted}"/>
+        <Label Grid.Row="1" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
+                    <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding Warriors}" Margin="0,8">
+        <CollectionView Grid.Row="2" x:Name="WarriorCollection" ItemsSource="{Binding Warriors}" Margin="0,8">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Warrior">
                     <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
@@ -46,9 +53,11 @@
                             <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
                                 <Label.FormattedText>
                                     <FormattedString>
-                                        <Span Text="{Binding Cost, StringFormat='Cost: {0}gc'}"/>
+                                        <Span Text="{loc:Loc WarriorsCostLabel}"/>
+                                        <Span Text="{Binding Cost, StringFormat=' {0}gc'}"/>
                                         <Span Text="  ·  "/>
-                                        <Span Text="{Binding Experience, StringFormat='XP: {0}'}"/>
+                                        <Span Text="{loc:Loc WarriorsXpLabel}"/>
+                                        <Span Text="{Binding Experience, StringFormat=' {0}'}"/>
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>
@@ -58,7 +67,11 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="3" Text="+ Recruit Warrior" Margin="12" Command="{Binding RecruitWarriorCommand}"/>
+        <HorizontalStackLayout Grid.Row="3" Spacing="10" HorizontalOptions="Center" Margin="0,8">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
+                                 Command="{Binding RecruitWarriorCommand}"
+                                 Tooltip="{loc:Loc BtnRecruit}"/>
+        </HorizontalStackLayout>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

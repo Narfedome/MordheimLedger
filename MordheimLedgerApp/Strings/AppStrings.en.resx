@@ -148,4 +148,28 @@
   <data name="SettingsReportBugDesc" xml:space="preserve">
     <value>Open the form</value>
   </data>
+  <data name="BtnRecruit" xml:space="preserve">
+    <value>Recruit</value>
+  </data>
+  <data name="DialogRecruit" xml:space="preserve">
+    <value>Recruit</value>
+  </data>
+  <data name="WarriorsChooseType" xml:space="preserve">
+    <value>Choose a warrior to recruit</value>
+  </data>
+  <data name="WarriorsEmptyLibraryTitle" xml:space="preserve">
+    <value>Empty library</value>
+  </data>
+  <data name="WarriorsEmptyLibraryMessage" xml:space="preserve">
+    <value>This warband type has no recruitable warrior yet.</value>
+  </data>
+  <data name="WarbandsTreasuryLabel" xml:space="preserve">
+    <value>Treasury:</value>
+  </data>
+  <data name="WarriorsCostLabel" xml:space="preserve">
+    <value>Cost:</value>
+  </data>
+  <data name="WarriorsXpLabel" xml:space="preserve">
+    <value>XP:</value>
+  </data>
 </root>

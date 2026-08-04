@@ -1,0 +1,13 @@
+[build]
+  publish = "."
+  # Recupere l'exe/l'APK de la derniere GitHub Release (cf. scripts/fetch-downloads.js) avant de
+  # publier : ces binaires ne sont jamais commites dans le depot, pour ne pas faire gonfler
+  # l'historique git a chaque nouvelle version (cf. Build-Release.ps1 -Publish).
+  command = "node scripts/fetch-downloads.js"
+  # Desactive le build automatique declenche par un push git (sur master ou une PR) : "exit 0"
+  # dit a Netlify de toujours ignorer/annuler ce declenchement, pour ne pas consommer de credits
+  # de build a chaque commit. Cette consigne ne s'applique PAS aux Build Hooks ni au bouton
+  # "Trigger deploy" du dashboard (comportement documente par Netlify) : le redeploiement reste
+  # donc possible a la main, ou automatiquement via le Build Hook appele en fin de
+  # Deploy/Build-Release.ps1.
+  ignore = "exit 0"

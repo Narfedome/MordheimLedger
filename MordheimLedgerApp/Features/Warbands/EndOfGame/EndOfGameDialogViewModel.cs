@@ -3,26 +3,30 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>
-/// Wizard 5 étapes : Résultat, Blessures Graves, Expérience, Trésor, Récapitulatif - dans cet ordre
-/// pour suivre la "Séquence d'après-bataille" du livre de règles (Blessures Graves puis Expérience
-/// puis Revenus, à faire "devant témoin" juste après la partie ; le reste de la séquence - vente de
-/// pierre magique, disponibilité des vétérans, personnages spéciaux, achats... - n'est pas dans ce
-/// dialog, soit hors périmètre V1 soit déjà couvert ailleurs dans l'appli, ex. Recruter/Ajouter un
-/// objet sur la carte guerrier). Résultat n'est pas une étape du livre à proprement parler, gardé en
-/// premier comme contexte léger pour la phrase d'Historique.
-/// Même pattern CurrentStep/IsStepN que WarriorArchetypeEditDialogViewModel. L'étape Expérience reste
-/// une saisie libre pour l'instant (pas de calcul assisté ni de jets d'Advance - ce sera une passe
-/// séparée) ; le Statut, lui, n'est plus une saisie manuelle du tout - voir WarriorOutcomeRow.
-/// ApplyInjuryRoll.
+/// Wizard jusqu'à 6 étapes : Résultat, Blessures Graves, Expérience, Progression, Trésor,
+/// Récapitulatif - dans cet ordre pour suivre la "Séquence d'après-bataille" du livre de règles
+/// (Blessures Graves puis Expérience puis Revenus, à faire "devant témoin" juste après la partie ;
+/// le reste de la séquence - vente de pierre magique, disponibilité des vétérans, personnages
+/// spéciaux, achats... - n'est pas dans ce dialog, soit hors périmètre V1 soit déjà couvert ailleurs
+/// dans l'appli, ex. Recruter/Ajouter un objet sur la carte guerrier). Résultat n'est pas une étape
+/// du livre à proprement parler, gardé en premier comme contexte léger pour la phrase d'Historique.
+/// Progression n'est pas non plus une étape séparée du livre (le jet s'y fait "immédiatement" dès
+/// qu'un palier d'XP est franchi, cf. Campagne.md § Expérience) mais mérite son propre écran plutôt
+/// que d'être imbriquée dans Expérience : un guerrier peut franchir plusieurs paliers d'un coup, un
+/// jet 2D6 par palier (voir WarriorOutcomeRow.AdvanceRolls/ExperienceMilestones). Elle disparaît
+/// entièrement du wizard (ActiveSteps) si aucun guerrier n'a franchi de palier cette partie.
+/// Même pattern CurrentStep/IsStepN que WarriorArchetypeEditDialogViewModel. Le Statut n'est plus une
+/// saisie manuelle du tout - voir WarriorOutcomeRow.ApplyInjuryRoll.
 /// </summary>
 public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 {
-    private const int StepCount = 5;
+    private readonly ISkillPickerService _skillPicker;
 
     protected override bool CancelResult => false;
 
@@ -41,6 +45,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsStep2))]
     [NotifyPropertyChangedFor(nameof(IsStep3))]
     [NotifyPropertyChangedFor(nameof(IsStep4))]
+    [NotifyPropertyChangedFor(nameof(IsStep5))]
     [NotifyPropertyChangedFor(nameof(CanGoBack))]
     [NotifyPropertyChangedFor(nameof(IsLastStep))]
     [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -51,12 +56,28 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsStep2 => CurrentStep == 2;
     public bool IsStep3 => CurrentStep == 3;
     public bool IsStep4 => CurrentStep == 4;
-    public bool CanGoBack => CurrentStep > 0;
-    public bool IsLastStep => CurrentStep == StepCount - 1;
-    public string StepLabel => string.Format(Loc["LibStepLabel"], CurrentStep + 1, StepCount);
+    public bool IsStep5 => CurrentStep == 5;
 
-    public EndOfGameDialogViewModel(IEnumerable<Warrior> activeWarriors)
+    /// <summary>True si au moins un guerrier franchit un palier d'XP cette partie - évalué à chaque
+    /// Next/Back (pas mis en cache) puisque ça dépend des PX saisis à l'étape Expérience juste
+    /// avant. Pilote à la fois ActiveSteps (l'étape 3 "Progression" est incluse ou non) et l'affichage
+    /// conditionnel de son contenu dans le XAML (IsStep3 seul ne suffit pas : encore faut-il que
+    /// CurrentStep puisse valoir 3, ce que ActiveSteps empêche si ce flag est faux).</summary>
+    public bool HasAnyMilestone => WarriorRows.Any(r => r.HasMilestone);
+
+    /// <summary>Étape 3 (Progression) incluse seulement si HasAnyMilestone - les indices des autres
+    /// étapes restent fixes (0..5) pour que IsStepN reste simple, seule la séquence de navigation et
+    /// la numérotation affichée (StepLabel) sautent l'étape 3 quand elle est vide.</summary>
+    private List<int> ActiveSteps => HasAnyMilestone ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 4, 5];
+
+    public bool CanGoBack => ActiveSteps.IndexOf(CurrentStep) > 0;
+    public bool IsLastStep => CurrentStep == ActiveSteps[^1];
+    public string StepLabel => string.Format(Loc["LibStepLabel"], ActiveSteps.IndexOf(CurrentStep) + 1, ActiveSteps.Count);
+
+    public EndOfGameDialogViewModel(IEnumerable<Warrior> activeWarriors, ISkillPickerService skillPicker)
     {
+        _skillPicker = skillPicker;
+
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
         ResultOptions.Add(Loc["EndOfGameResultDraw"]);
@@ -68,13 +89,17 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void Next()
     {
-        if (CurrentStep < StepCount - 1) CurrentStep++;
+        var steps = ActiveSteps;
+        var index = steps.IndexOf(CurrentStep);
+        if (index < steps.Count - 1) CurrentStep = steps[index + 1];
     }
 
     [RelayCommand]
     private void Back()
     {
-        if (CurrentStep > 0) CurrentStep--;
+        var steps = ActiveSteps;
+        var index = steps.IndexOf(CurrentStep);
+        if (index > 0) CurrentStep = steps[index - 1];
     }
 
     // Lance les dés à la place du joueur (D66 pour un Héros, D6 pour un Homme de main - deux tables
@@ -119,6 +144,56 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
     }
 
+    // Un guerrier peut franchir plusieurs paliers d'un coup - chaque AdvanceRollEntry (une par palier,
+    // voir WarriorOutcomeRow.SyncAdvanceRolls) est un jet 2D6 indépendant sur la table de progression,
+    // même pattern que AutoRoll/ShowInjuryResult mais purement descriptif : aucune stat n'est modifiée
+    // automatiquement (les sous-jets 1D6 des résultats 6/8/9 et le choix CC/CT du 7 restent à résoudre
+    // par le joueur, cf. HeroAdvanceTable/HenchmanAdvanceTable).
+    [RelayCommand]
+    private async Task AutoRollAdvance(AdvanceRollEntry entry)
+    {
+        var (roll, text) = entry.IsHero ? HeroAdvanceTable.Roll() : HenchmanAdvanceTable.Roll();
+        entry.ManualRoll = roll.ToString();
+        entry.ResultText = text;
+        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
+    }
+
+    [RelayCommand]
+    private async Task ShowAdvanceResult(AdvanceRollEntry entry)
+    {
+        if (!int.TryParse(entry.ManualRoll, out var roll))
+        {
+            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
+            return;
+        }
+
+        string text;
+        bool found;
+        if (entry.IsHero) found = HeroAdvanceTable.TryGet(roll, out text);
+        else found = HenchmanAdvanceTable.TryGet(roll, out text);
+
+        if (!found)
+        {
+            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
+            return;
+        }
+
+        entry.ResultText = text;
+        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
+    }
+
+    // Résultat "Compétence" (voir HeroAdvanceTable.IsSkill) : le joueur choisit directement une
+    // compétence existante de la Bibliothèque, comme le "+" Compétences de la carte guerrier -
+    // rattachée au guerrier par WarbandDetailViewModel.EndOfGame à l'enregistrement du wizard, pas
+    // tout de suite (même logique différée que les autres résultats de cette étape).
+    [RelayCommand]
+    private async Task PickAdvanceSkill(AdvanceRollEntry entry)
+    {
+        var skills = await _skillPicker.PickSkillAsync();
+        foreach (var skill in skills)
+            entry.SelectedSkills.Add(skill);
+    }
+
     [RelayCommand]
     private void Save() => Close(true);
 }
@@ -135,7 +210,11 @@ public partial class WarriorOutcomeRow : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(MilestoneCount))]
+    [NotifyPropertyChangedFor(nameof(HasMilestone))]
     private int experienceGained;
+
+    partial void OnExperienceGainedChanged(int value) => SyncAdvanceRolls();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowInjuryTools))]
@@ -151,6 +230,12 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     private string injuryResultText = string.Empty;
 
+    /// <summary>Un jet 2D6 par palier d'XP franchi cette partie (voir SyncAdvanceRolls) - un guerrier
+    /// qui saute plusieurs cases à bord épais d'un coup doit relancer autant de fois sur la table de
+    /// progression (Campagne.md § Expérience). Distincte du jet de Blessure Grave (ManualRoll) : les
+    /// deux peuvent coexister le même End of Game.</summary>
+    public ObservableCollection<AdvanceRollEntry> AdvanceRolls { get; } = new();
+
     /// <summary>Plus de saisie manuelle : uniquement modifié par ApplyInjuryRoll (résultat "Mort",
     /// jets 11-15). Reste sur Warrior.Status (donc "Actif") pour tout le reste, y compris les
     /// rétablissements et le résultat "Blessures multiples" (16, ambigu - deux jets de plus requis).</summary>
@@ -162,6 +247,12 @@ public partial class WarriorOutcomeRow : ObservableObject
     public bool ShowInjuryTools => IsOutOfAction;
     public WarriorStatus Status => _statusByLabel.GetValueOrDefault(SelectedStatusLabel, Warrior.Status);
     public bool IsDead => Status == WarriorStatus.Dead;
+
+    /// <summary>Nombre de cases à bord épais franchies par les PX gagnés cette partie (voir
+    /// ExperienceMilestones) - peut dépasser 1 si le guerrier cumule assez de PX pour sauter
+    /// plusieurs paliers d'un coup, d'où AdvanceRolls plutôt qu'un jet unique.</summary>
+    public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience, Warrior.Experience + ExperienceGained);
+    public bool HasMilestone => MilestoneCount > 0;
 
     /// <summary>Héros et Hommes de main utilisent deux tables de Blessures Graves totalement
     /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce label et ce
@@ -178,6 +269,11 @@ public partial class WarriorOutcomeRow : ObservableObject
             if (ExperienceGained != 0) parts.Add($"+{ExperienceGained} PX");
             if (Status != Warrior.Status) parts.Add(SelectedStatusLabel);
             if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(InjuryResultText);
+            foreach (var advance in AdvanceRolls)
+            {
+                if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
+                else if (!string.IsNullOrWhiteSpace(advance.ResultText)) parts.Add(advance.ResultText);
+            }
 
             return parts.Count > 0
                 ? $"{Name} : {string.Join(", ", parts)}"
@@ -205,5 +301,68 @@ public partial class WarriorOutcomeRow : ObservableObject
         if (!isDeath) return;
 
         SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == WarriorStatus.Dead).Key;
+    }
+
+    /// <summary>Ajuste AdvanceRolls pour qu'il compte exactement un AdvanceRollEntry par palier
+    /// franchi (MilestoneCount), en préservant les jets déjà faits quand le nombre ne diminue pas -
+    /// appelé à chaque frappe dans le champ PX de l'étape Expérience (OnExperienceGainedChanged).</summary>
+    private void SyncAdvanceRolls()
+    {
+        while (AdvanceRolls.Count < MilestoneCount)
+        {
+            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero);
+            entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+            AdvanceRolls.Add(entry);
+        }
+        while (AdvanceRolls.Count > MilestoneCount)
+            AdvanceRolls.RemoveAt(AdvanceRolls.Count - 1);
+    }
+}
+
+/// <summary>One 2D6 progression roll for one milestone crossed by a WarriorOutcomeRow - see
+/// WarriorOutcomeRow.AdvanceRolls/SyncAdvanceRolls (a warrior can cross several milestones in the
+/// same End of Game, each needing its own independent roll).</summary>
+public partial class AdvanceRollEntry : ObservableObject
+{
+    private readonly LocalizationService _loc = LocalizationService.Instance;
+
+    public int Index { get; }
+    public bool IsHero { get; }
+    public string Label => string.Format(_loc["EndOfGameMilestoneLabel"], Index);
+
+    /// <summary>Le score 2D6 - saisi à la main (jet physique) ou rempli par AutoRollAdvance.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSkillResult))]
+    private string manualRoll = string.Empty;
+
+    /// <summary>Texte descriptif du résultat une fois consulté - purement informatif, voir
+    /// HeroAdvanceTable/HenchmanAdvanceTable.</summary>
+    [ObservableProperty]
+    private string resultText = string.Empty;
+
+    /// <summary>Seuls les résultats "Compétence" des Héros (voir HeroAdvanceTable.IsSkill) proposent
+    /// de choisir directement une compétence - les résultats de stat/choix (6/7/8/9) et la
+    /// promotion Homme de main (10-12, "Ce gars est doué") restent du texte descriptif.</summary>
+    public bool IsSkillResult => IsHero && int.TryParse(ManualRoll, out var roll) && HeroAdvanceTable.IsSkill(roll);
+
+    /// <summary>Compétence(s) choisie(s) pour ce jet - rattachée(s) au guerrier par
+    /// WarbandDetailViewModel.EndOfGame à l'enregistrement, voir PickAdvanceSkill.</summary>
+    public ObservableCollection<Skill> SelectedSkills { get; } = new();
+    public string SelectedSkillsText => string.Join(", ", SelectedSkills.Select(s => s.Name));
+
+    /// <summary>Pilote l'affichage exclusif bouton "Choisir une compétence" / nom(s) choisi(s) dans le
+    /// XAML - une fois une compétence sélectionnée, son nom remplace le bouton plutôt que de
+    /// s'afficher à côté.</summary>
+    public bool HasSkillSelected => SelectedSkills.Count > 0;
+
+    public AdvanceRollEntry(int index, bool isHero)
+    {
+        Index = index;
+        IsHero = isHero;
+        SelectedSkills.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(SelectedSkillsText));
+            OnPropertyChanged(nameof(HasSkillSelected));
+        };
     }
 }

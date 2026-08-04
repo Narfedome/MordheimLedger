@@ -36,10 +36,16 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private ObservableCollection<WarriorRow> henchmen = new();
 
     [ObservableProperty]
+    private ObservableCollection<WarriorRow> deadWarriors = new();
+
+    [ObservableProperty]
     private bool heroesExpanded = true;
 
     [ObservableProperty]
     private bool henchmenExpanded = true;
+
+    [ObservableProperty]
+    private bool deadExpanded;
 
     [ObservableProperty]
     private ObservableCollection<HistoryEntry> historyEntries = new();
@@ -65,6 +71,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleHenchmen() => HenchmenExpanded = !HenchmenExpanded;
 
+    [RelayCommand]
+    private void ToggleDead() => DeadExpanded = !DeadExpanded;
+
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -77,8 +86,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             var loaded = await _warbandService.GetWarriorsAsync(id);
             var rows = loaded.Select(ToRow).ToList();
-            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero));
-            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero));
+            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead));
+            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead));
+            DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
@@ -180,10 +190,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Initiative = w.Initiative,
             Attacks = w.Attacks,
             Leadership = w.Leadership,
+            Equipment = w.Equipment,
+            Skills = w.Skills,
             Injuries = w.Injuries
         };
 
-        var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], _warbandService, _injuryPicker);
+        var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
+            _equipmentPicker, _skillPicker, _injuryPicker);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
         // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
@@ -225,7 +238,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             return;
         }
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors);
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -241,6 +254,23 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             List<Injury>? injuryCatalog = null;
 
+            // Find-or-create par nom dans le même catalogue Injury que les Blessures Graves - réutilisé
+            // pour les résultats de Progression (voir plus bas) : même si "Force +1" n'est pas une
+            // blessure, on veut que ça reste visible sur la fiche du guerrier au même endroit, plutôt
+            // que d'inventer une seconde entité juste pour ce cas.
+            async Task<Injury> GetOrCreateInjuryAsync(string name)
+            {
+                injuryCatalog ??= await _libraryService.GetInjuriesAsync();
+                var injury = injuryCatalog.FirstOrDefault(i => i.Name == name);
+                if (injury is null)
+                {
+                    injury = new Injury { Name = name, Source = ContentSource.Official };
+                    await _libraryService.SaveInjuryAsync(injury);
+                    injuryCatalog.Add(injury);
+                }
+                return injury;
+            }
+
             foreach (var row in dialogViewModel.WarriorRows)
             {
                 var warrior = row.Warrior;
@@ -253,6 +283,24 @@ public partial class WarbandDetailViewModel : BaseViewModel
                     changed = true;
                 }
 
+                foreach (var advance in row.AdvanceRolls)
+                {
+                    if (string.IsNullOrWhiteSpace(advance.ResultText)) continue;
+
+                    // Aucun résultat d'Advance (compétence ou stat) ne touche Injuries - ça prêterait à
+                    // confusion avec une vraie blessure. La vraie compétence choisie est rattachée au
+                    // guerrier ; les résultats de stat/choix (pas d'équivalent structuré dans le modèle,
+                    // "no rules engine V1") ne vivent que dans l'Historique de la bande, à appliquer à la
+                    // main via l'édition du guerrier.
+                    var text = advance.SelectedSkills.Count > 0
+                        ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
+                        : advance.ResultText;
+                    sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], warrior.Name, text));
+
+                    foreach (var skill in advance.SelectedSkills)
+                        await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                }
+
                 if (row.Status != warrior.Status)
                 {
                     warrior.Status = row.Status;
@@ -263,18 +311,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
                 if (!string.IsNullOrWhiteSpace(row.InjuryResultText))
                 {
-                    // Même liste que celle suivie manuellement (WarriorEditDialog) : find-or-create par
-                    // nom plutôt qu'un doublon en texte libre - la table Blessures Graves a un texte
-                    // fixe par jet, donc pas de risque de quasi-doublons.
-                    injuryCatalog ??= await _libraryService.GetInjuriesAsync();
-                    var injury = injuryCatalog.FirstOrDefault(i => i.Name == row.InjuryResultText);
-                    if (injury is null)
-                    {
-                        injury = new Injury { Name = row.InjuryResultText, Source = ContentSource.Official };
-                        await _libraryService.SaveInjuryAsync(injury);
-                        injuryCatalog.Add(injury);
-                    }
-
+                    var injury = await GetOrCreateInjuryAsync(row.InjuryResultText);
                     await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
                     sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
                 }
@@ -301,59 +338,4 @@ public partial class WarbandDetailViewModel : BaseViewModel
         HistoryEntries = new ObservableCollection<HistoryEntry>(history);
     }
 
-    [RelayCommand]
-    private async Task AddEquipment(WarriorRow row)
-    {
-        if (Warband is null) return;
-
-        var items = await _equipmentPicker.PickEquipmentAsync();
-        foreach (var item in items)
-        {
-            // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
-            // plutôt que de tout annuler - les objets déjà payés restent acquis.
-            if (Warband.Treasury < item.Cost)
-            {
-                await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-                break;
-            }
-
-            Warband.Treasury -= item.Cost;
-            await _warbandService.SaveWarbandAsync(Warband);
-            OnPropertyChanged(nameof(Warband));
-
-            var carried = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, item);
-            row.Equipment.Add(carried);
-        }
-    }
-
-    [RelayCommand]
-    private async Task RemoveEquipment(WarriorEquipment carried)
-    {
-        var row = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Equipment.Contains(carried));
-        if (row is null) return;
-
-        await _warbandService.RemoveWarriorEquipmentAsync(carried.Id);
-        row.Equipment.Remove(carried);
-    }
-
-    [RelayCommand]
-    private async Task AddSkill(WarriorRow row)
-    {
-        var skills = await _skillPicker.PickSkillAsync();
-        foreach (var skill in skills)
-        {
-            var learned = await _warbandService.AddWarriorSkillAsync(row.Warrior.Id, skill);
-            row.Skills.Add(learned);
-        }
-    }
-
-    [RelayCommand]
-    private async Task RemoveSkill(WarriorSkill learned)
-    {
-        var row = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Skills.Contains(learned));
-        if (row is null) return;
-
-        await _warbandService.RemoveWarriorSkillAsync(learned.Id);
-        row.Skills.Remove(learned);
-    }
 }

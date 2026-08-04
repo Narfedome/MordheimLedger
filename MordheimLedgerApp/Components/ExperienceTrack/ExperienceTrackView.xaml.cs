@@ -1,3 +1,5 @@
+using MordheimLedgerApp.Services;
+
 namespace MordheimLedgerApp.Components.ExperienceTrack;
 
 /// <summary>
@@ -44,7 +46,7 @@ public partial class ExperienceTrackView : ContentView
     {
         var total = IsHero ? HeroBoxCount : HenchmanBoxCount;
         var rowSize = IsHero ? HeroRowSize : HenchmanBoxCount;
-        var milestones = IsHero ? HeroMilestones() : HenchmanMilestones(total);
+        var milestones = IsHero ? ExperienceMilestones.HeroMilestones() : ExperienceMilestones.HenchmanMilestones(total);
 
         var boxes = new List<ExperienceBox>(total);
         for (var i = 1; i <= total; i++)
@@ -58,37 +60,5 @@ public partial class ExperienceTrackView : ContentView
             .ToList();
 
         BindableLayout.SetItemsSource(TrackLayout, rows);
-    }
-
-    private static List<int> HeroMilestones()
-    {
-        (int gap, int repeats)[] tiers = [(1, 4), (2, 4), (3, 4), (4, 3), (5, 3), (6, 3)];
-        var positions = new List<int>();
-        var pos = 0;
-        foreach (var (gap, repeats) in tiers)
-        {
-            var unit = gap + 1;
-            for (var r = 0; r < repeats; r++)
-            {
-                pos += unit;
-                positions.Add(pos);
-            }
-        }
-        return positions;
-    }
-
-    private static List<int> HenchmanMilestones(int max)
-    {
-        var positions = new List<int>();
-        var pos = 0;
-        var gap = 1;
-        while (true)
-        {
-            pos += gap + 1;
-            if (pos > max) break;
-            positions.Add(pos);
-            gap++;
-        }
-        return positions;
     }
 }

@@ -50,35 +50,104 @@
                 <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
             </Grid>
 
-            <!-- Blessures : alimenté à la fois par le jet de Fin de partie et par le "+" ci-dessous
-                 (retrait par la croix sur chaque puce) - même style de puce que Équipement/Compétences
-                 sur la carte guerrier. -->
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Grid.Column="0" Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                              Command="{Binding AddInjuryCommand}"/>
-            </Grid>
-            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Injuries}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="models:WarriorInjury">
-                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                            <HorizontalStackLayout Spacing="4">
-                                <Label Text="{x:Static icons:RpgFont.RaBrokenBone}"
-                                       FontFamily="RpgAwesome" FontSize="12"
-                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
-                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                              Icon="{x:Static icons:SolidFont.Xmark}"
-                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveInjuryCommand}"
-                                                              CommandParameter="{Binding .}"/>
-                            </HorizontalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </FlexLayout>
+            <!-- Onglets Équipement/Compétences/Blessures - même pattern toggle (pas de vrai TabbedPage)
+                 que Roster/Historique sur WarbandDetailPage : la carte guerrier reste lecture seule pour
+                 ces trois listes, tout se gère ici. -->
+            <HorizontalStackLayout Spacing="16">
+                <Button Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
+                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0" FontSize="12"/>
+                <Button Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
+                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0" FontSize="12"/>
+                <Button Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
+                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0" FontSize="12"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddEquipmentCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorEquipment">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSkillsTab}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc WarriorsSkillsHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddSkillCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorSkill">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveSkillCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsInjuriesTab}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddInjuryCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Injuries}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorInjury">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:RpgFont.RaBrokenBone}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveInjuryCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"

@@ -240,6 +240,9 @@
   <data name="WarriorsGroupHenchmen" xml:space="preserve">
     <value>Henchmen</value>
   </data>
+  <data name="WarriorsGroupDead" xml:space="preserve">
+    <value>Dead</value>
+  </data>
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Experience</value>
   </data>
@@ -530,6 +533,93 @@
   </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0}: no change</value>
+  </data>
+  <data name="EndOfGameAdvanceHeading" xml:space="preserve">
+    <value>Progression</value>
+  </data>
+  <data name="EndOfGameMilestoneLabel" xml:space="preserve">
+    <value>Milestone {0}</value>
+  </data>
+  <data name="EndOfGamePickSkill" xml:space="preserve">
+    <value>Pick a skill</value>
+  </data>
+  <data name="EndOfGameAdvanceSkillResultText" xml:space="preserve">
+    <value>Skill gained: {0}</value>
+  </data>
+  <data name="EndOfGameAdvanceRollPh" xml:space="preserve">
+    <value>2D6</value>
+  </data>
+  <data name="EndOfGameInvalidAdvanceRoll" xml:space="preserve">
+    <value>Invalid roll (2 to 12).</value>
+  </data>
+  <data name="HistoryAdvanceSentence" xml:space="preserve">
+    <value>{0} advanced: {1}</value>
+  </data>
+  <data name="AdvanceHero2" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHero3" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHero4" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHero5" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHero6" xml:space="preserve">
+    <value>Physical advance: roll 1D6 - on 1-3 Strength +1, on 4-6 Attacks +1.</value>
+  </data>
+  <data name="AdvanceHero7" xml:space="preserve">
+    <value>Combat advance: WS +1 or BS +1, your choice.</value>
+  </data>
+  <data name="AdvanceHero8" xml:space="preserve">
+    <value>Physical advance: roll 1D6 - on 1-3 Initiative +1, on 4-6 Leadership +1.</value>
+  </data>
+  <data name="AdvanceHero9" xml:space="preserve">
+    <value>Physical advance: roll 1D6 - on 1-3 Wounds +1, on 4-6 Toughness +1.</value>
+  </data>
+  <data name="AdvanceHero10" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHero11" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHero12" xml:space="preserve">
+    <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
+  </data>
+  <data name="AdvanceHenchman2" xml:space="preserve">
+    <value>Initiative +1 for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman3" xml:space="preserve">
+    <value>Initiative +1 for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman4" xml:space="preserve">
+    <value>Initiative +1 for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman5" xml:space="preserve">
+    <value>Strength +1 for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman6" xml:space="preserve">
+    <value>WS +1 or BS +1, your choice, for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman7" xml:space="preserve">
+    <value>WS +1 or BS +1, your choice, for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman8" xml:space="preserve">
+    <value>Attacks +1 for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman9" xml:space="preserve">
+    <value>Leadership +1 for the whole group.</value>
+  </data>
+  <data name="AdvanceHenchman10" xml:space="preserve">
+    <value>This guy's gone up in the world: one group member becomes a Hero, keeps their profile and XP, picks two Hero skill tables available to the warband, and immediately gets a Hero progression roll.</value>
+  </data>
+  <data name="AdvanceHenchman11" xml:space="preserve">
+    <value>This guy's gone up in the world: one group member becomes a Hero, keeps their profile and XP, picks two Hero skill tables available to the warband, and immediately gets a Hero progression roll.</value>
+  </data>
+  <data name="AdvanceHenchman12" xml:space="preserve">
+    <value>This guy's gone up in the world: one group member becomes a Hero, keeps their profile and XP, picks two Hero skill tables available to the warband, and immediately gets a Hero progression roll.</value>
   </data>
   <data name="InjurySerious11" xml:space="preserve">
     <value>Dead. The warrior is lost, all their equipment is lost.</value>

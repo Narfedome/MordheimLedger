@@ -5,9 +5,9 @@ using MordheimLedgerApp.Core.Models;
 namespace MordheimLedgerApp.Features.Warbands;
 
 /// <summary>
-/// Ligne du roster (WarbandDetailPage) : pas de sélection - chaque action (éditer, ajouter un objet...)
-/// est un bouton directement sur la carte, il n'y a plus de "sélectionner puis agir" comme dans la
-/// Bibliothèque.
+/// Ligne du roster (WarbandDetailPage) : pas de sélection. Éditer est le seul bouton directement sur
+/// la carte - Équipement/Compétences/Blessures sont toutes en lecture seule ici, gérées depuis
+/// WarriorEditDialog (onglets dédiés) plutôt qu'à deux endroits différents.
 /// </summary>
 public partial class WarriorRow : ObservableObject
 {
@@ -18,18 +18,23 @@ public partial class WarriorRow : ObservableObject
     /// (e.g. the archetype was since deleted from the Library).</summary>
     public string RoleName { get; }
 
-    /// <summary>Mirrors Warrior.Equipment as an ObservableCollection so add/remove reflects on the card without a full reload.</summary>
+    /// <summary>Mirrors Warrior.Equipment - read-only display, managed via WarriorEditDialog.</summary>
     public ObservableCollection<WarriorEquipment> Equipment { get; }
 
-    /// <summary>Mirrors Warrior.Skills as an ObservableCollection so add/remove reflects on the card without a full reload.</summary>
+    /// <summary>Mirrors Warrior.Skills - read-only display, managed via WarriorEditDialog.</summary>
     public ObservableCollection<WarriorSkill> Skills { get; }
 
-    /// <summary>Mirrors Warrior.Injuries as an ObservableCollection - fed both by the End of Game
-    /// Serious Injury roll and by manual additions via WarriorEditDialog (not editable directly from
-    /// this card, which stays read-only).</summary>
+    /// <summary>Mirrors Warrior.Injuries - fed both by the End of Game Serious Injury roll and by
+    /// manual additions via WarriorEditDialog - read-only display here.</summary>
     public ObservableCollection<WarriorInjury> Injuries { get; }
 
+    public bool HasEquipment => Equipment.Count > 0;
+    public bool HasSkills => Skills.Count > 0;
     public bool HasInjuries => Injuries.Count > 0;
+
+    /// <summary>Drives the read-only treatment of the card in the "Morts" group (hides Edit/Add/Remove
+    /// buttons) - Dead is only ever reached via the End of Game wizard, see WarriorStatus.</summary>
+    public bool IsDead => Warrior.Status == WarriorStatus.Dead;
 
     public WarriorRow(Warrior warrior, string roleName)
     {

@@ -76,9 +76,11 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape 3 : Expérience (livre, étape 2 - saisie libre pour l'instant, calcul assisté et
-                 jets d'Advance dans une passe séparée). Pas de Statut ici : entièrement auto-géré
-                 depuis l'étape Blessures Graves. -->
+            <!-- Étape 3 : Expérience (livre, étape 2 - saisie libre, pas de calcul assisté). Pas de
+                 Statut ici : entièrement auto-géré depuis l'étape Blessures Graves. Le jet de
+                 progression (palier franchi) est déplacé dans sa propre étape juste après, voir
+                 IsStep3 - un guerrier peut franchir plusieurs paliers d'un coup, ça ne tient plus sur
+                 une carte imbriquée ici. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep2}">
                 <Label Text="{loc:Loc EndOfGameExperienceHeading}" FontAttributes="Bold"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
@@ -102,14 +104,74 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape 4 : Revenus (livre, étape 3 - trésor trouvé) -->
+            <!-- Étape 4 : Progression - seulement si au moins un guerrier a franchi un palier d'XP à
+                 l'étape précédente (HasAnyMilestone, voir ActiveSteps dans le ViewModel : le wizard
+                 saute carrément cette étape sinon, elle n'apparaît jamais dans la navigation Next/Back
+                 ni dans la numérotation StepLabel). Un guerrier qui saute plusieurs paliers d'un coup a
+                 une carte par palier (AdvanceRolls), chacune avec ses propres outils Tirer/Voir le
+                 résultat - même principe que les Blessures Graves, purement descriptif. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep3}">
+                <Label Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasMilestone}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </Grid>
+                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding AdvanceRolls}" Spacing="6">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:AdvanceRollEntry">
+                                                <VerticalStackLayout Spacing="4">
+                                                    <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameAdvanceRollPh}" WidthRequest="70"/>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowAdvanceResultCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameShowResult}"/>
+                                                    </Grid>
+                                                    <Label Text="{Binding ResultText}" FontSize="12"/>
+                                                    <!-- Résultat "Compétence" (Héros 2-5/10-12 uniquement, voir
+                                                         HeroAdvanceTable.IsSkill) : choix direct dans la Bibliothèque,
+                                                         rattachée au guerrier à l'enregistrement du wizard. -->
+                                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsSkillResult}">
+                                                        <Button Text="{loc:Loc EndOfGamePickSkill}"
+                                                                Style="{StaticResource DialogSecondaryButtonStyle}"
+                                                                FontSize="12" Padding="8,4"
+                                                                IsVisible="{Binding HasSkillSelected, Converter={StaticResource InverseBoolConverter}}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
+                                                                CommandParameter="{Binding .}"/>
+                                                        <Label Text="{Binding SelectedSkillsText}" FontSize="12"
+                                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"
+                                                               IsVisible="{Binding HasSkillSelected}"/>
+                                                    </HorizontalStackLayout>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape 5 : Revenus (livre, étape 3 - trésor trouvé) -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep4}">
                 <Label Text="{loc:Loc EndOfGameTreasuryHeading}" FontAttributes="Bold"/>
                 <Entry Text="{Binding TreasuryFound}" Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameTreasuryPh}"/>
             </VerticalStackLayout>
 
-            <!-- Étape 5 : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep4}">
+            <!-- Étape 6 : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep5}">
                 <Label Text="{loc:Loc EndOfGameRecapHeading}" FontAttributes="Bold"/>
                 <Label>
                     <Label.FormattedText>

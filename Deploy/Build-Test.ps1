@@ -1,0 +1,149 @@
+<#
+.SYNOPSIS
+    Publie MordheimLedgerApp (Windows + Android) et genere l'installeur Inno Setup, sans rien publier
+    (pas de GitHub Release, pas de redeploiement Netlify) : uniquement pour tester une build en
+    local avant une vraie release.
+
+.DESCRIPTION
+    Meme logique de build que Build-Release.ps1 (meme numero de version, meme keystore de
+    signature Android, memes artefacts sous Website\downloads\), mais s'arrete la : pas de
+    `gh release create`, pas d'appel au Build Hook Netlify. A utiliser pour installer l'APK sur
+    un appareil/emulateur et faire des tests d'integration sans toucher au site public ni
+    consommer de credits de build Netlify.
+
+    La version suit le meme schema que la cible SetVersionFromGit du csproj :
+    AppVersionMajor.AppVersionMinor.<nombre de commits git> - lu ici depuis le csproj pour
+    ne jamais s'en ecarter silencieusement.
+    Les deux artefacts finissent sous Website\downloads\ (a la racine du depot), avec un nom de
+    fichier fixe (MordheimLedgerInstaller.exe / MordheimLedger.apk) - meme dossier que Build-Release.ps1, donc
+    une vraie release ecrasera ces fichiers de test au prochain lancement. La signature Android
+    vient de la keystore de release partagee si Deploy\mordheimledger-release.keystore est present
+    (recupere depuis le Drive partage, jamais commite) et que Deploy\Build-Release.local.ps1
+    definit ses identifiants ; sinon elle retombe sur le debug.keystore local, qui differe d'un
+    PC a l'autre (sans consequence ici puisque rien n'est publie).
+
+.PARAMETER SkipWindows
+    N'effectue que la publication Android.
+
+.PARAMETER SkipAndroid
+    N'effectue que la publication Windows + installeur.
+
+.EXAMPLE
+    .\Build-Test.ps1
+    Genere l'installeur Windows ET l'APK Android, sans rien publier.
+
+.EXAMPLE
+    .\Build-Test.ps1 -SkipWindows
+    Ne genere que l'APK Android, pour l'installer sur un appareil de test.
+#>
+
+param(
+    [switch]$SkipWindows,
+    [switch]$SkipAndroid
+)
+
+$ErrorActionPreference = "Stop"
+
+# Tout le corps du script est dans ce try/catch : lance en double-clic (pas depuis un terminal deja
+# ouvert), une erreur non rattrapee fermerait sinon la fenetre PowerShell instantanement avec elle,
+# sans laisser le temps de lire le message.
+try {
+    $releaseDir       = $PSScriptRoot
+    $repoRoot         = Split-Path -Parent $releaseDir
+    $csprojPath       = Join-Path $repoRoot "MordheimLedgerApp\MordheimLedgerApp.csproj"
+    $issPath          = Join-Path $releaseDir "Installer.iss"
+    $isccPath         = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+    # Meme dossier de sortie que Build-Release.ps1 : index.html (FR/EN) y pointe deja, pratique
+    # pour tester le site en local (Website\serve.ps1) avec une vraie build.
+    $outputDir        = Join-Path $repoRoot "Website\downloads"
+    $outputDirWindows = $outputDir
+    $outputDirAndroid = $outputDir
+
+    New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
+
+    # --- Config locale (jamais commitee, cf. .gitignore) : chemin + mots de passe de la keystore de
+    #     release, propres a chaque machine. Copier Build-Release.local.ps1.example -> Build-Release.local.ps1
+    #     (dans ce meme dossier Deploy\) et renseigner les valeurs une seule fois par PC. ---
+    $localConfigPath = Join-Path $releaseDir "Build-Release.local.ps1"
+    if (Test-Path $localConfigPath) {
+        . $localConfigPath
+    }
+
+    # --- Version : major.minor du csproj + patch = nombre de commits git (identique a la cible
+    #     SetVersionFromGit du csproj, pour que l'installeur, l'APK et l'appli affichent le meme numero) ---
+    [xml]$csproj = Get-Content $csprojPath
+    $major = $csproj.Project.PropertyGroup.AppVersionMajor | Where-Object { $_ } | Select-Object -First 1
+    $minor = $csproj.Project.PropertyGroup.AppVersionMinor | Where-Object { $_ } | Select-Object -First 1
+    $patch = (git -C $repoRoot rev-list --count HEAD).Trim()
+    $version = "$major.$minor.$patch"
+
+    Write-Host "Version (test) : $version" -ForegroundColor Cyan
+
+    # --- Windows : publish (unpackaged, cf. WindowsPackageType=None du csproj) + installeur Inno Setup ---
+    if (-not $SkipWindows) {
+        if (-not (Test-Path $isccPath)) {
+            throw "Inno Setup Compiler introuvable a '$isccPath'. Installe Inno Setup 6 ou ajuste `$isccPath dans ce script."
+        }
+
+        Write-Host "`n=== Windows : publication ===" -ForegroundColor Cyan
+        dotnet publish $csprojPath -f net10.0-windows10.0.19041.0 -c Release -p:WindowsPackageType=None
+        if ($LASTEXITCODE -ne 0) { throw "dotnet publish (Windows) a echoue (code $LASTEXITCODE)." }
+
+        Write-Host "=== Windows : compilation de l'installeur ===" -ForegroundColor Cyan
+        # /O et /F surchargent OutputDir/OutputBaseFilename du .iss : nom de fichier fixe (sans version)
+        # pour que le lien de telechargement public n'ait jamais besoin de changer.
+        & $isccPath "/DMyAppVersion=$version" "/O$outputDirWindows" "/FMordheimLedgerInstaller" $issPath
+        if ($LASTEXITCODE -ne 0) { throw "ISCC a echoue (code $LASTEXITCODE)." }
+
+        Write-Host "Installeur : $outputDirWindows\MordheimLedgerInstaller.exe" -ForegroundColor Green
+    }
+
+    # --- Android : publish. Le csproj gere le format (AndroidPackageFormat=apk force en config
+    #     Release) ; la signature vient de la keystore de release partagee, attendue sous
+    #     Deploy\mordheimledger-release.keystore (gitignoree - cf. .gitignore) : recuperer le fichier
+    #     depuis le Drive partage et le deposer dans ce dossier suffit, aucun chemin a configurer.
+    #     Sans ce fichier, dotnet publish retombe sur le debug.keystore auto-genere par machine, ce
+    #     qui produit une signature differente d'un PC a l'autre - sans consequence pour un test
+    #     local (contrairement a une vraie release distribuee). ---
+    if (-not $SkipAndroid) {
+        Write-Host "`n=== Android : publication ===" -ForegroundColor Cyan
+
+        $keystorePath  = Join-Path $releaseDir "mordheimledger-release.keystore"
+        $keystoreAlias = $env:MORDHEIMLEDGER_KEYSTORE_ALIAS
+        $storePass     = $env:MORDHEIMLEDGER_KEYSTORE_STOREPASS
+        $keyPass       = $env:MORDHEIMLEDGER_KEYSTORE_KEYPASS
+
+        $signingArgs = @()
+        if ((Test-Path $keystorePath) -and $keystoreAlias -and $storePass -and $keyPass) {
+            Write-Host "Signature : keystore de release ($keystorePath)" -ForegroundColor DarkGray
+            $signingArgs = @(
+                "-p:AndroidKeyStore=true"
+                "-p:AndroidSigningKeyStore=$keystorePath"
+                "-p:AndroidSigningKeyAlias=$keystoreAlias"
+                "-p:AndroidSigningStorePass=$storePass"
+                "-p:AndroidSigningKeyPass=$keyPass"
+            )
+        } else {
+            Write-Warning "Deploy\mordheimledger-release.keystore absent (ou identifiants manquants dans Build-Release.local.ps1) : signature avec le debug.keystore local."
+        }
+
+        dotnet publish $csprojPath -f net10.0-android -c Release @signingArgs
+        if ($LASTEXITCODE -ne 0) { throw "dotnet publish (Android) a echoue (code $LASTEXITCODE)." }
+
+        # Copie sous un nom fixe (sans version) a cote de l'installeur Windows : meme raison que
+        # pour l'exe, le lien de telechargement public n'a jamais besoin de changer.
+        $publishedApk = Join-Path $repoRoot "MordheimLedgerApp\bin\Release\net10.0-android\publish\com.narfedome.mordheimledgerapp-Signed.apk"
+        if (-not (Test-Path $publishedApk)) { throw "APK signe introuvable a '$publishedApk'." }
+        $apkPath = Join-Path $outputDirAndroid "MordheimLedger.apk"
+        Copy-Item -Path $publishedApk -Destination $apkPath -Force
+
+        Write-Host "APK : $apkPath" -ForegroundColor Green
+    }
+
+    Write-Host "`nBuild de test terminee (rien publie : pas de GitHub Release, pas de redeploiement Netlify)." -ForegroundColor Green
+}
+catch {
+    Write-Host "`nECHEC : $($_.Exception.Message)" -ForegroundColor Red
+    Read-Host "`nAppuie sur Entree pour fermer"
+    exit 1
+}

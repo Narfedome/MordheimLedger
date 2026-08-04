@@ -1,0 +1,22 @@
+# Config locale pour Build-Release.ps1 - propre a chaque machine, jamais commitee.
+#
+# 1. Recuperer "dmtools-release.keystore" depuis le Drive partage et le deposer dans ce meme
+#    dossier Deploy\ (a cote de Build-Release.ps1). Le nom de fichier est fixe, rien a configurer
+#    pour le chemin.
+# 2. Copier ce fichier en "Build-Release.local.ps1" (a cote de Build-Release.ps1, toujours dans
+#    Deploy\) et renseigner les identifiants ci-dessous.
+#    (Astuce : garder aussi une copie du vrai Build-Release.local.ps1 rempli dans le meme dossier
+#    Drive que la keystore, pour recuperer les deux fichiers d'un coup sur un nouveau PC.)
+# 3. C'est tout : Build-Release.ps1 charge ce fichier automatiquement s'il existe.
+#
+# Keystore generee une seule fois avec keytool, puis copiee sur le Drive partage :
+#   keytool -genkeypair -v -keystore dmtools-release.keystore -alias dmtools -keyalg RSA -keysize 2048 -validity 10000
+
+$env:DMTOOLS_KEYSTORE_ALIAS     = "dmtools"
+$env:DMTOOLS_KEYSTORE_STOREPASS = "mot-de-passe-keystore"
+$env:DMTOOLS_KEYSTORE_KEYPASS   = "mot-de-passe-cle"
+
+# Optionnel : Build Hook Netlify (Site settings > Build & deploy > Build hooks sur netlify.com).
+# Avec ca, Build-Release.ps1 redeploie le site automatiquement juste apres avoir publie la
+# GitHub Release - sans, le site attend le prochain push sur master pour se mettre a jour.
+$env:DMTOOLS_NETLIFY_BUILD_HOOK = "https://api.netlify.com/build_hooks/xxxxxxxxxxxxxxxxxxxxxxxx"

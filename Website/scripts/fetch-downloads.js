@@ -6,7 +6,7 @@
 //
 // Le dépôt est privé : l'API GitHub renvoie une 404 (pas une 403, pour ne pas révéler son
 // existence) sur les endpoints de release à toute requête non authentifiée, même si la release
-// existe. DMTOOLS_GITHUB_TOKEN (variable d'environnement Netlify, PAT en lecture seule sur ce
+// existe. MORDHEIMLEDGER_GITHUB_TOKEN (variable d'environnement Netlify, PAT en lecture seule sur ce
 // repo) est donc indispensable ici - cf. Website/README.md pour comment le créer et le configurer.
 "use strict";
 
@@ -14,15 +14,15 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 
-const REPO = "Narfedome/DmTools";
-const ASSETS = ["DmToolsInstaller.exe", "DmTools.apk"];
+const REPO = "Narfedome/MordheimLedger";
+const ASSETS = ["MordheimLedgerInstaller.exe", "MordheimLedger.apk"];
 const OUT_DIR = path.join(__dirname, "..", "downloads");
-const GITHUB_TOKEN = process.env.DMTOOLS_GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.MORDHEIMLEDGER_GITHUB_TOKEN;
 
 function get(url, headers) {
   return new Promise((resolve, reject) => {
     https
-      .get(url, { headers: { "User-Agent": "dmtools-netlify-build", ...headers } }, (res) => {
+      .get(url, { headers: { "User-Agent": "mordheimledger-netlify-build", ...headers } }, (res) => {
         // GitHub redirige les assets de release vers un stockage temporaire signé (S3/Azure) : il
         // faut suivre la redirection nous-mêmes, https.get() ne le fait pas automatiquement. On ne
         // renvoie PAS nos headers (notamment Authorization) sur cette redirection : l'URL cible est
@@ -90,7 +90,7 @@ function updateChangelogVersion(version) {
 
 async function main() {
   if (!GITHUB_TOKEN) {
-    console.warn("DMTOOLS_GITHUB_TOKEN non défini : le dépôt étant privé, l'appel à l'API GitHub va échouer (404).");
+    console.warn("MORDHEIMLEDGER_GITHUB_TOKEN non défini : le dépôt étant privé, l'appel à l'API GitHub va échouer (404).");
   }
 
   fs.mkdirSync(OUT_DIR, { recursive: true });

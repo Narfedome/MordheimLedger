@@ -10,13 +10,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 
 public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 {
-    private readonly Dictionary<string, WarriorStatus> _statusByLabel = new();
     private readonly IWarbandService _warbandService;
     private readonly IInjuryPickerService _injuryPicker;
 
     protected override bool CancelResult => false;
-
-    public ObservableCollection<string> StatusOptions { get; } = new();
 
     [ObservableProperty]
     private Warrior item;
@@ -24,8 +21,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string title;
 
-    [ObservableProperty]
-    private string selectedStatusLabel = string.Empty;
+    /// <summary>Set when Delete succeeds - the caller (WarbandDetailViewModel.EditWarrior) checks this
+    /// instead of trying to SaveWarriorAsync a warrior that no longer exists.</summary>
+    public bool WasDeleted { get; private set; }
 
     /// <summary>Alimenté à la fois par le jet de blessure de Fin de partie et par les ajouts manuels
     /// (picker via +, retrait via la croix sur chaque puce). Persisté immédiatement (pas soumis à
@@ -39,22 +37,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _warbandService = warbandService;
         _injuryPicker = injuryPicker;
 
-        foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
-        {
-            var label = Loc[$"WarriorStatus{status}"];
-            _statusByLabel[label] = status;
-            StatusOptions.Add(label);
-        }
-
-        selectedStatusLabel = Loc[$"WarriorStatus{item.Status}"];
-
         Injuries = new ObservableCollection<WarriorInjury>(item.Injuries);
-    }
-
-    partial void OnSelectedStatusLabelChanged(string value)
-    {
-        if (_statusByLabel.TryGetValue(value, out var status))
-            Item.Status = status;
     }
 
     [RelayCommand]
@@ -73,6 +56,19 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     {
         await _warbandService.RemoveWarriorInjuryAsync(tracked.Id);
         Injuries.Remove(tracked);
+    }
+
+    [RelayCommand]
+    private async Task Delete()
+    {
+        // Message dédié (pas ConfirmDeleteAsync générique) : précise que ce n'est pas une mort du
+        // personnage (ça se joue via Fin de partie) et que le coût est remboursé au trésor.
+        if (!await ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["WarriorDeleteConfirm"], Item.Name)))
+            return;
+
+        await _warbandService.DeleteWarriorAsync(Item.Id);
+        WasDeleted = true;
+        Close(true);
     }
 
     [RelayCommand]

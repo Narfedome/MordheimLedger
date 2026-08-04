@@ -41,14 +41,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private bool henchmenExpanded = true;
 
-    // IsSelected porté par la ligne (SelectionMode="None" sur le CollectionView), pas la sélection
-    // native : constaté à l'usage (screenshot Android) que même un Border stylé via
-    // VisualStateManager (SelectableGridItemBorderStyle, utilisé par la Library) n'empêche pas
-    // Android d'afficher son propre fond de sélection teinté colorAccent par-dessus - seule une
-    // sélection entièrement gérée à la main l'évite, même mécanisme que WarbandRow/WarbandListPage.
-    [ObservableProperty]
-    private WarriorRow? selectedRow;
-
     [ObservableProperty]
     private ObservableCollection<HistoryEntry> historyEntries = new();
 
@@ -66,15 +58,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
     }
 
     partial void OnWarbandIdChanged(int value) => _ = LoadAsync(value);
-
-    partial void OnSelectedRowChanged(WarriorRow? oldValue, WarriorRow? newValue)
-    {
-        if (oldValue != null) oldValue.IsSelected = false;
-        if (newValue != null) newValue.IsSelected = true;
-    }
-
-    [RelayCommand]
-    private void Select(WarriorRow row) => SelectedRow = row;
 
     [RelayCommand]
     private void ToggleHeroes() => HeroesExpanded = !HeroesExpanded;
@@ -96,7 +79,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
             var rows = loaded.Select(ToRow).ToList();
             Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero));
             Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero));
-            SelectedRow = null;
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
@@ -151,12 +133,22 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var index = await ShowActionSheetIndexAsync(Loc["WarriorsChooseType"], sheetOptions);
         if (index < 0) return;
 
+        var archetype = candidates[index];
+        if (Warband.Treasury < archetype.Cost)
+        {
+            await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
+            return;
+        }
+
         var name = await ShowPromptAsync(Loc["DialogRecruit"], Loc["PromptName"]);
         if (string.IsNullOrWhiteSpace(name)) return;
 
         await Loading.RunAsync(async () =>
         {
-            var archetype = candidates[index];
+            Warband.Treasury -= archetype.Cost;
+            await _warbandService.SaveWarbandAsync(Warband);
+            OnPropertyChanged(nameof(Warband));
+
             var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, name);
             var row = ToRow(warrior);
             (archetype.IsHero ? Heroes : Henchmen).Add(row);
@@ -199,8 +191,20 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // Enregistrer/Annuler (même logique que l'Équipement/les Compétences sur la carte guerrier).
         await Loading.RunAsync(async () =>
         {
-            if (saved == true)
+            // WasDeleted : le guerrier n'existe plus en base (supprimé depuis le dialog) - le
+            // ré-enregistrer écraserait rien puisqu'il n'y a plus de ligne à mettre à jour. Rembourse
+            // son coût de recrutement + tout son équipement (row.Equipment, pas copy.Equipment qui
+            // n'est jamais rempli dans ce dialog) ; pas les compétences/blessures, qui n'ont pas de coût.
+            if (dialogViewModel.WasDeleted)
+            {
+                var refund = copy.Cost + row.Equipment.Sum(e => e.Item.Cost * e.Quantity);
+                Warband.Treasury += refund;
+                await _warbandService.SaveWarbandAsync(Warband);
+            }
+            else if (saved == true)
+            {
                 await _warbandService.SaveWarriorAsync(copy);
+            }
 
             await LoadAsync(Warband.Id);
         });
@@ -300,9 +304,23 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddEquipment(WarriorRow row)
     {
+        if (Warband is null) return;
+
         var items = await _equipmentPicker.PickEquipmentAsync();
         foreach (var item in items)
         {
+            // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
+            // plutôt que de tout annuler - les objets déjà payés restent acquis.
+            if (Warband.Treasury < item.Cost)
+            {
+                await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
+                break;
+            }
+
+            Warband.Treasury -= item.Cost;
+            await _warbandService.SaveWarbandAsync(Warband);
+            OnPropertyChanged(nameof(Warband));
+
             var carried = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, item);
             row.Equipment.Add(carried);
         }

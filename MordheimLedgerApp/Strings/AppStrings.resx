@@ -138,6 +138,9 @@
   <data name="DialogDeleteConfirm" xml:space="preserve">
     <value>Supprimer "{0}" ?</value>
   </data>
+  <data name="WarriorDeleteConfirm" xml:space="preserve">
+    <value>Supprimer {0} du roster ? Ce n'est pas une mort du personnage (voir Fin de partie pour ça) — son coût de recrutement et son équipement seront remboursés au trésor de la bande.</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
   </data>
@@ -164,6 +167,12 @@
   </data>
   <data name="WarbandsChooseType" xml:space="preserve">
     <value>Choisir un type de bande</value>
+  </data>
+  <data name="WarbandsInsufficientFundsTitle" xml:space="preserve">
+    <value>Fonds insuffisants</value>
+  </data>
+  <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
+    <value>Pas assez d'or dans le trésor de la bande.</value>
   </data>
   <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
     <value>Bibliothèque vide</value>
@@ -435,6 +444,9 @@
   <data name="EndOfGameTreasuryPh" xml:space="preserve">
     <value>Trésor trouvé (po)</value>
   </data>
+  <data name="EndOfGameTreasuryHeading" xml:space="preserve">
+    <value>Revenus</value>
+  </data>
   <data name="EndOfGameXpPh" xml:space="preserve">
     <value>PX gagnés</value>
   </data>
@@ -468,9 +480,6 @@
   <data name="WarriorEditTitle" xml:space="preserve">
     <value>Modifier le guerrier</value>
   </data>
-  <data name="WarriorStatusPh" xml:space="preserve">
-    <value>Statut</value>
-  </data>
   <data name="WarriorExperiencePh" xml:space="preserve">
     <value>Points d'expérience</value>
   </data>
@@ -483,6 +492,21 @@
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>
   </data>
+  <data name="EndOfGameHenchmanRollPh" xml:space="preserve">
+    <value>D6</value>
+  </data>
+  <data name="HenchmanInjuryDead" xml:space="preserve">
+    <value>Mort. Le guerrier est perdu.</value>
+  </data>
+  <data name="HenchmanInjuryRecovered" xml:space="preserve">
+    <value>Rétablissement complet.</value>
+  </data>
+  <data name="WarriorRoleHenchmanSingular" xml:space="preserve">
+    <value>Homme de main</value>
+  </data>
+  <data name="WarriorRoleHeroSingular" xml:space="preserve">
+    <value>Héros</value>
+  </data>
   <data name="EndOfGameShowResult" xml:space="preserve">
     <value>Voir le résultat</value>
   </data>
@@ -492,112 +516,127 @@
   <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
     <value>Résultat ({0})</value>
   </data>
+  <data name="EndOfGameInjuriesHeading" xml:space="preserve">
+    <value>Blessures Graves</value>
+  </data>
+  <data name="EndOfGameExperienceHeading" xml:space="preserve">
+    <value>Expérience</value>
+  </data>
+  <data name="EndOfGameDeadLabel" xml:space="preserve">
+    <value>Mort</value>
+  </data>
+  <data name="EndOfGameRecapHeading" xml:space="preserve">
+    <value>Récapitulatif</value>
+  </data>
+  <data name="EndOfGameNoChange" xml:space="preserve">
+    <value>{0} : aucun changement</value>
+  </data>
   <data name="InjurySerious11" xml:space="preserve">
-    <value>Mort. Le guerrier est perdu.</value>
+    <value>Mort. Le guerrier est perdu, tout son équipement est perdu.</value>
   </data>
   <data name="InjurySerious12" xml:space="preserve">
-    <value>Mort. Le guerrier est perdu.</value>
+    <value>Mort. Le guerrier est perdu, tout son équipement est perdu.</value>
   </data>
   <data name="InjurySerious13" xml:space="preserve">
-    <value>Mort. Le guerrier est perdu.</value>
+    <value>Mort. Le guerrier est perdu, tout son équipement est perdu.</value>
   </data>
   <data name="InjurySerious14" xml:space="preserve">
-    <value>Mort. Le guerrier est perdu.</value>
+    <value>Mort. Le guerrier est perdu, tout son équipement est perdu.</value>
   </data>
   <data name="InjurySerious15" xml:space="preserve">
-    <value>Mort. Le guerrier est perdu.</value>
+    <value>Mort. Le guerrier est perdu, tout son équipement est perdu.</value>
   </data>
   <data name="InjurySerious16" xml:space="preserve">
-    <value>Blessures multiples : retirer deux fois de plus sur cette table (un nouveau 16 est ignoré).</value>
+    <value>Blessures multiples : ne meurt pas. Relancez 1D6 fois sur cette table (relancez tout Mort, Capturé ou nouveau Blessures multiples) et cumulez tous les effets obtenus.</value>
   </data>
   <data name="InjurySerious21" xml:space="preserve">
-    <value>Jambe blessée : Mouvement réduit de façon permanente.</value>
+    <value>Blessures multiples : ne meurt pas. Relancez 1D6 fois sur cette table (relancez tout Mort, Capturé ou nouveau Blessures multiples) et cumulez tous les effets obtenus.</value>
   </data>
   <data name="InjurySerious22" xml:space="preserve">
-    <value>Bras blessé : Force réduite de façon permanente.</value>
+    <value>Blessure à la jambe : Mouvement -1 de façon permanente.</value>
   </data>
   <data name="InjurySerious23" xml:space="preserve">
-    <value>Folie passagère : rate la prochaine bataille.</value>
+    <value>Blessure au bras (1D6) : sur 1, bras amputé, ne peut plus utiliser que des armes à une main (permanent) ; sur 2-6, blessure légère, rate la prochaine bataille.</value>
   </data>
   <data name="InjurySerious24" xml:space="preserve">
-    <value>Blessure à la poitrine : Endurance réduite de façon permanente.</value>
+    <value>Folie (1D6) : sur 1-3 devient Stupide de façon permanente ; sur 4-6 devient Frénétique de façon permanente.</value>
   </data>
   <data name="InjurySerious25" xml:space="preserve">
-    <value>Borgne : Capacité de Tir (ou Capacité de Combat) réduite de façon permanente.</value>
+    <value>Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille.</value>
   </data>
   <data name="InjurySerious26" xml:space="preserve">
-    <value>Vieille blessure de guerre : rate la prochaine bataille, sauf soins.</value>
+    <value>Blessure au torse : Endurance -1 de façon permanente.</value>
   </data>
   <data name="InjurySerious31" xml:space="preserve">
-    <value>Nerfs fragiles : doit réussir un test de Commandement pour charger à l'avenir.</value>
+    <value>Œil crevé : Capacité de Tir -1 de façon permanente ; la perte du second œil entraîne un retrait obligatoire de la bande.</value>
   </data>
   <data name="InjurySerious32" xml:space="preserve">
-    <value>Endurci : rien cette fois, immunisé contre le prochain résultat de folie.</value>
+    <value>Vieille blessure : avant chaque bataille future, 1D6 - sur un 1, ne peut pas combattre cette bataille-là (permanent, à retester à chaque partie).</value>
   </data>
   <data name="InjurySerious33" xml:space="preserve">
-    <value>Main blessée : Capacité de Tir réduite de façon permanente.</value>
+    <value>Traumatisme nerveux : Initiative -1 de façon permanente.</value>
   </data>
   <data name="InjurySerious34" xml:space="preserve">
-    <value>Capturé par une bande rivale : peut être libéré contre rançon.</value>
+    <value>Blessure à la main : Capacité de Combat -1 de façon permanente.</value>
   </data>
   <data name="InjurySerious35" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Blessure profonde : hors service pendant 1D3 batailles, ne peut rien faire durant ce temps.</value>
   </data>
   <data name="InjurySerious36" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Dépouillé : s'échappe mais perd toutes ses armes, armures et son équipement.</value>
   </data>
   <data name="InjurySerious41" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious42" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious43" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious44" xml:space="preserve">
-    <value>Détroussé : perd un objet au hasard de son équipement.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious45" xml:space="preserve">
-    <value>Survit contre toute attente : gagne 1 point d'expérience.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious46" xml:space="preserve">
-    <value>Haine tenace envers la bande responsable.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious51" xml:space="preserve">
-    <value>Cou raide : Initiative réduite de façon permanente.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious52" xml:space="preserve">
-    <value>Jambe folle : Mouvement réduit de façon permanente.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious53" xml:space="preserve">
-    <value>Cicatrices impressionnantes : Commandement réduit, mais provoque la Peur.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious54" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious55" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille.</value>
   </data>
   <data name="InjurySerious56" xml:space="preserve">
-    <value>Vendu aux arènes : le guerrier est perdu, sauf rachat.</value>
+    <value>Rancune : récupère totalement mais hait désormais (1D6) le responsable ou sa bande.</value>
   </data>
   <data name="InjurySerious61" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Capturé : rançon, échange, ou vendu comme esclave (1D6×5 CO). Équipement gardé si échangé ou revendu vivant.</value>
   </data>
   <data name="InjurySerious62" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Endurci : devient immunisé à la Peur de façon permanente.</value>
   </data>
   <data name="InjurySerious63" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Endurci : devient immunisé à la Peur de façon permanente.</value>
   </data>
   <data name="InjurySerious64" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Horribles balafres : provoque désormais la Peur, de façon permanente.</value>
   </data>
   <data name="InjurySerious65" xml:space="preserve">
-    <value>Rétablissement complet.</value>
+    <value>Vendu aux arènes : combat un gladiateur (Francs-Tireurs). Victoire : +50 CO, +2 XP, rejoint la bande avec son équipement. Défaite : relancez en ne gardant que 11-35 ; s'il survit, rejoint la bande sans armure ni armes.</value>
   </data>
   <data name="InjurySerious66" xml:space="preserve">
-    <value>Combattant aguerri : bonus mineur à la prochaine bataille.</value>
+    <value>Survie miraculeuse : survit et rejoint la bande, gagne 1 point d'expérience.</value>
   </data>
 </root>

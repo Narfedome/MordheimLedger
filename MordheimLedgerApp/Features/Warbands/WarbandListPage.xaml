@@ -26,7 +26,7 @@
                     </Grid.GestureRecognizers>
                     <BoxView Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ChapterDividerStyle}"/>
                     <BoxView Grid.Column="0" Style="{StaticResource SelectionMarkerStyle}"/>
-                    <Label Grid.Column="1" Text="{Binding Name}" FontAttributes="Italic"
+                    <Label Grid.Column="1" Text="{Binding Name}"
                            FontSize="{OnIdiom Default=15, Desktop=13}"
                            VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
                     <Grid Grid.Column="2">

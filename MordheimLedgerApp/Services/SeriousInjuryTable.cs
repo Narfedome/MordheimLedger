@@ -1,17 +1,21 @@
 namespace MordheimLedgerApp.Services;
 
 /// <summary>
-/// Reference lookup for the rulebook's Serious Injury table (D66: two D6, first die = tens digit).
-/// Pure flavor/reference text - deliberately does not mutate any Warrior stat itself (see the
-/// roadmap's "no rules engine in V1" boundary, also documented on Core/Models/WarriorStatus.cs): the
-/// resulting text becomes (find-or-create) a Library Injury linked onto the Warrior (see
-/// WarbandDetailViewModel.EndOfGame), Status is chosen by the player in the dialog. Lives in the App
-/// layer (not Core) because the entries are looked up through LocalizationService - Core stays
-/// MAUI/localization-free.
+/// Reference lookup for the rulebook's Heroes' Serious Injury table (D66: two D6, first die = tens
+/// digit) - Henchmen use a completely different, simpler mechanic, see HenchmanInjuryTable. Pure
+/// flavor/reference text - deliberately does not mutate any Warrior stat itself (see the roadmap's
+/// "no rules engine in V1" boundary, also documented on Core/Models/WarriorStatus.cs): the resulting
+/// text becomes (find-or-create) a Library Injury linked onto the Warrior (see
+/// WarbandDetailViewModel.EndOfGame). Status IS auto-derived from the roll though (see IsDeath) - the
+/// 11-15 results are unambiguously "Mort", so the End of Game wizard sets WarriorStatus.Dead itself
+/// instead of asking the player to also pick it by hand. Lives in the App layer (not Core) because the
+/// entries are looked up through LocalizationService - Core stays MAUI/localization-free.
 ///
-/// IMPORTANT: entered from general knowledge of the Mordheim rulebook, NOT verified against the
-/// actual book (same caveat as OfficialContentSeed.cs's Reiklander Mercenaries stats) - the exact
-/// roll ranges and wording here are very likely off and need a full rewrite from the real table.
+/// Verified against the rulebook (p. 118-119) via RulesReference/Campagne.md. The "Blessures
+/// multiples" result (16, 21) means rolling 1D6 more sub-rolls on this same table (rerolling any
+/// Dead/Captured/further-Multiple) and stacking every effect - that loop is left to the player to
+/// execute manually (roll again, add another Injury via the picker) rather than automated, per the
+/// same "no rules engine" boundary.
 /// </summary>
 public static class SeriousInjuryTable
 {
@@ -25,6 +29,8 @@ public static class SeriousInjuryTable
         61, 62, 63, 64, 65, 66
     ];
 
+    private static readonly int[] DeathRolls = [11, 12, 13, 14, 15];
+
     public static bool TryGet(int roll, out string text)
     {
         if (Array.IndexOf(Rolls, roll) < 0)
@@ -36,6 +42,11 @@ public static class SeriousInjuryTable
         text = LocalizationService.Instance[$"InjurySerious{roll}"];
         return true;
     }
+
+    /// <summary>True for the unambiguous "Mort" results (11-15). 16 ("Blessures multiples") isn't
+    /// included even though it could lead to death indirectly - it means rolling twice more, which
+    /// this single-roll check can't resolve on its own.</summary>
+    public static bool IsDeath(int roll) => Array.IndexOf(DeathRolls, roll) >= 0;
 
     /// <summary>Rolls two D6 (D66: first die = tens digit) and looks up the result.</summary>
     public static (int Roll, string Text) Roll()

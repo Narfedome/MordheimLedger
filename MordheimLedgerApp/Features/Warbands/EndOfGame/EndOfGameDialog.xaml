@@ -20,58 +20,142 @@
             <Label Text="{loc:Loc EndOfGameTitle}"
                    FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
                    TextColor="{DynamicResource AppText}"/>
+            <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
 
-            <Picker Title="{loc:Loc EndOfGameResultPh}"
-                    ItemsSource="{Binding ResultOptions}"
-                    SelectedItem="{Binding SelectedResult}"/>
-            <Entry Text="{Binding TreasuryFound}" Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameTreasuryPh}"/>
-
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="local:WarriorOutcomeRow">
-                        <Border Style="{StaticResource SectionCardBorderStyle}">
-                            <VerticalStackLayout Spacing="8">
-                                <Label Text="{Binding Name}" FontAttributes="Bold"/>
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                                    <Entry Grid.Column="0" Text="{Binding ExperienceGained}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameXpPh}"/>
-                                    <Picker Grid.Column="1" ItemsSource="{Binding StatusOptions}"
-                                            SelectedItem="{Binding SelectedStatusLabel}"/>
-                                </Grid>
-                                <HorizontalStackLayout Spacing="10">
-                                    <CheckBox IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
-                                    <Label Text="{loc:Loc EndOfGameOutOfAction}" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                                <!-- Le joueur peut soit laisser l'appli tirer les dés (Dice = jet
-                                     aléatoire + popup de résultat immédiate), soit lancer ses propres
-                                     dés à la table et saisir le score lui-même (Entry + Eye = affiche
-                                     le résultat correspondant sans en tirer un nouveau). -->
-                                <Grid IsVisible="{Binding ShowInjuryTools}" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
-                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70"/>
-                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollCommand}"
-                                                                  CommandParameter="{Binding .}"
-                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                    <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryResultCommand}"
-                                                                  CommandParameter="{Binding .}"
-                                                                  Tooltip="{loc:Loc EndOfGameShowResult}"/>
-                                </Grid>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
+            <!-- Étape 1 : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsStep0}">
+                <Picker Title="{loc:Loc EndOfGameResultPh}"
+                        ItemsSource="{Binding ResultOptions}"
+                        SelectedItem="{Binding SelectedResult}"/>
             </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <!-- Étape 2 : Blessures Graves (livre de règles, étape 1 de la séquence d'après-bataille) -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep1}">
+                <Label Text="{loc:Loc EndOfGameInjuriesHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <!-- Héros et Hommes de main ont des tables de Blessures Graves
+                                             totalement différentes (D66 vs D6) - toujours afficher le
+                                             rôle pour lever l'ambiguïté. -->
+                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de
+                                             mort (voir ApplyInjuryRoll), pas de saisie manuelle. -->
+                                        <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
+                                               IsVisible="{Binding IsDead}"
+                                               TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
+                                    </Grid>
+                                    <HorizontalStackLayout Spacing="10">
+                                        <CheckBox IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
+                                        <Label Text="{loc:Loc EndOfGameOutOfAction}" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
+                                    <!-- Le joueur peut soit laisser l'appli tirer les dés (Dice = jet
+                                         aléatoire + popup de résultat immédiate), soit lancer ses propres
+                                         dés à la table et saisir le score lui-même (Entry + Eye = affiche
+                                         le résultat correspondant sans en tirer un nouveau). -->
+                                    <Grid IsVisible="{Binding ShowInjuryTools}" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                               Placeholder="{Binding RollPlaceholder}" WidthRequest="70"/>
+                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollCommand}"
+                                                                      CommandParameter="{Binding .}"
+                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryResultCommand}"
+                                                                      CommandParameter="{Binding .}"
+                                                                      Tooltip="{loc:Loc EndOfGameShowResult}"/>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape 3 : Expérience (livre, étape 2 - saisie libre pour l'instant, calcul assisté et
+                 jets d'Advance dans une passe séparée). Pas de Statut ici : entièrement auto-géré
+                 depuis l'étape Blessures Graves. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep2}">
+                <Label Text="{loc:Loc EndOfGameExperienceHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                            <!-- Un guerrier mort (Blessures Graves, étape précédente) ne gagne plus
+                                 d'XP - retiré de cette étape plutôt que juste grisé. -->
+                            <Border Style="{StaticResource SectionCardBorderStyle}"
+                                    IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </Grid>
+                                    <Entry Text="{Binding ExperienceGained}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameXpPh}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape 4 : Revenus (livre, étape 3 - trésor trouvé) -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep3}">
+                <Label Text="{loc:Loc EndOfGameTreasuryHeading}" FontAttributes="Bold"/>
+                <Entry Text="{Binding TreasuryFound}" Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameTreasuryPh}"/>
+            </VerticalStackLayout>
+
+            <!-- Étape 5 : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep4}">
+                <Label Text="{loc:Loc EndOfGameRecapHeading}" FontAttributes="Bold"/>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc EndOfGameResultPh}"/>
+                            <Span Text=" : "/>
+                            <Span Text="{Binding SelectedResult}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label>
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc EndOfGameTreasuryPh}"/>
+                            <Span Text=" : "/>
+                            <Span Text="{Binding TreasuryFound}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="4">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                            <Label Text="{Binding SummaryText}" FontSize="13"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"
                         Style="{StaticResource DialogSecondaryButtonStyle}"
                         Command="{Binding CancelCommand}"/>
                 <Button Grid.Column="1"
+                        Text="{loc:Loc LibBack}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding BackCommand}"
+                        IsEnabled="{Binding CanGoBack}"/>
+                <Button Grid.Column="2"
+                        Text="{loc:Loc LibNext}"
+                        Command="{Binding NextCommand}"
+                        IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
+                <Button Grid.Column="2"
                         Text="{loc:Loc BtnSave}"
-                        Command="{Binding SaveCommand}"/>
+                        Command="{Binding SaveCommand}"
+                        IsVisible="{Binding IsLastStep}"/>
             </Grid>
         </VerticalStackLayout>
         </ScrollView>

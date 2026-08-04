@@ -21,12 +21,7 @@
                  du Warrior lié (IsHero pilote directement ExperienceTrackView), pas du groupe qui
                  l'affiche. -->
             <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
-                <Border Style="{StaticResource SelectableCardBorderStyle}" Margin="12,6">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=SelectCommand}"
-                            CommandParameter="{Binding .}"/>
-                    </Border.GestureRecognizers>
+                <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
                     <VerticalStackLayout Spacing="6">
                         <Grid ColumnDefinitions="*,Auto,Auto">
                             <Label Grid.Column="0" Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>

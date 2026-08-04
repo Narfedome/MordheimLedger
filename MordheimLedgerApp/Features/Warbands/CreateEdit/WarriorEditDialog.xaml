@@ -19,14 +19,17 @@
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
-            <Label Text="{Binding Title}"
-                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                   TextColor="{DynamicResource AppText}"/>
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                       TextColor="{DynamicResource AppText}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Trash}"
+                                              IconSize="14" ButtonWidthRequest="28" ButtonHeightRequest="28"
+                                              Command="{Binding DeleteCommand}"/>
+            </Grid>
 
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc PromptName}"/>
-            <Picker Title="{loc:Loc WarriorStatusPh}"
-                    ItemsSource="{Binding StatusOptions}"
-                    SelectedItem="{Binding SelectedStatusLabel}"/>
             <VerticalStackLayout Spacing="2">
                 <Label Text="{loc:Loc WarriorExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Entry Text="{Binding Item.Experience}" Keyboard="Numeric"/>

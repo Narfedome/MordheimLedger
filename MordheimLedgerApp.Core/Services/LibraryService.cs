@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models.Library;
 
@@ -48,7 +49,8 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         var rows = await _db.Connection.Table<EquipmentItemEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        return rows.Select(r => r.ToModel(translations)).ToList();
+        var restrictions = await LoadEquipmentRestrictionsAsync();
+        return rows.Select(r => r.ToModel(translations, restrictions)).ToList();
     }
 
     public async Task<List<Skill>> GetSkillsAsync(string languageCode)
@@ -56,7 +58,8 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         var rows = await _db.Connection.Table<SkillEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        return rows.Select(r => r.ToModel(translations)).ToList();
+        var restrictions = await LoadSkillRestrictionsAsync();
+        return rows.Select(r => r.ToModel(translations, restrictions)).ToList();
     }
 
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)
@@ -65,6 +68,45 @@ public class LibraryService : ILibraryService
         var rows = await _db.Connection.Table<InjuryEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         return rows.Select(r => r.ToModel(translations)).ToList();
+    }
+
+    public async Task<List<Spell>> GetSpellsAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<SpellEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).OrderBy(s => s.SpellListName).ThenBy(s => s.RollValue).ToList();
+    }
+
+    /// <summary>Loads the whole restriction join table once (same "load whole table, filter in-memory"
+    /// idiom as TranslationResolver) rather than a FindAsync per item - catalogs are small enough that
+    /// this beats N+1 queries.</summary>
+    private async Task<Dictionary<int, List<int>>> LoadEquipmentRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarbandArchetypeEquipmentEntity>().ToListAsync();
+        return rows.GroupBy(r => r.EquipmentItemId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+    }
+
+    private async Task<Dictionary<int, List<int>>> LoadSkillRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarbandArchetypeSkillEntity>().ToListAsync();
+        return rows.GroupBy(r => r.SkillId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+    }
+
+    /// <summary>Replace-all: deletes the item's existing restriction rows and inserts the current list -
+    /// no diffing needed at this scale.</summary>
+    private async Task SaveEquipmentRestrictionsAsync(int equipmentItemId, List<int> warbandArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeEquipmentEntity WHERE EquipmentItemId = ?", equipmentItemId);
+        foreach (var warbandArchetypeId in warbandArchetypeIds)
+            await _db.Connection.InsertAsync(new WarbandArchetypeEquipmentEntity { EquipmentItemId = equipmentItemId, WarbandArchetypeId = warbandArchetypeId });
+    }
+
+    private async Task SaveSkillRestrictionsAsync(int skillId, List<int> warbandArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeSkillEntity WHERE SkillId = ?", skillId);
+        foreach (var warbandArchetypeId in warbandArchetypeIds)
+            await _db.Connection.InsertAsync(new WarbandArchetypeSkillEntity { SkillId = skillId, WarbandArchetypeId = warbandArchetypeId });
     }
 
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
@@ -113,12 +155,15 @@ public class LibraryService : ILibraryService
             var entity = item.ToEntity();
             await _db.Connection.InsertAsync(entity);
             item.Id = entity.Id;
-            return;
+        }
+        else
+        {
+            var existing = await _db.Connection.FindAsync<EquipmentItemEntity>(item.Id);
+            if (existing?.Source == ContentSource.Official) item.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(item.ToEntity());
         }
 
-        var existing = await _db.Connection.FindAsync<EquipmentItemEntity>(item.Id);
-        if (existing?.Source == ContentSource.Official) item.Source = ContentSource.Modified;
-        await _db.Connection.UpdateAsync(item.ToEntity());
+        await SaveEquipmentRestrictionsAsync(item.Id, item.RestrictedToWarbandArchetypeIds);
     }
 
     public async Task SaveSkillAsync(Skill skill, string languageCode)
@@ -131,12 +176,15 @@ public class LibraryService : ILibraryService
             var entity = skill.ToEntity();
             await _db.Connection.InsertAsync(entity);
             skill.Id = entity.Id;
-            return;
+        }
+        else
+        {
+            var existing = await _db.Connection.FindAsync<SkillEntity>(skill.Id);
+            if (existing?.Source == ContentSource.Official) skill.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(skill.ToEntity());
         }
 
-        var existing = await _db.Connection.FindAsync<SkillEntity>(skill.Id);
-        if (existing?.Source == ContentSource.Official) skill.Source = ContentSource.Modified;
-        await _db.Connection.UpdateAsync(skill.ToEntity());
+        await SaveSkillRestrictionsAsync(skill.Id, skill.RestrictedToWarbandArchetypeIds);
     }
 
     public async Task SaveInjuryAsync(Injury injury, string languageCode)
@@ -155,6 +203,24 @@ public class LibraryService : ILibraryService
         var existing = await _db.Connection.FindAsync<InjuryEntity>(injury.Id);
         if (existing?.Source == ContentSource.Official) injury.Source = ContentSource.Modified;
         await _db.Connection.UpdateAsync(injury.ToEntity());
+    }
+
+    public async Task SaveSpellAsync(Spell spell, string languageCode)
+    {
+        await _db.Initialization;
+        await ApplyTranslationsAsync(spell, languageCode);
+
+        if (spell.Id == 0)
+        {
+            var entity = spell.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            spell.Id = entity.Id;
+            return;
+        }
+
+        var existing = await _db.Connection.FindAsync<SpellEntity>(spell.Id);
+        if (existing?.Source == ContentSource.Official) spell.Source = ContentSource.Modified;
+        await _db.Connection.UpdateAsync(spell.ToEntity());
     }
 
     /// <summary>Writes Name (and Description, when non-blank) as the translation value for
@@ -200,6 +266,14 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
+    private async Task ApplyTranslationsAsync(Spell m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
     public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)
     {
         await _db.Initialization;
@@ -228,5 +302,11 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<InjuryEntity>(injuryId);
+    }
+
+    public async Task DeleteSpellAsync(int spellId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<SpellEntity>(spellId);
     }
 }

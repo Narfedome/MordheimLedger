@@ -15,4 +15,8 @@
     <InternalsVisibleTo Include="MordheimLedgerApp.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Data\SeedData\*.json" />
+  </ItemGroup>
+
 </Project>

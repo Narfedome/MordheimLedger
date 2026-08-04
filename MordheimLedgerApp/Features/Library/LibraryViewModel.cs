@@ -3,13 +3,14 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
 using MordheimLedgerApp.Features.Library.Injuries;
 using MordheimLedgerApp.Features.Library.Skills;
+using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
 
 /// <summary>
-/// Single "Codex" Shell tab hosting the 4 catalog sections (types de bande, Place du Marché,
-/// Compétences, Blessures) that used to each be their own top-level TabBar tab - consolidated to
+/// Single "Codex" Shell tab hosting the 5 catalog sections (types de bande, Place du Marché,
+/// Compétences, Blessures, Sorts) that used to each be their own top-level TabBar tab - consolidated to
 /// declutter the bottom nav bar on Android. Same toggle pattern (index + IsXTab, no real TabbedPage)
 /// already used by WarbandDetailPage's Roster/Historique and WarriorEditDialog's Équipement/
 /// Compétences/Blessures. Each section keeps its own existing ViewModel/*View ContentView unchanged -
@@ -21,26 +22,30 @@ public partial class LibraryViewModel : BaseViewModel
     public EquipmentItemViewModel EquipmentItems { get; }
     public SkillViewModel Skills { get; }
     public InjuryViewModel Injuries { get; }
+    public SpellViewModel Spells { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
     [NotifyPropertyChangedFor(nameof(IsTradingPostTab))]
     [NotifyPropertyChangedFor(nameof(IsSkillsTab))]
     [NotifyPropertyChangedFor(nameof(IsInjuriesTab))]
+    [NotifyPropertyChangedFor(nameof(IsSpellsTab))]
     private int selectedTab;
 
     public bool IsWarbandsTab => SelectedTab == 0;
     public bool IsTradingPostTab => SelectedTab == 1;
     public bool IsSkillsTab => SelectedTab == 2;
     public bool IsInjuriesTab => SelectedTab == 3;
+    public bool IsSpellsTab => SelectedTab == 4;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
-        SkillViewModel skills, InjuryViewModel injuries)
+        SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
         Skills = skills;
         Injuries = injuries;
+        Spells = spells;
     }
 
     [RelayCommand]
@@ -55,7 +60,10 @@ public partial class LibraryViewModel : BaseViewModel
     [RelayCommand]
     private void ShowInjuriesTab() => SelectedTab = 3;
 
-    /// <summary>All 4 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
+    [RelayCommand]
+    private void ShowSpellsTab() => SelectedTab = 4;
+
+    /// <summary>All 5 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
     /// switching between them is instant.</summary>
     public async Task InitializeAsync()
     {
@@ -63,5 +71,6 @@ public partial class LibraryViewModel : BaseViewModel
         await EquipmentItems.InitializeAsync();
         await Skills.InitializeAsync();
         await Injuries.InitializeAsync();
+        await Spells.InitializeAsync();
     }
 }

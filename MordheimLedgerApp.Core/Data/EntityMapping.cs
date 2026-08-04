@@ -88,6 +88,7 @@ public static class EntityMapping
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
+        SpellListName = e.SpellListName,
         ImagePath = e.ImagePath ?? string.Empty
     };
 
@@ -111,6 +112,7 @@ public static class EntityMapping
         Leadership = m.Leadership,
         StartingExperience = m.StartingExperience,
         DescriptionKey = m.DescriptionKey,
+        SpellListName = m.SpellListName,
         ImagePath = m.ImagePath
     };
 
@@ -147,7 +149,8 @@ public static class EntityMapping
         Notes = m.Notes
     };
 
-    public static Skill ToModel(this SkillEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static Skill ToModel(this SkillEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -156,7 +159,8 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
-        ImagePath = e.ImagePath ?? string.Empty
+        ImagePath = e.ImagePath ?? string.Empty,
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
     };
 
     public static SkillEntity ToEntity(this Skill m) => new()
@@ -189,7 +193,8 @@ public static class EntityMapping
         ImagePath = m.ImagePath
     };
 
-    public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -200,7 +205,34 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty,
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+    };
+
+    public static Spell ToModel(this SpellEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        SpellListName = e.SpellListName,
+        RollValue = e.RollValue,
+        Difficulty = e.Difficulty,
+        Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty
+    };
+
+    public static SpellEntity ToEntity(this Spell m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
+        SpellListName = m.SpellListName,
+        RollValue = m.RollValue,
+        Difficulty = m.Difficulty,
+        Source = m.Source,
+        ImagePath = m.ImagePath
     };
 
     public static EquipmentItemEntity ToEntity(this EquipmentItem m) => new()

@@ -6,6 +6,7 @@ using MordheimLedgerApp.Features.Library;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
 using MordheimLedgerApp.Features.Library.Injuries;
 using MordheimLedgerApp.Features.Library.Skills;
+using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
 using MordheimLedgerApp.Features.Settings;
@@ -70,6 +71,7 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<InjurySelectorPage>();
             builder.Services.AddSingleton<IInjuryPickerNavigationService, InjuryPickerNavigationService>();
             builder.Services.AddSingleton<IInjuryPickerService, InjuryPickerService>();
+            builder.Services.AddTransient<SpellViewModel>();
             builder.Services.AddTransient<LibraryViewModel>();
             builder.Services.AddTransient<LibraryPage>();
 

@@ -1,5 +1,8 @@
+using System.Reflection;
+using System.Text.Json;
 using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
+using MordheimLedgerApp.Core.Models.Library;
 using SQLite;
 
 namespace MordheimLedgerApp.Core.Data;
@@ -37,6 +40,9 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorInjuryEntity>();
         await _db.CreateTableAsync<HistoryEntryEntity>();
         await _db.CreateTableAsync<TranslationEntity>();
+        await _db.CreateTableAsync<SpellEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeEquipmentEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeSkillEntity>();
 
         // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
         // nothing the player made is at risk of being duplicated).
@@ -74,6 +80,93 @@ public class AppDatabase
                 ? null
                 : await SeedTranslationAsync(item.Description, fr.Description);
             await _db.InsertAsync(item.ToEntity());
+        }
+
+        // Pilot for the JSON-driven seed path (see WarbandSeedData) - Reiklander above stays on the
+        // original hardcoded OfficialContentSeed.cs shape to prove both mechanisms coexist. More
+        // warbands get added here as their JSON files are authored.
+        await SeedWarbandFromJsonAsync("MortsVivants.json");
+        await SeedWarbandFromJsonAsync("ChasseursDeTresorsNains.json");
+    }
+
+    /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
+    /// archetypes, band-specific equipment (with restriction rows where flagged) and spells - each
+    /// translatable field gets a fresh key via SeedTranslationAsync, same as the Reiklander seed above.</summary>
+    private async Task SeedWarbandFromJsonAsync(string fileName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith(fileName, StringComparison.Ordinal));
+        await using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        var data = await JsonSerializer.DeserializeAsync<WarbandSeedData>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidOperationException($"Empty or invalid seed file: {fileName}");
+
+        var warband = new WarbandArchetype
+        {
+            Source = ContentSource.Official,
+            StartingTreasury = data.StartingTreasury,
+            MaxWarriors = data.MaxWarriors
+        };
+        warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
+        warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
+        var warbandEntity = warband.ToEntity();
+        await _db.InsertAsync(warbandEntity);
+
+        foreach (var w in data.Warriors)
+        {
+            var warrior = new WarriorArchetype
+            {
+                WarbandArchetypeId = warbandEntity.Id,
+                IsHero = w.IsHero,
+                Cost = w.Cost,
+                MaxCount = w.MaxCount,
+                StartingExperience = w.StartingExperience,
+                Movement = w.Movement,
+                WeaponSkill = w.WeaponSkill,
+                BallisticSkill = w.BallisticSkill,
+                Strength = w.Strength,
+                Toughness = w.Toughness,
+                Wounds = w.Wounds,
+                Initiative = w.Initiative,
+                Attacks = w.Attacks,
+                Leadership = w.Leadership,
+                Source = ContentSource.Official,
+                SpellListName = w.SpellListName
+            };
+            warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
+            warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
+            await _db.InsertAsync(warrior.ToEntity());
+        }
+
+        foreach (var eq in data.Equipment)
+        {
+            var item = new EquipmentItem
+            {
+                Category = Enum.Parse<EquipmentCategory>(eq.Category),
+                Cost = eq.Cost,
+                Rarity = eq.Rarity,
+                Source = ContentSource.Official
+            };
+            item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
+            item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
+            var itemEntity = item.ToEntity();
+            await _db.InsertAsync(itemEntity);
+
+            if (eq.RestrictedToThisWarband)
+                await _db.InsertAsync(new WarbandArchetypeEquipmentEntity { WarbandArchetypeId = warbandEntity.Id, EquipmentItemId = itemEntity.Id });
+        }
+
+        foreach (var sp in data.Spells)
+        {
+            var spell = new Spell
+            {
+                SpellListName = sp.SpellListName,
+                RollValue = sp.RollValue,
+                Difficulty = sp.Difficulty,
+                Source = ContentSource.Official
+            };
+            spell.NameKey = await SeedTranslationAsync(sp.Name.En, sp.Name.Fr);
+            spell.DescriptionKey = sp.Description is null ? null : await SeedTranslationAsync(sp.Description.En, sp.Description.Fr);
+            await _db.InsertAsync(spell.ToEntity());
         }
     }
 

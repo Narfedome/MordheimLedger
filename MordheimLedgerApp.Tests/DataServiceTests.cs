@@ -26,11 +26,16 @@ public class DataServiceTests : IDisposable
         if (File.Exists(_dbPath)) File.Delete(_dbPath);
     }
 
+    /// <summary>The seed now covers 3 warbands (Reiklander Mercenaries hardcoded + Undead/Dwarf Treasure
+    /// Hunters from JSON, see AppDatabase.SeedWarbandFromJsonAsync) - tests needing "the" seeded archetype
+    /// specifically target Reiklander by name rather than assuming there's only one.</summary>
+    private async Task<WarbandArchetype> GetReiklandersAsync(string languageCode = "en") =>
+        (await _library.GetWarbandArchetypesAsync(languageCode)).Single(a => a.Name is "Reiklander Mercenaries" or "Mercenaires Reiklander");
+
     [Fact]
     public async Task Database_SeedsReiklanderMercenariesOnFirstLaunch()
     {
-        var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        var reiklanders = Assert.Single(archetypes);
+        var reiklanders = await GetReiklandersAsync();
         Assert.Equal("Reiklander Mercenaries", reiklanders.Name);
         Assert.Equal(ContentSource.Official, reiklanders.Source);
 
@@ -44,15 +49,34 @@ public class DataServiceTests : IDisposable
     [Fact]
     public async Task Database_SeedsReiklanderMercenaries_InFrenchToo()
     {
-        var archetypes = await _library.GetWarbandArchetypesAsync("fr");
-        var reiklanders = Assert.Single(archetypes);
+        var reiklanders = await GetReiklandersAsync("fr");
         Assert.Equal("Mercenaires Reiklander", reiklanders.Name);
+    }
+
+    [Fact]
+    public async Task Database_SeedsThreeWarbandsTotal()
+    {
+        var archetypes = await _library.GetWarbandArchetypesAsync("en");
+        Assert.Equal(3, archetypes.Count);
+        Assert.Contains(archetypes, a => a.Name == "Undead");
+        Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
+
+        var spells = await _library.GetSpellsAsync("en");
+        Assert.Equal(6, spells.Count);
+        Assert.All(spells, s => Assert.Equal("Nécromancie", s.SpellListName));
+
+        var necromancer = (await _library.GetWarriorArchetypesAsync(
+            archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
+        Assert.Equal("Nécromancie", necromancer.SpellListName);
+
+        var dwarfAxe = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Dwarf axe");
+        Assert.Single(dwarfAxe.RestrictedToWarbandArchetypeIds);
     }
 
     [Fact]
     public async Task CreateWarband_PreFillsTreasuryFromArchetype()
     {
-        var archetype = (await _library.GetWarbandArchetypesAsync("en")).Single();
+        var archetype = await GetReiklandersAsync();
 
         var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", archetype);
 
@@ -64,7 +88,7 @@ public class DataServiceTests : IDisposable
     [Fact]
     public async Task RecruitWarrior_PreFillsStatsFromArchetype_AndPersists()
     {
-        var warbandArchetype = (await _library.GetWarbandArchetypesAsync("en")).Single();
+        var warbandArchetype = await GetReiklandersAsync();
         var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
         var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en"))
             .Single(a => a.Name == "Mercenary Captain");
@@ -83,12 +107,12 @@ public class DataServiceTests : IDisposable
     [Fact]
     public async Task EditingOfficialArchetype_FlipsSourceToModified()
     {
-        var archetype = (await _library.GetWarbandArchetypesAsync("en")).Single();
+        var archetype = await GetReiklandersAsync();
         archetype.StartingTreasury = 600;
 
         await _library.SaveWarbandArchetypeAsync(archetype, "en");
 
-        var reloaded = (await _library.GetWarbandArchetypesAsync("en")).Single();
+        var reloaded = await GetReiklandersAsync();
         Assert.Equal(ContentSource.Modified, reloaded.Source);
         Assert.Equal(600, reloaded.StartingTreasury);
     }
@@ -96,7 +120,7 @@ public class DataServiceTests : IDisposable
     [Fact]
     public async Task DeleteWarband_CascadesToWarriorsAndEquipment()
     {
-        var warbandArchetype = (await _library.GetWarbandArchetypesAsync("en")).Single();
+        var warbandArchetype = await GetReiklandersAsync();
         var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
         var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
         await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");

@@ -29,5 +29,6 @@ public class WarriorArchetypeEntity
     public int StartingExperience { get; set; }
 
     public string? DescriptionKey { get; set; }
+    public string? SpellListName { get; set; }
     public string? ImagePath { get; set; }
 }

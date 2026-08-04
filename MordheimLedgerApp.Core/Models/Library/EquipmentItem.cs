@@ -27,4 +27,9 @@ public class EquipmentItem
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>Empty = common to every warband. Non-empty = canon-restricted to these WarbandArchetype
+    /// ids (e.g. "Hache Naine" - Dwarf warbands only). Data-only for now: shown as a badge, not enforced
+    /// in the equipment picker (see WarbandArchetypeEquipmentEntity).</summary>
+    public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
 }

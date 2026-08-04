@@ -44,6 +44,11 @@ public class WarriorArchetype
     public string? NameKey { get; set; }
     public string? DescriptionKey { get; set; }
 
+    /// <summary>Null = not a spellcaster. Non-null = this archetype rolls on Spell entries whose
+    /// SpellListName matches this value (e.g. "Nécromancie" for a Nécromancien). A simple string match
+    /// rather than a join table since it's a 1:1 relationship (one archetype -> one list).</summary>
+    public string? SpellListName { get; set; }
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 }

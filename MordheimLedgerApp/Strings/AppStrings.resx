@@ -378,6 +378,27 @@
   <data name="InjuryEditTitle" xml:space="preserve">
     <value>Modifier la blessure</value>
   </data>
+  <data name="SpellNamePh" xml:space="preserve">
+    <value>Nom du sort</value>
+  </data>
+  <data name="SpellCreateTitle" xml:space="preserve">
+    <value>Nouveau sort</value>
+  </data>
+  <data name="SpellEditTitle" xml:space="preserve">
+    <value>Modifier le sort</value>
+  </data>
+  <data name="SpellListNamePh" xml:space="preserve">
+    <value>Table (ex. Nécromancie)</value>
+  </data>
+  <data name="SpellRollValuePh" xml:space="preserve">
+    <value>Résultat du dé</value>
+  </data>
+  <data name="SpellDifficultyPh" xml:space="preserve">
+    <value>Difficulté</value>
+  </data>
+  <data name="LibTabSpells" xml:space="preserve">
+    <value>Sorts</value>
+  </data>
   <data name="InjurySelectTitle" xml:space="preserve">
     <value>Choisir une blessure</value>
   </data>

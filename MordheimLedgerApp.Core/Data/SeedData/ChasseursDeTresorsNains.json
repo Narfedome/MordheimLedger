@@ -1,0 +1,103 @@
+{
+  "name": { "en": "Dwarf Treasure Hunters", "fr": "Chasseurs de Trésors Nains" },
+  "description": {
+    "en": "Exiled or ambitious Dwarf nobles gather their kin to seek fortune and glory among the ruins of Mordheim.",
+    "fr": "Des nobles nains bannis ou ambitieux rassemblent leurs proches pour chercher fortune et gloire dans les ruines de Mordheim."
+  },
+  "startingTreasury": 500,
+  "maxWarriors": 12,
+  "warriors": [
+    {
+      "name": { "en": "Noble", "fr": "Noble Nain" },
+      "isHero": true,
+      "cost": 85,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 3, "weaponSkill": 5, "ballisticSkill": 4, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
+      "description": {
+        "en": "Dwarf nobles are Treasure Hunters who have recruited a band of like-minded kin and left their stronghold in search of riches.",
+        "fr": "Les nobles nains sont des Chasseurs de Trésors qui ont recruté une bande de leurs congénères aux motivations similaires et ont quitté leur forteresse en quête de richesses."
+      }
+    },
+    {
+      "name": { "en": "Engineer", "fr": "Ingénieur Nain" },
+      "isHero": true,
+      "cost": 50,
+      "maxCount": 1,
+      "startingExperience": 10,
+      "movement": 3, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
+      "description": {
+        "en": "Dwarf engineers are highly respected members of Dwarf society, masters of the war machines that made the Dwarf race famous.",
+        "fr": "Les ingénieurs nains sont des membres très respectés de la société naine, qui construisent les formidables machines de guerre qui ont fait la réputation légendaire de leur race."
+      }
+    },
+    {
+      "name": { "en": "Troll Slayer", "fr": "Tueur de Trolls Nain" },
+      "isHero": true,
+      "cost": 50,
+      "maxCount": 2,
+      "startingExperience": 8,
+      "movement": 3, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
+      "description": {
+        "en": "Troll Slayers belong to a grim cult dedicated to seeking a heroic death in battle.",
+        "fr": "Les Tueurs de Trolls font partie d'un culte sinistre dédié à la recherche obsessionnelle d'une mort héroïque au combat."
+      }
+    },
+    {
+      "name": { "en": "Dwarf Clansman", "fr": "Guerrier Nain" },
+      "isHero": false,
+      "cost": 40,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 3, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
+      "description": {
+        "en": "Dwarf warriors in all their glory: tenacious, stubborn and unfailingly brave.",
+        "fr": "Ce sont des guerriers nains dans toute leur splendeur : tenaces, têtus et d'une bravoure à toute épreuve."
+      }
+    },
+    {
+      "name": { "en": "Dwarf Thunderer", "fr": "Tireur Nain" },
+      "isHero": false,
+      "cost": 40,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 3, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
+      "description": {
+        "en": "Dwarf Thunderers are experts with missile weapons - many an Orc or Goblin has died to their crossbow bolts or handgun fire.",
+        "fr": "Les tireurs nains sont des experts en armes de tir. Plus d'un orque ou gobelin est mort sous les carreaux de leurs arbalètes ou les balles de leurs arquebuses."
+      }
+    },
+    {
+      "name": { "en": "Beardling", "fr": "Poil-au-Menton" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 3, "weaponSkill": 3, "ballisticSkill": 2, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 8,
+      "description": {
+        "en": "Young Dwarfs with barely a beard to their name, banded together under an experienced elder in hope of glory and riches.",
+        "fr": "Ce sont de jeunes nains à la barbe naissante qui se sont regroupés sous les ordres d'un aîné plus expérimenté dans l'espoir qu'il les conduira vers la gloire et la richesse."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": { "en": "Dwarf axe", "fr": "Hache Naine" },
+      "category": "MeleeWeapon",
+      "cost": 15,
+      "rarity": 8,
+      "description": {
+        "en": "A shorter-hafted axe made of lighter but stronger materials than a normal axe - grants an additional -1 armour save modifier and can be used to Parry.",
+        "fr": "Une hache à manche court en matériaux plus légers mais plus solides qu'une hache normale - inflige un modificateur de sauvegarde additionnel de -1 et permet de parer."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
+  "spells": []
+}

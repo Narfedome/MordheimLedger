@@ -15,7 +15,8 @@ namespace MordheimLedgerApp.Services
     // ThemeService so more palettes slot in later without touching Settings or this service's shape.
     public enum AppPalette
     {
-        CendreEtWyrdstone = 0
+        CendreEtWyrdstone = 0,
+        TenebreEtOr
     }
 
     public class ThemeService : INotifyPropertyChanged
@@ -42,7 +43,11 @@ namespace MordheimLedgerApp.Services
         // No embedded watermark art yet for any palette (single entry, "Cendre & Wyrdstone") - returns
         // null until a resource exists, cf. DmTools' ImageSource.FromResource per-palette lookup for
         // the pattern to extend once art is available (WatermarkedLayout.xaml already wired for it).
-        public ImageSource? WatermarkImageSource => null;
+        public ImageSource? WatermarkImageSource => ImageSource.FromResource(_palette switch
+        {
+            AppPalette.CendreEtWyrdstone => "green.png",
+            _ => "gold.png",
+        }, typeof(ThemeService).Assembly);
 
         public AppPalette Palette
         {

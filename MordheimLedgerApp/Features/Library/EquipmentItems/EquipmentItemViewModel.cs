@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
@@ -22,6 +23,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
     [ObservableProperty]
     private EquipmentItemRow? selectedRow;
 
+    /// <summary>Le vrai critère de filtre - null = Tout. Distinct de SelectedCategoryLabel (juste
+    /// l'affichage) : comparer des libellés résolus par LocalizationService cassait le filtre au
+    /// changement de langue (le libellé "Tout" figé dans l'ancienne langue ne correspondait plus à
+    /// rien après un rechargement en LoadData, filtrant silencieusement la liste à vide).</summary>
+    [ObservableProperty]
+    private EquipmentCategory? selectedCategory;
+
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
@@ -40,22 +48,32 @@ public partial class EquipmentItemViewModel : BaseViewModel
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
         selectedCategoryLabel = Loc["LibFilterAll"];
+
+        // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
+        // (onglet TabBar gardé en mémoire par Shell).
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
+            (r, m) => _ = ((EquipmentItemViewModel)r).LoadData());
     }
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     private async Task LoadData()
     {
-        _allItems = await _libraryService.GetEquipmentItemsAsync();
+        _allItems = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
+        RefreshSelectedCategoryLabel();
         ApplyFilter();
     }
 
+    /// <summary>Recompute le libellé affiché depuis SelectedCategory (le vrai critère) - à refaire à
+    /// chaque LoadData puisque le texte dépend de la langue courante.</summary>
+    private void RefreshSelectedCategoryLabel() =>
+        SelectedCategoryLabel = SelectedCategory is { } category ? CategoryLabel(category) : Loc["LibFilterAll"];
+
     private void ApplyFilter()
     {
-        var allLabel = Loc["LibFilterAll"];
-        var filtered = SelectedCategoryLabel == allLabel
-            ? _allItems
-            : _allItems.Where(i => CategoryLabel(i.Category) == SelectedCategoryLabel).ToList();
+        var filtered = SelectedCategory is { } category
+            ? _allItems.Where(i => i.Category == category).ToList()
+            : _allItems;
 
         EquipmentItems = new ObservableCollection<EquipmentItemRow>(filtered.Select(i => new EquipmentItemRow(i)));
         SelectedRow = null;
@@ -89,13 +107,14 @@ public partial class EquipmentItemViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectCategory()
     {
-        var allLabel = Loc["LibFilterAll"];
-        var options = new[] { allLabel }.Concat(Enum.GetValues<EquipmentCategory>().Select(CategoryLabel)).ToArray();
+        var categories = Enum.GetValues<EquipmentCategory>();
+        var options = new[] { Loc["LibFilterAll"] }.Concat(categories.Select(CategoryLabel)).ToArray();
 
-        var result = await ShowActionSheetAsync(Loc["LibFilterCategory"], options);
-        if (result is null) return;
+        var index = await ShowActionSheetIndexAsync(Loc["LibFilterCategory"], options);
+        if (index < 0) return;
 
-        SelectedCategoryLabel = result;
+        SelectedCategory = index == 0 ? null : categories[index - 1];
+        RefreshSelectedCategoryLabel();
         ApplyFilter();
     }
 
@@ -106,7 +125,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
         var dialogViewModel = new EquipmentItemEditDialogViewModel(newItem, Loc["EquipmentItemCreateTitle"]);
         if (await ShowDialogAsync(new EquipmentItemEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveEquipmentItemAsync(newItem);
+        await _libraryService.SaveEquipmentItemAsync(newItem, LocalizationService.Instance.Language);
         _allItems.Add(newItem);
         ApplyFilter();
     }
@@ -125,6 +144,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
             Cost = s.Cost,
             Rarity = s.Rarity,
             Description = s.Description,
+            NameKey = s.NameKey,
+            DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath
         };
@@ -132,7 +153,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"]);
         if (await ShowDialogAsync(new EquipmentItemEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveEquipmentItemAsync(copy);
+        await _libraryService.SaveEquipmentItemAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 

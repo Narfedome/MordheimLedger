@@ -8,6 +8,9 @@ namespace MordheimLedgerApp.Core.Models.Library;
 public class WarbandArchetype
 {
     public int Id { get; set; }
+
+    /// <summary>Resolved display text in the requested language - see LibraryService's
+    /// ResolveTranslationsAsync/SetTranslationAsync.</summary>
     public string Name { get; set; } = string.Empty;
     public ContentSource Source { get; set; }
     public int StartingTreasury { get; set; }
@@ -16,6 +19,10 @@ public class WarbandArchetype
     public int? MaxWarriors { get; set; }
 
     public string? Description { get; set; }
+
+    /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>
+    public string? NameKey { get; set; }
+    public string? DescriptionKey { get; set; }
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;

@@ -12,6 +12,16 @@ namespace MordheimLedgerApp.Core.Data;
 /// </summary>
 public static class EntityMapping
 {
+    /// <summary>Resolves a translation key against an already-fetched (Key, LanguageCode) → Value
+    /// dictionary for the requested language (see LibraryService.ResolveTranslationsAsync) - falls
+    /// back to the raw key itself (visible placeholder rather than blank) if nothing was resolved.</summary>
+    private static string ResolveName(string key, IReadOnlyDictionary<string, string> translations) =>
+        translations.GetValueOrDefault(key, key);
+
+    private static string? ResolveDescription(string? key, IReadOnlyDictionary<string, string> translations) =>
+        key is null ? null : translations.GetValueOrDefault(key, key);
+
+
     public static Warband ToModel(this WarbandEntity e) => new()
     {
         Id = e.Id,
@@ -32,33 +42,35 @@ public static class EntityMapping
         Notes = m.Notes
     };
 
-    public static WarbandArchetype ToModel(this WarbandArchetypeEntity e) => new()
+    public static WarbandArchetype ToModel(this WarbandArchetypeEntity e, IReadOnlyDictionary<string, string> translations) => new()
     {
         Id = e.Id,
-        Name = e.Name,
+        Name = ResolveName(e.NameKey, translations),
         Source = e.Source,
         StartingTreasury = e.StartingTreasury,
         MaxWarriors = e.MaxWarriors,
-        Description = e.Description,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
         ImagePath = e.ImagePath ?? string.Empty
     };
 
     public static WarbandArchetypeEntity ToEntity(this WarbandArchetype m) => new()
     {
         Id = m.Id,
-        Name = m.Name,
+        NameKey = m.NameKey ?? string.Empty,
         Source = m.Source,
         StartingTreasury = m.StartingTreasury,
         MaxWarriors = m.MaxWarriors,
-        Description = m.Description,
+        DescriptionKey = m.DescriptionKey,
         ImagePath = m.ImagePath
     };
 
-    public static WarriorArchetype ToModel(this WarriorArchetypeEntity e) => new()
+    public static WarriorArchetype ToModel(this WarriorArchetypeEntity e, IReadOnlyDictionary<string, string> translations) => new()
     {
         Id = e.Id,
         WarbandArchetypeId = e.WarbandArchetypeId,
-        Name = e.Name,
+        Name = ResolveName(e.NameKey, translations),
         IsHero = e.IsHero,
         Cost = e.Cost,
         Source = e.Source,
@@ -73,7 +85,9 @@ public static class EntityMapping
         Attacks = e.Attacks,
         Leadership = e.Leadership,
         StartingExperience = e.StartingExperience,
-        Description = e.Description,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
         ImagePath = e.ImagePath ?? string.Empty
     };
 
@@ -81,7 +95,7 @@ public static class EntityMapping
     {
         Id = m.Id,
         WarbandArchetypeId = m.WarbandArchetypeId,
-        Name = m.Name,
+        NameKey = m.NameKey ?? string.Empty,
         IsHero = m.IsHero,
         Cost = m.Cost,
         Source = m.Source,
@@ -96,7 +110,7 @@ public static class EntityMapping
         Attacks = m.Attacks,
         Leadership = m.Leadership,
         StartingExperience = m.StartingExperience,
-        Description = m.Description,
+        DescriptionKey = m.DescriptionKey,
         ImagePath = m.ImagePath
     };
 
@@ -133,12 +147,14 @@ public static class EntityMapping
         Notes = m.Notes
     };
 
-    public static Skill ToModel(this SkillEntity e) => new()
+    public static Skill ToModel(this SkillEntity e, IReadOnlyDictionary<string, string> translations) => new()
     {
         Id = e.Id,
-        Name = e.Name,
+        Name = ResolveName(e.NameKey, translations),
         Category = e.Category,
-        Description = e.Description,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty
     };
@@ -146,18 +162,20 @@ public static class EntityMapping
     public static SkillEntity ToEntity(this Skill m) => new()
     {
         Id = m.Id,
-        Name = m.Name,
+        NameKey = m.NameKey ?? string.Empty,
         Category = m.Category,
-        Description = m.Description,
+        DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath
     };
 
-    public static Injury ToModel(this InjuryEntity e) => new()
+    public static Injury ToModel(this InjuryEntity e, IReadOnlyDictionary<string, string> translations) => new()
     {
         Id = e.Id,
-        Name = e.Name,
-        Description = e.Description,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty
     };
@@ -165,20 +183,22 @@ public static class EntityMapping
     public static InjuryEntity ToEntity(this Injury m) => new()
     {
         Id = m.Id,
-        Name = m.Name,
-        Description = m.Description,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath
     };
 
-    public static EquipmentItem ToModel(this EquipmentItemEntity e) => new()
+    public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations) => new()
     {
         Id = e.Id,
-        Name = e.Name,
+        Name = ResolveName(e.NameKey, translations),
         Category = e.Category,
         Cost = e.Cost,
         Rarity = e.Rarity,
-        Description = e.Description,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty
     };
@@ -186,11 +206,11 @@ public static class EntityMapping
     public static EquipmentItemEntity ToEntity(this EquipmentItem m) => new()
     {
         Id = m.Id,
-        Name = m.Name,
+        NameKey = m.NameKey ?? string.Empty,
         Category = m.Category,
         Cost = m.Cost,
         Rarity = m.Rarity,
-        Description = m.Description,
+        DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath
     };

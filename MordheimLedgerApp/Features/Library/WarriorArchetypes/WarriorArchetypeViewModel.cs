@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.WarriorArchetypes;
 
@@ -30,13 +32,19 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     public WarriorArchetypeViewModel(ILibraryService libraryService)
     {
         _libraryService = libraryService;
+
+        // Voir WarbandArchetypeViewModel - même besoin de rechargement explicite sur changement de
+        // langue (cette page est atteinte par push depuis la Bibliothèque, mais rien n'empêche l'appli
+        // d'y être déjà quand la langue change).
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
+            (r, m) => _ = ((WarriorArchetypeViewModel)r).LoadData());
     }
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     private async Task LoadData()
     {
-        var items = await _libraryService.GetWarriorArchetypesAsync(WarbandArchetypeId);
+        var items = await _libraryService.GetWarriorArchetypesAsync(WarbandArchetypeId, LocalizationService.Instance.Language);
         WarriorArchetypeItems = new ObservableCollection<WarriorArchetypeRow>(items.Select(i => new WarriorArchetypeRow(i)));
         SelectedRow = null;
     }
@@ -60,7 +68,7 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"]);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveWarriorArchetypeAsync(newItem);
+        await _libraryService.SaveWarriorArchetypeAsync(newItem, LocalizationService.Instance.Language);
         WarriorArchetypeItems.Add(new WarriorArchetypeRow(newItem));
     }
 
@@ -89,13 +97,15 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
             Attacks = s.Attacks,
             Leadership = s.Leadership,
             Description = s.Description,
+            NameKey = s.NameKey,
+            DescriptionKey = s.DescriptionKey,
             ImagePath = s.ImagePath
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"]);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveWarriorArchetypeAsync(copy);
+        await _libraryService.SaveWarriorArchetypeAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 

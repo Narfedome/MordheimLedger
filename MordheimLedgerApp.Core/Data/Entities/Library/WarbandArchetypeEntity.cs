@@ -7,10 +7,10 @@ public class WarbandArchetypeEntity
 {
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string NameKey { get; set; } = string.Empty;
     public ContentSource Source { get; set; }
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
-    public string? Description { get; set; }
+    public string? DescriptionKey { get; set; }
     public string? ImagePath { get; set; }
 }

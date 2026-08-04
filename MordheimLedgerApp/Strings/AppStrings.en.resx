@@ -261,6 +261,12 @@
   <data name="TabTradingPost" xml:space="preserve">
     <value>Trading Post</value>
   </data>
+  <data name="LibTabWarbands" xml:space="preserve">
+    <value>Warbands</value>
+  </data>
+  <data name="LibTabTradingPost" xml:space="preserve">
+    <value>Market</value>
+  </data>
   <data name="BtnSave" xml:space="preserve">
     <value>Save</value>
   </data>

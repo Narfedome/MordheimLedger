@@ -48,14 +48,17 @@ public class EntityMappingTests
         {
             Id = 1,
             Name = "Dagger",
+            NameKey = "dagger-name",
             Category = EquipmentCategory.MeleeWeapon,
             Cost = 0,
             Rarity = null,
             Description = "Grants one extra Attack, always used in addition to another weapon.",
+            DescriptionKey = "dagger-desc",
             Source = ContentSource.Official
         };
+        var translations = new Dictionary<string, string> { ["dagger-name"] = item.Name, ["dagger-desc"] = item.Description };
 
-        var roundTripped = item.ToEntity().ToModel();
+        var roundTripped = item.ToEntity().ToModel(translations);
 
         Assert.Equal(item.Id, roundTripped.Id);
         Assert.Equal(item.Name, roundTripped.Name);
@@ -73,13 +76,16 @@ public class EntityMappingTests
         {
             Id = 3,
             Name = "Reiklander Mercenaries",
+            NameKey = "reiklander-name",
             Source = ContentSource.Official,
             StartingTreasury = 500,
             MaxWarriors = 15,
-            Description = "The default human warband of the Empire."
+            Description = "The default human warband of the Empire.",
+            DescriptionKey = "reiklander-desc"
         };
+        var translations = new Dictionary<string, string> { ["reiklander-name"] = archetype.Name, ["reiklander-desc"] = archetype.Description };
 
-        var roundTripped = archetype.ToEntity().ToModel();
+        var roundTripped = archetype.ToEntity().ToModel(translations);
 
         Assert.Equal(archetype.Id, roundTripped.Id);
         Assert.Equal(archetype.Name, roundTripped.Name);
@@ -97,6 +103,7 @@ public class EntityMappingTests
             Id = 10,
             WarbandArchetypeId = 3,
             Name = "Mercenary Captain",
+            NameKey = "captain-name",
             IsHero = true,
             Cost = 80,
             Source = ContentSource.Official,
@@ -111,10 +118,12 @@ public class EntityMappingTests
             Attacks = 1,
             Leadership = 8,
             StartingExperience = 20,
-            Description = "May be given any Combat, Shooting or Strength skill."
+            Description = "May be given any Combat, Shooting or Strength skill.",
+            DescriptionKey = "captain-desc"
         };
+        var translations = new Dictionary<string, string> { ["captain-name"] = archetype.Name, ["captain-desc"] = archetype.Description };
 
-        var roundTripped = archetype.ToEntity().ToModel();
+        var roundTripped = archetype.ToEntity().ToModel(translations);
 
         Assert.Equal(archetype.Id, roundTripped.Id);
         Assert.Equal(archetype.WarbandArchetypeId, roundTripped.WarbandArchetypeId);

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library"
+             xmlns:warbandArchetypes="clr-namespace:MordheimLedgerApp.Features.Library.WarbandArchetypes"
+             xmlns:equipmentItems="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
+             xmlns:skills="clr-namespace:MordheimLedgerApp.Features.Library.Skills"
+             xmlns:injuries="clr-namespace:MordheimLedgerApp.Features.Library.Injuries"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Features.Library.LibraryPage"
+             x:DataType="local:LibraryViewModel">
+
+    <components:WatermarkedLayout>
+    <Grid RowDefinitions="Auto,*">
+        <!-- Toggle Bandes/Marché/Compétences/Blessures - même pattern que Roster/Historique sur
+             WarbandDetailPage : pas de vrai TabbedPage, juste des boutons + IsVisible. TabToggleButton
+             (style implicite) met l'onglet actif en gras/accent. -->
+        <HorizontalStackLayout Grid.Row="0" Spacing="16" Margin="16,10,16,8" HorizontalOptions="Center">
+            <components:TabToggleButton Text="{loc:Loc LibTabWarbands}" Command="{Binding ShowWarbandsTabCommand}" IsActive="{Binding IsWarbandsTab}"/>
+            <components:TabToggleButton Text="{loc:Loc LibTabTradingPost}" Command="{Binding ShowTradingPostTabCommand}" IsActive="{Binding IsTradingPostTab}"/>
+            <components:TabToggleButton Text="{loc:Loc TabSkills}" Command="{Binding ShowSkillsTabCommand}" IsActive="{Binding IsSkillsTab}"/>
+            <components:TabToggleButton Text="{loc:Loc TabInjuries}" Command="{Binding ShowInjuriesTabCommand}" IsActive="{Binding IsInjuriesTab}"/>
+        </HorizontalStackLayout>
+
+        <!-- Chaque section garde son ViewModel/*View existant tel quel (BindingContext explicite,
+             plutôt qu'hérité du parent) - le conteneur ne fait que le toggle. IsVisible doit sourcer
+             explicitement l'ancêtre (Source={RelativeSource AncestorType=...}) : poser BindingContext
+             sur le même élément que IsVisible="{Binding IsXTab}" ferait chercher IsXTab sur le
+             sous-ViewModel (qui ne l'a pas) au lieu du conteneur - liaison en échec, IsVisible reste à
+             sa valeur par défaut (true), les 4 sections restent toutes visibles superposées. -->
+        <warbandArchetypes:WarbandArchetypeView Grid.Row="1" BindingContext="{Binding WarbandArchetypes}"
+            IsVisible="{Binding IsWarbandsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+        <equipmentItems:EquipmentItemView Grid.Row="1" BindingContext="{Binding EquipmentItems}"
+            IsVisible="{Binding IsTradingPostTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+        <skills:SkillView Grid.Row="1" BindingContext="{Binding Skills}"
+            IsVisible="{Binding IsSkillsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+        <injuries:InjuryView Grid.Row="1" BindingContext="{Binding Injuries}"
+            IsVisible="{Binding IsInjuriesTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+    </Grid>
+    </components:WatermarkedLayout>
+</ContentPage>

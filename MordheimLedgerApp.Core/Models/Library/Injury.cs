@@ -8,8 +8,17 @@ namespace MordheimLedgerApp.Core.Models.Library;
 public class Injury
 {
     public int Id { get; set; }
+
+    /// <summary>Resolved display text in the requested language - see LibraryService's
+    /// ResolveTranslationsAsync. Editing and saving writes it back as the translation value for
+    /// NameKey in whatever language was requested.</summary>
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+
+    /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>
+    public string? NameKey { get; set; }
+    public string? DescriptionKey { get; set; }
+
     public ContentSource Source { get; set; }
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>

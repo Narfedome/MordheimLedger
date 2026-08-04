@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
@@ -34,13 +35,18 @@ public partial class InjuryViewModel : BaseViewModel
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
+
+        // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
+        // (onglet TabBar gardé en mémoire par Shell).
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
+            (r, m) => _ = ((InjuryViewModel)r).LoadData());
     }
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     private async Task LoadData()
     {
-        var allItems = await _libraryService.GetInjuriesAsync();
+        var allItems = await _libraryService.GetInjuriesAsync(LocalizationService.Instance.Language);
         Injuries = new ObservableCollection<InjuryRow>(allItems.Select(i => new InjuryRow(i)));
         SelectedRow = null;
         SelectedRows.Clear();
@@ -75,7 +81,7 @@ public partial class InjuryViewModel : BaseViewModel
         var dialogViewModel = new InjuryEditDialogViewModel(newItem, Loc["InjuryCreateTitle"]);
         if (await ShowDialogAsync(new InjuryEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveInjuryAsync(newItem);
+        await _libraryService.SaveInjuryAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
     }
 
@@ -90,6 +96,8 @@ public partial class InjuryViewModel : BaseViewModel
             Id = s.Id,
             Name = s.Name,
             Description = s.Description,
+            NameKey = s.NameKey,
+            DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath
         };
@@ -97,7 +105,7 @@ public partial class InjuryViewModel : BaseViewModel
         var dialogViewModel = new InjuryEditDialogViewModel(copy, Loc["InjuryEditTitle"]);
         if (await ShowDialogAsync(new InjuryEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveInjuryAsync(copy);
+        await _libraryService.SaveInjuryAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 

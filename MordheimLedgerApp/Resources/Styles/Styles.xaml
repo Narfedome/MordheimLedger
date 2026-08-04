@@ -22,6 +22,7 @@
         <Setter Property="Color" Value="{DynamicResource AppAccent}" />
     </Style>
 
+
     <Style TargetType="IndicatorView">
         <Setter Property="IndicatorColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}"/>
         <Setter Property="SelectedIndicatorColor" Value="{DynamicResource AppAccent}"/>

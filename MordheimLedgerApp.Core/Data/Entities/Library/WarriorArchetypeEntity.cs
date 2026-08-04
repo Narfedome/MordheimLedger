@@ -11,7 +11,7 @@ public class WarriorArchetypeEntity
     [Indexed]
     public int WarbandArchetypeId { get; set; }
 
-    public string Name { get; set; } = string.Empty;
+    public string NameKey { get; set; } = string.Empty;
     public bool IsHero { get; set; }
     public int Cost { get; set; }
     public ContentSource Source { get; set; }
@@ -28,6 +28,6 @@ public class WarriorArchetypeEntity
     public int Leadership { get; set; }
     public int StartingExperience { get; set; }
 
-    public string? Description { get; set; }
+    public string? DescriptionKey { get; set; }
     public string? ImagePath { get; set; }
 }

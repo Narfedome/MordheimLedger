@@ -261,6 +261,12 @@
   <data name="TabTradingPost" xml:space="preserve">
     <value>Place du Marché</value>
   </data>
+  <data name="LibTabWarbands" xml:space="preserve">
+    <value>Bandes</value>
+  </data>
+  <data name="LibTabTradingPost" xml:space="preserve">
+    <value>Marché</value>
+  </data>
   <data name="BtnSave" xml:space="preserve">
     <value>Enregistrer</value>
   </data>

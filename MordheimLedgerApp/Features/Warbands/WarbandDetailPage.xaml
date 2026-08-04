@@ -149,10 +149,10 @@
              même logique que "Ajouter une note" ci-dessous, contextuel à l'onglet Historique. -->
         <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="16,0,16,8">
             <HorizontalStackLayout Grid.Column="0" Spacing="16">
-                <Button Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
-                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
-                <Button Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
-                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
+                <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
+                                             IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
+                <components:TabToggleButton Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
+                                             IsActive="{Binding ShowHistory}"/>
             </HorizontalStackLayout>
             <components:IconTextButton Grid.Column="1"
                                         IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"

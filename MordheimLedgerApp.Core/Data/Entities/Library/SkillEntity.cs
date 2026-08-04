@@ -7,9 +7,9 @@ public class SkillEntity
 {
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string NameKey { get; set; } = string.Empty;
     public SkillCategory Category { get; set; }
-    public string? Description { get; set; }
+    public string? DescriptionKey { get; set; }
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
 }

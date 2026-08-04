@@ -14,7 +14,7 @@ public interface IWarbandService
     Task SaveWarbandAsync(Warband warband);
     Task DeleteWarbandAsync(int warbandId);
 
-    Task<List<Warrior>> GetWarriorsAsync(int warbandId);
+    Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode);
 
     /// <summary>Copies archetype.Cost/stats onto a new Warrior via WarriorArchetype.ToWarrior().</summary>
     Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name);

@@ -1,10 +1,10 @@
 using CommunityToolkit.Maui.Extensions;
 
-namespace MordheimLedgerApp.Features.Library.Skills;
+namespace MordheimLedgerApp.Features.Library;
 
-public partial class SkillListPage : ContentPage
+public partial class LibraryPage : ContentPage
 {
-    public SkillListPage(SkillViewModel viewModel)
+    public LibraryPage(LibraryViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
@@ -17,7 +17,7 @@ public partial class SkillListPage : ContentPage
         if (args.WasPreviousPageACommunityToolkitPopupPage())
             return;
 
-        if (BindingContext is SkillViewModel vm)
+        if (BindingContext is LibraryViewModel vm)
             await vm.InitializeAsync();
     }
 }

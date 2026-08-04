@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Skills.CreateEdit;
@@ -22,6 +23,13 @@ public partial class SkillViewModel : BaseViewModel
     [ObservableProperty]
     private SkillRow? selectedRow;
 
+    /// <summary>Le vrai critère de filtre - null = Tout. Distinct de SelectedCategoryLabel (juste
+    /// l'affichage) : comparer des libellés résolus par LocalizationService cassait le filtre au
+    /// changement de langue (le libellé "Tout" figé dans l'ancienne langue ne correspondait plus à
+    /// rien après un rechargement en LoadData, filtrant silencieusement la liste à vide).</summary>
+    [ObservableProperty]
+    private SkillCategory? selectedCategory;
+
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
@@ -39,22 +47,32 @@ public partial class SkillViewModel : BaseViewModel
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
         selectedCategoryLabel = Loc["LibFilterAll"];
+
+        // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
+        // (onglet TabBar gardé en mémoire par Shell).
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
+            (r, m) => _ = ((SkillViewModel)r).LoadData());
     }
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     private async Task LoadData()
     {
-        _allItems = await _libraryService.GetSkillsAsync();
+        _allItems = await _libraryService.GetSkillsAsync(LocalizationService.Instance.Language);
+        RefreshSelectedCategoryLabel();
         ApplyFilter();
     }
 
+    /// <summary>Recompute le libellé affiché depuis SelectedCategory (le vrai critère) - à refaire à
+    /// chaque LoadData puisque le texte dépend de la langue courante.</summary>
+    private void RefreshSelectedCategoryLabel() =>
+        SelectedCategoryLabel = SelectedCategory is { } category ? CategoryLabel(category) : Loc["LibFilterAll"];
+
     private void ApplyFilter()
     {
-        var allLabel = Loc["LibFilterAll"];
-        var filtered = SelectedCategoryLabel == allLabel
-            ? _allItems
-            : _allItems.Where(i => CategoryLabel(i.Category) == SelectedCategoryLabel).ToList();
+        var filtered = SelectedCategory is { } category
+            ? _allItems.Where(i => i.Category == category).ToList()
+            : _allItems;
 
         Skills = new ObservableCollection<SkillRow>(filtered.Select(i => new SkillRow(i)));
         SelectedRow = null;
@@ -88,13 +106,14 @@ public partial class SkillViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectCategory()
     {
-        var allLabel = Loc["LibFilterAll"];
-        var options = new[] { allLabel }.Concat(Enum.GetValues<SkillCategory>().Select(CategoryLabel)).ToArray();
+        var categories = Enum.GetValues<SkillCategory>();
+        var options = new[] { Loc["LibFilterAll"] }.Concat(categories.Select(CategoryLabel)).ToArray();
 
-        var result = await ShowActionSheetAsync(Loc["LibFilterCategory"], options);
-        if (result is null) return;
+        var index = await ShowActionSheetIndexAsync(Loc["LibFilterCategory"], options);
+        if (index < 0) return;
 
-        SelectedCategoryLabel = result;
+        SelectedCategory = index == 0 ? null : categories[index - 1];
+        RefreshSelectedCategoryLabel();
         ApplyFilter();
     }
 
@@ -105,7 +124,7 @@ public partial class SkillViewModel : BaseViewModel
         var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"]);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveSkillAsync(newItem);
+        await _libraryService.SaveSkillAsync(newItem, LocalizationService.Instance.Language);
         _allItems.Add(newItem);
         ApplyFilter();
     }
@@ -122,6 +141,8 @@ public partial class SkillViewModel : BaseViewModel
             Name = s.Name,
             Category = s.Category,
             Description = s.Description,
+            NameKey = s.NameKey,
+            DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath
         };
@@ -129,7 +150,7 @@ public partial class SkillViewModel : BaseViewModel
         var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"]);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveSkillAsync(copy);
+        await _libraryService.SaveSkillAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 

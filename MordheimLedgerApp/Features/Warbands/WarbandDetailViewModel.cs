@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
@@ -61,6 +62,15 @@ public partial class WarbandDetailViewModel : BaseViewModel
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
+
+        // Le roster affiche des noms d'Équipement/Compétences/Blessures résolus dans la langue courante
+        // - sans ça, ils resteraient périmés si la langue change pendant que cette page est déjà
+        // affichée (même besoin que les pages Bibliothèque, voir WarbandArchetypeViewModel).
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (r, m) =>
+        {
+            var vm = (WarbandDetailViewModel)r;
+            if (vm.Warband is not null) _ = vm.LoadAsync(vm.WarbandId);
+        });
     }
 
     partial void OnWarbandIdChanged(int value) => _ = LoadAsync(value);
@@ -81,10 +91,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Warband = await _warbandService.GetWarbandAsync(id);
             if (Warband is null) return;
 
-            _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId);
+            _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _archetypeNames = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.Name);
 
-            var loaded = await _warbandService.GetWarriorsAsync(id);
+            var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
             Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead));
             Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead));
@@ -254,18 +264,18 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             List<Injury>? injuryCatalog = null;
 
-            // Find-or-create par nom dans le même catalogue Injury que les Blessures Graves - réutilisé
-            // pour les résultats de Progression (voir plus bas) : même si "Force +1" n'est pas une
-            // blessure, on veut que ça reste visible sur la fiche du guerrier au même endroit, plutôt
-            // que d'inventer une seconde entité juste pour ce cas.
+            // Find-or-create par nom (résolu dans la langue courante, comme le catalogue lui-même) dans
+            // le catalogue Injury - la table Blessures Graves a un texte fixe par jet, donc pas de
+            // risque de quasi-doublons.
+            var language = LocalizationService.Instance.Language;
             async Task<Injury> GetOrCreateInjuryAsync(string name)
             {
-                injuryCatalog ??= await _libraryService.GetInjuriesAsync();
+                injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
                 var injury = injuryCatalog.FirstOrDefault(i => i.Name == name);
                 if (injury is null)
                 {
                     injury = new Injury { Name = name, Source = ContentSource.Official };
-                    await _libraryService.SaveInjuryAsync(injury);
+                    await _libraryService.SaveInjuryAsync(injury, language);
                     injuryCatalog.Add(injury);
                 }
                 return injury;

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -51,7 +52,7 @@ public partial class WarbandListViewModel : BaseViewModel
     [RelayCommand]
     private async Task CreateWarbandAsync()
     {
-        var archetypes = await _libraryService.GetWarbandArchetypesAsync();
+        var archetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         if (archetypes.Count == 0)
         {
             await ShowInfoAsync(Loc["WarbandsEmptyLibraryTitle"], Loc["WarbandsEmptyLibraryMessage"]);

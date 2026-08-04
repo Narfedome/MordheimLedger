@@ -54,12 +54,12 @@
                  que Roster/Historique sur WarbandDetailPage : la carte guerrier reste lecture seule pour
                  ces trois listes, tout se gère ici. -->
             <HorizontalStackLayout Spacing="16">
-                <Button Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
-                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0" FontSize="12"/>
-                <Button Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
-                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0" FontSize="12"/>
-                <Button Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
-                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
+                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
+                                             IsActive="{Binding IsSkillsTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
+                                             IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
             </HorizontalStackLayout>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">

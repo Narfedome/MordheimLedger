@@ -1,10 +1,12 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
@@ -23,13 +25,20 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     public WarbandArchetypeViewModel(ILibraryService libraryService)
     {
         _libraryService = libraryService;
+
+        // Les pages Bibliothèque sont des onglets TabBar gardés en mémoire par Shell - OnNavigatedTo ne
+        // se déclenche pas de façon fiable en changeant d'onglet, donc Name/Description (résolus dans
+        // la langue courante) resteraient périmés après un changement de langue depuis Réglages sans ce
+        // rechargement explicite. Même pattern que SettingsViewModel.RebuildThemeOptions.
+        WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
+            (r, m) => _ = ((WarbandArchetypeViewModel)r).LoadData());
     }
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     private async Task LoadData()
     {
-        var items = await _libraryService.GetWarbandArchetypesAsync();
+        var items = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         WarbandArchetypeItems = new ObservableCollection<WarbandArchetypeRow>(items.Select(i => new WarbandArchetypeRow(i)));
         SelectedRow = null;
     }
@@ -50,7 +59,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"]);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveWarbandArchetypeAsync(newItem);
+        await _libraryService.SaveWarbandArchetypeAsync(newItem, LocalizationService.Instance.Language);
         WarbandArchetypeItems.Add(new WarbandArchetypeRow(newItem));
     }
 
@@ -68,13 +77,15 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             StartingTreasury = s.StartingTreasury,
             MaxWarriors = s.MaxWarriors,
             Description = s.Description,
+            NameKey = s.NameKey,
+            DescriptionKey = s.DescriptionKey,
             ImagePath = s.ImagePath
         };
 
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"]);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveWarbandArchetypeAsync(copy);
+        await _libraryService.SaveWarbandArchetypeAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 

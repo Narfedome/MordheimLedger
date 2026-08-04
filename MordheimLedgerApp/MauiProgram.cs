@@ -2,6 +2,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
 using MordheimLedgerApp.Features.Library.Injuries;
 using MordheimLedgerApp.Features.Library.Skills;
@@ -55,24 +56,22 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<WarbandArchetypeViewModel>();
-            builder.Services.AddTransient<WarbandArchetypeListPage>();
             builder.Services.AddTransient<WarriorArchetypeViewModel>();
             builder.Services.AddTransient<WarriorArchetypeListPage>();
             builder.Services.AddTransient<EquipmentItemViewModel>();
-            builder.Services.AddTransient<EquipmentItemListPage>();
             builder.Services.AddTransient<EquipmentItemSelectorPage>();
             builder.Services.AddSingleton<IEquipmentPickerNavigationService, EquipmentPickerNavigationService>();
             builder.Services.AddSingleton<IEquipmentPickerService, EquipmentPickerService>();
             builder.Services.AddTransient<SkillViewModel>();
-            builder.Services.AddTransient<SkillListPage>();
             builder.Services.AddTransient<SkillSelectorPage>();
             builder.Services.AddSingleton<ISkillPickerNavigationService, SkillPickerNavigationService>();
             builder.Services.AddSingleton<ISkillPickerService, SkillPickerService>();
             builder.Services.AddTransient<InjuryViewModel>();
-            builder.Services.AddTransient<InjuryListPage>();
             builder.Services.AddTransient<InjurySelectorPage>();
             builder.Services.AddSingleton<IInjuryPickerNavigationService, InjuryPickerNavigationService>();
             builder.Services.AddSingleton<IInjuryPickerService, InjuryPickerService>();
+            builder.Services.AddTransient<LibraryViewModel>();
+            builder.Services.AddTransient<LibraryPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

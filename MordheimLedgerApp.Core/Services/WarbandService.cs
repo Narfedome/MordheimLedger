@@ -57,7 +57,7 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarbandEntity>(warbandId);
     }
 
-    public async Task<List<Warrior>> GetWarriorsAsync(int warbandId)
+    public async Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode)
     {
         await _db.Initialization;
         var warriorRows = await _db.Connection.Table<WarriorEntity>().Where(w => w.WarbandId == warbandId).ToListAsync();
@@ -71,7 +71,10 @@ public class WarbandService : IWarbandService
             {
                 var itemEntity = await _db.Connection.FindAsync<EquipmentItemEntity>(carriedRow.EquipmentItemId);
                 if (itemEntity is not null)
-                    carried.Add(carriedRow.ToModel(itemEntity.ToModel()));
+                {
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [itemEntity.NameKey, itemEntity.DescriptionKey], languageCode);
+                    carried.Add(carriedRow.ToModel(itemEntity.ToModel(translations)));
+                }
             }
 
             var learnedRows = await _db.Connection.Table<WarriorSkillEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
@@ -80,7 +83,10 @@ public class WarbandService : IWarbandService
             {
                 var skillEntity = await _db.Connection.FindAsync<SkillEntity>(learnedRow.SkillId);
                 if (skillEntity is not null)
-                    learned.Add(learnedRow.ToModel(skillEntity.ToModel()));
+                {
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [skillEntity.NameKey, skillEntity.DescriptionKey], languageCode);
+                    learned.Add(learnedRow.ToModel(skillEntity.ToModel(translations)));
+                }
             }
 
             var injuryRows = await _db.Connection.Table<WarriorInjuryEntity>().Where(i => i.WarriorId == row.Id).ToListAsync();
@@ -89,7 +95,10 @@ public class WarbandService : IWarbandService
             {
                 var injuryEntity = await _db.Connection.FindAsync<InjuryEntity>(injuryRow.InjuryId);
                 if (injuryEntity is not null)
-                    injuries.Add(injuryRow.ToModel(injuryEntity.ToModel()));
+                {
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [injuryEntity.NameKey, injuryEntity.DescriptionKey], languageCode);
+                    injuries.Add(injuryRow.ToModel(injuryEntity.ToModel(translations)));
+                }
             }
 
             warriors.Add(row.ToModel(carried, learned, injuries));

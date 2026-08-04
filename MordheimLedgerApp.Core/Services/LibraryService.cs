@@ -10,53 +10,68 @@ public class LibraryService : ILibraryService
 
     public LibraryService(AppDatabase db) => _db = db;
 
-    public async Task<List<WarbandArchetype>> GetWarbandArchetypesAsync()
+    private Task<Dictionary<string, string>> ResolveTranslationsAsync(IEnumerable<string?> keys, string languageCode) =>
+        TranslationResolver.ResolveAsync(_db.Connection, keys, languageCode);
+
+    private Task<string> SetTranslationAsync(string? key, string languageCode, string value) =>
+        TranslationResolver.SetAsync(_db.Connection, key, languageCode, value);
+
+    public async Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode)
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<WarbandArchetypeEntity>().ToListAsync();
-        return rows.Select(r => r.ToModel()).ToList();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).ToList();
     }
 
-    public async Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id)
+    public async Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id, string languageCode)
     {
         await _db.Initialization;
         var row = await _db.Connection.FindAsync<WarbandArchetypeEntity>(id);
-        return row?.ToModel();
+        if (row is null) return null;
+        var translations = await ResolveTranslationsAsync([row.NameKey, row.DescriptionKey], languageCode);
+        return row.ToModel(translations);
     }
 
-    public async Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId)
+    public async Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId, string languageCode)
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<WarriorArchetypeEntity>()
             .Where(w => w.WarbandArchetypeId == warbandArchetypeId)
             .ToListAsync();
-        return rows.Select(r => r.ToModel()).ToList();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).ToList();
     }
 
-    public async Task<List<EquipmentItem>> GetEquipmentItemsAsync()
+    public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode)
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<EquipmentItemEntity>().ToListAsync();
-        return rows.Select(r => r.ToModel()).ToList();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).ToList();
     }
 
-    public async Task<List<Skill>> GetSkillsAsync()
+    public async Task<List<Skill>> GetSkillsAsync(string languageCode)
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<SkillEntity>().ToListAsync();
-        return rows.Select(r => r.ToModel()).ToList();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).ToList();
     }
 
-    public async Task<List<Injury>> GetInjuriesAsync()
+    public async Task<List<Injury>> GetInjuriesAsync(string languageCode)
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<InjuryEntity>().ToListAsync();
-        return rows.Select(r => r.ToModel()).ToList();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).ToList();
     }
 
-    public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype)
+    public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
     {
         await _db.Initialization;
+        await ApplyTranslationsAsync(archetype, languageCode);
+
         if (archetype.Id == 0)
         {
             var entity = archetype.ToEntity();
@@ -70,9 +85,11 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(archetype.ToEntity());
     }
 
-    public async Task SaveWarriorArchetypeAsync(WarriorArchetype archetype)
+    public async Task SaveWarriorArchetypeAsync(WarriorArchetype archetype, string languageCode)
     {
         await _db.Initialization;
+        await ApplyTranslationsAsync(archetype, languageCode);
+
         if (archetype.Id == 0)
         {
             var entity = archetype.ToEntity();
@@ -86,9 +103,11 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(archetype.ToEntity());
     }
 
-    public async Task SaveEquipmentItemAsync(EquipmentItem item)
+    public async Task SaveEquipmentItemAsync(EquipmentItem item, string languageCode)
     {
         await _db.Initialization;
+        await ApplyTranslationsAsync(item, languageCode);
+
         if (item.Id == 0)
         {
             var entity = item.ToEntity();
@@ -102,9 +121,11 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(item.ToEntity());
     }
 
-    public async Task SaveSkillAsync(Skill skill)
+    public async Task SaveSkillAsync(Skill skill, string languageCode)
     {
         await _db.Initialization;
+        await ApplyTranslationsAsync(skill, languageCode);
+
         if (skill.Id == 0)
         {
             var entity = skill.ToEntity();
@@ -118,9 +139,11 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(skill.ToEntity());
     }
 
-    public async Task SaveInjuryAsync(Injury injury)
+    public async Task SaveInjuryAsync(Injury injury, string languageCode)
     {
         await _db.Initialization;
+        await ApplyTranslationsAsync(injury, languageCode);
+
         if (injury.Id == 0)
         {
             var entity = injury.ToEntity();
@@ -132,6 +155,49 @@ public class LibraryService : ILibraryService
         var existing = await _db.Connection.FindAsync<InjuryEntity>(injury.Id);
         if (existing?.Source == ContentSource.Official) injury.Source = ContentSource.Modified;
         await _db.Connection.UpdateAsync(injury.ToEntity());
+    }
+
+    /// <summary>Writes Name (and Description, when non-blank) as the translation value for
+    /// languageCode, allocating a key on first save - shared by all 5 Save*Async methods above since
+    /// they otherwise only differ in entity type.</summary>
+    private async Task ApplyTranslationsAsync(WarbandArchetype m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
+    private async Task ApplyTranslationsAsync(WarriorArchetype m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
+    private async Task ApplyTranslationsAsync(EquipmentItem m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
+    private async Task ApplyTranslationsAsync(Skill m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
+    private async Task ApplyTranslationsAsync(Injury m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
     public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)

@@ -97,7 +97,7 @@ public partial class WarriorOutcomeRow : ObservableObject
         Warrior = warrior;
 
         var loc = LocalizationService.Instance;
-        foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead, WarriorStatus.Retired })
+        foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
         {
             var label = loc[$"WarriorStatus{status}"];
             _statusByLabel[label] = status;

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:stepper="clr-namespace:MordheimLedgerApp.Components.StatStepper"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.WarriorEditDialog"
+               x:DataType="local:WarriorEditDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <VerticalStackLayout Spacing="16">
+            <Label Text="{Binding Title}"
+                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                   TextColor="{DynamicResource AppText}"/>
+
+            <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc PromptName}"/>
+            <Picker Title="{loc:Loc WarriorStatusPh}"
+                    ItemsSource="{Binding StatusOptions}"
+                    SelectedItem="{Binding SelectedStatusLabel}"/>
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Loc WarriorExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding Item.Experience}" Keyboard="Numeric"/>
+            </VerticalStackLayout>
+
+            <!-- Abréviations officielles du livre de règles, pas de traduction - même grille que
+                 WarriorArchetypeEditDialog (étape profil). Steppers +/- (StatStepperView) : les
+                 avances (jets d'Advance) se font quasi toujours de ±1. -->
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
+                <stepper:StatStepperView Grid.Row="0" Grid.Column="0" Label="M" Value="{Binding Item.Movement}"/>
+                <stepper:StatStepperView Grid.Row="0" Grid.Column="1" Label="WS" Value="{Binding Item.WeaponSkill}"/>
+                <stepper:StatStepperView Grid.Row="0" Grid.Column="2" Label="BS" Value="{Binding Item.BallisticSkill}"/>
+                <stepper:StatStepperView Grid.Row="1" Grid.Column="0" Label="S" Value="{Binding Item.Strength}"/>
+                <stepper:StatStepperView Grid.Row="1" Grid.Column="1" Label="T" Value="{Binding Item.Toughness}"/>
+                <stepper:StatStepperView Grid.Row="1" Grid.Column="2" Label="W" Value="{Binding Item.Wounds}"/>
+                <stepper:StatStepperView Grid.Row="2" Grid.Column="0" Label="I" Value="{Binding Item.Initiative}"/>
+                <stepper:StatStepperView Grid.Row="2" Grid.Column="1" Label="A" Value="{Binding Item.Attacks}"/>
+                <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="{loc:Loc BtnCancel}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Grid.Column="1"
+                        Text="{loc:Loc BtnSave}"
+                        Command="{Binding SaveCommand}"/>
+            </Grid>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

@@ -447,14 +447,20 @@
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} was taken out of action: {1}</value>
   </data>
+  <data name="WarriorEditTitle" xml:space="preserve">
+    <value>Edit Warrior</value>
+  </data>
+  <data name="WarriorStatusPh" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="WarriorExperiencePh" xml:space="preserve">
+    <value>Experience points</value>
+  </data>
   <data name="WarriorStatusActive" xml:space="preserve">
     <value>Active</value>
   </data>
   <data name="WarriorStatusDead" xml:space="preserve">
     <value>Dead</value>
-  </data>
-  <data name="WarriorStatusRetired" xml:space="preserve">
-    <value>Retired</value>
   </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>

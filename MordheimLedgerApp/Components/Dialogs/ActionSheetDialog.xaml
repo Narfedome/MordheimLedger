@@ -18,10 +18,16 @@
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Options}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="dialogs:ActionSheetOption">
-                            <Button Text="{Binding Label}"
-                                    Style="{StaticResource DialogOptionButtonStyle}"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type dialogs:ActionSheetDialogViewModel}}, Path=SelectCommand}"
-                                    CommandParameter="{Binding .}"/>
+                            <Grid>
+                                <Label Text="{Binding Label}" IsVisible="{Binding IsHeader}"
+                                       FontAttributes="Bold" FontSize="12" Margin="4,8,4,2"
+                                       TextColor="{DynamicResource AppTextMuted}"/>
+                                <Button Text="{Binding Label}"
+                                        IsVisible="{Binding IsHeader, Converter={StaticResource InverseBoolConverter}}"
+                                        Style="{StaticResource DialogOptionButtonStyle}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type dialogs:ActionSheetDialogViewModel}}, Path=SelectCommand}"
+                                        CommandParameter="{Binding .}"/>
+                            </Grid>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.StatStepper.StatStepperView"
+             x:Name="root">
+
+    <VerticalStackLayout Spacing="2">
+        <Label Text="{Binding Source={x:Reference root}, Path=Label}" FontSize="12"
+               HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="2">
+            <components:FaIconButtonView Grid.Column="0" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Minus}" IconSize="10"
+                                          ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                          Command="{Binding Source={x:Reference root}, Path=DecrementCommand}"/>
+            <Entry Grid.Column="1" Text="{Binding Source={x:Reference root}, Path=Value}" Keyboard="Numeric"
+                   HorizontalTextAlignment="Center"/>
+            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}" IconSize="10"
+                                          ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                          Command="{Binding Source={x:Reference root}, Path=IncrementCommand}"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

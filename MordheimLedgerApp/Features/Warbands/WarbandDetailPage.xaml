@@ -28,9 +28,14 @@
                             CommandParameter="{Binding .}"/>
                     </Border.GestureRecognizers>
                     <VerticalStackLayout Spacing="6">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto">
                             <Label Grid.Column="0" Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
                             <Label Grid.Column="1" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Pen}"
+                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EditWarriorCommand}"
+                                                          CommandParameter="{Binding .}"/>
                         </Grid>
 
                         <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*" RowDefinitions="Auto,Auto" RowSpacing="2">
@@ -67,6 +72,9 @@
                                 <DataTemplate x:DataType="models:WarriorEquipment">
                                     <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
                                         <HorizontalStackLayout Spacing="4">
+                                            <Label Text="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                   FontFamily="RpgAwesome" FontSize="12"
+                                                   TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
                                             <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
                                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                           Icon="{x:Static icons:SolidFont.Xmark}"
@@ -92,6 +100,9 @@
                                 <DataTemplate x:DataType="models:WarriorSkill">
                                     <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
                                         <HorizontalStackLayout Spacing="4">
+                                            <Label Text="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                   FontFamily="RpgAwesome" FontSize="12"
+                                                   TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
                                             <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
                                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                           Icon="{x:Static icons:SolidFont.Xmark}"
@@ -113,8 +124,15 @@
     </ContentPage.Resources>
 
     <components:WatermarkedLayout>
-    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
-        <header:DetailPageHeaderView Grid.Row="0" x:Name="Header" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+        <Grid Grid.Row="0" x:Name="Header" ColumnDefinitions="*,Auto">
+            <header:DetailPageHeaderView Grid.Column="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
+            <components:IconTextButton Grid.Column="1" Margin="0,0,16,0"
+                                        Icon="{x:Static icons:SolidFont.FlagCheckered}"
+                                        Text="{loc:Loc EndOfGameTitle}"
+                                        TextColor="{DynamicResource AppAccent}"
+                                        Command="{Binding EndOfGameCommand}"/>
+        </Grid>
 
         <Label Grid.Row="1" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
             <Label.FormattedText>
@@ -126,13 +144,23 @@
         </Label>
 
         <!-- Roster / Historique : pas de précédent DmTools pour des "onglets" internes à une page de
-             détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab. -->
-        <HorizontalStackLayout Grid.Row="2" Spacing="16" Margin="16,0,16,8">
-            <Button Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
-                    BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
-            <Button Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
-                    BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
-        </HorizontalStackLayout>
+             détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab.
+             Recruter vit ici (pas en bas de page, isolé) car il n'a de sens que sur l'onglet Roster -
+             même logique que "Ajouter une note" ci-dessous, contextuel à l'onglet Historique. -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="16,0,16,8">
+            <HorizontalStackLayout Grid.Column="0" Spacing="16">
+                <Button Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
+                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
+                <Button Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
+                        BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
+            </HorizontalStackLayout>
+            <components:IconTextButton Grid.Column="1"
+                                        IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"
+                                        Icon="{x:Static icons:SolidFont.Plus}"
+                                        Text="{loc:Loc BtnRecruit}"
+                                        TextColor="{DynamicResource AppAccent}"
+                                        Command="{Binding RecruitWarriorCommand}"/>
+        </Grid>
 
         <!-- Pas de CollectionView ici (virtualisation inutile pour un roster de quelques dizaines de
              guerriers max, et une CollectionView imbriquée dans un ScrollView pose des soucis de
@@ -204,15 +232,6 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>
-
-        <HorizontalStackLayout Grid.Row="4" Spacing="10" HorizontalOptions="Center" Margin="0,8">
-            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
-                                 Command="{Binding RecruitWarriorCommand}"
-                                 Tooltip="{loc:Loc BtnRecruit}"/>
-            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.FlagCheckered}"
-                                 Command="{Binding EndOfGameCommand}"
-                                 Tooltip="{loc:Loc EndOfGameTitle}"/>
-        </HorizontalStackLayout>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

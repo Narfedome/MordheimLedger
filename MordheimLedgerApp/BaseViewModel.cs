@@ -71,4 +71,12 @@ public abstract partial class BaseViewModel : ObservableObject
         var result = await CurrentPage.ShowPopupAsync<int>(popup, new PopupOptions { CanBeDismissedByTappingOutsideOfPopup = true }, CancellationToken.None);
         return result.WasDismissedByTappingOutsideOfPopup ? -1 : result.Result is int index ? index : -1;
     }
+
+    /// <summary>Pre-built option list variant - lets a caller mix in non-selectable header rows.</summary>
+    protected async Task<int> ShowActionSheetIndexAsync(string title, IEnumerable<ActionSheetOption> options)
+    {
+        var popup = new ActionSheetDialog(new ActionSheetDialogViewModel(title, options, Loc["BtnCancel"]));
+        var result = await CurrentPage.ShowPopupAsync<int>(popup, new PopupOptions { CanBeDismissedByTappingOutsideOfPopup = true }, CancellationToken.None);
+        return result.WasDismissedByTappingOutsideOfPopup ? -1 : result.Result is int index ? index : -1;
+    }
 }

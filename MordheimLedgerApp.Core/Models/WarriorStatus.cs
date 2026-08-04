@@ -8,6 +8,5 @@ namespace MordheimLedgerApp.Core.Models;
 public enum WarriorStatus
 {
     Active = 0,
-    Dead = 1,
-    Retired = 2
+    Dead = 1
 }

@@ -1,9 +1,11 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
 using MordheimLedgerApp.Services;
 
@@ -121,8 +123,30 @@ public partial class WarbandDetailViewModel : BaseViewModel
             return;
         }
 
-        var options = _recruitableArchetypes.Select(a => $"{a.Name} ({a.Cost}gc)").ToArray();
-        var index = await ShowActionSheetIndexAsync(Loc["WarriorsChooseType"], options);
+        var heroArchetypes = _recruitableArchetypes.Where(a => a.IsHero).ToList();
+        var henchmanArchetypes = _recruitableArchetypes.Where(a => !a.IsHero).ToList();
+
+        // Une seule liste (un warband n'a jamais assez de types recrutables pour justifier un écran à
+        // part) avec des en-têtes Héros/Hommes de main non sélectionnables - seulement si les deux
+        // groupes ont des types, sinon la liste reste plate.
+        var candidates = new List<WarriorArchetype>();
+        var sheetOptions = new List<ActionSheetOption>();
+        var showHeaders = heroArchetypes.Count > 0 && henchmanArchetypes.Count > 0;
+
+        void AddGroup(string headerKey, List<WarriorArchetype> group)
+        {
+            if (group.Count == 0) return;
+            if (showHeaders) sheetOptions.Add(new ActionSheetOption(-1, Loc[headerKey], IsHeader: true));
+            foreach (var a in group)
+            {
+                sheetOptions.Add(new ActionSheetOption(candidates.Count, $"{a.Name} ({a.Cost}gc)"));
+                candidates.Add(a);
+            }
+        }
+        AddGroup("WarriorsGroupHeroes", heroArchetypes);
+        AddGroup("WarriorsGroupHenchmen", henchmanArchetypes);
+
+        var index = await ShowActionSheetIndexAsync(Loc["WarriorsChooseType"], sheetOptions);
         if (index < 0) return;
 
         var name = await ShowPromptAsync(Loc["DialogRecruit"], Loc["PromptName"]);
@@ -130,10 +154,48 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         await Loading.RunAsync(async () =>
         {
-            var archetype = _recruitableArchetypes[index];
+            var archetype = candidates[index];
             var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, name);
             var row = ToRow(warrior);
             (archetype.IsHero ? Heroes : Henchmen).Add(row);
+        });
+    }
+
+    [RelayCommand]
+    private async Task EditWarrior(WarriorRow row)
+    {
+        if (Warband is null) return;
+
+        var w = row.Warrior;
+        var copy = new Warrior
+        {
+            Id = w.Id,
+            WarbandId = w.WarbandId,
+            WarriorArchetypeId = w.WarriorArchetypeId,
+            Name = w.Name,
+            IsHero = w.IsHero,
+            Cost = w.Cost,
+            Experience = w.Experience,
+            Status = w.Status,
+            Movement = w.Movement,
+            WeaponSkill = w.WeaponSkill,
+            BallisticSkill = w.BallisticSkill,
+            Strength = w.Strength,
+            Toughness = w.Toughness,
+            Wounds = w.Wounds,
+            Initiative = w.Initiative,
+            Attacks = w.Attacks,
+            Leadership = w.Leadership,
+            Notes = w.Notes
+        };
+
+        var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"]);
+        if (await ShowDialogAsync(new WarriorEditDialog(dialogViewModel)) != true) return;
+
+        await Loading.RunAsync(async () =>
+        {
+            await _warbandService.SaveWarriorAsync(copy);
+            await LoadAsync(Warband.Id);
         });
     }
 

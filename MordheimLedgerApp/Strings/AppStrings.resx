@@ -447,14 +447,20 @@
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} a été mis hors de combat : {1}</value>
   </data>
+  <data name="WarriorEditTitle" xml:space="preserve">
+    <value>Modifier le guerrier</value>
+  </data>
+  <data name="WarriorStatusPh" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="WarriorExperiencePh" xml:space="preserve">
+    <value>Points d'expérience</value>
+  </data>
   <data name="WarriorStatusActive" xml:space="preserve">
     <value>Actif</value>
   </data>
   <data name="WarriorStatusDead" xml:space="preserve">
     <value>Mort</value>
-  </data>
-  <data name="WarriorStatusRetired" xml:space="preserve">
-    <value>Retiré</value>
   </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>

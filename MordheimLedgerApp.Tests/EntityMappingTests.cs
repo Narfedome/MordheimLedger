@@ -198,8 +198,7 @@ public class EntityMappingTests
             Wounds = 1,
             Initiative = 4,
             Attacks = 1,
-            Leadership = 8,
-            Notes = "Founding member"
+            Leadership = 8
         };
 
         var roundTripped = warrior.ToEntity().ToModel();
@@ -221,7 +220,6 @@ public class EntityMappingTests
         Assert.Equal(warrior.Initiative, roundTripped.Initiative);
         Assert.Equal(warrior.Attacks, roundTripped.Attacks);
         Assert.Equal(warrior.Leadership, roundTripped.Leadership);
-        Assert.Equal(warrior.Notes, roundTripped.Notes);
         Assert.Empty(roundTripped.Equipment);
     }
 

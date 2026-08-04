@@ -30,11 +30,19 @@ public partial class WarriorRow : ObservableObject
     /// <summary>Mirrors Warrior.Skills as an ObservableCollection so add/remove reflects on the card without a full reload.</summary>
     public ObservableCollection<WarriorSkill> Skills { get; }
 
+    /// <summary>Mirrors Warrior.Injuries as an ObservableCollection - fed both by the End of Game
+    /// Serious Injury roll and by manual additions via WarriorEditDialog (not editable directly from
+    /// this card, which stays read-only).</summary>
+    public ObservableCollection<WarriorInjury> Injuries { get; }
+
+    public bool HasInjuries => Injuries.Count > 0;
+
     public WarriorRow(Warrior warrior, string roleName)
     {
         Warrior = warrior;
         RoleName = roleName;
         Equipment = new ObservableCollection<WarriorEquipment>(warrior.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(warrior.Skills);
+        Injuries = new ObservableCollection<WarriorInjury>(warrior.Injuries);
     }
 }

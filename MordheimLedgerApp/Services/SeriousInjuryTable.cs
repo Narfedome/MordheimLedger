@@ -4,8 +4,10 @@ namespace MordheimLedgerApp.Services;
 /// Reference lookup for the rulebook's Serious Injury table (D66: two D6, first die = tens digit).
 /// Pure flavor/reference text - deliberately does not mutate any Warrior stat itself (see the
 /// roadmap's "no rules engine in V1" boundary, also documented on Core/Models/WarriorStatus.cs): the
-/// player reads the result and applies it by hand (Notes, Status). Lives in the App layer (not Core)
-/// because the entries are looked up through LocalizationService - Core stays MAUI/localization-free.
+/// resulting text becomes (find-or-create) a Library Injury linked onto the Warrior (see
+/// WarbandDetailViewModel.EndOfGame), Status is chosen by the player in the dialog. Lives in the App
+/// layer (not Core) because the entries are looked up through LocalizationService - Core stays
+/// MAUI/localization-free.
 ///
 /// IMPORTANT: entered from general knowledge of the Mordheim rulebook, NOT verified against the
 /// actual book (same caveat as OfficialContentSeed.cs's Reiklander Mercenaries stats) - the exact

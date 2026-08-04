@@ -83,7 +83,16 @@ public class WarbandService : IWarbandService
                     learned.Add(learnedRow.ToModel(skillEntity.ToModel()));
             }
 
-            warriors.Add(row.ToModel(carried, learned));
+            var injuryRows = await _db.Connection.Table<WarriorInjuryEntity>().Where(i => i.WarriorId == row.Id).ToListAsync();
+            var injuries = new List<WarriorInjury>();
+            foreach (var injuryRow in injuryRows)
+            {
+                var injuryEntity = await _db.Connection.FindAsync<InjuryEntity>(injuryRow.InjuryId);
+                if (injuryEntity is not null)
+                    injuries.Add(injuryRow.ToModel(injuryEntity.ToModel()));
+            }
+
+            warriors.Add(row.ToModel(carried, learned, injuries));
         }
         return warriors;
     }
@@ -110,6 +119,7 @@ public class WarbandService : IWarbandService
         await _db.Initialization;
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
     }
 
@@ -143,6 +153,22 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorSkillEntity>(warriorSkillId);
+    }
+
+    public async Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury)
+    {
+        await _db.Initialization;
+        var tracked = new WarriorInjury { WarriorId = warriorId, Item = injury };
+        var entity = tracked.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        tracked.Id = entity.Id;
+        return tracked;
+    }
+
+    public async Task RemoveWarriorInjuryAsync(int warriorInjuryId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorInjuryEntity>(warriorInjuryId);
     }
 
     public async Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId)

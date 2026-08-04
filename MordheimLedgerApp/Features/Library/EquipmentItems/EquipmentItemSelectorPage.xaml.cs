@@ -5,6 +5,7 @@ public partial class EquipmentItemSelectorPage : ContentPage
     public EquipmentItemSelectorPage(EquipmentItemViewModel viewModel)
     {
         InitializeComponent();
+        viewModel.IsSelectorMode = true;
         BindingContext = viewModel;
     }
 

@@ -1,37 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MordheimLedgerApp.Features.Library.Skills.SkillView"
-             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Skills"
+             x:Class="MordheimLedgerApp.Features.Library.Injuries.InjuryView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Injuries"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
+    <!-- Pas de filtre par catégorie (contrairement à EquipmentItemView/SkillView) : la table Blessures
+         Graves du livre de règles n'a pas de regroupement par type. -->
     <Grid Margin="5" RowSpacing="8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que EquipmentItemView -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Padding="5,0">
-            <Button Grid.Column="0"
-                    Text="{Binding SelectedCategoryLabel}"
-                    Command="{Binding SelectCategoryCommand}"
-                    BackgroundColor="Transparent"
-                    TextColor="{DynamicResource AppAccent}"
-                    HorizontalOptions="Start"
-                    Padding="0"/>
-        </Grid>
-
-        <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+        <ActivityIndicator Grid.Row="0" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
-                ItemsSource="{Binding Skills}"
+        <CollectionView Grid.Row="0" x:Name="ItemsCollection"
+                ItemsSource="{Binding Injuries}"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
@@ -41,7 +31,7 @@
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="local:SkillRow">
+                <DataTemplate x:DataType="local:InjuryRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
@@ -64,7 +54,8 @@
                             <components:LibraryItemImageView
                                 Grid.Row="0"
                                 ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:SolidFont.Brain}"
+                                DefaultGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
+                                FontFamily="RpgAwesome"
                                 Padding="20" />
                             <Label Text="{Binding Item.Name}"
                                    Grid.Row="1"
@@ -77,7 +68,7 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
@@ -94,7 +85,7 @@
 
         <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
              toutes les tuiles cochées d'un coup. -->
-        <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"

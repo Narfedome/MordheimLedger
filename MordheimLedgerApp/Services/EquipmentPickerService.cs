@@ -5,7 +5,7 @@ namespace MordheimLedgerApp.Services;
 
 public interface IEquipmentPickerService
 {
-    Task<EquipmentItem?> PickEquipmentAsync();
+    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync();
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -14,9 +14,9 @@ public class EquipmentPickerService : IEquipmentPickerService
 
     public EquipmentPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<EquipmentItem?> PickEquipmentAsync()
+    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync()
     {
-        var tcs = new TaskCompletionSource<EquipmentItem?>();
+        var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
         var navigationService = _provider.GetRequiredService<IEquipmentPickerNavigationService>();
         navigationService.RegisterTaskSource(tcs);
@@ -32,7 +32,7 @@ public class EquipmentPickerService : IEquipmentPickerService
             if (!ReferenceEquals(e.Modal, modal))
                 return;
             window.ModalPopped -= OnModalPopped;
-            tcs.TrySetResult(null);
+            tcs.TrySetResult(Array.Empty<EquipmentItem>());
         }
         window.ModalPopped += OnModalPopped;
 

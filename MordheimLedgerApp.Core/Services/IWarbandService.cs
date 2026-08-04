@@ -27,6 +27,9 @@ public interface IWarbandService
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);
     Task RemoveWarriorSkillAsync(int warriorSkillId);
 
+    Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury);
+    Task RemoveWarriorInjuryAsync(int warriorInjuryId);
+
     /// <summary>Most recent first.</summary>
     Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId);
 

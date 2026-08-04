@@ -4,17 +4,17 @@ namespace MordheimLedgerApp.Services;
 
 public interface IEquipmentPickerNavigationService
 {
-    void RegisterTaskSource(TaskCompletionSource<EquipmentItem?> tcs);
-    Task ClosePickerAsync(EquipmentItem? result);
+    void RegisterTaskSource(TaskCompletionSource<IReadOnlyList<EquipmentItem>> tcs);
+    Task ClosePickerAsync(IReadOnlyList<EquipmentItem> result);
 }
 
 public class EquipmentPickerNavigationService : IEquipmentPickerNavigationService
 {
-    private TaskCompletionSource<EquipmentItem?>? _tcs;
+    private TaskCompletionSource<IReadOnlyList<EquipmentItem>>? _tcs;
 
-    public void RegisterTaskSource(TaskCompletionSource<EquipmentItem?> tcs) => _tcs = tcs;
+    public void RegisterTaskSource(TaskCompletionSource<IReadOnlyList<EquipmentItem>> tcs) => _tcs = tcs;
 
-    public async Task ClosePickerAsync(EquipmentItem? result)
+    public async Task ClosePickerAsync(IReadOnlyList<EquipmentItem> result)
     {
         _tcs?.TrySetResult(result);
 

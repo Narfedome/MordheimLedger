@@ -29,6 +29,4 @@ public class WarriorEntity
     public int Initiative { get; set; }
     public int Attacks { get; set; }
     public int Leadership { get; set; }
-
-    public string? Notes { get; set; }
 }

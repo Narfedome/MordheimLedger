@@ -28,11 +28,14 @@ public class Warrior
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
-    public string? Notes { get; set; }
-
     /// <summary>Loaded separately via the Warrior/EquipmentItem join table — not persisted on this object.</summary>
     public List<WarriorEquipment> Equipment { get; set; } = new();
 
     /// <summary>Loaded separately via the Warrior/Skill join table — not persisted on this object.</summary>
     public List<WarriorSkill> Skills { get; set; } = new();
+
+    /// <summary>Loaded separately via the Warrior/Injury join table — not persisted on this object. Both
+    /// the End of Game Serious Injury roll and manual additions (WarriorEditDialog) go through this
+    /// same list — see WarbandDetailViewModel.EndOfGame's find-or-create-by-name lookup.</summary>
+    public List<WarriorInjury> Injuries { get; set; } = new();
 }

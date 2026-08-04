@@ -47,6 +47,13 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel()).ToList();
     }
 
+    public async Task<List<Injury>> GetInjuriesAsync()
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<InjuryEntity>().ToListAsync();
+        return rows.Select(r => r.ToModel()).ToList();
+    }
+
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype)
     {
         await _db.Initialization;
@@ -111,6 +118,22 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(skill.ToEntity());
     }
 
+    public async Task SaveInjuryAsync(Injury injury)
+    {
+        await _db.Initialization;
+        if (injury.Id == 0)
+        {
+            var entity = injury.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            injury.Id = entity.Id;
+            return;
+        }
+
+        var existing = await _db.Connection.FindAsync<InjuryEntity>(injury.Id);
+        if (existing?.Source == ContentSource.Official) injury.Source = ContentSource.Modified;
+        await _db.Connection.UpdateAsync(injury.ToEntity());
+    }
+
     public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)
     {
         await _db.Initialization;
@@ -133,5 +156,11 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<SkillEntity>(skillId);
+    }
+
+    public async Task DeleteInjuryAsync(int injuryId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<InjuryEntity>(injuryId);
     }
 }

@@ -234,6 +234,9 @@
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Experience</value>
   </data>
+  <data name="WarriorsInjuriesHeading" xml:space="preserve">
+    <value>Injuries</value>
+  </data>
   <data name="WarriorsEquipmentHeading" xml:space="preserve">
     <value>Equipment</value>
   </data>
@@ -344,6 +347,21 @@
   </data>
   <data name="TabSkills" xml:space="preserve">
     <value>Skills</value>
+  </data>
+  <data name="TabInjuries" xml:space="preserve">
+    <value>Injuries</value>
+  </data>
+  <data name="InjuryNamePh" xml:space="preserve">
+    <value>Injury name</value>
+  </data>
+  <data name="InjuryCreateTitle" xml:space="preserve">
+    <value>New Injury</value>
+  </data>
+  <data name="InjuryEditTitle" xml:space="preserve">
+    <value>Edit Injury</value>
+  </data>
+  <data name="InjurySelectTitle" xml:space="preserve">
+    <value>Select Injury</value>
   </data>
   <data name="SkillNamePh" xml:space="preserve">
     <value>Skill name</value>

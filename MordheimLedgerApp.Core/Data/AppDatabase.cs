@@ -31,8 +31,10 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorEntity>();
         await _db.CreateTableAsync<EquipmentItemEntity>();
         await _db.CreateTableAsync<SkillEntity>();
+        await _db.CreateTableAsync<InjuryEntity>();
         await _db.CreateTableAsync<WarriorEquipmentEntity>();
         await _db.CreateTableAsync<WarriorSkillEntity>();
+        await _db.CreateTableAsync<WarriorInjuryEntity>();
         await _db.CreateTableAsync<HistoryEntryEntity>();
 
         // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and

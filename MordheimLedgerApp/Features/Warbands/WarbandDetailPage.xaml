@@ -59,6 +59,28 @@
                             <Label Grid.Row="1" Grid.Column="8" Text="{Binding Warrior.Leadership}" FontSize="13" HorizontalTextAlignment="Center"/>
                         </Grid>
 
+                        <!-- Blessures : lecture seule ici (pas de bouton "+"/"x") - gérées depuis le
+                             dialog d'édition (voir WarriorEditDialog). Alimenté à la fois par le jet de
+                             Fin de partie et par les ajouts manuels. Même style de puce que
+                             Équipement/Compétences. -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasInjuries}">
+                            <Label Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Injuries}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorInjury">
+                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Label Text="{x:Static icons:RpgFont.RaBrokenBone}"
+                                                       FontFamily="RpgAwesome" FontSize="12"
+                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Grid.Column="0" Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"

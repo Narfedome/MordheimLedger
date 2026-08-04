@@ -153,6 +153,24 @@ public static class EntityMapping
         ImagePath = m.ImagePath
     };
 
+    public static Injury ToModel(this InjuryEntity e) => new()
+    {
+        Id = e.Id,
+        Name = e.Name,
+        Description = e.Description,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty
+    };
+
+    public static InjuryEntity ToEntity(this Injury m) => new()
+    {
+        Id = m.Id,
+        Name = m.Name,
+        Description = m.Description,
+        Source = m.Source,
+        ImagePath = m.ImagePath
+    };
+
     public static EquipmentItem ToModel(this EquipmentItemEntity e) => new()
     {
         Id = e.Id,
@@ -179,7 +197,8 @@ public static class EntityMapping
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>
     /// <param name="skills">Learned skills/spells, loaded separately via the join table.</param>
-    public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null) => new()
+    /// <param name="injuries">Tracked injuries, loaded separately via the join table.</param>
+    public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null, IEnumerable<WarriorInjury>? injuries = null) => new()
     {
         Id = e.Id,
         WarbandId = e.WarbandId,
@@ -198,9 +217,9 @@ public static class EntityMapping
         Initiative = e.Initiative,
         Attacks = e.Attacks,
         Leadership = e.Leadership,
-        Notes = e.Notes,
         Equipment = equipment?.ToList() ?? new List<WarriorEquipment>(),
-        Skills = skills?.ToList() ?? new List<WarriorSkill>()
+        Skills = skills?.ToList() ?? new List<WarriorSkill>(),
+        Injuries = injuries?.ToList() ?? new List<WarriorInjury>()
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -221,8 +240,7 @@ public static class EntityMapping
         Wounds = m.Wounds,
         Initiative = m.Initiative,
         Attacks = m.Attacks,
-        Leadership = m.Leadership,
-        Notes = m.Notes
+        Leadership = m.Leadership
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>
@@ -255,6 +273,21 @@ public static class EntityMapping
         Id = m.Id,
         WarriorId = m.WarriorId,
         SkillId = m.Item.Id
+    };
+
+    /// <param name="item">The catalog injury this row references, loaded separately.</param>
+    public static WarriorInjury ToModel(this WarriorInjuryEntity e, Injury item) => new()
+    {
+        Id = e.Id,
+        WarriorId = e.WarriorId,
+        Item = item
+    };
+
+    public static WarriorInjuryEntity ToEntity(this WarriorInjury m) => new()
+    {
+        Id = m.Id,
+        WarriorId = m.WarriorId,
+        InjuryId = m.Item.Id
     };
 
     public static HistoryEntry ToModel(this HistoryEntryEntity e) => new()

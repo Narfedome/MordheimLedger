@@ -4,17 +4,17 @@ namespace MordheimLedgerApp.Services;
 
 public interface ISkillPickerNavigationService
 {
-    void RegisterTaskSource(TaskCompletionSource<Skill?> tcs);
-    Task ClosePickerAsync(Skill? result);
+    void RegisterTaskSource(TaskCompletionSource<IReadOnlyList<Skill>> tcs);
+    Task ClosePickerAsync(IReadOnlyList<Skill> result);
 }
 
 public class SkillPickerNavigationService : ISkillPickerNavigationService
 {
-    private TaskCompletionSource<Skill?>? _tcs;
+    private TaskCompletionSource<IReadOnlyList<Skill>>? _tcs;
 
-    public void RegisterTaskSource(TaskCompletionSource<Skill?> tcs) => _tcs = tcs;
+    public void RegisterTaskSource(TaskCompletionSource<IReadOnlyList<Skill>> tcs) => _tcs = tcs;
 
-    public async Task ClosePickerAsync(Skill? result)
+    public async Task ClosePickerAsync(IReadOnlyList<Skill> result)
     {
         _tcs?.TrySetResult(result);
 

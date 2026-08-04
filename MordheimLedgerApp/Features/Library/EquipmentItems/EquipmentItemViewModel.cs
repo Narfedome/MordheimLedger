@@ -25,6 +25,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
+    /// <summary>Set by EquipmentItemSelectorPage right after construction: en mode picker, un tap
+    /// bascule la sélection d'une ligne (liseré bleu, plusieurs lignes à la fois) au lieu du
+    /// remplacement à une seule ligne utilisé par l'onglet Library (IsCrud) pour Éditer/Supprimer.</summary>
+    public bool IsSelectorMode { get; set; }
+
+    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par ApplyFilter.</summary>
+    public ObservableCollection<EquipmentItemRow> SelectedRows { get; } = new();
+
+    public bool HasSelectedRows => SelectedRows.Count > 0;
+
     public EquipmentItemViewModel(ILibraryService libraryService, IEquipmentPickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
@@ -49,6 +59,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
         EquipmentItems = new ObservableCollection<EquipmentItemRow>(filtered.Select(i => new EquipmentItemRow(i)));
         SelectedRow = null;
+        SelectedRows.Clear();
+        OnPropertyChanged(nameof(HasSelectedRows));
     }
 
     private string CategoryLabel(EquipmentCategory category) => Loc[$"EquipmentCategory{category}"];
@@ -60,7 +72,19 @@ public partial class EquipmentItemViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Select(EquipmentItemRow row) => SelectedRow = row;
+    private void Select(EquipmentItemRow row)
+    {
+        if (!IsSelectorMode)
+        {
+            SelectedRow = row;
+            return;
+        }
+
+        row.IsSelected = !row.IsSelected;
+        if (row.IsSelected) SelectedRows.Add(row);
+        else SelectedRows.Remove(row);
+        OnPropertyChanged(nameof(HasSelectedRows));
+    }
 
     [RelayCommand]
     private async Task SelectCategory()
@@ -126,10 +150,10 @@ public partial class EquipmentItemViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmSelection()
     {
-        if (SelectedRow is { } row)
-            await _pickerNavigation.ClosePickerAsync(row.Item);
+        var items = SelectedRows.Select(r => r.Item).ToList();
+        await _pickerNavigation.ClosePickerAsync(items);
     }
 
     [RelayCommand]
-    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(null);
+    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<EquipmentItem>());
 }

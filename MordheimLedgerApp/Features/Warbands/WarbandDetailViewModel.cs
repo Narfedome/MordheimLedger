@@ -18,6 +18,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
+    private readonly IInjuryPickerService _injuryPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private Dictionary<int, string> _archetypeNames = new();
@@ -55,12 +56,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private bool showHistory;
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService,
-        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker)
+        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
+        _injuryPicker = injuryPicker;
     }
 
     partial void OnWarbandIdChanged(int value) => _ = LoadAsync(value);
@@ -186,15 +188,20 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Initiative = w.Initiative,
             Attacks = w.Attacks,
             Leadership = w.Leadership,
-            Notes = w.Notes
+            Injuries = w.Injuries
         };
 
-        var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"]);
-        if (await ShowDialogAsync(new WarriorEditDialog(dialogViewModel)) != true) return;
+        var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], _warbandService, _injuryPicker);
+        var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
+        // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
+        // (AddInjury/RemoveInjury) persiste immédiatement dans le dialog, indépendamment du bouton
+        // Enregistrer/Annuler (même logique que l'Équipement/les Compétences sur la carte guerrier).
         await Loading.RunAsync(async () =>
         {
-            await _warbandService.SaveWarriorAsync(copy);
+            if (saved == true)
+                await _warbandService.SaveWarriorAsync(copy);
+
             await LoadAsync(Warband.Id);
         });
     }
@@ -228,6 +235,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
                 sentences.Add(string.Format(Loc["HistoryTreasurySentence"], dialogViewModel.TreasuryFound));
             }
 
+            List<Injury>? injuryCatalog = null;
+
             foreach (var row in dialogViewModel.WarriorRows)
             {
                 var warrior = row.Warrior;
@@ -250,11 +259,20 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
                 if (!string.IsNullOrWhiteSpace(row.InjuryResultText))
                 {
-                    warrior.Notes = string.IsNullOrWhiteSpace(warrior.Notes)
-                        ? row.InjuryResultText
-                        : $"{warrior.Notes}\n{row.InjuryResultText}";
+                    // Même liste que celle suivie manuellement (WarriorEditDialog) : find-or-create par
+                    // nom plutôt qu'un doublon en texte libre - la table Blessures Graves a un texte
+                    // fixe par jet, donc pas de risque de quasi-doublons.
+                    injuryCatalog ??= await _libraryService.GetInjuriesAsync();
+                    var injury = injuryCatalog.FirstOrDefault(i => i.Name == row.InjuryResultText);
+                    if (injury is null)
+                    {
+                        injury = new Injury { Name = row.InjuryResultText, Source = ContentSource.Official };
+                        await _libraryService.SaveInjuryAsync(injury);
+                        injuryCatalog.Add(injury);
+                    }
+
+                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
                     sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
-                    changed = true;
                 }
 
                 if (changed)
@@ -282,11 +300,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddEquipment(WarriorRow row)
     {
-        var item = await _equipmentPicker.PickEquipmentAsync();
-        if (item is null) return;
-
-        var carried = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, item);
-        row.Equipment.Add(carried);
+        var items = await _equipmentPicker.PickEquipmentAsync();
+        foreach (var item in items)
+        {
+            var carried = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, item);
+            row.Equipment.Add(carried);
+        }
     }
 
     [RelayCommand]
@@ -302,11 +321,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddSkill(WarriorRow row)
     {
-        var skill = await _skillPicker.PickSkillAsync();
-        if (skill is null) return;
-
-        var learned = await _warbandService.AddWarriorSkillAsync(row.Warrior.Id, skill);
-        row.Skills.Add(learned);
+        var skills = await _skillPicker.PickSkillAsync();
+        foreach (var skill in skills)
+        {
+            var learned = await _warbandService.AddWarriorSkillAsync(row.Warrior.Id, skill);
+            row.Skills.Add(learned);
+        }
     }
 
     [RelayCommand]

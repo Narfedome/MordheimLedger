@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Deploy secrets - keystore signing password + Netlify token, never committed (see
+# Build-Release.local.ps1.example for the template to fill in locally instead)
+Deploy/Build-Release.local.ps1
+Deploy/*.keystore

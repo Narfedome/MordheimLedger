@@ -1,27 +1,27 @@
 using MordheimLedgerApp.Core.Models.Library;
-using MordheimLedgerApp.Features.Library.Skills;
+using MordheimLedgerApp.Features.Library.Injuries;
 
 namespace MordheimLedgerApp.Services;
 
-public interface ISkillPickerService
+public interface IInjuryPickerService
 {
-    Task<IReadOnlyList<Skill>> PickSkillAsync();
+    Task<IReadOnlyList<Injury>> PickInjuriesAsync();
 }
 
-public class SkillPickerService : ISkillPickerService
+public class InjuryPickerService : IInjuryPickerService
 {
     private readonly IServiceProvider _provider;
 
-    public SkillPickerService(IServiceProvider provider) => _provider = provider;
+    public InjuryPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Skill>> PickSkillAsync()
+    public async Task<IReadOnlyList<Injury>> PickInjuriesAsync()
     {
-        var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
+        var tcs = new TaskCompletionSource<IReadOnlyList<Injury>>();
 
-        var navigationService = _provider.GetRequiredService<ISkillPickerNavigationService>();
+        var navigationService = _provider.GetRequiredService<IInjuryPickerNavigationService>();
         navigationService.RegisterTaskSource(tcs);
 
-        var page = _provider.GetRequiredService<SkillSelectorPage>();
+        var page = _provider.GetRequiredService<InjurySelectorPage>();
         var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton
@@ -32,7 +32,7 @@ public class SkillPickerService : ISkillPickerService
             if (!ReferenceEquals(e.Modal, modal))
                 return;
             window.ModalPopped -= OnModalPopped;
-            tcs.TrySetResult(Array.Empty<Skill>());
+            tcs.TrySetResult(Array.Empty<Injury>());
         }
         window.ModalPopped += OnModalPopped;
 

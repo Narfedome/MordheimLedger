@@ -25,6 +25,15 @@ public partial class SkillViewModel : BaseViewModel
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
+    /// <summary>Set by SkillSelectorPage right after construction - même bascule multi-sélection
+    /// qu'EquipmentItemViewModel.IsSelectorMode.</summary>
+    public bool IsSelectorMode { get; set; }
+
+    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par ApplyFilter.</summary>
+    public ObservableCollection<SkillRow> SelectedRows { get; } = new();
+
+    public bool HasSelectedRows => SelectedRows.Count > 0;
+
     public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
@@ -49,6 +58,8 @@ public partial class SkillViewModel : BaseViewModel
 
         Skills = new ObservableCollection<SkillRow>(filtered.Select(i => new SkillRow(i)));
         SelectedRow = null;
+        SelectedRows.Clear();
+        OnPropertyChanged(nameof(HasSelectedRows));
     }
 
     private string CategoryLabel(SkillCategory category) => Loc[$"SkillCategory{category}"];
@@ -60,7 +71,19 @@ public partial class SkillViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Select(SkillRow row) => SelectedRow = row;
+    private void Select(SkillRow row)
+    {
+        if (!IsSelectorMode)
+        {
+            SelectedRow = row;
+            return;
+        }
+
+        row.IsSelected = !row.IsSelected;
+        if (row.IsSelected) SelectedRows.Add(row);
+        else SelectedRows.Remove(row);
+        OnPropertyChanged(nameof(HasSelectedRows));
+    }
 
     [RelayCommand]
     private async Task SelectCategory()
@@ -124,10 +147,10 @@ public partial class SkillViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmSelection()
     {
-        if (SelectedRow is { } row)
-            await _pickerNavigation.ClosePickerAsync(row.Item);
+        var items = SelectedRows.Select(r => r.Item).ToList();
+        await _pickerNavigation.ClosePickerAsync(items);
     }
 
     [RelayCommand]
-    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(null);
+    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Skill>());
 }

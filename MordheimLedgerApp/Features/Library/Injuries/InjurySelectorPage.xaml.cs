@@ -1,8 +1,8 @@
-namespace MordheimLedgerApp.Features.Library.Skills;
+namespace MordheimLedgerApp.Features.Library.Injuries;
 
-public partial class SkillSelectorPage : ContentPage
+public partial class InjurySelectorPage : ContentPage
 {
-    public SkillSelectorPage(SkillViewModel viewModel)
+    public InjurySelectorPage(InjuryViewModel viewModel)
     {
         InitializeComponent();
         viewModel.IsSelectorMode = true;
@@ -13,7 +13,7 @@ public partial class SkillSelectorPage : ContentPage
     {
         base.OnAppearing();
 
-        if (BindingContext is SkillViewModel vm)
+        if (BindingContext is InjuryViewModel vm)
             await vm.InitializeAsync();
     }
 }

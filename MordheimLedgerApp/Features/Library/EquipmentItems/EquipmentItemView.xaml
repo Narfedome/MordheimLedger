@@ -99,12 +99,14 @@
                                          IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
         </HorizontalStackLayout>
 
+        <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
+             toutes les tuiles cochées d'un coup. -->
         <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"
                                          Tooltip="{loc:Loc LibConfirm}"
-                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+                                         IsEnabled="{Binding HasSelectedRows}"/>
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleXmark}"
                                          Command="{Binding CancelCommand}"
                                          Tooltip="{loc:Loc LibCancel}"/>

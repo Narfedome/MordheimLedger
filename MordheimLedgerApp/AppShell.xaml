@@ -8,6 +8,7 @@
     xmlns:warbandArchetypes="clr-namespace:MordheimLedgerApp.Features.Library.WarbandArchetypes"
     xmlns:equipmentItems="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
     xmlns:skills="clr-namespace:MordheimLedgerApp.Features.Library.Skills"
+    xmlns:injuries="clr-namespace:MordheimLedgerApp.Features.Library.Injuries"
     xmlns:extensions="clr-namespace:MordheimLedgerApp.Extensions"
     xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
     xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
@@ -40,6 +41,13 @@
             <ShellContent
                 ContentTemplate="{DataTemplate skills:SkillListPage}"
                 Route="SkillListPage" />
+        </Tab>
+
+        <Tab Title="{loc:Loc TabInjuries}"
+             Icon="{extensions:FaIcon Glyph={x:Static icons:SolidFont.Bone}}">
+            <ShellContent
+                ContentTemplate="{DataTemplate injuries:InjuryListPage}"
+                Route="InjuryListPage" />
         </Tab>
 
         <Tab Title="{loc:Loc TabSettings}"

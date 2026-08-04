@@ -21,6 +21,12 @@ public interface IWarbandService
     Task SaveWarriorAsync(Warrior warrior);
     Task DeleteWarriorAsync(int warriorId);
 
+    Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1);
+    Task RemoveWarriorEquipmentAsync(int warriorEquipmentId);
+
+    Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);
+    Task RemoveWarriorSkillAsync(int warriorSkillId);
+
     /// <summary>Most recent first.</summary>
     Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId);
 

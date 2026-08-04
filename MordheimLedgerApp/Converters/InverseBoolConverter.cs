@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Resources.Icons;
 using System.Globalization;
 
 namespace MordheimLedgerApp.Converters
@@ -15,6 +16,15 @@ namespace MordheimLedgerApp.Converters
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
             => value != null;
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
+    public class BoolToChevronConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => value is bool isExpanded && isExpanded ? SolidFont.ChevronUp : SolidFont.ChevronDown;
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
             => throw new NotImplementedException();

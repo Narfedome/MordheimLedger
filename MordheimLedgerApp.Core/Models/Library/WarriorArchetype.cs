@@ -28,6 +28,13 @@ public class WarriorArchetype
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
+    /// <summary>
+    /// XP a newly recruited warrior of this type starts with (e.g. a Witch Hunter Captain starts at
+    /// 20 XP) — already reflected in the stat line above, not something the app re-derives. Most
+    /// generic warrior types start at 0.
+    /// </summary>
+    public int StartingExperience { get; set; }
+
     public string? Description { get; set; }
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>

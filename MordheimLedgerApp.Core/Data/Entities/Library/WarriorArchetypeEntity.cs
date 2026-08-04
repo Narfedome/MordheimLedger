@@ -26,6 +26,7 @@ public class WarriorArchetypeEntity
     public int Initiative { get; set; }
     public int Attacks { get; set; }
     public int Leadership { get; set; }
+    public int StartingExperience { get; set; }
 
     public string? Description { get; set; }
     public string? ImagePath { get; set; }

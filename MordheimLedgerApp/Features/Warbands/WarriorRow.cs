@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
 
@@ -15,8 +16,25 @@ public partial class WarriorRow : ObservableObject
 {
     public Warrior Warrior { get; }
 
+    /// <summary>The archetype's name (e.g. "Mercenary Captain") shown instead of a plain Hero/Henchman
+    /// label — looked up by the ViewModel from the warband's recruitable archetypes, "?" if unknown
+    /// (e.g. the archetype was since deleted from the Library).</summary>
+    public string RoleName { get; }
+
     [ObservableProperty]
     private bool isSelected;
 
-    public WarriorRow(Warrior warrior) => Warrior = warrior;
+    /// <summary>Mirrors Warrior.Equipment as an ObservableCollection so add/remove reflects on the card without a full reload.</summary>
+    public ObservableCollection<WarriorEquipment> Equipment { get; }
+
+    /// <summary>Mirrors Warrior.Skills as an ObservableCollection so add/remove reflects on the card without a full reload.</summary>
+    public ObservableCollection<WarriorSkill> Skills { get; }
+
+    public WarriorRow(Warrior warrior, string roleName)
+    {
+        Warrior = warrior;
+        RoleName = roleName;
+        Equipment = new ObservableCollection<WarriorEquipment>(warrior.Equipment);
+        Skills = new ObservableCollection<WarriorSkill>(warrior.Skills);
+    }
 }

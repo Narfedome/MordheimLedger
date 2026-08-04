@@ -8,6 +8,7 @@
         <ResourceDictionary>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:BoolToChevronConverter x:Key="BoolToChevronConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Sizes.xaml" />

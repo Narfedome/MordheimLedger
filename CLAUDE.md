@@ -79,6 +79,25 @@ propre en-tête via le composant `Components/DetailPageHeader/DetailPageHeaderVi
 BackCommand) — le rendu natif de la barre/flèche retour diverge trop entre plateformes (surtout
 Windows) pour rester cohérent avec le reste du thème.
 
+**Roster de `WarbandDetailPage`** : conçu d'après une vraie feuille de bande papier ("Feuille de
+Bande Mordheim v3.4" + fiches Héros/Hommes de main originales 1999, fournies par l'utilisateur) plutôt
+que deviné :
+- Guerriers groupés Héros/Hommes de main (dépliable/repliable, `HeroesExpanded`/`HenchmenExpanded`),
+  le nom du rôle (`WarriorRow.RoleName`, résolu depuis `WarriorArchetype.Name`) affiché à la place
+  d'un simple badge "Hero"/"Henchman".
+- Pas de coût en or affiché sur la carte guerrier : absent de la fiche officielle (qui ne le montre
+  qu'au recrutement et dans le calcul de Valeur de Bande), retiré pour coller à l'original.
+- `Components/ExperienceTrack/ExperienceTrackView` : piste de cases à cocher fixe (comme sur papier —
+  toutes les cases sont dessinées d'avance, remplies ou non), avec des cases-paliers à bordure dorée
+  plus épaisse — **purement un repère visuel copié de la fiche, pas une règle que l'app interprète**.
+  L'espacement n'est pas régulier : Héros = paliers d'écart 1/2/3 (×4 chacun) puis 4/5/6 (×3 chacun)
+  → 90 cases ; Hommes de main = écart qui augmente de 1 à chaque palier (2, 5, 9, 14, 20...). Voir le
+  code (`HeroMilestones`/`HenchmanMilestones`) pour la formule exacte.
+- `WarriorArchetype.StartingExperience` : XP de départ d'un type de guerrier (ex. un Capitaine
+  Chasseur de Sorcières démarre à 20 XP, déjà reflété dans son profil) — copié sur le `Warrior` par
+  `ToWarrior()` au recrutement, à renseigner par archétype (0 par défaut, correct pour la plupart des
+  types génériques).
+
 ## Sources de contenu officiel (voir ROADMAP.md § Sources)
 
 - Livre des Règles PDF fourni par l'utilisateur — **trop volumineux** pour l'outil Read (>100 Mo,

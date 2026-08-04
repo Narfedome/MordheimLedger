@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemView"
-             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
+             x:Class="MordheimLedgerApp.Features.Library.Skills.SkillView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Skills"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
@@ -15,7 +15,7 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que LibraryTrackView de DmTools -->
+        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que EquipmentItemView -->
         <Grid Grid.Row="0" ColumnDefinitions="*,auto" Padding="5,0">
             <Button Grid.Column="0"
                     Text="{Binding SelectedCategoryLabel}"
@@ -31,7 +31,7 @@
                            WidthRequest="120" HeightRequest="120"/>
 
         <CollectionView Grid.Row="1" x:Name="ItemsCollection"
-                ItemsSource="{Binding EquipmentItems}"
+                ItemsSource="{Binding Skills}"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
@@ -41,14 +41,7 @@
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="local:EquipmentItemRow">
-                    <!-- Sélection gérée à la main (IsSelected, pas SelectionMode) - reprise mot pour mot
-                         de LibraryTrackView chez DmTools (commit 09c71545a) : BackgroundColor/Stroke
-                         posés en dur sur l'instance (plus besoin du fond translucide, la sélection
-                         native n'est plus utilisée du tout ici), VisualStateGroupList vide pour
-                         neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
-                         empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
-                         le DataTrigger sur IsSelected. -->
+                <DataTemplate x:DataType="local:SkillRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
@@ -71,7 +64,7 @@
                             <components:LibraryItemImageView
                                 Grid.Row="0"
                                 ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:SolidFont.Coins}"
+                                DefaultGlyph="{x:Static icons:SolidFont.Brain}"
                                 Padding="20" />
                             <Label Text="{Binding Item.Name}"
                                    Grid.Row="1"

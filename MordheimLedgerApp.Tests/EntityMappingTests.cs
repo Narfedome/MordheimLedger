@@ -110,6 +110,7 @@ public class EntityMappingTests
             Initiative = 4,
             Attacks = 1,
             Leadership = 8,
+            StartingExperience = 20,
             Description = "May be given any Combat, Shooting or Strength skill."
         };
 
@@ -131,19 +132,21 @@ public class EntityMappingTests
         Assert.Equal(archetype.Initiative, roundTripped.Initiative);
         Assert.Equal(archetype.Attacks, roundTripped.Attacks);
         Assert.Equal(archetype.Leadership, roundTripped.Leadership);
+        Assert.Equal(archetype.StartingExperience, roundTripped.StartingExperience);
         Assert.Equal(archetype.Description, roundTripped.Description);
     }
 
     [Fact]
-    public void RecruitingFromArchetype_PreFillsWarriorStatsAndCost()
+    public void RecruitingFromArchetype_PreFillsWarriorStatsCostAndStartingExperience()
     {
         var archetype = new WarriorArchetype
         {
-            Id = 10,
-            WarbandArchetypeId = 3,
-            Name = "Mercenary Captain",
+            Id = 11,
+            WarbandArchetypeId = 4,
+            Name = "Witch Hunter Captain",
             IsHero = true,
             Cost = 80,
+            StartingExperience = 20,
             Movement = 4,
             WeaponSkill = 4,
             BallisticSkill = 3,
@@ -170,7 +173,7 @@ public class EntityMappingTests
         Assert.Equal(archetype.Initiative, recruited.Initiative);
         Assert.Equal(archetype.Attacks, recruited.Attacks);
         Assert.Equal(archetype.Leadership, recruited.Leadership);
-        Assert.Equal(0, recruited.Experience);
+        Assert.Equal(archetype.StartingExperience, recruited.Experience);
         Assert.Equal(WarriorStatus.Active, recruited.Status);
     }
 

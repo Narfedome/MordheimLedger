@@ -1,5 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -166,14 +225,23 @@
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Treasury:</value>
   </data>
-  <data name="WarriorsCostLabel" xml:space="preserve">
-    <value>Cost:</value>
+  <data name="WarriorsGroupHeroes" xml:space="preserve">
+    <value>Heroes</value>
   </data>
-  <data name="WarriorsXpLabel" xml:space="preserve">
-    <value>XP:</value>
+  <data name="WarriorsGroupHenchmen" xml:space="preserve">
+    <value>Henchmen</value>
+  </data>
+  <data name="WarriorsExperienceHeading" xml:space="preserve">
+    <value>Experience</value>
+  </data>
+  <data name="WarriorsEquipmentHeading" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="WarriorsSkillsHeading" xml:space="preserve">
+    <value>Skills</value>
   </data>
   <data name="TabLibrary" xml:space="preserve">
-    <value>Library</value>
+    <value>Codex</value>
   </data>
   <data name="TabTradingPost" xml:space="preserve">
     <value>Trading Post</value>
@@ -229,6 +297,9 @@
   <data name="WarriorArchetypeMaxCountPh" xml:space="preserve">
     <value>Maximum count</value>
   </data>
+  <data name="WarriorArchetypeStartingExperiencePh" xml:space="preserve">
+    <value>Starting XP</value>
+  </data>
   <data name="WarriorArchetypeEditTitle" xml:space="preserve">
     <value>Edit Warrior Type</value>
   </data>
@@ -270,6 +341,51 @@
   </data>
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Miscellaneous Equipment</value>
+  </data>
+  <data name="TabSkills" xml:space="preserve">
+    <value>Skills</value>
+  </data>
+  <data name="SkillNamePh" xml:space="preserve">
+    <value>Skill name</value>
+  </data>
+  <data name="SkillCategoryPh" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="SkillEditTitle" xml:space="preserve">
+    <value>Edit Skill</value>
+  </data>
+  <data name="SkillCreateTitle" xml:space="preserve">
+    <value>New Skill</value>
+  </data>
+  <data name="SkillCategoryCombat" xml:space="preserve">
+    <value>Combat</value>
+  </data>
+  <data name="SkillCategoryShooting" xml:space="preserve">
+    <value>Shooting</value>
+  </data>
+  <data name="SkillCategoryAcademic" xml:space="preserve">
+    <value>Academic</value>
+  </data>
+  <data name="SkillCategoryStrength" xml:space="preserve">
+    <value>Strength</value>
+  </data>
+  <data name="SkillCategorySpeed" xml:space="preserve">
+    <value>Speed</value>
+  </data>
+  <data name="SkillCategorySpecial" xml:space="preserve">
+    <value>Special</value>
+  </data>
+  <data name="LibConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="LibCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="EquipmentItemSelectTitle" xml:space="preserve">
+    <value>Select Item</value>
+  </data>
+  <data name="SkillSelectTitle" xml:space="preserve">
+    <value>Select Skill</value>
   </data>
   <data name="BtnPlay" xml:space="preserve">
     <value>Play</value>

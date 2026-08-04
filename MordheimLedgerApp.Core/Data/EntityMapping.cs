@@ -72,6 +72,7 @@ public static class EntityMapping
         Initiative = e.Initiative,
         Attacks = e.Attacks,
         Leadership = e.Leadership,
+        StartingExperience = e.StartingExperience,
         Description = e.Description,
         ImagePath = e.ImagePath ?? string.Empty
     };
@@ -94,17 +95,19 @@ public static class EntityMapping
         Initiative = m.Initiative,
         Attacks = m.Attacks,
         Leadership = m.Leadership,
+        StartingExperience = m.StartingExperience,
         Description = m.Description,
         ImagePath = m.ImagePath
     };
 
-    /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line).</summary>
+    /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
     public static Warrior ToWarrior(this WarriorArchetype archetype, string name) => new()
     {
         WarriorArchetypeId = archetype.Id,
         Name = name,
         IsHero = archetype.IsHero,
         Cost = archetype.Cost,
+        Experience = archetype.StartingExperience,
         Movement = archetype.Movement,
         WeaponSkill = archetype.WeaponSkill,
         BallisticSkill = archetype.BallisticSkill,
@@ -128,6 +131,26 @@ public static class EntityMapping
         Id = m.Id,
         Name = m.Name,
         Notes = m.Notes
+    };
+
+    public static Skill ToModel(this SkillEntity e) => new()
+    {
+        Id = e.Id,
+        Name = e.Name,
+        Category = e.Category,
+        Description = e.Description,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty
+    };
+
+    public static SkillEntity ToEntity(this Skill m) => new()
+    {
+        Id = m.Id,
+        Name = m.Name,
+        Category = m.Category,
+        Description = m.Description,
+        Source = m.Source,
+        ImagePath = m.ImagePath
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e) => new()
@@ -155,7 +178,8 @@ public static class EntityMapping
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>
-    public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null) => new()
+    /// <param name="skills">Learned skills/spells, loaded separately via the join table.</param>
+    public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null) => new()
     {
         Id = e.Id,
         WarbandId = e.WarbandId,
@@ -175,7 +199,8 @@ public static class EntityMapping
         Attacks = e.Attacks,
         Leadership = e.Leadership,
         Notes = e.Notes,
-        Equipment = equipment?.ToList() ?? new List<WarriorEquipment>()
+        Equipment = equipment?.ToList() ?? new List<WarriorEquipment>(),
+        Skills = skills?.ToList() ?? new List<WarriorSkill>()
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -215,6 +240,21 @@ public static class EntityMapping
         WarriorId = m.WarriorId,
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity
+    };
+
+    /// <param name="item">The catalog skill this row references, loaded separately.</param>
+    public static WarriorSkill ToModel(this WarriorSkillEntity e, Skill item) => new()
+    {
+        Id = e.Id,
+        WarriorId = e.WarriorId,
+        Item = item
+    };
+
+    public static WarriorSkillEntity ToEntity(this WarriorSkill m) => new()
+    {
+        Id = m.Id,
+        WarriorId = m.WarriorId,
+        SkillId = m.Item.Id
     };
 
     public static HistoryEntry ToModel(this HistoryEntryEntity e) => new()

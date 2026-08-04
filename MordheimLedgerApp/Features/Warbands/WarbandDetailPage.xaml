@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
              xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:xp="clr-namespace:MordheimLedgerApp.Components.ExperienceTrack"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandDetailPage"
@@ -13,6 +14,103 @@
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False"/>
     </Shell.BackButtonBehavior>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Carte guerrier partagée entre les sections Heroes/Henchmen : le contenu ne dépend que
+                 du Warrior lié (IsHero pilote directement ExperienceTrackView), pas du groupe qui
+                 l'affiche. -->
+            <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
+                <Border Style="{StaticResource SelectableCardBorderStyle}" Margin="12,6">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=SelectCommand}"
+                            CommandParameter="{Binding .}"/>
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                            <Label Grid.Column="1" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*" RowDefinitions="Auto,Auto" RowSpacing="2">
+                            <Label Grid.Row="0" Grid.Column="0" Text="M" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="1" Text="WS" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="2" Text="BS" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="3" Text="S" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="4" Text="T" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="5" Text="W" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="6" Text="I" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="7" Text="A" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="0" Grid.Column="8" Text="Ld" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Row="1" Grid.Column="0" Text="{Binding Warrior.Movement}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Warrior.WeaponSkill}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="2" Text="{Binding Warrior.BallisticSkill}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="3" Text="{Binding Warrior.Strength}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="4" Text="{Binding Warrior.Toughness}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="5" Text="{Binding Warrior.Wounds}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="6" Text="{Binding Warrior.Initiative}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="7" Text="{Binding Warrior.Attacks}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="8" Text="{Binding Warrior.Leadership}" FontSize="13" HorizontalTextAlignment="Center"/>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=AddEquipmentCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                        </Grid>
+                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:WarriorEquipment">
+                                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                        <HorizontalStackLayout Spacing="4">
+                                            <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                          IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=RemoveEquipmentCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{loc:Loc WarriorsSkillsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=AddSkillCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                        </Grid>
+                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:WarriorSkill">
+                                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                        <HorizontalStackLayout Spacing="4">
+                                            <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                          IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=RemoveSkillCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                        </HorizontalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <Label Text="{loc:Loc WarriorsExperienceHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                        <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <components:WatermarkedLayout>
     <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
@@ -36,56 +134,54 @@
                     BackgroundColor="Transparent" TextColor="{DynamicResource AppAccent}" Padding="0"/>
         </HorizontalStackLayout>
 
-        <CollectionView Grid.Row="3" x:Name="WarriorCollection" ItemsSource="{Binding Warriors}" Margin="0,8"
-                        SelectionMode="None"
-                        IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="vm:WarriorRow">
-                    <!-- Sélection gérée à la main (IsSelected sur la ligne, pas SelectionMode) : un Border
-                         stylé via VisualStateManager (SelectableGridItemBorderStyle, Library) n'empêche
-                         pas Android d'afficher son propre fond de sélection teinté colorAccent par-dessus
-                         - seul le liseré (SelectableCardBorderStyle, DataTrigger sur IsSelected) l'évite. -->
-                    <Border Style="{StaticResource SelectableCardBorderStyle}" Margin="12,6">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=SelectCommand}"
-                                CommandParameter="{Binding .}"/>
-                        </Border.GestureRecognizers>
-                        <VerticalStackLayout Spacing="4">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
-                                <Label Grid.Column="1" Text="Hero" TextColor="{DynamicResource AppAccent}"
-                                       IsVisible="{Binding Warrior.IsHero}"/>
-                                <Label Grid.Column="1" Text="Henchman" TextColor="{DynamicResource AppTextMuted}"
-                                       IsVisible="{Binding Warrior.IsHero, Converter={StaticResource InverseBoolConverter}}"/>
-                            </Grid>
-                            <HorizontalStackLayout Spacing="10">
-                                <Label Text="{Binding Warrior.Movement, StringFormat='M{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.WeaponSkill, StringFormat='WS{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.BallisticSkill, StringFormat='BS{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.Strength, StringFormat='S{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.Toughness, StringFormat='T{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.Wounds, StringFormat='W{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.Initiative, StringFormat='I{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.Attacks, StringFormat='A{0}'}" FontSize="12"/>
-                                <Label Text="{Binding Warrior.Leadership, StringFormat='Ld{0}'}" FontSize="12"/>
-                            </HorizontalStackLayout>
-                            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{loc:Loc WarriorsCostLabel}"/>
-                                        <Span Text="{Binding Warrior.Cost, StringFormat=' {0}gc'}"/>
-                                        <Span Text="  ·  "/>
-                                        <Span Text="{loc:Loc WarriorsXpLabel}"/>
-                                        <Span Text="{Binding Warrior.Experience, StringFormat=' {0}'}"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
-                        </VerticalStackLayout>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <!-- Pas de CollectionView ici (virtualisation inutile pour un roster de quelques dizaines de
+             guerriers max, et une CollectionView imbriquée dans un ScrollView pose des soucis de
+             hauteur) : un simple ScrollView + BindableLayout par groupe. -->
+        <ScrollView Grid.Row="3" x:Name="RosterScroll" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
+            <VerticalStackLayout Spacing="0" Margin="0,8">
+
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleHeroesCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc WarriorsGroupHeroes}"/>
+                                <Span Text="{Binding Heroes.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding HeroesExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleHeroesCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding HeroesExpanded}"
+                                     BindableLayout.ItemsSource="{Binding Heroes}"
+                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
+
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleHenchmenCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc WarriorsGroupHenchmen}"/>
+                                <Span Text="{Binding Henchmen.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding HenchmenExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleHenchmenCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding HenchmenExpanded}"
+                                     BindableLayout.ItemsSource="{Binding Henchmen}"
+                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
+
+            </VerticalStackLayout>
+        </ScrollView>
 
         <Grid Grid.Row="3" RowDefinitions="Auto,*" Margin="0,8" IsVisible="{Binding ShowHistory}">
             <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="16,0,16,8">

@@ -73,7 +73,17 @@ public class WarbandService : IWarbandService
                 if (itemEntity is not null)
                     carried.Add(carriedRow.ToModel(itemEntity.ToModel()));
             }
-            warriors.Add(row.ToModel(carried));
+
+            var learnedRows = await _db.Connection.Table<WarriorSkillEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
+            var learned = new List<WarriorSkill>();
+            foreach (var learnedRow in learnedRows)
+            {
+                var skillEntity = await _db.Connection.FindAsync<SkillEntity>(learnedRow.SkillId);
+                if (skillEntity is not null)
+                    learned.Add(learnedRow.ToModel(skillEntity.ToModel()));
+            }
+
+            warriors.Add(row.ToModel(carried, learned));
         }
         return warriors;
     }
@@ -99,7 +109,40 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
+    }
+
+    public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1)
+    {
+        await _db.Initialization;
+        var carried = new WarriorEquipment { WarriorId = warriorId, Item = item, Quantity = quantity };
+        var entity = carried.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        carried.Id = entity.Id;
+        return carried;
+    }
+
+    public async Task RemoveWarriorEquipmentAsync(int warriorEquipmentId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+    }
+
+    public async Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill)
+    {
+        await _db.Initialization;
+        var learned = new WarriorSkill { WarriorId = warriorId, Item = skill };
+        var entity = learned.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        learned.Id = entity.Id;
+        return learned;
+    }
+
+    public async Task RemoveWarriorSkillAsync(int warriorSkillId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorSkillEntity>(warriorSkillId);
     }
 
     public async Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId)

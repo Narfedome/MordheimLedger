@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
+using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
 using MordheimLedgerApp.Features.Settings;
@@ -58,6 +59,14 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<WarriorArchetypeListPage>();
             builder.Services.AddTransient<EquipmentItemViewModel>();
             builder.Services.AddTransient<EquipmentItemListPage>();
+            builder.Services.AddTransient<EquipmentItemSelectorPage>();
+            builder.Services.AddSingleton<IEquipmentPickerNavigationService, EquipmentPickerNavigationService>();
+            builder.Services.AddSingleton<IEquipmentPickerService, EquipmentPickerService>();
+            builder.Services.AddTransient<SkillViewModel>();
+            builder.Services.AddTransient<SkillListPage>();
+            builder.Services.AddTransient<SkillSelectorPage>();
+            builder.Services.AddSingleton<ISkillPickerNavigationService, SkillPickerNavigationService>();
+            builder.Services.AddSingleton<ISkillPickerService, SkillPickerService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

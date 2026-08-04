@@ -32,4 +32,7 @@ public class Warrior
 
     /// <summary>Loaded separately via the Warrior/EquipmentItem join table — not persisted on this object.</summary>
     public List<WarriorEquipment> Equipment { get; set; } = new();
+
+    /// <summary>Loaded separately via the Warrior/Skill join table — not persisted on this object.</summary>
+    public List<WarriorSkill> Skills { get; set; } = new();
 }

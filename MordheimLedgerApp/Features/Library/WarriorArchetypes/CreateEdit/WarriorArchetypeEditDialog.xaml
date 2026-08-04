@@ -35,6 +35,7 @@
                     <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeCostPh}"/>
                     <Entry Grid.Column="1" Text="{Binding Item.MaxCount}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeMaxCountPh}"/>
                 </Grid>
+                <Entry Text="{Binding Item.StartingExperience}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeStartingExperiencePh}"/>
             </VerticalStackLayout>
 
             <!-- Étape 2 : profil (abréviations officielles du livre de règles, pas de traduction) -->

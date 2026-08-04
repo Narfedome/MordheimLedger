@@ -5,6 +5,7 @@ using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -13,8 +14,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
 {
     private readonly IWarbandService _warbandService;
     private readonly ILibraryService _libraryService;
+    private readonly IEquipmentPickerService _equipmentPicker;
+    private readonly ISkillPickerService _skillPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
+    private Dictionary<int, string> _archetypeNames = new();
 
     [ObservableProperty]
     private int warbandId;
@@ -23,7 +27,16 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private Warband? warband;
 
     [ObservableProperty]
-    private ObservableCollection<WarriorRow> warriors = new();
+    private ObservableCollection<WarriorRow> heroes = new();
+
+    [ObservableProperty]
+    private ObservableCollection<WarriorRow> henchmen = new();
+
+    [ObservableProperty]
+    private bool heroesExpanded = true;
+
+    [ObservableProperty]
+    private bool henchmenExpanded = true;
 
     // IsSelected porté par la ligne (SelectionMode="None" sur le CollectionView), pas la sélection
     // native : constaté à l'usage (screenshot Android) que même un Border stylé via
@@ -39,10 +52,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private bool showHistory;
 
-    public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService)
+    public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService,
+        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
+        _equipmentPicker = equipmentPicker;
+        _skillPicker = skillPicker;
     }
 
     partial void OnWarbandIdChanged(int value) => _ = LoadAsync(value);
@@ -56,6 +72,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void Select(WarriorRow row) => SelectedRow = row;
 
+    [RelayCommand]
+    private void ToggleHeroes() => HeroesExpanded = !HeroesExpanded;
+
+    [RelayCommand]
+    private void ToggleHenchmen() => HenchmenExpanded = !HenchmenExpanded;
+
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -64,15 +86,21 @@ public partial class WarbandDetailViewModel : BaseViewModel
             if (Warband is null) return;
 
             _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId);
+            _archetypeNames = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.Name);
 
             var loaded = await _warbandService.GetWarriorsAsync(id);
-            Warriors = new ObservableCollection<WarriorRow>(loaded.Select(w => new WarriorRow(w)));
+            var rows = loaded.Select(ToRow).ToList();
+            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero));
+            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero));
             SelectedRow = null;
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
         });
     }
+
+    private WarriorRow ToRow(Warrior warrior) =>
+        new(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"));
 
     [RelayCommand]
     private static async Task BackAsync() => await Shell.Current.GoToAsync("..");
@@ -102,8 +130,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         await Loading.RunAsync(async () =>
         {
-            var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, _recruitableArchetypes[index], name);
-            Warriors.Add(new WarriorRow(warrior));
+            var archetype = _recruitableArchetypes[index];
+            var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, name);
+            var row = ToRow(warrior);
+            (archetype.IsHero ? Heroes : Henchmen).Add(row);
         });
     }
 
@@ -112,7 +142,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
-        var activeWarriors = Warriors.Select(r => r.Warrior).Where(w => w.Status == WarriorStatus.Active).ToList();
+        var activeWarriors = Heroes.Concat(Henchmen)
+            .Select(r => r.Warrior)
+            .Where(w => w.Status == WarriorStatus.Active)
+            .ToList();
         if (activeWarriors.Count == 0)
         {
             await ShowInfoAsync(Loc["EndOfGameTitle"], Loc["EndOfGameNoWarriors"]);
@@ -182,5 +215,45 @@ public partial class WarbandDetailViewModel : BaseViewModel
         await _warbandService.AddHistoryEntryAsync(Warband.Id, text);
         var history = await _warbandService.GetHistoryEntriesAsync(Warband.Id);
         HistoryEntries = new ObservableCollection<HistoryEntry>(history);
+    }
+
+    [RelayCommand]
+    private async Task AddEquipment(WarriorRow row)
+    {
+        var item = await _equipmentPicker.PickEquipmentAsync();
+        if (item is null) return;
+
+        var carried = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, item);
+        row.Equipment.Add(carried);
+    }
+
+    [RelayCommand]
+    private async Task RemoveEquipment(WarriorEquipment carried)
+    {
+        var row = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Equipment.Contains(carried));
+        if (row is null) return;
+
+        await _warbandService.RemoveWarriorEquipmentAsync(carried.Id);
+        row.Equipment.Remove(carried);
+    }
+
+    [RelayCommand]
+    private async Task AddSkill(WarriorRow row)
+    {
+        var skill = await _skillPicker.PickSkillAsync();
+        if (skill is null) return;
+
+        var learned = await _warbandService.AddWarriorSkillAsync(row.Warrior.Id, skill);
+        row.Skills.Add(learned);
+    }
+
+    [RelayCommand]
+    private async Task RemoveSkill(WarriorSkill learned)
+    {
+        var row = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Skills.Contains(learned));
+        if (row is null) return;
+
+        await _warbandService.RemoveWarriorSkillAsync(learned.Id);
+        row.Skills.Remove(learned);
     }
 }

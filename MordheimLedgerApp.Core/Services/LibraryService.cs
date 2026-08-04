@@ -40,6 +40,13 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel()).ToList();
     }
 
+    public async Task<List<Skill>> GetSkillsAsync()
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<SkillEntity>().ToListAsync();
+        return rows.Select(r => r.ToModel()).ToList();
+    }
+
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype)
     {
         await _db.Initialization;
@@ -88,6 +95,22 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(item.ToEntity());
     }
 
+    public async Task SaveSkillAsync(Skill skill)
+    {
+        await _db.Initialization;
+        if (skill.Id == 0)
+        {
+            var entity = skill.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            skill.Id = entity.Id;
+            return;
+        }
+
+        var existing = await _db.Connection.FindAsync<SkillEntity>(skill.Id);
+        if (existing?.Source == ContentSource.Official) skill.Source = ContentSource.Modified;
+        await _db.Connection.UpdateAsync(skill.ToEntity());
+    }
+
     public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)
     {
         await _db.Initialization;
@@ -104,5 +127,11 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<EquipmentItemEntity>(equipmentItemId);
+    }
+
+    public async Task DeleteSkillAsync(int skillId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<SkillEntity>(skillId);
     }
 }

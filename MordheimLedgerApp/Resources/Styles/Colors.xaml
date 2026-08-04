@@ -13,6 +13,9 @@
     <Color x:Key="AppTextMuted">#948C7E</Color>
     <Color x:Key="AppBorder">#35303A</Color>
     <Color x:Key="AppDanger">#8B3A3A</Color>
+    <!-- Fixed (not palette-dependent), like AppDanger — milestone boxes on an ExperienceTrackView
+         (see WarbandDetailPage roster) need to read as "highlighted" regardless of theme. -->
+    <Color x:Key="AppMilestone">#C9A227</Color>
 
     <!-- Static neutrals -->
     <Color x:Key="White">White</Color>

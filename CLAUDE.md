@@ -144,7 +144,17 @@ sur les Bénédictions de Nurgle de Kermesse (exclusives aux Impurs) en contrast
 Mutations génériques du Culte des Possédés (non-restreint, partagé avec les Pillards Hommes-Bêtes à
 venir). Les deux bandes ont chacune leur propre `MagicSchool` distincte (Rituels de Nurgle vs Rituels
 du Chaos) bien que thématiquement proches — confirmé sur mordheimer.net, ne pas les fusionner. La
-Roulotte de la Peste de Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1.
+Roulotte de la Peste de Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1. Horde Orque
+intégrée ensuite (1re bande à peupler `Mounts` dans son JSON — Sanglier de guerre, restreint à cette
+bande, avec ses propres SpecialRules "Charge Furieuse"/"Peau Épaisse"). Cette bande a aussi fait
+apparaître un cas non couvert par le modèle : le Mouvement des Squigs des cavernes n'est pas une
+caractéristique fixe (2D6ps à chaque déplacement, comme sur la fiche officielle et mordheimer.net) alors
+que `WarriorArchetype.Movement`/`Warrior.Movement` sont des `int`. Décision avec l'utilisateur (plutôt que
+d'improviser un 0 ou une moyenne) : ajout de `MovementOverride` (`string?`, nullable) sur `WarriorArchetype`
+et `Warrior` + `MovementDisplay` (= `MovementOverride ?? Movement.ToString()`), copié à la volée
+(`ToWarrior`) et affiché partout où le Mouvement apparaît (fiche guerrier, dialogs d'édition) — `Movement`
+reste un `int` de repli, `MovementOverride` prend le dessus dès qu'il est renseigné. À réutiliser si
+Skavens ou une autre bande à venir présente le même genre de caractéristique non-fixe.
 
 **Limite connue (Équipement)** : pas de dédup find-or-create par nom pour `EquipmentItem` (contrairement
 à SpecialRule/Mutation/MagicSchool) — donc impossible d'étendre la restriction d'un objet déjà seedé

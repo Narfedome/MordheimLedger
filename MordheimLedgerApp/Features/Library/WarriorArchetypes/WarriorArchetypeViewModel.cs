@@ -90,6 +90,7 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
             Source = s.Source,
             MaxCount = s.MaxCount,
             Movement = s.Movement,
+            MovementOverride = s.MovementOverride,
             WeaponSkill = s.WeaponSkill,
             BallisticSkill = s.BallisticSkill,
             Strength = s.Strength,

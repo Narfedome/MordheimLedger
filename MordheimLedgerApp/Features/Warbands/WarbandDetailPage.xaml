@@ -45,7 +45,7 @@
                             <Label Grid.Row="0" Grid.Column="6" Text="I" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
                             <Label Grid.Row="0" Grid.Column="7" Text="A" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
                             <Label Grid.Row="0" Grid.Column="8" Text="Ld" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="1" Grid.Column="0" Text="{Binding Warrior.Movement}" FontSize="13" HorizontalTextAlignment="Center"/>
+                            <Label Grid.Row="1" Grid.Column="0" Text="{Binding Warrior.MovementDisplay}" FontSize="13" HorizontalTextAlignment="Center"/>
                             <Label Grid.Row="1" Grid.Column="1" Text="{Binding Warrior.WeaponSkill}" FontSize="13" HorizontalTextAlignment="Center"/>
                             <Label Grid.Row="1" Grid.Column="2" Text="{Binding Warrior.BallisticSkill}" FontSize="13" HorizontalTextAlignment="Center"/>
                             <Label Grid.Row="1" Grid.Column="3" Text="{Binding Warrior.Strength}" FontSize="13" HorizontalTextAlignment="Center"/>

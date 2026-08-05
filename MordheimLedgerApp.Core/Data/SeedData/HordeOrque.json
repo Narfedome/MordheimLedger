@@ -1,0 +1,368 @@
+{
+  "name": { "en": "Orc Mob", "fr": "Horde Orque" },
+  "description": {
+    "en": "Orcs and Goblins love nothing more than a good scrap and a good pillage - many Orc Bosses are drawn to the City of the Damned and the magic stone that lies within it, preferring to ambush other warbands for their loot rather than dig for it themselves.",
+    "fr": "Les orques et les gobelins sont ceux, parmi toutes les races du monde de Warhammer, pour qui une bonne bagarre est la perspective la plus réjouissante. De nombreux Chefs Orques sont attirés vers la Cité des Damnés et la pierre magique qui s'y trouve, préférant tendre des embuscades aux autres bandes pour leur dérober leurs richesses plutôt que de les extraire eux-mêmes."
+  },
+  "specialRules": [
+    {
+      "name": { "en": "Distasteful Company", "fr": "Des gens peu recommandables" },
+      "description": {
+        "en": "Many Hired Swords refuse to work for Orcs, fearing they are just as likely to be eaten as fought alongside. An Orc warband may only hire Pit Fighters, Ogre Bodyguards or Warlocks.",
+        "fr": "De nombreux Francs-Tireurs refusent de travailler pour des Orques, craignant de se faire dévorer plutôt qu'épauler au combat. Une bande d'Orques ne peut louer les services que de Gladiateurs, Gardes du Corps Ogres ou Mages."
+      }
+    }
+  ],
+  "magicSchools": [
+    { "name": { "en": "Waaagh! Magic", "fr": "Magie Waaagh !" } }
+  ],
+  "startingTreasury": 500,
+  "maxWarriors": 20,
+  "warriors": [
+    {
+      "name": { "en": "Orc Boss", "fr": "Chef Orque" },
+      "isHero": true,
+      "cost": 80,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 4, "toughness": 4,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 8,
+      "description": {
+        "en": "A massive, brutal individual who throws his lads into any fight he thinks he can profit from - the strongest, toughest and most violent of the mob, ready to prove it with his fists to any Boy who thinks otherwise.",
+        "fr": "Le Chef Orque est un individu massif et brutal, qui entraîne ses gars dans la moindre bagarre pourvu qu'il pense en tirer profit. Il est le plus fort, le plus résistant et le plus violent de la bande, et si un des Boyz osait s'imaginer le contraire, il le lui démontrerait à coups de poing."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Leader", "fr": "Chef" },
+          "description": {
+            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
+            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Orc Shaman", "fr": "Chamane Orque" },
+      "isHero": true,
+      "cost": 40,
+      "maxCount": 1,
+      "startingExperience": 10,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Shamans are outcasts of Orc society, gifted by the gods Gork and Mork with powers they can neither understand nor fully control - roaming Orc mobs are often the only place they are respected rather than shunned. May never wear armour.",
+        "fr": "Les Chamanes sont des individus à part dans la société orque, bénis par les dieux Gork et Mork qui leur ont accordé des pouvoirs qu'ils ne peuvent ni comprendre ni totalement maîtriser - les bandes en maraude sont souvent les seules à leur offrir un certain statut plutôt que le rejet. Ne porte jamais d'armure."
+      },
+      "isSpellcaster": true,
+      "specialRules": [
+        {
+          "name": { "en": "Wizard", "fr": "Sorcier" },
+          "description": {
+            "en": "This model is a Wizard and may cast spells (see the Spells library).",
+            "fr": "Cette figurine est un Sorcier et peut lancer des sorts (voir la bibliothèque des Sorts)."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Big 'Un", "fr": "Kosto" },
+      "isHero": true,
+      "cost": 40,
+      "maxCount": 2,
+      "startingExperience": 15,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Only the toughest survive and rise through the ranks of Orc society - Big 'Uns are such rising stars, carrying out the Boss's orders and, should he ever fall, deciding on his replacement (usually through personal combat).",
+        "fr": "Seuls les plus agressifs peuvent survivre et prospérer au sein de la société orque. Les Kostos font partie de cette élite et font office de bras droit pour le Chef - si jamais ce dernier venait à faillir, c'est probablement un de ses Kostos qui le pousserait dehors pour prendre sa place (le différend étant généralement réglé en combat singulier)."
+      }
+    },
+    {
+      "name": { "en": "Orc Boyz", "fr": "Boyz Orques" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Savage and tough, Boyz fear nothing they can get their hands on, though they are even more ignorant and superstitious than most other creatures - they form the core of any Orc mob.",
+        "fr": "Les Boyz sont sauvages et résistants. Ils ne craignent rien, peut-être parce qu'ils sont encore plus ignorants et superstitieux que n'importe quel autre être - ils constituent le gros des effectifs d'une bande Orque."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Animosity", "fr": "Animosité" },
+          "description": {
+            "en": "At the start of the Orc player's turn, roll a D6 for each Orc or Goblin Henchman not engaged in hand-to-hand combat - on a 1, roll again on the Animosity table to see how the model takes offense at one of its mates this turn.",
+            "fr": "Au début de chaque tour du joueur Orque, lancez 1D6 pour chaque Homme de main Orque ou Gobelin qui n'est pas engagé au Corps à Corps - sur un résultat de 1, relancez sur le tableau d'Animosité pour déterminer comment la figurine s'en prend à un de ses camarades ce tour-ci."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Goblin Warriors", "fr": "Guerriers Gobelins" },
+      "isHero": false,
+      "cost": 15,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 2, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 5,
+      "description": {
+        "en": "Used as cannon fodder (and occasionally as a food source!) by their larger Orc cousins - Goblins are less well equipped than Boyz, having to make do with whatever the Orcs do not want. A mob may never field more than twice as many Goblins as Orcs (Heroes included).",
+        "fr": "Les Gobelins sont utilisés comme chair à canon (et parfois comme source de nourriture !) par leurs gros cousins Orques. Ils sont moins bien équipés que les Boyz et doivent se contenter de ce que ces derniers n'ont pas voulu. Une bande ne peut jamais compter plus de deux fois plus de Gobelins que d'Orques (Héros inclus)."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Animosity", "fr": "Animosité" },
+          "description": {
+            "en": "At the start of the Orc player's turn, roll a D6 for each Orc or Goblin Henchman not engaged in hand-to-hand combat - on a 1, roll again on the Animosity table to see how the model takes offense at one of its mates this turn.",
+            "fr": "Au début de chaque tour du joueur Orque, lancez 1D6 pour chaque Homme de main Orque ou Gobelin qui n'est pas engagé au Corps à Corps - sur un résultat de 1, relancez sur le tableau d'Animosité pour déterminer comment la figurine s'en prend à un de ses camarades ce tour-ci."
+          }
+        },
+        {
+          "name": { "en": "Not Orcs", "fr": "Pas des Orques" },
+          "description": {
+            "en": "Orcs do not trust other species and are not unsettled when a Goblin or Squig routs or is taken out of action - when checking whether the warband must take a Rout test, each Goblin or Squig taken out of action counts as only half a model.",
+            "fr": "Les Orques ne font pas confiance aux autres espèces et ne sont pas perturbés si un Gobelin ou un Squig est démoralisé ou mis hors de combat - lors du test de Déroute de la bande, chaque Gobelin ou Squig mis hors de combat compte comme une demie figurine."
+          }
+        },
+        {
+          "name": { "en": "Runts", "fr": "Moins que rien" },
+          "description": {
+            "en": "If a Goblin Warrior rolls 'That Lad's Got Talent' on the Experience table, the Boss kills it on the spot for getting too big for its boots - remove the model from the roster.",
+            "fr": "Si un Guerrier Gobelin obtient le résultat 'Ce gars est doué' sur le tableau d'Expérience, le Chef le tue sur-le-champ car l'avorton commence à 's'la donner' - retirez-le de la feuille de bande."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Cave Squigs", "fr": "Squigs des cavernes" },
+      "isHero": false,
+      "cost": 15,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 0, "movementOverride": "2D6", "weaponSkill": 4, "ballisticSkill": 0, "strength": 4, "toughness": 3,
+      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 5,
+      "description": {
+        "en": "A curious blend of animal and fungus raised by the Goblins, mostly composed of teeth, horns and a nasty temperament - never carries weapons or armour. Movement is 2D6\" (not a fixed value, see Movement rule below). A mob may never field more Squigs than Goblin Warriors.",
+        "fr": "Curieux métissage d'animal et de champignon dressé par les Gobelins, se résumant à une énorme mâchoire, une paire de cornes et un tempérament plutôt soupe au lait - ne porte jamais d'armes ni d'armures. Le Mouvement est de 2D6ps (caractéristique non fixe, voir la règle Mouvement ci-dessous). Une bande ne peut jamais compter plus de Squigs que de Guerriers Gobelins."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Movement", "fr": "Mouvement" },
+          "description": {
+            "en": "Cave Squigs move with an ungainly bouncing stride: roll 2D6\" for their move each time. Squigs never run and never declare charges, but count as charging in the following close combat round if their move brings them into contact with an enemy model.",
+            "fr": "Les Squigs se déplacent d'une démarche bondissante erratique : lancez 2D6ps pour leur mouvement à chaque fois. Ils ne courent jamais et ne déclarent jamais de charge, mais sont considérés comme ayant chargé pour la phase de Corps à Corps qui suit si leur mouvement les amène au contact d'un ennemi."
+          }
+        },
+        {
+          "name": { "en": "Minderz", "fr": "Au pied !" },
+          "description": {
+            "en": "A Cave Squig must always remain within 6\" of a Goblin Warrior. If none is within 6\" at the start of its Movement phase, the Squig goes wild: move it 2D6\" in a random direction each Movement phase, engaging any model it contacts, until the end of the game.",
+            "fr": "Un Squig des cavernes doit toujours rester à moins de 6ps d'un Guerrier Gobelin. Si aucun ne se trouve à portée au début de sa phase de Mouvement, le Squig devient fou : déplacez-le de 2D6ps dans une direction aléatoire à chaque phase de Mouvement, engageant toute figurine qu'il contacte, jusqu'à la fin de la partie."
+          }
+        },
+        {
+          "name": { "en": "Not Orcs", "fr": "Pas des Orques" },
+          "description": {
+            "en": "Orcs do not trust other species and are not unsettled when a Goblin or Squig routs or is taken out of action - when checking whether the warband must take a Rout test, each Goblin or Squig taken out of action counts as only half a model.",
+            "fr": "Les Orques ne font pas confiance aux autres espèces et ne sont pas perturbés si un Gobelin ou un Squig est démoralisé ou mis hors de combat - lors du test de Déroute de la bande, chaque Gobelin ou Squig mis hors de combat compte comme une demie figurine."
+          }
+        },
+        {
+          "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" },
+          "description": {
+            "en": "This model never gains Experience points.",
+            "fr": "Cette figurine ne gagne jamais de points d'Expérience."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Troll", "fr": "Troll" },
+      "isHero": false,
+      "cost": 200,
+      "maxCount": 1,
+      "startingExperience": 0,
+      "movement": 6, "weaponSkill": 3, "ballisticSkill": 1, "strength": 5, "toughness": 4,
+      "wounds": 3, "initiative": 1, "attacks": 3, "leadership": 4,
+      "description": {
+        "en": "Not intelligent enough to recognize the value of gold, but a big enough pile of food can buy a Troll's loyalty. May never be given weapons or armour, though it often carries a big club.",
+        "fr": "Les Trolls ne sont pas suffisamment intelligents pour reconnaître la valeur de l'or, mais il est possible de les amadouer avec un gros tas de nourriture. Ne peut jamais recevoir d'armes ni d'armures, bien qu'il porte souvent un gros gourdin."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
+          "description": {
+            "en": "This model causes Fear (see the Psychology rules).",
+            "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+          }
+        },
+        {
+          "name": { "en": "Stupidity", "fr": "Stupidité" },
+          "description": {
+            "en": "This model is subject to the rules for Stupidity (see the Psychology rules).",
+            "fr": "Cette figurine est soumise aux règles de Stupidité (voir les règles de Psychologie)."
+          }
+        },
+        {
+          "name": { "en": "Regeneration", "fr": "Régénération" },
+          "description": {
+            "en": "Whenever this model suffers a Wound, roll a D6: on a 4+ the Wound is ignored. Does not work against Wounds caused by fire or fire-based magic. This model never rolls on the Serious Injury table after a battle.",
+            "fr": "Chaque fois que cette figurine subit une Blessure, lancez 1D6 : sur un résultat de 4+, la Blessure est ignorée. Ne fonctionne pas contre les blessures causées par le feu ou la magie basée sur le feu. Cette figurine ne fait jamais de jet de Blessure Grave en fin de partie."
+          }
+        },
+        {
+          "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" },
+          "description": {
+            "en": "This model never gains Experience points.",
+            "fr": "Cette figurine ne gagne jamais de points d'Expérience."
+          }
+        },
+        {
+          "name": { "en": "Always Hungry", "fr": "Toujours Faim" },
+          "description": {
+            "en": "The warband must pay 15 gc after every battle to feed the Troll. If it cannot, the Boss may sacrifice 2 Goblins or Squigs to feed it instead - if neither is paid, the Troll leaves the warband for good.",
+            "fr": "La bande doit dépenser 15 CO après chaque bataille pour nourrir le Troll. Si elle n'en a pas les moyens, le Chef peut sacrifier 2 Gobelins ou Squigs pour le nourrir à la place - si ni l'un ni l'autre n'est fait, le Troll quitte la bande définitivement."
+          }
+        },
+        {
+          "name": { "en": "Vomit Attack", "fr": "Vomi" },
+          "description": {
+            "en": "Instead of its normal attacks, the Troll may make a single automatic-hit attack with Strength 5 that ignores armour saves.",
+            "fr": "Au lieu de ses attaques normales, le Troll peut effectuer une unique attaque touchant automatiquement, résolue à Force 5 et ignorant les sauvegardes d'armure."
+          }
+        },
+        {
+          "name": { "en": "Large Target", "fr": "Grande Cible" },
+          "description": {
+            "en": "This model is a Large Target, as defined in the Shooting rules.",
+            "fr": "Cette figurine est une Grande Cible, comme défini dans les règles de Tir."
+          }
+        }
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": { "en": "Short Bow", "fr": "Arc court" }, "category": "MissileWeapon", "cost": 5,
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Ball & Chain", "fr": "Chaîne & boulet" }, "category": "MeleeWeapon", "cost": 15,
+      "description": {
+        "en": "Goblins only. Two-handed, Colossal Strength (no armour save allowed, Wounds caused are 1D3 instead of 1), Tiring (roll an Injury test for the wielder after the battle), Unpredictable (see below): a huge ball on a long chain, requiring Mad Cap Mushrooms to wield. When first swung, the wielder is moved 2D6\" in a direction chosen by the controlling player; on subsequent Movement phases roll a D6 to see where it drags him next, and it may knock him out of action outright.",
+        "fr": "Réservée aux Gobelins. Arme à deux mains, Force Colossale (aucune sauvegarde d'armure, les blessures infligées sont de 1D3 au lieu d'une seule), Épuisante (jet de Blessure pour le porteur après la bataille), Imprévisible (voir ci-dessous) : un énorme boulet fixé au bout d'une longue chaîne, dont le maniement nécessite la consommation de champignons bonnets de fou. Au premier tour où le porteur la fait tournoyer, il est déplacé de 2D6ps dans une direction choisie par son joueur ; aux phases de Mouvement suivantes, un jet de 1D6 détermine où elle l'entraîne, pouvant le mettre hors de combat."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Squig Prodder", "fr": "Aiguillon à squigs" }, "category": "MeleeWeapon", "cost": 15,
+      "description": {
+        "en": "Goblins only. A trident on a long haft used to steer Cave Squigs - a Goblin carrying one may control any Squig within 12\" instead of the usual 6\" (see the Minderz rule). Counts as a spear in hand-to-hand combat.",
+        "fr": "Réservé aux Gobelins. Un trident fixé au bout d'une longue hampe utilisé pour diriger les Squigs des cavernes - un Gobelin qui en porte un peut contrôler tout Squig à moins de 12ps au lieu des 6ps habituels (voir la règle Au pied !). Considéré comme une lance au Corps à Corps."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Mad Cap Mushrooms", "fr": "Champignons bonnets de fou" }, "category": "MiscellaneousEquipment", "cost": 25,
+      "description": {
+        "en": "Common only if the warband includes at least one Goblin. A Goblin Warrior may eat these before a battle to gain Frenzy. After the battle, roll a D6: on a 1 the model becomes permanently Stupid. Required to wield a Ball & Chain.",
+        "fr": "Disponibilité Commune uniquement si la bande compte au moins un Gobelin. Un Guerrier Gobelin peut en consommer avant une bataille pour gagner la Frénésie. Après la bataille, lancez 1D6 : sur un 1, la figurine devient Stupide de façon permanente. Nécessaires pour manier une Chaîne & boulet."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
+  "spells": [
+    {
+      "magicSchoolName": "Waaagh! Magic",
+      "rollValue": 1,
+      "difficulty": 9,
+      "name": { "en": "Led'z Go", "fr": "Z'y Va !" },
+      "description": {
+        "en": "Any Orc or Goblin within 4\" of the Shaman automatically strikes first in hand-to-hand combat, regardless of other circumstances. Lasts until the Shaman is knocked down, stunned or taken out of action.",
+        "fr": "Toute figurine Orque ou Gobelin à moins de 4ps du Chamane frappe automatiquement en premier au Corps à Corps, quelles que soient les circonstances. Dure jusqu'à ce que le Chamane soit mis à terre, sonné ou hors de combat."
+      }
+    },
+    {
+      "magicSchoolName": "Waaagh! Magic",
+      "rollValue": 2,
+      "difficulty": 7,
+      "name": { "en": "Oi! Gerroff!", "fr": "Bouge de Là !" },
+      "description": {
+        "en": "Range 8\". Moves an enemy model D6\" directly away from the Shaman. If it collides with another model or a building, both suffer a Strength 3 hit. May not target models in hand-to-hand combat.",
+        "fr": "Portée 8ps. Déplace une figurine ennemie de 1D6ps dans la direction opposée au Chamane. Si la figurine heurte une autre figurine ou un bâtiment, les deux subissent une touche de Force 3. Ne peut pas cibler une figurine engagée au Corps à Corps."
+      }
+    },
+    {
+      "magicSchoolName": "Waaagh! Magic",
+      "rollValue": 3,
+      "difficulty": 9,
+      "name": { "en": "Zzap!", "fr": "Zzzap !" },
+      "description": {
+        "en": "Range 12\". Causes D3 Strength 4 hits on the closest enemy model, no armour saves allowed.",
+        "fr": "Portée 12ps. Inflige 1D3 touches de Force 4 à la figurine ennemie la plus proche, aucune sauvegarde d'armure possible."
+      }
+    },
+    {
+      "magicSchoolName": "Waaagh! Magic",
+      "rollValue": 4,
+      "difficulty": 6,
+      "name": { "en": "Fooled Ya!", "fr": "Bouffon, Va !" },
+      "description": {
+        "en": "No enemy may charge the Shaman next turn. If the Shaman is engaged in hand-to-hand combat, he may immediately move 4\" away.",
+        "fr": "Aucun ennemi ne peut charger le Chamane durant le prochain tour. Si le Chamane est engagé au Corps à Corps, il peut immédiatement être déplacé de 4ps."
+      }
+    },
+    {
+      "magicSchoolName": "Waaagh! Magic",
+      "rollValue": 5,
+      "difficulty": 7,
+      "name": { "en": "Clubba", "fr": "Ramèn'ta Fraise !" },
+      "description": {
+        "en": "An ectoplasmic club appears in the Shaman's hand, counting as a club with +2 Strength and granting +1 Attack. Lasts until the Shaman suffers a Wound.",
+        "fr": "Une énorme massue fantomatique apparaît dans la main du Chamane, considérée comme un gourdin ordinaire mais donnant +2 en Force et +1 Attaque. Dure jusqu'à ce que le Chamane subisse une Blessure."
+      }
+    },
+    {
+      "magicSchoolName": "Waaagh! Magic",
+      "rollValue": 6,
+      "difficulty": 8,
+      "name": { "en": "Fire of Gork", "fr": "Feu de Gork" },
+      "description": {
+        "en": "Range 12\". Two bolts of green flame each cause D3 Strength 3 hits - both bolts may strike the closest enemy model, or be split between the two closest enemy models.",
+        "fr": "Portée 12ps. Deux éclairs de flammes vertes infligent chacun 1D3 touches de Force 3 - les deux éclairs peuvent frapper la figurine ennemie la plus proche, ou être répartis entre les deux figurines ennemies les plus proches."
+      }
+    }
+  ],
+  "mounts": [
+    {
+      "name": { "en": "War Boar", "fr": "Sanglier de guerre" },
+      "description": {
+        "en": "Huge, fierce and bad-tempered - the biggest Orcs invariably claim the right to ride these into the ruins of Mordheim.",
+        "fr": "Énorme, féroce et soupe au lait : les orques les plus gros se réservent immanquablement le droit de le chevaucher dans les ruines de Mordheim."
+      },
+      "cost": 90,
+      "rarity": 11,
+      "movement": 7, "weaponSkill": 3, "ballisticSkill": 0, "strength": 3, "toughness": 4,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 3,
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": { "en": "Furious Charge", "fr": "Charge Furieuse" },
+          "description": {
+            "en": "The War Boar gains +2 Strength when it charges - this bonus applies only to the boar, not its rider.",
+            "fr": "Le sanglier de guerre gagne un bonus de +2 en Force lorsqu'il charge - ce bonus ne s'applique qu'au sanglier, pas à son cavalier."
+          }
+        },
+        {
+          "name": { "en": "Thick Skin", "fr": "Peau Épaisse" },
+          "description": {
+            "en": "The rider's armour save is increased by +2 instead of the usual +1 while mounted on a War Boar.",
+            "fr": "La sauvegarde d'armure du cavalier est augmentée de +2 au lieu de +1 habituel tant qu'il est monté sur un sanglier de guerre."
+          }
+        }
+      ]
+    }
+  ]
+}

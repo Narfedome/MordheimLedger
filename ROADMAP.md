@@ -22,7 +22,7 @@
 - [ ] Historique de campagne / trésorerie détaillée
 - [x] Restrictions par bande (Équipement/Compétences/Montures) réellement éditables + filtrées dans les pickers
 - [x] Écoles de magie normalisées en entité propre (`MagicSchool`), liée à la bande plutôt qu'au guerrier
-- [~] Compléter le catalogue au-delà d'une seule bande — 9 bandes intégrées, toutes via le pipeline JSON
+- [~] Compléter le catalogue au-delà d'une seule bande — 10 bandes intégrées, toutes via le pipeline JSON
   `Data/SeedData/*.json` : Morts-Vivants, Chasseurs de Trésors Nains, Mercenaires Averlanders, Mercenaires
   Ostlanders, Mercenaires Reiklander/Middenheimer/Marienburg (les 3 dernières partagent un même roster de
   base — Capitaine/Champion/Jeune Loup/Guerrier/Tireur/Bretteur — avec des règles spéciales et trésorerie
@@ -38,9 +38,14 @@
   livre de règles) ne peut pas encore être étendu à une bande déjà seedée depuis un JSON ultérieur. Pour
   l'instant ces 2 objets du Culte des Possédés sont restreints à cette seule bande en attendant un vrai
   mécanisme de partage multi-bandes (à généraliser plus tard, refera surface à l'import des Pillards
-  Hommes-Bêtes). **En cours** : import du reste du second lot fourni par l'utilisateur (textes FR bruts,
-  mise en page dégradée) — Horde Orque, Pillards Hommes-Bêtes, Répurgateurs, Skavens (Clan Eshin), Sœurs de
-  Sigmar, Kislévites. Méthode : croiser le texte FR fourni avec mordheimer.net (EN, via le Browser pane —
+  Hommes-Bêtes), Horde Orque (1re bande à utiliser le catalogue Mount — Sanglier de guerre, restreint —
+  et 1er cas de caractéristique Mouvement non-fixe : les Squigs des cavernes se déplacent de 2D6ps plutôt
+  qu'une valeur fixe, d'où l'ajout de `WarriorArchetype.MovementOverride`/`MovementDisplay` — texte libre
+  qui prime sur le Mouvement numérique partout où il est affiché, décidé avec l'utilisateur plutôt que de
+  transformer `Movement` en texte pur ou de bricoler une valeur numérique approximative). **En cours** :
+  import du reste du second lot fourni par l'utilisateur (textes FR bruts, mise en page dégradée) —
+  Pillards Hommes-Bêtes, Répurgateurs, Skavens (Clan Eshin), Sœurs de Sigmar, Kislévites. Méthode :
+  croiser le texte FR fourni avec mordheimer.net (EN, via le Browser pane —
   WebFetch direct renvoie 403 sur ce site) pour combler les trous de mise en page / vérifier les chiffres
   avant d'écrire le JSON, bande par bande. La Roulotte de la Peste de Kermesse (véhicule à 4 profils
   combinés) reste hors périmètre V1, comme décidé.

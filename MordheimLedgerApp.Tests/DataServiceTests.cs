@@ -55,10 +55,10 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsNineWarbandsTotal()
+    public async Task Database_SeedsTenWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(9, archetypes.Count);
+        Assert.Equal(10, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
@@ -68,13 +68,15 @@ public class DataServiceTests : IDisposable
         Assert.Contains(archetypes, a => a.Name == "Marienburg Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Carnival of Chaos");
         Assert.Contains(archetypes, a => a.Name == "Cult of the Possessed");
+        Assert.Contains(archetypes, a => a.Name == "Orc Mob");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(24, spells.Count);
+        Assert.Equal(30, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Chaos Rituals"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Waaagh! Magic"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -185,6 +187,30 @@ public class DataServiceTests : IDisposable
         var allMutations = await _library.GetMutationsAsync("en");
         var greatClaw = allMutations.Single(m => m.Name == "Great Claw");
         Assert.Empty(greatClaw.RestrictedToWarbandArchetypeIds);
+    }
+
+    /// <summary>Orc Mob is the first warband to use both the Mount catalog (War Boar, restricted) and a
+    /// non-fixed Movement characteristic (Cave Squigs roll 2D6" instead of a fixed value) - see
+    /// WarriorArchetype.MovementOverride/MovementDisplay, added specifically for this case.</summary>
+    [Fact]
+    public async Task HordeOrque_SquigMovementOverride_AndWarBoarMount()
+    {
+        var orcs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Orc Mob");
+        var warriors = await _library.GetWarriorArchetypesAsync(orcs.Id, "en");
+
+        var squigs = warriors.Single(w => w.Name == "Cave Squigs");
+        Assert.Equal("2D6", squigs.MovementOverride);
+        Assert.Equal("2D6", squigs.MovementDisplay);
+        Assert.Contains(squigs.SpecialRules, r => r.Name == "Never Gains Experience");
+
+        var boss = warriors.Single(w => w.Name == "Orc Boss");
+        Assert.Equal(boss.Movement.ToString(), boss.MovementDisplay);
+        Assert.Contains(boss.SpecialRules, r => r.Name == "Leader");
+
+        var mounts = await _library.GetMountsAsync("en");
+        var warBoar = mounts.Single(m => m.Name == "War Boar");
+        Assert.Equal([orcs.Id], warBoar.RestrictedToWarbandArchetypeIds);
+        Assert.Contains(warBoar.SpecialRules, r => r.Name == "Furious Charge");
     }
 
     [Fact]

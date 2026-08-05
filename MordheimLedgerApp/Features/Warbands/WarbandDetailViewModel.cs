@@ -209,6 +209,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Experience = w.Experience,
             Status = w.Status,
             Movement = w.Movement,
+            MovementOverride = w.MovementOverride,
             WeaponSkill = w.WeaponSkill,
             BallisticSkill = w.BallisticSkill,
             Strength = w.Strength,

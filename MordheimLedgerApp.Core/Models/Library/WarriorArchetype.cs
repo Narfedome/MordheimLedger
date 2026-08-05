@@ -22,6 +22,16 @@ public class WarriorArchetype
     public int? MaxCount { get; set; }
 
     public int Movement { get; set; }
+
+    /// <summary>Non-null overrides the displayed Movement value with free text (e.g. "2D6" for Cave
+    /// Squigs, whose Movement isn't a fixed characteristic) - Movement itself is kept as a numeric
+    /// fallback/sort key. See MovementDisplay.</summary>
+    public string? MovementOverride { get; set; }
+
+    /// <summary>What the UI should actually show for Movement - MovementOverride if set, otherwise the
+    /// plain numeric Movement.</summary>
+    public string MovementDisplay => MovementOverride ?? Movement.ToString();
+
     public int WeaponSkill { get; set; }
     public int BallisticSkill { get; set; }
     public int Strength { get; set; }

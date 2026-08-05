@@ -59,6 +59,11 @@
                 <VerticalStackLayout Grid.Row="0" Grid.Column="0">
                     <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Entry Text="{Binding Item.Movement}" Keyboard="Numeric"/>
+                    <!-- Surcharge texte optionnelle (ex. "2D6" pour les Squigs des cavernes, dont le
+                         Mouvement n'est pas une caractéristique fixe) - prioritaire sur la valeur
+                         numérique ci-dessus partout où le Mouvement est affiché (WarriorArchetype.
+                         MovementDisplay/Warrior.MovementDisplay). -->
+                    <Entry Text="{Binding Item.MovementOverride}" Placeholder="{loc:Loc WarriorArchetypeMovementOverridePh}" FontSize="11"/>
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Row="0" Grid.Column="1">
                     <Label Text="WS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>

@@ -141,6 +141,7 @@ public class AppDatabase
         await SeedWarbandFromJsonAsync("Marienburgers.json");
         await SeedWarbandFromJsonAsync("KermesseDuChaos.json");
         await SeedWarbandFromJsonAsync("CulteDesPossedes.json");
+        await SeedWarbandFromJsonAsync("HordeOrque.json");
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
@@ -189,6 +190,7 @@ public class AppDatabase
                 MaxCount = w.MaxCount,
                 StartingExperience = w.StartingExperience,
                 Movement = w.Movement,
+                MovementOverride = w.MovementOverride,
                 WeaponSkill = w.WeaponSkill,
                 BallisticSkill = w.BallisticSkill,
                 Strength = w.Strength,

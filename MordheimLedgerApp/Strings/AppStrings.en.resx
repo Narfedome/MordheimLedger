@@ -351,6 +351,9 @@
   <data name="WarriorArchetypeStartingExperiencePh" xml:space="preserve">
     <value>Starting XP</value>
   </data>
+  <data name="WarriorArchetypeMovementOverridePh" xml:space="preserve">
+    <value>Movement (text, e.g. 2D6)</value>
+  </data>
   <data name="WarriorArchetypeEditTitle" xml:space="preserve">
     <value>Edit Warrior Type</value>
   </data>

@@ -18,6 +18,7 @@ public class WarriorArchetypeEntity
     public int? MaxCount { get; set; }
 
     public int Movement { get; set; }
+    public string? MovementOverride { get; set; }
     public int WeaponSkill { get; set; }
     public int BallisticSkill { get; set; }
     public int Strength { get; set; }

@@ -65,6 +65,11 @@ public class WarriorSeedData
     public int? MaxCount { get; set; }
     public int StartingExperience { get; set; }
     public int Movement { get; set; }
+
+    /// <summary>Non-null overrides the displayed Movement value with free text (e.g. "2D6" for Cave
+    /// Squigs) - see WarriorArchetype.MovementOverride. Movement itself stays a plain int fallback.</summary>
+    public string? MovementOverride { get; set; }
+
     public int WeaponSkill { get; set; }
     public int BallisticSkill { get; set; }
     public int Strength { get; set; }

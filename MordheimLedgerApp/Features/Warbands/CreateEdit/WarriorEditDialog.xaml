@@ -50,6 +50,14 @@
                 <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
             </Grid>
 
+            <!-- Surcharge texte optionnelle du Mouvement (ex. "2D6" pour les Squigs des cavernes) -
+                 prioritaire sur le stepper M ci-dessus partout où le Mouvement est affiché, copiée
+                 depuis l'archétype au recrutement (voir WarriorArchetype.MovementOverride). -->
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Loc WarriorArchetypeMovementOverridePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding Item.MovementOverride}"/>
+            </VerticalStackLayout>
+
             <!-- Monture : champ 0..1 (pas une liste/onglet) - même famille que Nom/stats, soumis au
                  Enregistrer/Annuler du dialog plutôt qu'à une persistance immédiate. -->
             <VerticalStackLayout Spacing="2">

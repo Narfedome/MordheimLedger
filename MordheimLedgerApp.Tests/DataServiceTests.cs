@@ -55,10 +55,10 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsEightWarbandsTotal()
+    public async Task Database_SeedsNineWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(8, archetypes.Count);
+        Assert.Equal(9, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
@@ -67,12 +67,14 @@ public class DataServiceTests : IDisposable
         Assert.Contains(archetypes, a => a.Name == "Middenheim Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Marienburg Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Carnival of Chaos");
+        Assert.Contains(archetypes, a => a.Name == "Cult of the Possessed");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(18, spells.Count);
+        Assert.Equal(24, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Chaos Rituals"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -166,6 +168,23 @@ public class DataServiceTests : IDisposable
         var allMutations = await _library.GetMutationsAsync("en");
         var rot = allMutations.Single(m => m.Name == "Nurgle's Rot");
         Assert.Equal([kermesse.Id], rot.RestrictedToWarbandArchetypeIds);
+    }
+
+    /// <summary>Contrasts with Kermesse's restricted Nurgle's Blessings: the generic Chaos mutation
+    /// list (p.76) stays unrestricted (empty RestrictedToWarbandArchetypeIds) so it's shareable with
+    /// Pillards Hommes-Bêtes later - and both Possessed archetypes flagged CanBuyMutations get the
+    /// mutations tab.</summary>
+    [Fact]
+    public async Task CulteDesPossedes_MutationsAreUnrestricted()
+    {
+        var possessed = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Cult of the Possessed");
+        var warriors = await _library.GetWarriorArchetypesAsync(possessed.Id, "en");
+        Assert.True(warriors.Single(w => w.Name == "The Possessed").CanBuyMutations);
+        Assert.True(warriors.Single(w => w.Name == "Mutant").CanBuyMutations);
+
+        var allMutations = await _library.GetMutationsAsync("en");
+        var greatClaw = allMutations.Single(m => m.Name == "Great Claw");
+        Assert.Empty(greatClaw.RestrictedToWarbandArchetypeIds);
     }
 
     [Fact]

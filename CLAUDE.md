@@ -137,6 +137,23 @@ ajoutées non-restreintes via `Reiklanders.json` plutôt que dans `OfficialConte
 MagicSchool — attention à ne pas re-déclarer un nom déjà présent dans un futur import, ça créerait un
 doublon).
 
+**Fait (suite)** : Kermesse du Chaos et Culte des Possédés intégrées. Mutation a reçu le même
+mécanisme de restriction par bande qu'Équipement/Compétence/Monture
+(`RestrictedToWarbandArchetypeIds` + `WarbandArchetypeMutationEntity`), utilisé pour la première fois
+sur les Bénédictions de Nurgle de Kermesse (exclusives aux Impurs) en contraste avec le pool de
+Mutations génériques du Culte des Possédés (non-restreint, partagé avec les Pillards Hommes-Bêtes à
+venir). Les deux bandes ont chacune leur propre `MagicSchool` distincte (Rituels de Nurgle vs Rituels
+du Chaos) bien que thématiquement proches — confirmé sur mordheimer.net, ne pas les fusionner. La
+Roulotte de la Peste de Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1.
+
+**Limite connue (Équipement)** : pas de dédup find-or-create par nom pour `EquipmentItem` (contrairement
+à SpecialRule/Mutation/MagicSchool) — donc impossible d'étendre la restriction d'un objet déjà seedé
+par une autre bande dans un JSON importé plus tard. L'Arme Obsidienne et l'Armure du Chaos du Culte
+des Possédés (censées être partagées par 6 bandes selon le livre de règles, dont les Pillards
+Hommes-Bêtes) sont pour l'instant restreintes à la seule bande Culte des Possédés en attendant un vrai
+mécanisme de partage multi-bandes pour l'Équipement — à généraliser si/quand ça bloque un futur import
+(probablement aux Pillards Hommes-Bêtes).
+
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
 `get_page_text`) fonctionne.
 

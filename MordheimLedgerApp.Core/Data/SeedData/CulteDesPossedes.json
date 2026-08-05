@@ -1,0 +1,345 @@
+{
+  "name": { "en": "Cult of the Possessed", "fr": "Culte des Possédés" },
+  "description": {
+    "en": "Chaos worshippers led by the Shadow Lord, gathering wyrdstone in Mordheim to create ever more Possessed - warriors who have willingly given their bodies to daemons.",
+    "fr": "Des adorateurs du Chaos menés par le Seigneur des Ombres, récoltant la pierre magique de Mordheim pour créer toujours plus de Possédés - des guerriers qui ont volontairement abandonné leur corps à des démons."
+  },
+  "specialRules": [],
+  "magicSchools": [
+    { "name": { "en": "Chaos Rituals", "fr": "Rituels du Chaos" } }
+  ],
+  "startingTreasury": 500,
+  "maxWarriors": 15,
+  "warriors": [
+    {
+      "name": { "en": "Magister", "fr": "Magister" },
+      "isHero": true,
+      "cost": 70,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 8,
+      "isSpellcaster": true,
+      "description": {
+        "en": "Magisters lead the covens of the Possessed, granted magical powers by their patron gods - fanatical followers of the Dark Gods, utterly dedicated to bringing Chaos to the world.",
+        "fr": "Les Magisters mènent les Cultes de Possédés. Ils ont reçu des pouvoirs magiques de leurs dieux. Ce sont de fervents serviteurs des puissances ténébreuses, entièrement dévoués à l'avènement du Chaos."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Leader", "fr": "Chef" },
+          "description": {
+            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
+            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          }
+        },
+        {
+          "name": { "en": "Wizard", "fr": "Sorcier" },
+          "description": {
+            "en": "This model is a Wizard and may cast spells (see the Spells library).",
+            "fr": "Cette figurine est un Sorcier et peut lancer des sorts (voir la bibliothèque des Sorts)."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "The Possessed", "fr": "Possédé" },
+      "isHero": true,
+      "cost": 90,
+      "maxCount": 2,
+      "startingExperience": 8,
+      "movement": 5, "weaponSkill": 4, "ballisticSkill": 0, "strength": 4, "toughness": 4,
+      "wounds": 2, "initiative": 4, "attacks": 2, "leadership": 7,
+      "canBuyMutations": true,
+      "description": {
+        "en": "Warriors who have committed the greatest of heresies and given their bodies to daemons - nightmarish creatures, a melding of flesh, metal and black magic, perhaps the most dangerous and loathsome creatures of Mordheim.",
+        "fr": "Les Possédés ont commis la plus grave des hérésies, ils ont abandonné leur corps à un démon. Ce sont des êtres monstrueux, mélange de chair, de métal et d'énergie magique pure, peut-être les créatures les plus dangereuses de Mordheim, et certainement les plus effrayantes et les plus écœurantes."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
+          "description": {
+            "en": "This model causes Fear (see the Psychology rules).",
+            "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+          }
+        },
+        {
+          "name": { "en": "No Equipment", "fr": "Sans équipement" },
+          "description": {
+            "en": "This model may never be equipped with weapons or armour.",
+            "fr": "Cette figurine ne peut jamais être équipée d'armes ni d'armures."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Mutant", "fr": "Mutant" },
+      "isHero": true,
+      "cost": 25,
+      "maxCount": 2,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "canBuyMutations": true,
+      "description": {
+        "en": "Revered as the favoured ones of the Dark Gods, their physical disfigurements marking the vileness of their soul - they come in many shapes and sizes, each more bizarre than the next.",
+        "fr": "Les Mutants sont célébrés comme les favoris des dieux des ténèbres, leurs difformités montrant la déchéance de leurs âmes. Ils peuvent prendre bien des formes et des tailles différentes, toutes plus bizarres les unes que les autres."
+      }
+    },
+    {
+      "name": { "en": "Darksoul", "fr": "Damné" },
+      "isHero": false,
+      "cost": 35,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 4, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 6,
+      "description": {
+        "en": "Men driven insane by daemonic possession - the daemons have left their bodies, but their minds remain scarred, their insane strength making them dangerous fighters revered as holy men by the cult.",
+        "fr": "Les Damnés sont des hommes que les possessions démoniaques, très fréquentes juste après la destruction de Mordheim, ont fini par rendre complètement fous. Leur force de déments contribue à faire des Damnés de redoutables combattants. Les autres membres des bandes de Possédés les regardent comme des saints."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Crazed", "fr": "Déments" },
+          "description": {
+            "en": "Darksouls have been driven insane by daemonic possession and know no fear - they automatically pass any Leadership test they are required to take.",
+            "fr": "Les Damnés ont été rendus fous par la possession et ne connaissent pas la peur. Ils réussissent automatiquement tous les tests de Commandement qu'ils pourraient avoir à passer."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Beastman", "fr": "Homme-Bête" },
+      "isHero": false,
+      "cost": 45,
+      "maxCount": 3,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+      "wounds": 2, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Mutated monstrosities infesting the forests of the Empire - massive horned creatures with an inhuman resistance to pain, readily allying with the Magisters of the Possessed.",
+        "fr": "Les Hommes-Bêtes sont des monstres mutants qui infestent les forêts de l'Empire ; ils possèdent des cornes impressionnantes et sont très durs au mal. Ils se sont très vite alliés aux Magisters des bandes de Possédés."
+      }
+    },
+    {
+      "name": { "en": "Initiate", "fr": "Initié" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Chaos adepts aspiring to damnation - their vile deeds have driven them to the brink of insanity.",
+        "fr": "Les Initiés sont des adeptes du Chaos aspirant à la damnation. Leurs actes immondes les ont conduits jusqu'aux confins de la folie."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": { "en": "Obsidian Weapon", "fr": "Arme en obsidienne" },
+      "category": "MeleeWeapon",
+      "cost": 40,
+      "rarity": 12,
+      "description": {
+        "en": "Forged from obsidian mined in the Dark Lands - grants +1 Strength in close combat, costs 4x the price of a normal weapon of that type (pick any melee weapon type). Never usable by Dwarfs, Elves, Sisters of Sigmar, Witch Hunters or Priests. Always strikes last, even when charging.",
+        "fr": "Forgée dans l'obsidienne extraite des Terres Sombres - octroie +1 en Force au corps à corps, coûte 4 fois le prix d'une arme normale de ce type (choisissez le type d'arme). Jamais utilisable par les Nains, les Elfes, les Sœurs de Sigmar, les Répurgateurs ou les Prêtres. Frappe toujours en dernier, même en chargeant."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Chaos Armour", "fr": "Armure du Chaos" },
+      "category": "Armour",
+      "cost": 185,
+      "rarity": 13,
+      "description": {
+        "en": "A gift of the Dark Gods to a worthy warrior - grants a 4+ armour save. Once acquired, a Hero will never give it up and it fuses with its wearer permanently. May be worn by spellcasters, but not combined with a shield or buckler.",
+        "fr": "Un don des Dieux Sombres au guerrier méritant - octroie une sauvegarde d'armure de 4+. Une fois acquise, un Héros ne s'en sépare jamais et elle fusionne définitivement avec son porteur. Peut être portée par les lanceurs de sorts, mais pas combinée avec un bouclier ou une rondache."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
+  "mutations": [
+    {
+      "name": { "en": "Daemon Soul", "fr": "Âme démoniaque" },
+      "description": {
+        "en": "A daemon possesses the mutant's soul, granting a 4+ save against the effects of spells or prayers.",
+        "fr": "Un démon possède l'âme du mutant. Le démon confère une sauvegarde spéciale de 4+ contre les sorts ou les prières."
+      },
+      "cost": 20
+    },
+    {
+      "name": { "en": "Great Claw", "fr": "Pince" },
+      "description": {
+        "en": "One arm ends in a great crab-like claw - no weapon in that arm, but gains an extra Strength+1 Attack in close combat.",
+        "fr": "Un des bras du mutant se termine par une énorme pince de crabe. Il ne porte pas d'arme avec ce bras, mais gagne une Attaque supplémentaire de Force+1 au Corps à Corps."
+      },
+      "cost": 50
+    },
+    {
+      "name": { "en": "Cloven Hoofs", "fr": "Sabots fendus" },
+      "description": {
+        "en": "The warrior gains +1 Movement.",
+        "fr": "Le guerrier gagne +1 en Mouvement."
+      },
+      "cost": 40
+    },
+    {
+      "name": { "en": "Tentacle", "fr": "Tentacule" },
+      "description": {
+        "en": "One arm ends in a tentacle - may grapple an opponent in close combat, reducing its Attacks by 1 (minimum 1); the mutant chooses which Attack is lost.",
+        "fr": "Un des bras du mutant se termine par un tentacule. Le mutant peut agripper ses adversaires au Corps à Corps et leur faire perdre 1 Attaque, jusqu'à un minimum de 1."
+      },
+      "cost": 35
+    },
+    {
+      "name": { "en": "Blackblood", "fr": "Sang acide" },
+      "description": {
+        "en": "If the mutant suffers a wound in close combat, any model in base contact suffers a Strength 3 hit (no critical hits) from the corrosive spray.",
+        "fr": "Si le mutant subit une blessure au Corps à Corps, les figurines en contact subissent une touche de Force 3 (pas de Coups Critiques) à cause des éclaboussures."
+      },
+      "cost": 30
+    },
+    {
+      "name": { "en": "Spines", "fr": "Épines" },
+      "description": {
+        "en": "Any model in base contact automatically suffers a Strength 1 hit at the start of each close combat phase - spines never cause critical hits.",
+        "fr": "Toute figurine en contact avec le mutant subit automatiquement une touche de Force 1 au début de chaque phase de Corps à Corps. Les épines ne provoquent jamais de Coups Critiques."
+      },
+      "cost": 35
+    },
+    {
+      "name": { "en": "Scorpion Tail", "fr": "Queue de scorpion" },
+      "description": {
+        "en": "A long barbed venomed tail grants an extra Strength 5 Attack each close combat phase - reduced to Strength 2 if the target is immune to poison.",
+        "fr": "Le mutant possède une longue queue épineuse avec un dard empoisonné, autorisant une Attaque supplémentaire de Force 5 à chaque phase de Corps à Corps. Si la figurine touchée est immunisée au poison, la Force de la touche est réduite à 2."
+      },
+      "cost": 40
+    },
+    {
+      "name": { "en": "Extra Arm", "fr": "Bras supplémentaire" },
+      "description": {
+        "en": "May use any one-handed weapon in the extra arm for +1 Attack in close combat, or carry a shield/buckler. A Possessed choosing this gains an extra Attack but still carries no weapon.",
+        "fr": "Le mutant peut utiliser n'importe quelle arme à une main avec son bras supplémentaire, ce qui lui donne une Attaque supplémentaire au Corps à Corps. Il peut aussi utiliser un bouclier ou une rondache."
+      },
+      "cost": 40
+    },
+    {
+      "name": { "en": "Hideous", "fr": "Hideux" },
+      "description": {
+        "en": "The mutant causes Fear.",
+        "fr": "Le mutant est si laid qu'il provoque la peur."
+      },
+      "cost": 40
+    },
+    {
+      "name": { "en": "Crystalline Body", "fr": "Corps cristallin" },
+      "description": {
+        "en": "The mutant's body becomes living crystal, both hard and brittle. Toughness becomes 6 and Wounds becomes 1 - neither can ever be changed by Experience or another mutation; re-roll any Advance roll that would increase either.",
+        "fr": "Le corps du mutant devient du cristal vivant, à la fois dur et cassant. L'Endurance du mutant passe à 6 et ses Points de Vie à 1. Aucune de ces caractéristiques ne peut être modifiée par l'expérience ou par une autre mutation."
+      },
+      "cost": 60
+    },
+    {
+      "name": { "en": "Venomous Bite", "fr": "Morsure venimeuse" },
+      "description": {
+        "en": "Small fangs secrete a powerful poison - grants an extra Strength 5 close combat Attack (reduced to Strength 2 against poison-immune targets), or improves an existing bite Attack to include this effect.",
+        "fr": "Le mutant développe de petits crocs qui peuvent sécréter un puissant poison. Il gagne une Attaque supplémentaire au Corps à Corps de Force 5, réduite à Force 2 si la cible est immunisée aux poisons."
+      },
+      "cost": 50
+    },
+    {
+      "name": { "en": "Bulging Brute", "fr": "Brute épaisse" },
+      "description": {
+        "en": "The power of Chaos grants superhuman strength as muscle mass doubles, at the cost of wits - +2 Strength, -4 Leadership.",
+        "fr": "La puissance du Chaos confère à ce guerrier une force surhumaine. Le guerrier ajoute +2 à sa Force, mais subit un malus de -4 en Commandement."
+      },
+      "cost": 50
+    },
+    {
+      "name": { "en": "Prehensile Tail", "fr": "Queue préhensile" },
+      "description": {
+        "en": "A prehensile tail grows - grants an extra close combat Attack (unless the model already has a tail attack), and can hold a one-handed weapon, shield or buckler if available in its equipment list.",
+        "fr": "Une queue préhensile pousse sur le mutant, lui donnant une Attaque supplémentaire au Corps à Corps. Cette queue lui permet de tenir et d'utiliser une arme à une main, un bouclier ou une rondache."
+      },
+      "cost": 50
+    },
+    {
+      "name": { "en": "Scaly Skin", "fr": "Peau écailleuse" },
+      "description": {
+        "en": "A thin layer of reptilian scales grants a natural 5+ armour save (armour save penalties cannot reduce it past 6+, but a no-save Critical Hit result ignores it entirely); light armour still adds its usual +1.",
+        "fr": "Une fine couche d'écailles reptiliennes recouvre la chair du guerrier, lui conférant une sauvegarde d'armure de 5+. Les malus de sauvegarde ne peuvent pas la modifier au-delà de 6+, mais un résultat aucune sauvegarde sur le tableau des Coups Critiques l'annulera."
+      },
+      "cost": 60
+    },
+    {
+      "name": { "en": "Wings", "fr": "Ailes" },
+      "description": {
+        "en": "A pair of wings grow, feathered or leathery - not powerful enough for true flight, but let the mutant glide down from an elevated position: 2\" horizontal move per 1\" of fall.",
+        "fr": "Le mutant développe une paire d'ailes. Elles ne sont pas assez puissantes pour permettre de voler à proprement parler, mais lui permettent de planer à partir d'une position élevée : pour 1ps de chute, il avance de 2ps horizontalement."
+      },
+      "cost": 45
+    }
+  ],
+  "spells": [
+    {
+      "magicSchoolName": "Chaos Rituals",
+      "rollValue": 1,
+      "difficulty": 10,
+      "name": { "en": "Vision of Horror", "fr": "Vision d'Horreur" },
+      "description": {
+        "en": "Unbearable visions of the Realms of Chaos crush the will of an enemy. Range 6\" - if the caster is in close combat, the target must be in base contact. The victim is immediately Stunned (Knocked Down if it cannot be Stunned).",
+        "fr": "Le sorcier du Chaos provoque d'insoutenables visions des Royaumes du Chaos et son ennemi se recroqueville d'horreur. Ce sort a une portée de 6ps et doit être lancé sur l'ennemi le plus proche (en contact socle à socle s'il est au Corps à Corps). La victime est immédiatement sonnée (à terre si elle ne peut être sonnée)."
+      }
+    },
+    {
+      "magicSchoolName": "Chaos Rituals",
+      "rollValue": 2,
+      "difficulty": 7,
+      "name": { "en": "Third Eye", "fr": "Œil Divin" },
+      "description": {
+        "en": "The Dark Gods grant a gift to their servant. Usable only once per battle. Choose any model within 6\", friend or foe, and roll 1D6: 1 = immediately Out of Action (no Serious Injury roll); 2-5 = +1 to one Characteristic for the battle (caster's choice); 6 = +1 to all Characteristics for the battle.",
+        "fr": "Le sorcier du Chaos implore les dieux sombres d'accorder un don à leur serviteur. Utilisable une seule fois par bataille. Choisissez n'importe quelle figurine à moins de 6ps, amie ou ennemie, et lancez 1D6 : 1 = mise hors de combat immédiate (sans jet de Blessure Grave) ; 2-5 = +1 à une Caractéristique pour la bataille ; 6 = +1 à toutes les Caractéristiques pour la bataille."
+      }
+    },
+    {
+      "magicSchoolName": "Chaos Rituals",
+      "rollValue": 3,
+      "difficulty": 8,
+      "name": { "en": "Black Blood", "fr": "Sang Noir" },
+      "description": {
+        "en": "The caster slashes his palm and his burning blood erupts forth. Range 8\", D3 Strength 5 hits on the first model in its path. After casting, the caster rolls on the Injury table for his own wound (an Out of Action result is treated as Stunned instead).",
+        "fr": "Le sorcier du Chaos s'entaille la paume de la main et son sang jaillit et brûle chair et armures. Cette attaque a une portée de 8ps et cause D3 touches de Force 5 à la première figurine sur sa trajectoire. Le sorcier doit ensuite lancer sur le tableau des Dégâts pour sa propre blessure (un résultat hors de combat est traité comme sonné)."
+      }
+    },
+    {
+      "magicSchoolName": "Chaos Rituals",
+      "rollValue": 4,
+      "difficulty": 9,
+      "name": { "en": "Chaos Temptation", "fr": "Tentation du Chaos" },
+      "description": {
+        "en": "Awakens the chaotic side lurking in every living being. Range 12\", cast on the nearest enemy model. Compare 1D6+caster's Leadership to 1D6+target's Leadership; if the caster wins, they control the victim until it passes a Leadership test in its controller's Rally phase. The victim cannot suicide but may attack its own side; it will not fight the caster's warband. If already in combat with them, it disengages 1\" immediately.",
+        "fr": "Le sorcier du Chaos réveille le côté chaotique qui se cache au tréfonds de l'âme de tout être vivant. Le sort a une portée de 12ps et doit être jeté sur la figurine ennemie la plus proche. Comparez 1D6+Commandement du sorcier au 1D6+Commandement de la cible. Si le sorcier obtient le total le plus haut, il prend le contrôle de sa victime jusqu'à ce qu'elle réussisse un test de Commandement lors de la phase de Ralliement adverse. La figurine ne peut pas se suicider, mais peut attaquer les figurines de son propre camp et ne combattra pas la bande du sorcier."
+      }
+    },
+    {
+      "magicSchoolName": "Chaos Rituals",
+      "rollValue": 5,
+      "difficulty": 7,
+      "name": { "en": "Dark Wings", "fr": "Ailes Ténébreuses" },
+      "description": {
+        "en": "Two dark daemons lift the caster wherever they will. The caster may immediately move up to 12\" anywhere, even into base contact with an enemy (counts as a charge). If it contacts a fleeing enemy, it inflicts one automatic hit in the ensuing close combat phase and the enemy must flee again if it survives.",
+        "fr": "Le sorcier du Chaos est soulevé par deux démons ténébreux qui l'emportent là où il le désire. Le sorcier peut immédiatement se déplacer n'importe où à 12ps maximum, même au contact avec l'ennemi, auquel cas il compte comme ayant chargé. S'il engage un ennemi en fuite, il inflige une touche automatique pendant la phase de Corps à Corps puis son adversaire fuit à nouveau s'il survit."
+      }
+    },
+    {
+      "magicSchoolName": "Chaos Rituals",
+      "rollValue": 6,
+      "difficulty": 7,
+      "name": { "en": "Word of Pain", "fr": "Mot de Souffrance" },
+      "description": {
+        "en": "Speaking the name of his dark god, the caster inflicts terrible pain on all who hear it. Every model within 3\" of the caster, friend or foe, suffers a Strength 3 hit with no armour save.",
+        "fr": "En prononçant le nom de son dieu ténébreux, le sorcier du Chaos inflige une douleur atroce à tous ceux qui l'entendent. Toutes les figurines situées à moins de 3ps du sorcier, amies ou ennemies, subissent une touche de Force 3 sans sauvegarde d'armure."
+      }
+    }
+  ]
+}

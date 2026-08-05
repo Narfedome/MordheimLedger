@@ -37,7 +37,10 @@
             "en": "This model causes Fear (see the Psychology rules).",
             "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
           }
-        }
+        },
+        { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" }, "description": { "en": "This model is unaffected by psychology and never leaves combat.", "fr": "Cette figurine n'est pas affectée par la psychologie et ne quitte jamais un combat." } },
+        { "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" }, "description": { "en": "This model is unaffected by any poison.", "fr": "Cette figurine n'est affectée par aucun poison." } },
+        { "name": { "en": "Not Alive", "fr": "Insensible" }, "description": { "en": "This model replaces Stunned results with Knocked Down.", "fr": "Cette figurine remplace les résultats sonné par à terre." } }
       ]
     },
     {

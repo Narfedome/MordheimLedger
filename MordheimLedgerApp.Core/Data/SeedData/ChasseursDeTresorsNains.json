@@ -34,10 +34,10 @@
       }
     },
     {
-      "name": { "en": "Grudgers", "fr": "Rancuniers" },
+      "name": { "en": "Grudgebearers", "fr": "Rancuniers" },
       "description": {
-        "en": "An old rivalry with the Elves means a Dwarf band can never hire an Elf Hired Sword, of any kind.",
-        "fr": "Une vieille rivalité avec les elfes fait qu'une bande naine ne peut jamais inclure de Franc-Tireur elfe, quel qu'il soit."
+        "en": "Dwarfs hold an ancient grudge against Elves - a Dwarf warband may never include any kind of Elven Hired Sword or Dramatis Personae.",
+        "fr": "Une vieille rivalité avec les elfes fait qu'une bande naine ne peut jamais inclure de Franc-Tireur ou de Personæ Dramatis elfe, quel qu'il soit."
       }
     },
     {
@@ -118,8 +118,8 @@
         {
           "name": { "en": "Slayer Skills", "fr": "Compétences de Tueur" },
           "description": {
-            "en": "When this model gains a new skill, it may pick from the Slayer skill table (Fear no Danger, Berserk Charge, Monster Slayer) in addition to the normal skill tables.",
-            "fr": "Lorsque cette figurine gagne une nouvelle compétence, elle peut choisir dans le tableau de compétences de Tueur (Charge Furieuse, Tueur de Monstres, Berserk) en plus des tableaux de compétences classiques."
+            "en": "When this model gains a new skill, it may pick from the Slayer skill table (Ferocious Charge: double attacks when charging, -1 to hit that turn; Monster Slayer: always wounds on 4+ regardless of Toughness unless a lower roll would already be needed; Berserker: +1 to hit in close combat when charging) in addition to the normal skill tables.",
+            "fr": "Lorsque cette figurine gagne une nouvelle compétence, elle peut choisir dans le tableau de compétences de Tueur (Charge Féroce : double ses attaques en chargeant, -1 pour toucher ce tour ; Tueur de Monstres : blesse toujours sur 4+ quelle que soit l'Endurance, sauf si un résultat inférieur suffirait déjà ; Berserker : +1 pour toucher au corps à corps en chargeant) en plus des tableaux de compétences classiques."
           }
         }
       ]

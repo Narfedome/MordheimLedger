@@ -123,7 +123,7 @@
     },
     { "name": { "en": "Blunderbuss", "fr": "Tromblon" }, "category": "BlackPowderWeapon", "cost": 30 },
     { "name": { "en": "Handgun", "fr": "Arquebuse" }, "category": "BlackPowderWeapon", "cost": 35 },
-    { "name": { "en": "Hunting Rifle", "fr": "Long fusil d'Hochland" }, "category": "BlackPowderWeapon", "cost": 200, "rarity": 12 },
+    { "name": { "en": "Hunting Rifle", "fr": "Long fusil d'Hochland" }, "category": "BlackPowderWeapon", "cost": 200, "rarity": 11 },
     { "name": { "en": "Heavy Armour", "fr": "Armure lourde" }, "category": "Armour", "cost": 50 },
     { "name": { "en": "Shield", "fr": "Bouclier" }, "category": "Armour", "cost": 5 },
     { "name": { "en": "Helmet", "fr": "Casque" }, "category": "Armour", "cost": 10 }

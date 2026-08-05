@@ -416,7 +416,8 @@ public static class EntityMapping
         SpellId = m.Item.Id
     };
 
-    public static Mutation ToModel(this MutationEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static Mutation ToModel(this MutationEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -425,7 +426,8 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
-        ImagePath = e.ImagePath ?? string.Empty
+        ImagePath = e.ImagePath ?? string.Empty,
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
     };
 
     public static MutationEntity ToEntity(this Mutation m) => new()

@@ -112,6 +112,34 @@ que deviné :
 d'une des sources ci-dessus. À vérifier contre le livre de règles et corriger via l'UI (le flux
 Official → Modified existe précisément pour ça) si un chiffre est faux.
 
+**Import bande par bande (2e lot, en cours)** : l'utilisateur a fourni 13 fichiers texte (extraits FR
+bruts GW/GLM, mise en page dégradée par l'extraction PDF→texte — colonnes de tableaux mélangées,
+accents cassés sur certains fichiers) pour Kermesse du Chaos, Chasseurs de Trésors Nains (déjà
+intégrée, fichier de relecture), Culte des Possédés, Horde Orque, Pillards Hommes-Bêtes,
+Répurgateurs, Skavens (Clan Eshin — confirmé par l'équipement signature griffes de combat/lames
+suintantes/Magie du Rat Cornu, pas Pestilens), Sœurs de Sigmar, Kislévites, Mercenaires Averlanders/
+Ostlanders/Morts-Vivants (déjà intégrées, fichiers de relecture) et Mercenaires Marienburgers/
+Middenheimers/Reiklanders (un seul fichier pour les 3 variantes — même roster de base, règles
+spéciales et trésorerie de départ différentes par ville). Méthode : croiser ces textes avec
+mordheimer.net (EN) pour combler les trous de mise en page/vérifier les chiffres avant d'écrire
+chaque JSON, bande par bande, comme pour le premier lot.
+
+**Fait** : Reiklander a migré vers le pipeline JSON (`Reiklanders.json`), `OfficialContentSeed.cs` ne
+contient plus que l'équipement commun (`CoreEquipment`). Les 3 variantes Mercenaires (Reiklander/
+Middenheim/Marienburg) partagent un même roster de base (Capitaine/Champion/Jeune Loup/Guerrier/
+Tireur/Bretteur, cf. mordheimer.net) mais divergent sur les règles spéciales : Reiklander a
+"Discipline Militaire" (12ps au lieu de Chef 6ps) sur son Capitaine + le bonus +1 CT des Tireurs cuit
+directement dans leur profil ; Middenheim démarre Capitaine/Champion à Force 4 ; Marienburg démarre à
+600 CO + a la règle "Négociants Fortunés" (bonus objets rares + budget recrutement). Plusieurs armes/
+armures communes manquantes (Masse, Hallebarde, Arbalète, Pistolet, Armure Lourde, etc.) ont été
+ajoutées non-restreintes via `Reiklanders.json` plutôt que dans `OfficialContentSeed.CoreEquipment`
+(pas de mécanisme de dédup par nom pour l'Équipement comme il en existe pour SpecialRule/Mutation/
+MagicSchool — attention à ne pas re-déclarer un nom déjà présent dans un futur import, ça créerait un
+doublon).
+
+mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
+`get_page_text`) fonctionne.
+
 ## Règles de collaboration
 
 - **Ne jamais committer sans relecture explicite de l'utilisateur** — toujours demander avant,

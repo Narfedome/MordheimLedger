@@ -1,0 +1,132 @@
+{
+  "name": { "en": "Reiklander Mercenaries", "fr": "Mercenaires Reiklander" },
+  "description": {
+    "en": "The classic human mercenary warband of the Empire, recruited in Reikland at the heart of the Empire - devout followers of Sigmar, disciplined and loyal to their officers.",
+    "fr": "La bande de mercenaires humains classique de l'Empire, recrutée en Reikland, au cœur de l'Empire - de fervents fidèles de Sigmar, disciplinés et loyaux envers leurs officiers."
+  },
+  "specialRules": [],
+  "startingTreasury": 500,
+  "maxWarriors": 15,
+  "warriors": [
+    {
+      "name": { "en": "Mercenary Captain", "fr": "Capitaine mercenaire" },
+      "isHero": true,
+      "cost": 60,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+      "description": {
+        "en": "A mercenary captain with solid experience, ready to fight for anyone so long as the price is right - the risks of Mordheim are real, but so are the potential riches.",
+        "fr": "Un capitaine mercenaire jouit d'une solide expérience, il affrontera n'importe quoi ou n'importe qui, pour peu que le prix soit convenable. Mordheim offre à de tels hommes des opportunités de richesse incommensurables mais présente des risques bien réels."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Military Discipline", "fr": "Discipline Militaire" },
+          "description": {
+            "en": "Reikland mercenaries are accustomed to the demands of military discipline - any warrior within 12\" of this model (instead of the usual 6\") may use its Leadership for their tests.",
+            "fr": "Les mercenaires reiklanders sont accoutumés aux exigences de la discipline militaire - toute figurine à moins de 12ps de ce guerrier (au lieu des 6ps habituels) peut utiliser son Commandement pour ses tests."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Champion", "fr": "Champion" },
+      "isHero": true,
+      "cost": 35,
+      "maxCount": 2,
+      "startingExperience": 8,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "In every mercenary warband you will find a warrior bigger, stronger (and often uglier) than his comrades - champions answer the challenges levelled at the warband and pick their share of loot right after the captain.",
+        "fr": "Dans toutes les bandes de mercenaires vous trouverez un guerrier plus gros, plus fort (souvent plus laid), que les autres. Ils sont appelés champions et relèvent généralement les défis lancés à la bande, touchant leur part de butin juste après le capitaine."
+      }
+    },
+    {
+      "name": { "en": "Youngblood", "fr": "Jeune Loup" },
+      "isHero": true,
+      "cost": 15,
+      "maxCount": 2,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 6,
+      "description": {
+        "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
+        "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
+      }
+    },
+    {
+      "name": { "en": "Warrior", "fr": "Guerrier" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Grim, seasoned fighters, fearing no man as long as they have their weapons and armour - they form the core of any mercenary warband.",
+        "fr": "Ce sont des baroudeurs renfrognés, à vendre au plus offrant et peu enclins à la peur tant qu'ils sont armés. Ils constituent le gros des bandes de mercenaires."
+      }
+    },
+    {
+      "name": { "en": "Marksman", "fr": "Tireur" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": 7,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "A strong tradition of martial training is responsible for the high standards of archery amongst Reiklanders - their Ballistic Skill above already reflects this bonus.",
+        "fr": "Une forte tradition d'entraînement martial est responsable du haut degré de précision des archers reiklanders - leur Capacité de Tir ci-dessus intègre déjà ce bonus."
+      }
+    },
+    {
+      "name": { "en": "Swordsman", "fr": "Bretteur" },
+      "isHero": false,
+      "cost": 35,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Professional warriors specialised in fencing, particularly well suited to the kind of fighting that takes place in Mordheim.",
+        "fr": "Les bretteurs sont des guerriers professionnels spécialisés dans l'escrime. Ils sont très recherchés par les chefs de bandes, car leur habileté à l'épée est particulièrement adaptée aux types de combats qui se déroulent dans Mordheim."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Expert Swordsman", "fr": "Expert à l'épée" },
+          "description": {
+            "en": "So skilled with their weapon that they may re-roll failed to-hit rolls when charging - only applies when armed with a normal sword, not a double-handed sword or any other weapon.",
+            "fr": "Si doué avec son arme que, lorsqu'il charge, il peut relancer ses jets pour toucher ratés. Ne s'applique que s'il est équipé d'une épée normale, pas une arme à deux mains ou une autre arme."
+          }
+        }
+      ]
+    }
+  ],
+  "equipment": [
+    { "name": { "en": "Mace", "fr": "Masse" }, "category": "MeleeWeapon", "cost": 3 },
+    { "name": { "en": "Morning star", "fr": "Morgenstern" }, "category": "MeleeWeapon", "cost": 15 },
+    { "name": { "en": "Double-handed weapon", "fr": "Arme à deux mains" }, "category": "MeleeWeapon", "cost": 15 },
+    { "name": { "en": "Spear", "fr": "Lance" }, "category": "MeleeWeapon", "cost": 10 },
+    { "name": { "en": "Halberd", "fr": "Hallebarde" }, "category": "MeleeWeapon", "cost": 10 },
+    { "name": { "en": "Crossbow", "fr": "Arbalète" }, "category": "MissileWeapon", "cost": 25 },
+    { "name": { "en": "Long bow", "fr": "Arc long" }, "category": "MissileWeapon", "cost": 15 },
+    {
+      "name": { "en": "Pistol", "fr": "Pistolet" }, "category": "BlackPowderWeapon", "cost": 15,
+      "description": { "en": "30 gc for a brace.", "fr": "30 CO la paire." }
+    },
+    {
+      "name": { "en": "Duelling Pistol", "fr": "Pistolet de duel" }, "category": "BlackPowderWeapon", "cost": 25,
+      "description": { "en": "50 gc for a brace.", "fr": "50 CO la paire." }
+    },
+    { "name": { "en": "Blunderbuss", "fr": "Tromblon" }, "category": "BlackPowderWeapon", "cost": 30 },
+    { "name": { "en": "Handgun", "fr": "Arquebuse" }, "category": "BlackPowderWeapon", "cost": 35 },
+    { "name": { "en": "Hunting Rifle", "fr": "Long fusil d'Hochland" }, "category": "BlackPowderWeapon", "cost": 200, "rarity": 12 },
+    { "name": { "en": "Heavy Armour", "fr": "Armure lourde" }, "category": "Armour", "cost": 50 },
+    { "name": { "en": "Shield", "fr": "Bouclier" }, "category": "Armour", "cost": 5 },
+    { "name": { "en": "Helmet", "fr": "Casque" }, "category": "Armour", "cost": 10 }
+  ],
+  "spells": []
+}

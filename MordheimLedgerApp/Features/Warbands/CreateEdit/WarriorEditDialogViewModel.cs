@@ -194,7 +194,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddMutation()
     {
-        var mutations = await _mutationPicker.PickMutationsAsync();
+        var mutations = await _mutationPicker.PickMutationsAsync(_warband.WarbandArchetypeId);
         foreach (var mutation in mutations)
         {
             var bought = await _warbandService.AddWarriorMutationAsync(Item.Id, mutation);

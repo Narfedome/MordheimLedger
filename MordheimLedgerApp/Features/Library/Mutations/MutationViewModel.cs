@@ -13,6 +13,8 @@ public partial class MutationViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly IMutationPickerNavigationService _pickerNavigation;
+    private readonly IWarbandArchetypePickerService _warbandPicker;
+    private List<WarbandArchetype> _warbandArchetypes = new();
 
     [ObservableProperty]
     private ObservableCollection<MutationRow> mutations = new();
@@ -31,10 +33,17 @@ public partial class MutationViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public MutationViewModel(ILibraryService libraryService, IMutationPickerNavigationService pickerNavigation)
+    /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by
+    /// MutationPickerService before construction) = only mutations whose RestrictedToWarbandArchetypeIds
+    /// is empty (common) or contains this id are shown - see WarriorEditDialogViewModel.AddMutation.</summary>
+    public int? AllowedWarbandArchetypeId { get; set; }
+
+    public MutationViewModel(ILibraryService libraryService, IMutationPickerNavigationService pickerNavigation,
+        IWarbandArchetypePickerService warbandPicker)
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
+        _warbandPicker = warbandPicker;
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
         // (onglet TabBar gardé en mémoire par Shell).
@@ -47,7 +56,13 @@ public partial class MutationViewModel : BaseViewModel
     private async Task LoadData()
     {
         var allItems = await _libraryService.GetMutationsAsync(LocalizationService.Instance.Language);
-        Mutations = new ObservableCollection<MutationRow>(allItems.Select(i => new MutationRow(i)));
+        _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+
+        var filtered = AllowedWarbandArchetypeId is { } warbandId
+            ? allItems.Where(m => m.RestrictedToWarbandArchetypeIds.Count == 0 || m.RestrictedToWarbandArchetypeIds.Contains(warbandId)).ToList()
+            : allItems;
+
+        Mutations = new ObservableCollection<MutationRow>(filtered.Select(i => new MutationRow(i)));
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
@@ -78,7 +93,7 @@ public partial class MutationViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new Mutation();
-        var dialogViewModel = new MutationEditDialogViewModel(newItem, Loc["MutationCreateTitle"]);
+        var dialogViewModel = new MutationEditDialogViewModel(newItem, Loc["MutationCreateTitle"], _warbandPicker, _warbandArchetypes);
         if (await ShowDialogAsync(new MutationEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveMutationAsync(newItem, LocalizationService.Instance.Language);
@@ -100,10 +115,11 @@ public partial class MutationViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
-            ImagePath = s.ImagePath
+            ImagePath = s.ImagePath,
+            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds)
         };
 
-        var dialogViewModel = new MutationEditDialogViewModel(copy, Loc["MutationEditTitle"]);
+        var dialogViewModel = new MutationEditDialogViewModel(copy, Loc["MutationEditTitle"], _warbandPicker, _warbandArchetypes);
         if (await ShowDialogAsync(new MutationEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveMutationAsync(copy, LocalizationService.Instance.Language);

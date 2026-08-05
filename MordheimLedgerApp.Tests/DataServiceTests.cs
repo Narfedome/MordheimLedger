@@ -26,9 +26,9 @@ public class DataServiceTests : IDisposable
         if (File.Exists(_dbPath)) File.Delete(_dbPath);
     }
 
-    /// <summary>The seed now covers 3 warbands (Reiklander Mercenaries hardcoded + Undead/Dwarf Treasure
-    /// Hunters from JSON, see AppDatabase.SeedWarbandFromJsonAsync) - tests needing "the" seeded archetype
-    /// specifically target Reiklander by name rather than assuming there's only one.</summary>
+    /// <summary>The seed covers several warbands (see AppDatabase.SeedWarbandFromJsonAsync) - tests
+    /// needing "the" seeded archetype specifically target Reiklander by name rather than assuming
+    /// there's only one.</summary>
     private async Task<WarbandArchetype> GetReiklandersAsync(string languageCode = "en") =>
         (await _library.GetWarbandArchetypesAsync(languageCode)).Single(a => a.Name is "Reiklander Mercenaries" or "Mercenaires Reiklander");
 
@@ -39,8 +39,9 @@ public class DataServiceTests : IDisposable
         Assert.Equal("Reiklander Mercenaries", reiklanders.Name);
         Assert.Equal(ContentSource.Official, reiklanders.Source);
 
+        // Captain/Champion/Youngblood/Warrior/Marksman/Swordsman - see Reiklanders.json.
         var warriorArchetypes = await _library.GetWarriorArchetypesAsync(reiklanders.Id, "en");
-        Assert.Equal(4, warriorArchetypes.Count);
+        Assert.Equal(6, warriorArchetypes.Count);
 
         var equipment = await _library.GetEquipmentItemsAsync("en");
         Assert.NotEmpty(equipment);
@@ -54,14 +55,17 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsFourWarbandsTotal()
+    public async Task Database_SeedsSevenWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(5, archetypes.Count);
+        Assert.Equal(7, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Ostland Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Reiklander Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Middenheim Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Marienburg Mercenaries");
 
         var spells = await _library.GetSpellsAsync("en");
         Assert.Equal(12, spells.Count);
@@ -106,6 +110,39 @@ public class DataServiceTests : IDisposable
         Assert.Contains(dwarfs.SpecialRules, r => r.Name == "Hard to Kill");
         var ostlanders = archetypes.Single(a => a.Name == "Ostland Mercenaries");
         Assert.Contains(ostlanders.SpecialRules, r => r.Name == "Self-Reliant");
+    }
+
+    /// <summary>Reikland/Middenheim/Marienburg share the same base Mercenary roster (see
+    /// Reiklanders.json/Middenheimers.json/Marienburgers.json) but diverge on city-specific rules: Reikland's
+    /// Captain has Discipline Militaire (12ps command range) instead of the shared Leader rule, and its
+    /// Marksman has the +1 BS bonus baked directly into its profile; Middenheim's Captain/Champion start at
+    /// Strength 4; Marienburg starts with 600gc instead of 500.</summary>
+    [Fact]
+    public async Task MercenaryVariants_HaveCityDistinctStats()
+    {
+        var archetypes = await _library.GetWarbandArchetypesAsync("en");
+
+        var reiklanders = archetypes.Single(a => a.Name == "Reiklander Mercenaries");
+        var reiklanderWarriors = await _library.GetWarriorArchetypesAsync(reiklanders.Id, "en");
+        Assert.Contains(reiklanderWarriors.Single(w => w.Name == "Mercenary Captain").SpecialRules, r => r.Name == "Military Discipline");
+        Assert.DoesNotContain(reiklanderWarriors.Single(w => w.Name == "Mercenary Captain").SpecialRules, r => r.Name == "Leader");
+        Assert.Equal(4, reiklanderWarriors.Single(w => w.Name == "Marksman").BallisticSkill);
+
+        var middenheimers = archetypes.Single(a => a.Name == "Middenheim Mercenaries");
+        var middenheimerWarriors = await _library.GetWarriorArchetypesAsync(middenheimers.Id, "en");
+        Assert.Equal(4, middenheimerWarriors.Single(w => w.Name == "Mercenary Captain").Strength);
+        Assert.Equal(4, middenheimerWarriors.Single(w => w.Name == "Champion").Strength);
+        Assert.Contains(middenheimerWarriors.Single(w => w.Name == "Mercenary Captain").SpecialRules, r => r.Name == "Leader");
+        Assert.Equal(3, middenheimerWarriors.Single(w => w.Name == "Marksman").BallisticSkill);
+
+        var marienburgers = archetypes.Single(a => a.Name == "Marienburg Mercenaries");
+        Assert.Equal(600, marienburgers.StartingTreasury);
+        Assert.Contains(marienburgers.SpecialRules, r => r.Name == "Wealthy Traders");
+
+        // "Expert Swordsman" is shared verbatim across all 3 cities' Swordsman archetype - find-or-create
+        // by English Name must resolve them to the same catalog row instead of 3 duplicates.
+        var allRules = await _library.GetSpecialRulesAsync("en");
+        Assert.Single(allRules, r => r.Name == "Expert Swordsman");
     }
 
     [Fact]

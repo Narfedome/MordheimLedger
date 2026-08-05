@@ -5,7 +5,9 @@ namespace MordheimLedgerApp.Services;
 
 public interface IMutationPickerService
 {
-    Task<IReadOnlyList<Mutation>> PickMutationsAsync();
+    /// <summary>warbandArchetypeId: only mutations whose RestrictedToWarbandArchetypeIds is empty
+    /// (common) or contains this id are selectable - see WarriorEditDialogViewModel.AddMutation.</summary>
+    Task<IReadOnlyList<Mutation>> PickMutationsAsync(int warbandArchetypeId);
 }
 
 public class MutationPickerService : IMutationPickerService
@@ -14,14 +16,18 @@ public class MutationPickerService : IMutationPickerService
 
     public MutationPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Mutation>> PickMutationsAsync()
+    public async Task<IReadOnlyList<Mutation>> PickMutationsAsync(int warbandArchetypeId)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Mutation>>();
 
         var navigationService = _provider.GetRequiredService<IMutationPickerNavigationService>();
         navigationService.RegisterTaskSource(tcs);
 
-        var page = _provider.GetRequiredService<MutationSelectorPage>();
+        // Résolu manuellement (pas GetRequiredService<MutationSelectorPage>()) pour pouvoir poser le
+        // filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
+        var viewModel = _provider.GetRequiredService<MutationViewModel>();
+        viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        var page = new MutationSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton

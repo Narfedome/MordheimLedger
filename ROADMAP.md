@@ -20,7 +20,18 @@
 - [x] Écrans de gestion de la bibliothèque (créer/éditer archétypes et objets) — Types de Bande (avec Types de Guerrier imbriqués) et Trading Post, tuiles en grille + dialogs Create/Edit (wizard 3 étapes pour les guerriers)
 - [ ] Table des Blessures Graves
 - [ ] Historique de campagne / trésorerie détaillée
-- [ ] Compléter le catalogue au-delà d'une seule bande
+- [x] Restrictions par bande (Équipement/Compétences/Montures) réellement éditables + filtrées dans les pickers
+- [x] Écoles de magie normalisées en entité propre (`MagicSchool`), liée à la bande plutôt qu'au guerrier
+- [~] Compléter le catalogue au-delà d'une seule bande — 7 bandes intégrées, toutes via le pipeline JSON
+  `Data/SeedData/*.json` : Morts-Vivants, Chasseurs de Trésors Nains, Mercenaires Averlanders, Mercenaires
+  Ostlanders, Mercenaires Reiklander/Middenheimer/Marienburg (les 3 dernières partagent un même roster de
+  base — Capitaine/Champion/Jeune Loup/Guerrier/Tireur/Bretteur — avec des règles spéciales et trésorerie
+  propres à chaque ville ; Reiklander a quitté le seed historique `OfficialContentSeed.cs` pour rejoindre
+  ce pipeline). **En cours** : import du reste du second lot fourni par l'utilisateur (textes FR bruts,
+  mise en page dégradée) — Kermesse du Chaos, Culte des Possédés, Horde Orque, Pillards Hommes-Bêtes,
+  Répurgateurs, Skavens (Clan Eshin), Sœurs de Sigmar, Kislévites. Méthode : croiser le texte FR fourni
+  avec mordheimer.net (EN, via le Browser pane — WebFetch direct renvoie 403 sur ce site) pour combler les
+  trous de mise en page / vérifier les chiffres avant d'écrire le JSON, bande par bande.
 
 ## V2 — Partage entre joueurs
 - **Export/Import fichier** (partage natif OS) pour bandes/objets modifiés — capacité illimitée

@@ -4,6 +4,7 @@
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mutations.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
@@ -26,6 +27,39 @@
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc MutationNamePh}"/>
             <Entry Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc MutationCostPh}"/>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+
+            <!-- Réservé à ces bandes : vide = commun à toutes les bandes qui peuvent acheter des
+                 mutations (voir Mutation.RestrictedToWarbandArchetypeIds). Même pattern chip+picker
+                 qu'EquipmentItemEditDialog. -->
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc LibRestrictedToWarbandsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddRestrictionCommand}"/>
+                </Grid>
+                <Label Text="{loc:Loc LibRestrictedToAllHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarbands}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:WarbandArchetype">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:SolidFont.Shield}" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:MutationEditDialogViewModel}}, Path=RemoveRestrictionCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"

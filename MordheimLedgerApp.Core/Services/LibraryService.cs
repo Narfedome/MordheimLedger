@@ -106,7 +106,21 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         var rows = await _db.Connection.Table<MutationEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
+        var restrictions = await LoadMutationRestrictionsAsync();
+        return rows.Select(r => r.ToModel(translations, restrictions)).OrderBy(r => r.Name).ToList();
+    }
+
+    private async Task<Dictionary<int, List<int>>> LoadMutationRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarbandArchetypeMutationEntity>().ToListAsync();
+        return rows.GroupBy(r => r.MutationId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+    }
+
+    private async Task SaveMutationRestrictionsAsync(int mutationId, List<int> warbandArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeMutationEntity WHERE MutationId = ?", mutationId);
+        foreach (var warbandArchetypeId in warbandArchetypeIds)
+            await _db.Connection.InsertAsync(new WarbandArchetypeMutationEntity { MutationId = mutationId, WarbandArchetypeId = warbandArchetypeId });
     }
 
     public async Task<List<Mount>> GetMountsAsync(string languageCode)
@@ -381,12 +395,15 @@ public class LibraryService : ILibraryService
             var entity = mutation.ToEntity();
             await _db.Connection.InsertAsync(entity);
             mutation.Id = entity.Id;
-            return;
+        }
+        else
+        {
+            var existing = await _db.Connection.FindAsync<MutationEntity>(mutation.Id);
+            if (existing?.Source == ContentSource.Official) mutation.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(mutation.ToEntity());
         }
 
-        var existing = await _db.Connection.FindAsync<MutationEntity>(mutation.Id);
-        if (existing?.Source == ContentSource.Official) mutation.Source = ContentSource.Modified;
-        await _db.Connection.UpdateAsync(mutation.ToEntity());
+        await SaveMutationRestrictionsAsync(mutation.Id, mutation.RestrictedToWarbandArchetypeIds);
     }
 
     public async Task SaveMountAsync(Mount mount, string languageCode)

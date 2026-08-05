@@ -130,13 +130,18 @@ public class SpecialRuleSeedData
     public LocalizedText? Description { get; set; }
 }
 
-/// <summary>One entry of the (shared, global) Mutation catalog - find-or-created by English Name at
-/// seed time, see WarbandSeedData.Mutations.</summary>
+/// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see
+/// WarbandSeedData.Mutations. Most entries are shared verbatim across Chaos-adjacent warbands
+/// (RestrictedToThisWarband false); some warbands add their own exclusive entries instead (e.g.
+/// Kermesse du Chaos's Nurgle-themed Bénédictions).</summary>
 public class MutationSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
     public int Cost { get; set; }
+
+    /// <summary>True = only this warband may buy it (see WarbandArchetypeMutationEntity).</summary>
+    public bool RestrictedToThisWarband { get; set; }
 }
 
 public class MountSeedData

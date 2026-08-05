@@ -1,0 +1,122 @@
+{
+  "name": { "en": "Middenheim Mercenaries", "fr": "Mercenaires Middenheimers" },
+  "description": {
+    "en": "Mercenaries from Middenheim, the City of the White Wolf, sacred to Ulric - large, strongly built men famous for their physical prowess and their contempt for danger.",
+    "fr": "Des mercenaires venus de Middenheim, la Cité du Loup Blanc, consacrée à Ulric - de grands gaillards costauds, réputés pour leur force physique et leur mépris du danger."
+  },
+  "specialRules": [],
+  "startingTreasury": 500,
+  "maxWarriors": 15,
+  "warriors": [
+    {
+      "name": { "en": "Mercenary Captain", "fr": "Capitaine mercenaire" },
+      "isHero": true,
+      "cost": 60,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 4, "toughness": 3,
+      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+      "description": {
+        "en": "The men of Middenheim are famous for their physical prowess - to represent their advantage in size and bulk, Middenheim captains start with Strength 4 instead of the usual 3.",
+        "fr": "Les hommes de Middenheim sont célèbres pour leur force physique - pour représenter cet avantage de carrure, les capitaines de Middenheim démarrent avec une Force de 4 au lieu de 3."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Leader", "fr": "Chef" },
+          "description": {
+            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
+            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Champion", "fr": "Champion" },
+      "isHero": true,
+      "cost": 35,
+      "maxCount": 2,
+      "startingExperience": 8,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 4, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "The champions and captains of a Middenheim warband start with Strength 4 instead of Strength 3.",
+        "fr": "Les champions et capitaines d'une bande de Middenheim démarrent avec une Force de 4 au lieu de 3."
+      }
+    },
+    {
+      "name": { "en": "Youngblood", "fr": "Jeune Loup" },
+      "isHero": true,
+      "cost": 15,
+      "maxCount": 2,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 6,
+      "description": {
+        "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
+        "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
+      }
+    },
+    {
+      "name": { "en": "Warrior", "fr": "Guerrier" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Grim, seasoned fighters, fearing no man as long as they have their weapons and armour - they form the core of any mercenary warband.",
+        "fr": "Ce sont des baroudeurs renfrognés, à vendre au plus offrant et peu enclins à la peur tant qu'ils sont armés. Ils constituent le gros des bandes de mercenaires."
+      }
+    },
+    {
+      "name": { "en": "Marksman", "fr": "Tireur" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": 7,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "The archers and hunters of the Old World are famed for their skill, said to hit a coin at 300 paces with a long bow.",
+        "fr": "Les archers et les chasseurs du Vieux Monde sont réputés pour leur adresse et on dit qu'ils peuvent atteindre une pièce à 300 pieds avec un arc long."
+      }
+    },
+    {
+      "name": { "en": "Swordsman", "fr": "Bretteur" },
+      "isHero": false,
+      "cost": 35,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Professional warriors specialised in fencing, particularly well suited to the kind of fighting that takes place in Mordheim.",
+        "fr": "Les bretteurs sont des guerriers professionnels spécialisés dans l'escrime. Ils sont très recherchés par les chefs de bandes, car leur habileté à l'épée est particulièrement adaptée aux types de combats qui se déroulent dans Mordheim."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Expert Swordsman", "fr": "Expert à l'épée" },
+          "description": {
+            "en": "So skilled with their weapon that they may re-roll failed to-hit rolls when charging - only applies when armed with a normal sword, not a double-handed sword or any other weapon.",
+            "fr": "Si doué avec son arme que, lorsqu'il charge, il peut relancer ses jets pour toucher ratés. Ne s'applique que s'il est équipé d'une épée normale, pas une arme à deux mains ou une autre arme."
+          }
+        }
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": { "en": "Wolfcloak", "fr": "Cape de loup" },
+      "category": "MiscellaneousEquipment",
+      "cost": 10,
+      "rarity": 7,
+      "description": {
+        "en": "Middenheimers only. To acquire one, a Hero must pay 10 gc and roll equal to or under his Strength on a D6 - success means the Hero slays a wolf and wears its blessed pelt. Grants +1 to armour saves against all shooting attacks. Middenheimers may buy a Wolfcloak when starting their warband without an availability roll.",
+        "fr": "Réservée aux Middenheimers. Pour l'obtenir, un Héros doit payer 10 CO et réussir un jet inférieur ou égal à sa Force sur 1D6 - en cas de succès, il tue un loup et porte sa dépouille bénie. Octroie +1 aux sauvegardes d'armure contre les attaques de tir. Un Middenheimer peut l'acheter sans jet de disponibilité à la création de la bande."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
+  "spells": []
+}

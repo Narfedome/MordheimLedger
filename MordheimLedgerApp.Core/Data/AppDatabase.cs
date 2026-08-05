@@ -64,6 +64,7 @@ public class AppDatabase
         await _db.CreateTableAsync<MountSpecialRuleEntity>();
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeMutationEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -95,6 +96,7 @@ public class AppDatabase
         await _db.DropTableAsync<MountSpecialRuleEntity>();
         await _db.DropTableAsync<MagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMagicSchoolEntity>();
+        await _db.DropTableAsync<WarbandArchetypeMutationEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -115,24 +117,9 @@ public class AppDatabase
 
     private async Task SeedOfficialContentAsync()
     {
-        var warband = OfficialContentSeed.ReiklanderMercenaries;
-        warband.NameKey = await SeedTranslationAsync(warband.Name, OfficialContentSeed.ReiklanderMercenariesFr.Name);
-        warband.DescriptionKey = await SeedTranslationAsync(warband.Description!, OfficialContentSeed.ReiklanderMercenariesFr.Description);
-        var warbandArchetypeEntity = warband.ToEntity();
-        await _db.InsertAsync(warbandArchetypeEntity);
-
-        var warriors = OfficialContentSeed.ReiklanderMercenariesWarriors(warbandArchetypeEntity.Id);
-        for (var i = 0; i < warriors.Count; i++)
-        {
-            var warrior = warriors[i];
-            var fr = OfficialContentSeed.ReiklanderMercenariesWarriorsFr[i];
-            warrior.NameKey = await SeedTranslationAsync(warrior.Name, fr.Name);
-            warrior.DescriptionKey = warrior.Description is null
-                ? null
-                : await SeedTranslationAsync(warrior.Description, fr.Description);
-            await _db.InsertAsync(warrior.ToEntity());
-        }
-
+        // Small hand-written common equipment pool (Dagger/Sword/Hammer/Axe/Bow/Light Armour/Buckler),
+        // unrestricted so every warband can use it - band-specific JSON files only need to add their own
+        // exclusives or genuinely new common items (see Reiklanders.json for the latter).
         var equipment = OfficialContentSeed.CoreEquipment;
         for (var i = 0; i < equipment.Count; i++)
         {
@@ -145,13 +132,13 @@ public class AppDatabase
             await _db.InsertAsync(item.ToEntity());
         }
 
-        // Pilot for the JSON-driven seed path (see WarbandSeedData) - Reiklander above stays on the
-        // original hardcoded OfficialContentSeed.cs shape to prove both mechanisms coexist. More
-        // warbands get added here as their JSON files are authored.
         await SeedWarbandFromJsonAsync("MortsVivants.json");
         await SeedWarbandFromJsonAsync("ChasseursDeTresorsNains.json");
         await SeedWarbandFromJsonAsync("Averlanders.json");
         await SeedWarbandFromJsonAsync("Ostlanders.json");
+        await SeedWarbandFromJsonAsync("Reiklanders.json");
+        await SeedWarbandFromJsonAsync("Middenheimers.json");
+        await SeedWarbandFromJsonAsync("Marienburgers.json");
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
@@ -257,7 +244,7 @@ public class AppDatabase
         }
 
         foreach (var mu in data.Mutations)
-            await FindOrCreateMutationAsync(mu);
+            await FindOrCreateMutationAsync(mu, warbandEntity.Id);
 
         foreach (var mo in data.Mounts)
         {
@@ -331,7 +318,7 @@ public class AppDatabase
     /// across every Chaos-adjacent warband's JSON, resolve to one shared catalog row.</summary>
     private readonly Dictionary<string, int> _mutationIdsByEnglishName = new();
 
-    private async Task<int> FindOrCreateMutationAsync(MutationSeedData seed)
+    private async Task<int> FindOrCreateMutationAsync(MutationSeedData seed, int warbandArchetypeId)
     {
         if (_mutationIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
@@ -341,6 +328,9 @@ public class AppDatabase
         mutation.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
         var entity = mutation.ToEntity();
         await _db.InsertAsync(entity);
+
+        if (seed.RestrictedToThisWarband)
+            await _db.InsertAsync(new WarbandArchetypeMutationEntity { WarbandArchetypeId = warbandArchetypeId, MutationId = entity.Id });
 
         _mutationIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;

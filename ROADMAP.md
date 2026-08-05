@@ -22,33 +22,47 @@
 - [ ] Historique de campagne / trésorerie détaillée
 - [x] Restrictions par bande (Équipement/Compétences/Montures) réellement éditables + filtrées dans les pickers
 - [x] Écoles de magie normalisées en entité propre (`MagicSchool`), liée à la bande plutôt qu'au guerrier
-- [~] Compléter le catalogue au-delà d'une seule bande — 10 bandes intégrées, toutes via le pipeline JSON
-  `Data/SeedData/*.json` : Morts-Vivants, Chasseurs de Trésors Nains, Mercenaires Averlanders, Mercenaires
-  Ostlanders, Mercenaires Reiklander/Middenheimer/Marienburg (les 3 dernières partagent un même roster de
-  base — Capitaine/Champion/Jeune Loup/Guerrier/Tireur/Bretteur — avec des règles spéciales et trésorerie
-  propres à chaque ville ; Reiklander a quitté le seed historique `OfficialContentSeed.cs` pour rejoindre
-  ce pipeline), Kermesse du Chaos (1re bande à utiliser les Mutations restreintes par bande — Bénédictions
-  de Nurgle propres aux Impurs — et à prouver que deux bandes peuvent avoir chacune leur propre école de
-  magie distincte, ici Rituels de Nurgle vs Nécromancie/Prières de Taal), Culte des Possédés (école de
-  magie Rituels du Chaos + pool de Mutations génériques, tous deux non-restreints puisque partagés avec les
-  Pillards Hommes-Bêtes à venir — contraste volontaire avec les Bénédictions de Nurgle de Kermesse qui,
-  elles, restent exclusives à leur bande). **Limite connue** : `EquipmentItem` n'a pas de déduplication
-  find-or-create par nom (contrairement à SpecialRule/Mutation/MagicSchool), donc un objet censé être
-  partagé entre plusieurs bandes (ex. Arme Obsidienne / Armure du Chaos, partagées par 6 bandes selon le
-  livre de règles) ne peut pas encore être étendu à une bande déjà seedée depuis un JSON ultérieur. Pour
-  l'instant ces 2 objets du Culte des Possédés sont restreints à cette seule bande en attendant un vrai
-  mécanisme de partage multi-bandes (à généraliser plus tard, refera surface à l'import des Pillards
-  Hommes-Bêtes), Horde Orque (1re bande à utiliser le catalogue Mount — Sanglier de guerre, restreint —
-  et 1er cas de caractéristique Mouvement non-fixe : les Squigs des cavernes se déplacent de 2D6ps plutôt
-  qu'une valeur fixe, d'où l'ajout de `WarriorArchetype.MovementOverride`/`MovementDisplay` — texte libre
-  qui prime sur le Mouvement numérique partout où il est affiché, décidé avec l'utilisateur plutôt que de
-  transformer `Movement` en texte pur ou de bricoler une valeur numérique approximative). **En cours** :
-  import du reste du second lot fourni par l'utilisateur (textes FR bruts, mise en page dégradée) —
-  Pillards Hommes-Bêtes, Répurgateurs, Skavens (Clan Eshin), Sœurs de Sigmar, Kislévites. Méthode :
-  croiser le texte FR fourni avec mordheimer.net (EN, via le Browser pane —
-  WebFetch direct renvoie 403 sur ce site) pour combler les trous de mise en page / vérifier les chiffres
-  avant d'écrire le JSON, bande par bande. La Roulotte de la Peste de Kermesse (véhicule à 4 profils
-  combinés) reste hors périmètre V1, comme décidé.
+- [x] Catalogue complet du second lot fourni par l'utilisateur — 15 bandes intégrées au total, toutes via
+  le pipeline JSON `Data/SeedData/*.json` : Morts-Vivants, Chasseurs de Trésors Nains, Mercenaires
+  Averlanders, Mercenaires Ostlanders, Mercenaires Reiklander/Middenheimer/Marienburg (les 3 dernières
+  partagent un même roster de base — Capitaine/Champion/Jeune Loup/Guerrier/Tireur/Bretteur — avec des
+  règles spéciales et trésorerie propres à chaque ville ; Reiklander a quitté le seed historique
+  `OfficialContentSeed.cs` pour rejoindre ce pipeline), Kermesse du Chaos (1re bande à utiliser les
+  Mutations restreintes par bande — Bénédictions de Nurgle propres aux Impurs — et à prouver que deux
+  bandes peuvent avoir chacune leur propre école de magie distincte, ici Rituels de Nurgle vs Nécromancie/
+  Prières de Taal), Culte des Possédés (école de magie Rituels du Chaos + pool de Mutations génériques,
+  tous deux non-restreints — partagés ensuite avec les Pillards Hommes-Bêtes, qui référencent la même
+  école et le même pool sans rien redéclarer, plutôt qu'un contraste volontaire avec les Bénédictions de
+  Nurgle de Kermesse qui, elles, restent exclusives à leur bande), Horde Orque (1re bande à utiliser le
+  catalogue Mount — Sanglier de guerre, restreint — et 1er cas de caractéristique Mouvement non-fixe : les
+  Squigs des cavernes se déplacent de 2D6ps plutôt qu'une valeur fixe, d'où l'ajout de
+  `WarriorArchetype.MovementOverride`/`MovementDisplay` — texte libre qui prime sur le Mouvement numérique
+  partout où il est affiché, décidé avec l'utilisateur plutôt que de transformer `Movement` en texte pur
+  ou de bricoler une valeur numérique approximative), Pillards Hommes-Bêtes (réutilise Rituels du Chaos +
+  Mutations génériques du Culte des Possédés sans rien redéclarer, aucun équipement/monture propre — la
+  monture optionnelle « Destrier du Chaos » du texte FR vient d'un article Town Cryer distinct, absente de
+  la fiche canonique mordheimer.net, donc volontairement omise), Répurgateurs (1re bande à utiliser une
+  nouvelle école Prières de Sigmar — 6 entrées traduites depuis mordheimer.net, le texte FR fourni pour
+  cette section étant vide/illisible à l'extraction —, objets rares propres Brasero de Fer/Marteau des
+  Sorcières/Livre Saint), Skavens - Clan Eshin (magie du Rat Cornu, 6 entrées ; équipement signature
+  Griffes de Combat/Lames Suintantes/Sarbacane/Pistolet à Malepierre confirmant bien Eshin et non
+  Pestilens), Sœurs de Sigmar (réutilise l'école Prières de Sigmar créée par les Répurgateurs sans
+  redéclarer de sorts ; son propre Livre Saint à prix fixe 120 CO reste un doublon distinct de celui des
+  Répurgateurs — limite connue ci-dessous), Kislévites (aucune école de magie, aucun jeteur de sorts dans
+  le roster). Tous les jeteurs de sorts, quelle que soit la bande, réutilisent la même règle spéciale
+  générique « Wizard »/« Sorcier » (texte identique, dédupliquée par nom anglais) — l'affiliation à une
+  école de magie donnée se fait uniquement via `WarbandSeedData.MagicSchools`/`WarriorSeedData.
+  IsSpellcaster`, jamais via une règle spéciale dédiée par bande. **Limite connue** : `EquipmentItem` n'a
+  pas de déduplication find-or-create par nom (contrairement à SpecialRule/Mutation/MagicSchool), donc un
+  objet censé être partagé entre plusieurs bandes (ex. Arme Obsidienne/Armure du Chaos partagées par 6
+  bandes selon le livre de règles, ou Livre Saint partagé par Répurgateurs et Sœurs de Sigmar) ne peut pas
+  encore être étendu à une bande déjà seedée depuis un JSON ultérieur — chaque bande qui en a besoin
+  recrée sa propre ligne restreinte (à généraliser plus tard si ça devient gênant). Méthode d'import
+  utilisée pour tout le second lot : croiser le texte FR fourni par l'utilisateur (extraits bruts GW/GLM,
+  reproduits proches du texte original par choix explicite, fan-licence) avec mordheimer.net (EN, via le
+  Browser pane — WebFetch direct renvoie 403 sur ce site) pour combler les trous de mise en page/vérifier
+  les chiffres/compléter les tables de sorts manquantes, bande par bande. La Roulotte de la Peste de
+  Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1, comme décidé.
 
 ## V2 — Partage entre joueurs
 - **Export/Import fichier** (partage natif OS) pour bandes/objets modifiés — capacité illimitée

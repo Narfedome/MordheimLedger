@@ -112,17 +112,23 @@ que deviné :
 d'une des sources ci-dessus. À vérifier contre le livre de règles et corriger via l'UI (le flux
 Official → Modified existe précisément pour ça) si un chiffre est faux.
 
-**Import bande par bande (2e lot, en cours)** : l'utilisateur a fourni 13 fichiers texte (extraits FR
+**Import bande par bande (2e lot, terminé)** : l'utilisateur a fourni 13 fichiers texte (extraits FR
 bruts GW/GLM, mise en page dégradée par l'extraction PDF→texte — colonnes de tableaux mélangées,
-accents cassés sur certains fichiers) pour Kermesse du Chaos, Chasseurs de Trésors Nains (déjà
-intégrée, fichier de relecture), Culte des Possédés, Horde Orque, Pillards Hommes-Bêtes,
-Répurgateurs, Skavens (Clan Eshin — confirmé par l'équipement signature griffes de combat/lames
-suintantes/Magie du Rat Cornu, pas Pestilens), Sœurs de Sigmar, Kislévites, Mercenaires Averlanders/
-Ostlanders/Morts-Vivants (déjà intégrées, fichiers de relecture) et Mercenaires Marienburgers/
+accents cassés sur certains fichiers) pour Kermesse du Chaos, Chasseurs de Trésors Nains, Culte des
+Possédés, Horde Orque, Pillards Hommes-Bêtes, Répurgateurs, Skavens (Clan Eshin — confirmé par
+l'équipement signature griffes de combat/lames suintantes/Magie du Rat Cornu, pas Pestilens), Sœurs de
+Sigmar, Kislévites, Mercenaires Averlanders/Ostlanders/Morts-Vivants et Mercenaires Marienburgers/
 Middenheimers/Reiklanders (un seul fichier pour les 3 variantes — même roster de base, règles
-spéciales et trésorerie de départ différentes par ville). Méthode : croiser ces textes avec
-mordheimer.net (EN) pour combler les trous de mise en page/vérifier les chiffres avant d'écrire
-chaque JSON, bande par bande, comme pour le premier lot.
+spéciales et trésorerie de départ différentes par ville). Les 13 bandes sont maintenant toutes
+intégrées (15 bandes au total avec Reiklander + les 2 pilotes du premier lot). Méthode : croiser ces
+textes avec mordheimer.net (EN) pour combler les trous de mise en page/vérifier les chiffres/compléter
+les tables de sorts absentes du texte FR fourni (Prières de Sigmar pour Répurgateurs/Sœurs de Sigmar,
+Magie du Rat Cornu pour Skavens — sections "Magie" vides à l'extraction) avant d'écrire chaque JSON,
+bande par bande, comme pour le premier lot. Tout jeteur de sorts, quelle que soit la bande, réutilise
+la même règle spéciale générique « Wizard »/« Sorcier » plutôt qu'une règle dédiée par bande —
+l'affiliation à une école de magie passe uniquement par `WarbandSeedData.MagicSchools`/
+`WarriorSeedData.IsSpellcaster` (voir ROADMAP.md § V1 pour le détail bande par bande et les limites
+connues).
 
 **Fait** : Reiklander a migré vers le pipeline JSON (`Reiklanders.json`), `OfficialContentSeed.cs` ne
 contient plus que l'équipement commun (`CoreEquipment`). Les 3 variantes Mercenaires (Reiklander/

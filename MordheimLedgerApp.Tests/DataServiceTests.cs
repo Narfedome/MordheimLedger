@@ -55,10 +55,10 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsTenWarbandsTotal()
+    public async Task Database_SeedsFifteenWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(10, archetypes.Count);
+        Assert.Equal(15, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
@@ -69,14 +69,21 @@ public class DataServiceTests : IDisposable
         Assert.Contains(archetypes, a => a.Name == "Carnival of Chaos");
         Assert.Contains(archetypes, a => a.Name == "Cult of the Possessed");
         Assert.Contains(archetypes, a => a.Name == "Orc Mob");
+        Assert.Contains(archetypes, a => a.Name == "Beastmen Raiders");
+        Assert.Contains(archetypes, a => a.Name == "Witch Hunters");
+        Assert.Contains(archetypes, a => a.Name == "Skaven of Clan Eshin");
+        Assert.Contains(archetypes, a => a.Name == "The Sisters of Sigmar");
+        Assert.Contains(archetypes, a => a.Name == "Kislevites");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(30, spells.Count);
+        Assert.Equal(42, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Chaos Rituals"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Waaagh! Magic"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Sigmar"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Magic of the Horned Rat"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");

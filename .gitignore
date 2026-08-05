@@ -366,3 +366,4 @@ FodyWeavers.xsd
 # Build-Release.local.ps1.example for the template to fill in locally instead)
 Deploy/Build-Release.local.ps1
 Deploy/*.keystore
+/Website/downloads

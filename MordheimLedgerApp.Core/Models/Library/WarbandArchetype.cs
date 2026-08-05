@@ -31,6 +31,13 @@ public class WarbandArchetype
     /// e.g. "Chef"/"Leader" reads identically wherever it's attached instead of being retyped per band.</summary>
     public List<SpecialRule> SpecialRules { get; set; } = new();
 
+    /// <summary>Magic school(s) this band's casters may pick spells from (e.g. Nécromancie for Undead) -
+    /// empty = this band has no spellcasting. A shared MagicSchool catalog entry (see
+    /// WarbandArchetypeMagicSchoolEntity join) rather than a free-text field on each caster archetype,
+    /// since in the rulebook a spell list belongs to the warband as a whole - see WarriorArchetype.
+    /// IsSpellcaster for which of the band's Hero types may actually cast.</summary>
+    public List<MagicSchool> MagicSchools { get; set; } = new();
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 }

@@ -10,6 +10,7 @@ using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.Mounts;
+using MordheimLedgerApp.Features.Library.MagicSchools;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
 using MordheimLedgerApp.Features.Settings;
@@ -93,6 +94,10 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<MountSelectorPage>();
             builder.Services.AddSingleton<IMountPickerNavigationService, MountPickerNavigationService>();
             builder.Services.AddSingleton<IMountPickerService, MountPickerService>();
+            builder.Services.AddTransient<MagicSchoolViewModel>();
+            builder.Services.AddTransient<MagicSchoolSelectorPage>();
+            builder.Services.AddSingleton<IMagicSchoolPickerNavigationService, MagicSchoolPickerNavigationService>();
+            builder.Services.AddSingleton<IMagicSchoolPickerService, MagicSchoolPickerService>();
             builder.Services.AddTransient<LibraryViewModel>();
             builder.Services.AddTransient<LibraryPage>();
 

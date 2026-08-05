@@ -324,9 +324,6 @@
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possessed (may buy mutations)</value>
   </data>
-  <data name="WarriorArchetypeSpellListNamePh" xml:space="preserve">
-    <value>Magic school (empty = not a spellcaster)</value>
-  </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Cost</value>
   </data>
@@ -408,9 +405,6 @@
   <data name="WarriorsSpellsHeading" xml:space="preserve">
     <value>Known spells</value>
   </data>
-  <data name="SpellListNamePh" xml:space="preserve">
-    <value>Table (e.g. Necromancy)</value>
-  </data>
   <data name="SpellRollValuePh" xml:space="preserve">
     <value>Roll value</value>
   </data>
@@ -488,6 +482,30 @@
   </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Mount</value>
+  </data>
+  <data name="LibTabMagicSchools" xml:space="preserve">
+    <value>Magic schools</value>
+  </data>
+  <data name="MagicSchoolNamePh" xml:space="preserve">
+    <value>School name</value>
+  </data>
+  <data name="MagicSchoolCreateTitle" xml:space="preserve">
+    <value>New magic school</value>
+  </data>
+  <data name="MagicSchoolEditTitle" xml:space="preserve">
+    <value>Edit magic school</value>
+  </data>
+  <data name="MagicSchoolSelectTitle" xml:space="preserve">
+    <value>Select magic school</value>
+  </data>
+  <data name="WarriorArchetypeIsSpellcaster" xml:space="preserve">
+    <value>Spellcaster</value>
+  </data>
+  <data name="LibMagicSchoolsPh" xml:space="preserve">
+    <value>Granted magic schools</value>
+  </data>
+  <data name="SpellMagicSchoolPh" xml:space="preserve">
+    <value>Magic school</value>
   </data>
   <data name="SkillNamePh" xml:space="preserve">
     <value>Skill name</value>

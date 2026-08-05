@@ -80,8 +80,7 @@
                 <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
                                              IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
                 <!-- Onglet Sorts : visible seulement si l'archétype de ce guerrier est un lanceur de
-                     sorts (WarriorArchetype.SpellListName non nul) - inutile pour un Homme de main
-                     lambda. -->
+                     sorts (WarriorArchetype.IsSpellcaster) - inutile pour un Homme de main lambda. -->
                 <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
                                              IsActive="{Binding IsSpellsTab}" FontSize="12"
                                              IsVisible="{Binding IsSpellcaster}"/>

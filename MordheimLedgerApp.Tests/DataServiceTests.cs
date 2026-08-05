@@ -65,12 +65,15 @@ public class DataServiceTests : IDisposable
 
         var spells = await _library.GetSpellsAsync("en");
         Assert.Equal(12, spells.Count);
-        Assert.Equal(6, spells.Count(s => s.SpellListName == "Nécromancie"));
-        Assert.Equal(6, spells.Count(s => s.SpellListName == "Prières de Taal"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
-        Assert.Equal("Nécromancie", necromancer.SpellListName);
+        Assert.True(necromancer.IsSpellcaster);
+
+        var undead = archetypes.Single(a => a.Name == "Undead");
+        Assert.Contains(undead.MagicSchools, s => s.Name == "Necromancy");
 
         var dwarfAxe = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Dwarf axe");
         Assert.Single(dwarfAxe.RestrictedToWarbandArchetypeIds);

@@ -45,6 +45,12 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
+    /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by
+    /// EquipmentPickerService before construction) = only items whose RestrictedToWarbandArchetypeIds is
+    /// empty (common to every band) or contains this id are shown - see WarriorEditDialogViewModel.
+    /// AddEquipment.</summary>
+    public int? AllowedWarbandArchetypeId { get; set; }
+
     public EquipmentItemViewModel(ILibraryService libraryService, IEquipmentPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker)
     {
@@ -76,9 +82,11 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     private void ApplyFilter()
     {
-        var filtered = SelectedCategory is { } category
-            ? _allItems.Where(i => i.Category == category).ToList()
-            : _allItems;
+        IEnumerable<EquipmentItem> filtered = _allItems;
+        if (SelectedCategory is { } category)
+            filtered = filtered.Where(i => i.Category == category);
+        if (AllowedWarbandArchetypeId is { } warbandId)
+            filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
 
         EquipmentItems = new ObservableCollection<EquipmentItemRow>(filtered.Select(i => new EquipmentItemRow(i)));
         SelectedRow = null;

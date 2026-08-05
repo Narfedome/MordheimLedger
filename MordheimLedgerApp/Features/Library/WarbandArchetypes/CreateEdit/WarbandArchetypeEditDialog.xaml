@@ -55,6 +55,36 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </FlexLayout>
+
+            <!-- Écoles de magie accordées à la bande - détermine quels sorts sont proposés aux casters
+                 (voir WarriorArchetype.IsSpellcaster + WarriorEditDialogViewModel.AddSpell). Même
+                 pattern chip+picker que les règles spéciales ci-dessus. -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{loc:Loc LibMagicSchoolsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                              Command="{Binding AddMagicSchoolCommand}"/>
+            </Grid>
+            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding MagicSchools}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="library:MagicSchool">
+                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="{x:Static icons:RpgFont.RaCrystalBall}" FontFamily="RpgAwesome" FontSize="12"
+                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandArchetypeEditDialogViewModel}}, Path=RemoveMagicSchoolCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"

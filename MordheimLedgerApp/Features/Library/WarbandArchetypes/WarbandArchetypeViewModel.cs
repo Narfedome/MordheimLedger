@@ -14,6 +14,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly ISpecialRulePickerService _specialRulePicker;
+    private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly IWarbandArchetypePickerNavigationService _pickerNavigation;
 
     [ObservableProperty]
@@ -35,10 +36,11 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
     public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker,
-        IWarbandArchetypePickerNavigationService pickerNavigation)
+        IMagicSchoolPickerService magicSchoolPicker, IWarbandArchetypePickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
         _specialRulePicker = specialRulePicker;
+        _magicSchoolPicker = magicSchoolPicker;
         _pickerNavigation = pickerNavigation;
 
         // Les pages Bibliothèque sont des onglets TabBar gardés en mémoire par Shell - OnNavigatedTo ne
@@ -95,7 +97,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new WarbandArchetype();
-        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"], _specialRulePicker);
+        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"], _specialRulePicker, _magicSchoolPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarbandArchetypeAsync(newItem, LocalizationService.Instance.Language);
@@ -119,10 +121,11 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             ImagePath = s.ImagePath,
-            SpecialRules = new List<SpecialRule>(s.SpecialRules)
+            SpecialRules = new List<SpecialRule>(s.SpecialRules),
+            MagicSchools = new List<MagicSchool>(s.MagicSchools)
         };
 
-        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"], _specialRulePicker);
+        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"], _specialRulePicker, _magicSchoolPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarbandArchetypeAsync(copy, LocalizationService.Instance.Language);

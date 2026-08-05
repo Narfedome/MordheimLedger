@@ -79,10 +79,6 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     private void Save()
     {
         Item.SpecialRules = SpecialRules.ToList();
-        // Normalise "" en null : IsSpellcaster (voir WarbandDetailViewModel.EditWarrior) teste "non
-        // nul", un champ vidé par l'utilisateur doit redevenir "pas de lanceur de sorts" plutôt qu'une
-        // école de magie vide qui ne matcherait jamais aucun Spell.SpellListName.
-        Item.SpellListName = string.IsNullOrWhiteSpace(Item.SpellListName) ? null : Item.SpellListName;
         Close(true);
     }
 }

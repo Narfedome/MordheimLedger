@@ -43,7 +43,8 @@ public static class EntityMapping
     };
 
     public static WarbandArchetype ToModel(this WarbandArchetypeEntity e, IReadOnlyDictionary<string, string> translations,
-        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarbandId = null) => new()
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarbandId = null,
+        IReadOnlyDictionary<int, List<MagicSchool>>? magicSchoolsByWarbandId = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -54,7 +55,8 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         ImagePath = e.ImagePath ?? string.Empty,
-        SpecialRules = specialRulesByWarbandId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
+        SpecialRules = specialRulesByWarbandId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
+        MagicSchools = magicSchoolsByWarbandId?.GetValueOrDefault(e.Id) ?? new List<MagicSchool>()
     };
 
     public static WarbandArchetypeEntity ToEntity(this WarbandArchetype m) => new()
@@ -91,7 +93,7 @@ public static class EntityMapping
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
-        SpellListName = e.SpellListName,
+        IsSpellcaster = e.IsSpellcaster,
         CanBuyMutations = e.CanBuyMutations,
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
@@ -117,7 +119,7 @@ public static class EntityMapping
         Leadership = m.Leadership,
         StartingExperience = m.StartingExperience,
         DescriptionKey = m.DescriptionKey,
-        SpellListName = m.SpellListName,
+        IsSpellcaster = m.IsSpellcaster,
         CanBuyMutations = m.CanBuyMutations,
         ImagePath = m.ImagePath
     };
@@ -235,14 +237,16 @@ public static class EntityMapping
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
     };
 
-    public static Spell ToModel(this SpellEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static Spell ToModel(this SpellEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, MagicSchool>? magicSchoolsById = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
-        SpellListName = e.SpellListName,
+        MagicSchoolId = e.MagicSchoolId,
+        MagicSchool = magicSchoolsById?.GetValueOrDefault(e.MagicSchoolId),
         RollValue = e.RollValue,
         Difficulty = e.Difficulty,
         Source = e.Source,
@@ -254,9 +258,29 @@ public static class EntityMapping
         Id = m.Id,
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
-        SpellListName = m.SpellListName,
+        MagicSchoolId = m.MagicSchoolId,
         RollValue = m.RollValue,
         Difficulty = m.Difficulty,
+        Source = m.Source,
+        ImagePath = m.ImagePath
+    };
+
+    public static MagicSchool ToModel(this MagicSchoolEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty
+    };
+
+    public static MagicSchoolEntity ToEntity(this MagicSchool m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath
     };

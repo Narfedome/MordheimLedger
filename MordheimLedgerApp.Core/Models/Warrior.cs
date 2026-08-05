@@ -40,7 +40,7 @@ public class Warrior
     public List<WarriorInjury> Injuries { get; set; } = new();
 
     /// <summary>Loaded separately via the Warrior/Spell join table — not persisted on this object. Which
-    /// specific spells this warrior has learned from its archetype's SpellListName table (a caster
+    /// specific spells this warrior has learned from its band's granted magic school(s) (a caster
     /// doesn't know the whole table at once, see WarriorSpell) — empty for non-casters.</summary>
     public List<WarriorSpell> Spells { get; set; } = new();
 

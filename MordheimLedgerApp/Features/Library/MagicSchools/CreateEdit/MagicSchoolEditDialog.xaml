@@ -3,13 +3,13 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
-               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Spells.CreateEdit"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.MagicSchools.CreateEdit"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                x:TypeArguments="system:Boolean"
-               x:Class="MordheimLedgerApp.Features.Library.Spells.CreateEdit.SpellEditDialog"
-               x:DataType="local:SpellEditDialogViewModel"
+               x:Class="MordheimLedgerApp.Features.Library.MagicSchools.CreateEdit.MagicSchoolEditDialog"
+               x:DataType="local:MagicSchoolEditDialogViewModel"
                BackgroundColor="Transparent"
                Padding="0"
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
@@ -21,16 +21,9 @@
                    FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
                    TextColor="{DynamicResource AppText}"/>
             <components:LibraryItemImageView ImagePath="{Binding Item.ImagePath}"
-                                              DefaultGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                              DefaultGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
                                               FontFamily="RpgAwesome" MaximumHeightRequest="30"/>
-            <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc SpellNamePh}"/>
-            <Picker Title="{loc:Loc SpellMagicSchoolPh}"
-                    ItemsSource="{Binding MagicSchoolOptions}"
-                    SelectedItem="{Binding SelectedMagicSchoolLabel}"/>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <Entry Grid.Column="0" Text="{Binding Item.RollValue}" Keyboard="Numeric" Placeholder="{loc:Loc SpellRollValuePh}"/>
-                <Entry Grid.Column="1" Text="{Binding Item.Difficulty}" Keyboard="Numeric" Placeholder="{loc:Loc SpellDifficultyPh}"/>
-            </Grid>
+            <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc MagicSchoolNamePh}"/>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"

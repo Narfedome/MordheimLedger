@@ -11,16 +11,23 @@ namespace MordheimLedgerApp.Features.Library.Spells;
 
 /// <summary>
 /// Also doubles as a picker (see WarriorSpell): a caster learns specific spells one at a time via
-/// Advance rolls rather than knowing its whole SpellListName table, so Spells DO get attached to a
+/// Advance rolls rather than knowing its whole magic school table, so Spells DO get attached to a
 /// Warrior now - same IsSelectorMode/SelectedRows multi-select toggle as InjuryViewModel.
 /// </summary>
 public partial class SpellViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly ISpellPickerNavigationService _pickerNavigation;
+    private List<MagicSchool> _magicSchools = new();
 
     [ObservableProperty]
     private ObservableCollection<SpellRow> spells = new();
+
+    /// <summary>Null (Library CRUD tab) = no filter, shows every school's spells. Non-null (picker mode,
+    /// set by SpellPickerService before construction) = only spells whose MagicSchool.Id is in this set,
+    /// enforcing that a Warrior can only learn from the school(s) its WarbandArchetype grants access to
+    /// (see WarriorEditDialogViewModel.AddSpell).</summary>
+    public List<int>? AllowedMagicSchoolIds { get; set; }
 
     [ObservableProperty]
     private SpellRow? selectedRow;
@@ -50,7 +57,13 @@ public partial class SpellViewModel : BaseViewModel
     private async Task LoadData()
     {
         var allItems = await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language);
-        Spells = new ObservableCollection<SpellRow>(allItems.Select(i => new SpellRow(i)));
+        _magicSchools = await _libraryService.GetMagicSchoolsAsync(LocalizationService.Instance.Language);
+
+        var filtered = AllowedMagicSchoolIds is null
+            ? allItems
+            : allItems.Where(s => AllowedMagicSchoolIds.Contains(s.MagicSchoolId)).ToList();
+
+        Spells = new ObservableCollection<SpellRow>(filtered.Select(i => new SpellRow(i)));
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
@@ -91,7 +104,7 @@ public partial class SpellViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new Spell();
-        var dialogViewModel = new SpellEditDialogViewModel(newItem, Loc["SpellCreateTitle"]);
+        var dialogViewModel = new SpellEditDialogViewModel(newItem, Loc["SpellCreateTitle"], _magicSchools);
         if (await ShowDialogAsync(new SpellEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSpellAsync(newItem, LocalizationService.Instance.Language);
@@ -111,14 +124,14 @@ public partial class SpellViewModel : BaseViewModel
             Description = s.Description,
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
-            SpellListName = s.SpellListName,
+            MagicSchoolId = s.MagicSchoolId,
             RollValue = s.RollValue,
             Difficulty = s.Difficulty,
             Source = s.Source,
             ImagePath = s.ImagePath
         };
 
-        var dialogViewModel = new SpellEditDialogViewModel(copy, Loc["SpellEditTitle"]);
+        var dialogViewModel = new SpellEditDialogViewModel(copy, Loc["SpellEditTitle"], _magicSchools);
         if (await ShowDialogAsync(new SpellEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSpellAsync(copy, LocalizationService.Instance.Language);

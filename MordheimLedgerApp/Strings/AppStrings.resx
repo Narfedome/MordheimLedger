@@ -324,9 +324,6 @@
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé (peut acheter des mutations)</value>
   </data>
-  <data name="WarriorArchetypeSpellListNamePh" xml:space="preserve">
-    <value>École de magie (vide = pas de lanceur de sorts)</value>
-  </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Coût</value>
   </data>
@@ -408,9 +405,6 @@
   <data name="WarriorsSpellsHeading" xml:space="preserve">
     <value>Sorts connus</value>
   </data>
-  <data name="SpellListNamePh" xml:space="preserve">
-    <value>Table (ex. Nécromancie)</value>
-  </data>
   <data name="SpellRollValuePh" xml:space="preserve">
     <value>Résultat du dé</value>
   </data>
@@ -488,6 +482,30 @@
   </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Monture</value>
+  </data>
+  <data name="LibTabMagicSchools" xml:space="preserve">
+    <value>Écoles de magie</value>
+  </data>
+  <data name="MagicSchoolNamePh" xml:space="preserve">
+    <value>Nom de l'école</value>
+  </data>
+  <data name="MagicSchoolCreateTitle" xml:space="preserve">
+    <value>Nouvelle école de magie</value>
+  </data>
+  <data name="MagicSchoolEditTitle" xml:space="preserve">
+    <value>Modifier l'école de magie</value>
+  </data>
+  <data name="MagicSchoolSelectTitle" xml:space="preserve">
+    <value>Choisir une école de magie</value>
+  </data>
+  <data name="WarriorArchetypeIsSpellcaster" xml:space="preserve">
+    <value>Lanceur de sorts</value>
+  </data>
+  <data name="LibMagicSchoolsPh" xml:space="preserve">
+    <value>Écoles de magie accordées</value>
+  </data>
+  <data name="SpellMagicSchoolPh" xml:space="preserve">
+    <value>École de magie</value>
   </data>
   <data name="SkillNamePh" xml:space="preserve">
     <value>Nom de la compétence</value>

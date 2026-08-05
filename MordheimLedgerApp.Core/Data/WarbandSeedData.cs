@@ -27,6 +27,12 @@ public class WarbandSeedData
     /// it's attached.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 
+    /// <summary>Magic school(s) this band grants access to (empty = no spellcasting) - find-or-created
+    /// by English Name like SpecialRules, but not shared across files in practice (each school is
+    /// specific to one warband's tradition). Must be declared here before any Spells entry can reference
+    /// it via SpellSeedData.MagicSchoolName.</summary>
+    public List<MagicSchoolSeedData> MagicSchools { get; set; } = new();
+
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public List<WarriorSeedData> Warriors { get; set; } = new();
@@ -36,7 +42,7 @@ public class WarbandSeedData
     public List<EquipmentSeedData> Equipment { get; set; } = new();
 
     /// <summary>All entries of every spell/prayer/ritual table this warband uses (empty for non-casting
-    /// warbands like the dwarfs) - see WarriorSeedData.SpellListName for the link to the caster archetype.</summary>
+    /// warbands like the dwarfs) - see MagicSchools above and WarriorSeedData.IsSpellcaster.</summary>
     public List<SpellSeedData> Spells { get; set; } = new();
 
     /// <summary>Mutations introduced by this warband's JSON - find-or-created by English Name like
@@ -74,9 +80,9 @@ public class WarriorSeedData
     /// find-or-create-by-English-Name reuse as WarbandSeedData.SpecialRules.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 
-    /// <summary>Non-null = this archetype rolls on the Spell entries with a matching SpellListName
-    /// (see WarbandSeedData.Spells).</summary>
-    public string? SpellListName { get; set; }
+    /// <summary>True = this archetype may learn spells - which magic school(s) it can pick from comes
+    /// from the parent WarbandSeedData.MagicSchools, not from here (see WarriorArchetype.IsSpellcaster).</summary>
+    public bool IsSpellcaster { get; set; }
 
     /// <summary>True for Mutant/Possessed-type archetypes that may buy Mutations at recruitment.</summary>
     public bool CanBuyMutations { get; set; }
@@ -99,9 +105,18 @@ public class EquipmentSeedData
 
 public class SpellSeedData
 {
-    public string SpellListName { get; set; } = string.Empty;
+    /// <summary>Must match the English Name of one of the parent WarbandSeedData's MagicSchools entries.</summary>
+    public string MagicSchoolName { get; set; } = string.Empty;
     public int RollValue { get; set; }
     public int? Difficulty { get; set; }
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+}
+
+/// <summary>One magic school entry (see WarbandSeedData.MagicSchools) - find-or-created by English Name
+/// at seed time, same shape/rationale as SpecialRuleSeedData.</summary>
+public class MagicSchoolSeedData
+{
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 }

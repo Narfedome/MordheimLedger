@@ -52,6 +52,8 @@ public class AppDatabase
         await _db.CreateTableAsync<MountEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMountEntity>();
         await _db.CreateTableAsync<MountSpecialRuleEntity>();
+        await _db.CreateTableAsync<MagicSchoolEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
 
         // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
         // nothing the player made is at risk of being duplicated).
@@ -128,6 +130,14 @@ public class AppDatabase
             await _db.InsertAsync(new WarbandArchetypeSpecialRuleEntity { WarbandArchetypeId = warbandEntity.Id, SpecialRuleId = ruleId });
         }
 
+        // Doit précéder le traitement de data.Spells plus bas : chaque Spell référence son école par
+        // nom anglais (SpellSeedData.MagicSchoolName), résolu contre ce cache.
+        foreach (var ms in data.MagicSchools)
+        {
+            var schoolId = await FindOrCreateMagicSchoolAsync(ms);
+            await _db.InsertAsync(new WarbandArchetypeMagicSchoolEntity { WarbandArchetypeId = warbandEntity.Id, MagicSchoolId = schoolId });
+        }
+
         foreach (var w in data.Warriors)
         {
             var warrior = new WarriorArchetype
@@ -147,7 +157,7 @@ public class AppDatabase
                 Attacks = w.Attacks,
                 Leadership = w.Leadership,
                 Source = ContentSource.Official,
-                SpellListName = w.SpellListName,
+                IsSpellcaster = w.IsSpellcaster,
                 CanBuyMutations = w.CanBuyMutations
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
@@ -184,7 +194,7 @@ public class AppDatabase
         {
             var spell = new Spell
             {
-                SpellListName = sp.SpellListName,
+                MagicSchoolId = _magicSchoolIdsByEnglishName[sp.MagicSchoolName],
                 RollValue = sp.RollValue,
                 Difficulty = sp.Difficulty,
                 Source = ContentSource.Official
@@ -281,6 +291,27 @@ public class AppDatabase
         await _db.InsertAsync(entity);
 
         _mutationIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
+    }
+
+    /// <summary>English Name -> already-created MagicSchoolEntity id, same rationale/scope as
+    /// _specialRuleIdsByEnglishName - a school like "Necromancy" is declared once per warband's
+    /// WarbandSeedData.MagicSchools and then referenced by its Spell entries via
+    /// SpellSeedData.MagicSchoolName.</summary>
+    private readonly Dictionary<string, int> _magicSchoolIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateMagicSchoolAsync(MagicSchoolSeedData seed)
+    {
+        if (_magicSchoolIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var school = new MagicSchool { Source = ContentSource.Official };
+        school.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        school.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = school.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _magicSchoolIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 }

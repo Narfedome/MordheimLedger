@@ -15,7 +15,7 @@ public interface ILibraryService
     Task<List<Skill>> GetSkillsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 
-    /// <summary>Every entry of every spell/prayer/ritual table (see Spell.SpellListName) - purely
+    /// <summary>Every entry of every spell/prayer/ritual table (see Spell.MagicSchool) - purely
     /// reference data, no in-app casting/rolling ("no rules engine V1").</summary>
     Task<List<Spell>> GetSpellsAsync(string languageCode);
 
@@ -32,11 +32,14 @@ public interface ILibraryService
     /// EquipmentItem.</summary>
     Task<List<Mount>> GetMountsAsync(string languageCode);
 
+    /// <summary>The MagicSchool catalog (e.g. "Nécromancie") - see Models.Library.MagicSchool.</summary>
+    Task<List<MagicSchool>> GetMagicSchoolsAsync(string languageCode);
+
     /// <summary>Inserts (Id == 0) or updates. Editing a row whose current Source is Official flips it
     /// to Modified. Name/Description are written as the translation value for languageCode - any other
-    /// language's existing translation is left untouched. Also replaces the band's SpecialRule
-    /// attachment rows (see WarbandArchetype.SpecialRules) with the current list - simple replace-all,
-    /// no diffing.</summary>
+    /// language's existing translation is left untouched. Also replaces the band's SpecialRule and
+    /// MagicSchool attachment rows (see WarbandArchetype.SpecialRules/MagicSchools) with the current
+    /// list - simple replace-all, no diffing.</summary>
     Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode);
 
     /// <summary>Also replaces the archetype's SpecialRule attachment rows (see
@@ -56,6 +59,7 @@ public interface ILibraryService
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
     Task SaveMutationAsync(Mutation mutation, string languageCode);
     Task SaveMountAsync(Mount mount, string languageCode);
+    Task SaveMagicSchoolAsync(MagicSchool school, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
     Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
@@ -66,4 +70,5 @@ public interface ILibraryService
     Task DeleteSpecialRuleAsync(int specialRuleId);
     Task DeleteMutationAsync(int mutationId);
     Task DeleteMountAsync(int mountId);
+    Task DeleteMagicSchoolAsync(int magicSchoolId);
 }

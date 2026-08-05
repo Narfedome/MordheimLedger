@@ -43,12 +43,14 @@
                     <Entry Grid.Column="1" Text="{Binding Item.MaxCount}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeMaxCountPh}"/>
                 </Grid>
                 <Entry Text="{Binding Item.StartingExperience}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeStartingExperiencePh}"/>
-                <!-- Doit correspondre exactement (même chaîne) au Spell.SpellListName des entrées du
-                     Grimoire pour que ce type roule sur cette table - c'est ce lien, pas une liste
-                     "bandes autorisées", qui réserve une école de magie (ex. Nécromancie) à certaines
-                     bandes : pour l'ouvrir à une autre bande, on tape le même nom ici sur un de ses
-                     archétypes. -->
-                <Entry Text="{Binding Item.SpellListName}" Placeholder="{loc:Loc WarriorArchetypeSpellListNamePh}"/>
+                <!-- L'école de magie elle-même est liée à la bande (WarbandArchetype.MagicSchools, voir
+                     WarbandArchetypeEditDialog) - ici on marque juste ce type de guerrier comme lanceur
+                     de sorts. La sélection de sorts (WarriorEditDialog) ne propose alors que les sorts
+                     des écoles accordées à la bande. -->
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox IsChecked="{Binding Item.IsSpellcaster}" VerticalOptions="Center"/>
+                    <Label Text="{loc:Loc WarriorArchetypeIsSpellcaster}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
             </VerticalStackLayout>
 
             <!-- Étape 2 : profil (abréviations officielles du livre de règles, pas de traduction) -->

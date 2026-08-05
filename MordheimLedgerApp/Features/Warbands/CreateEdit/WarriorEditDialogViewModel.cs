@@ -16,6 +16,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
     private readonly ISpellPickerService _spellPicker;
+    private readonly IReadOnlyList<int> _allowedMagicSchoolIds;
     private readonly IMutationPickerService _mutationPicker;
     private readonly IMountPickerService _mountPicker;
 
@@ -49,8 +50,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public bool IsMutationsTab => SelectedTab == 4;
 
     /// <summary>Set by the caller (WarbandDetailViewModel.EditWarrior, which already looks up the
-    /// warrior's WarriorArchetype for RoleName) from WarriorArchetype.SpellListName != null - gates the
-    /// Sorts tab, hidden entirely for non-casters.</summary>
+    /// warrior's WarriorArchetype) from WarriorArchetype.IsSpellcaster - gates the Sorts tab, hidden
+    /// entirely for non-casters.</summary>
     public bool IsSpellcaster { get; }
 
     /// <summary>Set by the caller from WarriorArchetype.CanBuyMutations - gates the Mutations tab,
@@ -83,8 +84,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, bool isSpellcaster, IMutationPickerService mutationPicker, bool isMutant,
-        IMountPickerService mountPicker)
+        ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
+        IMutationPickerService mutationPicker, bool isMutant, IMountPickerService mountPicker)
     {
         this.item = item;
         this.title = title;
@@ -95,6 +96,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _injuryPicker = injuryPicker;
         _spellPicker = spellPicker;
         IsSpellcaster = isSpellcaster;
+        _allowedMagicSchoolIds = allowedMagicSchoolIds;
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
         _mountPicker = mountPicker;
@@ -109,7 +111,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
-        var items = await _equipmentPicker.PickEquipmentAsync();
+        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId);
         foreach (var equipmentItem in items)
         {
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
@@ -138,7 +140,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSkill()
     {
-        var skills = await _skillPicker.PickSkillAsync();
+        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId);
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);
@@ -174,7 +176,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSpell()
     {
-        var spells = await _spellPicker.PickSpellsAsync();
+        var spells = await _spellPicker.PickSpellsAsync(_allowedMagicSchoolIds);
         foreach (var spell in spells)
         {
             var learned = await _warbandService.AddWarriorSpellAsync(Item.Id, spell);

@@ -5,7 +5,9 @@ namespace MordheimLedgerApp.Services;
 
 public interface IEquipmentPickerService
 {
-    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync();
+    /// <summary>warbandArchetypeId: only items whose RestrictedToWarbandArchetypeIds is empty (common)
+    /// or contains this id are selectable - see WarriorEditDialogViewModel.AddEquipment.</summary>
+    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -14,14 +16,18 @@ public class EquipmentPickerService : IEquipmentPickerService
 
     public EquipmentPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync()
+    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
         var navigationService = _provider.GetRequiredService<IEquipmentPickerNavigationService>();
         navigationService.RegisterTaskSource(tcs);
 
-        var page = _provider.GetRequiredService<EquipmentItemSelectorPage>();
+        // Résolu manuellement (pas GetRequiredService<EquipmentItemSelectorPage>()) pour pouvoir poser
+        // le filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
+        var viewModel = _provider.GetRequiredService<EquipmentItemViewModel>();
+        viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        var page = new EquipmentItemSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton

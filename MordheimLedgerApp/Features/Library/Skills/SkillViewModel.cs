@@ -44,6 +44,11 @@ public partial class SkillViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
+    /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by SkillPickerService
+    /// before construction) = only skills whose RestrictedToWarbandArchetypeIds is empty (common) or
+    /// contains this id are shown - see WarriorEditDialogViewModel.AddSkill/EndOfGameDialogViewModel.</summary>
+    public int? AllowedWarbandArchetypeId { get; set; }
+
     public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker)
     {
@@ -75,9 +80,11 @@ public partial class SkillViewModel : BaseViewModel
 
     private void ApplyFilter()
     {
-        var filtered = SelectedCategory is { } category
-            ? _allItems.Where(i => i.Category == category).ToList()
-            : _allItems;
+        IEnumerable<Skill> filtered = _allItems;
+        if (SelectedCategory is { } category)
+            filtered = filtered.Where(i => i.Category == category);
+        if (AllowedWarbandArchetypeId is { } warbandId)
+            filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
 
         Skills = new ObservableCollection<SkillRow>(filtered.Select(i => new SkillRow(i)));
         SelectedRow = null;

@@ -5,6 +5,9 @@
     "fr": "Des légions de morts-vivants menées par un vampire, récoltant la pierre magique pour leur maître immortel dans les ruines de Mordheim."
   },
   "specialRules": [],
+  "magicSchools": [
+    { "name": { "en": "Necromancy", "fr": "Nécromancie" } }
+  ],
   "startingTreasury": 500,
   "maxWarriors": 15,
   "warriors": [
@@ -58,7 +61,7 @@
           }
         }
       ],
-      "spellListName": "Nécromancie"
+      "isSpellcaster": true
     },
     {
       "name": { "en": "Dreg", "fr": "Paria" },
@@ -157,7 +160,7 @@
   ],
   "spells": [
     {
-      "spellListName": "Nécromancie",
+      "magicSchoolName": "Necromancy",
       "rollValue": 1,
       "difficulty": 10,
       "name": { "en": "Lifestealer", "fr": "Drain de Vie" },
@@ -167,7 +170,7 @@
       }
     },
     {
-      "spellListName": "Nécromancie",
+      "magicSchoolName": "Necromancy",
       "rollValue": 2,
       "difficulty": 5,
       "name": { "en": "Re-Animation", "fr": "Réanimation" },
@@ -177,7 +180,7 @@
       }
     },
     {
-      "spellListName": "Nécromancie",
+      "magicSchoolName": "Necromancy",
       "rollValue": 3,
       "difficulty": 6,
       "name": { "en": "Death Vision", "fr": "Vision de Mort" },
@@ -187,7 +190,7 @@
       }
     },
     {
-      "spellListName": "Nécromancie",
+      "magicSchoolName": "Necromancy",
       "rollValue": 4,
       "difficulty": 9,
       "name": { "en": "Spell of Doom", "fr": "Fatalité" },
@@ -197,7 +200,7 @@
       }
     },
     {
-      "spellListName": "Nécromancie",
+      "magicSchoolName": "Necromancy",
       "rollValue": 5,
       "difficulty": 6,
       "name": { "en": "Call of Vanhel", "fr": "Appel de Vanhel" },
@@ -207,7 +210,7 @@
       }
     },
     {
-      "spellListName": "Nécromancie",
+      "magicSchoolName": "Necromancy",
       "rollValue": 6,
       "difficulty": null,
       "name": { "en": "Spell of Awakening", "fr": "Incantation de Réveil" },

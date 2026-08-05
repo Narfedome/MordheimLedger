@@ -13,6 +13,9 @@
       }
     }
   ],
+  "magicSchools": [
+    { "name": { "en": "Prayers of Taal", "fr": "Prières de Taal" } }
+  ],
   "startingTreasury": 500,
   "maxWarriors": 15,
   "warriors": [
@@ -66,7 +69,7 @@
           }
         }
       ],
-      "spellListName": "Prières de Taal"
+      "isSpellcaster": true
     },
     {
       "name": { "en": "Blood Brother", "fr": "Frère de sang" },
@@ -206,7 +209,7 @@
   ],
   "spells": [
     {
-      "spellListName": "Prières de Taal",
+      "magicSchoolName": "Prayers of Taal",
       "rollValue": 1,
       "difficulty": 7,
       "name": { "en": "Leap of the Stag", "fr": "Saut du Cerf" },
@@ -215,7 +218,7 @@
       }
     },
     {
-      "spellListName": "Prières de Taal",
+      "magicSchoolName": "Prayers of Taal",
       "rollValue": 2,
       "difficulty": 5,
       "name": { "en": "Blessed Beer", "fr": "Bière Bénite" },
@@ -224,7 +227,7 @@
       }
     },
     {
-      "spellListName": "Prières de Taal",
+      "magicSchoolName": "Prayers of Taal",
       "rollValue": 3,
       "difficulty": 7,
       "name": { "en": "Bear's Paw", "fr": "Patte d'Ours" },
@@ -233,7 +236,7 @@
       }
     },
     {
-      "spellListName": "Prières de Taal",
+      "magicSchoolName": "Prayers of Taal",
       "rollValue": 4,
       "difficulty": 9,
       "name": { "en": "Earthquake", "fr": "Tremblement de Terre" },
@@ -242,7 +245,7 @@
       }
     },
     {
-      "spellListName": "Prières de Taal",
+      "magicSchoolName": "Prayers of Taal",
       "rollValue": 5,
       "difficulty": 8,
       "name": { "en": "Entangle", "fr": "Entraves" },
@@ -251,7 +254,7 @@
       }
     },
     {
-      "spellListName": "Prières de Taal",
+      "magicSchoolName": "Prayers of Taal",
       "rollValue": 6,
       "difficulty": 7,
       "name": { "en": "Squirrel Swarm", "fr": "Invocation d'Écureuils" },

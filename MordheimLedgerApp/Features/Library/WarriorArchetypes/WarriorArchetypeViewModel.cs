@@ -103,7 +103,7 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             ImagePath = s.ImagePath,
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
-            SpellListName = s.SpellListName,
+            IsSpellcaster = s.IsSpellcaster,
             CanBuyMutations = s.CanBuyMutations
         };
 

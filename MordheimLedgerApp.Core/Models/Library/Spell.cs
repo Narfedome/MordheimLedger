@@ -3,11 +3,10 @@ namespace MordheimLedgerApp.Core.Models.Library;
 /// <summary>
 /// One entry (a single die-roll result) of a spell/prayer/ritual table (e.g. "Nécromancie", "Prières
 /// de Sigmar", "Magie Waaagh") - Mordheim spellcasting is a fixed D6/2D6 table per tradition, not a
-/// freely composed spell list. SpellListName groups entries into their table (see WarriorArchetype.
-/// SpellListName, which links a Hero archetype to the table it rolls on by matching this string) - kept
-/// as a plain field rather than a separate normalized entity for simplicity, since a spell list is just
-/// a shared grouping label. Purely descriptive like the rest of the Library ("no rules engine V1") -
-/// there's no in-app casting/rolling, just reference text.
+/// freely composed spell list. MagicSchool groups entries into their table - a caster's WarbandArchetype
+/// grants access to a school (see WarbandArchetype.MagicSchools), which is what the Spell picker filters
+/// against (see WarriorEditDialogViewModel.AddSpell). Purely descriptive like the rest of the Library
+/// ("no rules engine V1") - there's no in-app casting/rolling, just reference text.
 /// </summary>
 public class Spell
 {
@@ -22,9 +21,11 @@ public class Spell
     public string? NameKey { get; set; }
     public string? DescriptionKey { get; set; }
 
-    /// <summary>Which table this entry belongs to (e.g. "Nécromancie") - matches WarriorArchetype.
-    /// SpellListName for the archetype(s) that can roll on it.</summary>
-    public string SpellListName { get; set; } = string.Empty;
+    /// <summary>Which table this entry belongs to.</summary>
+    public int MagicSchoolId { get; set; }
+
+    /// <summary>Resolved from MagicSchoolId - see LibraryService.GetSpellsAsync.</summary>
+    public MagicSchool? MagicSchool { get; set; }
 
     /// <summary>The die-roll result this entry corresponds to (1-6 for a D6 table, etc.).</summary>
     public int RollValue { get; set; }

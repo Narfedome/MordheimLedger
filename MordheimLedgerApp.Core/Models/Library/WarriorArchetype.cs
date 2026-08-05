@@ -50,10 +50,11 @@ public class WarriorArchetype
     /// join) rather than free text, so e.g. "Chef" reads identically on every archetype that has it.</summary>
     public List<SpecialRule> SpecialRules { get; set; } = new();
 
-    /// <summary>Null = not a spellcaster. Non-null = this archetype rolls on Spell entries whose
-    /// SpellListName matches this value (e.g. "Nécromancie" for a Nécromancien). A simple string match
-    /// rather than a join table since it's a 1:1 relationship (one archetype -> one list).</summary>
-    public string? SpellListName { get; set; }
+    /// <summary>True = this archetype may learn spells. Which magic school(s) it can actually pick from
+    /// is not tracked here - it's whatever WarbandArchetype.MagicSchools grants to the parent band (see
+    /// WarbandDetailViewModel.LoadAsync), since in the rulebook a spell list belongs to the warband, not
+    /// to one specific Hero type within it.</summary>
+    public bool IsSpellcaster { get; set; }
 
     /// <summary>True for Mutant/Possessed-type archetypes that may buy Mutations at recruitment (see
     /// RulesReference/Campagne.md - "Mutants et Possédés ne peuvent acheter une mutation qu'au

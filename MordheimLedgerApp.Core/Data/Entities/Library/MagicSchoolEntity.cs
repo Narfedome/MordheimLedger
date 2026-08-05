@@ -3,18 +3,12 @@ using SQLite;
 
 namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
-public class SpellEntity
+public class MagicSchoolEntity
 {
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
     public string NameKey { get; set; } = string.Empty;
     public string? DescriptionKey { get; set; }
-
-    [Indexed]
-    public int MagicSchoolId { get; set; }
-
-    public int RollValue { get; set; }
-    public int? Difficulty { get; set; }
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
 }

@@ -27,6 +27,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private Dictionary<int, string> _archetypeNames = new();
     private List<SpecialRule> _bandWideSpecialRules = new();
+    private List<int> _bandMagicSchoolIds = new();
 
     [ObservableProperty]
     private int warbandId;
@@ -103,6 +104,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             _archetypeNames = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.Name);
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
+            _bandMagicSchoolIds = warbandArchetype?.MagicSchools.Select(s => s.Id).ToList() ?? new List<int>();
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
@@ -224,11 +226,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
         };
 
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == w.WarriorArchetypeId);
-        var isSpellcaster = archetype?.SpellListName is not null;
+        var isSpellcaster = archetype?.IsSpellcaster ?? false;
         var isMutant = archetype?.CanBuyMutations ?? false;
         var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
-            _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _mutationPicker, isMutant,
-            _mountPicker);
+            _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchoolIds,
+            _mutationPicker, isMutant, _mountPicker);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
         // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
@@ -270,7 +272,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             return;
         }
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker);
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker, Warband.WarbandArchetypeId);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>

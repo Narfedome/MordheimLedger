@@ -5,7 +5,10 @@ namespace MordheimLedgerApp.Services;
 
 public interface ISkillPickerService
 {
-    Task<IReadOnlyList<Skill>> PickSkillAsync();
+    /// <summary>warbandArchetypeId: only skills whose RestrictedToWarbandArchetypeIds is empty (common)
+    /// or contains this id are selectable - see WarriorEditDialogViewModel.AddSkill/
+    /// EndOfGameDialogViewModel's Advance roll skill choice.</summary>
+    Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId);
 }
 
 public class SkillPickerService : ISkillPickerService
@@ -14,14 +17,18 @@ public class SkillPickerService : ISkillPickerService
 
     public SkillPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Skill>> PickSkillAsync()
+    public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
 
         var navigationService = _provider.GetRequiredService<ISkillPickerNavigationService>();
         navigationService.RegisterTaskSource(tcs);
 
-        var page = _provider.GetRequiredService<SkillSelectorPage>();
+        // Résolu manuellement (pas GetRequiredService<SkillSelectorPage>()) pour pouvoir poser le
+        // filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
+        var viewModel = _provider.GetRequiredService<SkillViewModel>();
+        viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        var page = new SkillSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton

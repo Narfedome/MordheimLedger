@@ -7,6 +7,7 @@ using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.Mounts;
+using MordheimLedgerApp.Features.Library.MagicSchools;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
@@ -30,6 +31,7 @@ public partial class LibraryViewModel : BaseViewModel
     public SpecialRuleViewModel SpecialRules { get; }
     public MutationViewModel Mutations { get; }
     public MountViewModel Mounts { get; }
+    public MagicSchoolViewModel MagicSchools { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
@@ -40,6 +42,7 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsSpecialRulesTab))]
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
     [NotifyPropertyChangedFor(nameof(IsMountsTab))]
+    [NotifyPropertyChangedFor(nameof(IsMagicSchoolsTab))]
     private int selectedTab;
 
     public bool IsWarbandsTab => SelectedTab == 0;
@@ -50,10 +53,11 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsSpecialRulesTab => SelectedTab == 5;
     public bool IsMutationsTab => SelectedTab == 6;
     public bool IsMountsTab => SelectedTab == 7;
+    public bool IsMagicSchoolsTab => SelectedTab == 8;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
-        MutationViewModel mutations, MountViewModel mounts)
+        MutationViewModel mutations, MountViewModel mounts, MagicSchoolViewModel magicSchools)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
@@ -63,6 +67,7 @@ public partial class LibraryViewModel : BaseViewModel
         SpecialRules = specialRules;
         Mutations = mutations;
         Mounts = mounts;
+        MagicSchools = magicSchools;
     }
 
     [RelayCommand]
@@ -89,7 +94,10 @@ public partial class LibraryViewModel : BaseViewModel
     [RelayCommand]
     private void ShowMountsTab() => SelectedTab = 7;
 
-    /// <summary>All 8 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
+    [RelayCommand]
+    private void ShowMagicSchoolsTab() => SelectedTab = 8;
+
+    /// <summary>All 9 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
     /// switching between them is instant.</summary>
     public async Task InitializeAsync()
     {
@@ -101,5 +109,6 @@ public partial class LibraryViewModel : BaseViewModel
         await SpecialRules.InitializeAsync();
         await Mutations.InitializeAsync();
         await Mounts.InitializeAsync();
+        await MagicSchools.InitializeAsync();
     }
 }

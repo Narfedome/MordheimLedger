@@ -139,6 +139,7 @@ public class AppDatabase
         await SeedWarbandFromJsonAsync("Reiklanders.json");
         await SeedWarbandFromJsonAsync("Middenheimers.json");
         await SeedWarbandFromJsonAsync("Marienburgers.json");
+        await SeedWarbandFromJsonAsync("KermesseDuChaos.json");
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior

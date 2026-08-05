@@ -22,16 +22,20 @@
 - [ ] Historique de campagne / trésorerie détaillée
 - [x] Restrictions par bande (Équipement/Compétences/Montures) réellement éditables + filtrées dans les pickers
 - [x] Écoles de magie normalisées en entité propre (`MagicSchool`), liée à la bande plutôt qu'au guerrier
-- [~] Compléter le catalogue au-delà d'une seule bande — 7 bandes intégrées, toutes via le pipeline JSON
+- [~] Compléter le catalogue au-delà d'une seule bande — 8 bandes intégrées, toutes via le pipeline JSON
   `Data/SeedData/*.json` : Morts-Vivants, Chasseurs de Trésors Nains, Mercenaires Averlanders, Mercenaires
   Ostlanders, Mercenaires Reiklander/Middenheimer/Marienburg (les 3 dernières partagent un même roster de
   base — Capitaine/Champion/Jeune Loup/Guerrier/Tireur/Bretteur — avec des règles spéciales et trésorerie
   propres à chaque ville ; Reiklander a quitté le seed historique `OfficialContentSeed.cs` pour rejoindre
-  ce pipeline). **En cours** : import du reste du second lot fourni par l'utilisateur (textes FR bruts,
-  mise en page dégradée) — Kermesse du Chaos, Culte des Possédés, Horde Orque, Pillards Hommes-Bêtes,
-  Répurgateurs, Skavens (Clan Eshin), Sœurs de Sigmar, Kislévites. Méthode : croiser le texte FR fourni
-  avec mordheimer.net (EN, via le Browser pane — WebFetch direct renvoie 403 sur ce site) pour combler les
-  trous de mise en page / vérifier les chiffres avant d'écrire le JSON, bande par bande.
+  ce pipeline), Kermesse du Chaos (1re bande à utiliser les Mutations restreintes par bande — Bénédictions
+  de Nurgle propres aux Impurs — et à prouver que deux bandes peuvent avoir chacune leur propre école de
+  magie distincte, ici Rituels de Nurgle vs Nécromancie/Prières de Taal). **En cours** : import du reste du
+  second lot fourni par l'utilisateur (textes FR bruts, mise en page dégradée) — Culte des Possédés, Horde
+  Orque, Pillards Hommes-Bêtes, Répurgateurs, Skavens (Clan Eshin), Sœurs de Sigmar, Kislévites. Méthode :
+  croiser le texte FR fourni avec mordheimer.net (EN, via le Browser pane — WebFetch direct renvoie 403 sur
+  ce site) pour combler les trous de mise en page / vérifier les chiffres avant d'écrire le JSON, bande par
+  bande. La Roulotte de la Peste de Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1, comme
+  décidé.
 
 ## V2 — Partage entre joueurs
 - **Export/Import fichier** (partage natif OS) pour bandes/objets modifiés — capacité illimitée

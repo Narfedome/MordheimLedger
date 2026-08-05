@@ -55,10 +55,10 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsSevenWarbandsTotal()
+    public async Task Database_SeedsEightWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(7, archetypes.Count);
+        Assert.Equal(8, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
@@ -66,11 +66,13 @@ public class DataServiceTests : IDisposable
         Assert.Contains(archetypes, a => a.Name == "Reiklander Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Middenheim Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Marienburg Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Carnival of Chaos");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(12, spells.Count);
+        Assert.Equal(18, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -143,6 +145,27 @@ public class DataServiceTests : IDisposable
         // by English Name must resolve them to the same catalog row instead of 3 duplicates.
         var allRules = await _library.GetSpecialRulesAsync("en");
         Assert.Single(allRules, r => r.Name == "Expert Swordsman");
+    }
+
+    /// <summary>Kermesse du Chaos is the first warband to use the Mutation restriction mechanism (its
+    /// Nurgle's Blessings must not leak into other Chaos-adjacent warbands' mutation pickers) and to
+    /// prove two warbands can each have their own distinctly-named magic school (its "Nurgle Rituals" is
+    /// unrelated to the Undead's "Necromancy").</summary>
+    [Fact]
+    public async Task KermesseDuChaos_MutationsAreWarbandRestricted()
+    {
+        var kermesse = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Carnival of Chaos");
+
+        Assert.Contains(kermesse.MagicSchools, s => s.Name == "Nurgle Rituals");
+        var master = (await _library.GetWarriorArchetypesAsync(kermesse.Id, "en")).Single(w => w.Name == "Carnival Master");
+        Assert.True(master.IsSpellcaster);
+
+        var spells = await _library.GetSpellsAsync("en");
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
+
+        var allMutations = await _library.GetMutationsAsync("en");
+        var rot = allMutations.Single(m => m.Name == "Nurgle's Rot");
+        Assert.Equal([kermesse.Id], rot.RestrictedToWarbandArchetypeIds);
     }
 
     [Fact]

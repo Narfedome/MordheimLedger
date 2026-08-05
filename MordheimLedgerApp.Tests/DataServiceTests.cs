@@ -54,16 +54,19 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsThreeWarbandsTotal()
+    public async Task Database_SeedsFourWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(3, archetypes.Count);
+        Assert.Equal(5, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
+        Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Ostland Mercenaries");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(6, spells.Count);
-        Assert.All(spells, s => Assert.Equal("Nécromancie", s.SpellListName));
+        Assert.Equal(12, spells.Count);
+        Assert.Equal(6, spells.Count(s => s.SpellListName == "Nécromancie"));
+        Assert.Equal(6, spells.Count(s => s.SpellListName == "Prières de Taal"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -71,6 +74,35 @@ public class DataServiceTests : IDisposable
 
         var dwarfAxe = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Dwarf axe");
         Assert.Single(dwarfAxe.RestrictedToWarbandArchetypeIds);
+    }
+
+    /// <summary>"Leader" is attached from 4 different warbands' JSON files (Averlanders/Captain,
+    /// Ostlanders/Elder, Dwarf Treasure Hunters/Noble, Undead/Vampire) - find-or-create by English Name
+    /// (see AppDatabase.FindOrCreateSpecialRuleAsync) must resolve them all to the SAME catalog row
+    /// instead of 4 duplicates, and each archetype's WarriorArchetype.SpecialRules must carry it.</summary>
+    [Fact]
+    public async Task SpecialRules_SharedAcrossWarbands_ResolveToSameCatalogRow()
+    {
+        var allRules = await _library.GetSpecialRulesAsync("en");
+        Assert.Single(allRules, r => r.Name == "Leader");
+        var leaderId = allRules.Single(r => r.Name == "Leader").Id;
+
+        var archetypes = await _library.GetWarbandArchetypesAsync("en");
+        var leaderBearers = new[] { ("Averland Mercenaries", "Captain"), ("Ostland Mercenaries", "Elder"),
+            ("Dwarf Treasure Hunters", "Noble"), ("Undead", "Vampire") };
+
+        foreach (var (bandName, warriorName) in leaderBearers)
+        {
+            var band = archetypes.Single(a => a.Name == bandName);
+            var warrior = (await _library.GetWarriorArchetypesAsync(band.Id, "en")).Single(w => w.Name == warriorName);
+            Assert.Contains(warrior.SpecialRules, r => r.Id == leaderId);
+        }
+
+        // Band-wide rules (not tied to one warrior type) live on the WarbandArchetype itself.
+        var dwarfs = archetypes.Single(a => a.Name == "Dwarf Treasure Hunters");
+        Assert.Contains(dwarfs.SpecialRules, r => r.Name == "Hard to Kill");
+        var ostlanders = archetypes.Single(a => a.Name == "Ostland Mercenaries");
+        Assert.Contains(ostlanders.SpecialRules, r => r.Name == "Self-Reliant");
     }
 
     [Fact]

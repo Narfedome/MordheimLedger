@@ -16,6 +16,17 @@ public class WarbandSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
+
+    /// <summary>Rules that apply to every warrior in the band regardless of type (e.g. "Autonome" for
+    /// Ostlanders) - distinct from each WarriorSeedData's own SpecialRules, which only apply to that one
+    /// warrior type. See RulesReference/*.md: most warbands split their "Règles Spéciales" this way. Each
+    /// entry is find-or-created by its English Name (see AppDatabase.FindOrCreateSpecialRuleAsync) so a
+    /// rule like "Leader" reused across many warbands' JSON files resolves to the same catalog row -
+    /// keep the English Name identical (verbatim) across files when it's meant to be the same rule, and
+    /// keep its Description generic/mechanical (no per-archetype flavor) so it reads correctly wherever
+    /// it's attached.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public List<WarriorSeedData> Warriors { get; set; } = new();
@@ -47,6 +58,11 @@ public class WarriorSeedData
     public int Leadership { get; set; }
     public LocalizedText? Description { get; set; }
 
+    /// <summary>Rules specific to this one warrior type (e.g. "Chef", "Provoque la Peur") - distinct from
+    /// the parent WarbandSeedData.SpecialRules, which apply band-wide regardless of warrior type. Same
+    /// find-or-create-by-English-Name reuse as WarbandSeedData.SpecialRules.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
     /// <summary>Non-null = this archetype rolls on the Spell entries with a matching SpellListName
     /// (see WarbandSeedData.Spells).</summary>
     public string? SpellListName { get; set; }
@@ -72,6 +88,15 @@ public class SpellSeedData
     public string SpellListName { get; set; } = string.Empty;
     public int RollValue { get; set; }
     public int? Difficulty { get; set; }
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+}
+
+/// <summary>One named, reusable SpecialRule entry (see WarbandSeedData.SpecialRules/WarriorSeedData.
+/// SpecialRules) - find-or-created by English Name at seed time so the same rule attached across
+/// multiple warbands/warrior types resolves to a single shared catalog row instead of duplicate text.</summary>
+public class SpecialRuleSeedData
+{
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 }

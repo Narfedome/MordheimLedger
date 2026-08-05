@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MordheimLedgerApp.Features.Warbands"
              xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+             xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
              xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:xp="clr-namespace:MordheimLedgerApp.Components.ExperienceTrack"
@@ -54,6 +55,28 @@
                             <Label Grid.Row="1" Grid.Column="7" Text="{Binding Warrior.Attacks}" FontSize="13" HorizontalTextAlignment="Center"/>
                             <Label Grid.Row="1" Grid.Column="8" Text="{Binding Warrior.Leadership}" FontSize="13" HorizontalTextAlignment="Center"/>
                         </Grid>
+
+                        <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
+                             ViewModel depuis WarriorArchetype.SpecialRules + WarbandArchetype.
+                             SpecialRules (règles bande-entière), pas stockées sur le Warrior. Pour
+                             changer les règles d'un type de guerrier, ça se passe dans la Bibliothèque
+                             (WarriorArchetypeEditDialog/WarbandArchetypeEditDialog), pas ici. -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasSpecialRules}">
+                            <Label Text="{loc:Loc WarriorsSpecialRulesHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SpecialRules}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="library:SpecialRule">
+                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
+                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
 
                         <!-- Blessures : lecture seule ici (pas de bouton "+"/"x") - gérées depuis le
                              dialog d'édition (voir WarriorEditDialog). Alimenté à la fois par le jet de

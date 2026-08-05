@@ -42,7 +42,8 @@ public static class EntityMapping
         Notes = m.Notes
     };
 
-    public static WarbandArchetype ToModel(this WarbandArchetypeEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static WarbandArchetype ToModel(this WarbandArchetypeEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarbandId = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -52,7 +53,8 @@ public static class EntityMapping
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
-        ImagePath = e.ImagePath ?? string.Empty
+        ImagePath = e.ImagePath ?? string.Empty,
+        SpecialRules = specialRulesByWarbandId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
 
     public static WarbandArchetypeEntity ToEntity(this WarbandArchetype m) => new()
@@ -66,7 +68,8 @@ public static class EntityMapping
         ImagePath = m.ImagePath
     };
 
-    public static WarriorArchetype ToModel(this WarriorArchetypeEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static WarriorArchetype ToModel(this WarriorArchetypeEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarriorArchetypeId = null) => new()
     {
         Id = e.Id,
         WarbandArchetypeId = e.WarbandArchetypeId,
@@ -89,7 +92,8 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         SpellListName = e.SpellListName,
-        ImagePath = e.ImagePath ?? string.Empty
+        ImagePath = e.ImagePath ?? string.Empty,
+        SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
 
     public static WarriorArchetypeEntity ToEntity(this WarriorArchetype m) => new()
@@ -185,6 +189,26 @@ public static class EntityMapping
     };
 
     public static InjuryEntity ToEntity(this Injury m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source,
+        ImagePath = m.ImagePath
+    };
+
+    public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty
+    };
+
+    public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
     {
         Id = m.Id,
         NameKey = m.NameKey ?? string.Empty,

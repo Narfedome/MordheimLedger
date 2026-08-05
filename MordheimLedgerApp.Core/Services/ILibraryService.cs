@@ -19,10 +19,20 @@ public interface ILibraryService
     /// reference data, no in-app casting/rolling ("no rules engine V1").</summary>
     Task<List<Spell>> GetSpellsAsync(string languageCode);
 
+    /// <summary>The shared SpecialRule catalog (e.g. "Chef", "Provoque la Peur") - attached to
+    /// WarbandArchetype/WarriorArchetype via join tables rather than duplicated as free text, see
+    /// WarbandArchetype.SpecialRules/WarriorArchetype.SpecialRules.</summary>
+    Task<List<SpecialRule>> GetSpecialRulesAsync(string languageCode);
+
     /// <summary>Inserts (Id == 0) or updates. Editing a row whose current Source is Official flips it
     /// to Modified. Name/Description are written as the translation value for languageCode - any other
-    /// language's existing translation is left untouched.</summary>
+    /// language's existing translation is left untouched. Also replaces the band's SpecialRule
+    /// attachment rows (see WarbandArchetype.SpecialRules) with the current list - simple replace-all,
+    /// no diffing.</summary>
     Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode);
+
+    /// <summary>Also replaces the archetype's SpecialRule attachment rows (see
+    /// WarriorArchetype.SpecialRules) with the current list.</summary>
     Task SaveWarriorArchetypeAsync(WarriorArchetype archetype, string languageCode);
 
     /// <summary>Also replaces the item's warband-restriction rows (see
@@ -35,6 +45,7 @@ public interface ILibraryService
     Task SaveSkillAsync(Skill skill, string languageCode);
     Task SaveInjuryAsync(Injury injury, string languageCode);
     Task SaveSpellAsync(Spell spell, string languageCode);
+    Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
     Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
@@ -42,4 +53,5 @@ public interface ILibraryService
     Task DeleteSkillAsync(int skillId);
     Task DeleteInjuryAsync(int injuryId);
     Task DeleteSpellAsync(int spellId);
+    Task DeleteSpecialRuleAsync(int specialRuleId);
 }

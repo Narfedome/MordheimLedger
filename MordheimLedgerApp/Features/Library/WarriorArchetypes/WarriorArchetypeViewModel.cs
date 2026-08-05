@@ -14,6 +14,7 @@ namespace MordheimLedgerApp.Features.Library.WarriorArchetypes;
 public partial class WarriorArchetypeViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly ISpecialRulePickerService _specialRulePicker;
 
     [ObservableProperty]
     private int warbandArchetypeId;
@@ -29,9 +30,10 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     [ObservableProperty]
     private WarriorArchetypeRow? selectedRow;
 
-    public WarriorArchetypeViewModel(ILibraryService libraryService)
+    public WarriorArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
+        _specialRulePicker = specialRulePicker;
 
         // Voir WarbandArchetypeViewModel - même besoin de rechargement explicite sur changement de
         // langue (cette page est atteinte par push depuis la Bibliothèque, mais rien n'empêche l'appli
@@ -65,7 +67,7 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new WarriorArchetype { WarbandArchetypeId = WarbandArchetypeId };
-        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"]);
+        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"], _specialRulePicker);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarriorArchetypeAsync(newItem, LocalizationService.Instance.Language);
@@ -99,10 +101,11 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
             Description = s.Description,
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
-            ImagePath = s.ImagePath
+            ImagePath = s.ImagePath,
+            SpecialRules = new List<SpecialRule>(s.SpecialRules)
         };
 
-        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"]);
+        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"], _specialRulePicker);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarriorArchetypeAsync(copy, LocalizationService.Instance.Language);

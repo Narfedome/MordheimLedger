@@ -44,6 +44,12 @@ public class WarriorArchetype
     public string? NameKey { get; set; }
     public string? DescriptionKey { get; set; }
 
+    /// <summary>Rules specific to this one warrior type (e.g. "Chef", "Provoque la Peur", "Pièges") -
+    /// distinct from the parent WarbandArchetype's own SpecialRules, which apply band-wide regardless of
+    /// warrior type. Each SpecialRule is a shared catalog entry (see WarriorArchetypeSpecialRuleEntity
+    /// join) rather than free text, so e.g. "Chef" reads identically on every archetype that has it.</summary>
+    public List<SpecialRule> SpecialRules { get; set; } = new();
+
     /// <summary>Null = not a spellcaster. Non-null = this archetype rolls on Spell entries whose
     /// SpellListName matches this value (e.g. "Nécromancie" for a Nécromancien). A simple string match
     /// rather than a join table since it's a 1:1 relationship (one archetype -> one list).</summary>

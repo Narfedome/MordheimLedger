@@ -13,6 +13,7 @@ namespace MordheimLedgerApp.Features.Library.WarbandArchetypes;
 public partial class WarbandArchetypeViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly ISpecialRulePickerService _specialRulePicker;
 
     [ObservableProperty]
     private ObservableCollection<WarbandArchetypeRow> warbandArchetypeItems = new();
@@ -22,9 +23,10 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [ObservableProperty]
     private WarbandArchetypeRow? selectedRow;
 
-    public WarbandArchetypeViewModel(ILibraryService libraryService)
+    public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
+        _specialRulePicker = specialRulePicker;
 
         // Les pages Bibliothèque sont des onglets TabBar gardés en mémoire par Shell - OnNavigatedTo ne
         // se déclenche pas de façon fiable en changeant d'onglet, donc Name/Description (résolus dans
@@ -56,7 +58,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new WarbandArchetype();
-        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"]);
+        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"], _specialRulePicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarbandArchetypeAsync(newItem, LocalizationService.Instance.Language);
@@ -79,10 +81,11 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             Description = s.Description,
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
-            ImagePath = s.ImagePath
+            ImagePath = s.ImagePath,
+            SpecialRules = new List<SpecialRule>(s.SpecialRules)
         };
 
-        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"]);
+        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"], _specialRulePicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarbandArchetypeAsync(copy, LocalizationService.Instance.Language);

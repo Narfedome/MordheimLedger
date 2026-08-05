@@ -4,6 +4,50 @@
     "en": "Exiled or ambitious Dwarf nobles gather their kin to seek fortune and glory among the ruins of Mordheim.",
     "fr": "Des nobles nains bannis ou ambitieux rassemblent leurs proches pour chercher fortune et gloire dans les ruines de Mordheim."
   },
+  "specialRules": [
+    {
+      "name": { "en": "Hard to Kill", "fr": "Difficiles à Tuer" },
+      "description": {
+        "en": "A Dwarf is only taken Out of Action on a roll of 6 instead of 5-6 on the damage chart (treat 1-2 as Knocked Down, 3-5 as Stunned, 6 as Out of Action).",
+        "fr": "Un nain n'est mis hors de combat que sur un résultat de 6 au lieu de 5-6 sur le tableau des dégâts (considérez un 1-2 comme à terre, un 3-5 comme sonné, un 6 comme hors de combat)."
+      }
+    },
+    {
+      "name": { "en": "Hard Headed", "fr": "Tête Dure" },
+      "description": {
+        "en": "Dwarfs ignore the special rules of maces, hammers etc. - they're not easily knocked out!",
+        "fr": "Les nains ignorent les règles spéciales des masses, marteaux, etc. - ils ne sont pas faciles à assommer !"
+      }
+    },
+    {
+      "name": { "en": "No Armour Penalty", "fr": "Armure" },
+      "description": {
+        "en": "Dwarfs suffer no Movement penalty for wearing armour.",
+        "fr": "Les nains ne subissent aucune pénalité de Mouvement pour le port d'une armure."
+      }
+    },
+    {
+      "name": { "en": "Hatred of Orcs and Goblins", "fr": "Haine des Orques et des Gobelins" },
+      "description": {
+        "en": "All Dwarfs are subject to Hatred against Orcs and Goblins.",
+        "fr": "Tous les nains sont sujets à la Haine envers les orques et les gobelins."
+      }
+    },
+    {
+      "name": { "en": "Grudgers", "fr": "Rancuniers" },
+      "description": {
+        "en": "An old rivalry with the Elves means a Dwarf band can never hire an Elf Hired Sword, of any kind.",
+        "fr": "Une vieille rivalité avec les elfes fait qu'une bande naine ne peut jamais inclure de Franc-Tireur elfe, quel qu'il soit."
+      }
+    },
+    {
+      "name": { "en": "Unrivalled Miners", "fr": "Mineurs Sans Égaux" },
+      "description": {
+        "en": "Dwarfs add +1 to the number of wyrdstone fragments found during the Exploration roll at the end of a battle.",
+        "fr": "Les nains ajoutent +1 au nombre de fragments de pierre magique trouvés lors du jet d'Exploration en fin de partie."
+      }
+    }
+  ],
   "startingTreasury": 500,
   "maxWarriors": 12,
   "warriors": [
@@ -18,7 +62,16 @@
       "description": {
         "en": "Dwarf nobles are Treasure Hunters who have recruited a band of like-minded kin and left their stronghold in search of riches.",
         "fr": "Les nobles nains sont des Chasseurs de Trésors qui ont recruté une bande de leurs congénères aux motivations similaires et ont quitté leur forteresse en quête de richesses."
-      }
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Leader", "fr": "Chef" },
+          "description": {
+            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
+            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          }
+        }
+      ]
     },
     {
       "name": { "en": "Engineer", "fr": "Ingénieur Nain" },
@@ -31,7 +84,16 @@
       "description": {
         "en": "Dwarf engineers are highly respected members of Dwarf society, masters of the war machines that made the Dwarf race famous.",
         "fr": "Les ingénieurs nains sont des membres très respectés de la société naine, qui construisent les formidables machines de guerre qui ont fait la réputation légendaire de leur race."
-      }
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Master Gunsmith", "fr": "Maître Armurier" },
+          "description": {
+            "en": "Through superior materials and secret techniques, this model increases the range of missile weapons bought from the Dwarf Equipment List - Pistols by 3\", Crossbows and Handguns by 6\". Only applies to battles it takes part in (even if it hasn't yet entered play or was taken Out of Action), and never to Hired Swords' equipment.",
+            "fr": "Grâce à l'utilisation de meilleurs matériaux et de techniques secrètes, cette figurine peut accroître la portée des armes de tir de la bande achetées sur la Liste d'Équipement Nain de 3ps pour les Pistolets et de 6ps pour les Arbalètes et les Arquebuses. L'augmentation ne s'applique qu'aux batailles auxquelles elle participe (même si elle n'est pas encore entrée en jeu ou a été mise hors de combat), jamais à l'équipement des Francs-Tireurs."
+          }
+        }
+      ]
     },
     {
       "name": { "en": "Troll Slayer", "fr": "Tueur de Trolls Nain" },
@@ -44,7 +106,23 @@
       "description": {
         "en": "Troll Slayers belong to a grim cult dedicated to seeking a heroic death in battle.",
         "fr": "Les Tueurs de Trolls font partie d'un culte sinistre dédié à la recherche obsessionnelle d'une mort héroïque au combat."
-      }
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Death Wish", "fr": "Vœu de Mort" },
+          "description": {
+            "en": "This model seeks an honourable death in combat - it is immune to psychology and never takes an Alone Against All test.",
+            "fr": "Cette figurine cherche une mort honorable au combat - elle est immunisée à la psychologie et ne fait jamais de test lorsqu'elle se bat seule."
+          }
+        },
+        {
+          "name": { "en": "Slayer Skills", "fr": "Compétences de Tueur" },
+          "description": {
+            "en": "When this model gains a new skill, it may pick from the Slayer skill table (Fear no Danger, Berserk Charge, Monster Slayer) in addition to the normal skill tables.",
+            "fr": "Lorsque cette figurine gagne une nouvelle compétence, elle peut choisir dans le tableau de compétences de Tueur (Charge Furieuse, Tueur de Monstres, Berserk) en plus des tableaux de compétences classiques."
+          }
+        }
+      ]
     },
     {
       "name": { "en": "Dwarf Clansman", "fr": "Guerrier Nain" },

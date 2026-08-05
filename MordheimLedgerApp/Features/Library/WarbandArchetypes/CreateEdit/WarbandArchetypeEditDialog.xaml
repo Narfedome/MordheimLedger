@@ -4,6 +4,7 @@
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
@@ -25,7 +26,35 @@
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc WarbandArchetypeNamePh}"/>
             <Entry Text="{Binding Item.StartingTreasury}" Keyboard="Numeric" Placeholder="{loc:Loc WarbandArchetypeTreasuryPh}"/>
             <Entry Text="{Binding Item.MaxWarriors}" Keyboard="Numeric" Placeholder="{loc:Loc WarbandArchetypeMaxWarriorsPh}"/>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="80"/>
+            <!-- Règles qui s'appliquent à toute la bande, quel que soit le type de guerrier (ex.
+                 "Autonome" chez les Ostlanders) - distinctes des règles spéciales par archétype. Même
+                 principe picker+chips que WarriorArchetypeEditDialog. -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{loc:Loc LibSpecialRulesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                              Command="{Binding AddSpecialRuleCommand}"/>
+            </Grid>
+            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SpecialRules}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="library:SpecialRule">
+                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
+                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandArchetypeEditDialogViewModel}}, Path=RemoveSpecialRuleCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"

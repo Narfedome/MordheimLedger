@@ -4,17 +4,18 @@ using MordheimLedgerApp.Features.Library.EquipmentItems;
 using MordheimLedgerApp.Features.Library.Injuries;
 using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Features.Library.Spells;
+using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
 
 /// <summary>
-/// Single "Codex" Shell tab hosting the 5 catalog sections (types de bande, Place du Marché,
-/// Compétences, Blessures, Sorts) that used to each be their own top-level TabBar tab - consolidated to
-/// declutter the bottom nav bar on Android. Same toggle pattern (index + IsXTab, no real TabbedPage)
-/// already used by WarbandDetailPage's Roster/Historique and WarriorEditDialog's Équipement/
-/// Compétences/Blessures. Each section keeps its own existing ViewModel/*View ContentView unchanged -
-/// this container only owns the toggle and BindingContext wiring, no catalog logic of its own.
+/// Single "Codex" Shell tab hosting the 6 catalog sections (types de bande, Place du Marché,
+/// Compétences, Blessures, Sorts, Règles spéciales) that used to each be their own top-level TabBar tab
+/// - consolidated to declutter the bottom nav bar on Android. Same toggle pattern (index + IsXTab, no
+/// real TabbedPage) already used by WarbandDetailPage's Roster/Historique and WarriorEditDialog's
+/// Équipement/Compétences/Blessures. Each section keeps its own existing ViewModel/*View ContentView
+/// unchanged - this container only owns the toggle and BindingContext wiring, no catalog logic of its own.
 /// </summary>
 public partial class LibraryViewModel : BaseViewModel
 {
@@ -23,6 +24,7 @@ public partial class LibraryViewModel : BaseViewModel
     public SkillViewModel Skills { get; }
     public InjuryViewModel Injuries { get; }
     public SpellViewModel Spells { get; }
+    public SpecialRuleViewModel SpecialRules { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
@@ -30,6 +32,7 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsSkillsTab))]
     [NotifyPropertyChangedFor(nameof(IsInjuriesTab))]
     [NotifyPropertyChangedFor(nameof(IsSpellsTab))]
+    [NotifyPropertyChangedFor(nameof(IsSpecialRulesTab))]
     private int selectedTab;
 
     public bool IsWarbandsTab => SelectedTab == 0;
@@ -37,15 +40,17 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsSkillsTab => SelectedTab == 2;
     public bool IsInjuriesTab => SelectedTab == 3;
     public bool IsSpellsTab => SelectedTab == 4;
+    public bool IsSpecialRulesTab => SelectedTab == 5;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
-        SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells)
+        SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
         Skills = skills;
         Injuries = injuries;
         Spells = spells;
+        SpecialRules = specialRules;
     }
 
     [RelayCommand]
@@ -63,7 +68,10 @@ public partial class LibraryViewModel : BaseViewModel
     [RelayCommand]
     private void ShowSpellsTab() => SelectedTab = 4;
 
-    /// <summary>All 5 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
+    [RelayCommand]
+    private void ShowSpecialRulesTab() => SelectedTab = 5;
+
+    /// <summary>All 6 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
     /// switching between them is instant.</summary>
     public async Task InitializeAsync()
     {
@@ -72,5 +80,6 @@ public partial class LibraryViewModel : BaseViewModel
         await Skills.InitializeAsync();
         await Injuries.InitializeAsync();
         await Spells.InitializeAsync();
+        await SpecialRules.InitializeAsync();
     }
 }

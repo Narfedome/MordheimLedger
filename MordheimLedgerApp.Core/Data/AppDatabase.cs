@@ -43,6 +43,9 @@ public class AppDatabase
         await _db.CreateTableAsync<SpellEntity>();
         await _db.CreateTableAsync<WarbandArchetypeEquipmentEntity>();
         await _db.CreateTableAsync<WarbandArchetypeSkillEntity>();
+        await _db.CreateTableAsync<SpecialRuleEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeSpecialRuleEntity>();
+        await _db.CreateTableAsync<WarriorArchetypeSpecialRuleEntity>();
 
         // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
         // nothing the player made is at risk of being duplicated).
@@ -87,6 +90,8 @@ public class AppDatabase
         // warbands get added here as their JSON files are authored.
         await SeedWarbandFromJsonAsync("MortsVivants.json");
         await SeedWarbandFromJsonAsync("ChasseursDeTresorsNains.json");
+        await SeedWarbandFromJsonAsync("Averlanders.json");
+        await SeedWarbandFromJsonAsync("Ostlanders.json");
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
@@ -111,6 +116,12 @@ public class AppDatabase
         var warbandEntity = warband.ToEntity();
         await _db.InsertAsync(warbandEntity);
 
+        foreach (var sr in data.SpecialRules)
+        {
+            var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+            await _db.InsertAsync(new WarbandArchetypeSpecialRuleEntity { WarbandArchetypeId = warbandEntity.Id, SpecialRuleId = ruleId });
+        }
+
         foreach (var w in data.Warriors)
         {
             var warrior = new WarriorArchetype
@@ -134,7 +145,14 @@ public class AppDatabase
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
-            await _db.InsertAsync(warrior.ToEntity());
+            var warriorEntity = warrior.ToEntity();
+            await _db.InsertAsync(warriorEntity);
+
+            foreach (var sr in w.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new WarriorArchetypeSpecialRuleEntity { WarriorArchetypeId = warriorEntity.Id, SpecialRuleId = ruleId });
+            }
         }
 
         foreach (var eq in data.Equipment)
@@ -180,5 +198,27 @@ public class AppDatabase
         if (!string.IsNullOrEmpty(fr))
             await _db.InsertAsync(new TranslationEntity { Key = key, LanguageCode = "fr", Value = fr });
         return key;
+    }
+
+    /// <summary>English Name -> already-created SpecialRuleEntity id, for this seeding pass only (the
+    /// whole SeedOfficialContentAsync run happens once, gated by "catalog empty" - no need to also check
+    /// the DB for pre-existing rows). Lets e.g. "Leader" attached from 4 different warbands' JSON files
+    /// resolve to the SAME catalog row instead of 4 duplicates - keep the English Name verbatim-identical
+    /// across files for a rule meant to be shared.</summary>
+    private readonly Dictionary<string, int> _specialRuleIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateSpecialRuleAsync(SpecialRuleSeedData seed)
+    {
+        if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var rule = new SpecialRule { Source = ContentSource.Official };
+        rule.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        rule.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = rule.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _specialRuleIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
     }
 }

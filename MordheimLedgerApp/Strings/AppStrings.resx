@@ -276,6 +276,9 @@
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
+  <data name="LibSpecialRulesPh" xml:space="preserve">
+    <value>Règles spéciales</value>
+  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
   </data>
@@ -401,6 +404,24 @@
   </data>
   <data name="InjurySelectTitle" xml:space="preserve">
     <value>Choisir une blessure</value>
+  </data>
+  <data name="LibTabSpecialRules" xml:space="preserve">
+    <value>Règles spéciales</value>
+  </data>
+  <data name="SpecialRuleNamePh" xml:space="preserve">
+    <value>Nom de la règle</value>
+  </data>
+  <data name="SpecialRuleCreateTitle" xml:space="preserve">
+    <value>Nouvelle règle spéciale</value>
+  </data>
+  <data name="SpecialRuleEditTitle" xml:space="preserve">
+    <value>Modifier la règle spéciale</value>
+  </data>
+  <data name="SpecialRuleSelectTitle" xml:space="preserve">
+    <value>Choisir une règle spéciale</value>
+  </data>
+  <data name="WarriorsSpecialRulesHeading" xml:space="preserve">
+    <value>Règles spéciales</value>
   </data>
   <data name="SkillNamePh" xml:space="preserve">
     <value>Nom de la compétence</value>

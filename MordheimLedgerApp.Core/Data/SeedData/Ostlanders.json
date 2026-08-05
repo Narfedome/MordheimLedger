@@ -1,0 +1,263 @@
+{
+  "name": { "en": "Ostland Mercenaries", "fr": "Mercenaires Ostlanders" },
+  "description": {
+    "en": "An extended Ostland family - fathers, uncles, brothers, cousins, even a tough aunt or two - banded together to seek their fortune in Mordheim.",
+    "fr": "Une famille élargie d'Ostlanders - pères, oncles, frères, cousins, voire une tante coriace ou deux - unie pour chercher fortune dans les ruines de Mordheim."
+  },
+  "specialRules": [
+    {
+      "name": { "en": "Self-Reliant", "fr": "Autonome" },
+      "description": {
+        "en": "Ostlanders have no wish to let a stranger walk off with gold they worked hard for. As a result, they may never hire Hired Swords, except Ogres.",
+        "fr": "Les Ostlanders n'ont aucune envie de laisser l'or qu'ils ont durement gagné aux mains d'un étranger. En conséquence, ils ne peuvent jamais embaucher de Francs-Tireurs, excepté les Ogres."
+      }
+    }
+  ],
+  "startingTreasury": 500,
+  "maxWarriors": 15,
+  "warriors": [
+    {
+      "name": { "en": "Elder", "fr": "Doyen" },
+      "isHero": true,
+      "cost": 60,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+      "description": {
+        "en": "In Ostland, the oldest (or most often, the most impressive) man of the village receives the title of Elder - only through his exhortations can an entire village be convinced to pack up and head to Mordheim to seek its fortune.",
+        "fr": "En Ostland, l'homme le plus âgé (ou plus souvent le plus impressionnant) du village reçoit le titre de Doyen - ce n'est que par ses exhortations que tout un village peut être amené à faire ses valises et se rendre à Mordheim pour chercher fortune."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Leader", "fr": "Chef" },
+          "description": {
+            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
+            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Priest of Taal", "fr": "Prêtre de Taal" },
+      "isHero": true,
+      "cost": 45,
+      "maxCount": 1,
+      "startingExperience": 12,
+      "movement": 4, "weaponSkill": 2, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "All Priests of Taal are said to be born under the darkest phase of the moon - loners by nature, they wander the wild forests of the northern Empire, and none quite know why they've begun joining Ostlander bands digging through the ruins of Mordheim.",
+        "fr": "On dit que tous les Prêtres de Taal sont nés pendant la phase la plus sombre de la lune - solitaires par nature, ils errent dans les forêts sauvages du nord de l'Empire, et nul ne sait pourquoi ils ont commencé à se joindre aux bandes d'Ostlanders qui fouillent les ruines de Mordheim."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Prayers", "fr": "Prières" },
+          "description": {
+            "en": "This model may recite prayers (see the Spells library).",
+            "fr": "Cette figurine peut réciter des prières (voir la bibliothèque des Sorts)."
+          }
+        },
+        {
+          "name": { "en": "Frail", "fr": "Frêle" },
+          "description": {
+            "en": "This model may never wear heavy armour.",
+            "fr": "Cette figurine ne peut jamais porter une armure lourde."
+          }
+        }
+      ],
+      "spellListName": "Prières de Taal"
+    },
+    {
+      "name": { "en": "Blood Brother", "fr": "Frère de sang" },
+      "isHero": true,
+      "cost": 35,
+      "maxCount": 2,
+      "startingExperience": 12,
+      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Ostland villages are generally one large extended family - everyone is somebody's uncle, cousin or brother. Rather than bother with exact family ties, the village's most respected men (other than the Elder) are simply called Blood Brothers.",
+        "fr": "Les villages d'Ostland sont généralement composés d'une famille élargie. Tout le monde est l'oncle, le cousin ou le frère d'un des membres du village. Au lieu de s'embêter avec les liens familiaux, les hommes les plus respectés du village (à l'exception du Doyen) sont simplement appelés Frères de sang."
+      }
+    },
+    {
+      "name": { "en": "Jaeger", "fr": "Jaeger" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": 7,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Some men of Ostland prefer to live alone in the forests of the Old World rather than marry. Though these trappers don't share the tight family bonds of the average Ostlander, they're respected for their forest lore and unshakeable determination.",
+        "fr": "Certains hommes de l'Ostland préfèrent vivre seuls dans les forêts du Vieux Monde plutôt que de se marier. Bien que ces trappeurs ne partagent pas les liens familiaux étroits de l'Ostlander moyen, ils sont respectés pour leur connaissance de la forêt et leur détermination sans faille."
+      }
+    },
+    {
+      "name": { "en": "Kin", "fr": "Proche" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "description": {
+        "en": "Most of an Ostlander band's warriors are brothers or cousins of the Elder - most are married men with children to feed. The ruins of Mordheim tempt with a greed few poor villagers can resist.",
+        "fr": "La plupart des guerriers d'une bande d'Ostlanders sont des frères ou des cousins du Doyen. La plupart sont des hommes mariés avec des enfants à nourrir. Les ruines de Mordheim attisent une convoitise à laquelle peu de pauvres villageois peuvent résister."
+      }
+    },
+    {
+      "name": { "en": "Ne'er-do-well", "fr": "Vaurien" },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
+      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 10,
+      "description": {
+        "en": "Every Ostlander loves his beer, but in every village a few take that love to the extreme. Never sober and rarely aware, these fools cut a swathe through Mordheim's streets, hurling insults, committing petty vandalism and sowing chaos wherever they roam.",
+        "fr": "Tous les Ostlanders aiment leur bière, mais dans chaque village il y a toujours quelques hommes qui poussent cet amour à l'extrême. Jamais sobres et rarement conscients, ces bouffons se frayent un chemin dans les rues de Mordheim en criant des insultes et en semant le désordre sur leur passage."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Drunk", "fr": "Ivre" },
+          "description": {
+            "en": "This model automatically passes any Leadership test it's required to take.",
+            "fr": "Cette figurine réussit automatiquement tous les tests de Commandement qu'elle doit passer."
+          }
+        },
+        {
+          "name": { "en": "Disreputable", "fr": "Irrespectable" },
+          "description": {
+            "en": "This model inspires a mix of pity and fear in its fellows and may never become the band's Leader.",
+            "fr": "Cette figurine inspire un mélange de pitié et de peur chez ses camarades et ne peut jamais devenir Chef de bande."
+          }
+        }
+      ]
+    },
+    {
+      "name": { "en": "Ogre", "fr": "Ogre" },
+      "isHero": false,
+      "cost": 160,
+      "maxCount": 1,
+      "startingExperience": 0,
+      "movement": 6, "weaponSkill": 3, "ballisticSkill": 2, "strength": 4, "toughness": 4,
+      "wounds": 3, "initiative": 3, "attacks": 2, "leadership": 7,
+      "description": {
+        "en": "Ogres are more common in the pine-covered hills of Ostland than anywhere else in the Empire - the rugged mountain men value their muscle above all, and an Ogre's almost legendary strength and ability to shrug off terrible wounds make him a perfect shock trooper, if a costly one to keep fed.",
+        "fr": "Il est possible de croiser un Ogre plus fréquemment dans les collines couvertes de pins de l'Ostland que n'importe où ailleurs dans l'Empire - ces créatures brutales sont très recherchées pour leurs muscles, et leur force quasi légendaire ainsi que leur capacité à supporter d'affreuses blessures en font des troupes de choc parfaites, bien que coûteuses à nourrir."
+      },
+      "specialRules": [
+        {
+          "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
+          "description": {
+            "en": "This model causes Fear (see the Psychology rules).",
+            "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+          }
+        },
+        {
+          "name": { "en": "Large Target", "fr": "Grande Cible" },
+          "description": {
+            "en": "This model is a Large Target, as defined in the Shooting rules.",
+            "fr": "Cette figurine est une Grande Cible, comme défini dans les règles de Tir."
+          }
+        },
+        {
+          "name": { "en": "Combat and Strength Skills on Promotion", "fr": "Compétences de Combat et de Force à la promotion" },
+          "description": {
+            "en": "If this model becomes a Hero via a \"He's Really Come On\" result, it may pick from the Combat and Strength skill tables.",
+            "fr": "Si cette figurine devient un Héros via un résultat Ce gars est doué, elle peut faire son choix dans les tableaux de compétences de Combat et de Force."
+          }
+        },
+        {
+          "name": { "en": "Slow Learner", "fr": "Lent d'Esprit" },
+          "description": {
+            "en": "Though this model can gain experience and benefit from advances, it isn't the brightest of creatures - it only gains an advance every other time (it needs twice the normal experience for an advance).",
+            "fr": "Bien que cette figurine soit capable de gagner de l'expérience et de profiter des progressions, elle n'est pas des plus intelligentes - elle ne gagne une progression qu'une fois sur deux (elle doit accumuler deux fois plus d'expérience que la normale)."
+          }
+        }
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": { "en": "Double-barrelled pistol", "fr": "Pistolet à double canon" },
+      "category": "BlackPowderWeapon",
+      "cost": 30,
+      "rarity": 10,
+      "description": {
+        "en": "A double-barrelled firearm is treated exactly like a normal one, with one exception: any enemy hit is struck by two shots instead of one (i.e. a pistol causes 2 Strength 4 hits instead of one per successful shot). Each barrel takes a full turn to reload, so it takes two turns to reload both. If only one barrel is loaded, it may be used as a normal pistol/rifle. A pair of double-barrelled pistols may be fired every other turn instead of every turn like a normal pair.",
+        "fr": "Une arme à feu à double canon est traitée exactement comme une version normale à une exception près : tout ennemi est frappé par deux tirs au lieu d'un (un pistolet provoque 2 touches de Force 4 plutôt qu'une pour chaque coup réussi). Chaque canon nécessite un tour complet pour être rechargé, il faut donc deux tours pour recharger les deux. Si un seul canon est rechargé, on peut l'utiliser comme un pistolet/fusil normal. Une paire de pistolets à double canon peut tirer tous les deux tours au lieu d'une fois par tour comme une paire normale."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Double-barrelled Hochland long rifle", "fr": "Long fusil du Hochland à double canon" },
+      "category": "BlackPowderWeapon",
+      "cost": 300,
+      "rarity": 12,
+      "description": {
+        "en": "A Hochland long rifle fitted with a second barrel, following the same double-barrel principle as the Ostlanders' double-barrelled pistols.",
+        "fr": "Un long fusil du Hochland doté d'un second canon, suivant le même principe de double canon que les pistolets à double canon des Ostlanders."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
+  "spells": [
+    {
+      "spellListName": "Prières de Taal",
+      "rollValue": 1,
+      "difficulty": 7,
+      "name": { "en": "Leap of the Stag", "fr": "Saut du Cerf" },
+      "description": {
+        "en": "Many Priests of Taal wear a stag's skull as a symbol of their devotion, and the Lord of the Forest's power can be called upon to mimic the speed and grace of this magnificent beast. The Priest may immediately move anywhere within 9\", including into base contact with an enemy, in which case the move counts as a charge with +1 Strength for the first turn. If it contacts a fleeing enemy, it automatically hits it with +1 Strength in the ensuing combat phase and the enemy must flee again (if it survives)."
+      }
+    },
+    {
+      "spellListName": "Prières de Taal",
+      "rollValue": 2,
+      "difficulty": 5,
+      "name": { "en": "Blessed Beer", "fr": "Bière Bénite" },
+      "description": {
+        "en": "Like his brother Ulric, Taal has a great appetite for the strong beers of the northern Empire - every Ostland village taps at least one barrel of beer in Taal's honour at the Summer solstice. Thanks to enough flasks of blessed beer, a Priest of Taal may heal himself or any model within 2\" - the warrior recovers to his maximum Wounds. In addition, every living enemy model (not Undead or Possessed) within 2\" of the Priest loses 1 Attack during the next close combat phase due to the powerful fumes."
+      }
+    },
+    {
+      "spellListName": "Prières de Taal",
+      "rollValue": 3,
+      "difficulty": 7,
+      "name": { "en": "Bear's Paw", "fr": "Patte d'Ours" },
+      "description": {
+        "en": "Many armoured knights have been thrown to the ground by the surprising strength of Taal's followers - though traditionally called Bear's Paw, Ostlanders who have felt its power sometimes call it the Elk's Breath instead. The Priest blesses himself or a friendly model within 6\" - the target gains +2 Strength until the Priest's next turn."
+      }
+    },
+    {
+      "spellListName": "Prières de Taal",
+      "rollValue": 4,
+      "difficulty": 9,
+      "name": { "en": "Earthquake", "fr": "Tremblement de Terre" },
+      "description": {
+        "en": "Taal's domain covers both earth and sky, and his power can even reach the dark streets of Mordheim. When his name is invoked three times and an eagle's blood is spilled on the ground, the Lord of Nature makes the thunder roar and the earth shake. Must be cast on a building within 4\" - any enemy model in contact with the building suffers a Strength 3 hit. In addition, the building collapses and every model inside is treated as having fallen (e.g. a model falling 5\" must pass two Initiative tests - one per 2\" - or suffer 1D3 Strength 5 hits). Remove the building from play for the rest of the game."
+      }
+    },
+    {
+      "spellListName": "Prières de Taal",
+      "rollValue": 5,
+      "difficulty": 8,
+      "name": { "en": "Entangle", "fr": "Entraves" },
+      "description": {
+        "en": "It's said that when Taal walked the earth, life sprang from his footsteps - part of his power can be called upon by his followers to help the forest regrow and return the land to its natural state. Vines and saplings burst from the ground, entangling anyone trying to cross it. Every friendly or enemy model (except Ostlander Jaegers) within 12\" of the Priest may only move at half Movement until the next Shooting phase."
+      }
+    },
+    {
+      "spellListName": "Prières de Taal",
+      "rollValue": 6,
+      "difficulty": 7,
+      "name": { "en": "Squirrel Swarm", "fr": "Invocation d'Écureuils" },
+      "description": {
+        "en": "Taal is master of every beast, great and small - those who anger him may be mauled by a mountain lion or drowned by an enraged beaver's flood. With this prayer, the Priest calls upon the Lord of Beasts' wrath, summoning dozens upon dozens of enraged squirrels. The furious rodents attack an enemy within 12\" of the Priest, swarming under the warrior's clothes and armour, scratching and biting. The target suffers 2D6 Strength 1 hits, no armour save allowed."
+      }
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -28,20 +29,28 @@ public partial class WarriorRow : ObservableObject
     /// manual additions via WarriorEditDialog - read-only display here.</summary>
     public ObservableCollection<WarriorInjury> Injuries { get; }
 
+    /// <summary>Not stored on the Warrior itself - resolved by the ViewModel from the warrior's own
+    /// WarriorArchetype.SpecialRules plus the band's WarbandArchetype.SpecialRules (band-wide rules
+    /// apply to every warrior regardless of type). Purely a reference/read-only display, same as
+    /// RoleName - editing happens on the archetype in the Library, not per-Warrior.</summary>
+    public ObservableCollection<SpecialRule> SpecialRules { get; }
+
     public bool HasEquipment => Equipment.Count > 0;
     public bool HasSkills => Skills.Count > 0;
     public bool HasInjuries => Injuries.Count > 0;
+    public bool HasSpecialRules => SpecialRules.Count > 0;
 
     /// <summary>Drives the read-only treatment of the card in the "Morts" group (hides Edit/Add/Remove
     /// buttons) - Dead is only ever reached via the End of Game wizard, see WarriorStatus.</summary>
     public bool IsDead => Warrior.Status == WarriorStatus.Dead;
 
-    public WarriorRow(Warrior warrior, string roleName)
+    public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRule>? specialRules = null)
     {
         Warrior = warrior;
         RoleName = roleName;
         Equipment = new ObservableCollection<WarriorEquipment>(warrior.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(warrior.Skills);
         Injuries = new ObservableCollection<WarriorInjury>(warrior.Injuries);
+        SpecialRules = new ObservableCollection<SpecialRule>(specialRules ?? Enumerable.Empty<SpecialRule>());
     }
 }

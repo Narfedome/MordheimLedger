@@ -7,6 +7,7 @@
              xmlns:skills="clr-namespace:MordheimLedgerApp.Features.Library.Skills"
              xmlns:injuries="clr-namespace:MordheimLedgerApp.Features.Library.Injuries"
              xmlns:spells="clr-namespace:MordheimLedgerApp.Features.Library.Spells"
+             xmlns:specialRules="clr-namespace:MordheimLedgerApp.Features.Library.SpecialRules"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Library.LibraryPage"
@@ -23,6 +24,7 @@
             <components:TabToggleButton Text="{loc:Loc TabSkills}" Command="{Binding ShowSkillsTabCommand}" IsActive="{Binding IsSkillsTab}"/>
             <components:TabToggleButton Text="{loc:Loc TabInjuries}" Command="{Binding ShowInjuriesTabCommand}" IsActive="{Binding IsInjuriesTab}"/>
             <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}" IsActive="{Binding IsSpellsTab}"/>
+            <components:TabToggleButton Text="{loc:Loc LibTabSpecialRules}" Command="{Binding ShowSpecialRulesTabCommand}" IsActive="{Binding IsSpecialRulesTab}"/>
         </HorizontalStackLayout>
 
         <!-- Chaque section garde son ViewModel/*View existant tel quel (BindingContext explicite,
@@ -41,6 +43,8 @@
             IsVisible="{Binding IsInjuriesTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
         <spells:SpellView Grid.Row="1" BindingContext="{Binding Spells}"
             IsVisible="{Binding IsSpellsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+        <specialRules:SpecialRuleView Grid.Row="1" BindingContext="{Binding SpecialRules}"
+            IsVisible="{Binding IsSpecialRulesTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

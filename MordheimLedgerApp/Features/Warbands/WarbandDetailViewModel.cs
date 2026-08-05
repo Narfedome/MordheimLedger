@@ -23,6 +23,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private Dictionary<int, string> _archetypeNames = new();
+    private List<SpecialRule> _bandWideSpecialRules = new();
 
     [ObservableProperty]
     private int warbandId;
@@ -93,6 +94,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _archetypeNames = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.Name);
+            var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
+            _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
@@ -105,8 +108,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
         });
     }
 
-    private WarriorRow ToRow(Warrior warrior) =>
-        new(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"));
+    private WarriorRow ToRow(Warrior warrior)
+    {
+        var archetypeRules = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId)?.SpecialRules
+            ?? new List<SpecialRule>();
+        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
+        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), mergedRules);
+    }
 
     [RelayCommand]
     private static async Task BackAsync() => await Shell.Current.GoToAsync("..");

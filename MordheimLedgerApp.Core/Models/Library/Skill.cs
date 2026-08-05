@@ -24,7 +24,7 @@ public class Skill
     public string ImagePath { get; set; } = string.Empty;
 
     /// <summary>Empty = common to every warband. Non-empty = canon-restricted to these WarbandArchetype
-    /// ids (an alternate skill table only some warbands can pick from). Data-only for now: shown as a
-    /// badge, not enforced in the skill picker (see WarbandArchetypeSkillEntity).</summary>
+    /// ids (an alternate skill table only some warbands can pick from). Editable via SkillEditDialog -
+    /// not enforced in the skill picker though (still shows the full catalog), "no rules engine V1".</summary>
     public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
 }

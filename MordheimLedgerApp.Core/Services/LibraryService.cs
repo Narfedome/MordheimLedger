@@ -187,6 +187,20 @@ public class LibraryService : ILibraryService
             await _db.Connection.InsertAsync(new WarbandArchetypeSkillEntity { SkillId = skillId, WarbandArchetypeId = warbandArchetypeId });
     }
 
+    private async Task SaveMountRestrictionsAsync(int mountId, List<int> warbandArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeMountEntity WHERE MountId = ?", mountId);
+        foreach (var warbandArchetypeId in warbandArchetypeIds)
+            await _db.Connection.InsertAsync(new WarbandArchetypeMountEntity { MountId = mountId, WarbandArchetypeId = warbandArchetypeId });
+    }
+
+    private async Task SaveMountSpecialRulesAsync(int mountId, List<SpecialRule> specialRules)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM MountSpecialRuleEntity WHERE MountId = ?", mountId);
+        foreach (var rule in specialRules)
+            await _db.Connection.InsertAsync(new MountSpecialRuleEntity { MountId = mountId, SpecialRuleId = rule.Id });
+    }
+
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
     {
         await _db.Initialization;
@@ -360,6 +374,9 @@ public class LibraryService : ILibraryService
             if (existing?.Source == ContentSource.Official) mount.Source = ContentSource.Modified;
             await _db.Connection.UpdateAsync(mount.ToEntity());
         }
+
+        await SaveMountRestrictionsAsync(mount.Id, mount.RestrictedToWarbandArchetypeIds);
+        await SaveMountSpecialRulesAsync(mount.Id, mount.SpecialRules);
     }
 
     /// <summary>Writes Name (and Description, when non-blank) as the translation value for

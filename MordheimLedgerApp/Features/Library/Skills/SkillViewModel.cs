@@ -13,7 +13,9 @@ public partial class SkillViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly ISkillPickerNavigationService _pickerNavigation;
+    private readonly IWarbandArchetypePickerService _warbandPicker;
     private List<Skill> _allItems = new();
+    private List<WarbandArchetype> _warbandArchetypes = new();
 
     [ObservableProperty]
     private ObservableCollection<SkillRow> skills = new();
@@ -42,10 +44,12 @@ public partial class SkillViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation)
+    public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation,
+        IWarbandArchetypePickerService warbandPicker)
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
+        _warbandPicker = warbandPicker;
         selectedCategoryLabel = Loc["LibFilterAll"];
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
@@ -59,6 +63,7 @@ public partial class SkillViewModel : BaseViewModel
     private async Task LoadData()
     {
         _allItems = await _libraryService.GetSkillsAsync(LocalizationService.Instance.Language);
+        _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         RefreshSelectedCategoryLabel();
         ApplyFilter();
     }
@@ -121,7 +126,7 @@ public partial class SkillViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new Skill();
-        var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"]);
+        var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"], _warbandPicker, _warbandArchetypes);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(newItem, LocalizationService.Instance.Language);
@@ -144,10 +149,11 @@ public partial class SkillViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
-            ImagePath = s.ImagePath
+            ImagePath = s.ImagePath,
+            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds)
         };
 
-        var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"]);
+        var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"], _warbandPicker, _warbandArchetypes);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(copy, LocalizationService.Instance.Language);

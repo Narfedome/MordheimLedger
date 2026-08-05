@@ -14,6 +14,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly ISpecialRulePickerService _specialRulePicker;
+    private readonly IWarbandArchetypePickerNavigationService _pickerNavigation;
 
     [ObservableProperty]
     private ObservableCollection<WarbandArchetypeRow> warbandArchetypeItems = new();
@@ -23,10 +24,22 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [ObservableProperty]
     private WarbandArchetypeRow? selectedRow;
 
-    public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker)
+    /// <summary>Set by WarbandArchetypeSelectorPage right after construction - même bascule
+    /// multi-sélection que SpecialRuleViewModel.IsSelectorMode (utilisé pour "réservé à ces bandes" sur
+    /// Équipement/Compétences/Montures).</summary>
+    public bool IsSelectorMode { get; set; }
+
+    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>
+    public ObservableCollection<WarbandArchetypeRow> SelectedRows { get; } = new();
+
+    public bool HasSelectedRows => SelectedRows.Count > 0;
+
+    public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker,
+        IWarbandArchetypePickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
         _specialRulePicker = specialRulePicker;
+        _pickerNavigation = pickerNavigation;
 
         // Les pages Bibliothèque sont des onglets TabBar gardés en mémoire par Shell - OnNavigatedTo ne
         // se déclenche pas de façon fiable en changeant d'onglet, donc Name/Description (résolus dans
@@ -43,6 +56,8 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         var items = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         WarbandArchetypeItems = new ObservableCollection<WarbandArchetypeRow>(items.Select(i => new WarbandArchetypeRow(i)));
         SelectedRow = null;
+        SelectedRows.Clear();
+        OnPropertyChanged(nameof(HasSelectedRows));
     }
 
     partial void OnSelectedRowChanged(WarbandArchetypeRow? oldValue, WarbandArchetypeRow? newValue)
@@ -52,7 +67,29 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Select(WarbandArchetypeRow row) => SelectedRow = row;
+    private void Select(WarbandArchetypeRow row)
+    {
+        if (!IsSelectorMode)
+        {
+            SelectedRow = row;
+            return;
+        }
+
+        row.IsSelected = !row.IsSelected;
+        if (row.IsSelected) SelectedRows.Add(row);
+        else SelectedRows.Remove(row);
+        OnPropertyChanged(nameof(HasSelectedRows));
+    }
+
+    [RelayCommand]
+    private async Task ConfirmSelection()
+    {
+        var items = SelectedRows.Select(r => r.Item).ToList();
+        await _pickerNavigation.ClosePickerAsync(items);
+    }
+
+    [RelayCommand]
+    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<WarbandArchetype>());
 
     [RelayCommand]
     private async Task Create()

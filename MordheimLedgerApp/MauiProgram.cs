@@ -60,6 +60,9 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<WarbandArchetypeViewModel>();
+            builder.Services.AddTransient<WarbandArchetypeSelectorPage>();
+            builder.Services.AddSingleton<IWarbandArchetypePickerNavigationService, WarbandArchetypePickerNavigationService>();
+            builder.Services.AddSingleton<IWarbandArchetypePickerService, WarbandArchetypePickerService>();
             builder.Services.AddTransient<WarriorArchetypeViewModel>();
             builder.Services.AddTransient<WarriorArchetypeListPage>();
             builder.Services.AddTransient<EquipmentItemViewModel>();

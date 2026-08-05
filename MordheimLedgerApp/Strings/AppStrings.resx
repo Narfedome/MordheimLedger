@@ -279,6 +279,12 @@
   <data name="LibSpecialRulesPh" xml:space="preserve">
     <value>Règles spéciales</value>
   </data>
+  <data name="LibRestrictedToWarbandsPh" xml:space="preserve">
+    <value>Réservé aux bandes</value>
+  </data>
+  <data name="LibRestrictedToAllHint" xml:space="preserve">
+    <value>Commun à toutes les bandes</value>
+  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
   </data>
@@ -317,6 +323,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé (peut acheter des mutations)</value>
+  </data>
+  <data name="WarriorArchetypeSpellListNamePh" xml:space="preserve">
+    <value>École de magie (vide = pas de lanceur de sorts)</value>
   </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Coût</value>
@@ -473,6 +482,9 @@
   </data>
   <data name="MountSelectTitle" xml:space="preserve">
     <value>Choisir une monture</value>
+  </data>
+  <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
+    <value>Choisir des bandes</value>
   </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Monture</value>

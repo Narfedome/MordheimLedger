@@ -3,9 +3,7 @@ namespace MordheimLedgerApp.Core.Models.Library;
 /// <summary>
 /// A mount a Warrior can ride (e.g. "Cheval", "Sanglier de guerre") - has its own stat profile,
 /// separate from and not merged with its rider's (matches the tabletop rule: a mounted model is a
-/// distinct unit with its own Wounds/save). Rarity/restriction/SpecialRules editing is data-only for
-/// this pass (settable via JSON seed, shown for reference) - same precedent as EquipmentItem/Skill,
-/// not exposed in the edit dialog UI yet.
+/// distinct unit with its own Wounds/save).
 /// </summary>
 public class Mount
 {
@@ -40,12 +38,10 @@ public class Mount
     public string ImagePath { get; set; } = string.Empty;
 
     /// <summary>Empty = common to every warband. Non-empty = canon-restricted to these WarbandArchetype
-    /// ids (e.g. "Sanglier de guerre" - Orques only). Data-only: shown as reference, not enforced in the
-    /// picker - same as EquipmentItem.RestrictedToWarbandArchetypeIds.</summary>
+    /// ids (e.g. "Sanglier de guerre" - Orques only). Editable via MountEditDialog.</summary>
     public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
 
     /// <summary>Mount-specific special rules (e.g. "Charge Furieuse", "Peau Épaisse") - same shared
-    /// SpecialRule catalog as WarbandArchetype/WarriorArchetype, seed-only for this pass (no picker UI
-    /// on the edit dialog yet).</summary>
+    /// SpecialRule catalog as WarbandArchetype/WarriorArchetype, editable via MountEditDialog.</summary>
     public List<SpecialRule> SpecialRules { get; set; } = new();
 }

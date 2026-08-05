@@ -72,7 +72,8 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8">
+        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+                               IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
                                          Tooltip="{loc:Loc BtnAdd}"/>
@@ -88,6 +89,19 @@
                                          Command="{Binding ManageWarriorsCommand}"
                                          Tooltip="{loc:Loc LibManageWarriors}"
                                          IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+        </HorizontalStackLayout>
+
+        <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
+             toutes les tuiles cochées d'un coup - même pattern que SpecialRuleView. -->
+        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+                               IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
+                                         Command="{Binding ConfirmSelectionCommand}"
+                                         Tooltip="{loc:Loc LibConfirm}"
+                                         IsEnabled="{Binding HasSelectedRows}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleXmark}"
+                                         Command="{Binding CancelCommand}"
+                                         Tooltip="{loc:Loc LibCancel}"/>
         </HorizontalStackLayout>
 
     </Grid>

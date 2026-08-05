@@ -13,6 +13,9 @@ public partial class MountViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly IMountPickerNavigationService _pickerNavigation;
+    private readonly IWarbandArchetypePickerService _warbandPicker;
+    private readonly ISpecialRulePickerService _specialRulePicker;
+    private List<WarbandArchetype> _warbandArchetypes = new();
 
     [ObservableProperty]
     private ObservableCollection<MountRow> mounts = new();
@@ -32,10 +35,13 @@ public partial class MountViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public MountViewModel(ILibraryService libraryService, IMountPickerNavigationService pickerNavigation)
+    public MountViewModel(ILibraryService libraryService, IMountPickerNavigationService pickerNavigation,
+        IWarbandArchetypePickerService warbandPicker, ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
+        _warbandPicker = warbandPicker;
+        _specialRulePicker = specialRulePicker;
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
         // (onglet TabBar gardé en mémoire par Shell).
@@ -48,6 +54,7 @@ public partial class MountViewModel : BaseViewModel
     private async Task LoadData()
     {
         var allItems = await _libraryService.GetMountsAsync(LocalizationService.Instance.Language);
+        _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         Mounts = new ObservableCollection<MountRow>(allItems.Select(i => new MountRow(i)));
         SelectedRow = null;
         SelectedRows.Clear();
@@ -79,7 +86,7 @@ public partial class MountViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new Mount();
-        var dialogViewModel = new MountEditDialogViewModel(newItem, Loc["MountCreateTitle"]);
+        var dialogViewModel = new MountEditDialogViewModel(newItem, Loc["MountCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
         if (await ShowDialogAsync(new MountEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveMountAsync(newItem, LocalizationService.Instance.Language);
@@ -116,7 +123,7 @@ public partial class MountViewModel : BaseViewModel
             SpecialRules = s.SpecialRules
         };
 
-        var dialogViewModel = new MountEditDialogViewModel(copy, Loc["MountEditTitle"]);
+        var dialogViewModel = new MountEditDialogViewModel(copy, Loc["MountEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
         if (await ShowDialogAsync(new MountEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveMountAsync(copy, LocalizationService.Instance.Language);

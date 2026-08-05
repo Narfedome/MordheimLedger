@@ -3,12 +3,14 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 
 public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly Dictionary<string, EquipmentCategory> _categoryByLabel = new();
+    private readonly IWarbandArchetypePickerService _warbandPicker;
 
     protected override bool CancelResult => false;
 
@@ -23,10 +25,17 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
-    public EquipmentItemEditDialogViewModel(EquipmentItem item, string title)
+    /// <summary>Édité en mémoire ici, recopié sur Item.RestrictedToWarbandArchetypeIds à la sauvegarde -
+    /// même principe que WarriorArchetypeEditDialogViewModel.SpecialRules. Vide = commun à toutes les
+    /// bandes (voir EquipmentItem.RestrictedToWarbandArchetypeIds).</summary>
+    public ObservableCollection<WarbandArchetype> RestrictedWarbands { get; }
+
+    public EquipmentItemEditDialogViewModel(EquipmentItem item, string title, IWarbandArchetypePickerService warbandPicker,
+        IReadOnlyList<WarbandArchetype> allWarbandArchetypes)
     {
         this.item = item;
         this.title = title;
+        _warbandPicker = warbandPicker;
 
         foreach (var category in Enum.GetValues<EquipmentCategory>())
         {
@@ -36,6 +45,8 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
         }
 
         selectedCategoryLabel = Loc[$"EquipmentCategory{item.Category}"];
+        RestrictedWarbands = new ObservableCollection<WarbandArchetype>(
+            allWarbandArchetypes.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)));
     }
 
     partial void OnSelectedCategoryLabelChanged(string value)
@@ -45,5 +56,23 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
-    private void Save() => Close(true);
+    private async Task AddRestriction()
+    {
+        var picked = await _warbandPicker.PickWarbandArchetypesAsync();
+        foreach (var warband in picked)
+        {
+            if (RestrictedWarbands.Any(w => w.Id == warband.Id)) continue;
+            RestrictedWarbands.Add(warband);
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveRestriction(WarbandArchetype warband) => RestrictedWarbands.Remove(warband);
+
+    [RelayCommand]
+    private void Save()
+    {
+        Item.RestrictedToWarbandArchetypeIds = RestrictedWarbands.Select(w => w.Id).ToList();
+        Close(true);
+    }
 }

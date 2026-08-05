@@ -29,7 +29,7 @@ public class EquipmentItem
     public string ImagePath { get; set; } = string.Empty;
 
     /// <summary>Empty = common to every warband. Non-empty = canon-restricted to these WarbandArchetype
-    /// ids (e.g. "Hache Naine" - Dwarf warbands only). Data-only for now: shown as a badge, not enforced
-    /// in the equipment picker (see WarbandArchetypeEquipmentEntity).</summary>
+    /// ids (e.g. "Hache Naine" - Dwarf warbands only). Editable via EquipmentItemEditDialog - not
+    /// enforced in the equipment picker though (still shows the full catalog), "no rules engine V1".</summary>
     public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
 }

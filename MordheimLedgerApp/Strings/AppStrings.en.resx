@@ -279,6 +279,12 @@
   <data name="LibSpecialRulesPh" xml:space="preserve">
     <value>Special rules</value>
   </data>
+  <data name="LibRestrictedToWarbandsPh" xml:space="preserve">
+    <value>Restricted to warbands</value>
+  </data>
+  <data name="LibRestrictedToAllHint" xml:space="preserve">
+    <value>Common to every warband</value>
+  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>All</value>
   </data>
@@ -317,6 +323,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possessed (may buy mutations)</value>
+  </data>
+  <data name="WarriorArchetypeSpellListNamePh" xml:space="preserve">
+    <value>Magic school (empty = not a spellcaster)</value>
   </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Cost</value>
@@ -473,6 +482,9 @@
   </data>
   <data name="MountSelectTitle" xml:space="preserve">
     <value>Select mount</value>
+  </data>
+  <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
+    <value>Select warbands</value>
   </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Mount</value>

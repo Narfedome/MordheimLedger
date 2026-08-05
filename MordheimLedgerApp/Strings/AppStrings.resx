@@ -216,6 +216,24 @@
   <data name="SettingsReportBugDesc" xml:space="preserve">
     <value>Ouvrir le formulaire</value>
   </data>
+  <data name="SettingsResetTitle" xml:space="preserve">
+    <value>Réinitialiser les données</value>
+  </data>
+  <data name="SettingsResetDesc" xml:space="preserve">
+    <value>Supprime tout (bandes, campagnes, contenu personnalisé) et recharge le contenu officiel depuis zéro</value>
+  </data>
+  <data name="SettingsResetAction" xml:space="preserve">
+    <value>Réinitialiser</value>
+  </data>
+  <data name="SettingsResetConfirm" xml:space="preserve">
+    <value>Cette action supprime définitivement toutes vos bandes, campagnes et personnalisations, puis recharge le contenu officiel depuis les fichiers de données. Continuer ?</value>
+  </data>
+  <data name="SettingsResetConfirmAgain" xml:space="preserve">
+    <value>Vraiment sûr ? Cette action est irréversible.</value>
+  </data>
+  <data name="SettingsResetDone" xml:space="preserve">
+    <value>Données réinitialisées. Redémarrez l'application pour rafraîchir les écrans déjà ouverts.</value>
+  </data>
   <data name="BtnRecruit" xml:space="preserve">
     <value>Recruter</value>
   </data>

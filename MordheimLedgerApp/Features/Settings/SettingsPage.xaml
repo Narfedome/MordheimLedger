@@ -9,6 +9,7 @@
              x:DataType="local:SettingsViewModel">
 
     <components:WatermarkedLayout>
+    <Grid>
     <ScrollView>
         <!-- Cf. DmTools SettingsPage : sur Desktop, une fenêtre large étirait chaque carte de section
              bord à bord - plafonnée et centrée à la place (fait en code-behind, cf. SettingsPage.xaml.cs). -->
@@ -102,7 +103,41 @@
                 </Grid>
             </Border>
 
+            <!-- Réinitialiser la base - dev/beta uniquement pour l'instant : reseed depuis les JSON
+                 après un changement de schéma, sans supprimer le fichier .db3 à la main. Rouge
+                 (AppDanger) pour bien marquer que c'est destructif/irréversible - double confirmation
+                 côté ViewModel (ResetDatabaseCommand). -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="{loc:Loc SettingsResetTitle}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                        <Label Text="{loc:Loc SettingsResetDesc}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1"
+                           Text="{loc:Loc SettingsResetAction}"
+                           TextColor="{DynamicResource AppDanger}"
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ResetDatabaseCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </Border>
+
         </VerticalStackLayout>
     </ScrollView>
+
+    <!-- Bloque toute interaction pendant Loading.IsLoading (ex. réinitialisation de la BDD) - un
+         ActivityIndicator seul (comme sur les autres pages) ne suffit pas ici : l'opération est
+         destructive/longue, il ne faut pas qu'un second tap sur Réinitialiser (ou toute autre action)
+         puisse se glisser pendant qu'elle tourne. Grid avec un fond opaque plutôt que transparent :
+         un Grid sans Background ne garantit pas d'intercepter le tactile sur toutes les plateformes. -->
+    <Grid IsVisible="{Binding Loading.IsLoading}"
+          BackgroundColor="#B0000000">
+        <ActivityIndicator IsRunning="{Binding Loading.IsLoading}"
+                            WidthRequest="80" HeightRequest="80"
+                            HorizontalOptions="Center" VerticalOptions="Center"/>
+    </Grid>
+    </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

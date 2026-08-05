@@ -216,6 +216,24 @@
   <data name="SettingsReportBugDesc" xml:space="preserve">
     <value>Open the form</value>
   </data>
+  <data name="SettingsResetTitle" xml:space="preserve">
+    <value>Reset data</value>
+  </data>
+  <data name="SettingsResetDesc" xml:space="preserve">
+    <value>Deletes everything (warbands, campaigns, custom content) and reloads official content from scratch</value>
+  </data>
+  <data name="SettingsResetAction" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="SettingsResetConfirm" xml:space="preserve">
+    <value>This permanently deletes every warband, campaign and customization, then reloads official content from the data files. Continue?</value>
+  </data>
+  <data name="SettingsResetConfirmAgain" xml:space="preserve">
+    <value>Really sure? This cannot be undone.</value>
+  </data>
+  <data name="SettingsResetDone" xml:space="preserve">
+    <value>Data reset. Restart the app to refresh any screen that was already open.</value>
+  </data>
   <data name="BtnRecruit" xml:space="preserve">
     <value>Recruit</value>
   </data>

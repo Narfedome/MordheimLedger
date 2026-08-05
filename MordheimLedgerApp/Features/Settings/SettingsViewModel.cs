@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
 
@@ -9,6 +10,7 @@ namespace MordheimLedgerApp.Features.Settings
     public partial class SettingsViewModel : BaseViewModel
     {
         private readonly ThemeService _theme = ThemeService.Instance;
+        private readonly AppDatabase _db;
 
         // Windows exige 4 segments (Major.Minor.Build.Revision) pour l'identité de package - le 4e
         // (Revision) est une valeur fixe du csproj sans intérêt pour l'utilisateur, on l'aligne sur
@@ -47,6 +49,23 @@ namespace MordheimLedgerApp.Features.Settings
         public async Task ReportBug() =>
             await Launcher.OpenAsync(new Uri("https://docs.google.com/forms/d/e/1FAIpQLSdg2q1o01eGZsFvd0qIwOqYEVKDwBikQ0g7FWLSWHenKqeW0g/viewform?usp=dialog"));
 
+        /// <summary>Wipes every table (all campaigns/warbands AND any Library edits/custom content) and
+        /// re-seeds from the bundled JSON (see AppDatabase.ResetAsync) - the point is to let dev/beta
+        /// iteration re-run the seed after a Core schema/data change without manually deleting the db
+        /// file, now that the schema is roughly stable. Double confirmation (destructive, irreversible)
+        /// then a restart prompt rather than force-closing the app ourselves - every already-loaded
+        /// page/ViewModel in the running Shell still holds now-stale in-memory data.</summary>
+        [RelayCommand]
+        public async Task ResetDatabase()
+        {
+            if (!await ConfirmAsync(Loc["SettingsResetTitle"], Loc["SettingsResetConfirm"])) return;
+            if (!await ConfirmAsync(Loc["SettingsResetTitle"], Loc["SettingsResetConfirmAgain"])) return;
+
+            await Loading.RunAsync(() => _db.ResetAsync());
+
+            await ShowInfoAsync(Loc["SettingsResetTitle"], Loc["SettingsResetDone"]);
+        }
+
         public static Dictionary<string, string> LanguageLabels => LocalizationService.SupportedLanguages;
 
         public ObservableCollection<string> ThemeOptions { get; } = new();
@@ -63,8 +82,9 @@ namespace MordheimLedgerApp.Features.Settings
         [ObservableProperty]
         private AppPalette selectedPalette;
 
-        public SettingsViewModel()
+        public SettingsViewModel(AppDatabase db)
         {
+            _db = db;
             selectedLanguage = Loc.Language;
             selectedPalette = _theme.Palette;
             RebuildThemeOptions();

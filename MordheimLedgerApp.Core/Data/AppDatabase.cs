@@ -27,6 +27,16 @@ public class AppDatabase
 
     private async Task InitializeAsync()
     {
+        await CreateAllTablesAsync();
+
+        // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
+        // nothing the player made is at risk of being duplicated).
+        if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
+            await SeedOfficialContentAsync();
+    }
+
+    private async Task CreateAllTablesAsync()
+    {
         await _db.CreateTableAsync<CampaignEntity>();
         await _db.CreateTableAsync<WarbandArchetypeEntity>();
         await _db.CreateTableAsync<WarbandEntity>();
@@ -54,11 +64,53 @@ public class AppDatabase
         await _db.CreateTableAsync<MountSpecialRuleEntity>();
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
+    }
 
-        // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
-        // nothing the player made is at risk of being duplicated).
-        if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
-            await SeedOfficialContentAsync();
+    private async Task DropAllTablesAsync()
+    {
+        await _db.DropTableAsync<CampaignEntity>();
+        await _db.DropTableAsync<WarbandArchetypeEntity>();
+        await _db.DropTableAsync<WarbandEntity>();
+        await _db.DropTableAsync<WarriorArchetypeEntity>();
+        await _db.DropTableAsync<WarriorEntity>();
+        await _db.DropTableAsync<EquipmentItemEntity>();
+        await _db.DropTableAsync<SkillEntity>();
+        await _db.DropTableAsync<InjuryEntity>();
+        await _db.DropTableAsync<WarriorEquipmentEntity>();
+        await _db.DropTableAsync<WarriorSkillEntity>();
+        await _db.DropTableAsync<WarriorInjuryEntity>();
+        await _db.DropTableAsync<WarriorSpellEntity>();
+        await _db.DropTableAsync<HistoryEntryEntity>();
+        await _db.DropTableAsync<TranslationEntity>();
+        await _db.DropTableAsync<SpellEntity>();
+        await _db.DropTableAsync<WarbandArchetypeEquipmentEntity>();
+        await _db.DropTableAsync<WarbandArchetypeSkillEntity>();
+        await _db.DropTableAsync<SpecialRuleEntity>();
+        await _db.DropTableAsync<WarbandArchetypeSpecialRuleEntity>();
+        await _db.DropTableAsync<WarriorArchetypeSpecialRuleEntity>();
+        await _db.DropTableAsync<MutationEntity>();
+        await _db.DropTableAsync<WarriorMutationEntity>();
+        await _db.DropTableAsync<MountEntity>();
+        await _db.DropTableAsync<WarbandArchetypeMountEntity>();
+        await _db.DropTableAsync<MountSpecialRuleEntity>();
+        await _db.DropTableAsync<MagicSchoolEntity>();
+        await _db.DropTableAsync<WarbandArchetypeMagicSchoolEntity>();
+    }
+
+    /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
+    /// reseeds from the bundled JSON - lets the Settings "Réinitialiser" button re-run the seed after a
+    /// Core schema/data change without the user manually deleting the db file. Also clears the
+    /// find-or-create caches (SpecialRule/Mutation/MagicSchool) since an id resolved during a previous
+    /// seeding pass is meaningless against the fresh tables.</summary>
+    public async Task ResetAsync()
+    {
+        await Initialization;
+        await DropAllTablesAsync();
+        _specialRuleIdsByEnglishName.Clear();
+        _mutationIdsByEnglishName.Clear();
+        _magicSchoolIdsByEnglishName.Clear();
+        await CreateAllTablesAsync();
+        await SeedOfficialContentAsync();
     }
 
     private async Task SeedOfficialContentAsync()

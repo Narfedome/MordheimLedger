@@ -15,6 +15,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
+    private readonly ISpellPickerService _spellPicker;
+    private readonly IMutationPickerService _mutationPicker;
+    private readonly IMountPickerService _mountPicker;
 
     protected override bool CancelResult => false;
 
@@ -28,18 +31,31 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// instead of trying to SaveWarriorAsync a warrior that no longer exists.</summary>
     public bool WasDeleted { get; private set; }
 
-    /// <summary>Onglets Équipement/Compétences/Blessures - même pattern toggle (pas de vrai TabbedPage)
-    /// que Roster/Historique sur WarbandDetailPage, adapté à 3 sections avec un index plutôt que des
-    /// bools séparés (précédent local : CurrentStep/IsStepN de EndOfGameDialogViewModel).</summary>
+    /// <summary>Onglets Équipement/Compétences/Blessures/Sorts/Mutations - même pattern toggle (pas de
+    /// vrai TabbedPage) que Roster/Historique sur WarbandDetailPage, adapté à 5 sections avec un index
+    /// plutôt que des bools séparés (précédent local : CurrentStep/IsStepN de EndOfGameDialogViewModel).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
     [NotifyPropertyChangedFor(nameof(IsSkillsTab))]
     [NotifyPropertyChangedFor(nameof(IsInjuriesTab))]
+    [NotifyPropertyChangedFor(nameof(IsSpellsTab))]
+    [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
     private int selectedTab;
 
     public bool IsEquipmentTab => SelectedTab == 0;
     public bool IsSkillsTab => SelectedTab == 1;
     public bool IsInjuriesTab => SelectedTab == 2;
+    public bool IsSpellsTab => SelectedTab == 3;
+    public bool IsMutationsTab => SelectedTab == 4;
+
+    /// <summary>Set by the caller (WarbandDetailViewModel.EditWarrior, which already looks up the
+    /// warrior's WarriorArchetype for RoleName) from WarriorArchetype.SpellListName != null - gates the
+    /// Sorts tab, hidden entirely for non-casters.</summary>
+    public bool IsSpellcaster { get; }
+
+    /// <summary>Set by the caller from WarriorArchetype.CanBuyMutations - gates the Mutations tab,
+    /// hidden entirely for ordinary (non-Mutant/Possessed) archetypes.</summary>
+    public bool IsMutant { get; }
 
     [RelayCommand]
     private void ShowEquipmentTab() => SelectedTab = 0;
@@ -50,15 +66,25 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void ShowInjuriesTab() => SelectedTab = 2;
 
-    /// <summary>Équipement/Compétences/Blessures sont toutes persistées immédiatement (pas soumises à
-    /// Enregistrer/Annuler) - regroupées ici depuis la carte guerrier (WarbandDetailPage, qui reste
-    /// lecture seule pour ces trois listes) plutôt que gérées à deux endroits différents.</summary>
+    [RelayCommand]
+    private void ShowSpellsTab() => SelectedTab = 3;
+
+    [RelayCommand]
+    private void ShowMutationsTab() => SelectedTab = 4;
+
+    /// <summary>Équipement/Compétences/Blessures/Sorts/Mutations sont toutes persistées immédiatement
+    /// (pas soumises à Enregistrer/Annuler) - regroupées ici depuis la carte guerrier (WarbandDetailPage,
+    /// qui reste lecture seule pour ces listes) plutôt que gérées à deux endroits différents.</summary>
     public ObservableCollection<WarriorEquipment> Equipment { get; }
     public ObservableCollection<WarriorSkill> Skills { get; }
     public ObservableCollection<WarriorInjury> Injuries { get; }
+    public ObservableCollection<WarriorSpell> Spells { get; }
+    public ObservableCollection<WarriorMutation> Mutations { get; }
 
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
-        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker)
+        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
+        ISpellPickerService spellPicker, bool isSpellcaster, IMutationPickerService mutationPicker, bool isMutant,
+        IMountPickerService mountPicker)
     {
         this.item = item;
         this.title = title;
@@ -67,10 +93,17 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
+        _spellPicker = spellPicker;
+        IsSpellcaster = isSpellcaster;
+        _mutationPicker = mutationPicker;
+        IsMutant = isMutant;
+        _mountPicker = mountPicker;
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);
         Injuries = new ObservableCollection<WarriorInjury>(item.Injuries);
+        Spells = new ObservableCollection<WarriorSpell>(item.Spells);
+        Mutations = new ObservableCollection<WarriorMutation>(item.Mutations);
     }
 
     [RelayCommand]
@@ -136,6 +169,66 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     {
         await _warbandService.RemoveWarriorInjuryAsync(tracked.Id);
         Injuries.Remove(tracked);
+    }
+
+    [RelayCommand]
+    private async Task AddSpell()
+    {
+        var spells = await _spellPicker.PickSpellsAsync();
+        foreach (var spell in spells)
+        {
+            var learned = await _warbandService.AddWarriorSpellAsync(Item.Id, spell);
+            Spells.Add(learned);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveSpell(WarriorSpell learned)
+    {
+        await _warbandService.RemoveWarriorSpellAsync(learned.Id);
+        Spells.Remove(learned);
+    }
+
+    [RelayCommand]
+    private async Task AddMutation()
+    {
+        var mutations = await _mutationPicker.PickMutationsAsync();
+        foreach (var mutation in mutations)
+        {
+            var bought = await _warbandService.AddWarriorMutationAsync(Item.Id, mutation);
+            Mutations.Add(bought);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveMutation(WarriorMutation bought)
+    {
+        await _warbandService.RemoveWarriorMutationAsync(bought.Id);
+        Mutations.Remove(bought);
+    }
+
+    /// <summary>Monture n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Mount,
+    /// soumis comme les stats au bouton Enregistrer/Annuler (pas de persistance immédiate ni de méthode
+    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.MountId).</summary>
+    [RelayCommand]
+    private async Task SelectMount()
+    {
+        var mounts = await _mountPicker.PickMountsAsync();
+        if (mounts.Count > 0)
+        {
+            Item.Mount = mounts[0];
+            // Item lui-même (Warrior) n'implémente pas INotifyPropertyChanged - Mount est modifié en
+            // place sur la même instance, donc les liaisons "Item.Mount.Name" ne se rafraîchiraient pas
+            // sans ce signal explicite sur la propriété racine.
+            OnPropertyChanged(nameof(Item));
+        }
+    }
+
+    [RelayCommand]
+    private void ClearMount()
+    {
+        Item.Mount = null;
+        OnPropertyChanged(nameof(Item));
     }
 
     [RelayCommand]

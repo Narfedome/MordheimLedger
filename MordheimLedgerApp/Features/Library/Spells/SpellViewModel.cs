@@ -10,12 +10,14 @@ using MordheimLedgerApp.Services;
 namespace MordheimLedgerApp.Features.Library.Spells;
 
 /// <summary>
-/// Pure reference browsing - unlike Equipment/Skill/Injury, Spells are never picked onto a Warrior (no
-/// in-app casting, "no rules engine V1"), so there's no picker/selector mode here at all.
+/// Also doubles as a picker (see WarriorSpell): a caster learns specific spells one at a time via
+/// Advance rolls rather than knowing its whole SpellListName table, so Spells DO get attached to a
+/// Warrior now - same IsSelectorMode/SelectedRows multi-select toggle as InjuryViewModel.
 /// </summary>
 public partial class SpellViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly ISpellPickerNavigationService _pickerNavigation;
 
     [ObservableProperty]
     private ObservableCollection<SpellRow> spells = new();
@@ -23,9 +25,19 @@ public partial class SpellViewModel : BaseViewModel
     [ObservableProperty]
     private SpellRow? selectedRow;
 
-    public SpellViewModel(ILibraryService libraryService)
+    /// <summary>Set by SpellSelectorPage right after construction - même bascule multi-sélection
+    /// qu'InjuryViewModel.IsSelectorMode.</summary>
+    public bool IsSelectorMode { get; set; }
+
+    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>
+    public ObservableCollection<SpellRow> SelectedRows { get; } = new();
+
+    public bool HasSelectedRows => SelectedRows.Count > 0;
+
+    public SpellViewModel(ILibraryService libraryService, ISpellPickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
+        _pickerNavigation = pickerNavigation;
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
         // (onglet TabBar gardé en mémoire par Shell).
@@ -40,6 +52,8 @@ public partial class SpellViewModel : BaseViewModel
         var allItems = await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language);
         Spells = new ObservableCollection<SpellRow>(allItems.Select(i => new SpellRow(i)));
         SelectedRow = null;
+        SelectedRows.Clear();
+        OnPropertyChanged(nameof(HasSelectedRows));
     }
 
     partial void OnSelectedRowChanged(SpellRow? oldValue, SpellRow? newValue)
@@ -49,7 +63,29 @@ public partial class SpellViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Select(SpellRow row) => SelectedRow = row;
+    private void Select(SpellRow row)
+    {
+        if (!IsSelectorMode)
+        {
+            SelectedRow = row;
+            return;
+        }
+
+        row.IsSelected = !row.IsSelected;
+        if (row.IsSelected) SelectedRows.Add(row);
+        else SelectedRows.Remove(row);
+        OnPropertyChanged(nameof(HasSelectedRows));
+    }
+
+    [RelayCommand]
+    private async Task ConfirmSelection()
+    {
+        var items = SelectedRows.Select(r => r.Item).ToList();
+        await _pickerNavigation.ClosePickerAsync(items);
+    }
+
+    [RelayCommand]
+    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Spell>());
 
     [RelayCommand]
     private async Task Create()

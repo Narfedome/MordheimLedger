@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mounts.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.Mounts.CreateEdit.MountEditDialog"
+               x:DataType="local:MountEditDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <VerticalStackLayout Spacing="16">
+            <Label Text="{Binding Title}"
+                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                   TextColor="{DynamicResource AppText}"/>
+            <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+
+            <!-- Étape 1 : identité -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsStep0}">
+                <components:LibraryItemImageView ImagePath="{Binding Item.ImagePath}"
+                                                  DefaultGlyph="{x:Static icons:RpgFont.RaHorseshoe}"
+                                                  FontFamily="RpgAwesome" MaximumHeightRequest="30"/>
+                <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc MountNamePh}"/>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc MountCostPh}"/>
+                    <Entry Grid.Column="1" Text="{Binding Item.Rarity}" Keyboard="Numeric" Placeholder="{loc:Loc MountRarityPh}"/>
+                </Grid>
+                <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="80"/>
+            </VerticalStackLayout>
+
+            <!-- Étape 2 : profil (abréviations officielles du livre de règles, pas de traduction) -->
+            <Grid IsVisible="{Binding IsStep1}"
+                  ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                    <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Movement}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                    <Label Text="WS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.WeaponSkill}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="0" Grid.Column="2">
+                    <Label Text="BS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.BallisticSkill}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Grid.Column="0">
+                    <Label Text="S" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Strength}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Grid.Column="1">
+                    <Label Text="T" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Toughness}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Grid.Column="2">
+                    <Label Text="W" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Wounds}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="2" Grid.Column="0">
+                    <Label Text="I" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Initiative}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="2" Grid.Column="1">
+                    <Label Text="A" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Attacks}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="2" Grid.Column="2">
+                    <Label Text="Ld" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Leadership}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
+                        Text="{loc:Loc BtnCancel}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Grid.Column="1"
+                        Text="{loc:Loc LibBack}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding BackCommand}"
+                        IsEnabled="{Binding CanGoBack}"/>
+                <Button Grid.Column="2"
+                        Text="{loc:Loc LibNext}"
+                        Command="{Binding NextCommand}"
+                        IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
+                <Button Grid.Column="2"
+                        Text="{loc:Loc BtnSave}"
+                        Command="{Binding SaveCommand}"
+                        IsVisible="{Binding IsLastStep}"/>
+            </Grid>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

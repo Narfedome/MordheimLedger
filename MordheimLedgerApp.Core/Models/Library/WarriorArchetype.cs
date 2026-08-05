@@ -55,6 +55,11 @@ public class WarriorArchetype
     /// rather than a join table since it's a 1:1 relationship (one archetype -> one list).</summary>
     public string? SpellListName { get; set; }
 
+    /// <summary>True for Mutant/Possessed-type archetypes that may buy Mutations at recruitment (see
+    /// RulesReference/Campagne.md - "Mutants et Possédés ne peuvent acheter une mutation qu'au
+    /// recrutement"). Gates the Mutations tab on WarriorEditDialog - false for every ordinary archetype.</summary>
+    public bool CanBuyMutations { get; set; }
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 }

@@ -50,6 +50,25 @@
                 <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
             </Grid>
 
+            <!-- Monture : champ 0..1 (pas une liste/onglet) - même famille que Nom/stats, soumis au
+                 Enregistrer/Annuler du dialog plutôt qu'à une persistance immédiate. -->
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Loc WarriorMountHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <Label Grid.Column="0" Text="{Binding Item.Mount.Name}" VerticalOptions="Center"
+                           TextColor="{DynamicResource AppText}"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:RpgFont.RaHorseshoe}"
+                                                  IconSize="14" ButtonWidthRequest="28" ButtonHeightRequest="28"
+                                                  Command="{Binding SelectMountCommand}"/>
+                    <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                  IconSize="14" ButtonWidthRequest="28" ButtonHeightRequest="28"
+                                                  IsVisible="{Binding Item.Mount, Converter={StaticResource IsNotNullConverter}}"
+                                                  Command="{Binding ClearMountCommand}"/>
+                </Grid>
+            </VerticalStackLayout>
+
             <!-- Onglets Équipement/Compétences/Blessures - même pattern toggle (pas de vrai TabbedPage)
                  que Roster/Historique sur WarbandDetailPage : la carte guerrier reste lecture seule pour
                  ces trois listes, tout se gère ici. -->
@@ -60,6 +79,17 @@
                                              IsActive="{Binding IsSkillsTab}" FontSize="12"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
                                              IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
+                <!-- Onglet Sorts : visible seulement si l'archétype de ce guerrier est un lanceur de
+                     sorts (WarriorArchetype.SpellListName non nul) - inutile pour un Homme de main
+                     lambda. -->
+                <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
+                                             IsActive="{Binding IsSpellsTab}" FontSize="12"
+                                             IsVisible="{Binding IsSpellcaster}"/>
+                <!-- Onglet Mutations : visible seulement si l'archétype de ce guerrier a
+                     WarriorArchetype.CanBuyMutations (Mutants/Possédés). -->
+                <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" Command="{Binding ShowMutationsTabCommand}"
+                                             IsActive="{Binding IsMutationsTab}" FontSize="12"
+                                             IsVisible="{Binding IsMutant}"/>
             </HorizontalStackLayout>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
@@ -141,6 +171,64 @@
                                                                   Icon="{x:Static icons:SolidFont.Xmark}"
                                                                   IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveInjuryCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSpellsTab}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc WarriorsSpellsHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddSpellCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorSpell">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveSpellCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsMutationsTab}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc WarriorsMutationsHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddMutationCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Mutations}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorMutation">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:RpgFont.RaBiohazard}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveMutationCommand}"
                                                                   CommandParameter="{Binding .}"/>
                                 </HorizontalStackLayout>
                             </Border>

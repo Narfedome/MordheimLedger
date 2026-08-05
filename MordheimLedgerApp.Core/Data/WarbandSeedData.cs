@@ -38,6 +38,17 @@ public class WarbandSeedData
     /// <summary>All entries of every spell/prayer/ritual table this warband uses (empty for non-casting
     /// warbands like the dwarfs) - see WarriorSeedData.SpellListName for the link to the caster archetype.</summary>
     public List<SpellSeedData> Spells { get; set; } = new();
+
+    /// <summary>Mutations introduced by this warband's JSON - find-or-created by English Name like
+    /// SpecialRules, since the rulebook's list (p.76) is shared verbatim across every Chaos-adjacent
+    /// warband. Not linked back to this warband (Mutation is a flat global catalog, see
+    /// Models.Library.Mutation) - only the first JSON to define an entry actually creates it, later
+    /// files reusing the same English Name just reference the existing row.</summary>
+    public List<MutationSeedData> Mutations { get; set; } = new();
+
+    /// <summary>Mounts introduced by this warband (e.g. "Sanglier de guerre" for Orques) - like
+    /// Equipment, typically warband-specific via RestrictedToThisWarband.</summary>
+    public List<MountSeedData> Mounts { get; set; } = new();
 }
 
 public class WarriorSeedData
@@ -66,6 +77,9 @@ public class WarriorSeedData
     /// <summary>Non-null = this archetype rolls on the Spell entries with a matching SpellListName
     /// (see WarbandSeedData.Spells).</summary>
     public string? SpellListName { get; set; }
+
+    /// <summary>True for Mutant/Possessed-type archetypes that may buy Mutations at recruitment.</summary>
+    public bool CanBuyMutations { get; set; }
 }
 
 public class EquipmentSeedData
@@ -99,4 +113,36 @@ public class SpecialRuleSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
+}
+
+/// <summary>One entry of the (shared, global) Mutation catalog - find-or-created by English Name at
+/// seed time, see WarbandSeedData.Mutations.</summary>
+public class MutationSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+    public int Cost { get; set; }
+}
+
+public class MountSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+    public int Cost { get; set; }
+    public int? Rarity { get; set; }
+    public int Movement { get; set; }
+    public int WeaponSkill { get; set; }
+    public int BallisticSkill { get; set; }
+    public int Strength { get; set; }
+    public int Toughness { get; set; }
+    public int Wounds { get; set; }
+    public int Initiative { get; set; }
+    public int Attacks { get; set; }
+    public int Leadership { get; set; }
+
+    /// <summary>True = only this warband may buy/ride it (see WarbandArchetypeMountEntity).</summary>
+    public bool RestrictedToThisWarband { get; set; }
+
+    /// <summary>Find-or-created by English Name, same as WarbandSeedData.SpecialRules.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 }

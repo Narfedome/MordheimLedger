@@ -30,5 +30,6 @@ public class WarriorArchetypeEntity
 
     public string? DescriptionKey { get; set; }
     public string? SpellListName { get; set; }
+    public bool CanBuyMutations { get; set; }
     public string? ImagePath { get; set; }
 }

@@ -29,4 +29,8 @@ public class WarriorEntity
     public int Initiative { get; set; }
     public int Attacks { get; set; }
     public int Leadership { get; set; }
+
+    /// <summary>Null = not mounted. The rider's stats aren't merged with the mount's - it's tracked as
+    /// its own separate profile, resolved from MountEntity by WarbandService (see Models.Warrior.Mount).</summary>
+    public int? MountId { get; set; }
 }

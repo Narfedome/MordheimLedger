@@ -100,6 +100,61 @@
                             </FlexLayout>
                         </VerticalStackLayout>
 
+                        <!-- Sorts connus : lecture seule, gérés depuis l'onglet Sorts de WarriorEditDialog
+                             (visible seulement si l'archétype de ce guerrier est un lanceur de sorts). -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasSpells}">
+                            <Label Text="{loc:Loc WarriorsSpellsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorSpell">
+                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
+                                                       FontFamily="RpgAwesome" FontSize="12"
+                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Mutations : lecture seule, gérées depuis l'onglet Mutations de
+                             WarriorEditDialog (visible seulement si l'archétype de ce guerrier a
+                             CanBuyMutations). -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasMutations}">
+                            <Label Text="{loc:Loc WarriorsMutationsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Mutations}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorMutation">
+                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Label Text="{x:Static icons:RpgFont.RaBiohazard}"
+                                                       FontFamily="RpgAwesome" FontSize="12"
+                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                            </HorizontalStackLayout>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Monture : lecture seule, un seul chip (champ 0..1, pas une liste) - gérée
+                             depuis WarriorEditDialog. -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasMount}">
+                            <Label Text="{loc:Loc WarriorMountHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4" HorizontalOptions="Start">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:RpgFont.RaHorseshoe}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Mount.Name}" FontSize="11" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
                         <!-- Équipement/Compétences : lecture seule ici, même traitement que Blessures -
                              gérées depuis le dialog d'édition (voir WarriorEditDialog, onglets dédiés). -->
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding HasEquipment}">

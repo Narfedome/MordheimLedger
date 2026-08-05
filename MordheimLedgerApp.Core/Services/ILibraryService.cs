@@ -24,6 +24,14 @@ public interface ILibraryService
     /// WarbandArchetype.SpecialRules/WarriorArchetype.SpecialRules.</summary>
     Task<List<SpecialRule>> GetSpecialRulesAsync(string languageCode);
 
+    /// <summary>The flat global Mutation catalog (see Models.Library.Mutation) - not restricted per
+    /// warband, shared verbatim across every Chaos-adjacent band.</summary>
+    Task<List<Mutation>> GetMutationsAsync(string languageCode);
+
+    /// <summary>The Mount catalog (see Models.Library.Mount) - has its own stat profile, separate from
+    /// EquipmentItem.</summary>
+    Task<List<Mount>> GetMountsAsync(string languageCode);
+
     /// <summary>Inserts (Id == 0) or updates. Editing a row whose current Source is Official flips it
     /// to Modified. Name/Description are written as the translation value for languageCode - any other
     /// language's existing translation is left untouched. Also replaces the band's SpecialRule
@@ -46,6 +54,8 @@ public interface ILibraryService
     Task SaveInjuryAsync(Injury injury, string languageCode);
     Task SaveSpellAsync(Spell spell, string languageCode);
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
+    Task SaveMutationAsync(Mutation mutation, string languageCode);
+    Task SaveMountAsync(Mount mount, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
     Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
@@ -54,4 +64,6 @@ public interface ILibraryService
     Task DeleteInjuryAsync(int injuryId);
     Task DeleteSpellAsync(int spellId);
     Task DeleteSpecialRuleAsync(int specialRuleId);
+    Task DeleteMutationAsync(int mutationId);
+    Task DeleteMountAsync(int mountId);
 }

@@ -315,6 +315,9 @@
   <data name="WarriorArchetypeIsHero" xml:space="preserve">
     <value>Hero</value>
   </data>
+  <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
+    <value>Mutant/Possédé (peut acheter des mutations)</value>
+  </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Coût</value>
   </data>
@@ -390,6 +393,12 @@
   <data name="SpellEditTitle" xml:space="preserve">
     <value>Modifier le sort</value>
   </data>
+  <data name="SpellSelectTitle" xml:space="preserve">
+    <value>Choisir un sort</value>
+  </data>
+  <data name="WarriorsSpellsHeading" xml:space="preserve">
+    <value>Sorts connus</value>
+  </data>
   <data name="SpellListNamePh" xml:space="preserve">
     <value>Table (ex. Nécromancie)</value>
   </data>
@@ -422,6 +431,51 @@
   </data>
   <data name="WarriorsSpecialRulesHeading" xml:space="preserve">
     <value>Règles spéciales</value>
+  </data>
+  <data name="LibTabMutations" xml:space="preserve">
+    <value>Mutations</value>
+  </data>
+  <data name="MutationNamePh" xml:space="preserve">
+    <value>Nom de la mutation</value>
+  </data>
+  <data name="MutationCostPh" xml:space="preserve">
+    <value>Coût (CO)</value>
+  </data>
+  <data name="MutationCreateTitle" xml:space="preserve">
+    <value>Nouvelle mutation</value>
+  </data>
+  <data name="MutationEditTitle" xml:space="preserve">
+    <value>Modifier la mutation</value>
+  </data>
+  <data name="MutationSelectTitle" xml:space="preserve">
+    <value>Choisir une mutation</value>
+  </data>
+  <data name="WarriorsMutationsHeading" xml:space="preserve">
+    <value>Mutations</value>
+  </data>
+  <data name="LibTabMounts" xml:space="preserve">
+    <value>Montures</value>
+  </data>
+  <data name="MountNamePh" xml:space="preserve">
+    <value>Nom de la monture</value>
+  </data>
+  <data name="MountCostPh" xml:space="preserve">
+    <value>Coût (CO)</value>
+  </data>
+  <data name="MountRarityPh" xml:space="preserve">
+    <value>Rareté (vide = commun)</value>
+  </data>
+  <data name="MountCreateTitle" xml:space="preserve">
+    <value>Nouvelle monture</value>
+  </data>
+  <data name="MountEditTitle" xml:space="preserve">
+    <value>Modifier la monture</value>
+  </data>
+  <data name="MountSelectTitle" xml:space="preserve">
+    <value>Choisir une monture</value>
+  </data>
+  <data name="WarriorMountHeading" xml:space="preserve">
+    <value>Monture</value>
   </data>
   <data name="SkillNamePh" xml:space="preserve">
     <value>Nom de la compétence</value>

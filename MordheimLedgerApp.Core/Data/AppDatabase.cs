@@ -38,6 +38,7 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorEquipmentEntity>();
         await _db.CreateTableAsync<WarriorSkillEntity>();
         await _db.CreateTableAsync<WarriorInjuryEntity>();
+        await _db.CreateTableAsync<WarriorSpellEntity>();
         await _db.CreateTableAsync<HistoryEntryEntity>();
         await _db.CreateTableAsync<TranslationEntity>();
         await _db.CreateTableAsync<SpellEntity>();
@@ -46,6 +47,11 @@ public class AppDatabase
         await _db.CreateTableAsync<SpecialRuleEntity>();
         await _db.CreateTableAsync<WarbandArchetypeSpecialRuleEntity>();
         await _db.CreateTableAsync<WarriorArchetypeSpecialRuleEntity>();
+        await _db.CreateTableAsync<MutationEntity>();
+        await _db.CreateTableAsync<WarriorMutationEntity>();
+        await _db.CreateTableAsync<MountEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeMountEntity>();
+        await _db.CreateTableAsync<MountSpecialRuleEntity>();
 
         // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
         // nothing the player made is at risk of being duplicated).
@@ -141,7 +147,8 @@ public class AppDatabase
                 Attacks = w.Attacks,
                 Leadership = w.Leadership,
                 Source = ContentSource.Official,
-                SpellListName = w.SpellListName
+                SpellListName = w.SpellListName,
+                CanBuyMutations = w.CanBuyMutations
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -186,6 +193,41 @@ public class AppDatabase
             spell.DescriptionKey = sp.Description is null ? null : await SeedTranslationAsync(sp.Description.En, sp.Description.Fr);
             await _db.InsertAsync(spell.ToEntity());
         }
+
+        foreach (var mu in data.Mutations)
+            await FindOrCreateMutationAsync(mu);
+
+        foreach (var mo in data.Mounts)
+        {
+            var mount = new Mount
+            {
+                Cost = mo.Cost,
+                Rarity = mo.Rarity,
+                Movement = mo.Movement,
+                WeaponSkill = mo.WeaponSkill,
+                BallisticSkill = mo.BallisticSkill,
+                Strength = mo.Strength,
+                Toughness = mo.Toughness,
+                Wounds = mo.Wounds,
+                Initiative = mo.Initiative,
+                Attacks = mo.Attacks,
+                Leadership = mo.Leadership,
+                Source = ContentSource.Official
+            };
+            mount.NameKey = await SeedTranslationAsync(mo.Name.En, mo.Name.Fr);
+            mount.DescriptionKey = mo.Description is null ? null : await SeedTranslationAsync(mo.Description.En, mo.Description.Fr);
+            var mountEntity = mount.ToEntity();
+            await _db.InsertAsync(mountEntity);
+
+            if (mo.RestrictedToThisWarband)
+                await _db.InsertAsync(new WarbandArchetypeMountEntity { WarbandArchetypeId = warbandEntity.Id, MountId = mountEntity.Id });
+
+            foreach (var sr in mo.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new MountSpecialRuleEntity { MountId = mountEntity.Id, SpecialRuleId = ruleId });
+            }
+        }
     }
 
     /// <summary>Allocates a fresh translation key and writes the English (seed data's authoring
@@ -219,6 +261,26 @@ public class AppDatabase
         await _db.InsertAsync(entity);
 
         _specialRuleIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
+    }
+
+    /// <summary>English Name -> already-created MutationEntity id, same rationale/scope as
+    /// _specialRuleIdsByEnglishName - lets the identical rulebook Mutations list (p.76), reused verbatim
+    /// across every Chaos-adjacent warband's JSON, resolve to one shared catalog row.</summary>
+    private readonly Dictionary<string, int> _mutationIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateMutationAsync(MutationSeedData seed)
+    {
+        if (_mutationIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var mutation = new Mutation { Source = ContentSource.Official, Cost = seed.Cost };
+        mutation.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        mutation.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = mutation.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _mutationIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 }

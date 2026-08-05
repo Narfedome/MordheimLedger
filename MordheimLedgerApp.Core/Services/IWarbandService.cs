@@ -30,6 +30,12 @@ public interface IWarbandService
     Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury);
     Task RemoveWarriorInjuryAsync(int warriorInjuryId);
 
+    Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell);
+    Task RemoveWarriorSpellAsync(int warriorSpellId);
+
+    Task<WarriorMutation> AddWarriorMutationAsync(int warriorId, Mutation mutation);
+    Task RemoveWarriorMutationAsync(int warriorMutationId);
+
     /// <summary>Most recent first.</summary>
     Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId);
 

@@ -38,4 +38,17 @@ public class Warrior
     /// the End of Game Serious Injury roll and manual additions (WarriorEditDialog) go through this
     /// same list — see WarbandDetailViewModel.EndOfGame's find-or-create-by-name lookup.</summary>
     public List<WarriorInjury> Injuries { get; set; } = new();
+
+    /// <summary>Loaded separately via the Warrior/Spell join table — not persisted on this object. Which
+    /// specific spells this warrior has learned from its archetype's SpellListName table (a caster
+    /// doesn't know the whole table at once, see WarriorSpell) — empty for non-casters.</summary>
+    public List<WarriorSpell> Spells { get; set; } = new();
+
+    /// <summary>Loaded separately via the Warrior/Mutation join table — not persisted on this object.
+    /// Only meaningful for warriors whose archetype has CanBuyMutations set — empty otherwise.</summary>
+    public List<WarriorMutation> Mutations { get; set; } = new();
+
+    /// <summary>Null = not mounted. Resolved separately from the Mount catalog by WarbandService (not a
+    /// join table - a warrior can only ride one mount at a time, picking a new one replaces this).</summary>
+    public Library.Mount? Mount { get; set; }
 }

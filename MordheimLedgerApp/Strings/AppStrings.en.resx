@@ -315,6 +315,9 @@
   <data name="WarriorArchetypeIsHero" xml:space="preserve">
     <value>Hero</value>
   </data>
+  <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
+    <value>Mutant/Possessed (may buy mutations)</value>
+  </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Cost</value>
   </data>
@@ -390,6 +393,12 @@
   <data name="SpellEditTitle" xml:space="preserve">
     <value>Edit Spell</value>
   </data>
+  <data name="SpellSelectTitle" xml:space="preserve">
+    <value>Select Spell</value>
+  </data>
+  <data name="WarriorsSpellsHeading" xml:space="preserve">
+    <value>Known spells</value>
+  </data>
   <data name="SpellListNamePh" xml:space="preserve">
     <value>Table (e.g. Necromancy)</value>
   </data>
@@ -422,6 +431,51 @@
   </data>
   <data name="WarriorsSpecialRulesHeading" xml:space="preserve">
     <value>Special rules</value>
+  </data>
+  <data name="LibTabMutations" xml:space="preserve">
+    <value>Mutations</value>
+  </data>
+  <data name="MutationNamePh" xml:space="preserve">
+    <value>Mutation name</value>
+  </data>
+  <data name="MutationCostPh" xml:space="preserve">
+    <value>Cost (gc)</value>
+  </data>
+  <data name="MutationCreateTitle" xml:space="preserve">
+    <value>New mutation</value>
+  </data>
+  <data name="MutationEditTitle" xml:space="preserve">
+    <value>Edit mutation</value>
+  </data>
+  <data name="MutationSelectTitle" xml:space="preserve">
+    <value>Select mutation</value>
+  </data>
+  <data name="WarriorsMutationsHeading" xml:space="preserve">
+    <value>Mutations</value>
+  </data>
+  <data name="LibTabMounts" xml:space="preserve">
+    <value>Mounts</value>
+  </data>
+  <data name="MountNamePh" xml:space="preserve">
+    <value>Mount name</value>
+  </data>
+  <data name="MountCostPh" xml:space="preserve">
+    <value>Cost (gc)</value>
+  </data>
+  <data name="MountRarityPh" xml:space="preserve">
+    <value>Rarity (blank = common)</value>
+  </data>
+  <data name="MountCreateTitle" xml:space="preserve">
+    <value>New mount</value>
+  </data>
+  <data name="MountEditTitle" xml:space="preserve">
+    <value>Edit mount</value>
+  </data>
+  <data name="MountSelectTitle" xml:space="preserve">
+    <value>Select mount</value>
+  </data>
+  <data name="WarriorMountHeading" xml:space="preserve">
+    <value>Mount</value>
   </data>
   <data name="SkillNamePh" xml:space="preserve">
     <value>Skill name</value>

@@ -32,6 +32,12 @@
                     <CheckBox IsChecked="{Binding Item.IsHero}" VerticalOptions="Center"/>
                     <Label Text="{loc:Loc WarriorArchetypeIsHero}" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
+                <!-- Mutant/Possédé : ouvre l'onglet Mutations sur la fiche du guerrier recruté (voir
+                     WarriorEditDialog.IsMutant). -->
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox IsChecked="{Binding Item.CanBuyMutations}" VerticalOptions="Center"/>
+                    <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                     <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeCostPh}"/>
                     <Entry Grid.Column="1" Text="{Binding Item.MaxCount}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeMaxCountPh}"/>

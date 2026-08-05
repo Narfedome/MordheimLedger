@@ -20,6 +20,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
+    private readonly ISpellPickerService _spellPicker;
+    private readonly IMutationPickerService _mutationPicker;
+    private readonly IMountPickerService _mountPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private Dictionary<int, string> _archetypeNames = new();
@@ -56,13 +59,17 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private bool showHistory;
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService,
-        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker)
+        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
+        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IMountPickerService mountPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
+        _spellPicker = spellPicker;
+        _mutationPicker = mutationPicker;
+        _mountPicker = mountPicker;
 
         // Le roster affiche des noms d'Équipement/Compétences/Blessures résolus dans la langue courante
         // - sans ça, ils resteraient périmés si la langue change pendant que cette page est déjà
@@ -210,11 +217,18 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Leadership = w.Leadership,
             Equipment = w.Equipment,
             Skills = w.Skills,
-            Injuries = w.Injuries
+            Injuries = w.Injuries,
+            Spells = w.Spells,
+            Mutations = w.Mutations,
+            Mount = w.Mount
         };
 
+        var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == w.WarriorArchetypeId);
+        var isSpellcaster = archetype?.SpellListName is not null;
+        var isMutant = archetype?.CanBuyMutations ?? false;
         var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
-            _equipmentPicker, _skillPicker, _injuryPicker);
+            _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _mutationPicker, isMutant,
+            _mountPicker);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
         // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie

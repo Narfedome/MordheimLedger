@@ -102,7 +102,9 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             ImagePath = s.ImagePath,
-            SpecialRules = new List<SpecialRule>(s.SpecialRules)
+            SpecialRules = new List<SpecialRule>(s.SpecialRules),
+            SpellListName = s.SpellListName,
+            CanBuyMutations = s.CanBuyMutations
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"], _specialRulePicker);

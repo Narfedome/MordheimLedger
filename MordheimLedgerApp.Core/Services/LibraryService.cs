@@ -89,6 +89,38 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
     }
 
+    public async Task<List<Mutation>> GetMutationsAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<MutationEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
+    }
+
+    public async Task<List<Mount>> GetMountsAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<MountEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var restrictions = await LoadMountRestrictionsAsync();
+        var specialRules = await LoadMountSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, restrictions, specialRules)).OrderBy(r => r.Name).ToList();
+    }
+
+    private async Task<Dictionary<int, List<int>>> LoadMountRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarbandArchetypeMountEntity>().ToListAsync();
+        return rows.GroupBy(r => r.MountId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+    }
+
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadMountSpecialRulesAsync(string languageCode)
+    {
+        var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
+        var links = await _db.Connection.Table<MountSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.MountId)
+            .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
     /// <summary>Loads the whole SpecialRule catalog (resolved) plus the whole band-level attachment join
     /// table once, then groups into WarbandArchetypeId -> resolved rules - same bulk-load idiom as
     /// LoadEquipmentRestrictionsAsync, except here we want the full rule (name+text), not just ids.</summary>
@@ -293,6 +325,43 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(rule.ToEntity());
     }
 
+    public async Task SaveMutationAsync(Mutation mutation, string languageCode)
+    {
+        await _db.Initialization;
+        await ApplyTranslationsAsync(mutation, languageCode);
+
+        if (mutation.Id == 0)
+        {
+            var entity = mutation.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            mutation.Id = entity.Id;
+            return;
+        }
+
+        var existing = await _db.Connection.FindAsync<MutationEntity>(mutation.Id);
+        if (existing?.Source == ContentSource.Official) mutation.Source = ContentSource.Modified;
+        await _db.Connection.UpdateAsync(mutation.ToEntity());
+    }
+
+    public async Task SaveMountAsync(Mount mount, string languageCode)
+    {
+        await _db.Initialization;
+        await ApplyTranslationsAsync(mount, languageCode);
+
+        if (mount.Id == 0)
+        {
+            var entity = mount.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            mount.Id = entity.Id;
+        }
+        else
+        {
+            var existing = await _db.Connection.FindAsync<MountEntity>(mount.Id);
+            if (existing?.Source == ContentSource.Official) mount.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(mount.ToEntity());
+        }
+    }
+
     /// <summary>Writes Name (and Description, when non-blank) as the translation value for
     /// languageCode, allocating a key on first save - shared by all 5 Save*Async methods above since
     /// they otherwise only differ in entity type.</summary>
@@ -352,6 +421,22 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
+    private async Task ApplyTranslationsAsync(Mutation m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
+    private async Task ApplyTranslationsAsync(Mount m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
     public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)
     {
         await _db.Initialization;
@@ -392,5 +477,17 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<SpecialRuleEntity>(specialRuleId);
+    }
+
+    public async Task DeleteMutationAsync(int mutationId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<MutationEntity>(mutationId);
+    }
+
+    public async Task DeleteMountAsync(int mountId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<MountEntity>(mountId);
     }
 }

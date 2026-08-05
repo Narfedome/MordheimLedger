@@ -8,9 +8,7 @@
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
-    <!-- Pas de picker/mode sélection : les Sorts sont de la référence pure, jamais attachés à un
-         guerrier ("pas de moteur de règles V1", pas de lancer de sort en jeu) - toujours Add/Edit/Delete,
-         contrairement à Equipment/Skill/Injury qui servent aussi de picker. -->
+    <!-- Multi-sélection en mode picker (IsCrud=False), même pattern qu'InjuryView. -->
     <Grid Margin="5" RowSpacing="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -79,7 +77,8 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8">
+        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+                               IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
                                          Tooltip="{loc:Loc BtnAdd}"/>
@@ -91,6 +90,19 @@
                                          Command="{Binding DeleteCommand}"
                                          Tooltip="{loc:Loc BtnDelete}"
                                          IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+        </HorizontalStackLayout>
+
+        <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
+             toutes les tuiles cochées d'un coup. -->
+        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+                               IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
+                                         Command="{Binding ConfirmSelectionCommand}"
+                                         Tooltip="{loc:Loc LibConfirm}"
+                                         IsEnabled="{Binding HasSelectedRows}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleXmark}"
+                                         Command="{Binding CancelCommand}"
+                                         Tooltip="{loc:Loc LibCancel}"/>
         </HorizontalStackLayout>
     </Grid>
 </ContentView>

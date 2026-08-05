@@ -92,6 +92,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         SpellListName = e.SpellListName,
+        CanBuyMutations = e.CanBuyMutations,
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
@@ -117,6 +118,7 @@ public static class EntityMapping
         StartingExperience = m.StartingExperience,
         DescriptionKey = m.DescriptionKey,
         SpellListName = m.SpellListName,
+        CanBuyMutations = m.CanBuyMutations,
         ImagePath = m.ImagePath
     };
 
@@ -272,9 +274,14 @@ public static class EntityMapping
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>
-    /// <param name="skills">Learned skills/spells, loaded separately via the join table.</param>
+    /// <param name="skills">Learned skills, loaded separately via the join table.</param>
     /// <param name="injuries">Tracked injuries, loaded separately via the join table.</param>
-    public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null, IEnumerable<WarriorInjury>? injuries = null) => new()
+    /// <param name="spells">Learned spells, loaded separately via the join table.</param>
+    /// <param name="mutations">Bought mutations, loaded separately via the join table.</param>
+    /// <param name="mount">Ridden mount, resolved separately from MountEntity - not a join, see WarriorEntity.MountId.</param>
+    public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null,
+        IEnumerable<WarriorInjury>? injuries = null, IEnumerable<WarriorSpell>? spells = null, IEnumerable<WarriorMutation>? mutations = null,
+        Mount? mount = null) => new()
     {
         Id = e.Id,
         WarbandId = e.WarbandId,
@@ -295,7 +302,10 @@ public static class EntityMapping
         Leadership = e.Leadership,
         Equipment = equipment?.ToList() ?? new List<WarriorEquipment>(),
         Skills = skills?.ToList() ?? new List<WarriorSkill>(),
-        Injuries = injuries?.ToList() ?? new List<WarriorInjury>()
+        Injuries = injuries?.ToList() ?? new List<WarriorInjury>(),
+        Spells = spells?.ToList() ?? new List<WarriorSpell>(),
+        Mutations = mutations?.ToList() ?? new List<WarriorMutation>(),
+        Mount = mount
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -316,7 +326,8 @@ public static class EntityMapping
         Wounds = m.Wounds,
         Initiative = m.Initiative,
         Attacks = m.Attacks,
-        Leadership = m.Leadership
+        Leadership = m.Leadership,
+        MountId = m.Mount?.Id
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>
@@ -364,6 +375,103 @@ public static class EntityMapping
         Id = m.Id,
         WarriorId = m.WarriorId,
         InjuryId = m.Item.Id
+    };
+
+    /// <param name="item">The catalog spell this row references, loaded separately.</param>
+    public static WarriorSpell ToModel(this WarriorSpellEntity e, Spell item) => new()
+    {
+        Id = e.Id,
+        WarriorId = e.WarriorId,
+        Item = item
+    };
+
+    public static WarriorSpellEntity ToEntity(this WarriorSpell m) => new()
+    {
+        Id = m.Id,
+        WarriorId = m.WarriorId,
+        SpellId = m.Item.Id
+    };
+
+    public static Mutation ToModel(this MutationEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Cost = e.Cost,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty
+    };
+
+    public static MutationEntity ToEntity(this Mutation m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        Cost = m.Cost,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source,
+        ImagePath = m.ImagePath
+    };
+
+    /// <param name="item">The catalog mutation this row references, loaded separately.</param>
+    public static WarriorMutation ToModel(this WarriorMutationEntity e, Mutation item) => new()
+    {
+        Id = e.Id,
+        WarriorId = e.WarriorId,
+        Item = item
+    };
+
+    public static WarriorMutationEntity ToEntity(this WarriorMutation m) => new()
+    {
+        Id = m.Id,
+        WarriorId = m.WarriorId,
+        MutationId = m.Item.Id
+    };
+
+    public static Mount ToModel(this MountEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null, IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByMountId = null) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Cost = e.Cost,
+        Rarity = e.Rarity,
+        Movement = e.Movement,
+        WeaponSkill = e.WeaponSkill,
+        BallisticSkill = e.BallisticSkill,
+        Strength = e.Strength,
+        Toughness = e.Toughness,
+        Wounds = e.Wounds,
+        Initiative = e.Initiative,
+        Attacks = e.Attacks,
+        Leadership = e.Leadership,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty,
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        SpecialRules = specialRulesByMountId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
+    };
+
+    public static MountEntity ToEntity(this Mount m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        Cost = m.Cost,
+        Rarity = m.Rarity,
+        Movement = m.Movement,
+        WeaponSkill = m.WeaponSkill,
+        BallisticSkill = m.BallisticSkill,
+        Strength = m.Strength,
+        Toughness = m.Toughness,
+        Wounds = m.Wounds,
+        Initiative = m.Initiative,
+        Attacks = m.Attacks,
+        Leadership = m.Leadership,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source,
+        ImagePath = m.ImagePath
     };
 
     public static HistoryEntry ToModel(this HistoryEntryEntity e) => new()

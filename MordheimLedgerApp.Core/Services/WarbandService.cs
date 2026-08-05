@@ -101,7 +101,42 @@ public class WarbandService : IWarbandService
                 }
             }
 
-            warriors.Add(row.ToModel(carried, learned, injuries));
+            var spellRows = await _db.Connection.Table<WarriorSpellEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
+            var spells = new List<WarriorSpell>();
+            foreach (var spellRow in spellRows)
+            {
+                var spellEntity = await _db.Connection.FindAsync<SpellEntity>(spellRow.SpellId);
+                if (spellEntity is not null)
+                {
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [spellEntity.NameKey, spellEntity.DescriptionKey], languageCode);
+                    spells.Add(spellRow.ToModel(spellEntity.ToModel(translations)));
+                }
+            }
+
+            var mutationRows = await _db.Connection.Table<WarriorMutationEntity>().Where(m => m.WarriorId == row.Id).ToListAsync();
+            var mutations = new List<WarriorMutation>();
+            foreach (var mutationRow in mutationRows)
+            {
+                var mutationEntity = await _db.Connection.FindAsync<MutationEntity>(mutationRow.MutationId);
+                if (mutationEntity is not null)
+                {
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [mutationEntity.NameKey, mutationEntity.DescriptionKey], languageCode);
+                    mutations.Add(mutationRow.ToModel(mutationEntity.ToModel(translations)));
+                }
+            }
+
+            Mount? mount = null;
+            if (row.MountId is { } mountId)
+            {
+                var mountEntity = await _db.Connection.FindAsync<MountEntity>(mountId);
+                if (mountEntity is not null)
+                {
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [mountEntity.NameKey, mountEntity.DescriptionKey], languageCode);
+                    mount = mountEntity.ToModel(translations);
+                }
+            }
+
+            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, mount));
         }
         return warriors;
     }
@@ -129,6 +164,8 @@ public class WarbandService : IWarbandService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ?", warriorId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorSpellEntity WHERE WarriorId = ?", warriorId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorMutationEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
     }
 
@@ -178,6 +215,38 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorInjuryEntity>(warriorInjuryId);
+    }
+
+    public async Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell)
+    {
+        await _db.Initialization;
+        var learned = new WarriorSpell { WarriorId = warriorId, Item = spell };
+        var entity = learned.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        learned.Id = entity.Id;
+        return learned;
+    }
+
+    public async Task RemoveWarriorSpellAsync(int warriorSpellId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorSpellEntity>(warriorSpellId);
+    }
+
+    public async Task<WarriorMutation> AddWarriorMutationAsync(int warriorId, Mutation mutation)
+    {
+        await _db.Initialization;
+        var bought = new WarriorMutation { WarriorId = warriorId, Item = mutation };
+        var entity = bought.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        bought.Id = entity.Id;
+        return bought;
+    }
+
+    public async Task RemoveWarriorMutationAsync(int warriorMutationId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorMutationEntity>(warriorMutationId);
     }
 
     public async Task<List<HistoryEntry>> GetHistoryEntriesAsync(int warbandId)

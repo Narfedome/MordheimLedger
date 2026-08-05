@@ -1,19 +1,28 @@
 {
-  "name": { "en": "Carnival of Chaos", "fr": "Kermesse du Chaos" },
+  "name": {
+    "en": "Carnival of Chaos",
+    "fr": "Kermesse du Chaos"
+  },
   "description": {
     "en": "A traveling band of performers worshipping Nurgle, the Lord of Decay - what looks like a troupe of jugglers and jesters reveals its true, diseased nature once the audience is in its grip.",
     "fr": "Une troupe itinérante de saltimbanques adorant Nurgle, le Seigneur de la Peste - ce qui ressemble à une bande de jongleurs et de bouffons révèle sa vraie nature pestiférée une fois le public sous son emprise."
   },
   "specialRules": [
     {
-      "name": { "en": "Dangerous to Know", "fr": "Sinistre Réputation" },
+      "name": {
+        "en": "Dangerous to Know",
+        "fr": "Sinistre Réputation"
+      },
       "description": {
         "en": "Because of its diseased nature a Carnival of Chaos warband finds it very hard to keep any Hired Sword alive - it may never hire one, of any kind.",
         "fr": "En raison de sa nature quelque peu pestiférée, une kermesse du Chaos a le plus grand mal à attirer des mercenaires. Elle ne peut en aucun cas recruter de Francs-Tireurs."
       }
     },
     {
-      "name": { "en": "Tainted", "fr": "Corrompu" },
+      "name": {
+        "en": "Tainted",
+        "fr": "Corrompu"
+      },
       "description": {
         "en": "The Carnival is a similarly unclean mass of mutation and Chaos to the Possessed, and so counts as such for purposes of Exploration and Serious Injuries.",
         "fr": "La kermesse du Chaos ressemble beaucoup aux bandes de possédés dans la mesure où il s'agit d'un ramassis de mutants corrompus et déments. Elle compte donc comme une bande de possédés pour tout ce qui est de l'Exploration et des Blessures Graves."
@@ -21,19 +30,34 @@
     }
   ],
   "magicSchools": [
-    { "name": { "en": "Nurgle Rituals", "fr": "Rituels de Nurgle" } }
+    {
+      "name": {
+        "en": "Nurgle Rituals",
+        "fr": "Rituels de Nurgle"
+      }
+    }
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
   "warriors": [
     {
-      "name": { "en": "Carnival Master", "fr": "Maître de Cérémonie" },
+      "name": {
+        "en": "Carnival Master",
+        "fr": "Maître de Cérémonie"
+      },
       "isHero": true,
       "cost": 70,
       "maxCount": 1,
       "startingExperience": 20,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 8,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 8,
       "isSpellcaster": true,
       "description": {
         "en": "The Master is a power-crazed individual who leads his coven of daemonic entertainers throughout the backwaters of the Empire, tainting villages with disease - his cunning enchantments keep his troupe one step ahead of the Witch Hunters.",
@@ -41,36 +65,47 @@
       },
       "specialRules": [
         {
-          "name": { "en": "Leader", "fr": "Chef" },
-          "description": {
-            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
-            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
           }
         },
         {
-          "name": { "en": "Wizard", "fr": "Sorcier" },
-          "description": {
-            "en": "This model is a Wizard and may cast spells (see the Spells library).",
-            "fr": "Cette figurine est un Sorcier et peut lancer des sorts (voir la bibliothèque des Sorts)."
+          "name": {
+            "en": "Wizard",
+            "fr": "Sorcier"
           }
         }
       ]
     },
     {
-      "name": { "en": "Brute", "fr": "Colosse" },
+      "name": {
+        "en": "Brute",
+        "fr": "Colosse"
+      },
       "isHero": true,
       "cost": 60,
       "maxCount": 2,
       "startingExperience": 8,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 0, "strength": 4, "toughness": 4,
-      "wounds": 1, "initiative": 2, "attacks": 2, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 0,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 2,
+      "attacks": 2,
+      "leadership": 7,
       "description": {
         "en": "A specific type of mutant whose constitution has been bolstered by Nurgle's unnatural vitality - massive, statuesque creatures who play the strongman in the Carnival, wielding huge hammers and flails with reckless abandon.",
         "fr": "Les Colosses sont un type de mutant particulier dont la constitution a été renforcée par la vitalité surnaturelle du Seigneur de la Peste. Ils jouent le rôle d'hommes forts dans le cadre de la kermesse, accumulant les exploits pour susciter l'admiration des foules chétives. Au combat, ils s'arment de lourds marteaux et fléaux qu'ils font tourbillonner autour de leur tête avec une joie puérile."
       },
       "specialRules": [
         {
-          "name": { "en": "Unnatural Strength", "fr": "Force Surnaturelle" },
+          "name": {
+            "en": "Unnatural Strength",
+            "fr": "Force Surnaturelle"
+          },
           "description": {
             "en": "Brutes start the game with the Strongman skill from the Strength skill list in the Mordheim rulebook.",
             "fr": "Les Colosses disposent dès le début de leur carrière de la compétence de force Homme Fort du livre de règles de Mordheim."
@@ -79,13 +114,23 @@
       ]
     },
     {
-      "name": { "en": "Tainted One", "fr": "Impur" },
+      "name": {
+        "en": "Tainted One",
+        "fr": "Impur"
+      },
       "isHero": true,
       "cost": 25,
       "maxCount": 2,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "canBuyMutations": true,
       "description": {
         "en": "Those most blessed and favoured of Father Nurgle, occupying a position of great importance in the Carnival's hierarchy - so wracked with disease and mutation that it is unsafe for even the other mortal members to touch their bare skin.",
@@ -93,7 +138,10 @@
       },
       "specialRules": [
         {
-          "name": { "en": "Nurgle's Blessings", "fr": "Bénédiction de Nurgle" },
+          "name": {
+            "en": "Nurgle's Blessings",
+            "fr": "Bénédiction de Nurgle"
+          },
           "description": {
             "en": "Tainted Ones must start the game with one or more Blessings of Nurgle - see the Mutations library (only buyable at recruitment, 1st at list price, each next one double).",
             "fr": "Les Impurs doivent recevoir une ou plusieurs Bénédictions de Nurgle à l'achat (voir la bibliothèque des Mutations) - achetées uniquement au recrutement, la première au prix indiqué, les suivantes au double."
@@ -102,69 +150,91 @@
       ]
     },
     {
-      "name": { "en": "Plague Bearer", "fr": "Portepeste" },
+      "name": {
+        "en": "Plague Bearer",
+        "fr": "Portepeste"
+      },
       "isHero": false,
       "cost": 50,
       "maxCount": 2,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 4, "toughness": 4,
-      "wounds": 1, "initiative": 4, "attacks": 2, "leadership": 10,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 2,
+      "leadership": 10,
       "description": {
         "en": "Daemons of Nurgle, identified by their cyclopean face and decayed body - revered by the mortal members of the warband as the Tallymen of Plagues, they take great pleasure in their showy roles as stage actors.",
         "fr": "Les Portepestes sont des démons du dieu du Chaos Nurgle. On les reconnaît à leur œil unique et à leur corps décomposé. Parfois appelés Frères-vers et Comptables de Nurgle, ils sont révérés par les membres mortels de la bande et apprécient leur rôle d'acteur de premier plan."
       },
       "specialRules": [
         {
-          "name": { "en": "Cloud of Flies", "fr": "Nuage de Mouches" },
+          "name": {
+            "en": "Cloud of Flies",
+            "fr": "Nuage de Mouches"
+          },
           "description": {
             "en": "Surrounded by a cloud of flies that don't bother this model but distract its close combat opponents - they suffer a -1 to-hit penalty.",
             "fr": "Entouré d'un nuage de mouches qui bourdonnent constamment autour de lui et de ses adversaires. Ses adversaires subissent un malus de -1 pour le toucher au corps à corps."
           }
         },
         {
-          "name": { "en": "Stream of Corruption", "fr": "Flot de Corruption" },
+          "name": {
+            "en": "Stream of Corruption",
+            "fr": "Flot de Corruption"
+          },
           "description": {
             "en": "Can spew forth a grotesque stream of maggots, entrails and filth - counts as a shooting attack, range 6\", Strength 3, no armour save.",
             "fr": "Peut vomir une immonde gerbe d'asticots, de viscères et de pus. Ceci compte comme un tir, avec une portée de 6ps, une Force de 3 et l'adversaire n'a droit à aucune sauvegarde d'armure."
           }
         },
         {
-          "name": { "en": "Demonic", "fr": "Démons" },
+          "name": {
+            "en": "Demonic",
+            "fr": "Démons"
+          },
           "description": {
             "en": "Not a being of flesh and blood but the eternal, unchanging energy of Chaos - never gains Experience.",
             "fr": "N'est pas un être de chair et de sang : il est fait de l'énergie brute du Chaos, éternelle et immuable. Il ne gagne donc jamais d'expérience."
           }
         },
         {
-          "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" },
-          "description": {
-            "en": "This model is unaffected by any poison.",
-            "fr": "Cette figurine n'est affectée par aucun poison."
+          "name": {
+            "en": "Immune to Poison",
+            "fr": "Immunité aux Poisons"
           }
         },
         {
-          "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" },
-          "description": {
-            "en": "This model is unaffected by psychology and never leaves combat.",
-            "fr": "Cette figurine n'est pas affectée par la psychologie et ne quitte jamais un combat."
+          "name": {
+            "en": "Immune to Psychology",
+            "fr": "Immunité à la Psychologie"
           }
         },
         {
-          "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
-          "description": {
-            "en": "This model causes Fear (see the Psychology rules).",
-            "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
           }
         },
         {
-          "name": { "en": "Daemonic Aura", "fr": "Aura Démoniaque" },
+          "name": {
+            "en": "Daemonic Aura",
+            "fr": "Aura Démoniaque"
+          },
           "description": {
             "en": "A special armour save of 5+, modified by Strength as normal but completely negated by magic weapons and spells - its own attacks also count as magical.",
             "fr": "Une sauvegarde d'armure spéciale de 5+, modifiée comme d'ordinaire par la Force de l'attaquant mais complètement annulée par les armes magiques et les sorts. Ses propres attaques comptent également comme des attaques magiques."
           }
         },
         {
-          "name": { "en": "Daemonic Instability", "fr": "Instabilité Démoniaque" },
+          "name": {
+            "en": "Daemonic Instability",
+            "fr": "Instabilité Démoniaque"
+          },
           "description": {
             "en": "If taken Out of Action, banished and effectively destroyed on a roll of 1-3 on 1D6 (no Injury roll). If the warband fails a Rout test, every model with this rule must immediately pass a Leadership test or count as destroyed.",
             "fr": "Si mis hors de combat, banni et effectivement détruit sur un résultat de 1-3 sur 1D6 (pas de jet sur le tableau des blessures). Si la bande rate un test de déroute, cette figurine doit immédiatement réussir un test de Commandement ou compter comme détruite."
@@ -173,62 +243,85 @@
       ]
     },
     {
-      "name": { "en": "Nurgling", "fr": "Nurgling" },
+      "name": {
+        "en": "Nurgling",
+        "fr": "Nurgling"
+      },
       "isHero": false,
       "cost": 15,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 0, "strength": 3, "toughness": 2,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 10,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 0,
+      "strength": 3,
+      "toughness": 2,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 10,
       "description": {
         "en": "Tiny daemons of Nurgle, seen by his followers as his beloved children - more a nuisance than a real threat individually, but able to overwhelm even the toughest warrior in numbers.",
         "fr": "Les Nurglings sont de minuscules démons de Nurgle, et les suivants de ce dernier les voient comme ses enfants chéris. Au combat, les Nurglings s'avèrent généralement davantage une gêne qu'une véritable menace, mais ils peuvent faire fléchir sous le nombre le plus coriace des guerriers."
       },
       "specialRules": [
         {
-          "name": { "en": "Cloud of Flies", "fr": "Nuage de Mouches" },
+          "name": {
+            "en": "Cloud of Flies",
+            "fr": "Nuage de Mouches"
+          },
           "description": {
             "en": "Surrounded by a cloud of flies that don't bother this model but distract its close combat opponents - they suffer a -1 to-hit penalty.",
             "fr": "Entouré d'un nuage de mouches qui bourdonnent constamment autour de lui et de ses adversaires. Ses adversaires subissent un malus de -1 pour le toucher au corps à corps."
           }
         },
         {
-          "name": { "en": "Swarm", "fr": "Nuées" },
+          "name": {
+            "en": "Swarm",
+            "fr": "Nuées"
+          },
           "description": {
             "en": "You may recruit as many Nurglings as you wish, even more than five in a single Henchman group.",
             "fr": "Vous pouvez avoir autant de Nurglings que vous le désirez (vous pouvez ainsi avoir plus de 5 Nurglings par groupe d'hommes de main)."
           }
         },
         {
-          "name": { "en": "Demonic", "fr": "Démons" },
+          "name": {
+            "en": "Demonic",
+            "fr": "Démons"
+          },
           "description": {
             "en": "Not a being of flesh and blood but the eternal, unchanging energy of Chaos - never gains Experience.",
             "fr": "N'est pas un être de chair et de sang : il est fait de l'énergie brute du Chaos, éternelle et immuable. Il ne gagne donc jamais d'expérience."
           }
         },
         {
-          "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" },
-          "description": {
-            "en": "This model is unaffected by any poison.",
-            "fr": "Cette figurine n'est affectée par aucun poison."
+          "name": {
+            "en": "Immune to Poison",
+            "fr": "Immunité aux Poisons"
           }
         },
         {
-          "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" },
-          "description": {
-            "en": "This model is unaffected by psychology and never leaves combat.",
-            "fr": "Cette figurine n'est pas affectée par la psychologie et ne quitte jamais un combat."
+          "name": {
+            "en": "Immune to Psychology",
+            "fr": "Immunité à la Psychologie"
           }
         },
         {
-          "name": { "en": "Daemonic Aura", "fr": "Aura Démoniaque" },
+          "name": {
+            "en": "Daemonic Aura",
+            "fr": "Aura Démoniaque"
+          },
           "description": {
             "en": "A special armour save of 5+, modified by Strength as normal but completely negated by magic weapons and spells - its own attacks also count as magical.",
             "fr": "Une sauvegarde d'armure spéciale de 5+, modifiée comme d'ordinaire par la Force de l'attaquant mais complètement annulée par les armes magiques et les sorts. Ses propres attaques comptent également comme des attaques magiques."
           }
         },
         {
-          "name": { "en": "Daemonic Instability", "fr": "Instabilité Démoniaque" },
+          "name": {
+            "en": "Daemonic Instability",
+            "fr": "Instabilité Démoniaque"
+          },
           "description": {
             "en": "If taken Out of Action, banished and effectively destroyed on a roll of 1-3 on 1D6 (no Injury roll). If the warband fails a Rout test, every model with this rule must immediately pass a Leadership test or count as destroyed.",
             "fr": "Si mis hors de combat, banni et effectivement détruit sur un résultat de 1-3 sur 1D6 (pas de jet sur le tableau des blessures). Si la bande rate un test de déroute, cette figurine doit immédiatement réussir un test de Commandement ou compter comme détruite."
@@ -237,26 +330,36 @@
       ]
     },
     {
-      "name": { "en": "Brethren", "fr": "Frère" },
+      "name": {
+        "en": "Brethren",
+        "fr": "Frère"
+      },
       "isHero": false,
       "cost": 25,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Devoted followers of Nurgle who have fully embraced the path of damnation - in the Carnival, the Brethren take on all the minor roles: stagehands, puppeteers, and the like.",
         "fr": "Les Frères sont les dévots du Seigneur de la Peste, et ils ont totalement adopté sa philosophie en s'engageant sur la voie de la damnation. Dans le cadre de la kermesse, les frères occupent les seconds rôles, ou font office de marionnettistes."
       }
     }
   ],
-  "equipment": [
-    { "name": { "en": "Short Bow", "fr": "Arc Court" }, "category": "MissileWeapon", "cost": 10 },
-    { "name": { "en": "Flail", "fr": "Fléau" }, "category": "MeleeWeapon", "cost": 10 }
-  ],
+  "equipment": [],
   "mutations": [
     {
-      "name": { "en": "Stream of Corruption", "fr": "Flot de Corruption" },
+      "name": {
+        "en": "Stream of Corruption",
+        "fr": "Flot de Corruption"
+      },
       "description": {
         "en": "Can spew forth a grotesque stream of maggots, bile and blood - counts as a shooting attack, range 6\", Strength 3, no armour save.",
         "fr": "L'Impur peut vomir une immonde gerbe de vers, de bile et de sang. Ceci compte comme un tir, avec une portée de 6ps, une Force de 3 et l'adversaire n'a droit à aucune sauvegarde d'armure."
@@ -265,7 +368,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Nurgle's Rot", "fr": "Pourriture de Nurgle" },
+      "name": {
+        "en": "Nurgle's Rot",
+        "fr": "Pourriture de Nurgle"
+      },
       "description": {
         "en": "Infected with Nurgle's deadly, incurable pestilence and immune to poison. Can be transmitted in close combat on an unmodified to-wound roll of 6 (living targets only). Each following battle the victim tests Toughness or permanently loses 1 Toughness (dies if it reaches 0); a roll of 6 on that test spreads the Rot to a random bandmate.",
         "fr": "L'Impur est infecté par la pire maladie de son maître et est immunisé aux effets des poisons. La Pourriture est une maladie virulente et incurable, transmissible au corps à corps sur un jet pour blesser de 6. Au début de chaque bataille suivante, la victime teste son Endurance ou en perd 1 point de façon permanente (meurt si elle tombe à 0) ; un résultat de 6 au test transmet la Pourriture à un autre membre de la bande, déterminé au hasard."
@@ -274,7 +380,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Cloud of Flies", "fr": "Nuage de Mouches" },
+      "name": {
+        "en": "Cloud of Flies",
+        "fr": "Nuage de Mouches"
+      },
       "description": {
         "en": "Surrounded by a cloud of flies that don't bother this model but distract its close combat opponents - they suffer a -1 to-hit penalty.",
         "fr": "L'Impur est entouré d'un nuage de mouches qui bourdonnent constamment autour de lui et de ses adversaires. Ses adversaires subissent un malus de -1 pour le toucher au corps à corps."
@@ -283,7 +392,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Bloated", "fr": "Horreur Enflée" },
+      "name": {
+        "en": "Bloated",
+        "fr": "Horreur Enflée"
+      },
       "description": {
         "en": "An enormous gluttonous mass of folds and diseased flesh - gains +1 Wound and +1 Toughness, but Movement is reduced by 1.",
         "fr": "L'Impur est une énorme masse gluante de plis et de chairs malades. Il gagne +1 Point de Vie et +1 en Endurance, mais son Mouvement est réduit d'1 point."
@@ -292,84 +404,17 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Mark of Nurgle", "fr": "Marque de Nurgle" },
+      "name": {
+        "en": "Mark of Nurgle",
+        "fr": "Marque de Nurgle"
+      },
       "description": {
         "en": "Bears Nurgle's symbol, three burnt circles of skin oozing a brownish pus - gains +1 Wound and becomes immune to all poisons.",
         "fr": "L'Impur arbore le symbole de Nurgle, trois cercles de peau brûlée dont suinte constamment un pus brunâtre. Il gagne +1 Point de Vie et devient immunisé aux effets de tous les poisons."
       },
       "cost": 35,
       "restrictedToThisWarband": true
-    },
-    {
-      "name": { "en": "Hideous", "fr": "Hideux" },
-      "description": {
-        "en": "This model's appearance is abject - skin hanging in shreds, rotten entrails on display. It causes Fear.",
-        "fr": "L'apparence de l'Impur est abjecte : sa peau pend en lambeaux de ses membres, et ses entrailles pourries gigotent à l'air libre. Il cause la peur."
-      },
-      "cost": 40,
-      "restrictedToThisWarband": true
     }
   ],
-  "spells": [
-    {
-      "magicSchoolName": "Nurgle Rituals",
-      "rollValue": 1,
-      "difficulty": 8,
-      "name": { "en": "Daemonic Vigour", "fr": "Vigueur Démoniaque" },
-      "description": {
-        "en": "The Master grants his daemonic servants supernatural toughness. Any Plague Bearer or Nurgling within 8\" of the Master has its daemonic armour save improved to 4+ until the start of its next turn.",
-        "fr": "Le Maître accorde à ses serviteurs démoniaques une robustesse surnaturelle. Tout Portepeste ou Nurgling dans un rayon de 8ps du Maître voit sa sauvegarde démoniaque passer à 4+ jusqu'au début de son prochain tour."
-      }
-    },
-    {
-      "magicSchoolName": "Nurgle Rituals",
-      "rollValue": 2,
-      "difficulty": 7,
-      "name": { "en": "Buboes", "fr": "Bubons" },
-      "description": {
-        "en": "The Master bestows superb buboes upon his enemies. Range 8\", affects one enemy warrior - it must pass a Toughness test or lose 1 Wound, no armour save allowed.",
-        "fr": "Le Maître dispense de superbes bubons à ses ennemis. Ce sort a une portée de 8ps et affecte un guerrier ennemi. Celui-ci doit réussir un test d'Endurance ou perdre 1 Point de Vie. Aucune sauvegarde d'armure n'est autorisée."
-      }
-    },
-    {
-      "magicSchoolName": "Nurgle Rituals",
-      "rollValue": 3,
-      "difficulty": 8,
-      "name": { "en": "Nurgling Miasma", "fr": "Miasmes Nurglesques" },
-      "description": {
-        "en": "The Master emits a foul-smelling fog that suffocates his enemies. Range 6\", affects every living creature, friend or foe - a warrior in range must pass a Toughness test or lose 1 Attack for the rest of the turn.",
-        "fr": "Le Maître émet un brouillard malodorant qui fait suffoquer ses ennemis. Ce sort a une portée de 6ps et affecte toutes les créatures vivantes, amies ou ennemies. Tout guerrier à portée doit réussir un test d'Endurance ou perdre 1 Attaque pour le reste du tour."
-      }
-    },
-    {
-      "magicSchoolName": "Nurgle Rituals",
-      "rollValue": 4,
-      "difficulty": 10,
-      "name": { "en": "Pestilence", "fr": "Pestilence" },
-      "description": {
-        "en": "The Master inflicts grave lesions upon the ungodly. Every enemy model within 12\" of the Master suffers a Strength 3 hit, no armour save allowed.",
-        "fr": "Le Maître inflige de graves lésions aux mécréants. Toute figurine ennemie dans un rayon de 12ps du Maître subit une touche de Force 3, sans sauvegarde d'armure."
-      }
-    },
-    {
-      "magicSchoolName": "Nurgle Rituals",
-      "rollValue": 5,
-      "difficulty": 8,
-      "name": { "en": "Warty Skin", "fr": "Peau Verruqueuse" },
-      "description": {
-        "en": "The Master's skin takes on the aspect of his god's diseased hide. The Master gains a 2+ armour save, replacing his current one, lasting until the start of his next Shooting phase.",
-        "fr": "La peau du Maître prend l'aspect du cuir malade de son dieu. Le Maître gagne une sauvegarde d'armure de 2+ qui remplace sa sauvegarde d'armure actuelle. Ce rituel dure jusqu'au début de sa prochaine phase de tir."
-      }
-    },
-    {
-      "magicSchoolName": "Nurgle Rituals",
-      "rollValue": 6,
-      "difficulty": 9,
-      "name": { "en": "Nurgle's Rot", "fr": "Pourriture de Nurgle" },
-      "description": {
-        "en": "The Master grants Nurgle's blessing to his foes. Any enemy model in base contact with the Master must immediately pass a Toughness test or catch Nurgle's Rot (see the Nurgle's Rot mutation).",
-        "fr": "Le Maître accorde la bénédiction de Nurgle à ses adversaires. Toute figurine ennemie en contact avec le Maître doit immédiatement réussir un test d'Endurance ou attraper la Pourriture de Nurgle (voir la mutation Pourriture de Nurgle)."
-      }
-    }
-  ]
+  "spells": []
 }

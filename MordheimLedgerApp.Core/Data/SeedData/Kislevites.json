@@ -1,19 +1,28 @@
 {
-  "name": { "en": "Kislevites", "fr": "Kislévites" },
+  "name": {
+    "en": "Kislevites",
+    "fr": "Kislévites"
+  },
   "description": {
     "en": "A warband of hardy folk from the frozen, war-scarred land of Kislev, north and east of the Empire - courageous warriors who despise Chaos more than most, and are quick to detect and purge any cult the rest of the Empire might overlook.",
     "fr": "Une bande kislévite représente un groupe d'individus venus du froid royaume de Kislev, au nord et à l'est de l'Empire. Les kislévites sont réputés pour être des guerriers courageux, et ils vouent au Chaos une haine qui dépasse celle de beaucoup d'autres peuples du Vieux Monde. Là où nombre de citoyens de l'Empire ne comprendront pas qu'une secte du Chaos est en train d'émerger, les kislévites la détecteront et la purgeront rapidement par le fer et le feu."
   },
   "specialRules": [
     {
-      "name": { "en": "May Hire", "fr": "Francs-tireurs" },
+      "name": {
+        "en": "May Hire",
+        "fr": "Francs-tireurs"
+      },
       "description": {
         "en": "A Kislevite warband is allowed the same selection of Hired Swords as Human Mercenary warbands.",
         "fr": "Une bande kislévite peut engager les mêmes Francs-tireurs que les bandes de mercenaires humains décrites dans le livre de règles de Mordheim."
       }
     },
     {
-      "name": { "en": "Ancient Enemies", "fr": "Vieux Ennemis" },
+      "name": {
+        "en": "Ancient Enemies",
+        "fr": "Vieux Ennemis"
+      },
       "description": {
         "en": "Kislevites may never ally with any type of Chaos warband - this includes Possessed, Beastmen, Skaven, Dark Elves, Chaos Dwarfs and any other warband judged sufficiently 'Chaotic'.",
         "fr": "Les kislévites ne peuvent en aucun cas s'allier avec une bande du Chaos d'un type ou d'un autre. Cette restriction s'étend aux bandes suivantes : Possédés, Hommes-Bêtes, Skavens, Elfes Noirs, Nains du Chaos, et toute autre bande que les joueurs jugent comme étant trop chaotique."
@@ -24,27 +33,39 @@
   "maxWarriors": 15,
   "warriors": [
     {
-      "name": { "en": "Druzhina Captain", "fr": "Capitaine de Druzhina" },
+      "name": {
+        "en": "Druzhina Captain",
+        "fr": "Capitaine de Druzhina"
+      },
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
       "startingExperience": 20,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 8,
       "description": {
         "en": "Druzhina are the minor nobles of Kislev, forming their own regiments in wartime - rich enough to afford their own horse and battlegear, often ancient artefacts handed down from father to son, they must always be ready to fight for the Tzar.",
         "fr": "Il s'agit des nobliaux de Kislev. En temps de guerre, ces derniers forment leurs propres régiments dans l'armée kislévite. Ils ont une apparence impressionnante, en grande partie grâce à leurs armes et armures antiques, qui sont souvent des artefacts passant de père en fils depuis des générations. Les capitaines sont assez riches pour s'offrir leur propre monture et équipement, aussi doivent-ils toujours se tenir prêts à combattre pour le Tzar."
       },
       "specialRules": [
         {
-          "name": { "en": "Leader", "fr": "Chef" },
-          "description": {
-            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
-            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
           }
         },
         {
-          "name": { "en": "Inheritance", "fr": "Héritage" },
+          "name": {
+            "en": "Inheritance",
+            "fr": "Héritage"
+          },
           "description": {
             "en": "When the warband is created, the Captain may buy one item from the Kislevite Warrior equipment list at half price, representing a family heirloom. If it is ever lost (e.g. a 'Robbed' result), it must be replaced as soon as possible at 150% of its normal price, or the Captain suffers -1 to all tests and to-hit rolls until it is.",
             "fr": "Lorsque la bande est créée, le Capitaine a le droit d'acheter un objet de la liste d'équipement des guerriers kislévites à moitié prix. Cet objet représente un héritage familial transmis de génération en génération. Si cet artefact ancestral est perdu (par exemple le résultat Dépouillé du tableau des blessures), le Capitaine doit le remplacer aussitôt que possible par un substitut de bonne qualité, à 150% de son prix habituel. Tant que l'objet n'a pas été remplacé, le Capitaine subit un malus de -1 sur tous ses tests et jets pour toucher."
@@ -53,33 +74,56 @@
       ]
     },
     {
-      "name": { "en": "Esaul", "fr": "Esaul" },
+      "name": {
+        "en": "Esaul",
+        "fr": "Esaul"
+      },
       "isHero": true,
       "cost": 35,
       "maxCount": 1,
       "startingExperience": 8,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "An ancient Cossack term meaning 'best warrior', given by a chieftain to his personal champion - or used by Gospodar warriors as a familiar term for an experienced veteran. Most Kislevite city garrisons hold at least one such grizzled officer.",
         "fr": "Esaul est un ancien mot cosaque signifiant 'meilleur guerrier', et était généralement appliqué au plus puissant combattant de la tribu. Le mot est aujourd'hui donné comme titre honorifique par un chef à son champion personnel, bien qu'il soit également encore utilisé par les guerriers Gospodar pour désigner un vétéran. Toute garnison de cité kislévite contient au moins un officier endurci que ses hommes appellent affectueusement Esaul."
       }
     },
     {
-      "name": { "en": "Bear Tamer", "fr": "Dompteur d'Ours" },
+      "name": {
+        "en": "Bear Tamer",
+        "fr": "Dompteur d'Ours"
+      },
       "isHero": true,
       "cost": 35,
       "maxCount": 1,
       "startingExperience": 8,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 4, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Bears have featured in Kislevite myth since ancient times, and the powerful men who train them are widely renowned among their people - the best Bear Tamers are often recruited into Kislev's armies, where they enjoy special status.",
         "fr": "Depuis des temps immémoriaux, les ours ont une place prépondérante dans les légendes kislévites. Les colosses qui entraînent ces ours sont appelés dompteurs d'ours, et les meilleurs d'entre eux sont réputés parmi tous les kislévites. Un ours peut également être entraîné au combat, aussi les dompteurs sont souvent recrutés au sein des armées kislévites, où ils jouissent d'un statut privilégié."
       },
       "specialRules": [
         {
-          "name": { "en": "Bear Handler", "fr": "Dompteur d'Ours" },
+          "name": {
+            "en": "Bear Handler",
+            "fr": "Dompteur d'Ours"
+          },
           "description": {
             "en": "A warband including a Bear Tamer may recruit a Trained Bear as a Henchman - it automatically passes Stupidity tests while within 6\" of the Bear Tamer, even if he is Knocked Down or Stunned.",
             "fr": "Une bande kislévite incluant un Dompteur d'Ours peut recruter un Ours Apprivoisé en tant qu'Homme de Main. Cet animal a été dressé pour suivre les instructions du Dompteur, il réussira donc automatiquement ses tests de stupidité lorsqu'il se trouve dans un rayon de 6ps du Dompteur d'Ours (même si ce dernier est à terre ou sonné)."
@@ -88,46 +132,79 @@
       ]
     },
     {
-      "name": { "en": "Youths", "fr": "Recrues" },
+      "name": {
+        "en": "Youths",
+        "fr": "Recrues"
+      },
       "isHero": true,
       "cost": 15,
       "maxCount": 2,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 6,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 6,
       "description": {
         "en": "Strong, strapping lads from the countryside, often joining a band of daring adventurers to make their fortune.",
         "fr": "Ces jeunes paysans robustes se joignent souvent à des bandes d'aventuriers pour chercher fortune."
       }
     },
     {
-      "name": { "en": "Warriors", "fr": "Guerriers" },
+      "name": {
+        "en": "Warriors",
+        "fr": "Guerriers"
+      },
       "isHero": false,
       "cost": 25,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "The Gospodar tribe make up the bulk of Kislev's people and are generally considered its most civilised - Gospodar women hold the same rights as men, and the most powerful of the legendary Ice Mages of Kislev are all female.",
         "fr": "La tribu des Gospodar constitue la majorité du peuple de Kislev, et ses membres sont généralement considérés comme étant les gens les plus civilisés de ce pays inhospitalier. Celles-ci disposent d'ailleurs des mêmes droits que les mâles Gospodar : de fait, les plus puissants des légendaires mages des glaces kislévites sont tous des femmes !"
       }
     },
     {
-      "name": { "en": "Cossacks", "fr": "Cosaques" },
+      "name": {
+        "en": "Cossacks",
+        "fr": "Cosaques"
+      },
       "isHero": false,
       "cost": 30,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Nomadic tribesmen of northern Kislev, always the first to face Chaos invaders from the north - renowned horsemen whose favoured weapons are the sabre and spear.",
         "fr": "Les Cosaques sont des nomades vivant dans le nord de Kislev. Ils sont toujours les premiers à souffrir d'une invasion chaotique, c'est pourquoi ils vouent une haine farouche aux serviteurs des ténèbres. Les Cosaques sont réputés pour leurs talents de cavalier, leurs armes favorites étant le cimeterre et la lance."
       },
       "specialRules": [
         {
-          "name": { "en": "Hate Chaos", "fr": "Haine du Chaos" },
+          "name": {
+            "en": "Hate Chaos",
+            "fr": "Haine du Chaos"
+          },
           "description": {
             "en": "Years of bitter struggle against Chaos have left their mark - Cossacks are subject to Hatred against all forces of Chaos (i.e. any warband covered by the Ancient Enemies rule).",
             "fr": "Des années de conflit contre les forces du Chaos ont laissé leur empreinte dans l'âme des Cosaques. Ceux-ci sont sujets à la haine des forces du Chaos (c'est-à-dire les membres de toute bande à laquelle s'applique la règle Vieux Ennemis)."
@@ -136,20 +213,33 @@
       ]
     },
     {
-      "name": { "en": "Streltsi", "fr": "Streltsi" },
+      "name": {
+        "en": "Streltsi",
+        "fr": "Streltsi"
+      },
       "isHero": false,
       "cost": 25,
       "maxCount": 3,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Firearms were introduced to Kislev by Prince Boydinov of Erengrad, whose legacy funded a regiment of handgunners - the only Kislevite warriors trained in the use of handguns, also skilled with the small halberd known as the bardiche.",
         "fr": "Les armes à feu furent introduites à Kislev par le Prince Boydinov d'Erengrad. À sa mort, le prince légua une bonne partie de sa fortune à la création et à l'entretien d'un régiment d'arquebusiers : celui-ci existe encore, et ses membres sont appelés les Streltsi. En plus de leur connaissance des armes à feu, les Streltsi utilisent aussi une petite hallebarde appelée bardiche."
       },
       "specialRules": [
         {
-          "name": { "en": "Gun-Rest", "fr": "Appui" },
+          "name": {
+            "en": "Gun-Rest",
+            "fr": "Appui"
+          },
           "description": {
             "en": "A Streltsi armed with both halberd and handgun may use the halberd as a gun-rest, gaining +1 to hit with the handgun as long as he did not move that turn (even if a skill would otherwise let him move and shoot).",
             "fr": "Un Streltsi armé d'une hallebarde et d'une arquebuse peut utiliser cette dernière pour y poser son arme à feu. Il bénéficie alors d'un bonus de +1 pour toucher avec son arquebuse tant qu'il ne se déplace pas durant la phase de mouvement (cela s'applique même si le Streltsi dispose d'une compétence lui permettant de se déplacer et de tirer avec une arquebuse : il ne doit pas se déplacer du tout pour pouvoir poser son arquebuse)."
@@ -158,58 +248,78 @@
       ]
     },
     {
-      "name": { "en": "Trained Bear", "fr": "Ours Apprivoisé" },
+      "name": {
+        "en": "Trained Bear",
+        "fr": "Ours Apprivoisé"
+      },
       "isHero": false,
       "cost": 125,
       "maxCount": 1,
       "startingExperience": 0,
-      "movement": 6, "weaponSkill": 3, "ballisticSkill": 0, "strength": 5, "toughness": 5,
-      "wounds": 2, "initiative": 2, "attacks": 2, "leadership": 6,
+      "movement": 6,
+      "weaponSkill": 3,
+      "ballisticSkill": 0,
+      "strength": 5,
+      "toughness": 5,
+      "wounds": 2,
+      "initiative": 2,
+      "attacks": 2,
+      "leadership": 6,
       "description": {
         "en": "Bear Tamers often bring one of their sacred bears into battle - it takes years to win such a creature's trust, but there is no more loyal friend or useful ally when things turn bad.",
         "fr": "Les Dompteurs d'Ours amènent souvent avec eux l'un de leurs ours sacrés. Ces énormes bêtes ne respectent pas grand-chose, et il faut à un humain des années pour gagner leur confiance et leur obéissance. Mais ces efforts ne sont jamais vains car lorsque les choses tournent mal, il n'est pas d'ami plus fidèle et plus sauvagement loyal qu'un ours apprivoisé."
       },
       "specialRules": [
         {
-          "name": { "en": "Trained", "fr": "Apprivoisé" },
+          "name": {
+            "en": "Trained",
+            "fr": "Apprivoisé"
+          },
           "description": {
             "en": "The Bear only follows its Tamer's orders and never uses the warband leader's Leadership - it may use the Tamer's Leadership if within 6\" of him, and is subject to Stupidity otherwise (though it is exempt while within 6\" of the Tamer). The warband cannot field the Bear in any game the Bear Tamer does not take part in.",
             "fr": "Un Ours se moque des objectifs d'une bande ou de ses inimitiés : il obéit simplement à son dompteur. L'Ours n'utilise jamais le Commandement du chef de bande pour ses tests, mais il peut utiliser celui du Dompteur s'il se trouve dans un rayon de 6ps de lui, et il est sujet à la stupidité en dehors de ce rayon. La bande ne peut pas utiliser l'Ours lors d'une partie à laquelle le Dompteur ne participe pas."
           }
         },
         {
-          "name": { "en": "Fearsome", "fr": "Effrayant" },
+          "name": {
+            "en": "Fearsome",
+            "fr": "Effrayant"
+          },
           "description": {
             "en": "A charging Trained Bear is a terrifying sight - it causes Fear.",
             "fr": "Un ours en charge est un spectacle effrayant. Un Ours Apprivoisé provoque la Peur."
           }
         },
         {
-          "name": { "en": "Bear Hug", "fr": "Étreinte" },
+          "name": {
+            "en": "Bear Hug",
+            "fr": "Étreinte"
+          },
           "description": {
             "en": "If the Bear hits the same enemy with both its Attacks in the same round, it may instead resolve a single Bear Hug: both players roll a D6 and add their model's Strength. If the Bear's total is equal or higher, the victim suffers a single automatic Wound with no armour save. Otherwise the victim breaks free and suffers no damage.",
             "fr": "Si l'Ours touche une figurine ennemie avec ses deux Attaques lors du même tour de combat, le joueur peut choisir de lui faire effectuer une seule touche d'étreinte au lieu des deux touches ordinaires. Les deux joueurs jettent chacun 1D6 et ajoutent au résultat la Force de leur figurine. Si le total de l'ours est supérieur ou égal à celui de l'ennemi, ce dernier perd automatiquement 1 Point de Vie, sans sauvegarde d'armure autorisée. Si le total de la victime est plus élevé, elle parvient à se dégager et ne subit aucun dommage."
           }
         },
         {
-          "name": { "en": "Fiercely Loyal", "fr": "Férocement Loyal" },
+          "name": {
+            "en": "Fiercely Loyal",
+            "fr": "Férocement Loyal"
+          },
           "description": {
             "en": "As long as the Bear is not put Out of Action during a game, the Bear Tamer ignores 'Sold to the Pits', 'Robbed' and 'Captured' results on the Serious Injury table (and equivalents on other tables) - treat them as a Full Recovery instead.",
             "fr": "Tant que son Ours n'a pas été mis hors de combat pendant une partie, le Dompteur pourra ignorer les résultats suivants sur le tableau des blessures graves : Dépouillé, Capturé et Vendu aux Arènes (et les résultats équivalents sur d'autres tableaux des blessures graves). Si l'un de ces résultats est obtenu, traitez-le à la place comme un résultat Récupération Totale."
           }
         },
         {
-          "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" },
-          "description": {
-            "en": "This model never gains Experience points.",
-            "fr": "Cette figurine ne gagne jamais de points d'Expérience."
+          "name": {
+            "en": "Never Gains Experience",
+            "fr": "Ne gagne jamais d'Expérience"
           }
         },
         {
-          "name": { "en": "Large Target", "fr": "Grande Cible" },
-          "description": {
-            "en": "This model is a Large Target, as defined in the Shooting rules.",
-            "fr": "Cette figurine est une Grande Cible, comme défini dans les règles de Tir."
+          "name": {
+            "en": "Large Target",
+            "fr": "Grande Cible"
           }
         }
       ]
@@ -217,10 +327,13 @@
   ],
   "equipment": [
     {
-      "name": { "en": "Throwing Knives", "fr": "Couteau de Lancer" }, "category": "MissileWeapon", "cost": 15
-    },
-    {
-      "name": { "en": "Bear-Claw Necklace", "fr": "Collier de Griffes d'Ours" }, "category": "MiscellaneousEquipment", "cost": 75, "rarity": 9,
+      "name": {
+        "en": "Bear-Claw Necklace",
+        "fr": "Collier de Griffes d'Ours"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 75,
+      "rarity": 9,
       "description": {
         "en": "Heroes only. Bears are sacred in Kislev, and a necklace of their claws or teeth is reputed to hold magical power. Full cost is 75 + 3D6 gc. The wearer gains some of the bear's strength and ferocity, becoming subject to Frenzy.",
         "fr": "Réservé aux Héros. À Kislev, les ours sont sacrés, et un collier fait de dents (ou de crocs) de cet animal est réputé avoir des pouvoirs magiques. Coût total de 75 + 3D6 CO. Un guerrier portant ce collier reçoit une partie de la force et de la férocité de l'ours dont il est issu : il devient sujet à la Frénésie."
@@ -228,7 +341,13 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Vodka", "fr": "Vodka" }, "category": "MiscellaneousEquipment", "cost": 35, "rarity": 8,
+      "name": {
+        "en": "Vodka",
+        "fr": "Vodka"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 35,
+      "rarity": 8,
       "description": {
         "en": "Heroes only. Full cost is 35 + 2D6 gc. A one-use item a Kislevite Hero may give the warband before a battle: every warrior gains +1 Leadership (maximum 10) for the game, but every member must test against Toughness before the battle, suffering -1 Initiative for the game on a failure.",
         "fr": "Réservée aux Héros. Coût total de 35 + 2D6 CO. Un objet à usage unique qu'un Héros kislévite peut donner à sa bande avant une bataille : tous les membres de la bande bénéficient alors d'un bonus de +1 en Commandement (jusqu'à un maximum de 10) pour la durée de la partie, mais tous doivent effectuer un test d'Endurance avant le début de la partie, sous peine de subir un malus de -1 en Initiative en cas d'échec."

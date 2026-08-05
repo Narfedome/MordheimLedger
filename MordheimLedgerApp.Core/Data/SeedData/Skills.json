@@ -1,0 +1,240 @@
+[
+  {
+    "name": { "en": "Strike to Injure", "fr": "Frapper pour Blesser" }, "category": "Combat",
+    "description": {
+      "en": "The warrior can land his blows with uncanny accuracy. Add +1 to all injury rolls caused by the model in hand-to-hand combat.",
+      "fr": "Le guerrier porte ses coups avec une précision redoutable. Ajoutez +1 à tous les jets de Blessure infligés par cette figurine au Corps à Corps."
+    }
+  },
+  {
+    "name": { "en": "Combat Master", "fr": "Maître du Combat" }, "category": "Combat",
+    "description": {
+      "en": "The warrior is able to take on several opponents at once. If he fights against more than one enemy at a time, he gains an extra Attack in each hand-to-hand combat phase as long as he is fighting two or more enemy models. In addition, the warrior is immune to 'All Alone' tests.",
+      "fr": "Le guerrier est capable d'affronter plusieurs adversaires à la fois. S'il combat plus d'un ennemi en même temps, il gagne une Attaque supplémentaire à chaque phase de Corps à Corps tant qu'il affronte deux ennemis ou plus. De plus, il est immunisé au test Seul contre Tous."
+    }
+  },
+  {
+    "name": { "en": "Weapons Training", "fr": "Entraînement aux Armes" }, "category": "Combat",
+    "description": {
+      "en": "A warrior with this skill is adept at using many different weapons. He may use any hand-to-hand combat weapon he comes across, not just those in his equipment options.",
+      "fr": "Ce guerrier maîtrise de nombreuses armes différentes. Il peut utiliser n'importe quelle arme de Corps à Corps qu'il trouve, pas seulement celles de sa liste d'équipement."
+    }
+  },
+  {
+    "name": { "en": "Web of Steel", "fr": "Toile d'Acier" }, "category": "Combat",
+    "description": {
+      "en": "Few can match the ability of this warrior. He fights with great skill, weaving a web of steel around him. The model gains +1 to all his rolls on Critical Hit tables in hand-to-hand combat.",
+      "fr": "Peu de guerriers égalent son habileté. Il combat avec une grande maîtrise, tissant une toile d'acier autour de lui. La figurine gagne +1 à tous ses jets sur les tableaux de Coups Critiques au Corps à Corps."
+    }
+  },
+  {
+    "name": { "en": "Expert Swordsman", "fr": "Expert à l'Épée" }, "category": "Combat",
+    "description": {
+      "en": "This warrior has been expertly taught in the art of swordsmanship. He may re-roll all missed attacks if he is using a sword in the hand-to-hand phase of the turn that he charges. Only applies when armed with a normal sword or weeping blades, not with double-handed swords or any other weapon.",
+      "fr": "Ce guerrier a été formé à l'art de l'escrime. Il peut relancer toutes les attaques ratées s'il est équipé d'une épée lors de la phase de Corps à Corps du tour où il charge. Ne s'applique qu'aux épées normales ou aux lames suintantes, pas aux armes à deux mains ni à toute autre arme."
+    }
+  },
+  {
+    "name": { "en": "Step Aside", "fr": "Dérobade" }, "category": "Combat",
+    "description": {
+      "en": "The warrior has a natural ability to avoid injury in combat. Each time he suffers a wound in close combat he may make an additional saving throw of 5+. This save is never modified and is taken after all other armour saves.",
+      "fr": "Ce guerrier a un don naturel pour éviter les blessures au combat. Chaque fois qu'il subit une blessure au Corps à Corps, il peut effectuer une sauvegarde supplémentaire de 5+. Cette sauvegarde n'est jamais modifiée et se fait après toutes les autres sauvegardes d'armure."
+    }
+  },
+  {
+    "name": { "en": "Quick Shot", "fr": "Tir Rapide" }, "category": "Shooting",
+    "description": {
+      "en": "Only with bow or crossbow (not crossbow pistol). The warrior may shoot twice per turn with a bow or crossbow (but not a crossbow pistol).",
+      "fr": "Uniquement avec un arc ou une arbalète (pas une arbalète de poing). Le guerrier peut tirer deux fois par tour avec un arc ou une arbalète (mais pas une arbalète de poing)."
+    }
+  },
+  {
+    "name": { "en": "Pistolier", "fr": "Pistolero" }, "category": "Shooting",
+    "description": {
+      "en": "The warrior is an expert at using all kinds of pistols. If equipped with a brace of pistols of any type (including crossbow pistols), he may fire twice in the Shooting phase (normal reloading rules still apply). If he has a single pistol, he may fire it the same turn it was reloaded.",
+      "fr": "Ce guerrier est un expert dans l'usage de toutes sortes de pistolets. S'il est équipé d'une paire de pistolets, quel qu'en soit le type (y compris les arbalètes de poing), il peut tirer deux fois lors de la phase de Tir (les règles de rechargement normales s'appliquent toujours). S'il n'a qu'un seul pistolet, il peut tirer avec dès le tour où il l'a rechargé."
+    }
+  },
+  {
+    "name": { "en": "Eagle Eyes", "fr": "Yeux de Rapace" }, "category": "Shooting",
+    "description": {
+      "en": "The warrior's sight is exceptionally keen. He adds +6\" to the range of any missile weapon he is using.",
+      "fr": "La vue de ce guerrier est exceptionnellement perçante. Il ajoute +6ps à la portée de toute arme de tir qu'il utilise."
+    }
+  },
+  {
+    "name": { "en": "Weapons Expert", "fr": "Expert en Armes" }, "category": "Shooting",
+    "description": {
+      "en": "The warrior has been trained to use some of the more unusual weapons of the known world. He may use any missile weapon he comes across, not just the weapons available from his warband's list.",
+      "fr": "Ce guerrier a été formé à l'usage des armes les plus inhabituelles du Monde Connu. Il peut utiliser n'importe quelle arme de tir qu'il trouve, pas seulement celles de la liste de sa bande."
+    }
+  },
+  {
+    "name": { "en": "Nimble", "fr": "Agile" }, "category": "Shooting",
+    "description": {
+      "en": "Cannot be combined with Quick Shot. The warrior may move and fire with weapons that are normally only usable if the firer has not moved.",
+      "fr": "Ne peut pas être combinée avec Tir Rapide. Le guerrier peut se déplacer et tirer avec des armes normalement utilisables uniquement si le tireur ne s'est pas déplacé."
+    }
+  },
+  {
+    "name": { "en": "Trick Shooter", "fr": "Tireur d'Élite" }, "category": "Shooting",
+    "description": {
+      "en": "The warrior can shoot through the tiniest gap without it affecting his aim. He ignores all modifiers for cover when using missile weapons.",
+      "fr": "Ce guerrier peut tirer à travers la plus petite ouverture sans que cela n'affecte sa précision. Il ignore tous les modificateurs de couvert lorsqu'il utilise une arme de tir."
+    }
+  },
+  {
+    "name": { "en": "Hunter", "fr": "Chasseur" }, "category": "Shooting",
+    "description": {
+      "en": "The warrior is an expert at getting his weapon loaded and ready. He may fire each turn with a handgun or Hochland long rifle.",
+      "fr": "Ce guerrier est passé maître dans l'art de charger rapidement son arme. Il peut tirer chaque tour avec une arquebuse ou un long fusil du Hochland."
+    }
+  },
+  {
+    "name": { "en": "Knife-fighter", "fr": "Lanceur de Couteaux" }, "category": "Shooting",
+    "description": {
+      "en": "Cannot be combined with Quick Shot. The warrior is an unrivalled expert with throwing knives and throwing stars. He can throw up to three of these missiles in his shooting phase, dividing his shots between any targets within range as he wishes.",
+      "fr": "Ne peut pas être combinée avec Tir Rapide. Ce guerrier est un expert incomparable du couteau et de l'étoile de jet. Il peut en lancer jusqu'à trois lors de sa phase de Tir et peut répartir ses tirs entre plusieurs cibles à portée comme il le souhaite."
+    }
+  },
+  {
+    "name": { "en": "Battle Tongue", "fr": "Voix de Commandement" }, "category": "Academic",
+    "description": {
+      "en": "Only for leaders, Undead leaders cannot use. This skill may only be chosen by a leader. The warrior has drilled his warband to follow short barked commands, increasing the range of his Leader ability by 6\".",
+      "fr": "Réservée aux chefs, inutilisable par les chefs Morts-Vivants. Cette compétence ne peut être choisie que par un chef. Le guerrier a entraîné sa bande à suivre des ordres brefs et incisifs, ce qui augmente de 6ps la portée de sa capacité de Chef."
+    }
+  },
+  {
+    "name": { "en": "Sorcery", "fr": "Sorcellerie" }, "category": "Academic",
+    "description": {
+      "en": "Only for spellcasting Heroes, Sisters of Sigmar and Warrior-Priests cannot use. This skill may only be taken by Heroes capable of casting spells. It grants +1 to the roll to see whether a spell is cast successfully.",
+      "fr": "Réservée aux Héros jeteurs de sorts, inutilisable par les Sœurs de Sigmar et les Prêtres-Guerriers. Cette compétence ne peut être choisie que par un Héros capable de lancer des sorts. Elle donne +1 au jet déterminant si le sort est lancé avec succès."
+    }
+  },
+  {
+    "name": { "en": "Streetwise", "fr": "Débrouillard" }, "category": "Academic",
+    "description": {
+      "en": "A warrior with this skill has good contacts and knows where to purchase rare items. He may add +2 to the roll that determines his chances of finding such items.",
+      "fr": "Ce guerrier a de bons contacts et sait où se procurer des objets rares. Il peut ajouter +2 au jet déterminant ses chances de trouver un tel objet."
+    }
+  },
+  {
+    "name": { "en": "Haggle", "fr": "Marchandage" }, "category": "Academic",
+    "description": {
+      "en": "Once per post-battle sequence, minimum cost 1gc. The warrior knows all the tricks of bargaining. He may deduct 2D6 gold crowns from the price of any single item (to a minimum of 1gc), once per post-battle sequence.",
+      "fr": "Une fois par séquence d'après-bataille, coût minimum 1 CO. Ce guerrier connaît toutes les ficelles du marchandage. Il peut déduire 2D6 Couronnes d'Or du prix d'un objet (jusqu'à un coût minimum de 1 CO), une fois par séquence d'après-bataille."
+    }
+  },
+  {
+    "name": { "en": "Arcane Lore", "fr": "Savoir Arcanique" }, "category": "Academic",
+    "description": {
+      "en": "Cannot be taken by Witch Hunters, Sisters of Sigmar or Warrior-Priests. Any warrior with this skill may learn Lesser Magic if he owns a Tome of Magic.",
+      "fr": "Ne peut pas être choisie par les Répurgateurs, Sœurs de Sigmar ou Prêtres-Guerriers. Tout guerrier possédant cette compétence peut apprendre la Magie Mineure s'il possède un Grimoire."
+    }
+  },
+  {
+    "name": { "en": "Wyrdstone Hunter", "fr": "Chasseur de Pierre Magique" }, "category": "Academic",
+    "description": {
+      "en": "The warrior has an uncanny ability to find hidden shards of wyrdstone. If searching the ruins in the exploration phase, re-roll one dice when rolling on the Exploration chart - the second result stands.",
+      "fr": "Ce guerrier a un don étrange pour dénicher les éclats cachés de pierre magique. S'il explore les ruines lors de la phase d'Exploration, relancez un dé sur le tableau d'Exploration - le second résultat est définitif."
+    }
+  },
+  {
+    "name": { "en": "Warrior Wizard", "fr": "Guerrier Sorcier" }, "category": "Academic",
+    "description": {
+      "en": "Only for spellcasters. The mental powers of the wizard allow him to wear armour and still cast spells.",
+      "fr": "Réservée aux jeteurs de sorts. Les pouvoirs mentaux du sorcier lui permettent de porter une armure tout en lançant des sorts."
+    }
+  },
+  {
+    "name": { "en": "Mighty Blow", "fr": "Coup Puissant" }, "category": "Strength",
+    "description": {
+      "en": "The warrior knows how to use his strength to maximum effect and has a +1 Strength bonus in close combat (excluding pistols), applying to all such weapons.",
+      "fr": "Ce guerrier sait exploiter sa force au maximum et bénéficie d'un bonus de +1 en Force au Corps à Corps (hors pistolets). Ce bonus s'applique à toutes les armes de Corps à Corps utilisant sa Force."
+    }
+  },
+  {
+    "name": { "en": "Pit Fighter", "fr": "Gladiateur" }, "category": "Strength",
+    "description": {
+      "en": "The warrior has learned to fight in enclosed spaces from his time in the fighting pits of the Empire. He adds +1 to his Weapon Skill and +1 to his Attacks when fighting inside buildings or ruins.",
+      "fr": "Ce guerrier a appris à combattre dans des espaces confinés durant son passage dans les dangereuses arènes de l'Empire. Il ajoute +1 en Capacité de Combat et +1 en Attaques lorsqu'il combat à l'intérieur d'un bâtiment ou de ruines."
+    }
+  },
+  {
+    "name": { "en": "Resilient", "fr": "Résistant" }, "category": "Strength",
+    "description": {
+      "en": "The warrior is covered in battle scars. Deduct -1 Strength from all hits against him in close combat - this does not affect armour save modifiers.",
+      "fr": "Ce guerrier est couvert de cicatrices de guerre. Déduisez -1 en Force à toutes les touches qu'il subit au Corps à Corps. Cela n'affecte pas les modificateurs de sauvegarde d'armure."
+    }
+  },
+  {
+    "name": { "en": "Fearsome", "fr": "Redoutable" }, "category": "Strength",
+    "description": {
+      "en": "Such is the reputation and physique of the model that he causes Fear in opposing models.",
+      "fr": "La réputation et la carrure de cette figurine sont telles qu'elle provoque la Peur chez les figurines adverses."
+    }
+  },
+  {
+    "name": { "en": "Strongman", "fr": "Costaud" }, "category": "Strength",
+    "description": {
+      "en": "The warrior is capable of great feats of strength. He may use a double-handed weapon without the usual penalty of always striking last.",
+      "fr": "Ce guerrier est capable de prouesses de force impressionnantes. Il peut utiliser une arme à deux mains sans subir la pénalité habituelle de frapper toujours en dernier."
+    }
+  },
+  {
+    "name": { "en": "Unstoppable Charge", "fr": "Charge Irrésistible" }, "category": "Strength",
+    "description": {
+      "en": "When he charges, the warrior is almost impossible to halt. He adds +1 to his Weapon Skill when charging.",
+      "fr": "Lorsqu'il charge, ce guerrier est presque impossible à arrêter. Il ajoute +1 en Capacité de Combat lorsqu'il charge."
+    }
+  },
+  {
+    "name": { "en": "Leap", "fr": "Bond" }, "category": "Speed",
+    "description": {
+      "en": "The warrior may leap D6\" in the movement phase in addition to his normal movement (move and leap, run and leap, or charge and leap - once per turn). A leaping warrior may jump over man-sized models and 1\" obstacles without penalty, and may leap across gaps (committing before rolling; falls through on a short roll).",
+      "fr": "Ce guerrier peut bondir de 1D6ps lors de la phase de Mouvement, en plus de son mouvement normal (se déplacer et bondir, courir et bondir, ou charger et bondir - une fois par tour). Il peut sauter par-dessus des figurines de taille humaine, y compris ennemies, et des obstacles de 1ps de haut, sans pénalité, et peut aussi sauter au-dessus de trous."
+    }
+  },
+  {
+    "name": { "en": "Sprint", "fr": "Sprint" }, "category": "Speed",
+    "description": {
+      "en": "The warrior may triple his Movement rate when he runs or charges, rather than doubling it as normal.",
+      "fr": "Ce guerrier peut tripler son Mouvement lorsqu'il court ou charge, au lieu de le doubler comme d'habitude."
+    }
+  },
+  {
+    "name": { "en": "Acrobat", "fr": "Acrobate" }, "category": "Speed",
+    "description": {
+      "en": "The warrior is incredibly supple and agile. He may fall or jump from a height of up to 12\" without damage if he passes an Initiative test, and may re-roll failed Diving Charge rolls (still only from up to 6\").",
+      "fr": "Ce guerrier est d'une souplesse et d'une agilité incroyables. Il peut tomber ou sauter d'une hauteur allant jusqu'à 12ps sans subir de dommage s'il réussit un test d'Initiative, et peut relancer un jet de Charge Plongeante raté. Il ne peut toujours effectuer une charge plongeante que depuis une hauteur maximale de 6ps."
+    }
+  },
+  {
+    "name": { "en": "Lightning Reflexes", "fr": "Réflexes Foudroyants" }, "category": "Speed",
+    "description": {
+      "en": "If charged, the warrior 'strikes first' against those who charged that turn - since chargers normally also strike first, order between them is resolved by comparing Initiative values.",
+      "fr": "Si ce guerrier est chargé, il « frappe en premier » contre ceux qui l'ont chargé ce tour. Comme les chargeurs frappent normalement aussi en premier, l'ordre des attaques entre eux et ce guerrier se détermine en comparant les valeurs d'Initiative."
+    }
+  },
+  {
+    "name": { "en": "Jump Up", "fr": "Prompt Rétablissement" }, "category": "Speed",
+    "description": {
+      "en": "The warrior springs to his feet immediately if knocked down, ignoring knocked-down results when rolling for injuries - unless knocked down by a helmet save or the No Pain special rule.",
+      "fr": "Ce guerrier peut se relever en un instant après avoir été mis à terre. Il peut ignorer les résultats « à terre » lors des jets de Blessure, sauf s'il a été mis à terre grâce à une sauvegarde de casque ou à la règle spéciale Insensible."
+    }
+  },
+  {
+    "name": { "en": "Dodge", "fr": "Esquive" }, "category": "Speed",
+    "description": {
+      "en": "The warrior can avoid any hit from a missile weapon on a D6 roll of 5+, rolled as soon as a hit is scored, before rolling to wound and before any other skill or equipment effect.",
+      "fr": "Ce guerrier peut éviter toute touche d'une arme de tir sur un jet de 1D6 de 5+, effectué dès qu'une touche est marquée, avant le jet pour blesser et avant tout autre effet de compétence ou d'équipement."
+    }
+  },
+  {
+    "name": { "en": "Scale Sheer Surfaces", "fr": "Escalade" }, "category": "Speed",
+    "description": {
+      "en": "The warrior can scale even the highest wall or fence with ease, climbing up or down a height equal to twice his normal Movement without needing an Initiative test.",
+      "fr": "Ce guerrier peut escalader avec aisance même les murs ou clôtures les plus hauts. Il peut grimper ou descendre une hauteur égale à deux fois son Mouvement normal, sans avoir besoin de réussir de test d'Initiative pour cela."
+    }
+  }
+]

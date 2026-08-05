@@ -47,22 +47,39 @@
   Sorcières/Livre Saint), Skavens - Clan Eshin (magie du Rat Cornu, 6 entrées ; équipement signature
   Griffes de Combat/Lames Suintantes/Sarbacane/Pistolet à Malepierre confirmant bien Eshin et non
   Pestilens), Sœurs de Sigmar (réutilise l'école Prières de Sigmar créée par les Répurgateurs sans
-  redéclarer de sorts ; son propre Livre Saint à prix fixe 120 CO reste un doublon distinct de celui des
-  Répurgateurs — limite connue ci-dessous), Kislévites (aucune école de magie, aucun jeteur de sorts dans
-  le roster). Tous les jeteurs de sorts, quelle que soit la bande, réutilisent la même règle spéciale
-  générique « Wizard »/« Sorcier » (texte identique, dédupliquée par nom anglais) — l'affiliation à une
-  école de magie donnée se fait uniquement via `WarbandSeedData.MagicSchools`/`WarriorSeedData.
-  IsSpellcaster`, jamais via une règle spéciale dédiée par bande. **Limite connue** : `EquipmentItem` n'a
-  pas de déduplication find-or-create par nom (contrairement à SpecialRule/Mutation/MagicSchool), donc un
-  objet censé être partagé entre plusieurs bandes (ex. Arme Obsidienne/Armure du Chaos partagées par 6
-  bandes selon le livre de règles, ou Livre Saint partagé par Répurgateurs et Sœurs de Sigmar) ne peut pas
-  encore être étendu à une bande déjà seedée depuis un JSON ultérieur — chaque bande qui en a besoin
-  recrée sa propre ligne restreinte (à généraliser plus tard si ça devient gênant). Méthode d'import
-  utilisée pour tout le second lot : croiser le texte FR fourni par l'utilisateur (extraits bruts GW/GLM,
-  reproduits proches du texte original par choix explicite, fan-licence) avec mordheimer.net (EN, via le
-  Browser pane — WebFetch direct renvoie 403 sur ce site) pour combler les trous de mise en page/vérifier
-  les chiffres/compléter les tables de sorts manquantes, bande par bande. La Roulotte de la Peste de
-  Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1, comme décidé.
+  redéclarer de sorts), Kislévites (aucune école de magie, aucun jeteur de sorts dans le roster). Tous les
+  jeteurs de sorts, quelle que soit la bande, réutilisent la même règle spéciale générique « Wizard »/
+  « Sorcier » (texte identique, dédupliquée par nom anglais) — l'affiliation à une école de magie donnée
+  se fait uniquement via `WarbandSeedData.MagicSchools`/`WarriorSeedData.IsSpellcaster`, jamais via une
+  règle spéciale dédiée par bande. Méthode d'import utilisée pour tout le second lot : croiser le texte FR
+  fourni par l'utilisateur (extraits bruts GW/GLM, reproduits proches du texte original par choix
+  explicite, fan-licence) avec mordheimer.net (EN, via le Browser pane — WebFetch direct renvoie 403 sur
+  ce site) pour combler les trous de mise en page/vérifier les chiffres/compléter les tables de sorts
+  manquantes, bande par bande. Toutes les données ainsi importées ont ensuite été vérifiées une seconde
+  fois contre BSData/mordheim (dépôt GitHub communautaire au format BattleScribe) puis, en cas de
+  désaccord entre les deux sources, tranchées contre mordheimer.net (seule source de confiance retenue) —
+  4 vraies erreurs corrigées (règle du Capitaine Reiklander, rareté du Long Fusil du Hochland, compétences
+  de Tueur des Nains, exclusion Rancuniers), le reste des signalements BSData s'étant révélé faux positif.
+  La Roulotte de la Peste de Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1, comme
+  décidé.
+- [x] Données communes centralisées — `SpecialRules.json`/`Equipment.json`/`Mutations.json`/
+  `Skills.json`/`MagicSchools.json` (`Data/SeedData/`), seedés avant les 15 fichiers de bande (voir
+  `AppDatabase.SeedOfficialContentAsync`). Avant ce refactor, chaque bande redéclarait le texte complet
+  des règles/objets/mutations vraiment génériques (ex. « Leader » dupliqué dans 14 fichiers) ; seule la
+  1re copie seedée comptait réellement (dédup find-or-create par nom anglais pour SpecialRule/Mutation/
+  MagicSchool), le reste étant du texte mort — et `EquipmentItem` n'avait aucune dédup du tout, d'où 3
+  vrais doublons à coût différent (Arc court, Fléau, Livre Saint) qui ont été fusionnés en une seule
+  entrée canonique par ce refactor (prix vérifiés contre mordheimer.net). Les fichiers de bande ne
+  déclarent plus que ce qui leur est vraiment propre ; les règles/objets/mutations communs y sont
+  référencés par un stub `{name}` minimal (sans description) pour continuer à créer la ligne de jointure
+  par guerrier/bande (`WarriorArchetypeSpecialRuleEntity` etc.) sans dupliquer le texte. `OfficialContent
+  Seed.cs` (l'ancien pool d'équipement commun écrit à la main, avant le pipeline JSON) est retiré,
+  entièrement absorbé par `Equipment.json`. `Skills.json` seede pour la **première fois** les ~34
+  compétences core du livre de règles (Combat/Tir/Érudition/Force/Vitesse, non-restreintes) — l'onglet
+  Compétences du Codex était vide jusqu'ici. Les tableaux de compétences spéciales propres à chaque bande
+  (Tueur de Troll, Hommes-Bêtes, Skavens...) restent du texte libre dans une `SpecialRule`, pas de vraies
+  entrées `Skill` — décision explicite de l'utilisateur, à reprendre plus tard avec la restriction par
+  héros.
 
 ## V2 — Partage entre joueurs
 - **Export/Import fichier** (partage natif OS) pour bandes/objets modifiés — capacité illimitée

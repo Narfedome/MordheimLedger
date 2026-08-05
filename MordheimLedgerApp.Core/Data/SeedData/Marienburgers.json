@@ -1,12 +1,18 @@
 {
-  "name": { "en": "Marienburg Mercenaries", "fr": "Mercenaires Marienburgers" },
+  "name": {
+    "en": "Marienburg Mercenaries",
+    "fr": "Mercenaires Marienburgers"
+  },
   "description": {
     "en": "Mercenaries from Marienburg, the City of Gold, the largest and most prosperous trading city in the Old World - sumptuously dressed and armed, skilled at duelling and the use of poison.",
     "fr": "Des mercenaires venus de Marienburg, la Cité de l'Or, le plus vaste et le plus prospère des ports du Vieux Monde - somptueusement vêtus et armés, doués pour les duels et l'usage des poisons."
   },
   "specialRules": [
     {
-      "name": { "en": "Wealthy Traders", "fr": "Négociants Fortunés" },
+      "name": {
+        "en": "Wealthy Traders",
+        "fr": "Négociants Fortunés"
+      },
       "description": {
         "en": "As natural traders with contacts in the merchant guilds, Marienburg warbands receive a +1 bonus when attempting to find rare items. To reflect their enormous wealth, Marienburgers start a campaign with an extra 100 gold crowns (600 in total). In a one-off game they are permitted an extra 20% gold crowns when recruiting a warband (e.g. 1200 gc instead of 1000 gc).",
         "fr": "En contact avec les guildes de marchands, les bandes de Marienburg reçoivent un bonus de +1 lors des jets pour trouver des objets rares. Pour représenter leur immense richesse, les Marienburgers débutent une campagne avec 100 Couronnes d'Or supplémentaires (600 au total). Dans une partie ponctuelle, ils ont droit à une majoration de 20% de la somme prévue pour le recrutement (ex. 1200 CO au lieu de 1000 CO)."
@@ -17,97 +23,155 @@
   "maxWarriors": 15,
   "warriors": [
     {
-      "name": { "en": "Mercenary Captain", "fr": "Capitaine mercenaire" },
+      "name": {
+        "en": "Mercenary Captain",
+        "fr": "Capitaine mercenaire"
+      },
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
       "startingExperience": 20,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 8,
       "description": {
         "en": "A mercenary captain with solid experience, ready to fight for anyone so long as the price is right - the risks of Mordheim are real, but so are the potential riches.",
         "fr": "Un capitaine mercenaire jouit d'une solide expérience, il affrontera n'importe quoi ou n'importe qui, pour peu que le prix soit convenable. Mordheim offre à de tels hommes des opportunités de richesse incommensurables mais présente des risques bien réels."
       },
       "specialRules": [
         {
-          "name": { "en": "Leader", "fr": "Chef" },
-          "description": {
-            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
-            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
           }
         }
       ]
     },
     {
-      "name": { "en": "Champion", "fr": "Champion" },
+      "name": {
+        "en": "Champion",
+        "fr": "Champion"
+      },
       "isHero": true,
       "cost": 35,
       "maxCount": 2,
       "startingExperience": 8,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "In every mercenary warband you will find a warrior bigger, stronger (and often uglier) than his comrades - champions answer the challenges levelled at the warband and pick their share of loot right after the captain.",
         "fr": "Dans toutes les bandes de mercenaires vous trouverez un guerrier plus gros, plus fort (souvent plus laid), que les autres. Ils sont appelés champions et relèvent généralement les défis lancés à la bande, touchant leur part de butin juste après le capitaine."
       }
     },
     {
-      "name": { "en": "Youngblood", "fr": "Jeune Loup" },
+      "name": {
+        "en": "Youngblood",
+        "fr": "Jeune Loup"
+      },
       "isHero": true,
       "cost": 15,
       "maxCount": 2,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 6,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 6,
       "description": {
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
       }
     },
     {
-      "name": { "en": "Warrior", "fr": "Guerrier" },
+      "name": {
+        "en": "Warrior",
+        "fr": "Guerrier"
+      },
       "isHero": false,
       "cost": 25,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Most Marienburg warbands are recruited from the dockland thugs, ships' crews and stevedores of the City of Gold - grim, seasoned fighters who form the core of the warband.",
         "fr": "Le gros des bandes de Marienburg est recruté dans les bas-fonds de la Cité de l'Or - marins, dockers et autres - des baroudeurs renfrognés qui constituent le gros de la bande."
       }
     },
     {
-      "name": { "en": "Marksman", "fr": "Tireur" },
+      "name": {
+        "en": "Marksman",
+        "fr": "Tireur"
+      },
       "isHero": false,
       "cost": 25,
       "maxCount": 7,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "The archers and hunters of the Old World are famed for their skill, said to hit a coin at 300 paces with a long bow.",
         "fr": "Les archers et les chasseurs du Vieux Monde sont réputés pour leur adresse et on dit qu'ils peuvent atteindre une pièce à 300 pieds avec un arc long."
       }
     },
     {
-      "name": { "en": "Swordsman", "fr": "Bretteur" },
+      "name": {
+        "en": "Swordsman",
+        "fr": "Bretteur"
+      },
       "isHero": false,
       "cost": 35,
       "maxCount": 5,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Marienburg's chief skills lie in duelling and the use of poisons - swordsmen are professional duellists particularly well suited to the fighting that takes place in Mordheim.",
         "fr": "Marienburg excelle dans les duels et l'usage des poisons - les bretteurs sont des duellistes professionnels particulièrement adaptés aux types de combats qui se déroulent dans Mordheim."
       },
       "specialRules": [
         {
-          "name": { "en": "Expert Swordsman", "fr": "Expert à l'épée" },
-          "description": {
-            "en": "So skilled with their weapon that they may re-roll failed to-hit rolls when charging - only applies when armed with a normal sword, not a double-handed sword or any other weapon.",
-            "fr": "Si doué avec son arme que, lorsqu'il charge, il peut relancer ses jets pour toucher ratés. Ne s'applique que s'il est équipé d'une épée normale, pas une arme à deux mains ou une autre arme."
+          "name": {
+            "en": "Expert Swordsman",
+            "fr": "Expert à l'épée"
           }
         }
       ]

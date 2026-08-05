@@ -1,37 +1,57 @@
 {
-  "name": { "en": "Witch Hunters", "fr": "Répurgateurs" },
+  "name": {
+    "en": "Witch Hunters",
+    "fr": "Répurgateurs"
+  },
   "description": {
     "en": "The Order of Witch Hunters, dedicated to hunting down and destroying heretics of every kind - mages, witches, mutants, necromancers, sinners and daemon-worshippers. Few escape their suspicion, save perhaps other Witch Hunters.",
     "fr": "L'ordre des Templiers de Sigmar, universellement connu sous le nom de Répurgateurs, est une organisation vouée à la traque et à la destruction des hérétiques, qu'ils soient mages, sorcières, voyants, nécromants, mutants, pécheurs, blasphémateurs, possédés ou serviteurs des démons. Peu de gens échappent à leurs soupçons, à part peut-être les autres Répurgateurs."
   },
   "magicSchools": [
-    { "name": { "en": "Prayers of Sigmar", "fr": "Prières de Sigmar" } }
+    {
+      "name": {
+        "en": "Prayers of Sigmar",
+        "fr": "Prières de Sigmar"
+      }
+    }
   ],
   "startingTreasury": 500,
   "maxWarriors": 12,
   "warriors": [
     {
-      "name": { "en": "Witch Hunter Captain", "fr": "Capitaine Répurgateur" },
+      "name": {
+        "en": "Witch Hunter Captain",
+        "fr": "Capitaine Répurgateur"
+      },
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
       "startingExperience": 20,
-      "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 8,
       "description": {
         "en": "Driven by fanaticism, Witch Hunter Captains are obsessed with cleansing Mordheim and bringing the justice of Sigmar to all - carrying the edict of the Grand Theogonist himself, they have the divine right to judge and execute all who dare oppose them.",
         "fr": "Animé par le fanatisme, un capitaine répurgateur est obsédé par l'idée de purifier Mordheim et d'apporter la justice de Sigmar à tous. Transportant l'édit du Grand Théogoniste, il a une autorisation divine de juger et châtier les hérétiques et, en fait, tous ceux qui se dressent devant lui."
       },
       "specialRules": [
         {
-          "name": { "en": "Leader", "fr": "Chef" },
-          "description": {
-            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
-            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
           }
         },
         {
-          "name": { "en": "Burn the Witch!", "fr": "Au Bûcher !" },
+          "name": {
+            "en": "Burn the Witch!",
+            "fr": "Au Bûcher !"
+          },
           "description": {
             "en": "This model hates all models who can cast spells.",
             "fr": "Cette figurine hait tous les jeteurs de sorts."
@@ -40,20 +60,33 @@
       ]
     },
     {
-      "name": { "en": "Witch Hunters", "fr": "Répurgateurs" },
+      "name": {
+        "en": "Witch Hunters",
+        "fr": "Répurgateurs"
+      },
       "isHero": true,
       "cost": 25,
       "maxCount": 3,
       "startingExperience": 8,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Members of the grim Order of Witch Hunters, dedicated to eradicating Chaos and all its minions - they usually prowl the Old World alone, but the situation in Mordheim requires them to band together.",
         "fr": "Les répurgateurs appartiennent au sinistre Ordre des Répurgateurs, voué à l'éradication du Chaos et de ses serviteurs. Ils parcourent habituellement le Vieux Monde seuls, exécutant les ennemis de Sigmar, mais la situation à Mordheim nécessite très souvent qu'ils se regroupent en bandes."
       },
       "specialRules": [
         {
-          "name": { "en": "Burn the Witch!", "fr": "Au Bûcher !" },
+          "name": {
+            "en": "Burn the Witch!",
+            "fr": "Au Bûcher !"
+          },
           "description": {
             "en": "This model hates all models who can cast spells.",
             "fr": "Cette figurine hait tous les jeteurs de sorts."
@@ -62,13 +95,23 @@
       ]
     },
     {
-      "name": { "en": "Warrior-Priest", "fr": "Prêtre-guerrier" },
+      "name": {
+        "en": "Warrior-Priest",
+        "fr": "Prêtre-guerrier"
+      },
       "isHero": true,
       "cost": 40,
       "maxCount": 1,
       "startingExperience": 12,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 8,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 8,
       "description": {
         "en": "Many powerful fighting men have come from the ranks of the faithful - the Priests of Sigmar are no exception, and the military wing of the cult is feared and respected throughout the Empire.",
         "fr": "Beaucoup de puissants guerriers ont rejoint les rangs des fidèles. Les prêtres de Sigmar ne font pas exception, et le bras armé du culte de Sigmar est craint et respecté dans tout l'Empire."
@@ -76,29 +119,41 @@
       "isSpellcaster": true,
       "specialRules": [
         {
-          "name": { "en": "Wizard", "fr": "Sorcier" },
-          "description": {
-            "en": "This model is a Wizard and may cast spells (see the Spells library).",
-            "fr": "Cette figurine est un Sorcier et peut lancer des sorts (voir la bibliothèque des Sorts)."
+          "name": {
+            "en": "Wizard",
+            "fr": "Sorcier"
           }
         }
       ]
     },
     {
-      "name": { "en": "Flagellants", "fr": "Flagellants" },
+      "name": {
+        "en": "Flagellants",
+        "fr": "Flagellants"
+      },
       "isHero": false,
       "cost": 40,
       "maxCount": 5,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 4, "toughness": 4,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 10,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 10,
       "description": {
         "en": "Fanatics and madmen obsessed with the end of the world, often men who lost their families to war or disaster - dangerous opponents in close combat, their bodies inured to pain by years of self-mutilation.",
         "fr": "Les flagellants sont des déments fanatiques obsédés par la fin du monde. Ce sont souvent des hommes qui ont perdu l'esprit en même temps que leurs familles à cause de la guerre ou de catastrophes naturelles. Ils sont des adversaires particulièrement redoutables au corps à corps, car la démence décuple leur force et leur corps est devenu insensible en raison des nombreuses auto-mutilations qu'ils s'infligent."
       },
       "specialRules": [
         {
-          "name": { "en": "Fanatical", "fr": "Fanatiques" },
+          "name": {
+            "en": "Fanatical",
+            "fr": "Fanatiques"
+          },
           "description": {
             "en": "Flagellants are convinced the end of the world is nigh and fear nothing - they automatically pass all Leadership tests they are required to take. A Flagellant may never become the warband leader.",
             "fr": "Les flagellants sont convaincus que la fin du monde est proche et ils n'ont donc peur de rien. Ils réussissent automatiquement tous les tests de Commandement qu'ils pourraient avoir à passer. Un flagellant ne peut jamais devenir chef de bande."
@@ -107,36 +162,55 @@
       ]
     },
     {
-      "name": { "en": "Zealots", "fr": "Séides" },
+      "name": {
+        "en": "Zealots",
+        "fr": "Séides"
+      },
       "isHero": false,
       "cost": 20,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "When a man loses his family, home and all he cared for, religion is often the last refuge - these wandering, bitter fanatics exist only to destroy evil and the minions of Chaos, and many a band of Zealots is led by a Witch Hunter.",
         "fr": "Quand un homme perd sa famille, sa maison et ce qui donnait un sens à sa vie, la religion est souvent le dernier refuge. Ces hommes deviennent des vagabonds fanatiques, dangereux et amers, prêts à venger leurs pertes à n'importe quel prix. On les appelle séides. Les Répurgateurs trouvent beaucoup d'alliés dans leurs rangs et plus d'une bande de séides est dirigée par des Répurgateurs."
       }
     },
     {
-      "name": { "en": "War Hounds", "fr": "Chiens de guerre" },
+      "name": {
+        "en": "War Hounds",
+        "fr": "Chiens de guerre"
+      },
       "isHero": false,
       "cost": 15,
       "maxCount": 5,
       "startingExperience": 0,
-      "movement": 6, "weaponSkill": 4, "ballisticSkill": 0, "strength": 4, "toughness": 3,
-      "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 5,
+      "movement": 6,
+      "weaponSkill": 4,
+      "ballisticSkill": 0,
+      "strength": 4,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 5,
       "description": {
         "en": "Witch Hunters often keep packs of ferocious hunting dogs - with their huge jaws and powerful bite, they are perfect for hunting down (and tearing apart) heretics, mutants and witches.",
         "fr": "Les Répurgateurs ont souvent des meutes de féroces chiens de chasse. Avec leur flair et leurs puissantes mâchoires, ils sont parfaits pour la traque et la mise à mort des mutants, sorciers et autres hérétiques."
       },
       "specialRules": [
         {
-          "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" },
-          "description": {
-            "en": "This model never gains Experience points.",
-            "fr": "Cette figurine ne gagne jamais de points d'Expérience."
+          "name": {
+            "en": "Never Gains Experience",
+            "fr": "Ne gagne jamais d'Expérience"
           }
         }
       ]
@@ -144,13 +218,13 @@
   ],
   "equipment": [
     {
-      "name": { "en": "Crossbow Pistol", "fr": "Arbalète de Poing" }, "category": "MissileWeapon", "cost": 35
-    },
-    {
-      "name": { "en": "Short Bow", "fr": "Arc court" }, "category": "MissileWeapon", "cost": 5
-    },
-    {
-      "name": { "en": "Brazier Iron", "fr": "Brasero de Fer" }, "category": "MeleeWeapon", "cost": 35, "rarity": 7,
+      "name": {
+        "en": "Brazier Iron",
+        "fr": "Brasero de Fer"
+      },
+      "category": "MeleeWeapon",
+      "cost": 35,
+      "rarity": 7,
       "description": {
         "en": "A long haft topped by an iron cup filled with burning coals. Two-handed (no shield, buckler or other hand weapon in close combat, though a shield may still be used against missile fire). Strength as user +1. On a successful hit, roll a D6: on a 5+ the victim is set on fire, suffering a Strength 4 hit each turn until a 4+ Recovery roll puts it out (another warrior may help by moving into base contact and scoring a 4+).",
         "fr": "Une longue hampe surmontée d'une coupe de fer emplie de braises ardentes. Arme à deux mains (aucun bouclier, rondache ou autre arme de corps à corps ne peut être utilisé en combat, mais un bouclier reste utilisable contre le tir). Force de l'utilisateur +1. Sur un coup au but réussi, lancez 1D6 : sur un 5+, la victime prend feu et subit une touche de Force 4 chaque tour jusqu'à ce qu'un jet de récupération de 4+ éteigne les flammes (un autre guerrier peut aider en se plaçant au contact et en réussissant lui aussi un 4+)."
@@ -158,82 +232,19 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Hammer of Witches", "fr": "Marteau des Sorcières" }, "category": "MiscellaneousEquipment", "cost": 100, "rarity": 10,
+      "name": {
+        "en": "Hammer of Witches",
+        "fr": "Marteau des Sorcières"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 100,
+      "rarity": 10,
       "description": {
         "en": "This tome describes the servants of Chaos - witches, heretics, deviants, mutants, warlocks, blasphemers, necromancers and other enemies of Sigmar - in all their foulness. A Hero carrying it hates all Possessed, Skaven, Beastmen, Chaos, Daemon, Dark Elf, Orc & Goblin and Sisters of Sigmar models.",
         "fr": "Les pages de cet ouvrage décrivent les serviteurs du Chaos - sorcières, hérétiques, déviants, mutants, sorciers, blasphémateurs, nécromants et autres ennemis de Sigmar - dans toute leur infamie. Un Héros qui le porte hait tous les Possédés, Skavens, Hommes-Bêtes, figurines du Chaos, Démons, Elfes Noirs, Orques & Gobelins et Sœurs de Sigmar."
       },
       "restrictedToThisWarband": true
-    },
-    {
-      "name": { "en": "Holy Tome", "fr": "Livre Saint" }, "category": "MiscellaneousEquipment", "cost": 100, "rarity": 8,
-      "description": {
-        "en": "Books of prayers and holy deeds copied by hand in the scriptoriums of Sigmar - a holy man reciting from one strengthens his faith. Full cost is 100 + D6×10 gc. A Warrior-Priest or Sister of Sigmar with a Holy Tome adds +1 to the score when trying to recite a prayer.",
-        "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6×10 CO. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
-      },
-      "restrictedToThisWarband": true
     }
   ],
-  "spells": [
-    {
-      "magicSchoolName": "Prayers of Sigmar",
-      "rollValue": 1,
-      "difficulty": 7,
-      "name": { "en": "The Hammer of Sigmar", "fr": "Le Marteau de Sigmar" },
-      "description": {
-        "en": "This weapon of the faithful glows with the righteous power of Sigmar. The wielder gains +2 Strength in close combat and all hits inflicted cause double damage (2 Wounds instead of 1). The Priest must test again each Shooting phase he wishes to keep using it.",
-        "fr": "Cette arme du fidèle brille d'une lumière dorée, empreinte de la puissance vertueuse de Sigmar. Le porteur gagne +2 en Force au Corps à Corps et tous les coups qu'il inflige causent le double de dégâts (2 Blessures au lieu d'une). Le Prêtre doit retenter le test à chaque phase de Tir pour continuer à l'utiliser."
-      }
-    },
-    {
-      "magicSchoolName": "Prayers of Sigmar",
-      "rollValue": 2,
-      "difficulty": 8,
-      "name": { "en": "Hearts of Steel", "fr": "Cœurs d'Acier" },
-      "description": {
-        "en": "Waves of glory surround the servant of Sigmar. Any allied warrior within 8\" becomes immune to Fear and All Alone tests, and the whole warband gains +1 to Rout tests. Lasts until the caster is knocked down, stunned or put out of action; the bonus does not stack if cast again.",
-        "fr": "Des vagues de gloire entourent le serviteur de Sigmar. Tout guerrier allié à moins de 8ps devient immunisé à la Peur et au test Seul contre Tous, et toute la bande gagne +1 à ses tests de Déroute. Dure jusqu'à ce que le lanceur soit mis à terre, sonné ou hors de combat ; le bonus ne se cumule pas si le sort est relancé."
-      }
-    },
-    {
-      "magicSchoolName": "Prayers of Sigmar",
-      "rollValue": 3,
-      "difficulty": 9,
-      "name": { "en": "Soulfire", "fr": "Feu de l'Âme" },
-      "description": {
-        "en": "The wrath of Sigmar comes to earth in purifying flames. All enemy models within 4\" suffer a Strength 3 hit, no armour saves allowed - Undead and Possessed models suffer a Strength 5 hit instead.",
-        "fr": "La colère de Sigmar s'abat sur terre en flammes purificatrices. Toute figurine ennemie à moins de 4ps subit une touche de Force 3, sans sauvegarde d'armure possible - les figurines Mortes-Vivantes et Possédées subissent une touche de Force 5 à la place."
-      }
-    },
-    {
-      "magicSchoolName": "Prayers of Sigmar",
-      "rollValue": 4,
-      "difficulty": 6,
-      "name": { "en": "Shield of Faith", "fr": "Bouclier de la Foi" },
-      "description": {
-        "en": "A shield of pure white light appears before the Priest, granting immunity to all spells as long as his faith holds. Roll at the start of each Recovery phase: on a 1 or 2 the shield disappears.",
-        "fr": "Un bouclier de pure lumière blanche apparaît devant le Prêtre, le rendant immunisé à tous les sorts tant que sa foi reste forte. Lancez le dé au début de chaque phase de Récupération : sur un 1 ou 2, le bouclier disparaît."
-      }
-    },
-    {
-      "magicSchoolName": "Prayers of Sigmar",
-      "rollValue": 5,
-      "difficulty": 5,
-      "name": { "en": "Healing Hand", "fr": "Main Guérisseuse" },
-      "description": {
-        "en": "Laying hands upon a wounded comrade, the Priest calls upon Sigmar to heal his wounds. Any one model within 2\" (including himself) is restored to full Wounds; any other stunned or knocked-down friendly model within 2\" immediately stands up and fights on normally.",
-        "fr": "En posant les mains sur un compagnon blessé, le Prêtre invoque Sigmar pour guérir ses blessures. Une figurine à moins de 2ps (lui-même inclus) recouvre la totalité de ses Points de Vie ; toute autre figurine amie sonnée ou à terre à moins de 2ps se relève aussitôt et combat normalement."
-      }
-    },
-    {
-      "magicSchoolName": "Prayers of Sigmar",
-      "rollValue": 6,
-      "difficulty": 9,
-      "name": { "en": "Armour of Righteousness", "fr": "Armure de la Vertu" },
-      "description": {
-        "en": "Impenetrable armour covers the Priest, a fiery twin-tailed comet burning above his head. He gains a 2+ armour save (replacing his normal save) and causes Fear, becoming immune to it himself, until the start of his next Shooting phase.",
-        "fr": "Une armure impénétrable recouvre le Prêtre, tandis qu'une comète bifide enflammée brille au-dessus de sa tête. Il obtient une sauvegarde d'armure de 2+ (qui remplace sa sauvegarde normale) et provoque la Peur tout en y étant lui-même immunisé, jusqu'au début de sa prochaine phase de Tir."
-      }
-    }
-  ]
+  "spells": []
 }

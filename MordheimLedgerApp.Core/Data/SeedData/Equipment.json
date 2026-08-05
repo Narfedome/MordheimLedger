@@ -1,0 +1,56 @@
+[
+  {
+    "name": { "en": "Dagger", "fr": "Dague" }, "category": "MeleeWeapon", "cost": 0,
+    "description": {
+      "en": "Grants one extra Attack, always used in addition to another weapon.",
+      "fr": "Octroie une Attaque supplémentaire, toujours utilisée en plus d'une autre arme."
+    }
+  },
+  { "name": { "en": "Sword", "fr": "Épée" }, "category": "MeleeWeapon", "cost": 10 },
+  { "name": { "en": "Hammer", "fr": "Marteau" }, "category": "MeleeWeapon", "cost": 3 },
+  { "name": { "en": "Axe", "fr": "Hache" }, "category": "MeleeWeapon", "cost": 5 },
+  { "name": { "en": "Bow", "fr": "Arc" }, "category": "MissileWeapon", "cost": 10 },
+  { "name": { "en": "Light Armour", "fr": "Armure Légère" }, "category": "Armour", "cost": 20 },
+  { "name": { "en": "Buckler", "fr": "Rondache" }, "category": "Armour", "cost": 5 },
+  { "name": { "en": "Mace", "fr": "Masse" }, "category": "MeleeWeapon", "cost": 3 },
+  { "name": { "en": "Morning star", "fr": "Morgenstern" }, "category": "MeleeWeapon", "cost": 15 },
+  { "name": { "en": "Double-handed weapon", "fr": "Arme à deux mains" }, "category": "MeleeWeapon", "cost": 15 },
+  { "name": { "en": "Spear", "fr": "Lance" }, "category": "MeleeWeapon", "cost": 10 },
+  { "name": { "en": "Halberd", "fr": "Hallebarde" }, "category": "MeleeWeapon", "cost": 10 },
+  { "name": { "en": "Crossbow", "fr": "Arbalète" }, "category": "MissileWeapon", "cost": 25 },
+  { "name": { "en": "Long bow", "fr": "Arc long" }, "category": "MissileWeapon", "cost": 15 },
+  {
+    "name": { "en": "Pistol", "fr": "Pistolet" }, "category": "BlackPowderWeapon", "cost": 15,
+    "description": { "en": "30 gc for a brace.", "fr": "30 CO la paire." }
+  },
+  {
+    "name": { "en": "Duelling Pistol", "fr": "Pistolet de duel" }, "category": "BlackPowderWeapon", "cost": 25,
+    "description": { "en": "50 gc for a brace.", "fr": "50 CO la paire." }
+  },
+  { "name": { "en": "Blunderbuss", "fr": "Tromblon" }, "category": "BlackPowderWeapon", "cost": 30 },
+  { "name": { "en": "Handgun", "fr": "Arquebuse" }, "category": "BlackPowderWeapon", "cost": 35 },
+  { "name": { "en": "Hunting Rifle", "fr": "Long fusil d'Hochland" }, "category": "BlackPowderWeapon", "cost": 200, "rarity": 11 },
+  { "name": { "en": "Heavy Armour", "fr": "Armure lourde" }, "category": "Armour", "cost": 50 },
+  { "name": { "en": "Shield", "fr": "Bouclier" }, "category": "Armour", "cost": 5 },
+  { "name": { "en": "Helmet", "fr": "Casque" }, "category": "Armour", "cost": 10 },
+  {
+    "name": { "en": "Short Bow", "fr": "Arc court" }, "category": "MissileWeapon", "cost": 5,
+    "description": {
+      "en": "A cheaper, shorter-ranged bow variant found in several warbands' equipment lists (e.g. Orc Mob's Goblins, Witch Hunters' Zealots) at the same price - not exclusive to any one warband.",
+      "fr": "Une variante d'arc moins chère et à plus courte portée, présente dans les listes d'équipement de plusieurs bandes (Gobelins de la Horde Orque, Séides des Répurgateurs) au même prix - pas exclusive à une seule bande."
+    }
+  },
+  { "name": { "en": "Flail", "fr": "Fléau" }, "category": "MeleeWeapon", "cost": 15 },
+  {
+    "name": { "en": "Holy Tome", "fr": "Livre Saint" }, "category": "MiscellaneousEquipment", "cost": 100, "rarity": 8,
+    "description": {
+      "en": "Books of prayers and holy deeds copied by hand in the scriptoriums of Sigmar - a holy man reciting from one strengthens his faith. Full cost is 100 + D6×10 gc. A Warrior-Priest or Sister of Sigmar with a Holy Tome adds +1 to the score when trying to recite a prayer.",
+      "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6×10 CO. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
+    }
+  },
+  { "name": { "en": "Throwing Knives", "fr": "Couteau de Lancer" }, "category": "MissileWeapon", "cost": 15 },
+  { "name": { "en": "Crossbow Pistol", "fr": "Arbalète de Poing" }, "category": "MissileWeapon", "cost": 35 },
+  { "name": { "en": "Sling", "fr": "Fronde" }, "category": "MissileWeapon", "cost": 2 },
+  { "name": { "en": "Throwing Stars", "fr": "Étoiles de Jet" }, "category": "MissileWeapon", "cost": 15 },
+  { "name": { "en": "Club", "fr": "Gourdin" }, "category": "MeleeWeapon", "cost": 3 }
+]

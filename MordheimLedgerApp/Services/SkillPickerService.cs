@@ -7,8 +7,9 @@ public interface ISkillPickerService
 {
     /// <summary>warbandArchetypeId: only skills whose RestrictedToWarbandArchetypeIds is empty (common)
     /// or contains this id are selectable - see WarriorEditDialogViewModel.AddSkill/
-    /// EndOfGameDialogViewModel's Advance roll skill choice.</summary>
-    Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId);
+    /// EndOfGameDialogViewModel's Advance roll skill choice. warriorArchetypeId: same idea one level
+    /// down, null = no further filtering (e.g. picking for a Warrior whose archetype isn't relevant).</summary>
+    Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null);
 }
 
 public class SkillPickerService : ISkillPickerService
@@ -17,7 +18,7 @@ public class SkillPickerService : ISkillPickerService
 
     public SkillPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId)
+    public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
 
@@ -28,6 +29,7 @@ public class SkillPickerService : ISkillPickerService
         // filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
         var viewModel = _provider.GetRequiredService<SkillViewModel>();
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
         var page = new SkillSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 

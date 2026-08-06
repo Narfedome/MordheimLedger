@@ -54,6 +54,7 @@ public class AppDatabase
         await _db.CreateTableAsync<SpellEntity>();
         await _db.CreateTableAsync<WarbandArchetypeEquipmentEntity>();
         await _db.CreateTableAsync<WarbandArchetypeSkillEntity>();
+        await _db.CreateTableAsync<WarriorArchetypeSkillEntity>();
         await _db.CreateTableAsync<SpecialRuleEntity>();
         await _db.CreateTableAsync<WarbandArchetypeSpecialRuleEntity>();
         await _db.CreateTableAsync<WarriorArchetypeSpecialRuleEntity>();
@@ -86,6 +87,7 @@ public class AppDatabase
         await _db.DropTableAsync<SpellEntity>();
         await _db.DropTableAsync<WarbandArchetypeEquipmentEntity>();
         await _db.DropTableAsync<WarbandArchetypeSkillEntity>();
+        await _db.DropTableAsync<WarriorArchetypeSkillEntity>();
         await _db.DropTableAsync<SpecialRuleEntity>();
         await _db.DropTableAsync<WarbandArchetypeSpecialRuleEntity>();
         await _db.DropTableAsync<WarriorArchetypeSpecialRuleEntity>();
@@ -182,6 +184,11 @@ public class AppDatabase
             await _db.InsertAsync(new WarbandArchetypeMagicSchoolEntity { WarbandArchetypeId = warbandEntity.Id, MagicSchoolId = schoolId });
         }
 
+        // Nom anglais -> id, alimenté ci-dessous pour résoudre SkillSeedData.RestrictedToWarriorNames
+        // plus bas dans cette même passe (les noms de guerrier ne sont pas uniques globalement, donc pas
+        // de cache au niveau classe comme pour SpecialRule/Mutation/MagicSchool).
+        var warriorIdsByEnglishName = new Dictionary<string, int>();
+
         foreach (var w in data.Warriors)
         {
             var warrior = new WarriorArchetype
@@ -209,11 +216,34 @@ public class AppDatabase
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
             var warriorEntity = warrior.ToEntity();
             await _db.InsertAsync(warriorEntity);
+            warriorIdsByEnglishName[w.Name.En] = warriorEntity.Id;
 
             foreach (var sr in w.SpecialRules)
             {
                 var ruleId = await FindOrCreateSpecialRuleAsync(sr);
                 await _db.InsertAsync(new WarriorArchetypeSpecialRuleEntity { WarriorArchetypeId = warriorEntity.Id, SpecialRuleId = ruleId });
+            }
+        }
+
+        foreach (var sk in data.Skills)
+        {
+            var skill = new Skill
+            {
+                Category = Enum.Parse<SkillCategory>(sk.Category),
+                Source = ContentSource.Official
+            };
+            skill.NameKey = await SeedTranslationAsync(sk.Name.En, sk.Name.Fr);
+            skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
+            var skillEntity = skill.ToEntity();
+            await _db.InsertAsync(skillEntity);
+
+            if (sk.RestrictedToThisWarband)
+                await _db.InsertAsync(new WarbandArchetypeSkillEntity { WarbandArchetypeId = warbandEntity.Id, SkillId = skillEntity.Id });
+
+            if (sk.RestrictedToWarriorNames is { Count: > 0 } names)
+            {
+                foreach (var name in names)
+                    await _db.InsertAsync(new WarriorArchetypeSkillEntity { WarriorArchetypeId = warriorIdsByEnglishName[name], SkillId = skillEntity.Id });
             }
         }
 

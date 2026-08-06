@@ -61,6 +61,12 @@ public class WarbandSeedData
     /// <summary>Mounts introduced by this warband (e.g. "Sanglier de guerre" for Orques) - like
     /// Equipment, typically warband-specific via RestrictedToThisWarband.</summary>
     public List<MountSeedData> Mounts { get; set; } = new();
+
+    /// <summary>Skills SPECIFIC to this warband (its unique "special skill" table, e.g. Orc Mob's
+    /// Waaagh!/'Ard 'Ead/...) - the generic common pool (Combat Master, Step Aside, ...) still lives
+    /// once in Data/SeedData/Skills.json, seeded before any warband file. See
+    /// SkillSeedData.RestrictedToThisWarband/RestrictedToWarriorNames.</summary>
+    public List<SkillSeedData> Skills { get; set; } = new();
 }
 
 public class WarriorSeedData
@@ -155,8 +161,8 @@ public class MutationSeedData
     public bool RestrictedToThisWarband { get; set; }
 }
 
-/// <summary>One entry of the common Skill catalog (Data/SeedData/Skills.json only - no warband file
-/// declares any) - always unrestricted, so no RestrictedToThisWarband field unlike Equipment/Mutation.</summary>
+/// <summary>One Skill catalog entry - either from the common pool (Data/SeedData/Skills.json, always
+/// unrestricted) or a warband's own special-skill table (WarbandSeedData.Skills).</summary>
 public class SkillSeedData
 {
     public LocalizedText Name { get; set; } = new();
@@ -165,6 +171,15 @@ public class SkillSeedData
     public string Category { get; set; } = string.Empty;
 
     public LocalizedText? Description { get; set; }
+
+    /// <summary>True = only the declaring warband may pick it (see WarbandArchetypeSkillEntity).
+    /// Always false for the common pool (Skills.json).</summary>
+    public bool RestrictedToThisWarband { get; set; }
+
+    /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that alone
+    /// may pick this skill (e.g. "Da Cunnin' Plan" -&gt; ["Orc Boss"]) - null/empty = every warrior of the
+    /// restricted warband(s) can pick it. Only meaningful alongside RestrictedToThisWarband.</summary>
+    public List<string>? RestrictedToWarriorNames { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

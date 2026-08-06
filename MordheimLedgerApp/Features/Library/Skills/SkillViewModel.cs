@@ -14,6 +14,7 @@ public partial class SkillViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly ISkillPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
+    private readonly IWarriorArchetypePickerService _warriorPicker;
     private List<Skill> _allItems = new();
     private List<WarbandArchetype> _warbandArchetypes = new();
 
@@ -56,12 +57,19 @@ public partial class SkillViewModel : BaseViewModel
     /// contains this id are shown - see WarriorEditDialogViewModel.AddSkill/EndOfGameDialogViewModel.</summary>
     public int? AllowedWarbandArchetypeId { get; set; }
 
+    /// <summary>Same idea as AllowedWarbandArchetypeId, one level down: only skills whose
+    /// RestrictedToWarriorArchetypeIds is empty (any warrior of the restricted warband) or contains
+    /// this id are shown - lets e.g. Orc Mob's "Da Cunnin' Plan" only appear when picking for the Orc
+    /// Boss specifically, not every Orc warrior.</summary>
+    public int? AllowedWarriorArchetypeId { get; set; }
+
     public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation,
-        IWarbandArchetypePickerService warbandPicker)
+        IWarbandArchetypePickerService warbandPicker, IWarriorArchetypePickerService warriorPicker)
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
         _warbandPicker = warbandPicker;
+        _warriorPicker = warriorPicker;
         selectedCategoryLabel = Loc["LibFilterAll"];
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
@@ -94,6 +102,8 @@ public partial class SkillViewModel : BaseViewModel
             filtered = filtered.Where(i => i.Category == category);
         if (AllowedWarbandArchetypeId is { } warbandId)
             filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+        if (AllowedWarriorArchetypeId is { } warriorId)
+            filtered = filtered.Where(i => i.RestrictedToWarriorArchetypeIds.Count == 0 || i.RestrictedToWarriorArchetypeIds.Contains(warriorId));
 
         var groups = new ObservableCollection<SkillGroup>();
         foreach (var item in filtered)
@@ -155,7 +165,8 @@ public partial class SkillViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new Skill();
-        var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"], _warbandPicker, _warbandArchetypes);
+        var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"], _warbandPicker,
+            _warriorPicker, _warbandArchetypes, Array.Empty<WarriorArchetype>());
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(newItem, LocalizationService.Instance.Language);
@@ -179,10 +190,17 @@ public partial class SkillViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath,
-            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds)
+            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
+            RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds)
         };
 
-        var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"], _warbandPicker, _warbandArchetypes);
+        var initialWarriors = copy.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(copy.RestrictedToWarbandArchetypeIds, LocalizationService.Instance.Language))
+                .Where(w => copy.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"], _warbandPicker,
+            _warriorPicker, _warbandArchetypes, initialWarriors);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(copy, LocalizationService.Instance.Language);

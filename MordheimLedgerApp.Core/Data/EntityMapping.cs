@@ -163,7 +163,8 @@ public static class EntityMapping
     };
 
     public static Skill ToModel(this SkillEntity e, IReadOnlyDictionary<string, string> translations,
-        IReadOnlyDictionary<int, List<int>>? restrictions = null) => new()
+        IReadOnlyDictionary<int, List<int>>? restrictions = null,
+        IReadOnlyDictionary<int, List<int>>? warriorRestrictions = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -173,7 +174,8 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
-        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
     };
 
     public static SkillEntity ToEntity(this Skill m) => new()

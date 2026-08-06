@@ -27,4 +27,10 @@ public class Skill
     /// ids (an alternate skill table only some warbands can pick from). Editable via SkillEditDialog -
     /// not enforced in the skill picker though (still shows the full catalog), "no rules engine V1".</summary>
     public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
+
+    /// <summary>Empty = every warrior of the restricted warband(s) can pick it. Non-empty = further
+    /// restricted to specific WarriorArchetype ids within that warband (e.g. "Da Cunnin' Plan" -
+    /// Orc Boss only). Only meaningful alongside a non-empty RestrictedToWarbandArchetypeIds. Seed-only
+    /// for now - no SkillEditDialog UI, populated exclusively via WarbandSeedData.Skills.</summary>
+    public List<int> RestrictedToWarriorArchetypeIds { get; set; } = new();
 }

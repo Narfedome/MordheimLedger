@@ -20,6 +20,63 @@
       }
     }
   ],
+  "skills": [
+    {
+      "name": { "en": "Shaggy Hide", "fr": "Peau Hirsute" },
+      "category": "Special",
+      "description": {
+        "en": "6+ Armour save, stacks with other armour.",
+        "fr": "Sauvegarde d'armure de 6+, cumulable avec une autre armure."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Mutant", "fr": "Mutant" },
+      "category": "Special",
+      "description": {
+        "en": "May buy one Mutation.",
+        "fr": "Peut acheter une Mutation."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Fearless", "fr": "Intrépide" },
+      "category": "Special",
+      "description": {
+        "en": "Immune to Fear and All Alone tests.",
+        "fr": "Immunisé à la Peur et au test Seul contre Tous."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Horned One", "fr": "Cornu" },
+      "category": "Special",
+      "description": {
+        "en": "An extra Attack at the model's Strength when charging.",
+        "fr": "Une Attaque supplémentaire à sa Force de base en chargeant."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Bellowing Roar", "fr": "Rugissement Tonitruant" },
+      "category": "Special",
+      "description": {
+        "en": "Chieftain only: may re-roll failed Rout tests.",
+        "fr": "Chef seul : peut relancer les tests de Déroute ratés."
+      },
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Beastmen Chieftain"]
+    },
+    {
+      "name": { "en": "Manhater", "fr": "Haine des Hommes" },
+      "category": "Special",
+      "description": {
+        "en": "Hatred against Human warbands.",
+        "fr": "Haine envers les bandes humaines."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
   "magicSchools": [
     {
       "name": {

@@ -20,6 +20,63 @@
       }
     }
   ],
+  "skills": [
+    {
+      "name": { "en": "'Ard 'Ead", "fr": "Têt'dure" },
+      "category": "Special",
+      "description": {
+        "en": "3+ save on a D6 to avoid being Stunned, treated as Knocked Down instead if made; 2+ if also wearing a helmet, replacing its normal save.",
+        "fr": "Sauvegarde spéciale de 3+ sur 1D6 pour éviter d'être sonné, remplacé par à terre en cas de réussite ; 2+ s'il porte aussi un casque, remplaçant sa sauvegarde normale."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Waaagh!", "fr": "Waaagh !" },
+      "category": "Special",
+      "description": {
+        "en": "+D3\" charge range.",
+        "fr": "+1D3ps à sa portée de charge."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "'Ere We Go!", "fr": "On y va !" },
+      "category": "Special",
+      "description": {
+        "en": "No Fear test needed when charging.",
+        "fr": "Aucun test de Peur lors d'une charge."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Well 'Ard", "fr": "Dur à cuire" },
+      "category": "Special",
+      "description": {
+        "en": "+1 Armour save.",
+        "fr": "+1 à la sauvegarde d'armure."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "'Eadbasher", "fr": "Coup d'boule" },
+      "category": "Special",
+      "description": {
+        "en": "Knocked Down results caused by this model in close combat count as Stunned instead.",
+        "fr": "Toute figurine mise à terre par cette figurine au Corps à Corps est considérée comme sonnée à la place."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Da Cunnin' Plan", "fr": "Rev'nez ici !" },
+      "category": "Special",
+      "description": {
+        "en": "Orc Boss only: the warband may re-roll failed Rout tests as long as the Boss is not out of action.",
+        "fr": "Chef Orque seul : la bande peut relancer tout test de Déroute raté tant que le Chef n'est pas hors de combat."
+      },
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Orc Boss"]
+    }
+  ],
   "magicSchools": [
     {
       "name": {

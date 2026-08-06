@@ -49,6 +49,19 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations, specialRules)).ToList();
     }
 
+    public async Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(IEnumerable<int> warbandArchetypeIds, string languageCode)
+    {
+        var ids = warbandArchetypeIds as ICollection<int> ?? warbandArchetypeIds.ToList();
+        if (ids.Count == 0) return new List<WarriorArchetype>();
+
+        await _db.Initialization;
+        var rows = (await _db.Connection.Table<WarriorArchetypeEntity>().ToListAsync())
+            .Where(w => ids.Contains(w.WarbandArchetypeId)).ToList();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var specialRules = await LoadWarriorSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, specialRules)).ToList();
+    }
+
     public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode)
     {
         await _db.Initialization;
@@ -64,7 +77,8 @@ public class LibraryService : ILibraryService
         var rows = await _db.Connection.Table<SkillEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         var restrictions = await LoadSkillRestrictionsAsync();
-        return rows.Select(r => r.ToModel(translations, restrictions)).ToList();
+        var warriorRestrictions = await LoadSkillWarriorRestrictionsAsync();
+        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions)).ToList();
     }
 
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)
@@ -216,6 +230,15 @@ public class LibraryService : ILibraryService
         return rows.GroupBy(r => r.SkillId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
     }
 
+    /// <summary>Seed-only axis (see Skill.RestrictedToWarriorArchetypeIds) - loaded/saved here so
+    /// editing a seeded special skill through SkillEditDialog round-trips it instead of silently
+    /// dropping it, even though the dialog has no UI to set it directly.</summary>
+    private async Task<Dictionary<int, List<int>>> LoadSkillWarriorRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarriorArchetypeSkillEntity>().ToListAsync();
+        return rows.GroupBy(r => r.SkillId).ToDictionary(g => g.Key, g => g.Select(r => r.WarriorArchetypeId).ToList());
+    }
+
     /// <summary>Replace-all: deletes the item's existing restriction rows and inserts the current list -
     /// no diffing needed at this scale.</summary>
     private async Task SaveEquipmentRestrictionsAsync(int equipmentItemId, List<int> warbandArchetypeIds)
@@ -230,6 +253,13 @@ public class LibraryService : ILibraryService
         await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeSkillEntity WHERE SkillId = ?", skillId);
         foreach (var warbandArchetypeId in warbandArchetypeIds)
             await _db.Connection.InsertAsync(new WarbandArchetypeSkillEntity { SkillId = skillId, WarbandArchetypeId = warbandArchetypeId });
+    }
+
+    private async Task SaveSkillWarriorRestrictionsAsync(int skillId, List<int> warriorArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorArchetypeSkillEntity WHERE SkillId = ?", skillId);
+        foreach (var warriorArchetypeId in warriorArchetypeIds)
+            await _db.Connection.InsertAsync(new WarriorArchetypeSkillEntity { SkillId = skillId, WarriorArchetypeId = warriorArchetypeId });
     }
 
     private async Task SaveMountRestrictionsAsync(int mountId, List<int> warbandArchetypeIds)
@@ -329,6 +359,7 @@ public class LibraryService : ILibraryService
         }
 
         await SaveSkillRestrictionsAsync(skill.Id, skill.RestrictedToWarbandArchetypeIds);
+        await SaveSkillWarriorRestrictionsAsync(skill.Id, skill.RestrictedToWarriorArchetypeIds);
     }
 
     public async Task SaveInjuryAsync(Injury injury, string languageCode)

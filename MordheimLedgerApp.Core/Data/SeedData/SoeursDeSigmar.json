@@ -8,6 +8,54 @@
     "en": "For centuries the noble houses of the Empire sent their most difficult daughters to the sacred convent of Mordheim, to be schooled in the sole order devoted to the Empire's patron god - the Sisters of Sigmar cared for orphans, healed the sick, and were renowned for unravelling the threads of fate. Warned by their Prophetess of the city's coming destruction, they alone survived unscathed within their fortress on the Rock of Sigmar.",
     "fr": "Pendant des siècles la noblesse de l'Empire envoya ses filles les plus récalcitrantes ou les plus dissipées dans le couvent sacré de l'ordre des Sœurs de la Pitié de Sigmar à Mordheim, pour être éduquées dans le seul ordre dédié au dieu tutélaire de l'Empire. Les Sœurs de Sigmar parcouraient l'Empire pour aider les nécessiteux, soigner les malades et réconforter les infirmes, et sont réputées pour leur habileté à démêler l'écheveau du destin. Prévenues par leur prophétesse Cassandora du désastre à venir, elles seules survécurent indemnes, retranchées dans leur forteresse du Roc de Sigmar."
   },
+  "skills": [
+    {
+      "name": { "en": "Sign of Sigmar", "fr": "Signe de Sigmar" },
+      "category": "Special",
+      "description": {
+        "en": "Possessed/Undead opponents lose their first close combat attack against her, minimum 1.",
+        "fr": "Les adversaires Possédés/Morts-vivants perdent leur première Attaque au premier round de Corps à Corps contre elle, minimum 1."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Protection of Sigmar", "fr": "Protection de Sigmar" },
+      "category": "Special",
+      "description": {
+        "en": "Any spell targeting her is nullified on a D6 roll of 4+.",
+        "fr": "Tout sort la ciblant est annulé sur 1D6 = 4+."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Utter Determination", "fr": "Détermination Absolue" },
+      "category": "Special",
+      "description": {
+        "en": "Matriarch only: may re-roll failed Rout tests.",
+        "fr": "Matriarche seule : peut relancer les tests de Déroute ratés."
+      },
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Sigmarite Matriarch"]
+    },
+    {
+      "name": { "en": "Righteous Fury", "fr": "Fureur Vertueuse" },
+      "category": "Special",
+      "description": {
+        "en": "Hatred against Skaven, Undead, Possessed, Beastmen, Dark Elves and other evil warbands.",
+        "fr": "Haine envers les Skavens, Morts-vivants, Possédés, Hommes-Bêtes, Elfes Noirs et autres bandes maléfiques."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Absolute Faith", "fr": "Foi Inébranlable" },
+      "category": "Special",
+      "description": {
+        "en": "May re-roll Fear tests, immune to All Alone tests.",
+        "fr": "Relance les tests de Peur, immunisée au test Seul contre Tous."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
   "magicSchools": [
     {
       "name": {

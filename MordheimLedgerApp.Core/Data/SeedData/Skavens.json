@@ -8,6 +8,53 @@
     "en": "Man-rats born of Chaos-tainted mutation, who have burrowed beneath the world of men for millennia in secret - Clan Eshin, masters of poison and silent murder, now infiltrate Mordheim's ruins to recover the glittering warpstone before rival clans learn the city's secret.",
     "fr": "Les skavens sont des hommes-rats issus de mutations provoquées par le Chaos, qui parcourent le monde depuis des temps reculés à la recherche de la malepierre. Le Maître de la Nuit du clan Eshin, experts dans l'art du meurtre silencieux et de l'usage du poison, a préféré envoyer de petites bandes s'infiltrer dans le réseau de tunnels sous Mordheim afin de réunir les pierres brillantes et les ramener vers son repaire, plutôt que de risquer d'éveiller l'attention des clans rivaux."
   },
+  "skills": [
+    {
+      "name": { "en": "Black Hunger", "fr": "Faim Noire" },
+      "category": "Special",
+      "description": {
+        "en": "Declared at the start of the turn: +1 Attack and +D3\" Movement this turn, then suffers D3 Strength 3 hits with no armour save at the end of the turn.",
+        "fr": "Déclarée en début de tour : +1 Attaque et +1D3ps de Mouvement ce tour, puis subit 1D3 touches de Force 3 sans sauvegarde d'armure en fin de tour."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Tail Fighting", "fr": "Combat à la Queue" },
+      "category": "Special",
+      "description": {
+        "en": "Wields a shield/knife/sword with the tail for an extra Attack or +1 Armour save.",
+        "fr": "Manie un bouclier/couteau/épée avec sa queue pour une Attaque supplémentaire ou +1 en sauvegarde d'armure."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Wall Runner", "fr": "Grimpeur" },
+      "category": "Special",
+      "description": {
+        "en": "No Initiative test needed to climb sheer surfaces.",
+        "fr": "Aucun test d'Initiative requis pour escalader une paroi lisse."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Art of Silent Death", "fr": "Art de la Mort Silencieuse" },
+      "category": "Special",
+      "description": {
+        "en": "Fights bare-pawed without penalty as if dual-wielding, causes a Critical Hit on a 5-6 instead of just 6.",
+        "fr": "Combat à mains nues sans pénalité comme s'il portait deux armes, cause un Coup Critique sur 5-6 au lieu de 6 seul."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Infiltration", "fr": "Infiltration" },
+      "category": "Special",
+      "description": {
+        "en": "Deployed after the opposing warband, anywhere out of sight and 12\"+ from any enemy model.",
+        "fr": "Déployée après la bande adverse, n'importe où hors de vue et à 12ps ou plus de tout ennemi."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
   "magicSchools": [
     {
       "name": {

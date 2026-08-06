@@ -345,6 +345,12 @@
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Common to every warband</value>
   </data>
+  <data name="LibRestrictedToWarriorsPh" xml:space="preserve">
+    <value>Restricted to these warriors</value>
+  </data>
+  <data name="LibRestrictedToWarriorsHint" xml:space="preserve">
+    <value>Empty = every warrior of the selected warband(s)</value>
+  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>All</value>
   </data>
@@ -551,6 +557,9 @@
   </data>
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Select warbands</value>
+  </data>
+  <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
+    <value>Select warriors</value>
   </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Mount</value>

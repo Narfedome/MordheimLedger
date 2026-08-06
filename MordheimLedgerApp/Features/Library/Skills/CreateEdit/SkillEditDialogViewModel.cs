@@ -11,6 +11,7 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly Dictionary<string, SkillCategory> _categoryByLabel = new();
     private readonly IWarbandArchetypePickerService _warbandPicker;
+    private readonly IWarriorArchetypePickerService _warriorPicker;
 
     protected override bool CancelResult => false;
 
@@ -30,12 +31,24 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
     /// bandes (voir Skill.RestrictedToWarbandArchetypeIds).</summary>
     public ObservableCollection<WarbandArchetype> RestrictedWarbands { get; }
 
+    /// <summary>Même principe que RestrictedWarbands, un niveau plus bas - vide = tout guerrier des
+    /// bandes ci-dessus peut piocher la compétence (voir Skill.RestrictedToWarriorArchetypeIds). Le
+    /// picker (AddRestrictedWarriorCommand) se limite aux guerriers de RestrictedWarbands ; retirer une
+    /// bande retire aussi ses guerriers déjà cochés (voir RemoveRestriction).</summary>
+    public ObservableCollection<WarriorArchetype> RestrictedWarriors { get; }
+
+    /// <summary>Pilote l'affichage du bloc "Réservé à ces guerriers" - inutile tant qu'aucune bande
+    /// n'est sélectionnée (rien à restreindre).</summary>
+    public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
+
     public SkillEditDialogViewModel(Skill item, string title, IWarbandArchetypePickerService warbandPicker,
-        IReadOnlyList<WarbandArchetype> allWarbandArchetypes)
+        IWarriorArchetypePickerService warriorPicker, IReadOnlyList<WarbandArchetype> allWarbandArchetypes,
+        IReadOnlyList<WarriorArchetype> initialRestrictedWarriors)
     {
         this.item = item;
         this.title = title;
         _warbandPicker = warbandPicker;
+        _warriorPicker = warriorPicker;
 
         foreach (var category in Enum.GetValues<SkillCategory>())
         {
@@ -47,6 +60,7 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
         selectedCategoryLabel = Loc[$"SkillCategory{item.Category}"];
         RestrictedWarbands = new ObservableCollection<WarbandArchetype>(
             allWarbandArchetypes.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)));
+        RestrictedWarriors = new ObservableCollection<WarriorArchetype>(initialRestrictedWarriors);
     }
 
     partial void OnSelectedCategoryLabelChanged(string value)
@@ -64,15 +78,39 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
             if (RestrictedWarbands.Any(w => w.Id == warband.Id)) continue;
             RestrictedWarbands.Add(warband);
         }
+        OnPropertyChanged(nameof(HasRestrictedWarbands));
     }
 
     [RelayCommand]
-    private void RemoveRestriction(WarbandArchetype warband) => RestrictedWarbands.Remove(warband);
+    private void RemoveRestriction(WarbandArchetype warband)
+    {
+        RestrictedWarbands.Remove(warband);
+
+        // Une restriction guerrier ne peut pas survivre à sa restriction bande.
+        foreach (var warrior in RestrictedWarriors.Where(w => w.WarbandArchetypeId == warband.Id).ToList())
+            RestrictedWarriors.Remove(warrior);
+        OnPropertyChanged(nameof(HasRestrictedWarbands));
+    }
+
+    [RelayCommand]
+    private async Task AddRestrictedWarrior()
+    {
+        var picked = await _warriorPicker.PickWarriorArchetypesAsync(RestrictedWarbands.Select(w => w.Id));
+        foreach (var warrior in picked)
+        {
+            if (RestrictedWarriors.Any(w => w.Id == warrior.Id)) continue;
+            RestrictedWarriors.Add(warrior);
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveRestrictedWarrior(WarriorArchetype warrior) => RestrictedWarriors.Remove(warrior);
 
     [RelayCommand]
     private void Save()
     {
         Item.RestrictedToWarbandArchetypeIds = RestrictedWarbands.Select(w => w.Id).ToList();
+        Item.RestrictedToWarriorArchetypeIds = RestrictedWarriors.Select(w => w.Id).ToList();
         Close(true);
     }
 }

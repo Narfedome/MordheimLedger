@@ -114,9 +114,19 @@ public class DataServiceTests : IDisposable
 
         var skills = await _library.GetSkillsAsync("en");
         Assert.True(skills.Count > 30, $"Expected the core rulebook skill lists (~34 entries), got {skills.Count}");
-        Assert.All(skills, s => Assert.Empty(s.RestrictedToWarbandArchetypeIds));
+        var coreSkills = skills.Where(s => s.Category != SkillCategory.Special).ToList();
+        Assert.True(coreSkills.Count > 30, $"Expected the core rulebook skill lists (~34 entries), got {coreSkills.Count}");
+        Assert.All(coreSkills, s => Assert.Empty(s.RestrictedToWarbandArchetypeIds));
         foreach (var category in new[] { SkillCategory.Combat, SkillCategory.Shooting, SkillCategory.Academic, SkillCategory.Strength, SkillCategory.Speed })
             Assert.Contains(skills, s => s.Category == category);
+
+        // Special = each warband's own special-skill table (e.g. Orc Mob's Waaagh!/'Ard 'Ead/...),
+        // seed-only via WarbandSeedData.Skills - always warband-restricted, some further restricted to
+        // a specific WarriorArchetype (e.g. Orc Boss's "Da Cunnin' Plan").
+        var specialSkills = skills.Where(s => s.Category == SkillCategory.Special).ToList();
+        Assert.NotEmpty(specialSkills);
+        Assert.All(specialSkills, s => Assert.Single(s.RestrictedToWarbandArchetypeIds));
+        Assert.Single(specialSkills, s => s.Name == "Da Cunnin' Plan" && s.RestrictedToWarriorArchetypeIds.Count == 1);
     }
 
     /// <summary>"Leader" is attached from 4 different warbands' JSON files (Averlanders/Captain,

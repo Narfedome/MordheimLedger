@@ -140,7 +140,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSkill()
     {
-        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId);
+        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId);
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);

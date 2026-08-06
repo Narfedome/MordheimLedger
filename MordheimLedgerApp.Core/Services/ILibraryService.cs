@@ -11,6 +11,11 @@ public interface ILibraryService
     Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode);
     Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id, string languageCode);
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId, string languageCode);
+
+    /// <summary>Warriors of ANY of these warbands - used by the "restricted to warrior" picker, which
+    /// scopes to whichever warband(s) a Skill (etc.) is already restricted to. Empty input = empty
+    /// result, no call.</summary>
+    Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(IEnumerable<int> warbandArchetypeIds, string languageCode);
     Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode);
     Task<List<Skill>> GetSkillsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);

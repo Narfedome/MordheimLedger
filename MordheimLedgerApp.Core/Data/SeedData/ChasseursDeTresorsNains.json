@@ -70,6 +70,53 @@
       }
     }
   ],
+  "skills": [
+    {
+      "name": { "en": "Master of Blades", "fr": "Maître d'Armes" },
+      "category": "Special",
+      "description": {
+        "en": "With a Parrying weapon, parries on a tied roll as well as beating it; with two Parrying weapons, may parry two attacks instead of one.",
+        "fr": "Avec une arme à Parade, pare sur une égalité et pas seulement en dépassant le jet adverse ; avec deux armes à Parade, peut parer deux attaques au lieu d'une."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Extra Tough", "fr": "Increvable" },
+      "category": "Special",
+      "description": {
+        "en": "May re-roll the Heroes Serious Injury roll once, the second result stands.",
+        "fr": "Peut relancer une fois son jet de Blessure Grave, le second résultat est définitif."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Resource Hunter", "fr": "Chercheur de Ressources" },
+      "category": "Special",
+      "description": {
+        "en": "+1 or -1 to one Exploration roll.",
+        "fr": "+1 ou -1 sur un jet d'Exploration."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "True Grit", "fr": "Coriace" },
+      "category": "Special",
+      "description": {
+        "en": "An Injury roll of 1-3 counts as Knocked Down, 4-5 as Stunned, 6 as Out of Action.",
+        "fr": "Jet de Blessure : 1-3 = à terre, 4-5 = sonné, 6 = hors de combat."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": { "en": "Thick Skull", "fr": "Crâne Épais" },
+      "category": "Special",
+      "description": {
+        "en": "3+ save to avoid being Stunned, treated as Knocked Down instead if made; 2+ if also wearing a helmet, replacing its normal save.",
+        "fr": "Sauvegarde de 3+ pour éviter d'être sonné, remplacé par à terre en cas de réussite ; 2+ s'il porte aussi un casque, remplaçant sa sauvegarde normale."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
   "startingTreasury": 500,
   "maxWarriors": 12,
   "warriors": [

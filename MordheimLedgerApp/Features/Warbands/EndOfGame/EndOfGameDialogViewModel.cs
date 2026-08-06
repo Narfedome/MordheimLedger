@@ -191,7 +191,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task PickAdvanceSkill(AdvanceRollEntry entry)
     {
-        var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId);
+        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry));
+        var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId);
         foreach (var skill in skills)
             entry.SelectedSkills.Add(skill);
     }

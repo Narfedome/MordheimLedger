@@ -345,6 +345,12 @@
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Commun à toutes les bandes</value>
   </data>
+  <data name="LibRestrictedToWarriorsPh" xml:space="preserve">
+    <value>Réservé à ces guerriers</value>
+  </data>
+  <data name="LibRestrictedToWarriorsHint" xml:space="preserve">
+    <value>Vide = tout guerrier des bandes sélectionnées</value>
+  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
   </data>
@@ -551,6 +557,9 @@
   </data>
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des bandes</value>
+  </data>
+  <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
+    <value>Choisir des guerriers</value>
   </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Monture</value>

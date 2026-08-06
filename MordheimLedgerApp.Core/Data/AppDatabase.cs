@@ -117,20 +117,16 @@ public class AppDatabase
 
     private async Task SeedOfficialContentAsync()
     {
-        // Small hand-written common equipment pool (Dagger/Sword/Hammer/Axe/Bow/Light Armour/Buckler),
-        // unrestricted so every warband can use it - band-specific JSON files only need to add their own
-        // exclusives or genuinely new common items (see Reiklanders.json for the latter).
-        var equipment = OfficialContentSeed.CoreEquipment;
-        for (var i = 0; i < equipment.Count; i++)
-        {
-            var item = equipment[i];
-            var fr = OfficialContentSeed.CoreEquipmentFr[i];
-            item.NameKey = await SeedTranslationAsync(item.Name, fr.Name);
-            item.DescriptionKey = item.Description is null
-                ? null
-                : await SeedTranslationAsync(item.Description, fr.Description);
-            await _db.InsertAsync(item.ToEntity());
-        }
+        // The 5 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
+        // Skills.json, MagicSchools.json) must seed before any warband file below - warband JSON files
+        // only declare rules/equipment/mutations/schools that are genuinely THEIRS, and find-or-create-by-
+        // English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted insert (Equipment/Skill)
+        // relies on the canonical row already existing by the time a warband references it.
+        await SeedSpecialRulesAsync();
+        await SeedEquipmentAsync();
+        await SeedMutationsAsync();
+        await SeedSkillsAsync();
+        await SeedMagicSchoolsAsync();
 
         await SeedWarbandFromJsonAsync("MortsVivants.json");
         await SeedWarbandFromJsonAsync("ChasseursDeTresorsNains.json");
@@ -142,6 +138,11 @@ public class AppDatabase
         await SeedWarbandFromJsonAsync("KermesseDuChaos.json");
         await SeedWarbandFromJsonAsync("CulteDesPossedes.json");
         await SeedWarbandFromJsonAsync("HordeOrque.json");
+        await SeedWarbandFromJsonAsync("PillardsHommesBetes.json");
+        await SeedWarbandFromJsonAsync("Repurgateurs.json");
+        await SeedWarbandFromJsonAsync("Skavens.json");
+        await SeedWarbandFromJsonAsync("SoeursDeSigmar.json");
+        await SeedWarbandFromJsonAsync("Kislevites.json");
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
@@ -283,6 +284,88 @@ public class AppDatabase
         }
     }
 
+    /// <summary>Deserializes an embedded Data/SeedData/*.json file that is a bare top-level array (the 5
+    /// common catalogs, as opposed to the warband files' single top-level object) - same embedded-
+    /// resource lookup as SeedWarbandFromJsonAsync.</summary>
+    private static async Task<List<T>> LoadSeedArrayAsync<T>(string fileName)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith(fileName, StringComparison.Ordinal));
+        await using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        return await JsonSerializer.DeserializeAsync<List<T>>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? throw new InvalidOperationException($"Empty or invalid seed file: {fileName}");
+    }
+
+    private async Task SeedSpecialRulesAsync()
+    {
+        foreach (var sr in await LoadSeedArrayAsync<SpecialRuleSeedData>("SpecialRules.json"))
+            await FindOrCreateSpecialRuleAsync(sr);
+    }
+
+    /// <summary>Plain insert, no dedup lookup needed - Equipment.json is hand-authored to be duplicate-
+    /// free internally, and after this runs no warband file declares any of these names anymore.</summary>
+    private async Task SeedEquipmentAsync()
+    {
+        foreach (var eq in await LoadSeedArrayAsync<EquipmentSeedData>("Equipment.json"))
+        {
+            var item = new EquipmentItem
+            {
+                Category = Enum.Parse<EquipmentCategory>(eq.Category),
+                Cost = eq.Cost,
+                Rarity = eq.Rarity,
+                Source = ContentSource.Official
+            };
+            item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
+            item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
+            await _db.InsertAsync(item.ToEntity());
+        }
+    }
+
+    private async Task SeedMutationsAsync()
+    {
+        foreach (var mu in await LoadSeedArrayAsync<MutationSeedData>("Mutations.json"))
+            await FindOrCreateMutationAsync(mu, warbandArchetypeId: null);
+    }
+
+    /// <summary>Plain insert, no dedup - first (and, for the standard 5 skill lists, only) source of
+    /// Skill data in the whole seed pipeline.</summary>
+    private async Task SeedSkillsAsync()
+    {
+        foreach (var sk in await LoadSeedArrayAsync<SkillSeedData>("Skills.json"))
+        {
+            var skill = new Skill
+            {
+                Category = Enum.Parse<SkillCategory>(sk.Category),
+                Source = ContentSource.Official
+            };
+            skill.NameKey = await SeedTranslationAsync(sk.Name.En, sk.Name.Fr);
+            skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
+            await _db.InsertAsync(skill.ToEntity());
+        }
+    }
+
+    private async Task SeedMagicSchoolsAsync()
+    {
+        foreach (var school in await LoadSeedArrayAsync<MagicSchoolWithSpellsSeedData>("MagicSchools.json"))
+        {
+            var schoolId = await FindOrCreateMagicSchoolAsync(new MagicSchoolSeedData { Name = school.Name, Description = school.Description });
+
+            foreach (var sp in school.Spells)
+            {
+                var spell = new Spell
+                {
+                    MagicSchoolId = schoolId,
+                    RollValue = sp.RollValue,
+                    Difficulty = sp.Difficulty,
+                    Source = ContentSource.Official
+                };
+                spell.NameKey = await SeedTranslationAsync(sp.Name.En, sp.Name.Fr);
+                spell.DescriptionKey = sp.Description is null ? null : await SeedTranslationAsync(sp.Description.En, sp.Description.Fr);
+                await _db.InsertAsync(spell.ToEntity());
+            }
+        }
+    }
+
     /// <summary>Allocates a fresh translation key and writes the English (seed data's authoring
     /// language) and, when supplied, French values for it directly - bypasses LibraryService (which
     /// also does the Official-&gt;Modified flip check, irrelevant for a brand new insert).</summary>
@@ -322,7 +405,7 @@ public class AppDatabase
     /// across every Chaos-adjacent warband's JSON, resolve to one shared catalog row.</summary>
     private readonly Dictionary<string, int> _mutationIdsByEnglishName = new();
 
-    private async Task<int> FindOrCreateMutationAsync(MutationSeedData seed, int warbandArchetypeId)
+    private async Task<int> FindOrCreateMutationAsync(MutationSeedData seed, int? warbandArchetypeId)
     {
         if (_mutationIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
@@ -333,8 +416,8 @@ public class AppDatabase
         var entity = mutation.ToEntity();
         await _db.InsertAsync(entity);
 
-        if (seed.RestrictedToThisWarband)
-            await _db.InsertAsync(new WarbandArchetypeMutationEntity { WarbandArchetypeId = warbandArchetypeId, MutationId = entity.Id });
+        if (seed.RestrictedToThisWarband && warbandArchetypeId is not null)
+            await _db.InsertAsync(new WarbandArchetypeMutationEntity { WarbandArchetypeId = warbandArchetypeId.Value, MutationId = entity.Id });
 
         _mutationIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;

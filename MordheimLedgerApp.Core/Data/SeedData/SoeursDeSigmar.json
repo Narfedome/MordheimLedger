@@ -1,0 +1,218 @@
+{
+  "name": {
+    "en": "The Sisters of Sigmar",
+    "fr": "Sœurs de Sigmar"
+  },
+  "description": {
+    "en": "For centuries the noble houses of the Empire sent their most difficult daughters to the sacred convent of Mordheim, to be schooled in the sole order devoted to the Empire's patron god - the Sisters of Sigmar cared for orphans, healed the sick, and were renowned for unravelling the threads of fate. Warned by their Prophetess of the city's coming destruction, they alone survived unscathed within their fortress on the Rock of Sigmar.",
+    "fr": "Pendant des siècles la noblesse de l'Empire envoya ses filles les plus récalcitrantes ou les plus dissipées dans le couvent sacré de l'ordre des Sœurs de la Pitié de Sigmar à Mordheim, pour être éduquées dans le seul ordre dédié au dieu tutélaire de l'Empire. Les Sœurs de Sigmar parcouraient l'Empire pour aider les nécessiteux, soigner les malades et réconforter les infirmes, et sont réputées pour leur habileté à démêler l'écheveau du destin. Prévenues par leur prophétesse Cassandora du désastre à venir, elles seules survécurent indemnes, retranchées dans leur forteresse du Roc de Sigmar."
+  },
+  "magicSchools": [
+    {
+      "name": {
+        "en": "Prayers of Sigmar",
+        "fr": "Prières de Sigmar"
+      }
+    }
+  ],
+  "startingTreasury": 500,
+  "maxWarriors": 15,
+  "warriors": [
+    {
+      "name": {
+        "en": "Sigmarite Matriarch",
+        "fr": "Matriarche sigmarite"
+      },
+      "isHero": true,
+      "cost": 70,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 8,
+      "description": {
+        "en": "The Sigmarite Matriarchs form an inner circle of twelve, answerable to the High Matriarch of the temple - each leads a warband of Sisters in frequent searches of the city, driven by zealous devotion and a relentless will to redeem the Sisterhood in Sigmar's eyes.",
+        "fr": "Les matriarches sigmarites constituent un cercle fermé de douze sœurs, rendant des comptes à la Haute Matriarche. Chacune mène une bande de sœurs dans l'exploration des ruines. Les matriarches sont conduites par leur dévotion au culte de Sigmar et une farouche détermination de réhabiliter les sœurs aux yeux des autres serviteurs du culte."
+      },
+      "isSpellcaster": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
+          }
+        },
+        {
+          "name": {
+            "en": "Wizard",
+            "fr": "Sorcier"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Augur",
+        "fr": "Augure"
+      },
+      "isHero": true,
+      "cost": 25,
+      "maxCount": 1,
+      "startingExperience": 0,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "Blind and blessed beyond their comrades, Augurs have given up their sight for second sight, a gift from Sigmar himself - very few are so marked, and they are greatly revered, shaving their heads save for a single long braid.",
+        "fr": "Les augures sont aveugles et bénies entre toutes les sœurs. En renonçant à la vue, elles ont obtenu une contrepartie, une vision intérieure, cadeau de leur dieu. Seules quelques-unes d'entre elles subissent ces stigmates et elles sont très respectées par la congrégation. Contrairement aux autres sœurs, elles se rasent la tête, ne gardant qu'une longue tresse."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Blessed Sight",
+            "fr": "Vision Sacrée"
+          },
+          "description": {
+            "en": "An Augur may re-roll any failed characteristic test (climbing, resisting spells or otherwise) and any roll to hit in close combat or shooting, keeping the second result. If not put out of action, she may also roll two dice during the Exploration phase and pick either result.",
+            "fr": "Une augure peut relancer ses tests de caractéristiques ratés (grimper, résister aux sorts ou autre) et les jets pour toucher au corps à corps ou au tir - vous devez toujours garder le second résultat. De plus, une augure peut utiliser sa vision sacrée pour aider les sœurs lorsqu'elles cherchent la pierre magique en ville : si elle n'est pas hors de combat, vous pouvez lancer deux dés lors de la phase d'exploration et choisir le résultat."
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Sister Superior",
+        "fr": "Sœur supérieure"
+      },
+      "isHero": true,
+      "cost": 35,
+      "maxCount": 3,
+      "startingExperience": 8,
+      "movement": 4,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "A long-serving priestess of the Cult of Sigmar, well versed in temple ritual and an example to the younger Sisters and Novices - any peril lurking in Mordheim's ruins is nothing compared to a Sister Superior's wrath.",
+        "fr": "Chaque sœur supérieure est une prêtresse depuis longtemps au service du Culte de Sigmar, très versée dans les rituels du temple et un exemple pour les sœurs plus jeunes et les novices. N'importe quel danger ou ennemi rôdant dans les ruines de Mordheim n'est rien comparé à la colère d'une sœur supérieure."
+      }
+    },
+    {
+      "name": {
+        "en": "Sigmarite Sister",
+        "fr": "Sœur"
+      },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "Sworn upon Sigmar's altar to pacify the city and thereby earn redemption for their shamed order - whatever perils stand in their way, they will overcome them.",
+        "fr": "Les sœurs de Sigmar savent que leur ordre est discrédité aux yeux de Sigmar, leur dieu. Chacune d'elle a juré sur son autel de pacifier la cité et ainsi d'obtenir la rédemption de leurs péchés. Quels que soient les périls à affronter, elles ne flancheront jamais et poursuivront leur tâche !"
+      }
+    },
+    {
+      "name": {
+        "en": "Novices",
+        "fr": "Novices"
+      },
+      "isHero": false,
+      "cost": 15,
+      "maxCount": 10,
+      "startingExperience": 0,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 6,
+      "description": {
+        "en": "The Sisters draw their recruits only from the noblest houses of the Empire - few in number, they must endure years as Novices while their devotion is tested, all eager to prove themselves worthy handmaidens of Sigmar.",
+        "fr": "Par tradition les sœurs ne recrutent que parmi les meilleures maisons de l'Empire et les familles de la noblesse considèrent comme un grand honneur d'avoir une fille acceptée dans l'ordre. Malgré le faible nombre des recrues, elles doivent rester des novices pendant plusieurs années au cours desquelles on éprouve la ferveur de leur foi. Toutes sont désireuses de prouver leur valeur et servir parmi les vierges de Sigmar."
+      }
+    }
+  ],
+  "equipment": [
+    {
+      "name": {
+        "en": "Sigmarite Warhammer",
+        "fr": "Marteau de Guerre Sigmarite"
+      },
+      "category": "MeleeWeapon",
+      "cost": 15,
+      "description": {
+        "en": "One of the Sisterhood's traditional weapons, echoing Ghal-Maraz, the great hammer of Sigmar himself. Strength as user +1. A roll of 2-4 in close combat with it is treated as Stunned on the Injury chart. Blessed by the High Matriarch, it grants +1 to wound rolls against Possessed or Undead models (still needs an unmodified 6 for a critical hit). Only Matriarchs and Sister Superiors may carry two.",
+        "fr": "Une des armes traditionnelles de l'Ordre, en souvenir de Ghal-Maraz, le marteau de Sigmar. Force de l'utilisateur +1. Un résultat de 2 à 4 au corps à corps avec cette arme compte comme sonné sur le tableau des dégâts. Chaque marteau a été béni par une matriarche : il donne un bonus de +1 sur tous les jets pour blesser infligés au corps à corps contre les possédés et les morts vivants (il faut tout de même un 6 avant modificateurs pour infliger une touche critique). Seules les matriarches et les sœurs supérieures de l'ordre peuvent porter deux marteaux de guerre sigmarites."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Steel Whip",
+        "fr": "Fouet d'Acier"
+      },
+      "category": "MeleeWeapon",
+      "cost": 10,
+      "description": {
+        "en": "A flexible weapon of barbed steel chains, unique to the Sisterhood - it cannot be parried with a sword or buckler. The wielder gains +1 Attack when charging, and +1 Attack (striking first) when charged, usable only against the charger; this bonus does not stack if charged by multiple opponents, and only the first whip grants it when dual-wielded.",
+        "fr": "Une autre arme unique de l'ordre, faite de chaînes d'acier barbelées. Les tentatives de parade contre cette arme sont inutiles : une figurine attaquée par le fouet d'acier ne peut pas parer, ni avec une épée ni avec une rondache. Le porteur gagne +1 Attaque lorsqu'il charge, et +1 Attaque (frappant en premier) lorsqu'il est chargé, utilisable uniquement contre l'assaillant ; ce bonus ne se cumule pas si le porteur est chargé par plusieurs ennemis, et seul le premier fouet donne ce bonus s'il en porte deux."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Blessed Water",
+        "fr": "Eau Bénite"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 10,
+      "description": {
+        "en": "Heroines only. Water sanctified in Sigmar's name.",
+        "fr": "Réservée aux Héroïnes. Eau sanctifiée au nom de Sigmar."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Holy Relic",
+        "fr": "Relique Sacrée"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 15,
+      "description": {
+        "en": "Heroines only. A sacred relic of the Cult of Sigmar, carried for its protection.",
+        "fr": "Réservée aux Héroïnes. Une relique sacrée du Culte de Sigmar, portée pour sa protection."
+      },
+      "restrictedToThisWarband": true
+    }
+  ]
+}

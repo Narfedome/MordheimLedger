@@ -1,153 +1,342 @@
 {
-  "name": { "en": "Undead", "fr": "Morts-vivants" },
+  "name": {
+    "en": "Undead",
+    "fr": "Morts-vivants"
+  },
   "description": {
     "en": "Vampire-led legions of the walking dead, harvesting wyrdstone for their immortal masters in the ruins of Mordheim.",
     "fr": "Des légions de morts-vivants menées par un vampire, récoltant la pierre magique pour leur maître immortel dans les ruines de Mordheim."
   },
   "specialRules": [],
   "magicSchools": [
-    { "name": { "en": "Necromancy", "fr": "Nécromancie" } }
+    {
+      "name": {
+        "en": "Necromancy",
+        "fr": "Nécromancie"
+      }
+    }
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
   "warriors": [
     {
-      "name": { "en": "Vampire", "fr": "Vampire" },
+      "name": {
+        "en": "Vampire",
+        "fr": "Vampire"
+      },
       "isHero": true,
       "cost": 110,
       "maxCount": 1,
       "startingExperience": 20,
-      "movement": 6, "weaponSkill": 4, "ballisticSkill": 4, "strength": 4, "toughness": 4,
-      "wounds": 2, "initiative": 5, "attacks": 2, "leadership": 8,
+      "movement": 6,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 2,
+      "initiative": 5,
+      "attacks": 2,
+      "leadership": 8,
       "description": {
         "en": "Vampires lead the Undead in their search for the magical stones that will give their master the power to conquer the Empire.",
         "fr": "Les vampires conduisent les morts-vivants dans leur quête de la pierre magique qui donnera à leur maître le pouvoir de conquérir l'Empire."
       },
       "specialRules": [
         {
-          "name": { "en": "Leader", "fr": "Chef" },
-          "description": {
-            "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
-            "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
           }
         },
         {
-          "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
+          }
+        },
+        {
+          "name": {
+            "en": "Immune to Psychology",
+            "fr": "Immunité à la Psychologie"
+          }
+        },
+        {
+          "name": {
+            "en": "Immune to Poison",
+            "fr": "Immunité aux Poisons"
+          }
+        },
+        {
+          "name": {
+            "en": "Not Alive",
+            "fr": "Insensible"
+          },
           "description": {
-            "en": "This model causes Fear (see the Psychology rules).",
-            "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+            "en": "This model replaces Stunned results with Knocked Down.",
+            "fr": "Cette figurine remplace les résultats sonné par à terre."
           }
         }
       ]
     },
     {
-      "name": { "en": "Necromancer", "fr": "Nécromancien" },
+      "name": {
+        "en": "Necromancer",
+        "fr": "Nécromancien"
+      },
       "isHero": true,
       "cost": 35,
       "maxCount": 1,
       "startingExperience": 8,
-      "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Necromancers are evil wizards, studying the corrupt art of Necromancy.",
         "fr": "Les nécromanciens sont des sorciers malfaisants, qui étudient les arcanes maudits de la nécromancie."
       },
       "specialRules": [
         {
-          "name": { "en": "Wizard", "fr": "Sorcier" },
-          "description": {
-            "en": "This model is a Wizard and may cast spells (see the Spells library).",
-            "fr": "Cette figurine est un Sorcier et peut lancer des sorts (voir la bibliothèque des Sorts)."
+          "name": {
+            "en": "Wizard",
+            "fr": "Sorcier"
           }
         }
       ],
       "isSpellcaster": true
     },
     {
-      "name": { "en": "Dreg", "fr": "Paria" },
+      "name": {
+        "en": "Dreg",
+        "fr": "Paria"
+      },
       "isHero": true,
       "cost": 20,
       "maxCount": 3,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
       "description": {
         "en": "Dregs are the most miserable human survivors of the demise of Mordheim, deformed and rejected individuals often bound in fanatical loyalty to their Undead masters.",
         "fr": "Les parias sont les plus misérables survivants humains de la chute de Mordheim, des individus difformes et rejetés, souvent fanatiquement loyaux envers leurs maîtres morts-vivants."
       }
     },
     {
-      "name": { "en": "Zombie", "fr": "Zombie" },
+      "name": {
+        "en": "Zombie",
+        "fr": "Zombie"
+      },
       "isHero": false,
       "cost": 15,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 2, "ballisticSkill": 0, "strength": 3, "toughness": 3,
-      "wounds": 1, "initiative": 1, "attacks": 1, "leadership": 5,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 0,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 1,
+      "attacks": 1,
+      "leadership": 5,
       "description": {
         "en": "Zombies are the most common Undead, animated by the will of a Necromancer.",
         "fr": "Les zombies sont les morts-vivants les plus répandus, animés par la volonté d'un nécromancien."
       },
       "specialRules": [
-        { "name": { "en": "No Equipment", "fr": "Sans équipement" }, "description": { "en": "This model may never be equipped with weapons or armour.", "fr": "Cette figurine ne peut jamais être équipée d'armes ni d'armures." } },
-        { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" }, "description": { "en": "This model causes Fear (see the Psychology rules).", "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)." } },
-        { "name": { "en": "Sluggish", "fr": "Apathie" }, "description": { "en": "This model reacts slowly and can never run, though it may still charge.", "fr": "Cette figurine a des réactions lentes et ne sait pas courir, mais elle peut charger normalement." } },
-        { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" }, "description": { "en": "This model is unaffected by psychology and never leaves combat.", "fr": "Cette figurine n'est pas affectée par la psychologie et ne quitte jamais un combat." } },
-        { "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" }, "description": { "en": "This model is unaffected by any poison.", "fr": "Cette figurine n'est affectée par aucun poison." } },
-        { "name": { "en": "Not Alive", "fr": "Insensible" }, "description": { "en": "This model replaces Stunned results with Knocked Down.", "fr": "Cette figurine remplace les résultats sonné par à terre." } },
-        { "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" }, "description": { "en": "This model never gains Experience points.", "fr": "Cette figurine ne gagne jamais de points d'Expérience." } }
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
+        {
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
+          }
+        },
+        {
+          "name": {
+            "en": "Sluggish",
+            "fr": "Apathie"
+          },
+          "description": {
+            "en": "This model reacts slowly and can never run, though it may still charge.",
+            "fr": "Cette figurine a des réactions lentes et ne sait pas courir, mais elle peut charger normalement."
+          }
+        },
+        {
+          "name": {
+            "en": "Immune to Psychology",
+            "fr": "Immunité à la Psychologie"
+          }
+        },
+        {
+          "name": {
+            "en": "Immune to Poison",
+            "fr": "Immunité aux Poisons"
+          }
+        },
+        {
+          "name": {
+            "en": "Not Alive",
+            "fr": "Insensible"
+          },
+          "description": {
+            "en": "This model replaces Stunned results with Knocked Down.",
+            "fr": "Cette figurine remplace les résultats sonné par à terre."
+          }
+        },
+        {
+          "name": {
+            "en": "Never Gains Experience",
+            "fr": "Ne gagne jamais d'Expérience"
+          }
+        }
       ]
     },
     {
-      "name": { "en": "Ghoul", "fr": "Goule" },
+      "name": {
+        "en": "Ghoul",
+        "fr": "Goule"
+      },
       "isHero": false,
       "cost": 40,
       "maxCount": null,
       "startingExperience": 0,
-      "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 4,
-      "wounds": 1, "initiative": 3, "attacks": 2, "leadership": 5,
+      "movement": 4,
+      "weaponSkill": 2,
+      "ballisticSkill": 2,
+      "strength": 3,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 2,
+      "leadership": 5,
       "description": {
         "en": "Ghouls are the descendants of evil and insane men who ate the flesh of the dead to survive the famine.",
         "fr": "Les goules sont les descendantes dégénérées d'hommes qui mangèrent les morts pour survivre à la famine."
       },
       "specialRules": [
-        { "name": { "en": "No Equipment", "fr": "Sans équipement" }, "description": { "en": "This model may never be equipped with weapons or armour.", "fr": "Cette figurine ne peut jamais être équipée d'armes ni d'armures." } },
-        { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" }, "description": { "en": "This model causes Fear (see the Psychology rules).", "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)." } }
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
+        {
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
+          }
+        }
       ]
     },
     {
-      "name": { "en": "Dire Wolf", "fr": "Loup Funeste" },
+      "name": {
+        "en": "Dire Wolf",
+        "fr": "Loup Funeste"
+      },
       "isHero": false,
       "cost": 50,
       "maxCount": 5,
       "startingExperience": 0,
-      "movement": 9, "weaponSkill": 3, "ballisticSkill": 0, "strength": 4, "toughness": 3,
-      "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 4,
+      "movement": 9,
+      "weaponSkill": 3,
+      "ballisticSkill": 0,
+      "strength": 4,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 2,
+      "attacks": 1,
+      "leadership": 4,
       "description": {
         "en": "Dire Wolves are slavering Undead hounds, the animated remains of giant wolves from the Edge of the World Mountains.",
         "fr": "Les loups funestes sont des cadavres animés de loups géants originaires des Montagnes du Bord du Monde, les chiens de guerre des morts-vivants."
       },
       "specialRules": [
-        { "name": { "en": "No Equipment", "fr": "Sans équipement" }, "description": { "en": "This model may never be equipped with weapons or armour.", "fr": "Cette figurine ne peut jamais être équipée d'armes ni d'armures." } },
         {
-          "name": { "en": "Pack Charge", "fr": "Charge en Meute" },
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
+        {
+          "name": {
+            "en": "Pack Charge",
+            "fr": "Charge en Meute"
+          },
           "description": {
             "en": "This model gains two Attacks instead of one on the turn it charges, overwhelming the enemy in numbers.",
             "fr": "Cette figurine bénéficie de deux Attaques au lieu d'une durant le tour où elle charge, submergeant l'ennemi sous le nombre."
           }
         },
-        { "name": { "en": "Sluggish", "fr": "Apathie" }, "description": { "en": "This model reacts slowly and can never run, though it may still charge.", "fr": "Cette figurine a des réactions lentes et ne sait pas courir, mais elle peut charger normalement." } },
-        { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" }, "description": { "en": "This model causes Fear (see the Psychology rules).", "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)." } },
-        { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" }, "description": { "en": "This model is unaffected by psychology and never leaves combat.", "fr": "Cette figurine n'est pas affectée par la psychologie et ne quitte jamais un combat." } },
-        { "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" }, "description": { "en": "This model is unaffected by any poison.", "fr": "Cette figurine n'est affectée par aucun poison." } },
-        { "name": { "en": "Not Alive", "fr": "Insensible" }, "description": { "en": "This model replaces Stunned results with Knocked Down.", "fr": "Cette figurine remplace les résultats sonné par à terre." } },
-        { "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" }, "description": { "en": "This model never gains Experience points.", "fr": "Cette figurine ne gagne jamais de points d'Expérience." } }
+        {
+          "name": {
+            "en": "Sluggish",
+            "fr": "Apathie"
+          },
+          "description": {
+            "en": "This model reacts slowly and can never run, though it may still charge.",
+            "fr": "Cette figurine a des réactions lentes et ne sait pas courir, mais elle peut charger normalement."
+          }
+        },
+        {
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
+          }
+        },
+        {
+          "name": {
+            "en": "Immune to Psychology",
+            "fr": "Immunité à la Psychologie"
+          }
+        },
+        {
+          "name": {
+            "en": "Immune to Poison",
+            "fr": "Immunité aux Poisons"
+          }
+        },
+        {
+          "name": {
+            "en": "Not Alive",
+            "fr": "Insensible"
+          },
+          "description": {
+            "en": "This model replaces Stunned results with Knocked Down.",
+            "fr": "Cette figurine remplace les résultats sonné par à terre."
+          }
+        },
+        {
+          "name": {
+            "en": "Never Gains Experience",
+            "fr": "Ne gagne jamais d'Expérience"
+          }
+        }
       ]
     }
   ],
   "equipment": [
     {
-      "name": { "en": "Book of the Dead", "fr": "Livre des Morts" },
+      "name": {
+        "en": "Book of the Dead",
+        "fr": "Livre des Morts"
+      },
       "category": "MiscellaneousEquipment",
       "cost": 200,
       "rarity": 12,
@@ -158,66 +347,5 @@
       "restrictedToThisWarband": true
     }
   ],
-  "spells": [
-    {
-      "magicSchoolName": "Necromancy",
-      "rollValue": 1,
-      "difficulty": 10,
-      "name": { "en": "Lifestealer", "fr": "Drain de Vie" },
-      "description": {
-        "en": "Choose a model within 6\". It suffers a wound (no save) and the Necromancer gains an extra wound for the battle, possibly above his maximum. Doesn't affect Possessed or Undead.",
-        "fr": "Choisissez une figurine à moins de 6ps. Elle subit une blessure (sans sauvegarde) et le nécromancien gagne 1 PV supplémentaire pour la bataille, pouvant dépasser son maximum. N'affecte pas les Possédés ni les Morts-Vivants."
-      }
-    },
-    {
-      "magicSchoolName": "Necromancy",
-      "rollValue": 2,
-      "difficulty": 5,
-      "name": { "en": "Re-Animation", "fr": "Réanimation" },
-      "description": {
-        "en": "One Zombie taken out of action in the last combat/shooting phase immediately returns to the battle within 6\" of the Necromancer, not in base contact with an enemy.",
-        "fr": "Un zombie mis hors de combat lors de la dernière phase de corps à corps ou de tir retourne immédiatement au combat, placé à moins de 6ps du nécromancien, pas au contact d'un ennemi."
-      }
-    },
-    {
-      "magicSchoolName": "Necromancy",
-      "rollValue": 3,
-      "difficulty": 6,
-      "name": { "en": "Death Vision", "fr": "Vision de Mort" },
-      "description": {
-        "en": "The Necromancer causes fear in his enemies for the duration of the battle.",
-        "fr": "Le nécromancien cause la peur à ses ennemis pour la durée de la bataille."
-      }
-    },
-    {
-      "magicSchoolName": "Necromancy",
-      "rollValue": 4,
-      "difficulty": 9,
-      "name": { "en": "Spell of Doom", "fr": "Fatalité" },
-      "description": {
-        "en": "Target an enemy within 12\" - it must roll equal to or under its Strength on 1D6 or the dead seize it; on a failure, roll on the Injury table.",
-        "fr": "Désignez un ennemi à moins de 12ps - il doit obtenir un résultat inférieur ou égal à sa Force sur 1D6 ou les morts le saisissent ; en cas d'échec, lancez sur le tableau des blessures."
-      }
-    },
-    {
-      "magicSchoolName": "Necromancy",
-      "rollValue": 5,
-      "difficulty": 6,
-      "name": { "en": "Call of Vanhel", "fr": "Appel de Vanhel" },
-      "description": {
-        "en": "A single Zombie or Dire Wolf within 6\" of the Necromancer may move again up to its full Movement; if this brings it into base contact with an enemy, it counts as charging.",
-        "fr": "Un zombie ou loup funeste à moins de 6ps du nécromancien peut se déplacer à nouveau de son mouvement maximum ; si cela l'amène au contact d'un ennemi, il compte comme ayant chargé."
-      }
-    },
-    {
-      "magicSchoolName": "Necromancy",
-      "rollValue": 6,
-      "difficulty": null,
-      "name": { "en": "Spell of Awakening", "fr": "Incantation de Réveil" },
-      "description": {
-        "en": "Automatic. If an enemy Hero is killed (11-15 on the Serious Injury chart), the Necromancer may raise him as a Zombie - keeps his profile/gear, counts as a solo Henchman group, can't run or gain experience.",
-        "fr": "Automatique. Si un Héros ennemi est tué (11-15 sur le tableau des Blessures Graves), le nécromancien peut le réveiller en zombie - garde son profil/équipement, compte comme un groupe d'Hommes de main à lui seul, ne peut plus courir ni gagner d'expérience."
-      }
-    }
-  ]
+  "spells": []
 }

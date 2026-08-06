@@ -1,0 +1,321 @@
+{
+  "name": {
+    "en": "Beastmen Raiders",
+    "fr": "Pillards Hommes-Bêtes"
+  },
+  "description": {
+    "en": "Savage, brutal creatures of Chaos dwelling in the deep forests bordering Mordheim, raiding and killing on pure instinct - the herd answers only to the largest, strongest Gor, and knows neither cities nor laws.",
+    "fr": "Les Hommes-Bêtes sont des créatures sauvages et brutales qui vivent dans les profondeurs des forêts du Vieux Monde. La harde tient lieu de structure sociale : elle regroupe une douzaine d'Hommes-Bêtes autour du Gor le plus grand et le plus fort, et n'a ni cités, ni lois, ni organisation."
+  },
+  "specialRules": [
+    {
+      "name": {
+        "en": "Animals",
+        "fr": "Bestiaux"
+      },
+      "description": {
+        "en": "Beastmen are fearsome creatures of Chaos and may never hire any Hired Sword unless specifically stated otherwise in its description.",
+        "fr": "Les Hommes-Bêtes sont de féroces créatures du Chaos et ne peuvent pas recruter de Francs-Tireurs à moins que le contraire ne soit précisé dans leur description."
+      }
+    }
+  ],
+  "magicSchools": [
+    {
+      "name": {
+        "en": "Chaos Rituals",
+        "fr": "Rituels du Chaos"
+      }
+    }
+  ],
+  "startingTreasury": 500,
+  "maxWarriors": 15,
+  "warriors": [
+    {
+      "name": {
+        "en": "Beastmen Chieftain",
+        "fr": "Chef Homme-Bête"
+      },
+      "isHero": true,
+      "cost": 65,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 5,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "Beastmen chieftains have gained their position through sheer brutality - he leads the Beastmen to Mordheim to gather Chaos Stones for his Herdstone.",
+        "fr": "Chez les sauvages Hommes-Bêtes, c'est le Gor le plus puissant qui commande. Il conduit ses semblables dans les ruines de Mordheim en quête de pierres du Chaos qui orneront celle de la Harde."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Beastmen Shaman",
+        "fr": "Chaman Homme-Bête"
+      },
+      "isHero": true,
+      "cost": 45,
+      "maxCount": 1,
+      "startingExperience": 11,
+      "movement": 5,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 6,
+      "description": {
+        "en": "Beastmen Shamans are prophets of the Dark Gods, and the most respected of all Beastmen - may never wear armour.",
+        "fr": "Les Chamans Hommes-Bêtes sont les prophètes des Dieux Sombres et ils sont très respectés. Il ne peut en aucun cas porter d'armure."
+      },
+      "isSpellcaster": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Wizard",
+            "fr": "Sorcier"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Bestigor",
+        "fr": "Bestigor"
+      },
+      "isHero": true,
+      "cost": 45,
+      "maxCount": 2,
+      "startingExperience": 8,
+      "movement": 5,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "Bestigors are the largest type of Beastmen, the great horned warriors of the warband - massive creatures with an inhuman resistance to pain.",
+        "fr": "Les Bestigors sont les plus grands et les plus puissants Hommes-Bêtes de la Harde. Ils arborent aussi les cornes les plus imposantes et semblent ignorer la douleur."
+      }
+    },
+    {
+      "name": {
+        "en": "Centigor",
+        "fr": "Centigor"
+      },
+      "isHero": true,
+      "cost": 80,
+      "maxCount": 1,
+      "startingExperience": 8,
+      "movement": 8,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 2,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "A disturbing cross between a horse or oxen and a Beastman - the four legs grant great strength and speed while the humanoid torso can wield weapons, a redoutable combination.",
+        "fr": "Un Centigor est le mélange contre-nature d'un quadrupède et d'un Homme-Bête. Ses quatre pattes lui permettent de se déplacer très vite et ses bras humanoïdes sont aptes à manier des armes. Il s'agit là d'une redoutable combinaison."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Drunken",
+            "fr": "Ivre"
+          },
+          "description": {
+            "en": "Before battle, Centigors gorge on vast quantities of looted beer and wine. At the start of each turn roll a D6: on a 1, take a Stupidity test (if failed, its effect lasts until the end of the turn); on 2-5 nothing happens; on a 6 the Centigor becomes Frenzied for the turn. While Stupid or Frenzied this way, it is immune to all other Psychology.",
+            "fr": "Avant un combat, le Centigor a pour habitude d'ingurgiter de grandes quantités de bière et de vin, fruits de ses précédentes rapines. Au début de chaque tour, jetez 1D6. Sur un résultat de 1, effectuez un test de stupidité (en cas d'échec, l'effet dure jusqu'à la fin du tour). Si vous obtenez un résultat compris entre 2 et 5, rien de particulier. Un résultat de 6 indique qu'il devient frénétique pour la durée du tour. Lorsqu'il est stupide ou frénétique, le Centigor est immunisé à la psychologie."
+          }
+        },
+        {
+          "name": {
+            "en": "Woodland Dwelling",
+            "fr": "Habitat forestier"
+          },
+          "description": {
+            "en": "The Centigor is a creature of the deep, dark forests and suffers no Movement penalty in wooded terrain.",
+            "fr": "Le Centigor est une créature vivant au cœur des forêts sombres du Vieux Monde, il ne subit donc aucune pénalité de Mouvement en terrain boisé."
+          }
+        },
+        {
+          "name": {
+            "en": "Trample",
+            "fr": "Piétinement"
+          },
+          "description": {
+            "en": "Besides its weapons, the Centigor uses its hooves and sheer size to crush its enemies - this counts as an additional Attack on its profile, unaffected by the bonuses or penalties of its weapons.",
+            "fr": "En plus de ses armes, le Centigor utilise ses sabots pour piétiner ses ennemis. Il a donc une Attaque supplémentaire sur son profil, mais elle n'est pas affectée par les bonus et malus de ses armes."
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Ungor",
+        "fr": "Ungor"
+      },
+      "isHero": false,
+      "cost": 25,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 5,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 6,
+      "description": {
+        "en": "Ungor are the most numerous of the Beastmen - small, spiteful creatures, but dangerous in large masses.",
+        "fr": "Les Ungors sont les Hommes-Bêtes les plus courants. Ils sont plus frêles que les Gors mais leur cruauté les rend très dangereux s'ils sont en grand nombre."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Lowest of the Low",
+            "fr": "Sous-bêtes"
+          },
+          "description": {
+            "en": "Ungor are on the lowest rung of Beastmen society and, regardless of Experience accrued, will never rise in the hierarchy. If an Ungor rolls 'That Lad's Got Talent' on the Experience table, re-roll it.",
+            "fr": "Les Ungors constituent la caste la plus basse de la société Homme-Bête. Quel que soit le nombre de points d'expérience accumulé, un Ungor ne pourra jamais se hisser dans la hiérarchie. Si suite à un jet de progression, un Ungor obtient le résultat 'Ce gars est doué', relancez le dé."
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Gor",
+        "fr": "Gor"
+      },
+      "isHero": false,
+      "cost": 35,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 5,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 4,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 6,
+      "description": {
+        "en": "Gor are nearly as numerous as Ungor, but larger and more brutish.",
+        "fr": "Les Gors sont moins nombreux que les Ungors, mais ils sont bien plus puissants et d'une violence extrême."
+      }
+    },
+    {
+      "name": {
+        "en": "Warhounds of Chaos",
+        "fr": "Chiens du Chaos"
+      },
+      "isHero": false,
+      "cost": 15,
+      "maxCount": 5,
+      "startingExperience": 0,
+      "movement": 7,
+      "weaponSkill": 4,
+      "ballisticSkill": 0,
+      "strength": 4,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 3,
+      "attacks": 1,
+      "leadership": 5,
+      "description": {
+        "en": "Titanic, mastiff-like creatures, insanely dangerous in close combat - apart from fangs and a nasty temper, Chaos Hounds carry no weapons or armour and fight without penalty.",
+        "fr": "Les Chiens du Chaos sont bien plus gros que les chiens de combat et beaucoup plus dangereux au corps à corps. Mis à part leurs griffes, leurs crocs, et quelques cornes pour les plus altérés, ils n'ont aucun équipement et combattent donc sans aucune pénalité."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Never Gains Experience",
+            "fr": "Ne gagne jamais d'Expérience"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Minotaur",
+        "fr": "Minotaure"
+      },
+      "isHero": false,
+      "cost": 200,
+      "maxCount": 1,
+      "startingExperience": 0,
+      "movement": 6,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 4,
+      "wounds": 3,
+      "initiative": 4,
+      "attacks": 3,
+      "leadership": 8,
+      "description": {
+        "en": "A giant, bull-headed Beastman - so powerful and fearsome that any Beastmen Chieftain will try to recruit one into his warband.",
+        "fr": "Le Minotaure est un Homme-Bête géant à tête de taureau. Il est si puissant et effrayant que tout Chef Homme-Bête essaiera d'en recruter un dans sa Harde."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
+          }
+        },
+        {
+          "name": {
+            "en": "Bloodgreed",
+            "fr": "Soif de sang"
+          },
+          "description": {
+            "en": "If the Minotaur puts all of its enemies out of action in close combat, it becomes Frenzied on a D6 roll of 4+.",
+            "fr": "Si le Minotaure met tous ses ennemis hors de combat au Corps à Corps, il devient frénétique si vous obtenez 4+ sur 1D6."
+          }
+        },
+        {
+          "name": {
+            "en": "Animal",
+            "fr": "Animal"
+          },
+          "description": {
+            "en": "The Minotaur is far more bestial than its Beastmen brethren - although it may gain Experience, it may never become a Hero.",
+            "fr": "Le Minotaure est bien plus bestial que ses frères Hommes-Bêtes et même s'il peut acquérir de l'expérience, il ne deviendra jamais un Héros."
+          }
+        },
+        {
+          "name": {
+            "en": "Large Target",
+            "fr": "Grande Cible"
+          }
+        }
+      ]
+    }
+  ]
+}

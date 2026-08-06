@@ -1,0 +1,301 @@
+{
+  "name": {
+    "en": "Skaven of Clan Eshin",
+    "fr": "Skavens (Clan Eshin)"
+  },
+  "description": {
+    "en": "Man-rats born of Chaos-tainted mutation, who have burrowed beneath the world of men for millennia in secret - Clan Eshin, masters of poison and silent murder, now infiltrate Mordheim's ruins to recover the glittering warpstone before rival clans learn the city's secret.",
+    "fr": "Les skavens sont des hommes-rats issus de mutations provoquées par le Chaos, qui parcourent le monde depuis des temps reculés à la recherche de la malepierre. Le Maître de la Nuit du clan Eshin, experts dans l'art du meurtre silencieux et de l'usage du poison, a préféré envoyer de petites bandes s'infiltrer dans le réseau de tunnels sous Mordheim afin de réunir les pierres brillantes et les ramener vers son repaire, plutôt que de risquer d'éveiller l'attention des clans rivaux."
+  },
+  "magicSchools": [
+    {
+      "name": {
+        "en": "Magic of the Horned Rat",
+        "fr": "Magie du Rat Cornu"
+      }
+    }
+  ],
+  "startingTreasury": 500,
+  "maxWarriors": 20,
+  "warriors": [
+    {
+      "name": {
+        "en": "Assassin Adept",
+        "fr": "Adepte assassin"
+      },
+      "isHero": true,
+      "cost": 60,
+      "maxCount": 1,
+      "startingExperience": 20,
+      "movement": 6,
+      "weaponSkill": 4,
+      "ballisticSkill": 4,
+      "strength": 4,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 5,
+      "attacks": 1,
+      "leadership": 7,
+      "description": {
+        "en": "The Nightmaster of Clan Eshin has sent this Assassin to collect precious wyrdstone - success means wealth and status among the clan, failure is best not contemplated.",
+        "fr": "Le Maître de la Nuit du clan Eshin a envoyé un de ses lieutenants à la recherche de la précieuse pierre magique. Le succès signifie gloire, descendance et aisance, tandis que la défaite signifie... Mieux vaut ne pas aborder ce sujet."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Leader",
+            "fr": "Chef"
+          }
+        },
+        {
+          "name": {
+            "en": "Perfect Killer",
+            "fr": "Machine à Tuer"
+          },
+          "description": {
+            "en": "This model always applies an extra -1 modifier to the enemy's armour save when it wounds them, whether by shooting or in close combat.",
+            "fr": "Un adepte assassin inflige toujours un modificateur de -1 à la sauvegarde ennemie lorsqu'il blesse (que ce soit au tir ou au corps à corps)."
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Black Skaven",
+        "fr": "Skaven noir"
+      },
+      "isHero": true,
+      "cost": 40,
+      "maxCount": 2,
+      "startingExperience": 8,
+      "movement": 6,
+      "weaponSkill": 4,
+      "ballisticSkill": 3,
+      "strength": 4,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 5,
+      "attacks": 1,
+      "leadership": 6,
+      "description": {
+        "en": "The most powerful fighters of Clan Eshin - black-furred killers trained in every martial art of their clan, excelling at ambush and assassination in Mordheim's ruins.",
+        "fr": "Les skavens noirs sont les plus puissants de tous les guerriers du clan Eshin, des tueurs chevronnés entraînés à tous les arts martiaux de leurs clans. À Mordheim ils excellent dans les embuscades et les assassinats."
+      }
+    },
+    {
+      "name": {
+        "en": "Eshin Sorcerer",
+        "fr": "Sorcier Eshin"
+      },
+      "isHero": true,
+      "cost": 45,
+      "maxCount": 1,
+      "startingExperience": 8,
+      "movement": 5,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 6,
+      "description": {
+        "en": "The sorcerers of Clan Eshin are black magicians who manufacture the enchanted weapons of the Assassins - their power is slight compared to the Warlocks of Clan Skryre or the mighty Grey Seers, but potent nonetheless.",
+        "fr": "Les sorciers du clan Eshin sont des enchanteurs maléfiques qui fabriquent des armes magiques pour les assassins. Bien que leurs pouvoirs soient faibles en comparaison de ceux des technomages du clan Skryre ou des Prophètes Gris, leur sorcellerie est puissante."
+      },
+      "isSpellcaster": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Wizard",
+            "fr": "Sorcier"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Night Runners",
+        "fr": "Coureurs nocturnes"
+      },
+      "isHero": true,
+      "cost": 20,
+      "maxCount": 2,
+      "startingExperience": 0,
+      "movement": 6,
+      "weaponSkill": 2,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 4,
+      "description": {
+        "en": "Young apprentices of Clan Eshin, recently initiated into the secrets of the clan - they make up for their lack of knowledge with ambition and energy.",
+        "fr": "Les coureurs nocturnes sont de jeunes apprentis du clan Eshin. Récemment initiés dans les secrets du clan, ils compensent leur manque de savoir par l'ambition et l'énergie dont ils font preuve."
+      }
+    },
+    {
+      "name": {
+        "en": "Verminkin",
+        "fr": "Vermineux"
+      },
+      "isHero": false,
+      "cost": 20,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 5,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 5,
+      "description": {
+        "en": "The Clanrats of Clan Eshin - the strongest among them are initiated into the clan's secrets and begin training to become Assassins, the most feared of Skaven warriors.",
+        "fr": "Les vermineux sont les guerriers du clan Eshin. Les plus forts d'entre eux sont initiés aux secrets du clan et sont entraînés pour devenir des assassins, ce sont les plus redoutés des guerriers des clans skavens. Tous rêvent de devenir un jour assassin."
+      }
+    },
+    {
+      "name": {
+        "en": "Giant Rats",
+        "fr": "Rats géants"
+      },
+      "isHero": false,
+      "cost": 15,
+      "maxCount": null,
+      "startingExperience": 0,
+      "movement": 6,
+      "weaponSkill": 2,
+      "ballisticSkill": 0,
+      "strength": 3,
+      "toughness": 3,
+      "wounds": 1,
+      "initiative": 4,
+      "attacks": 1,
+      "leadership": 4,
+      "description": {
+        "en": "Mutated creations of Clan Moulder trainees, the size of dogs - they fight alongside the Skaven, overpowering opponents through sheer weight of numbers.",
+        "fr": "Les rats géants sont des créations de l'étrange génie des skavens. Ce sont des rats mutants aussi gros que des chiens. Ils combattent aux côtés des skavens ajoutant encore au nombre pour submerger l'ennemi."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Never Gains Experience",
+            "fr": "Ne gagne jamais d'Expérience"
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Rat Ogre",
+        "fr": "Rat-ogre"
+      },
+      "isHero": false,
+      "cost": 210,
+      "maxCount": 1,
+      "startingExperience": 0,
+      "movement": 6,
+      "weaponSkill": 3,
+      "ballisticSkill": 3,
+      "strength": 5,
+      "toughness": 5,
+      "wounds": 3,
+      "initiative": 4,
+      "attacks": 3,
+      "leadership": 4,
+      "description": {
+        "en": "Horrible monsters much in demand as bodyguards to important Skaven.",
+        "fr": "Ces horribles monstres sont très demandés comme gardes du corps par les skavens importants."
+      },
+      "specialRules": [
+        {
+          "name": {
+            "en": "Causes Fear",
+            "fr": "Provoque la Peur"
+          }
+        },
+        {
+          "name": {
+            "en": "Stupidity (Unless Skaven Hero Nearby)",
+            "fr": "Stupidité (sauf Héros Skaven à proximité)"
+          },
+          "description": {
+            "en": "This model is subject to the rules for Stupidity, unless a Skaven Hero is within 6\".",
+            "fr": "Cette figurine est soumise aux règles de Stupidité, à moins qu'un Héros skaven ne se trouve à moins de 6ps."
+          }
+        },
+        {
+          "name": {
+            "en": "Large Target",
+            "fr": "Grande Cible"
+          }
+        }
+      ]
+    }
+  ],
+  "equipment": [
+    {
+      "name": {
+        "en": "Fighting Claws",
+        "fr": "Griffes de Combat"
+      },
+      "category": "MeleeWeapon",
+      "cost": 35,
+      "rarity": 7,
+      "description": {
+        "en": "Sharp metal blades fixed to the wielder's paws, the signature weapon of Clan Eshin's martial arts - traditionally worn as a pair (one on each hand), granting an extra Attack. A Skaven so equipped adds +1 Initiative to Climbing tests and may parry (re-roll a failed attempt once) as if armed with a sword and buckler, but may use no other weapon for the entire battle.",
+        "fr": "Les arts martiaux du clan Eshin nécessitent des armes exotiques. Les plus célèbres sont les griffes de combat : des lames acérées fixées aux pattes du guerrier. Traditionnellement utilisées par paire, une dans chaque main, elles donnent +1 Attaque à leur porteur, +1 en Initiative pour les tests d'escalade, et permettent la parade (comme s'il était équipé d'une épée et d'une rondache) - mais la figurine ne peut alors utiliser aucune autre arme durant toute la partie."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Weeping Blades",
+        "fr": "Lames Suintantes"
+      },
+      "category": "MeleeWeapon",
+      "cost": 50,
+      "rarity": 9,
+      "description": {
+        "en": "Swords forged with a small amount of warpstone mixed into their steel, constantly weeping a deadly corrosive venom. Traditionally used as a pair, granting an extra Attack; count as permanently coated in Black Lotus (no additional poison may be applied) and may be used to parry like a sword.",
+        "fr": "Les adeptes du clan Eshin utilisent des lames suintantes : des épées forgées avec une petite quantité de malepierre mélangée à leur acier, qui diffusent du poison en permanence. Traditionnellement utilisées par paire, elles donnent une Attaque supplémentaire ; elles sont équivalentes à des armes enduites de Lotus Noir (aucun autre poison ne peut y être ajouté) et permettent la parade comme des épées."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Blowpipe",
+        "fr": "Sarbacane"
+      },
+      "category": "MissileWeapon",
+      "cost": 25,
+      "rarity": 7,
+      "description": {
+        "en": "A short hollow tube for firing poisoned darts - too small to cause much direct damage, but a hidden shooter can fire it silently without revealing his position (the target may take an Initiative test to spot him). Any roll of 6 to hit automatically wounds the victim (as Black Lotus poison); cannot cause critical hits. Grants a positive armour save modifier: a 5+ save becomes 4+, and models without a save get a 6+.",
+        "fr": "La sarbacane est un tube utilisé pour envoyer des dards empoisonnés. Le grand avantage d'une sarbacane, c'est qu'elle est silencieuse ; un utilisateur bien caché peut tirer ses dards empoisonnés sans être repéré (la cible peut faire un test d'Initiative pour repérer le tireur). Sur un 6 pour toucher, la cible est blessée automatiquement (comme le Lotus Noir) ; une sarbacane ne peut pas infliger de coups critiques. Cette arme est dotée d'un modificateur de sauvegarde positif : une sauvegarde de 5+ devient 4+, et les figurines sans sauvegarde obtiennent 6+."
+      },
+      "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Warplock Pistol",
+        "fr": "Pistolet à Malepierre"
+      },
+      "category": "BlackPowderWeapon",
+      "cost": 35,
+      "rarity": 11,
+      "description": {
+        "en": "70 gc for a brace. A terrifying weapon of Clan Skryre, firing ammunition made from magically treated warpstone - wounds it causes often degenerate into terrible infections. Range 8\", Strength 5, -3 armour save modifier; fires every other turn (every turn if wielded as a brace).",
+        "fr": "70 CO la paire. Les pistolets à malepierre sont des armes redoutables, témoignages du génie malsain du clan Skryre. Ces pistolets tirent des munitions faites à partir de fragments de malepierre ensorcelés, provoquant d'horribles blessures qui dégénèrent souvent en terribles infections. Portée 8ps, Force 5, modificateur de sauvegarde -3 ; tire un tour sur deux (tous les tours si porté en paire)."
+      },
+      "restrictedToThisWarband": true
+    }
+  ],
+  "spells": []
+}

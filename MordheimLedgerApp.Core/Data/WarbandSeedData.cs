@@ -1,10 +1,13 @@
 namespace MordheimLedgerApp.Core.Data;
 
 /// <summary>
-/// JSON shape for a warband's seed data (Data/SeedData/*.json, embedded resources) - the scalable
-/// replacement for OfficialContentSeed.cs's hand-written C# object initializers, which don't scale
-/// past a single warband. AppDatabase.SeedOfficialContentAsync() deserializes these and writes both
-/// language values via the same SeedTranslationAsync key-allocation helper used for Reiklander.
+/// JSON shape for a warband's seed data (Data/SeedData/*.json, embedded resources). Genuinely common
+/// data (universal SpecialRules, the generic Equipment/Skill/Mutation pools, MagicSchools + their
+/// Spells) lives once in its own file (SpecialRules.json/Equipment.json/Mutations.json/Skills.json/
+/// MagicSchools.json), seeded before any warband file - see AppDatabase.SeedOfficialContentAsync().
+/// Warband files only declare what's specific to them, referencing the shared catalogs by English Name
+/// where relevant (SpecialRules/Mutations/MagicSchools). Each translatable field gets a key via the same
+/// SeedTranslationAsync helper.
 /// </summary>
 public class LocalizedText
 {
@@ -17,39 +20,37 @@ public class WarbandSeedData
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 
-    /// <summary>Rules that apply to every warrior in the band regardless of type (e.g. "Autonome" for
-    /// Ostlanders) - distinct from each WarriorSeedData's own SpecialRules, which only apply to that one
-    /// warrior type. See RulesReference/*.md: most warbands split their "Règles Spéciales" this way. Each
-    /// entry is find-or-created by its English Name (see AppDatabase.FindOrCreateSpecialRuleAsync) so a
-    /// rule like "Leader" reused across many warbands' JSON files resolves to the same catalog row -
-    /// keep the English Name identical (verbatim) across files when it's meant to be the same rule, and
-    /// keep its Description generic/mechanical (no per-archetype flavor) so it reads correctly wherever
-    /// it's attached.</summary>
+    /// <summary>Rules SPECIFIC to this warband (e.g. "Ancient Enemies" for Kislevites) - genuinely
+    /// common rules (Leader, Wizard, Causes Fear, ...) now live once in Data/SeedData/SpecialRules.json,
+    /// seeded before any warband file, so they're never redeclared here anymore. Still find-or-created by
+    /// English Name (see AppDatabase.FindOrCreateSpecialRuleAsync) for the rare case two warbands
+    /// independently need the exact same band-specific rule.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 
-    /// <summary>Magic school(s) this band grants access to (empty = no spellcasting) - find-or-created
-    /// by English Name like SpecialRules, but not shared across files in practice (each school is
-    /// specific to one warband's tradition). Must be declared here before any Spells entry can reference
-    /// it via SpellSeedData.MagicSchoolName.</summary>
+    /// <summary>Magic school(s) this band grants access to (empty = no spellcasting) - name-only
+    /// reference into Data/SeedData/MagicSchools.json, which is the sole owner of each school's
+    /// Description and Spells (seeded before any warband file). Multiple warbands may reference the same
+    /// school name (e.g. Cult of the Possessed and Beastmen Raiders both use "Chaos Rituals") without
+    /// either redeclaring its spell table.</summary>
     public List<MagicSchoolSeedData> MagicSchools { get; set; } = new();
 
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public List<WarriorSeedData> Warriors { get; set; } = new();
 
-    /// <summary>Equipment introduced by this warband (beyond the shared CoreEquipment) - typically
-    /// warband-specific rare items, see EquipmentSeedData.RestrictedToThisWarband.</summary>
+    /// <summary>Equipment SPECIFIC to this warband (typically rare/restricted items) - the generic common
+    /// pool (Dagger, Sword, Mace, ...) now lives once in Data/SeedData/Equipment.json, seeded before any
+    /// warband file. See EquipmentSeedData.RestrictedToThisWarband.</summary>
     public List<EquipmentSeedData> Equipment { get; set; } = new();
 
-    /// <summary>All entries of every spell/prayer/ritual table this warband uses (empty for non-casting
-    /// warbands like the dwarfs) - see MagicSchools above and WarriorSeedData.IsSpellcaster.</summary>
+    /// <summary>Always empty now - every warband's spell table lives in Data/SeedData/MagicSchools.json
+    /// instead (see MagicSchools above). Kept for JSON-schema stability rather than removed.</summary>
     public List<SpellSeedData> Spells { get; set; } = new();
 
-    /// <summary>Mutations introduced by this warband's JSON - find-or-created by English Name like
-    /// SpecialRules, since the rulebook's list (p.76) is shared verbatim across every Chaos-adjacent
-    /// warband. Not linked back to this warband (Mutation is a flat global catalog, see
-    /// Models.Library.Mutation) - only the first JSON to define an entry actually creates it, later
-    /// files reusing the same English Name just reference the existing row.</summary>
+    /// <summary>Mutations SPECIFIC to this warband (e.g. Kermesse du Chaos's Nurgle-themed Bénédictions)
+    /// - the generic rulebook-wide pool (p.76) now lives once in Data/SeedData/Mutations.json, seeded
+    /// before any warband file. Still find-or-created by English Name for the rare case two warbands
+    /// independently need the exact same band-specific mutation.</summary>
     public List<MutationSeedData> Mutations { get; set; } = new();
 
     /// <summary>Mounts introduced by this warband (e.g. "Sanglier de guerre" for Orques) - like
@@ -147,6 +148,28 @@ public class MutationSeedData
 
     /// <summary>True = only this warband may buy it (see WarbandArchetypeMutationEntity).</summary>
     public bool RestrictedToThisWarband { get; set; }
+}
+
+/// <summary>One entry of the common Skill catalog (Data/SeedData/Skills.json only - no warband file
+/// declares any) - always unrestricted, so no RestrictedToThisWarband field unlike Equipment/Mutation.</summary>
+public class SkillSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.SkillCategory member name.</summary>
+    public string Category { get; set; } = string.Empty;
+
+    public LocalizedText? Description { get; set; }
+}
+
+/// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the
+/// explicit owner of a school's spells, referenced by warband files via WarbandSeedData.MagicSchools
+/// (name-only, no Description, no Spells) to link a spellcaster without redeclaring the table.</summary>
+public class MagicSchoolWithSpellsSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+    public List<SpellSeedData> Spells { get; set; } = new();
 }
 
 public class MountSeedData

@@ -55,10 +55,10 @@ public class DataServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task Database_SeedsTenWarbandsTotal()
+    public async Task Database_SeedsFifteenWarbandsTotal()
     {
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        Assert.Equal(10, archetypes.Count);
+        Assert.Equal(15, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
@@ -69,14 +69,21 @@ public class DataServiceTests : IDisposable
         Assert.Contains(archetypes, a => a.Name == "Carnival of Chaos");
         Assert.Contains(archetypes, a => a.Name == "Cult of the Possessed");
         Assert.Contains(archetypes, a => a.Name == "Orc Mob");
+        Assert.Contains(archetypes, a => a.Name == "Beastmen Raiders");
+        Assert.Contains(archetypes, a => a.Name == "Witch Hunters");
+        Assert.Contains(archetypes, a => a.Name == "Skaven of Clan Eshin");
+        Assert.Contains(archetypes, a => a.Name == "The Sisters of Sigmar");
+        Assert.Contains(archetypes, a => a.Name == "Kislevites");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(30, spells.Count);
+        Assert.Equal(42, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Chaos Rituals"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Waaagh! Magic"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Sigmar"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Magic of the Horned Rat"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -87,6 +94,30 @@ public class DataServiceTests : IDisposable
 
         var dwarfAxe = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Dwarf axe");
         Assert.Single(dwarfAxe.RestrictedToWarbandArchetypeIds);
+    }
+
+    /// <summary>The 5 common seed files (SpecialRules/Equipment/Mutations/Skills/MagicSchools.json,
+    /// seeded first in AppDatabase.SeedOfficialContentAsync) replace what used to be duplicated across
+    /// warband files. This locks in the 3 real name/cost collisions that consolidation fixed (Short Bow,
+    /// Flail, Holy Tome each existed 2-3× at different prices before) and the Skills catalog, which
+    /// wasn't seeded at all before this.</summary>
+    [Fact]
+    public async Task CommonCatalogs_DedupCollisions_AndSeedSkills()
+    {
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+        Assert.Equal(5, Assert.Single(equipment, e => e.Name == "Short Bow").Cost);
+        Assert.Equal(15, Assert.Single(equipment, e => e.Name == "Flail").Cost);
+        Assert.Equal(100, Assert.Single(equipment, e => e.Name == "Holy Tome").Cost);
+
+        var mutations = await _library.GetMutationsAsync("en");
+        Assert.Contains(mutations, m => m.Name == "Hideous" && m.Description == "The mutant causes Fear.");
+        Assert.Contains(mutations, m => m.Name == "Rotting Visage");
+
+        var skills = await _library.GetSkillsAsync("en");
+        Assert.True(skills.Count > 30, $"Expected the core rulebook skill lists (~34 entries), got {skills.Count}");
+        Assert.All(skills, s => Assert.Empty(s.RestrictedToWarbandArchetypeIds));
+        foreach (var category in new[] { SkillCategory.Combat, SkillCategory.Shooting, SkillCategory.Academic, SkillCategory.Strength, SkillCategory.Speed })
+            Assert.Contains(skills, s => s.Category == category);
     }
 
     /// <summary>"Leader" is attached from 4 different warbands' JSON files (Averlanders/Captain,

@@ -1,0 +1,122 @@
+[
+  {
+    "name": { "en": "Daemon Soul", "fr": "Âme démoniaque" },
+    "description": {
+      "en": "A daemon possesses the mutant's soul, granting a 4+ save against the effects of spells or prayers.",
+      "fr": "Un démon possède l'âme du mutant. Le démon confère une sauvegarde spéciale de 4+ contre les sorts ou les prières."
+    },
+    "cost": 20
+  },
+  {
+    "name": { "en": "Great Claw", "fr": "Pince" },
+    "description": {
+      "en": "One arm ends in a great crab-like claw - no weapon in that arm, but gains an extra Strength+1 Attack in close combat.",
+      "fr": "Un des bras du mutant se termine par une énorme pince de crabe. Il ne porte pas d'arme avec ce bras, mais gagne une Attaque supplémentaire de Force+1 au Corps à Corps."
+    },
+    "cost": 50
+  },
+  {
+    "name": { "en": "Cloven Hoofs", "fr": "Sabots fendus" },
+    "description": {
+      "en": "The warrior gains +1 Movement.",
+      "fr": "Le guerrier gagne +1 en Mouvement."
+    },
+    "cost": 40
+  },
+  {
+    "name": { "en": "Tentacle", "fr": "Tentacule" },
+    "description": {
+      "en": "One arm ends in a tentacle - may grapple an opponent in close combat, reducing its Attacks by 1 (minimum 1); the mutant chooses which Attack is lost.",
+      "fr": "Un des bras du mutant se termine par un tentacule. Le mutant peut agripper ses adversaires au Corps à Corps et leur faire perdre 1 Attaque, jusqu'à un minimum de 1."
+    },
+    "cost": 35
+  },
+  {
+    "name": { "en": "Blackblood", "fr": "Sang acide" },
+    "description": {
+      "en": "If the mutant suffers a wound in close combat, any model in base contact suffers a Strength 3 hit (no critical hits) from the corrosive spray.",
+      "fr": "Si le mutant subit une blessure au Corps à Corps, les figurines en contact subissent une touche de Force 3 (pas de Coups Critiques) à cause des éclaboussures."
+    },
+    "cost": 30
+  },
+  {
+    "name": { "en": "Spines", "fr": "Épines" },
+    "description": {
+      "en": "Any model in base contact automatically suffers a Strength 1 hit at the start of each close combat phase - spines never cause critical hits.",
+      "fr": "Toute figurine en contact avec le mutant subit automatiquement une touche de Force 1 au début de chaque phase de Corps à Corps. Les épines ne provoquent jamais de Coups Critiques."
+    },
+    "cost": 35
+  },
+  {
+    "name": { "en": "Scorpion Tail", "fr": "Queue de scorpion" },
+    "description": {
+      "en": "A long barbed venomed tail grants an extra Strength 5 Attack each close combat phase - reduced to Strength 2 if the target is immune to poison.",
+      "fr": "Le mutant possède une longue queue épineuse avec un dard empoisonné, autorisant une Attaque supplémentaire de Force 5 à chaque phase de Corps à Corps. Si la figurine touchée est immunisée au poison, la Force de la touche est réduite à 2."
+    },
+    "cost": 40
+  },
+  {
+    "name": { "en": "Extra Arm", "fr": "Bras supplémentaire" },
+    "description": {
+      "en": "May use any one-handed weapon in the extra arm for +1 Attack in close combat, or carry a shield/buckler. A Possessed choosing this gains an extra Attack but still carries no weapon.",
+      "fr": "Le mutant peut utiliser n'importe quelle arme à une main avec son bras supplémentaire, ce qui lui donne une Attaque supplémentaire au Corps à Corps. Il peut aussi utiliser un bouclier ou une rondache."
+    },
+    "cost": 40
+  },
+  {
+    "name": { "en": "Hideous", "fr": "Hideux" },
+    "description": {
+      "en": "This model's appearance is abject - skin hanging in shreds, rotten entrails on display. It causes Fear.",
+      "fr": "L'apparence de l'Impur est abjecte : sa peau pend en lambeaux de ses membres, et ses entrailles pourries gigotent à l'air libre. Il cause la Peur."
+    },
+    "cost": 40
+  },
+  {
+    "name": { "en": "Crystalline Body", "fr": "Corps cristallin" },
+    "description": {
+      "en": "The mutant's body becomes living crystal, both hard and brittle. Toughness becomes 6 and Wounds becomes 1 - neither can ever be changed by Experience or another mutation; re-roll any Advance roll that would increase either.",
+      "fr": "Le corps du mutant devient du cristal vivant, à la fois dur et cassant. L'Endurance du mutant passe à 6 et ses Points de Vie à 1. Aucune de ces caractéristiques ne peut être modifiée par l'expérience ou par une autre mutation."
+    },
+    "cost": 60
+  },
+  {
+    "name": { "en": "Venomous Bite", "fr": "Morsure venimeuse" },
+    "description": {
+      "en": "Small fangs secrete a powerful poison - grants an extra Strength 5 close combat Attack (reduced to Strength 2 against poison-immune targets), or improves an existing bite Attack to include this effect.",
+      "fr": "Le mutant développe de petits crocs qui peuvent sécréter un puissant poison. Il gagne une Attaque supplémentaire au Corps à Corps de Force 5, réduite à Force 2 si la cible est immunisée aux poisons."
+    },
+    "cost": 50
+  },
+  {
+    "name": { "en": "Bulging Brute", "fr": "Brute épaisse" },
+    "description": {
+      "en": "The power of Chaos grants superhuman strength as muscle mass doubles, at the cost of wits - +2 Strength, -4 Leadership.",
+      "fr": "La puissance du Chaos confère à ce guerrier une force surhumaine. Le guerrier ajoute +2 à sa Force, mais subit un malus de -4 en Commandement."
+    },
+    "cost": 50
+  },
+  {
+    "name": { "en": "Prehensile Tail", "fr": "Queue préhensile" },
+    "description": {
+      "en": "A prehensile tail grows - grants an extra close combat Attack (unless the model already has a tail attack), and can hold a one-handed weapon, shield or buckler if available in its equipment list.",
+      "fr": "Une queue préhensile pousse sur le mutant, lui donnant une Attaque supplémentaire au Corps à Corps. Cette queue lui permet de tenir et d'utiliser une arme à une main, un bouclier ou une rondache."
+    },
+    "cost": 50
+  },
+  {
+    "name": { "en": "Scaly Skin", "fr": "Peau écailleuse" },
+    "description": {
+      "en": "A thin layer of reptilian scales grants a natural 5+ armour save (armour save penalties cannot reduce it past 6+, but a no-save Critical Hit result ignores it entirely); light armour still adds its usual +1.",
+      "fr": "Une fine couche d'écailles reptiliennes recouvre la chair du guerrier, lui conférant une sauvegarde d'armure de 5+. Les malus de sauvegarde ne peuvent pas la modifier au-delà de 6+, mais un résultat aucune sauvegarde sur le tableau des Coups Critiques l'annulera."
+    },
+    "cost": 60
+  },
+  {
+    "name": { "en": "Wings", "fr": "Ailes" },
+    "description": {
+      "en": "A pair of wings grow, feathered or leathery - not powerful enough for true flight, but let the mutant glide down from an elevated position: 2\" horizontal move per 1\" of fall.",
+      "fr": "Le mutant développe une paire d'ailes. Elles ne sont pas assez puissantes pour permettre de voler à proprement parler, mais lui permettent de planer à partir d'une position élevée : pour 1ps de chute, il avance de 2ps horizontalement."
+    },
+    "cost": 45
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "name": { "en": "Leader", "fr": "Chef" },
+    "description": {
+      "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
+      "fr": "Toute figurine à moins de 6ps de ce guerrier peut utiliser son Commandement pour ses tests."
+    }
+  },
+  {
+    "name": { "en": "Wizard", "fr": "Sorcier" },
+    "description": {
+      "en": "This model is a Wizard and may cast spells (see the Spells library).",
+      "fr": "Cette figurine est un Sorcier et peut lancer des sorts (voir la bibliothèque des Sorts)."
+    }
+  },
+  {
+    "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
+    "description": {
+      "en": "This model causes Fear (see the Psychology rules).",
+      "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+    }
+  },
+  {
+    "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" },
+    "description": {
+      "en": "This model never gains Experience points.",
+      "fr": "Cette figurine ne gagne jamais de points d'Expérience."
+    }
+  },
+  {
+    "name": { "en": "Large Target", "fr": "Grande Cible" },
+    "description": {
+      "en": "This model is a Large Target, as defined in the Shooting rules.",
+      "fr": "Cette figurine est une Grande Cible, comme défini dans les règles de Tir."
+    }
+  },
+  {
+    "name": { "en": "Expert Swordsman", "fr": "Expert à l'épée" },
+    "description": {
+      "en": "So skilled with their weapon that they may re-roll failed to-hit rolls when charging - only applies when armed with a normal sword, not a double-handed sword or any other weapon.",
+      "fr": "Si doué avec son arme que, lorsqu'il charge, il peut relancer ses jets pour toucher ratés. Ne s'applique que s'il est équipé d'une épée normale, pas une arme à deux mains ou une autre arme."
+    }
+  },
+  {
+    "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" },
+    "description": {
+      "en": "This model is unaffected by any poison.",
+      "fr": "Cette figurine n'est affectée par aucun poison."
+    }
+  },
+  {
+    "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" },
+    "description": {
+      "en": "This model is unaffected by psychology and never leaves combat.",
+      "fr": "Cette figurine n'est pas affectée par la psychologie et ne quitte jamais un combat."
+    }
+  },
+  {
+    "name": { "en": "No Equipment", "fr": "Sans équipement" },
+    "description": {
+      "en": "This model may never be equipped with weapons or armour.",
+      "fr": "Cette figurine ne peut jamais être équipée d'armes ni d'armures."
+    }
+  }
+]

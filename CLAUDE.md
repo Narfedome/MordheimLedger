@@ -107,35 +107,71 @@ que deviné :
 - Broheim.net (EN) — terminologie officielle + règles core découpées en 3 parties plus petites
 - Mordheimer.net (EN) — catalogue de bandes le plus complet, jusqu'à Grand Army 2a
 
-**Important** : les stats saisies dans `MordheimLedgerApp.Core/Data/OfficialContentSeed.cs`
-(Reiklander Mercenaries) viennent de la mémoire générale du modèle, pas d'une extraction fiable
-d'une des sources ci-dessus. À vérifier contre le livre de règles et corriger via l'UI (le flux
-Official → Modified existe précisément pour ça) si un chiffre est faux.
+**Important** : les stats saisies à l'origine pour Reiklander Mercenaries (aujourd'hui dans
+`Reiklanders.json` + `Data/SeedData/Equipment.json`, `OfficialContentSeed.cs` a été retiré, voir plus
+bas) venaient de la mémoire générale du modèle, pas d'une extraction fiable d'une des sources
+ci-dessus. À vérifier contre le livre de règles et corriger via l'UI (le flux Official → Modified
+existe précisément pour ça) si un chiffre est faux.
 
-**Import bande par bande (2e lot, en cours)** : l'utilisateur a fourni 13 fichiers texte (extraits FR
+**Import bande par bande (2e lot, terminé)** : l'utilisateur a fourni 13 fichiers texte (extraits FR
 bruts GW/GLM, mise en page dégradée par l'extraction PDF→texte — colonnes de tableaux mélangées,
-accents cassés sur certains fichiers) pour Kermesse du Chaos, Chasseurs de Trésors Nains (déjà
-intégrée, fichier de relecture), Culte des Possédés, Horde Orque, Pillards Hommes-Bêtes,
-Répurgateurs, Skavens (Clan Eshin — confirmé par l'équipement signature griffes de combat/lames
-suintantes/Magie du Rat Cornu, pas Pestilens), Sœurs de Sigmar, Kislévites, Mercenaires Averlanders/
-Ostlanders/Morts-Vivants (déjà intégrées, fichiers de relecture) et Mercenaires Marienburgers/
+accents cassés sur certains fichiers) pour Kermesse du Chaos, Chasseurs de Trésors Nains, Culte des
+Possédés, Horde Orque, Pillards Hommes-Bêtes, Répurgateurs, Skavens (Clan Eshin — confirmé par
+l'équipement signature griffes de combat/lames suintantes/Magie du Rat Cornu, pas Pestilens), Sœurs de
+Sigmar, Kislévites, Mercenaires Averlanders/Ostlanders/Morts-Vivants et Mercenaires Marienburgers/
 Middenheimers/Reiklanders (un seul fichier pour les 3 variantes — même roster de base, règles
-spéciales et trésorerie de départ différentes par ville). Méthode : croiser ces textes avec
-mordheimer.net (EN) pour combler les trous de mise en page/vérifier les chiffres avant d'écrire
-chaque JSON, bande par bande, comme pour le premier lot.
+spéciales et trésorerie de départ différentes par ville). Les 13 bandes sont maintenant toutes
+intégrées (15 bandes au total avec Reiklander + les 2 pilotes du premier lot). Méthode : croiser ces
+textes avec mordheimer.net (EN) pour combler les trous de mise en page/vérifier les chiffres/compléter
+les tables de sorts absentes du texte FR fourni (Prières de Sigmar pour Répurgateurs/Sœurs de Sigmar,
+Magie du Rat Cornu pour Skavens — sections "Magie" vides à l'extraction) avant d'écrire chaque JSON,
+bande par bande, comme pour le premier lot. Tout jeteur de sorts, quelle que soit la bande, réutilise
+la même règle spéciale générique « Wizard »/« Sorcier » plutôt qu'une règle dédiée par bande —
+l'affiliation à une école de magie passe uniquement par `WarbandSeedData.MagicSchools`/
+`WarriorSeedData.IsSpellcaster` (voir ROADMAP.md § V1 pour le détail bande par bande et les limites
+connues).
 
-**Fait** : Reiklander a migré vers le pipeline JSON (`Reiklanders.json`), `OfficialContentSeed.cs` ne
-contient plus que l'équipement commun (`CoreEquipment`). Les 3 variantes Mercenaires (Reiklander/
-Middenheim/Marienburg) partagent un même roster de base (Capitaine/Champion/Jeune Loup/Guerrier/
-Tireur/Bretteur, cf. mordheimer.net) mais divergent sur les règles spéciales : Reiklander a
-"Discipline Militaire" (12ps au lieu de Chef 6ps) sur son Capitaine + le bonus +1 CT des Tireurs cuit
-directement dans leur profil ; Middenheim démarre Capitaine/Champion à Force 4 ; Marienburg démarre à
-600 CO + a la règle "Négociants Fortunés" (bonus objets rares + budget recrutement). Plusieurs armes/
-armures communes manquantes (Masse, Hallebarde, Arbalète, Pistolet, Armure Lourde, etc.) ont été
-ajoutées non-restreintes via `Reiklanders.json` plutôt que dans `OfficialContentSeed.CoreEquipment`
-(pas de mécanisme de dédup par nom pour l'Équipement comme il en existe pour SpecialRule/Mutation/
-MagicSchool — attention à ne pas re-déclarer un nom déjà présent dans un futur import, ça créerait un
-doublon).
+**Fait** : Reiklander a migré vers le pipeline JSON (`Reiklanders.json`). Les 3 variantes Mercenaires
+(Reiklander/Middenheim/Marienburg) partagent un même roster de base (Capitaine/Champion/Jeune Loup/
+Guerrier/Tireur/Bretteur, cf. mordheimer.net) mais divergent sur les règles spéciales : Reiklander a
+"Discipline Militaire" (12ps au lieu de Chef 6ps, confirmé texte exact sur mordheimer.net) sur son
+Capitaine + le bonus +1 CT des Tireurs cuit directement dans leur profil ; Middenheim démarre Capitaine/
+Champion à Force 4 ; Marienburg démarre à 600 CO + a la règle "Négociants Fortunés" (bonus objets rares
++ budget recrutement).
+
+**Fait (données communes centralisées)** : `Data/SeedData/SpecialRules.json`/`Equipment.json`/
+`Mutations.json`/`Skills.json`/`MagicSchools.json` — un fichier par catalogue vraiment partagé (au lieu
+d'un fichier "Common" fourre-tout), seedés en premier dans `AppDatabase.SeedOfficialContentAsync` avant
+les 15 fichiers de bande. `OfficialContentSeed.cs` (l'ancien pool d'équipement commun écrit à la main,
+`CoreEquipment`/`CoreEquipmentFr` par position de tableau) est **retiré**, entièrement absorbé par
+`Equipment.json`. Un fichier de bande ne déclare plus que ce qui lui est vraiment propre ; pour une
+règle/mutation/école commune (ex. "Leader"), il porte juste un stub `{name: {en, fr}}` **sans
+description** — nécessaire pour que la ligne de jointure par guerrier/bande (`WarriorArchetype
+SpecialRuleEntity` etc.) se crée quand même, la description venant du fichier commun via le cache
+find-or-create déjà existant (`FindOrCreateSpecialRuleAsync`/`FindOrCreateMutationAsync`/
+`FindOrCreateMagicSchoolAsync`, inchangés). **Attention si un futur import ajoute une règle/mutation/
+école qu'on pense déjà commune** : vérifier si son nom anglais existe déjà dans `SpecialRules.json`/
+`Mutations.json`/`MagicSchools.json` avant de la redéclarer en toutes lettres dans le fichier de bande —
+sinon ça marche quand même (le texte du fichier de bande est juste silencieusement ignoré au profit du
+fichier commun s'il seed après), mais autant utiliser le stub directement. `Equipment.json` n'a **pas**
+de mécanisme de dédup à l'exécution (contrairement aux 3 autres) : c'est un fichier unique écrit à la
+main sans doublon interne, et les fichiers de bande ne déclarent plus aucun des noms qu'il contient — ce
+refactor a d'ailleurs corrigé 3 vrais doublons à coût différent qui existaient avant lui (Arc court,
+Fléau, Livre Saint, chacun réparti sur 2-3 bandes avec des prix contradictoires) en les fusionnant en une
+seule entrée, prix vérifié contre mordheimer.net. `Skills.json` seede pour la première fois les ~34
+compétences core du livre (Combat/Tir/Érudition/Force/Vitesse) — l'onglet Compétences du Codex était vide
+jusque-là ; les tableaux de compétences spéciales par bande restent en texte libre dans une
+`SpecialRule`, pas de vraies entrées `Skill` (décision explicite, restriction par héros à traiter plus
+tard).
+
+**Fait (vérification croisée post-import)** : les 15 bandes ont été vérifiées une seconde fois contre
+BSData/mordheim (dépôt GitHub communautaire au format BattleScribe, `.cat` par bande + `data.cat`
+partagé) en croisant chaque divergence trouvée contre mordheimer.net pour trancher (seule source de
+confiance retenue, sur demande explicite de l'utilisateur — BSData sert de piste à vérifier, pas de
+vérité). Sur 14 signalements, seuls 4 étaient de vraies erreurs (corrigées : règle du Capitaine
+Reiklander, rareté du Long Fusil du Hochland, tableau de compétences du Tueur de Troll nain, exclusion
+Personæ Dramatis des Rancuniers) ; le reste était soit déjà correct (BSData incomplet/silencieux sur
+l'objet, ex. Sanglier de guerre/Arme Obsidienne absents de leur dépôt), soit une confusion de leur part.
 
 **Fait (suite)** : Kermesse du Chaos et Culte des Possédés intégrées. Mutation a reçu le même
 mécanisme de restriction par bande qu'Équipement/Compétence/Monture

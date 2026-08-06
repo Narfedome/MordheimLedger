@@ -227,11 +227,11 @@
         {
           "name": {
             "en": "Drunk",
-            "fr": "Ivre"
+            "fr": "Bourré"
           },
           "description": {
             "en": "This model automatically passes any Leadership test it's required to take.",
-            "fr": "Cette figurine réussit automatiquement tous les tests de Commandement qu'elle doit passer."
+            "fr": "Cette figurine a tellement bu qu'elle réussit automatiquement tous les tests de Commandement qu'elle doit passer."
           }
         },
         {

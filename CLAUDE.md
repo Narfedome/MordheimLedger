@@ -98,6 +98,42 @@ que deviné :
   `ToWarrior()` au recrutement, à renseigner par archétype (0 par défaut, correct pour la plupart des
   types génériques).
 
+**Tuiles du Codex + dialogs récap en lecture seule** (branche `feature/codex-tile-recap-ui`, 2 commits,
+pas encore mergée sur `master`) : passe de polish sur les 8 onglets Codex (Bandes, Trading Post,
+Compétences, Règles Spéciales, Mutations, Montures, Sorts, Blessures) + 3 grilles de tuiles annexes
+(`EquipmentListView`, `WarriorArchetypeView`, `WarriorArchetypeSelectorView` — mêmes styles partagés,
+mais sans bouton info/dialog récap, hors périmètre des 8 types catalogués).
+- Tuiles carrées à taille fixe (130×130, `CodexTileFrameStyle` + `ResponsiveGridSpanBehavior
+  TileWidth="130"` déclaré par fichier — **pas** centralisé en constante malgré la tentation, décision
+  explicite après essai : cf. règles de collaboration ci-dessous), nom enroulé sur 3 lignes
+  (`CodexTileNameLabelStyle`) plutôt que tronqué à 1 (`TruncatedLabelStyle`, toujours utilisé tel quel par
+  `WarbandListPage` et `MagicSchoolView` — liste à plat, pas une grille de tuiles, hors périmètre).
+  Icône+nom(+ligne secondaire) centrés en groupe compact (`VerticalStackLayout`) plutôt qu'en lignes de
+  `Grid` élastiques — l'ancienne disposition en lignes laissait l'icône flotter loin du nom. Icône à
+  taille fixe (26px tuiles simples, 20px si ligne secondaire) au lieu de `Padding` élastique qui la
+  laissait gonfler pour remplir la tuile.
+- Icône de tuile par `EquipmentCategory` pour la Place du Marché (`EquipmentItemRow.CategoryIcon`/
+  `CategoryIconFont`) plutôt qu'un glyphe "Coins" unique pour tout le catalogue, peu pertinent pour une
+  arme/armure.
+- Ligne d'info secondaire (`CodexTileSecondaryLabelStyle`) : Trading Post affiche coût+rareté, Sorts
+  affiche jet+difficulté — abréviations en toutes lettres (`LibGoldCrownsAbbr` = "CO"/"GC",
+  `LibRollAbbr` = "Jet"/"Roll", `LibDifficultyAbbr` = "Diff.") plutôt qu'une icône, trop peu distinguable
+  à la taille d'une tuile (testé puis abandonné).
+- Bouton info (cercle fantôme, coin haut-droit) sur les 8 types catalogués, ouvrant un nouveau dialog
+  récap en lecture seule par type (`Features/Library/*/CreateEdit/XxxDetailDialog.xaml(.cs)` +
+  `XxxDetailDialogViewModel.cs`) qui reprend le layout de son dialog Edit mais en `Label` plutôt
+  qu'`Entry`/`Editor`/`Picker` ("plus mignon" que des champs désactivés) — sans l'icône du dialog Edit
+  (retirée sur demande explicite, readonly uniquement). Base commune `Components/Dialogs/
+  ReadOnlyDialogViewModel.cs` (mirror de `ConfirmDialogViewModel`, juste un bouton Fermer).
+- Chips (règles spéciales/écoles de magie/restrictions bande-guerrier) à l'intérieur de ces dialogs
+  récap : tapotables, ouvrent un mini-popup partagé (`Components/Dialogs/ChipDetailDialog.xaml` +
+  `ChipDetailDialogViewModel`) affichant juste Nom+Description de l'élément taponné — un seul dialog
+  générique réutilisé par tous les types de chip plutôt qu'un par type.
+
+En attente/reporté (pas dans cette passe) :
+- Regroupement de la liste à plat de Règles Spéciales (77 entrées, pas de groupe) — pas encore tranché.
+- Icônes par objet (URIs du site FR de Mordheim) — encore en évaluation par l'utilisateur.
+
 ## Sources de contenu officiel (voir ROADMAP.md § Sources)
 
 - Livre des Règles PDF fourni par l'utilisateur — **trop volumineux** pour l'outil Read (>100 Mo,
@@ -217,3 +253,10 @@ mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`pre
 - Build de référence pour valider une modification : `dotnet build MordheimLedgerApp.csproj -f
   net10.0-windows10.0.19041.0` (le seul target testable sur cette machine Windows) +
   `dotnet test MordheimLedgerApp.Tests`.
+- **Depuis la passe tuiles du Codex : dev par branche de fonctionnalité** (`feature/<nom>`), plus
+  directement sur `master` — la base est maintenant stable, à protéger.
+- La taille des tuiles du Codex (`ResponsiveGridSpanBehavior.TileWidth="130"`, dupliquée dans les 11
+  fichiers) a été temporairement centralisée en constante C# (`DefaultTileWidth`) référencée par XAML
+  via `x:Static`, puis explicitement annulée par l'utilisateur ("on retourne en arrière") en faveur de la
+  duplication d'origine — **ne pas retenter cette centralisation sans redemander**, la décision était
+  volontaire, pas un oubli de nettoyage.

@@ -17,6 +17,15 @@ public interface ILibraryService
     /// result, no call.</summary>
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(IEnumerable<int> warbandArchetypeIds, string languageCode);
     Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode);
+
+    /// <summary>This warband's own named starting-equipment lists (see Models.Library.EquipmentList) -
+    /// what a WarriorArchetype.EquipmentListId actually points at.</summary>
+    Task<List<EquipmentList>> GetEquipmentListsAsync(int warbandArchetypeId, string languageCode);
+
+    /// <summary>Member item ids of one EquipmentList - the starting-list channel consumed by the
+    /// roster equipment picker (see EquipmentPickerService), distinct from
+    /// EquipmentItem.RestrictedToWarbandArchetypeIds (the Rare/Trading-Post channel).</summary>
+    Task<HashSet<int>> GetEquipmentListItemIdsAsync(int equipmentListId);
     Task<List<Skill>> GetSkillsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 
@@ -51,10 +60,14 @@ public interface ILibraryService
     /// WarriorArchetype.SpecialRules) with the current list.</summary>
     Task SaveWarriorArchetypeAsync(WarriorArchetype archetype, string languageCode);
 
-    /// <summary>Also replaces the item's warband-restriction rows (see
-    /// EquipmentItem.RestrictedToWarbandArchetypeIds) with the current list - simple replace-all, no
-    /// diffing.</summary>
+    /// <summary>Also replaces the item's warband-restriction and warrior-restriction rows (see
+    /// EquipmentItem.RestrictedToWarbandArchetypeIds/RestrictedToWarriorArchetypeIds) with the current
+    /// lists - simple replace-all, no diffing.</summary>
     Task SaveEquipmentItemAsync(EquipmentItem item, string languageCode);
+
+    /// <summary>Also replaces the list's member-item rows (see EquipmentList.ItemIds) with the current
+    /// list.</summary>
+    Task SaveEquipmentListAsync(EquipmentList list, string languageCode);
 
     /// <summary>Also replaces the skill's warband-restriction rows (see
     /// Skill.RestrictedToWarbandArchetypeIds) with the current list.</summary>
@@ -69,6 +82,7 @@ public interface ILibraryService
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
     Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
     Task DeleteEquipmentItemAsync(int equipmentItemId);
+    Task DeleteEquipmentListAsync(int equipmentListId);
     Task DeleteSkillAsync(int skillId);
     Task DeleteInjuryAsync(int injuryId);
     Task DeleteSpellAsync(int spellId);

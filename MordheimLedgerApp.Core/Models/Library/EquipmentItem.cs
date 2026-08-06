@@ -29,7 +29,15 @@ public class EquipmentItem
     public string ImagePath { get; set; } = string.Empty;
 
     /// <summary>Empty = common to every warband. Non-empty = canon-restricted to these WarbandArchetype
-    /// ids (e.g. "Hache Naine" - Dwarf warbands only). Editable via EquipmentItemEditDialog - not
-    /// enforced in the equipment picker though (still shows the full catalog), "no rules engine V1".</summary>
+    /// ids (e.g. "Hache Naine" - Dwarf warbands only). This is the Rare/Trading-Post acquisition
+    /// channel (bought any time, not tied to a starting EquipmentList) - see EquipmentList for the
+    /// other, starting-list channel. Editable via EquipmentItemEditDialog.</summary>
     public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
+
+    /// <summary>Empty = every warrior of the restricted warband(s) (or every member of whichever
+    /// EquipmentList(s) this item belongs to) can pick it. Non-empty = further restricted to specific
+    /// WarriorArchetype ids (e.g. Averlanders' "Long bow" - Bergjaeger only, despite being in the
+    /// shared Scout list; Middenheim's "Wolfcloak" - Middenheim Heroes only). Seed-only for now, same
+    /// precedent as Skill.RestrictedToWarriorArchetypeIds - no EquipmentItemEditDialog UI.</summary>
+    public List<int> RestrictedToWarriorArchetypeIds { get; set; } = new();
 }

@@ -117,7 +117,8 @@
             "fr": "Chef"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Orc Equipment List"
     },
     {
       "name": {
@@ -149,7 +150,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Orc Equipment List"
     },
     {
       "name": {
@@ -172,7 +174,8 @@
       "description": {
         "en": "Only the toughest survive and rise through the ranks of Orc society - Big 'Uns are such rising stars, carrying out the Boss's orders and, should he ever fall, deciding on his replacement (usually through personal combat).",
         "fr": "Seuls les plus agressifs peuvent survivre et prospérer au sein de la société orque. Les Kostos font partie de cette élite et font office de bras droit pour le Chef - si jamais ce dernier venait à faillir, c'est probablement un de ses Kostos qui le pousserait dehors pour prendre sa place (le différend étant généralement réglé en combat singulier)."
-      }
+      },
+      "equipmentListName": "Orc Equipment List"
     },
     {
       "name": {
@@ -207,7 +210,8 @@
             "fr": "Au début de chaque tour du joueur Orque, lancez 1D6 pour chaque Homme de main Orque ou Gobelin qui n'est pas engagé au Corps à Corps - sur un résultat de 1, relancez sur le tableau d'Animosité pour déterminer comment la figurine s'en prend à un de ses camarades ce tour-ci."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Orc Equipment List"
     },
     {
       "name": {
@@ -262,7 +266,8 @@
             "fr": "Si un Guerrier Gobelin obtient le résultat 'Ce gars est doué' sur le tableau d'Expérience, le Chef le tue sur-le-champ car l'avorton commence à 's'la donner' - retirez-le de la feuille de bande."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Goblin Equipment List"
     },
     {
       "name": {
@@ -422,7 +427,7 @@
         "en": "Goblins only. Two-handed, Colossal Strength (no armour save allowed, Wounds caused are 1D3 instead of 1), Tiring (roll an Injury test for the wielder after the battle), Unpredictable (see below): a huge ball on a long chain, requiring Mad Cap Mushrooms to wield. When first swung, the wielder is moved 2D6\" in a direction chosen by the controlling player; on subsequent Movement phases roll a D6 to see where it drags him next, and it may knock him out of action outright.",
         "fr": "Réservée aux Gobelins. Arme à deux mains, Force Colossale (aucune sauvegarde d'armure, les blessures infligées sont de 1D3 au lieu d'une seule), Épuisante (jet de Blessure pour le porteur après la bataille), Imprévisible (voir ci-dessous) : un énorme boulet fixé au bout d'une longue chaîne, dont le maniement nécessite la consommation de champignons bonnets de fou. Au premier tour où le porteur la fait tournoyer, il est déplacé de 2D6ps dans une direction choisie par son joueur ; aux phases de Mouvement suivantes, un jet de 1D6 détermine où elle l'entraîne, pouvant le mettre hors de combat."
       },
-      "restrictedToThisWarband": true
+      "restrictedToWarriorNames": ["Goblin Warriors"]
     },
     {
       "name": {
@@ -435,7 +440,7 @@
         "en": "Goblins only. A trident on a long haft used to steer Cave Squigs - a Goblin carrying one may control any Squig within 12\" instead of the usual 6\" (see the Minderz rule). Counts as a spear in hand-to-hand combat.",
         "fr": "Réservé aux Gobelins. Un trident fixé au bout d'une longue hampe utilisé pour diriger les Squigs des cavernes - un Gobelin qui en porte un peut contrôler tout Squig à moins de 12ps au lieu des 6ps habituels (voir la règle Au pied !). Considéré comme une lance au Corps à Corps."
       },
-      "restrictedToThisWarband": true
+      "restrictedToWarriorNames": ["Goblin Warriors"]
     },
     {
       "name": {
@@ -448,7 +453,17 @@
         "en": "Common only if the warband includes at least one Goblin. A Goblin Warrior may eat these before a battle to gain Frenzy. After the battle, roll a D6: on a 1 the model becomes permanently Stupid. Required to wield a Ball & Chain.",
         "fr": "Disponibilité Commune uniquement si la bande compte au moins un Gobelin. Un Guerrier Gobelin peut en consommer avant une bataille pour gagner la Frénésie. Après la bataille, lancez 1D6 : sur un 1, la figurine devient Stupide de façon permanente. Nécessaires pour manier une Chaîne & boulet."
       },
-      "restrictedToThisWarband": true
+      "restrictedToWarriorNames": ["Goblin Warriors"]
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Orc Equipment List", "fr": "Liste d'équipement des Orques" },
+      "itemNames": ["Dagger", "Axe", "Sword", "Spear", "Halberd", "Double-handed weapon", "Morning star", "Bow", "Crossbow", "Light Armour", "Shield", "Helmet"]
+    },
+    {
+      "name": { "en": "Goblin Equipment List", "fr": "Liste d'équipement des Gobelins" },
+      "itemNames": ["Dagger", "Club", "Sword", "Spear", "Ball & Chain", "Short Bow", "Shield", "Helmet", "Squig Prodder", "Mad Cap Mushrooms"]
     }
   ],
   "spells": [],

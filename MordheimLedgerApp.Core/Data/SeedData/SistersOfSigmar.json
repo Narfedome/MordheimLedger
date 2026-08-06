@@ -103,7 +103,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Sisters of Sigmar Equipment List"
     },
     {
       "name": {
@@ -138,7 +139,8 @@
             "fr": "Une augure peut relancer ses tests de caractéristiques ratés (grimper, résister aux sorts ou autre) et les jets pour toucher au corps à corps ou au tir - vous devez toujours garder le second résultat. De plus, une augure peut utiliser sa vision sacrée pour aider les sœurs lorsqu'elles cherchent la pierre magique en ville : si elle n'est pas hors de combat, vous pouvez lancer deux dés lors de la phase d'exploration et choisir le résultat."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Sisters of Sigmar Equipment List"
     },
     {
       "name": {
@@ -161,7 +163,8 @@
       "description": {
         "en": "A long-serving priestess of the Cult of Sigmar, well versed in temple ritual and an example to the younger Sisters and Novices - any peril lurking in Mordheim's ruins is nothing compared to a Sister Superior's wrath.",
         "fr": "Chaque sœur supérieure est une prêtresse depuis longtemps au service du Culte de Sigmar, très versée dans les rituels du temple et un exemple pour les sœurs plus jeunes et les novices. N'importe quel danger ou ennemi rôdant dans les ruines de Mordheim n'est rien comparé à la colère d'une sœur supérieure."
-      }
+      },
+      "equipmentListName": "Sisters of Sigmar Equipment List"
     },
     {
       "name": {
@@ -184,7 +187,8 @@
       "description": {
         "en": "Sworn upon Sigmar's altar to pacify the city and thereby earn redemption for their shamed order - whatever perils stand in their way, they will overcome them.",
         "fr": "Les sœurs de Sigmar savent que leur ordre est discrédité aux yeux de Sigmar, leur dieu. Chacune d'elle a juré sur son autel de pacifier la cité et ainsi d'obtenir la rédemption de leurs péchés. Quels que soient les périls à affronter, elles ne flancheront jamais et poursuivront leur tâche !"
-      }
+      },
+      "equipmentListName": "Sisters of Sigmar Equipment List"
     },
     {
       "name": {
@@ -207,7 +211,8 @@
       "description": {
         "en": "The Sisters draw their recruits only from the noblest houses of the Empire - few in number, they must endure years as Novices while their devotion is tested, all eager to prove themselves worthy handmaidens of Sigmar.",
         "fr": "Par tradition les sœurs ne recrutent que parmi les meilleures maisons de l'Empire et les familles de la noblesse considèrent comme un grand honneur d'avoir une fille acceptée dans l'ordre. Malgré le faible nombre des recrues, elles doivent rester des novices pendant plusieurs années au cours desquelles on éprouve la ferveur de leur foi. Toutes sont désireuses de prouver leur valeur et servir parmi les vierges de Sigmar."
-      }
+      },
+      "equipmentListName": "Sisters of Sigmar Equipment List"
     }
   ],
   "equipment": [
@@ -248,7 +253,8 @@
         "en": "Heroines only. Water sanctified in Sigmar's name.",
         "fr": "Réservée aux Héroïnes. Eau sanctifiée au nom de Sigmar."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Sigmarite Matriarch", "Augur", "Sister Superior"]
     },
     {
       "name": {
@@ -261,7 +267,29 @@
         "en": "Heroines only. A sacred relic of the Cult of Sigmar, carried for its protection.",
         "fr": "Réservée aux Héroïnes. Une relique sacrée du Culte de Sigmar, portée pour sa protection."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Sigmarite Matriarch", "Augur", "Sister Superior"]
+    },
+    {
+      "name": {
+        "en": "Holy Tome",
+        "fr": "Livre Saint"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 100,
+      "rarity": 8,
+      "description": {
+        "en": "Books of prayers and holy deeds copied by hand in the scriptoriums of Sigmar - a holy man reciting from one strengthens his faith. Full cost is 100 + D6x10 gc. Warrior-Priests and Sisters of Sigmar only. A Warrior-Priest or Sister of Sigmar with a Holy Tome adds +1 to the score when trying to recite a prayer.",
+        "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6x10 CO. Réservé aux Prêtres-Guerriers et aux Sœurs de Sigmar. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
+      },
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Sigmarite Matriarch", "Augur", "Sister Superior"]
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Sisters of Sigmar Equipment List", "fr": "Liste d'équipement des Sœurs de Sigmar" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Sigmarite Warhammer", "Flail", "Steel Whip", "Double-handed weapon", "Sling", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Holy Tome", "Blessed Water", "Holy Relic"]
     }
   ]
 }

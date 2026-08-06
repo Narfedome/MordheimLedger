@@ -72,7 +72,8 @@
             "fr": "Lorsque la bande est créée, le Capitaine a le droit d'acheter un objet de la liste d'équipement des guerriers kislévites à moitié prix. Cet objet représente un héritage familial transmis de génération en génération. Si cet artefact ancestral est perdu (par exemple le résultat Dépouillé du tableau des blessures), le Capitaine doit le remplacer aussitôt que possible par un substitut de bonne qualité, à 150% de son prix habituel. Tant que l'objet n'a pas été remplacé, le Capitaine subit un malus de -1 sur tous ses tests et jets pour toucher."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Kislev Warrior Equipment List"
     },
     {
       "name": {
@@ -95,7 +96,8 @@
       "description": {
         "en": "An ancient Cossack term meaning 'best warrior', given by a chieftain to his personal champion - or used by Gospodar warriors as a familiar term for an experienced veteran. Most Kislevite city garrisons hold at least one such grizzled officer.",
         "fr": "Esaul est un ancien mot cosaque signifiant 'meilleur guerrier', et était généralement appliqué au plus puissant combattant de la tribu. Le mot est aujourd'hui donné comme titre honorifique par un chef à son champion personnel, bien qu'il soit également encore utilisé par les guerriers Gospodar pour désigner un vétéran. Toute garnison de cité kislévite contient au moins un officier endurci que ses hommes appellent affectueusement Esaul."
-      }
+      },
+      "equipmentListName": "Kislev Warrior Equipment List"
     },
     {
       "name": {
@@ -130,7 +132,8 @@
             "fr": "Une bande kislévite incluant un Dompteur d'Ours peut recruter un Ours Apprivoisé en tant qu'Homme de Main. Cet animal a été dressé pour suivre les instructions du Dompteur, il réussira donc automatiquement ses tests de stupidité lorsqu'il se trouve dans un rayon de 6ps du Dompteur d'Ours (même si ce dernier est à terre ou sonné)."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Kislev Warrior Equipment List"
     },
     {
       "name": {
@@ -153,7 +156,8 @@
       "description": {
         "en": "Strong, strapping lads from the countryside, often joining a band of daring adventurers to make their fortune.",
         "fr": "Ces jeunes paysans robustes se joignent souvent à des bandes d'aventuriers pour chercher fortune."
-      }
+      },
+      "equipmentListName": "Kislev Warrior Equipment List"
     },
     {
       "name": {
@@ -176,7 +180,8 @@
       "description": {
         "en": "The Gospodar tribe make up the bulk of Kislev's people and are generally considered its most civilised - Gospodar women hold the same rights as men, and the most powerful of the legendary Ice Mages of Kislev are all female.",
         "fr": "La tribu des Gospodar constitue la majorité du peuple de Kislev, et ses membres sont généralement considérés comme étant les gens les plus civilisés de ce pays inhospitalier. Celles-ci disposent d'ailleurs des mêmes droits que les mâles Gospodar : de fait, les plus puissants des légendaires mages des glaces kislévites sont tous des femmes !"
-      }
+      },
+      "equipmentListName": "Kislev Warrior Equipment List"
     },
     {
       "name": {
@@ -211,7 +216,8 @@
             "fr": "Des années de conflit contre les forces du Chaos ont laissé leur empreinte dans l'âme des Cosaques. Ceux-ci sont sujets à la haine des forces du Chaos (c'est-à-dire les membres de toute bande à laquelle s'applique la règle Vieux Ennemis)."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Kislev Warrior Equipment List"
     },
     {
       "name": {
@@ -246,7 +252,8 @@
             "fr": "Un Streltsi armé d'une hallebarde et d'une arquebuse peut utiliser cette dernière pour y poser son arme à feu. Il bénéficie alors d'un bonus de +1 pour toucher avec son arquebuse tant qu'il ne se déplace pas durant la phase de mouvement (cela s'applique même si le Streltsi dispose d'une compétence lui permettant de se déplacer et de tirer avec une arquebuse : il ne doit pas se déplacer du tout pour pouvoir poser son arquebuse)."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Streltsi Equipment List"
     },
     {
       "name": {
@@ -339,7 +346,8 @@
         "en": "Heroes only. Bears are sacred in Kislev, and a necklace of their claws or teeth is reputed to hold magical power. Full cost is 75 + 3D6 gc. The wearer gains some of the bear's strength and ferocity, becoming subject to Frenzy.",
         "fr": "Réservé aux Héros. À Kislev, les ours sont sacrés, et un collier fait de dents (ou de crocs) de cet animal est réputé avoir des pouvoirs magiques. Coût total de 75 + 3D6 CO. Un guerrier portant ce collier reçoit une partie de la force et de la férocité de l'ours dont il est issu : il devient sujet à la Frénésie."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Druzhina Captain", "Esaul", "Bear Tamer", "Youths"]
     },
     {
       "name": {
@@ -353,7 +361,18 @@
         "en": "Heroes only. Full cost is 35 + 2D6 gc. A one-use item a Kislevite Hero may give the warband before a battle: every warrior gains +1 Leadership (maximum 10) for the game, but every member must test against Toughness before the battle, suffering -1 Initiative for the game on a failure.",
         "fr": "Réservée aux Héros. Coût total de 35 + 2D6 CO. Un objet à usage unique qu'un Héros kislévite peut donner à sa bande avant une bataille : tous les membres de la bande bénéficient alors d'un bonus de +1 en Commandement (jusqu'à un maximum de 10) pour la durée de la partie, mais tous doivent effectuer un test d'Endurance avant le début de la partie, sous peine de subir un malus de -1 en Initiative en cas d'échec."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Druzhina Captain", "Esaul", "Bear Tamer", "Youths"]
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Kislev Warrior Equipment List", "fr": "Liste d'équipement des Guerriers Kislévites" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Throwing Knives", "Short Bow", "Bow", "Crossbow", "Pistol", "Duelling Pistol", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Bear-Claw Necklace", "Vodka"]
+    },
+    {
+      "name": { "en": "Streltsi Equipment List", "fr": "Liste d'équipement des Streltsi" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Bow", "Crossbow", "Pistol", "Duelling Pistol", "Handgun", "Light Armour", "Shield", "Helmet"]
     }
   ]
 }

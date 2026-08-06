@@ -61,8 +61,8 @@ public class DataServiceTests : IDisposable
         Assert.Equal(15, archetypes.Count);
         Assert.Contains(archetypes, a => a.Name == "Undead");
         Assert.Contains(archetypes, a => a.Name == "Dwarf Treasure Hunters");
-        Assert.Contains(archetypes, a => a.Name == "Averland Mercenaries");
-        Assert.Contains(archetypes, a => a.Name == "Ostland Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Averlander Mercenaries");
+        Assert.Contains(archetypes, a => a.Name == "Ostlander Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Reiklander Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Middenheim Mercenaries");
         Assert.Contains(archetypes, a => a.Name == "Marienburg Mercenaries");
@@ -141,7 +141,7 @@ public class DataServiceTests : IDisposable
         var leaderId = allRules.Single(r => r.Name == "Leader").Id;
 
         var archetypes = await _library.GetWarbandArchetypesAsync("en");
-        var leaderBearers = new[] { ("Averland Mercenaries", "Captain"), ("Ostland Mercenaries", "Elder"),
+        var leaderBearers = new[] { ("Averlander Mercenaries", "Captain"), ("Ostlander Mercenaries", "Elder"),
             ("Dwarf Treasure Hunters", "Noble"), ("Undead", "Vampire") };
 
         foreach (var (bandName, warriorName) in leaderBearers)
@@ -154,7 +154,7 @@ public class DataServiceTests : IDisposable
         // Band-wide rules (not tied to one warrior type) live on the WarbandArchetype itself.
         var dwarfs = archetypes.Single(a => a.Name == "Dwarf Treasure Hunters");
         Assert.Contains(dwarfs.SpecialRules, r => r.Name == "Hard to Kill");
-        var ostlanders = archetypes.Single(a => a.Name == "Ostland Mercenaries");
+        var ostlanders = archetypes.Single(a => a.Name == "Ostlander Mercenaries");
         Assert.Contains(ostlanders.SpecialRules, r => r.Name == "Self-Reliant");
     }
 
@@ -196,7 +196,7 @@ public class DataServiceTests : IDisposable
     /// prove two warbands can each have their own distinctly-named magic school (its "Nurgle Rituals" is
     /// unrelated to the Undead's "Necromancy").</summary>
     [Fact]
-    public async Task KermesseDuChaos_MutationsAreWarbandRestricted()
+    public async Task CarnivalOfChaos_MutationsAreWarbandRestricted()
     {
         var kermesse = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Carnival of Chaos");
 
@@ -217,7 +217,7 @@ public class DataServiceTests : IDisposable
     /// Pillards Hommes-Bêtes later - and both Possessed archetypes flagged CanBuyMutations get the
     /// mutations tab.</summary>
     [Fact]
-    public async Task CulteDesPossedes_MutationsAreUnrestricted()
+    public async Task CultOfThePossessed_MutationsAreUnrestricted()
     {
         var possessed = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Cult of the Possessed");
         var warriors = await _library.GetWarriorArchetypesAsync(possessed.Id, "en");
@@ -233,7 +233,7 @@ public class DataServiceTests : IDisposable
     /// non-fixed Movement characteristic (Cave Squigs roll 2D6" instead of a fixed value) - see
     /// WarriorArchetype.MovementOverride/MovementDisplay, added specifically for this case.</summary>
     [Fact]
-    public async Task HordeOrque_SquigMovementOverride_AndWarBoarMount()
+    public async Task OrcMob_SquigMovementOverride_AndWarBoarMount()
     {
         var orcs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Orc Mob");
         var warriors = await _library.GetWarriorArchetypesAsync(orcs.Id, "en");
@@ -251,6 +251,107 @@ public class DataServiceTests : IDisposable
         var warBoar = mounts.Single(m => m.Name == "War Boar");
         Assert.Equal([orcs.Id], warBoar.RestrictedToWarbandArchetypeIds);
         Assert.Contains(warBoar.SpecialRules, r => r.Name == "Furious Charge");
+    }
+
+    /// <summary>Undead is a 1-equipment-list band (all equipped warriors share it) - the simplest shape,
+    /// see AppDatabase.SeedWarbandFromJsonAsync's Equipment/EquipmentLists/Warriors seeding order.</summary>
+    [Fact]
+    public async Task Undead_AllEquippedWarriorsShareOneEquipmentList()
+    {
+        var undead = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Undead");
+        var lists = await _library.GetEquipmentListsAsync(undead.Id, "en");
+        var list = Assert.Single(lists);
+        Assert.Equal("Undead Equipment List", list.Name);
+        Assert.NotEmpty(list.ItemIds);
+
+        var warriors = await _library.GetWarriorArchetypesAsync(undead.Id, "en");
+        foreach (var name in new[] { "Vampire", "Necromancer", "Dreg" })
+            Assert.Equal(list.Id, warriors.Single(w => w.Name == name).EquipmentListId);
+
+        // Zombies/Ghouls/Dire Wolves carry no equipment at all.
+        Assert.Null(warriors.Single(w => w.Name == "Zombie").EquipmentListId);
+    }
+
+    /// <summary>Skaven is a 2-list band where a Hero (Night Runners) draws from the Henchmen list rather
+    /// than the Heroes one - the list<->archetype mapping isn't a fixed Hero/Henchman split.</summary>
+    [Fact]
+    public async Task Skaven_NightRunnersHero_UsesHenchmenEquipmentList()
+    {
+        var skavens = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Skaven of Clan Eshin");
+        var lists = await _library.GetEquipmentListsAsync(skavens.Id, "en");
+        Assert.Equal(2, lists.Count);
+
+        var warriors = await _library.GetWarriorArchetypesAsync(skavens.Id, "en");
+        var heroesList = lists.Single(l => l.Name == "Heroes Equipment List");
+        var henchmenList = lists.Single(l => l.Name == "Henchmen Equipment List");
+
+        var nightRunners = warriors.Single(w => w.Name == "Night Runners");
+        Assert.True(nightRunners.IsHero);
+        Assert.Equal(henchmenList.Id, nightRunners.EquipmentListId);
+
+        var assassinAdept = warriors.Single(w => w.Name == "Assassin Adept");
+        Assert.Equal(heroesList.Id, assassinAdept.EquipmentListId);
+    }
+
+    /// <summary>Reiklanders.json declares no band-specific "equipment" (empty array) - its two
+    /// equipment lists are built purely from ItemNames referencing the common Equipment.json pool.</summary>
+    [Fact]
+    public async Task Reiklanders_EquipmentListsBuiltEntirelyFromCommonPool()
+    {
+        var reiklanders = await GetReiklandersAsync();
+        var lists = await _library.GetEquipmentListsAsync(reiklanders.Id, "en");
+        Assert.Equal(2, lists.Count);
+        Assert.All(lists, l => Assert.NotEmpty(l.ItemIds));
+
+        var warriors = await _library.GetWarriorArchetypesAsync(reiklanders.Id, "en");
+        Assert.All(warriors, w => Assert.NotNull(w.EquipmentListId));
+    }
+
+    /// <summary>Averlanders' "Hunting Arrows" is restricted to the Bergjaeger archetype even though it's
+    /// a member of the Scout Equipment List shared with Halfling Scouts - see
+    /// EquipmentItem.RestrictedToWarriorArchetypeIds.</summary>
+    [Fact]
+    public async Task Averlanders_HuntingArrows_RestrictedToBergjaegerOnly()
+    {
+        var averlanders = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Averlander Mercenaries");
+        var warriors = await _library.GetWarriorArchetypesAsync(averlanders.Id, "en");
+        var bergjaeger = warriors.Single(w => w.Name == "Bergjaeger");
+
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+        var huntingArrows = equipment.Single(e => e.Name == "Hunting Arrows");
+        Assert.Equal([bergjaeger.Id], huntingArrows.RestrictedToWarriorArchetypeIds);
+
+        var scoutList = (await _library.GetEquipmentListsAsync(averlanders.Id, "en")).Single(l => l.Name == "Scout Equipment List");
+        Assert.Contains(huntingArrows.Id, scoutList.ItemIds);
+    }
+
+    /// <summary>Holy Tome is a Rare item shared by two unrelated bands (Witch Hunters, Sisters of
+    /// Sigmar), each restricting it to a different set of their own Heroes - must resolve to a single
+    /// catalog row (not two duplicates) via AppDatabase.SeedWarbandFromJsonAsync's find-or-create
+    /// Equipment loop, with both bands' warband/warrior restriction rows accumulating on it.</summary>
+    [Fact]
+    public async Task HolyTome_SharedRareItem_RestrictedPerBandAndPerHero()
+    {
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+        var holyTomes = equipment.Where(e => e.Name == "Holy Tome").ToList();
+        var holyTome = Assert.Single(holyTomes);
+
+        var witchHunters = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Witch Hunters");
+        var sisters = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "The Sisters of Sigmar");
+        Assert.Equal(new[] { witchHunters.Id, sisters.Id }.OrderBy(x => x), holyTome.RestrictedToWarbandArchetypeIds.OrderBy(x => x));
+
+        var warriorPriest = (await _library.GetWarriorArchetypesAsync(witchHunters.Id, "en")).Single(w => w.Name == "Warrior-Priest");
+        var sisterHeroines = (await _library.GetWarriorArchetypesAsync(sisters.Id, "en"))
+            .Where(w => w.Name is "Sigmarite Matriarch" or "Augur" or "Sister Superior").Select(w => w.Id);
+        var expectedWarriors = new[] { warriorPriest.Id }.Concat(sisterHeroines).OrderBy(x => x);
+        Assert.Equal(expectedWarriors, holyTome.RestrictedToWarriorArchetypeIds.OrderBy(x => x));
+
+        // The recruit picker is list-only now (see EquipmentItemViewModel.ApplyFilter) - a Rare item a
+        // warrior can actually buy must be a member of their list, not just warband/warrior-restricted.
+        var witchHunterList = (await _library.GetEquipmentListsAsync(witchHunters.Id, "en")).Single(l => l.Name == "Witch Hunter Equipment List");
+        var sistersList = (await _library.GetEquipmentListsAsync(sisters.Id, "en")).Single(l => l.Name == "Sisters of Sigmar Equipment List");
+        Assert.Contains(holyTome.Id, witchHunterList.ItemIds);
+        Assert.Contains(holyTome.Id, sistersList.ItemIds);
     }
 
     [Fact]

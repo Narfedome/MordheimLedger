@@ -56,7 +56,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Possessed Equipment List"
     },
     {
       "name": {
@@ -118,7 +119,8 @@
       "description": {
         "en": "Revered as the favoured ones of the Dark Gods, their physical disfigurements marking the vileness of their soul - they come in many shapes and sizes, each more bizarre than the next.",
         "fr": "Les Mutants sont célébrés comme les favoris des dieux des ténèbres, leurs difformités montrant la déchéance de leurs âmes. Ils peuvent prendre bien des formes et des tailles différentes, toutes plus bizarres les unes que les autres."
-      }
+      },
+      "equipmentListName": "Possessed Equipment List"
     },
     {
       "name": {
@@ -153,7 +155,8 @@
             "fr": "Les Damnés ont été rendus fous par la possession et ne connaissent pas la peur. Ils réussissent automatiquement tous les tests de Commandement qu'ils pourraient avoir à passer."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Darksouls Equipment List"
     },
     {
       "name": {
@@ -176,7 +179,8 @@
       "description": {
         "en": "Mutated monstrosities infesting the forests of the Empire - massive horned creatures with an inhuman resistance to pain, readily allying with the Magisters of the Possessed.",
         "fr": "Les Hommes-Bêtes sont des monstres mutants qui infestent les forêts de l'Empire ; ils possèdent des cornes impressionnantes et sont très durs au mal. Ils se sont très vite alliés aux Magisters des bandes de Possédés."
-      }
+      },
+      "equipmentListName": "Darksouls Equipment List"
     },
     {
       "name": {
@@ -199,7 +203,8 @@
       "description": {
         "en": "Chaos adepts aspiring to damnation - their vile deeds have driven them to the brink of insanity.",
         "fr": "Les Initiés sont des adeptes du Chaos aspirant à la damnation. Leurs actes immondes les ont conduits jusqu'aux confins de la folie."
-      }
+      },
+      "equipmentListName": "Possessed Equipment List"
     }
   ],
   "equipment": [
@@ -230,6 +235,16 @@
         "fr": "Un don des Dieux Sombres au guerrier méritant - octroie une sauvegarde d'armure de 4+. Une fois acquise, un Héros ne s'en sépare jamais et elle fusionne définitivement avec son porteur. Peut être portée par les lanceurs de sorts, mais pas combinée avec un bouclier ou une rondache."
       },
       "restrictedToThisWarband": true
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Possessed Equipment List", "fr": "Liste d'équipement des Possédés" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Spear", "Bow", "Short Bow", "Light Armour", "Heavy Armour", "Shield", "Helmet", "Obsidian Weapon", "Chaos Armour"]
+    },
+    {
+      "name": { "en": "Darksouls Equipment List", "fr": "Liste d'équipement des Damnés" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Flail", "Light Armour", "Heavy Armour", "Shield", "Helmet", "Obsidian Weapon", "Chaos Armour"]
     }
   ],
   "mutations": [],

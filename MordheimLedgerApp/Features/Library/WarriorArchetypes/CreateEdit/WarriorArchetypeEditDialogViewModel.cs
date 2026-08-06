@@ -11,6 +11,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 {
     private const int StepCount = 3;
     private readonly ISpecialRulePickerService _specialRulePicker;
+    private readonly Dictionary<string, EquipmentList> _equipmentListByLabel = new();
 
     protected override bool CancelResult => false;
 
@@ -24,6 +25,15 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     /// principe que Item lui-même (une copie, rien n'est persisté avant Enregistrer), contrairement aux
     /// Équipement/Compétences/Blessures d'un Warrior qui persistent immédiatement.</summary>
     public ObservableCollection<SpecialRule> SpecialRules { get; }
+
+    /// <summary>Options du Picker "Liste d'équipement" - même pattern que SpellEditDialogViewModel's
+    /// MagicSchool picker (label -> ligne catalogue, écrit Item.EquipmentListId via
+    /// OnSelectedEquipmentListLabelChanged), avec en plus une entrée "Aucune" puisque EquipmentListId
+    /// est nullable (beaucoup d'archétypes - Zombies, Trolls... - n'utilisent aucun équipement).</summary>
+    public ObservableCollection<string> EquipmentListOptions { get; } = new();
+
+    [ObservableProperty]
+    private string selectedEquipmentListLabel = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStep0))]
@@ -41,13 +51,27 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => CurrentStep == StepCount - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], CurrentStep + 1, StepCount);
 
-    public WarriorArchetypeEditDialogViewModel(WarriorArchetype item, string title, ISpecialRulePickerService specialRulePicker)
+    public WarriorArchetypeEditDialogViewModel(WarriorArchetype item, string title, ISpecialRulePickerService specialRulePicker,
+        IReadOnlyList<EquipmentList> allEquipmentLists)
     {
         this.item = item;
         this.title = title;
         _specialRulePicker = specialRulePicker;
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
+
+        var noneLabel = Loc["WarriorArchetypeEquipmentListNone"];
+        EquipmentListOptions.Add(noneLabel);
+        foreach (var list in allEquipmentLists)
+        {
+            _equipmentListByLabel[list.Name] = list;
+            EquipmentListOptions.Add(list.Name);
+        }
+        var currentList = allEquipmentLists.FirstOrDefault(l => l.Id == item.EquipmentListId);
+        selectedEquipmentListLabel = currentList?.Name ?? noneLabel;
     }
+
+    partial void OnSelectedEquipmentListLabelChanged(string value) =>
+        Item.EquipmentListId = _equipmentListByLabel.TryGetValue(value, out var list) ? list.Id : null;
 
     [RelayCommand]
     private async Task AddSpecialRule()

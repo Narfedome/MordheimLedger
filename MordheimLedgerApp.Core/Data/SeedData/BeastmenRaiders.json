@@ -117,7 +117,8 @@
             "fr": "Chef"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Beastmen Equipment List"
     },
     {
       "name": {
@@ -149,7 +150,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Beastmen Equipment List"
     },
     {
       "name": {
@@ -172,7 +174,8 @@
       "description": {
         "en": "Bestigors are the largest type of Beastmen, the great horned warriors of the warband - massive creatures with an inhuman resistance to pain.",
         "fr": "Les Bestigors sont les plus grands et les plus puissants Hommes-Bêtes de la Harde. Ils arborent aussi les cornes les plus imposantes et semblent ignorer la douleur."
-      }
+      },
+      "equipmentListName": "Beastmen Equipment List"
     },
     {
       "name": {
@@ -227,7 +230,8 @@
             "fr": "En plus de ses armes, le Centigor utilise ses sabots pour piétiner ses ennemis. Il a donc une Attaque supplémentaire sur son profil, mais elle n'est pas affectée par les bonus et malus de ses armes."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Beastmen Equipment List"
     },
     {
       "name": {
@@ -262,7 +266,8 @@
             "fr": "Les Ungors constituent la caste la plus basse de la société Homme-Bête. Quel que soit le nombre de points d'expérience accumulé, un Ungor ne pourra jamais se hisser dans la hiérarchie. Si suite à un jet de progression, un Ungor obtient le résultat 'Ce gars est doué', relancez le dé."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Ungor Equipment List"
     },
     {
       "name": {
@@ -285,7 +290,8 @@
       "description": {
         "en": "Gor are nearly as numerous as Ungor, but larger and more brutish.",
         "fr": "Les Gors sont moins nombreux que les Ungors, mais ils sont bien plus puissants et d'une violence extrême."
-      }
+      },
+      "equipmentListName": "Beastmen Equipment List"
     },
     {
       "name": {
@@ -373,7 +379,18 @@
             "fr": "Grande Cible"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Beastmen Equipment List"
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Beastmen Equipment List", "fr": "Liste d'équipement des Hommes-Bêtes" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Halberd", "Double-handed weapon", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+    },
+    {
+      "name": { "en": "Ungor Equipment List", "fr": "Liste d'équipement des Ungors" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Spear", "Shield"]
     }
   ]
 }

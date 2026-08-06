@@ -1,7 +1,7 @@
 {
   "grade": "Grade1a",
   "name": {
-    "en": "Ostland Mercenaries",
+    "en": "Ostlander Mercenaries",
     "fr": "Mercenaires Ostlanders"
   },
   "description": {
@@ -60,7 +60,8 @@
             "fr": "Chef"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Ostlander Equipment List"
     },
     {
       "name": {
@@ -106,7 +107,8 @@
           }
         }
       ],
-      "isSpellcaster": true
+      "isSpellcaster": true,
+      "equipmentListName": "Ostlander Equipment List"
     },
     {
       "name": {
@@ -129,7 +131,8 @@
       "description": {
         "en": "Ostland villages are generally one large extended family - everyone is somebody's uncle, cousin or brother. Rather than bother with exact family ties, the village's most respected men (other than the Elder) are simply called Blood Brothers.",
         "fr": "Les villages d'Ostland sont généralement composés d'une famille élargie. Tout le monde est l'oncle, le cousin ou le frère d'un des membres du village. Au lieu de s'embêter avec les liens familiaux, les hommes les plus respectés du village (à l'exception du Doyen) sont simplement appelés Frères de sang."
-      }
+      },
+      "equipmentListName": "Ostlander Equipment List"
     },
     {
       "name": {
@@ -152,7 +155,8 @@
       "description": {
         "en": "Some men of Ostland prefer to live alone in the forests of the Old World rather than marry. Though these trappers don't share the tight family bonds of the average Ostlander, they're respected for their forest lore and unshakeable determination.",
         "fr": "Certains hommes de l'Ostland préfèrent vivre seuls dans les forêts du Vieux Monde plutôt que de se marier. Bien que ces trappeurs ne partagent pas les liens familiaux étroits de l'Ostlander moyen, ils sont respectés pour leur connaissance de la forêt et leur détermination sans faille."
-      }
+      },
+      "equipmentListName": "Jaeger Equipment List"
     },
     {
       "name": {
@@ -175,7 +179,8 @@
       "description": {
         "en": "Most of an Ostlander band's warriors are brothers or cousins of the Elder - most are married men with children to feed. The ruins of Mordheim tempt with a greed few poor villagers can resist.",
         "fr": "La plupart des guerriers d'une bande d'Ostlanders sont des frères ou des cousins du Doyen. La plupart sont des hommes mariés avec des enfants à nourrir. Les ruines de Mordheim attisent une convoitise à laquelle peu de pauvres villageois peuvent résister."
-      }
+      },
+      "equipmentListName": "Ostlander Equipment List"
     },
     {
       "name": {
@@ -220,7 +225,8 @@
             "fr": "Cette figurine inspire un mélange de pitié et de peur chez ses camarades et ne peut jamais devenir Chef de bande."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Ruffian Equipment List"
     },
     {
       "name": {
@@ -277,7 +283,8 @@
             "fr": "Bien que cette figurine soit capable de gagner de l'expérience et de profiter des progressions, elle n'est pas des plus intelligentes - elle ne gagne une progression qu'une fois sur deux (elle doit accumuler deux fois plus d'expérience que la normale)."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Ogre Equipment List"
     }
   ],
   "equipment": [
@@ -308,6 +315,24 @@
         "fr": "Un long fusil du Hochland doté d'un second canon, suivant le même principe de double canon que les pistolets à double canon des Ostlanders."
       },
       "restrictedToThisWarband": true
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Ostlander Equipment List", "fr": "Liste d'équipement des Ostlanders" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Spear", "Double-handed weapon", "Bow", "Pistol", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+    },
+    {
+      "name": { "en": "Ruffian Equipment List", "fr": "Liste d'équipement des Vauriens" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Light Armour"]
+    },
+    {
+      "name": { "en": "Jaeger Equipment List", "fr": "Liste d'équipement des Jaeger" },
+      "itemNames": ["Dagger", "Axe", "Sword", "Spear", "Pistol", "Double-barrelled pistol", "Bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Double-barrelled Hochland long rifle", "Light Armour", "Shield", "Helmet"]
+    },
+    {
+      "name": { "en": "Ogre Equipment List", "fr": "Liste d'équipement des Ogres" },
+      "itemNames": ["Club", "Axe", "Sword", "Double-handed weapon", "Light Armour"]
     }
   ],
   "spells": []

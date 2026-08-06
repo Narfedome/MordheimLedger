@@ -34,4 +34,6 @@ public class WarriorEntity
     /// <summary>Null = not mounted. The rider's stats aren't merged with the mount's - it's tracked as
     /// its own separate profile, resolved from MountEntity by WarbandService (see Models.Warrior.Mount).</summary>
     public int? MountId { get; set; }
+
+    public int? EquipmentListId { get; set; }
 }

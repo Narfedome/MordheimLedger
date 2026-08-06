@@ -105,7 +105,8 @@
             "fr": "Un adepte assassin inflige toujours un modificateur de -1 à la sauvegarde ennemie lorsqu'il blesse (que ce soit au tir ou au corps à corps)."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Heroes Equipment List"
     },
     {
       "name": {
@@ -128,7 +129,8 @@
       "description": {
         "en": "The most powerful fighters of Clan Eshin - black-furred killers trained in every martial art of their clan, excelling at ambush and assassination in Mordheim's ruins.",
         "fr": "Les skavens noirs sont les plus puissants de tous les guerriers du clan Eshin, des tueurs chevronnés entraînés à tous les arts martiaux de leurs clans. À Mordheim ils excellent dans les embuscades et les assassinats."
-      }
+      },
+      "equipmentListName": "Heroes Equipment List"
     },
     {
       "name": {
@@ -160,7 +162,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Heroes Equipment List"
     },
     {
       "name": {
@@ -183,7 +186,8 @@
       "description": {
         "en": "Young apprentices of Clan Eshin, recently initiated into the secrets of the clan - they make up for their lack of knowledge with ambition and energy.",
         "fr": "Les coureurs nocturnes sont de jeunes apprentis du clan Eshin. Récemment initiés dans les secrets du clan, ils compensent leur manque de savoir par l'ambition et l'énergie dont ils font preuve."
-      }
+      },
+      "equipmentListName": "Henchmen Equipment List"
     },
     {
       "name": {
@@ -206,7 +210,8 @@
       "description": {
         "en": "The Clanrats of Clan Eshin - the strongest among them are initiated into the clan's secrets and begin training to become Assassins, the most feared of Skaven warriors.",
         "fr": "Les vermineux sont les guerriers du clan Eshin. Les plus forts d'entre eux sont initiés aux secrets du clan et sont entraînés pour devenir des assassins, ce sont les plus redoutés des guerriers des clans skavens. Tous rêvent de devenir un jour assassin."
-      }
+      },
+      "equipmentListName": "Henchmen Equipment List"
     },
     {
       "name": {
@@ -343,6 +348,16 @@
         "fr": "70 CO la paire. Les pistolets à malepierre sont des armes redoutables, témoignages du génie malsain du clan Skryre. Ces pistolets tirent des munitions faites à partir de fragments de malepierre ensorcelés, provoquant d'horribles blessures qui dégénèrent souvent en terribles infections. Portée 8ps, Force 5, modificateur de sauvegarde -3 ; tire un tour sur deux (tous les tours si porté en paire)."
       },
       "restrictedToThisWarband": true
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Heroes Equipment List", "fr": "Liste d'équipement des Héros" },
+      "itemNames": ["Dagger", "Sword", "Flail", "Spear", "Halberd", "Weeping Blades", "Fighting Claws", "Sling", "Throwing Stars", "Blowpipe", "Warplock Pistol", "Light Armour", "Buckler", "Helmet"]
+    },
+    {
+      "name": { "en": "Henchmen Equipment List", "fr": "Liste d'équipement des Hommes de main" },
+      "itemNames": ["Dagger", "Club", "Sword", "Spear", "Sling", "Light Armour", "Shield", "Helmet"]
     }
   ],
   "spells": []

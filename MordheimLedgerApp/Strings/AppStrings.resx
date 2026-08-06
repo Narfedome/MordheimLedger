@@ -333,6 +333,21 @@
   <data name="LibManageWarriors" xml:space="preserve">
     <value>Gérer les guerriers</value>
   </data>
+  <data name="LibManageEquipmentLists" xml:space="preserve">
+    <value>Gérer les listes d'équipement</value>
+  </data>
+  <data name="EquipmentListCreateTitle" xml:space="preserve">
+    <value>Nouvelle liste d'équipement</value>
+  </data>
+  <data name="EquipmentListEditTitle" xml:space="preserve">
+    <value>Modifier la liste d'équipement</value>
+  </data>
+  <data name="EquipmentListNamePh" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="EquipmentListItemsPh" xml:space="preserve">
+    <value>Objets</value>
+  </data>
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -584,6 +599,12 @@
   </data>
   <data name="WarriorArchetypeIsSpellcaster" xml:space="preserve">
     <value>Lanceur de sorts</value>
+  </data>
+  <data name="WarriorArchetypeEquipmentListPh" xml:space="preserve">
+    <value>Liste d'équipement</value>
+  </data>
+  <data name="WarriorArchetypeEquipmentListNone" xml:space="preserve">
+    <value>Aucune</value>
   </data>
   <data name="LibMagicSchoolsPh" xml:space="preserve">
     <value>Écoles de magie accordées</value>

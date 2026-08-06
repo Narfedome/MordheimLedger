@@ -111,7 +111,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
-        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId);
+        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId);
         foreach (var equipmentItem in items)
         {
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher

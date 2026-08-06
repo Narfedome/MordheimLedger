@@ -73,4 +73,11 @@ public class WarriorArchetype
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>Which of the parent WarbandArchetype's EquipmentLists this archetype's Weapons/Armour
+    /// line draws from (e.g. Skaven's Night Runners, a Hero, use the Henchmen list) - null = this
+    /// archetype never uses equipment (Ghouls, Zombies, Trolls, Cave Squigs...). Copied onto Warrior at
+    /// recruitment (see EntityMapping.ToWarrior), same snapshot-at-recruit-time convention as Cost/the
+    /// stat line - editing this later doesn't retroactively change already-recruited warriors.</summary>
+    public int? EquipmentListId { get; set; }
 }

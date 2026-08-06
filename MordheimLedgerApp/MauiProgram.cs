@@ -4,6 +4,7 @@ using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
+using MordheimLedgerApp.Features.Library.EquipmentLists;
 using MordheimLedgerApp.Features.Library.Injuries;
 using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Features.Library.Spells;
@@ -74,6 +75,8 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<WarriorArchetypeSelectorPage>();
             builder.Services.AddSingleton<IWarriorArchetypePickerNavigationService, WarriorArchetypePickerNavigationService>();
             builder.Services.AddSingleton<IWarriorArchetypePickerService, WarriorArchetypePickerService>();
+            builder.Services.AddTransient<EquipmentListViewModel>();
+            builder.Services.AddTransient<EquipmentListListPage>();
             builder.Services.AddTransient<EquipmentItemViewModel>();
             builder.Services.AddTransient<EquipmentItemSelectorPage>();
             builder.Services.AddSingleton<IEquipmentPickerNavigationService, EquipmentPickerNavigationService>();

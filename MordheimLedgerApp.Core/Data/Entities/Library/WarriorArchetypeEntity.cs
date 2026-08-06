@@ -33,4 +33,5 @@ public class WarriorArchetypeEntity
     public bool IsSpellcaster { get; set; }
     public bool CanBuyMutations { get; set; }
     public string? ImagePath { get; set; }
+    public int? EquipmentListId { get; set; }
 }

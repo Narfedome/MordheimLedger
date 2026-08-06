@@ -149,7 +149,8 @@
             "fr": "Chef"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Dwarf Warrior Equipment List"
     },
     {
       "name": {
@@ -184,7 +185,8 @@
             "fr": "Grâce à l'utilisation de meilleurs matériaux et de techniques secrètes, cette figurine peut accroître la portée des armes de tir de la bande achetées sur la Liste d'Équipement Nain de 3ps pour les Pistolets et de 6ps pour les Arbalètes et les Arquebuses. L'augmentation ne s'applique qu'aux batailles auxquelles elle participe (même si elle n'est pas encore entrée en jeu ou a été mise hors de combat), jamais à l'équipement des Francs-Tireurs."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Thunderer Equipment List"
     },
     {
       "name": {
@@ -229,7 +231,8 @@
             "fr": "Lorsque cette figurine gagne une nouvelle compétence, elle peut choisir dans le tableau de compétences de Tueur (Charge Féroce : double ses attaques en chargeant, -1 pour toucher ce tour ; Tueur de Monstres : blesse toujours sur 4+ quelle que soit l'Endurance, sauf si un résultat inférieur suffirait déjà ; Berserker : +1 pour toucher au corps à corps en chargeant) en plus des tableaux de compétences classiques."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Dwarf Warrior Equipment List"
     },
     {
       "name": {
@@ -252,7 +255,8 @@
       "description": {
         "en": "Dwarf warriors in all their glory: tenacious, stubborn and unfailingly brave.",
         "fr": "Ce sont des guerriers nains dans toute leur splendeur : tenaces, têtus et d'une bravoure à toute épreuve."
-      }
+      },
+      "equipmentListName": "Dwarf Warrior Equipment List"
     },
     {
       "name": {
@@ -275,7 +279,8 @@
       "description": {
         "en": "Dwarf Thunderers are experts with missile weapons - many an Orc or Goblin has died to their crossbow bolts or handgun fire.",
         "fr": "Les tireurs nains sont des experts en armes de tir. Plus d'un orque ou gobelin est mort sous les carreaux de leurs arbalètes ou les balles de leurs arquebuses."
-      }
+      },
+      "equipmentListName": "Thunderer Equipment List"
     },
     {
       "name": {
@@ -298,7 +303,8 @@
       "description": {
         "en": "Young Dwarfs with barely a beard to their name, banded together under an experienced elder in hope of glory and riches.",
         "fr": "Ce sont de jeunes nains à la barbe naissante qui se sont regroupés sous les ordres d'un aîné plus expérimenté dans l'espoir qu'il les conduira vers la gloire et la richesse."
-      }
+      },
+      "equipmentListName": "Dwarf Warrior Equipment List"
     }
   ],
   "equipment": [
@@ -315,6 +321,16 @@
         "fr": "Une hache à manche court en matériaux plus légers mais plus solides qu'une hache normale - inflige un modificateur de sauvegarde additionnel de -1 et permet de parer."
       },
       "restrictedToThisWarband": true
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Dwarf Warrior Equipment List", "fr": "Liste d'équipement des Guerriers Nains" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Dwarf axe", "Double-handed weapon", "Spear", "Halberd", "Pistol", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+    },
+    {
+      "name": { "en": "Thunderer Equipment List", "fr": "Liste d'équipement des Tireurs Nains" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Pistol", "Crossbow", "Handgun", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
     }
   ],
   "spells": []

@@ -41,13 +41,6 @@
     }
   },
   { "name": { "en": "Flail", "fr": "Fléau" }, "category": "MeleeWeapon", "cost": 15 },
-  {
-    "name": { "en": "Holy Tome", "fr": "Livre Saint" }, "category": "MiscellaneousEquipment", "cost": 100, "rarity": 8,
-    "description": {
-      "en": "Books of prayers and holy deeds copied by hand in the scriptoriums of Sigmar - a holy man reciting from one strengthens his faith. Full cost is 100 + D6×10 gc. A Warrior-Priest or Sister of Sigmar with a Holy Tome adds +1 to the score when trying to recite a prayer.",
-      "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6×10 CO. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
-    }
-  },
   { "name": { "en": "Throwing Knives", "fr": "Couteau de Lancer" }, "category": "MissileWeapon", "cost": 15 },
   { "name": { "en": "Crossbow Pistol", "fr": "Arbalète de Poing" }, "category": "MissileWeapon", "cost": 35 },
   { "name": { "en": "Sling", "fr": "Fronde" }, "category": "MissileWeapon", "cost": 2 },

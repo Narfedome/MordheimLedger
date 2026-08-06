@@ -51,6 +51,12 @@
                     <CheckBox IsChecked="{Binding Item.IsSpellcaster}" VerticalOptions="Center"/>
                     <Label Text="{loc:Loc WarriorArchetypeIsSpellcaster}" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
+                <!-- Quelle liste d'équipement de la bande ce type de guerrier utilise pour son
+                     Armement/Armure - "Aucune" pour les archétypes qui n'utilisent jamais d'équipement
+                     (Zombies, Squigs des cavernes...). Voir EquipmentList/WarriorArchetype.EquipmentListId. -->
+                <Picker Title="{loc:Loc WarriorArchetypeEquipmentListPh}"
+                        ItemsSource="{Binding EquipmentListOptions}"
+                        SelectedItem="{Binding SelectedEquipmentListLabel}"/>
             </VerticalStackLayout>
 
             <!-- Étape 2 : profil (abréviations officielles du livre de règles, pas de traduction) -->

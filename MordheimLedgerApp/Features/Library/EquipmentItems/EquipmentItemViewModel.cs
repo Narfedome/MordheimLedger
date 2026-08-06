@@ -53,10 +53,25 @@ public partial class EquipmentItemViewModel : BaseViewModel
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
     /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by
-    /// EquipmentPickerService before construction) = only items whose RestrictedToWarbandArchetypeIds is
-    /// empty (common to every band) or contains this id are shown - see WarriorEditDialogViewModel.
-    /// AddEquipment.</summary>
+    /// EquipmentPickerService before construction) = picker mode is active. Only directly consulted for
+    /// filtering when AllowedEquipmentListItemIds is null (the EquipmentList editor's "add item"
+    /// picker) - see ApplyFilter.</summary>
     public int? AllowedWarbandArchetypeId { get; set; }
+
+    /// <summary>Narrows RestrictedToWarriorArchetypeIds-tagged items within either channel below to just
+    /// this warrior - null = no further narrowing (e.g. the EquipmentList editor's own "add item"
+    /// picker, which isn't scoped to one specific warrior).</summary>
+    public int? AllowedWarriorArchetypeId { get; set; }
+
+    /// <summary>Set only by the roster recruit/purchase picker (EquipmentPickerService, when the
+    /// recruit has an assigned EquipmentList) - member item ids of that list. When set, this is the
+    /// SOLE source of truth for what the recruit may buy: the list is what "usable by this warrior"
+    /// means, so Rare items a warrior can access must themselves be added as list members (with
+    /// RestrictedToWarriorArchetypeIds narrowing them within a list shared by several archetypes, e.g.
+    /// Holy Tome in the Witch Hunter list - Warrior-Priest only). AllowedWarbandArchetypeId is only
+    /// consulted when this is null, i.e. the EquipmentList editor's own "add item" picker, which has no
+    /// list of its own yet and needs the broad "common + this band's own items" browse instead.</summary>
+    public HashSet<int>? AllowedEquipmentListItemIds { get; set; }
 
     public EquipmentItemViewModel(ILibraryService libraryService, IEquipmentPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker)
@@ -95,7 +110,20 @@ public partial class EquipmentItemViewModel : BaseViewModel
         if (SelectedCategory is { } category)
             filtered = filtered.Where(i => i.Category == category);
         if (AllowedWarbandArchetypeId is { } warbandId)
-            filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+        {
+            bool WarriorOk(EquipmentItem i) => i.RestrictedToWarriorArchetypeIds.Count == 0
+                || (AllowedWarriorArchetypeId is { } wa && i.RestrictedToWarriorArchetypeIds.Contains(wa));
+
+            filtered = AllowedEquipmentListItemIds is { } listIds
+                // Recruit picker: the assigned list is the sole source of truth for what this warrior
+                // can buy - Rare items reachable by this warrior are list members too, just narrowed to
+                // specific archetypes via RestrictedToWarriorArchetypeIds where the list is shared.
+                ? filtered.Where(i => listIds.Contains(i.Id) && WarriorOk(i))
+                // Broad warband-scoped browse (EquipmentList editor's own "add item" picker, or a
+                // warrior with no assigned list) - common pool + this band's own items, unchanged from
+                // before EquipmentList existed.
+                : filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+        }
 
         var groups = new ObservableCollection<EquipmentItemGroup>();
         foreach (var item in filtered)
@@ -183,7 +211,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath,
-            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds)
+            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
+            RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds)
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes);

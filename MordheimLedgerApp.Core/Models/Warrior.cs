@@ -38,6 +38,11 @@ public class Warrior
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
+    /// <summary>Which EquipmentList this warrior may buy starting equipment from - copied from the
+    /// recruiting WarriorArchetype at recruitment (see WarriorArchetype.EquipmentListId), null = no
+    /// equipment usable. Editing the archetype's list later doesn't retroactively change this.</summary>
+    public int? EquipmentListId { get; set; }
+
     /// <summary>Loaded separately via the Warrior/EquipmentItem join table — not persisted on this object.</summary>
     public List<WarriorEquipment> Equipment { get; set; } = new();
 

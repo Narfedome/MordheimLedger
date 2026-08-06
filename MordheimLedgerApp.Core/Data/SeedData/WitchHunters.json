@@ -58,7 +58,8 @@
             "fr": "Cette figurine hait tous les jeteurs de sorts."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Witch Hunter Equipment List"
     },
     {
       "name": {
@@ -93,7 +94,8 @@
             "fr": "Cette figurine hait tous les jeteurs de sorts."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Witch Hunter Equipment List"
     },
     {
       "name": {
@@ -125,7 +127,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Witch Hunter Equipment List"
     },
     {
       "name": {
@@ -160,7 +163,8 @@
             "fr": "Les flagellants sont convaincus que la fin du monde est proche et ils n'ont donc peur de rien. Ils réussissent automatiquement tous les tests de Commandement qu'ils pourraient avoir à passer. Un flagellant ne peut jamais devenir chef de bande."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Flagellant Equipment List"
     },
     {
       "name": {
@@ -183,7 +187,8 @@
       "description": {
         "en": "When a man loses his family, home and all he cared for, religion is often the last refuge - these wandering, bitter fanatics exist only to destroy evil and the minions of Chaos, and many a band of Zealots is led by a Witch Hunter.",
         "fr": "Quand un homme perd sa famille, sa maison et ce qui donnait un sens à sa vie, la religion est souvent le dernier refuge. Ces hommes deviennent des vagabonds fanatiques, dangereux et amers, prêts à venger leurs pertes à n'importe quel prix. On les appelle séides. Les Répurgateurs trouvent beaucoup d'alliés dans leurs rangs et plus d'une bande de séides est dirigée par des Répurgateurs."
-      }
+      },
+      "equipmentListName": "Zealot Equipment List"
     },
     {
       "name": {
@@ -245,6 +250,35 @@
         "fr": "Les pages de cet ouvrage décrivent les serviteurs du Chaos - sorcières, hérétiques, déviants, mutants, sorciers, blasphémateurs, nécromants et autres ennemis de Sigmar - dans toute leur infamie. Un Héros qui le porte hait tous les Possédés, Skavens, Hommes-Bêtes, figurines du Chaos, Démons, Elfes Noirs, Orques & Gobelins et Sœurs de Sigmar."
       },
       "restrictedToThisWarband": true
+    },
+    {
+      "name": {
+        "en": "Holy Tome",
+        "fr": "Livre Saint"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 100,
+      "rarity": 8,
+      "description": {
+        "en": "Books of prayers and holy deeds copied by hand in the scriptoriums of Sigmar - a holy man reciting from one strengthens his faith. Full cost is 100 + D6x10 gc. Warrior-Priests and Sisters of Sigmar only. A Warrior-Priest or Sister of Sigmar with a Holy Tome adds +1 to the score when trying to recite a prayer.",
+        "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6x10 CO. Réservé aux Prêtres-Guerriers et aux Sœurs de Sigmar. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
+      },
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Warrior-Priest"]
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Witch Hunter Equipment List", "fr": "Liste d'équipement des Répurgateurs" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Crossbow", "Pistol", "Crossbow Pistol", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Brazier Iron", "Hammer of Witches", "Holy Tome"]
+    },
+    {
+      "name": { "en": "Flagellant Equipment List", "fr": "Liste d'équipement des Flagellants" },
+      "itemNames": ["Flail", "Morning star", "Double-handed weapon"]
+    },
+    {
+      "name": { "en": "Zealot Equipment List", "fr": "Liste d'équipement des Séides" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Spear", "Bow", "Short Bow", "Light Armour", "Shield", "Helmet"]
     }
   ],
   "spells": []

@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
 
 namespace MordheimLedgerApp.Services;
@@ -6,17 +7,26 @@ namespace MordheimLedgerApp.Services;
 public interface IEquipmentPickerService
 {
     /// <summary>warbandArchetypeId: only items whose RestrictedToWarbandArchetypeIds is empty (common)
-    /// or contains this id are selectable - see WarriorEditDialogViewModel.AddEquipment.</summary>
-    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId);
+    /// or contains this id are selectable - see WarriorEditDialogViewModel.AddEquipment. equipmentListId:
+    /// non-null (recruit picker, the warrior's assigned EquipmentList) switches filtering to the union of
+    /// that list and the band's Rare/Trading-Post items; null (EquipmentList editor's own "add item"
+    /// picker) keeps the broad common+band browse. warriorArchetypeId: narrows any
+    /// RestrictedToWarriorArchetypeIds-tagged item further, same idea as the Skill picker.</summary>
+    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
 {
     private readonly IServiceProvider _provider;
+    private readonly ILibraryService _libraryService;
 
-    public EquipmentPickerService(IServiceProvider provider) => _provider = provider;
+    public EquipmentPickerService(IServiceProvider provider, ILibraryService libraryService)
+    {
+        _provider = provider;
+        _libraryService = libraryService;
+    }
 
-    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId)
+    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -27,6 +37,8 @@ public class EquipmentPickerService : IEquipmentPickerService
         // le filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
         var viewModel = _provider.GetRequiredService<EquipmentItemViewModel>();
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
+        viewModel.AllowedEquipmentListItemIds = equipmentListId is { } id ? await _libraryService.GetEquipmentListItemIdsAsync(id) : null;
         var page = new EquipmentItemSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 

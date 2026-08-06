@@ -67,7 +67,8 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new WarriorArchetype { WarbandArchetypeId = WarbandArchetypeId };
-        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"], _specialRulePicker);
+        var equipmentLists = await _libraryService.GetEquipmentListsAsync(WarbandArchetypeId, LocalizationService.Instance.Language);
+        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"], _specialRulePicker, equipmentLists);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarriorArchetypeAsync(newItem, LocalizationService.Instance.Language);
@@ -105,10 +106,12 @@ public partial class WarriorArchetypeViewModel : BaseViewModel
             ImagePath = s.ImagePath,
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
             IsSpellcaster = s.IsSpellcaster,
-            CanBuyMutations = s.CanBuyMutations
+            CanBuyMutations = s.CanBuyMutations,
+            EquipmentListId = s.EquipmentListId
         };
 
-        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"], _specialRulePicker);
+        var equipmentLists = await _libraryService.GetEquipmentListsAsync(WarbandArchetypeId, LocalizationService.Instance.Language);
+        var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"], _specialRulePicker, equipmentLists);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarriorArchetypeAsync(copy, LocalizationService.Instance.Language);

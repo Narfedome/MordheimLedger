@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.EquipmentLists;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
 using MordheimLedgerApp.Services;
@@ -212,6 +213,19 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         if (SelectedRow is not { } row) return;
 
         await Shell.Current.GoToAsync(nameof(WarriorArchetypeListPage),
+            new Dictionary<string, object>
+            {
+                { "WarbandArchetypeId", row.Item.Id },
+                { "WarbandArchetypeName", row.Item.Name }
+            });
+    }
+
+    [RelayCommand]
+    private async Task ManageEquipmentLists()
+    {
+        if (SelectedRow is not { } row) return;
+
+        await Shell.Current.GoToAsync(nameof(EquipmentListListPage),
             new Dictionary<string, object>
             {
                 { "WarbandArchetypeId", row.Item.Id },

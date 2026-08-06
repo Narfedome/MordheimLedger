@@ -77,7 +77,8 @@
             "fr": "Sorcier"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Carnival of Chaos Equipment List"
     },
     {
       "name": {
@@ -112,7 +113,8 @@
             "fr": "Les Colosses disposent dès le début de leur carrière de la compétence de force Homme Fort du livre de règles de Mordheim."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Brute Equipment List"
     },
     {
       "name": {
@@ -148,7 +150,8 @@
             "fr": "Les Impurs doivent recevoir une ou plusieurs Bénédictions de Nurgle à l'achat (voir la bibliothèque des Mutations) - achetées uniquement au recrutement, la première au prix indiqué, les suivantes au double."
           }
         }
-      ]
+      ],
+      "equipmentListName": "Carnival of Chaos Equipment List"
     },
     {
       "name": {
@@ -351,10 +354,21 @@
       "description": {
         "en": "Devoted followers of Nurgle who have fully embraced the path of damnation - in the Carnival, the Brethren take on all the minor roles: stagehands, puppeteers, and the like.",
         "fr": "Les Frères sont les dévots du Seigneur de la Peste, et ils ont totalement adopté sa philosophie en s'engageant sur la voie de la damnation. Dans le cadre de la kermesse, les frères occupent les seconds rôles, ou font office de marionnettistes."
-      }
+      },
+      "equipmentListName": "Carnival of Chaos Equipment List"
     }
   ],
   "equipment": [],
+  "equipmentLists": [
+    {
+      "name": { "en": "Carnival of Chaos Equipment List", "fr": "Liste d'équipement de la Kermesse du Chaos" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Short Bow", "Bow", "Pistol", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+    },
+    {
+      "name": { "en": "Brute Equipment List", "fr": "Liste d'équipement des Colosses" },
+      "itemNames": ["Double-handed weapon", "Flail"]
+    }
+  ],
   "mutations": [
     {
       "name": {

@@ -218,6 +218,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Initiative = w.Initiative,
             Attacks = w.Attacks,
             Leadership = w.Leadership,
+            EquipmentListId = w.EquipmentListId,
             Equipment = w.Equipment,
             Skills = w.Skills,
             Injuries = w.Injuries,

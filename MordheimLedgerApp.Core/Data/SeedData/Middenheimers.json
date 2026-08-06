@@ -41,7 +41,8 @@
             "fr": "Chef"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Mercenary Equipment List"
     },
     {
       "name": {
@@ -64,7 +65,8 @@
       "description": {
         "en": "The champions and captains of a Middenheim warband start with Strength 4 instead of Strength 3.",
         "fr": "Les champions et capitaines d'une bande de Middenheim démarrent avec une Force de 4 au lieu de 3."
-      }
+      },
+      "equipmentListName": "Mercenary Equipment List"
     },
     {
       "name": {
@@ -87,7 +89,8 @@
       "description": {
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
-      }
+      },
+      "equipmentListName": "Mercenary Equipment List"
     },
     {
       "name": {
@@ -110,7 +113,8 @@
       "description": {
         "en": "Grim, seasoned fighters, fearing no man as long as they have their weapons and armour - they form the core of any mercenary warband.",
         "fr": "Ce sont des baroudeurs renfrognés, à vendre au plus offrant et peu enclins à la peur tant qu'ils sont armés. Ils constituent le gros des bandes de mercenaires."
-      }
+      },
+      "equipmentListName": "Mercenary Equipment List"
     },
     {
       "name": {
@@ -133,7 +137,8 @@
       "description": {
         "en": "The archers and hunters of the Old World are famed for their skill, said to hit a coin at 300 paces with a long bow.",
         "fr": "Les archers et les chasseurs du Vieux Monde sont réputés pour leur adresse et on dit qu'ils peuvent atteindre une pièce à 300 pieds avec un arc long."
-      }
+      },
+      "equipmentListName": "Marksman Equipment List"
     },
     {
       "name": {
@@ -164,7 +169,8 @@
             "fr": "Expert à l'épée"
           }
         }
-      ]
+      ],
+      "equipmentListName": "Mercenary Equipment List"
     }
   ],
   "equipment": [
@@ -180,7 +186,18 @@
         "en": "Middenheimers only. To acquire one, a Hero must pay 10 gc and roll equal to or under his Strength on a D6 - success means the Hero slays a wolf and wears its blessed pelt. Grants +1 to armour saves against all shooting attacks. Middenheimers may buy a Wolfcloak when starting their warband without an availability roll.",
         "fr": "Réservée aux Middenheimers. Pour l'obtenir, un Héros doit payer 10 CO et réussir un jet inférieur ou égal à sa Force sur 1D6 - en cas de succès, il tue un loup et porte sa dépouille bénie. Octroie +1 aux sauvegardes d'armure contre les attaques de tir. Un Middenheimer peut l'acheter sans jet de disponibilité à la création de la bande."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": ["Mercenary Captain", "Champion", "Youngblood"]
+    }
+  ],
+  "equipmentLists": [
+    {
+      "name": { "en": "Mercenary Equipment List", "fr": "Liste d'équipement des Mercenaires" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Crossbow", "Pistol", "Duelling Pistol", "Bow", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Wolfcloak"]
+    },
+    {
+      "name": { "en": "Marksman Equipment List", "fr": "Liste d'équipement des Tireurs" },
+      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Crossbow", "Pistol", "Bow", "Long bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Light Armour", "Shield", "Helmet"]
     }
   ],
   "spells": []

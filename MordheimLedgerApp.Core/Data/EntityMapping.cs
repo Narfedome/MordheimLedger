@@ -99,7 +99,8 @@ public static class EntityMapping
         IsSpellcaster = e.IsSpellcaster,
         CanBuyMutations = e.CanBuyMutations,
         ImagePath = e.ImagePath ?? string.Empty,
-        SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
+        SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
+        EquipmentListId = e.EquipmentListId
     };
 
     public static WarriorArchetypeEntity ToEntity(this WarriorArchetype m) => new()
@@ -125,7 +126,8 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey,
         IsSpellcaster = m.IsSpellcaster,
         CanBuyMutations = m.CanBuyMutations,
-        ImagePath = m.ImagePath
+        ImagePath = m.ImagePath,
+        EquipmentListId = m.EquipmentListId
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -145,7 +147,8 @@ public static class EntityMapping
         Wounds = archetype.Wounds,
         Initiative = archetype.Initiative,
         Attacks = archetype.Attacks,
-        Leadership = archetype.Leadership
+        Leadership = archetype.Leadership,
+        EquipmentListId = archetype.EquipmentListId
     };
 
     public static Campaign ToModel(this CampaignEntity e) => new()
@@ -229,7 +232,8 @@ public static class EntityMapping
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,
-        IReadOnlyDictionary<int, List<int>>? restrictions = null) => new()
+        IReadOnlyDictionary<int, List<int>>? restrictions = null,
+        IReadOnlyDictionary<int, List<int>>? warriorRestrictions = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -241,7 +245,27 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
-        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+    };
+
+    public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? itemsByListId = null) => new()
+    {
+        Id = e.Id,
+        WarbandArchetypeId = e.WarbandArchetypeId,
+        Name = ResolveName(e.NameKey, translations),
+        NameKey = e.NameKey,
+        Source = e.Source,
+        ItemIds = itemsByListId?.GetValueOrDefault(e.Id) ?? new List<int>()
+    };
+
+    public static EquipmentListEntity ToEntity(this EquipmentList m) => new()
+    {
+        Id = m.Id,
+        WarbandArchetypeId = m.WarbandArchetypeId,
+        NameKey = m.NameKey ?? string.Empty,
+        Source = m.Source
     };
 
     public static Spell ToModel(this SpellEntity e, IReadOnlyDictionary<string, string> translations,
@@ -332,6 +356,7 @@ public static class EntityMapping
         Initiative = e.Initiative,
         Attacks = e.Attacks,
         Leadership = e.Leadership,
+        EquipmentListId = e.EquipmentListId,
         Equipment = equipment?.ToList() ?? new List<WarriorEquipment>(),
         Skills = skills?.ToList() ?? new List<WarriorSkill>(),
         Injuries = injuries?.ToList() ?? new List<WarriorInjury>(),
@@ -360,7 +385,8 @@ public static class EntityMapping
         Initiative = m.Initiative,
         Attacks = m.Attacks,
         Leadership = m.Leadership,
-        MountId = m.Mount?.Id
+        MountId = m.Mount?.Id,
+        EquipmentListId = m.EquipmentListId
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>

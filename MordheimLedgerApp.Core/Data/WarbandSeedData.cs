@@ -67,6 +67,12 @@ public class WarbandSeedData
     /// once in Data/SeedData/Skills.json, seeded before any warband file. See
     /// SkillSeedData.RestrictedToThisWarband/RestrictedToWarriorNames.</summary>
     public List<SkillSeedData> Skills { get; set; } = new();
+
+    /// <summary>This warband's named starting-equipment lists (e.g. "Skaven Heroes Equipment list",
+    /// "Marksman Equipment list") - see EquipmentListSeedData. Each WarriorSeedData references one by
+    /// name via EquipmentListName. Distinct from Equipment above, which is the Rare/Trading-Post
+    /// channel (RestrictedToThisWarband), not tied to any list.</summary>
+    public List<EquipmentListSeedData> EquipmentLists { get; set; } = new();
 }
 
 public class WarriorSeedData
@@ -103,6 +109,11 @@ public class WarriorSeedData
 
     /// <summary>True for Mutant/Possessed-type archetypes that may buy Mutations at recruitment.</summary>
     public bool CanBuyMutations { get; set; }
+
+    /// <summary>English Name of one of the parent WarbandSeedData's EquipmentLists entries that this
+    /// archetype's Weapons/Armour line draws from - null/omitted = this archetype never uses equipment
+    /// (Ghouls, Zombies, Trolls, Cave Squigs...).</summary>
+    public string? EquipmentListName { get; set; }
 }
 
 public class EquipmentSeedData
@@ -116,8 +127,23 @@ public class EquipmentSeedData
     public int? Rarity { get; set; }
     public LocalizedText? Description { get; set; }
 
-    /// <summary>True = only this warband can buy/carry it (see WarbandArchetypeEquipmentEntity).</summary>
+    /// <summary>True = only this warband can buy/carry it (see WarbandArchetypeEquipmentEntity) - the
+    /// Rare/Trading-Post channel, bought any time and not tied to a starting EquipmentList.</summary>
     public bool RestrictedToThisWarband { get; set; }
+
+    /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that
+    /// alone may have this item (e.g. Averlanders' "Long bow" in the shared Scout list - Bergjaeger
+    /// only) - null/empty = every warrior of the restricted warband(s)/list members can have it.</summary>
+    public List<string>? RestrictedToWarriorNames { get; set; }
+}
+
+/// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
+/// resolved against either the common Data/SeedData/Equipment.json pool or this same band's own
+/// Equipment declarations at seed time.</summary>
+public class EquipmentListSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public List<string> ItemNames { get; set; } = new();
 }
 
 public class SpellSeedData

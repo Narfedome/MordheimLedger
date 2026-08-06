@@ -180,6 +180,15 @@
   <data name="WarbandsEmptyLibraryMessage" xml:space="preserve">
     <value>No warband type is available yet.</value>
   </data>
+  <data name="EmptyWarbandsTitle" xml:space="preserve">
+    <value>Create your first warband</value>
+  </data>
+  <data name="EmptyWarbandsBody" xml:space="preserve">
+    <value>A warband holds your warriors, their equipment, and their progress through the campaign.</value>
+  </data>
+  <data name="DialogCreateItem" xml:space="preserve">
+    <value>Create</value>
+  </data>
   <data name="TabSettings" xml:space="preserve">
     <value>Settings</value>
   </data>

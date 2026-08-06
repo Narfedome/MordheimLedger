@@ -58,10 +58,29 @@
                    VerticalOptions="Center" HorizontalOptions="Center"
                    WidthRequest="80" HeightRequest="80"/>
 
-        <CollectionView Grid.Row="1" x:Name="WarbandCollection"
-                ItemsSource="{Binding Rows}"
-                SelectionMode="None"
-                ItemTemplate="{StaticResource WarbandTemplate}"/>
+        <Grid Grid.Row="1" IsVisible="{Binding IsInitialized}">
+            <!-- État vide : aucune bande - même gabarit que l'état vide Campagnes de DmTools (carte
+                 SectionCardBorderStyle plutôt que du texte flottant seul). -->
+            <Border IsVisible="{Binding HasWarbands, Converter={StaticResource InverseBoolConverter}}"
+                    Style="{StaticResource SectionCardBorderStyle}" WidthRequest="340"
+                    HorizontalOptions="Center" VerticalOptions="Center">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Label Text="{x:Static icons:SolidFont.Users}" FontFamily="FontSolid" FontSize="{OnIdiom Default=40, Desktop=34}"
+                           TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center"/>
+                    <Label Text="{loc:Loc EmptyWarbandsTitle}" FontSize="{OnIdiom Default=18, Desktop=15}" FontAttributes="Bold"
+                           HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                    <Label Text="{loc:Loc EmptyWarbandsBody}" TextColor="{DynamicResource AppTextMuted}"
+                           HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                    <Button Text="{loc:Loc DialogCreateItem}" Command="{Binding CreateWarbandCommand}" Margin="0,8,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <CollectionView x:Name="WarbandCollection"
+                    ItemsSource="{Binding Rows}"
+                    SelectionMode="None"
+                    IsVisible="{Binding HasWarbands}"
+                    ItemTemplate="{StaticResource WarbandTemplate}"/>
+        </Grid>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"

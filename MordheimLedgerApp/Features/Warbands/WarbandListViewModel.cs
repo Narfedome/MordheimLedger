@@ -14,6 +14,17 @@ public partial class WarbandListViewModel : BaseViewModel
     [ObservableProperty]
     private ObservableCollection<WarbandRow> rows = new();
 
+    [ObservableProperty]
+    private bool hasWarbands;
+
+    // Reste false pendant le court instant entre l'affichage de la page et le vrai début du
+    // chargement (Loading.IsLoading ne passe à true qu'à l'intérieur de LoadWarbandsAsync) : sans ce
+    // garde-fou, HasWarbands vaudrait encore false par défaut durant cette fenêtre et l'état vide
+    // (bouton "Créer") s'afficherait brièvement avant le spinner - cf. CampaignViewModel.IsInitialized
+    // dans DmTools.
+    [ObservableProperty]
+    private bool isInitialized;
+
     // Pas de CollectionView.SelectedItem/SelectionMode natif (même raison que CategoryListPage de
     // DmTools : sur Android, le fond de sélection natif reste teinté par colorAccent quel que soit le
     // style posé dessus) - IsSelected est porté par la ligne elle-même, cf. SelectionMarkerStyle.
@@ -43,6 +54,8 @@ public partial class WarbandListViewModel : BaseViewModel
             var warbands = await _warbandService.GetWarbandsAsync();
             Rows = new ObservableCollection<WarbandRow>(warbands.Select(w => new WarbandRow(w)));
             SelectedRow = null;
+            HasWarbands = warbands.Count > 0;
+            IsInitialized = true;
         });
     }
 

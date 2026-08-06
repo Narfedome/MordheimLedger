@@ -180,6 +180,15 @@
   <data name="WarbandsEmptyLibraryMessage" xml:space="preserve">
     <value>Aucun type de bande n'est disponible pour l'instant.</value>
   </data>
+  <data name="EmptyWarbandsTitle" xml:space="preserve">
+    <value>Créez votre première bande</value>
+  </data>
+  <data name="EmptyWarbandsBody" xml:space="preserve">
+    <value>Une bande regroupe vos guerriers, leur équipement et leur progression au fil de la campagne.</value>
+  </data>
+  <data name="DialogCreateItem" xml:space="preserve">
+    <value>Créer</value>
+  </data>
   <data name="TabSettings" xml:space="preserve">
     <value>Paramètres</value>
   </data>

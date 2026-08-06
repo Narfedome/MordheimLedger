@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mounts.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.Mounts.CreateEdit.MountDetailDialog"
+               x:DataType="local:MountDetailDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <VerticalStackLayout Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                       TextColor="{DynamicResource AppText}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Loc MountCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{loc:Loc MountRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding RarityDisplay}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+            </Grid>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+
+            <!-- Profil (abréviations officielles du livre de règles, pas de traduction) - même grille que
+                 MountEditDialog, valeurs non éditables. -->
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
+                <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                    <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Movement}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="0" Grid.Column="1">
+                    <Label Text="WS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.WeaponSkill}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="0" Grid.Column="2">
+                    <Label Text="BS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.BallisticSkill}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Grid.Column="0">
+                    <Label Text="S" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Strength}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Grid.Column="1">
+                    <Label Text="T" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Toughness}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" Grid.Column="2">
+                    <Label Text="W" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Wounds}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="2" Grid.Column="0">
+                    <Label Text="I" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Initiative}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="2" Grid.Column="1">
+                    <Label Text="A" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Attacks}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="2" Grid.Column="2">
+                    <Label Text="Ld" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Leadership}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc LibRestrictedToWarbandsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc LibRestrictedToAllHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                       IsVisible="{Binding HasRestrictedWarbands, Converter={StaticResource InverseBoolConverter}}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarbands}"
+                            IsVisible="{Binding HasRestrictedWarbands}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:WarbandArchetype">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MountDetailDialogViewModel}}, Path=ShowWarbandDetailCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:SolidFont.Shield}" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc LibSpecialRulesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.SpecialRules}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:SpecialRule">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MountDetailDialogViewModel}}, Path=ShowSpecialRuleDetailCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

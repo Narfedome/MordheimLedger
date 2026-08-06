@@ -242,4 +242,23 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<EquipmentItem>());
+
+    /// <summary>Read-only recap popup (tile info button) - RestrictedToWarbandArchetypeIds resolves
+    /// against the already-loaded _warbandArchetypes (same idiom as MutationViewModel.GroupNameFor);
+    /// RestrictedToWarriorArchetypeIds needs one extra fetch, same as SkillViewModel.Edit's
+    /// initialWarriors.</summary>
+    [RelayCommand]
+    private async Task ShowDetails(EquipmentItemRow row)
+    {
+        var item = row.Item;
+        var restrictedWarbands = _warbandArchetypes.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0 || item.RestrictedToWarriorArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, LocalizationService.Instance.Language))
+                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        var dialogViewModel = new EquipmentItemDetailDialogViewModel(item, CategoryLabel(item.Category), restrictedWarbands, restrictedWarriors);
+        await ShowDialogAsync(new EquipmentItemDetailDialog(dialogViewModel));
+    }
 }

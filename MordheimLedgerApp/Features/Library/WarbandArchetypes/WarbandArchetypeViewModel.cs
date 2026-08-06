@@ -207,6 +207,12 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         await LoadData();
     }
 
+    /// <summary>Read-only recap popup (tile info button) - no new service call, SpecialRules/
+    /// MagicSchools are already resolved objects on the already-loaded Item.</summary>
+    [RelayCommand]
+    private async Task ShowDetails(WarbandArchetypeRow row) =>
+        await ShowDialogAsync(new WarbandArchetypeDetailDialog(new WarbandArchetypeDetailDialogViewModel(row.Item)));
+
     [RelayCommand]
     private async Task ManageWarriors()
     {

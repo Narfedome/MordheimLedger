@@ -128,4 +128,9 @@ public partial class SpecialRuleViewModel : BaseViewModel
 
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<SpecialRule>());
+
+    /// <summary>Read-only recap popup (tile info button) - simplest of the 8, just Name/Description.</summary>
+    [RelayCommand]
+    private async Task ShowDetails(SpecialRuleRow row) =>
+        await ShowDialogAsync(new SpecialRuleDetailDialog(new SpecialRuleDetailDialogViewModel(row.Item)));
 }

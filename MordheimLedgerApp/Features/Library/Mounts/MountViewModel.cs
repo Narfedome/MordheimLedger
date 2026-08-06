@@ -221,4 +221,14 @@ public partial class MountViewModel : BaseViewModel
 
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Mount>());
+
+    /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.
+    /// SpecialRules needs no such resolution - Mount.SpecialRules is already a List&lt;SpecialRule&gt;.</summary>
+    [RelayCommand]
+    private async Task ShowDetails(MountRow row)
+    {
+        var restrictedWarbands = _warbandArchetypes.Where(w => row.Item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+        var dialogViewModel = new MountDetailDialogViewModel(row.Item, restrictedWarbands);
+        await ShowDialogAsync(new MountDetailDialog(dialogViewModel));
+    }
 }

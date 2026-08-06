@@ -38,7 +38,7 @@
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
+                <components:ResponsiveGridSpanBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
@@ -69,25 +69,29 @@
                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
                                 CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <Grid WidthRequest="120" HeightRequest="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <components:LibraryItemImageView
-                                Grid.Row="0"
-                                ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:RpgFont.RaHorseshoe}"
-                                FontFamily="RpgAwesome"
-                                Padding="20" />
-                            <Label Text="{Binding Item.Name}"
-                                   Grid.Row="1"
-                                   Style="{StaticResource TruncatedLabelStyle}"
-                                   HorizontalOptions="Center"
-                                   Margin="5,0"/>
-                            <Label Grid.Row="2" Text="{Binding Item.Cost}" HorizontalOptions="Center"
-                                   FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Grid Style="{StaticResource CodexTileFrameStyle}">
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                                <components:LibraryItemImageView
+                                    ImagePath="{Binding Item.ImagePath}"
+                                    DefaultGlyph="{x:Static icons:RpgFont.RaHorseshoe}"
+                                    FontFamily="RpgAwesome"
+                                    WidthRequest="20" HeightRequest="20"
+                                    HorizontalOptions="Center" />
+                                <Label Text="{Binding Item.Name}"
+                                       Style="{StaticResource CodexTileNameLabelStyle}"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       Margin="5,0"/>
+                                <Label Text="{Binding Item.Cost}"
+                                       Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
+                            </VerticalStackLayout>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                          Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                          IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                                          HorizontalOptions="End" VerticalOptions="Start"
+                                                          Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                          CommandParameter="{Binding .}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>

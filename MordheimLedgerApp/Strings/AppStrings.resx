@@ -324,6 +324,21 @@
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Commun à toutes les bandes</value>
   </data>
+  <data name="LibNoDescription" xml:space="preserve">
+    <value>Aucune description.</value>
+  </data>
+  <data name="LibDetailsTooltip" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="LibGoldCrownsAbbr" xml:space="preserve">
+    <value>CO</value>
+  </data>
+  <data name="LibRollAbbr" xml:space="preserve">
+    <value>Jet</value>
+  </data>
+  <data name="LibDifficultyAbbr" xml:space="preserve">
+    <value>Diff.</value>
+  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
   </data>
@@ -911,6 +926,9 @@
   </data>
   <data name="LibManageMagicSchools" xml:space="preserve">
     <value>Gérer les écoles de magie</value>
+  </data>
+  <data name="WarbandGradePh" xml:space="preserve">
+    <value>Grade</value>
   </data>
   <data name="WarbandGradeCore" xml:space="preserve">
     <value>Livre de base</value>

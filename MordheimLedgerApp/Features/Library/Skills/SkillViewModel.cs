@@ -235,4 +235,21 @@ public partial class SkillViewModel : BaseViewModel
 
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Skill>());
+
+    /// <summary>Read-only recap popup (tile info button) - same dual restriction-id resolution as Edit's
+    /// initialWarriors fetch.</summary>
+    [RelayCommand]
+    private async Task ShowDetails(SkillRow row)
+    {
+        var item = row.Item;
+        var restrictedWarbands = _warbandArchetypes.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, LocalizationService.Instance.Language))
+                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        var dialogViewModel = new SkillDetailDialogViewModel(item, CategoryLabel(item.Category), restrictedWarbands, restrictedWarriors);
+        await ShowDialogAsync(new SkillDetailDialog(dialogViewModel));
+    }
 }

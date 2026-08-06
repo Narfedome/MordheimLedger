@@ -345,6 +345,30 @@
         </Setter>
     </Style>
 
+    <!-- Tuiles du Codex (8 onglets + WarriorArchetypeView/Selector, EquipmentListView) - nom enroulé sur
+         3 lignes plutôt que tronqué à 1, contrairement à TruncatedLabelStyle (encore utilisé tel quel par
+         WarbandListPage et MagicSchoolView - liste à plat, pas une grille de tuiles - hors périmètre ici). -->
+    <Style TargetType="Label" x:Key="CodexTileNameLabelStyle" BasedOn="{StaticResource TruncatedLabelStyle}">
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+        <Setter Property="MaxLines" Value="3"/>
+    </Style>
+
+    <!-- Taille fixe et carrée du Grid racine de chaque tuile - un seul endroit à retoucher pour les 11
+         usages plutôt que WidthRequest/HeightRequest dupliqués en dur dans chaque fichier. -->
+    <Style TargetType="Grid" x:Key="CodexTileFrameStyle">
+        <Setter Property="WidthRequest" Value="130"/>
+        <Setter Property="HeightRequest" Value="130"/>
+    </Style>
+
+    <!-- Ligne d'info secondaire sous le nom (coût, rareté, jet de sort...) - Mutation/Mount/Spell
+         l'utilisaient déjà en style ad hoc (AppTextMuted) ; formalisé ici en AppAccent pour mieux
+         ressortir, et étendu à Equipment lors de ce même passage. -->
+    <Style TargetType="Label" x:Key="CodexTileSecondaryLabelStyle">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+    </Style>
+
     <Style TargetType="Picker">
         <Setter Property="TextColor" Value="{DynamicResource AppText}" />
         <Setter Property="TitleColor" Value="{DynamicResource AppTextMuted}" />

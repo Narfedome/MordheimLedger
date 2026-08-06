@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Skills.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.Skills.CreateEdit.SkillDetailDialog"
+               x:DataType="local:SkillDetailDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <VerticalStackLayout Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                       TextColor="{DynamicResource AppText}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc SkillCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc LibRestrictedToWarbandsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc LibRestrictedToAllHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                       IsVisible="{Binding HasRestrictedWarbands, Converter={StaticResource InverseBoolConverter}}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarbands}"
+                            IsVisible="{Binding HasRestrictedWarbands}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:WarbandArchetype">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:SkillDetailDialogViewModel}}, Path=ShowWarbandDetailCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:SolidFont.Shield}" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasRestrictedWarriors}">
+                <Label Text="{loc:Loc LibRestrictedToWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarriors}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:WarriorArchetype">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:SkillDetailDialogViewModel}}, Path=ShowWarriorDetailCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:SolidFont.User}" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

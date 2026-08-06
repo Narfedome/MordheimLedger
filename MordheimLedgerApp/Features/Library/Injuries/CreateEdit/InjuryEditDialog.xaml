@@ -24,6 +24,10 @@
                                               DefaultGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
                                               FontFamily="RpgAwesome" MaximumHeightRequest="30"/>
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc InjuryNamePh}"/>
+            <Picker Title="{loc:Loc InjuryCategoryPh}"
+                    ItemsSource="{Binding CategoryOptions}"
+                    SelectedItem="{Binding SelectedCategoryLabel}"/>
+            <Entry Text="{Binding Item.RollRange}" Placeholder="{loc:Loc InjuryRollRangePh}"/>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"

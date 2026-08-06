@@ -1,0 +1,200 @@
+[
+  {
+    "name": { "en": "Dead", "fr": "Mort" },
+    "category": "Hero",
+    "rollRange": "11-15",
+    "description": {
+      "en": "Dead. The warrior is lost, all their equipment is lost.",
+      "fr": "Mort. Le guerrier est perdu, tout son équipement est perdu."
+    }
+  },
+  {
+    "name": { "en": "Multiple Injuries", "fr": "Blessures multiples" },
+    "category": "Hero",
+    "rollRange": "16, 21",
+    "description": {
+      "en": "Multiple injuries: not dead. Roll 1D6 times more on this table (reroll any Dead, Captured or further Multiple injuries) and stack every effect obtained.",
+      "fr": "Blessures multiples : ne meurt pas. Relancez 1D6 fois sur cette table (relancez tout Mort, Capturé ou nouveau Blessures multiples) et cumulez tous les effets obtenus."
+    }
+  },
+  {
+    "name": { "en": "Leg Wound", "fr": "Blessure à la jambe" },
+    "category": "Hero",
+    "rollRange": "22",
+    "description": {
+      "en": "Leg wound: Movement permanently reduced by 1.",
+      "fr": "Blessure à la jambe : Mouvement -1 de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Arm Wound", "fr": "Blessure au bras" },
+    "category": "Hero",
+    "rollRange": "23",
+    "description": {
+      "en": "Arm wound (1D6): on a 1, arm amputated, can only use one-handed weapons from now on (permanent); on 2-6, minor wound, misses the next battle.",
+      "fr": "Blessure au bras (1D6) : sur 1, bras amputé, ne peut plus utiliser que des armes à une main (permanent) ; sur 2-6, blessure légère, rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Madness", "fr": "Folie" },
+    "category": "Hero",
+    "rollRange": "24",
+    "description": {
+      "en": "Madness (1D6): on 1-3 becomes permanently Stupid; on 4-6 becomes permanently Frenzied.",
+      "fr": "Folie (1D6) : sur 1-3 devient Stupide de façon permanente ; sur 4-6 devient Frénétique de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Smashed Leg", "fr": "Jambe écrasée" },
+    "category": "Hero",
+    "rollRange": "25",
+    "description": {
+      "en": "Crushed leg (1D6): on a 1, can no longer run but can still charge (permanent); on 2-6, misses the next battle.",
+      "fr": "Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Chest Wound", "fr": "Blessure au torse" },
+    "category": "Hero",
+    "rollRange": "26",
+    "description": {
+      "en": "Chest wound: Toughness permanently reduced by 1.",
+      "fr": "Blessure au torse : Endurance -1 de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Blinded in One Eye", "fr": "Œil crevé" },
+    "category": "Hero",
+    "rollRange": "31",
+    "description": {
+      "en": "Eye put out: Ballistic Skill permanently reduced by 1; losing the second eye forces retirement from the warband.",
+      "fr": "Œil crevé : Capacité de Tir -1 de façon permanente ; la perte du second œil entraîne un retrait obligatoire de la bande."
+    }
+  },
+  {
+    "name": { "en": "Old Battle Wound", "fr": "Vieille blessure" },
+    "category": "Hero",
+    "rollRange": "32",
+    "description": {
+      "en": "Old wound: before every future battle, roll 1D6 - on a 1, can't fight that battle (permanent, retest every game).",
+      "fr": "Vieille blessure : avant chaque bataille future, 1D6 - sur un 1, ne peut pas combattre cette bataille-là (permanent, à retester à chaque partie)."
+    }
+  },
+  {
+    "name": { "en": "Nervous Condition", "fr": "Traumatisme nerveux" },
+    "category": "Hero",
+    "rollRange": "33",
+    "description": {
+      "en": "Nervous condition: Initiative permanently reduced by 1.",
+      "fr": "Traumatisme nerveux : Initiative -1 de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Hand Injury", "fr": "Blessure à la main" },
+    "category": "Hero",
+    "rollRange": "34",
+    "description": {
+      "en": "Hand injury: Weapon Skill permanently reduced by 1.",
+      "fr": "Blessure à la main : Capacité de Combat -1 de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Deep Wound", "fr": "Blessure profonde" },
+    "category": "Hero",
+    "rollRange": "35",
+    "description": {
+      "en": "Deep wound: out of action for 1D3 battles, can do nothing during that time.",
+      "fr": "Blessure profonde : hors service pendant 1D3 batailles, ne peut rien faire durant ce temps."
+    }
+  },
+  {
+    "name": { "en": "Robbed", "fr": "Dépouillé" },
+    "category": "Hero",
+    "rollRange": "36",
+    "description": {
+      "en": "Robbed: escapes but loses all weapons, armor and equipment.",
+      "fr": "Dépouillé : s'échappe mais perd toutes ses armes, armures et son équipement."
+    }
+  },
+  {
+    "name": { "en": "Full Recovery", "fr": "Récupération totale" },
+    "category": "Hero",
+    "rollRange": "41-55",
+    "description": {
+      "en": "Full recovery: knocked out or lightly wounded, recovers completely, fights normally next battle.",
+      "fr": "Récupération totale : assommé ou blessure légère, se rétablit complètement, combat normalement la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Bitter Enmity", "fr": "Rancune" },
+    "category": "Hero",
+    "rollRange": "56",
+    "description": {
+      "en": "Bitter enmity: recovers fully but now hates (1D6) whoever's responsible or their warband.",
+      "fr": "Rancune : récupère totalement mais hait désormais (1D6) le responsable ou sa bande."
+    }
+  },
+  {
+    "name": { "en": "Captured", "fr": "Capturé" },
+    "category": "Hero",
+    "rollRange": "61",
+    "description": {
+      "en": "Captured: ransom, exchange, or sold as a slave (1D6x5 gc). Equipment kept if exchanged or sold back alive.",
+      "fr": "Capturé : rançon, échange, ou vendu comme esclave (1D6×5 CO). Équipement gardé si échangé ou revendu vivant."
+    }
+  },
+  {
+    "name": { "en": "Hardened", "fr": "Endurci" },
+    "category": "Hero",
+    "rollRange": "62-63",
+    "description": {
+      "en": "Hardened: becomes permanently immune to Fear.",
+      "fr": "Endurci : devient immunisé à la Peur de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Horrible Scars", "fr": "Horribles balafres" },
+    "category": "Hero",
+    "rollRange": "64",
+    "description": {
+      "en": "Horrible scars: now permanently causes Fear.",
+      "fr": "Horribles balafres : provoque désormais la Peur, de façon permanente."
+    }
+  },
+  {
+    "name": { "en": "Sold to the Pits", "fr": "Vendu aux arènes" },
+    "category": "Hero",
+    "rollRange": "65",
+    "description": {
+      "en": "Sold to the pits: fights a gladiator (Hired Sword). Win: +50 gc, +2 XP, joins the warband with their equipment. Loss: reroll keeping only 11-35; if they survive, joins the warband with no armor or weapons.",
+      "fr": "Vendu aux arènes : combat un gladiateur (Francs-Tireurs). Victoire : +50 CO, +2 XP, rejoint la bande avec son équipement. Défaite : relancez en ne gardant que 11-35 ; s'il survit, rejoint la bande sans armure ni armes."
+    }
+  },
+  {
+    "name": { "en": "Survives Against the Odds", "fr": "Survie miraculeuse" },
+    "category": "Hero",
+    "rollRange": "66",
+    "description": {
+      "en": "Miraculous survival: survives and rejoins the warband, gains 1 Experience point.",
+      "fr": "Survie miraculeuse : survit et rejoint la bande, gagne 1 point d'expérience."
+    }
+  },
+  {
+    "name": { "en": "Lost", "fr": "Perdu" },
+    "category": "Henchman",
+    "rollRange": "1-2",
+    "description": {
+      "en": "Dead. The warrior is lost.",
+      "fr": "Mort. Le guerrier est perdu."
+    }
+  },
+  {
+    "name": { "en": "Full Recovery", "fr": "Récupération totale" },
+    "category": "Henchman",
+    "rollRange": "3-6",
+    "description": {
+      "en": "Full recovery.",
+      "fr": "Rétablissement complet."
+    }
+  }
+]

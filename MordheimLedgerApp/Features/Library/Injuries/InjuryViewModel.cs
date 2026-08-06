@@ -13,20 +13,35 @@ public partial class InjuryViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
     private readonly IInjuryPickerNavigationService _pickerNavigation;
+    private List<Injury> _allItems = new();
 
+    /// <summary>Sections of the grid, one per InjuryCategory (Hero/Henchman) - always grouped
+    /// internally, the header is just hidden outside the "All" filter, cf. SkillViewModel.</summary>
     [ObservableProperty]
-    private ObservableCollection<InjuryRow> injuries = new();
+    private ObservableCollection<InjuryGroup> injuryGroups = new();
+
+    /// <summary>Group headers are redundant once a single category is picked (its name is already on
+    /// the filter button) - only shown for the "All" filter, cf. SkillViewModel.ShowGroupHeaders.</summary>
+    public bool ShowGroupHeaders => SelectedCategory is null;
 
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
     [ObservableProperty]
     private InjuryRow? selectedRow;
 
+    /// <summary>Le vrai critère de filtre - null = Tout. Voir SkillViewModel.SelectedCategory pour la
+    /// raison de la séparation avec SelectedCategoryLabel.</summary>
+    [ObservableProperty]
+    private InjuryCategory? selectedCategory;
+
+    [ObservableProperty]
+    private string selectedCategoryLabel = string.Empty;
+
     /// <summary>Set by InjurySelectorPage right after construction - même bascule multi-sélection
     /// qu'EquipmentItemViewModel.IsSelectorMode.</summary>
     public bool IsSelectorMode { get; set; }
 
-    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>
+    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par ApplyFilter.</summary>
     public ObservableCollection<InjuryRow> SelectedRows { get; } = new();
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
@@ -35,6 +50,7 @@ public partial class InjuryViewModel : BaseViewModel
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
+        selectedCategoryLabel = Loc["LibFilterAll"];
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
         // (onglet TabBar gardé en mémoire par Shell).
@@ -46,12 +62,44 @@ public partial class InjuryViewModel : BaseViewModel
 
     private async Task LoadData()
     {
-        var allItems = await _libraryService.GetInjuriesAsync(LocalizationService.Instance.Language);
-        Injuries = new ObservableCollection<InjuryRow>(allItems.Select(i => new InjuryRow(i)));
+        _allItems = await _libraryService.GetInjuriesAsync(LocalizationService.Instance.Language);
+        RefreshSelectedCategoryLabel();
+        ApplyFilter();
+    }
+
+    /// <summary>Recompute le libellé affiché depuis SelectedCategory (le vrai critère) - à refaire à
+    /// chaque LoadData puisque le texte dépend de la langue courante.</summary>
+    private void RefreshSelectedCategoryLabel() =>
+        SelectedCategoryLabel = SelectedCategory is { } category ? CategoryLabel(category) : Loc["LibFilterAll"];
+
+    partial void OnSelectedCategoryChanged(InjuryCategory? value) => OnPropertyChanged(nameof(ShowGroupHeaders));
+
+    private void ApplyFilter()
+    {
+        IEnumerable<Injury> filtered = _allItems;
+        if (SelectedCategory is { } category)
+            filtered = filtered.Where(i => i.Category == category);
+
+        var groups = new ObservableCollection<InjuryGroup>();
+        foreach (var item in filtered)
+        {
+            var groupName = CategoryLabel(item.Category);
+            var group = groups.FirstOrDefault(g => g.Name == groupName);
+            if (group is null)
+            {
+                group = new InjuryGroup(groupName);
+                groups.Add(group);
+            }
+            group.Add(new InjuryRow(item));
+        }
+        InjuryGroups = groups;
+
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
     }
+
+    private string CategoryLabel(InjuryCategory category) => Loc[$"InjuryCategory{category}"];
 
     partial void OnSelectedRowChanged(InjuryRow? oldValue, InjuryRow? newValue)
     {
@@ -75,6 +123,20 @@ public partial class InjuryViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task SelectCategory()
+    {
+        var categories = Enum.GetValues<InjuryCategory>();
+        var options = new[] { Loc["LibFilterAll"] }.Concat(categories.Select(CategoryLabel)).ToArray();
+
+        var index = await ShowActionSheetIndexAsync(Loc["LibFilterCategory"], options);
+        if (index < 0) return;
+
+        SelectedCategory = index == 0 ? null : categories[index - 1];
+        RefreshSelectedCategoryLabel();
+        ApplyFilter();
+    }
+
+    [RelayCommand]
     private async Task Create()
     {
         var newItem = new Injury();
@@ -82,7 +144,8 @@ public partial class InjuryViewModel : BaseViewModel
         if (await ShowDialogAsync(new InjuryEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveInjuryAsync(newItem, LocalizationService.Instance.Language);
-        await LoadData();
+        _allItems.Add(newItem);
+        ApplyFilter();
     }
 
     [RelayCommand]
@@ -99,7 +162,9 @@ public partial class InjuryViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
-            ImagePath = s.ImagePath
+            ImagePath = s.ImagePath,
+            Category = s.Category,
+            RollRange = s.RollRange
         };
 
         var dialogViewModel = new InjuryEditDialogViewModel(copy, Loc["InjuryEditTitle"]);
@@ -116,7 +181,8 @@ public partial class InjuryViewModel : BaseViewModel
         if (!await ConfirmDeleteAsync(row.Item.Name)) return;
 
         await _libraryService.DeleteInjuryAsync(row.Item.Id);
-        await LoadData();
+        _allItems.Remove(row.Item);
+        ApplyFilter();
     }
 
     [RelayCommand]

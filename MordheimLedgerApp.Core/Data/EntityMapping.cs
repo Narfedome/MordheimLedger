@@ -199,7 +199,9 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
-        ImagePath = e.ImagePath ?? string.Empty
+        ImagePath = e.ImagePath ?? string.Empty,
+        Category = e.Category,
+        RollRange = e.RollRange
     };
 
     public static InjuryEntity ToEntity(this Injury m) => new()
@@ -208,7 +210,9 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
-        ImagePath = m.ImagePath
+        ImagePath = m.ImagePath,
+        Category = m.Category,
+        RollRange = m.RollRange
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()

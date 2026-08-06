@@ -129,6 +129,26 @@ public class DataServiceTests : IDisposable
         Assert.Single(specialSkills, s => s.Name == "Da Cunnin' Plan" && s.RestrictedToWarriorArchetypeIds.Count == 1);
     }
 
+    /// <summary>Injuries.json seeds the rulebook's Serious Injuries charts once, common to every
+    /// warband (no warband file references it) - Heroes' D66 chart (20 named rows covering the full
+    /// 11-66 range) + Henchmen's much simpler D6 chart (2 rows).</summary>
+    [Fact]
+    public async Task Injuries_SeedsHeroesAndHenchmenChartsFromRulebook()
+    {
+        var injuries = await _library.GetInjuriesAsync("en");
+
+        var heroInjuries = injuries.Where(i => i.Category == InjuryCategory.Hero).ToList();
+        Assert.Equal(20, heroInjuries.Count);
+        Assert.Contains(heroInjuries, i => i.Name == "Dead" && i.RollRange == "11-15");
+        Assert.Contains(heroInjuries, i => i.Name == "Survives Against the Odds" && i.RollRange == "66");
+        Assert.All(heroInjuries, i => Assert.False(string.IsNullOrWhiteSpace(i.RollRange)));
+
+        var henchmanInjuries = injuries.Where(i => i.Category == InjuryCategory.Henchman).ToList();
+        Assert.Equal(2, henchmanInjuries.Count);
+        Assert.Contains(henchmanInjuries, i => i.Name == "Lost" && i.RollRange == "1-2");
+        Assert.Contains(henchmanInjuries, i => i.Name == "Full Recovery" && i.RollRange == "3-6");
+    }
+
     /// <summary>"Leader" is attached from 4 different warbands' JSON files (Averlanders/Captain,
     /// Ostlanders/Elder, Dwarf Treasure Hunters/Noble, Undead/Vampire) - find-or-create by English Name
     /// (see AppDatabase.FindOrCreateSpecialRuleAsync) must resolve them all to the SAME catalog row

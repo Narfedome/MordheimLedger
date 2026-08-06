@@ -11,4 +11,6 @@ public class InjuryEntity
     public string? DescriptionKey { get; set; }
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
+    public InjuryCategory Category { get; set; }
+    public string? RollRange { get; set; }
 }

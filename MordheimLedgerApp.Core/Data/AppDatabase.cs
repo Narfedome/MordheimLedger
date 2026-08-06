@@ -126,15 +126,18 @@ public class AppDatabase
 
     private async Task SeedOfficialContentAsync()
     {
-        // The 5 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
-        // Skills.json, MagicSchools.json) must seed before any warband file below - warband JSON files
-        // only declare rules/equipment/mutations/schools that are genuinely THEIRS, and find-or-create-by-
-        // English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted insert (Equipment/Skill)
-        // relies on the canonical row already existing by the time a warband references it.
+        // The 6 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
+        // Skills.json, Injuries.json, MagicSchools.json) must seed before any warband file below -
+        // warband JSON files only declare rules/equipment/mutations/schools that are genuinely THEIRS,
+        // and find-or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted
+        // insert (Equipment/Skill/Injury) relies on the canonical row already existing by the time a
+        // warband references it. Injuries.json isn't referenced by any warband file at all (no per-band
+        // injury tables in the rulebook), it just needs to seed once.
         await SeedSpecialRulesAsync();
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
+        await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
 
         await SeedWarbandFromJsonAsync("Undead.json");
@@ -438,6 +441,25 @@ public class AppDatabase
             skill.NameKey = await SeedTranslationAsync(sk.Name.En, sk.Name.Fr);
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
             await _db.InsertAsync(skill.ToEntity());
+        }
+    }
+
+    /// <summary>Plain insert, no dedup - the rulebook's Serious Injuries charts (Heroes' D66 + Henchmen's
+    /// D6), common to every warband. Purely a browsable/editable reference catalog - see Injury's doc
+    /// comment for why this is deliberately not wired into SeriousInjuryTable/HenchmanInjuryTable.</summary>
+    private async Task SeedInjuriesAsync()
+    {
+        foreach (var inj in await LoadSeedArrayAsync<InjurySeedData>("Injuries.json"))
+        {
+            var injury = new Injury
+            {
+                Category = Enum.Parse<InjuryCategory>(inj.Category),
+                RollRange = inj.RollRange,
+                Source = ContentSource.Official
+            };
+            injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);
+            injury.DescriptionKey = inj.Description is null ? null : await SeedTranslationAsync(inj.Description.En, inj.Description.Fr);
+            await _db.InsertAsync(injury.ToEntity());
         }
     }
 

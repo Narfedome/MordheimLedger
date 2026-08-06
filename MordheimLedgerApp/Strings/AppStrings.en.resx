@@ -477,6 +477,18 @@
   <data name="InjuryEditTitle" xml:space="preserve">
     <value>Edit Injury</value>
   </data>
+  <data name="InjuryCategoryPh" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="InjuryCategoryHero" xml:space="preserve">
+    <value>Heroes</value>
+  </data>
+  <data name="InjuryCategoryHenchman" xml:space="preserve">
+    <value>Henchmen</value>
+  </data>
+  <data name="InjuryRollRangePh" xml:space="preserve">
+    <value>Dice roll (e.g. 22, 41-55)</value>
+  </data>
   <data name="SpellNamePh" xml:space="preserve">
     <value>Spell name</value>
   </data>

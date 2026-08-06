@@ -477,6 +477,18 @@
   <data name="InjuryEditTitle" xml:space="preserve">
     <value>Modifier la blessure</value>
   </data>
+  <data name="InjuryCategoryPh" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="InjuryCategoryHero" xml:space="preserve">
+    <value>Héros</value>
+  </data>
+  <data name="InjuryCategoryHenchman" xml:space="preserve">
+    <value>Hommes de main</value>
+  </data>
+  <data name="InjuryRollRangePh" xml:space="preserve">
+    <value>Jet de dé (ex. 22, 41-55)</value>
+  </data>
   <data name="SpellNamePh" xml:space="preserve">
     <value>Nom du sort</value>
   </data>

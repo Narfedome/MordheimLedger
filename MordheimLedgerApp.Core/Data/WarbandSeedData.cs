@@ -208,6 +208,19 @@ public class SkillSeedData
     public List<string>? RestrictedToWarriorNames { get; set; }
 }
 
+/// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to
+/// every warband - not declared per-band). See Injury.Category/RollRange.</summary>
+public class InjurySeedData
+{
+    public LocalizedText Name { get; set; } = new();
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.InjuryCategory member name.</summary>
+    public string Category { get; set; } = string.Empty;
+
+    public string? RollRange { get; set; }
+    public LocalizedText? Description { get; set; }
+}
+
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the
 /// explicit owner of a school's spells, referenced by warband files via WarbandSeedData.MagicSchools
 /// (name-only, no Description, no Spells) to link a spellcaster without redeclaring the table.</summary>

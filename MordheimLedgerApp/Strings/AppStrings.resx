@@ -145,7 +145,7 @@
     <value>Erreur</value>
   </data>
   <data name="TabWarbands" xml:space="preserve">
-    <value>Warbands</value>
+    <value>Bandes</value>
   </data>
   <data name="BtnAdd" xml:space="preserve">
     <value>Ajouter</value>
@@ -303,9 +303,6 @@
   <data name="TabTradingPost" xml:space="preserve">
     <value>Place du Marché</value>
   </data>
-  <data name="LibTabWarbands" xml:space="preserve">
-    <value>Bandes</value>
-  </data>
   <data name="LibTabTradingPost" xml:space="preserve">
     <value>Marché</value>
   </data>
@@ -441,6 +438,12 @@
   <data name="SpellCreateTitle" xml:space="preserve">
     <value>Nouveau sort</value>
   </data>
+  <data name="SpellFilterAllSchools" xml:space="preserve">
+    <value>Toutes les écoles</value>
+  </data>
+  <data name="SpellFilterMagicSchoolTitle" xml:space="preserve">
+    <value>Filtrer par école de magie</value>
+  </data>
   <data name="SpellEditTitle" xml:space="preserve">
     <value>Modifier le sort</value>
   </data>
@@ -530,6 +533,9 @@
   </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Écoles de magie</value>
+  </data>
+  <data name="LibManageMagicSchools" xml:space="preserve">
+    <value>Gérer les écoles de magie</value>
   </data>
   <data name="MagicSchoolNamePh" xml:space="preserve">
     <value>Nom de l'école</value>

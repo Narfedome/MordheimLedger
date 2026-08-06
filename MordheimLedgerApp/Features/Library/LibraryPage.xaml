@@ -10,7 +10,6 @@
              xmlns:specialRules="clr-namespace:MordheimLedgerApp.Features.Library.SpecialRules"
              xmlns:mutations="clr-namespace:MordheimLedgerApp.Features.Library.Mutations"
              xmlns:mounts="clr-namespace:MordheimLedgerApp.Features.Library.Mounts"
-             xmlns:magicSchools="clr-namespace:MordheimLedgerApp.Features.Library.MagicSchools"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Library.LibraryPage"
@@ -22,7 +21,7 @@
              WarbandDetailPage : pas de vrai TabbedPage, juste des boutons + IsVisible. TabToggleButton
              (style implicite) met l'onglet actif en gras/accent. -->
         <HorizontalStackLayout Grid.Row="0" Spacing="16" Margin="16,10,16,8" HorizontalOptions="Center">
-            <components:TabToggleButton Text="{loc:Loc LibTabWarbands}" Command="{Binding ShowWarbandsTabCommand}" IsActive="{Binding IsWarbandsTab}"/>
+            <components:TabToggleButton Text="{loc:Loc TabWarbands}" Command="{Binding ShowWarbandsTabCommand}" IsActive="{Binding IsWarbandsTab}"/>
             <components:TabToggleButton Text="{loc:Loc LibTabTradingPost}" Command="{Binding ShowTradingPostTabCommand}" IsActive="{Binding IsTradingPostTab}"/>
             <components:TabToggleButton Text="{loc:Loc TabSkills}" Command="{Binding ShowSkillsTabCommand}" IsActive="{Binding IsSkillsTab}"/>
             <components:TabToggleButton Text="{loc:Loc TabInjuries}" Command="{Binding ShowInjuriesTabCommand}" IsActive="{Binding IsInjuriesTab}"/>
@@ -30,7 +29,6 @@
             <components:TabToggleButton Text="{loc:Loc LibTabSpecialRules}" Command="{Binding ShowSpecialRulesTabCommand}" IsActive="{Binding IsSpecialRulesTab}"/>
             <components:TabToggleButton Text="{loc:Loc LibTabMutations}" Command="{Binding ShowMutationsTabCommand}" IsActive="{Binding IsMutationsTab}"/>
             <components:TabToggleButton Text="{loc:Loc LibTabMounts}" Command="{Binding ShowMountsTabCommand}" IsActive="{Binding IsMountsTab}"/>
-            <components:TabToggleButton Text="{loc:Loc LibTabMagicSchools}" Command="{Binding ShowMagicSchoolsTabCommand}" IsActive="{Binding IsMagicSchoolsTab}"/>
         </HorizontalStackLayout>
 
         <!-- Chaque section garde son ViewModel/*View existant tel quel (BindingContext explicite,
@@ -55,8 +53,6 @@
             IsVisible="{Binding IsMutationsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
         <mounts:MountView Grid.Row="1" BindingContext="{Binding Mounts}"
             IsVisible="{Binding IsMountsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
-        <magicSchools:MagicSchoolView Grid.Row="1" BindingContext="{Binding MagicSchools}"
-            IsVisible="{Binding IsMagicSchoolsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

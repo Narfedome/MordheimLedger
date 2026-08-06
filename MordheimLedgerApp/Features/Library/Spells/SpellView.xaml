@@ -9,18 +9,40 @@
              x:Name="root">
 
     <!-- Multi-sélection en mode picker (IsCrud=False), même pattern qu'InjuryView. -->
-    <Grid Margin="5" RowSpacing="8">
+    <Grid Margin="5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <ActivityIndicator Grid.Row="0" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+        <!-- Filtre + gestion des écoles de magie - même en-tête que LibraryTrackView de DmTools
+             (bouton texte = filtre courant/ouvre l'ActionSheet, icône = gérer). Les écoles de magie ne
+             sont plus un onglet Codex à part entière (trop imbriqué pour être une catégorie de premier
+             niveau, cf. Category de DmTools) - accessibles d'ici uniquement, seul endroit où elles ont
+             du sens (les Sorts y sont rattachés). Le filtre reste visible en mode picker aussi (même
+             gabarit que DmTools, partagé entre onglet Codex et sélecteur). -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Margin="8,0,8,8" ColumnSpacing="4" VerticalOptions="Center">
+            <Button Grid.Column="0" Text="{Binding SelectedMagicSchoolFilter}"
+                    Command="{Binding SelectMagicSchoolFilterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{DynamicResource AppAccent}"
+                    FontSize="{OnIdiom Default=15, Desktop=13}"
+                    HorizontalOptions="Start"
+                    Padding="8,4"/>
+            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.HatWizard}"
+                                         Command="{Binding ManageMagicSchoolsCommand}"
+                                         Tooltip="{loc:Loc LibManageMagicSchools}"
+                                         IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}"/>
+        </Grid>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="0" x:Name="ItemsCollection"
-                ItemsSource="{Binding Spells}"
+        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+                ItemsSource="{Binding SpellGroups}"
+                IsGrouped="True"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
@@ -29,6 +51,19 @@
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
+            <!-- Toujours groupé en interne (cf. SpellViewModel.ShowGroupHeaders) : seul l'en-tête est
+                 masqué hors du filtre "Toutes les écoles", où il serait redondant avec le bouton de
+                 filtre déjà affiché au-dessus. -->
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                           FontAttributes="Bold"
+                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                           TextColor="{DynamicResource AppText}"
+                           Margin="4,12,4,4"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:SpellRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
@@ -62,22 +97,15 @@
                                    Style="{StaticResource TruncatedLabelStyle}"
                                    HorizontalOptions="Center"
                                    Margin="5,0"/>
-                            <Label Grid.Row="2" HorizontalOptions="Center" FontSize="10" TextColor="{DynamicResource AppTextMuted}">
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding Item.MagicSchool.Name}"/>
-                                        <Span Text=" · "/>
-                                        <Span Text="{Binding Item.RollValue}"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>
+                            <Label Grid.Row="2" HorizontalOptions="Center" FontSize="10" TextColor="{DynamicResource AppTextMuted}"
+                                   Text="{Binding Item.RollValue}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
@@ -94,7 +122,7 @@
 
         <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
              toutes les tuiles cochées d'un coup. -->
-        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"

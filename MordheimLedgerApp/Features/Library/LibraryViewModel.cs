@@ -7,19 +7,24 @@ using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.Mounts;
-using MordheimLedgerApp.Features.Library.MagicSchools;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
 
 /// <summary>
-/// Single "Codex" Shell tab hosting the 7 catalog sections (types de bande, Place du Marché,
-/// Compétences, Blessures, Sorts, Règles spéciales, Mutations) that used to each be their own
+/// Single "Codex" Shell tab hosting the 8 catalog sections (types de bande, Place du Marché,
+/// Compétences, Blessures, Sorts, Règles spéciales, Mutations, Montures) that used to each be their own
 /// top-level TabBar tab - consolidated to declutter the bottom nav bar on Android. Same toggle pattern
 /// (index + IsXTab, no real TabbedPage) already used by WarbandDetailPage's Roster/Historique and
 /// WarriorEditDialog's Équipement/Compétences/Blessures. Each section keeps its own existing
 /// ViewModel/*View ContentView unchanged - this container only owns the toggle and BindingContext
 /// wiring, no catalog logic of its own.
+///
+/// MagicSchool is deliberately NOT one of these tabs, unlike the other 8 catalogs - too nested a
+/// concept for a top-level Codex entry (same call as DmTools' Category, managed from within the Track
+/// library rather than its own TabBar tab). It's reached instead via SpellViewModel.ManageMagicSchools
+/// (see SpellView.xaml's "Gérer les écoles de magie" icon), which pushes MagicSchoolListPage as a
+/// route - see AppShell.xaml.cs.
 /// </summary>
 public partial class LibraryViewModel : BaseViewModel
 {
@@ -31,7 +36,6 @@ public partial class LibraryViewModel : BaseViewModel
     public SpecialRuleViewModel SpecialRules { get; }
     public MutationViewModel Mutations { get; }
     public MountViewModel Mounts { get; }
-    public MagicSchoolViewModel MagicSchools { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
@@ -42,7 +46,6 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsSpecialRulesTab))]
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
     [NotifyPropertyChangedFor(nameof(IsMountsTab))]
-    [NotifyPropertyChangedFor(nameof(IsMagicSchoolsTab))]
     private int selectedTab;
 
     public bool IsWarbandsTab => SelectedTab == 0;
@@ -53,11 +56,10 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsSpecialRulesTab => SelectedTab == 5;
     public bool IsMutationsTab => SelectedTab == 6;
     public bool IsMountsTab => SelectedTab == 7;
-    public bool IsMagicSchoolsTab => SelectedTab == 8;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
-        MutationViewModel mutations, MountViewModel mounts, MagicSchoolViewModel magicSchools)
+        MutationViewModel mutations, MountViewModel mounts)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
@@ -67,7 +69,6 @@ public partial class LibraryViewModel : BaseViewModel
         SpecialRules = specialRules;
         Mutations = mutations;
         Mounts = mounts;
-        MagicSchools = magicSchools;
     }
 
     [RelayCommand]
@@ -94,10 +95,7 @@ public partial class LibraryViewModel : BaseViewModel
     [RelayCommand]
     private void ShowMountsTab() => SelectedTab = 7;
 
-    [RelayCommand]
-    private void ShowMagicSchoolsTab() => SelectedTab = 8;
-
-    /// <summary>All 9 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
+    /// <summary>All 8 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
     /// switching between them is instant.</summary>
     public async Task InitializeAsync()
     {
@@ -109,6 +107,5 @@ public partial class LibraryViewModel : BaseViewModel
         await SpecialRules.InitializeAsync();
         await Mutations.InitializeAsync();
         await Mounts.InitializeAsync();
-        await MagicSchools.InitializeAsync();
     }
 }

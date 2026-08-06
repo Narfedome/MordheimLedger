@@ -20,50 +20,27 @@
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
+        <!-- Simple liste nommée (pas de tuiles à image comme les autres catalogues) : une école de
+             magie n'a ni artwork ni besoin d'un aperçu visuel, seul le nom compte au quotidien - même
+             gabarit de ligne que WarbandListPage (BoxView ChapterDividerStyle/SelectionMarkerStyle),
+             pas de zone "Jouer" ici. -->
         <CollectionView Grid.Row="0" x:Name="ItemsCollection"
                 ItemsSource="{Binding MagicSchools}"
-                SelectionMode="None"
-                ItemSizingStrategy="MeasureFirstItem">
-            <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
-            </CollectionView.Behaviors>
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
-            </CollectionView.ItemsLayout>
+                SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:MagicSchoolRow">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroupList/>
-                        </VisualStateManager.VisualStateGroups>
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                <Setter Property="Stroke" Value="LightSkyBlue"/>
-                            </DataTrigger>
-                        </Border.Triggers>
-                        <Border.GestureRecognizers>
+                    <Grid ColumnDefinitions="4,*" Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48">
+                        <Grid.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
                                 CommandParameter="{Binding .}"/>
-                        </Border.GestureRecognizers>
-                        <Grid WidthRequest="120" HeightRequest="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <components:LibraryItemImageView
-                                Grid.Row="0"
-                                ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
-                                FontFamily="RpgAwesome"
-                                Padding="20" />
-                            <Label Text="{Binding Item.Name}"
-                                   Grid.Row="1"
-                                   Style="{StaticResource TruncatedLabelStyle}"
-                                   HorizontalOptions="Center"
-                                   Margin="5"/>
-                        </Grid>
-                    </Border>
+                        </Grid.GestureRecognizers>
+                        <BoxView Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource ChapterDividerStyle}"/>
+                        <BoxView Grid.Column="0" Style="{StaticResource SelectionMarkerStyle}"/>
+                        <Label Grid.Column="1" Text="{Binding Item.Name}"
+                               FontSize="{OnIdiom Default=15, Desktop=13}"
+                               VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

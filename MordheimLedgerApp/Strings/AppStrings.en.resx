@@ -303,9 +303,6 @@
   <data name="TabTradingPost" xml:space="preserve">
     <value>Trading Post</value>
   </data>
-  <data name="LibTabWarbands" xml:space="preserve">
-    <value>Warbands</value>
-  </data>
   <data name="LibTabTradingPost" xml:space="preserve">
     <value>Market</value>
   </data>
@@ -441,6 +438,12 @@
   <data name="SpellCreateTitle" xml:space="preserve">
     <value>New Spell</value>
   </data>
+  <data name="SpellFilterAllSchools" xml:space="preserve">
+    <value>All schools</value>
+  </data>
+  <data name="SpellFilterMagicSchoolTitle" xml:space="preserve">
+    <value>Filter by magic school</value>
+  </data>
   <data name="SpellEditTitle" xml:space="preserve">
     <value>Edit Spell</value>
   </data>
@@ -530,6 +533,9 @@
   </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Magic schools</value>
+  </data>
+  <data name="LibManageMagicSchools" xml:space="preserve">
+    <value>Manage magic schools</value>
   </data>
   <data name="MagicSchoolNamePh" xml:space="preserve">
     <value>School name</value>

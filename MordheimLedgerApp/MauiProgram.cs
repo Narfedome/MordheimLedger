@@ -100,6 +100,7 @@ namespace MordheimLedgerApp
             builder.Services.AddSingleton<IMountPickerService, MountPickerService>();
             builder.Services.AddTransient<MagicSchoolViewModel>();
             builder.Services.AddTransient<MagicSchoolSelectorPage>();
+            builder.Services.AddTransient<MagicSchoolListPage>();
             builder.Services.AddSingleton<IMagicSchoolPickerNavigationService, MagicSchoolPickerNavigationService>();
             builder.Services.AddSingleton<IMagicSchoolPickerService, MagicSchoolPickerService>();
             builder.Services.AddTransient<LibraryViewModel>();

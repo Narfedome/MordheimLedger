@@ -119,6 +119,12 @@ public partial class MagicSchoolViewModel : BaseViewModel
         await LoadData();
     }
 
+    /// <summary>Only bound when this ViewModel backs the standalone MagicSchoolListPage (reached from
+    /// the Sorts tab's "Gérer les écoles de magie" button) rather than embedded in the Codex tab or the
+    /// picker - see MagicSchoolListPage.xaml.</summary>
+    [RelayCommand]
+    private static async Task Back() => await Shell.Current.GoToAsync("..");
+
     [RelayCommand]
     private async Task ConfirmSelection()
     {

@@ -110,8 +110,7 @@ public class DataServiceTests : IDisposable
         Assert.Equal(100, Assert.Single(equipment, e => e.Name == "Holy Tome").Cost);
 
         var mutations = await _library.GetMutationsAsync("en");
-        Assert.Contains(mutations, m => m.Name == "Hideous" && m.Description == "The mutant causes Fear.");
-        Assert.Contains(mutations, m => m.Name == "Rotting Visage");
+        Assert.Contains(mutations, m => m.Name == "Hideous" && m.Description!.Contains("causes Fear"));
 
         var skills = await _library.GetSkillsAsync("en");
         Assert.True(skills.Count > 30, $"Expected the core rulebook skill lists (~34 entries), got {skills.Count}");

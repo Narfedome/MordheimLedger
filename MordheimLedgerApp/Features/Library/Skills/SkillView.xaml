@@ -31,7 +31,8 @@
                            WidthRequest="120" HeightRequest="120"/>
 
         <CollectionView Grid.Row="1" x:Name="ItemsCollection"
-                ItemsSource="{Binding Skills}"
+                ItemsSource="{Binding SkillGroups}"
+                IsGrouped="True"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
@@ -40,6 +41,16 @@
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                           FontAttributes="Bold"
+                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                           TextColor="{DynamicResource AppText}"
+                           Margin="4,12,4,4"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:SkillRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">

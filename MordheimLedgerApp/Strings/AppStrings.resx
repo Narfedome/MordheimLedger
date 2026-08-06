@@ -168,6 +168,27 @@
   <data name="WarbandsChooseType" xml:space="preserve">
     <value>Choisir un type de bande</value>
   </data>
+  <data name="WarbandGradeCore" xml:space="preserve">
+    <value>Livre de base</value>
+  </data>
+  <data name="WarbandGradeGrade1a" xml:space="preserve">
+    <value>Grade 1a</value>
+  </data>
+  <data name="WarbandGradeGrade1b" xml:space="preserve">
+    <value>Grade 1b</value>
+  </data>
+  <data name="WarbandGradeGrade1c" xml:space="preserve">
+    <value>Grade 1c</value>
+  </data>
+  <data name="WarbandGradeGrade2a" xml:space="preserve">
+    <value>Grade 2a</value>
+  </data>
+  <data name="WarbandGradeFilterAll" xml:space="preserve">
+    <value>Toutes les bandes</value>
+  </data>
+  <data name="WarbandGradeFilterTitle" xml:space="preserve">
+    <value>Filtrer par grade</value>
+  </data>
   <data name="WarbandsInsufficientFundsTitle" xml:space="preserve">
     <value>Fonds insuffisants</value>
   </data>
@@ -326,6 +347,9 @@
   </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
+  </data>
+  <data name="LibFilterCommon" xml:space="preserve">
+    <value>Commun</value>
   </data>
   <data name="LibFilterCategory" xml:space="preserve">
     <value>Filtrer par catégorie</value>

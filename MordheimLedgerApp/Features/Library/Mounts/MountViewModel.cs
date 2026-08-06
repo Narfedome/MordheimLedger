@@ -16,9 +16,27 @@ public partial class MountViewModel : BaseViewModel
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private List<WarbandArchetype> _warbandArchetypes = new();
+    private List<Mount> _allItems = new();
+    private bool _suppressFilterReload;
+
+    /// <summary>Sections of the grid, one per group ("Commun" or a warband name) - always grouped
+    /// internally (cf. SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter
+    /// where it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
+    [ObservableProperty]
+    private ObservableCollection<MountGroup> mountGroups = new();
+
+    private string AllGroupsLabel => Loc["LibFilterAll"];
+    private string CommonLabel => Loc["LibFilterCommon"];
 
     [ObservableProperty]
-    private ObservableCollection<MountRow> mounts = new();
+    private ObservableCollection<string> groupFilterOptions = new();
+
+    [ObservableProperty]
+    private string selectedGroupFilter = string.Empty;
+
+    /// <summary>Group headers are redundant once a single group is picked (its name is already on the
+    /// filter button) - only shown for the "All" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
+    public bool ShowGroupHeaders => SelectedGroupFilter == AllGroupsLabel;
 
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
@@ -51,14 +69,68 @@ public partial class MountViewModel : BaseViewModel
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
+    partial void OnSelectedGroupFilterChanged(string value)
+    {
+        OnPropertyChanged(nameof(ShowGroupHeaders));
+        if (_suppressFilterReload) return;
+        ApplyFilterAndGroup();
+    }
+
+    /// <summary>Mount has no rulebook category - "Commun" (unrestricted) vs. the warband name(s) it's
+    /// restricted to doubles as the group, using data already tracked for the picker rather than adding
+    /// an unused field (see MountGroup).</summary>
+    private string GroupNameFor(Mount item) =>
+        item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? CommonLabel
+            : string.Join(", ", item.RestrictedToWarbandArchetypeIds
+                .Select(id => _warbandArchetypes.FirstOrDefault(w => w.Id == id)?.Name)
+                .Where(n => n != null));
+
     private async Task LoadData()
     {
-        var allItems = await _libraryService.GetMountsAsync(LocalizationService.Instance.Language);
+        _allItems = await _libraryService.GetMountsAsync(LocalizationService.Instance.Language);
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
-        Mounts = new ObservableCollection<MountRow>(allItems.Select(i => new MountRow(i)));
+
+        var previousFilter = string.IsNullOrEmpty(SelectedGroupFilter) ? AllGroupsLabel : SelectedGroupFilter;
+        _suppressFilterReload = true;
+        GroupFilterOptions = new ObservableCollection<string>(
+            new[] { AllGroupsLabel }.Concat(_allItems.Select(GroupNameFor).Distinct()));
+        SelectedGroupFilter = GroupFilterOptions.Contains(previousFilter) ? previousFilter : AllGroupsLabel;
+        _suppressFilterReload = false;
+
+        ApplyFilterAndGroup();
+    }
+
+    private void ApplyFilterAndGroup()
+    {
+        var filtered = SelectedGroupFilter == AllGroupsLabel
+            ? _allItems
+            : _allItems.Where(i => GroupNameFor(i) == SelectedGroupFilter).ToList();
+
+        var groups = new ObservableCollection<MountGroup>();
+        foreach (var item in filtered)
+        {
+            var groupName = GroupNameFor(item);
+            var group = groups.FirstOrDefault(g => g.Name == groupName);
+            if (group is null)
+            {
+                group = new MountGroup(groupName);
+                groups.Add(group);
+            }
+            group.Add(new MountRow(item));
+        }
+        MountGroups = groups;
+
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
+    }
+
+    [RelayCommand]
+    private async Task SelectGroupFilter()
+    {
+        var result = await ShowActionSheetAsync(Loc["LibFilterCategory"], GroupFilterOptions.ToArray());
+        if (result != null) SelectedGroupFilter = result;
     }
 
     partial void OnSelectedRowChanged(MountRow? oldValue, MountRow? newValue)

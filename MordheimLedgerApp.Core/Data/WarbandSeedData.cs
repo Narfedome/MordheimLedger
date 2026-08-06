@@ -20,6 +20,11 @@ public class WarbandSeedData
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 
+    /// <summary>Official quality/provenance tier (mordheimer.net's Core/1a/1b/1c/2a classification,
+    /// the sole reference source retained for this - see CLAUDE.md). Matches
+    /// MordheimLedgerApp.Core.Models.Library.WarbandGrade member names exactly (e.g. "Grade1a").</summary>
+    public string Grade { get; set; } = nameof(Models.Library.WarbandGrade.Core);
+
     /// <summary>Rules SPECIFIC to this warband (e.g. "Ancient Enemies" for Kislevites) - genuinely
     /// common rules (Leader, Wizard, Causes Fear, ...) now live once in Data/SeedData/SpecialRules.json,
     /// seeded before any warband file, so they're never redeclared here anymore. Still find-or-created by

@@ -105,7 +105,10 @@ que deviné :
 - Grande Librairie de Mordheim (FR, sites.google.com) — contenu principal en images sur le site,
   mais des PDF par bande plus réduits existent et sont probablement lisibles directement
 - Broheim.net (EN) — terminologie officielle + règles core découpées en 3 parties plus petites
-- Mordheimer.net (EN) — catalogue de bandes le plus complet, jusqu'à Grand Army 2a
+- Mordheimer.net (EN) — catalogue de bandes le plus complet, jusqu'à Grand Army 2a ; **seule source de
+  référence retenue** pour vérifier/compléter les données (décision explicite de l'utilisateur -
+  BSData/mordheim, utilisé ponctuellement comme piste de vérification croisée lors du 2e lot d'import,
+  est abandonné, y compris pour la classification par Grade des bandes).
 
 **Important** : les stats saisies à l'origine pour Reiklander Mercenaries (aujourd'hui dans
 `Reiklanders.json` + `Data/SeedData/Equipment.json`, `OfficialContentSeed.cs` a été retiré, voir plus

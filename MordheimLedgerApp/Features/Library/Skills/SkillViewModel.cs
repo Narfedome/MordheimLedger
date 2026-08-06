@@ -17,8 +17,15 @@ public partial class SkillViewModel : BaseViewModel
     private List<Skill> _allItems = new();
     private List<WarbandArchetype> _warbandArchetypes = new();
 
+    /// <summary>Sections of the grid, one per SkillCategory - always grouped internally (cf.
+    /// SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter where it'd be
+    /// redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<SkillRow> skills = new();
+    private ObservableCollection<SkillGroup> skillGroups = new();
+
+    /// <summary>Group headers are redundant once a single category is picked (its name is already on
+    /// the filter button) - only shown for the "All" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
+    public bool ShowGroupHeaders => SelectedCategory is null;
 
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
@@ -78,6 +85,8 @@ public partial class SkillViewModel : BaseViewModel
     private void RefreshSelectedCategoryLabel() =>
         SelectedCategoryLabel = SelectedCategory is { } category ? CategoryLabel(category) : Loc["LibFilterAll"];
 
+    partial void OnSelectedCategoryChanged(SkillCategory? value) => OnPropertyChanged(nameof(ShowGroupHeaders));
+
     private void ApplyFilter()
     {
         IEnumerable<Skill> filtered = _allItems;
@@ -86,7 +95,20 @@ public partial class SkillViewModel : BaseViewModel
         if (AllowedWarbandArchetypeId is { } warbandId)
             filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
 
-        Skills = new ObservableCollection<SkillRow>(filtered.Select(i => new SkillRow(i)));
+        var groups = new ObservableCollection<SkillGroup>();
+        foreach (var item in filtered)
+        {
+            var groupName = CategoryLabel(item.Category);
+            var group = groups.FirstOrDefault(g => g.Name == groupName);
+            if (group is null)
+            {
+                group = new SkillGroup(groupName);
+                groups.Add(group);
+            }
+            group.Add(new SkillRow(item));
+        }
+        SkillGroups = groups;
+
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));

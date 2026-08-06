@@ -10,16 +10,32 @@
 
     <Grid Margin="5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+        <!-- Filtre par Grade (Core/1a/1b/1c/2a, classification mordheimer.net) - même en-tête que
+             SpellView (bouton texte = filtre courant, ouvre l'ActionSheet). Pas d'icône "gérer" ici,
+             contrairement aux Sorts/Écoles de magie : le Grade est un champ direct de WarbandArchetype,
+             pas un sous-catalogue séparé. -->
+        <Grid Grid.Row="0" Margin="8,0,8,8" VerticalOptions="Center">
+            <Button Text="{Binding SelectedGradeFilter}"
+                    Command="{Binding SelectGradeFilterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{DynamicResource AppAccent}"
+                    FontSize="{OnIdiom Default=15, Desktop=13}"
+                    HorizontalOptions="Start"
+                    Padding="8,4"/>
+        </Grid>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView x:Name="ItemsCollection"
-                ItemsSource="{Binding WarbandArchetypeItems}"
+        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+                ItemsSource="{Binding WarbandArchetypeGroups}"
+                IsGrouped="True"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
@@ -28,6 +44,16 @@
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                           FontAttributes="Bold"
+                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                           TextColor="{DynamicResource AppText}"
+                           Margin="4,12,4,4"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:WarbandArchetypeRow">
                     <!-- Sélection gérée à la main (IsSelected, pas SelectionMode) - reprise mot pour mot
@@ -72,7 +98,7 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
@@ -93,7 +119,7 @@
 
         <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
              toutes les tuiles cochées d'un coup - même pattern que SpecialRuleView. -->
-        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"

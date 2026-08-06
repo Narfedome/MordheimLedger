@@ -15,9 +15,27 @@ public partial class MutationViewModel : BaseViewModel
     private readonly IMutationPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private List<WarbandArchetype> _warbandArchetypes = new();
+    private List<Mutation> _allItems = new();
+    private bool _suppressFilterReload;
+
+    /// <summary>Sections of the grid, one per group ("Commun" or a warband name) - always grouped
+    /// internally (cf. SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter
+    /// where it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
+    [ObservableProperty]
+    private ObservableCollection<MutationGroup> mutationGroups = new();
+
+    private string AllGroupsLabel => Loc["LibFilterAll"];
+    private string CommonLabel => Loc["LibFilterCommon"];
 
     [ObservableProperty]
-    private ObservableCollection<MutationRow> mutations = new();
+    private ObservableCollection<string> groupFilterOptions = new();
+
+    [ObservableProperty]
+    private string selectedGroupFilter = string.Empty;
+
+    /// <summary>Group headers are redundant once a single group is picked (its name is already on the
+    /// filter button) - only shown for the "All" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
+    public bool ShowGroupHeaders => SelectedGroupFilter == AllGroupsLabel;
 
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
@@ -53,19 +71,76 @@ public partial class MutationViewModel : BaseViewModel
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
+    partial void OnSelectedGroupFilterChanged(string value)
+    {
+        OnPropertyChanged(nameof(ShowGroupHeaders));
+        if (_suppressFilterReload) return;
+        ApplyFilterAndGroup();
+    }
+
+    /// <summary>Mutation has no rulebook category - "Commun" (unrestricted) vs. the warband name(s) it's
+    /// restricted to doubles as the group, using data already tracked for the picker rather than adding
+    /// an unused field (see MutationGroup).</summary>
+    private string GroupNameFor(Mutation item) =>
+        item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? CommonLabel
+            : string.Join(", ", item.RestrictedToWarbandArchetypeIds
+                .Select(id => _warbandArchetypes.FirstOrDefault(w => w.Id == id)?.Name)
+                .Where(n => n != null));
+
     private async Task LoadData()
     {
-        var allItems = await _libraryService.GetMutationsAsync(LocalizationService.Instance.Language);
+        _allItems = await _libraryService.GetMutationsAsync(LocalizationService.Instance.Language);
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
 
-        var filtered = AllowedWarbandArchetypeId is { } warbandId
-            ? allItems.Where(m => m.RestrictedToWarbandArchetypeIds.Count == 0 || m.RestrictedToWarbandArchetypeIds.Contains(warbandId)).ToList()
-            : allItems;
+        var allowedFiltered = AllowedWarbandArchetypeId is { } warbandId
+            ? _allItems.Where(m => m.RestrictedToWarbandArchetypeIds.Count == 0 || m.RestrictedToWarbandArchetypeIds.Contains(warbandId)).ToList()
+            : _allItems;
 
-        Mutations = new ObservableCollection<MutationRow>(filtered.Select(i => new MutationRow(i)));
+        var previousFilter = string.IsNullOrEmpty(SelectedGroupFilter) ? AllGroupsLabel : SelectedGroupFilter;
+        _suppressFilterReload = true;
+        GroupFilterOptions = new ObservableCollection<string>(
+            new[] { AllGroupsLabel }.Concat(allowedFiltered.Select(GroupNameFor).Distinct()));
+        SelectedGroupFilter = GroupFilterOptions.Contains(previousFilter) ? previousFilter : AllGroupsLabel;
+        _suppressFilterReload = false;
+
+        ApplyFilterAndGroup();
+    }
+
+    private void ApplyFilterAndGroup()
+    {
+        var allowedFiltered = AllowedWarbandArchetypeId is { } warbandId
+            ? _allItems.Where(m => m.RestrictedToWarbandArchetypeIds.Count == 0 || m.RestrictedToWarbandArchetypeIds.Contains(warbandId)).ToList()
+            : _allItems;
+
+        var filtered = SelectedGroupFilter == AllGroupsLabel
+            ? allowedFiltered
+            : allowedFiltered.Where(i => GroupNameFor(i) == SelectedGroupFilter).ToList();
+
+        var groups = new ObservableCollection<MutationGroup>();
+        foreach (var item in filtered)
+        {
+            var groupName = GroupNameFor(item);
+            var group = groups.FirstOrDefault(g => g.Name == groupName);
+            if (group is null)
+            {
+                group = new MutationGroup(groupName);
+                groups.Add(group);
+            }
+            group.Add(new MutationRow(item));
+        }
+        MutationGroups = groups;
+
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
+    }
+
+    [RelayCommand]
+    private async Task SelectGroupFilter()
+    {
+        var result = await ShowActionSheetAsync(Loc["LibFilterCategory"], GroupFilterOptions.ToArray());
+        if (result != null) SelectedGroupFilter = result;
     }
 
     partial void OnSelectedRowChanged(MutationRow? oldValue, MutationRow? newValue)

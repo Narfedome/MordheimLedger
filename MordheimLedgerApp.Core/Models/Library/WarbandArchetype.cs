@@ -13,6 +13,11 @@ public class WarbandArchetype
     /// ResolveTranslationsAsync/SetTranslationAsync.</summary>
     public string Name { get; set; } = string.Empty;
     public ContentSource Source { get; set; }
+
+    /// <summary>Official quality/provenance tier (mordheimer.net's Core/1a/1b/1c/2a classification) -
+    /// used to filter/group the Codex Warbands tab, same idiom as Spells grouping by MagicSchool.</summary>
+    public WarbandGrade Grade { get; set; }
+
     public int StartingTreasury { get; set; }
 
     /// <summary>Null = no roster cap tracked.</summary>

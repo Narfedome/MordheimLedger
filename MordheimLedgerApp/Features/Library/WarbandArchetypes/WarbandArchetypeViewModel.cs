@@ -17,8 +17,26 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly IWarbandArchetypePickerNavigationService _pickerNavigation;
 
+    private List<WarbandArchetype> _allItems = new();
+    private bool _suppressFilterReload;
+
+    /// <summary>Sections of the grid, one per Grade - always grouped internally (cf.
+    /// SpellViewModel.SpellGroups), the header is just hidden outside the "All warbands" filter where
+    /// it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<WarbandArchetypeRow> warbandArchetypeItems = new();
+    private ObservableCollection<WarbandArchetypeGroup> warbandArchetypeGroups = new();
+
+    private string AllGradesLabel => Loc["WarbandGradeFilterAll"];
+
+    [ObservableProperty]
+    private ObservableCollection<string> gradeFilterOptions = new();
+
+    [ObservableProperty]
+    private string selectedGradeFilter = string.Empty;
+
+    /// <summary>Group headers are redundant once a single Grade is picked (its name is already on the
+    /// filter button) - only shown for the "All warbands" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
+    public bool ShowGroupHeaders => SelectedGradeFilter == AllGradesLabel;
 
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
@@ -53,13 +71,58 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
+    partial void OnSelectedGradeFilterChanged(string value)
+    {
+        OnPropertyChanged(nameof(ShowGroupHeaders));
+        if (_suppressFilterReload) return;
+        ApplyFilterAndGroup();
+    }
+
     private async Task LoadData()
     {
-        var items = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
-        WarbandArchetypeItems = new ObservableCollection<WarbandArchetypeRow>(items.Select(i => new WarbandArchetypeRow(i)));
+        _allItems = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+
+        var gradesPresent = _allItems.Select(i => i.Grade).Distinct().OrderBy(g => g);
+        var previousFilter = string.IsNullOrEmpty(SelectedGradeFilter) ? AllGradesLabel : SelectedGradeFilter;
+        _suppressFilterReload = true;
+        GradeFilterOptions = new ObservableCollection<string>(
+            new[] { AllGradesLabel }.Concat(gradesPresent.Select(g => Loc[$"WarbandGrade{g}"])));
+        SelectedGradeFilter = GradeFilterOptions.Contains(previousFilter) ? previousFilter : AllGradesLabel;
+        _suppressFilterReload = false;
+
+        ApplyFilterAndGroup();
+    }
+
+    private void ApplyFilterAndGroup()
+    {
+        var filtered = SelectedGradeFilter == AllGradesLabel
+            ? _allItems
+            : _allItems.Where(i => Loc[$"WarbandGrade{i.Grade}"] == SelectedGradeFilter).ToList();
+
+        var groups = new ObservableCollection<WarbandArchetypeGroup>();
+        foreach (var item in filtered)
+        {
+            var groupName = Loc[$"WarbandGrade{item.Grade}"];
+            var group = groups.FirstOrDefault(g => g.Name == groupName);
+            if (group is null)
+            {
+                group = new WarbandArchetypeGroup(groupName);
+                groups.Add(group);
+            }
+            group.Add(new WarbandArchetypeRow(item));
+        }
+        WarbandArchetypeGroups = groups;
+
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
+    }
+
+    [RelayCommand]
+    private async Task SelectGradeFilter()
+    {
+        var result = await ShowActionSheetAsync(Loc["WarbandGradeFilterTitle"], GradeFilterOptions.ToArray());
+        if (result != null) SelectedGradeFilter = result;
     }
 
     partial void OnSelectedRowChanged(WarbandArchetypeRow? oldValue, WarbandArchetypeRow? newValue)
@@ -101,7 +164,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveWarbandArchetypeAsync(newItem, LocalizationService.Instance.Language);
-        WarbandArchetypeItems.Add(new WarbandArchetypeRow(newItem));
+        await LoadData();
     }
 
     [RelayCommand]
@@ -115,6 +178,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             Id = s.Id,
             Name = s.Name,
             Source = s.Source,
+            Grade = s.Grade,
             StartingTreasury = s.StartingTreasury,
             MaxWarriors = s.MaxWarriors,
             Description = s.Description,
@@ -139,8 +203,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         if (!await ConfirmDeleteAsync(row.Item.Name)) return;
 
         await _libraryService.DeleteWarbandArchetypeAsync(row.Item.Id);
-        WarbandArchetypeItems.Remove(row);
-        SelectedRow = null;
+        await LoadData();
     }
 
     [RelayCommand]

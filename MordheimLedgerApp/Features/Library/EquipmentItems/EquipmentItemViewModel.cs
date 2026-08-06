@@ -17,8 +17,15 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private List<EquipmentItem> _allItems = new();
     private List<WarbandArchetype> _warbandArchetypes = new();
 
+    /// <summary>Sections of the grid, one per EquipmentCategory - always grouped internally (cf.
+    /// SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter where it'd be
+    /// redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<EquipmentItemRow> equipmentItems = new();
+    private ObservableCollection<EquipmentItemGroup> equipmentItemGroups = new();
+
+    /// <summary>Group headers are redundant once a single category is picked (its name is already on
+    /// the filter button) - only shown for the "All" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
+    public bool ShowGroupHeaders => SelectedCategory is null;
 
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
@@ -80,6 +87,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private void RefreshSelectedCategoryLabel() =>
         SelectedCategoryLabel = SelectedCategory is { } category ? CategoryLabel(category) : Loc["LibFilterAll"];
 
+    partial void OnSelectedCategoryChanged(EquipmentCategory? value) => OnPropertyChanged(nameof(ShowGroupHeaders));
+
     private void ApplyFilter()
     {
         IEnumerable<EquipmentItem> filtered = _allItems;
@@ -88,7 +97,20 @@ public partial class EquipmentItemViewModel : BaseViewModel
         if (AllowedWarbandArchetypeId is { } warbandId)
             filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
 
-        EquipmentItems = new ObservableCollection<EquipmentItemRow>(filtered.Select(i => new EquipmentItemRow(i)));
+        var groups = new ObservableCollection<EquipmentItemGroup>();
+        foreach (var item in filtered)
+        {
+            var groupName = CategoryLabel(item.Category);
+            var group = groups.FirstOrDefault(g => g.Name == groupName);
+            if (group is null)
+            {
+                group = new EquipmentItemGroup(groupName);
+                groups.Add(group);
+            }
+            group.Add(new EquipmentItemRow(item));
+        }
+        EquipmentItemGroups = groups;
+
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));

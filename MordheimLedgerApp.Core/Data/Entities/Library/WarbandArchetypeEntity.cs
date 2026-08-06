@@ -9,6 +9,7 @@ public class WarbandArchetypeEntity
     public int Id { get; set; }
     public string NameKey { get; set; } = string.Empty;
     public ContentSource Source { get; set; }
+    public WarbandGrade Grade { get; set; }
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public string? DescriptionKey { get; set; }

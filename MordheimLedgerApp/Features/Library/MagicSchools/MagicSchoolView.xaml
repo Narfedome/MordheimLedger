@@ -29,7 +29,7 @@
                 SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:MagicSchoolRow">
-                    <Grid ColumnDefinitions="4,*" Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48">
+                    <Grid ColumnDefinitions="4,*" Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48" ColumnSpacing="8">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"

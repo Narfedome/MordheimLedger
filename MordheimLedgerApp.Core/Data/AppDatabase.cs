@@ -159,6 +159,7 @@ public class AppDatabase
         var warband = new WarbandArchetype
         {
             Source = ContentSource.Official,
+            Grade = Enum.Parse<WarbandGrade>(data.Grade),
             StartingTreasury = data.StartingTreasury,
             MaxWarriors = data.MaxWarriors
         };

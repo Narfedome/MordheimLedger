@@ -46,7 +46,14 @@
           }
         }
       ],
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -70,7 +77,12 @@
         "en": "In every mercenary warband you will find a warrior bigger, stronger (and often uglier) than his comrades - champions answer the challenges levelled at the warband and pick their share of loot right after the captain.",
         "fr": "Dans toutes les bandes de mercenaires vous trouverez un guerrier plus gros, plus fort (souvent plus laid), que les autres. Ils sont appelés champions et relèvent généralement les défis lancés à la bande, touchant leur part de butin juste après le capitaine."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength"
+      ]
     },
     {
       "name": {
@@ -94,7 +106,12 @@
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -180,12 +197,53 @@
   "equipment": [],
   "equipmentLists": [
     {
-      "name": { "en": "Mercenary Equipment List", "fr": "Liste d'équipement des Mercenaires" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Crossbow", "Pistol", "Duelling Pistol", "Bow", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet"]
+      "name": {
+        "en": "Mercenary Equipment List",
+        "fr": "Liste d'équipement des Mercenaires"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Morning star",
+        "Double-handed weapon",
+        "Spear",
+        "Halberd",
+        "Crossbow",
+        "Pistol",
+        "Duelling Pistol",
+        "Bow",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Marksman Equipment List", "fr": "Liste d'équipement des Tireurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Crossbow", "Pistol", "Bow", "Long bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Marksman Equipment List",
+        "fr": "Liste d'équipement des Tireurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Crossbow",
+        "Pistol",
+        "Bow",
+        "Long bow",
+        "Blunderbuss",
+        "Handgun",
+        "Hunting Rifle",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

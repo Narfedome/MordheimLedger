@@ -63,6 +63,12 @@ public partial class SkillViewModel : BaseViewModel
     /// Boss specifically, not every Orc warrior.</summary>
     public int? AllowedWarriorArchetypeId { get; set; }
 
+    /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by SkillPickerService
+    /// before construction) = only skills whose Category is in this list are shown - the warband's
+    /// per-warrior "skill table" (WarriorArchetype/Warrior.AllowedSkillCategories), e.g. a Bear Tamer
+    /// only ever sees Combat/Strength/Speed skills, never Academic ones.</summary>
+    public IReadOnlyList<SkillCategory>? AllowedCategories { get; set; }
+
     public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker, IWarriorArchetypePickerService warriorPicker)
     {
@@ -104,6 +110,8 @@ public partial class SkillViewModel : BaseViewModel
             filtered = filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
         if (AllowedWarriorArchetypeId is { } warriorId)
             filtered = filtered.Where(i => i.RestrictedToWarriorArchetypeIds.Count == 0 || i.RestrictedToWarriorArchetypeIds.Contains(warriorId));
+        if (AllowedCategories is { } categories)
+            filtered = filtered.Where(i => categories.Contains(i.Category));
 
         var groups = new ObservableCollection<SkillGroup>();
         foreach (var item in filtered)
@@ -150,7 +158,7 @@ public partial class SkillViewModel : BaseViewModel
     [RelayCommand]
     private async Task SelectCategory()
     {
-        var categories = Enum.GetValues<SkillCategory>();
+        var categories = AllowedCategories?.ToArray() ?? Enum.GetValues<SkillCategory>();
         var options = new[] { Loc["LibFilterAll"] }.Concat(categories.Select(CategoryLabel)).ToArray();
 
         var index = await ShowActionSheetIndexAsync(Loc["LibFilterCategory"], options);

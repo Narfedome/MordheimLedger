@@ -80,4 +80,11 @@ public class WarriorArchetype
     /// recruitment (see EntityMapping.ToWarrior), same snapshot-at-recruit-time convention as Cost/the
     /// stat line - editing this later doesn't retroactively change already-recruited warriors.</summary>
     public int? EquipmentListId { get; set; }
+
+    /// <summary>Which of the 6 rulebook Skill lists this archetype may pick an Advance from (its row of
+    /// the warband's "skill table", e.g. a Witch Hunter Captain gets all 5 standard categories, a Bear
+    /// Tamer only Combat/Strength/Speed) - empty = not seeded/unknown, not "may pick nothing". Data-only,
+    /// same "no rules engine V1" convention as the other Restricted* lists elsewhere: not enforced in the
+    /// Skill picker, just informative.</summary>
+    public List<SkillCategory> AllowedSkillCategories { get; set; } = new();
 }

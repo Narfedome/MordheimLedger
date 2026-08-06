@@ -114,6 +114,11 @@ public class WarriorSeedData
     /// archetype's Weapons/Armour line draws from - null/omitted = this archetype never uses equipment
     /// (Ghouls, Zombies, Trolls, Cave Squigs...).</summary>
     public string? EquipmentListName { get; set; }
+
+    /// <summary>This archetype's row of the warband's "skill table" (e.g. ["Combat","Strength","Speed"])
+    /// - matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names. Empty/omitted = not
+    /// sourced yet, not "may pick nothing" - see WarriorArchetype.AllowedSkillCategories.</summary>
+    public List<string> SkillCategories { get; set; } = new();
 }
 
 public class EquipmentSeedData

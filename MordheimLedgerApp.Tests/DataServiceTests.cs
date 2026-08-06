@@ -388,6 +388,32 @@ public class DataServiceTests : IDisposable
         Assert.Contains(holyTome.Id, sistersList.ItemIds);
     }
 
+    /// <summary>Each Hero archetype's row of its warband's "skill table" (which of the 6 rulebook Skill
+    /// lists it may pick an Advance from) is seeded from a source CSV, per-warrior, into
+    /// WarriorArchetype.AllowedSkillCategories - data-only (not enforced in the Skill picker), same
+    /// convention as the other Restricted* lists. Henchmen (no skill table in the rulebook) get none.</summary>
+    [Fact]
+    public async Task WarriorArchetype_AllowedSkillCategories_MatchSourceSkillTable()
+    {
+        var witchHunters = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Witch Hunters");
+        var warriors = await _library.GetWarriorArchetypesAsync(witchHunters.Id, "en");
+
+        var captain = warriors.Single(w => w.Name == "Witch Hunter Captain");
+        Assert.Equal(
+            new[] { SkillCategory.Combat, SkillCategory.Shooting, SkillCategory.Academic, SkillCategory.Strength, SkillCategory.Speed },
+            captain.AllowedSkillCategories);
+
+        var priest = warriors.Single(w => w.Name == "Warrior-Priest");
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Academic, SkillCategory.Strength], priest.AllowedSkillCategories);
+
+        var warHounds = warriors.Single(w => w.Name == "War Hounds");
+        Assert.Empty(warHounds.AllowedSkillCategories);
+
+        var dwarfs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Dwarf Treasure Hunters");
+        var trollSlayer = (await _library.GetWarriorArchetypesAsync(dwarfs.Id, "en")).Single(w => w.Name == "Troll Slayer");
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Strength, SkillCategory.Special], trollSlayer.AllowedSkillCategories);
+    }
+
     [Fact]
     public async Task CreateWarband_PreFillsTreasuryFromArchetype()
     {

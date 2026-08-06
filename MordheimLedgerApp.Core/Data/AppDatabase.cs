@@ -288,7 +288,8 @@ public class AppDatabase
                 Source = ContentSource.Official,
                 IsSpellcaster = w.IsSpellcaster,
                 CanBuyMutations = w.CanBuyMutations,
-                EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName]
+                EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
+                AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList()
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);

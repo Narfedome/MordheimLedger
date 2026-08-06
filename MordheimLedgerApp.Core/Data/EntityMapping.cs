@@ -100,8 +100,14 @@ public static class EntityMapping
         CanBuyMutations = e.CanBuyMutations,
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
-        EquipmentListId = e.EquipmentListId
+        EquipmentListId = e.EquipmentListId,
+        AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories)
     };
+
+    private static List<SkillCategory> ParseSkillCategories(string? csv) =>
+        string.IsNullOrEmpty(csv)
+            ? new List<SkillCategory>()
+            : csv.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<SkillCategory>).ToList();
 
     public static WarriorArchetypeEntity ToEntity(this WarriorArchetype m) => new()
     {
@@ -127,7 +133,8 @@ public static class EntityMapping
         IsSpellcaster = m.IsSpellcaster,
         CanBuyMutations = m.CanBuyMutations,
         ImagePath = m.ImagePath,
-        EquipmentListId = m.EquipmentListId
+        EquipmentListId = m.EquipmentListId,
+        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -148,7 +155,8 @@ public static class EntityMapping
         Initiative = archetype.Initiative,
         Attacks = archetype.Attacks,
         Leadership = archetype.Leadership,
-        EquipmentListId = archetype.EquipmentListId
+        EquipmentListId = archetype.EquipmentListId,
+        AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories)
     };
 
     public static Campaign ToModel(this CampaignEntity e) => new()
@@ -361,6 +369,7 @@ public static class EntityMapping
         Attacks = e.Attacks,
         Leadership = e.Leadership,
         EquipmentListId = e.EquipmentListId,
+        AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         Equipment = equipment?.ToList() ?? new List<WarriorEquipment>(),
         Skills = skills?.ToList() ?? new List<WarriorSkill>(),
         Injuries = injuries?.ToList() ?? new List<WarriorInjury>(),
@@ -390,7 +399,8 @@ public static class EntityMapping
         Attacks = m.Attacks,
         Leadership = m.Leadership,
         MountId = m.Mount?.Id,
-        EquipmentListId = m.EquipmentListId
+        EquipmentListId = m.EquipmentListId,
+        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>

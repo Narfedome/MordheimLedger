@@ -61,7 +61,14 @@
           }
         }
       ],
-      "equipmentListName": "Ostlander Equipment List"
+      "equipmentListName": "Ostlander Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -108,7 +115,14 @@
         }
       ],
       "isSpellcaster": true,
-      "equipmentListName": "Ostlander Equipment List"
+      "equipmentListName": "Ostlander Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -132,7 +146,12 @@
         "en": "Ostland villages are generally one large extended family - everyone is somebody's uncle, cousin or brother. Rather than bother with exact family ties, the village's most respected men (other than the Elder) are simply called Blood Brothers.",
         "fr": "Les villages d'Ostland sont généralement composés d'une famille élargie. Tout le monde est l'oncle, le cousin ou le frère d'un des membres du village. Au lieu de s'embêter avec les liens familiaux, les hommes les plus respectés du village (à l'exception du Doyen) sont simplement appelés Frères de sang."
       },
-      "equipmentListName": "Ostlander Equipment List"
+      "equipmentListName": "Ostlander Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -319,20 +338,75 @@
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Ostlander Equipment List", "fr": "Liste d'équipement des Ostlanders" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Spear", "Double-handed weapon", "Bow", "Pistol", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Ostlander Equipment List",
+        "fr": "Liste d'équipement des Ostlanders"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Spear",
+        "Double-handed weapon",
+        "Bow",
+        "Pistol",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Ruffian Equipment List", "fr": "Liste d'équipement des Vauriens" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Light Armour"]
+      "name": {
+        "en": "Ruffian Equipment List",
+        "fr": "Liste d'équipement des Vauriens"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Light Armour"
+      ]
     },
     {
-      "name": { "en": "Jaeger Equipment List", "fr": "Liste d'équipement des Jaeger" },
-      "itemNames": ["Dagger", "Axe", "Sword", "Spear", "Pistol", "Double-barrelled pistol", "Bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Double-barrelled Hochland long rifle", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Jaeger Equipment List",
+        "fr": "Liste d'équipement des Jaeger"
+      },
+      "itemNames": [
+        "Dagger",
+        "Axe",
+        "Sword",
+        "Spear",
+        "Pistol",
+        "Double-barrelled pistol",
+        "Bow",
+        "Blunderbuss",
+        "Handgun",
+        "Hunting Rifle",
+        "Double-barrelled Hochland long rifle",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Ogre Equipment List", "fr": "Liste d'équipement des Ogres" },
-      "itemNames": ["Club", "Axe", "Sword", "Double-handed weapon", "Light Armour"]
+      "name": {
+        "en": "Ogre Equipment List",
+        "fr": "Liste d'équipement des Ogres"
+      },
+      "itemNames": [
+        "Club",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Light Armour"
+      ]
     }
   ],
   "spells": []

@@ -22,7 +22,10 @@
   ],
   "skills": [
     {
-      "name": { "en": "Shaggy Hide", "fr": "Peau Hirsute" },
+      "name": {
+        "en": "Shaggy Hide",
+        "fr": "Peau Hirsute"
+      },
       "category": "Special",
       "description": {
         "en": "6+ Armour save, stacks with other armour.",
@@ -31,7 +34,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Mutant", "fr": "Mutant" },
+      "name": {
+        "en": "Mutant",
+        "fr": "Mutant"
+      },
       "category": "Special",
       "description": {
         "en": "May buy one Mutation.",
@@ -40,7 +46,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Fearless", "fr": "Intrépide" },
+      "name": {
+        "en": "Fearless",
+        "fr": "Intrépide"
+      },
       "category": "Special",
       "description": {
         "en": "Immune to Fear and All Alone tests.",
@@ -49,7 +58,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Horned One", "fr": "Cornu" },
+      "name": {
+        "en": "Horned One",
+        "fr": "Cornu"
+      },
       "category": "Special",
       "description": {
         "en": "An extra Attack at the model's Strength when charging.",
@@ -58,17 +70,25 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Bellowing Roar", "fr": "Rugissement Tonitruant" },
+      "name": {
+        "en": "Bellowing Roar",
+        "fr": "Rugissement Tonitruant"
+      },
       "category": "Special",
       "description": {
         "en": "Chieftain only: may re-roll failed Rout tests.",
         "fr": "Chef seul : peut relancer les tests de Déroute ratés."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Beastmen Chieftain"]
+      "restrictedToWarriorNames": [
+        "Beastmen Chieftain"
+      ]
     },
     {
-      "name": { "en": "Manhater", "fr": "Haine des Hommes" },
+      "name": {
+        "en": "Manhater",
+        "fr": "Haine des Hommes"
+      },
       "category": "Special",
       "description": {
         "en": "Hatred against Human warbands.",
@@ -118,7 +138,13 @@
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List"
+      "equipmentListName": "Beastmen Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -151,7 +177,12 @@
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List"
+      "equipmentListName": "Beastmen Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -175,7 +206,12 @@
         "en": "Bestigors are the largest type of Beastmen, the great horned warriors of the warband - massive creatures with an inhuman resistance to pain.",
         "fr": "Les Bestigors sont les plus grands et les plus puissants Hommes-Bêtes de la Harde. Ils arborent aussi les cornes les plus imposantes et semblent ignorer la douleur."
       },
-      "equipmentListName": "Beastmen Equipment List"
+      "equipmentListName": "Beastmen Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -231,7 +267,12 @@
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List"
+      "equipmentListName": "Beastmen Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -385,12 +426,37 @@
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Beastmen Equipment List", "fr": "Liste d'équipement des Hommes-Bêtes" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Halberd", "Double-handed weapon", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Beastmen Equipment List",
+        "fr": "Liste d'équipement des Hommes-Bêtes"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Halberd",
+        "Double-handed weapon",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Ungor Equipment List", "fr": "Liste d'équipement des Ungors" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Spear", "Shield"]
+      "name": {
+        "en": "Ungor Equipment List",
+        "fr": "Liste d'équipement des Ungors"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Spear",
+        "Shield"
+      ]
     }
   ]
 }

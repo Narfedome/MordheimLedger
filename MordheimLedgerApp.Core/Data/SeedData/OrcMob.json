@@ -22,7 +22,10 @@
   ],
   "skills": [
     {
-      "name": { "en": "'Ard 'Ead", "fr": "Têt'dure" },
+      "name": {
+        "en": "'Ard 'Ead",
+        "fr": "Têt'dure"
+      },
       "category": "Special",
       "description": {
         "en": "3+ save on a D6 to avoid being Stunned, treated as Knocked Down instead if made; 2+ if also wearing a helmet, replacing its normal save.",
@@ -31,7 +34,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Waaagh!", "fr": "Waaagh !" },
+      "name": {
+        "en": "Waaagh!",
+        "fr": "Waaagh !"
+      },
       "category": "Special",
       "description": {
         "en": "+D3\" charge range.",
@@ -40,7 +46,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "'Ere We Go!", "fr": "On y va !" },
+      "name": {
+        "en": "'Ere We Go!",
+        "fr": "On y va !"
+      },
       "category": "Special",
       "description": {
         "en": "No Fear test needed when charging.",
@@ -49,7 +58,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Well 'Ard", "fr": "Dur à cuire" },
+      "name": {
+        "en": "Well 'Ard",
+        "fr": "Dur à cuire"
+      },
       "category": "Special",
       "description": {
         "en": "+1 Armour save.",
@@ -58,7 +70,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "'Eadbasher", "fr": "Coup d'boule" },
+      "name": {
+        "en": "'Eadbasher",
+        "fr": "Coup d'boule"
+      },
       "category": "Special",
       "description": {
         "en": "Knocked Down results caused by this model in close combat count as Stunned instead.",
@@ -67,14 +82,19 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Da Cunnin' Plan", "fr": "Rev'nez ici !" },
+      "name": {
+        "en": "Da Cunnin' Plan",
+        "fr": "Rev'nez ici !"
+      },
       "category": "Special",
       "description": {
         "en": "Orc Boss only: the warband may re-roll failed Rout tests as long as the Boss is not out of action.",
         "fr": "Chef Orque seul : la bande peut relancer tout test de Déroute raté tant que le Chef n'est pas hors de combat."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Orc Boss"]
+      "restrictedToWarriorNames": [
+        "Orc Boss"
+      ]
     }
   ],
   "magicSchools": [
@@ -118,7 +138,14 @@
           }
         }
       ],
-      "equipmentListName": "Orc Equipment List"
+      "equipmentListName": "Orc Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -151,7 +178,11 @@
           }
         }
       ],
-      "equipmentListName": "Orc Equipment List"
+      "equipmentListName": "Orc Equipment List",
+      "skillCategories": [
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -175,7 +206,13 @@
         "en": "Only the toughest survive and rise through the ranks of Orc society - Big 'Uns are such rising stars, carrying out the Boss's orders and, should he ever fall, deciding on his replacement (usually through personal combat).",
         "fr": "Seuls les plus agressifs peuvent survivre et prospérer au sein de la société orque. Les Kostos font partie de cette élite et font office de bras droit pour le Chef - si jamais ce dernier venait à faillir, c'est probablement un de ses Kostos qui le pousserait dehors pour prendre sa place (le différend étant généralement réglé en combat singulier)."
       },
-      "equipmentListName": "Orc Equipment List"
+      "equipmentListName": "Orc Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -427,7 +464,9 @@
         "en": "Goblins only. Two-handed, Colossal Strength (no armour save allowed, Wounds caused are 1D3 instead of 1), Tiring (roll an Injury test for the wielder after the battle), Unpredictable (see below): a huge ball on a long chain, requiring Mad Cap Mushrooms to wield. When first swung, the wielder is moved 2D6\" in a direction chosen by the controlling player; on subsequent Movement phases roll a D6 to see where it drags him next, and it may knock him out of action outright.",
         "fr": "Réservée aux Gobelins. Arme à deux mains, Force Colossale (aucune sauvegarde d'armure, les blessures infligées sont de 1D3 au lieu d'une seule), Épuisante (jet de Blessure pour le porteur après la bataille), Imprévisible (voir ci-dessous) : un énorme boulet fixé au bout d'une longue chaîne, dont le maniement nécessite la consommation de champignons bonnets de fou. Au premier tour où le porteur la fait tournoyer, il est déplacé de 2D6ps dans une direction choisie par son joueur ; aux phases de Mouvement suivantes, un jet de 1D6 détermine où elle l'entraîne, pouvant le mettre hors de combat."
       },
-      "restrictedToWarriorNames": ["Goblin Warriors"]
+      "restrictedToWarriorNames": [
+        "Goblin Warriors"
+      ]
     },
     {
       "name": {
@@ -440,7 +479,9 @@
         "en": "Goblins only. A trident on a long haft used to steer Cave Squigs - a Goblin carrying one may control any Squig within 12\" instead of the usual 6\" (see the Minderz rule). Counts as a spear in hand-to-hand combat.",
         "fr": "Réservé aux Gobelins. Un trident fixé au bout d'une longue hampe utilisé pour diriger les Squigs des cavernes - un Gobelin qui en porte un peut contrôler tout Squig à moins de 12ps au lieu des 6ps habituels (voir la règle Au pied !). Considéré comme une lance au Corps à Corps."
       },
-      "restrictedToWarriorNames": ["Goblin Warriors"]
+      "restrictedToWarriorNames": [
+        "Goblin Warriors"
+      ]
     },
     {
       "name": {
@@ -453,17 +494,49 @@
         "en": "Common only if the warband includes at least one Goblin. A Goblin Warrior may eat these before a battle to gain Frenzy. After the battle, roll a D6: on a 1 the model becomes permanently Stupid. Required to wield a Ball & Chain.",
         "fr": "Disponibilité Commune uniquement si la bande compte au moins un Gobelin. Un Guerrier Gobelin peut en consommer avant une bataille pour gagner la Frénésie. Après la bataille, lancez 1D6 : sur un 1, la figurine devient Stupide de façon permanente. Nécessaires pour manier une Chaîne & boulet."
       },
-      "restrictedToWarriorNames": ["Goblin Warriors"]
+      "restrictedToWarriorNames": [
+        "Goblin Warriors"
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Orc Equipment List", "fr": "Liste d'équipement des Orques" },
-      "itemNames": ["Dagger", "Axe", "Sword", "Spear", "Halberd", "Double-handed weapon", "Morning star", "Bow", "Crossbow", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Orc Equipment List",
+        "fr": "Liste d'équipement des Orques"
+      },
+      "itemNames": [
+        "Dagger",
+        "Axe",
+        "Sword",
+        "Spear",
+        "Halberd",
+        "Double-handed weapon",
+        "Morning star",
+        "Bow",
+        "Crossbow",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Goblin Equipment List", "fr": "Liste d'équipement des Gobelins" },
-      "itemNames": ["Dagger", "Club", "Sword", "Spear", "Ball & Chain", "Short Bow", "Shield", "Helmet", "Squig Prodder", "Mad Cap Mushrooms"]
+      "name": {
+        "en": "Goblin Equipment List",
+        "fr": "Liste d'équipement des Gobelins"
+      },
+      "itemNames": [
+        "Dagger",
+        "Club",
+        "Sword",
+        "Spear",
+        "Ball & Chain",
+        "Short Bow",
+        "Shield",
+        "Helmet",
+        "Squig Prodder",
+        "Mad Cap Mushrooms"
+      ]
     }
   ],
   "spells": [],

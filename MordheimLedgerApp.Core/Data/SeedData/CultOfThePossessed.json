@@ -57,7 +57,12 @@
           }
         }
       ],
-      "equipmentListName": "Possessed Equipment List"
+      "equipmentListName": "Possessed Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -95,6 +100,11 @@
             "fr": "Sans équipement"
           }
         }
+      ],
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Speed"
       ]
     },
     {
@@ -120,7 +130,11 @@
         "en": "Revered as the favoured ones of the Dark Gods, their physical disfigurements marking the vileness of their soul - they come in many shapes and sizes, each more bizarre than the next.",
         "fr": "Les Mutants sont célébrés comme les favoris des dieux des ténèbres, leurs difformités montrant la déchéance de leurs âmes. Ils peuvent prendre bien des formes et des tailles différentes, toutes plus bizarres les unes que les autres."
       },
-      "equipmentListName": "Possessed Equipment List"
+      "equipmentListName": "Possessed Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -239,12 +253,48 @@
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Possessed Equipment List", "fr": "Liste d'équipement des Possédés" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Spear", "Bow", "Short Bow", "Light Armour", "Heavy Armour", "Shield", "Helmet", "Obsidian Weapon", "Chaos Armour"]
+      "name": {
+        "en": "Possessed Equipment List",
+        "fr": "Liste d'équipement des Possédés"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Spear",
+        "Bow",
+        "Short Bow",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet",
+        "Obsidian Weapon",
+        "Chaos Armour"
+      ]
     },
     {
-      "name": { "en": "Darksouls Equipment List", "fr": "Liste d'équipement des Damnés" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Flail", "Light Armour", "Heavy Armour", "Shield", "Helmet", "Obsidian Weapon", "Chaos Armour"]
+      "name": {
+        "en": "Darksouls Equipment List",
+        "fr": "Liste d'équipement des Damnés"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Flail",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet",
+        "Obsidian Weapon",
+        "Chaos Armour"
+      ]
     }
   ],
   "mutations": [],

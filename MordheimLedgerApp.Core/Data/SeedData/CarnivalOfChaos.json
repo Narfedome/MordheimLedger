@@ -78,7 +78,14 @@
           }
         }
       ],
-      "equipmentListName": "Carnival of Chaos Equipment List"
+      "equipmentListName": "Carnival of Chaos Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -114,7 +121,12 @@
           }
         }
       ],
-      "equipmentListName": "Brute Equipment List"
+      "equipmentListName": "Brute Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -151,7 +163,11 @@
           }
         }
       ],
-      "equipmentListName": "Carnival of Chaos Equipment List"
+      "equipmentListName": "Carnival of Chaos Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -361,12 +377,38 @@
   "equipment": [],
   "equipmentLists": [
     {
-      "name": { "en": "Carnival of Chaos Equipment List", "fr": "Liste d'équipement de la Kermesse du Chaos" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Short Bow", "Bow", "Pistol", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Carnival of Chaos Equipment List",
+        "fr": "Liste d'équipement de la Kermesse du Chaos"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Morning star",
+        "Double-handed weapon",
+        "Spear",
+        "Halberd",
+        "Short Bow",
+        "Bow",
+        "Pistol",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Brute Equipment List", "fr": "Liste d'équipement des Colosses" },
-      "itemNames": ["Double-handed weapon", "Flail"]
+      "name": {
+        "en": "Brute Equipment List",
+        "fr": "Liste d'équipement des Colosses"
+      },
+      "itemNames": [
+        "Double-handed weapon",
+        "Flail"
+      ]
     }
   ],
   "mutations": [

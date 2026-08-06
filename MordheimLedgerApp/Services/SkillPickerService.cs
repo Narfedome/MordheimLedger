@@ -8,8 +8,12 @@ public interface ISkillPickerService
     /// <summary>warbandArchetypeId: only skills whose RestrictedToWarbandArchetypeIds is empty (common)
     /// or contains this id are selectable - see WarriorEditDialogViewModel.AddSkill/
     /// EndOfGameDialogViewModel's Advance roll skill choice. warriorArchetypeId: same idea one level
-    /// down, null = no further filtering (e.g. picking for a Warrior whose archetype isn't relevant).</summary>
-    Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null);
+    /// down, null = no further filtering (e.g. picking for a Warrior whose archetype isn't relevant).
+    /// allowedCategories: further restrict to these SkillCategory values (the warrior's own "skill
+    /// table" row, e.g. WarriorArchetype/Warrior.AllowedSkillCategories) - null/omitted = no category
+    /// filtering.</summary>
+    Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
+        IReadOnlyList<SkillCategory>? allowedCategories = null);
 }
 
 public class SkillPickerService : ISkillPickerService
@@ -18,7 +22,8 @@ public class SkillPickerService : ISkillPickerService
 
     public SkillPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null)
+    public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
+        IReadOnlyList<SkillCategory>? allowedCategories = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
 
@@ -30,6 +35,7 @@ public class SkillPickerService : ISkillPickerService
         var viewModel = _provider.GetRequiredService<SkillViewModel>();
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
         viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
+        viewModel.AllowedCategories = allowedCategories is { Count: > 0 } ? allowedCategories : null;
         var page = new SkillSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 

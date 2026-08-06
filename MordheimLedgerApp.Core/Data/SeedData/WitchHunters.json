@@ -59,7 +59,14 @@
           }
         }
       ],
-      "equipmentListName": "Witch Hunter Equipment List"
+      "equipmentListName": "Witch Hunter Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -95,7 +102,13 @@
           }
         }
       ],
-      "equipmentListName": "Witch Hunter Equipment List"
+      "equipmentListName": "Witch Hunter Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -128,7 +141,12 @@
           }
         }
       ],
-      "equipmentListName": "Witch Hunter Equipment List"
+      "equipmentListName": "Witch Hunter Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Strength"
+      ]
     },
     {
       "name": {
@@ -264,21 +282,67 @@
         "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6x10 CO. Réservé aux Prêtres-Guerriers et aux Sœurs de Sigmar. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Warrior-Priest"]
+      "restrictedToWarriorNames": [
+        "Warrior-Priest"
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Witch Hunter Equipment List", "fr": "Liste d'équipement des Répurgateurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Crossbow", "Pistol", "Crossbow Pistol", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Brazier Iron", "Hammer of Witches", "Holy Tome"]
+      "name": {
+        "en": "Witch Hunter Equipment List",
+        "fr": "Liste d'équipement des Répurgateurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Crossbow",
+        "Pistol",
+        "Crossbow Pistol",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet",
+        "Brazier Iron",
+        "Hammer of Witches",
+        "Holy Tome"
+      ]
     },
     {
-      "name": { "en": "Flagellant Equipment List", "fr": "Liste d'équipement des Flagellants" },
-      "itemNames": ["Flail", "Morning star", "Double-handed weapon"]
+      "name": {
+        "en": "Flagellant Equipment List",
+        "fr": "Liste d'équipement des Flagellants"
+      },
+      "itemNames": [
+        "Flail",
+        "Morning star",
+        "Double-handed weapon"
+      ]
     },
     {
-      "name": { "en": "Zealot Equipment List", "fr": "Liste d'équipement des Séides" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Spear", "Bow", "Short Bow", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Zealot Equipment List",
+        "fr": "Liste d'équipement des Séides"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Spear",
+        "Bow",
+        "Short Bow",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

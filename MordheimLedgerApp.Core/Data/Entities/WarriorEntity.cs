@@ -36,4 +36,8 @@ public class WarriorEntity
     public int? MountId { get; set; }
 
     public int? EquipmentListId { get; set; }
+
+    /// <summary>Comma-separated SkillCategory member names - see Warrior.AllowedSkillCategories /
+    /// WarriorArchetypeEntity.AllowedSkillCategories (same storage convention, copied at recruitment).</summary>
+    public string? AllowedSkillCategories { get; set; }
 }

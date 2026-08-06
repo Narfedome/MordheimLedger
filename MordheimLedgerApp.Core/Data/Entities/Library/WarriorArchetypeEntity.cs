@@ -34,4 +34,9 @@ public class WarriorArchetypeEntity
     public bool CanBuyMutations { get; set; }
     public string? ImagePath { get; set; }
     public int? EquipmentListId { get; set; }
+
+    /// <summary>Comma-separated SkillCategory member names (e.g. "Combat,Strength,Speed") - see
+    /// WarriorArchetype.AllowedSkillCategories. A plain delimited column rather than a join table since
+    /// SkillCategory is a small fixed enum, not a foreign catalog to look up.</summary>
+    public string? AllowedSkillCategories { get; set; }
 }

@@ -42,7 +42,14 @@
           }
         }
       ],
-      "equipmentListName": "Mountainguard Equipment List"
+      "equipmentListName": "Mountainguard Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -66,7 +73,12 @@
         "en": "A veteran soldier, easily recognized by his many scars and the cynicism that marks a lifelong campaigner - some Captains are merely merchants or nobles looking to turn a profit, and delegate all practical matters to a Sergeant.",
         "fr": "Un vétéran facilement reconnaissable à ses nombreuses cicatrices et au cynisme qui marque à jamais un soldat - certains Capitaines ne sont que des marchands ou des nobles à la recherche d'opportunités et délèguent tout l'aspect pratique à un Sergent."
       },
-      "equipmentListName": "Mountainguard Equipment List"
+      "equipmentListName": "Mountainguard Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -102,7 +114,11 @@
           }
         }
       ],
-      "equipmentListName": "Scout Equipment List"
+      "equipmentListName": "Scout Equipment List",
+      "skillCategories": [
+        "Shooting",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -126,7 +142,12 @@
         "en": "Even the armies of the Empire, full of seasoned men, always need youngsters to man the field kitchens or carry orders - some of these greenhorns, seeking romance and glory, prefer to join a mercenary band instead.",
         "fr": "Même les armées de l'Empire, remplies d'hommes mûrs, ont toujours besoin de jeunots pour aider aux fourneaux ou transmettre les ordres - certains de ces bleus, en quête d'aventures romanesques, préfèrent rejoindre une bande de mercenaires."
       },
-      "equipmentListName": "Mountainguard Equipment List"
+      "equipmentListName": "Mountainguard Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -225,21 +246,79 @@
         "en": "Bergjaeger only. Specially crafted arrowheads used for hunting. Requires a bow.",
         "fr": "Réservées aux Bergjaeger. Pointes de flèches spécialement conçues pour la chasse. Nécessitent un arc."
       },
-      "restrictedToWarriorNames": ["Bergjaeger"]
+      "restrictedToWarriorNames": [
+        "Bergjaeger"
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Scout Equipment List", "fr": "Liste d'équipement des Éclaireurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Bow", "Long bow", "Hunting Arrows", "Light Armour", "Buckler", "Helmet"]
+      "name": {
+        "en": "Scout Equipment List",
+        "fr": "Liste d'équipement des Éclaireurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Bow",
+        "Long bow",
+        "Hunting Arrows",
+        "Light Armour",
+        "Buckler",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Marksman Equipment List", "fr": "Liste d'équipement des Tireurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Crossbow", "Pistol", "Bow", "Long bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Light Armour", "Buckler", "Helmet"]
+      "name": {
+        "en": "Marksman Equipment List",
+        "fr": "Liste d'équipement des Tireurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Crossbow",
+        "Pistol",
+        "Bow",
+        "Long bow",
+        "Blunderbuss",
+        "Handgun",
+        "Hunting Rifle",
+        "Light Armour",
+        "Buckler",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Mountainguard Equipment List", "fr": "Liste d'équipement de la Garde des Montagnes" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Spear", "Halberd", "Morning star", "Double-handed weapon", "Pistol", "Duelling Pistol", "Crossbow", "Bow", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet"]
+      "name": {
+        "en": "Mountainguard Equipment List",
+        "fr": "Liste d'équipement de la Garde des Montagnes"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Spear",
+        "Halberd",
+        "Morning star",
+        "Double-handed weapon",
+        "Pistol",
+        "Duelling Pistol",
+        "Crossbow",
+        "Bow",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

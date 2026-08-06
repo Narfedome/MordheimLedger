@@ -10,7 +10,10 @@
   },
   "skills": [
     {
-      "name": { "en": "Black Hunger", "fr": "Faim Noire" },
+      "name": {
+        "en": "Black Hunger",
+        "fr": "Faim Noire"
+      },
       "category": "Special",
       "description": {
         "en": "Declared at the start of the turn: +1 Attack and +D3\" Movement this turn, then suffers D3 Strength 3 hits with no armour save at the end of the turn.",
@@ -19,7 +22,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Tail Fighting", "fr": "Combat à la Queue" },
+      "name": {
+        "en": "Tail Fighting",
+        "fr": "Combat à la Queue"
+      },
       "category": "Special",
       "description": {
         "en": "Wields a shield/knife/sword with the tail for an extra Attack or +1 Armour save.",
@@ -28,7 +34,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Wall Runner", "fr": "Grimpeur" },
+      "name": {
+        "en": "Wall Runner",
+        "fr": "Grimpeur"
+      },
       "category": "Special",
       "description": {
         "en": "No Initiative test needed to climb sheer surfaces.",
@@ -37,7 +46,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Art of Silent Death", "fr": "Art de la Mort Silencieuse" },
+      "name": {
+        "en": "Art of Silent Death",
+        "fr": "Art de la Mort Silencieuse"
+      },
       "category": "Special",
       "description": {
         "en": "Fights bare-pawed without penalty as if dual-wielding, causes a Critical Hit on a 5-6 instead of just 6.",
@@ -46,7 +58,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Infiltration", "fr": "Infiltration" },
+      "name": {
+        "en": "Infiltration",
+        "fr": "Infiltration"
+      },
       "category": "Special",
       "description": {
         "en": "Deployed after the opposing warband, anywhere out of sight and 12\"+ from any enemy model.",
@@ -106,7 +121,15 @@
           }
         }
       ],
-      "equipmentListName": "Heroes Equipment List"
+      "equipmentListName": "Heroes Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -130,7 +153,14 @@
         "en": "The most powerful fighters of Clan Eshin - black-furred killers trained in every martial art of their clan, excelling at ambush and assassination in Mordheim's ruins.",
         "fr": "Les skavens noirs sont les plus puissants de tous les guerriers du clan Eshin, des tueurs chevronnés entraînés à tous les arts martiaux de leurs clans. À Mordheim ils excellent dans les embuscades et les assassinats."
       },
-      "equipmentListName": "Heroes Equipment List"
+      "equipmentListName": "Heroes Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -163,7 +193,12 @@
           }
         }
       ],
-      "equipmentListName": "Heroes Equipment List"
+      "equipmentListName": "Heroes Equipment List",
+      "skillCategories": [
+        "Academic",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -187,7 +222,12 @@
         "en": "Young apprentices of Clan Eshin, recently initiated into the secrets of the clan - they make up for their lack of knowledge with ambition and energy.",
         "fr": "Les coureurs nocturnes sont de jeunes apprentis du clan Eshin. Récemment initiés dans les secrets du clan, ils compensent leur manque de savoir par l'ambition et l'énergie dont ils font preuve."
       },
-      "equipmentListName": "Henchmen Equipment List"
+      "equipmentListName": "Henchmen Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -352,12 +392,42 @@
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Heroes Equipment List", "fr": "Liste d'équipement des Héros" },
-      "itemNames": ["Dagger", "Sword", "Flail", "Spear", "Halberd", "Weeping Blades", "Fighting Claws", "Sling", "Throwing Stars", "Blowpipe", "Warplock Pistol", "Light Armour", "Buckler", "Helmet"]
+      "name": {
+        "en": "Heroes Equipment List",
+        "fr": "Liste d'équipement des Héros"
+      },
+      "itemNames": [
+        "Dagger",
+        "Sword",
+        "Flail",
+        "Spear",
+        "Halberd",
+        "Weeping Blades",
+        "Fighting Claws",
+        "Sling",
+        "Throwing Stars",
+        "Blowpipe",
+        "Warplock Pistol",
+        "Light Armour",
+        "Buckler",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Henchmen Equipment List", "fr": "Liste d'équipement des Hommes de main" },
-      "itemNames": ["Dagger", "Club", "Sword", "Spear", "Sling", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Henchmen Equipment List",
+        "fr": "Liste d'équipement des Hommes de main"
+      },
+      "itemNames": [
+        "Dagger",
+        "Club",
+        "Sword",
+        "Spear",
+        "Sling",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

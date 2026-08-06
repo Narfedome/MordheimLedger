@@ -10,7 +10,10 @@
   },
   "skills": [
     {
-      "name": { "en": "Sign of Sigmar", "fr": "Signe de Sigmar" },
+      "name": {
+        "en": "Sign of Sigmar",
+        "fr": "Signe de Sigmar"
+      },
       "category": "Special",
       "description": {
         "en": "Possessed/Undead opponents lose their first close combat attack against her, minimum 1.",
@@ -19,7 +22,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Protection of Sigmar", "fr": "Protection de Sigmar" },
+      "name": {
+        "en": "Protection of Sigmar",
+        "fr": "Protection de Sigmar"
+      },
       "category": "Special",
       "description": {
         "en": "Any spell targeting her is nullified on a D6 roll of 4+.",
@@ -28,17 +34,25 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Utter Determination", "fr": "Détermination Absolue" },
+      "name": {
+        "en": "Utter Determination",
+        "fr": "Détermination Absolue"
+      },
       "category": "Special",
       "description": {
         "en": "Matriarch only: may re-roll failed Rout tests.",
         "fr": "Matriarche seule : peut relancer les tests de Déroute ratés."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Sigmarite Matriarch"]
+      "restrictedToWarriorNames": [
+        "Sigmarite Matriarch"
+      ]
     },
     {
-      "name": { "en": "Righteous Fury", "fr": "Fureur Vertueuse" },
+      "name": {
+        "en": "Righteous Fury",
+        "fr": "Fureur Vertueuse"
+      },
       "category": "Special",
       "description": {
         "en": "Hatred against Skaven, Undead, Possessed, Beastmen, Dark Elves and other evil warbands.",
@@ -47,7 +61,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Absolute Faith", "fr": "Foi Inébranlable" },
+      "name": {
+        "en": "Absolute Faith",
+        "fr": "Foi Inébranlable"
+      },
       "category": "Special",
       "description": {
         "en": "May re-roll Fear tests, immune to All Alone tests.",
@@ -104,7 +121,14 @@
           }
         }
       ],
-      "equipmentListName": "Sisters of Sigmar Equipment List"
+      "equipmentListName": "Sisters of Sigmar Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -140,7 +164,12 @@
           }
         }
       ],
-      "equipmentListName": "Sisters of Sigmar Equipment List"
+      "equipmentListName": "Sisters of Sigmar Equipment List",
+      "skillCategories": [
+        "Academic",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -164,7 +193,14 @@
         "en": "A long-serving priestess of the Cult of Sigmar, well versed in temple ritual and an example to the younger Sisters and Novices - any peril lurking in Mordheim's ruins is nothing compared to a Sister Superior's wrath.",
         "fr": "Chaque sœur supérieure est une prêtresse depuis longtemps au service du Culte de Sigmar, très versée dans les rituels du temple et un exemple pour les sœurs plus jeunes et les novices. N'importe quel danger ou ennemi rôdant dans les ruines de Mordheim n'est rien comparé à la colère d'une sœur supérieure."
       },
-      "equipmentListName": "Sisters of Sigmar Equipment List"
+      "equipmentListName": "Sisters of Sigmar Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -254,7 +290,11 @@
         "fr": "Réservée aux Héroïnes. Eau sanctifiée au nom de Sigmar."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Sigmarite Matriarch", "Augur", "Sister Superior"]
+      "restrictedToWarriorNames": [
+        "Sigmarite Matriarch",
+        "Augur",
+        "Sister Superior"
+      ]
     },
     {
       "name": {
@@ -268,7 +308,11 @@
         "fr": "Réservée aux Héroïnes. Une relique sacrée du Culte de Sigmar, portée pour sa protection."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Sigmarite Matriarch", "Augur", "Sister Superior"]
+      "restrictedToWarriorNames": [
+        "Sigmarite Matriarch",
+        "Augur",
+        "Sister Superior"
+      ]
     },
     {
       "name": {
@@ -283,13 +327,37 @@
         "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6x10 CO. Réservé aux Prêtres-Guerriers et aux Sœurs de Sigmar. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Sigmarite Matriarch", "Augur", "Sister Superior"]
+      "restrictedToWarriorNames": [
+        "Sigmarite Matriarch",
+        "Augur",
+        "Sister Superior"
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Sisters of Sigmar Equipment List", "fr": "Liste d'équipement des Sœurs de Sigmar" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Sigmarite Warhammer", "Flail", "Steel Whip", "Double-handed weapon", "Sling", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Holy Tome", "Blessed Water", "Holy Relic"]
+      "name": {
+        "en": "Sisters of Sigmar Equipment List",
+        "fr": "Liste d'équipement des Sœurs de Sigmar"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Sigmarite Warhammer",
+        "Flail",
+        "Steel Whip",
+        "Double-handed weapon",
+        "Sling",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet",
+        "Holy Tome",
+        "Blessed Water",
+        "Holy Relic"
+      ]
     }
   ]
 }

@@ -18,8 +18,13 @@
 - [x] Seed d'une première bande officielle (Reiklander Mercenaries) — stats à vérifier contre le livre de règles
 - [x] Écrans de bout en bout : liste de bandes, création, détail/roster, recrutement
 - [x] Écrans de gestion de la bibliothèque (créer/éditer archétypes et objets) — Types de Bande (avec Types de Guerrier imbriqués) et Trading Post, tuiles en grille + dialogs Create/Edit (wizard 3 étapes pour les guerriers)
-- [ ] Table des Blessures Graves
-- [ ] Historique de campagne / trésorerie détaillée
+- [x] Table des Blessures Graves — D66 Héros (`Services/SeriousInjuryTable.cs`) + table Hommes de main
+  séparée (`Services/HenchmanInjuryTable.cs`), tirage intégré à l'assistant Fin de Partie
+  (`Features/Warbands/EndOfGame/`), statut Mort auto-dérivé sur les résultats 11-15, "Blessures
+  multiples" (16/21) laissé au joueur (texte pur, pas de moteur de règles)
+- [x] Historique de campagne / trésorerie détaillée — `HistoryEntry` (log narré par bande, auto-généré à
+  chaque recrutement/butin/fin de partie + notes manuelles) et `Warband.Treasury` ajusté à chaque
+  mouvement d'or (recrutement, remboursement, trésor trouvé)
 - [x] Restrictions par bande (Équipement/Compétences/Montures) réellement éditables + filtrées dans les pickers
 - [x] Écoles de magie normalisées en entité propre (`MagicSchool`), liée à la bande plutôt qu'au guerrier
 - [x] Catalogue complet du second lot fourni par l'utilisateur — 15 bandes intégrées au total, toutes via

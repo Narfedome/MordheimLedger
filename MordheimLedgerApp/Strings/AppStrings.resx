@@ -234,6 +234,21 @@
   <data name="SettingsResetDone" xml:space="preserve">
     <value>Données réinitialisées. Redémarrez l'application pour rafraîchir les écrans déjà ouverts.</value>
   </data>
+  <data name="OnboardingTitle" xml:space="preserve">
+    <value>Bienvenue dans Mordheim Ledger</value>
+  </data>
+  <data name="OnboardingDesc" xml:space="preserve">
+    <value>Votre registre pour vos bandes de Mordheim. Gérez vos guerriers, suivez leur progression et consultez le codex des bandes officielles — le tout depuis une interface sobre et thématique.</value>
+  </data>
+  <data name="OnboardingPalette" xml:space="preserve">
+    <value>Choisissez votre palette</value>
+  </data>
+  <data name="OnboardingLanguage" xml:space="preserve">
+    <value>Langue</value>
+  </data>
+  <data name="OnboardingStart" xml:space="preserve">
+    <value>Commencer</value>
+  </data>
   <data name="BtnRecruit" xml:space="preserve">
     <value>Recruter</value>
   </data>

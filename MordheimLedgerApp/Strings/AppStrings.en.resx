@@ -234,6 +234,21 @@
   <data name="SettingsResetDone" xml:space="preserve">
     <value>Data reset. Restart the app to refresh any screen that was already open.</value>
   </data>
+  <data name="OnboardingTitle" xml:space="preserve">
+    <value>Welcome to Mordheim Ledger</value>
+  </data>
+  <data name="OnboardingDesc" xml:space="preserve">
+    <value>Your ledger for Mordheim warbands. Manage your warriors, track their progression, and browse the codex of official warbands — all from a clean, themed interface.</value>
+  </data>
+  <data name="OnboardingPalette" xml:space="preserve">
+    <value>Choose your palette</value>
+  </data>
+  <data name="OnboardingLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="OnboardingStart" xml:space="preserve">
+    <value>Get started</value>
+  </data>
   <data name="BtnRecruit" xml:space="preserve">
     <value>Recruit</value>
   </data>

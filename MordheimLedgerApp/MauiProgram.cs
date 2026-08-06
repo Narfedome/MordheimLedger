@@ -13,6 +13,7 @@ using MordheimLedgerApp.Features.Library.Mounts;
 using MordheimLedgerApp.Features.Library.MagicSchools;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
+using MordheimLedgerApp.Features.Onboarding;
 using MordheimLedgerApp.Features.Settings;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
@@ -51,6 +52,9 @@ namespace MordheimLedgerApp
                 });
 
             builder.Services.AddSingleton(new AppDatabase(dbPath));
+            builder.Services.AddSingleton<AppShell>();
+            builder.Services.AddTransient<OnboardingViewModel>();
+            builder.Services.AddTransient<OnboardingPage>();
             builder.Services.AddTransient<LoadingService>();
             builder.Services.AddSingleton<ILibraryService, LibraryService>();
             builder.Services.AddSingleton<IWarbandService, WarbandService>();

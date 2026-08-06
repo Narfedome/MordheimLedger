@@ -4,7 +4,10 @@
                      "en":  "Necromancy",
                      "fr":  "Nécromancie"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "Necromancy is the magic of the dead. It grants Necromancers the power to raise the dead and command spirits, but also to destroy the vitality of the living.",
+                            "fr":  "La Nécromancie est la magie des morts. Elle confère aux nécromanciens le pouvoir de relever les morts et de commander les esprits, mais aussi de détruire la vitalité des vivants."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Necromancy",
@@ -91,7 +94,10 @@
                      "en":  "Prayers of Taal",
                      "fr":  "Prières de Taal"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "Taal is the God of Nature, the Lord of Beasts, revered by all who venture into the wild regions of the Empire - portrayed as a tall, broad-shouldered man wearing a stag skull as a helm and clothed in bison and bear skins. His followers include rangers, trappers and those who live in the wilds. Prayers of Taal work like Prayers of Sigmar, though the Priest of Taal may never wear Heavy Armour.",
+                            "fr":  "Taal est le Dieu de la Nature, le Seigneur des Bêtes, révéré par tous ceux qui s'aventurent dans les régions sauvages de l'Empire - dépeint comme un homme grand et carré, portant un crâne de cerf en guise de heaume et vêtu de peaux de bison et d'ours. Ses fidèles comptent des rôdeurs, des trappeurs et tous ceux qui vivent dans les contrées sauvages. Les Prières de Taal fonctionnent comme les Prières de Sigmar, à ceci près que le Prêtre de Taal ne peut jamais porter d'Armure Lourde."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Prayers of Taal",
@@ -172,7 +178,10 @@
                      "en":  "Nurgle Rituals",
                      "fr":  "Rituels de Nurgle"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "The Carnival Master uses the rituals of Nurgle to pervert and corrupt nature, inflicting hideous diseases for which there are no known cures.",
+                            "fr":  "Le Maître du Carnaval utilise les rituels de Nurgle pour pervertir et corrompre la nature, infligeant d'horribles maladies pour lesquelles nul remède n'est connu."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Nurgle Rituals",
@@ -259,7 +268,10 @@
                      "en":  "Chaos Rituals",
                      "fr":  "Rituels du Chaos"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "Chaos rituals employ the raw power of the darkest magic, and are therefore supremely useful in bringing pain and suffering, as well as change and mutation.",
+                            "fr":  "Les Rituels du Chaos font appel à la puissance brute de la magie la plus sombre, redoutablement utile pour répandre douleur et souffrance, ainsi que changement et mutation."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Chaos Rituals",
@@ -346,7 +358,10 @@
                      "en":  "Waaagh! Magic",
                      "fr":  "Magie Waaagh !"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "Waaagh! spells are used by Orc Shamans. They are rituals of a sort, howling prayers to the boisterous Orc gods Gork and Mork.",
+                            "fr":  "Les sorts Waaagh! sont utilisés par les Chamanes Orques. Ce sont une forme de rituels, des prières hurlées aux dieux tapageurs des Orques, Gork et Mork."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Waaagh! Magic",
@@ -433,7 +448,10 @@
                      "en":  "Prayers of Sigmar",
                      "fr":  "Prières de Sigmar"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "Those with great faith in the gods can call upon their divine power. The priests of Sigmar can pray for many miracles: healing of wounds, strengthening the resolve of their comrades or the banishment of Daemonic creatures and the Undead. A warrior may use the divine power of Sigmar while wearing armour - Prayers of Sigmar are not regarded as spells, so any special protection against spells does not affect them.",
+                            "fr":  "Ceux qui ont une grande foi dans les dieux peuvent faire appel à leur puissance divine. Les prêtres de Sigmar peuvent prier pour de nombreux miracles : guérison des blessures, renforcement de la détermination de leurs compagnons ou bannissement des créatures démoniaques et des Morts-Vivants. Un guerrier peut invoquer la puissance divine de Sigmar tout en portant une armure - les Prières de Sigmar ne sont pas considérées comme des sorts, une protection spéciale contre la magie ne les affecte donc pas."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Prayers of Sigmar",
@@ -520,7 +538,10 @@
                      "en":  "Magic of the Horned Rat",
                      "fr":  "Magie du Rat Cornu"
                  },
-        "description":  null,
+        "description":  {
+                            "en":  "This brand of sorcery is used by the Skaven. It is a sinister form of magic which calls upon the Skaven deity, a loathsome daemonic god known as the Horned Rat.",
+                            "fr":  "Cette forme de sorcellerie est utilisée par les Skavens. Il s'agit d'une magie sinistre qui fait appel à la divinité skaven, un abject dieu démoniaque connu sous le nom de Rat Cornu."
+                        },
         "spells":  [
                        {
                            "magicSchoolName":  "Magic of the Horned Rat",

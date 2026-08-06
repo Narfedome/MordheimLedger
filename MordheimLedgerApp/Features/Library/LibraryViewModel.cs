@@ -28,6 +28,14 @@ namespace MordheimLedgerApp.Features.Library;
 /// </summary>
 public partial class LibraryViewModel : BaseViewModel
 {
+    /// <summary>Translation keys for the 8 sections, in SelectedTab order - single source of truth for
+    /// both the ActionSheet options and SelectedTabLabel, see SelectTab/RefreshSelectedTabLabel.</summary>
+    private static readonly string[] TabKeys =
+    [
+        "TabWarbands", "LibTabTradingPost", "TabSkills", "TabInjuries",
+        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabMounts"
+    ];
+
     public WarbandArchetypeViewModel WarbandArchetypes { get; }
     public EquipmentItemViewModel EquipmentItems { get; }
     public SkillViewModel Skills { get; }
@@ -47,6 +55,12 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
     [NotifyPropertyChangedFor(nameof(IsMountsTab))]
     private int selectedTab;
+
+    /// <summary>Displayed on the single section-picker Button - see SelectTab. Distinct from a direct
+    /// {Binding SelectedTab} text lookup so it can be recomputed on language change, cf.
+    /// SkillViewModel.SelectedCategoryLabel.</summary>
+    [ObservableProperty]
+    private string selectedTabLabel = string.Empty;
 
     public bool IsWarbandsTab => SelectedTab == 0;
     public bool IsTradingPostTab => SelectedTab == 1;
@@ -69,31 +83,25 @@ public partial class LibraryViewModel : BaseViewModel
         SpecialRules = specialRules;
         Mutations = mutations;
         Mounts = mounts;
+        RefreshSelectedTabLabel();
     }
 
-    [RelayCommand]
-    private void ShowWarbandsTab() => SelectedTab = 0;
+    private void RefreshSelectedTabLabel() => SelectedTabLabel = Loc[TabKeys[SelectedTab]];
 
+    /// <summary>Single entry point replacing the former 8 separate ShowXTab buttons - one Button (see
+    /// LibraryPage.xaml) showing the active section, opening an ActionSheet of all 8 on tap. Same idiom
+    /// as SkillViewModel.SelectCategory, picked to keep the section switcher compact regardless of how
+    /// many Codex sections exist.</summary>
     [RelayCommand]
-    private void ShowTradingPostTab() => SelectedTab = 1;
+    private async Task SelectTab()
+    {
+        var options = TabKeys.Select(k => Loc[k]).ToArray();
+        var index = await ShowActionSheetIndexAsync(Loc["LibSelectSectionTitle"], options);
+        if (index < 0) return;
 
-    [RelayCommand]
-    private void ShowSkillsTab() => SelectedTab = 2;
-
-    [RelayCommand]
-    private void ShowInjuriesTab() => SelectedTab = 3;
-
-    [RelayCommand]
-    private void ShowSpellsTab() => SelectedTab = 4;
-
-    [RelayCommand]
-    private void ShowSpecialRulesTab() => SelectedTab = 5;
-
-    [RelayCommand]
-    private void ShowMutationsTab() => SelectedTab = 6;
-
-    [RelayCommand]
-    private void ShowMountsTab() => SelectedTab = 7;
+        SelectedTab = index;
+        RefreshSelectedTabLabel();
+    }
 
     /// <summary>All 8 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
     /// switching between them is instant.</summary>
@@ -107,5 +115,6 @@ public partial class LibraryViewModel : BaseViewModel
         await SpecialRules.InitializeAsync();
         await Mutations.InitializeAsync();
         await Mounts.InitializeAsync();
+        RefreshSelectedTabLabel();
     }
 }

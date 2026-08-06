@@ -17,19 +17,21 @@
 
     <components:WatermarkedLayout>
     <Grid RowDefinitions="Auto,*">
-        <!-- Toggle Bandes/Marché/Compétences/Blessures - même pattern que Roster/Historique sur
-             WarbandDetailPage : pas de vrai TabbedPage, juste des boutons + IsVisible. TabToggleButton
-             (style implicite) met l'onglet actif en gras/accent. -->
-        <HorizontalStackLayout Grid.Row="0" Spacing="16" Margin="16,10,16,8" HorizontalOptions="Center">
-            <components:TabToggleButton Text="{loc:Loc TabWarbands}" Command="{Binding ShowWarbandsTabCommand}" IsActive="{Binding IsWarbandsTab}"/>
-            <components:TabToggleButton Text="{loc:Loc LibTabTradingPost}" Command="{Binding ShowTradingPostTabCommand}" IsActive="{Binding IsTradingPostTab}"/>
-            <components:TabToggleButton Text="{loc:Loc TabSkills}" Command="{Binding ShowSkillsTabCommand}" IsActive="{Binding IsSkillsTab}"/>
-            <components:TabToggleButton Text="{loc:Loc TabInjuries}" Command="{Binding ShowInjuriesTabCommand}" IsActive="{Binding IsInjuriesTab}"/>
-            <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}" IsActive="{Binding IsSpellsTab}"/>
-            <components:TabToggleButton Text="{loc:Loc LibTabSpecialRules}" Command="{Binding ShowSpecialRulesTabCommand}" IsActive="{Binding IsSpecialRulesTab}"/>
-            <components:TabToggleButton Text="{loc:Loc LibTabMutations}" Command="{Binding ShowMutationsTabCommand}" IsActive="{Binding IsMutationsTab}"/>
-            <components:TabToggleButton Text="{loc:Loc LibTabMounts}" Command="{Binding ShowMountsTabCommand}" IsActive="{Binding IsMountsTab}"/>
-        </HorizontalStackLayout>
+        <!-- Sélecteur de section (Bandes/Marché/Compétences/Blessures/...) : un seul bouton affichant la
+             section active, ouvrant un ActionSheet listant les 8 au tap - même mécanisme que le filtre
+             par catégorie de SkillView/MutationView (SelectCategoryCommand), préféré à 8 boutons côte à
+             côte pour rester compact quel que soit le nombre de sections. -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Margin="16,10,16,8">
+            <Button Grid.Column="0"
+                    Text="{Binding SelectedTabLabel}"
+                    Command="{Binding SelectTabCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{DynamicResource AppAccent}"
+                    FontAttributes="Bold"
+                    FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                    HorizontalOptions="Center"
+                    Padding="0"/>
+        </Grid>
 
         <!-- Chaque section garde son ViewModel/*View existant tel quel (BindingContext explicite,
              plutôt qu'hérité du parent) - le conteneur ne fait que le toggle. IsVisible doit sourcer

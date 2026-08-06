@@ -168,27 +168,6 @@
   <data name="WarbandsChooseType" xml:space="preserve">
     <value>Choisir un type de bande</value>
   </data>
-  <data name="WarbandGradeCore" xml:space="preserve">
-    <value>Livre de base</value>
-  </data>
-  <data name="WarbandGradeGrade1a" xml:space="preserve">
-    <value>Grade 1a</value>
-  </data>
-  <data name="WarbandGradeGrade1b" xml:space="preserve">
-    <value>Grade 1b</value>
-  </data>
-  <data name="WarbandGradeGrade1c" xml:space="preserve">
-    <value>Grade 1c</value>
-  </data>
-  <data name="WarbandGradeGrade2a" xml:space="preserve">
-    <value>Grade 2a</value>
-  </data>
-  <data name="WarbandGradeFilterAll" xml:space="preserve">
-    <value>Toutes les bandes</value>
-  </data>
-  <data name="WarbandGradeFilterTitle" xml:space="preserve">
-    <value>Filtrer par grade</value>
-  </data>
   <data name="WarbandsInsufficientFundsTitle" xml:space="preserve">
     <value>Fonds insuffisants</value>
   </data>
@@ -325,28 +304,13 @@
     <value>Place du Marché</value>
   </data>
   <data name="LibTabTradingPost" xml:space="preserve">
-    <value>Marché</value>
+    <value>Place du Marché</value>
   </data>
   <data name="BtnSave" xml:space="preserve">
     <value>Enregistrer</value>
   </data>
   <data name="LibManageWarriors" xml:space="preserve">
     <value>Gérer les guerriers</value>
-  </data>
-  <data name="LibManageEquipmentLists" xml:space="preserve">
-    <value>Gérer les listes d'équipement</value>
-  </data>
-  <data name="EquipmentListCreateTitle" xml:space="preserve">
-    <value>Nouvelle liste d'équipement</value>
-  </data>
-  <data name="EquipmentListEditTitle" xml:space="preserve">
-    <value>Modifier la liste d'équipement</value>
-  </data>
-  <data name="EquipmentListNamePh" xml:space="preserve">
-    <value>Nom</value>
-  </data>
-  <data name="EquipmentListItemsPh" xml:space="preserve">
-    <value>Objets</value>
   </data>
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
@@ -360,17 +324,8 @@
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Commun à toutes les bandes</value>
   </data>
-  <data name="LibRestrictedToWarriorsPh" xml:space="preserve">
-    <value>Réservé à ces guerriers</value>
-  </data>
-  <data name="LibRestrictedToWarriorsHint" xml:space="preserve">
-    <value>Vide = tout guerrier des bandes sélectionnées</value>
-  </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
-  </data>
-  <data name="LibFilterCommon" xml:space="preserve">
-    <value>Commun</value>
   </data>
   <data name="LibFilterCategory" xml:space="preserve">
     <value>Filtrer par catégorie</value>
@@ -477,29 +432,11 @@
   <data name="InjuryEditTitle" xml:space="preserve">
     <value>Modifier la blessure</value>
   </data>
-  <data name="InjuryCategoryPh" xml:space="preserve">
-    <value>Catégorie</value>
-  </data>
-  <data name="InjuryCategoryHero" xml:space="preserve">
-    <value>Héros</value>
-  </data>
-  <data name="InjuryCategoryHenchman" xml:space="preserve">
-    <value>Hommes de main</value>
-  </data>
-  <data name="InjuryRollRangePh" xml:space="preserve">
-    <value>Jet de dé (ex. 22, 41-55)</value>
-  </data>
   <data name="SpellNamePh" xml:space="preserve">
     <value>Nom du sort</value>
   </data>
   <data name="SpellCreateTitle" xml:space="preserve">
     <value>Nouveau sort</value>
-  </data>
-  <data name="SpellFilterAllSchools" xml:space="preserve">
-    <value>Toutes les écoles</value>
-  </data>
-  <data name="SpellFilterMagicSchoolTitle" xml:space="preserve">
-    <value>Filtrer par école de magie</value>
   </data>
   <data name="SpellEditTitle" xml:space="preserve">
     <value>Modifier le sort</value>
@@ -585,17 +522,11 @@
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des bandes</value>
   </data>
-  <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
-    <value>Choisir des guerriers</value>
-  </data>
   <data name="WarriorMountHeading" xml:space="preserve">
     <value>Monture</value>
   </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Écoles de magie</value>
-  </data>
-  <data name="LibManageMagicSchools" xml:space="preserve">
-    <value>Gérer les écoles de magie</value>
   </data>
   <data name="MagicSchoolNamePh" xml:space="preserve">
     <value>Nom de l'école</value>
@@ -611,12 +542,6 @@
   </data>
   <data name="WarriorArchetypeIsSpellcaster" xml:space="preserve">
     <value>Lanceur de sorts</value>
-  </data>
-  <data name="WarriorArchetypeEquipmentListPh" xml:space="preserve">
-    <value>Liste d'équipement</value>
-  </data>
-  <data name="WarriorArchetypeEquipmentListNone" xml:space="preserve">
-    <value>Aucune</value>
   </data>
   <data name="LibMagicSchoolsPh" xml:space="preserve">
     <value>Écoles de magie accordées</value>
@@ -977,5 +902,83 @@
   </data>
   <data name="InjurySerious66" xml:space="preserve">
     <value>Survie miraculeuse : survit et rejoint la bande, gagne 1 point d'expérience.</value>
+  </data>
+  <data name="SpellFilterAllSchools" xml:space="preserve">
+    <value>Toutes les écoles</value>
+  </data>
+  <data name="SpellFilterMagicSchoolTitle" xml:space="preserve">
+    <value>Filtrer par école de magie</value>
+  </data>
+  <data name="LibManageMagicSchools" xml:space="preserve">
+    <value>Gérer les écoles de magie</value>
+  </data>
+  <data name="WarbandGradeCore" xml:space="preserve">
+    <value>Livre de base</value>
+  </data>
+  <data name="WarbandGradeGrade1a" xml:space="preserve">
+    <value>Grade 1a</value>
+  </data>
+  <data name="WarbandGradeGrade1b" xml:space="preserve">
+    <value>Grade 1b</value>
+  </data>
+  <data name="WarbandGradeGrade1c" xml:space="preserve">
+    <value>Grade 1c</value>
+  </data>
+  <data name="WarbandGradeGrade2a" xml:space="preserve">
+    <value>Grade 2a</value>
+  </data>
+  <data name="WarbandGradeFilterAll" xml:space="preserve">
+    <value>Toutes les bandes</value>
+  </data>
+  <data name="WarbandGradeFilterTitle" xml:space="preserve">
+    <value>Filtrer par grade</value>
+  </data>
+  <data name="LibFilterCommon" xml:space="preserve">
+    <value>Commun</value>
+  </data>
+  <data name="LibRestrictedToWarriorsPh" xml:space="preserve">
+    <value>Réservé à ces guerriers</value>
+  </data>
+  <data name="LibRestrictedToWarriorsHint" xml:space="preserve">
+    <value>Vide = tout guerrier des bandes sélectionnées</value>
+  </data>
+  <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
+    <value>Choisir des guerriers</value>
+  </data>
+  <data name="LibManageEquipmentLists" xml:space="preserve">
+    <value>Gérer les listes d'équipement</value>
+  </data>
+  <data name="EquipmentListCreateTitle" xml:space="preserve">
+    <value>Nouvelle liste d'équipement</value>
+  </data>
+  <data name="EquipmentListEditTitle" xml:space="preserve">
+    <value>Modifier la liste d'équipement</value>
+  </data>
+  <data name="EquipmentListNamePh" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="EquipmentListItemsPh" xml:space="preserve">
+    <value>Objets</value>
+  </data>
+  <data name="WarriorArchetypeEquipmentListPh" xml:space="preserve">
+    <value>Liste d'équipement</value>
+  </data>
+  <data name="WarriorArchetypeEquipmentListNone" xml:space="preserve">
+    <value>Aucune</value>
+  </data>
+  <data name="InjuryCategoryPh" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="InjuryCategoryHero" xml:space="preserve">
+    <value>Héros</value>
+  </data>
+  <data name="InjuryCategoryHenchman" xml:space="preserve">
+    <value>Hommes de main</value>
+  </data>
+  <data name="InjuryRollRangePh" xml:space="preserve">
+    <value>Jet de dé (ex. 22, 41-55)</value>
+  </data>
+  <data name="LibSelectSectionTitle" xml:space="preserve">
+    <value>Choisir une section</value>
   </data>
 </root>

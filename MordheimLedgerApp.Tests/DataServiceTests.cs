@@ -149,6 +149,20 @@ public class DataServiceTests : IDisposable
         Assert.Contains(henchmanInjuries, i => i.Name == "Full Recovery" && i.RollRange == "3-6");
     }
 
+    /// <summary>Every MagicSchool now carries a flavor-text Description (sourced from mordheimer.net's
+    /// school pages) in both languages - used to be null for all 7 schools until this was filled in.</summary>
+    [Fact]
+    public async Task MagicSchools_AllHaveBilingualDescriptions()
+    {
+        var schoolsEn = await _library.GetMagicSchoolsAsync("en");
+        Assert.Equal(7, schoolsEn.Count);
+        Assert.All(schoolsEn, s => Assert.False(string.IsNullOrWhiteSpace(s.Description)));
+
+        var schoolsFr = await _library.GetMagicSchoolsAsync("fr");
+        Assert.Equal(7, schoolsFr.Count);
+        Assert.All(schoolsFr, s => Assert.False(string.IsNullOrWhiteSpace(s.Description)));
+    }
+
     /// <summary>"Leader" is attached from 4 different warbands' JSON files (Averlanders/Captain,
     /// Ostlanders/Elder, Dwarf Treasure Hunters/Noble, Undead/Vampire) - find-or-create by English Name
     /// (see AppDatabase.FindOrCreateSpecialRuleAsync) must resolve them all to the SAME catalog row

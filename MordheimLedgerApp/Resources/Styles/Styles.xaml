@@ -361,10 +361,10 @@
          repris tel quel dans les 8 onglets catalogués. AppFontSizeBase plutôt que
          AppFontSizeSectionTitle (repris par erreur du titre de page, trop proche visuellement) et marge
          resserrée : le picker de section (LibraryPage) et le picker de catégorie au-dessus prenaient
-         déjà pas mal de hauteur avant d'ajouter celle des group headers. Le DataTrigger IsFirst annule
-         la marge haute pour le tout premier groupe (sinon il hérite en plus de l'espace du picker de
-         catégorie juste au-dessus) - propriété portée par la classe XxxGroup, à ajouter au fur et à
-         mesure que chaque onglet migre vers le groupement "maison" (voir SkillGroup.IsFirst). -->
+         déjà pas mal de hauteur avant d'ajouter celle des group headers. Limite connue (WinUI) :
+         CollectionView IsGrouped="True" ne laisse aucune prise sur le padding/chrome natif du header -
+         un ex-DataTrigger IsFirst annulant la marge du tout premier groupe n'avait donc aucun effet
+         visible, retiré (voir CLAUDE.md § limite WinUI). -->
     <Style TargetType="Label" x:Key="CodexGroupHeaderStyle">
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>

@@ -139,24 +139,19 @@ resserrées sur le picker de section (`LibraryPage`) et le picker de catégorie 
 qu'on y place — `Margin`/`HeightRequest`/`VerticalTextAlignment` sur le Label n'ont aucun effet sur la
 hauteur totale du header (testé et confirmé sans effet le 2026-08-07).
 
-**Fait** : groupement natif remplacé par un contrôle maison,
-`Components/CodexGroupedGrid/CodexGroupedGridView` (+ `ICodexGroup`, interface que chaque `XxxGroup`
-implémente - `Name` + `IsFirst`, ce dernier annulant la marge haute du tout premier header via un
-`DataTrigger` sur `CodexGroupHeaderStyle`), généralisé aux 8 onglets Codex. Header inline + tuiles en
-`FlexLayout Wrap` (repli natif à largeur de tuile fixe, plus besoin de `ResponsiveGridSpanBehavior`) au
-lieu de `GridItemsLayout`/`BindableLayout` sans virtualisation par tuile (sans impact aux volumes
-actuels). Header épinglé (sticky) au scroll : `ScrollView.Scrolled` plutôt que `CollectionView.Scrolled`
-(jamais déclenché sur WinUI, confirmé en debug - `CollectionView` reste utilisée nulle part dans ce
-contrôle du coup), groupe courant déterminé en comparant `ScrollY` à la position Y réelle de chaque
-groupe dans l'arbre visuel (pas de cache, recalculé à chaque scroll). Toujours visible dès qu'il y a des
-groupes (y compris à `ScrollY=0`, initialisé sur le premier groupe dès la pose d'`ItemsSource`) plutôt
-que masqué sous un seuil - la version seuil faisait "sauter" le bandeau à son apparition. Piège
-rencontré : juste après un changement d'`ItemsSource`, le layout n'a pas encore tourné et tous les
-enfants réalisés rapportent `Bounds.Y == 0` - la boucle de détection du groupe courant ne s'arrêtait
-alors jamais et retenait le DERNIER groupe au lieu du premier ; parée en détectant un enfant non mesuré
-(`Bounds.Height <= 0`) et en basculant sur un repli direct via `ItemsSource`.
+**Essayé puis abandonné** : un contrôle maison, `Components/CodexGroupedGrid/CodexGroupedGridView` (+
+`ICodexGroup`, header inline + tuiles en `FlexLayout Wrap`, header épinglé au scroll via
+`ScrollView.Scrolled`), avait été construit pour contourner la limite WinUI ci-dessus et généralisé aux
+8 onglets Codex. **Revert complet vers le `CollectionView` natif** décidé par l'utilisateur : le contrôle
+maison faisait perdre la flexibilité (sélection, virtualisation, comportements) qu'offre `CollectionView`
+prête à l'emploi, pour un gain qui ne concernait que l'espacement du tout premier header de groupe. La
+marge du tout premier header (`IsFirst` sur chaque `XxxGroup` + `DataTrigger` sur `CodexGroupHeaderStyle`)
+reste donc sans effet visible (annulée par le padding natif non maîtrisable, cf. limite ci-dessus) -
+`IsFirst` est toujours positionné correctement côté code, juste sans effet visuel avec `CollectionView`.
 
 En attente/reporté (pas dans cette passe) :
+- Espacement du premier header de groupe (`IsFirst`) — reporté, pas de solution retenue pour l'instant
+  avec `CollectionView` natif.
 - Regroupement de la liste à plat de Règles Spéciales (77 entrées, pas de groupe) — pas encore tranché.
 - Icônes par objet (URIs du site FR de Mordheim) — encore en évaluation par l'utilisateur.
 

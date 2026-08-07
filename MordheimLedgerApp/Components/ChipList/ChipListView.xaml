@@ -7,8 +7,8 @@
     <!-- Généralise le bloc "header + FlexLayout de chips tapotables" dupliqué dans les dialogs récap du
          Codex (WarbandArchetypeDetailDialog, AnimalDetailDialog, EquipmentItemDetailDialog,
          SkillDetailDialog, MutationDetailDialog). ItemsSource attend n'importe quelle liste d'objets
-         avec une propriété Name (binding faiblement typé dans le DataTemplate interne, même technique
-         que CodexGroupedGridView - pas besoin d'interface commune). ShowSection/HasItems sont calculées
+         avec une propriété Name (binding faiblement typé dans le DataTemplate interne, pas besoin
+         d'interface commune). ShowSection/HasItems sont calculées
          (voir code-behind) : la section entière se masque si ItemsSource est vide ET qu'aucun
          EmptyHintText n'est fourni ; si EmptyHintText est fourni, il s'affiche à la place du
          FlexLayout quand la liste est vide (cas "Réservé à ces bandes : vide = commun à toutes"). -->

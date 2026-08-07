@@ -10,7 +10,7 @@
          AnimalDetailDialog et WarriorArchetypeDetailDialog. Item (WarriorArchetype/Animal/Warrior)
          expose les 8 stats WeaponSkill/BallisticSkill/Strength/Toughness/Wounds/Initiative/Attacks/
          Leadership sous les mêmes noms - binding faiblement typé contre Item comme BindingContext du
-         Grid (même technique que ChipListView/CodexGroupedGridView), pas besoin d'interface commune.
+         Grid (même technique que ChipListView), pas besoin d'interface commune.
          Movement est à part (MovementText, à fournir explicitement par l'appelant) : Animal n'a pas de
          MovementDisplay/MovementOverride contrairement à WarriorArchetype/Warrior, donc pas de nom de
          propriété uniforme à binder faiblement pour cette seule colonne. AbbrFontSize/ValueFontSize

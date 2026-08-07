@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.CodexGroupedGridView"
+             x:Name="root">
+
+    <!-- Groupement "maison" (header Label + FlexLayout Wrap de tuiles) partagé par les 8 onglets Codex,
+         au lieu de CollectionView IsGrouped/GroupHeaderTemplate : sur Windows/WinUI, le conteneur natif
+         du group header a un padding/chrome non contrôlable depuis le Label qu'on y place (essayé via
+         Margin/HeightRequest, sans effet - voir CLAUDE.md). ItemsSource attend une liste de groupes
+         implémentant ICodexGroup, chaque groupe étant lui-même une IEnumerable de ses lignes (cf.
+         SkillGroup : ObservableCollection<SkillRow>, ICodexGroup) - le ViewModel ne change pas.
+         ItemTemplate est le template d'UNE tuile (fourni par la page appelante, différent par onglet :
+         icône par défaut, ligne secondaire éventuelle...) ; le binding interne au template reste défini
+         dans le fichier de la page appelante, donc x:Reference root à l'intérieur pointe toujours vers
+         le root de CETTE page, pas celui de ce contrôle. -->
+    <Grid>
+        <CollectionView x:Name="InnerCollection"
+                ItemsSource="{Binding Source={x:Reference root}, Path=ItemsSource}"
+                SelectionMode="None"
+                Scrolled="OnScrolled">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding Name}"
+                               IsVisible="{Binding Source={x:Reference root}, Path=ShowGroupHeaders}"
+                               Style="{StaticResource CodexGroupHeaderStyle}"/>
+                        <FlexLayout Wrap="Wrap" JustifyContent="Start"
+                                    BindableLayout.ItemsSource="{Binding .}"
+                                    BindableLayout.ItemTemplate="{Binding Source={x:Reference root}, Path=ItemTemplate}"/>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- En-tête épinglé : reprend le comportement "sticky" du GroupHeaderTemplate natif abandonné -
+             mis à jour sur CollectionView.Scrolled via FirstVisibleItemIndex, qui pointe directement sur
+             le groupe visible en haut (chaque item de la liste EST un groupe entier, pas une tuile
+             individuelle - pas d'ambiguïté de frontière à gérer). Masqué tant qu'on n'a pas dépassé le
+             tout premier groupe (son header inline suffit) - approximation volontaire, pas un pin
+             pixel-perfect au moment exact où l'inline header sort de l'écran. -->
+        <Border x:Name="PinnedHeaderBorder" IsVisible="False" InputTransparent="True"
+                BackgroundColor="{DynamicResource AppBackground}" StrokeThickness="0" Padding="0"
+                VerticalOptions="Start" HorizontalOptions="Fill">
+            <Label x:Name="PinnedHeaderLabel" Style="{StaticResource CodexGroupHeaderStyle}"/>
+        </Border>
+    </Grid>
+</ContentView>

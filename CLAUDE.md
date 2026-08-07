@@ -130,6 +130,28 @@ mais sans bouton info/dialog récap, hors périmètre des 8 types catalogués).
   `ChipDetailDialogViewModel`) affichant juste Nom+Description de l'élément taponné — un seul dialog
   générique réutilisé par tous les types de chip plutôt qu'un par type.
 
+En-têtes de groupe (les 8 onglets catalogués) resserrés via un style partagé
+(`CodexGroupHeaderStyle` dans `Resources/Styles/Styles.xaml`) : taille réduite (`AppFontSizeBase` au
+lieu d'`AppFontSizeSectionTitle`, repris par erreur du titre de page) et marge réduite, plus marges
+resserrées sur le picker de section (`LibraryPage`) et le picker de catégorie de chaque onglet.
+**Limite connue (WinUI)** : `CollectionView IsGrouped="True"` délègue le rendu du `GroupHeaderTemplate`
+à un conteneur natif dont le padding/chrome autour du header n'est pas contrôlable depuis le `Label`
+qu'on y place — `Margin`/`HeightRequest`/`VerticalTextAlignment` sur le Label n'ont aucun effet sur la
+hauteur totale du header (testé et confirmé sans effet le 2026-08-07).
+
+**En cours** : remplacement du groupement natif par un contrôle maison,
+`Components/CodexGroupedGrid/CodexGroupedGridView` (+ `ICodexGroup`, interface que chaque `XxxGroup`
+implémente - `Name` + `IsFirst`, ce dernier annulant la marge haute du tout premier header via un
+`DataTrigger` sur `CodexGroupHeaderStyle`). Header inline + tuiles en `FlexLayout Wrap` (repli natif à
+largeur de tuile fixe, plus besoin de `ResponsiveGridSpanBehavior`) au lieu de `GridItemsLayout`/
+`BindableLayout` sans virtualisation par tuile (sans impact aux volumes actuels). Prototypé sur
+Compétences (`SkillGroup`/`SkillView`) seulement pour l'instant - pas encore généralisé aux 7 autres
+onglets. Header inline + sélection + tuiles confirmés visuellement OK par l'utilisateur. Tentative de
+header épinglé (sticky) au scroll via `CollectionView.Scrolled`/`FirstVisibleItemIndex` (chaque item de
+la liste = un groupe entier, donc l'index pointe directement sur le groupe visible en haut) - **ne
+fonctionne pas encore** (le `Border` épinglé ne s'affiche pas), cause pas identifiée, à déboguer avant
+de généraliser aux 7 autres onglets.
+
 En attente/reporté (pas dans cette passe) :
 - Regroupement de la liste à plat de Règles Spéciales (77 entrées, pas de groupe) — pas encore tranché.
 - Icônes par objet (URIs du site FR de Mordheim) — encore en évaluation par l'utilisateur.

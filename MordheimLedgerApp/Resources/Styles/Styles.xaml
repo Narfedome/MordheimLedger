@@ -373,12 +373,20 @@
          repris tel quel dans les 8 onglets catalogués. AppFontSizeBase plutôt que
          AppFontSizeSectionTitle (repris par erreur du titre de page, trop proche visuellement) et marge
          resserrée : le picker de section (LibraryPage) et le picker de catégorie au-dessus prenaient
-         déjà pas mal de hauteur avant d'ajouter celle des group headers. -->
+         déjà pas mal de hauteur avant d'ajouter celle des group headers. Le DataTrigger IsFirst annule
+         la marge haute pour le tout premier groupe (sinon il hérite en plus de l'espace du picker de
+         catégorie juste au-dessus) - propriété portée par la classe XxxGroup, à ajouter au fur et à
+         mesure que chaque onglet migre vers le groupement "maison" (voir SkillGroup.IsFirst). -->
     <Style TargetType="Label" x:Key="CodexGroupHeaderStyle">
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>
         <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
-        <Setter Property="Margin" Value="4,8,4,2"/>
+        <Setter Property="Margin" Value="4,20,4,2"/>
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding IsFirst}" Value="True">
+                <Setter Property="Margin" Value="4,0,4,2"/>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <Style TargetType="Picker">

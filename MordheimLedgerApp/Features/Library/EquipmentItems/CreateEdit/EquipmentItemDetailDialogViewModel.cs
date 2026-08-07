@@ -22,10 +22,6 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 
-    public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
-    public bool HasRestrictedWarriors => RestrictedWarriors.Count > 0;
-    public bool HasSpecialRules => Item.SpecialRules.Count > 0;
-
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel,
         List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
     {

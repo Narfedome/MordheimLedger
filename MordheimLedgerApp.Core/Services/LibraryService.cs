@@ -12,10 +12,10 @@ public class LibraryService : ILibraryService
     public LibraryService(AppDatabase db) => _db = db;
 
     private Task<Dictionary<string, string>> ResolveTranslationsAsync(IEnumerable<string?> keys, string languageCode) =>
-        TranslationResolver.ResolveAsync(_db.Connection, keys, languageCode);
+        TranslationResolver.ResolveAsync(_db, keys, languageCode);
 
     private Task<string> SetTranslationAsync(string? key, string languageCode, string value) =>
-        TranslationResolver.SetAsync(_db.Connection, key, languageCode, value);
+        TranslationResolver.SetAsync(_db, key, languageCode, value);
 
     public async Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode)
     {

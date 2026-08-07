@@ -13,8 +13,6 @@ public partial class MutationDetailDialogViewModel : ReadOnlyDialogViewModel
     /// same idiom as MutationViewModel.GroupNameFor, no service call needed here.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
 
-    public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
-
     public MutationDetailDialogViewModel(Mutation item, List<WarbandArchetype> restrictedWarbands)
     {
         Item = item;

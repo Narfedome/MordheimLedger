@@ -12,7 +12,7 @@ namespace MordheimLedgerApp.Components;
 public class ResponsiveGridSpanBehavior : Behavior<CollectionView>
 {
     public static readonly BindableProperty TileWidthProperty =
-        BindableProperty.Create(nameof(TileWidth), typeof(double), typeof(ResponsiveGridSpanBehavior), 142.0);
+        BindableProperty.Create(nameof(TileWidth), typeof(double), typeof(ResponsiveGridSpanBehavior), 135.0);
 
     public double TileWidth
     {

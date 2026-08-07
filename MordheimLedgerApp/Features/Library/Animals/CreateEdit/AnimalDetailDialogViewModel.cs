@@ -19,8 +19,6 @@ public partial class AnimalDetailDialogViewModel : ReadOnlyDialogViewModel
     /// is already a List&lt;SpecialRule&gt;.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
 
-    public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
-
     public AnimalDetailDialogViewModel(Animal item, List<WarbandArchetype> restrictedWarbands)
     {
         Item = item;

@@ -3,14 +3,13 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
-               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mutations.CreateEdit"
-               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                x:TypeArguments="system:Boolean"
-               x:Class="MordheimLedgerApp.Features.Library.Mutations.CreateEdit.MutationDetailDialog"
-               x:DataType="local:MutationDetailDialogViewModel"
+               x:Class="MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit.EquipmentListDetailDialog"
+               x:DataType="local:EquipmentListDetailDialogViewModel"
                BackgroundColor="Transparent"
                Padding="0"
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
@@ -27,20 +26,11 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc MutationCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
 
-            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarbandsPh}"
-                                      EmptyHintText="{loc:Loc LibRestrictedToAllHint}"
-                                      ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Shield}"
-                                      Command="{Binding ShowWarbandDetailCommand}"/>
+            <components:ChipListView HeaderText="{loc:Loc EquipmentListItemsPh}"
+                                      ItemsSource="{Binding Items}"
+                                      IconGlyph="{x:Static icons:SolidFont.Coins}"
+                                      Command="{Binding ShowItemDetailCommand}"/>
         </VerticalStackLayout>
         </ScrollView>
     </Border>

@@ -321,6 +321,33 @@
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
+  <data name="StatMovementAbbr" xml:space="preserve">
+    <value>M</value>
+  </data>
+  <data name="StatWeaponSkillAbbr" xml:space="preserve">
+    <value>CC</value>
+  </data>
+  <data name="StatBallisticSkillAbbr" xml:space="preserve">
+    <value>CT</value>
+  </data>
+  <data name="StatStrengthAbbr" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="StatToughnessAbbr" xml:space="preserve">
+    <value>E</value>
+  </data>
+  <data name="StatWoundsAbbr" xml:space="preserve">
+    <value>PV</value>
+  </data>
+  <data name="StatInitiativeAbbr" xml:space="preserve">
+    <value>I</value>
+  </data>
+  <data name="StatAttacksAbbr" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="StatLeadershipAbbr" xml:space="preserve">
+    <value>Cd</value>
+  </data>
   <data name="LibSpecialRulesPh" xml:space="preserve">
     <value>Règles spéciales</value>
   </data>
@@ -369,6 +396,18 @@
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
     <value>Nombre maximum de guerriers</value>
   </data>
+  <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
+    <value>Général</value>
+  </data>
+  <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
+    <value>Guerriers</value>
+  </data>
+  <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
+    <value>Équipement</value>
+  </data>
+  <data name="WarbandArchetypeTabRules" xml:space="preserve">
+    <value>Règles</value>
+  </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Modifier le type de bande</value>
   </data>
@@ -383,6 +422,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé (peut acheter des mutations)</value>
+  </data>
+  <data name="WarriorArchetypeRolePh" xml:space="preserve">
+    <value>Rôle</value>
   </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Coût</value>

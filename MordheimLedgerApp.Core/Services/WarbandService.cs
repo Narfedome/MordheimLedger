@@ -72,7 +72,7 @@ public class WarbandService : IWarbandService
                 var itemEntity = await _db.Connection.FindAsync<EquipmentItemEntity>(carriedRow.EquipmentItemId);
                 if (itemEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [itemEntity.NameKey, itemEntity.DescriptionKey], languageCode);
+                    var translations = await TranslationResolver.ResolveAsync(_db, [itemEntity.NameKey, itemEntity.DescriptionKey], languageCode);
 
                     SpecialRule? materialRule = null;
                     if (carriedRow.MaterialSpecialRuleId is { } materialRuleId)
@@ -80,7 +80,7 @@ public class WarbandService : IWarbandService
                         var materialEntity = await _db.Connection.FindAsync<SpecialRuleEntity>(materialRuleId);
                         if (materialEntity is not null)
                         {
-                            var materialTranslations = await TranslationResolver.ResolveAsync(_db.Connection, [materialEntity.NameKey, materialEntity.DescriptionKey], languageCode);
+                            var materialTranslations = await TranslationResolver.ResolveAsync(_db, [materialEntity.NameKey, materialEntity.DescriptionKey], languageCode);
                             materialRule = materialEntity.ToModel(materialTranslations);
                         }
                     }
@@ -96,7 +96,7 @@ public class WarbandService : IWarbandService
                 var skillEntity = await _db.Connection.FindAsync<SkillEntity>(learnedRow.SkillId);
                 if (skillEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [skillEntity.NameKey, skillEntity.DescriptionKey], languageCode);
+                    var translations = await TranslationResolver.ResolveAsync(_db, [skillEntity.NameKey, skillEntity.DescriptionKey], languageCode);
                     learned.Add(learnedRow.ToModel(skillEntity.ToModel(translations)));
                 }
             }
@@ -108,7 +108,7 @@ public class WarbandService : IWarbandService
                 var injuryEntity = await _db.Connection.FindAsync<InjuryEntity>(injuryRow.InjuryId);
                 if (injuryEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [injuryEntity.NameKey, injuryEntity.DescriptionKey], languageCode);
+                    var translations = await TranslationResolver.ResolveAsync(_db, [injuryEntity.NameKey, injuryEntity.DescriptionKey], languageCode);
                     injuries.Add(injuryRow.ToModel(injuryEntity.ToModel(translations)));
                 }
             }
@@ -120,7 +120,7 @@ public class WarbandService : IWarbandService
                 var spellEntity = await _db.Connection.FindAsync<SpellEntity>(spellRow.SpellId);
                 if (spellEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [spellEntity.NameKey, spellEntity.DescriptionKey], languageCode);
+                    var translations = await TranslationResolver.ResolveAsync(_db, [spellEntity.NameKey, spellEntity.DescriptionKey], languageCode);
                     spells.Add(spellRow.ToModel(spellEntity.ToModel(translations)));
                 }
             }
@@ -132,7 +132,7 @@ public class WarbandService : IWarbandService
                 var mutationEntity = await _db.Connection.FindAsync<MutationEntity>(mutationRow.MutationId);
                 if (mutationEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [mutationEntity.NameKey, mutationEntity.DescriptionKey], languageCode);
+                    var translations = await TranslationResolver.ResolveAsync(_db, [mutationEntity.NameKey, mutationEntity.DescriptionKey], languageCode);
                     mutations.Add(mutationRow.ToModel(mutationEntity.ToModel(translations)));
                 }
             }
@@ -143,7 +143,7 @@ public class WarbandService : IWarbandService
                 var animalEntity = await _db.Connection.FindAsync<AnimalEntity>(animalId);
                 if (animalEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [animalEntity.NameKey, animalEntity.DescriptionKey], languageCode);
+                    var translations = await TranslationResolver.ResolveAsync(_db, [animalEntity.NameKey, animalEntity.DescriptionKey], languageCode);
                     animal = animalEntity.ToModel(translations);
                 }
             }

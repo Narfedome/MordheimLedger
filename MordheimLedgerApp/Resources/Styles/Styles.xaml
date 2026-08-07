@@ -85,35 +85,23 @@
         <Setter Property="Color" Value="Grey"/>
     </Style>
 
-    <!-- Tuile de grille sélectionnable (Library : archétypes de bande/guerrier, objets) - reprise mot
-         pour mot de SelectableGridItemBorderStyle chez DmTools (Resources/Styles/Styles.xaml). Ce
-         style garde son VisualStateManager (Normal/Selected) tel quel ; c'est l'INSTANCE du Border
-         dans chaque tuile qui neutralise ce VSM (VisualStateGroupList vide) et porte son propre
-         Border.Triggers DataTrigger sur IsSelected - cf. EquipmentItemView/WarriorArchetypeView/
-         WarbandArchetypeView.xaml et le commentaire sur la tuile elle-même pour la raison (VSM
-         prioritaire sur Trigger en MAUI, sélection native Android non fiable). -->
+    <!-- Tuile de grille sélectionnable (Library : archétypes de bande/guerrier, objets) - reprise à
+         l'origine de SelectableGridItemBorderStyle chez DmTools avec son VisualStateManager (Normal/
+         Selected), neutralisé par instance (VisualStateGroupList vide + Border.Triggers DataTrigger
+         propre à chaque tuile, cf. EquipmentItemView/WarriorArchetypeView/WarbandArchetypeView.xaml)
+         pour éviter que le VSM du style ne prenne le pas sur le Trigger. **VSM retiré ici** (2026-08-07,
+         suite à un rendu d'un bouton "info" tuile qui semblait "activer" celui d'une autre tuile) : un
+         VisualStateGroupList défini une seule fois dans un Style puis reproduit par CollectionView à
+         travers de nombreuses tuiles réutilisées est un piège connu MAUI/WinUI - l'objet peut se
+         retrouver partagé entre plusieurs instances de tuile recyclées, au lieu d'un par tuile. Le VSM
+         était de toute façon mort dans les faits (chaque tuile le neutralisait déjà et gérait la
+         couleur du Stroke localement) - Stroke="Grey" en dur sur chaque tuile + le DataTrigger suffisent
+         entièrement, pas besoin de VisualStateManager du tout pour ce style. -->
     <Style x:Key="SelectableGridItemBorderStyle" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{DynamicResource AppSurfaceTranslucent}"/>
         <Setter Property="StrokeThickness" Value="2"/>
         <Setter Property="StrokeShape" Value="RoundRectangle 5"/>
         <Setter Property="HorizontalOptions" Value="{OnPlatform Default=Fill, WinUI=Center}"/>
-        <Setter Property="VisualStateManager.VisualStateGroups">
-            <VisualStateGroupList>
-                <VisualStateGroup Name="CommonStates">
-                    <VisualState Name="Normal">
-                        <VisualState.Setters>
-                            <Setter Property="Stroke" Value="Grey" />
-                            <Setter Property="StrokeThickness" Value="2" />
-                        </VisualState.Setters>
-                    </VisualState>
-                    <VisualState Name="Selected">
-                        <VisualState.Setters>
-                            <Setter Property="Stroke" Value="LightSkyBlue" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </Setter>
     </Style>
 
     <!-- Secondary button (Cancel/No) for themed popups: outline instead of a solid accent fill -->

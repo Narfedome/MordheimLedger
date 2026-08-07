@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.ChipListView"
+             x:Name="root">
+
+    <!-- Généralise le bloc "header + FlexLayout de chips tapotables" dupliqué dans les dialogs récap du
+         Codex (WarbandArchetypeDetailDialog, AnimalDetailDialog, EquipmentItemDetailDialog,
+         SkillDetailDialog, MutationDetailDialog). ItemsSource attend n'importe quelle liste d'objets
+         avec une propriété Name (binding faiblement typé dans le DataTemplate interne, même technique
+         que CodexGroupedGridView - pas besoin d'interface commune). ShowSection/HasItems sont calculées
+         (voir code-behind) : la section entière se masque si ItemsSource est vide ET qu'aucun
+         EmptyHintText n'est fourni ; si EmptyHintText est fourni, il s'affiche à la place du
+         FlexLayout quand la liste est vide (cas "Réservé à ces bandes : vide = commun à toutes"). -->
+    <VerticalStackLayout Spacing="8" BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}">
+        <Label Text="{Binding HeaderText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+        <Label Text="{Binding EmptyHintText}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+               IsVisible="{Binding HasItems, Converter={StaticResource InverseBoolConverter}}"/>
+        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ItemsSource}" IsVisible="{Binding HasItems}">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference root}, Path=Command}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Spacing="4">
+                            <Label Text="{Binding Source={x:Reference root}, Path=IconGlyph}"
+                                   FontFamily="{Binding Source={x:Reference root}, Path=IconFontFamily}"
+                                   FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                            <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </FlexLayout>
+    </VerticalStackLayout>
+</ContentView>

@@ -59,11 +59,12 @@
                         SelectedItem="{Binding SelectedEquipmentListLabel}"/>
             </VerticalStackLayout>
 
-            <!-- Étape 2 : profil (abréviations officielles du livre de règles, pas de traduction) -->
+            <!-- Étape 2 : profil sur une seule ligne (abréviations françaises officielles, localisées
+                 via StatXAbbr). -->
             <Grid IsVisible="{Binding IsStep1}"
-                  ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
-                <VerticalStackLayout Grid.Row="0" Grid.Column="0">
-                    <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                  ColumnDefinitions="*,*,*,*,*,*,*,*,*" ColumnSpacing="4">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="{loc:Loc StatMovementAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Movement}" Keyboard="Numeric"/>
                     <!-- Surcharge texte optionnelle (ex. "2D6" pour les Squigs des cavernes, dont le
                          Mouvement n'est pas une caractéristique fixe) - prioritaire sur la valeur
@@ -71,36 +72,36 @@
                          MovementDisplay/Warrior.MovementDisplay). -->
                     <Entry Text="{Binding Item.MovementOverride}" Placeholder="{loc:Loc WarriorArchetypeMovementOverridePh}" FontSize="11"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="0" Grid.Column="1">
-                    <Label Text="WS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="{loc:Loc StatWeaponSkillAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.WeaponSkill}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="0" Grid.Column="2">
-                    <Label Text="BS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="2">
+                    <Label Text="{loc:Loc StatBallisticSkillAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.BallisticSkill}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="0">
-                    <Label Text="S" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="3">
+                    <Label Text="{loc:Loc StatStrengthAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Strength}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="1">
-                    <Label Text="T" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="4">
+                    <Label Text="{loc:Loc StatToughnessAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Toughness}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="2">
-                    <Label Text="W" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="5">
+                    <Label Text="{loc:Loc StatWoundsAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Wounds}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="0">
-                    <Label Text="I" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="6">
+                    <Label Text="{loc:Loc StatInitiativeAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Initiative}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="1">
-                    <Label Text="A" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="7">
+                    <Label Text="{loc:Loc StatAttacksAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Attacks}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="2">
-                    <Label Text="Ld" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Grid.Column="8">
+                    <Label Text="{loc:Loc StatLeadershipAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
                     <Entry Text="{Binding Item.Leadership}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
             </Grid>

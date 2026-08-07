@@ -41,9 +41,6 @@
             <components:CodexGroupedGridView.ItemTemplate>
                 <DataTemplate x:DataType="local:MutationRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey" Margin="0,0,5,5">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroupList/>
-                        </VisualStateManager.VisualStateGroups>
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="LightSkyBlue"/>

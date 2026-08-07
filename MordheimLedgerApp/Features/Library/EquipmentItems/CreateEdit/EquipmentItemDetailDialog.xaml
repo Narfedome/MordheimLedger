@@ -46,74 +46,21 @@
                 <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
             </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="8">
-                <Label Text="{loc:Loc LibRestrictedToWarbandsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{loc:Loc LibRestrictedToAllHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
-                       IsVisible="{Binding HasRestrictedWarbands, Converter={StaticResource InverseBoolConverter}}"/>
-                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarbands}"
-                            IsVisible="{Binding HasRestrictedWarbands}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="library:WarbandArchetype">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:EquipmentItemDetailDialogViewModel}}, Path=ShowWarbandDetailCommand}"
-                                        CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                                <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{x:Static icons:SolidFont.Shield}" FontSize="12"
-                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
-            </VerticalStackLayout>
+            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarbandsPh}"
+                                      EmptyHintText="{loc:Loc LibRestrictedToAllHint}"
+                                      ItemsSource="{Binding RestrictedWarbands}"
+                                      IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                      Command="{Binding ShowWarbandDetailCommand}"/>
 
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasRestrictedWarriors}">
-                <Label Text="{loc:Loc LibRestrictedToWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarriors}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="library:WarriorArchetype">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:EquipmentItemDetailDialogViewModel}}, Path=ShowWarriorDetailCommand}"
-                                        CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                                <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{x:Static icons:SolidFont.User}" FontSize="12"
-                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
-            </VerticalStackLayout>
+            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarriorsPh}"
+                                      ItemsSource="{Binding RestrictedWarriors}"
+                                      IconGlyph="{x:Static icons:SolidFont.User}"
+                                      Command="{Binding ShowWarriorDetailCommand}"/>
 
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSpecialRules}">
-                <Label Text="{loc:Loc LibSpecialRulesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.SpecialRules}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="library:SpecialRule">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:EquipmentItemDetailDialogViewModel}}, Path=ShowSpecialRuleDetailCommand}"
-                                        CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                                <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
-                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
-            </VerticalStackLayout>
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding Item.SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
         </VerticalStackLayout>
         </ScrollView>
     </Border>

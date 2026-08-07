@@ -209,11 +209,14 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         await LoadData();
     }
 
-    /// <summary>Read-only recap popup (tile info button) - no new service call, SpecialRules/
-    /// MagicSchools are already resolved objects on the already-loaded Item.</summary>
+    /// <summary>Read-only recap popup (tile info button) - opens instantly, no service call: Général
+    /// (Grade/Trésorerie/Description/SpecialRules/MagicSchools) reads entirely off the already-loaded
+    /// Item. Guerriers/Équipement fetch lazily on first visit to their own onglet (see
+    /// WarbandArchetypeDetailDialogViewModel) - _libraryService is just handed through for that.</summary>
     [RelayCommand]
-    private async Task ShowDetails(WarbandArchetypeRow row) =>
-        await ShowDialogAsync(new WarbandArchetypeDetailDialog(new WarbandArchetypeDetailDialogViewModel(row.Item)));
+    private Task ShowDetails(WarbandArchetypeRow row) =>
+        ShowDialogAsync(new WarbandArchetypeDetailDialog(
+            new WarbandArchetypeDetailDialogViewModel(row.Item, _libraryService)));
 
     [RelayCommand]
     private async Task ManageWarriors()

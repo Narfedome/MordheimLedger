@@ -321,6 +321,33 @@
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
+  <data name="StatMovementAbbr" xml:space="preserve">
+    <value>M</value>
+  </data>
+  <data name="StatWeaponSkillAbbr" xml:space="preserve">
+    <value>WS</value>
+  </data>
+  <data name="StatBallisticSkillAbbr" xml:space="preserve">
+    <value>BS</value>
+  </data>
+  <data name="StatStrengthAbbr" xml:space="preserve">
+    <value>S</value>
+  </data>
+  <data name="StatToughnessAbbr" xml:space="preserve">
+    <value>T</value>
+  </data>
+  <data name="StatWoundsAbbr" xml:space="preserve">
+    <value>W</value>
+  </data>
+  <data name="StatInitiativeAbbr" xml:space="preserve">
+    <value>I</value>
+  </data>
+  <data name="StatAttacksAbbr" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="StatLeadershipAbbr" xml:space="preserve">
+    <value>Ld</value>
+  </data>
   <data name="LibSpecialRulesPh" xml:space="preserve">
     <value>Special rules</value>
   </data>
@@ -369,6 +396,18 @@
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
     <value>Maximum warriors</value>
   </data>
+  <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
+    <value>Warriors</value>
+  </data>
+  <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="WarbandArchetypeTabRules" xml:space="preserve">
+    <value>Rules</value>
+  </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Edit Warband Type</value>
   </data>
@@ -383,6 +422,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possessed (may buy mutations)</value>
+  </data>
+  <data name="WarriorArchetypeRolePh" xml:space="preserve">
+    <value>Role</value>
   </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Cost</value>

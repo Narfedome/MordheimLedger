@@ -15,9 +15,6 @@ public partial class SkillDetailDialogViewModel : ReadOnlyDialogViewModel
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 
-    public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
-    public bool HasRestrictedWarriors => RestrictedWarriors.Count > 0;
-
     public SkillDetailDialogViewModel(Skill item, string categoryLabel,
         List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
     {

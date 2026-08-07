@@ -13,36 +13,50 @@
          ItemTemplate est le template d'UNE tuile (fourni par la page appelante, différent par onglet :
          icône par défaut, ligne secondaire éventuelle...) ; le binding interne au template reste défini
          dans le fichier de la page appelante, donc x:Reference root à l'intérieur pointe toujours vers
-         le root de CETTE page, pas celui de ce contrôle. -->
+         le root de CETTE page, pas celui de ce contrôle.
+
+         ScrollView + VerticalStackLayout/BindableLayout plutôt que CollectionView : CollectionView.
+         Scrolled ne se déclenche pas de façon fiable sur WinUI (confirmé - la liste défile bien, mais
+         l'event handler n'est jamais atteint, y compris en debug), alors que ScrollView.Scrolled est
+         une API bien plus ancienne/éprouvée sur toutes les plateformes MAUI. Contrepartie : plus de
+         virtualisation des GROUPES non plus (déjà perdue pour les tuiles avec le passage au FlexLayout)
+         - sans impact vu les volumes actuels. -->
     <Grid>
-        <CollectionView x:Name="InnerCollection"
-                ItemsSource="{Binding Source={x:Reference root}, Path=ItemsSource}"
-                SelectionMode="None"
-                Scrolled="OnScrolled">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <VerticalStackLayout Spacing="2">
-                        <Label Text="{Binding Name}"
-                               IsVisible="{Binding Source={x:Reference root}, Path=ShowGroupHeaders}"
-                               Style="{StaticResource CodexGroupHeaderStyle}"/>
-                        <FlexLayout Wrap="Wrap" JustifyContent="Start"
-                                    BindableLayout.ItemsSource="{Binding .}"
-                                    BindableLayout.ItemTemplate="{Binding Source={x:Reference root}, Path=ItemTemplate}"/>
-                    </VerticalStackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <ScrollView x:Name="InnerScroll" Scrolled="OnScrolled">
+            <VerticalStackLayout x:Name="GroupsStack"
+                    BindableLayout.ItemsSource="{Binding Source={x:Reference root}, Path=ItemsSource}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding Name}"
+                                   IsVisible="{Binding Source={x:Reference root}, Path=ShowGroupHeaders}"
+                                   Style="{StaticResource CodexGroupHeaderStyle}"/>
+                            <FlexLayout Wrap="Wrap" JustifyContent="Start"
+                                        BindableLayout.ItemsSource="{Binding .}"
+                                        BindableLayout.ItemTemplate="{Binding Source={x:Reference root}, Path=ItemTemplate}"/>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </ScrollView>
 
         <!-- En-tête épinglé : reprend le comportement "sticky" du GroupHeaderTemplate natif abandonné -
-             mis à jour sur CollectionView.Scrolled via FirstVisibleItemIndex, qui pointe directement sur
-             le groupe visible en haut (chaque item de la liste EST un groupe entier, pas une tuile
-             individuelle - pas d'ambiguïté de frontière à gérer). Masqué tant qu'on n'a pas dépassé le
-             tout premier groupe (son header inline suffit) - approximation volontaire, pas un pin
-             pixel-perfect au moment exact où l'inline header sort de l'écran. -->
+             mis à jour sur ScrollView.Scrolled en comparant ScrollY à la position Y de chaque groupe
+             réel dans GroupsStack.Children (pas de cache : recalculé à chaque scroll, coût négligeable
+             vu le nombre de groupes). Masqué tant qu'on n'a pas dépassé le tout début de la liste.
+             StrokeShape="Rectangle" explicite : le style implicite TargetType="Border" (Styles.xaml)
+             pose RoundRectangle 15 - même avec StrokeThickness=0 la découpe du BackgroundColor suit
+             cette forme, donnant un bandeau à coins arrondis au lieu d'une bande pleine largeur. Label
+             sans CodexGroupHeaderStyle : sa marge (espacement ENTRE groupes dans le flux normal, dont le
+             DataTrigger IsFirst) n'a pas de sens ici, juste un Padding propre au bandeau. -->
         <Border x:Name="PinnedHeaderBorder" IsVisible="False" InputTransparent="True"
-                BackgroundColor="{DynamicResource AppBackground}" StrokeThickness="0" Padding="0"
+                BackgroundColor="{DynamicResource AppBackground}" Stroke="Transparent" StrokeThickness="0"
+                StrokeShape="Rectangle" Padding="4,4"
                 VerticalOptions="Start" HorizontalOptions="Fill">
-            <Label x:Name="PinnedHeaderLabel" Style="{StaticResource CodexGroupHeaderStyle}"/>
+            <Label x:Name="PinnedHeaderLabel"
+                   FontAttributes="Bold"
+                   FontSize="{DynamicResource AppFontSizeBase}"
+                   TextColor="{DynamicResource AppText}"/>
         </Border>
     </Grid>
 </ContentView>

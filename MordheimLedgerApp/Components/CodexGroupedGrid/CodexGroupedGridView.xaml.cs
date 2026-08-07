@@ -38,22 +38,37 @@ public partial class CodexGroupedGridView : ContentView
         InitializeComponent();
     }
 
-    private void OnScrolled(object? sender, ItemsViewScrolledEventArgs e)
+    private void OnScrolled(object? sender, ScrolledEventArgs e)
     {
-        // Groupe 0 encore visible en haut : son header inline suffit, pas besoin du pin.
-        if (!ShowGroupHeaders || ItemsSource is null || e.FirstVisibleItemIndex <= 0)
+        // Tout en haut (avant tout scroll) : le header inline du 1er groupe est déjà visible, pas
+        // besoin du pin. Petit seuil plutôt que "> 0" pour absorber le bruit de scroll natif.
+        if (!ShowGroupHeaders || e.ScrollY < 10)
         {
             PinnedHeaderBorder.IsVisible = false;
             return;
         }
 
-        if (ItemsSource.Cast<object>().ElementAtOrDefault(e.FirstVisibleItemIndex) is not ICodexGroup group)
+        // Le groupe "courant" est le dernier dont le header a défilé au-dessus du haut visible -
+        // recalculé à chaque scroll plutôt que mis en cache (pas de risque de désynchronisation si
+        // ItemsSource change ou si une tuile change de taille).
+        ICodexGroup? current = null;
+        foreach (var child in GroupsStack.Children)
+        {
+            if (child is not VisualElement { BindingContext: ICodexGroup group } element)
+                continue;
+            if (element.Bounds.Y <= e.ScrollY)
+                current = group;
+            else
+                break;
+        }
+
+        if (current is null)
         {
             PinnedHeaderBorder.IsVisible = false;
             return;
         }
 
-        PinnedHeaderLabel.Text = group.Name;
+        PinnedHeaderLabel.Text = current.Name;
         PinnedHeaderBorder.IsVisible = true;
     }
 }

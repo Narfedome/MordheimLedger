@@ -7,13 +7,9 @@ namespace MordheimLedgerApp.Features.Library.EquipmentItems;
 /// CollectionView) - Name is the displayed header (localized category label). Cf. SpellGroup (grouped
 /// by MagicSchool) - same idiom, ported for Market/EquipmentCategory. Implements ICodexGroup for
 /// CodexGroupedGridView.</summary>
-public class EquipmentItemGroup : ObservableCollection<EquipmentItemRow>, ICodexGroup
+public class EquipmentItemGroup : ObservableCollection<EquipmentItemRow>
 {
     public string Name { get; }
-
-    /// <summary>True for the first group in the list - trims CodexGroupHeaderStyle's top margin. Set
-    /// by the ViewModel after building the list.</summary>
-    public bool IsFirst { get; set; }
 
     public EquipmentItemGroup(string name) => Name = name;
 }

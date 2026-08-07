@@ -7,13 +7,9 @@ namespace MordheimLedgerApp.Features.Library.Spells;
 /// CollectionView) - Name is the displayed header (magic school name). Cf. DmTools' TrackGroup
 /// (grouped by Category) - same idiom, ported for Spells/MagicSchool. Implements ICodexGroup for
 /// CodexGroupedGridView.</summary>
-public class SpellGroup : ObservableCollection<SpellRow>, ICodexGroup
+public class SpellGroup : ObservableCollection<SpellRow>
 {
     public string Name { get; }
-
-    /// <summary>True for the first group in the list - trims CodexGroupHeaderStyle's top margin. Set
-    /// by the ViewModel after building the list.</summary>
-    public bool IsFirst { get; set; }
-
+    
     public SpellGroup(string name) => Name = name;
 }

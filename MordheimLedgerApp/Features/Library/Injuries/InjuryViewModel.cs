@@ -92,8 +92,6 @@ public partial class InjuryViewModel : BaseViewModel
             }
             group.Add(new InjuryRow(item));
         }
-        if (groups.Count > 0)
-            groups[0].IsFirst = true;
         InjuryGroups = groups;
 
         SelectedRow = null;

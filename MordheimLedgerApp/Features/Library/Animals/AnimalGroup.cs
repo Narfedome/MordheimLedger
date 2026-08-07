@@ -8,13 +8,9 @@ namespace MordheimLedgerApp.Features.Library.Animals;
 /// RestrictedToWarbandArchetypeIds (already tracked for the picker) doubles as the grouping axis
 /// instead of adding an unused field. Name is the displayed header. Cf. MutationGroup - same idiom.
 /// Implements ICodexGroup for CodexGroupedGridView.</summary>
-public class AnimalGroup : ObservableCollection<AnimalRow>, ICodexGroup
+public class AnimalGroup : ObservableCollection<AnimalRow>
 {
     public string Name { get; }
-
-    /// <summary>True for the first group in the list - trims CodexGroupHeaderStyle's top margin. Set
-    /// by the ViewModel after building the list.</summary>
-    public bool IsFirst { get; set; }
-
+    
     public AnimalGroup(string name) => Name = name;
 }

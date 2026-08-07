@@ -125,8 +125,6 @@ public partial class SkillViewModel : BaseViewModel
             }
             group.Add(new SkillRow(item));
         }
-        if (groups.Count > 0)
-            groups[0].IsFirst = true;
         SkillGroups = groups;
 
         SelectedRow = null;

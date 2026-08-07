@@ -129,8 +129,6 @@ public partial class MutationViewModel : BaseViewModel
             }
             group.Add(new MutationRow(item));
         }
-        if (groups.Count > 0)
-            groups[0].IsFirst = true;
         MutationGroups = groups;
 
         SelectedRow = null;

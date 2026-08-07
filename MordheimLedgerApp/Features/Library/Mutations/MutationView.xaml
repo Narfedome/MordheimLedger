@@ -32,15 +32,30 @@
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <!-- Groupement "maison" partagé (CodexGroupedGridView, Components/CodexGroupedGrid) plutôt que
-             CollectionView IsGrouped/GroupHeaderTemplate - voir CLAUDE.md pour la raison (chrome du
-             group header natif non maîtrisable sur WinUI). -->
-        <components:CodexGroupedGridView Grid.Row="1"
-                ItemsSource="{Binding MutationGroups}"
-                ShowGroupHeaders="{Binding ShowGroupHeaders}">
-            <components:CodexGroupedGridView.ItemTemplate>
+        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+            ItemsSource="{Binding MutationGroups}"
+            IsGrouped="True"
+            SelectionMode="None"
+            ItemSizingStrategy="MeasureFirstItem">
+            <CollectionView.Behaviors>
+                <components:ResponsiveGridSpanBehavior/>
+            </CollectionView.Behaviors>
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                       IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                       Style="{StaticResource CodexGroupHeaderStyle}"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+            <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:MutationRow">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey" Margin="0,0,5,5">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList/>
+                        </VisualStateManager.VisualStateGroups>
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="LightSkyBlue"/>
@@ -48,37 +63,37 @@
                         </Border.Triggers>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
-                                CommandParameter="{Binding .}"/>
+                            Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                            CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
                         <Grid Style="{StaticResource CodexTileFrameStyle}">
                             <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
                                 <components:LibraryItemImageView
-                                    ImagePath="{Binding Item.ImagePath}"
-                                    DefaultGlyph="{x:Static icons:RpgFont.RaBiohazard}"
-                                    FontFamily="RpgAwesome"
-                                    WidthRequest="20" HeightRequest="20"
-                                    HorizontalOptions="Center" />
+                                ImagePath="{Binding Item.ImagePath}"
+                                DefaultGlyph="{x:Static icons:RpgFont.RaBiohazard}"
+                                FontFamily="RpgAwesome"
+                                WidthRequest="20" HeightRequest="20"
+                                HorizontalOptions="Center" />
                                 <Label Text="{Binding Item.Name}"
-                                       Style="{StaticResource CodexTileNameLabelStyle}"
-                                       HorizontalOptions="Center"
-                                       HorizontalTextAlignment="Center"
-                                       Margin="5,0"/>
+                                   Style="{StaticResource CodexTileNameLabelStyle}"
+                                   HorizontalOptions="Center"
+                                   HorizontalTextAlignment="Center"
+                                   Margin="5,0"/>
                                 <Label Text="{Binding CostDisplay}"
-                                       Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
+                                   Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
                             </VerticalStackLayout>
                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                          Icon="{x:Static icons:SolidFont.CircleInfo}"
-                                                          Tooltip="{loc:Loc LibDetailsTooltip}"
-                                                          IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
-                                                          HorizontalOptions="End" VerticalOptions="Start"
-                                                          Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
-                                                          CommandParameter="{Binding .}"/>
+                                                      Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                      Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                      IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                                      HorizontalOptions="End" VerticalOptions="Start"
+                                                      Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                      CommandParameter="{Binding .}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>
-            </components:CodexGroupedGridView.ItemTemplate>
-        </components:CodexGroupedGridView>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">

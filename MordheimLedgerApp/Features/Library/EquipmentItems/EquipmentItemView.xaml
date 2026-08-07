@@ -8,7 +8,7 @@
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
-    <Grid Margin="5" RowSpacing="5">
+    <Grid  RowSpacing="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>

@@ -31,7 +31,7 @@
                             <Label Text="{Binding Name}"
                                    IsVisible="{Binding Source={x:Reference root}, Path=ShowGroupHeaders}"
                                    Style="{StaticResource CodexGroupHeaderStyle}"/>
-                            <FlexLayout Wrap="Wrap" JustifyContent="Start"
+                            <FlexLayout Wrap="Wrap" JustifyContent="Start" Margin="5"
                                         BindableLayout.ItemsSource="{Binding .}"
                                         BindableLayout.ItemTemplate="{Binding Source={x:Reference root}, Path=ItemTemplate}"/>
                         </VerticalStackLayout>
@@ -59,6 +59,7 @@
                 VerticalOptions="Start" HorizontalOptions="Fill">
             <Label x:Name="PinnedHeaderLabel"
                    FontAttributes="Bold"
+                                   Style="{StaticResource PinnedCodexGroupHeaderStyle}"
                    FontSize="{DynamicResource AppFontSizeBase}"
                    TextColor="{DynamicResource AppText}"/>
         </Border>

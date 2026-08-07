@@ -21,7 +21,7 @@
              section active, ouvrant un ActionSheet listant les 8 au tap - même mécanisme que le filtre
              par catégorie de SkillView/MutationView (SelectCategoryCommand), préféré à 8 boutons côte à
              côte pour rester compact quel que soit le nombre de sections. -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Margin="16,0,16,0">
+        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Margin="16,4,16,0">
             <Button Grid.Column="0"
                     Text="{Binding SelectedTabLabel}"
                     Command="{Binding SelectTabCommand}"
@@ -30,7 +30,7 @@
                     FontAttributes="Bold"
                     FontSize="{DynamicResource AppFontSizeSectionTitle}"
                     HorizontalOptions="Center"
-                    Padding="0"/>
+                         Padding="8,4"/>
         </Grid>
 
         <!-- Chaque section garde son ViewModel/*View existant tel quel (BindingContext explicite,

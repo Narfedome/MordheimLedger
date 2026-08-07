@@ -47,8 +47,24 @@ public partial class TabToggleButton : ContentView
         set => SetValue(FontSizeProperty, value);
     }
 
+    /// <summary>Survol souris (Desktop uniquement, voir PointerGestureRecognizer côté XAML) - aucun état
+    /// PointerOver natif ici puisque ce n'est pas un Button, juste un Label+TapGestureRecognizer (voir
+    /// le commentaire de classe). Interne : mise à jour uniquement par OnPointerEntered/Exited.</summary>
+    public static readonly BindableProperty IsHoveredProperty =
+        BindableProperty.Create(nameof(IsHovered), typeof(bool), typeof(TabToggleButton), false);
+
+    public bool IsHovered
+    {
+        get => (bool)GetValue(IsHoveredProperty);
+        private set => SetValue(IsHoveredProperty, value);
+    }
+
     public TabToggleButton()
     {
         InitializeComponent();
     }
+
+    private void OnPointerEntered(object? sender, PointerEventArgs e) => IsHovered = true;
+
+    private void OnPointerExited(object? sender, PointerEventArgs e) => IsHovered = false;
 }

@@ -9,10 +9,18 @@
          BindingContext hérité (peu importe, rien ne s'y lie directement), et tout le contenu interne
          (Text/Command/IsActive/FontSize) lit les bindable properties de la ContentView via cette
          référence explicite. -->
-    <VerticalStackLayout Spacing="4" BindingContext="{x:Reference root}" HorizontalOptions="Center">
+    <!-- PointerGestureRecognizer (Desktop uniquement - no-op sur mobile, pas de souris) plutôt qu'un
+         VisualStateManager PointerOver : ce n'est pas un Button, pas d'état PointerOver natif ici. -->
+    <VerticalStackLayout Spacing="4" BindingContext="{x:Reference root}" HorizontalOptions="Center" Opacity="1">
         <VerticalStackLayout.GestureRecognizers>
             <TapGestureRecognizer Command="{Binding Command}"/>
+            <PointerGestureRecognizer PointerEntered="OnPointerEntered" PointerExited="OnPointerExited"/>
         </VerticalStackLayout.GestureRecognizers>
+        <VerticalStackLayout.Triggers>
+            <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsHovered}" Value="True">
+                <Setter Property="Opacity" Value="0.7"/>
+            </DataTrigger>
+        </VerticalStackLayout.Triggers>
         <Label Text="{Binding Text}" FontSize="{Binding FontSize}"
                TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center">
             <Label.Triggers>

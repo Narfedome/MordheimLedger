@@ -369,12 +369,18 @@
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>
         <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
-        <Setter Property="Margin" Value="4,20,4,2"/>
+        <Setter Property="Margin" Value="15,20,4,2"/>
         <Style.Triggers>
             <DataTrigger TargetType="Label" Binding="{Binding IsFirst}" Value="True">
-                <Setter Property="Margin" Value="4,0,4,2"/>
+                <Setter Property="Margin" Value="15,0,4,2"/>
             </DataTrigger>
         </Style.Triggers>
+    </Style>
+    <Style TargetType="Label" x:Key="PinnedCodexGroupHeaderStyle">
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>
+        <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
+        <Setter Property="Margin" Value="15,0,4,2"/>
     </Style>
 
     <Style TargetType="Picker">

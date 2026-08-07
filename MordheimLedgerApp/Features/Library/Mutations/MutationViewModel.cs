@@ -223,8 +223,9 @@ public partial class MutationViewModel : BaseViewModel
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Mutation>());
 
-    /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.</summary>
-    [RelayCommand]
+    /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.
+    /// AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ShowDetails(MutationRow row)
     {
         var restrictedWarbands = _warbandArchetypes.Where(w => row.Item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();

@@ -212,8 +212,11 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     /// <summary>Read-only recap popup (tile info button) - opens instantly, no service call: Général
     /// (Grade/Trésorerie/Description/SpecialRules/MagicSchools) reads entirely off the already-loaded
     /// Item. Guerriers/Équipement fetch lazily on first visit to their own onglet (see
-    /// WarbandArchetypeDetailDialogViewModel) - _libraryService is just handed through for that.</summary>
-    [RelayCommand]
+    /// WarbandArchetypeDetailDialogViewModel) - _libraryService is just handed through for that.
+    /// AllowConcurrentExecutions : ShowDetailsCommand est une seule instance partagée par toutes les
+    /// tuiles (seul CommandParameter change) - sans ça, AsyncRelayCommand désactive tout le monde
+    /// (CanExecute lié à IsRunning) pendant qu'un dialog est ouvert pour UNE tuile, pas juste elle.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private Task ShowDetails(WarbandArchetypeRow row) =>
         ShowDialogAsync(new WarbandArchetypeDetailDialog(
             new WarbandArchetypeDetailDialogViewModel(row.Item, _libraryService)));

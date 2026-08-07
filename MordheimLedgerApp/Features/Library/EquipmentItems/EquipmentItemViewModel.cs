@@ -252,8 +252,10 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// <summary>Read-only recap popup (tile info button) - RestrictedToWarbandArchetypeIds resolves
     /// against the already-loaded _warbandArchetypes (same idiom as MutationViewModel.GroupNameFor);
     /// RestrictedToWarriorArchetypeIds needs one extra fetch, same as SkillViewModel.Edit's
-    /// initialWarriors.</summary>
-    [RelayCommand]
+    /// initialWarriors. AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails - une
+    /// seule commande partagée par toutes les tuiles, sinon elles se désactivent toutes ensemble tant
+    /// qu'un dialog est ouvert.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ShowDetails(EquipmentItemRow row)
     {
         var item = row.Item;

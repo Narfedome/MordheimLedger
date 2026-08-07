@@ -225,8 +225,9 @@ public partial class AnimalViewModel : BaseViewModel
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Animal>());
 
     /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.
-    /// SpecialRules needs no such resolution - Animal.SpecialRules is already a List&lt;SpecialRule&gt;.</summary>
-    [RelayCommand]
+    /// SpecialRules needs no such resolution - Animal.SpecialRules is already a List&lt;SpecialRule&gt;.
+    /// AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ShowDetails(AnimalRow row)
     {
         var restrictedWarbands = _warbandArchetypes.Where(w => row.Item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();

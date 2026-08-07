@@ -239,8 +239,8 @@ public partial class SkillViewModel : BaseViewModel
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Skill>());
 
     /// <summary>Read-only recap popup (tile info button) - same dual restriction-id resolution as Edit's
-    /// initialWarriors fetch.</summary>
-    [RelayCommand]
+    /// initialWarriors fetch. AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task ShowDetails(SkillRow row)
     {
         var item = row.Item;

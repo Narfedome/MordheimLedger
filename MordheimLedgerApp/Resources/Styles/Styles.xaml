@@ -369,6 +369,18 @@
         <Setter Property="HorizontalOptions" Value="Center"/>
     </Style>
 
+    <!-- En-tête de groupe des grilles de tuiles Codex (ex. "Vitesse"/"Spécial" dans Compétences) -
+         repris tel quel dans les 8 onglets catalogués. AppFontSizeBase plutôt que
+         AppFontSizeSectionTitle (repris par erreur du titre de page, trop proche visuellement) et marge
+         resserrée : le picker de section (LibraryPage) et le picker de catégorie au-dessus prenaient
+         déjà pas mal de hauteur avant d'ajouter celle des group headers. -->
+    <Style TargetType="Label" x:Key="CodexGroupHeaderStyle">
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>
+        <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
+        <Setter Property="Margin" Value="4,8,4,2"/>
+    </Style>
+
     <Style TargetType="Picker">
         <Setter Property="TextColor" Value="{DynamicResource AppText}" />
         <Setter Property="TitleColor" Value="{DynamicResource AppTextMuted}" />

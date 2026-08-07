@@ -10,7 +10,7 @@
 
     <!-- Filtre par groupe ("Guerriers & Bandes" vs "Objets", dérivé des tables de jointure - voir
          SpecialRuleViewModel.GroupNameFor) - même en-tête que MutationView/EquipmentItemView. -->
-    <Grid Margin="5" RowSpacing="8">
+    <Grid Margin="5" RowSpacing="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -46,10 +46,7 @@
                 <DataTemplate>
                     <Label Text="{Binding Name}"
                            IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           FontAttributes="Bold"
-                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                           TextColor="{DynamicResource AppText}"
-                           Margin="4,12,4,4"/>
+                           Style="{StaticResource CodexGroupHeaderStyle}"/>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>

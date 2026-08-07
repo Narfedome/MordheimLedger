@@ -19,7 +19,7 @@
              SpellView (bouton texte = filtre courant, ouvre l'ActionSheet). Pas d'icône "gérer" ici,
              contrairement aux Sorts/Écoles de magie : le Grade est un champ direct de WarbandArchetype,
              pas un sous-catalogue séparé. -->
-        <Grid Grid.Row="0" Margin="8,0,8,8" VerticalOptions="Center">
+        <Grid Grid.Row="0" Margin="8,0,8,0" VerticalOptions="Center">
             <Button Text="{Binding SelectedGradeFilter}"
                     Command="{Binding SelectGradeFilterCommand}"
                     BackgroundColor="Transparent"
@@ -48,10 +48,7 @@
                 <DataTemplate>
                     <Label Text="{Binding Name}"
                            IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           FontAttributes="Bold"
-                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                           TextColor="{DynamicResource AppText}"
-                           Margin="4,12,4,4"/>
+                           Style="{StaticResource CodexGroupHeaderStyle}"/>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>

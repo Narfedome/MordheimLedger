@@ -58,10 +58,7 @@
                 <DataTemplate>
                     <Label Text="{Binding Name}"
                            IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           FontAttributes="Bold"
-                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                           TextColor="{DynamicResource AppText}"
-                           Margin="4,12,4,4"/>
+                           Style="{StaticResource CodexGroupHeaderStyle}"/>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>

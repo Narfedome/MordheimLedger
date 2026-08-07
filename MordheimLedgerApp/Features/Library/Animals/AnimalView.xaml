@@ -11,7 +11,7 @@
     <!-- Filtre par groupe ("Commun" vs. bande restrictive) : Animal n'a pas de catégorie propre au livre
          de règles, RestrictedToWarbandArchetypeIds (déjà suivi pour le picker) sert d'axe de
          regroupement - même en-tête que MutationView. -->
-    <Grid Margin="5" RowSpacing="8">
+    <Grid Margin="5" RowSpacing="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -47,10 +47,7 @@
                 <DataTemplate>
                     <Label Text="{Binding Name}"
                            IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           FontAttributes="Bold"
-                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                           TextColor="{DynamicResource AppText}"
-                           Margin="4,12,4,4"/>
+                           Style="{StaticResource CodexGroupHeaderStyle}"/>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>

@@ -34,7 +34,7 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <VerticalStackLayout Grid.Column="0" Spacing="4">
                     <Label Text="{loc:Loc EquipmentItemCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
+                    <Label Text="{Binding CostDisplay}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Column="1" Spacing="4">
                     <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -84,6 +84,28 @@
                                 </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{x:Static icons:SolidFont.User}" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSpecialRules}">
+                <Label Text="{loc:Loc LibSpecialRulesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.SpecialRules}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:SpecialRule">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:EquipmentItemDetailDialogViewModel}}, Path=ShowSpecialRuleDetailCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
                                            TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
                                     <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>

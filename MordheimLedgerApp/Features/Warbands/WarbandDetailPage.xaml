@@ -168,6 +168,9 @@
                                                        FontFamily="RpgAwesome" FontSize="12"
                                                        TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
                                                 <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                                <Label Text="{Binding MaterialRule.Name}" FontSize="11" FontAttributes="Italic"
+                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"
+                                                       IsVisible="{Binding MaterialRule, Converter={StaticResource IsNotNullConverter}}"/>
                                             </HorizontalStackLayout>
                                         </Border>
                                     </DataTemplate>

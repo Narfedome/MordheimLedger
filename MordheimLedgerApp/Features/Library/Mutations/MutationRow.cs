@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.Mutations;
 
@@ -14,6 +15,10 @@ public partial class MutationRow : ObservableObject
 
     [ObservableProperty]
     private bool isSelected;
+
+    /// <summary>Ligne d'info secondaire de la tuile (CodexTileSecondaryLabelStyle) - "CO"/"GC" en toutes
+    /// lettres, même formule que EquipmentItemRow.CostDisplay.</summary>
+    public string CostDisplay => $"{Item.Cost} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
 
     public MutationRow(Mutation item) => Item = item;
 }

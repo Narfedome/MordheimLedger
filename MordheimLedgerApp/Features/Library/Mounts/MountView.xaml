@@ -82,7 +82,7 @@
                                        HorizontalOptions="Center"
                                        HorizontalTextAlignment="Center"
                                        Margin="5,0"/>
-                                <Label Text="{Binding Item.Cost}"
+                                <Label Text="{Binding CostDisplay}"
                                        Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
                             </VerticalStackLayout>
                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"

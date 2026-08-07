@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.Mounts;
 
@@ -14,6 +15,17 @@ public partial class MountRow : ObservableObject
 
     [ObservableProperty]
     private bool isSelected;
+
+    /// <summary>Ligne d'info secondaire de la tuile (CodexTileSecondaryLabelStyle) - "CO"/"GC" en toutes
+    /// lettres, même formule que EquipmentItemRow.CostDisplay.</summary>
+    public string CostDisplay
+    {
+        get
+        {
+            var abbr = LocalizationService.Instance["LibGoldCrownsAbbr"];
+            return Item.Rarity.HasValue ? $"{Item.Cost} {abbr} · R{Item.Rarity}" : $"{Item.Cost} {abbr}";
+        }
+    }
 
     public MountRow(Mount item) => Item = item;
 }

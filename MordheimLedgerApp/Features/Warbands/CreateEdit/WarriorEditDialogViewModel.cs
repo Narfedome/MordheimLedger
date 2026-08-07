@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
 
@@ -12,6 +13,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly Warband _warband;
     private readonly IWarbandService _warbandService;
+    private readonly ILibraryService _libraryService;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
@@ -83,14 +85,15 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public ObservableCollection<WarriorMutation> Mutations { get; }
 
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
-        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
+        ILibraryService libraryService, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
+        IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
         IMutationPickerService mutationPicker, bool isMutant, IMountPickerService mountPicker)
     {
         this.item = item;
         this.title = title;
         _warband = warband;
         _warbandService = warbandService;
+        _libraryService = libraryService;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
@@ -114,18 +117,36 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId);
         foreach (var equipmentItem in items)
         {
+            // Arme de corps à corps : propose un matériau (Gromril/Ithilmar/...) avant de calculer le
+            // prix - toute SpecialRule dotée d'un CostMultiplier est éligible, pas seulement ces deux-là.
+            // Annuler le picker (< 0) revient à choisir "Normal".
+            SpecialRule? materialRule = null;
+            if (equipmentItem.Category == EquipmentCategory.MeleeWeapon)
+            {
+                var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
+                    .Where(r => r.CostMultiplier.HasValue).ToList();
+                if (materialRules.Count > 0)
+                {
+                    var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
+                    var index = await ShowActionSheetIndexAsync(Loc["WarriorsMaterialPickerTitle"], options);
+                    if (index > 0) materialRule = materialRules[index - 1];
+                }
+            }
+
+            var cost = equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
+
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.
-            if (_warband.Treasury < equipmentItem.Cost)
+            if (_warband.Treasury < cost)
             {
                 await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
                 break;
             }
 
-            _warband.Treasury -= equipmentItem.Cost;
+            _warband.Treasury -= cost;
             await _warbandService.SaveWarbandAsync(_warband);
 
-            var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem);
+            var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem, materialRule: materialRule);
             Equipment.Add(carried);
         }
     }

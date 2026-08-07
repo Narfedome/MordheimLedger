@@ -26,7 +26,8 @@ public partial class EquipmentItemRow : ObservableObject
         get
         {
             var abbr = LocalizationService.Instance["LibGoldCrownsAbbr"];
-            return Item.Rarity.HasValue ? $"{Item.Cost} {abbr} · R{Item.Rarity}" : $"{Item.Cost} {abbr}";
+            var cost = Item.CostRandomMax is { } max ? $"{Item.Cost}-{Item.Cost + max}" : Item.Cost.ToString();
+            return Item.Rarity.HasValue ? $"{cost} {abbr} · R{Item.Rarity}" : $"{cost} {abbr}";
         }
     }
 

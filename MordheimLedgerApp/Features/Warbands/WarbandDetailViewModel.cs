@@ -231,7 +231,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var isSpellcaster = archetype?.IsSpellcaster ?? false;
         var isMutant = archetype?.CanBuyMutations ?? false;
         var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
-            _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchoolIds,
+            _libraryService, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchoolIds,
             _mutationPicker, isMutant, _mountPicker);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 

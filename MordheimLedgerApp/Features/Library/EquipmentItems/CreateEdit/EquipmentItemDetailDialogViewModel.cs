@@ -13,6 +13,10 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     public string CategoryLabel { get; }
     public string RarityDisplay { get; }
 
+    /// <summary>"30 - 48" when CostRandomMax is set (worst-case total, see EquipmentItem.CostRandomMax),
+    /// otherwise just "30".</summary>
+    public string CostDisplay => Item.CostRandomMax is { } max ? $"{Item.Cost} - {Item.Cost + max}" : Item.Cost.ToString();
+
     /// <summary>Already resolved by the caller (EquipmentItemViewModel.ShowDetails) from the ids on
     /// Item - same idiom as SkillViewModel.Edit's initialWarriors fetch.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
@@ -20,6 +24,7 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
 
     public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
     public bool HasRestrictedWarriors => RestrictedWarriors.Count > 0;
+    public bool HasSpecialRules => Item.SpecialRules.Count > 0;
 
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel,
         List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
@@ -37,4 +42,7 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
 
     [RelayCommand]
     private Task ShowWarriorDetail(WarriorArchetype warrior) => ShowChipDetailAsync(warrior.Name, warrior.Description);
+
+    [RelayCommand]
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
 }

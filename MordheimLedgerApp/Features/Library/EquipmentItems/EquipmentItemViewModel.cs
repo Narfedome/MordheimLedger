@@ -14,6 +14,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly IEquipmentPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
+    private readonly ISpecialRulePickerService _specialRulePicker;
     private List<EquipmentItem> _allItems = new();
     private List<WarbandArchetype> _warbandArchetypes = new();
 
@@ -74,11 +75,12 @@ public partial class EquipmentItemViewModel : BaseViewModel
     public HashSet<int>? AllowedEquipmentListItemIds { get; set; }
 
     public EquipmentItemViewModel(ILibraryService libraryService, IEquipmentPickerNavigationService pickerNavigation,
-        IWarbandArchetypePickerService warbandPicker)
+        IWarbandArchetypePickerService warbandPicker, ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
         _pickerNavigation = pickerNavigation;
         _warbandPicker = warbandPicker;
+        _specialRulePicker = specialRulePicker;
         selectedCategoryLabel = Loc["LibFilterAll"];
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
@@ -185,7 +187,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new EquipmentItem();
-        var dialogViewModel = new EquipmentItemEditDialogViewModel(newItem, Loc["EquipmentItemCreateTitle"], _warbandPicker, _warbandArchetypes);
+        var dialogViewModel = new EquipmentItemEditDialogViewModel(newItem, Loc["EquipmentItemCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
         if (await ShowDialogAsync(new EquipmentItemEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveEquipmentItemAsync(newItem, LocalizationService.Instance.Language);
@@ -206,16 +208,18 @@ public partial class EquipmentItemViewModel : BaseViewModel
             Category = s.Category,
             Cost = s.Cost,
             Rarity = s.Rarity,
+            CostRandomMax = s.CostRandomMax,
             Description = s.Description,
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath,
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
-            RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds)
+            RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds),
+            SpecialRules = new List<SpecialRule>(s.SpecialRules)
         };
 
-        var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes);
+        var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
         if (await ShowDialogAsync(new EquipmentItemEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveEquipmentItemAsync(copy, LocalizationService.Instance.Language);

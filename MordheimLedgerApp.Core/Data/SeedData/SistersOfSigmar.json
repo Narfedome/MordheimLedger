@@ -263,7 +263,29 @@
         "en": "One of the Sisterhood's traditional weapons, echoing Ghal-Maraz, the great hammer of Sigmar himself. Strength as user +1. A roll of 2-4 in close combat with it is treated as Stunned on the Injury chart. Blessed by the High Matriarch, it grants +1 to wound rolls against Possessed or Undead models (still needs an unmodified 6 for a critical hit). Only Matriarchs and Sister Superiors may carry two.",
         "fr": "Une des armes traditionnelles de l'Ordre, en souvenir de Ghal-Maraz, le marteau de Sigmar. Force de l'utilisateur +1. Un résultat de 2 à 4 au corps à corps avec cette arme compte comme sonné sur le tableau des dégâts. Chaque marteau a été béni par une matriarche : il donne un bonus de +1 sur tous les jets pour blesser infligés au corps à corps contre les possédés et les morts vivants (il faut tout de même un 6 avant modificateurs pour infliger une touche critique). Seules les matriarches et les sœurs supérieures de l'ordre peuvent porter deux marteaux de guerre sigmarites."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Concussion",
+            "fr": "Commotion"
+          },
+          "description": {
+            "en": "Hammers and other bludgeoning weapons are excellent to use for striking your enemy senseless. When using a hammer, club or mace, a roll of 2-4 is treated as stunned when rolling to see the extent of a model's injuries.",
+            "fr": "Les marteaux et autres armes contondantes sont excellents pour assommer l'adversaire. Avec un marteau, un gourdin ou une masse, un résultat de 2 à 4 est traité comme Étourdi lors du jet de blessures graves."
+          }
+        },
+        {
+          "name": {
+            "en": "Holy Weapon",
+            "fr": "Arme Sacrée"
+          },
+          "description": {
+            "en": "Each warhammer is blessed by the High Matriarch herself before it is handed to the Sisters. The warhammer has a +1 bonus on all to wound rolls against any Possessed or Undead models. Note that you will still need to score a 6 before any modifiers in order to cause a critical hit. Only Matriarchs and Sister Superiors may carry two Sigmarite warhammers.",
+            "fr": "Chaque marteau de guerre est béni par la Grande Matriarche elle-même avant d'être remis aux Sœurs. Il bénéficie d'un bonus de +1 sur tous les jets pour blesser contre les figurines Possédées ou Morts-Vivantes. Un 6 non modifié reste nécessaire pour infliger une touche critique. Seules les Matriarches et les Sœurs Supérieures peuvent porter deux marteaux de guerre sigmarites."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -276,7 +298,29 @@
         "en": "A flexible weapon of barbed steel chains, unique to the Sisterhood - it cannot be parried with a sword or buckler. The wielder gains +1 Attack when charging, and +1 Attack (striking first) when charged, usable only against the charger; this bonus does not stack if charged by multiple opponents, and only the first whip grants it when dual-wielded.",
         "fr": "Une autre arme unique de l'ordre, faite de chaînes d'acier barbelées. Les tentatives de parade contre cette arme sont inutiles : une figurine attaquée par le fouet d'acier ne peut pas parer, ni avec une épée ni avec une rondache. Le porteur gagne +1 Attaque lorsqu'il charge, et +1 Attaque (frappant en premier) lorsqu'il est chargé, utilisable uniquement contre l'assaillant ; ce bonus ne se cumule pas si le porteur est chargé par plusieurs ennemis, et seul le premier fouet donne ce bonus s'il en porte deux."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Cannot be parried",
+            "fr": "Ne peut être paré"
+          },
+          "description": {
+            "en": "The steel whip is a flexible weapon and the Priestesses use it with great expertise. Attempts to parry its strikes are futile. A model attacked by a steel whip may not make parries with swords or bucklers.",
+            "fr": "Le fouet d'acier est une arme flexible que les Prêtresses manient avec une grande dextérité. Toute tentative de parade contre ses coups est vaine. Une figurine attaquée par un fouet d'acier ne peut parer ni avec une épée ni avec une rondache."
+          }
+        },
+        {
+          "name": {
+            "en": "Whipcrack",
+            "fr": "Claquement"
+          },
+          "description": {
+            "en": "When the wielder charges they gain +1A for that turn. This bonus attack is added after any other modifications. When the wielder is charged they gain +1A that they may only use against the charger; this additional attack will 'strike first'. If the wielder is simultaneously charged by two or more opponents they will still only receive a total of +1A. If the wielder is using two whips at the same time then they get +1A for the additional hand weapon, but only the first whip gets the whipcrack +1A.",
+            "fr": "Lorsque le porteur charge, il gagne +1 Attaque ce tour-là, ajoutée après tout autre modificateur. Lorsqu'il est chargé, il gagne +1 Attaque, utilisable uniquement contre l'assaillant ; cette attaque supplémentaire « frappe en premier ». Si le porteur est chargé simultanément par deux adversaires ou plus, il ne reçoit malgré tout qu'un total de +1 Attaque. S'il utilise deux fouets en même temps, il gagne +1 Attaque pour l'arme de corps à corps supplémentaire, mais seul le premier fouet donne le bonus de claquement."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -285,6 +329,7 @@
       },
       "category": "MiscellaneousEquipment",
       "cost": 10,
+      "costRandomMax": 18,
       "description": {
         "en": "Heroines only. Water sanctified in Sigmar's name.",
         "fr": "Réservée aux Héroïnes. Eau sanctifiée au nom de Sigmar."
@@ -294,6 +339,18 @@
         "Sigmarite Matriarch",
         "Augur",
         "Sister Superior"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Effect (Blessed Water)",
+            "fr": "Effet (Eau Bénite)"
+          },
+          "description": {
+            "en": "A vial of blessed water contains enough liquid for just one use, and has a thrown range of twice the thrower's Strength in inches. Roll to hit using the model's Ballistic Skill. No modifiers for range or moving apply. Blessed water causes 1 wound on Undead, Daemon or Possessed models automatically, with no armour save. Undead or Possessed models may not use blessed water.",
+            "fr": "Une fiole d'eau bénite ne contient qu'assez de liquide pour un seul usage, avec une portée de jet égale à deux fois la Force du lanceur en pouces. Le jet pour toucher utilise la Capacité de Tir du guerrier ; aucun modificateur de distance ou de mouvement ne s'applique. L'eau bénite inflige automatiquement 1 blessure aux figurines Mort-Vivant, Démon ou Possédé, sans sauvegarde d'armure possible. Les figurines Mort-Vivant ou Possédé ne peuvent pas utiliser d'eau bénite."
+          }
+        }
       ]
     },
     {
@@ -303,15 +360,29 @@
       },
       "category": "MiscellaneousEquipment",
       "cost": 15,
+      "costRandomMax": 18,
+      "rarity": 8,
       "description": {
-        "en": "Heroines only. A sacred relic of the Cult of Sigmar, carried for its protection.",
-        "fr": "Réservée aux Héroïnes. Une relique sacrée du Culte de Sigmar, portée pour sa protection."
+        "en": "In this age of superstition and religious fanaticism, holy objects are an important part of life. Relics abound in the Old World: hairs of Sigmar, pieces from Ulric's hammer, teeth of Daemon Princes, all are sold to men needing encouragement before battle and as charms against sorcery.",
+        "fr": "En cette époque de superstition et de fanatisme religieux, les objets sacrés occupent une place importante dans la vie quotidienne. Les reliques abondent dans le Vieux Monde : cheveux de Sigmar, fragments du marteau d'Ulric, dents de Princes Démons - tout se vend aux hommes en quête de réconfort avant la bataille, ou de protection contre la sorcellerie."
       },
       "restrictedToThisWarband": true,
       "restrictedToWarriorNames": [
         "Sigmarite Matriarch",
         "Augur",
         "Sister Superior"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Effect (Holy Relic)",
+            "fr": "Effet (Relique Sacrée)"
+          },
+          "description": {
+            "en": "A model with a holy relic will automatically pass the first Leadership test he is required to make in the game. If worn by the leader, it will allow him to automatically pass the first Rout test if he has not taken any Leadership tests before. You can only ignore the first Leadership test in any single game - owning two or more holy relics will not allow you to ignore second and subsequent tests.",
+            "fr": "Une figurine possédant une relique sacrée réussit automatiquement le premier test de Commandement qu'elle doit effectuer dans la partie. Si elle est portée par le chef, elle lui permet également de réussir automatiquement son premier test de Déroute s'il n'a passé aucun test de Commandement auparavant. Un seul test de Commandement peut être ignoré par partie de cette façon - posséder plusieurs reliques sacrées ne permet pas d'ignorer un second test ou les suivants."
+          }
+        }
       ]
     },
     {
@@ -331,6 +402,18 @@
         "Sigmarite Matriarch",
         "Augur",
         "Sister Superior"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Effect (Holy Tome)",
+            "fr": "Effet (Livre Saint)"
+          },
+          "description": {
+            "en": "A Warrior Priest or Sister of Sigmar with a holy tome can add +1 to the score when determining whether he (or she) can recite a spell successfully or not.",
+            "fr": "Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
+          }
+        }
       ]
     }
   ],

@@ -61,5 +61,21 @@
       "en": "This model may never be equipped with weapons or armour.",
       "fr": "Cette figurine ne peut jamais être équipée d'armes ni d'armures."
     }
+  },
+  {
+    "name": { "en": "Gromril Weapon", "fr": "Arme en Gromril" },
+    "description": {
+      "en": "A gromril weapon has an extra -1 save modifier, and costs four times the price of a normal weapon of its kind. Only a Dwarf Runesmith can forge a weapon from gromril, a rare meteoric iron - a blade fashioned from this metal will stay keen for a thousand years.",
+      "fr": "Une arme en gromril bénéficie d'un modificateur de sauvegarde supplémentaire de -1, et coûte quatre fois le prix d'une arme normale de son type. Seul un Maître des Runes nain peut forger une arme en gromril, un rare fer météorique - une lame façonnée dans ce métal reste tranchante pendant mille ans."
+    },
+    "costMultiplier": 4
+  },
+  {
+    "name": { "en": "Ithilmar Weapon", "fr": "Arme en Ithilmar" },
+    "description": {
+      "en": "An ithilmar weapon gives its user +1 Initiative in hand-to-hand combat, and costs three times the price of a normal weapon of its kind. Elven blades are forged from priceless ithilmar, an extremely light but strong metal, found only in the fabled Elven kingdoms.",
+      "fr": "Une arme en ithilmar confère à son porteur +1 en Initiative au combat rapproché, et coûte trois fois le prix d'une arme normale de son type. Les lames elfiques sont forgées dans l'ithilmar, un métal d'une valeur inestimable, extrêmement léger mais résistant, que l'on ne trouve que dans les légendaires royaumes elfiques."
+    },
+    "costMultiplier": 3
   }
 ]

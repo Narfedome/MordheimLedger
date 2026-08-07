@@ -466,6 +466,48 @@
       },
       "restrictedToWarriorNames": [
         "Goblin Warriors"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Incredible Force",
+            "fr": "Force Inouïe"
+          },
+          "description": {
+            "en": "Because the Ball and Chain is so heavy, normal armour does very little to protect against it. No armour saves are allowed against wounds caused by a Ball and Chain. In addition, any hit that successfully wounds will do 1D3 wounds instead of 1.",
+            "fr": "Le Boulet et Chaîne est si lourd qu'une armure normale offre peu de protection contre lui. Aucune sauvegarde d'armure n'est autorisée contre les blessures qu'il inflige. De plus, toute touche qui blesse inflige 1D3 blessures au lieu d'une seule."
+          }
+        },
+        {
+          "name": {
+            "en": "Random",
+            "fr": "Imprévisible"
+          },
+          "description": {
+            "en": "The only way to wield a Ball and Chain is to swing it around in large circles, using your body as a counter-weight. The first turn he starts swinging it, the model is moved 2D6\" in a direction nominated by the controlling player. In subsequent Movement phases, roll a D6: on a 1 the model trips and strangles himself with the chain and is taken out of action (a roll of 1-3 for Injury means he is out permanently instead of the normal 1-2); on 2-5 the model moves 2D6\" in a direction nominated by the controlling player; on a 6 the model moves 2D6\" in a random direction. If the model moves into contact with another model he counts as charging into close combat; opponents attacking him suffer a -1 To Hit penalty. He cannot be held in close combat and moves automatically even if already in base contact. If he moves into a building, wall or other obstruction, he is automatically taken out of action. A Goblin wielding a Ball and Chain also ignores the special rules for Animosity.",
+            "fr": "La seule façon de manier un Boulet et Chaîne est de le faire tournoyer en larges cercles, en utilisant son corps comme contrepoids. Au premier tour où il commence à le faire tournoyer, la figurine est déplacée de 2D6ps dans une direction choisie par son joueur. Lors des phases de Mouvement suivantes, lancez 1D6 : sur un 1, la figurine trébuche et s'étrangle avec la chaîne - elle est mise hors de combat (un résultat de 1 à 3 au jet de Blessure la met hors jeu de façon permanente, au lieu du 1-2 habituel) ; sur 2-5, elle se déplace de 2D6ps dans une direction choisie par son joueur ; sur un 6, elle se déplace de 2D6ps dans une direction aléatoire. Si elle entre au contact d'une autre figurine, elle est considérée comme chargeant en combat rapproché ; les adversaires qui l'attaquent subissent un malus de -1 pour toucher. Elle ne peut pas être maintenue au corps à corps et se déplace automatiquement même au contact d'une autre figurine. Si elle entre en contact avec un bâtiment, un mur ou un autre obstacle, elle est automatiquement mise hors de combat. Un Gobelin maniant un Boulet et Chaîne ignore également les règles spéciales d'Animosité."
+          }
+        },
+        {
+          "name": {
+            "en": "Cumbersome (Ball & Chain)",
+            "fr": "Encombrant (Chaîne & boulet)"
+          },
+          "description": {
+            "en": "Because the Ball and Chain is so heavy, a model equipped with one may carry no other weapons or equipment. In addition, only a model under the influence of Mad Cap Mushrooms has the strength to wield a Ball and Chain.",
+            "fr": "Le Boulet et Chaîne étant si lourd, son porteur ne peut transporter aucune autre arme ni aucun autre équipement. De plus, seule une figurine sous l'effet des Champignons Bonnets de Fou a la force nécessaire pour le manier."
+          }
+        },
+        {
+          "name": {
+            "en": "Unwieldy (Ball & Chain)",
+            "fr": "Peu maniable (Chaîne & boulet)"
+          },
+          "description": {
+            "en": "The great weight of the Ball and Chain can easily tear ligaments or pull a wielder's arms out of their sockets. At the end of the battle the controlling player must roll for Injury for each model that used a Ball and Chain, just as if the model had been taken out of action (unless it actually was, in which case only one roll is needed).",
+            "fr": "Le poids énorme du Boulet et Chaîne peut facilement déchirer des ligaments ou déboîter les bras de son porteur. À la fin de la bataille, un jet de Blessure doit être effectué pour chaque figurine ayant utilisé un Boulet et Chaîne, comme si elle avait été mise hors de combat (sauf si elle l'a réellement été, auquel cas un seul jet suffit)."
+          }
+        }
       ]
     },
     {
@@ -481,6 +523,18 @@
       },
       "restrictedToWarriorNames": [
         "Goblin Warriors"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Squig Handling",
+            "fr": "Dressage de Squigs"
+          },
+          "description": {
+            "en": "A Goblin with a Squig prodder can keep all Cave Squigs within 12\" from going wild, instead of the normal 6\" (see the Minderz special rule under the Cave Squig entry). In addition, a Squig prodder is treated exactly like a spear in hand-to-hand combat.",
+            "fr": "Un Gobelin muni d'un aiguillon à squigs peut empêcher tout Squig des cavernes à moins de 12ps de devenir incontrôlable, au lieu des 6ps habituels (voir la règle spéciale Au pied ! de l'entrée Squig des cavernes). De plus, l'aiguillon à squigs est considéré exactement comme une lance en combat rapproché."
+          }
+        }
       ]
     },
     {
@@ -489,13 +543,36 @@
         "fr": "Champignons bonnets de fou"
       },
       "category": "MiscellaneousEquipment",
-      "cost": 25,
+      "cost": 30,
+      "costRandomMax": 18,
       "description": {
         "en": "Common only if the warband includes at least one Goblin. A Goblin Warrior may eat these before a battle to gain Frenzy. After the battle, roll a D6: on a 1 the model becomes permanently Stupid. Required to wield a Ball & Chain.",
         "fr": "Disponibilité Commune uniquement si la bande compte au moins un Gobelin. Un Guerrier Gobelin peut en consommer avant une bataille pour gagner la Frénésie. Après la bataille, lancez 1D6 : sur un 1, la figurine devient Stupide de façon permanente. Nécessaires pour manier une Chaîne & boulet."
       },
       "restrictedToWarriorNames": [
         "Goblin Warriors"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Frenzy",
+            "fr": "Frénésie"
+          },
+          "description": {
+            "en": "Any warrior who takes Mad Cap Mushrooms before a battle will be subject to Frenzy. Mad Cap Mushrooms have no effect on Undead such as Vampires and Zombies, or the Possessed.",
+            "fr": "Tout guerrier ayant consommé des Champignons Bonnets de Fou avant une bataille est sujet à la Frénésie. Les champignons n'ont aucun effet sur les Morts-Vivants tels que les Vampires et les Zombies, ni sur les Possédés."
+          }
+        },
+        {
+          "name": {
+            "en": "Side effect",
+            "fr": "Effet secondaire"
+          },
+          "description": {
+            "en": "After the battle, roll a D6. On a roll of a 1 the model becomes permanently Stupid.",
+            "fr": "Après la bataille, lancez 1D6 : sur un résultat de 1, la figurine devient Stupide de façon permanente."
+          }
+        }
       ]
     }
   ],

@@ -367,3 +367,6 @@ FodyWeavers.xsd
 Deploy/Build-Release.local.ps1
 Deploy/*.keystore
 /Website/downloads
+
+# Scraper output - regenerable analysis data, not source content (see Tools/*.mjs)
+/Tools/output/

@@ -130,6 +130,12 @@ public class EquipmentSeedData
 
     public int Cost { get; set; }
     public int? Rarity { get; set; }
+
+    /// <summary>Null = Cost is fixed. Otherwise the maximum value of a random supplement rolled on top of
+    /// Cost at purchase time (e.g. "30 + 3D6 gc" -> Cost 30, CostRandomMax 18) - see
+    /// EquipmentItem.CostRandomMax.</summary>
+    public int? CostRandomMax { get; set; }
+
     public LocalizedText? Description { get; set; }
 
     /// <summary>True = only this warband can buy/carry it (see WarbandArchetypeEquipmentEntity) - the
@@ -140,6 +146,12 @@ public class EquipmentSeedData
     /// alone may have this item (e.g. Averlanders' "Long bow" in the shared Scout list - Bergjaeger
     /// only) - null/empty = every warrior of the restricted warband(s)/list members can have it.</summary>
     public List<string>? RestrictedToWarriorNames { get; set; }
+
+    /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - find-or-created by
+    /// English Name, same as MountSeedData.SpecialRules. Only applied when this item is newly created
+    /// (see AppDatabase) - a band file re-declaring an already-seeded item by name doesn't re-attach
+    /// rules, same precedent as Description there.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -176,6 +188,10 @@ public class SpecialRuleSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
+
+    /// <summary>Null = not a purchasable material. Non-null marks this rule as a weapon-material option
+    /// (e.g. "Gromril" -&gt; 4) - see SpecialRule.CostMultiplier.</summary>
+    public int? CostMultiplier { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

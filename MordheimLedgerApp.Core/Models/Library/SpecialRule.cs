@@ -25,4 +25,12 @@ public class SpecialRule
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>Null = this rule has no purchase-cost effect (the vast majority). Non-null marks it as a
+    /// selectable "material" a player can apply to a hand-to-hand weapon when buying it for a warrior
+    /// (e.g. "Gromril" -&gt; 4, "Ithilmar" -&gt; 3): the actual gc paid is the weapon's Cost times this
+    /// multiplier - see WarriorEquipment.MaterialRule. Editable like any other SpecialRule field, so
+    /// correcting the multiplier (or the rule text) here applies everywhere it's used - no rules engine
+    /// beyond this one multiplication, same "no rules engine V1" stance as the rest of the Library.</summary>
+    public int? CostMultiplier { get; set; }
 }

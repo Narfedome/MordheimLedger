@@ -69,6 +69,7 @@ public class AppDatabase
         await _db.CreateTableAsync<EquipmentListEntity>();
         await _db.CreateTableAsync<EquipmentListItemEntity>();
         await _db.CreateTableAsync<WarriorArchetypeEquipmentEntity>();
+        await _db.CreateTableAsync<EquipmentItemSpecialRuleEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -105,6 +106,7 @@ public class AppDatabase
         await _db.DropTableAsync<EquipmentListEntity>();
         await _db.DropTableAsync<EquipmentListItemEntity>();
         await _db.DropTableAsync<WarriorArchetypeEquipmentEntity>();
+        await _db.DropTableAsync<EquipmentItemSpecialRuleEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -222,6 +224,7 @@ public class AppDatabase
                     Category = Enum.Parse<EquipmentCategory>(eq.Category),
                     Cost = eq.Cost,
                     Rarity = eq.Rarity,
+                    CostRandomMax = eq.CostRandomMax,
                     Source = ContentSource.Official
                 };
                 item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
@@ -230,6 +233,12 @@ public class AppDatabase
                 await _db.InsertAsync(itemEntity);
                 itemId = itemEntity.Id;
                 _equipmentIdsByEnglishName[eq.Name.En] = itemId;
+
+                foreach (var sr in eq.SpecialRules)
+                {
+                    var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                    await _db.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = itemId, SpecialRuleId = ruleId });
+                }
             }
             bandEquipmentIdsByEnglishName[eq.Name.En] = itemId;
 
@@ -412,6 +421,7 @@ public class AppDatabase
                 Category = Enum.Parse<EquipmentCategory>(eq.Category),
                 Cost = eq.Cost,
                 Rarity = eq.Rarity,
+                CostRandomMax = eq.CostRandomMax,
                 Source = ContentSource.Official
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
@@ -419,6 +429,12 @@ public class AppDatabase
             var itemEntity = item.ToEntity();
             await _db.InsertAsync(itemEntity);
             _equipmentIdsByEnglishName[eq.Name.En] = itemEntity.Id;
+
+            foreach (var sr in eq.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = itemEntity.Id, SpecialRuleId = ruleId });
+            }
         }
     }
 
@@ -510,7 +526,7 @@ public class AppDatabase
         if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
-        var rule = new SpecialRule { Source = ContentSource.Official };
+        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier };
         rule.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
         rule.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
         var entity = rule.ToEntity();

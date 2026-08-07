@@ -69,7 +69,8 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         var restrictions = await LoadEquipmentRestrictionsAsync();
         var warriorRestrictions = await LoadEquipmentWarriorRestrictionsAsync();
-        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions)).ToList();
+        var specialRules = await LoadEquipmentSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions, specialRules)).ToList();
     }
 
     public async Task<List<EquipmentList>> GetEquipmentListsAsync(int warbandArchetypeId, string languageCode)
@@ -143,6 +144,21 @@ public class LibraryService : ILibraryService
         var rows = await _db.Connection.Table<SpecialRuleEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
+    }
+
+    /// <summary>Ids of SpecialRules attached to at least one WarbandArchetype/WarriorArchetype/Mount
+    /// (FighterRuleIds) vs. at least one EquipmentItem (ItemRuleIds) - derived from the 4 attachment join
+    /// tables rather than a stored category field, since a rule could in principle belong to both. Used
+    /// by SpecialRuleViewModel's group filter (Codex "Guerriers &amp; Bandes" vs "Objets" split).</summary>
+    public async Task<(HashSet<int> FighterRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync()
+    {
+        await _db.Initialization;
+        var warbandIds = (await _db.Connection.Table<WarbandArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var warriorIds = (await _db.Connection.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var mountIds = (await _db.Connection.Table<MountSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var itemIds = (await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var fighterRuleIds = new HashSet<int>(warbandIds.Concat(warriorIds).Concat(mountIds));
+        return (fighterRuleIds, new HashSet<int>(itemIds));
     }
 
     public async Task<List<Mutation>> GetMutationsAsync(string languageCode)
@@ -277,6 +293,14 @@ public class LibraryService : ILibraryService
         return rows.GroupBy(r => r.EquipmentItemId).ToDictionary(g => g.Key, g => g.Select(r => r.WarriorArchetypeId).ToList());
     }
 
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadEquipmentSpecialRulesAsync(string languageCode)
+    {
+        var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
+        var links = await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.EquipmentItemId)
+            .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
     /// <summary>Replace-all: deletes the item's existing restriction rows and inserts the current list -
     /// no diffing needed at this scale.</summary>
     private async Task SaveEquipmentRestrictionsAsync(int equipmentItemId, List<int> warbandArchetypeIds)
@@ -291,6 +315,13 @@ public class LibraryService : ILibraryService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorArchetypeEquipmentEntity WHERE EquipmentItemId = ?", equipmentItemId);
         foreach (var warriorArchetypeId in warriorArchetypeIds)
             await _db.Connection.InsertAsync(new WarriorArchetypeEquipmentEntity { EquipmentItemId = equipmentItemId, WarriorArchetypeId = warriorArchetypeId });
+    }
+
+    private async Task SaveEquipmentSpecialRulesAsync(int equipmentItemId, List<SpecialRule> specialRules)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ?", equipmentItemId);
+        foreach (var rule in specialRules)
+            await _db.Connection.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = equipmentItemId, SpecialRuleId = rule.Id });
     }
 
     /// <summary>Replace-all membership of an EquipmentList's items - distinct from
@@ -393,6 +424,7 @@ public class LibraryService : ILibraryService
 
         await SaveEquipmentRestrictionsAsync(item.Id, item.RestrictedToWarbandArchetypeIds);
         await SaveEquipmentWarriorRestrictionsAsync(item.Id, item.RestrictedToWarriorArchetypeIds);
+        await SaveEquipmentSpecialRulesAsync(item.Id, item.SpecialRules);
     }
 
     public async Task SaveEquipmentListAsync(EquipmentList list, string languageCode)

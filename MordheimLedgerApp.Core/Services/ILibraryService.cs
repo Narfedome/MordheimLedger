@@ -38,6 +38,10 @@ public interface ILibraryService
     /// WarbandArchetype.SpecialRules/WarriorArchetype.SpecialRules.</summary>
     Task<List<SpecialRule>> GetSpecialRulesAsync(string languageCode);
 
+    /// <summary>Ids of SpecialRules attached to a Warband/Warrior/Mount vs. to an EquipmentItem - see
+    /// LibraryService for details.</summary>
+    Task<(HashSet<int> FighterRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync();
+
     /// <summary>The flat global Mutation catalog (see Models.Library.Mutation) - not restricted per
     /// warband, shared verbatim across every Chaos-adjacent band.</summary>
     Task<List<Mutation>> GetMutationsAsync(string languageCode);

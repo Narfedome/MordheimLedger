@@ -21,7 +21,9 @@ public interface IWarbandService
     Task SaveWarriorAsync(Warrior warrior);
     Task DeleteWarriorAsync(int warriorId);
 
-    Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1);
+    /// <param name="materialRule">Optional material (e.g. "Gromril") chosen for this specific carried
+    /// weapon - see WarriorEquipment.MaterialRule.</param>
+    Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null);
     Task RemoveWarriorEquipmentAsync(int warriorEquipmentId);
 
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);

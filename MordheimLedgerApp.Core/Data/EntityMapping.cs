@@ -231,7 +231,8 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
-        ImagePath = e.ImagePath ?? string.Empty
+        ImagePath = e.ImagePath ?? string.Empty,
+        CostMultiplier = e.CostMultiplier
     };
 
     public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
@@ -240,25 +241,29 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
-        ImagePath = m.ImagePath
+        ImagePath = m.ImagePath,
+        CostMultiplier = m.CostMultiplier
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,
         IReadOnlyDictionary<int, List<int>>? restrictions = null,
-        IReadOnlyDictionary<int, List<int>>? warriorRestrictions = null) => new()
+        IReadOnlyDictionary<int, List<int>>? warriorRestrictions = null,
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByItemId = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
         Category = e.Category,
         Cost = e.Cost,
         Rarity = e.Rarity,
+        CostRandomMax = e.CostRandomMax,
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+        RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        SpecialRules = specialRulesByItemId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -335,6 +340,7 @@ public static class EntityMapping
         Category = m.Category,
         Cost = m.Cost,
         Rarity = m.Rarity,
+        CostRandomMax = m.CostRandomMax,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath
@@ -404,12 +410,15 @@ public static class EntityMapping
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>
-    public static WarriorEquipment ToModel(this WarriorEquipmentEntity e, EquipmentItem item) => new()
+    /// <param name="materialRule">The chosen material rule, loaded separately - see
+    /// WarriorEquipment.MaterialRule.</param>
+    public static WarriorEquipment ToModel(this WarriorEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null) => new()
     {
         Id = e.Id,
         WarriorId = e.WarriorId,
         Item = item,
-        Quantity = e.Quantity
+        Quantity = e.Quantity,
+        MaterialRule = materialRule
     };
 
     public static WarriorEquipmentEntity ToEntity(this WarriorEquipment m) => new()
@@ -417,7 +426,8 @@ public static class EntityMapping
         Id = m.Id,
         WarriorId = m.WarriorId,
         EquipmentItemId = m.Item.Id,
-        Quantity = m.Quantity
+        Quantity = m.Quantity,
+        MaterialSpecialRuleId = m.MaterialRule?.Id
     };
 
     /// <param name="item">The catalog skill this row references, loaded separately.</param>

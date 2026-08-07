@@ -32,27 +32,15 @@
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+        <!-- Groupement "maison" partagé (CodexGroupedGridView, Components/CodexGroupedGrid) plutôt que
+             CollectionView IsGrouped/GroupHeaderTemplate - voir CLAUDE.md pour la raison (chrome du
+             group header natif non maîtrisable sur WinUI). -->
+        <components:CodexGroupedGridView Grid.Row="1"
                 ItemsSource="{Binding MutationGroups}"
-                IsGrouped="True"
-                SelectionMode="None"
-                ItemSizingStrategy="MeasureFirstItem">
-            <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior/>
-            </CollectionView.Behaviors>
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
-            </CollectionView.ItemsLayout>
-            <CollectionView.GroupHeaderTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding Name}"
-                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           Style="{StaticResource CodexGroupHeaderStyle}"/>
-                </DataTemplate>
-            </CollectionView.GroupHeaderTemplate>
-            <CollectionView.ItemTemplate>
+                ShowGroupHeaders="{Binding ShowGroupHeaders}">
+            <components:CodexGroupedGridView.ItemTemplate>
                 <DataTemplate x:DataType="local:MutationRow">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey" Margin="0,0,5,5">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>
@@ -92,8 +80,8 @@
                         </Grid>
                     </Border>
                 </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+            </components:CodexGroupedGridView.ItemTemplate>
+        </components:CodexGroupedGridView>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">

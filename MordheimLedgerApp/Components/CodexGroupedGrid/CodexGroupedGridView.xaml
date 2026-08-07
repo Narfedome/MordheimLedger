@@ -43,7 +43,11 @@
         <!-- En-tête épinglé : reprend le comportement "sticky" du GroupHeaderTemplate natif abandonné -
              mis à jour sur ScrollView.Scrolled en comparant ScrollY à la position Y de chaque groupe
              réel dans GroupsStack.Children (pas de cache : recalculé à chaque scroll, coût négligeable
-             vu le nombre de groupes). Masqué tant qu'on n'a pas dépassé le tout début de la liste.
+             vu le nombre de groupes). Toujours visible dès qu'il y a des groupes (y compris ScrollY=0) -
+             masqué seulement en dessous d'un seuil, ça faisait "sauter" le bandeau à l'apparition
+             (signalé par l'utilisateur) ; en restant permanent il coïncide avec le header inline du
+             groupe en haut plutôt que de le dupliquer. Padding top=0 pour s'aligner sur la marge du
+             header inline du 1er groupe (IsFirst, cf. CodexGroupHeaderStyle) au repos.
              StrokeShape="Rectangle" explicite : le style implicite TargetType="Border" (Styles.xaml)
              pose RoundRectangle 15 - même avec StrokeThickness=0 la découpe du BackgroundColor suit
              cette forme, donnant un bandeau à coins arrondis au lieu d'une bande pleine largeur. Label
@@ -51,7 +55,7 @@
              DataTrigger IsFirst) n'a pas de sens ici, juste un Padding propre au bandeau. -->
         <Border x:Name="PinnedHeaderBorder" IsVisible="False" InputTransparent="True"
                 BackgroundColor="{DynamicResource AppBackground}" Stroke="Transparent" StrokeThickness="0"
-                StrokeShape="Rectangle" Padding="4,4"
+                StrokeShape="Rectangle" Padding="4,0,4,4"
                 VerticalOptions="Start" HorizontalOptions="Fill">
             <Label x:Name="PinnedHeaderLabel"
                    FontAttributes="Bold"

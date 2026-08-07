@@ -117,6 +117,8 @@ public partial class SpecialRuleViewModel : BaseViewModel
             }
             group.Add(new SpecialRuleRow(item));
         }
+        if (groups.Count > 0)
+            groups[0].IsFirst = true;
         SpecialRuleGroups = groups;
 
         SelectedRow = null;

@@ -30,25 +30,13 @@
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+        <!-- Groupement "maison" partagé (CodexGroupedGridView, Components/CodexGroupedGrid) plutôt que
+             CollectionView IsGrouped/GroupHeaderTemplate - voir CLAUDE.md pour la raison (chrome du
+             group header natif non maîtrisable sur WinUI). -->
+        <components:CodexGroupedGridView Grid.Row="1"
                 ItemsSource="{Binding EquipmentItemGroups}"
-                IsGrouped="True"
-                SelectionMode="None"
-                ItemSizingStrategy="MeasureFirstItem">
-            <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior/>
-            </CollectionView.Behaviors>
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
-            </CollectionView.ItemsLayout>
-            <CollectionView.GroupHeaderTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding Name}"
-                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           Style="{StaticResource CodexGroupHeaderStyle}"/>
-                </DataTemplate>
-            </CollectionView.GroupHeaderTemplate>
-            <CollectionView.ItemTemplate>
+                ShowGroupHeaders="{Binding ShowGroupHeaders}">
+            <components:CodexGroupedGridView.ItemTemplate>
                 <DataTemplate x:DataType="local:EquipmentItemRow">
                     <!-- Sélection gérée à la main (IsSelected, pas SelectionMode) - reprise mot pour mot
                          de LibraryTrackView chez DmTools (commit 09c71545a) : BackgroundColor/Stroke
@@ -57,7 +45,7 @@
                          neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
                          empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
                          le DataTrigger sur IsSelected. -->
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey" Margin="0,0,5,5">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>
@@ -97,8 +85,8 @@
                         </Grid>
                     </Border>
                 </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+            </components:CodexGroupedGridView.ItemTemplate>
+        </components:CodexGroupedGridView>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">

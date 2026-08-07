@@ -6,7 +6,8 @@ namespace MordheimLedgerApp.Components;
 public partial class CodexGroupedGridView : ContentView
 {
     public static readonly BindableProperty ItemsSourceProperty =
-        BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(CodexGroupedGridView));
+        BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(CodexGroupedGridView),
+            propertyChanged: (bindable, _, _) => ((CodexGroupedGridView)bindable).RefreshPinnedHeader(0));
 
     public IEnumerable? ItemsSource
     {
@@ -25,7 +26,8 @@ public partial class CodexGroupedGridView : ContentView
     }
 
     public static readonly BindableProperty ShowGroupHeadersProperty =
-        BindableProperty.Create(nameof(ShowGroupHeaders), typeof(bool), typeof(CodexGroupedGridView), true);
+        BindableProperty.Create(nameof(ShowGroupHeaders), typeof(bool), typeof(CodexGroupedGridView), true,
+            propertyChanged: (bindable, _, _) => ((CodexGroupedGridView)bindable).RefreshPinnedHeader(0));
 
     public bool ShowGroupHeaders
     {
@@ -38,11 +40,15 @@ public partial class CodexGroupedGridView : ContentView
         InitializeComponent();
     }
 
-    private void OnScrolled(object? sender, ScrolledEventArgs e)
+    private void OnScrolled(object? sender, ScrolledEventArgs e) => RefreshPinnedHeader(e.ScrollY);
+
+    // Épinglé en permanence (y compris au tout en haut, ScrollY=0) plutôt que masqué tant qu'on n'a pas
+    // dépassé un seuil : un pin qui apparaît en cours de route "saute" visuellement (signalé par
+    // l'utilisateur - le bandeau surgit d'un coup). En restant toujours visible, il coïncide
+    // exactement avec le header inline du groupe actuellement en haut plutôt que de le dupliquer.
+    private void RefreshPinnedHeader(double scrollY)
     {
-        // Tout en haut (avant tout scroll) : le header inline du 1er groupe est déjà visible, pas
-        // besoin du pin. Petit seuil plutôt que "> 0" pour absorber le bruit de scroll natif.
-        if (!ShowGroupHeaders || e.ScrollY < 10)
+        if (!ShowGroupHeaders)
         {
             PinnedHeaderBorder.IsVisible = false;
             return;
@@ -56,11 +62,24 @@ public partial class CodexGroupedGridView : ContentView
         {
             if (child is not VisualElement { BindingContext: ICodexGroup group } element)
                 continue;
-            if (element.Bounds.Y <= e.ScrollY)
+            // Pas encore mesuré (juste après un changement d'ItemsSource, avant le premier passage de
+            // layout) : Bounds.Y vaut 0 pour TOUS les enfants, donc "Y <= scrollY" ne s'arrête jamais et
+            // retiendrait le DERNIER groupe au lieu du premier - on abandonne au profit du repli
+            // ci-dessous dès qu'un enfant non mesuré est rencontré.
+            if (element.Bounds.Height <= 0)
+            {
+                current = null;
+                break;
+            }
+            if (element.Bounds.Y <= scrollY)
                 current = group;
             else
                 break;
         }
+
+        // Au tout premier rendu (ItemsSource vient d'être posé), GroupsStack.Children n'a pas encore de
+        // Bounds mesurés - repli sur le premier élément d'ItemsSource directement.
+        current ??= ItemsSource?.Cast<object>().OfType<ICodexGroup>().FirstOrDefault();
 
         if (current is null)
         {

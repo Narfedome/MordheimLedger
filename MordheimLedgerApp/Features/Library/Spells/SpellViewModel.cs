@@ -116,6 +116,8 @@ public partial class SpellViewModel : BaseViewModel
             }
             group.Add(new SpellRow(item));
         }
+        if (groups.Count > 0)
+            groups[0].IsFirst = true;
         SpellGroups = groups;
 
         SelectedRow = null;

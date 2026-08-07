@@ -112,6 +112,8 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             }
             group.Add(new WarbandArchetypeRow(item));
         }
+        if (groups.Count > 0)
+            groups[0].IsFirst = true;
         WarbandArchetypeGroups = groups;
 
         SelectedRow = null;

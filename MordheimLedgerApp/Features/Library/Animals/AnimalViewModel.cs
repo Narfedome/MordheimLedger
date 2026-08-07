@@ -119,6 +119,8 @@ public partial class AnimalViewModel : BaseViewModel
             }
             group.Add(new AnimalRow(item));
         }
+        if (groups.Count > 0)
+            groups[0].IsFirst = true;
         AnimalGroups = groups;
 
         SelectedRow = null;

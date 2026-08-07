@@ -139,6 +139,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
             }
             group.Add(new EquipmentItemRow(item));
         }
+        if (groups.Count > 0)
+            groups[0].IsFirst = true;
         EquipmentItemGroups = groups;
 
         SelectedRow = null;

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MordheimLedgerApp.Features.Library.Mounts.MountView"
-             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mounts"
+             x:Class="MordheimLedgerApp.Features.Library.Animals.AnimalView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Animals"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
-    <!-- Filtre par groupe ("Commun" vs. bande restrictive) : Mount n'a pas de catégorie propre au livre
+    <!-- Filtre par groupe ("Commun" vs. bande restrictive) : Animal n'a pas de catégorie propre au livre
          de règles, RestrictedToWarbandArchetypeIds (déjà suivi pour le picker) sert d'axe de
          regroupement - même en-tête que MutationView. -->
     <Grid Margin="5" RowSpacing="8">
@@ -33,7 +33,7 @@
                            WidthRequest="120" HeightRequest="120"/>
 
         <CollectionView Grid.Row="1" x:Name="ItemsCollection"
-                ItemsSource="{Binding MountGroups}"
+                ItemsSource="{Binding AnimalGroups}"
                 IsGrouped="True"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
@@ -54,7 +54,7 @@
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="local:MountRow">
+                <DataTemplate x:DataType="local:AnimalRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
@@ -73,7 +73,7 @@
                             <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
                                 <components:LibraryItemImageView
                                     ImagePath="{Binding Item.ImagePath}"
-                                    DefaultGlyph="{x:Static icons:RpgFont.RaHorseshoe}"
+                                    DefaultGlyph="{x:Static icons:RpgFont.RaPawprint}"
                                     FontFamily="RpgAwesome"
                                     WidthRequest="20" HeightRequest="20"
                                     HorizontalOptions="Center" />
@@ -114,8 +114,8 @@
         </HorizontalStackLayout>
 
         <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
-             toutes les tuiles cochées d'un coup - en pratique la monture ne prend que le premier résultat
-             coché (voir WarriorEditDialogViewModel.PickMount). -->
+             toutes les tuiles cochées d'un coup - en pratique le guerrier ne prend que le premier résultat
+             coché (voir WarriorEditDialogViewModel.PickAnimal). -->
         <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"

@@ -73,7 +73,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
         ApplyFilterAndGroup();
     }
 
-    /// <summary>A rule can in principle be attached to both a fighter (Warband/Warrior/Mount) and an
+    /// <summary>A rule can in principle be attached to both a fighter (Warband/Warrior/Animal) and an
     /// item - joined like MutationViewModel.GroupNameFor joins multiple warband restrictions. Neither
     /// (a freshly-created rule not attached anywhere yet) falls back to "Non classée".</summary>
     private string GroupNameFor(SpecialRule item)

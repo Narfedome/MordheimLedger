@@ -58,22 +58,22 @@
                 <Entry Text="{Binding Item.MovementOverride}"/>
             </VerticalStackLayout>
 
-            <!-- Monture : champ 0..1 (pas une liste/onglet) - même famille que Nom/stats, soumis au
+            <!-- Animal : champ 0..1 (pas une liste/onglet) - même famille que Nom/stats, soumis au
                  Enregistrer/Annuler du dialog plutôt qu'à une persistance immédiate. -->
             <VerticalStackLayout Spacing="2">
-                <Label Text="{loc:Loc WarriorMountHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc WarriorAnimalHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Grid ColumnDefinitions="*,Auto,Auto">
-                    <Label Grid.Column="0" Text="{Binding Item.Mount.Name}" VerticalOptions="Center"
+                    <Label Grid.Column="0" Text="{Binding Item.Animal.Name}" VerticalOptions="Center"
                            TextColor="{DynamicResource AppText}"/>
                     <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Icon="{x:Static icons:RpgFont.RaHorseshoe}"
+                                                  Icon="{x:Static icons:RpgFont.RaPawprint}"
                                                   IconSize="14" ButtonWidthRequest="28" ButtonHeightRequest="28"
-                                                  Command="{Binding SelectMountCommand}"/>
+                                                  Command="{Binding SelectAnimalCommand}"/>
                     <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                   Icon="{x:Static icons:SolidFont.Xmark}"
                                                   IconSize="14" ButtonWidthRequest="28" ButtonHeightRequest="28"
-                                                  IsVisible="{Binding Item.Mount, Converter={StaticResource IsNotNullConverter}}"
-                                                  Command="{Binding ClearMountCommand}"/>
+                                                  IsVisible="{Binding Item.Animal, Converter={StaticResource IsNotNullConverter}}"
+                                                  Command="{Binding ClearAnimalCommand}"/>
                 </Grid>
             </VerticalStackLayout>
 

@@ -351,10 +351,10 @@ public static class EntityMapping
     /// <param name="injuries">Tracked injuries, loaded separately via the join table.</param>
     /// <param name="spells">Learned spells, loaded separately via the join table.</param>
     /// <param name="mutations">Bought mutations, loaded separately via the join table.</param>
-    /// <param name="mount">Ridden mount, resolved separately from MountEntity - not a join, see WarriorEntity.MountId.</param>
+    /// <param name="animal">Ridden animal, resolved separately from AnimalEntity - not a join, see WarriorEntity.AnimalId.</param>
     public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null,
         IEnumerable<WarriorInjury>? injuries = null, IEnumerable<WarriorSpell>? spells = null, IEnumerable<WarriorMutation>? mutations = null,
-        Mount? mount = null) => new()
+        Animal? animal = null) => new()
     {
         Id = e.Id,
         WarbandId = e.WarbandId,
@@ -381,7 +381,7 @@ public static class EntityMapping
         Injuries = injuries?.ToList() ?? new List<WarriorInjury>(),
         Spells = spells?.ToList() ?? new List<WarriorSpell>(),
         Mutations = mutations?.ToList() ?? new List<WarriorMutation>(),
-        Mount = mount
+        Animal = animal
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -404,7 +404,7 @@ public static class EntityMapping
         Initiative = m.Initiative,
         Attacks = m.Attacks,
         Leadership = m.Leadership,
-        MountId = m.Mount?.Id,
+        AnimalId = m.Animal?.Id,
         EquipmentListId = m.EquipmentListId,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
     };
@@ -514,13 +514,14 @@ public static class EntityMapping
         MutationId = m.Item.Id
     };
 
-    public static Mount ToModel(this MountEntity e, IReadOnlyDictionary<string, string> translations,
-        IReadOnlyDictionary<int, List<int>>? restrictions = null, IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByMountId = null) => new()
+    public static Animal ToModel(this AnimalEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null, IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByAnimalId = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
         Cost = e.Cost,
         Rarity = e.Rarity,
+        CostRandomMax = e.CostRandomMax,
         Movement = e.Movement,
         WeaponSkill = e.WeaponSkill,
         BallisticSkill = e.BallisticSkill,
@@ -536,15 +537,16 @@ public static class EntityMapping
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        SpecialRules = specialRulesByMountId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
+        SpecialRules = specialRulesByAnimalId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
 
-    public static MountEntity ToEntity(this Mount m) => new()
+    public static AnimalEntity ToEntity(this Animal m) => new()
     {
         Id = m.Id,
         NameKey = m.NameKey ?? string.Empty,
         Cost = m.Cost,
         Rarity = m.Rarity,
+        CostRandomMax = m.CostRandomMax,
         Movement = m.Movement,
         WeaponSkill = m.WeaponSkill,
         BallisticSkill = m.BallisticSkill,

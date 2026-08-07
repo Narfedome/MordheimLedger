@@ -20,7 +20,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly ISpellPickerService _spellPicker;
     private readonly IReadOnlyList<int> _allowedMagicSchoolIds;
     private readonly IMutationPickerService _mutationPicker;
-    private readonly IMountPickerService _mountPicker;
+    private readonly IAnimalPickerService _animalPicker;
 
     protected override bool CancelResult => false;
 
@@ -87,7 +87,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
         ILibraryService libraryService, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
         IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
-        IMutationPickerService mutationPicker, bool isMutant, IMountPickerService mountPicker)
+        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker)
     {
         this.item = item;
         this.title = title;
@@ -102,7 +102,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _allowedMagicSchoolIds = allowedMagicSchoolIds;
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
-        _mountPicker = mountPicker;
+        _animalPicker = animalPicker;
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);
@@ -230,27 +230,27 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         Mutations.Remove(bought);
     }
 
-    /// <summary>Monture n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Mount,
+    /// <summary>Animal n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Animal,
     /// soumis comme les stats au bouton Enregistrer/Annuler (pas de persistance immédiate ni de méthode
-    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.MountId).</summary>
+    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.AnimalId).</summary>
     [RelayCommand]
-    private async Task SelectMount()
+    private async Task SelectAnimal()
     {
-        var mounts = await _mountPicker.PickMountsAsync();
-        if (mounts.Count > 0)
+        var animals = await _animalPicker.PickAnimalsAsync();
+        if (animals.Count > 0)
         {
-            Item.Mount = mounts[0];
-            // Item lui-même (Warrior) n'implémente pas INotifyPropertyChanged - Mount est modifié en
-            // place sur la même instance, donc les liaisons "Item.Mount.Name" ne se rafraîchiraient pas
+            Item.Animal = animals[0];
+            // Item lui-même (Warrior) n'implémente pas INotifyPropertyChanged - Animal est modifié en
+            // place sur la même instance, donc les liaisons "Item.Animal.Name" ne se rafraîchiraient pas
             // sans ce signal explicite sur la propriété racine.
             OnPropertyChanged(nameof(Item));
         }
     }
 
     [RelayCommand]
-    private void ClearMount()
+    private void ClearAnimal()
     {
-        Item.Mount = null;
+        Item.Animal = null;
         OnPropertyChanged(nameof(Item));
     }
 

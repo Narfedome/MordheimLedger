@@ -1,11 +1,11 @@
 using CommunityToolkit.Maui.Views;
 using MordheimLedgerApp.Components.Dialogs;
 
-namespace MordheimLedgerApp.Features.Library.Mounts.CreateEdit;
+namespace MordheimLedgerApp.Features.Library.Animals.CreateEdit;
 
-public partial class MountEditDialog : Popup<bool>
+public partial class AnimalEditDialog : Popup<bool>
 {
-    public MountEditDialog(MountEditDialogViewModel viewModel)
+    public AnimalEditDialog(AnimalEditDialogViewModel viewModel)
     {
         InitializeComponent();
         ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();

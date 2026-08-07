@@ -360,7 +360,7 @@
         <Setter Property="HeightRequest" Value="130"/>
     </Style>
 
-    <!-- Ligne d'info secondaire sous le nom (coût, rareté, jet de sort...) - Mutation/Mount/Spell
+    <!-- Ligne d'info secondaire sous le nom (coût, rareté, jet de sort...) - Mutation/Animal/Spell
          l'utilisaient déjà en style ad hoc (AppTextMuted) ; formalisé ici en AppAccent pour mieux
          ressortir, et étendu à Equipment lors de ce même passage. -->
     <Style TargetType="Label" x:Key="CodexTileSecondaryLabelStyle">

@@ -6,7 +6,7 @@ namespace MordheimLedgerApp.Core.Models.Library;
 /// Hommes-Bêtes, Kermesse du Chaos...), left unrestricted (empty RestrictedToWarbandArchetypeIds) so it
 /// resolves to the same catalog row everywhere via find-or-create-by-English-Name. Some warbands add
 /// their own exclusive entries instead (e.g. Kermesse du Chaos's Nurgle-themed "Bénédictions" for its
-/// Impurs) - restricted the same way as EquipmentItem/Skill/Mount so they don't leak into other bands'
+/// Impurs) - restricted the same way as EquipmentItem/Skill/Animal so they don't leak into other bands'
 /// pickers. The "1st at list price, each next one double" rule and "only at recruitment for
 /// Mutants/Possessed" restriction stay descriptive (Description), not enforced - same "no rules engine
 /// V1" boundary as the rest of the Library. Which WarriorArchetypes may buy mutations at all is gated by

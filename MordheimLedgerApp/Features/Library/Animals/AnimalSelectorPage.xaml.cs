@@ -1,8 +1,8 @@
-namespace MordheimLedgerApp.Features.Library.Mounts;
+namespace MordheimLedgerApp.Features.Library.Animals;
 
-public partial class MountSelectorPage : ContentPage
+public partial class AnimalSelectorPage : ContentPage
 {
-    public MountSelectorPage(MountViewModel viewModel)
+    public AnimalSelectorPage(AnimalViewModel viewModel)
     {
         InitializeComponent();
         viewModel.IsSelectorMode = true;
@@ -13,7 +13,7 @@ public partial class MountSelectorPage : ContentPage
     {
         base.OnAppearing();
 
-        if (BindingContext is MountViewModel vm)
+        if (BindingContext is AnimalViewModel vm)
             await vm.InitializeAsync();
     }
 }

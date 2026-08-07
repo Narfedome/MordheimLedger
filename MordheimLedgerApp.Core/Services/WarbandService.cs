@@ -137,18 +137,18 @@ public class WarbandService : IWarbandService
                 }
             }
 
-            Mount? mount = null;
-            if (row.MountId is { } mountId)
+            Animal? animal = null;
+            if (row.AnimalId is { } animalId)
             {
-                var mountEntity = await _db.Connection.FindAsync<MountEntity>(mountId);
-                if (mountEntity is not null)
+                var animalEntity = await _db.Connection.FindAsync<AnimalEntity>(animalId);
+                if (animalEntity is not null)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [mountEntity.NameKey, mountEntity.DescriptionKey], languageCode);
-                    mount = mountEntity.ToModel(translations);
+                    var translations = await TranslationResolver.ResolveAsync(_db.Connection, [animalEntity.NameKey, animalEntity.DescriptionKey], languageCode);
+                    animal = animalEntity.ToModel(translations);
                 }
             }
 
-            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, mount));
+            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal));
         }
         return warriors;
     }

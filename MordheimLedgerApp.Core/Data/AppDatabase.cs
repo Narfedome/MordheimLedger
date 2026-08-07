@@ -60,9 +60,9 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorArchetypeSpecialRuleEntity>();
         await _db.CreateTableAsync<MutationEntity>();
         await _db.CreateTableAsync<WarriorMutationEntity>();
-        await _db.CreateTableAsync<MountEntity>();
-        await _db.CreateTableAsync<WarbandArchetypeMountEntity>();
-        await _db.CreateTableAsync<MountSpecialRuleEntity>();
+        await _db.CreateTableAsync<AnimalEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeAnimalEntity>();
+        await _db.CreateTableAsync<AnimalSpecialRuleEntity>();
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMutationEntity>();
@@ -97,9 +97,9 @@ public class AppDatabase
         await _db.DropTableAsync<WarriorArchetypeSpecialRuleEntity>();
         await _db.DropTableAsync<MutationEntity>();
         await _db.DropTableAsync<WarriorMutationEntity>();
-        await _db.DropTableAsync<MountEntity>();
-        await _db.DropTableAsync<WarbandArchetypeMountEntity>();
-        await _db.DropTableAsync<MountSpecialRuleEntity>();
+        await _db.DropTableAsync<AnimalEntity>();
+        await _db.DropTableAsync<WarbandArchetypeAnimalEntity>();
+        await _db.DropTableAsync<AnimalSpecialRuleEntity>();
         await _db.DropTableAsync<MagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMutationEntity>();
@@ -128,19 +128,23 @@ public class AppDatabase
 
     private async Task SeedOfficialContentAsync()
     {
-        // The 6 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
-        // Skills.json, Injuries.json, MagicSchools.json) must seed before any warband file below -
-        // warband JSON files only declare rules/equipment/mutations/schools that are genuinely THEIRS,
-        // and find-or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted
-        // insert (Equipment/Skill/Injury) relies on the canonical row already existing by the time a
-        // warband references it. Injuries.json isn't referenced by any warband file at all (no per-band
-        // injury tables in the rulebook), it just needs to seed once.
+        // The 7 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
+        // Skills.json, Injuries.json, MagicSchools.json, Animals.json) must seed before any warband file
+        // below - warband JSON files only declare rules/equipment/mutations/schools/animals that are
+        // genuinely THEIRS, and find-or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a
+        // plain unrestricted insert (Equipment/Skill/Injury/Animal) relies on the canonical row already
+        // existing by the time a warband references it. Injuries.json isn't referenced by any warband
+        // file at all (no per-band injury tables in the rulebook), it just needs to seed once. Animals.json
+        // holds the core rulebook's non-band-specific animals (Cheval/Destrier/Chien de guerre) - band-only
+        // ones (e.g. Orc Mob's Sanglier de guerre) stay declared directly in their own warband file, same
+        // split as Equipment.json vs. band-declared equipment.
         await SeedSpecialRulesAsync();
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
+        await SeedAnimalsAsync();
 
         await SeedWarbandFromJsonAsync("Undead.json");
         await SeedWarbandFromJsonAsync("DwarfTreasureHunters.json");
@@ -359,9 +363,9 @@ public class AppDatabase
         foreach (var mu in data.Mutations)
             await FindOrCreateMutationAsync(mu, warbandEntity.Id);
 
-        foreach (var mo in data.Mounts)
+        foreach (var mo in data.Animals)
         {
-            var mount = new Mount
+            var animal = new Animal
             {
                 Cost = mo.Cost,
                 Rarity = mo.Rarity,
@@ -376,18 +380,18 @@ public class AppDatabase
                 Leadership = mo.Leadership,
                 Source = ContentSource.Official
             };
-            mount.NameKey = await SeedTranslationAsync(mo.Name.En, mo.Name.Fr);
-            mount.DescriptionKey = mo.Description is null ? null : await SeedTranslationAsync(mo.Description.En, mo.Description.Fr);
-            var mountEntity = mount.ToEntity();
-            await _db.InsertAsync(mountEntity);
+            animal.NameKey = await SeedTranslationAsync(mo.Name.En, mo.Name.Fr);
+            animal.DescriptionKey = mo.Description is null ? null : await SeedTranslationAsync(mo.Description.En, mo.Description.Fr);
+            var animalEntity = animal.ToEntity();
+            await _db.InsertAsync(animalEntity);
 
             if (mo.RestrictedToThisWarband)
-                await _db.InsertAsync(new WarbandArchetypeMountEntity { WarbandArchetypeId = warbandEntity.Id, MountId = mountEntity.Id });
+                await _db.InsertAsync(new WarbandArchetypeAnimalEntity { WarbandArchetypeId = warbandEntity.Id, AnimalId = animalEntity.Id });
 
             foreach (var sr in mo.SpecialRules)
             {
                 var ruleId = await FindOrCreateSpecialRuleAsync(sr);
-                await _db.InsertAsync(new MountSpecialRuleEntity { MountId = mountEntity.Id, SpecialRuleId = ruleId });
+                await _db.InsertAsync(new AnimalSpecialRuleEntity { AnimalId = animalEntity.Id, SpecialRuleId = ruleId });
             }
         }
     }
@@ -434,6 +438,41 @@ public class AppDatabase
             {
                 var ruleId = await FindOrCreateSpecialRuleAsync(sr);
                 await _db.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = itemEntity.Id, SpecialRuleId = ruleId });
+            }
+        }
+    }
+
+    /// <summary>Plain insert, no dedup - Animals.json only holds core rulebook animals with no band
+    /// affiliation (Cheval/Destrier/Chien de guerre), so nothing else can reference them by name.</summary>
+    private async Task SeedAnimalsAsync()
+    {
+        foreach (var an in await LoadSeedArrayAsync<AnimalSeedData>("Animals.json"))
+        {
+            var animal = new Animal
+            {
+                Cost = an.Cost,
+                Rarity = an.Rarity,
+                CostRandomMax = an.CostRandomMax,
+                Movement = an.Movement,
+                WeaponSkill = an.WeaponSkill,
+                BallisticSkill = an.BallisticSkill,
+                Strength = an.Strength,
+                Toughness = an.Toughness,
+                Wounds = an.Wounds,
+                Initiative = an.Initiative,
+                Attacks = an.Attacks,
+                Leadership = an.Leadership,
+                Source = ContentSource.Official
+            };
+            animal.NameKey = await SeedTranslationAsync(an.Name.En, an.Name.Fr);
+            animal.DescriptionKey = an.Description is null ? null : await SeedTranslationAsync(an.Description.En, an.Description.Fr);
+            var animalEntity = animal.ToEntity();
+            await _db.InsertAsync(animalEntity);
+
+            foreach (var sr in an.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new AnimalSpecialRuleEntity { AnimalId = animalEntity.Id, SpecialRuleId = ruleId });
             }
         }
     }

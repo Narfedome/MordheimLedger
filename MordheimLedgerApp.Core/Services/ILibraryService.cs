@@ -38,7 +38,7 @@ public interface ILibraryService
     /// WarbandArchetype.SpecialRules/WarriorArchetype.SpecialRules.</summary>
     Task<List<SpecialRule>> GetSpecialRulesAsync(string languageCode);
 
-    /// <summary>Ids of SpecialRules attached to a Warband/Warrior/Mount vs. to an EquipmentItem - see
+    /// <summary>Ids of SpecialRules attached to a Warband/Warrior/Animal vs. to an EquipmentItem - see
     /// LibraryService for details.</summary>
     Task<(HashSet<int> FighterRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync();
 
@@ -46,9 +46,9 @@ public interface ILibraryService
     /// warband, shared verbatim across every Chaos-adjacent band.</summary>
     Task<List<Mutation>> GetMutationsAsync(string languageCode);
 
-    /// <summary>The Mount catalog (see Models.Library.Mount) - has its own stat profile, separate from
+    /// <summary>The Animal catalog (see Models.Library.Animal) - has its own stat profile, separate from
     /// EquipmentItem.</summary>
-    Task<List<Mount>> GetMountsAsync(string languageCode);
+    Task<List<Animal>> GetAnimalsAsync(string languageCode);
 
     /// <summary>The MagicSchool catalog (e.g. "Nécromancie") - see Models.Library.MagicSchool.</summary>
     Task<List<MagicSchool>> GetMagicSchoolsAsync(string languageCode);
@@ -80,7 +80,7 @@ public interface ILibraryService
     Task SaveSpellAsync(Spell spell, string languageCode);
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
     Task SaveMutationAsync(Mutation mutation, string languageCode);
-    Task SaveMountAsync(Mount mount, string languageCode);
+    Task SaveAnimalAsync(Animal animal, string languageCode);
     Task SaveMagicSchoolAsync(MagicSchool school, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
@@ -92,6 +92,6 @@ public interface ILibraryService
     Task DeleteSpellAsync(int spellId);
     Task DeleteSpecialRuleAsync(int specialRuleId);
     Task DeleteMutationAsync(int mutationId);
-    Task DeleteMountAsync(int mountId);
+    Task DeleteAnimalAsync(int animalId);
     Task DeleteMagicSchoolAsync(int magicSchoolId);
 }

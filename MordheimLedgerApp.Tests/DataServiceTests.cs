@@ -263,11 +263,11 @@ public class DataServiceTests : IDisposable
         Assert.Empty(greatClaw.RestrictedToWarbandArchetypeIds);
     }
 
-    /// <summary>Orc Mob is the first warband to use both the Mount catalog (War Boar, restricted) and a
+    /// <summary>Orc Mob is the first warband to use both the Animal catalog (War Boar, restricted) and a
     /// non-fixed Movement characteristic (Cave Squigs roll 2D6" instead of a fixed value) - see
     /// WarriorArchetype.MovementOverride/MovementDisplay, added specifically for this case.</summary>
     [Fact]
-    public async Task OrcMob_SquigMovementOverride_AndWarBoarMount()
+    public async Task OrcMob_SquigMovementOverride_AndWarBoarAnimal()
     {
         var orcs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Orc Mob");
         var warriors = await _library.GetWarriorArchetypesAsync(orcs.Id, "en");
@@ -281,8 +281,8 @@ public class DataServiceTests : IDisposable
         Assert.Equal(boss.Movement.ToString(), boss.MovementDisplay);
         Assert.Contains(boss.SpecialRules, r => r.Name == "Leader");
 
-        var mounts = await _library.GetMountsAsync("en");
-        var warBoar = mounts.Single(m => m.Name == "War Boar");
+        var animals = await _library.GetAnimalsAsync("en");
+        var warBoar = animals.Single(m => m.Name == "War Boar");
         Assert.Equal([orcs.Id], warBoar.RestrictedToWarbandArchetypeIds);
         Assert.Contains(warBoar.SpecialRules, r => r.Name == "Furious Charge");
     }

@@ -3,13 +3,14 @@ using SQLite;
 
 namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
-public class MountEntity
+public class AnimalEntity
 {
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
     public string NameKey { get; set; } = string.Empty;
     public int Cost { get; set; }
     public int? Rarity { get; set; }
+    public int? CostRandomMax { get; set; }
 
     public int Movement { get; set; }
     public int WeaponSkill { get; set; }

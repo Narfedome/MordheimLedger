@@ -3,14 +3,14 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
-               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mounts.CreateEdit"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Animals.CreateEdit"
                xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                x:TypeArguments="system:Boolean"
-               x:Class="MordheimLedgerApp.Features.Library.Mounts.CreateEdit.MountDetailDialog"
-               x:DataType="local:MountDetailDialogViewModel"
+               x:Class="MordheimLedgerApp.Features.Library.Animals.CreateEdit.AnimalDetailDialog"
+               x:DataType="local:AnimalDetailDialogViewModel"
                BackgroundColor="Transparent"
                Padding="0"
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
@@ -29,11 +29,11 @@
             </Grid>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc MountCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
+                    <Label Text="{loc:Loc AnimalCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding CostDisplay}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="{loc:Loc MountRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{loc:Loc AnimalRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding RarityDisplay}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
             </Grid>
@@ -43,7 +43,7 @@
             </VerticalStackLayout>
 
             <!-- Profil (abréviations officielles du livre de règles, pas de traduction) - même grille que
-                 MountEditDialog, valeurs non éditables. -->
+                 AnimalEditDialog, valeurs non éditables. -->
             <Grid ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
                 <VerticalStackLayout Grid.Row="0" Grid.Column="0">
                     <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -94,7 +94,7 @@
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MountDetailDialogViewModel}}, Path=ShowWarbandDetailCommand}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:AnimalDetailDialogViewModel}}, Path=ShowWarbandDetailCommand}"
                                         CommandParameter="{Binding .}"/>
                                 </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
@@ -116,7 +116,7 @@
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MountDetailDialogViewModel}}, Path=ShowSpecialRuleDetailCommand}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:AnimalDetailDialogViewModel}}, Path=ShowSpecialRuleDetailCommand}"
                                         CommandParameter="{Binding .}"/>
                                 </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">

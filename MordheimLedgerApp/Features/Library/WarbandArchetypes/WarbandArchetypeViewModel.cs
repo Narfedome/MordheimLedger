@@ -46,7 +46,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 
     /// <summary>Set by WarbandArchetypeSelectorPage right after construction - même bascule
     /// multi-sélection que SpecialRuleViewModel.IsSelectorMode (utilisé pour "réservé à ces bandes" sur
-    /// Équipement/Compétences/Montures).</summary>
+    /// Équipement/Compétences/Animaux).</summary>
     public bool IsSelectorMode { get; set; }
 
     /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>

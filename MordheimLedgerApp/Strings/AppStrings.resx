@@ -525,32 +525,35 @@
   <data name="WarriorsMutationsHeading" xml:space="preserve">
     <value>Mutations</value>
   </data>
-  <data name="LibTabMounts" xml:space="preserve">
-    <value>Montures</value>
+  <data name="LibTabAnimals" xml:space="preserve">
+    <value>Animaux</value>
   </data>
-  <data name="MountNamePh" xml:space="preserve">
-    <value>Nom de la monture</value>
+  <data name="AnimalNamePh" xml:space="preserve">
+    <value>Nom de l'animal</value>
   </data>
-  <data name="MountCostPh" xml:space="preserve">
+  <data name="AnimalCostPh" xml:space="preserve">
     <value>Coût (CO)</value>
   </data>
-  <data name="MountRarityPh" xml:space="preserve">
+  <data name="AnimalRarityPh" xml:space="preserve">
     <value>Rareté (vide = commun)</value>
   </data>
-  <data name="MountCreateTitle" xml:space="preserve">
-    <value>Nouvelle monture</value>
+  <data name="AnimalCostRandomMaxPh" xml:space="preserve">
+    <value>Supplément aléatoire max. (ex. 2D6 = 12)</value>
   </data>
-  <data name="MountEditTitle" xml:space="preserve">
-    <value>Modifier la monture</value>
+  <data name="AnimalCreateTitle" xml:space="preserve">
+    <value>Nouvel animal</value>
   </data>
-  <data name="MountSelectTitle" xml:space="preserve">
-    <value>Choisir une monture</value>
+  <data name="AnimalEditTitle" xml:space="preserve">
+    <value>Modifier l'animal</value>
+  </data>
+  <data name="AnimalSelectTitle" xml:space="preserve">
+    <value>Choisir un animal</value>
   </data>
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des bandes</value>
   </data>
-  <data name="WarriorMountHeading" xml:space="preserve">
-    <value>Monture</value>
+  <data name="WarriorAnimalHeading" xml:space="preserve">
+    <value>Animal</value>
   </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Écoles de magie</value>

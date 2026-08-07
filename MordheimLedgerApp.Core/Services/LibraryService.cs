@@ -146,7 +146,7 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
     }
 
-    /// <summary>Ids of SpecialRules attached to at least one WarbandArchetype/WarriorArchetype/Mount
+    /// <summary>Ids of SpecialRules attached to at least one WarbandArchetype/WarriorArchetype/Animal
     /// (FighterRuleIds) vs. at least one EquipmentItem (ItemRuleIds) - derived from the 4 attachment join
     /// tables rather than a stored category field, since a rule could in principle belong to both. Used
     /// by SpecialRuleViewModel's group filter (Codex "Guerriers &amp; Bandes" vs "Objets" split).</summary>
@@ -155,9 +155,9 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         var warbandIds = (await _db.Connection.Table<WarbandArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var warriorIds = (await _db.Connection.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
-        var mountIds = (await _db.Connection.Table<MountSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var animalIds = (await _db.Connection.Table<AnimalSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var itemIds = (await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
-        var fighterRuleIds = new HashSet<int>(warbandIds.Concat(warriorIds).Concat(mountIds));
+        var fighterRuleIds = new HashSet<int>(warbandIds.Concat(warriorIds).Concat(animalIds));
         return (fighterRuleIds, new HashSet<int>(itemIds));
     }
 
@@ -183,27 +183,27 @@ public class LibraryService : ILibraryService
             await _db.Connection.InsertAsync(new WarbandArchetypeMutationEntity { MutationId = mutationId, WarbandArchetypeId = warbandArchetypeId });
     }
 
-    public async Task<List<Mount>> GetMountsAsync(string languageCode)
+    public async Task<List<Animal>> GetAnimalsAsync(string languageCode)
     {
         await _db.Initialization;
-        var rows = await _db.Connection.Table<MountEntity>().ToListAsync();
+        var rows = await _db.Connection.Table<AnimalEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        var restrictions = await LoadMountRestrictionsAsync();
-        var specialRules = await LoadMountSpecialRulesAsync(languageCode);
+        var restrictions = await LoadAnimalRestrictionsAsync();
+        var specialRules = await LoadAnimalSpecialRulesAsync(languageCode);
         return rows.Select(r => r.ToModel(translations, restrictions, specialRules)).OrderBy(r => r.Name).ToList();
     }
 
-    private async Task<Dictionary<int, List<int>>> LoadMountRestrictionsAsync()
+    private async Task<Dictionary<int, List<int>>> LoadAnimalRestrictionsAsync()
     {
-        var rows = await _db.Connection.Table<WarbandArchetypeMountEntity>().ToListAsync();
-        return rows.GroupBy(r => r.MountId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+        var rows = await _db.Connection.Table<WarbandArchetypeAnimalEntity>().ToListAsync();
+        return rows.GroupBy(r => r.AnimalId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
     }
 
-    private async Task<Dictionary<int, List<SpecialRule>>> LoadMountSpecialRulesAsync(string languageCode)
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadAnimalSpecialRulesAsync(string languageCode)
     {
         var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
-        var links = await _db.Connection.Table<MountSpecialRuleEntity>().ToListAsync();
-        return links.GroupBy(l => l.MountId)
+        var links = await _db.Connection.Table<AnimalSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.AnimalId)
             .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
     }
 
@@ -347,18 +347,18 @@ public class LibraryService : ILibraryService
             await _db.Connection.InsertAsync(new WarriorArchetypeSkillEntity { SkillId = skillId, WarriorArchetypeId = warriorArchetypeId });
     }
 
-    private async Task SaveMountRestrictionsAsync(int mountId, List<int> warbandArchetypeIds)
+    private async Task SaveAnimalRestrictionsAsync(int animalId, List<int> warbandArchetypeIds)
     {
-        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeMountEntity WHERE MountId = ?", mountId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeAnimalEntity WHERE AnimalId = ?", animalId);
         foreach (var warbandArchetypeId in warbandArchetypeIds)
-            await _db.Connection.InsertAsync(new WarbandArchetypeMountEntity { MountId = mountId, WarbandArchetypeId = warbandArchetypeId });
+            await _db.Connection.InsertAsync(new WarbandArchetypeAnimalEntity { AnimalId = animalId, WarbandArchetypeId = warbandArchetypeId });
     }
 
-    private async Task SaveMountSpecialRulesAsync(int mountId, List<SpecialRule> specialRules)
+    private async Task SaveAnimalSpecialRulesAsync(int animalId, List<SpecialRule> specialRules)
     {
-        await _db.Connection.ExecuteAsync("DELETE FROM MountSpecialRuleEntity WHERE MountId = ?", mountId);
+        await _db.Connection.ExecuteAsync("DELETE FROM AnimalSpecialRuleEntity WHERE AnimalId = ?", animalId);
         foreach (var rule in specialRules)
-            await _db.Connection.InsertAsync(new MountSpecialRuleEntity { MountId = mountId, SpecialRuleId = rule.Id });
+            await _db.Connection.InsertAsync(new AnimalSpecialRuleEntity { AnimalId = animalId, SpecialRuleId = rule.Id });
     }
 
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
@@ -545,26 +545,26 @@ public class LibraryService : ILibraryService
         await SaveMutationRestrictionsAsync(mutation.Id, mutation.RestrictedToWarbandArchetypeIds);
     }
 
-    public async Task SaveMountAsync(Mount mount, string languageCode)
+    public async Task SaveAnimalAsync(Animal animal, string languageCode)
     {
         await _db.Initialization;
-        await ApplyTranslationsAsync(mount, languageCode);
+        await ApplyTranslationsAsync(animal, languageCode);
 
-        if (mount.Id == 0)
+        if (animal.Id == 0)
         {
-            var entity = mount.ToEntity();
+            var entity = animal.ToEntity();
             await _db.Connection.InsertAsync(entity);
-            mount.Id = entity.Id;
+            animal.Id = entity.Id;
         }
         else
         {
-            var existing = await _db.Connection.FindAsync<MountEntity>(mount.Id);
-            if (existing?.Source == ContentSource.Official) mount.Source = ContentSource.Modified;
-            await _db.Connection.UpdateAsync(mount.ToEntity());
+            var existing = await _db.Connection.FindAsync<AnimalEntity>(animal.Id);
+            if (existing?.Source == ContentSource.Official) animal.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(animal.ToEntity());
         }
 
-        await SaveMountRestrictionsAsync(mount.Id, mount.RestrictedToWarbandArchetypeIds);
-        await SaveMountSpecialRulesAsync(mount.Id, mount.SpecialRules);
+        await SaveAnimalRestrictionsAsync(animal.Id, animal.RestrictedToWarbandArchetypeIds);
+        await SaveAnimalSpecialRulesAsync(animal.Id, animal.SpecialRules);
     }
 
     public async Task SaveMagicSchoolAsync(MagicSchool school, string languageCode)
@@ -655,7 +655,7 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
-    private async Task ApplyTranslationsAsync(Mount m, string languageCode)
+    private async Task ApplyTranslationsAsync(Animal m, string languageCode)
     {
         m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
         m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
@@ -725,10 +725,10 @@ public class LibraryService : ILibraryService
         await _db.Connection.DeleteAsync<MutationEntity>(mutationId);
     }
 
-    public async Task DeleteMountAsync(int mountId)
+    public async Task DeleteAnimalAsync(int animalId)
     {
         await _db.Initialization;
-        await _db.Connection.DeleteAsync<MountEntity>(mountId);
+        await _db.Connection.DeleteAsync<AnimalEntity>(animalId);
     }
 
     public async Task DeleteMagicSchoolAsync(int magicSchoolId)

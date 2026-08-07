@@ -49,6 +49,6 @@ public class EquipmentItem
     public List<int> RestrictedToWarriorArchetypeIds { get; set; } = new();
 
     /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - same shared SpecialRule
-    /// catalog as WarbandArchetype/WarriorArchetype/Mount, editable via EquipmentItemEditDialog.</summary>
+    /// catalog as WarbandArchetype/WarriorArchetype/Animal, editable via EquipmentItemEditDialog.</summary>
     public List<SpecialRule> SpecialRules { get; set; } = new();
 }

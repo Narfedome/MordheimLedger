@@ -5,12 +5,12 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Services;
 
-namespace MordheimLedgerApp.Features.Library.Mounts.CreateEdit;
+namespace MordheimLedgerApp.Features.Library.Animals.CreateEdit;
 
 /// <summary>Same wizard pattern (identité / profil / restrictions) as WarriorArchetypeEditDialogViewModel
 /// - restriction/special-rules chips edited in memory here, recopiés sur Item à Save (voir Save),
 /// comme SpecialRules sur WarriorArchetypeEditDialogViewModel.</summary>
-public partial class MountEditDialogViewModel : DialogViewModel<bool>
+public partial class AnimalEditDialogViewModel : DialogViewModel<bool>
 {
     private const int StepCount = 3;
     private readonly IWarbandArchetypePickerService _warbandPicker;
@@ -19,12 +19,12 @@ public partial class MountEditDialogViewModel : DialogViewModel<bool>
     protected override bool CancelResult => false;
 
     [ObservableProperty]
-    private Mount item;
+    private Animal item;
 
     [ObservableProperty]
     private string title;
 
-    /// <summary>Vide = commun à toutes les bandes (voir Mount.RestrictedToWarbandArchetypeIds).</summary>
+    /// <summary>Vide = commun à toutes les bandes (voir Animal.RestrictedToWarbandArchetypeIds).</summary>
     public ObservableCollection<WarbandArchetype> RestrictedWarbands { get; }
 
     public ObservableCollection<SpecialRule> SpecialRules { get; }
@@ -45,7 +45,7 @@ public partial class MountEditDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => CurrentStep == StepCount - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], CurrentStep + 1, StepCount);
 
-    public MountEditDialogViewModel(Mount item, string title, IWarbandArchetypePickerService warbandPicker,
+    public AnimalEditDialogViewModel(Animal item, string title, IWarbandArchetypePickerService warbandPicker,
         IReadOnlyList<WarbandArchetype> allWarbandArchetypes, ISpecialRulePickerService specialRulePicker)
     {
         this.item = item;

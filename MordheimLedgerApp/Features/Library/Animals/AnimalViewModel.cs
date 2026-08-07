@@ -4,26 +4,26 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.Mounts.CreateEdit;
+using MordheimLedgerApp.Features.Library.Animals.CreateEdit;
 using MordheimLedgerApp.Services;
 
-namespace MordheimLedgerApp.Features.Library.Mounts;
+namespace MordheimLedgerApp.Features.Library.Animals;
 
-public partial class MountViewModel : BaseViewModel
+public partial class AnimalViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
-    private readonly IMountPickerNavigationService _pickerNavigation;
+    private readonly IAnimalPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private List<WarbandArchetype> _warbandArchetypes = new();
-    private List<Mount> _allItems = new();
+    private List<Animal> _allItems = new();
     private bool _suppressFilterReload;
 
     /// <summary>Sections of the grid, one per group ("Commun" or a warband name) - always grouped
     /// internally (cf. SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter
     /// where it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<MountGroup> mountGroups = new();
+    private ObservableCollection<AnimalGroup> animalGroups = new();
 
     private string AllGroupsLabel => Loc["LibFilterAll"];
     private string CommonLabel => Loc["LibFilterCommon"];
@@ -41,19 +41,19 @@ public partial class MountViewModel : BaseViewModel
     // IsSelected porté par la ligne (SelectionMode="None"), pas la sélection native - cf.
     // SelectableGridItemBorderStyle.
     [ObservableProperty]
-    private MountRow? selectedRow;
+    private AnimalRow? selectedRow;
 
-    /// <summary>Set by MountSelectorPage right after construction - même bascule multi-sélection
-    /// qu'InjuryViewModel.IsSelectorMode (le picker ne renvoie en pratique qu'une monture : le premier
-    /// résultat coché remplace la monture actuelle du guerrier, voir WarriorEditDialogViewModel.PickMount).</summary>
+    /// <summary>Set by AnimalSelectorPage right after construction - même bascule multi-sélection
+    /// qu'InjuryViewModel.IsSelectorMode (le picker ne renvoie en pratique qu'un animal : le premier
+    /// résultat coché remplace l'animal actuel du guerrier, voir WarriorEditDialogViewModel.PickAnimal).</summary>
     public bool IsSelectorMode { get; set; }
 
     /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>
-    public ObservableCollection<MountRow> SelectedRows { get; } = new();
+    public ObservableCollection<AnimalRow> SelectedRows { get; } = new();
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public MountViewModel(ILibraryService libraryService, IMountPickerNavigationService pickerNavigation,
+    public AnimalViewModel(ILibraryService libraryService, IAnimalPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker, ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
@@ -64,7 +64,7 @@ public partial class MountViewModel : BaseViewModel
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
         // (onglet TabBar gardé en mémoire par Shell).
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
-            (r, m) => _ = ((MountViewModel)r).LoadData());
+            (r, m) => _ = ((AnimalViewModel)r).LoadData());
     }
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
@@ -76,10 +76,10 @@ public partial class MountViewModel : BaseViewModel
         ApplyFilterAndGroup();
     }
 
-    /// <summary>Mount has no rulebook category - "Commun" (unrestricted) vs. the warband name(s) it's
+    /// <summary>Animal has no rulebook category - "Commun" (unrestricted) vs. the warband name(s) it's
     /// restricted to doubles as the group, using data already tracked for the picker rather than adding
-    /// an unused field (see MountGroup).</summary>
-    private string GroupNameFor(Mount item) =>
+    /// an unused field (see AnimalGroup).</summary>
+    private string GroupNameFor(Animal item) =>
         item.RestrictedToWarbandArchetypeIds.Count == 0
             ? CommonLabel
             : string.Join(", ", item.RestrictedToWarbandArchetypeIds
@@ -88,7 +88,7 @@ public partial class MountViewModel : BaseViewModel
 
     private async Task LoadData()
     {
-        _allItems = await _libraryService.GetMountsAsync(LocalizationService.Instance.Language);
+        _allItems = await _libraryService.GetAnimalsAsync(LocalizationService.Instance.Language);
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
 
         var previousFilter = string.IsNullOrEmpty(SelectedGroupFilter) ? AllGroupsLabel : SelectedGroupFilter;
@@ -107,19 +107,19 @@ public partial class MountViewModel : BaseViewModel
             ? _allItems
             : _allItems.Where(i => GroupNameFor(i) == SelectedGroupFilter).ToList();
 
-        var groups = new ObservableCollection<MountGroup>();
+        var groups = new ObservableCollection<AnimalGroup>();
         foreach (var item in filtered)
         {
             var groupName = GroupNameFor(item);
             var group = groups.FirstOrDefault(g => g.Name == groupName);
             if (group is null)
             {
-                group = new MountGroup(groupName);
+                group = new AnimalGroup(groupName);
                 groups.Add(group);
             }
-            group.Add(new MountRow(item));
+            group.Add(new AnimalRow(item));
         }
-        MountGroups = groups;
+        AnimalGroups = groups;
 
         SelectedRow = null;
         SelectedRows.Clear();
@@ -133,14 +133,14 @@ public partial class MountViewModel : BaseViewModel
         if (result != null) SelectedGroupFilter = result;
     }
 
-    partial void OnSelectedRowChanged(MountRow? oldValue, MountRow? newValue)
+    partial void OnSelectedRowChanged(AnimalRow? oldValue, AnimalRow? newValue)
     {
         if (oldValue != null) oldValue.IsSelected = false;
         if (newValue != null) newValue.IsSelected = true;
     }
 
     [RelayCommand]
-    private void Select(MountRow row)
+    private void Select(AnimalRow row)
     {
         if (!IsSelectorMode)
         {
@@ -157,11 +157,11 @@ public partial class MountViewModel : BaseViewModel
     [RelayCommand]
     private async Task Create()
     {
-        var newItem = new Mount();
-        var dialogViewModel = new MountEditDialogViewModel(newItem, Loc["MountCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
-        if (await ShowDialogAsync(new MountEditDialog(dialogViewModel)) != true) return;
+        var newItem = new Animal();
+        var dialogViewModel = new AnimalEditDialogViewModel(newItem, Loc["AnimalCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
+        if (await ShowDialogAsync(new AnimalEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveMountAsync(newItem, LocalizationService.Instance.Language);
+        await _libraryService.SaveAnimalAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
     }
 
@@ -171,7 +171,7 @@ public partial class MountViewModel : BaseViewModel
         if (SelectedRow is not { } row) return;
 
         var s = row.Item;
-        var copy = new Mount
+        var copy = new Animal
         {
             Id = s.Id,
             Name = s.Name,
@@ -195,10 +195,10 @@ public partial class MountViewModel : BaseViewModel
             SpecialRules = s.SpecialRules
         };
 
-        var dialogViewModel = new MountEditDialogViewModel(copy, Loc["MountEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
-        if (await ShowDialogAsync(new MountEditDialog(dialogViewModel)) != true) return;
+        var dialogViewModel = new AnimalEditDialogViewModel(copy, Loc["AnimalEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
+        if (await ShowDialogAsync(new AnimalEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveMountAsync(copy, LocalizationService.Instance.Language);
+        await _libraryService.SaveAnimalAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 
@@ -208,7 +208,7 @@ public partial class MountViewModel : BaseViewModel
         if (SelectedRow is not { } row) return;
         if (!await ConfirmDeleteAsync(row.Item.Name)) return;
 
-        await _libraryService.DeleteMountAsync(row.Item.Id);
+        await _libraryService.DeleteAnimalAsync(row.Item.Id);
         await LoadData();
     }
 
@@ -220,15 +220,15 @@ public partial class MountViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Mount>());
+    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Animal>());
 
     /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.
-    /// SpecialRules needs no such resolution - Mount.SpecialRules is already a List&lt;SpecialRule&gt;.</summary>
+    /// SpecialRules needs no such resolution - Animal.SpecialRules is already a List&lt;SpecialRule&gt;.</summary>
     [RelayCommand]
-    private async Task ShowDetails(MountRow row)
+    private async Task ShowDetails(AnimalRow row)
     {
         var restrictedWarbands = _warbandArchetypes.Where(w => row.Item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-        var dialogViewModel = new MountDetailDialogViewModel(row.Item, restrictedWarbands);
-        await ShowDialogAsync(new MountDetailDialog(dialogViewModel));
+        var dialogViewModel = new AnimalDetailDialogViewModel(row.Item, restrictedWarbands);
+        await ShowDialogAsync(new AnimalDetailDialog(dialogViewModel));
     }
 }

@@ -1,27 +1,27 @@
 using MordheimLedgerApp.Core.Models.Library;
-using MordheimLedgerApp.Features.Library.Mounts;
+using MordheimLedgerApp.Features.Library.Animals;
 
 namespace MordheimLedgerApp.Services;
 
-public interface IMountPickerService
+public interface IAnimalPickerService
 {
-    Task<IReadOnlyList<Mount>> PickMountsAsync();
+    Task<IReadOnlyList<Animal>> PickAnimalsAsync();
 }
 
-public class MountPickerService : IMountPickerService
+public class AnimalPickerService : IAnimalPickerService
 {
     private readonly IServiceProvider _provider;
 
-    public MountPickerService(IServiceProvider provider) => _provider = provider;
+    public AnimalPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Mount>> PickMountsAsync()
+    public async Task<IReadOnlyList<Animal>> PickAnimalsAsync()
     {
-        var tcs = new TaskCompletionSource<IReadOnlyList<Mount>>();
+        var tcs = new TaskCompletionSource<IReadOnlyList<Animal>>();
 
-        var navigationService = _provider.GetRequiredService<IMountPickerNavigationService>();
+        var navigationService = _provider.GetRequiredService<IAnimalPickerNavigationService>();
         navigationService.RegisterTaskSource(tcs);
 
-        var page = _provider.GetRequiredService<MountSelectorPage>();
+        var page = _provider.GetRequiredService<AnimalSelectorPage>();
         var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton
@@ -32,7 +32,7 @@ public class MountPickerService : IMountPickerService
             if (!ReferenceEquals(e.Modal, modal))
                 return;
             window.ModalPopped -= OnModalPopped;
-            tcs.TrySetResult(Array.Empty<Mount>());
+            tcs.TrySetResult(Array.Empty<Animal>());
         }
         window.ModalPopped += OnModalPopped;
 

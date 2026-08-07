@@ -71,6 +71,16 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsMutationsTab => SelectedTab == 6;
     public bool IsAnimalsTab => SelectedTab == 7;
 
+    // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 7 autres ne le sont qu'au
+    // premier passage sur leur onglet, voir EnsureTabLoadedAsync.
+    private bool _equipmentItemsLoaded;
+    private bool _skillsLoaded;
+    private bool _injuriesLoaded;
+    private bool _spellsLoaded;
+    private bool _specialRulesLoaded;
+    private bool _mutationsLoaded;
+    private bool _animalsLoaded;
+
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
         MutationViewModel mutations, AnimalViewModel animals)
@@ -101,20 +111,46 @@ public partial class LibraryViewModel : BaseViewModel
 
         SelectedTab = index;
         RefreshSelectedTabLabel();
+        await EnsureTabLoadedAsync(index);
     }
 
-    /// <summary>All 8 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
-    /// switching between them is instant.</summary>
+    /// <summary>Seule la section Bandes (onglet par défaut) charge à l'ouverture du Codex - les 7 autres
+    /// chargeaient toutes en même temps ici avant ce correctif (catalogues "petits" à l'origine, plus
+    /// vrai avec 15 bandes + Trading Post/Animaux/Compétences seedés), d'où la sensation de freeze à
+    /// l'ouverture même quand un seul onglet est réellement visible. Chaque section garde son propre
+    /// indicateur de chargement (Loading.IsLoading, déjà câblé dans chaque XxxView), donc passer sur un
+    /// onglet pas encore chargé montre son spinner plutôt que de bloquer la page entière.</summary>
     public async Task InitializeAsync()
     {
         await WarbandArchetypes.InitializeAsync();
-        await EquipmentItems.InitializeAsync();
-        await Skills.InitializeAsync();
-        await Injuries.InitializeAsync();
-        await Spells.InitializeAsync();
-        await SpecialRules.InitializeAsync();
-        await Mutations.InitializeAsync();
-        await Animals.InitializeAsync();
         RefreshSelectedTabLabel();
+    }
+
+    private async Task EnsureTabLoadedAsync(int index)
+    {
+        switch (index)
+        {
+            case 1:
+                if (!_equipmentItemsLoaded) { await EquipmentItems.InitializeAsync(); _equipmentItemsLoaded = true; }
+                break;
+            case 2:
+                if (!_skillsLoaded) { await Skills.InitializeAsync(); _skillsLoaded = true; }
+                break;
+            case 3:
+                if (!_injuriesLoaded) { await Injuries.InitializeAsync(); _injuriesLoaded = true; }
+                break;
+            case 4:
+                if (!_spellsLoaded) { await Spells.InitializeAsync(); _spellsLoaded = true; }
+                break;
+            case 5:
+                if (!_specialRulesLoaded) { await SpecialRules.InitializeAsync(); _specialRulesLoaded = true; }
+                break;
+            case 6:
+                if (!_mutationsLoaded) { await Mutations.InitializeAsync(); _mutationsLoaded = true; }
+                break;
+            case 7:
+                if (!_animalsLoaded) { await Animals.InitializeAsync(); _animalsLoaded = true; }
+                break;
+        }
     }
 }

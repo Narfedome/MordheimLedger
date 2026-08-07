@@ -10,28 +10,27 @@ namespace MordheimLedgerApp.Core.Data;
 internal static class TranslationResolver
 {
     /// <summary>Resolves each key to its value in `languageCode`, falling back to whatever other
-    /// language is available, or the key itself as a last-resort visible placeholder. One indexed SQL
-    /// query per distinct key (TranslationEntity.Key is [Indexed]), fired concurrently via
-    /// Task.WhenAll, rather than loading/caching the whole Translation table up front - a single
-    /// upfront load pays its cost on whichever screen happens to be opened first, with no loading
-    /// indicator there to explain the pause; many small local queries (each cheap - this is an embedded
-    /// SQLite db, not a network round-trip) spread the cost proportionally to what each screen actually
-    /// needs instead.</summary>
+    /// language is available, or the key itself as a last-resort visible placeholder. One SQL query
+    /// with an IN clause for the whole key set, instead of one indexed query per distinct key fired
+    /// concurrently via Task.WhenAll (the original approach - it was fine while the catalog was tiny,
+    /// but a single Get*Async can now resolve hundreds of keys at once - 15 seeded warbands + Trading
+    /// Post/Animals/Skills - meaning hundreds of individual round-trips against the same SQLite
+    /// connection every time a catalog tab loads).</summary>
     public static async Task<Dictionary<string, string>> ResolveAsync(AppDatabase db, IEnumerable<string?> keys, string languageCode)
     {
-        var keySet = keys.Where(k => !string.IsNullOrEmpty(k)).Distinct().ToList();
+        var keySet = keys.Where(k => !string.IsNullOrEmpty(k)).Select(k => k!).Distinct().ToList();
         var result = new Dictionary<string, string>();
         if (keySet.Count == 0) return result;
 
-        var lookups = await Task.WhenAll(keySet.Select(async key =>
-        {
-            var rows = await db.Connection.Table<TranslationEntity>().Where(t => t.Key == key).ToListAsync();
-            var match = rows.FirstOrDefault(r => r.LanguageCode == languageCode) ?? rows.FirstOrDefault();
-            return (Key: key!, Value: match?.Value ?? key!);
-        }));
+        var rows = await db.Connection.Table<TranslationEntity>().Where(t => keySet.Contains(t.Key)).ToListAsync();
+        var rowsByKey = rows.ToLookup(r => r.Key);
 
-        foreach (var (key, value) in lookups)
-            result[key] = value;
+        foreach (var key in keySet)
+        {
+            var candidates = rowsByKey[key];
+            var match = candidates.FirstOrDefault(r => r.LanguageCode == languageCode) ?? candidates.FirstOrDefault();
+            result[key] = match?.Value ?? key;
+        }
         return result;
     }
 

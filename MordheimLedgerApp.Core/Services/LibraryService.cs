@@ -62,10 +62,49 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations, specialRules)).ToList();
     }
 
+    public async Task<WarriorArchetype?> GetWarriorArchetypeAsync(int id, string languageCode)
+    {
+        await _db.Initialization;
+        var row = await _db.Connection.FindAsync<WarriorArchetypeEntity>(id);
+        if (row is null) return null;
+        var translations = await ResolveTranslationsAsync([row.NameKey, row.DescriptionKey], languageCode);
+        var specialRules = await LoadWarriorSpecialRulesAsync(languageCode);
+        return row.ToModel(translations, specialRules);
+    }
+
+    public async Task<List<NamedRef>> GetWarriorArchetypeNamesAsync(int warbandArchetypeId, string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<WarriorArchetypeEntity>()
+            .Where(w => w.WarbandArchetypeId == warbandArchetypeId)
+            .ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
+        return rows.Select(r => new NamedRef { Id = r.Id, Name = EntityMapping.ResolveName(r.NameKey, translations) }).ToList();
+    }
+
     public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode)
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<EquipmentItemEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var restrictions = await LoadEquipmentRestrictionsAsync();
+        var warriorRestrictions = await LoadEquipmentWarriorRestrictionsAsync();
+        var specialRules = await LoadEquipmentSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions, specialRules)).ToList();
+    }
+
+    /// <summary>Same resolution as GetEquipmentItemsAsync(languageCode), but filtered to specific ids at
+    /// the SQL level (WHERE Id IN (...)) instead of fetching+translating the whole Trading Post catalog
+    /// and filtering in memory - used by EquipmentListDetailDialogViewModel to resolve one list's member
+    /// items without paying for every other item's Name/Description translation. Empty input = empty
+    /// result, no call.</summary>
+    public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(IEnumerable<int> ids, string languageCode)
+    {
+        var idSet = ids as ICollection<int> ?? ids.ToList();
+        if (idSet.Count == 0) return new List<EquipmentItem>();
+
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<EquipmentItemEntity>().Where(r => idSet.Contains(r.Id)).ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         var restrictions = await LoadEquipmentRestrictionsAsync();
         var warriorRestrictions = await LoadEquipmentWarriorRestrictionsAsync();
@@ -82,6 +121,17 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
         var itemsByListId = await LoadEquipmentListMembershipAsync();
         return rows.Select(r => r.ToModel(translations, itemsByListId)).OrderBy(r => r.Name).ToList();
+    }
+
+    public async Task<List<NamedRef>> GetEquipmentListNamesAsync(int warbandArchetypeId, string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<EquipmentListEntity>()
+            .Where(l => l.WarbandArchetypeId == warbandArchetypeId)
+            .ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
+        return rows.Select(r => new NamedRef { Id = r.Id, Name = EntityMapping.ResolveName(r.NameKey, translations) })
+            .OrderBy(r => r.Name).ToList();
     }
 
     private async Task<Dictionary<int, List<int>>> LoadEquipmentListMembershipAsync()

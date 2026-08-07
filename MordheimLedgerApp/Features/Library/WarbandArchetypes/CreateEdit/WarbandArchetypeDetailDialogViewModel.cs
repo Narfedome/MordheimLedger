@@ -17,7 +17,13 @@ namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 /// Guerriers/Équipement sont chargés en différé, au premier passage sur leur onglet (pas à
 /// l'ouverture du dialog) - le dialog s'ouvre donc instantanément sur Général, qui n'a besoin
 /// d'aucun appel service (tout vient de l'Item déjà chargé sur la tuile). Chaque onglet ne charge
-/// qu'une fois (_warriorsLoaded/_equipmentListsLoaded), pas à chaque re-sélection.</summary>
+/// qu'une fois (_warriorsLoaded/_equipmentListsLoaded), pas à chaque re-sélection.
+///
+/// Les deux onglets n'affichent que des chips Nom (voir ChipListView) - Warriors/EquipmentLists ne
+/// chargent donc que Id+Name (GetWarriorArchetypeNamesAsync/GetEquipmentListNamesAsync), pas les
+/// WarriorArchetype/EquipmentList complets (SpecialRules, ItemIds...) que personne ne regarde tant que
+/// le chip n'est pas tapé. Le détail complet n'est fetché qu'à la demande, un seul élément à la fois,
+/// dans ShowWarriorDetail/ShowEquipmentListDetail.</summary>
 public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewModel
 {
     public WarbandArchetype Item { get; }
@@ -25,10 +31,10 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     public string MaxWarriorsDisplay { get; }
 
     [ObservableProperty]
-    private List<WarriorArchetype> warriors = new();
+    private List<NamedRef> warriors = new();
 
     [ObservableProperty]
-    private List<EquipmentList> equipmentLists = new();
+    private List<NamedRef> equipmentLists = new();
 
     private readonly ILibraryService _libraryService;
     private bool _warriorsLoaded;
@@ -81,7 +87,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
             // temps (sensation de freeze signalée par l'utilisateur, indicateur qui n'apparaît pas au
             // bon moment).
             var language = LocalizationService.Instance.Language;
-            Warriors = await Task.Run(() => _libraryService.GetWarriorArchetypesAsync(Item.Id, language));
+            Warriors = await Task.Run(() => _libraryService.GetWarriorArchetypeNamesAsync(Item.Id, language));
             _warriorsLoaded = true;
         });
     }
@@ -92,7 +98,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
         return Loading.RunAsync(async () =>
         {
             var language = LocalizationService.Instance.Language;
-            EquipmentLists = await Task.Run(() => _libraryService.GetEquipmentListsAsync(Item.Id, language));
+            EquipmentLists = await Task.Run(() => _libraryService.GetEquipmentListNamesAsync(Item.Id, language));
             _equipmentListsLoaded = true;
         });
     }
@@ -104,26 +110,35 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     private Task ShowMagicSchoolDetail(MagicSchool school) => ShowChipDetailAsync(school.Name, school.Description);
 
     [RelayCommand]
-    private async Task ShowWarriorDetail(WarriorArchetype warrior)
+    private async Task ShowWarriorDetail(NamedRef warrior)
     {
-        // EquipmentListDisplay a besoin des listes de la bande pour résoudre le nom - garanti chargé
-        // même si l'utilisateur n'est jamais passé par l'onglet Équipement.
-        await EnsureEquipmentListsLoadedAsync();
-        await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(warrior, EquipmentLists)));
+        var language = LocalizationService.Instance.Language;
+        WarriorArchetype? fullWarrior = null;
+        await Loading.RunAsync(async () =>
+        {
+            // EquipmentListDisplay a besoin des listes de la bande pour résoudre le nom - garanti chargé
+            // même si l'utilisateur n'est jamais passé par l'onglet Équipement.
+            await EnsureEquipmentListsLoadedAsync();
+            fullWarrior = await Task.Run(() => _libraryService.GetWarriorArchetypeAsync(warrior.Id, language));
+        });
+        if (fullWarrior is null) return;
+
+        await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(fullWarrior, EquipmentLists)));
     }
 
     [RelayCommand]
-    private async Task ShowEquipmentListDetail(EquipmentList list)
+    private async Task ShowEquipmentListDetail(NamedRef list)
     {
         var language = LocalizationService.Instance.Language;
         List<EquipmentItem> items = null!;
         await Loading.RunAsync(async () =>
         {
-            var allEquipment = await Task.Run(() => _libraryService.GetEquipmentItemsAsync(language));
-            items = allEquipment.Where(i => list.ItemIds.Contains(i.Id)).ToList();
+            var itemIds = await _libraryService.GetEquipmentListItemIdsAsync(list.Id);
+            items = await Task.Run(() => _libraryService.GetEquipmentItemsAsync(itemIds, language));
         });
 
+        var equipmentList = new EquipmentList { Id = list.Id, Name = list.Name, WarbandArchetypeId = Item.Id };
         await ShowDialogAsync(new EquipmentListDetailDialog(
-            new EquipmentListDetailDialogViewModel(list, items, _libraryService)));
+            new EquipmentListDetailDialogViewModel(equipmentList, items, _libraryService)));
     }
 }

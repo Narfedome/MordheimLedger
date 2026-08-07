@@ -11,16 +11,32 @@ public interface ILibraryService
     Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode);
     Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id, string languageCode);
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId, string languageCode);
+    Task<WarriorArchetype?> GetWarriorArchetypeAsync(int id, string languageCode);
 
     /// <summary>Warriors of ANY of these warbands - used by the "restricted to warrior" picker, which
     /// scopes to whichever warband(s) a Skill (etc.) is already restricted to. Empty input = empty
     /// result, no call.</summary>
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(IEnumerable<int> warbandArchetypeIds, string languageCode);
+
+    /// <summary>Id+Name only, no SpecialRules/Description resolution - for chip lists (e.g.
+    /// WarbandArchetypeDetailDialog's Guerriers tab) that only display a name and fetch the full
+    /// WarriorArchetype on tap via GetWarriorArchetypeAsync(id, ...).</summary>
+    Task<List<NamedRef>> GetWarriorArchetypeNamesAsync(int warbandArchetypeId, string languageCode);
     Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode);
+
+    /// <summary>Same resolution as GetEquipmentItemsAsync(languageCode), filtered to specific ids at the
+    /// SQL level - for resolving a known subset (e.g. one EquipmentList's members) without paying for
+    /// the whole Trading Post catalog's translations. Empty input = empty result, no call.</summary>
+    Task<List<EquipmentItem>> GetEquipmentItemsAsync(IEnumerable<int> ids, string languageCode);
 
     /// <summary>This warband's own named starting-equipment lists (see Models.Library.EquipmentList) -
     /// what a WarriorArchetype.EquipmentListId actually points at.</summary>
     Task<List<EquipmentList>> GetEquipmentListsAsync(int warbandArchetypeId, string languageCode);
+
+    /// <summary>Id+Name only - same rationale as GetWarriorArchetypeNamesAsync, for
+    /// WarbandArchetypeDetailDialog's Équipement tab (member items resolved lazily on tap, see
+    /// GetEquipmentListItemIdsAsync).</summary>
+    Task<List<NamedRef>> GetEquipmentListNamesAsync(int warbandArchetypeId, string languageCode);
 
     /// <summary>Member item ids of one EquipmentList - the starting-list channel consumed by the
     /// roster equipment picker (see EquipmentPickerService), distinct from

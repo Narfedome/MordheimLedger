@@ -16,8 +16,8 @@ public partial class WarriorArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
 
     /// <summary>Already resolved by the caller (WarbandArchetypeDetailDialogViewModel, which already
     /// fetches the warband's EquipmentLists for its own Équipement tab) - avoids a second fetch just to
-    /// resolve Item.EquipmentListId here.</summary>
-    public WarriorArchetypeDetailDialogViewModel(WarriorArchetype item, IReadOnlyList<EquipmentList> warbandEquipmentLists)
+    /// resolve Item.EquipmentListId here. Id+Name only (NamedRef) - that's all this lookup needs.</summary>
+    public WarriorArchetypeDetailDialogViewModel(WarriorArchetype item, IReadOnlyList<NamedRef> warbandEquipmentLists)
     {
         Item = item;
         Title = item.Name;

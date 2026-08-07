@@ -15,7 +15,7 @@ public static class EntityMapping
     /// <summary>Resolves a translation key against an already-fetched (Key, LanguageCode) → Value
     /// dictionary for the requested language (see LibraryService.ResolveTranslationsAsync) - falls
     /// back to the raw key itself (visible placeholder rather than blank) if nothing was resolved.</summary>
-    private static string ResolveName(string key, IReadOnlyDictionary<string, string> translations) =>
+    internal static string ResolveName(string key, IReadOnlyDictionary<string, string> translations) =>
         translations.GetValueOrDefault(key, key);
 
     private static string? ResolveDescription(string? key, IReadOnlyDictionary<string, string> translations) =>

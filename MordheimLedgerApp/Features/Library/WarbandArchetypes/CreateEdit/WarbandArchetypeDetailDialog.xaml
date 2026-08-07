@@ -17,7 +17,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout x:Name="RootContent" Spacing="16" SizeChanged="OnRootContentSizeChanged">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"

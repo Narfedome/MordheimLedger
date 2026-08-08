@@ -35,6 +35,13 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedEquipmentListLabel = string.Empty;
 
+    /// <summary>Champ texte unique pour le Mouvement - accepte un nombre ("4") ou une surcharge libre
+    /// ("2D6" pour les Squigs des cavernes). Résolu vers Item.Movement/Item.MovementOverride au Save
+    /// selon que ça parse comme int ou non, plutôt que 2 champs séparés (Entry numérique + Entry
+    /// texte) - un seul champ, comme sur la fiche officielle.</summary>
+    [ObservableProperty]
+    private string movementInput;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStep0))]
     [NotifyPropertyChangedFor(nameof(IsStep1))]
@@ -58,6 +65,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         this.title = title;
         _specialRulePicker = specialRulePicker;
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
+        movementInput = item.MovementOverride ?? item.Movement.ToString();
 
         var noneLabel = Loc["WarriorArchetypeEquipmentListNone"];
         EquipmentListOptions.Add(noneLabel);
@@ -76,7 +84,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSpecialRule()
     {
-        var picked = await _specialRulePicker.PickSpecialRulesAsync();
+        var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleScope.Warrior);
         foreach (var rule in picked)
         {
             if (SpecialRules.Any(r => r.Id == rule.Id)) continue;
@@ -103,6 +111,17 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     private void Save()
     {
         Item.SpecialRules = SpecialRules.ToList();
+
+        if (int.TryParse(MovementInput, out var movement))
+        {
+            Item.Movement = movement;
+            Item.MovementOverride = null;
+        }
+        else
+        {
+            Item.MovementOverride = MovementInput;
+        }
+
         Close(true);
     }
 }

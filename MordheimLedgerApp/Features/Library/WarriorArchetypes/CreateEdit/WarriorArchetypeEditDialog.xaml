@@ -25,8 +25,6 @@
 
             <!-- Étape 1 : identité -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsStep0}">
-                <components:LibraryItemImageView ImagePath="{Binding Item.ImagePath}"
-                                                  DefaultGlyph="{x:Static icons:SolidFont.UserShield}" MaximumHeightRequest="30"/>
                 <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc WarriorArchetypeNamePh}"/>
                 <HorizontalStackLayout Spacing="10">
                     <CheckBox IsChecked="{Binding Item.IsHero}" VerticalOptions="Center"/>
@@ -39,10 +37,19 @@
                     <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeCostPh}"/>
-                    <Entry Grid.Column="1" Text="{Binding Item.MaxCount}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeMaxCountPh}"/>
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{loc:Loc WarriorArchetypeCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.MaxCount}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
                 </Grid>
-                <Entry Text="{Binding Item.StartingExperience}" Keyboard="Numeric" Placeholder="{loc:Loc WarriorArchetypeStartingExperiencePh}"/>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.StartingExperience}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
                 <!-- L'école de magie elle-même est liée à la bande (WarbandArchetype.MagicSchools, voir
                      WarbandArchetypeEditDialog) - ici on marque juste ce type de guerrier comme lanceur
                      de sorts. La sélection de sorts (WarriorEditDialog) ne propose alors que les sorts
@@ -65,12 +72,11 @@
                   ColumnDefinitions="*,*,*,*,*,*,*,*,*" ColumnSpacing="4">
                 <VerticalStackLayout Grid.Column="0">
                     <Label Text="{loc:Loc StatMovementAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-                    <Entry Text="{Binding Item.Movement}" Keyboard="Numeric"/>
-                    <!-- Surcharge texte optionnelle (ex. "2D6" pour les Squigs des cavernes, dont le
-                         Mouvement n'est pas une caractéristique fixe) - prioritaire sur la valeur
-                         numérique ci-dessus partout où le Mouvement est affiché (WarriorArchetype.
-                         MovementDisplay/Warrior.MovementDisplay). -->
-                    <Entry Text="{Binding Item.MovementOverride}" Placeholder="{loc:Loc WarriorArchetypeMovementOverridePh}" FontSize="11"/>
+                    <!-- Champ texte unique : accepte un nombre ("4") ou une surcharge libre ("2D6" pour
+                         les Squigs des cavernes) - résolu vers Item.Movement/Item.MovementOverride au
+                         Save selon que ça parse comme int ou non (voir WarriorArchetypeEditDialogViewModel.
+                         Save), pas de clavier numérique dédié puisque le texte libre doit rester possible. -->
+                    <Entry Text="{Binding MovementInput}" HorizontalTextAlignment="Center"/>
                 </VerticalStackLayout>
                 <VerticalStackLayout Grid.Column="1">
                     <Label Text="{loc:Loc StatWeaponSkillAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>

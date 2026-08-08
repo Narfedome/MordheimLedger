@@ -17,7 +17,8 @@
       "description": {
         "en": "Ostlanders have no wish to let a stranger walk off with gold they worked hard for. As a result, they may never hire Hired Swords, except Ogres.",
         "fr": "Les Ostlanders n'ont aucune envie de laisser l'or qu'ils ont durement gagné aux mains d'un étranger. En conséquence, ils ne peuvent jamais embaucher de Francs-Tireurs, excepté les Ogres."
-      }
+      },
+      "scope": "Warband"
     }
   ],
   "magicSchools": [

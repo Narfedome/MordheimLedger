@@ -17,7 +17,8 @@
       "description": {
         "en": "Many Hired Swords refuse to work for Orcs, fearing they are just as likely to be eaten as fought alongside. An Orc warband may only hire Pit Fighters, Ogre Bodyguards or Warlocks.",
         "fr": "De nombreux Francs-Tireurs refusent de travailler pour des Orques, craignant de se faire dévorer plutôt qu'épauler au combat. Une bande d'Orques ne peut louer les services que de Gladiateurs, Gardes du Corps Ogres ou Mages."
-      }
+      },
+      "scope": "Warband"
     }
   ],
   "skills": [

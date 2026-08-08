@@ -23,6 +23,9 @@
             <components:LibraryItemImageView ImagePath="{Binding Item.ImagePath}"
                                               DefaultGlyph="{x:Static icons:SolidFont.Scroll}" MaximumHeightRequest="30"/>
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc SpecialRuleNamePh}"/>
+            <Picker Title="{loc:Loc SpecialRuleScopePh}"
+                    ItemsSource="{Binding ScopeOptions}"
+                    SelectedItem="{Binding SelectedScopeLabel}"/>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
             <Entry Text="{Binding Item.CostMultiplier}" Keyboard="Numeric" Placeholder="{loc:Loc SpecialRuleCostMultiplierPh}"/>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">

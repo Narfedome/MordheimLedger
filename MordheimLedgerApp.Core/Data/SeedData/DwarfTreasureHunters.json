@@ -17,7 +17,8 @@
       "description": {
         "en": "A Dwarf is only taken Out of Action on a roll of 6 instead of 5-6 on the damage chart (treat 1-2 as Knocked Down, 3-5 as Stunned, 6 as Out of Action).",
         "fr": "Un nain n'est mis hors de combat que sur un résultat de 6 au lieu de 5-6 sur le tableau des dégâts (considérez un 1-2 comme à terre, un 3-5 comme sonné, un 6 comme hors de combat)."
-      }
+      },
+      "scope": "Warband"
     },
     {
       "name": {
@@ -27,7 +28,8 @@
       "description": {
         "en": "Dwarfs ignore the special rules of maces, hammers etc. - they're not easily knocked out!",
         "fr": "Les nains ignorent les règles spéciales des masses, marteaux, etc. - ils ne sont pas faciles à assommer !"
-      }
+      },
+      "scope": "Warband"
     },
     {
       "name": {
@@ -37,7 +39,8 @@
       "description": {
         "en": "Dwarfs suffer no Movement penalty for wearing armour.",
         "fr": "Les nains ne subissent aucune pénalité de Mouvement pour le port d'une armure."
-      }
+      },
+      "scope": "Warband"
     },
     {
       "name": {
@@ -47,7 +50,8 @@
       "description": {
         "en": "All Dwarfs are subject to Hatred against Orcs and Goblins.",
         "fr": "Tous les nains sont sujets à la Haine envers les orques et les gobelins."
-      }
+      },
+      "scope": "Warband"
     },
     {
       "name": {
@@ -57,7 +61,8 @@
       "description": {
         "en": "Dwarfs hold an ancient grudge against Elves - a Dwarf warband may never include any kind of Elven Hired Sword or Dramatis Personae.",
         "fr": "Une vieille rivalité avec les elfes fait qu'une bande naine ne peut jamais inclure de Franc-Tireur ou de Personæ Dramatis elfe, quel qu'il soit."
-      }
+      },
+      "scope": "Warband"
     },
     {
       "name": {
@@ -67,7 +72,8 @@
       "description": {
         "en": "Dwarfs add +1 to the number of wyrdstone fragments found during the Exploration roll at the end of a battle.",
         "fr": "Les nains ajoutent +1 au nombre de fragments de pierre magique trouvés lors du jet d'Exploration en fin de partie."
-      }
+      },
+      "scope": "Warband"
     }
   ],
   "skills": [

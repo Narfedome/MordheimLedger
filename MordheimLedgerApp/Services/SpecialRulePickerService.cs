@@ -5,7 +5,10 @@ namespace MordheimLedgerApp.Services;
 
 public interface ISpecialRulePickerService
 {
-    Task<IReadOnlyList<SpecialRule>> PickSpecialRulesAsync();
+    /// <summary>Null (Animal/EquipmentItem callers) shows the full unfiltered catalog, unchanged from
+    /// before Scope existed. Warband/Warrior restrict the selector to rules actually meant to be
+    /// added at that level - see SpecialRuleScope.</summary>
+    Task<IReadOnlyList<SpecialRule>> PickSpecialRulesAsync(SpecialRuleScope? scope = null);
 }
 
 public class SpecialRulePickerService : ISpecialRulePickerService
@@ -14,11 +17,12 @@ public class SpecialRulePickerService : ISpecialRulePickerService
 
     public SpecialRulePickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<SpecialRule>> PickSpecialRulesAsync()
+    public async Task<IReadOnlyList<SpecialRule>> PickSpecialRulesAsync(SpecialRuleScope? scope = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<SpecialRule>>();
 
         var navigationService = _provider.GetRequiredService<ISpecialRulePickerNavigationService>();
+        navigationService.RequestedScope = scope;
         navigationService.RegisterTaskSource(tcs);
 
         var page = _provider.GetRequiredService<SpecialRuleSelectorPage>();

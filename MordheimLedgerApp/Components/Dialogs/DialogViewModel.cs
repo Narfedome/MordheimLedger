@@ -19,5 +19,12 @@ namespace MordheimLedgerApp.Components.Dialogs
 
         [RelayCommand]
         public void Cancel() => Close(CancelResult);
+
+        /// <summary>Opens the shared chip mini-popup (Name+Description) - every chip-tap command in the
+        /// app funnels through here instead of duplicating the ShowDialogAsync/ChipDetailDialog wiring.
+        /// Lives on the generic base (not just ReadOnlyDialogViewModel) since editable dialogs
+        /// (WarbandArchetypeEditDialogViewModel) preview chips the same way while still editing them.</summary>
+        protected async Task ShowChipDetailAsync(string name, string? description) =>
+            await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(name, description)));
     }
 }

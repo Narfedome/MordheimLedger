@@ -89,6 +89,12 @@ public partial class SpecialRuleViewModel : BaseViewModel
         _allItems = await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language);
         (_fighterRuleIds, _itemRuleIds) = await _libraryService.GetSpecialRuleAttachmentsAsync();
 
+        // Sélecteur ouvert avec un Scope demandé (WarbandArchetypeEditDialog/WarriorArchetypeEditDialog) :
+        // ne propose que les règles pensées pour ce niveau-là, plus celles marquées Both. Hors sélecteur,
+        // ou sélecteur sans Scope (Animal/EquipmentItem) : catalogue complet, comportement inchangé.
+        if (IsSelectorMode && _pickerNavigation.RequestedScope is { } requestedScope)
+            _allItems = _allItems.Where(i => i.Scope == requestedScope || i.Scope == SpecialRuleScope.Both).ToList();
+
         var previousFilter = string.IsNullOrEmpty(SelectedGroupFilter) ? AllGroupsLabel : SelectedGroupFilter;
         _suppressFilterReload = true;
         GroupFilterOptions = new ObservableCollection<string>(
@@ -178,7 +184,8 @@ public partial class SpecialRuleViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath,
-            CostMultiplier = s.CostMultiplier
+            CostMultiplier = s.CostMultiplier,
+            Scope = s.Scope
         };
 
         var dialogViewModel = new SpecialRuleEditDialogViewModel(copy, Loc["SpecialRuleEditTitle"]);

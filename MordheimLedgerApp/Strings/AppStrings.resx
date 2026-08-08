@@ -462,6 +462,18 @@
   <data name="SpecialRuleCostMultiplierPh" xml:space="preserve">
     <value>Matériau : multiplicateur de prix (ex. ×4) - vide si non applicable</value>
   </data>
+  <data name="SpecialRuleScopePh" xml:space="preserve">
+    <value>Portée</value>
+  </data>
+  <data name="SpecialRuleScopeWarrior" xml:space="preserve">
+    <value>Guerrier</value>
+  </data>
+  <data name="SpecialRuleScopeWarband" xml:space="preserve">
+    <value>Bande</value>
+  </data>
+  <data name="SpecialRuleScopeBoth" xml:space="preserve">
+    <value>Les deux</value>
+  </data>
   <data name="EquipmentItemEditTitle" xml:space="preserve">
     <value>Modifier l'objet</value>
   </data>

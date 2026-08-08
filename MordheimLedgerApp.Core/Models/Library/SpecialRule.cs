@@ -23,9 +23,6 @@ public class SpecialRule
 
     public ContentSource Source { get; set; }
 
-    /// <summary>Filtre le sélecteur de règles (Warband vs Warrior) - voir SpecialRuleScope.</summary>
-    public SpecialRuleScope Scope { get; set; }
-
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 

@@ -9,10 +9,11 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 
-/// <summary>Read-only recap of WarbandArchetypeEditDialog. 3 onglets (Général/Guerriers/Équipement)
-/// plutôt qu'un long scroll empilé - même mécanisme toggle que WarriorEditDialog (SelectedTab +
-/// IsXTab dérivés), pas un vrai TabbedPage. Règles spéciales/Écoles de magie restent dans Général
-/// (pas d'onglet dédié) sur demande explicite de l'utilisateur.
+/// <summary>Read-only recap of WarbandArchetypeEditDialog. 5 onglets (Général/Règles/Magie/Guerriers/
+/// Équipement) plutôt qu'un long scroll empilé - même mécanisme toggle que WarriorEditDialog
+/// (SelectedTab + IsXTab dérivés), pas un vrai TabbedPage. Règles/Magie masqués (HasSpecialRules/
+/// HasMagicSchools) quand la bande n'a rien à y montrer - contrairement à WarbandArchetypeEditDialog
+/// où ils restent toujours visibles (on peut vouloir y ajouter du contenu).
 ///
 /// Guerriers/Équipement sont chargés en différé, au premier passage sur leur onglet (pas à
 /// l'ouverture du dialog) - le dialog s'ouvre donc instantanément sur Général, qui n'a besoin
@@ -42,13 +43,23 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsRulesTab))]
+    [NotifyPropertyChangedFor(nameof(IsMagicTab))]
     [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
     [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
     private int selectedTab;
 
     public bool IsGeneralTab => SelectedTab == 0;
-    public bool IsWarriorsTab => SelectedTab == 1;
-    public bool IsEquipmentTab => SelectedTab == 2;
+    public bool IsRulesTab => SelectedTab == 1;
+    public bool IsMagicTab => SelectedTab == 2;
+    public bool IsWarriorsTab => SelectedTab == 3;
+    public bool IsEquipmentTab => SelectedTab == 4;
+
+    /// <summary>Pilote la visibilité des onglets Règles/Magie - masqués (pas juste vides) quand la bande
+    /// n'a rien à montrer, contrairement à WarbandArchetypeEditDialog où ces onglets restent toujours
+    /// visibles (on peut vouloir en ajouter).</summary>
+    public bool HasSpecialRules => Item.SpecialRules.Count > 0;
+    public bool HasMagicSchools => Item.MagicSchools.Count > 0;
 
     public WarbandArchetypeDetailDialogViewModel(WarbandArchetype item, ILibraryService libraryService)
     {
@@ -63,16 +74,22 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     private void ShowGeneralTab() => SelectedTab = 0;
 
     [RelayCommand]
+    private void ShowRulesTab() => SelectedTab = 1;
+
+    [RelayCommand]
+    private void ShowMagicTab() => SelectedTab = 2;
+
+    [RelayCommand]
     private async Task ShowWarriorsTab()
     {
-        SelectedTab = 1;
+        SelectedTab = 3;
         await EnsureWarriorsLoadedAsync();
     }
 
     [RelayCommand]
     private async Task ShowEquipmentTab()
     {
-        SelectedTab = 2;
+        SelectedTab = 4;
         await EnsureEquipmentListsLoadedAsync();
     }
 

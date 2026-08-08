@@ -192,14 +192,6 @@ public class SpecialRuleSeedData
     /// <summary>Null = not a purchasable material. Non-null marks this rule as a weapon-material option
     /// (e.g. "Gromril" -&gt; 4) - see SpecialRule.CostMultiplier.</summary>
     public int? CostMultiplier { get; set; }
-
-    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.SpecialRuleScope member name. Omitted =
-    /// "Warrior" (the vast majority - rules attached at warrior/equipment/animal level), only set to
-    /// "Warband" on the handful of band-wide rules (e.g. "Self-Reliant", "Ancient Enemies") declared
-    /// directly in a WarbandSeedData.SpecialRules array - classified by attachment context across the
-    /// whole seed dataset, not by hand. Only read the first time a given English Name is seeded (see
-    /// FindOrCreateSpecialRuleAsync) - a stub re-declaration elsewhere doesn't need to repeat it.</summary>
-    public string? Scope { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

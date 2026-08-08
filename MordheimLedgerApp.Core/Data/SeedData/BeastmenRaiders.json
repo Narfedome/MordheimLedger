@@ -17,8 +17,7 @@
       "description": {
         "en": "Beastmen are fearsome creatures of Chaos and may never hire any Hired Sword unless specifically stated otherwise in its description.",
         "fr": "Les Hommes-Bêtes sont de féroces créatures du Chaos et ne peuvent pas recruter de Francs-Tireurs à moins que le contraire ne soit précisé dans leur description."
-      },
-      "scope": "Warband"
+      }
     }
   ],
   "skills": [

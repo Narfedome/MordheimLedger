@@ -200,15 +200,14 @@ public class LibraryService : ILibraryService
     /// (FighterRuleIds) vs. at least one EquipmentItem (ItemRuleIds) - derived from the 4 attachment join
     /// tables rather than a stored category field, since a rule could in principle belong to both. Used
     /// by SpecialRuleViewModel's group filter (Codex "Guerriers &amp; Bandes" vs "Objets" split).</summary>
-    public async Task<(HashSet<int> FighterRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync()
+    public async Task<(HashSet<int> WarbandRuleIds, HashSet<int> WarriorRuleIds, HashSet<int> AnimalRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync()
     {
         await _db.Initialization;
         var warbandIds = (await _db.Connection.Table<WarbandArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var warriorIds = (await _db.Connection.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var animalIds = (await _db.Connection.Table<AnimalSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var itemIds = (await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
-        var fighterRuleIds = new HashSet<int>(warbandIds.Concat(warriorIds).Concat(animalIds));
-        return (fighterRuleIds, new HashSet<int>(itemIds));
+        return (new HashSet<int>(warbandIds), new HashSet<int>(warriorIds), new HashSet<int>(animalIds), new HashSet<int>(itemIds));
     }
 
     public async Task<List<Mutation>> GetMutationsAsync(string languageCode)
@@ -784,6 +783,13 @@ public class LibraryService : ILibraryService
     public async Task DeleteMagicSchoolAsync(int magicSchoolId)
     {
         await _db.Initialization;
+
+        // Un Spell n'a pas de sens sans son école (Spell.MagicSchoolId non-nullable) - supprimer
+        // l'école sans ses sorts laisserait des lignes SpellEntity orphelines.
+        var orphanedSpells = await _db.Connection.Table<SpellEntity>().Where(s => s.MagicSchoolId == magicSchoolId).ToListAsync();
+        foreach (var spell in orphanedSpells)
+            await _db.Connection.DeleteAsync<SpellEntity>(spell.Id);
+
         await _db.Connection.DeleteAsync<MagicSchoolEntity>(magicSchoolId);
     }
 }

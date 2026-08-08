@@ -17,8 +17,7 @@
       "description": {
         "en": "A Kislevite warband is allowed the same selection of Hired Swords as Human Mercenary warbands.",
         "fr": "Une bande kislévite peut engager les mêmes Francs-tireurs que les bandes de mercenaires humains décrites dans le livre de règles de Mordheim."
-      },
-      "scope": "Warband"
+      }
     },
     {
       "name": {
@@ -28,8 +27,7 @@
       "description": {
         "en": "Kislevites may never ally with any type of Chaos warband - this includes Possessed, Beastmen, Skaven, Dark Elves, Chaos Dwarfs and any other warband judged sufficiently 'Chaotic'.",
         "fr": "Les kislévites ne peuvent en aucun cas s'allier avec une bande du Chaos d'un type ou d'un autre. Cette restriction s'étend aux bandes suivantes : Possédés, Hommes-Bêtes, Skavens, Elfes Noirs, Nains du Chaos, et toute autre bande que les joueurs jugent comme étant trop chaotique."
-      },
-      "scope": "Warband"
+      }
     }
   ],
   "startingTreasury": 500,

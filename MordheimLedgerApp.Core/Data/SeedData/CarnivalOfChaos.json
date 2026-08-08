@@ -17,8 +17,7 @@
       "description": {
         "en": "Because of its diseased nature a Carnival of Chaos warband finds it very hard to keep any Hired Sword alive - it may never hire one, of any kind.",
         "fr": "En raison de sa nature quelque peu pestiférée, une kermesse du Chaos a le plus grand mal à attirer des mercenaires. Elle ne peut en aucun cas recruter de Francs-Tireurs."
-      },
-      "scope": "Warband"
+      }
     },
     {
       "name": {
@@ -28,8 +27,7 @@
       "description": {
         "en": "The Carnival is a similarly unclean mass of mutation and Chaos to the Possessed, and so counts as such for purposes of Exploration and Serious Injuries.",
         "fr": "La kermesse du Chaos ressemble beaucoup aux bandes de possédés dans la mesure où il s'agit d'un ramassis de mutants corrompus et déments. Elle compte donc comme une bande de possédés pour tout ce qui est de l'Exploration et des Blessures Graves."
-      },
-      "scope": "Warband"
+      }
     }
   ],
   "magicSchools": [

@@ -28,13 +28,19 @@
                                               Command="{Binding CancelCommand}"/>
             </Grid>
 
-            <!-- 3 onglets plutôt qu'un long scroll empilé (mobile) - même TabToggleButton que
-                 WarriorEditDialog (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). Règles
-                 spéciales/Écoles de magie restent dans Général (pas d'onglet dédié) sur demande
-                 explicite de l'utilisateur. -->
+            <!-- Onglets Règles/Magie masqués si la bande n'a rien à y montrer (voir HasSpecialRules/
+                 HasMagicSchools) - contrairement à WarbandArchetypeEditDialog où ils restent toujours
+                 visibles. Même TabToggleButton que WarriorEditDialog
+                 (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). -->
             <HorizontalStackLayout Spacing="16">
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
                                              IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                             IsActive="{Binding IsRulesTab}" FontSize="12"
+                                             IsVisible="{Binding HasSpecialRules}"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
+                                             IsActive="{Binding IsMagicTab}" FontSize="12"
+                                             IsVisible="{Binding HasMagicSchools}"/>
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
                                              IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
@@ -60,10 +66,16 @@
                     <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
                 <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
                                           ItemsSource="{Binding Item.SpecialRules}"
                                           IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                           Command="{Binding ShowSpecialRuleDetailCommand}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsMagicTab}">
                 <components:ChipListView HeaderText="{loc:Loc LibMagicSchoolsPh}"
                                           ItemsSource="{Binding Item.MagicSchools}"
                                           IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"

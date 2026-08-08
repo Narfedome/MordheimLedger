@@ -17,8 +17,7 @@
       "description": {
         "en": "As natural traders with contacts in the merchant guilds, Marienburg warbands receive a +1 bonus when attempting to find rare items. To reflect their enormous wealth, Marienburgers start a campaign with an extra 100 gold crowns (600 in total). In a one-off game they are permitted an extra 20% gold crowns when recruiting a warband (e.g. 1200 gc instead of 1000 gc).",
         "fr": "En contact avec les guildes de marchands, les bandes de Marienburg reçoivent un bonus de +1 lors des jets pour trouver des objets rares. Pour représenter leur immense richesse, les Marienburgers débutent une campagne avec 100 Couronnes d'Or supplémentaires (600 au total). Dans une partie ponctuelle, ils ont droit à une majoration de 20% de la somme prévue pour le recrutement (ex. 1200 CO au lieu de 1000 CO)."
-      },
-      "scope": "Warband"
+      }
     }
   ],
   "startingTreasury": 600,

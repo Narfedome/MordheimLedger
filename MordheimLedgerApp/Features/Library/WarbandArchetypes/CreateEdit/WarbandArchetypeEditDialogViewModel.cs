@@ -71,13 +71,17 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsRulesTab))]
+    [NotifyPropertyChangedFor(nameof(IsMagicTab))]
     [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
     [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
     private int selectedTab;
 
     public bool IsGeneralTab => SelectedTab == 0;
-    public bool IsWarriorsTab => SelectedTab == 1;
-    public bool IsEquipmentTab => SelectedTab == 2;
+    public bool IsRulesTab => SelectedTab == 1;
+    public bool IsMagicTab => SelectedTab == 2;
+    public bool IsWarriorsTab => SelectedTab == 3;
+    public bool IsEquipmentTab => SelectedTab == 4;
 
     public WarbandArchetypeEditDialogViewModel(WarbandArchetype item, string title, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IEquipmentPickerService equipmentPicker)
@@ -120,7 +124,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSpecialRule()
     {
-        var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleScope.Warband);
+        var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleFilterKind.Warband);
         foreach (var rule in picked)
         {
             if (SpecialRules.Any(r => r.Id == rule.Id)) continue;
@@ -149,16 +153,22 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     private void ShowGeneralTab() => SelectedTab = 0;
 
     [RelayCommand]
+    private void ShowRulesTab() => SelectedTab = 1;
+
+    [RelayCommand]
+    private void ShowMagicTab() => SelectedTab = 2;
+
+    [RelayCommand]
     private async Task ShowWarriorsTab()
     {
-        SelectedTab = 1;
+        SelectedTab = 3;
         await EnsureWarriorsLoadedAsync();
     }
 
     [RelayCommand]
     private async Task ShowEquipmentTab()
     {
-        SelectedTab = 2;
+        SelectedTab = 4;
         await EnsureEquipmentListsLoadedAsync();
     }
 

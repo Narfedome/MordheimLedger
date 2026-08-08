@@ -27,12 +27,16 @@
                                               Command="{Binding CancelCommand}"/>
             </Grid>
 
-            <!-- Même structure à 3 onglets que WarbandArchetypeDetailDialog (visuel repris tel quel),
+            <!-- Même structure à onglets que WarbandArchetypeDetailDialog (visuel repris tel quel),
                  champs modifiables (Entry/Editor/Picker au lieu de Label) et Guerriers/Équipement en
                  CRUD inline via ChipListView.AddCommand/RemoveCommand plutôt qu'en lecture seule. -->
             <HorizontalStackLayout Spacing="16">
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
                                              IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                             IsActive="{Binding IsRulesTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
+                                             IsActive="{Binding IsMagicTab}" FontSize="12"/>
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
                                              IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
@@ -55,12 +59,18 @@
                     </VerticalStackLayout>
                 </Grid>
                 <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="80"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
                 <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
                                           ItemsSource="{Binding SpecialRules}"
                                           IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                           Command="{Binding ShowSpecialRuleDetailCommand}"
                                           AddCommand="{Binding AddSpecialRuleCommand}"
                                           RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsMagicTab}">
                 <components:ChipListView HeaderText="{loc:Loc LibMagicSchoolsPh}"
                                           ItemsSource="{Binding MagicSchools}"
                                           IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
@@ -77,6 +87,7 @@
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                 <components:ChipListView ItemsSource="{Binding Warriors}"
+                                         HeaderText="{loc:Loc LibMagicSchoolsPh}"
                                           IconGlyph="{x:Static icons:SolidFont.Shield}"
                                           Command="{Binding EditWarriorCommand}"
                                           AddCommand="{Binding AddWarriorCommand}"
@@ -87,13 +98,14 @@
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                 <components:ChipListView ItemsSource="{Binding EquipmentLists}"
+                                         HeaderText="{loc:Loc LibMagicSchoolsPh}"
                                           IconGlyph="{x:Static icons:SolidFont.ListCheck}"
                                           Command="{Binding EditEquipmentListCommand}"
                                           AddCommand="{Binding AddEquipmentListCommand}"
                                           RemoveCommand="{Binding RemoveEquipmentListCommand}"/>
             </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" VerticalOptions="End">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"
                         Style="{StaticResource DialogSecondaryButtonStyle}"

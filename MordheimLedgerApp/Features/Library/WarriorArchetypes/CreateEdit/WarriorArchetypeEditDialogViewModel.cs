@@ -84,7 +84,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSpecialRule()
     {
-        var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleScope.Warrior);
+        var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleFilterKind.Warrior);
         foreach (var rule in picked)
         {
             if (SpecialRules.Any(r => r.Id == rule.Id)) continue;

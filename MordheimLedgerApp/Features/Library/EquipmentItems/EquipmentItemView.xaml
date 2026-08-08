@@ -119,6 +119,11 @@
              toutes les tuiles cochées d'un coup. -->
         <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
+            <!-- Créer un nouvel élément directement depuis le sélecteur - auto-sélectionné à la
+                 création (voir EquipmentItemViewModel.Create), pas besoin de fermer/rouvrir le picker. -->
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
+                                         Command="{Binding CreateCommand}"
+                                         Tooltip="{loc:Loc BtnAdd}"/>
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"
                                          Tooltip="{loc:Loc LibConfirm}"

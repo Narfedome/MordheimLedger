@@ -5,6 +5,7 @@
                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
                xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Components.Dialogs.ChipDetailDialog"
@@ -23,6 +24,14 @@
                                               Command="{Binding CancelCommand}"/>
             </Grid>
             <Label Text="{Binding Description}" TextColor="{DynamicResource AppTextMuted}"/>
+            <!-- Uniquement renseigné pour le chip École de Magie (voir ChipDetailDialogViewModel) -
+                 masqué pour les 3 autres types de chip. -->
+            <components:ChipListView HeaderText="{loc:Loc LibSpellsPh}"
+                                      ItemsSource="{Binding RelatedSpells}"
+                                      IconFontFamily="RpgAwesome"
+                                      IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                      Command="{Binding ShowSpellDetailCommand}"
+                                      IsVisible="{Binding HasRelatedSpells}"/>
         </VerticalStackLayout>
     </Border>
 </toolkit:Popup>

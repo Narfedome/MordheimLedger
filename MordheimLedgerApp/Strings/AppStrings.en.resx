@@ -516,6 +516,9 @@
   <data name="SpellNamePh" xml:space="preserve">
     <value>Spell name</value>
   </data>
+  <data name="LibSpellsPh" xml:space="preserve">
+    <value>Spells</value>
+  </data>
   <data name="SpellCreateTitle" xml:space="preserve">
     <value>New Spell</value>
   </data>

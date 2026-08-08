@@ -107,7 +107,12 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
 
     [RelayCommand]
-    private Task ShowMagicSchoolDetail(MagicSchool school) => ShowChipDetailAsync(school.Name, school.Description);
+    private async Task ShowMagicSchoolDetail(MagicSchool school)
+    {
+        var language = LocalizationService.Instance.Language;
+        var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
+        await ShowChipDetailAsync(school.Name, school.Description, spells);
+    }
 
     [RelayCommand]
     private async Task ShowWarriorDetail(NamedRef warrior)

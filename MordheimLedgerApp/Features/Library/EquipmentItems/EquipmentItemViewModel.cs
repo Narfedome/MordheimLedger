@@ -193,6 +193,15 @@ public partial class EquipmentItemViewModel : BaseViewModel
         await _libraryService.SaveEquipmentItemAsync(newItem, LocalizationService.Instance.Language);
         _allItems.Add(newItem);
         ApplyFilter();
+
+        // Sélecteur : le "+" doit se comporter comme si on avait tapé la nouvelle tuile - coché et
+        // ajouté à SelectedRows, sans fermer le picker. Ne trouve rien si un filtre de catégorie actif
+        // exclut la catégorie du nouvel item - cas limite accepté, pas de changement de filtre forcé.
+        if (IsSelectorMode)
+        {
+            var row = EquipmentItemGroups.SelectMany(g => g).FirstOrDefault(r => r.Item.Id == newItem.Id);
+            if (row != null) Select(row);
+        }
     }
 
     [RelayCommand]

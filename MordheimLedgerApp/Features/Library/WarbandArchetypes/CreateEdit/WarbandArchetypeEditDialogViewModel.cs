@@ -110,7 +110,12 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
 
     [RelayCommand]
-    private Task ShowMagicSchoolDetail(MagicSchool school) => ShowChipDetailAsync(school.Name, school.Description);
+    private async Task ShowMagicSchoolDetail(MagicSchool school)
+    {
+        var language = LocalizationService.Instance.Language;
+        var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
+        await ShowChipDetailAsync(school.Name, school.Description, spells);
+    }
 
     [RelayCommand]
     private async Task AddSpecialRule()

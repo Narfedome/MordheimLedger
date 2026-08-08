@@ -78,11 +78,19 @@ public partial class MagicSchoolViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new MagicSchool();
-        var dialogViewModel = new MagicSchoolEditDialogViewModel(newItem, Loc["MagicSchoolCreateTitle"]);
+        var dialogViewModel = new MagicSchoolEditDialogViewModel(newItem, Loc["MagicSchoolCreateTitle"],
+            _libraryService, Array.Empty<Spell>());
         if (await ShowDialogAsync(new MagicSchoolEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveMagicSchoolAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
+
+        // Sélecteur : le "+" doit se comporter comme si on avait tapé la nouvelle tuile - coché et
+        // ajouté à SelectedRows, sans fermer le picker.
+        if (IsSelectorMode)
+        {
+            var row = MagicSchools.FirstOrDefault(r => r.Item.Id == newItem.Id);
+            if (row != null) Select(row);
+        }
     }
 
     [RelayCommand]
@@ -102,10 +110,12 @@ public partial class MagicSchoolViewModel : BaseViewModel
             ImagePath = s.ImagePath
         };
 
-        var dialogViewModel = new MagicSchoolEditDialogViewModel(copy, Loc["MagicSchoolEditTitle"]);
+        var language = LocalizationService.Instance.Language;
+        var initialSpells = (await _libraryService.GetSpellsAsync(language)).Where(sp => sp.MagicSchoolId == s.Id).ToList();
+        var dialogViewModel = new MagicSchoolEditDialogViewModel(copy, Loc["MagicSchoolEditTitle"],
+            _libraryService, initialSpells);
         if (await ShowDialogAsync(new MagicSchoolEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveMagicSchoolAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 

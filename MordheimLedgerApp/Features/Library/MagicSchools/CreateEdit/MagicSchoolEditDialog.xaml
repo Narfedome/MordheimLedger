@@ -25,6 +25,15 @@
                                               FontFamily="RpgAwesome" MaximumHeightRequest="30"/>
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc MagicSchoolNamePh}"/>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <!-- Sorts de cette école, édités en mémoire (voir MagicSchoolEditDialogViewModel) -
+                 sauvegardés en bloc avec l'école au Save, pas d'appel service avant. -->
+            <components:ChipListView HeaderText="{loc:Loc LibSpellsPh}"
+                                      ItemsSource="{Binding Spells}"
+                                      IconFontFamily="RpgAwesome"
+                                      IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                      Command="{Binding EditSpellCommand}"
+                                      AddCommand="{Binding AddSpellCommand}"
+                                      RemoveCommand="{Binding RemoveSpellCommand}"/>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"

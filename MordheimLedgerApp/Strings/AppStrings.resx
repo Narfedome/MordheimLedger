@@ -516,6 +516,9 @@
   <data name="SpellNamePh" xml:space="preserve">
     <value>Nom du sort</value>
   </data>
+  <data name="LibSpellsPh" xml:space="preserve">
+    <value>Sorts</value>
+  </data>
   <data name="SpellCreateTitle" xml:space="preserve">
     <value>Nouveau sort</value>
   </data>

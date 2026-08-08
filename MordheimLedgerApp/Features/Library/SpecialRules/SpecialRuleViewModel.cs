@@ -167,6 +167,15 @@ public partial class SpecialRuleViewModel : BaseViewModel
 
         await _libraryService.SaveSpecialRuleAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
+
+        // Sélecteur : le "+" doit se comporter comme si on avait tapé la nouvelle tuile - coché et
+        // ajouté à SelectedRows, sans fermer le picker (l'utilisateur peut enchaîner d'autres
+        // créations/sélections avant de Confirmer).
+        if (IsSelectorMode)
+        {
+            var row = SpecialRuleGroups.SelectMany(g => g).FirstOrDefault(r => r.Item.Id == newItem.Id);
+            if (row != null) Select(row);
+        }
     }
 
     [RelayCommand]

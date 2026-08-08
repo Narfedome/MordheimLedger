@@ -108,7 +108,13 @@ public partial class SpecialRuleViewModel : BaseViewModel
         if (IsSelectorMode && _pickerNavigation.RequestedFilterKind is { } filterKind)
         {
             var relevantIds = filterKind == SpecialRuleFilterKind.Warband ? _warbandRuleIds : _warriorRuleIds;
-            var everAttachedAnywhere = new HashSet<int>(_warbandRuleIds.Concat(_warriorRuleIds).Concat(_animalRuleIds).Concat(_itemRuleIds));
+            // Une règle de matériau (CostMultiplier != null, ex. "Gromril Weapon") compte comme classée
+            // Objets même sans ligne EquipmentItemSpecialRuleEntity - voir GroupNameFor, même raison :
+            // elle ne s'attache jamais à un objet précis, elle est choisie à l'achat
+            // (WarriorEquipment.MaterialRule). Sans ça elle repasse "jamais attachée nulle part" et
+            // resurgit dans tous les sélecteurs filtrés malgré le fix du regroupement Codex.
+            var materialRuleIds = _allItems.Where(i => i.CostMultiplier != null).Select(i => i.Id);
+            var everAttachedAnywhere = new HashSet<int>(_warbandRuleIds.Concat(_warriorRuleIds).Concat(_animalRuleIds).Concat(_itemRuleIds).Concat(materialRuleIds));
             _allItems = _allItems.Where(i => relevantIds.Contains(i.Id) || !everAttachedAnywhere.Contains(i.Id)).ToList();
         }
 

@@ -78,7 +78,13 @@
           }
         }
       ],
-      "equipmentListName": "Undead Equipment List"
+      "equipmentListName": "Undead Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -111,7 +117,11 @@
         }
       ],
       "isSpellcaster": true,
-      "equipmentListName": "Undead Equipment List"
+      "equipmentListName": "Undead Equipment List",
+      "skillCategories": [
+        "Academic",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -135,7 +145,11 @@
         "en": "Dregs are the most miserable human survivors of the demise of Mordheim, deformed and rejected individuals often bound in fanatical loyalty to their Undead masters.",
         "fr": "Les parias sont les plus misérables survivants humains de la chute de Mordheim, des individus difformes et rejetés, souvent fanatiquement loyaux envers leurs maîtres morts-vivants."
       },
-      "equipmentListName": "Undead Equipment List"
+      "equipmentListName": "Undead Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength"
+      ]
     },
     {
       "name": {
@@ -349,13 +363,35 @@
         "fr": "Contient des transcriptions des livres de Nagash, le grand nécromancien - un Nécromancien gagne un nouveau sort de façon permanente, un Vampire peut apprendre la nécromancie via la compétence Savoir Interdit. Coût complet : 200 + 1D6x25 CO."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Vampire", "Necromancer"]
+      "restrictedToWarriorNames": [
+        "Vampire",
+        "Necromancer"
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Undead Equipment List", "fr": "Liste d'équipement des Morts-vivants" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Spear", "Halberd", "Bow", "Short Bow", "Light Armour", "Heavy Armour", "Shield", "Helmet", "Book of the Dead"]
+      "name": {
+        "en": "Undead Equipment List",
+        "fr": "Liste d'équipement des Morts-vivants"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Spear",
+        "Halberd",
+        "Bow",
+        "Short Bow",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet",
+        "Book of the Dead"
+      ]
     }
   ],
   "spells": []

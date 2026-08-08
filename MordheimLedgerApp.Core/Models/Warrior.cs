@@ -43,6 +43,12 @@ public class Warrior
     /// equipment usable. Editing the archetype's list later doesn't retroactively change this.</summary>
     public int? EquipmentListId { get; set; }
 
+    /// <summary>Which of the 6 rulebook Skill lists this warrior may pick an Advance from - copied from
+    /// the recruiting WarriorArchetype at recruitment (see WarriorArchetype.AllowedSkillCategories), so
+    /// the End of Game Advance skill picker can filter to it (see EndOfGameDialogViewModel.
+    /// PickAdvanceSkill). Empty = not seeded/unknown, not "may pick nothing".</summary>
+    public List<Library.SkillCategory> AllowedSkillCategories { get; set; } = new();
+
     /// <summary>Loaded separately via the Warrior/EquipmentItem join table — not persisted on this object.</summary>
     public List<WarriorEquipment> Equipment { get; set; } = new();
 
@@ -63,7 +69,7 @@ public class Warrior
     /// Only meaningful for warriors whose archetype has CanBuyMutations set — empty otherwise.</summary>
     public List<WarriorMutation> Mutations { get; set; } = new();
 
-    /// <summary>Null = not mounted. Resolved separately from the Mount catalog by WarbandService (not a
-    /// join table - a warrior can only ride one mount at a time, picking a new one replaces this).</summary>
-    public Library.Mount? Mount { get; set; }
+    /// <summary>Null = no animal assigned. Resolved separately from the Animal catalog by WarbandService
+    /// (not a join table - a warrior can only have one animal at a time, picking a new one replaces this).</summary>
+    public Library.Animal? Animal { get; set; }
 }

@@ -4,26 +4,16 @@ using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Tests;
 
-/// <summary>Exercises LibraryService/WarbandService against a real (temp-file) SQLite database.</summary>
-public class DataServiceTests : IDisposable
+/// <summary>Exercises LibraryService against a real (temp-file) SQLite database - read-only, so every
+/// test shares one seeded database via SeededDatabaseFixture instead of re-seeding per test. Tests that
+/// mutate warband/catalog state live in WarbandMutationTests, each with its own fresh database.</summary>
+public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
 {
-    private readonly string _dbPath;
-    private readonly AppDatabase _db;
     private readonly ILibraryService _library;
-    private readonly IWarbandService _warbands;
 
-    public DataServiceTests()
+    public DataServiceTests(SeededDatabaseFixture fixture)
     {
-        _dbPath = Path.Combine(Path.GetTempPath(), $"mordheimledger-tests-{Guid.NewGuid()}.db3");
-        _db = new AppDatabase(_dbPath);
-        _library = new LibraryService(_db);
-        _warbands = new WarbandService(_db);
-    }
-
-    public void Dispose()
-    {
-        _db.Connection.CloseAsync().GetAwaiter().GetResult();
-        if (File.Exists(_dbPath)) File.Delete(_dbPath);
+        _library = fixture.Library;
     }
 
     /// <summary>The seed covers several warbands (see AppDatabase.SeedWarbandFromJsonAsync) - tests
@@ -263,11 +253,11 @@ public class DataServiceTests : IDisposable
         Assert.Empty(greatClaw.RestrictedToWarbandArchetypeIds);
     }
 
-    /// <summary>Orc Mob is the first warband to use both the Mount catalog (War Boar, restricted) and a
+    /// <summary>Orc Mob is the first warband to use both the Animal catalog (War Boar, restricted) and a
     /// non-fixed Movement characteristic (Cave Squigs roll 2D6" instead of a fixed value) - see
     /// WarriorArchetype.MovementOverride/MovementDisplay, added specifically for this case.</summary>
     [Fact]
-    public async Task OrcMob_SquigMovementOverride_AndWarBoarMount()
+    public async Task OrcMob_SquigMovementOverride_AndWarBoarAnimal()
     {
         var orcs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Orc Mob");
         var warriors = await _library.GetWarriorArchetypesAsync(orcs.Id, "en");
@@ -281,8 +271,8 @@ public class DataServiceTests : IDisposable
         Assert.Equal(boss.Movement.ToString(), boss.MovementDisplay);
         Assert.Contains(boss.SpecialRules, r => r.Name == "Leader");
 
-        var mounts = await _library.GetMountsAsync("en");
-        var warBoar = mounts.Single(m => m.Name == "War Boar");
+        var animals = await _library.GetAnimalsAsync("en");
+        var warBoar = animals.Single(m => m.Name == "War Boar");
         Assert.Equal([orcs.Id], warBoar.RestrictedToWarbandArchetypeIds);
         Assert.Contains(warBoar.SpecialRules, r => r.Name == "Furious Charge");
     }
@@ -388,61 +378,29 @@ public class DataServiceTests : IDisposable
         Assert.Contains(holyTome.Id, sistersList.ItemIds);
     }
 
+    /// <summary>Each Hero archetype's row of its warband's "skill table" (which of the 6 rulebook Skill
+    /// lists it may pick an Advance from) is seeded from a source CSV, per-warrior, into
+    /// WarriorArchetype.AllowedSkillCategories - data-only (not enforced in the Skill picker), same
+    /// convention as the other Restricted* lists. Henchmen (no skill table in the rulebook) get none.</summary>
     [Fact]
-    public async Task CreateWarband_PreFillsTreasuryFromArchetype()
+    public async Task WarriorArchetype_AllowedSkillCategories_MatchSourceSkillTable()
     {
-        var archetype = await GetReiklandersAsync();
+        var witchHunters = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Witch Hunters");
+        var warriors = await _library.GetWarriorArchetypesAsync(witchHunters.Id, "en");
 
-        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", archetype);
+        var captain = warriors.Single(w => w.Name == "Witch Hunter Captain");
+        Assert.Equal(
+            new[] { SkillCategory.Combat, SkillCategory.Shooting, SkillCategory.Academic, SkillCategory.Strength, SkillCategory.Speed },
+            captain.AllowedSkillCategories);
 
-        Assert.NotEqual(0, warband.Id);
-        Assert.Equal(archetype.StartingTreasury, warband.Treasury);
-        Assert.Equal(archetype.Id, warband.WarbandArchetypeId);
-    }
+        var priest = warriors.Single(w => w.Name == "Warrior-Priest");
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Academic, SkillCategory.Strength], priest.AllowedSkillCategories);
 
-    [Fact]
-    public async Task RecruitWarrior_PreFillsStatsFromArchetype_AndPersists()
-    {
-        var warbandArchetype = await GetReiklandersAsync();
-        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
-        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en"))
-            .Single(a => a.Name == "Mercenary Captain");
+        var warHounds = warriors.Single(w => w.Name == "War Hounds");
+        Assert.Empty(warHounds.AllowedSkillCategories);
 
-        var recruited = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
-
-        Assert.NotEqual(0, recruited.Id);
-        Assert.Equal(captainArchetype.Movement, recruited.Movement);
-        Assert.Equal(captainArchetype.Cost, recruited.Cost);
-
-        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
-        var persisted = Assert.Single(roster);
-        Assert.Equal("Otto", persisted.Name);
-    }
-
-    [Fact]
-    public async Task EditingOfficialArchetype_FlipsSourceToModified()
-    {
-        var archetype = await GetReiklandersAsync();
-        archetype.StartingTreasury = 600;
-
-        await _library.SaveWarbandArchetypeAsync(archetype, "en");
-
-        var reloaded = await GetReiklandersAsync();
-        Assert.Equal(ContentSource.Modified, reloaded.Source);
-        Assert.Equal(600, reloaded.StartingTreasury);
-    }
-
-    [Fact]
-    public async Task DeleteWarband_CascadesToWarriorsAndEquipment()
-    {
-        var warbandArchetype = await GetReiklandersAsync();
-        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
-        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
-        await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
-
-        await _warbands.DeleteWarbandAsync(warband.Id);
-
-        Assert.Null(await _warbands.GetWarbandAsync(warband.Id));
-        Assert.Empty(await _warbands.GetWarriorsAsync(warband.Id, "en"));
+        var dwarfs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Dwarf Treasure Hunters");
+        var trollSlayer = (await _library.GetWarriorArchetypesAsync(dwarfs.Id, "en")).Single(w => w.Name == "Troll Slayer");
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Strength, SkillCategory.Special], trollSlayer.AllowedSkillCategories);
     }
 }

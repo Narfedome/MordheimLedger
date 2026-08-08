@@ -11,16 +11,32 @@ public interface ILibraryService
     Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode);
     Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id, string languageCode);
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId, string languageCode);
+    Task<WarriorArchetype?> GetWarriorArchetypeAsync(int id, string languageCode);
 
     /// <summary>Warriors of ANY of these warbands - used by the "restricted to warrior" picker, which
     /// scopes to whichever warband(s) a Skill (etc.) is already restricted to. Empty input = empty
     /// result, no call.</summary>
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(IEnumerable<int> warbandArchetypeIds, string languageCode);
+
+    /// <summary>Id+Name only, no SpecialRules/Description resolution - for chip lists (e.g.
+    /// WarbandArchetypeDetailDialog's Guerriers tab) that only display a name and fetch the full
+    /// WarriorArchetype on tap via GetWarriorArchetypeAsync(id, ...).</summary>
+    Task<List<NamedRef>> GetWarriorArchetypeNamesAsync(int warbandArchetypeId, string languageCode);
     Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode);
+
+    /// <summary>Same resolution as GetEquipmentItemsAsync(languageCode), filtered to specific ids at the
+    /// SQL level - for resolving a known subset (e.g. one EquipmentList's members) without paying for
+    /// the whole Trading Post catalog's translations. Empty input = empty result, no call.</summary>
+    Task<List<EquipmentItem>> GetEquipmentItemsAsync(IEnumerable<int> ids, string languageCode);
 
     /// <summary>This warband's own named starting-equipment lists (see Models.Library.EquipmentList) -
     /// what a WarriorArchetype.EquipmentListId actually points at.</summary>
     Task<List<EquipmentList>> GetEquipmentListsAsync(int warbandArchetypeId, string languageCode);
+
+    /// <summary>Id+Name only - same rationale as GetWarriorArchetypeNamesAsync, for
+    /// WarbandArchetypeDetailDialog's Équipement tab (member items resolved lazily on tap, see
+    /// GetEquipmentListItemIdsAsync).</summary>
+    Task<List<NamedRef>> GetEquipmentListNamesAsync(int warbandArchetypeId, string languageCode);
 
     /// <summary>Member item ids of one EquipmentList - the starting-list channel consumed by the
     /// roster equipment picker (see EquipmentPickerService), distinct from
@@ -38,13 +54,17 @@ public interface ILibraryService
     /// WarbandArchetype.SpecialRules/WarriorArchetype.SpecialRules.</summary>
     Task<List<SpecialRule>> GetSpecialRulesAsync(string languageCode);
 
+    /// <summary>Ids of SpecialRules attached to a Warband/Warrior/Animal vs. to an EquipmentItem - see
+    /// LibraryService for details.</summary>
+    Task<(HashSet<int> FighterRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync();
+
     /// <summary>The flat global Mutation catalog (see Models.Library.Mutation) - not restricted per
     /// warband, shared verbatim across every Chaos-adjacent band.</summary>
     Task<List<Mutation>> GetMutationsAsync(string languageCode);
 
-    /// <summary>The Mount catalog (see Models.Library.Mount) - has its own stat profile, separate from
+    /// <summary>The Animal catalog (see Models.Library.Animal) - has its own stat profile, separate from
     /// EquipmentItem.</summary>
-    Task<List<Mount>> GetMountsAsync(string languageCode);
+    Task<List<Animal>> GetAnimalsAsync(string languageCode);
 
     /// <summary>The MagicSchool catalog (e.g. "Nécromancie") - see Models.Library.MagicSchool.</summary>
     Task<List<MagicSchool>> GetMagicSchoolsAsync(string languageCode);
@@ -76,7 +96,7 @@ public interface ILibraryService
     Task SaveSpellAsync(Spell spell, string languageCode);
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
     Task SaveMutationAsync(Mutation mutation, string languageCode);
-    Task SaveMountAsync(Mount mount, string languageCode);
+    Task SaveAnimalAsync(Animal animal, string languageCode);
     Task SaveMagicSchoolAsync(MagicSchool school, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
@@ -88,6 +108,6 @@ public interface ILibraryService
     Task DeleteSpellAsync(int spellId);
     Task DeleteSpecialRuleAsync(int specialRuleId);
     Task DeleteMutationAsync(int mutationId);
-    Task DeleteMountAsync(int mountId);
+    Task DeleteAnimalAsync(int animalId);
     Task DeleteMagicSchoolAsync(int magicSchoolId);
 }

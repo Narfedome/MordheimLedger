@@ -8,28 +8,47 @@
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
-    <!-- Pas de filtre par catégorie (contrairement à EquipmentItemView/SkillView) : une règle spéciale
-         n'a pas de regroupement par type dans le livre de règles. -->
-    <Grid Margin="5" RowSpacing="8">
+    <!-- Filtre par groupe ("Guerriers & Bandes" vs "Objets", dérivé des tables de jointure - voir
+         SpecialRuleViewModel.GroupNameFor) - même en-tête que MutationView/EquipmentItemView. -->
+    <Grid Margin="5" RowSpacing="5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <ActivityIndicator Grid.Row="0" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Padding="5,0">
+            <Button Grid.Column="0"
+                    Text="{Binding SelectedGroupFilter}"
+                    Command="{Binding SelectGroupFilterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{DynamicResource AppAccent}"
+                    HorizontalOptions="Start"
+                    Padding="0"/>
+        </Grid>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="0" x:Name="ItemsCollection"
-                ItemsSource="{Binding SpecialRules}"
-                SelectionMode="None"
-                ItemSizingStrategy="MeasureFirstItem">
+        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+           ItemsSource="{Binding SpecialRuleGroups}"
+           IsGrouped="True"
+           SelectionMode="None"
+           ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
+                <components:ResponsiveGridSpanBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                      IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                      Style="{StaticResource CodexGroupHeaderStyle}"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:SpecialRuleRow">
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
@@ -43,31 +62,36 @@
                         </Border.Triggers>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
-                                CommandParameter="{Binding .}"/>
+                           Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                           CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <Grid WidthRequest="120" HeightRequest="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <components:LibraryItemImageView
-                                Grid.Row="0"
-                                ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:SolidFont.Scroll}"
-                                Padding="20" />
-                            <Label Text="{Binding Item.Name}"
-                                   Grid.Row="1"
-                                   Style="{StaticResource TruncatedLabelStyle}"
-                                   HorizontalOptions="Center"
-                                   Margin="5"/>
+                        <Grid Style="{StaticResource CodexTileFrameStyle}">
+                            <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                <components:LibraryItemImageView
+                               ImagePath="{Binding Item.ImagePath}"
+                               DefaultGlyph="{x:Static icons:SolidFont.Scroll}"
+                               WidthRequest="26" HeightRequest="26"
+                               HorizontalOptions="Center" />
+                                <Label Text="{Binding Item.Name}"
+                                  Style="{StaticResource CodexTileNameLabelStyle}"
+                                  HorizontalOptions="Center"
+                                  HorizontalTextAlignment="Center"
+                                  Margin="5,0"/>
+                            </VerticalStackLayout>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                     Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                     Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                     IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                                     HorizontalOptions="End" VerticalOptions="Start"
+                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                     CommandParameter="{Binding .}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
@@ -84,7 +108,7 @@
 
         <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
              toutes les tuiles cochées d'un coup. -->
-        <HorizontalStackLayout Grid.Row="1" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+        <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"

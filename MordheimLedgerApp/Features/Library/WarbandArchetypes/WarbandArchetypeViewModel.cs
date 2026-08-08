@@ -46,7 +46,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 
     /// <summary>Set by WarbandArchetypeSelectorPage right after construction - même bascule
     /// multi-sélection que SpecialRuleViewModel.IsSelectorMode (utilisé pour "réservé à ces bandes" sur
-    /// Équipement/Compétences/Montures).</summary>
+    /// Équipement/Compétences/Animaux).</summary>
     public bool IsSelectorMode { get; set; }
 
     /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>
@@ -206,6 +206,18 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         await _libraryService.DeleteWarbandArchetypeAsync(row.Item.Id);
         await LoadData();
     }
+
+    /// <summary>Read-only recap popup (tile info button) - opens instantly, no service call: Général
+    /// (Grade/Trésorerie/Description/SpecialRules/MagicSchools) reads entirely off the already-loaded
+    /// Item. Guerriers/Équipement fetch lazily on first visit to their own onglet (see
+    /// WarbandArchetypeDetailDialogViewModel) - _libraryService is just handed through for that.
+    /// AllowConcurrentExecutions : ShowDetailsCommand est une seule instance partagée par toutes les
+    /// tuiles (seul CommandParameter change) - sans ça, AsyncRelayCommand désactive tout le monde
+    /// (CanExecute lié à IsRunning) pendant qu'un dialog est ouvert pour UNE tuile, pas juste elle.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private Task ShowDetails(WarbandArchetypeRow row) =>
+        ShowDialogAsync(new WarbandArchetypeDetailDialog(
+            new WarbandArchetypeDetailDialogViewModel(row.Item, _libraryService)));
 
     [RelayCommand]
     private async Task ManageWarriors()

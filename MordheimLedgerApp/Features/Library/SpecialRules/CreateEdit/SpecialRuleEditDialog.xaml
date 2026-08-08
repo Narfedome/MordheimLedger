@@ -24,6 +24,7 @@
                                               DefaultGlyph="{x:Static icons:SolidFont.Scroll}" MaximumHeightRequest="30"/>
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc SpecialRuleNamePh}"/>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <Entry Text="{Binding Item.CostMultiplier}" Keyboard="Numeric" Placeholder="{loc:Loc SpecialRuleCostMultiplierPh}"/>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0"
                         Text="{loc:Loc BtnCancel}"

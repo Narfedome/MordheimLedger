@@ -6,14 +6,14 @@ using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
-using MordheimLedgerApp.Features.Library.Mounts;
+using MordheimLedgerApp.Features.Library.Animals;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
 
 /// <summary>
 /// Single "Codex" Shell tab hosting the 8 catalog sections (types de bande, Place du Marché,
-/// Compétences, Blessures, Sorts, Règles spéciales, Mutations, Montures) that used to each be their own
+/// Compétences, Blessures, Sorts, Règles spéciales, Mutations, Animaux) that used to each be their own
 /// top-level TabBar tab - consolidated to declutter the bottom nav bar on Android. Same toggle pattern
 /// (index + IsXTab, no real TabbedPage) already used by WarbandDetailPage's Roster/Historique and
 /// WarriorEditDialog's Équipement/Compétences/Blessures. Each section keeps its own existing
@@ -33,7 +33,7 @@ public partial class LibraryViewModel : BaseViewModel
     private static readonly string[] TabKeys =
     [
         "TabWarbands", "LibTabTradingPost", "TabSkills", "TabInjuries",
-        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabMounts"
+        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabAnimals"
     ];
 
     public WarbandArchetypeViewModel WarbandArchetypes { get; }
@@ -43,7 +43,7 @@ public partial class LibraryViewModel : BaseViewModel
     public SpellViewModel Spells { get; }
     public SpecialRuleViewModel SpecialRules { get; }
     public MutationViewModel Mutations { get; }
-    public MountViewModel Mounts { get; }
+    public AnimalViewModel Animals { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
@@ -53,7 +53,7 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsSpellsTab))]
     [NotifyPropertyChangedFor(nameof(IsSpecialRulesTab))]
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
-    [NotifyPropertyChangedFor(nameof(IsMountsTab))]
+    [NotifyPropertyChangedFor(nameof(IsAnimalsTab))]
     private int selectedTab;
 
     /// <summary>Displayed on the single section-picker Button - see SelectTab. Distinct from a direct
@@ -69,11 +69,21 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsSpellsTab => SelectedTab == 4;
     public bool IsSpecialRulesTab => SelectedTab == 5;
     public bool IsMutationsTab => SelectedTab == 6;
-    public bool IsMountsTab => SelectedTab == 7;
+    public bool IsAnimalsTab => SelectedTab == 7;
+
+    // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 7 autres ne le sont qu'au
+    // premier passage sur leur onglet, voir EnsureTabLoadedAsync.
+    private bool _equipmentItemsLoaded;
+    private bool _skillsLoaded;
+    private bool _injuriesLoaded;
+    private bool _spellsLoaded;
+    private bool _specialRulesLoaded;
+    private bool _mutationsLoaded;
+    private bool _animalsLoaded;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
-        MutationViewModel mutations, MountViewModel mounts)
+        MutationViewModel mutations, AnimalViewModel animals)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
@@ -82,7 +92,7 @@ public partial class LibraryViewModel : BaseViewModel
         Spells = spells;
         SpecialRules = specialRules;
         Mutations = mutations;
-        Mounts = mounts;
+        Animals = animals;
         RefreshSelectedTabLabel();
     }
 
@@ -101,20 +111,46 @@ public partial class LibraryViewModel : BaseViewModel
 
         SelectedTab = index;
         RefreshSelectedTabLabel();
+        await EnsureTabLoadedAsync(index);
     }
 
-    /// <summary>All 8 sections load up front (catalogs are tiny, no lazy-load complexity needed) so
-    /// switching between them is instant.</summary>
+    /// <summary>Seule la section Bandes (onglet par défaut) charge à l'ouverture du Codex - les 7 autres
+    /// chargeaient toutes en même temps ici avant ce correctif (catalogues "petits" à l'origine, plus
+    /// vrai avec 15 bandes + Trading Post/Animaux/Compétences seedés), d'où la sensation de freeze à
+    /// l'ouverture même quand un seul onglet est réellement visible. Chaque section garde son propre
+    /// indicateur de chargement (Loading.IsLoading, déjà câblé dans chaque XxxView), donc passer sur un
+    /// onglet pas encore chargé montre son spinner plutôt que de bloquer la page entière.</summary>
     public async Task InitializeAsync()
     {
         await WarbandArchetypes.InitializeAsync();
-        await EquipmentItems.InitializeAsync();
-        await Skills.InitializeAsync();
-        await Injuries.InitializeAsync();
-        await Spells.InitializeAsync();
-        await SpecialRules.InitializeAsync();
-        await Mutations.InitializeAsync();
-        await Mounts.InitializeAsync();
         RefreshSelectedTabLabel();
+    }
+
+    private async Task EnsureTabLoadedAsync(int index)
+    {
+        switch (index)
+        {
+            case 1:
+                if (!_equipmentItemsLoaded) { await EquipmentItems.InitializeAsync(); _equipmentItemsLoaded = true; }
+                break;
+            case 2:
+                if (!_skillsLoaded) { await Skills.InitializeAsync(); _skillsLoaded = true; }
+                break;
+            case 3:
+                if (!_injuriesLoaded) { await Injuries.InitializeAsync(); _injuriesLoaded = true; }
+                break;
+            case 4:
+                if (!_spellsLoaded) { await Spells.InitializeAsync(); _spellsLoaded = true; }
+                break;
+            case 5:
+                if (!_specialRulesLoaded) { await SpecialRules.InitializeAsync(); _specialRulesLoaded = true; }
+                break;
+            case 6:
+                if (!_mutationsLoaded) { await Mutations.InitializeAsync(); _mutationsLoaded = true; }
+                break;
+            case 7:
+                if (!_animalsLoaded) { await Animals.InitializeAsync(); _animalsLoaded = true; }
+                break;
+        }
     }
 }

@@ -161,6 +161,13 @@ public partial class SpellViewModel : BaseViewModel
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Spell>());
 
+    /// <summary>Read-only recap popup (tile info button) - no restriction resolution needed,
+    /// MagicSchool is already resolved on the loaded Item. AllowConcurrentExecutions : voir
+    /// WarbandArchetypeViewModel.ShowDetails.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task ShowDetails(SpellRow row) =>
+        await ShowDialogAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(row.Item)));
+
     [RelayCommand]
     private async Task Create()
     {

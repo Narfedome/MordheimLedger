@@ -72,7 +72,10 @@
   ],
   "skills": [
     {
-      "name": { "en": "Master of Blades", "fr": "Maître d'Armes" },
+      "name": {
+        "en": "Master of Blades",
+        "fr": "Maître d'Armes"
+      },
       "category": "Special",
       "description": {
         "en": "With a Parrying weapon, parries on a tied roll as well as beating it; with two Parrying weapons, may parry two attacks instead of one.",
@@ -81,7 +84,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Extra Tough", "fr": "Increvable" },
+      "name": {
+        "en": "Extra Tough",
+        "fr": "Increvable"
+      },
       "category": "Special",
       "description": {
         "en": "May re-roll the Heroes Serious Injury roll once, the second result stands.",
@@ -90,7 +96,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Resource Hunter", "fr": "Chercheur de Ressources" },
+      "name": {
+        "en": "Resource Hunter",
+        "fr": "Chercheur de Ressources"
+      },
       "category": "Special",
       "description": {
         "en": "+1 or -1 to one Exploration roll.",
@@ -99,7 +108,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "True Grit", "fr": "Coriace" },
+      "name": {
+        "en": "True Grit",
+        "fr": "Coriace"
+      },
       "category": "Special",
       "description": {
         "en": "An Injury roll of 1-3 counts as Knocked Down, 4-5 as Stunned, 6 as Out of Action.",
@@ -108,7 +120,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Thick Skull", "fr": "Crâne Épais" },
+      "name": {
+        "en": "Thick Skull",
+        "fr": "Crâne Épais"
+      },
       "category": "Special",
       "description": {
         "en": "3+ save to avoid being Stunned, treated as Knocked Down instead if made; 2+ if also wearing a helmet, replacing its normal save.",
@@ -150,7 +165,13 @@
           }
         }
       ],
-      "equipmentListName": "Dwarf Warrior Equipment List"
+      "equipmentListName": "Dwarf Warrior Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -186,7 +207,12 @@
           }
         }
       ],
-      "equipmentListName": "Thunderer Equipment List"
+      "equipmentListName": "Thunderer Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -232,7 +258,12 @@
           }
         }
       ],
-      "equipmentListName": "Dwarf Warrior Equipment List"
+      "equipmentListName": "Dwarf Warrior Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -320,17 +351,73 @@
         "en": "A shorter-hafted axe made of lighter but stronger materials than a normal axe - grants an additional -1 armour save modifier and can be used to Parry.",
         "fr": "Une hache à manche court en matériaux plus légers mais plus solides qu'une hache normale - inflige un modificateur de sauvegarde additionnel de -1 et permet de parer."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Cutting Edge",
+            "fr": "Tranchant"
+          },
+          "description": {
+            "en": "An axe has an extra save modifier of -1, so a model with Strength 4 using an axe has a -2 save modifier when he hits an opponent in close combat.",
+            "fr": "Une hache bénéficie d'un modificateur de sauvegarde supplémentaire de -1 : un guerrier de Force 4 utilisant une hache inflige donc un malus de -2 à la sauvegarde d'armure de l'adversaire touché en combat rapproché."
+          }
+        },
+        {
+          "name": {
+            "en": "Parry (Dwarf axe)",
+            "fr": "Parade (Hache Naine)"
+          },
+          "description": {
+            "en": "Dwarf axes offer an excellent balance of defence and offense. A model armed with a Dwarf axe may parry blows. When his opponent rolls to hit, the model armed with a Dwarf axe may roll a D6. If the score is greater than the highest to hit score of his opponent, the model has parried the blow and that attack is discarded. A model may not parry attacks made with double or more its own Strength. A model may not parry more than one attack in a single Close Combat phase; a model armed with two Dwarf axes (or a Dwarf axe and a sword, etc) does not get to parry two attacks but may instead re-roll a failed parry.",
+            "fr": "Les haches naines offrent un excellent équilibre entre attaque et défense. Un guerrier armé d'une hache naine peut parer les coups. Lorsque son adversaire obtient un jet pour toucher, le porteur de la hache peut lancer 1D6 : si le résultat est supérieur au meilleur jet pour toucher de son adversaire, le coup est paré et cette attaque est ignorée. On ne peut pas parer une attaque dont la Force est égale ou supérieure au double de la sienne. Une figurine ne peut parer plus d'une attaque par phase de Combat Rapproché ; un guerrier armé de deux haches naines (ou d'une hache naine et d'une épée, etc.) ne pare pas deux attaques mais peut relancer une parade ratée."
+          }
+        }
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Dwarf Warrior Equipment List", "fr": "Liste d'équipement des Guerriers Nains" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Dwarf axe", "Double-handed weapon", "Spear", "Halberd", "Pistol", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Dwarf Warrior Equipment List",
+        "fr": "Liste d'équipement des Guerriers Nains"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Dwarf axe",
+        "Double-handed weapon",
+        "Spear",
+        "Halberd",
+        "Pistol",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Thunderer Equipment List", "fr": "Liste d'équipement des Tireurs Nains" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Pistol", "Crossbow", "Handgun", "Light Armour", "Heavy Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Thunderer Equipment List",
+        "fr": "Liste d'équipement des Tireurs Nains"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Pistol",
+        "Crossbow",
+        "Handgun",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

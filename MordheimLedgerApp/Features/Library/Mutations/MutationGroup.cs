@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using MordheimLedgerApp.Components;
 
 namespace MordheimLedgerApp.Features.Library.Mutations;
 
@@ -10,6 +11,6 @@ namespace MordheimLedgerApp.Features.Library.Mutations;
 public class MutationGroup : ObservableCollection<MutationRow>
 {
     public string Name { get; }
-
+    
     public MutationGroup(string name) => Name = name;
 }

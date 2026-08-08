@@ -194,4 +194,10 @@ public partial class InjuryViewModel : BaseViewModel
 
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Injury>());
+
+    /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
+    /// WarbandArchetypeViewModel.ShowDetails.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task ShowDetails(InjuryRow row) =>
+        await ShowDialogAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(row.Item)));
 }

@@ -31,9 +31,14 @@ public class WarriorEntity
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
-    /// <summary>Null = not mounted. The rider's stats aren't merged with the mount's - it's tracked as
-    /// its own separate profile, resolved from MountEntity by WarbandService (see Models.Warrior.Mount).</summary>
-    public int? MountId { get; set; }
+    /// <summary>Null = no animal assigned. The warrior's stats aren't merged with the animal's - it's
+    /// tracked as its own separate profile, resolved from AnimalEntity by WarbandService (see
+    /// Models.Warrior.Animal).</summary>
+    public int? AnimalId { get; set; }
 
     public int? EquipmentListId { get; set; }
+
+    /// <summary>Comma-separated SkillCategory member names - see Warrior.AllowedSkillCategories /
+    /// WarriorArchetypeEntity.AllowedSkillCategories (same storage convention, copied at recruitment).</summary>
+    public string? AllowedSkillCategories { get; set; }
 }

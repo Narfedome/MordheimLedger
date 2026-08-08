@@ -9,7 +9,7 @@
              x:Name="root">
 
     <!-- Filtre par catégorie (Héros/Hommes de main, bouton + ActionSheet), même mécanisme que SkillView -->
-    <Grid Margin="5" RowSpacing="8">
+    <Grid Margin="5" RowSpacing="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -31,12 +31,12 @@
                            WidthRequest="120" HeightRequest="120"/>
 
         <CollectionView Grid.Row="1" x:Name="ItemsCollection"
-                ItemsSource="{Binding InjuryGroups}"
-                IsGrouped="True"
-                SelectionMode="None"
-                ItemSizingStrategy="MeasureFirstItem">
+           ItemsSource="{Binding InjuryGroups}"
+           IsGrouped="True"
+           SelectionMode="None"
+           ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
+                <components:ResponsiveGridSpanBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
@@ -44,11 +44,8 @@
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
                     <Label Text="{Binding Name}"
-                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           FontAttributes="Bold"
-                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                           TextColor="{DynamicResource AppText}"
-                           Margin="4,12,4,4"/>
+                      IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                      Style="{StaticResource CodexGroupHeaderStyle}"/>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
@@ -64,25 +61,30 @@
                         </Border.Triggers>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
-                                CommandParameter="{Binding .}"/>
+                           Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                           CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <Grid WidthRequest="120" HeightRequest="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <components:LibraryItemImageView
-                                Grid.Row="0"
-                                ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
-                                FontFamily="RpgAwesome"
-                                Padding="20" />
-                            <Label Text="{Binding Item.Name}"
-                                   Grid.Row="1"
-                                   Style="{StaticResource TruncatedLabelStyle}"
-                                   HorizontalOptions="Center"
-                                   Margin="5"/>
+                        <Grid Style="{StaticResource CodexTileFrameStyle}">
+                            <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                <components:LibraryItemImageView
+                               ImagePath="{Binding Item.ImagePath}"
+                               DefaultGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
+                               FontFamily="RpgAwesome"
+                               WidthRequest="26" HeightRequest="26"
+                               HorizontalOptions="Center" />
+                                <Label Text="{Binding Item.Name}"
+                                  Style="{StaticResource CodexTileNameLabelStyle}"
+                                  HorizontalOptions="Center"
+                                  HorizontalTextAlignment="Center"
+                                  Margin="5,0"/>
+                            </VerticalStackLayout>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                     Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                     Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                     IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                                     HorizontalOptions="End" VerticalOptions="Start"
+                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                     CommandParameter="{Binding .}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>

@@ -23,7 +23,7 @@
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
+                <components:ResponsiveGridSpanBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
@@ -38,9 +38,6 @@
                          empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
                          le DataTrigger sur IsSelected. -->
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroupList/>
-                        </VisualStateManager.VisualStateGroups>
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="LightSkyBlue"/>
@@ -51,21 +48,19 @@
                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
                                 CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <Grid WidthRequest="120" HeightRequest="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <components:LibraryItemImageView
-                                Grid.Row="0"
-                                ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:SolidFont.UserShield}"
-                                Padding="20" />
-                            <Label Text="{Binding Item.Name}"
-                                   Grid.Row="1"
-                                   Style="{StaticResource TruncatedLabelStyle}"
-                                   HorizontalOptions="Center"
-                                   Margin="5"/>
+                        <Grid Style="{StaticResource CodexTileFrameStyle}">
+                            <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                <components:LibraryItemImageView
+                                    ImagePath="{Binding Item.ImagePath}"
+                                    DefaultGlyph="{x:Static icons:SolidFont.UserShield}"
+                                    WidthRequest="26" HeightRequest="26"
+                                    HorizontalOptions="Center" />
+                                <Label Text="{Binding Item.Name}"
+                                       Style="{StaticResource CodexTileNameLabelStyle}"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       Margin="5,0"/>
+                            </VerticalStackLayout>
                         </Grid>
                     </Border>
                 </DataTemplate>

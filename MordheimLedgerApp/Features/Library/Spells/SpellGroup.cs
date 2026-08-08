@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using MordheimLedgerApp.Components;
 
 namespace MordheimLedgerApp.Features.Library.Spells;
 
@@ -8,6 +9,6 @@ namespace MordheimLedgerApp.Features.Library.Spells;
 public class SpellGroup : ObservableCollection<SpellRow>
 {
     public string Name { get; }
-
+    
     public SpellGroup(string name) => Name = name;
 }

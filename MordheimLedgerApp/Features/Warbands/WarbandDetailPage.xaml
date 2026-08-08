@@ -35,26 +35,12 @@
                                                           CommandParameter="{Binding .}"/>
                         </Grid>
 
-                        <Grid ColumnDefinitions="*,*,*,*,*,*,*,*,*" RowDefinitions="Auto,Auto" RowSpacing="2">
-                            <Label Grid.Row="0" Grid.Column="0" Text="M" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="1" Text="WS" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="2" Text="BS" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="3" Text="S" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="4" Text="T" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="5" Text="W" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="6" Text="I" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="7" Text="A" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="0" Grid.Column="8" Text="Ld" FontSize="10" HorizontalTextAlignment="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Grid.Row="1" Grid.Column="0" Text="{Binding Warrior.MovementDisplay}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding Warrior.WeaponSkill}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="2" Text="{Binding Warrior.BallisticSkill}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="3" Text="{Binding Warrior.Strength}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="4" Text="{Binding Warrior.Toughness}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="5" Text="{Binding Warrior.Wounds}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="6" Text="{Binding Warrior.Initiative}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="7" Text="{Binding Warrior.Attacks}" FontSize="13" HorizontalTextAlignment="Center"/>
-                            <Label Grid.Row="1" Grid.Column="8" Text="{Binding Warrior.Leadership}" FontSize="13" HorizontalTextAlignment="Center"/>
-                        </Grid>
+                        <!-- StatRowView partagé avec AnimalDetailDialog/WarriorArchetypeDetailDialog -
+                             abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu
+                             du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
+                             de cartes guerrier d'affilée. -->
+                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}"
+                                                 AbbrFontSize="10" ValueFontSize="13"/>
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
                              ViewModel depuis WarriorArchetype.SpecialRules + WarbandArchetype.
@@ -141,16 +127,16 @@
                             </FlexLayout>
                         </VerticalStackLayout>
 
-                        <!-- Monture : lecture seule, un seul chip (champ 0..1, pas une liste) - gérée
+                        <!-- Animal : lecture seule, un seul chip (champ 0..1, pas une liste) - gérée
                              depuis WarriorEditDialog. -->
-                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasMount}">
-                            <Label Text="{loc:Loc WarriorMountHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasAnimal}">
+                            <Label Text="{loc:Loc WarriorAnimalHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4" HorizontalOptions="Start">
                                 <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{x:Static icons:RpgFont.RaHorseshoe}"
+                                    <Label Text="{x:Static icons:RpgFont.RaPawprint}"
                                            FontFamily="RpgAwesome" FontSize="12"
                                            TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Mount.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Animal.Name}" FontSize="11" VerticalOptions="Center"/>
                                 </HorizontalStackLayout>
                             </Border>
                         </VerticalStackLayout>
@@ -168,6 +154,9 @@
                                                        FontFamily="RpgAwesome" FontSize="12"
                                                        TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
                                                 <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                                <Label Text="{Binding MaterialRule.Name}" FontSize="11" FontAttributes="Italic"
+                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"
+                                                       IsVisible="{Binding MaterialRule, Converter={StaticResource IsNotNullConverter}}"/>
                                             </HorizontalStackLayout>
                                         </Border>
                                     </DataTemplate>

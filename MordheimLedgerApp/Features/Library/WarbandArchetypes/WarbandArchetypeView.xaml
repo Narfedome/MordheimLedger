@@ -8,7 +8,7 @@
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
-    <Grid Margin="5">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -19,7 +19,7 @@
              SpellView (bouton texte = filtre courant, ouvre l'ActionSheet). Pas d'icône "gérer" ici,
              contrairement aux Sorts/Écoles de magie : le Grade est un champ direct de WarbandArchetype,
              pas un sous-catalogue séparé. -->
-        <Grid Grid.Row="0" Margin="8,0,8,8" VerticalOptions="Center">
+        <Grid Grid.Row="0" VerticalOptions="Center">
             <Button Text="{Binding SelectedGradeFilter}"
                     Command="{Binding SelectGradeFilterCommand}"
                     BackgroundColor="Transparent"
@@ -34,12 +34,12 @@
                            WidthRequest="120" HeightRequest="120"/>
 
         <CollectionView Grid.Row="1" x:Name="ItemsCollection"
-                ItemsSource="{Binding WarbandArchetypeGroups}"
-                IsGrouped="True"
-                SelectionMode="None"
-                ItemSizingStrategy="MeasureFirstItem">
+            ItemsSource="{Binding WarbandArchetypeGroups}"
+            IsGrouped="True"
+            SelectionMode="None"
+            ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
-                <components:ResponsiveGridSpanBehavior TileWidth="140"/>
+                <components:ResponsiveGridSpanBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
@@ -47,22 +47,19 @@
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
                     <Label Text="{Binding Name}"
-                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
-                           FontAttributes="Bold"
-                           FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                           TextColor="{DynamicResource AppText}"
-                           Margin="4,12,4,4"/>
+                       IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                       Style="{StaticResource CodexGroupHeaderStyle}"/>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:WarbandArchetypeRow">
                     <!-- Sélection gérée à la main (IsSelected, pas SelectionMode) - reprise mot pour mot
-                         de LibraryTrackView chez DmTools (commit 09c71545a) : BackgroundColor/Stroke
-                         posés en dur sur l'instance (plus besoin du fond translucide, la sélection
-                         native n'est plus utilisée du tout ici), VisualStateGroupList vide pour
-                         neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
-                         empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
-                         le DataTrigger sur IsSelected. -->
+                     de LibraryTrackView chez DmTools (commit 09c71545a) : BackgroundColor/Stroke
+                     posés en dur sur l'instance (plus besoin du fond translucide, la sélection
+                     native n'est plus utilisée du tout ici), VisualStateGroupList vide pour
+                     neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
+                     empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
+                     le DataTrigger sur IsSelected. -->
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
@@ -74,24 +71,29 @@
                         </Border.Triggers>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
-                                CommandParameter="{Binding .}"/>
+                            Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                            CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <Grid WidthRequest="120" HeightRequest="120">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
-                            <components:LibraryItemImageView
-                                Grid.Row="0"
+                        <Grid Style="{StaticResource CodexTileFrameStyle}">
+                            <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                                <components:LibraryItemImageView
                                 ImagePath="{Binding Item.ImagePath}"
                                 DefaultGlyph="{x:Static icons:SolidFont.Shield}"
-                                Padding="20" />
-                            <Label Text="{Binding Item.Name}"
-                                   Grid.Row="1"
-                                   Style="{StaticResource TruncatedLabelStyle}"
+                                WidthRequest="26" HeightRequest="26"
+                                HorizontalOptions="Center" />
+                                <Label Text="{Binding Item.Name}"
+                                   Style="{StaticResource CodexTileNameLabelStyle}"
                                    HorizontalOptions="Center"
-                                   Margin="5"/>
+                                   HorizontalTextAlignment="Center"
+                                   Margin="5,0"/>
+                            </VerticalStackLayout>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                      Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                      IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                                      HorizontalOptions="End" VerticalOptions="Start"
+                                                      Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                      CommandParameter="{Binding .}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>

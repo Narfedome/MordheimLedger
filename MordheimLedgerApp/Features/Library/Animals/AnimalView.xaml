@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Features.Library.Animals.AnimalView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Animals"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Name="root">
+
+    <!-- Filtre par groupe ("Commun" vs. bande restrictive) : Animal n'a pas de catégorie propre au livre
+         de règles, RestrictedToWarbandArchetypeIds (déjà suivi pour le picker) sert d'axe de
+         regroupement - même en-tête que MutationView. -->
+    <Grid Margin="5" RowSpacing="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" ColumnDefinitions="*,auto" Padding="5,0">
+            <Button Grid.Column="0"
+                    Text="{Binding SelectedGroupFilter}"
+                    Command="{Binding SelectGroupFilterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{DynamicResource AppAccent}"
+                    HorizontalOptions="Start"
+                    Padding="0"/>
+        </Grid>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                           VerticalOptions="Center" HorizontalOptions="Center"
+                           WidthRequest="120" HeightRequest="120"/>
+
+        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+                ItemsSource="{Binding AnimalGroups}"
+                IsGrouped="True"
+                SelectionMode="None"
+                ItemSizingStrategy="MeasureFirstItem">
+            <CollectionView.Behaviors>
+                <components:ResponsiveGridSpanBehavior/>
+            </CollectionView.Behaviors>
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding Name}"
+                           IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowGroupHeaders}"
+                           Style="{StaticResource CodexGroupHeaderStyle}"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:AnimalRow">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList/>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                <Setter Property="Stroke" Value="LightSkyBlue"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </Border.GestureRecognizers>
+                        <Grid Style="{StaticResource CodexTileFrameStyle}">
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                                <components:LibraryItemImageView
+                                    ImagePath="{Binding Item.ImagePath}"
+                                    DefaultGlyph="{x:Static icons:RpgFont.RaPawprint}"
+                                    FontFamily="RpgAwesome"
+                                    WidthRequest="20" HeightRequest="20"
+                                    HorizontalOptions="Center" />
+                                <Label Text="{Binding Item.Name}"
+                                       Style="{StaticResource CodexTileNameLabelStyle}"
+                                       HorizontalOptions="Center"
+                                       HorizontalTextAlignment="Center"
+                                       Margin="5,0"/>
+                                <Label Text="{Binding CostDisplay}"
+                                       Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
+                            </VerticalStackLayout>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                          Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                          IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
+                                                          HorizontalOptions="End" VerticalOptions="Start"
+                                                          Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+
+        <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
+                               IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
+                                         Command="{Binding CreateCommand}"
+                                         Tooltip="{loc:Loc BtnAdd}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Pen}"
+                                         Command="{Binding EditCommand}"
+                                         Tooltip="{loc:Loc BtnRename}"
+                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Trash}"
+                                         Command="{Binding DeleteCommand}"
+                                         Tooltip="{loc:Loc BtnDelete}"
+                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+        </HorizontalStackLayout>
+
+        <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute
+             toutes les tuiles cochées d'un coup - en pratique le guerrier ne prend que le premier résultat
+             coché (voir WarriorEditDialogViewModel.PickAnimal). -->
+        <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8"
+                               IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
+                                         Command="{Binding ConfirmSelectionCommand}"
+                                         Tooltip="{loc:Loc LibConfirm}"
+                                         IsEnabled="{Binding HasSelectedRows}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleXmark}"
+                                         Command="{Binding CancelCommand}"
+                                         Tooltip="{loc:Loc LibCancel}"/>
+        </HorizontalStackLayout>
+
+    </Grid>
+</ContentView>

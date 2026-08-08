@@ -174,6 +174,12 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Pas assez d'or dans le trésor de la bande.</value>
   </data>
+  <data name="WarriorsMaterialPickerTitle" xml:space="preserve">
+    <value>Matériau de l'arme</value>
+  </data>
+  <data name="WarriorsMaterialNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
   <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
     <value>Bibliothèque vide</value>
   </data>
@@ -315,6 +321,33 @@
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
+  <data name="StatMovementAbbr" xml:space="preserve">
+    <value>M</value>
+  </data>
+  <data name="StatWeaponSkillAbbr" xml:space="preserve">
+    <value>CC</value>
+  </data>
+  <data name="StatBallisticSkillAbbr" xml:space="preserve">
+    <value>CT</value>
+  </data>
+  <data name="StatStrengthAbbr" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="StatToughnessAbbr" xml:space="preserve">
+    <value>E</value>
+  </data>
+  <data name="StatWoundsAbbr" xml:space="preserve">
+    <value>PV</value>
+  </data>
+  <data name="StatInitiativeAbbr" xml:space="preserve">
+    <value>I</value>
+  </data>
+  <data name="StatAttacksAbbr" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="StatLeadershipAbbr" xml:space="preserve">
+    <value>Cd</value>
+  </data>
   <data name="LibSpecialRulesPh" xml:space="preserve">
     <value>Règles spéciales</value>
   </data>
@@ -323,6 +356,21 @@
   </data>
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Commun à toutes les bandes</value>
+  </data>
+  <data name="LibNoDescription" xml:space="preserve">
+    <value>Aucune description.</value>
+  </data>
+  <data name="LibDetailsTooltip" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="LibGoldCrownsAbbr" xml:space="preserve">
+    <value>CO</value>
+  </data>
+  <data name="LibRollAbbr" xml:space="preserve">
+    <value>Jet</value>
+  </data>
+  <data name="LibDifficultyAbbr" xml:space="preserve">
+    <value>Diff.</value>
   </data>
   <data name="LibFilterAll" xml:space="preserve">
     <value>Toutes</value>
@@ -348,6 +396,18 @@
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
     <value>Nombre maximum de guerriers</value>
   </data>
+  <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
+    <value>Général</value>
+  </data>
+  <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
+    <value>Guerriers</value>
+  </data>
+  <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
+    <value>Équipement</value>
+  </data>
+  <data name="WarbandArchetypeTabRules" xml:space="preserve">
+    <value>Règles</value>
+  </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Modifier le type de bande</value>
   </data>
@@ -362,6 +422,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé (peut acheter des mutations)</value>
+  </data>
+  <data name="WarriorArchetypeRolePh" xml:space="preserve">
+    <value>Rôle</value>
   </data>
   <data name="WarriorArchetypeCostPh" xml:space="preserve">
     <value>Coût</value>
@@ -392,6 +455,12 @@
   </data>
   <data name="EquipmentItemRarityPh" xml:space="preserve">
     <value>Rareté</value>
+  </data>
+  <data name="EquipmentItemCostRandomMaxPh" xml:space="preserve">
+    <value>Supplément aléatoire max. (ex. 3D6 = 18)</value>
+  </data>
+  <data name="SpecialRuleCostMultiplierPh" xml:space="preserve">
+    <value>Matériau : multiplicateur de prix (ex. ×4) - vide si non applicable</value>
   </data>
   <data name="EquipmentItemEditTitle" xml:space="preserve">
     <value>Modifier l'objet</value>
@@ -498,32 +567,35 @@
   <data name="WarriorsMutationsHeading" xml:space="preserve">
     <value>Mutations</value>
   </data>
-  <data name="LibTabMounts" xml:space="preserve">
-    <value>Montures</value>
+  <data name="LibTabAnimals" xml:space="preserve">
+    <value>Animaux</value>
   </data>
-  <data name="MountNamePh" xml:space="preserve">
-    <value>Nom de la monture</value>
+  <data name="AnimalNamePh" xml:space="preserve">
+    <value>Nom de l'animal</value>
   </data>
-  <data name="MountCostPh" xml:space="preserve">
+  <data name="AnimalCostPh" xml:space="preserve">
     <value>Coût (CO)</value>
   </data>
-  <data name="MountRarityPh" xml:space="preserve">
+  <data name="AnimalRarityPh" xml:space="preserve">
     <value>Rareté (vide = commun)</value>
   </data>
-  <data name="MountCreateTitle" xml:space="preserve">
-    <value>Nouvelle monture</value>
+  <data name="AnimalCostRandomMaxPh" xml:space="preserve">
+    <value>Supplément aléatoire max. (ex. 2D6 = 12)</value>
   </data>
-  <data name="MountEditTitle" xml:space="preserve">
-    <value>Modifier la monture</value>
+  <data name="AnimalCreateTitle" xml:space="preserve">
+    <value>Nouvel animal</value>
   </data>
-  <data name="MountSelectTitle" xml:space="preserve">
-    <value>Choisir une monture</value>
+  <data name="AnimalEditTitle" xml:space="preserve">
+    <value>Modifier l'animal</value>
+  </data>
+  <data name="AnimalSelectTitle" xml:space="preserve">
+    <value>Choisir un animal</value>
   </data>
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des bandes</value>
   </data>
-  <data name="WarriorMountHeading" xml:space="preserve">
-    <value>Monture</value>
+  <data name="WarriorAnimalHeading" xml:space="preserve">
+    <value>Animal</value>
   </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Écoles de magie</value>
@@ -912,6 +984,9 @@
   <data name="LibManageMagicSchools" xml:space="preserve">
     <value>Gérer les écoles de magie</value>
   </data>
+  <data name="WarbandGradePh" xml:space="preserve">
+    <value>Grade</value>
+  </data>
   <data name="WarbandGradeCore" xml:space="preserve">
     <value>Livre de base</value>
   </data>
@@ -935,6 +1010,15 @@
   </data>
   <data name="LibFilterCommon" xml:space="preserve">
     <value>Commun</value>
+  </data>
+  <data name="LibFilterSpecialRuleFighters" xml:space="preserve">
+    <value>Guerriers &amp; Bandes</value>
+  </data>
+  <data name="LibFilterSpecialRuleItems" xml:space="preserve">
+    <value>Objets</value>
+  </data>
+  <data name="LibFilterUncategorized" xml:space="preserve">
+    <value>Non classée</value>
   </data>
   <data name="LibRestrictedToWarriorsPh" xml:space="preserve">
     <value>Réservé à ces guerriers</value>

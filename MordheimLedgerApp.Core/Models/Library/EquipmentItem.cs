@@ -17,6 +17,13 @@ public class EquipmentItem
     /// <summary>Null = Common (always available). Otherwise the rarity value (2D6 roll needed to find it).</summary>
     public int? Rarity { get; set; }
 
+    /// <summary>Null = Cost is fixed. Otherwise the maximum possible value of a random supplement rolled
+    /// on top of Cost at purchase time (e.g. "30 + 3D6 gc" -> Cost 30, CostRandomMax 18) - lets the
+    /// catalog/UI surface the worst-case total for budgeting without actually simulating the dice roll
+    /// (same "no rules engine V1" stance as the rest of the Library: the player rolls and adjusts the
+    /// warband's treasury manually).</summary>
+    public int? CostRandomMax { get; set; }
+
     public string? Description { get; set; }
 
     /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>
@@ -40,4 +47,8 @@ public class EquipmentItem
     /// shared Scout list; Middenheim's "Wolfcloak" - Middenheim Heroes only). Seed-only for now, same
     /// precedent as Skill.RestrictedToWarriorArchetypeIds - no EquipmentItemEditDialog UI.</summary>
     public List<int> RestrictedToWarriorArchetypeIds { get; set; } = new();
+
+    /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - same shared SpecialRule
+    /// catalog as WarbandArchetype/WarriorArchetype/Animal, editable via EquipmentItemEditDialog.</summary>
+    public List<SpecialRule> SpecialRules { get; set; } = new();
 }

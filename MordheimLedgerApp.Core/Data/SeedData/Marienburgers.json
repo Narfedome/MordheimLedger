@@ -53,7 +53,14 @@
           }
         }
       ],
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -77,7 +84,12 @@
         "en": "In every mercenary warband you will find a warrior bigger, stronger (and often uglier) than his comrades - champions answer the challenges levelled at the warband and pick their share of loot right after the captain.",
         "fr": "Dans toutes les bandes de mercenaires vous trouverez un guerrier plus gros, plus fort (souvent plus laid), que les autres. Ils sont appelés champions et relèvent généralement les défis lancés à la bande, touchant leur part de butin juste après le capitaine."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -101,7 +113,12 @@
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -184,15 +201,103 @@
       "equipmentListName": "Mercenary Equipment List"
     }
   ],
-  "equipment": [],
+  "equipment": [
+    {
+      "name": {
+        "en": "Rapier",
+        "fr": "Rapière"
+      },
+      "category": "MeleeWeapon",
+      "cost": 15,
+      "rarity": 5,
+      "description": {
+        "en": "The rapier is a long thing blade commonly used by dualists. It is a deadly, shard weapon capable of delivering a multitude of blows but lacks the power of a broadsword.",
+        "fr": "La rapière est une longue lame fine couramment utilisée par les duellistes. C'est une arme mortelle et effilée, capable de porter de nombreux coups, mais qui manque de la puissance d'une épée large."
+      },
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Parry (Rapier)",
+            "fr": "Parade (Rapière)"
+          },
+          "description": {
+            "en": "Like all swords, you may use a rapier to parry in hand to hand combat. When your opponent scores a hit you must roll a D6. If you can score greater than the highest 'to hit' roll you have parried the blow and the attack is discarded.",
+            "fr": "Comme toutes les épées, la rapière peut parer en combat rapproché. Lorsque l'adversaire obtient une touche, vous devez lancer 1D6 : si le résultat est supérieur au meilleur jet pour toucher de l'adversaire, le coup est paré et cette attaque est ignorée."
+          }
+        },
+        {
+          "name": {
+            "en": "Barrage",
+            "fr": "Rafale"
+          },
+          "description": {
+            "en": "A warrior armed with a rapier rolls to hit and wound as normal. However, if you manage to hit your opponent but fail to wound, you may attack again just as if you had another attack but at -1 to hit (down to a maximum to needing a 6 to hit). You may continue attacking as long as you hit and it is possible to strike your opponent many times, particularly if your warrior has more then one attack on his profile.",
+            "fr": "Un guerrier armé d'une rapière touche et blesse normalement. Cependant, s'il touche son adversaire mais échoue à le blesser, il peut attaquer à nouveau comme s'il disposait d'une attaque supplémentaire, mais avec un malus de -1 pour toucher (jusqu'à un maximum nécessitant un 6 pour toucher). Il peut continuer à attaquer tant qu'il touche, et frapper son adversaire à de nombreuses reprises, en particulier si le guerrier dispose de plusieurs Attaques sur son profil."
+          }
+        },
+        {
+          "name": {
+            "en": "Armour Save",
+            "fr": "Sauvegarde d'armure"
+          },
+          "description": {
+            "en": "Because a rapier is a very light sword that lacks the thick armour breaking blade of the broadsword, armour saves are made at +1.",
+            "fr": "La rapière étant une lame très légère dépourvue du tranchant lourd capable de briser les armures comme une épée large, les sauvegardes d'armure contre elle bénéficient d'un bonus de +1."
+          }
+        }
+      ]
+    }
+  ],
   "equipmentLists": [
     {
-      "name": { "en": "Mercenary Equipment List", "fr": "Liste d'équipement des Mercenaires" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Crossbow", "Pistol", "Duelling Pistol", "Bow", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet"]
+      "name": {
+        "en": "Mercenary Equipment List",
+        "fr": "Liste d'équipement des Mercenaires"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Morning star",
+        "Double-handed weapon",
+        "Spear",
+        "Halberd",
+        "Crossbow",
+        "Pistol",
+        "Duelling Pistol",
+        "Bow",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Marksman Equipment List", "fr": "Liste d'équipement des Tireurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Crossbow", "Pistol", "Bow", "Long bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Marksman Equipment List",
+        "fr": "Liste d'équipement des Tireurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Crossbow",
+        "Pistol",
+        "Bow",
+        "Long bow",
+        "Blunderbuss",
+        "Handgun",
+        "Hunting Rifle",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

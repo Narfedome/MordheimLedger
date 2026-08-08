@@ -10,7 +10,10 @@
   },
   "skills": [
     {
-      "name": { "en": "Black Hunger", "fr": "Faim Noire" },
+      "name": {
+        "en": "Black Hunger",
+        "fr": "Faim Noire"
+      },
       "category": "Special",
       "description": {
         "en": "Declared at the start of the turn: +1 Attack and +D3\" Movement this turn, then suffers D3 Strength 3 hits with no armour save at the end of the turn.",
@@ -19,7 +22,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Tail Fighting", "fr": "Combat à la Queue" },
+      "name": {
+        "en": "Tail Fighting",
+        "fr": "Combat à la Queue"
+      },
       "category": "Special",
       "description": {
         "en": "Wields a shield/knife/sword with the tail for an extra Attack or +1 Armour save.",
@@ -28,7 +34,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Wall Runner", "fr": "Grimpeur" },
+      "name": {
+        "en": "Wall Runner",
+        "fr": "Grimpeur"
+      },
       "category": "Special",
       "description": {
         "en": "No Initiative test needed to climb sheer surfaces.",
@@ -37,7 +46,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Art of Silent Death", "fr": "Art de la Mort Silencieuse" },
+      "name": {
+        "en": "Art of Silent Death",
+        "fr": "Art de la Mort Silencieuse"
+      },
       "category": "Special",
       "description": {
         "en": "Fights bare-pawed without penalty as if dual-wielding, causes a Critical Hit on a 5-6 instead of just 6.",
@@ -46,7 +58,10 @@
       "restrictedToThisWarband": true
     },
     {
-      "name": { "en": "Infiltration", "fr": "Infiltration" },
+      "name": {
+        "en": "Infiltration",
+        "fr": "Infiltration"
+      },
       "category": "Special",
       "description": {
         "en": "Deployed after the opposing warband, anywhere out of sight and 12\"+ from any enemy model.",
@@ -106,7 +121,15 @@
           }
         }
       ],
-      "equipmentListName": "Heroes Equipment List"
+      "equipmentListName": "Heroes Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -130,7 +153,14 @@
         "en": "The most powerful fighters of Clan Eshin - black-furred killers trained in every martial art of their clan, excelling at ambush and assassination in Mordheim's ruins.",
         "fr": "Les skavens noirs sont les plus puissants de tous les guerriers du clan Eshin, des tueurs chevronnés entraînés à tous les arts martiaux de leurs clans. À Mordheim ils excellent dans les embuscades et les assassinats."
       },
-      "equipmentListName": "Heroes Equipment List"
+      "equipmentListName": "Heroes Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Strength",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -163,7 +193,12 @@
           }
         }
       ],
-      "equipmentListName": "Heroes Equipment List"
+      "equipmentListName": "Heroes Equipment List",
+      "skillCategories": [
+        "Academic",
+        "Speed",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -187,7 +222,12 @@
         "en": "Young apprentices of Clan Eshin, recently initiated into the secrets of the clan - they make up for their lack of knowledge with ambition and energy.",
         "fr": "Les coureurs nocturnes sont de jeunes apprentis du clan Eshin. Récemment initiés dans les secrets du clan, ils compensent leur manque de savoir par l'ambition et l'énergie dont ils font preuve."
       },
-      "equipmentListName": "Henchmen Equipment List"
+      "equipmentListName": "Henchmen Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Special"
+      ]
     },
     {
       "name": {
@@ -305,7 +345,49 @@
         "en": "Sharp metal blades fixed to the wielder's paws, the signature weapon of Clan Eshin's martial arts - traditionally worn as a pair (one on each hand), granting an extra Attack. A Skaven so equipped adds +1 Initiative to Climbing tests and may parry (re-roll a failed attempt once) as if armed with a sword and buckler, but may use no other weapon for the entire battle.",
         "fr": "Les arts martiaux du clan Eshin nécessitent des armes exotiques. Les plus célèbres sont les griffes de combat : des lames acérées fixées aux pattes du guerrier. Traditionnellement utilisées par paire, une dans chaque main, elles donnent +1 Attaque à leur porteur, +1 en Initiative pour les tests d'escalade, et permettent la parade (comme s'il était équipé d'une épée et d'une rondache) - mais la figurine ne peut alors utiliser aucune autre arme durant toute la partie."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Pair",
+            "fr": "Paire"
+          },
+          "description": {
+            "en": "This weapon is traditionally used in pairs, one in each hand. A warrior so armed gets an additional attack.",
+            "fr": "Cette arme est traditionnellement utilisée par paire, une dans chaque main. Un guerrier ainsi armé gagne une Attaque supplémentaire."
+          }
+        },
+        {
+          "name": {
+            "en": "Climb",
+            "fr": "Escalade"
+          },
+          "description": {
+            "en": "A Skaven equipped with Fighting Claws can add +1 to his Initiative when making Climbing tests.",
+            "fr": "Un Skaven équipé de griffes de combat ajoute +1 à son Initiative lors des tests d'Escalade."
+          }
+        },
+        {
+          "name": {
+            "en": "Parry (Fighting Claws)",
+            "fr": "Parade (Griffes de Combat)"
+          },
+          "description": {
+            "en": "A Skaven armed with Fighting Claws may parry blows and can re-roll a failed attempt once, in the same way as a model armed with a sword and buckler.",
+            "fr": "Un Skaven armé de griffes de combat peut parer les coups et relancer une tentative ratée une fois, comme une figurine équipée d'une épée et d'une rondache."
+          }
+        },
+        {
+          "name": {
+            "en": "Cumbersome (Fighting Claws)",
+            "fr": "Encombrant (Griffes de Combat)"
+          },
+          "description": {
+            "en": "A model armed with Fighting Claws may not use any other weapons in the entire battle.",
+            "fr": "Une figurine armée de griffes de combat ne peut utiliser aucune autre arme durant toute la bataille."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -319,7 +401,39 @@
         "en": "Swords forged with a small amount of warpstone mixed into their steel, constantly weeping a deadly corrosive venom. Traditionally used as a pair, granting an extra Attack; count as permanently coated in Black Lotus (no additional poison may be applied) and may be used to parry like a sword.",
         "fr": "Les adeptes du clan Eshin utilisent des lames suintantes : des épées forgées avec une petite quantité de malepierre mélangée à leur acier, qui diffusent du poison en permanence. Traditionnellement utilisées par paire, elles donnent une Attaque supplémentaire ; elles sont équivalentes à des armes enduites de Lotus Noir (aucun autre poison ne peut y être ajouté) et permettent la parade comme des épées."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Pair",
+            "fr": "Paire"
+          },
+          "description": {
+            "en": "This weapon is traditionally used in pairs, one in each hand. A warrior so armed gets an additional attack.",
+            "fr": "Cette arme est traditionnellement utilisée par paire, une dans chaque main. Un guerrier ainsi armé gagne une Attaque supplémentaire."
+          }
+        },
+        {
+          "name": {
+            "en": "Venomous",
+            "fr": "Venimeuses"
+          },
+          "description": {
+            "en": "The venom of Weeping Blades will enter the blood of the victim and ravage his organs and muscles. These weapons count as being permanently coated in Black Lotus. No additional poison may be applied to Weeping Blades.",
+            "fr": "Le venin des lames suintantes s'infiltre dans le sang de la victime et ravage ses organes et ses muscles. Ces armes sont considérées comme enduites en permanence de Lotus Noir. Aucun poison supplémentaire ne peut y être appliqué."
+          }
+        },
+        {
+          "name": {
+            "en": "Parry (Weeping Blades)",
+            "fr": "Parade (Lames Suintantes)"
+          },
+          "description": {
+            "en": "Weeping Blades are swords and can be used for parrying.",
+            "fr": "Les lames suintantes sont des épées et peuvent être utilisées pour parer."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -333,7 +447,29 @@
         "en": "A short hollow tube for firing poisoned darts - too small to cause much direct damage, but a hidden shooter can fire it silently without revealing his position (the target may take an Initiative test to spot him). Any roll of 6 to hit automatically wounds the victim (as Black Lotus poison); cannot cause critical hits. Grants a positive armour save modifier: a 5+ save becomes 4+, and models without a save get a 6+.",
         "fr": "La sarbacane est un tube utilisé pour envoyer des dards empoisonnés. Le grand avantage d'une sarbacane, c'est qu'elle est silencieuse ; un utilisateur bien caché peut tirer ses dards empoisonnés sans être repéré (la cible peut faire un test d'Initiative pour repérer le tireur). Sur un 6 pour toucher, la cible est blessée automatiquement (comme le Lotus Noir) ; une sarbacane ne peut pas infliger de coups critiques. Cette arme est dotée d'un modificateur de sauvegarde positif : une sauvegarde de 5+ devient 4+, et les figurines sans sauvegarde obtiennent 6+."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Poison",
+            "fr": "Poison"
+          },
+          "description": {
+            "en": "The needles fired by a blowpipe are coated in a venom very similar in its effects to Black Lotus (if you roll a 6 on the To Hit roll, the victim is automatically wounded). A blowpipe cannot cause critical hits. This weapon has a positive armour save modifier, so a model that normally has a save of 5+ will get a save of 4+ against a blowpipe dart. Even models that normally do not have an armour save will get a 6+ save.",
+            "fr": "Les aiguilles tirées par la sarbacane sont enduites d'un venin aux effets très similaires au Lotus Noir (si vous obtenez un 6 pour toucher, la victime est automatiquement blessée). Une sarbacane ne peut pas infliger de coup critique. Cette arme confère un modificateur de sauvegarde positif : une figurine ayant normalement une sauvegarde de 5+ obtient un 4+ contre elle, et même les figurines sans sauvegarde obtiennent un 6+."
+          }
+        },
+        {
+          "name": {
+            "en": "Stealthy",
+            "fr": "Furtif"
+          },
+          "description": {
+            "en": "A model armed with a blowpipe can fire while hidden without revealing his position to the enemy. The target model can take an Initiative test in order to try to spot the firing model. If the test is successful, the model no longer counts as hidden.",
+            "fr": "Une figurine armée d'une sarbacane peut tirer tout en restant cachée, sans révéler sa position à l'ennemi. La figurine ciblée peut effectuer un test d'Initiative pour tenter de repérer le tireur. En cas de réussite, celui-ci n'est plus considéré comme caché."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -347,17 +483,79 @@
         "en": "70 gc for a brace. A terrifying weapon of Clan Skryre, firing ammunition made from magically treated warpstone - wounds it causes often degenerate into terrible infections. Range 8\", Strength 5, -3 armour save modifier; fires every other turn (every turn if wielded as a brace).",
         "fr": "70 CO la paire. Les pistolets à malepierre sont des armes redoutables, témoignages du génie malsain du clan Skryre. Ces pistolets tirent des munitions faites à partir de fragments de malepierre ensorcelés, provoquant d'horribles blessures qui dégénèrent souvent en terribles infections. Portée 8ps, Force 5, modificateur de sauvegarde -3 ; tire un tour sur deux (tous les tours si porté en paire)."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Prepare shot",
+            "fr": "Préparation du tir"
+          },
+          "description": {
+            "en": "A pistol takes a whole turn to reload, so you may only fire every other turn. If you have a brace of pistols (ie, two) you may fire every turn.",
+            "fr": "Un pistolet demande un tour complet pour être rechargé : le guerrier ne peut donc tirer qu'un tour sur deux. S'il possède une paire de pistolets, il peut tirer chaque tour."
+          }
+        },
+        {
+          "name": {
+            "en": "Save modifier (Warplock Pistol)",
+            "fr": "Modificateur de sauvegarde (Pistolet à Malepierre)"
+          },
+          "description": {
+            "en": "Warplock Pistols are even better at penetrating armour than their Strength 5 suggests. A warrior wounded by a warplock pistol must make his armour save with a -3 modifier.",
+            "fr": "Les pistolets à malepierre percent l'armure encore mieux que ne le laisse supposer leur Force 5. Un guerrier blessé par un pistolet à malepierre doit effectuer sa sauvegarde d'armure avec un malus de -3."
+          }
+        },
+        {
+          "name": {
+            "en": "Hand-to-hand (Warplock Pistol)",
+            "fr": "Corps à corps (Pistolet à Malepierre)"
+          },
+          "description": {
+            "en": "Pistols can be used in hand-to-hand combat as well as for shooting. A model armed with a pistol and another close combat weapon gains +1 Attack, which is resolved at Strength 5 with a -3 save modifier. This bonus attack can be used only once per combat. If you are firing a brace of pistols, your model can fight with 2 Attacks in the first turn of close combat. These attacks are resolved with a model's Weapon Skill like any normal close combat attack and likewise may be parried. Successful hits are resolved at Strength 5 and with a -3 save modifier, regardless of the firer's Strength.",
+            "fr": "Les pistolets peuvent être utilisés en combat rapproché aussi bien qu'au tir. Un guerrier armé d'un pistolet et d'une autre arme de corps à corps gagne +1 Attaque, résolue à Force 5 avec un malus de sauvegarde de -3. Cette attaque bonus ne peut être utilisée qu'une fois par combat. S'il tire avec une paire de pistolets, le guerrier combat avec 2 Attaques au premier round du corps à corps. Ces attaques sont résolues avec la Capacité de Combat du guerrier comme des attaques normales de corps à corps et peuvent donc être parées de la même façon. Les touches réussies sont résolues à Force 5 avec un malus de sauvegarde de -3, quelle que soit la Force du tireur."
+          }
+        }
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Heroes Equipment List", "fr": "Liste d'équipement des Héros" },
-      "itemNames": ["Dagger", "Sword", "Flail", "Spear", "Halberd", "Weeping Blades", "Fighting Claws", "Sling", "Throwing Stars", "Blowpipe", "Warplock Pistol", "Light Armour", "Buckler", "Helmet"]
+      "name": {
+        "en": "Heroes Equipment List",
+        "fr": "Liste d'équipement des Héros"
+      },
+      "itemNames": [
+        "Dagger",
+        "Sword",
+        "Flail",
+        "Spear",
+        "Halberd",
+        "Weeping Blades",
+        "Fighting Claws",
+        "Sling",
+        "Throwing Stars",
+        "Blowpipe",
+        "Warplock Pistol",
+        "Light Armour",
+        "Buckler",
+        "Helmet"
+      ]
     },
     {
-      "name": { "en": "Henchmen Equipment List", "fr": "Liste d'équipement des Hommes de main" },
-      "itemNames": ["Dagger", "Club", "Sword", "Spear", "Sling", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Henchmen Equipment List",
+        "fr": "Liste d'équipement des Hommes de main"
+      },
+      "itemNames": [
+        "Dagger",
+        "Club",
+        "Sword",
+        "Spear",
+        "Sling",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

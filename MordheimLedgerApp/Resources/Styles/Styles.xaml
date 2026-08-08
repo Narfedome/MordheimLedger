@@ -85,35 +85,23 @@
         <Setter Property="Color" Value="Grey"/>
     </Style>
 
-    <!-- Tuile de grille sélectionnable (Library : archétypes de bande/guerrier, objets) - reprise mot
-         pour mot de SelectableGridItemBorderStyle chez DmTools (Resources/Styles/Styles.xaml). Ce
-         style garde son VisualStateManager (Normal/Selected) tel quel ; c'est l'INSTANCE du Border
-         dans chaque tuile qui neutralise ce VSM (VisualStateGroupList vide) et porte son propre
-         Border.Triggers DataTrigger sur IsSelected - cf. EquipmentItemView/WarriorArchetypeView/
-         WarbandArchetypeView.xaml et le commentaire sur la tuile elle-même pour la raison (VSM
-         prioritaire sur Trigger en MAUI, sélection native Android non fiable). -->
+    <!-- Tuile de grille sélectionnable (Library : archétypes de bande/guerrier, objets) - reprise à
+         l'origine de SelectableGridItemBorderStyle chez DmTools avec son VisualStateManager (Normal/
+         Selected), neutralisé par instance (VisualStateGroupList vide + Border.Triggers DataTrigger
+         propre à chaque tuile, cf. EquipmentItemView/WarriorArchetypeView/WarbandArchetypeView.xaml)
+         pour éviter que le VSM du style ne prenne le pas sur le Trigger. **VSM retiré ici** (2026-08-07,
+         suite à un rendu d'un bouton "info" tuile qui semblait "activer" celui d'une autre tuile) : un
+         VisualStateGroupList défini une seule fois dans un Style puis reproduit par CollectionView à
+         travers de nombreuses tuiles réutilisées est un piège connu MAUI/WinUI - l'objet peut se
+         retrouver partagé entre plusieurs instances de tuile recyclées, au lieu d'un par tuile. Le VSM
+         était de toute façon mort dans les faits (chaque tuile le neutralisait déjà et gérait la
+         couleur du Stroke localement) - Stroke="Grey" en dur sur chaque tuile + le DataTrigger suffisent
+         entièrement, pas besoin de VisualStateManager du tout pour ce style. -->
     <Style x:Key="SelectableGridItemBorderStyle" TargetType="Border">
         <Setter Property="BackgroundColor" Value="{DynamicResource AppSurfaceTranslucent}"/>
         <Setter Property="StrokeThickness" Value="2"/>
         <Setter Property="StrokeShape" Value="RoundRectangle 5"/>
         <Setter Property="HorizontalOptions" Value="{OnPlatform Default=Fill, WinUI=Center}"/>
-        <Setter Property="VisualStateManager.VisualStateGroups">
-            <VisualStateGroupList>
-                <VisualStateGroup Name="CommonStates">
-                    <VisualState Name="Normal">
-                        <VisualState.Setters>
-                            <Setter Property="Stroke" Value="Grey" />
-                            <Setter Property="StrokeThickness" Value="2" />
-                        </VisualState.Setters>
-                    </VisualState>
-                    <VisualState Name="Selected">
-                        <VisualState.Setters>
-                            <Setter Property="Stroke" Value="LightSkyBlue" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </Setter>
     </Style>
 
     <!-- Secondary button (Cancel/No) for themed popups: outline instead of a solid accent fill -->
@@ -345,6 +333,44 @@
         </Setter>
     </Style>
 
+    <!-- Tuiles du Codex (8 onglets + WarriorArchetypeView/Selector, EquipmentListView) - nom enroulé sur
+         3 lignes plutôt que tronqué à 1, contrairement à TruncatedLabelStyle (encore utilisé tel quel par
+         WarbandListPage et MagicSchoolView - liste à plat, pas une grille de tuiles - hors périmètre ici). -->
+    <Style TargetType="Label" x:Key="CodexTileNameLabelStyle" BasedOn="{StaticResource TruncatedLabelStyle}">
+        <Setter Property="LineBreakMode" Value="WordWrap"/>
+        <Setter Property="MaxLines" Value="3"/>
+    </Style>
+
+    <!-- Taille fixe et carrée du Grid racine de chaque tuile - un seul endroit à retoucher pour les 11
+         usages plutôt que WidthRequest/HeightRequest dupliqués en dur dans chaque fichier. -->
+    <Style TargetType="Grid" x:Key="CodexTileFrameStyle">
+        <Setter Property="WidthRequest" Value="130"/>
+        <Setter Property="HeightRequest" Value="130"/>
+    </Style>
+
+    <!-- Ligne d'info secondaire sous le nom (coût, rareté, jet de sort...) - Mutation/Animal/Spell
+         l'utilisaient déjà en style ad hoc (AppTextMuted) ; formalisé ici en AppAccent pour mieux
+         ressortir, et étendu à Equipment lors de ce même passage. -->
+    <Style TargetType="Label" x:Key="CodexTileSecondaryLabelStyle">
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+    </Style>
+
+    <!-- En-tête de groupe des grilles de tuiles Codex (ex. "Vitesse"/"Spécial" dans Compétences) -
+         repris tel quel dans les 8 onglets catalogués. AppFontSizeBase plutôt que
+         AppFontSizeSectionTitle (repris par erreur du titre de page, trop proche visuellement) et marge
+         resserrée : le picker de section (LibraryPage) et le picker de catégorie au-dessus prenaient
+         déjà pas mal de hauteur avant d'ajouter celle des group headers. Limite connue (WinUI) :
+         CollectionView IsGrouped="True" ne laisse aucune prise sur le padding/chrome natif du header -
+         un ex-DataTrigger IsFirst annulant la marge du tout premier groupe n'avait donc aucun effet
+         visible, retiré (voir CLAUDE.md § limite WinUI). -->
+    <Style TargetType="Label" x:Key="CodexGroupHeaderStyle">
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>
+        <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
+        <Setter Property="Margin" Value="4,12,4,2"/>
+    </Style>
     <Style TargetType="Picker">
         <Setter Property="TextColor" Value="{DynamicResource AppText}" />
         <Setter Property="TitleColor" Value="{DynamicResource AppTextMuted}" />

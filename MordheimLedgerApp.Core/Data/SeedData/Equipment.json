@@ -1,49 +1,1939 @@
 [
   {
-    "name": { "en": "Dagger", "fr": "Dague" }, "category": "MeleeWeapon", "cost": 0,
+    "name": {
+      "en": "Dagger",
+      "fr": "Dague"
+    },
+    "category": "MeleeWeapon",
+    "cost": 2,
     "description": {
       "en": "Grants one extra Attack, always used in addition to another weapon.",
       "fr": "Octroie une Attaque supplémentaire, toujours utilisée en plus d'une autre arme."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "+1 Enemy armour save",
+          "fr": "Sauvegarde adverse +1"
+        },
+        "description": {
+          "en": "An enemy wounded gains a +1 bonus to his armour save, and a 6+ armour save if he has none normally.",
+          "fr": "L'adversaire blessé bénéficie d'un bonus de +1 à sa sauvegarde d'armure, et d'une sauvegarde de 6+ s'il n'en a normalement aucune."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Sword",
+      "fr": "Épée"
+    },
+    "category": "MeleeWeapon",
+    "cost": 10,
+    "description": {
+      "en": "The sword is often referred to as the 'king of weapons'. The most common sword available, the broadsword of the Empire, is a masterpiece by the standards of any smith: four full feet of gleaming steel, double-edged and razor-sharp.\n\nSwords are much more effective weapons than crude clubs and axes, though learning to use a sword is a long and difficult process. It takes years to truly master this weapon – most warriors in Mordheim die long before they get this far!",
+      "fr": "L'épée est souvent considérée comme la « reine des armes ». La plus répandue, l'épée large de l'Empire, est un chef-d'œuvre selon les standards de n'importe quel forgeron : plus d'un mètre vingt d'acier étincelant, à double tranchant et rasoir.\n\nLes épées sont des armes bien plus efficaces que les gourdins ou les haches grossières, bien qu'apprendre à en manier une soit un processus long et difficile. Il faut des années pour véritablement maîtriser cette arme - la plupart des guerriers de Mordheim meurent bien avant d'y parvenir !"
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Sword)",
+          "fr": "Parade (Épée)"
+        },
+        "description": {
+          "en": "Swords offer an excellent balance of defence and offence. A model armed with a sword may parry blows. When his opponent rolls to hit, the model armed with a sword may roll a D6. If the score is greater than the highest to hit score of his opponent, the model has parried the blow, and that attack is discarded. A model may not parry attacks made with double or more its own Strength – they are simply too powerful to be stopped.",
+          "fr": "Les épées offrent un excellent équilibre entre attaque et défense. Un guerrier armé d'une épée peut parer les coups. Lorsque son adversaire obtient un jet pour toucher, le porteur de l'épée peut lancer 1D6 : si le résultat est supérieur au meilleur jet pour toucher de son adversaire, le coup est paré et cette attaque est ignorée. On ne peut pas parer une attaque dont la Force est égale ou supérieure au double de la sienne - elle est tout simplement trop puissante pour être arrêtée."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Hammer",
+      "fr": "Marteau"
+    },
+    "category": "MeleeWeapon",
+    "cost": 3,
+    "description": {
+      "en": "Perhaps the simplest type of weapon, these brutal, bludgeoning instruments range from primitive wooden clubs to elaborately forged Dwarf hammers made from the finest steel. A blow from a mace can easily crush a skull or knock a man unconscious.",
+      "fr": "Sans doute le type d'arme le plus simple qui soit, ces instruments contondants et brutaux vont du gourdin de bois primitif au marteau nain forgé dans le meilleur acier. Un coup de masse peut facilement briser un crâne ou assommer un homme."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Concussion",
+          "fr": "Commotion"
+        },
+        "description": {
+          "en": "Hammers and other bludgeoning weapons are excellent to use for striking your enemy senseless. When using a hammer, club or mace, a roll of 2-4 is treated as stunned when rolling to see the extent of a model's injuries.",
+          "fr": "Les marteaux et autres armes contondantes sont excellents pour assommer l'adversaire. Avec un marteau, un gourdin ou une masse, un résultat de 2 à 4 est traité comme Étourdi lors du jet de blessures graves."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Axe",
+      "fr": "Hache"
+    },
+    "category": "MeleeWeapon",
+    "cost": 5,
+    "description": {
+      "en": "The axe is the traditional weapon of Empire woodsmen, and is also used as a weapon in poorer rural areas. Axes have a heavy blade and, if swung by a strong man, can cause a lot of damage. The blade of an axe can easily cut through armour, though it requires considerable strength from the wielder.\n\nOf all the warriors in the Old World, Dwarfs are the most adept at making axes. Their axes are invaluable to the warriors of the Old World and are some of the most sought after weapons.",
+      "fr": "La hache est l'arme traditionnelle des bûcherons de l'Empire, également utilisée comme arme dans les régions rurales les plus pauvres. Les haches ont une lame lourde qui, maniée par un homme fort, peut infliger de lourds dégâts. La lame d'une hache peut facilement trancher à travers une armure, bien que cela demande une force considérable de la part de son porteur.\n\nDe tous les guerriers du Vieux Monde, les Nains sont les plus habiles pour forger des haches. Leurs haches comptent parmi les armes les plus recherchées."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Cutting Edge",
+          "fr": "Tranchant"
+        },
+        "description": {
+          "en": "An axe has an extra save modifier of -1, so a model with Strength 4 using an axe has a -2 save modifier when he hits an opponent in close combat.",
+          "fr": "Une hache bénéficie d'un modificateur de sauvegarde supplémentaire de -1 : un guerrier de Force 4 utilisant une hache inflige donc un malus de -2 à la sauvegarde d'armure de l'adversaire touché en combat rapproché."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Bow",
+      "fr": "Arc"
+    },
+    "category": "MissileWeapon",
+    "cost": 10,
+    "description": {
+      "en": "The bow is carried by most races and used extensively in warfare. It is a compact yet powerful weapon, that is cheap to make and easy to maintain.",
+      "fr": "L'arc est utilisé par la plupart des peuples et largement employé à la guerre. C'est une arme compacte mais puissante, peu coûteuse à fabriquer et facile à entretenir."
     }
   },
-  { "name": { "en": "Sword", "fr": "Épée" }, "category": "MeleeWeapon", "cost": 10 },
-  { "name": { "en": "Hammer", "fr": "Marteau" }, "category": "MeleeWeapon", "cost": 3 },
-  { "name": { "en": "Axe", "fr": "Hache" }, "category": "MeleeWeapon", "cost": 5 },
-  { "name": { "en": "Bow", "fr": "Arc" }, "category": "MissileWeapon", "cost": 10 },
-  { "name": { "en": "Light Armour", "fr": "Armure Légère" }, "category": "Armour", "cost": 20 },
-  { "name": { "en": "Buckler", "fr": "Rondache" }, "category": "Armour", "cost": 5 },
-  { "name": { "en": "Mace", "fr": "Masse" }, "category": "MeleeWeapon", "cost": 3 },
-  { "name": { "en": "Morning star", "fr": "Morgenstern" }, "category": "MeleeWeapon", "cost": 15 },
-  { "name": { "en": "Double-handed weapon", "fr": "Arme à deux mains" }, "category": "MeleeWeapon", "cost": 15 },
-  { "name": { "en": "Spear", "fr": "Lance" }, "category": "MeleeWeapon", "cost": 10 },
-  { "name": { "en": "Halberd", "fr": "Hallebarde" }, "category": "MeleeWeapon", "cost": 10 },
-  { "name": { "en": "Crossbow", "fr": "Arbalète" }, "category": "MissileWeapon", "cost": 25 },
-  { "name": { "en": "Long bow", "fr": "Arc long" }, "category": "MissileWeapon", "cost": 15 },
   {
-    "name": { "en": "Pistol", "fr": "Pistolet" }, "category": "BlackPowderWeapon", "cost": 15,
-    "description": { "en": "30 gc for a brace.", "fr": "30 CO la paire." }
+    "name": {
+      "en": "Light Armour",
+      "fr": "Armure Légère"
+    },
+    "category": "Armour",
+    "cost": 20,
+    "description": {
+      "en": "Light Armour encompasses a wide variety of materials from hardened leather tunics to chain shirts forged from steel. It does not offer complete protection against arrows or swords, but it is better than having nothing at all. Light armour does not inhibit movement.",
+      "fr": "L'armure légère regroupe une grande variété de matériaux, du gilet de cuir durci à la cotte de mailles légère forgée dans l'acier. Elle n'offre pas une protection complète contre les flèches ou les épées, mais vaut toujours mieux que rien du tout. L'armure légère n'entrave pas les mouvements."
+    },
+    "specialRules": []
   },
   {
-    "name": { "en": "Duelling Pistol", "fr": "Pistolet de duel" }, "category": "BlackPowderWeapon", "cost": 25,
-    "description": { "en": "50 gc for a brace.", "fr": "50 CO la paire." }
+    "name": {
+      "en": "Buckler",
+      "fr": "Rondache"
+    },
+    "category": "Armour",
+    "cost": 5,
+    "description": {
+      "en": "Bucklers are small, round shields designed for parrying or deflecting blows. They are usually made of steel for they need to be tremendously durable to survive the brutal blows of hand-to-hand combat. Using a buckler requires great skill, but a nimble warrior can protect himself from blows which would otherwise cripple him.",
+      "fr": "Les rondaches sont de petits boucliers ronds conçus pour parer ou dévier les coups. Elles sont généralement faites d'acier, car elles doivent être extrêmement résistantes pour survivre aux coups brutaux du combat rapproché. Utiliser une rondache demande une grande habileté, mais un guerrier agile peut ainsi se protéger de coups qui l'estropieraient autrement."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Buckler)",
+          "fr": "Parade (Rondache)"
+        },
+        "description": {
+          "en": "A model equipped with a buckler may parry the first blow in each round of hand-to-hand combat. When his opponent scores a hit, a model with a buckler may roll 1D6. If the score is greater than the highest to hit score of his opponent, the model has parried the blow, and that attack is discarded. A model may not parry attacks made with double or more its own Strength – they are simply too powerful to be stopped.",
+          "fr": "Un guerrier équipé d'une rondache peut parer le premier coup de chaque round de combat rapproché. Lorsque son adversaire obtient une touche, le porteur de la rondache peut lancer 1D6 : si le résultat est supérieur au meilleur jet pour toucher de son adversaire, le coup est paré et cette attaque est ignorée. On ne peut pas parer une attaque dont la Force est égale ou supérieure au double de la sienne - elle est tout simplement trop puissante pour être arrêtée."
+        }
+      }
+    ]
   },
-  { "name": { "en": "Blunderbuss", "fr": "Tromblon" }, "category": "BlackPowderWeapon", "cost": 30 },
-  { "name": { "en": "Handgun", "fr": "Arquebuse" }, "category": "BlackPowderWeapon", "cost": 35 },
-  { "name": { "en": "Hunting Rifle", "fr": "Long fusil d'Hochland" }, "category": "BlackPowderWeapon", "cost": 200, "rarity": 11 },
-  { "name": { "en": "Heavy Armour", "fr": "Armure lourde" }, "category": "Armour", "cost": 50 },
-  { "name": { "en": "Shield", "fr": "Bouclier" }, "category": "Armour", "cost": 5 },
-  { "name": { "en": "Helmet", "fr": "Casque" }, "category": "Armour", "cost": 10 },
   {
-    "name": { "en": "Short Bow", "fr": "Arc court" }, "category": "MissileWeapon", "cost": 5,
+    "name": {
+      "en": "Mace",
+      "fr": "Masse"
+    },
+    "category": "MeleeWeapon",
+    "cost": 3,
+    "description": {
+      "en": "Perhaps the simplest type of weapon, these brutal, bludgeoning instruments range from primitive wooden clubs to elaborately forged Dwarf hammers made from the finest steel. A blow from a mace can easily crush a skull or knock a man unconscious.",
+      "fr": "Sans doute le type d'arme le plus simple qui soit, ces instruments contondants et brutaux vont du gourdin de bois primitif au marteau nain forgé dans le meilleur acier. Un coup de masse peut facilement briser un crâne ou assommer un homme."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Concussion",
+          "fr": "Commotion"
+        },
+        "description": {
+          "en": "Hammers and other bludgeoning weapons are excellent to use for striking your enemy senseless. When using a hammer, club or mace, a roll of 2-4 is treated as stunned when rolling to see the extent of a model's injuries.",
+          "fr": "Les marteaux et autres armes contondantes sont excellents pour assommer l'adversaire. Avec un marteau, un gourdin ou une masse, un résultat de 2 à 4 est traité comme Étourdi lors du jet de blessures graves."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Morning star",
+      "fr": "Morgenstern"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A morning star consists of a wooden or steel shaft with heavy chains that have spiked steel balls attached. It is very destructive and requires great skill to wield effectively.",
+      "fr": "Le morgenstern se compose d'un manche de bois ou d'acier prolongé par de lourdes chaînes portant des boules d'acier hérissées de pointes. Redoutablement destructeur, il exige une grande habileté pour être manié efficacement."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Heavy (Morning star)",
+          "fr": "Lourd (Morgenstern)"
+        },
+        "description": {
+          "en": "The morning star is extremely tiring to use, so its +1 Strength bonus applies only in the first turn of each hand-to-hand combat.",
+          "fr": "Le morgenstern est extrêmement fatigant à manier : son bonus de +1 en Force ne s'applique qu'au premier round de chaque combat rapproché."
+        }
+      },
+      {
+        "name": {
+          "en": "Difficult to use",
+          "fr": "Difficile à manier"
+        },
+        "description": {
+          "en": "A model with a morning star may not use a second weapon or buckler in his other hand because it requires all his skill to wield it. He may carry a shield as normal though.",
+          "fr": "Un guerrier armé d'un morgenstern ne peut utiliser d'arme supplémentaire ni de rondache dans son autre main, tant cette arme requiert toute son adresse. Il peut néanmoins porter un bouclier normalement."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Double-handed weapon",
+      "fr": "Arme à deux mains"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A blow from a double-handed axe or sword can cut a foe in half and break armour apart. It takes a long time to learn how to use these weapons and even then only extremely strong men are able to wield them effectively.",
+      "fr": "Un coup porté avec une arme à deux mains, hache ou épée, peut trancher un adversaire en deux et briser son armure. Il faut longtemps pour apprendre à manier ces armes, et seuls des hommes d'une force exceptionnelle parviennent à les utiliser efficacement."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Two-handed",
+          "fr": "Arme à deux mains"
+        },
+        "description": {
+          "en": "A model armed with this weapon may not use a shield, buckler or additional weapon in close combat. If the model is equipped with a shield he will still get a +1 bonus to his armour save against shooting.",
+          "fr": "Un guerrier armé de cette arme ne peut utiliser ni bouclier, ni rondache, ni arme supplémentaire en combat rapproché. S'il possède un bouclier, il conserve tout de même le bonus de +1 à sa sauvegarde d'armure contre les tirs."
+        }
+      },
+      {
+        "name": {
+          "en": "Strike last",
+          "fr": "Frappe en dernier"
+        },
+        "description": {
+          "en": "Double-handed weapons are so heavy that the model using them always strikes last, even when charging.",
+          "fr": "Les armes à deux mains sont si lourdes que leur porteur frappe toujours en dernier, même s'il charge."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Spear",
+      "fr": "Lance"
+    },
+    "category": "MeleeWeapon",
+    "cost": 10,
+    "description": {
+      "en": "Spears range from sharpened sticks used by Goblins to the impressive cavalry spears typical of the Elves.",
+      "fr": "Les lances vont du simple bâton taillé des Gobelins aux impressionnantes lances de cavalerie typiques des Elfes."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Strike first",
+          "fr": "Frappe en premier"
+        },
+        "description": {
+          "en": "A warrior with a spear 'strikes first' in the first turn of hand-to-hand combat.",
+          "fr": "Un guerrier armé d'une lance « frappe en premier » lors du premier round de combat rapproché."
+        }
+      },
+      {
+        "name": {
+          "en": "Unwieldy (Spear)",
+          "fr": "Peu maniable (Lance)"
+        },
+        "description": {
+          "en": "A warrior with a spear may only use a shield or a buckler in his other hand. He may not use a second weapon.",
+          "fr": "Un guerrier armé d'une lance ne peut utiliser qu'un bouclier ou une rondache dans son autre main. Il ne peut pas utiliser d'arme supplémentaire."
+        }
+      },
+      {
+        "name": {
+          "en": "Cavalry bonus (Spear)",
+          "fr": "Bonus de cavalerie (Lance)"
+        },
+        "description": {
+          "en": "If using the rules for mounted models, a mounted warrior armed with a spear receives a +1 Strength bonus when he charges. This bonus only applies for that turn.",
+          "fr": "En utilisant les règles de monture, un cavalier armé d'une lance bénéficie d'un bonus de +1 en Force lorsqu'il charge. Ce bonus ne s'applique que ce tour-là."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Halberd",
+      "fr": "Hallebarde"
+    },
+    "category": "MeleeWeapon",
+    "cost": 10,
+    "description": {
+      "en": "The halberd's heavy blade is mounted upon a sturdy shaft of oak or steel and has a point like a spear and a cutting edge like an axe. Since it can be used to chop as well as thrust, it is an adaptable weapon, but is difficult to use inside buildings.",
+      "fr": "La lourde lame de la hallebarde est montée sur une solide hampe de chêne ou d'acier ; elle possède une pointe comme une lance et un tranchant comme une hache. Pouvant à la fois frapper d'estoc et de taille, c'est une arme polyvalente, mais difficile à manier à l'intérieur des bâtiments."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Two-handed",
+          "fr": "Arme à deux mains"
+        },
+        "description": {
+          "en": "A model armed with this weapon may not use a shield, buckler or additional weapon in close combat. If the model is equipped with a shield he will still get a +1 bonus to his armour save against shooting.",
+          "fr": "Un guerrier armé de cette arme ne peut utiliser ni bouclier, ni rondache, ni arme supplémentaire en combat rapproché. S'il possède un bouclier, il conserve tout de même le bonus de +1 à sa sauvegarde d'armure contre les tirs."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Crossbow",
+      "fr": "Arbalète"
+    },
+    "category": "MissileWeapon",
+    "cost": 25,
+    "description": {
+      "en": "A crossbow consists of a short, strong bowstave mounted on a wooden or steel stock. The crossbows of the Empire are made of steel and often include a winding mechanism to draw back the string. It takes a long time to prepare a crossbow, but a bolt fired from one has a tremendous range and can penetrate armour easily.\n\nCrossbows take much longer than other bows to make, so they are expensive and relatively rare weapons. Still, they are the preferred weapon of many in Mordheim because of their power and long range.",
+      "fr": "Une arbalète se compose d'un arc court et puissant monté sur une crosse de bois ou d'acier. Les arbalètes de l'Empire sont en acier et intègrent souvent un mécanisme à manivelle pour bander la corde. Il faut longtemps pour préparer une arbalète, mais un carreau tiré par cette arme a une portée impressionnante et peut aisément percer les armures.\n\nLes arbalètes demandent bien plus de temps à fabriquer que les autres arcs : elles sont donc chères et relativement rares. Elles restent néanmoins l'arme de prédilection de nombreux guerriers à Mordheim en raison de leur puissance et de leur longue portée."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Move or fire",
+          "fr": "Se déplacer ou tirer"
+        },
+        "description": {
+          "en": "You may not move and fire this weapon in the same turn, other than to pivot on the spot to face your target or stand up.",
+          "fr": "Il est impossible de se déplacer et de tirer avec cette arme le même tour, si ce n'est pour pivoter sur place afin de faire face à sa cible, ou pour se relever."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Long bow",
+      "fr": "Arc long"
+    },
+    "category": "MissileWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A long bow is made of alternating layers of either yew or elm. A skilled archer can hit a chosen leaf on a tree from three hundred paces with this weapon.\n\nThe long bow is favoured by experienced archers due to its great reach and accuracy.",
+      "fr": "Un arc long est fabriqué à partir de couches alternées d'if ou d'orme. Un archer habile peut, avec cette arme, atteindre une feuille choisie sur un arbre à trois cents pas.\n\nL'arc long est prisé des archers expérimentés pour sa grande portée et sa précision."
+    }
+  },
+  {
+    "name": {
+      "en": "Pistol",
+      "fr": "Pistolet"
+    },
+    "category": "BlackPowderWeapon",
+    "cost": 15,
+    "description": {
+      "en": "30 gc for a brace.",
+      "fr": "30 CO la paire."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Prepare shot",
+          "fr": "Préparation du tir"
+        },
+        "description": {
+          "en": "A pistol takes a whole turn to reload, so you may only fire every other turn. If you have a brace of pistols (ie, two) you may fire every turn.",
+          "fr": "Un pistolet demande un tour complet pour être rechargé : le guerrier ne peut donc tirer qu'un tour sur deux. S'il possède une paire de pistolets, il peut tirer chaque tour."
+        }
+      },
+      {
+        "name": {
+          "en": "Save modifier",
+          "fr": "Modificateur de sauvegarde"
+        },
+        "description": {
+          "en": "These firearms are even better at penetrating armour than their Strength 4 suggests. A warrior wounded by one must make his armour save with a -2 modifier.",
+          "fr": "Ces armes à feu percent l'armure encore mieux que ne le laisse supposer leur Force 4. Un guerrier blessé par l'une d'elles doit effectuer sa sauvegarde d'armure avec un malus de -2."
+        }
+      },
+      {
+        "name": {
+          "en": "Hand-to-hand",
+          "fr": "Corps à corps"
+        },
+        "description": {
+          "en": "Pistols can be used in hand-to-hand combat as well as for shooting. A model armed with a pistol and another close combat weapon gains +1 Attack, which is resolved at Strength 4 with a -2 save modifier. This bonus attack can be used only once per combat. If you are firing a brace of pistols, your model can fight with 2 Attacks in the first turn of close combat. These attacks are resolved with a model's Weapon Skill like any normal close combat attack and likewise may be parried. Successful hits are resolved at Strength 4 and with a -2 save modifier, regardless of the firer's Strength.",
+          "fr": "Les pistolets peuvent être utilisés en combat rapproché aussi bien qu'au tir. Un guerrier armé d'un pistolet et d'une autre arme de corps à corps gagne +1 Attaque, résolue à Force 4 avec un malus de sauvegarde de -2. Cette attaque bonus ne peut être utilisée qu'une fois par combat. S'il tire avec une paire de pistolets, le guerrier combat avec 2 Attaques au premier round du corps à corps. Ces attaques sont résolues avec la Capacité de Combat du guerrier comme des attaques normales de corps à corps et peuvent donc être parées de la même façon. Les touches réussies sont résolues à Force 4 avec un malus de sauvegarde de -2, quelle que soit la Force du tireur."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Duelling Pistol",
+      "fr": "Pistolet de duel"
+    },
+    "category": "BlackPowderWeapon",
+    "cost": 25,
+    "description": {
+      "en": "50 gc for a brace.",
+      "fr": "50 CO la paire."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Accuracy",
+          "fr": "Précision"
+        },
+        "description": {
+          "en": "A duelling pistol is built for accuracy as a skilled duellist is able to hit a coin from twenty paces. All shots and close combat attacks from a duelling pistol have a +1 bonus to hit.",
+          "fr": "Un pistolet de duel est conçu pour la précision : un duelliste habile est capable de toucher une pièce de monnaie à vingt pas. Tous les tirs et attaques de corps à corps effectués avec un pistolet de duel bénéficient d'un bonus de +1 pour toucher."
+        }
+      },
+      {
+        "name": {
+          "en": "Prepare shot (Duelling Pistol)",
+          "fr": "Préparation du tir (Pistolet de duel)"
+        },
+        "description": {
+          "en": "A duelling pistol takes a complete turn to reload, so your model may only fire every other turn. If he has a brace of duelling pistols he may fire every turn.",
+          "fr": "Un pistolet de duel demande un tour complet pour être rechargé : le guerrier ne peut donc tirer qu'un tour sur deux. S'il possède une paire de pistolets de duel, il peut tirer chaque tour."
+        }
+      },
+      {
+        "name": {
+          "en": "Save modifier",
+          "fr": "Modificateur de sauvegarde"
+        },
+        "description": {
+          "en": "These firearms are even better at penetrating armour than their Strength 4 suggests. A warrior wounded by one must make his armour save with a -2 modifier.",
+          "fr": "Ces armes à feu percent l'armure encore mieux que ne le laisse supposer leur Force 4. Un guerrier blessé par l'une d'elles doit effectuer sa sauvegarde d'armure avec un malus de -2."
+        }
+      },
+      {
+        "name": {
+          "en": "Hand-to-hand",
+          "fr": "Corps à corps"
+        },
+        "description": {
+          "en": "Pistols can be used in hand-to-hand combat as well as for shooting. A model armed with a pistol and another close combat weapon gains +1 Attack, which is resolved at Strength 4 with a -2 save modifier. This bonus attack can be used only once per combat. If you are firing a brace of pistols, your model can fight with 2 Attacks in the first turn of close combat. These attacks are resolved with a model's Weapon Skill like any normal close combat attack and likewise may be parried. Successful hits are resolved at Strength 4 and with a -2 save modifier, regardless of the firer's Strength.",
+          "fr": "Les pistolets peuvent être utilisés en combat rapproché aussi bien qu'au tir. Un guerrier armé d'un pistolet et d'une autre arme de corps à corps gagne +1 Attaque, résolue à Force 4 avec un malus de sauvegarde de -2. Cette attaque bonus ne peut être utilisée qu'une fois par combat. S'il tire avec une paire de pistolets, le guerrier combat avec 2 Attaques au premier round du corps à corps. Ces attaques sont résolues avec la Capacité de Combat du guerrier comme des attaques normales de corps à corps et peuvent donc être parées de la même façon. Les touches réussies sont résolues à Force 4 avec un malus de sauvegarde de -2, quelle que soit la Force du tireur."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Blunderbuss",
+      "fr": "Tromblon"
+    },
+    "category": "BlackPowderWeapon",
+    "cost": 30,
+    "description": {
+      "en": "A blunderbuss is a primitive blackpowder weapon, which fires a hail of lead balls, rusty bolts, bent nails, and other assorted scrap metal. It is a powerful, if erratic, weapon and takes such a long time to load that most warriors discard it after the first shot.",
+      "fr": "Le tromblon est une arme à poudre noire primitive qui tire une volée de billes de plomb, de boulons rouillés, de clous tordus et autres ferrailles diverses. C'est une arme puissante, quoique imprécise, et si longue à recharger que la plupart des guerriers l'abandonnent après le premier tir."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Shot",
+          "fr": "Décharge"
+        },
+        "description": {
+          "en": "When your model fires the blunderbuss, draw a line 16\" long and 1\" wide in any direction from the firer (the line must be absolutely straight). Any and all models in its path are automatically hit by a Strength 3 hit.",
+          "fr": "Lorsque le guerrier tire au tromblon, tracez une ligne droite de 16 ps de long et 1 ps de large dans la direction de votre choix depuis le tireur. Tous les guerriers se trouvant sur cette ligne sont automatiquement touchés par une touche de Force 3."
+        }
+      },
+      {
+        "name": {
+          "en": "Fire Once",
+          "fr": "Tir unique"
+        },
+        "description": {
+          "en": "It takes a very long time to load a blunderbuss so it may only be fired it once per battle.",
+          "fr": "Un tromblon est si long à recharger qu'il ne peut être tiré qu'une seule fois par bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Handgun",
+      "fr": "Arquebuse"
+    },
+    "category": "BlackPowderWeapon",
+    "cost": 35,
+    "description": {
+      "en": "A handgun is a simple firearm. The quality of construction varies ranging from the crude wooden 'hakbuts' of the artillery school of Nuln, to the more sophisticated Dwarf firearms that have levers and springs which hold the burning match, and triggers which release the firing mechanism and fire the gun. Handguns are not terribly reliable weapons: the gun barrel occasionally tends to explode violently or the powder fails to ignite. But the weapon has a great range and tremendous penetrating power, making a mockery of even the thickest armour. In Mordheim, handguns are rare and expensive, but a warband which can boast such a weapon will command respect from all its rivals.",
+      "fr": "Une arquebuse est une arme à feu simple. Sa qualité de fabrication varie considérablement, des rudes « hakbuts » de bois de l'école d'artillerie de Nuln aux armes à feu naines plus sophistiquées, dotées de leviers et de ressorts retenant la mèche allumée, et de détentes libérant le mécanisme de mise à feu. Les arquebuses ne sont pas des armes très fiables : le canon a parfois tendance à exploser violemment, ou la poudre refuse de s'enflammer. Mais l'arme dispose d'une grande portée et d'un pouvoir de pénétration considérable, capable de venir à bout des armures les plus épaisses. À Mordheim, les arquebuses sont rares et coûteuses, mais une bande pouvant se targuer de posséder une telle arme s'attire le respect de tous ses rivaux."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Prepare shot (Single Shot)",
+          "fr": "Préparation du tir (Coup unique)"
+        },
+        "description": {
+          "en": "A single-shot firearm takes a complete turn to reload, so you may only fire it every other turn.",
+          "fr": "Une arme à feu à coup unique demande un tour complet pour être rechargée : elle ne peut donc être tirée qu'un tour sur deux."
+        }
+      },
+      {
+        "name": {
+          "en": "Move or fire",
+          "fr": "Se déplacer ou tirer"
+        },
+        "description": {
+          "en": "You may not move and fire this weapon in the same turn, other than to pivot on the spot to face your target or stand up.",
+          "fr": "Il est impossible de se déplacer et de tirer avec cette arme le même tour, si ce n'est pour pivoter sur place afin de faire face à sa cible, ou pour se relever."
+        }
+      },
+      {
+        "name": {
+          "en": "Save Modifier (Handgun)",
+          "fr": "Modificateur de sauvegarde (Arquebuse)"
+        },
+        "description": {
+          "en": "Handguns are even better at penetrating armour than their Strength 4 suggests. A warrior wounded by a handgun must take its armour save with a -2 modifier.",
+          "fr": "Les arquebuses percent l'armure encore mieux que ne le laisse supposer leur Force 4. Un guerrier blessé par une arquebuse doit effectuer sa sauvegarde d'armure avec un malus de -2."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Hunting Rifle",
+      "fr": "Long fusil d'Hochland"
+    },
+    "category": "BlackPowderWeapon",
+    "cost": 200,
+    "rarity": 11,
+    "description": {
+      "en": "Hochland is a province famed for its hunters, and the preferred weapon of its nobility when they go hunting is a long-ranged rifle. They are extremely rare and precious weapons, and only the most experienced weaponsmiths are capable of manufacturing them.",
+      "fr": "Le Hochland est une province réputée pour ses chasseurs, et l'arme de prédilection de sa noblesse lors des parties de chasse est un fusil à longue portée. Ce sont des armes extrêmement rares et précieuses, que seuls les armuriers les plus expérimentés sont capables de fabriquer."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Move or fire",
+          "fr": "Se déplacer ou tirer"
+        },
+        "description": {
+          "en": "You may not move and fire this weapon in the same turn, other than to pivot on the spot to face your target or stand up.",
+          "fr": "Il est impossible de se déplacer et de tirer avec cette arme le même tour, si ce n'est pour pivoter sur place afin de faire face à sa cible, ou pour se relever."
+        }
+      },
+      {
+        "name": {
+          "en": "Prepare shot (Single Shot)",
+          "fr": "Préparation du tir (Coup unique)"
+        },
+        "description": {
+          "en": "A single-shot firearm takes a complete turn to reload, so you may only fire it every other turn.",
+          "fr": "Une arme à feu à coup unique demande un tour complet pour être rechargée : elle ne peut donc être tirée qu'un tour sur deux."
+        }
+      },
+      {
+        "name": {
+          "en": "Pick target",
+          "fr": "Choix de la cible"
+        },
+        "description": {
+          "en": "A model armed with a Hochland long rifle can target any enemy model in sight, not just the closest one.",
+          "fr": "Un guerrier armé d'un long fusil d'Hochland peut viser n'importe quel guerrier ennemi visible, et non uniquement le plus proche."
+        }
+      },
+      {
+        "name": {
+          "en": "Save modifier",
+          "fr": "Modificateur de sauvegarde"
+        },
+        "description": {
+          "en": "These firearms are even better at penetrating armour than their Strength 4 suggests. A warrior wounded by one must make his armour save with a -2 modifier.",
+          "fr": "Ces armes à feu percent l'armure encore mieux que ne le laisse supposer leur Force 4. Un guerrier blessé par l'une d'elles doit effectuer sa sauvegarde d'armure avec un malus de -2."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Heavy Armour",
+      "fr": "Armure lourde"
+    },
+    "category": "Armour",
+    "cost": 50,
+    "description": {
+      "en": "Typical heavy armour is made from metal links and is called chain mail. Forging chain mail is a laborious and time consuming process, as the blacksmith must put together hundreds, sometimes thousands, of metal links. This makes chain mail expensive, but this type of armour provides excellent protection for anyone who can afford it.\n\nThere are other types of heavy armour as well, of which the best known are the steel breastplates and greaves worn by the foot knights of the Templar orders.",
+      "fr": "L'armure lourde typique est constituée de mailles métalliques : on l'appelle cotte de mailles. Forger une cotte de mailles est un processus long et laborieux, le forgeron devant assembler des centaines, parfois des milliers, de maillons métalliques. Cela rend la cotte de mailles coûteuse, mais ce type d'armure offre une excellente protection à qui peut se l'offrir.\n\nIl existe d'autres types d'armures lourdes, dont les plus connues sont les plastrons et jambières d'acier portés par les chevaliers à pied des ordres Templiers."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Movement Penalty (Heavy Armour)",
+          "fr": "Malus de Mouvement (Armure lourde)"
+        },
+        "description": {
+          "en": "A warrior that is armed with both heavy armour and a shield suffers a -1 Movement penalty.",
+          "fr": "Un guerrier équipé à la fois d'une armure lourde et d'un bouclier subit un malus de -1 en Mouvement."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Shield",
+      "fr": "Bouclier"
+    },
+    "category": "Armour",
+    "cost": 5,
+    "description": {
+      "en": "There are two types of shield common to the warriors of Mordheim: the first is made of wood, occasionally reinforced with metal plates. This basic type of shield, although strong, does tend to splinter, but this can sometimes save the user's life as his enemy's weapon can get trapped allowing him to strike back whilst his enemy struggles to free his weapon.\n\nMetal shields are heavy and cumbersome, but last much longer and can take a battering. A typical Empire shield is either round or triangular, and carries the emblem of the province or city of its owner.",
+      "fr": "Il existe deux types de boucliers courants chez les guerriers de Mordheim : le premier est en bois, parfois renforcé de plaques de métal. Ce type de bouclier basique, bien que solide, a tendance à se briser, ce qui peut parfois sauver la vie de son porteur lorsque l'arme adverse s'y retrouve coincée, lui laissant le temps de riposter pendant que son ennemi tente de dégager son arme.\n\nLes boucliers métalliques sont lourds et encombrants, mais durent bien plus longtemps et encaissent mieux les coups. Un bouclier typique de l'Empire est rond ou triangulaire, et porte l'emblème de la province ou de la cité de son propriétaire."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Combined Save",
+          "fr": "Sauvegarde combinée"
+        },
+        "description": {
+          "en": "As explained in the Armour section, shields combine with armour to give +1 to the save.",
+          "fr": "Comme expliqué dans la section Armure, les boucliers se combinent avec une armure pour donner un bonus de +1 à la sauvegarde."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Helmet",
+      "fr": "Casque"
+    },
+    "category": "Armour",
+    "cost": 10,
+    "description": {
+      "en": "From the shining steel helmets of Bretonnian knights to the leather caps of the Skaven, all sensible warriors try to protect the most vulnerable part of their body – their head. Even the most vain fighters still use a helmet, as it can be festooned with plumes, horns and other decorations.\n\nHelmets come in varying shapes and sizes, but their basic function remains the same.",
+      "fr": "Des casques d'acier étincelants des chevaliers Bretonniens aux calottes de cuir des Skavens, tout guerrier avisé cherche à protéger la partie la plus vulnérable de son corps : sa tête. Même les combattants les plus vaniteux portent un casque, quitte à l'orner de plumets, de cornes et d'autres décorations.\n\nLes casques existent sous des formes et des tailles variées, mais leur fonction reste toujours la même."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Avoid Stun",
+          "fr": "Évite l'Étourdissement"
+        },
+        "description": {
+          "en": "A model that is equipped with a helmet has a special 4+ save on a D6 against being stunned. If the save is made, treat the stunned result as knocked down instead. This save is not modified by the opponent's Strength.",
+          "fr": "Un guerrier équipé d'un casque bénéficie d'une sauvegarde spéciale de 4+ sur 1D6 contre le résultat Étourdi. Si la sauvegarde est réussie, traitez le résultat Étourdi comme un résultat À terre à la place. Cette sauvegarde n'est pas modifiée par la Force de l'adversaire."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Short Bow",
+      "fr": "Arc court"
+    },
+    "category": "MissileWeapon",
+    "cost": 5,
     "description": {
       "en": "A cheaper, shorter-ranged bow variant found in several warbands' equipment lists (e.g. Orc Mob's Goblins, Witch Hunters' Zealots) at the same price - not exclusive to any one warband.",
       "fr": "Une variante d'arc moins chère et à plus courte portée, présente dans les listes d'équipement de plusieurs bandes (Gobelins de la Horde Orque, Séides des Répurgateurs) au même prix - pas exclusive à une seule bande."
     }
   },
-  { "name": { "en": "Flail", "fr": "Fléau" }, "category": "MeleeWeapon", "cost": 15 },
-  { "name": { "en": "Throwing Knives", "fr": "Couteau de Lancer" }, "category": "MissileWeapon", "cost": 15 },
-  { "name": { "en": "Crossbow Pistol", "fr": "Arbalète de Poing" }, "category": "MissileWeapon", "cost": 35 },
-  { "name": { "en": "Sling", "fr": "Fronde" }, "category": "MissileWeapon", "cost": 2 },
-  { "name": { "en": "Throwing Stars", "fr": "Étoiles de Jet" }, "category": "MissileWeapon", "cost": 15 },
-  { "name": { "en": "Club", "fr": "Gourdin" }, "category": "MeleeWeapon", "cost": 3 }
+  {
+    "name": {
+      "en": "Flail",
+      "fr": "Fléau"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "description": {
+      "en": "The flail is a heavy weapon wielded with both hands. It normally consists of heavy weights, often spiked, attached to a pole or handle by means of heavy chains. Flails drain the user's stamina quickly, but are awesomely destructive in the hands of a skilled (or unhinged) warrior.",
+      "fr": "Le fléau est une arme lourde maniée à deux mains. Il se compose généralement de poids, souvent hérissés de pointes, fixés à un manche par de lourdes chaînes. Les fléaux épuisent rapidement leur porteur, mais se révèlent redoutablement destructeurs entre les mains d'un guerrier habile (ou dérangé)."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Heavy (Flail)",
+          "fr": "Lourd (Fléau)"
+        },
+        "description": {
+          "en": "A flail is extremely tiring to use and thus the +2 Strength bonus applies only in the first turn of each hand-to-hand combat.",
+          "fr": "Un fléau est extrêmement fatigant à manier : le bonus de +2 en Force ne s'applique donc qu'au premier round de chaque combat rapproché."
+        }
+      },
+      {
+        "name": {
+          "en": "Two-handed",
+          "fr": "Arme à deux mains"
+        },
+        "description": {
+          "en": "A model armed with this weapon may not use a shield, buckler or additional weapon in close combat. If the model is equipped with a shield he will still get a +1 bonus to his armour save against shooting.",
+          "fr": "Un guerrier armé de cette arme ne peut utiliser ni bouclier, ni rondache, ni arme supplémentaire en combat rapproché. S'il possède un bouclier, il conserve tout de même le bonus de +1 à sa sauvegarde d'armure contre les tirs."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Throwing Knives",
+      "fr": "Couteau de Lancer"
+    },
+    "category": "MissileWeapon",
+    "cost": 15,
+    "description": {
+      "en": "Throwing stars are used mainly by the assassins of the sinister House of Shadows, or by street thugs who specialise in ambushing the unwary. A perfectly balanced knife thrown from behind has ended the life of many a noble and merchant in Mordheim. Throwing knives are not suitable for close combat, as their balance makes them unwieldy in close quarters.",
+      "fr": "Les étoiles de jet sont surtout utilisées par les assassins de la sinistre Maison des Ombres, ou par des voyous des rues spécialisés dans les embuscades. Un couteau parfaitement équilibré lancé dans le dos a mis fin à la vie de nombreux nobles et marchands à Mordheim. Les couteaux de lancer ne conviennent pas au combat rapproché : leur équilibre les rend peu maniables au corps à corps."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Thrown Weapon",
+          "fr": "Arme de jet"
+        },
+        "description": {
+          "en": "Models using throwing stars or knives do not suffer penalties for range or moving as these weapons are perfectly balanced for throwing. They cannot be used in close combat.",
+          "fr": "Les guerriers utilisant des étoiles ou des couteaux de lancer ne subissent aucun malus lié à la distance ou au déplacement, ces armes étant parfaitement équilibrées pour le lancer. Elles ne peuvent pas être utilisées en combat rapproché."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Crossbow Pistol",
+      "fr": "Arbalète de Poing"
+    },
+    "category": "MissileWeapon",
+    "cost": 35,
+    "description": {
+      "en": "Crossbow pistols are masterpieces made by expert weaponsmiths. They are miniature crossbows with all the power and accuracy of the real thing. As these weapons may be easily concealed, they are the favoured weapon of assassins.",
+      "fr": "Les arbalètes de poing sont des chefs-d'œuvre réalisés par des armuriers experts. Ce sont de véritables arbalètes miniatures, dotées de toute la puissance et de la précision de l'original. Faciles à dissimuler, elles sont l'arme de prédilection des assassins."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Shoot In Hand-To-Hand Combat",
+          "fr": "Tir en Combat Rapproché"
+        },
+        "description": {
+          "en": "A model armed with a crossbow pistol may shoot it in the first round of a hand-to-hand combat and this shot is always resolved first, before any blows are struck. This shot has an extra -2 to hit penalty. Use model's Ballistic Skill to see whether it hits or not. This bonus attack is in addition to any close combat weapon attacks.",
+          "fr": "Un guerrier armé d'une arbalète de poing peut tirer avec au premier round d'un combat rapproché ; ce tir est toujours résolu avant les coups portés au corps à corps, avec un malus supplémentaire de -2 pour toucher. Utilisez la Capacité de Tir du guerrier pour déterminer si le tir touche. Cette attaque bonus s'ajoute aux attaques de corps à corps habituelles."
+        }
+      },
+      {
+        "name": {
+          "en": "Hand-to-hand (Crossbow Pistol)",
+          "fr": "Corps à corps (Arbalète de Poing)"
+        },
+        "description": {
+          "en": "Pistols can be used in hand-to-hand combat as well as for shooting. A model armed with a pistol and another close combat weapon gains +1 Attack, which is resolved at Strength 4. This bonus attack can be used only once per combat. If you are firing a brace of pistols, your model can fight with 2 Attacks in the first turn of close combat. These attacks are resolved with a model's Weapon Skill like any normal close combat attack and likewise may be parried. Successful hits are resolved at Strength 4, regardless of the firer's Strength.",
+          "fr": "Les pistolets peuvent être utilisés en combat rapproché aussi bien qu'au tir. Un guerrier armé d'un pistolet et d'une autre arme de corps à corps gagne +1 Attaque, résolue à Force 4. Cette attaque bonus ne peut être utilisée qu'une fois par combat. S'il tire avec une paire de pistolets, le guerrier combat avec 2 Attaques au premier round du corps à corps. Ces attaques sont résolues avec la Capacité de Combat du guerrier comme des attaques normales de corps à corps et peuvent donc être parées de la même façon. Les touches réussies sont résolues à Force 4, quelle que soit la Force du tireur."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Sling",
+      "fr": "Fronde"
+    },
+    "category": "MissileWeapon",
+    "cost": 2,
+    "description": {
+      "en": "Slings are rarely used, mainly because they are no more powerful than bows and have a shorter range. A sling is little more than a looped strip of cloth or leather into which a stone is placed. The sling is whirled about the slinger's head and the sling stone is then released towards the target.\n\nWhile this weapon is looked down upon by most archers, a skilled slinger can slay a man from a considerable distance, and the ammunition is easy to find: rocks are everywhere and free!",
+      "fr": "Les frondes sont rarement utilisées, principalement parce qu'elles ne sont pas plus puissantes que les arcs et ont une portée plus courte. Une fronde n'est guère plus qu'une bande de tissu ou de cuir repliée dans laquelle on place une pierre. On fait tournoyer la fronde autour de la tête du frondeur avant de relâcher le projectile en direction de la cible.\n\nBien que cette arme soit méprisée par la plupart des archers, un frondeur habile peut abattre un homme à bonne distance, et les munitions sont faciles à trouver : les cailloux sont partout et gratuits !"
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Fire twice at half range",
+          "fr": "Tir double à mi-portée"
+        },
+        "description": {
+          "en": "A slinger may fire twice in the shooting phase if he does not move in the movement phase. He cannot shoot over half range (9\") though, if he fires twice. If the model fires twice then each shot is at -1 to hit.",
+          "fr": "Un frondeur peut tirer deux fois lors de la phase de Tir s'il ne s'est pas déplacé lors de la phase de Mouvement. Il ne peut alors pas tirer au-delà de la moitié de sa portée (9 ps). S'il tire deux fois, chaque tir subit un malus de -1 pour toucher."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Throwing Stars",
+      "fr": "Étoiles de Jet"
+    },
+    "category": "MissileWeapon",
+    "cost": 15,
+    "description": {
+      "en": "Throwing stars are used mainly by the assassins of the sinister House of Shadows, or by street thugs who specialise in ambushing the unwary. A perfectly balanced knife thrown from behind has ended the life of many a noble and merchant in Mordheim. Throwing knives are not suitable for close combat, as their balance makes them unwieldy in close quarters.",
+      "fr": "Les étoiles de jet sont surtout utilisées par les assassins de la sinistre Maison des Ombres, ou par des voyous des rues spécialisés dans les embuscades. Un couteau parfaitement équilibré lancé dans le dos a mis fin à la vie de nombreux nobles et marchands à Mordheim. Les couteaux de lancer ne conviennent pas au combat rapproché : leur équilibre les rend peu maniables au corps à corps."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Thrown Weapon",
+          "fr": "Arme de jet"
+        },
+        "description": {
+          "en": "Models using throwing stars or knives do not suffer penalties for range or moving as these weapons are perfectly balanced for throwing. They cannot be used in close combat.",
+          "fr": "Les guerriers utilisant des étoiles ou des couteaux de lancer ne subissent aucun malus lié à la distance ou au déplacement, ces armes étant parfaitement équilibrées pour le lancer. Elles ne peuvent pas être utilisées en combat rapproché."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Club",
+      "fr": "Gourdin"
+    },
+    "category": "MeleeWeapon",
+    "cost": 3,
+    "description": {
+      "en": "Perhaps the simplest type of weapon, these brutal, bludgeoning instruments range from primitive wooden clubs to elaborately forged Dwarf hammers made from the finest steel. A blow from a mace can easily crush a skull or knock a man unconscious.",
+      "fr": "Sans doute le type d'arme le plus simple qui soit, ces instruments contondants et brutaux vont du gourdin de bois primitif au marteau nain forgé dans le meilleur acier. Un coup de masse peut facilement briser un crâne ou assommer un homme."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Concussion",
+          "fr": "Commotion"
+        },
+        "description": {
+          "en": "Hammers and other bludgeoning weapons are excellent to use for striking your enemy senseless. When using a hammer, club or mace, a roll of 2-4 is treated as stunned when rolling to see the extent of a model's injuries.",
+          "fr": "Les marteaux et autres armes contondantes sont excellents pour assommer l'adversaire. Avec un marteau, un gourdin ou une masse, un résultat de 2 à 4 est traité comme Étourdi lors du jet de blessures graves."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Fist",
+      "fr": "Poing"
+    },
+    "category": "MeleeWeapon",
+    "cost": 0,
+    "description": {
+      "en": "The truly desperate, who don't even own a knife, have to fight with their bare hands. Needless to say, their chances of survival are comparable to Halflings going without food for eight hours! The following rules only apply to warriors who have lost their weapons - creatures such as Zombies or animals ignore them.",
+      "fr": "Les plus désespérés, ceux qui ne possèdent même pas un couteau, doivent se battre à mains nues. Inutile de dire que leurs chances de survie sont comparables à celles d'un Halfling privé de nourriture pendant huit heures ! Les règles suivantes ne s'appliquent qu'aux guerriers ayant perdu leurs armes - les créatures telles que les Zombies ou les animaux les ignorent."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Only One Attack",
+          "fr": "Une Seule Attaque"
+        },
+        "description": {
+          "en": "Warriors using their fists can only ever make 1 attack.",
+          "fr": "Les guerriers combattant à mains nues ne peuvent jamais effectuer plus d'une Attaque."
+        }
+      },
+      {
+        "name": {
+          "en": "+1 Enemy armour save",
+          "fr": "Sauvegarde adverse +1"
+        },
+        "description": {
+          "en": "An enemy wounded gains a +1 bonus to his armour save, and a 6+ armour save if he has none normally.",
+          "fr": "L'adversaire blessé bénéficie d'un bonus de +1 à sa sauvegarde d'armure, et d'une sauvegarde de 6+ s'il n'en a normalement aucune."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Horseman's Hammer",
+      "fr": "Marteau de Cavalier"
+    },
+    "category": "MeleeWeapon",
+    "cost": 12,
+    "description": {
+      "en": "This is a great hammer similar to the ones used by Knights of the White Wolf. Far too bulky to use in one hand, a Horseman's Hammer is best suited to mounted combat, when the impetus of the horse may be used to add to the power of the weapon.",
+      "fr": "Il s'agit d'un grand marteau semblable à ceux utilisés par les Chevaliers du Loup Blanc. Bien trop encombrant pour être utilisé à une main, le marteau de cavalier est surtout adapté au combat monté, où l'élan du cheval peut ajouter à la puissance de l'arme."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Two-handed",
+          "fr": "Arme à deux mains"
+        },
+        "description": {
+          "en": "A model armed with this weapon may not use a shield, buckler or additional weapon in close combat. If the model is equipped with a shield he will still get a +1 bonus to his armour save against shooting.",
+          "fr": "Un guerrier armé de cette arme ne peut utiliser ni bouclier, ni rondache, ni arme supplémentaire en combat rapproché. S'il possède un bouclier, il conserve tout de même le bonus de +1 à sa sauvegarde d'armure contre les tirs."
+        }
+      },
+      {
+        "name": {
+          "en": "Cavalry Charge",
+          "fr": "Charge de Cavalerie"
+        },
+        "description": {
+          "en": "A model armed with a Horseman's Hammer may use the speed of his charge to increase the might of his attacks. A model on a steed with a Horseman's Hammer gains a further +1 Strength bonus when he charges. This bonus only applies for that turn.",
+          "fr": "Un guerrier armé d'un marteau de cavalier peut utiliser la vitesse de sa charge pour accroître la puissance de ses attaques. Monté sur une monture, il bénéficie d'un bonus supplémentaire de +1 en Force lorsqu'il charge. Ce bonus ne s'applique que ce tour-là."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Lance",
+      "fr": "Lance de Cavalerie"
+    },
+    "category": "MeleeWeapon",
+    "cost": 40,
+    "rarity": 8,
+    "description": {
+      "en": "Lances are long, heavy spears used by mounted shock troops to rip through armour and fling their foes to the ground. They are the chosen weapons of Knights Templar and other wealthy warriors. To use a lance requires great skill and strength, and only the richest warriors ride the heavy warhorses needed to wield these mighty weapons effectively.",
+      "fr": "Les lances de cavalerie sont de longues et lourdes lances utilisées par les troupes de choc montées pour déchirer les armures et jeter leurs adversaires à terre. Ce sont les armes de prédilection des Chevaliers Templiers et d'autres guerriers fortunés. Les manier demande une grande force et une grande habileté, et seuls les guerriers les plus riches possèdent les lourds chevaux de guerre nécessaires pour les utiliser efficacement."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Cavalry weapon",
+          "fr": "Arme de cavalerie"
+        },
+        "description": {
+          "en": "A warrior must own a warhorse to use a lance, as it can only be used whilst he is on horseback.",
+          "fr": "Un guerrier doit posséder un cheval de guerre pour utiliser une lance de cavalerie, car elle ne peut être maniée qu'à cheval."
+        }
+      },
+      {
+        "name": {
+          "en": "Cavalry bonus (Lance)",
+          "fr": "Bonus de cavalerie (Lance de Cavalerie)"
+        },
+        "description": {
+          "en": "If using optional rules for mounted models, a warrior armed with a lance receives a +2 Strength bonus when he charges. This bonus only applies for that turn.",
+          "fr": "En utilisant les règles de monture, un guerrier armé d'une lance de cavalerie bénéficie d'un bonus de +2 en Force lorsqu'il charge. Ce bonus ne s'applique que ce tour-là."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Sword Breaker",
+      "fr": "Brise-épée"
+    },
+    "category": "MeleeWeapon",
+    "cost": 30,
+    "rarity": 8,
+    "description": {
+      "en": "The sword breaker is a specialist weapon wrought by only the most talented swordsmiths. Next to the hilt are two prongs concealed within the blade that can be used to trap an opponent's blade, twisting and snapping it with a single, well timed movement.",
+      "fr": "Le brise-épée est une arme de spécialiste forgée par les artisans les plus talentueux. Près de la garde se trouvent deux dents dissimulées dans la lame, capables de piéger l'arme d'un adversaire pour la tordre et la briser d'un geste bien ajusté."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Sword Breaker)",
+          "fr": "Parade (Brise-épée)"
+        },
+        "description": {
+          "en": "The sword breaker allows the wielder to parry the attacks of his opponents in close combat. When your opponent scores a hit roll a D6. If you can roll greater than the highest 'to hit' roll of your opponent you have parried the attack and the blow is wasted.",
+          "fr": "Le brise-épée permet à son porteur de parer les attaques de ses adversaires en combat rapproché. Lorsque l'adversaire obtient une touche, lancez 1D6 : si le résultat est supérieur au meilleur jet pour toucher de l'adversaire, l'attaque est parée et le coup est perdu."
+        }
+      },
+      {
+        "name": {
+          "en": "Trap Blade",
+          "fr": "Piège à Lame"
+        },
+        "description": {
+          "en": "The two prongs used to trap an opponent's weapon are snapped out when the warrior parries. Whenever you make a successful parry attempt roll a D6. If you score a 4+ you break the weapon your opponent was using. The weapon is now useless and they must use another one, or if they have no other weapon, resort to unarmed combat.",
+          "fr": "Les deux dents utilisées pour piéger l'arme adverse se déploient lorsque le guerrier effectue une parade. À chaque parade réussie, lancez 1D6 : sur un 4+, vous brisez l'arme utilisée par votre adversaire. Cette arme devient inutilisable et il doit en utiliser une autre, ou combattre à mains nues s'il n'en a pas."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Elf Bow",
+      "fr": "Arc Elfique"
+    },
+    "category": "MissileWeapon",
+    "cost": 35,
+    "costRandomMax": 18,
+    "rarity": 12,
+    "description": {
+      "en": "Elven bows are the finest missile weapons of their kind. Constructed from ithilmar or wood from the Elf forests, with strings woven from the hair of Elf maidens, Elven bows are far superior to any missile weapons made by other races.",
+      "fr": "Les arcs elfiques sont les meilleures armes de tir de leur catégorie. Fabriqués en ithilmar ou en bois des forêts elfiques, avec des cordes tissées à partir de cheveux de jeunes elfes, ils surpassent largement toutes les armes de tir fabriquées par les autres peuples."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Save Modifier (Elf Bow)",
+          "fr": "Modificateur de sauvegarde (Arc Elfique)"
+        },
+        "description": {
+          "en": "An Elf bow has a -1 save modifier on armour saves against it.",
+          "fr": "Un arc elfique bénéficie d'un modificateur de sauvegarde d'armure de -1 contre lui."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Repeater Crossbow",
+      "fr": "Arbalète à Répétition"
+    },
+    "category": "MissileWeapon",
+    "cost": 40,
+    "rarity": 8,
+    "description": {
+      "en": "Repeater crossbows are extremely complex devices, expensive to acquire and difficult to make. While this makes them rare, they certainly have their uses: they can rain a deadly hail of bolts on enemies, and a warrior using one may move quite fast and still fire his weapon.",
+      "fr": "Les arbalètes à répétition sont des mécanismes extrêmement complexes, coûteux à acquérir et difficiles à fabriquer. Bien que rares, elles ont leur utilité : elles peuvent déverser une pluie mortelle de carreaux sur l'ennemi, et un guerrier qui en est équipé peut se déplacer assez vite tout en tirant."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Fire twice",
+          "fr": "Tir double"
+        },
+        "description": {
+          "en": "A model armed with a repeater crossbow may choose to fire twice per turn with an extra -1 to hit penalty on both shots.",
+          "fr": "Un guerrier armé d'une arbalète à répétition peut choisir de tirer deux fois par tour, avec un malus supplémentaire de -1 pour toucher sur les deux tirs."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Gromril Armour",
+      "fr": "Armure de Gromril"
+    },
+    "category": "Armour",
+    "cost": 150,
+    "rarity": 11,
+    "description": {
+      "en": "Gromril is the rarest and strongest metal known of in the Old World. Only a very few Dwarf smiths know the secret of forging gromril, and a suit of armour made from it fetches a huge price.",
+      "fr": "Le gromril est le métal le plus rare et le plus résistant connu dans le Vieux Monde. Seule une poignée de forgerons nains connaissent le secret de sa forge, et une armure faite de gromril se négocie à prix d'or."
+    },
+    "specialRules": []
+  },
+  {
+    "name": {
+      "en": "Ithilmar Armour",
+      "fr": "Armure d'Ithilmar"
+    },
+    "category": "Armour",
+    "cost": 90,
+    "rarity": 11,
+    "description": {
+      "en": "Ithilmar is a silvery metal which is as light as silk and stronger than steel. Elves are experts at fashioning weapons and armour from ithilmar, and the Elven kingdom of Caledor is the only place in the world where this metal can be found.",
+      "fr": "L'ithilmar est un métal argenté, aussi léger que la soie et plus résistant que l'acier. Les Elfes sont passés maîtres dans l'art de façonner armes et armures en ithilmar, et le royaume elfique de Caledor est le seul endroit au monde où l'on peut trouver ce métal."
+    },
+    "specialRules": []
+  },
+  {
+    "name": {
+      "en": "Pavise",
+      "fr": "Pavois"
+    },
+    "category": "Armour",
+    "cost": 25,
+    "rarity": 8,
+    "description": {
+      "en": "A pavise is a huge shield commonly used by regiments of warriors in battle to defend themselves from the arrows of their enemies. It is a weighty item and little use in a long protracted combat but excellent against shooting.",
+      "fr": "Le pavois est un immense bouclier couramment utilisé par les régiments de guerriers pour se protéger des flèches ennemies au combat. C'est un objet lourd, peu utile dans un combat prolongé, mais excellent contre le tir."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Cover",
+          "fr": "Couvert"
+        },
+        "description": {
+          "en": "A warrior using a pavise counts as if he is in cover against missile attacks (-1 to hit). In close combat, the pavise counts as a shield (+1 armour save) but only if the warrior was charged to his front.",
+          "fr": "Un guerrier utilisant un pavois est considéré comme à couvert contre les attaques de tir (-1 pour toucher). En combat rapproché, le pavois compte comme un bouclier (+1 en sauvegarde d'armure), mais seulement si le guerrier a été chargé de face."
+        }
+      },
+      {
+        "name": {
+          "en": "Combined Save",
+          "fr": "Sauvegarde combinée"
+        },
+        "description": {
+          "en": "As explained in the Armour section, shields combine with armour to give +1 to the save.",
+          "fr": "Comme expliqué dans la section Armure, les boucliers se combinent avec une armure pour donner un bonus de +1 à la sauvegarde."
+        }
+      },
+      {
+        "name": {
+          "en": "Movement Penalty (Pavise)",
+          "fr": "Malus de Mouvement (Pavois)"
+        },
+        "description": {
+          "en": "Because the Pavise is so heavy and cumbersome, the bearer moves at half pace.",
+          "fr": "Le pavois étant si lourd et encombrant, son porteur se déplace à vitesse réduite de moitié."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Toughened Leathers",
+      "fr": "Cuirs Renforcés"
+    },
+    "category": "Armour",
+    "cost": 5,
+    "description": {
+      "en": "Expert leatherworkers are able to turn leather coats into armour (after a fashion) and those with limited funds often favor these jackets and coats as armour is very expensive. Covered with crusted salt, alcohol and other less savory materials, toughened leather is hard to penetrate and offers some protection in combat.",
+      "fr": "Des artisans du cuir expérimentés parviennent à transformer des manteaux de cuir en une forme d'armure improvisée, et ceux disposant de fonds limités privilégient souvent ces vestes et manteaux, l'armure classique étant très coûteuse. Recouverts de sel incrusté, d'alcool et d'autres matières peu ragoûtantes, les cuirs renforcés sont difficiles à percer et offrent une certaine protection au combat."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Compatibility",
+          "fr": "Compatibilité"
+        },
+        "description": {
+          "en": "Toughened leathers cannot be combined with the effects of any other armour except a helmet or buckler (so not a shield).",
+          "fr": "Les cuirs renforcés ne peuvent se combiner avec les effets d'aucune autre armure, à l'exception d'un casque ou d'une rondache (mais pas d'un bouclier)."
+        }
+      },
+      {
+        "name": {
+          "en": "Sellback",
+          "fr": "Revente"
+        },
+        "description": {
+          "en": "Toughened leathers cannot be sold back at the Trading Posts; the stench alone is enough to drive away even the most desperate of buyers!",
+          "fr": "Les cuirs renforcés ne peuvent pas être revendus à la Place du Marché ; leur odeur suffit à elle seule à décourager même les acheteurs les plus désespérés !"
+        }
+      },
+      {
+        "name": {
+          "en": "Spell Casting",
+          "fr": "Incantation"
+        },
+        "description": {
+          "en": "Even though Toughened Leathers are purchased as miscellaneous equipment and need not be listed on a Hero's starting armour list to be taken, they are still armour and prevent spell casting.",
+          "fr": "Bien que les cuirs renforcés soient achetés comme équipement divers et n'aient pas besoin de figurer sur la liste d'armure de départ d'un Héros, ils restent une armure et empêchent l'incantation de sorts."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Barding",
+      "fr": "Barde"
+    },
+    "category": "Armour",
+    "cost": 80,
+    "rarity": 8,
+    "specialRules": [
+      {
+        "name": {
+          "en": "Movement Penalty (Barding)",
+          "fr": "Malus de Mouvement (Barde)"
+        },
+        "description": {
+          "en": "Armour, called barding, may be purchased for a warhorse. It adds a further +1 bonus to the model's armour save, but subtracts one from its Movement. A normal horse may not wear barding.",
+          "fr": "Une armure, appelée barde, peut être achetée pour un cheval de guerre. Elle ajoute un bonus supplémentaire de +1 à la sauvegarde d'armure de la monture, mais réduit son Mouvement de 1. Un cheval normal ne peut pas porter de barde."
+        }
+      },
+      {
+        "name": {
+          "en": "Durability",
+          "fr": "Robustesse"
+        },
+        "description": {
+          "en": "A barded warhorse is only killed on a serious injury roll of '1' if the model goes out of action.",
+          "fr": "Un cheval de guerre bardé n'est tué que sur un résultat de blessure grave de « 1 » s'il est mis hors de combat."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Banner",
+      "fr": "Bannière"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 10,
+    "rarity": 5,
+    "description": {
+      "en": "Many more established warbands carry a banner or flag, not only to announce their presence but to also act as a rallying point for the warband during a battle.",
+      "fr": "De nombreuses bandes bien établies portent une bannière ou un étendard, non seulement pour annoncer leur présence, mais aussi pour servir de point de ralliement pendant la bataille."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Rally Point",
+          "fr": "Point de Ralliement"
+        },
+        "description": {
+          "en": "A banner requires one hand to use and can be carried by any Hero in the warband. Friendly warriors within 12\" of the banner bearer may re-roll any failed 'All Alone' test; but remember, you can't re-roll a failed re-roll.",
+          "fr": "Une bannière nécessite une main pour être portée et peut être tenue par n'importe quel Héros de la bande. Les guerriers amis à moins de 12ps du porteur de la bannière peuvent relancer tout test « Tout Seul » raté ; mais rappelez-vous, on ne peut pas relancer une relance ratée."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Bugman's Ale",
+      "fr": "Bière de Bugman"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 50,
+    "costRandomMax": 18,
+    "rarity": 9,
+    "description": {
+      "en": "Of all the Dwarf brewmasters, Josef Bugman is the most famous. His ale is known throughout the Old World, and widely regarded as the best.",
+      "fr": "De tous les maîtres brasseurs nains, Josef Bugman est le plus célèbre. Sa bière est connue dans tout le Vieux Monde et largement considérée comme la meilleure qui soit."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Immune to Fear",
+          "fr": "Immunité à la Peur"
+        },
+        "description": {
+          "en": "A warband that drinks a barrel of Bugman's before a battle will be immune to fear for the whole of the battle. Elves may not drink Bugman's ale as they are far too delicate to cope with its effects. There is only enough ale to supply the warband for one battle.",
+          "fr": "Une bande qui boit un tonneau de bière de Bugman avant une bataille est immunisée contre la Peur pour toute la durée de la bataille. Les Elfes ne peuvent pas boire de bière de Bugman, bien trop délicats pour en supporter les effets. Il n'y a assez de bière que pour une seule bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Caltrops",
+      "fr": "Chausse-trapes"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 15,
+    "costRandomMax": 12,
+    "rarity": 6,
+    "description": {
+      "en": "Originally used on the battlefield to impede cavalry charges, a caltrop is a small spiked iron ball. In the City of the Damned a pouch of these small items can be enough to deter any attacker who risks serious injury should they try to charge over them.",
+      "fr": "Utilisées à l'origine sur le champ de bataille pour freiner les charges de cavalerie, une chausse-trape est une petite boule de fer hérissée de pointes. Dans la Cité des Damnés, une bourse de ces petits objets suffit à dissuader tout assaillant qui risquerait une blessure grave en chargeant dessus."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Charge Range Reduction",
+          "fr": "Réduction de Charge"
+        },
+        "description": {
+          "en": "There are enough caltrops to last for one use only. They may be used when an opponent decides to charge. The defender simply throws the caltrops into the path of his attacker and they reduce his charge range by D6 inches. If this means that the attacker cannot reach his target then it is a failed charge.",
+          "fr": "Il n'y a assez de chausse-trapes que pour un seul usage. Elles peuvent être utilisées lorsqu'un adversaire décide de charger : le défenseur jette simplement les chausse-trapes sur le chemin de son assaillant, réduisant sa distance de charge de 1D6 pouces. Si cela empêche l'attaquant d'atteindre sa cible, la charge est ratée."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Cathayan Silk Clothes",
+      "fr": "Habits de Soie Cathayenne"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 50,
+    "costRandomMax": 12,
+    "rarity": 9,
+    "description": {
+      "en": "Some rich warband leaders like to flaunt their wealth and purchase clothes made out of silk from distant Cathay. This silk is the most expensive fabric in the known world, and wearing such clothes is a sure way to attract attention – especially thieves and assassins!",
+      "fr": "Certains chefs de bande fortunés aiment étaler leur richesse en achetant des habits taillés dans la soie de la lointaine Cathay. Cette soie est le tissu le plus cher du monde connu, et porter de tels habits attire à coup sûr l'attention - notamment celle des voleurs et des assassins !"
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Prestige",
+          "fr": "Prestige"
+        },
+        "description": {
+          "en": "Any Mercenary warband whose leader is wearing silk clothes may re-roll the first failed Rout test. However, after each battle in which the leader is taken out of action, roll a D6. On a roll of 1-3 the clothes are ruined and must be discarded.",
+          "fr": "Toute bande Mercenaire dont le chef porte des habits de soie peut relancer son premier test de Déroute raté. Cependant, après chaque bataille où le chef est mis hors de combat, lancez 1D6 : sur un 1 à 3, les habits sont détruits et doivent être jetés."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Elven Cloak",
+      "fr": "Cape Elfique"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 100,
+    "costRandomMax": 60,
+    "rarity": 12,
+    "description": {
+      "en": "Made from the hair of Elven maidens and interwoven with living tree leaves, an Elven cloak is a wonder to behold. A warrior wearing such a cloak will blend into the shadows, making it very difficult to shoot at them with missile weapons.",
+      "fr": "Faite à partir de cheveux de jeunes elfes et tissée de feuilles d'arbres vivantes, une cape elfique est une merveille à contempler. Un guerrier portant une telle cape se fond dans les ombres, rendant très difficile de le viser avec une arme de tir."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Camouflage",
+          "fr": "Camouflage"
+        },
+        "description": {
+          "en": "A warrior aiming a missile weapon at a warrior wearing an Elven cloak suffers -1 on his to hit roll.",
+          "fr": "Un guerrier visant avec une arme de tir un adversaire portant une cape elfique subit un malus de -1 sur son jet pour toucher."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Fire Arrows",
+      "fr": "Flèches Incendiaires"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 30,
+    "costRandomMax": 6,
+    "rarity": 9,
+    "description": {
+      "en": "Fire arrows are tied with rags soaked in oil bunched tip to a tight pouch that explodes when hitting the target, setting clothes and equipment alight.",
+      "fr": "Les flèches incendiaires sont garnies de chiffons imbibés d'huile, regroupés en une pochette serrée qui explose au contact de la cible, enflammant vêtements et équipement."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Set Alight",
+          "fr": "Mise à Feu"
+        },
+        "description": {
+          "en": "If you hit with a fire arrow roll a D6. If you score a 4+ your opponent has been set on fire. They must roll a D6 in the recovery phase and score a 4+ to put themselves out or they will suffer a strength 4 hit and will be unable to do anything other than move for each turn they are on fire. Allies may also attempt to put the warrior out. They must be in base contact and need a 4+ to be successful. The fire arrows last for one battle only.",
+          "fr": "Si vous touchez avec une flèche incendiaire, lancez 1D6 : sur un 4+, l'adversaire prend feu. Il doit alors lancer 1D6 en phase de récupération et obtenir un 4+ pour s'éteindre, sans quoi il subit une touche de Force 4 et ne peut rien faire d'autre que se déplacer chaque tour tant qu'il brûle. Des alliés peuvent aussi tenter de l'éteindre : ils doivent être au contact et obtenir un 4+. Les flèches incendiaires ne durent qu'une seule bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Fire Bomb",
+      "fr": "Bombe Incendiaire"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 35,
+    "costRandomMax": 12,
+    "rarity": 9,
+    "description": {
+      "en": "Designed by the dwarf engineers of the World's Edge Mountains, fire bombs are a rare and deadly weapon. A small batch of gunpowder is sealed within an iron casing with a short fuse fed into it.",
+      "fr": "Conçues par les ingénieurs nains des Montagnes du Bout du Monde, les bombes incendiaires sont une arme rare et mortelle. Une petite charge de poudre est scellée dans un boîtier de fer relié à une mèche courte."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Explosion",
+          "fr": "Explosion"
+        },
+        "description": {
+          "en": "The fire bomb may be thrown in the shooting phase in the same way as blessed water. If the bomb lands on target the warrior hit takes D3 Strength 4 hits with no saves for armour and all warriors, friend or foe, within 1 inch of him take 1 Strength 3 hit with saves as normal. If the throwing warrior rolls a 1 when rolling to hit the bomb misfires and explodes just as if the throwing warrior had been hit by his own fire bomb!",
+          "fr": "La bombe incendiaire peut être lancée en phase de Tir de la même façon que l'eau bénite. Si elle touche sa cible, le guerrier touché subit 1D3 touches de Force 4 sans sauvegarde d'armure, et tous les guerriers, amis ou ennemis, à moins d'1 pouce de lui subissent 1 touche de Force 3 avec sauvegarde normale. Si le lanceur obtient un 1 pour toucher, la bombe explose prématurément, comme s'il avait été touché par sa propre bombe !"
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Flash Powder",
+      "fr": "Poudre Éclair"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 25,
+    "costRandomMax": 12,
+    "rarity": 8,
+    "description": {
+      "en": "An ancient Dwarf creation, flash powder is used in mines to illuminate darkened fissures in the search for gold and other precious minerals.",
+      "fr": "Création ancestrale des Nains, la poudre éclair est utilisée dans les mines pour illuminer les fissures obscures lors de la recherche d'or et d'autres minéraux précieux."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Blinding",
+          "fr": "Aveuglement"
+        },
+        "description": {
+          "en": "Flash powder can be thrown as an enemy charges the wielder (as an interrupt). The charger must take an immediate Initiative test in order to cover their eyes. If he fails, he is temporarily blinded and it counts as a failed charge. There is only enough flash powder for one use during the battle.",
+          "fr": "La poudre éclair peut être jetée lorsqu'un ennemi charge son porteur (en interruption). L'attaquant doit immédiatement réussir un test d'Initiative pour se protéger les yeux. En cas d'échec, il est temporairement aveuglé et la charge est considérée comme ratée. Il n'y a assez de poudre éclair que pour un seul usage par bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Lantern",
+      "fr": "Lanterne"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 10,
+    "specialRules": [
+      {
+        "name": {
+          "en": "Illumination",
+          "fr": "Éclairage"
+        },
+        "description": {
+          "en": "A model that is in possession of a lantern may add +4\" to the distance from which he is able to spot hidden enemies.",
+          "fr": "Une figurine possédant une lanterne ajoute +4ps à la distance à laquelle elle peut repérer les ennemis cachés."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Lock Picks",
+      "fr": "Crochets"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 15,
+    "rarity": 8,
+    "description": {
+      "en": "A standard piece of kit for less scrupulous characters. A set of lock picks may be used by those who rely more on skill-at-arms and speed of thought than brute strength to open doors that others have secured.",
+      "fr": "Un équipement classique pour les personnages les moins scrupuleux. Un jeu de crochets peut être utilisé par ceux qui comptent davantage sur l'habileté et la rapidité d'esprit que sur la force brute pour ouvrir les portes que d'autres ont verrouillées."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Lockpicking",
+          "fr": "Crochetage"
+        },
+        "description": {
+          "en": "A model equipped with a set of lock picks may make his test to open doors on his Initiative rather than his Strength characteristic if he wishes, with no -1 modifier and no chance that the door is too damaged to be locked again later.",
+          "fr": "Une figurine équipée d'un jeu de crochets peut effectuer son test d'ouverture de porte en utilisant son Initiative plutôt que sa Force si elle le souhaite, sans le malus de -1, et sans risque que la porte soit trop endommagée pour être reverrouillée plus tard."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Lucky Charm",
+      "fr": "Porte-Bonheur"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 10,
+    "rarity": 6,
+    "description": {
+      "en": "These take many shapes, but the most common are symbolic hammers that a pious Sigmarite Priest has touched, or carved heads of ancient Dwarf gods.",
+      "fr": "Ils prennent des formes variées, mais les plus courants sont des marteaux symboliques touchés par un pieux Prêtre Sigmarite, ou des têtes sculptées d'anciens dieux nains."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Lucky Save",
+          "fr": "Chance"
+        },
+        "description": {
+          "en": "The first time a model with a lucky charm is hit in a battle they roll a D6. On a 4+ the hit is discarded and no damage is suffered. Owning two or more charms does not confer any extra benefits, the model may still only try to discard the first hit.",
+          "fr": "La première fois qu'une figurine possédant un porte-bonheur est touchée dans une bataille, lancez 1D6 : sur un 4+, la touche est ignorée et aucun dégât n'est subi. Posséder plusieurs porte-bonheurs ne confère aucun bénéfice supplémentaire : la figurine ne peut toujours tenter d'ignorer que la première touche."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Mordheim Map",
+      "fr": "Carte de Mordheim"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 20,
+    "costRandomMax": 24,
+    "rarity": 9,
+    "description": {
+      "en": "Some survivors of the cataclysm still remain in the many settlements around Mordheim, and make a living by preparing maps of the city from memory. Many of these maps are faked, and even real ones are often crude and inaccurate.",
+      "fr": "Certains survivants du cataclysme vivent encore dans les nombreuses colonies autour de Mordheim, et gagnent leur vie en dessinant de mémoire des cartes de la cité. Beaucoup de ces cartes sont fausses, et même les authentiques sont souvent grossières et imprécises."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Guided Exploration",
+          "fr": "Exploration Guidée"
+        },
+        "description": {
+          "en": "When you buy a map, roll a D6: on a 1 it is Fake and worthless (your opponent may automatically choose the next scenario); on 2-3 it is Vague but generally accurate (re-roll one dice during the next Exploration phase, accepting the second result); on a 4 it is a Catacomb map (you may automatically choose the next scenario); on a 5 it is Accurate (re-roll up to three dice during the next Exploration phase, accepting the second result); on a 6 it is a Master map, one of the twelve made for Count von Steinhardt of Ostermark (you may always re-roll one dice on the Exploration chart as long as the Hero who possesses it was not taken out of action in the battle).",
+          "fr": "Lorsque vous achetez une carte, lancez 1D6 : sur un 1, elle est fausse et totalement inutile - votre adversaire peut choisir automatiquement le prochain scénario joué ; sur 2-3, elle est vague mais globalement fiable - vous pouvez relancer un dé lors de la prochaine phase d'Exploration mais devez accepter le second résultat ; sur un 4, c'est une carte des catacombes - vous choisissez automatiquement le scénario de la prochaine bataille ; sur un 5, elle est précise et très détaillée - vous pouvez relancer jusqu'à trois dés lors de la prochaine phase d'Exploration, en acceptant le second résultat ; sur un 6, c'est une carte maîtresse, l'une des douze réalisées pour le Comte von Steinhardt d'Ostermark - vous pouvez désormais toujours relancer un dé lors des jets d'Exploration, tant que le Héros qui la possède n'a pas été mis hors de combat pendant la bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Net",
+      "fr": "Filet"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 5,
+    "description": {
+      "en": "Steel nets, such as those used by Pit Fighters, can be used in battles.",
+      "fr": "Les filets d'acier, comme ceux utilisés par les Pit Fighters, peuvent être utilisés en bataille."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Entangle",
+          "fr": "Immobilisation"
+        },
+        "description": {
+          "en": "Once per game, the net may be thrown in the shooting phase instead of the model shooting a missile weapon. Treat the net as a missile weapon in all respects with a range of 8\". Use the model's BS to determine whether the net hits or not - there are no movement or range penalties. If it hits, the target must immediately roll a D6. If the result is equal to, or lower than his Strength, he rips the net apart. If the result is higher, he may not move, shoot or cast spells in his next turn. In either case the net is lost.",
+          "fr": "Une fois par partie, le filet peut être lancé en phase de Tir à la place d'un tir d'arme de missile normal. Traitez le filet comme une arme de tir à tous égards, avec une portée de 8ps. Utilisez la CT du guerrier pour déterminer si le filet touche - aucun malus de mouvement ou de distance ne s'applique. S'il touche, la cible doit immédiatement lancer 1D6 : si le résultat est inférieur ou égal à sa Force, elle déchire le filet. Si le résultat est supérieur, elle ne peut ni se déplacer, ni tirer, ni lancer de sorts lors de son tour suivant. Dans les deux cas, le filet est perdu."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Crimson Shade",
+      "fr": "Ombre Cramoisie"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 35,
+    "costRandomMax": 6,
+    "rarity": 8,
+    "description": {
+      "en": "Crimson Shade is the name given by Old Worlders to the leaves of the blood oak of Estalia. It is an extremely addictive drug, but grants its users inhuman quickness and strength.",
+      "fr": "L'Ombre Cramoisie est le nom donné par les habitants du Vieux Monde aux feuilles du chêne sanglant d'Estalie. C'est une drogue extrêmement addictive, mais qui confère à ses utilisateurs une rapidité et une force surhumaines."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Stimulant",
+          "fr": "Stimulant"
+        },
+        "description": {
+          "en": "A model using Crimson Shade has his Initiative increased by +D3 points, and Movement and Strength by +1 (this effect lasts for one game). Crimson Shade has no effect on Undead such as Vampires and Zombies, or the Possessed.",
+          "fr": "Une figurine sous l'effet de l'Ombre Cramoisie voit son Initiative augmenter de +1D3, ainsi que son Mouvement et sa Force de +1 (effet valable pour une partie). L'Ombre Cramoisie n'a aucun effet sur les Morts-Vivants tels que les Vampires et les Zombies, ni sur les Possédés."
+        }
+      },
+      {
+        "name": {
+          "en": "Crimson Shade Addiction",
+          "fr": "Dépendance à l'Ombre Cramoisie"
+        },
+        "description": {
+          "en": "After the battle, roll 2D6. On a roll of 2-3, the model becomes addicted and you must try to buy him a new batch of Crimson Shade before every battle from now on. If you fail to buy any, he will leave your warband. On a roll of 12 the model's Initiative is increased permanently by +1.",
+          "fr": "Après la bataille, lancez 2D6 : sur un résultat de 2-3, la figurine devient dépendante et vous devez lui racheter une nouvelle dose d'Ombre Cramoisie avant chaque bataille à venir ; si vous n'y parvenez pas, elle quitte la bande. Sur un résultat de 12, l'Initiative de la figurine augmente de façon permanente de +1."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Mandrake Root",
+      "fr": "Racine de Mandragore"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 25,
+    "costRandomMax": 6,
+    "rarity": 8,
+    "description": {
+      "en": "The man-shaped Mandrake Root grows in the rotting swamps of Sylvania. It is a noxious, deadly plant which is highly addictive and slowly kills its users, but also allows them to shrug off almost any pain.",
+      "fr": "La racine de mandragore, à la forme humanoïde, pousse dans les marais putrides de Sylvanie. C'est une plante toxique et hautement addictive qui tue lentement ses utilisateurs, mais leur permet également d'ignorer presque toute douleur."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Pain Resistance",
+          "fr": "Insensibilité à la Douleur"
+        },
+        "description": {
+          "en": "Mandrake Root makes a man almost oblivious to pain. His Toughness is increased by +1 for the duration of a battle and he treats all stunned results as knocked down instead. Mandrake Root has no effect on Undead, such as Vampires and Zombies, or on the Possessed.",
+          "fr": "La racine de mandragore rend un homme presque insensible à la douleur. Son Endurance augmente de +1 pour la durée de la bataille, et il traite tous les résultats Étourdi comme À terre à la place. La racine de mandragore n'a aucun effet sur les Morts-Vivants, tels que les Vampires et les Zombies, ni sur les Possédés."
+        }
+      },
+      {
+        "name": {
+          "en": "Mandrake Root Toxicity",
+          "fr": "Toxicité de la Mandragore"
+        },
+        "description": {
+          "en": "Mandrake Root is highly poisonous. At the end of the battle, roll 2D6. On a roll of 2-3 the model loses 1 point of Toughness permanently.",
+          "fr": "La racine de mandragore est hautement toxique. À la fin de la bataille, lancez 2D6 : sur un résultat de 2-3, la figurine perd 1 point d'Endurance de façon permanente."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Rabbit's Foot",
+      "fr": "Patte de Lapin"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 10,
+    "rarity": 5,
+    "description": {
+      "en": "The rabbit's foot is a symbol of good luck and often worn about the neck on a thin cord of leather by superstitious warriors.",
+      "fr": "La patte de lapin est un symbole de bonne fortune, souvent portée autour du cou sur un fin cordon de cuir par les guerriers superstitieux."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Lucky Reroll",
+          "fr": "Relance Chanceuse"
+        },
+        "description": {
+          "en": "A rabbit's foot allows the warrior wearing it to reroll one dice during the battle. If not used in the battle it can be used to reroll one dice during the exploration phase providing the hero is able to search through the ruins.",
+          "fr": "Une patte de lapin permet à son porteur de relancer un dé pendant la bataille. Si elle n'est pas utilisée durant la bataille, elle peut servir à relancer un dé pendant la phase d'Exploration, à condition que le Héros puisse fouiller les ruines."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Rope & Hook",
+      "fr": "Corde et Grappin"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 5,
+    "description": {
+      "en": "A warrior using a rope & hook will find it much easier to move amongst the ruins of Mordheim.",
+      "fr": "Un guerrier utilisant une corde et un grappin se déplace bien plus facilement parmi les ruines de Mordheim."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Easier Climbing",
+          "fr": "Escalade Facilitée"
+        },
+        "description": {
+          "en": "A warrior equipped with a rope & hook may re-roll failed Initiative tests when climbing up and down.",
+          "fr": "Une figurine équipée d'une corde et d'un grappin peut relancer les tests d'Initiative ratés lorsqu'elle grimpe ou descend."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Superior Blackpowder",
+      "fr": "Poudre Noire Supérieure"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 30,
+    "rarity": 11,
+    "description": {
+      "en": "The model has acquired a better quality of blackpowder than is normally available.",
+      "fr": "Le guerrier s'est procuré une poudre noire de meilleure qualité que celle habituellement disponible."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Enhanced Powder",
+          "fr": "Poudre Renforcée"
+        },
+        "description": {
+          "en": "This new batch adds +1 Strength to all blackpowder weapons that the model has. There is enough superior blackpowder to last for one game.",
+          "fr": "Ce nouveau lot ajoute +1 en Force à toutes les armes à poudre noire de la figurine. Il n'y en a assez que pour une seule partie."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Telescope",
+      "fr": "Longue-vue"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 75,
+    "costRandomMax": 18,
+    "rarity": 10,
+    "description": {
+      "en": "Common to the great astronomers in the observatories at Nuln, telescopes are a useful, if highly rare, item to have in the City of the Damned. The keen view offered by these instruments makes shooting easier and gives an unparalleled awareness of a warrior's surroundings.",
+      "fr": "Répandue chez les grands astronomes des observatoires de Nuln, la longue-vue est un objet utile, quoique très rare, dans la Cité des Damnés. La vision perçante qu'elle offre facilite le tir et procure une conscience inégalée de l'environnement d'un guerrier."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Extended Range",
+          "fr": "Portée Étendue"
+        },
+        "description": {
+          "en": "Any hero using a telescope may increase the range of any missile weapon he is using by D6 inches each turn. Furthermore, he triples the distance at which he can spot hidden enemies.",
+          "fr": "Tout Héros utilisant une longue-vue peut augmenter la portée de n'importe quelle arme de tir qu'il utilise de 1D6 pouces à chaque tour. De plus, il triple la distance à laquelle il peut repérer les ennemis cachés."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Torch",
+      "fr": "Torche"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 2,
+    "description": {
+      "en": "Warriors lacking the funds for a lantern may have to make do with torches.",
+      "fr": "Les guerriers manquant de fonds pour une lanterne doivent parfois se contenter d'une torche."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Firebrand",
+          "fr": "Flambeau"
+        },
+        "description": {
+          "en": "Torches act exactly as lanterns, adding +4\" to the range the model may spot hidden enemies, but has a few other special rules as well. A torch will only last one game. A model armed with a torch counts as causing fear in animals (Hunting Dogs, riding steeds, Bears, Wolves, etc), and may use a torch as a makeshift club, treated as a normal club with a -1 to hit modifier. Models with a Regeneration special rule (like Trolls) cannot regenerate wounds caused by a torch during the battle.",
+          "fr": "Les torches fonctionnent exactement comme les lanternes, ajoutant +4ps à la distance à laquelle la figurine peut repérer les ennemis cachés, mais possèdent quelques règles spéciales supplémentaires. Une torche ne dure qu'une seule partie. Une figurine armée d'une torche provoque la Peur chez les animaux (chiens de chasse, montures, ours, loups, etc.) et peut l'utiliser comme un gourdin de fortune, traité comme un gourdin normal avec un malus de -1 pour toucher. Les figurines possédant la règle spéciale Régénération (comme les Trolls) ne peuvent pas régénérer les blessures infligées par une torche pendant la bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "War Horn",
+      "fr": "Cor de Guerre"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 30,
+    "costRandomMax": 12,
+    "rarity": 8,
+    "description": {
+      "en": "The blaring sound of a war horn can be enough to stir the hearts of any warband which it is attempting to bolster. It grants men courage and gives them the will to fight on defiantly.",
+      "fr": "Le son retentissant d'un cor de guerre peut suffire à raviver le courage de toute bande qu'il cherche à galvaniser. Il insuffle du courage aux hommes et leur donne la volonté de continuer à se battre avec défi."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "War Cry",
+          "fr": "Sonnerie de Guerre"
+        },
+        "description": {
+          "en": "A war horn may be used once per battle at the beginning of any turn. It allows the warband to increase its Leadership by +1. The effect will last from the start of one turn to the start of the next. The war horn can be used just before a warband is about to take a rout test.",
+          "fr": "Un cor de guerre peut être utilisé une fois par bataille, au début de n'importe quel tour. Il permet à la bande d'augmenter son Commandement de +1. L'effet dure du début d'un tour jusqu'au début du suivant. Le cor de guerre peut être utilisé juste avant qu'une bande ne doive passer un test de Déroute."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Wyrdstone Pendulum",
+      "fr": "Pendule de Malepierre"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 25,
+    "costRandomMax": 18,
+    "rarity": 9,
+    "description": {
+      "en": "Pendulums made of wyrdstone can reputedly be used to find even more of the magical stone.",
+      "fr": "Les pendules faits de malepierre peuvent, dit-on, servir à trouver encore plus de cette pierre magique."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Divination",
+          "fr": "Divination"
+        },
+        "description": {
+          "en": "If he was not taken out, the Hero using the Wyrdstone Pendulum may make a Leadership test after the battle. If he is successful, you may re-roll any one dice in the Exploration phase. This dice may not be re-rolled a second time.",
+          "fr": "S'il n'a pas été mis hors de combat, le Héros utilisant le pendule de malepierre peut effectuer un test de Commandement après la bataille. En cas de réussite, vous pouvez relancer un dé lors de la phase d'Exploration. Ce dé ne peut pas être relancé une seconde fois."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Garlic",
+      "fr": "Ail"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 1,
+    "description": {
+      "en": "Garlic is a common herb grown in most gardens of the Empire. It is said to ward off Vampires and other denizens of the dark.",
+      "fr": "L'ail est une herbe commune cultivée dans la plupart des jardins de l'Empire. On dit qu'elle repousse les Vampires et autres créatures des ténèbres."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Repels Vampires",
+          "fr": "Répulsion"
+        },
+        "description": {
+          "en": "A Vampire must pass a Leadership test or it will be unable to charge a model carrying a clove of garlic. Garlic lasts for the duration of one battle only, whether it is used or not.",
+          "fr": "Un Vampire doit réussir un test de Commandement pour pouvoir charger une figurine portant une gousse d'ail. L'ail ne dure qu'une seule bataille, qu'il soit utilisé ou non."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Halfling Cookbook",
+      "fr": "Livre de Cuisine Halfling"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 30,
+    "costRandomMax": 18,
+    "rarity": 7,
+    "description": {
+      "en": "All Halfling chefs have their own secret recipes, and these are recorded in tomes handwritten in Mootland, the home country of the Halflings. Food prepared according to these recipes will attract warriors during these lean times.",
+      "fr": "Chaque cuisinier Halfling possède ses propres recettes secrètes, consignées dans des ouvrages écrits à la main au Mootland, la patrie des Halflings. La nourriture préparée selon ces recettes attire les guerriers en ces temps de disette."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Extra Recruit",
+          "fr": "Recettes Halfling"
+        },
+        "description": {
+          "en": "The maximum number of warriors allowed in your warband is increased by +1 (neither an Undead warband nor a Carnival of Chaos warband can use this item).",
+          "fr": "Le nombre maximum de guerriers autorisés dans votre bande augmente de +1 (les bandes de Morts-Vivants et de Kermesse du Chaos ne peuvent pas utiliser cet objet)."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Black Lotus",
+      "fr": "Lotus Noir"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 10,
+    "costRandomMax": 6,
+    "rarity": 9,
+    "description": {
+      "en": "In the deepest forests of the Southlands grows a plant that is extremely poisonous. It is known as Black Lotus and is much sought after by alchemists, assassins, wizards of the Western Coast and bored wives.",
+      "fr": "Dans les forêts profondes des Contrées du Sud pousse une plante extrêmement toxique. Elle est connue sous le nom de Lotus Noir et très recherchée par les alchimistes, les assassins, les sorciers de la Côte Occidentale et les épouses délaissées."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Black Lotus Poison",
+          "fr": "Poison du Lotus Noir"
+        },
+        "description": {
+          "en": "A weapon coated with the sap of the Black Lotus will wound its target automatically if you roll a 6 to hit. If you roll a 6 on the wound roll, you inflict a critical hit; otherwise a normal wound. Take armour saves as normal.",
+          "fr": "Une arme enduite de sève de Lotus Noir blesse automatiquement sa cible si vous obtenez un 6 pour toucher. Vous lancez tout de même un dé pour chaque blessure infligée de cette façon : un 6 inflige un coup critique, tout autre résultat inflige une blessure normale. Les sauvegardes d'armure s'appliquent normalement."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Dark Venom",
+      "fr": "Venin Sombre"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 30,
+    "costRandomMax": 12,
+    "rarity": 8,
+    "description": {
+      "en": "This is a poison extracted from Heldrakes, gigantic sea serpents that plague the Western Ocean and the coast of Naggaroth. The slightest wound infected by Dark Venom causes excruciating pain, incapacitating the bravest of men.",
+      "fr": "Il s'agit d'un poison extrait des Heldrakes, gigantesques serpents de mer qui infestent l'Océan Occidental et la côte de Naggaroth. La moindre blessure infectée par le Venin Sombre cause une douleur atroce, incapacitant même les plus braves."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Dark Venom Poison",
+          "fr": "Poison du Venin Sombre"
+        },
+        "description": {
+          "en": "Any hit caused by a weapon coated with Dark Venom counts as having +1 Strength. Armour saving throws are modified to take into account the increased Strength of the attack.",
+          "fr": "Toute touche infligée par une arme enduite de Venin Sombre est considérée comme ayant +1 en Force. Les sauvegardes d'armure sont modifiées en conséquence."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Tears of Shallaya",
+      "fr": "Larmes de Shallaya"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 10,
+    "costRandomMax": 12,
+    "rarity": 7,
+    "description": {
+      "en": "Tears of Shallaya are vials of water from the holy spring in Couronne. Shallaya is the goddess of healing and mercy and it is said that this water has curative properties and is proof against any poison.",
+      "fr": "Les Larmes de Shallaya sont des fioles d'eau provenant de la source sacrée de Couronne. Shallaya est la déesse de la guérison et de la miséricorde, et l'on dit que cette eau possède des vertus curatives et protège contre tout poison."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Poison Immunity",
+          "fr": "Immunité aux Poisons"
+        },
+        "description": {
+          "en": "A model who drinks a vial of the Tears of Shallaya at the beginning of a battle will be completely immune to all poisons for the duration of combat. Undead and Possessed warriors may not use the Tears of Shallaya. There is enough liquid in a vial to last for the duration of one battle.",
+          "fr": "Une figurine qui boit une fiole de Larmes de Shallaya au début d'une bataille est totalement immunisée contre tous les poisons pour la durée du combat. Les guerriers Morts-Vivants et Possédés ne peuvent pas utiliser les Larmes de Shallaya. Une fiole contient assez de liquide pour la durée d'une seule bataille."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Tarot Cards",
+      "fr": "Cartes de Tarot"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 50,
+    "rarity": 7,
+    "description": {
+      "en": "Though declared blasphemous and illegal by the Grand Theogonist, the Tarot of Stars is said to foretell the future for those who dare to consult it.",
+      "fr": "Bien que déclaré blasphématoire et illégal par le Grand Théogoniste, le Tarot des Étoiles est réputé prédire l'avenir de ceux qui osent le consulter."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Card Divination",
+          "fr": "Divination des Cartes"
+        },
+        "description": {
+          "en": "A Hero with a deck of tarot cards may consult them before each game. Make a Leadership test. If successful, the Hero gains a favorable insight into the future and you may modify the result of any one dice in the Exploration phase by -1/+1 (even if the Hero with the cards is taken Out Of Action). If the Leadership test is failed by three or more, the cards show a portent of doom and the Hero refuses to fight in the following battle and must miss the next game.",
+          "fr": "Un Héros possédant un jeu de cartes de tarot peut les consulter avant chaque partie. Effectuez un test de Commandement : en cas de réussite, le Héros obtient une vision favorable de l'avenir et vous pouvez modifier le résultat d'un dé lors de la phase d'Exploration de -1 ou +1 (même si le Héros a été mis hors de combat). Si le test de Commandement est raté de trois points ou plus, les cartes annoncent un présage funeste : le Héros refuse de combattre lors de la prochaine bataille et doit la manquer."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Tome of Magic",
+      "fr": "Grimoire"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 200,
+    "costRandomMax": 150,
+    "rarity": 12,
+    "description": {
+      "en": "Sometimes books of forbidden lore are offered for sale in the markets and dark alleys of the settlements around Mordheim. If the warband doesn't contain a wizard, a warrior with the Arcane Lore skill may use the Tome of Magic to learn Lesser Magic.",
+      "fr": "Il arrive que des livres de savoir interdit soient proposés à la vente sur les marchés et dans les ruelles sombres des colonies autour de Mordheim. Si la bande ne possède pas de sorcier, un guerrier avec la compétence Savoir Arcanique peut utiliser le Grimoire pour apprendre la Magie Mineure."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Arcane Learning",
+          "fr": "Apprentissage Arcanique"
+        },
+        "description": {
+          "en": "If a warband includes a wizard, he will gain an extra spell from the tome, permanently, randomly generated from his own list or the Lesser Magic list. The benefits from each Tome of Magic apply to only one model.",
+          "fr": "Si la bande possède un sorcier, celui-ci gagne un sort supplémentaire de façon permanente grâce au grimoire, généré aléatoirement depuis sa propre liste ou la liste de Magie Mineure. Les bénéfices de chaque Grimoire ne s'appliquent qu'à un seul guerrier."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Healing Herbs",
+      "fr": "Herbes Curatives"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 20,
+    "costRandomMax": 12,
+    "rarity": 8,
+    "description": {
+      "en": "Certain plants that grow on the banks of the River Stir have curative properties. Herbalists collect their roots and leaves and use them to treat the sick and wounded.",
+      "fr": "Certaines plantes qui poussent sur les rives de la Stir possèdent des vertus curatives. Les herboristes récoltent leurs racines et leurs feuilles pour soigner les malades et les blessés."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Healing",
+          "fr": "Soin"
+        },
+        "description": {
+          "en": "A Hero with healing herbs can use them at the beginning of any of his recovery phases as long as he is not engaged in hand-to-hand combat. This restores all wounds he has previously lost during the game.",
+          "fr": "Un Héros possédant des herbes curatives peut les utiliser au début de n'importe laquelle de ses phases de récupération, à condition de ne pas être engagé au corps à corps. Cela restaure toutes les blessures qu'il a perdues au cours de la partie."
+        }
+      }
+    ]
+  }
 ]

@@ -12,10 +12,10 @@ public class LibraryService : ILibraryService
     public LibraryService(AppDatabase db) => _db = db;
 
     private Task<Dictionary<string, string>> ResolveTranslationsAsync(IEnumerable<string?> keys, string languageCode) =>
-        TranslationResolver.ResolveAsync(_db.Connection, keys, languageCode);
+        TranslationResolver.ResolveAsync(_db, keys, languageCode);
 
     private Task<string> SetTranslationAsync(string? key, string languageCode, string value) =>
-        TranslationResolver.SetAsync(_db.Connection, key, languageCode, value);
+        TranslationResolver.SetAsync(_db, key, languageCode, value);
 
     public async Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode)
     {
@@ -62,6 +62,26 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations, specialRules)).ToList();
     }
 
+    public async Task<WarriorArchetype?> GetWarriorArchetypeAsync(int id, string languageCode)
+    {
+        await _db.Initialization;
+        var row = await _db.Connection.FindAsync<WarriorArchetypeEntity>(id);
+        if (row is null) return null;
+        var translations = await ResolveTranslationsAsync([row.NameKey, row.DescriptionKey], languageCode);
+        var specialRules = await LoadWarriorSpecialRulesAsync(languageCode);
+        return row.ToModel(translations, specialRules);
+    }
+
+    public async Task<List<NamedRef>> GetWarriorArchetypeNamesAsync(int warbandArchetypeId, string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<WarriorArchetypeEntity>()
+            .Where(w => w.WarbandArchetypeId == warbandArchetypeId)
+            .ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
+        return rows.Select(r => new NamedRef { Id = r.Id, Name = EntityMapping.ResolveName(r.NameKey, translations) }).ToList();
+    }
+
     public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode)
     {
         await _db.Initialization;
@@ -69,7 +89,27 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         var restrictions = await LoadEquipmentRestrictionsAsync();
         var warriorRestrictions = await LoadEquipmentWarriorRestrictionsAsync();
-        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions)).ToList();
+        var specialRules = await LoadEquipmentSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions, specialRules)).ToList();
+    }
+
+    /// <summary>Same resolution as GetEquipmentItemsAsync(languageCode), but filtered to specific ids at
+    /// the SQL level (WHERE Id IN (...)) instead of fetching+translating the whole Trading Post catalog
+    /// and filtering in memory - used by EquipmentListDetailDialogViewModel to resolve one list's member
+    /// items without paying for every other item's Name/Description translation. Empty input = empty
+    /// result, no call.</summary>
+    public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(IEnumerable<int> ids, string languageCode)
+    {
+        var idSet = ids as ICollection<int> ?? ids.ToList();
+        if (idSet.Count == 0) return new List<EquipmentItem>();
+
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<EquipmentItemEntity>().Where(r => idSet.Contains(r.Id)).ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var restrictions = await LoadEquipmentRestrictionsAsync();
+        var warriorRestrictions = await LoadEquipmentWarriorRestrictionsAsync();
+        var specialRules = await LoadEquipmentSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions, specialRules)).ToList();
     }
 
     public async Task<List<EquipmentList>> GetEquipmentListsAsync(int warbandArchetypeId, string languageCode)
@@ -81,6 +121,17 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
         var itemsByListId = await LoadEquipmentListMembershipAsync();
         return rows.Select(r => r.ToModel(translations, itemsByListId)).OrderBy(r => r.Name).ToList();
+    }
+
+    public async Task<List<NamedRef>> GetEquipmentListNamesAsync(int warbandArchetypeId, string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<EquipmentListEntity>()
+            .Where(l => l.WarbandArchetypeId == warbandArchetypeId)
+            .ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
+        return rows.Select(r => new NamedRef { Id = r.Id, Name = EntityMapping.ResolveName(r.NameKey, translations) })
+            .OrderBy(r => r.Name).ToList();
     }
 
     private async Task<Dictionary<int, List<int>>> LoadEquipmentListMembershipAsync()
@@ -145,6 +196,21 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
     }
 
+    /// <summary>Ids of SpecialRules attached to at least one WarbandArchetype/WarriorArchetype/Animal
+    /// (FighterRuleIds) vs. at least one EquipmentItem (ItemRuleIds) - derived from the 4 attachment join
+    /// tables rather than a stored category field, since a rule could in principle belong to both. Used
+    /// by SpecialRuleViewModel's group filter (Codex "Guerriers &amp; Bandes" vs "Objets" split).</summary>
+    public async Task<(HashSet<int> FighterRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync()
+    {
+        await _db.Initialization;
+        var warbandIds = (await _db.Connection.Table<WarbandArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var warriorIds = (await _db.Connection.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var animalIds = (await _db.Connection.Table<AnimalSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var itemIds = (await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        var fighterRuleIds = new HashSet<int>(warbandIds.Concat(warriorIds).Concat(animalIds));
+        return (fighterRuleIds, new HashSet<int>(itemIds));
+    }
+
     public async Task<List<Mutation>> GetMutationsAsync(string languageCode)
     {
         await _db.Initialization;
@@ -167,27 +233,27 @@ public class LibraryService : ILibraryService
             await _db.Connection.InsertAsync(new WarbandArchetypeMutationEntity { MutationId = mutationId, WarbandArchetypeId = warbandArchetypeId });
     }
 
-    public async Task<List<Mount>> GetMountsAsync(string languageCode)
+    public async Task<List<Animal>> GetAnimalsAsync(string languageCode)
     {
         await _db.Initialization;
-        var rows = await _db.Connection.Table<MountEntity>().ToListAsync();
+        var rows = await _db.Connection.Table<AnimalEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        var restrictions = await LoadMountRestrictionsAsync();
-        var specialRules = await LoadMountSpecialRulesAsync(languageCode);
+        var restrictions = await LoadAnimalRestrictionsAsync();
+        var specialRules = await LoadAnimalSpecialRulesAsync(languageCode);
         return rows.Select(r => r.ToModel(translations, restrictions, specialRules)).OrderBy(r => r.Name).ToList();
     }
 
-    private async Task<Dictionary<int, List<int>>> LoadMountRestrictionsAsync()
+    private async Task<Dictionary<int, List<int>>> LoadAnimalRestrictionsAsync()
     {
-        var rows = await _db.Connection.Table<WarbandArchetypeMountEntity>().ToListAsync();
-        return rows.GroupBy(r => r.MountId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+        var rows = await _db.Connection.Table<WarbandArchetypeAnimalEntity>().ToListAsync();
+        return rows.GroupBy(r => r.AnimalId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
     }
 
-    private async Task<Dictionary<int, List<SpecialRule>>> LoadMountSpecialRulesAsync(string languageCode)
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadAnimalSpecialRulesAsync(string languageCode)
     {
         var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
-        var links = await _db.Connection.Table<MountSpecialRuleEntity>().ToListAsync();
-        return links.GroupBy(l => l.MountId)
+        var links = await _db.Connection.Table<AnimalSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.AnimalId)
             .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
     }
 
@@ -277,6 +343,14 @@ public class LibraryService : ILibraryService
         return rows.GroupBy(r => r.EquipmentItemId).ToDictionary(g => g.Key, g => g.Select(r => r.WarriorArchetypeId).ToList());
     }
 
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadEquipmentSpecialRulesAsync(string languageCode)
+    {
+        var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
+        var links = await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.EquipmentItemId)
+            .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
     /// <summary>Replace-all: deletes the item's existing restriction rows and inserts the current list -
     /// no diffing needed at this scale.</summary>
     private async Task SaveEquipmentRestrictionsAsync(int equipmentItemId, List<int> warbandArchetypeIds)
@@ -291,6 +365,13 @@ public class LibraryService : ILibraryService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorArchetypeEquipmentEntity WHERE EquipmentItemId = ?", equipmentItemId);
         foreach (var warriorArchetypeId in warriorArchetypeIds)
             await _db.Connection.InsertAsync(new WarriorArchetypeEquipmentEntity { EquipmentItemId = equipmentItemId, WarriorArchetypeId = warriorArchetypeId });
+    }
+
+    private async Task SaveEquipmentSpecialRulesAsync(int equipmentItemId, List<SpecialRule> specialRules)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ?", equipmentItemId);
+        foreach (var rule in specialRules)
+            await _db.Connection.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = equipmentItemId, SpecialRuleId = rule.Id });
     }
 
     /// <summary>Replace-all membership of an EquipmentList's items - distinct from
@@ -316,18 +397,18 @@ public class LibraryService : ILibraryService
             await _db.Connection.InsertAsync(new WarriorArchetypeSkillEntity { SkillId = skillId, WarriorArchetypeId = warriorArchetypeId });
     }
 
-    private async Task SaveMountRestrictionsAsync(int mountId, List<int> warbandArchetypeIds)
+    private async Task SaveAnimalRestrictionsAsync(int animalId, List<int> warbandArchetypeIds)
     {
-        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeMountEntity WHERE MountId = ?", mountId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeAnimalEntity WHERE AnimalId = ?", animalId);
         foreach (var warbandArchetypeId in warbandArchetypeIds)
-            await _db.Connection.InsertAsync(new WarbandArchetypeMountEntity { MountId = mountId, WarbandArchetypeId = warbandArchetypeId });
+            await _db.Connection.InsertAsync(new WarbandArchetypeAnimalEntity { AnimalId = animalId, WarbandArchetypeId = warbandArchetypeId });
     }
 
-    private async Task SaveMountSpecialRulesAsync(int mountId, List<SpecialRule> specialRules)
+    private async Task SaveAnimalSpecialRulesAsync(int animalId, List<SpecialRule> specialRules)
     {
-        await _db.Connection.ExecuteAsync("DELETE FROM MountSpecialRuleEntity WHERE MountId = ?", mountId);
+        await _db.Connection.ExecuteAsync("DELETE FROM AnimalSpecialRuleEntity WHERE AnimalId = ?", animalId);
         foreach (var rule in specialRules)
-            await _db.Connection.InsertAsync(new MountSpecialRuleEntity { MountId = mountId, SpecialRuleId = rule.Id });
+            await _db.Connection.InsertAsync(new AnimalSpecialRuleEntity { AnimalId = animalId, SpecialRuleId = rule.Id });
     }
 
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
@@ -393,6 +474,7 @@ public class LibraryService : ILibraryService
 
         await SaveEquipmentRestrictionsAsync(item.Id, item.RestrictedToWarbandArchetypeIds);
         await SaveEquipmentWarriorRestrictionsAsync(item.Id, item.RestrictedToWarriorArchetypeIds);
+        await SaveEquipmentSpecialRulesAsync(item.Id, item.SpecialRules);
     }
 
     public async Task SaveEquipmentListAsync(EquipmentList list, string languageCode)
@@ -513,26 +595,26 @@ public class LibraryService : ILibraryService
         await SaveMutationRestrictionsAsync(mutation.Id, mutation.RestrictedToWarbandArchetypeIds);
     }
 
-    public async Task SaveMountAsync(Mount mount, string languageCode)
+    public async Task SaveAnimalAsync(Animal animal, string languageCode)
     {
         await _db.Initialization;
-        await ApplyTranslationsAsync(mount, languageCode);
+        await ApplyTranslationsAsync(animal, languageCode);
 
-        if (mount.Id == 0)
+        if (animal.Id == 0)
         {
-            var entity = mount.ToEntity();
+            var entity = animal.ToEntity();
             await _db.Connection.InsertAsync(entity);
-            mount.Id = entity.Id;
+            animal.Id = entity.Id;
         }
         else
         {
-            var existing = await _db.Connection.FindAsync<MountEntity>(mount.Id);
-            if (existing?.Source == ContentSource.Official) mount.Source = ContentSource.Modified;
-            await _db.Connection.UpdateAsync(mount.ToEntity());
+            var existing = await _db.Connection.FindAsync<AnimalEntity>(animal.Id);
+            if (existing?.Source == ContentSource.Official) animal.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(animal.ToEntity());
         }
 
-        await SaveMountRestrictionsAsync(mount.Id, mount.RestrictedToWarbandArchetypeIds);
-        await SaveMountSpecialRulesAsync(mount.Id, mount.SpecialRules);
+        await SaveAnimalRestrictionsAsync(animal.Id, animal.RestrictedToWarbandArchetypeIds);
+        await SaveAnimalSpecialRulesAsync(animal.Id, animal.SpecialRules);
     }
 
     public async Task SaveMagicSchoolAsync(MagicSchool school, string languageCode)
@@ -623,7 +705,7 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
-    private async Task ApplyTranslationsAsync(Mount m, string languageCode)
+    private async Task ApplyTranslationsAsync(Animal m, string languageCode)
     {
         m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
         m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
@@ -693,10 +775,10 @@ public class LibraryService : ILibraryService
         await _db.Connection.DeleteAsync<MutationEntity>(mutationId);
     }
 
-    public async Task DeleteMountAsync(int mountId)
+    public async Task DeleteAnimalAsync(int animalId)
     {
         await _db.Initialization;
-        await _db.Connection.DeleteAsync<MountEntity>(mountId);
+        await _db.Connection.DeleteAsync<AnimalEntity>(animalId);
     }
 
     public async Task DeleteMagicSchoolAsync(int magicSchoolId)

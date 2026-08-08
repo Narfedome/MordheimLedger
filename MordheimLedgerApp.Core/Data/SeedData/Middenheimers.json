@@ -42,7 +42,14 @@
           }
         }
       ],
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -66,7 +73,12 @@
         "en": "The champions and captains of a Middenheim warband start with Strength 4 instead of Strength 3.",
         "fr": "Les champions et capitaines d'une bande de Middenheim démarrent avec une Force de 4 au lieu de 3."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -90,7 +102,12 @@
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListName": "Mercenary Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -187,17 +204,63 @@
         "fr": "Réservée aux Middenheimers. Pour l'obtenir, un Héros doit payer 10 CO et réussir un jet inférieur ou égal à sa Force sur 1D6 - en cas de succès, il tue un loup et porte sa dépouille bénie. Octroie +1 aux sauvegardes d'armure contre les attaques de tir. Un Middenheimer peut l'acheter sans jet de disponibilité à la création de la bande."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Mercenary Captain", "Champion", "Youngblood"]
+      "restrictedToWarriorNames": [
+        "Mercenary Captain",
+        "Champion",
+        "Youngblood"
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Mercenary Equipment List", "fr": "Liste d'équipement des Mercenaires" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Morning star", "Double-handed weapon", "Spear", "Halberd", "Crossbow", "Pistol", "Duelling Pistol", "Bow", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Wolfcloak"]
+      "name": {
+        "en": "Mercenary Equipment List",
+        "fr": "Liste d'équipement des Mercenaires"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Morning star",
+        "Double-handed weapon",
+        "Spear",
+        "Halberd",
+        "Crossbow",
+        "Pistol",
+        "Duelling Pistol",
+        "Bow",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet",
+        "Wolfcloak"
+      ]
     },
     {
-      "name": { "en": "Marksman Equipment List", "fr": "Liste d'équipement des Tireurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Crossbow", "Pistol", "Bow", "Long bow", "Blunderbuss", "Handgun", "Hunting Rifle", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Marksman Equipment List",
+        "fr": "Liste d'équipement des Tireurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Crossbow",
+        "Pistol",
+        "Bow",
+        "Long bow",
+        "Blunderbuss",
+        "Handgun",
+        "Hunting Rifle",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
 
@@ -12,13 +13,14 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly Warband _warband;
     private readonly IWarbandService _warbandService;
+    private readonly ILibraryService _libraryService;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
     private readonly ISpellPickerService _spellPicker;
     private readonly IReadOnlyList<int> _allowedMagicSchoolIds;
     private readonly IMutationPickerService _mutationPicker;
-    private readonly IMountPickerService _mountPicker;
+    private readonly IAnimalPickerService _animalPicker;
 
     protected override bool CancelResult => false;
 
@@ -83,14 +85,15 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public ObservableCollection<WarriorMutation> Mutations { get; }
 
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
-        IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
-        IMutationPickerService mutationPicker, bool isMutant, IMountPickerService mountPicker)
+        ILibraryService libraryService, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
+        IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
+        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker)
     {
         this.item = item;
         this.title = title;
         _warband = warband;
         _warbandService = warbandService;
+        _libraryService = libraryService;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
@@ -99,7 +102,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _allowedMagicSchoolIds = allowedMagicSchoolIds;
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
-        _mountPicker = mountPicker;
+        _animalPicker = animalPicker;
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);
@@ -114,18 +117,36 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId);
         foreach (var equipmentItem in items)
         {
+            // Arme de corps à corps : propose un matériau (Gromril/Ithilmar/...) avant de calculer le
+            // prix - toute SpecialRule dotée d'un CostMultiplier est éligible, pas seulement ces deux-là.
+            // Annuler le picker (< 0) revient à choisir "Normal".
+            SpecialRule? materialRule = null;
+            if (equipmentItem.Category == EquipmentCategory.MeleeWeapon)
+            {
+                var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
+                    .Where(r => r.CostMultiplier.HasValue).ToList();
+                if (materialRules.Count > 0)
+                {
+                    var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
+                    var index = await ShowActionSheetIndexAsync(Loc["WarriorsMaterialPickerTitle"], options);
+                    if (index > 0) materialRule = materialRules[index - 1];
+                }
+            }
+
+            var cost = equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
+
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.
-            if (_warband.Treasury < equipmentItem.Cost)
+            if (_warband.Treasury < cost)
             {
                 await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
                 break;
             }
 
-            _warband.Treasury -= equipmentItem.Cost;
+            _warband.Treasury -= cost;
             await _warbandService.SaveWarbandAsync(_warband);
 
-            var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem);
+            var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem, materialRule: materialRule);
             Equipment.Add(carried);
         }
     }
@@ -140,7 +161,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSkill()
     {
-        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId);
+        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId, Item.AllowedSkillCategories);
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);
@@ -209,27 +230,27 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         Mutations.Remove(bought);
     }
 
-    /// <summary>Monture n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Mount,
+    /// <summary>Animal n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Animal,
     /// soumis comme les stats au bouton Enregistrer/Annuler (pas de persistance immédiate ni de méthode
-    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.MountId).</summary>
+    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.AnimalId).</summary>
     [RelayCommand]
-    private async Task SelectMount()
+    private async Task SelectAnimal()
     {
-        var mounts = await _mountPicker.PickMountsAsync();
-        if (mounts.Count > 0)
+        var animals = await _animalPicker.PickAnimalsAsync();
+        if (animals.Count > 0)
         {
-            Item.Mount = mounts[0];
-            // Item lui-même (Warrior) n'implémente pas INotifyPropertyChanged - Mount est modifié en
-            // place sur la même instance, donc les liaisons "Item.Mount.Name" ne se rafraîchiraient pas
+            Item.Animal = animals[0];
+            // Item lui-même (Warrior) n'implémente pas INotifyPropertyChanged - Animal est modifié en
+            // place sur la même instance, donc les liaisons "Item.Animal.Name" ne se rafraîchiraient pas
             // sans ce signal explicite sur la propriété racine.
             OnPropertyChanged(nameof(Item));
         }
     }
 
     [RelayCommand]
-    private void ClearMount()
+    private void ClearAnimal()
     {
-        Item.Mount = null;
+        Item.Animal = null;
         OnPropertyChanged(nameof(Item));
     }
 

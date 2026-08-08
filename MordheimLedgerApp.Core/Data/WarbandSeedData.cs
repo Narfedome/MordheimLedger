@@ -58,9 +58,9 @@ public class WarbandSeedData
     /// independently need the exact same band-specific mutation.</summary>
     public List<MutationSeedData> Mutations { get; set; } = new();
 
-    /// <summary>Mounts introduced by this warband (e.g. "Sanglier de guerre" for Orques) - like
+    /// <summary>Animals introduced by this warband (e.g. "Sanglier de guerre" for Orques) - like
     /// Equipment, typically warband-specific via RestrictedToThisWarband.</summary>
-    public List<MountSeedData> Mounts { get; set; } = new();
+    public List<AnimalSeedData> Animals { get; set; } = new();
 
     /// <summary>Skills SPECIFIC to this warband (its unique "special skill" table, e.g. Orc Mob's
     /// Waaagh!/'Ard 'Ead/...) - the generic common pool (Combat Master, Step Aside, ...) still lives
@@ -114,6 +114,11 @@ public class WarriorSeedData
     /// archetype's Weapons/Armour line draws from - null/omitted = this archetype never uses equipment
     /// (Ghouls, Zombies, Trolls, Cave Squigs...).</summary>
     public string? EquipmentListName { get; set; }
+
+    /// <summary>This archetype's row of the warband's "skill table" (e.g. ["Combat","Strength","Speed"])
+    /// - matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names. Empty/omitted = not
+    /// sourced yet, not "may pick nothing" - see WarriorArchetype.AllowedSkillCategories.</summary>
+    public List<string> SkillCategories { get; set; } = new();
 }
 
 public class EquipmentSeedData
@@ -125,6 +130,12 @@ public class EquipmentSeedData
 
     public int Cost { get; set; }
     public int? Rarity { get; set; }
+
+    /// <summary>Null = Cost is fixed. Otherwise the maximum value of a random supplement rolled on top of
+    /// Cost at purchase time (e.g. "30 + 3D6 gc" -> Cost 30, CostRandomMax 18) - see
+    /// EquipmentItem.CostRandomMax.</summary>
+    public int? CostRandomMax { get; set; }
+
     public LocalizedText? Description { get; set; }
 
     /// <summary>True = only this warband can buy/carry it (see WarbandArchetypeEquipmentEntity) - the
@@ -135,6 +146,12 @@ public class EquipmentSeedData
     /// alone may have this item (e.g. Averlanders' "Long bow" in the shared Scout list - Bergjaeger
     /// only) - null/empty = every warrior of the restricted warband(s)/list members can have it.</summary>
     public List<string>? RestrictedToWarriorNames { get; set; }
+
+    /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - find-or-created by
+    /// English Name, same as AnimalSeedData.SpecialRules. Only applied when this item is newly created
+    /// (see AppDatabase) - a band file re-declaring an already-seeded item by name doesn't re-attach
+    /// rules, same precedent as Description there.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -171,6 +188,10 @@ public class SpecialRuleSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
+
+    /// <summary>Null = not a purchasable material. Non-null marks this rule as a weapon-material option
+    /// (e.g. "Gromril" -&gt; 4) - see SpecialRule.CostMultiplier.</summary>
+    public int? CostMultiplier { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see
@@ -231,12 +252,18 @@ public class MagicSchoolWithSpellsSeedData
     public List<SpellSeedData> Spells { get; set; } = new();
 }
 
-public class MountSeedData
+public class AnimalSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
     public int Cost { get; set; }
     public int? Rarity { get; set; }
+
+    /// <summary>Null = Cost is fixed. Otherwise the maximum value of a random supplement rolled on top of
+    /// Cost at purchase time (e.g. "25 + 2D6 gc" -> Cost 25, CostRandomMax 12) - see
+    /// EquipmentItem.CostRandomMax.</summary>
+    public int? CostRandomMax { get; set; }
+
     public int Movement { get; set; }
     public int WeaponSkill { get; set; }
     public int BallisticSkill { get; set; }
@@ -247,7 +274,7 @@ public class MountSeedData
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
-    /// <summary>True = only this warband may buy/ride it (see WarbandArchetypeMountEntity).</summary>
+    /// <summary>True = only this warband may buy/ride it (see WarbandArchetypeAnimalEntity).</summary>
     public bool RestrictedToThisWarband { get; set; }
 
     /// <summary>Find-or-created by English Name, same as WarbandSeedData.SpecialRules.</summary>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit.WarbandArchetypeDetailDialog"
+               x:DataType="local:WarbandArchetypeDetailDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <VerticalStackLayout x:Name="RootContent" Spacing="16" SizeChanged="OnRootContentSizeChanged">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
+                       TextColor="{DynamicResource AppText}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+
+            <!-- 3 onglets plutôt qu'un long scroll empilé (mobile) - même TabToggleButton que
+                 WarriorEditDialog (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). Règles
+                 spéciales/Écoles de magie restent dans Général (pas d'onglet dédié) sur demande
+                 explicite de l'utilisateur. -->
+            <HorizontalStackLayout Spacing="16">
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
+                                             IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
+                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc WarbandGradePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding GradeLabel}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.StartingTreasury}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding MaxWarriorsDisplay}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                </Grid>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                          ItemsSource="{Binding Item.SpecialRules}"
+                                          IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                          Command="{Binding ShowSpecialRuleDetailCommand}"/>
+                <components:ChipListView HeaderText="{loc:Loc LibMagicSchoolsPh}"
+                                          ItemsSource="{Binding Item.MagicSchools}"
+                                          IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                          IconFontFamily="RpgAwesome"
+                                          Command="{Binding ShowMagicSchoolDetailCommand}"/>
+            </VerticalStackLayout>
+
+            <!-- Guerriers/Équipement se chargent au premier passage sur leur onglet (pas à l'ouverture
+                 du dialog) - Loading.IsLoading n'a de sens que dans l'onglet courant puisque l'autre
+                 est masqué entièrement pendant ce temps. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <components:ChipListView ItemsSource="{Binding Warriors}"
+                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                          Command="{Binding ShowWarriorDetailCommand}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <components:ChipListView ItemsSource="{Binding EquipmentLists}"
+                                          IconGlyph="{x:Static icons:SolidFont.ListCheck}"
+                                          Command="{Binding ShowEquipmentListDetailCommand}"/>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+        </ScrollView>
+    </Border>
+</toolkit:Popup>

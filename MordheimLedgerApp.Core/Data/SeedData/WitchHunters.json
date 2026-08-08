@@ -59,7 +59,14 @@
           }
         }
       ],
-      "equipmentListName": "Witch Hunter Equipment List"
+      "equipmentListName": "Witch Hunter Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Strength",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -95,7 +102,13 @@
           }
         }
       ],
-      "equipmentListName": "Witch Hunter Equipment List"
+      "equipmentListName": "Witch Hunter Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Shooting",
+        "Academic",
+        "Speed"
+      ]
     },
     {
       "name": {
@@ -128,7 +141,12 @@
           }
         }
       ],
-      "equipmentListName": "Witch Hunter Equipment List"
+      "equipmentListName": "Witch Hunter Equipment List",
+      "skillCategories": [
+        "Combat",
+        "Academic",
+        "Strength"
+      ]
     },
     {
       "name": {
@@ -235,7 +253,29 @@
         "en": "A long haft topped by an iron cup filled with burning coals. Two-handed (no shield, buckler or other hand weapon in close combat, though a shield may still be used against missile fire). Strength as user +1. On a successful hit, roll a D6: on a 5+ the victim is set on fire, suffering a Strength 4 hit each turn until a 4+ Recovery roll puts it out (another warrior may help by moving into base contact and scoring a 4+).",
         "fr": "Une longue hampe surmontée d'une coupe de fer emplie de braises ardentes. Arme à deux mains (aucun bouclier, rondache ou autre arme de corps à corps ne peut être utilisé en combat, mais un bouclier reste utilisable contre le tir). Force de l'utilisateur +1. Sur un coup au but réussi, lancez 1D6 : sur un 5+, la victime prend feu et subit une touche de Force 4 chaque tour jusqu'à ce qu'un jet de récupération de 4+ éteigne les flammes (un autre guerrier peut aider en se plaçant au contact et en réussissant lui aussi un 4+)."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Two-handed",
+            "fr": "Arme à deux mains"
+          },
+          "description": {
+            "en": "A model armed with this weapon may not use a shield, buckler or additional weapon in close combat. If the model is equipped with a shield he will still get a +1 bonus to his armour save against shooting.",
+            "fr": "Un guerrier armé de cette arme ne peut utiliser ni bouclier, ni rondache, ni arme supplémentaire en combat rapproché. S'il possède un bouclier, il conserve tout de même le bonus de +1 à sa sauvegarde d'armure contre les tirs."
+          }
+        },
+        {
+          "name": {
+            "en": "Fire",
+            "fr": "Feu"
+          },
+          "description": {
+            "en": "The burning brazier of coals atop the staff is deadly, capable of setting an opponent ablaze with even the slightest glancing blow. Whenever you score a successful hit with the brazier iron roll a D6. If you roll a 5+ the victim is set on fire. If the warrior survives the attack they must score a 4+ in the recovery phase or they will suffer a Strength 4 hit each turn they are on fire and will be unable to do anything other than move. Other warriors from the same warband may help to put the warrior out if they wish, by moving into base-to-base contact and scoring a 4+ in the recovery phase.",
+            "fr": "Le brasier de braises ardentes au sommet du brasero est mortel, capable d'enflammer un adversaire au moindre effleurement. Chaque fois qu'une touche réussie est portée avec le brasero de fer, lancez 1D6 : sur un 5+, la victime prend feu. Si le guerrier survit à l'attaque, il doit obtenir un 4+ en phase de récupération, sans quoi il subit une touche de Force 4 chaque tour tant qu'il brûle et ne peut rien faire d'autre que se déplacer. D'autres guerriers de la même bande peuvent l'aider à éteindre les flammes en se plaçant au contact et en réussissant eux aussi un 4+."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -249,7 +289,19 @@
         "en": "This tome describes the servants of Chaos - witches, heretics, deviants, mutants, warlocks, blasphemers, necromancers and other enemies of Sigmar - in all their foulness. A Hero carrying it hates all Possessed, Skaven, Beastmen, Chaos, Daemon, Dark Elf, Orc & Goblin and Sisters of Sigmar models.",
         "fr": "Les pages de cet ouvrage décrivent les serviteurs du Chaos - sorcières, hérétiques, déviants, mutants, sorciers, blasphémateurs, nécromants et autres ennemis de Sigmar - dans toute leur infamie. Un Héros qui le porte hait tous les Possédés, Skavens, Hommes-Bêtes, figurines du Chaos, Démons, Elfes Noirs, Orques & Gobelins et Sœurs de Sigmar."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "specialRules": [
+        {
+          "name": {
+            "en": "Hatred",
+            "fr": "Haine"
+          },
+          "description": {
+            "en": "A Hero with the Hammer of Witches will hate all Possessed, Skaven, Beastmen, Chaos, Daemons, Dark Elf, Orc & Goblins and Sigmarite Sisters.",
+            "fr": "Un Héros possédant le Marteau des Sorcières hait tous les Possédés, Skavens, Hommes-Bêtes, figurines du Chaos, Démons, Elfes Noirs, Orques & Gobelins et Sœurs de Sigmar."
+          }
+        }
+      ]
     },
     {
       "name": {
@@ -264,21 +316,110 @@
         "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6x10 CO. Réservé aux Prêtres-Guerriers et aux Sœurs de Sigmar. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": ["Warrior-Priest"]
+      "restrictedToWarriorNames": [
+        "Warrior-Priest"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Effect (Holy Tome)",
+            "fr": "Effet (Livre Saint)"
+          },
+          "description": {
+            "en": "A Warrior Priest or Sister of Sigmar with a holy tome can add +1 to the score when determining whether he (or she) can recite a spell successfully or not.",
+            "fr": "Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
+          }
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Holy Relic",
+        "fr": "Relique Sacrée"
+      },
+      "category": "MiscellaneousEquipment",
+      "cost": 15,
+      "costRandomMax": 18,
+      "rarity": 8,
+      "description": {
+        "en": "In this age of superstition and religious fanaticism, holy objects are an important part of life. Relics abound in the Old World: hairs of Sigmar, pieces from Ulric's hammer, teeth of Daemon Princes, all are sold to men needing encouragement before battle and as charms against sorcery.",
+        "fr": "En cette époque de superstition et de fanatisme religieux, les objets sacrés occupent une place importante dans la vie quotidienne. Les reliques abondent dans le Vieux Monde : cheveux de Sigmar, fragments du marteau d'Ulric, dents de Princes Démons - tout se vend aux hommes en quête de réconfort avant la bataille, ou de protection contre la sorcellerie."
+      },
+      "restrictedToThisWarband": true,
+      "restrictedToWarriorNames": [
+        "Warrior-Priest"
+      ],
+      "specialRules": [
+        {
+          "name": {
+            "en": "Effect (Holy Relic)",
+            "fr": "Effet (Relique Sacrée)"
+          },
+          "description": {
+            "en": "A model with a holy relic will automatically pass the first Leadership test he is required to make in the game. If worn by the leader, it will allow him to automatically pass the first Rout test if he has not taken any Leadership tests before. You can only ignore the first Leadership test in any single game - owning two or more holy relics will not allow you to ignore second and subsequent tests.",
+            "fr": "Une figurine possédant une relique sacrée réussit automatiquement le premier test de Commandement qu'elle doit effectuer dans la partie. Si elle est portée par le chef, elle lui permet également de réussir automatiquement son premier test de Déroute s'il n'a passé aucun test de Commandement auparavant. Un seul test de Commandement peut être ignoré par partie de cette façon - posséder plusieurs reliques sacrées ne permet pas d'ignorer un second test ou les suivants."
+          }
+        }
+      ]
     }
   ],
   "equipmentLists": [
     {
-      "name": { "en": "Witch Hunter Equipment List", "fr": "Liste d'équipement des Répurgateurs" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Crossbow", "Pistol", "Crossbow Pistol", "Light Armour", "Heavy Armour", "Shield", "Buckler", "Helmet", "Brazier Iron", "Hammer of Witches", "Holy Tome"]
+      "name": {
+        "en": "Witch Hunter Equipment List",
+        "fr": "Liste d'équipement des Répurgateurs"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Crossbow",
+        "Pistol",
+        "Crossbow Pistol",
+        "Light Armour",
+        "Heavy Armour",
+        "Shield",
+        "Buckler",
+        "Helmet",
+        "Brazier Iron",
+        "Hammer of Witches",
+        "Holy Tome",
+        "Holy Relic"
+      ]
     },
     {
-      "name": { "en": "Flagellant Equipment List", "fr": "Liste d'équipement des Flagellants" },
-      "itemNames": ["Flail", "Morning star", "Double-handed weapon"]
+      "name": {
+        "en": "Flagellant Equipment List",
+        "fr": "Liste d'équipement des Flagellants"
+      },
+      "itemNames": [
+        "Flail",
+        "Morning star",
+        "Double-handed weapon"
+      ]
     },
     {
-      "name": { "en": "Zealot Equipment List", "fr": "Liste d'équipement des Séides" },
-      "itemNames": ["Dagger", "Mace", "Hammer", "Axe", "Sword", "Double-handed weapon", "Spear", "Bow", "Short Bow", "Light Armour", "Shield", "Helmet"]
+      "name": {
+        "en": "Zealot Equipment List",
+        "fr": "Liste d'équipement des Séides"
+      },
+      "itemNames": [
+        "Dagger",
+        "Mace",
+        "Hammer",
+        "Axe",
+        "Sword",
+        "Double-handed weapon",
+        "Spear",
+        "Bow",
+        "Short Bow",
+        "Light Armour",
+        "Shield",
+        "Helmet"
+      ]
     }
   ],
   "spells": []

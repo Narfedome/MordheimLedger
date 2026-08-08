@@ -531,6 +531,9 @@
   <data name="LibTabSpells" xml:space="preserve">
     <value>Spells</value>
   </data>
+  <data name="LibTabProfile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
   <data name="InjurySelectTitle" xml:space="preserve">
     <value>Select Injury</value>
   </data>

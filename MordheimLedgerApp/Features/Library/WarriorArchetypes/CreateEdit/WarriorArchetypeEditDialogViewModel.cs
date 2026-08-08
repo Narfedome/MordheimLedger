@@ -9,7 +9,6 @@ namespace MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
 
 public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 {
-    private const int StepCount = 3;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly Dictionary<string, EquipmentList> _equipmentListByLabel = new();
 
@@ -42,21 +41,20 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string movementInput;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStep0))]
-    [NotifyPropertyChangedFor(nameof(IsStep1))]
-    [NotifyPropertyChangedFor(nameof(IsStep2))]
-    [NotifyPropertyChangedFor(nameof(CanGoBack))]
-    [NotifyPropertyChangedFor(nameof(IsLastStep))]
-    [NotifyPropertyChangedFor(nameof(StepLabel))]
-    private int currentStep;
+    private string? nameError;
 
-    public bool IsStep0 => CurrentStep == 0;
-    public bool IsStep1 => CurrentStep == 1;
-    public bool IsStep2 => CurrentStep == 2;
-    public bool CanGoBack => CurrentStep > 0;
-    public bool IsLastStep => CurrentStep == StepCount - 1;
-    public string StepLabel => string.Format(Loc["LibStepLabel"], CurrentStep + 1, StepCount);
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsProfileTab))]
+    [NotifyPropertyChangedFor(nameof(IsRulesTab))]
+    private int selectedTab;
+
+    public bool IsGeneralTab => SelectedTab == 0;
+    public bool IsProfileTab => SelectedTab == 1;
+    public bool IsRulesTab => SelectedTab == 2;
 
     public WarriorArchetypeEditDialogViewModel(WarriorArchetype item, string title, ISpecialRulePickerService specialRulePicker,
         IReadOnlyList<EquipmentList> allEquipmentLists)
@@ -82,6 +80,15 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         Item.EquipmentListId = _equipmentListByLabel.TryGetValue(value, out var list) ? list.Id : null;
 
     [RelayCommand]
+    private void ShowGeneralTab() => SelectedTab = 0;
+
+    [RelayCommand]
+    private void ShowProfileTab() => SelectedTab = 1;
+
+    [RelayCommand]
+    private void ShowRulesTab() => SelectedTab = 2;
+
+    [RelayCommand]
     private async Task AddSpecialRule()
     {
         var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleFilterKind.Warrior);
@@ -95,21 +102,26 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 
-    [RelayCommand]
-    private void Next()
+    private bool ValidateRequiredFields()
     {
-        if (CurrentStep < StepCount - 1) CurrentStep++;
-    }
-
-    [RelayCommand]
-    private void Back()
-    {
-        if (CurrentStep > 0) CurrentStep--;
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
     }
 
     [RelayCommand]
     private void Save()
     {
+        if (!ValidateRequiredFields())
+        {
+            SelectedTab = 0;
+            return;
+        }
+
         Item.SpecialRules = SpecialRules.ToList();
 
         if (int.TryParse(MovementInput, out var movement))

@@ -15,26 +15,38 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <Grid RowDefinitions="*,Auto" RowSpacing="16">
+        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
                    TextColor="{DynamicResource AppText}"/>
-            <components:LibraryItemImageView ImagePath="{Binding Item.ImagePath}"
-                                              DefaultGlyph="{x:Static icons:SolidFont.Scroll}" MaximumHeightRequest="30"/>
-            <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc SpecialRuleNamePh}"/>
+            <VerticalStackLayout Spacing="4">
+                <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc SpecialRuleNamePh}"/>
+                            <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Entry Text="{Binding Item.Name}"/>
+                <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
             <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
             <Entry Text="{Binding Item.CostMultiplier}" Keyboard="Numeric" Placeholder="{loc:Loc SpecialRuleCostMultiplierPh}"/>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <Button Grid.Column="0"
-                        Text="{loc:Loc BtnCancel}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding CancelCommand}"/>
-                <Button Grid.Column="1"
-                        Text="{loc:Loc BtnSave}"
-                        Command="{Binding SaveCommand}"/>
-            </Grid>
         </VerticalStackLayout>
         </ScrollView>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding SaveCommand}"/>
+        </Grid>
+        </Grid>
     </Border>
 </toolkit:Popup>

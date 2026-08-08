@@ -16,19 +16,36 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <Grid RowDefinitions="*,Auto" RowSpacing="16">
+        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
                    TextColor="{DynamicResource AppText}"/>
-            <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
 
-            <!-- Étape 1 : identité -->
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsStep0}">
-                <components:LibraryItemImageView ImagePath="{Binding Item.ImagePath}"
-                                                  DefaultGlyph="{x:Static icons:RpgFont.RaPawprint}"
-                                                  FontFamily="RpgAwesome" MaximumHeightRequest="30"/>
-                <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc AnimalNamePh}"/>
+            <HorizontalStackLayout Spacing="16">
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc LibTabProfile}" Command="{Binding ShowProfileTabCommand}"
+                                             IsActive="{Binding IsProfileTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                             IsActive="{Binding IsRulesTab}" FontSize="12"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsGeneralTab}">
+                <VerticalStackLayout Spacing="4">
+                    <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc AnimalNamePh}"/>
+                                <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Entry Text="{Binding Item.Name}"/>
+                    <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                           IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                </VerticalStackLayout>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                     <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalCostPh}"/>
                     <Entry Grid.Column="1" Text="{Binding Item.Rarity}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalRarityPh}"/>
@@ -37,8 +54,8 @@
                 <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="80"/>
             </VerticalStackLayout>
 
-            <!-- Étape 2 : profil (abréviations officielles du livre de règles, pas de traduction) -->
-            <Grid IsVisible="{Binding IsStep1}"
+            <!-- Profil (abréviations officielles du livre de règles, pas de traduction) -->
+            <Grid IsVisible="{Binding IsProfileTab}"
                   ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
                 <VerticalStackLayout Grid.Row="0" Grid.Column="0">
                     <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -78,87 +95,31 @@
                 </VerticalStackLayout>
             </Grid>
 
-            <!-- Étape 3 : réservé à ces bandes (vide = commun à toutes) + règles spéciales propres à
-                 l'animal - même pattern chip+picker qu'EquipmentItemEditDialog / WarriorArchetypeEditDialog. -->
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsStep2}">
-                <VerticalStackLayout Spacing="8">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="{loc:Loc LibRestrictedToWarbandsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                      Icon="{x:Static icons:SolidFont.Plus}"
-                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                      Command="{Binding AddRestrictionCommand}"/>
-                    </Grid>
-                    <Label Text="{loc:Loc LibRestrictedToAllHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding RestrictedWarbands}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="library:WarbandArchetype">
-                                <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                    <HorizontalStackLayout Spacing="4">
-                                        <Label Text="{x:Static icons:SolidFont.Shield}" FontSize="12"
-                                               TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                        <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                        <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Icon="{x:Static icons:SolidFont.Xmark}"
-                                                                      IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:AnimalEditDialogViewModel}}, Path=RemoveRestrictionCommand}"
-                                                                      CommandParameter="{Binding .}"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </FlexLayout>
-                </VerticalStackLayout>
-
-                <VerticalStackLayout Spacing="8">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Grid.Column="0" Text="{loc:Loc LibSpecialRulesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                      Icon="{x:Static icons:SolidFont.Plus}"
-                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                      Command="{Binding AddSpecialRuleCommand}"/>
-                    </Grid>
-                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SpecialRules}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="library:SpecialRule">
-                                <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                    <HorizontalStackLayout Spacing="4">
-                                        <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
-                                               TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                        <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                        <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Icon="{x:Static icons:SolidFont.Xmark}"
-                                                                      IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:AnimalEditDialogViewModel}}, Path=RemoveSpecialRuleCommand}"
-                                                                      CommandParameter="{Binding .}"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </FlexLayout>
-                </VerticalStackLayout>
+            <!-- Réservé à ces bandes (vide = commun à toutes) + règles spéciales propres à l'animal. -->
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
+                <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                          ItemsSource="{Binding RestrictedWarbands}"
+                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                          AddCommand="{Binding AddRestrictionCommand}"
+                                          RemoveCommand="{Binding RemoveRestrictionCommand}"/>
+                <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                          ItemsSource="{Binding SpecialRules}"
+                                          IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                          AddCommand="{Binding AddSpecialRuleCommand}"
+                                          RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
             </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <Button Grid.Column="0"
-                        Text="{loc:Loc BtnCancel}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding CancelCommand}"/>
-                <Button Grid.Column="1"
-                        Text="{loc:Loc LibBack}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding BackCommand}"
-                        IsEnabled="{Binding CanGoBack}"/>
-                <Button Grid.Column="2"
-                        Text="{loc:Loc LibNext}"
-                        Command="{Binding NextCommand}"
-                        IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
-                <Button Grid.Column="2"
-                        Text="{loc:Loc BtnSave}"
-                        Command="{Binding SaveCommand}"
-                        IsVisible="{Binding IsLastStep}"/>
-            </Grid>
         </VerticalStackLayout>
         </ScrollView>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding SaveCommand}"/>
+        </Grid>
+        </Grid>
     </Border>
 </toolkit:Popup>

@@ -19,6 +19,11 @@ public partial class AnimalDetailDialogViewModel : ReadOnlyDialogViewModel
     /// is already a List&lt;SpecialRule&gt;.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
 
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que AnimalEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+
     public AnimalDetailDialogViewModel(Animal item, List<WarbandArchetype> restrictedWarbands)
     {
         Item = item;

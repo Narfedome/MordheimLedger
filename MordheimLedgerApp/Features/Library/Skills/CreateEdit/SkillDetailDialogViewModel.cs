@@ -15,6 +15,11 @@ public partial class SkillDetailDialogViewModel : ReadOnlyDialogViewModel
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que SkillEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+
     public SkillDetailDialogViewModel(Skill item, string categoryLabel,
         List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
     {

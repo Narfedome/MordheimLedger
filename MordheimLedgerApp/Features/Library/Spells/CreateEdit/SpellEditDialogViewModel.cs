@@ -23,6 +23,11 @@ public partial class SpellEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedMagicSchoolLabel = string.Empty;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
     public SpellEditDialogViewModel(Spell item, string title, IReadOnlyList<MagicSchool> allMagicSchools)
     {
         this.item = item;
@@ -44,6 +49,21 @@ public partial class SpellEditDialogViewModel : DialogViewModel<bool>
             Item.MagicSchoolId = school.Id;
     }
 
+    private bool ValidateRequiredFields()
+    {
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
+    }
+
     [RelayCommand]
-    private void Save() => Close(true);
+    private void Save()
+    {
+        if (!ValidateRequiredFields()) return;
+        Close(true);
+    }
 }

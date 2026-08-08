@@ -30,6 +30,19 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string title;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsSpellsTab))]
+    private int selectedTab;
+
+    public bool IsGeneralTab => SelectedTab == 0;
+    public bool IsSpellsTab => SelectedTab == 1;
+
     public ObservableCollection<Spell> Spells { get; }
 
     public MagicSchoolEditDialogViewModel(MagicSchool item, string title, ILibraryService libraryService,
@@ -40,6 +53,12 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
         _libraryService = libraryService;
         Spells = new ObservableCollection<Spell>(initialSpells);
     }
+
+    [RelayCommand]
+    private void ShowGeneralTab() => SelectedTab = 0;
+
+    [RelayCommand]
+    private void ShowSpellsTab() => SelectedTab = 1;
 
     [RelayCommand]
     private async Task AddSpell()
@@ -82,9 +101,26 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
         if (spell.Id != 0) _removedSpellIds.Add(spell.Id);
     }
 
+    private bool ValidateRequiredFields()
+    {
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
+    }
+
     [RelayCommand]
     private async Task Save()
     {
+        if (!ValidateRequiredFields())
+        {
+            SelectedTab = 0;
+            return;
+        }
+
         var language = LocalizationService.Instance.Language;
         await Loading.RunAsync(async () =>
         {

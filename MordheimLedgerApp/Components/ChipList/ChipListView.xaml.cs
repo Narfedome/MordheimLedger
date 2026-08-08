@@ -112,6 +112,20 @@ public partial class ChipListView : ContentView
         set => SetValue(EmptyHintTextProperty, value);
     }
 
+    // Lecture seule uniquement (pas d'AddCommand pour forcer ShowSection quand la liste est vide, voir
+    // Recompute) : garde la section visible même vide, pour les cas où HeaderText lui-même porte déjà le
+    // message "vide" (ex. RestrictedWarbandsHeaderText qui bascule sur "Commun à toutes les bandes") -
+    // évite de dupliquer ce message dans EmptyHintText en plus du header.
+    public static readonly BindableProperty AlwaysShowSectionProperty =
+        BindableProperty.Create(nameof(AlwaysShowSection), typeof(bool), typeof(ChipListView), false,
+            propertyChanged: (bindable, _, _) => ((ChipListView)bindable).Recompute());
+
+    public bool AlwaysShowSection
+    {
+        get => (bool)GetValue(AlwaysShowSectionProperty);
+        set => SetValue(AlwaysShowSectionProperty, value);
+    }
+
     // Calculées à partir d'ItemsSource/EmptyHintText (voir Recompute) - pas destinées à être posées
     // depuis l'extérieur, juste bindées en interne par ChipListView.xaml.
     public static readonly BindableProperty HasItemsProperty =
@@ -142,6 +156,6 @@ public partial class ChipListView : ContentView
         HasItems = ItemsSource?.Cast<object>().Any() ?? false;
         // AddCommand renseignée : la section (header + bouton "+") reste visible même liste vide,
         // pour pouvoir ajouter le tout premier élément.
-        ShowSection = HasItems || !string.IsNullOrEmpty(EmptyHintText) || AddCommand != null;
+        ShowSection = HasItems || !string.IsNullOrEmpty(EmptyHintText) || AddCommand != null || AlwaysShowSection;
     }
 }

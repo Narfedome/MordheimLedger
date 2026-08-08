@@ -790,6 +790,11 @@ public class LibraryService : ILibraryService
         foreach (var spell in orphanedSpells)
             await _db.Connection.DeleteAsync<SpellEntity>(spell.Id);
 
+        // Idem pour les octrois de bande (WarbandArchetypeMagicSchoolEntity) - une ligne orpheline ici
+        // fait planter LoadWarbandMagicSchoolsAsync (KeyNotFoundException, l'école n'existe plus dans le
+        // dictionnaire résolu depuis GetMagicSchoolsAsync).
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeMagicSchoolEntity WHERE MagicSchoolId = ?", magicSchoolId);
+
         await _db.Connection.DeleteAsync<MagicSchoolEntity>(magicSchoolId);
     }
 }

@@ -87,7 +87,7 @@
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                 <components:ChipListView ItemsSource="{Binding Warriors}"
-                                         HeaderText="{loc:Loc LibMagicSchoolsPh}"
+                                          HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
                                           IconGlyph="{x:Static icons:SolidFont.Shield}"
                                           Command="{Binding EditWarriorCommand}"
                                           AddCommand="{Binding AddWarriorCommand}"
@@ -98,7 +98,7 @@
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                 <components:ChipListView ItemsSource="{Binding EquipmentLists}"
-                                         HeaderText="{loc:Loc LibMagicSchoolsPh}"
+                                          HeaderText="{loc:Loc WarbandArchetypeTabEquipment}"
                                           IconGlyph="{x:Static icons:SolidFont.ListCheck}"
                                           Command="{Binding EditEquipmentListCommand}"
                                           AddCommand="{Binding AddEquipmentListCommand}"

@@ -315,9 +315,6 @@
   <data name="BtnSave" xml:space="preserve">
     <value>Enregistrer</value>
   </data>
-  <data name="LibManageWarriors" xml:space="preserve">
-    <value>Gérer les guerriers</value>
-  </data>
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -410,9 +407,6 @@
   </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Équipement</value>
-  </data>
-  <data name="WarbandArchetypeTabRules" xml:space="preserve">
-    <value>Règles</value>
   </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Modifier le type de bande</value>
@@ -1043,9 +1037,6 @@
   </data>
   <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des guerriers</value>
-  </data>
-  <data name="LibManageEquipmentLists" xml:space="preserve">
-    <value>Gérer les listes d'équipement</value>
   </data>
   <data name="EquipmentListCreateTitle" xml:space="preserve">
     <value>Nouvelle liste d'équipement</value>

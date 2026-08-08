@@ -79,14 +79,18 @@ public partial class SpecialRuleViewModel : BaseViewModel
 
     /// <summary>A rule can in principle be attached to several types at once (e.g. a rule used both by
     /// a Warband and a Warrior) - joined like MutationViewModel.GroupNameFor joins multiple warband
-    /// restrictions. None (a freshly-created rule not attached anywhere yet) falls back to "Non classée".</summary>
+    /// restrictions. None (a freshly-created rule not attached anywhere yet) falls back to "Non classée".
+    /// A material rule (CostMultiplier != null, e.g. "Gromril Weapon") always counts as Objets even with
+    /// zero EquipmentItemSpecialRuleEntity rows - it's never pre-attached to a specific item, it's chosen
+    /// at purchase time as a weapon upgrade (see SpecialRule.CostMultiplier/WarriorEquipment.MaterialRule),
+    /// so the join-table membership that drives every other group never applies to it.</summary>
     private string GroupNameFor(SpecialRule item)
     {
         var labels = new List<string>();
         if (_warbandRuleIds.Contains(item.Id)) labels.Add(WarbandGroupLabel);
         if (_warriorRuleIds.Contains(item.Id)) labels.Add(WarriorGroupLabel);
         if (_animalRuleIds.Contains(item.Id)) labels.Add(AnimalGroupLabel);
-        if (_itemRuleIds.Contains(item.Id)) labels.Add(ItemGroupLabel);
+        if (_itemRuleIds.Contains(item.Id) || item.CostMultiplier != null) labels.Add(ItemGroupLabel);
         return labels.Count > 0 ? string.Join(", ", labels) : UncategorizedGroupLabel;
     }
 

@@ -88,7 +88,7 @@
     <!-- Tuile de grille sélectionnable (Library : archétypes de bande/guerrier, objets) - reprise à
          l'origine de SelectableGridItemBorderStyle chez DmTools avec son VisualStateManager (Normal/
          Selected), neutralisé par instance (VisualStateGroupList vide + Border.Triggers DataTrigger
-         propre à chaque tuile, cf. EquipmentItemView/WarriorArchetypeView/WarbandArchetypeView.xaml)
+         propre à chaque tuile, cf. EquipmentItemView/WarriorArchetypeSelectorView/WarbandArchetypeView.xaml)
          pour éviter que le VSM du style ne prenne le pas sur le Trigger. **VSM retiré ici** (2026-08-07,
          suite à un rendu d'un bouton "info" tuile qui semblait "activer" celui d'une autre tuile) : un
          VisualStateGroupList défini une seule fois dans un Style puis reproduit par CollectionView à
@@ -333,7 +333,7 @@
         </Setter>
     </Style>
 
-    <!-- Tuiles du Codex (8 onglets + WarriorArchetypeView/Selector, EquipmentListView) - nom enroulé sur
+    <!-- Tuiles du Codex (8 onglets + WarriorArchetypeSelectorView) - nom enroulé sur
          3 lignes plutôt que tronqué à 1, contrairement à TruncatedLabelStyle (encore utilisé tel quel par
          WarbandListPage et MagicSchoolView - liste à plat, pas une grille de tuiles - hors périmètre ici). -->
     <Style TargetType="Label" x:Key="CodexTileNameLabelStyle" BasedOn="{StaticResource TruncatedLabelStyle}">

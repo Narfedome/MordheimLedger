@@ -315,9 +315,6 @@
   <data name="BtnSave" xml:space="preserve">
     <value>Save</value>
   </data>
-  <data name="LibManageWarriors" xml:space="preserve">
-    <value>Manage warriors</value>
-  </data>
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -410,9 +407,6 @@
   </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Equipment</value>
-  </data>
-  <data name="WarbandArchetypeTabRules" xml:space="preserve">
-    <value>Rules</value>
   </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Edit Warband Type</value>
@@ -1043,9 +1037,6 @@
   </data>
   <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
     <value>Select warriors</value>
-  </data>
-  <data name="LibManageEquipmentLists" xml:space="preserve">
-    <value>Manage equipment lists</value>
   </data>
   <data name="EquipmentListCreateTitle" xml:space="preserve">
     <value>New equipment list</value>

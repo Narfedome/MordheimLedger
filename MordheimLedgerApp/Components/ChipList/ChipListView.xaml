@@ -32,24 +32,24 @@
         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ItemsSource}" IsVisible="{Binding HasItems}">
             <BindableLayout.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                    <Border Style="{StaticResource ChipBorderStyle}" Margin="0,0,4,4" >
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={x:Reference root}, Path=Command}"
                                 CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <HorizontalStackLayout Spacing="4">
-                            <Label Text="{Binding Source={x:Reference root}, Path=IconGlyph}"
+                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="4" HeightRequest="36" Margin="8,0">
+                            <Label Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=IconGlyph}"
                                    FontFamily="{Binding Source={x:Reference root}, Path=IconFontFamily}"
                                    FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                            <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Xmark}"
-                                                          IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                          IconSize="10" Padding="0,0,-8,0"
                                                           IsVisible="{Binding Source={x:Reference root}, Path=RemoveCommand, Converter={StaticResource IsNotNullConverter}}"
                                                           Command="{Binding Source={x:Reference root}, Path=RemoveCommand}"
                                                           CommandParameter="{Binding .}"/>
-                        </HorizontalStackLayout>
+                        </Grid>
                     </Border>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>

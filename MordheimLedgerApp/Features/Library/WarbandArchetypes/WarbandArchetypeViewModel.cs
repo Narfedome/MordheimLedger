@@ -161,7 +161,9 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Create()
     {
-        var newItem = new WarbandArchetype();
+        // Valeurs de départ raisonnables plutôt que 0/null - purement indicatives, l'utilisateur les
+        // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
+        var newItem = new WarbandArchetype { StartingTreasury = 500, MaxWarriors = 10 };
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"],
             _specialRulePicker, _magicSchoolPicker, _libraryService, _equipmentPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;

@@ -41,10 +41,10 @@
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
                                              IsActive="{Binding IsMagicTab}" FontSize="12"
                                              IsVisible="{Binding HasMagicSchools}"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
-                                             IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
                                              IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
+                                             IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
             </HorizontalStackLayout>
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
@@ -86,15 +86,6 @@
             <!-- Guerriers/Équipement se chargent au premier passage sur leur onglet (pas à l'ouverture
                  du dialog) - Loading.IsLoading n'a de sens que dans l'onglet courant puisque l'autre
                  est masqué entièrement pendant ce temps. -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
-                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
-                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
-                <components:ChipListView ItemsSource="{Binding Warriors}"
-                                          HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
-                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
-                                          Command="{Binding ShowWarriorDetailCommand}"/>
-            </VerticalStackLayout>
-
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
@@ -102,6 +93,15 @@
                                           HeaderText="{loc:Loc WarbandArchetypeTabEquipment}"
                                           IconGlyph="{x:Static icons:SolidFont.ListCheck}"
                                           Command="{Binding ShowEquipmentListDetailCommand}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <components:ChipListView ItemsSource="{Binding Warriors}"
+                                          HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
+                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                          Command="{Binding ShowWarriorDetailCommand}"/>
             </VerticalStackLayout>
         </VerticalStackLayout>
         </ScrollView>

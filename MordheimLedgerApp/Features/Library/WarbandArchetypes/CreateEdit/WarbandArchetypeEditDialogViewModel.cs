@@ -10,9 +10,11 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 
-/// <summary>3 onglets (Général/Guerriers/Équipement), même visuel que WarbandArchetypeDetailDialog mais
-/// modifiable. Guerriers/Équipement sont édités entièrement en mémoire (comme SpecialRules/MagicSchools
-/// déjà avant ce changement) - aucun appel service tant qu'on n'a pas cliqué Enregistrer, voir Save().
+/// <summary>5 onglets (Général/Règles/Magie/Équipement/Guerriers), même visuel que
+/// WarbandArchetypeDetailDialog mais modifiable - en édition, librement navigables ; en création
+/// (IsWizardMode), remplacés par un assistant Précédent/Suivant dans cet ordre fixe (voir IsWizardMode).
+/// Guerriers/Équipement sont édités entièrement en mémoire (comme SpecialRules/MagicSchools déjà avant
+/// ce changement) - aucun appel service tant qu'on n'a pas cliqué Enregistrer, voir Save().
 /// Nécessaire car WarriorArchetype.WarbandArchetypeId/EquipmentList.WarbandArchetypeId sont des int non
 /// nullables : pour une bande en cours de création (Item.Id == 0), impossible d'insérer un guerrier/une
 /// liste "flottants" avant que la bande elle-même existe en base - persister immédiatement obligerait à
@@ -21,6 +23,8 @@ namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 /// jamais rien en base.</summary>
 public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 {
+    private const int StepCount = 5;
+
     private readonly Dictionary<string, WarbandGrade> _gradeByLabel = new();
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
@@ -29,6 +33,13 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     private bool _warriorsLoaded;
     private bool _equipmentListsLoaded;
+
+    /// <summary>Figé à la construction (Item.Id == 0 = nouvelle bande) - une création se fait pas à pas
+    /// (onglets remplacés par Précédent/Suivant, ordre Général→Règles→Magie→Équipement→Guerriers : les
+    /// listes d'équipement doivent exister avant qu'un guerrier puisse en choisir une, voir AddWarrior),
+    /// une édition garde les onglets librement navigables. Ne peut pas changer en cours de vie du dialog
+    /// (Save ferme immédiatement après avoir persisté).</summary>
+    public bool IsWizardMode { get; }
 
     /// <summary>Ids des guerriers/listes qui existaient déjà en base (Id != 0) et ont été retirés de
     /// Warriors/EquipmentLists pendant cette session d'édition - une ObservableCollection seule ne
@@ -41,6 +52,12 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     [ObservableProperty]
     private WarbandArchetype item;
+
+    /// <summary>Null = pas d'erreur. Posé par ValidateGeneralStep - texte affiché sous le champ Nom,
+    /// pas juste une couleur (retour visuel textuel demandé explicitement), vérifié au clic sur
+    /// Suivant (mode assistant, par étape) et sur Enregistrer (mode édition, pas de notion d'étape).</summary>
+    [ObservableProperty]
+    private string? nameError;
 
     [ObservableProperty]
     private string title;
@@ -73,15 +90,23 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
     [NotifyPropertyChangedFor(nameof(IsRulesTab))]
     [NotifyPropertyChangedFor(nameof(IsMagicTab))]
-    [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
     [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
+    [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
+    [NotifyPropertyChangedFor(nameof(CanGoBack))]
+    [NotifyPropertyChangedFor(nameof(IsLastStep))]
+    [NotifyPropertyChangedFor(nameof(StepLabel))]
     private int selectedTab;
 
     public bool IsGeneralTab => SelectedTab == 0;
     public bool IsRulesTab => SelectedTab == 1;
     public bool IsMagicTab => SelectedTab == 2;
-    public bool IsWarriorsTab => SelectedTab == 3;
-    public bool IsEquipmentTab => SelectedTab == 4;
+    public bool IsEquipmentTab => SelectedTab == 3;
+    public bool IsWarriorsTab => SelectedTab == 4;
+
+    /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
+    public bool CanGoBack => SelectedTab > 0;
+    public bool IsLastStep => SelectedTab == StepCount - 1;
+    public string StepLabel => string.Format(Loc["LibStepLabel"], SelectedTab + 1, StepCount);
 
     public WarbandArchetypeEditDialogViewModel(WarbandArchetype item, string title, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IEquipmentPickerService equipmentPicker)
@@ -92,6 +117,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         _magicSchoolPicker = magicSchoolPicker;
         _libraryService = libraryService;
         _equipmentPicker = equipmentPicker;
+        IsWizardMode = item.Id == 0;
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
         MagicSchools = new ObservableCollection<MagicSchool>(item.MagicSchools);
 
@@ -159,17 +185,53 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     private void ShowMagicTab() => SelectedTab = 2;
 
     [RelayCommand]
-    private async Task ShowWarriorsTab()
+    private async Task ShowEquipmentTab()
     {
         SelectedTab = 3;
-        await EnsureWarriorsLoadedAsync();
+        await EnsureEquipmentListsLoadedAsync();
     }
 
     [RelayCommand]
-    private async Task ShowEquipmentTab()
+    private async Task ShowWarriorsTab()
     {
         SelectedTab = 4;
-        await EnsureEquipmentListsLoadedAsync();
+        await EnsureWarriorsLoadedAsync();
+    }
+
+    /// <summary>Onglet Général : seul champ obligatoire vérifié pour l'instant (Nom). Pose NameError
+    /// (texte affiché sous le champ, pas juste une couleur) si invalide.</summary>
+    private bool ValidateGeneralStep()
+    {
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
+    }
+
+    /// <summary>Mode assistant uniquement (bouton Suivant) - avance d'une étape dans l'ordre fixe
+    /// Général→Règles→Magie→Équipement→Guerriers, déclenchant le chargement différé au passage sur
+    /// Équipement/Guerriers comme le ferait un tap sur l'onglet correspondant en mode édition. Validé
+    /// par étape : en quittant Général, bloque tant que le Nom est vide (pas d'intérêt à valider
+    /// Règles/Magie/Équipement/Guerriers pour l'instant, rien d'obligatoire dessus).</summary>
+    [RelayCommand]
+    private async Task Next()
+    {
+        if (IsGeneralTab && !ValidateGeneralStep()) return;
+        if (SelectedTab >= StepCount - 1) return;
+        SelectedTab++;
+
+        if (IsEquipmentTab) await EnsureEquipmentListsLoadedAsync();
+        else if (IsWarriorsTab) await EnsureWarriorsLoadedAsync();
+    }
+
+    /// <summary>Mode assistant uniquement (bouton Précédent).</summary>
+    [RelayCommand]
+    private void Back()
+    {
+        if (SelectedTab > 0) SelectedTab--;
     }
 
     /// <summary>Item.Id == 0 (bande en cours de création) : collection vide de départ, rien à charger.
@@ -323,6 +385,14 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task Save()
     {
+        // Mode édition (pas de notion d'étape, Next ne passe jamais par ici) : seul point de vérification
+        // du Nom - ramène sur Général si on en était sorti, pour que l'erreur reste visible.
+        if (!ValidateGeneralStep())
+        {
+            SelectedTab = 0;
+            return;
+        }
+
         Item.SpecialRules = SpecialRules.ToList();
         Item.MagicSchools = MagicSchools.ToList();
 

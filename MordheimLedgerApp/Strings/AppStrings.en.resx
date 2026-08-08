@@ -357,6 +357,9 @@
   <data name="LibNoDescription" xml:space="preserve">
     <value>No description.</value>
   </data>
+  <data name="LibFieldRequired" xml:space="preserve">
+    <value>This field is required.</value>
+  </data>
   <data name="LibDetailsTooltip" xml:space="preserve">
     <value>Details</value>
   </data>
@@ -406,7 +409,7 @@
     <value>Warriors</value>
   </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
-    <value>Equipment</value>
+    <value>Equipment Lists</value>
   </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Edit Warband Type</value>

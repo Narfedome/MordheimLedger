@@ -16,7 +16,8 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <Grid RowDefinitions="*,Auto" RowSpacing="16">
+        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
@@ -146,26 +147,30 @@
                 </FlexLayout>
             </VerticalStackLayout>
 
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <Button Grid.Column="0"
-                        Text="{loc:Loc BtnCancel}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding CancelCommand}"/>
-                <Button Grid.Column="1"
-                        Text="{loc:Loc LibBack}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding BackCommand}"
-                        IsEnabled="{Binding CanGoBack}"/>
-                <Button Grid.Column="2"
-                        Text="{loc:Loc LibNext}"
-                        Command="{Binding NextCommand}"
-                        IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
-                <Button Grid.Column="2"
-                        Text="{loc:Loc BtnSave}"
-                        Command="{Binding SaveCommand}"
-                        IsVisible="{Binding IsLastStep}"/>
-            </Grid>
         </VerticalStackLayout>
         </ScrollView>
+
+        <!-- Ancré en bas (ligne Auto de la Grid englobante, hors ScrollView) plutôt que collé au contenu
+             de l'étape courante, dont la hauteur varie (identité vs profil vs description+règles). -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc LibBack}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding BackCommand}"
+                    IsEnabled="{Binding CanGoBack}"/>
+            <Button Grid.Column="2"
+                    Text="{loc:Loc LibNext}"
+                    Command="{Binding NextCommand}"
+                    IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
+            <Button Grid.Column="2"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding SaveCommand}"
+                    IsVisible="{Binding IsLastStep}"/>
+        </Grid>
+        </Grid>
     </Border>
 </toolkit:Popup>

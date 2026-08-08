@@ -52,8 +52,8 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     public bool IsGeneralTab => SelectedTab == 0;
     public bool IsRulesTab => SelectedTab == 1;
     public bool IsMagicTab => SelectedTab == 2;
-    public bool IsWarriorsTab => SelectedTab == 3;
-    public bool IsEquipmentTab => SelectedTab == 4;
+    public bool IsEquipmentTab => SelectedTab == 3;
+    public bool IsWarriorsTab => SelectedTab == 4;
 
     /// <summary>Pilote la visibilité des onglets Règles/Magie - masqués (pas juste vides) quand la bande
     /// n'a rien à montrer, contrairement à WarbandArchetypeEditDialog où ces onglets restent toujours
@@ -80,17 +80,17 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     private void ShowMagicTab() => SelectedTab = 2;
 
     [RelayCommand]
-    private async Task ShowWarriorsTab()
+    private async Task ShowEquipmentTab()
     {
         SelectedTab = 3;
-        await EnsureWarriorsLoadedAsync();
+        await EnsureEquipmentListsLoadedAsync();
     }
 
     [RelayCommand]
-    private async Task ShowEquipmentTab()
+    private async Task ShowWarriorsTab()
     {
         SelectedTab = 4;
-        await EnsureEquipmentListsLoadedAsync();
+        await EnsureWarriorsLoadedAsync();
     }
 
     private Task EnsureWarriorsLoadedAsync()

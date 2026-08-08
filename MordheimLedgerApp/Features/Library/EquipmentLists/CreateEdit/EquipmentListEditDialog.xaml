@@ -21,7 +21,6 @@
             <Label Text="{Binding Title}"
                    FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
                    TextColor="{DynamicResource AppText}"/>
-            <components:LibraryItemImageView ImagePath="" DefaultGlyph="{x:Static icons:SolidFont.ListCheck}" MaximumHeightRequest="30"/>
             <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc EquipmentListNamePh}"/>
 
             <!-- Objets de la liste : ajoutés/retirés via le picker Équipement existant (déjà multi-

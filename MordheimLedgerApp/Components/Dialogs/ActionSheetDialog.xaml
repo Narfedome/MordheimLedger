@@ -12,8 +12,7 @@
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="320">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
-                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                   TextColor="{DynamicResource AppText}"/>
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
             <ScrollView MaximumHeightRequest="320">
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Options}">
                     <BindableLayout.ItemTemplate>

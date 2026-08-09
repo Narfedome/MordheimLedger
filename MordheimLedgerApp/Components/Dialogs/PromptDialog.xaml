@@ -17,8 +17,7 @@
         <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
-                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                   TextColor="{DynamicResource AppText}"/>
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
             <Label Text="{Binding Message}"
                    IsVisible="{Binding HasMessage}"
                    TextColor="{DynamicResource AppTextMuted}"/>

@@ -11,12 +11,13 @@ namespace MordheimLedgerApp.Services
         Dark = 2
     }
 
-    // Single entry for now (ash/wyrdstone-green) — same enum + switch-based token lookup as DmTools'
-    // ThemeService so more palettes slot in later without touching Settings or this service's shape.
+    // Deux entrées (grim/cendre + wyrdstone-vert, ténèbre + or) — même enum + switch-based token lookup
+    // que DmTools' ThemeService, plus de palettes pourront s'ajouter plus tard sans retoucher Settings
+    // ni la forme de ce service.
     public enum AppPalette
     {
-        CendreEtWyrdstone = 0,
-        TenebreEtOr
+        AshAndWarpstone = 0,
+        ShadowAndGold
     }
 
     public class ThemeService : INotifyPropertyChanged
@@ -36,16 +37,19 @@ namespace MordheimLedgerApp.Services
 
         private ThemeService()
         {
-            _palette = (AppPalette)Preferences.Default.Get(PaletteKey, (int)AppPalette.CendreEtWyrdstone);
+            // Ténèbre & Or = palette par défaut (demande explicite de l'utilisateur, préférée à Cendre &
+            // Wyrdstone après comparaison des deux).
+            _palette = (AppPalette)Preferences.Default.Get(PaletteKey, (int)AppPalette.ShadowAndGold);
             _themePref = (AppThemePreference)Preferences.Default.Get(ThemePrefKey, (int)AppThemePreference.System);
         }
 
-        // No embedded watermark art yet for any palette (single entry, "Cendre & Wyrdstone") - returns
-        // null until a resource exists, cf. DmTools' ImageSource.FromResource per-palette lookup for
-        // the pattern to extend once art is available (WatermarkedLayout.xaml already wired for it).
+        // Même pattern que DmTools' ImageSource.FromResource per-palette lookup - le nom passé ici doit
+        // correspondre au LogicalName déclaré sur l'EmbeddedResource (voir MordheimLedgerApp.csproj),
+        // pas au chemin complet du fichier.
         public ImageSource? WatermarkImageSource => ImageSource.FromResource(_palette switch
         {
-            AppPalette.CendreEtWyrdstone => "green.png",
+            AppPalette.AshAndWarpstone => "green.png",
+            AppPalette.ShadowAndGold => "gold.png",
             _ => "gold.png",
         }, typeof(ThemeService).Assembly);
 
@@ -120,7 +124,7 @@ namespace MordheimLedgerApp.Services
 
         private static Dictionary<string, Color> GetPaletteTokens(AppPalette palette, bool dark) => palette switch
         {
-            AppPalette.CendreEtWyrdstone => dark
+            AppPalette.AshAndWarpstone => dark
                 ? new()
                 {
                     ["AppBackground"]      = Color.FromArgb("#17151A"),
@@ -142,12 +146,39 @@ namespace MordheimLedgerApp.Services
                     ["AppBorder"]          = Color.FromArgb("#D8D0BC"),
                 },
 
+            // Noir & or proche de la couverture du livre de règles (fond quasi-noir, lettrage or antique,
+            // accent rouge sombre repris de la bannière derrière "MORDHEIM") plutôt que le violet/indigo
+            // de DmTools' NuitEtOr - demande explicite de l'utilisateur après comparaison avec les
+            // références (couverture GW + sites fan), teintes propres à cette palette.
+            AppPalette.ShadowAndGold => dark
+                ? new()
+                {
+                    ["AppBackground"]      = Color.FromArgb("#0D0B0A"),
+                    ["AppSurface"]         = Color.FromArgb("#1A1512"),
+                    ["AppAccent"]          = Color.FromArgb("#C9A66B"),
+                    ["AppAccentSecondary"] = Color.FromArgb("#5C1A1E"),
+                    ["AppText"]            = Color.FromArgb("#EDE0C0"),
+                    ["AppTextMuted"]       = Color.FromArgb("#9C8F72"),
+                    ["AppBorder"]          = Color.FromArgb("#332B22"),
+                }
+                : new()
+                {
+                    ["AppBackground"]      = Color.FromArgb("#E8DBB8"),
+                    ["AppSurface"]         = Color.FromArgb("#F2E8CC"),
+                    ["AppAccent"]          = Color.FromArgb("#8B6F1F"),
+                    ["AppAccentSecondary"] = Color.FromArgb("#6B1F22"),
+                    ["AppText"]            = Color.FromArgb("#241F16"),
+                    ["AppTextMuted"]       = Color.FromArgb("#6B5D42"),
+                    ["AppBorder"]          = Color.FromArgb("#D4C79E"),
+                },
+
             _ => new()
         };
 
         public static (Color dark, Color light, Color accent) GetPaletteSwatchColors(AppPalette p) => p switch
         {
-            AppPalette.CendreEtWyrdstone => (Color.FromArgb("#17151A"), Color.FromArgb("#EDE7D9"), Color.FromArgb("#7FA34F")),
+            AppPalette.AshAndWarpstone => (Color.FromArgb("#17151A"), Color.FromArgb("#EDE7D9"), Color.FromArgb("#7FA34F")),
+            AppPalette.ShadowAndGold       => (Color.FromArgb("#0D0B0A"), Color.FromArgb("#E8DBB8"), Color.FromArgb("#C9A66B")),
             _                             => (Colors.Black, Colors.White, Colors.Gray)
         };
     }

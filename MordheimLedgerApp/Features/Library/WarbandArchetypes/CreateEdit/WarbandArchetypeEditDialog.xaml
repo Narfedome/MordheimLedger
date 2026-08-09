@@ -20,8 +20,7 @@
         <VerticalStackLayout x:Name="RootContent" Spacing="16" SizeChanged="OnRootContentSizeChanged">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
-                       FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                       TextColor="{DynamicResource AppText}" VerticalOptions="Center"/>
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                               Icon="{x:Static icons:SolidFont.Xmark}"
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"

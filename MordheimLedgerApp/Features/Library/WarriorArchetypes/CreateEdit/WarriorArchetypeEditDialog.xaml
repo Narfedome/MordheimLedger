@@ -20,8 +20,7 @@
         <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
-                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                   TextColor="{DynamicResource AppText}"/>
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
 
             <HorizontalStackLayout Spacing="16">
                 <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"

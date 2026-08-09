@@ -60,7 +60,7 @@
                      neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
                      empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
                      le DataTrigger sur IsSelected. -->
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>

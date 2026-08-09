@@ -86,10 +86,10 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0D0B0A" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0D0B0A" BaseSize="128,128" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -106,9 +106,18 @@
 	  <None Remove="Resources\WatermarkImages\green.png" />
 	</ItemGroup>
 
+	<!-- LogicalName explicite requis : sans lui, le nom de ressource embarquée par défaut est préfixé du
+	     namespace/chemin complet (MordheimLedgerApp.Resources.WatermarkImages.gold.png), pas juste
+	     "gold.png" - ce que ThemeService.WatermarkImageSource passe à ImageSource.FromResource. Sans ce
+	     LogicalName, la résolution échoue silencieusement (aucune erreur, le filigrane ne s'affiche
+	     simplement jamais). -->
 	<ItemGroup>
-	  <EmbeddedResource Include="Resources\WatermarkImages\gold.png" />
-	  <EmbeddedResource Include="Resources\WatermarkImages\green.png" />
+	  <EmbeddedResource Include="Resources\WatermarkImages\gold.png">
+	    <LogicalName>gold.png</LogicalName>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Resources\WatermarkImages\green.png">
+	    <LogicalName>green.png</LogicalName>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

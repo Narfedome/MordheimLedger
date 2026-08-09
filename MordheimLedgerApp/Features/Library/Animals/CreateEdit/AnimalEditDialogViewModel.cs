@@ -7,12 +7,11 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.Animals.CreateEdit;
 
-/// <summary>Same wizard pattern (identité / profil / restrictions) as WarriorArchetypeEditDialogViewModel
-/// - restriction/special-rules chips edited in memory here, recopiés sur Item à Save (voir Save),
-/// comme SpecialRules sur WarriorArchetypeEditDialogViewModel.</summary>
+/// <summary>3 onglets librement navigables (Général/Profil/Règles), même principe que
+/// WarbandArchetypeEditDialogViewModel - restriction/special-rules chips edited in memory here,
+/// recopiés sur Item à Save (voir Save).</summary>
 public partial class AnimalEditDialogViewModel : DialogViewModel<bool>
 {
-    private const int StepCount = 3;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
 
@@ -24,26 +23,30 @@ public partial class AnimalEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string title;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
     /// <summary>Vide = commun à toutes les bandes (voir Animal.RestrictedToWarbandArchetypeIds).</summary>
     public ObservableCollection<WarbandArchetype> RestrictedWarbands { get; }
+
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que MutationEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
 
     public ObservableCollection<SpecialRule> SpecialRules { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStep0))]
-    [NotifyPropertyChangedFor(nameof(IsStep1))]
-    [NotifyPropertyChangedFor(nameof(IsStep2))]
-    [NotifyPropertyChangedFor(nameof(CanGoBack))]
-    [NotifyPropertyChangedFor(nameof(IsLastStep))]
-    [NotifyPropertyChangedFor(nameof(StepLabel))]
-    private int currentStep;
+    [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsProfileTab))]
+    [NotifyPropertyChangedFor(nameof(IsRulesTab))]
+    private int selectedTab;
 
-    public bool IsStep0 => CurrentStep == 0;
-    public bool IsStep1 => CurrentStep == 1;
-    public bool IsStep2 => CurrentStep == 2;
-    public bool CanGoBack => CurrentStep > 0;
-    public bool IsLastStep => CurrentStep == StepCount - 1;
-    public string StepLabel => string.Format(Loc["LibStepLabel"], CurrentStep + 1, StepCount);
+    public bool IsGeneralTab => SelectedTab == 0;
+    public bool IsProfileTab => SelectedTab == 1;
+    public bool IsRulesTab => SelectedTab == 2;
 
     public AnimalEditDialogViewModel(Animal item, string title, IWarbandArchetypePickerService warbandPicker,
         IReadOnlyList<WarbandArchetype> allWarbandArchetypes, ISpecialRulePickerService specialRulePicker)
@@ -59,6 +62,15 @@ public partial class AnimalEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
+    private void ShowGeneralTab() => SelectedTab = 0;
+
+    [RelayCommand]
+    private void ShowProfileTab() => SelectedTab = 1;
+
+    [RelayCommand]
+    private void ShowRulesTab() => SelectedTab = 2;
+
+    [RelayCommand]
     private async Task AddRestriction()
     {
         var picked = await _warbandPicker.PickWarbandArchetypesAsync();
@@ -67,10 +79,15 @@ public partial class AnimalEditDialogViewModel : DialogViewModel<bool>
             if (RestrictedWarbands.Any(w => w.Id == warband.Id)) continue;
             RestrictedWarbands.Add(warband);
         }
+        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
     }
 
     [RelayCommand]
-    private void RemoveRestriction(WarbandArchetype warband) => RestrictedWarbands.Remove(warband);
+    private void RemoveRestriction(WarbandArchetype warband)
+    {
+        RestrictedWarbands.Remove(warband);
+        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
+    }
 
     [RelayCommand]
     private async Task AddSpecialRule()
@@ -86,21 +103,26 @@ public partial class AnimalEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 
-    [RelayCommand]
-    private void Next()
+    private bool ValidateRequiredFields()
     {
-        if (CurrentStep < StepCount - 1) CurrentStep++;
-    }
-
-    [RelayCommand]
-    private void Back()
-    {
-        if (CurrentStep > 0) CurrentStep--;
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
     }
 
     [RelayCommand]
     private void Save()
     {
+        if (!ValidateRequiredFields())
+        {
+            SelectedTab = 0;
+            return;
+        }
+
         Item.RestrictedToWarbandArchetypeIds = RestrictedWarbands.Select(w => w.Id).ToList();
         Item.SpecialRules = SpecialRules.ToList();
         Close(true);

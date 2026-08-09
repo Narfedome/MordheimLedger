@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Components.Dialogs
 {
@@ -19,5 +20,19 @@ namespace MordheimLedgerApp.Components.Dialogs
 
         [RelayCommand]
         public void Cancel() => Close(CancelResult);
+
+        /// <summary>Opens the shared chip mini-popup (Name+Description) - every chip-tap command in the
+        /// app funnels through here instead of duplicating the ShowDialogAsync/ChipDetailDialog wiring.
+        /// Lives on the generic base (not just ReadOnlyDialogViewModel) since editable dialogs
+        /// (WarbandArchetypeEditDialogViewModel) preview chips the same way while still editing them.</summary>
+        protected async Task ShowChipDetailAsync(string name, string? description) =>
+            await ShowChipDetailAsync(name, description, null);
+
+        /// <summary>Same popup, plus a read-only list of Spells shown underneath - only MagicSchool chips
+        /// pass a non-null/non-empty list (see WarbandArchetypeDetailDialogViewModel/
+        /// WarbandArchetypeEditDialogViewModel.ShowMagicSchoolDetail); every other chip type keeps using
+        /// the 2-arg overload above, unaffected.</summary>
+        protected async Task ShowChipDetailAsync(string name, string? description, IReadOnlyList<Spell>? relatedSpells) =>
+            await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(name, description, relatedSpells)));
     }
 }

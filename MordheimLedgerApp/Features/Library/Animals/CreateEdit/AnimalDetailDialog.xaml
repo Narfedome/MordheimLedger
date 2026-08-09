@@ -48,8 +48,8 @@
                  fourni explicitement. -->
             <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}"/>
 
-            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarbandsPh}"
-                                      EmptyHintText="{loc:Loc LibRestrictedToAllHint}"
+            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                      AlwaysShowSection="True"
                                       ItemsSource="{Binding RestrictedWarbands}"
                                       IconGlyph="{x:Static icons:SolidFont.Shield}"
                                       Command="{Binding ShowWarbandDetailCommand}"/>

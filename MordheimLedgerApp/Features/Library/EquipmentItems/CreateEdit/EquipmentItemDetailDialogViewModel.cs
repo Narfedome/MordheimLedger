@@ -22,6 +22,11 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que EquipmentItemEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel,
         List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
     {

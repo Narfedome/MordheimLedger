@@ -13,6 +13,11 @@ public partial class MutationDetailDialogViewModel : ReadOnlyDialogViewModel
     /// same idiom as MutationViewModel.GroupNameFor, no service call needed here.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
 
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que MutationEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+
     public MutationDetailDialogViewModel(Mutation item, List<WarbandArchetype> restrictedWarbands)
     {
         Item = item;

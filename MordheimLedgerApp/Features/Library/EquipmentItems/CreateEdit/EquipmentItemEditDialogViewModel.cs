@@ -26,10 +26,28 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsRulesTab))]
+    private int selectedTab;
+
+    public bool IsGeneralTab => SelectedTab == 0;
+    public bool IsRulesTab => SelectedTab == 1;
+
     /// <summary>Édité en mémoire ici, recopié sur Item.RestrictedToWarbandArchetypeIds à la sauvegarde -
     /// même principe que WarriorArchetypeEditDialogViewModel.SpecialRules. Vide = commun à toutes les
     /// bandes (voir EquipmentItem.RestrictedToWarbandArchetypeIds).</summary>
     public ObservableCollection<WarbandArchetype> RestrictedWarbands { get; }
+
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que MutationEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
 
     public ObservableCollection<SpecialRule> SpecialRules { get; }
 
@@ -61,6 +79,12 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
+    private void ShowGeneralTab() => SelectedTab = 0;
+
+    [RelayCommand]
+    private void ShowRulesTab() => SelectedTab = 1;
+
+    [RelayCommand]
     private async Task AddRestriction()
     {
         var picked = await _warbandPicker.PickWarbandArchetypesAsync();
@@ -69,10 +93,15 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
             if (RestrictedWarbands.Any(w => w.Id == warband.Id)) continue;
             RestrictedWarbands.Add(warband);
         }
+        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
     }
 
     [RelayCommand]
-    private void RemoveRestriction(WarbandArchetype warband) => RestrictedWarbands.Remove(warband);
+    private void RemoveRestriction(WarbandArchetype warband)
+    {
+        RestrictedWarbands.Remove(warband);
+        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
+    }
 
     [RelayCommand]
     private async Task AddSpecialRule()
@@ -88,9 +117,26 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 
+    private bool ValidateRequiredFields()
+    {
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
+    }
+
     [RelayCommand]
     private void Save()
     {
+        if (!ValidateRequiredFields())
+        {
+            SelectedTab = 0;
+            return;
+        }
+
         Item.RestrictedToWarbandArchetypeIds = RestrictedWarbands.Select(w => w.Id).ToList();
         Item.SpecialRules = SpecialRules.ToList();
         Close(true);

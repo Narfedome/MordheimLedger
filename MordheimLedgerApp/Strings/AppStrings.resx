@@ -315,9 +315,6 @@
   <data name="BtnSave" xml:space="preserve">
     <value>Enregistrer</value>
   </data>
-  <data name="LibManageWarriors" xml:space="preserve">
-    <value>Gérer les guerriers</value>
-  </data>
   <data name="LibDescriptionPh" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -360,6 +357,9 @@
   <data name="LibNoDescription" xml:space="preserve">
     <value>Aucune description.</value>
   </data>
+  <data name="LibFieldRequired" xml:space="preserve">
+    <value>Ce champ est obligatoire.</value>
+  </data>
   <data name="LibDetailsTooltip" xml:space="preserve">
     <value>Détails</value>
   </data>
@@ -399,14 +399,17 @@
   <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
     <value>Général</value>
   </data>
+  <data name="WarbandArchetypeTabRules" xml:space="preserve">
+    <value>Règles</value>
+  </data>
+  <data name="WarbandArchetypeTabMagic" xml:space="preserve">
+    <value>Magie</value>
+  </data>
   <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
     <value>Guerriers</value>
   </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
-    <value>Équipement</value>
-  </data>
-  <data name="WarbandArchetypeTabRules" xml:space="preserve">
-    <value>Règles</value>
+    <value>Listes d'équipement</value>
   </data>
   <data name="WarbandArchetypeEditTitle" xml:space="preserve">
     <value>Modifier le type de bande</value>
@@ -504,6 +507,9 @@
   <data name="SpellNamePh" xml:space="preserve">
     <value>Nom du sort</value>
   </data>
+  <data name="LibSpellsPh" xml:space="preserve">
+    <value>Sorts</value>
+  </data>
   <data name="SpellCreateTitle" xml:space="preserve">
     <value>Nouveau sort</value>
   </data>
@@ -524,6 +530,9 @@
   </data>
   <data name="LibTabSpells" xml:space="preserve">
     <value>Sorts</value>
+  </data>
+  <data name="LibTabProfile" xml:space="preserve">
+    <value>Profil</value>
   </data>
   <data name="InjurySelectTitle" xml:space="preserve">
     <value>Choisir une blessure</value>
@@ -1011,8 +1020,14 @@
   <data name="LibFilterCommon" xml:space="preserve">
     <value>Commun</value>
   </data>
-  <data name="LibFilterSpecialRuleFighters" xml:space="preserve">
-    <value>Guerriers &amp; Bandes</value>
+  <data name="LibFilterSpecialRuleWarbands" xml:space="preserve">
+    <value>Bandes</value>
+  </data>
+  <data name="LibFilterSpecialRuleWarriors" xml:space="preserve">
+    <value>Guerriers</value>
+  </data>
+  <data name="LibFilterSpecialRuleAnimals" xml:space="preserve">
+    <value>Montures</value>
   </data>
   <data name="LibFilterSpecialRuleItems" xml:space="preserve">
     <value>Objets</value>
@@ -1028,9 +1043,6 @@
   </data>
   <data name="WarriorArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des guerriers</value>
-  </data>
-  <data name="LibManageEquipmentLists" xml:space="preserve">
-    <value>Gérer les listes d'équipement</value>
   </data>
   <data name="EquipmentListCreateTitle" xml:space="preserve">
     <value>Nouvelle liste d'équipement</value>

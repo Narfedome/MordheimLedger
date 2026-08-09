@@ -46,8 +46,8 @@
                 <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
             </VerticalStackLayout>
 
-            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarbandsPh}"
-                                      EmptyHintText="{loc:Loc LibRestrictedToAllHint}"
+            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                      AlwaysShowSection="True"
                                       ItemsSource="{Binding RestrictedWarbands}"
                                       IconGlyph="{x:Static icons:SolidFont.Shield}"
                                       Command="{Binding ShowWarbandDetailCommand}"/>

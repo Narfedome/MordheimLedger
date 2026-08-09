@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows.Input;
 
@@ -17,13 +18,27 @@ public partial class ChipListView : ContentView
 
     public static readonly BindableProperty ItemsSourceProperty =
         BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(ChipListView),
-            propertyChanged: (bindable, _, _) => ((ChipListView)bindable).Recompute());
+            propertyChanged: (bindable, oldValue, newValue) => ((ChipListView)bindable).OnItemsSourceChanged((IEnumerable?)oldValue, (IEnumerable?)newValue));
 
     public IEnumerable? ItemsSource
     {
         get => (IEnumerable?)GetValue(ItemsSourceProperty);
         set => SetValue(ItemsSourceProperty, value);
     }
+
+    // ItemsSource reste la même instance d'ObservableCollection tout au long d'une session d'édition
+    // (AddWarrior/RemoveWarrior etc. mutent en place, ils ne réassignent jamais la propriété) - sans ce
+    // second abonnement, HasItems/ShowSection ne se recalculaient qu'au tout premier binding, restant
+    // figés à "vide" (donc FlexLayout cachée) pour le reste de la session dès qu'on partait d'une liste
+    // vide, même si BindableLayout affichait correctement les nouveaux items en dessous.
+    private void OnItemsSourceChanged(IEnumerable? oldValue, IEnumerable? newValue)
+    {
+        if (oldValue is INotifyCollectionChanged oldIncc) oldIncc.CollectionChanged -= OnItemsCollectionChanged;
+        if (newValue is INotifyCollectionChanged newIncc) newIncc.CollectionChanged += OnItemsCollectionChanged;
+        Recompute();
+    }
+
+    private void OnItemsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => Recompute();
 
     // "FontSolid" = Font Awesome 7 Free Solid (voir MauiProgram.ConfigureFonts) - la police de la
     // grande majorité des chips existants ; les icônes RpgAwesome (écoles de magie, animaux...)
@@ -57,6 +72,33 @@ public partial class ChipListView : ContentView
         set => SetValue(CommandProperty, value);
     }
 
+    // Non renseignée (défaut, usages en lecture seule) : pas de bouton "+" à côté de HeaderText.
+    // Renseignée (dialogs éditables, ex. WarbandArchetypeEditDialog) : affiche un petit
+    // FaIconButtonView GhostIconButtonStyle "+" invoquant cette commande - remplace le pattern
+    // Grid+FaIconButtonView dupliqué manuellement par chaque dialog Edit.
+    public static readonly BindableProperty AddCommandProperty =
+        BindableProperty.Create(nameof(AddCommand), typeof(ICommand), typeof(ChipListView),
+            propertyChanged: (bindable, _, _) => ((ChipListView)bindable).Recompute());
+
+    public ICommand? AddCommand
+    {
+        get => (ICommand?)GetValue(AddCommandProperty);
+        set => SetValue(AddCommandProperty, value);
+    }
+
+    // Non renseignée (défaut) : pas de bouton Xmark sur les chips (usages en lecture seule).
+    // Renseignée : chaque chip affiche un petit Xmark supplémentaire, invoqué avec l'item du chip en
+    // CommandParameter (même idée que Command, un second point d'entrée pour "retirer" plutôt que
+    // "voir le détail/éditer").
+    public static readonly BindableProperty RemoveCommandProperty =
+        BindableProperty.Create(nameof(RemoveCommand), typeof(ICommand), typeof(ChipListView));
+
+    public ICommand? RemoveCommand
+    {
+        get => (ICommand?)GetValue(RemoveCommandProperty);
+        set => SetValue(RemoveCommandProperty, value);
+    }
+
     // Non renseigné (défaut) : la section entière (header inclus) se masque si ItemsSource est vide.
     // Renseigné : affiché à la place du FlexLayout quand ItemsSource est vide (ex. "Réservé à ces
     // bandes : vide = commun à toutes les bandes" sur EquipmentItemDetailDialog).
@@ -68,6 +110,20 @@ public partial class ChipListView : ContentView
     {
         get => (string?)GetValue(EmptyHintTextProperty);
         set => SetValue(EmptyHintTextProperty, value);
+    }
+
+    // Lecture seule uniquement (pas d'AddCommand pour forcer ShowSection quand la liste est vide, voir
+    // Recompute) : garde la section visible même vide, pour les cas où HeaderText lui-même porte déjà le
+    // message "vide" (ex. RestrictedWarbandsHeaderText qui bascule sur "Commun à toutes les bandes") -
+    // évite de dupliquer ce message dans EmptyHintText en plus du header.
+    public static readonly BindableProperty AlwaysShowSectionProperty =
+        BindableProperty.Create(nameof(AlwaysShowSection), typeof(bool), typeof(ChipListView), false,
+            propertyChanged: (bindable, _, _) => ((ChipListView)bindable).Recompute());
+
+    public bool AlwaysShowSection
+    {
+        get => (bool)GetValue(AlwaysShowSectionProperty);
+        set => SetValue(AlwaysShowSectionProperty, value);
     }
 
     // Calculées à partir d'ItemsSource/EmptyHintText (voir Recompute) - pas destinées à être posées
@@ -98,6 +154,8 @@ public partial class ChipListView : ContentView
     private void Recompute()
     {
         HasItems = ItemsSource?.Cast<object>().Any() ?? false;
-        ShowSection = HasItems || !string.IsNullOrEmpty(EmptyHintText);
+        // AddCommand renseignée : la section (header + bouton "+") reste visible même liste vide,
+        // pour pouvoir ajouter le tout premier élément.
+        ShowSection = HasItems || !string.IsNullOrEmpty(EmptyHintText) || AddCommand != null || AlwaysShowSection;
     }
 }

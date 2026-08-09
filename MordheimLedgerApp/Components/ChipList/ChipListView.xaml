@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Components.ChipListView"
              x:Name="root">
 
@@ -10,27 +12,44 @@
          avec une propriété Name (binding faiblement typé dans le DataTemplate interne, pas besoin
          d'interface commune). ShowSection/HasItems sont calculées
          (voir code-behind) : la section entière se masque si ItemsSource est vide ET qu'aucun
-         EmptyHintText n'est fourni ; si EmptyHintText est fourni, il s'affiche à la place du
-         FlexLayout quand la liste est vide (cas "Réservé à ces bandes : vide = commun à toutes"). -->
+         EmptyHintText/AddCommand n'est fourni ; si EmptyHintText est fourni, il s'affiche à la place du
+         FlexLayout quand la liste est vide (cas "Réservé à ces bandes : vide = commun à toutes").
+         AddCommand/RemoveCommand (optionnelles, null par défaut) ajoutent respectivement un bouton "+"
+         à côté du header et un Xmark sur chaque chip - utilisées par les dialogs éditables
+         (WarbandArchetypeEditDialog), sans impact sur les usages en lecture seule qui ne les renseignent
+         pas. -->
     <VerticalStackLayout Spacing="8" BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}">
-        <Label Text="{Binding HeaderText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+        <Grid ColumnDefinitions="*,Auto">
+            <Label Grid.Column="0" Text="{Binding HeaderText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
+                                          Command="{Binding AddCommand}"/>
+        </Grid>
         <Label Text="{Binding EmptyHintText}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
                IsVisible="{Binding HasItems, Converter={StaticResource InverseBoolConverter}}"/>
         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ItemsSource}" IsVisible="{Binding HasItems}">
             <BindableLayout.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                    <Border Style="{StaticResource ChipBorderStyle}" Margin="0,0,4,4" >
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding Source={x:Reference root}, Path=Command}"
                                 CommandParameter="{Binding .}"/>
                         </Border.GestureRecognizers>
-                        <HorizontalStackLayout Spacing="4">
-                            <Label Text="{Binding Source={x:Reference root}, Path=IconGlyph}"
+                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="4" HeightRequest="36" Margin="8,0">
+                            <Label Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=IconGlyph}"
                                    FontFamily="{Binding Source={x:Reference root}, Path=IconFontFamily}"
                                    FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                            <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                        </HorizontalStackLayout>
+                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Xmark}"
+                                                          IconSize="10" Padding="0,0,-8,0"
+                                                          IsVisible="{Binding Source={x:Reference root}, Path=RemoveCommand, Converter={StaticResource IsNotNullConverter}}"
+                                                          Command="{Binding Source={x:Reference root}, Path=RemoveCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                        </Grid>
                     </Border>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>

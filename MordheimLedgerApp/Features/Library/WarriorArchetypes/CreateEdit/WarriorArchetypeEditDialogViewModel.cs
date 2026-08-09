@@ -9,7 +9,6 @@ namespace MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
 
 public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 {
-    private const int StepCount = 3;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly Dictionary<string, EquipmentList> _equipmentListByLabel = new();
 
@@ -35,21 +34,27 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedEquipmentListLabel = string.Empty;
 
+    /// <summary>Champ texte unique pour le Mouvement - accepte un nombre ("4") ou une surcharge libre
+    /// ("2D6" pour les Squigs des cavernes). Résolu vers Item.Movement/Item.MovementOverride au Save
+    /// selon que ça parse comme int ou non, plutôt que 2 champs séparés (Entry numérique + Entry
+    /// texte) - un seul champ, comme sur la fiche officielle.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStep0))]
-    [NotifyPropertyChangedFor(nameof(IsStep1))]
-    [NotifyPropertyChangedFor(nameof(IsStep2))]
-    [NotifyPropertyChangedFor(nameof(CanGoBack))]
-    [NotifyPropertyChangedFor(nameof(IsLastStep))]
-    [NotifyPropertyChangedFor(nameof(StepLabel))]
-    private int currentStep;
+    private string movementInput;
 
-    public bool IsStep0 => CurrentStep == 0;
-    public bool IsStep1 => CurrentStep == 1;
-    public bool IsStep2 => CurrentStep == 2;
-    public bool CanGoBack => CurrentStep > 0;
-    public bool IsLastStep => CurrentStep == StepCount - 1;
-    public string StepLabel => string.Format(Loc["LibStepLabel"], CurrentStep + 1, StepCount);
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
+    [NotifyPropertyChangedFor(nameof(IsProfileTab))]
+    [NotifyPropertyChangedFor(nameof(IsRulesTab))]
+    private int selectedTab;
+
+    public bool IsGeneralTab => SelectedTab == 0;
+    public bool IsProfileTab => SelectedTab == 1;
+    public bool IsRulesTab => SelectedTab == 2;
 
     public WarriorArchetypeEditDialogViewModel(WarriorArchetype item, string title, ISpecialRulePickerService specialRulePicker,
         IReadOnlyList<EquipmentList> allEquipmentLists)
@@ -58,6 +63,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         this.title = title;
         _specialRulePicker = specialRulePicker;
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
+        movementInput = item.MovementOverride ?? item.Movement.ToString();
 
         var noneLabel = Loc["WarriorArchetypeEquipmentListNone"];
         EquipmentListOptions.Add(noneLabel);
@@ -74,9 +80,18 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         Item.EquipmentListId = _equipmentListByLabel.TryGetValue(value, out var list) ? list.Id : null;
 
     [RelayCommand]
+    private void ShowGeneralTab() => SelectedTab = 0;
+
+    [RelayCommand]
+    private void ShowProfileTab() => SelectedTab = 1;
+
+    [RelayCommand]
+    private void ShowRulesTab() => SelectedTab = 2;
+
+    [RelayCommand]
     private async Task AddSpecialRule()
     {
-        var picked = await _specialRulePicker.PickSpecialRulesAsync();
+        var picked = await _specialRulePicker.PickSpecialRulesAsync(SpecialRuleFilterKind.Warrior);
         foreach (var rule in picked)
         {
             if (SpecialRules.Any(r => r.Id == rule.Id)) continue;
@@ -87,22 +102,38 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 
-    [RelayCommand]
-    private void Next()
+    private bool ValidateRequiredFields()
     {
-        if (CurrentStep < StepCount - 1) CurrentStep++;
-    }
-
-    [RelayCommand]
-    private void Back()
-    {
-        if (CurrentStep > 0) CurrentStep--;
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
     }
 
     [RelayCommand]
     private void Save()
     {
+        if (!ValidateRequiredFields())
+        {
+            SelectedTab = 0;
+            return;
+        }
+
         Item.SpecialRules = SpecialRules.ToList();
+
+        if (int.TryParse(MovementInput, out var movement))
+        {
+            Item.Movement = movement;
+            Item.MovementOverride = null;
+        }
+        else
+        {
+            Item.MovementOverride = MovementInput;
+        }
+
         Close(true);
     }
 }

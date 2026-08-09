@@ -14,10 +14,5 @@ namespace MordheimLedgerApp.Components.Dialogs
 
         [ObservableProperty]
         private string title = string.Empty;
-
-        /// <summary>Opens the shared chip mini-popup - every XxxDetailDialog's chip-tap commands funnel
-        /// through here instead of duplicating the ShowDialogAsync/ChipDetailDialog wiring 8 times.</summary>
-        protected async Task ShowChipDetailAsync(string name, string? description) =>
-            await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(name, description)));
     }
 }

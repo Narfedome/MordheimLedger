@@ -26,6 +26,11 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
     /// <summary>Édité en mémoire ici, recopié sur Item.RestrictedToWarbandArchetypeIds à la sauvegarde -
     /// même principe qu'EquipmentItemEditDialogViewModel.RestrictedWarbands. Vide = commun à toutes les
     /// bandes (voir Skill.RestrictedToWarbandArchetypeIds).</summary>
@@ -40,6 +45,16 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
     /// <summary>Pilote l'affichage du bloc "Réservé à ces guerriers" - inutile tant qu'aucune bande
     /// n'est sélectionnée (rien à restreindre).</summary>
     public bool HasRestrictedWarbands => RestrictedWarbands.Count > 0;
+
+    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
+    /// même principe que MutationEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
+    public string RestrictedWarbandsHeaderText =>
+        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+
+    /// <summary>Même principe un niveau en dessous - "Réservé à ces guerriers" tant qu'il y a des
+    /// guerriers cochés, remplacé par l'indice "vide = tout guerrier des bandes sélectionnées" sinon.</summary>
+    public string RestrictedWarriorsHeaderText =>
+        RestrictedWarriors.Count > 0 ? Loc["LibRestrictedToWarriorsPh"] : Loc["LibRestrictedToWarriorsHint"];
 
     public SkillEditDialogViewModel(Skill item, string title, IWarbandArchetypePickerService warbandPicker,
         IWarriorArchetypePickerService warriorPicker, IReadOnlyList<WarbandArchetype> allWarbandArchetypes,
@@ -79,6 +94,7 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
             RestrictedWarbands.Add(warband);
         }
         OnPropertyChanged(nameof(HasRestrictedWarbands));
+        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
     }
 
     [RelayCommand]
@@ -90,6 +106,8 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
         foreach (var warrior in RestrictedWarriors.Where(w => w.WarbandArchetypeId == warband.Id).ToList())
             RestrictedWarriors.Remove(warrior);
         OnPropertyChanged(nameof(HasRestrictedWarbands));
+        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
+        OnPropertyChanged(nameof(RestrictedWarriorsHeaderText));
     }
 
     [RelayCommand]
@@ -101,14 +119,32 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
             if (RestrictedWarriors.Any(w => w.Id == warrior.Id)) continue;
             RestrictedWarriors.Add(warrior);
         }
+        OnPropertyChanged(nameof(RestrictedWarriorsHeaderText));
     }
 
     [RelayCommand]
-    private void RemoveRestrictedWarrior(WarriorArchetype warrior) => RestrictedWarriors.Remove(warrior);
+    private void RemoveRestrictedWarrior(WarriorArchetype warrior)
+    {
+        RestrictedWarriors.Remove(warrior);
+        OnPropertyChanged(nameof(RestrictedWarriorsHeaderText));
+    }
+
+    private bool ValidateRequiredFields()
+    {
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
+    }
 
     [RelayCommand]
     private void Save()
     {
+        if (!ValidateRequiredFields()) return;
+
         Item.RestrictedToWarbandArchetypeIds = RestrictedWarbands.Select(w => w.Id).ToList();
         Item.RestrictedToWarriorArchetypeIds = RestrictedWarriors.Select(w => w.Id).ToList();
         Close(true);

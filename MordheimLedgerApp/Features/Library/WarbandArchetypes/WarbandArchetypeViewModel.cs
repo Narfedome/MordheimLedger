@@ -4,9 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.EquipmentLists;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
-using MordheimLedgerApp.Features.Library.WarriorArchetypes;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes;
@@ -16,6 +14,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private readonly ILibraryService _libraryService;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
+    private readonly IEquipmentPickerService _equipmentPicker;
     private readonly IWarbandArchetypePickerNavigationService _pickerNavigation;
 
     private List<WarbandArchetype> _allItems = new();
@@ -55,11 +54,13 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
     public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker,
-        IMagicSchoolPickerService magicSchoolPicker, IWarbandArchetypePickerNavigationService pickerNavigation)
+        IMagicSchoolPickerService magicSchoolPicker, IEquipmentPickerService equipmentPicker,
+        IWarbandArchetypePickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
         _specialRulePicker = specialRulePicker;
         _magicSchoolPicker = magicSchoolPicker;
+        _equipmentPicker = equipmentPicker;
         _pickerNavigation = pickerNavigation;
 
         // Les pages Bibliothèque sont des onglets TabBar gardés en mémoire par Shell - OnNavigatedTo ne
@@ -160,11 +161,13 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Create()
     {
-        var newItem = new WarbandArchetype();
-        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"], _specialRulePicker, _magicSchoolPicker);
+        // Valeurs de départ raisonnables plutôt que 0/null - purement indicatives, l'utilisateur les
+        // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
+        var newItem = new WarbandArchetype { StartingTreasury = 500, MaxWarriors = 10 };
+        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"],
+            _specialRulePicker, _magicSchoolPicker, _libraryService, _equipmentPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveWarbandArchetypeAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
     }
 
@@ -190,10 +193,10 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             MagicSchools = new List<MagicSchool>(s.MagicSchools)
         };
 
-        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"], _specialRulePicker, _magicSchoolPicker);
+        var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"],
+            _specialRulePicker, _magicSchoolPicker, _libraryService, _equipmentPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
-        await _libraryService.SaveWarbandArchetypeAsync(copy, LocalizationService.Instance.Language);
         await LoadData();
     }
 
@@ -218,30 +221,4 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     private Task ShowDetails(WarbandArchetypeRow row) =>
         ShowDialogAsync(new WarbandArchetypeDetailDialog(
             new WarbandArchetypeDetailDialogViewModel(row.Item, _libraryService)));
-
-    [RelayCommand]
-    private async Task ManageWarriors()
-    {
-        if (SelectedRow is not { } row) return;
-
-        await Shell.Current.GoToAsync(nameof(WarriorArchetypeListPage),
-            new Dictionary<string, object>
-            {
-                { "WarbandArchetypeId", row.Item.Id },
-                { "WarbandArchetypeName", row.Item.Name }
-            });
-    }
-
-    [RelayCommand]
-    private async Task ManageEquipmentLists()
-    {
-        if (SelectedRow is not { } row) return;
-
-        await Shell.Current.GoToAsync(nameof(EquipmentListListPage),
-            new Dictionary<string, object>
-            {
-                { "WarbandArchetypeId", row.Item.Id },
-                { "WarbandArchetypeName", row.Item.Name }
-            });
-    }
 }

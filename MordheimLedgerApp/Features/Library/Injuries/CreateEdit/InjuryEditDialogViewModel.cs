@@ -23,6 +23,11 @@ public partial class InjuryEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
 
+    /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
+    /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
+    [ObservableProperty]
+    private string? nameError;
+
     public InjuryEditDialogViewModel(Injury item, string title)
     {
         this.item = item;
@@ -44,6 +49,21 @@ public partial class InjuryEditDialogViewModel : DialogViewModel<bool>
             Item.Category = category;
     }
 
+    private bool ValidateRequiredFields()
+    {
+        if (string.IsNullOrWhiteSpace(Item.Name))
+        {
+            NameError = Loc["LibFieldRequired"];
+            return false;
+        }
+        NameError = null;
+        return true;
+    }
+
     [RelayCommand]
-    private void Save() => Close(true);
+    private void Save()
+    {
+        if (!ValidateRequiredFields()) return;
+        Close(true);
+    }
 }

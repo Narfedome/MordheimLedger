@@ -27,8 +27,10 @@ public class Spell
     /// <summary>Resolved from MagicSchoolId - see LibraryService.GetSpellsAsync.</summary>
     public MagicSchool? MagicSchool { get; set; }
 
-    /// <summary>The die-roll result this entry corresponds to (1-6 for a D6 table, etc.).</summary>
-    public int RollValue { get; set; }
+    /// <summary>The die-roll result this entry corresponds to (1-6 for a D6 table, etc.). Defaults to 1
+    /// (never 0, which is never a valid roll on a D6/2D6 table) so a freshly created Spell doesn't start
+    /// on an already-invalid value.</summary>
+    public int RollValue { get; set; } = 1;
 
     /// <summary>Target number to cast ("Difficulté X") - null for tables that don't use one.</summary>
     public int? Difficulty { get; set; }

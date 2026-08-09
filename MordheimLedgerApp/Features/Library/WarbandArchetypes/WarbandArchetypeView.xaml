@@ -113,14 +113,6 @@
                                          Command="{Binding DeleteCommand}"
                                          Tooltip="{loc:Loc BtnDelete}"
                                          IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
-            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.UserShield}"
-                                         Command="{Binding ManageWarriorsCommand}"
-                                         Tooltip="{loc:Loc LibManageWarriors}"
-                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
-            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.ListCheck}"
-                                         Command="{Binding ManageEquipmentListsCommand}"
-                                         Tooltip="{loc:Loc LibManageEquipmentLists}"
-                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
         </HorizontalStackLayout>
 
         <!-- Multi-sélection : un tap bascule le liseré bleu (IsSelected) de la tuile, Confirmer ajoute

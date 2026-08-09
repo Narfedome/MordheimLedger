@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
-#define MyAppName "MordheimLedger"
+#define MyAppName "Mordheim Ledger"
 ; Passée en ligne de commande par Build-Installer.ps1 (calquée sur ApplicationDisplayVersion du
 ; csproj : major.minor à la main + patch = nombre de commits git). Valeur de repli si le script
 ; n'est pas utilisé (compilation manuelle depuis l'IDE Inno Setup).
@@ -18,7 +18,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{7B7B8094-4771-4457-9D3D-44798FCECB1B}
+AppId={{8F90B23B-3419-4897-8533-0AB31D6F75DD}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}

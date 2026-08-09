@@ -186,4 +186,22 @@
 		<Delete Files="@(_StampToDelete)" Condition="'@(_StampToDelete)' != ''" />
 	</Target>
 
+	<!-- Régénère l'asset de base pré-seedée (Resources\Raw\seed.db3, copié tel quel au premier lancement
+	     plutôt que rejoué à froid - voir MauiProgram.EnsureDatabaseFileExists) dès qu'un JSON de
+	     Data\SeedData a changé depuis la dernière génération - voir Tools\DbSeedGenerator, qui réutilise
+	     AppDatabase telle quelle (aucune logique de seed dupliquée). Inputs/Outputs : ne relance le
+	     générateur (un `dotnet run` séparé, potentiellement plusieurs secondes) que si nécessaire, pas à
+	     chaque build. Ne surveille que les JSON, pas le code de seed C# (AppDatabase.cs etc.) - si ce
+	     dernier change sans qu'un JSON change aussi, supprimer seed.db3 à la main pour forcer la
+	     régénération. -->
+	<ItemGroup>
+		<CoreSeedJsonFiles Include="..\MordheimLedgerApp.Core\Data\SeedData\*.json" />
+	</ItemGroup>
+
+	<Target Name="GenerateSeedDatabase" BeforeTargets="BeforeBuild"
+	        Inputs="@(CoreSeedJsonFiles)"
+	        Outputs="$(MSBuildProjectDirectory)\Resources\Raw\seed.db3">
+		<Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\Tools\DbSeedGenerator\DbSeedGenerator.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\Resources\Raw\seed.db3&quot;" />
+	</Target>
+
 </Project>

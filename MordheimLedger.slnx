@@ -2,4 +2,5 @@
   <Project Path="MordheimLedgerApp/MordheimLedgerApp.csproj" />
   <Project Path="MordheimLedgerApp.Core/MordheimLedgerApp.Core.csproj" />
   <Project Path="MordheimLedgerApp.Tests/MordheimLedgerApp.Tests.csproj" />
+  <Project Path="Tools/DbSeedGenerator/DbSeedGenerator.csproj" />
 </Solution>

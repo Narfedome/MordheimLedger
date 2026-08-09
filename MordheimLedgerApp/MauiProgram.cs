@@ -28,6 +28,8 @@ namespace MordheimLedgerApp
 
         public static MauiApp CreateMauiApp()
         {
+            EnsureDatabaseFileExists();
+
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
@@ -114,6 +116,25 @@ namespace MordheimLedgerApp
 #endif
 
             return builder.Build();
+        }
+
+        /// <summary>Premier lancement (dbPath n'existe pas encore) : copie la base déjà entièrement
+        /// seedée embarquée comme asset (Resources/Raw/seed.db3, régénérée à chaque build depuis
+        /// Data/SeedData/*.json tant qu'un JSON a changé - voir MordheimLedgerApp.csproj/
+        /// GenerateSeedDatabase et Tools/DbSeedGenerator) plutôt que de laisser AppDatabase rejouer les
+        /// ~22 passes de seed JSON->SQLite à froid sur l'appareil. AppDatabase garde son garde-fou "table
+        /// vide -> seed" (InitializeAsync) totalement inchangé : la base copiée n'étant plus vide, il ne
+        /// se déclenche simplement jamais après un premier lancement. Lancements suivants (dbPath existe
+        /// déjà, campagnes/contenu personnalisé de l'utilisateur dedans) : no-op immédiat.
+        /// GetAwaiter().GetResult() volontaire ici (avant tout dispatcher UI, un seul blocage au tout
+        /// premier lancement) - CreateMauiApp() elle-même n'est pas async côté framework.</summary>
+        private static void EnsureDatabaseFileExists()
+        {
+            if (File.Exists(dbPath)) return;
+
+            using var source = FileSystem.OpenAppPackageFileAsync("seed.db3").GetAwaiter().GetResult();
+            using var destination = File.Create(dbPath);
+            source.CopyTo(destination);
         }
     }
 }

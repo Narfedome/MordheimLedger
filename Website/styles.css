@@ -1,11 +1,11 @@
 :root {
-  --bg: #1c1a2e;
-  --surface: #2a2750;
-  --accent: #c9a84c;
-  --accent-2: #6b5daa;
-  --text: #f0ede0;
-  --text-muted: #a09880;
-  --border: #3d3a65;
+  --bg: #0d0b0a;
+  --surface: #1a1512;
+  --accent: #c9a66b;
+  --accent-2: #5c1a1e;
+  --text: #ede0c0;
+  --text-muted: #9c8f72;
+  --border: #332b22;
 }
 
 * {
@@ -50,7 +50,7 @@ header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(28, 26, 46, 0.9);
+  background: rgba(13, 11, 10, 0.9);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--border);
 }
@@ -114,11 +114,11 @@ nav.container {
 
 .btn-primary {
   background: var(--accent);
-  color: #1c1a2e !important;
+  color: #0d0b0a !important;
 }
 
 .btn-primary:hover {
-  background: #ddbc63;
+  background: #ddc38f;
 }
 
 .btn-secondary {
@@ -162,7 +162,7 @@ nav.container {
 .hero {
   text-align: center;
   padding: 96px 24px 72px;
-  background: radial-gradient(ellipse at 50% -10%, rgba(107, 93, 170, 0.35), transparent 60%);
+  background: radial-gradient(ellipse at 50% -10%, rgba(201, 166, 107, 0.25), transparent 60%);
 }
 
 .hero img.hero-logo {
@@ -390,7 +390,7 @@ section > .container > p.section-intro {
 }
 
 .status.soon {
-  background: rgba(201, 168, 76, 0.15);
+  background: rgba(201, 166, 107, 0.15);
   color: var(--accent);
 }
 

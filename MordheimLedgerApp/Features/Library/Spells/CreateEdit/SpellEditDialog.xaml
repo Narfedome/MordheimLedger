@@ -19,8 +19,7 @@
         <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
-                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                   TextColor="{DynamicResource AppText}"/>
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
             <VerticalStackLayout Spacing="4">
                 <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
                     <Label.FormattedText>

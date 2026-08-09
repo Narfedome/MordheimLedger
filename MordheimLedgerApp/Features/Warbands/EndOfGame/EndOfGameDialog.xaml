@@ -18,8 +18,7 @@
         <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
         <VerticalStackLayout Spacing="16">
             <Label Text="{loc:Loc EndOfGameTitle}"
-                   FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"
-                   TextColor="{DynamicResource AppText}"/>
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
             <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
 
             <!-- Étape 1 : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->

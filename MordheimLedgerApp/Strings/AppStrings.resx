@@ -1077,4 +1077,10 @@
   <data name="LibSelectSectionTitle" xml:space="preserve">
     <value>Choisir une section</value>
   </data>
+  <data name="PaletteAshAndWarpstone" xml:space="preserve">
+    <value>Cendre &amp; Malepierre</value>
+  </data>
+  <data name="PaletteShadowAndGold" xml:space="preserve">
+    <value>Ténèbre &amp; Or</value>
+  </data>
 </root>

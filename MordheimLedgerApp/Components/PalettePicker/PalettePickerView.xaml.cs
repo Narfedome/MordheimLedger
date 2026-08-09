@@ -6,7 +6,7 @@ namespace MordheimLedgerApp.Components.PalettePicker
     {
         public static readonly BindableProperty SelectedPaletteProperty =
             BindableProperty.Create(nameof(SelectedPalette), typeof(AppPalette), typeof(PalettePickerView),
-                AppPalette.CendreEtWyrdstone, BindingMode.TwoWay, propertyChanged: (b, _, n) =>
+                AppPalette.ShadowAndGold, BindingMode.TwoWay, propertyChanged: (b, _, n) =>
                     ((PalettePickerView)b).UpdateSelection((AppPalette)n));
 
         public AppPalette SelectedPalette
@@ -21,11 +21,13 @@ namespace MordheimLedgerApp.Components.PalettePicker
             UpdateSelection(SelectedPalette);
         }
 
-        private void SelectA(object? sender, TappedEventArgs e) => SelectedPalette = AppPalette.CendreEtWyrdstone;
+        private void SelectA(object? sender, TappedEventArgs e) => SelectedPalette = AppPalette.ShadowAndGold;
+        private void SelectB(object? sender, TappedEventArgs e) => SelectedPalette = AppPalette.AshAndWarpstone;
 
         private void UpdateSelection(AppPalette palette)
         {
-            SetBorder(BorderA, palette == AppPalette.CendreEtWyrdstone, "#7FA34F");
+            SetBorder(BorderA, palette == AppPalette.ShadowAndGold, "#C9A66B");
+            SetBorder(BorderB, palette == AppPalette.AshAndWarpstone, "#7FA34F");
         }
 
         private static void SetBorder(Border border, bool selected, string accentHex)

@@ -5,10 +5,15 @@
              x:Class="MordheimLedgerApp.Components.WatermarkedLayout">
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <Grid>
+            <!-- HorizontalOptions/VerticalOptions="Fill" explicites : sans eux, un Grid sans
+                 RowDefinitions/ColumnDefinitions dans un ControlTemplate peut, sur WinUI, se
+                 dimensionner sur son contenu mesuré (le ContentPresenter) plutôt que sur l'espace
+                 réellement disponible - le filigrane centré dans ce Grid mal dimensionné apparaît alors
+                 décalé par rapport à la page visible plutôt que vraiment centré dessus. -->
+            <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
                 <Image Source="{Binding WatermarkImageSource, Source={x:Static services:ThemeService.Instance}}"
                        Opacity="0.35"
-                       WidthRequest="300" HeightRequest="300"
+                       WidthRequest="200" HeightRequest="200"
                        HorizontalOptions="Center" VerticalOptions="Center"
                        InputTransparent="True" />
                 <ContentPresenter />

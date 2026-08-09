@@ -33,7 +33,7 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:WarriorArchetypeRow">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" BackgroundColor="Transparent" Stroke="Grey">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey">
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="LightSkyBlue"/>

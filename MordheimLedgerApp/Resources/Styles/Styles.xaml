@@ -378,6 +378,14 @@
         <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
         <Setter Property="Margin" Value="4,12,4,2"/>
     </Style>
+
+    <!-- Titre de dialog (Text="{Binding Title}"/"{loc:Loc ...Title}" en haut de chaque Popup) - factorisé
+         depuis 27 déclarations inline identiques, plutôt qu'un fragment dupliqué dans chaque dialog. -->
+    <Style TargetType="Label" x:Key="DialogTitleLabelStyle">
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="{DynamicResource AppFontSizeSectionTitle}"/>
+        <Setter Property="TextColor" Value="{DynamicResource AppText}"/>
+    </Style>
     <Style TargetType="Picker">
         <Setter Property="TextColor" Value="{DynamicResource AppText}" />
         <Setter Property="TitleColor" Value="{DynamicResource AppTextMuted}" />

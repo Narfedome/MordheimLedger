@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.MagicSchools.CreateEdit;
@@ -91,6 +92,20 @@ public partial class MagicSchoolViewModel : BaseViewModel
             var row = MagicSchools.FirstOrDefault(r => r.Item.Id == newItem.Id);
             if (row != null) Select(row);
         }
+    }
+
+    /// <summary>Read-only recap (tile info button) - réutilise le ChipDetailDialog générique
+    /// (Nom+Description+Sorts) plutôt qu'un MagicSchoolDetailDialog dédié : même mécanisme déjà en
+    /// place pour le chip École de Magie sur WarbandArchetypeEditDialogViewModel.ShowMagicSchoolDetail.
+    /// AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails - une seule commande
+    /// partagée par toutes les tuiles, sinon elles se désactivent toutes ensemble tant qu'un dialog est
+    /// ouvert.</summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task ShowDetails(MagicSchoolRow row)
+    {
+        var language = LocalizationService.Instance.Language;
+        var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == row.Item.Id).ToList();
+        await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(row.Item.Name, row.Item.Description, spells)));
     }
 
     [RelayCommand]

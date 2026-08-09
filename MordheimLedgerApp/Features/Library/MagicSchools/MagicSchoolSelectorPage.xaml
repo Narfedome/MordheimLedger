@@ -8,6 +8,6 @@
              Title="{loc:Loc MagicSchoolSelectTitle}">
 
     <components:WatermarkedLayout>
-        <local:MagicSchoolView IsCrud="False"/>
+        <local:MagicSchoolView IsCrud="False" UseTileLayout="True"/>
     </components:WatermarkedLayout>
 </ContentPage>

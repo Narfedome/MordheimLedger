@@ -1,15 +1,13 @@
-using CommunityToolkit.Maui.Views;
 using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 
-public partial class EquipmentItemEditDialog : Popup<bool>
+public partial class EquipmentItemEditDialog : DialogContent<bool>
 {
     public EquipmentItemEditDialog(EquipmentItemEditDialogViewModel viewModel)
     {
         InitializeComponent();
         ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
-        viewModel.CloseRequested += async result => await CloseAsync(result);
     }
 }

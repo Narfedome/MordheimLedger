@@ -1,10 +1,9 @@
-using CommunityToolkit.Maui.Views;
 using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 
 /// <summary>Pure XAML wrapper bound to WarbandArchetypeDetailDialogViewModel: all logic lives there, not here.</summary>
-public partial class WarbandArchetypeDetailDialog : Popup<bool>
+public partial class WarbandArchetypeDetailDialog : DialogContent<bool>
 {
     // Le plus grand contenu jamais mesuré (voir OnRootContentSizeChanged) - pas de valeur fixe arbitraire
     // (ex. moitié écran), qui laissait un grand vide sous l'onglet Général, le plus court des 3.
@@ -14,7 +13,6 @@ public partial class WarbandArchetypeDetailDialog : Popup<bool>
     {
         InitializeComponent();
         BindingContext = viewModel;
-        viewModel.CloseRequested += async result => await CloseAsync(result);
     }
 
     /// <summary>RootContent (le seul enfant du ScrollView) se remesure à chaque bascule d'onglet et à

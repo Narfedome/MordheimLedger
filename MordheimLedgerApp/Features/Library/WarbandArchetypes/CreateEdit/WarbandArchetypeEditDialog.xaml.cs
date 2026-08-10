@@ -1,9 +1,8 @@
-using CommunityToolkit.Maui.Views;
 using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 
-public partial class WarbandArchetypeEditDialog : Popup<bool>
+public partial class WarbandArchetypeEditDialog : DialogContent<bool>
 {
     // Le plus grand contenu jamais mesuré (voir OnRootContentSizeChanged), même mécanisme que
     // WarbandArchetypeDetailDialog pour éviter le saut de taille au changement d'onglet.
@@ -13,7 +12,6 @@ public partial class WarbandArchetypeEditDialog : Popup<bool>
     {
         InitializeComponent();
         BindingContext = viewModel;
-        viewModel.CloseRequested += async result => await CloseAsync(result);
     }
 
     private void OnRootContentSizeChanged(object? sender, EventArgs e)

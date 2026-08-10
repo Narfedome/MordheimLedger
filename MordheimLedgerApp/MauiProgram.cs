@@ -28,6 +28,19 @@ namespace MordheimLedgerApp
 
         public static MauiApp CreateMauiApp()
         {
+            // Diagnostic du crash natif intermittent au sélecteur de règles spéciales (voir CrashLogger) -
+            // capte tout ce qui échapperait normalement au débogueur (exception sur un thread pool/Task
+            // non observée, thread hors dispatcher UI). Actif en Debug ET Release, contrairement à
+            // builder.Logging.AddDebug() plus bas.
+            AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+                CrashLogger.Log($"AppDomain.UnhandledException (IsTerminating={e.IsTerminating}): {e.ExceptionObject}");
+            TaskScheduler.UnobservedTaskException += (_, e) =>
+            {
+                CrashLogger.LogException("TaskScheduler.UnobservedTaskException", e.Exception);
+                e.SetObserved();
+            };
+            CrashLogger.Log("CreateMauiApp start");
+
             EnsureDatabaseFileExists();
 
             var builder = MauiApp.CreateBuilder();

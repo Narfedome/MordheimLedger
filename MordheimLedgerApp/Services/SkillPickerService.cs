@@ -1,5 +1,6 @@
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Features.Library.Skills;
+using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -51,7 +52,7 @@ public class SkillPickerService : ISkillPickerService
         }
         window.ModalPopped += OnModalPopped;
 
-        await Shell.Current.Navigation.PushModalAsync(modal);
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "SkillPicker.Push");
 
         return await tcs.Task;
     }

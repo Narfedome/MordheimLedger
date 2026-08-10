@@ -1,5 +1,6 @@
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Features.Library.Animals;
+using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -36,7 +37,7 @@ public class AnimalPickerService : IAnimalPickerService
         }
         window.ModalPopped += OnModalPopped;
 
-        await Shell.Current.Navigation.PushModalAsync(modal);
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "AnimalPicker.Push");
 
         return await tcs.Task;
     }

@@ -25,6 +25,14 @@ public class WarbandService : IWarbandService
         var row = await _db.Connection.FindAsync<WarbandEntity>(id);
         return row?.ToModel();
     }
+    public async Task<string> GetWarbandArchetypeNameAsync(int id, string languageCode)
+    {
+        await _db.Initialization;
+        var row = await _db.Connection.FindAsync<WarbandArchetypeEntity>(id);
+
+        var translations = await TranslationResolver.ResolveAsync(_db, [row.NameKey, row.DescriptionKey], languageCode);
+        return translations[row.NameKey];
+    }
 
     public async Task<Warband> CreateWarbandAsync(string name, WarbandArchetype archetype)
     {

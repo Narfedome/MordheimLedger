@@ -9,6 +9,7 @@ namespace MordheimLedgerApp.Features.Warbands;
 public partial class WarbandListViewModel : BaseViewModel
 {
     private readonly IWarbandService _warbandService;
+    private readonly IWarbandArchetypePickerService _warbandArchetypePickerService;
     private readonly ILibraryService _libraryService;
 
     [ObservableProperty]
@@ -34,10 +35,11 @@ public partial class WarbandListViewModel : BaseViewModel
 
     public bool CanModifySelectedWarband => SelectedRow != null;
 
-    public WarbandListViewModel(IWarbandService warbandService, ILibraryService libraryService)
+    public WarbandListViewModel(IWarbandService warbandService, ILibraryService libraryService, IWarbandArchetypePickerService warbandArchetypePickerService)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
+        _warbandArchetypePickerService = warbandArchetypePickerService;
     }
 
     partial void OnSelectedRowChanged(WarbandRow? oldValue, WarbandRow? newValue)
@@ -52,7 +54,8 @@ public partial class WarbandListViewModel : BaseViewModel
         await Loading.RunAsync(async () =>
         {
             var warbands = await _warbandService.GetWarbandsAsync();
-            Rows = new ObservableCollection<WarbandRow>(warbands.Select(w => new WarbandRow(w)));
+            var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.Id, LocalizationService.Instance.Language)));
+            Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i] }));
             SelectedRow = null;
             HasWarbands = warbands.Count > 0;
             IsInitialized = true;
@@ -65,23 +68,27 @@ public partial class WarbandListViewModel : BaseViewModel
     [RelayCommand]
     private async Task CreateWarbandAsync()
     {
-        var archetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
-        if (archetypes.Count == 0)
-        {
-            await ShowInfoAsync(Loc["WarbandsEmptyLibraryTitle"], Loc["WarbandsEmptyLibraryMessage"]);
-            return;
-        }
+        //var archetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+        //if (archetypes.Count == 0)
+        //{
+        //    await ShowInfoAsync(Loc["WarbandsEmptyLibraryTitle"], Loc["WarbandsEmptyLibraryMessage"]);
+        //    return;
+        //}
 
-        var options = archetypes.Select(a => $"{a.Name} ({a.StartingTreasury}gc)").ToArray();
-        var index = await ShowActionSheetIndexAsync(Loc["WarbandsChooseType"], options);
-        if (index < 0) return;
+        //var options = archetypes.Select(a => $"{a.Name} ({a.StartingTreasury}gc)").ToArray();
+        //var index = await ShowActionSheetIndexAsync(Loc["WarbandsChooseType"], options);
+
+
+
+        var picked = await _warbandArchetypePickerService.PickWarbandArchetypesAsync(SelectionMode.Single);
+        if (picked == null || picked.Count == 0) return;
 
         var name = await ShowPromptAsync(Loc["WarbandsNewTitle"], Loc["PromptName"]);
         if (string.IsNullOrWhiteSpace(name)) return;
 
         await Loading.RunAsync(async () =>
         {
-            await _warbandService.CreateWarbandAsync(name, archetypes[index]);
+            await _warbandService.CreateWarbandAsync(name, picked.First());
             await LoadWarbandsAsync();
         });
     }

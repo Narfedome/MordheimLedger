@@ -8,6 +8,7 @@ public interface IWarbandService
 {
     Task<List<Warband>> GetWarbandsAsync();
     Task<Warband?> GetWarbandAsync(int id);
+    Task<string> GetWarbandArchetypeNameAsync(int id, string languageCode);
 
     /// <summary>Pre-fills Treasury from archetype.StartingTreasury.</summary>
     Task<Warband> CreateWarbandAsync(string name, WarbandArchetype archetype);

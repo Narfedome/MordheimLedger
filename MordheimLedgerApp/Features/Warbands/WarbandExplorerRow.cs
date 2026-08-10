@@ -14,6 +14,9 @@ public partial class WarbandRow : ObservableObject
     public string Name => Warband.Name;
 
     [ObservableProperty]
+    private string archetypeName = string.Empty;
+
+    [ObservableProperty]
     private bool isSelected;
 
     public WarbandRow(Warband warband) => Warband = warband;

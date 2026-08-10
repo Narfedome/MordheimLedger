@@ -26,9 +26,16 @@
                     </Grid.GestureRecognizers>
                     <BoxView Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ChapterDividerStyle}"/>
                     <BoxView Grid.Column="0" Style="{StaticResource SelectionMarkerStyle}"/>
-                    <Label Grid.Column="1" Text="{Binding Name}"
+                    <VerticalStackLayout Grid.Column="1" >
+                        
+                    <Label Text="{Binding Name}"
                            FontSize="{OnIdiom Default=15, Desktop=13}"
                            VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
+                        
+                    <Label Text="{Binding ArchetypeName}" Margin="8,0,0,0"
+                           FontSize="{OnIdiom Default=10, Desktop=8}"
+                           VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
+                    </VerticalStackLayout>
                     <Grid Grid.Column="2">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer

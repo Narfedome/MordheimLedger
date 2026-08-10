@@ -48,10 +48,12 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     /// Équipement/Compétences/Animaux).</summary>
     public bool IsSelectorMode { get; set; }
 
+    public SelectionMode SelectionMode { get; set; }
+
     /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.</summary>
     public ObservableCollection<WarbandArchetypeRow> SelectedRows { get; } = new();
 
-    public bool HasSelectedRows => SelectedRows.Count > 0;
+    public bool HasSelectedRows => SelectedRows.Count > 0 || SelectedRow != null;
 
     public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, IEquipmentPickerService equipmentPicker,
@@ -136,9 +138,10 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private void Select(WarbandArchetypeRow row)
     {
-        if (!IsSelectorMode)
+        if (!IsSelectorMode || SelectionMode == SelectionMode.Single)
         {
             SelectedRow = row;
+            OnPropertyChanged(nameof(HasSelectedRows));
             return;
         }
 
@@ -151,8 +154,16 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     [RelayCommand]
     private async Task ConfirmSelection()
     {
-        var items = SelectedRows.Select(r => r.Item).ToList();
-        await _pickerNavigation.ClosePickerAsync(items);
+        if (SelectionMode == SelectionMode.Single && SelectedRow != null)
+        {
+            await  _pickerNavigation.ClosePickerAsync(SelectedRow.Item);
+        }
+        else
+        {
+            var items = SelectedRows.Select(r => r.Item).ToList();
+            await _pickerNavigation.ClosePickerAsync(items);
+        }
+
     }
 
     [RelayCommand]

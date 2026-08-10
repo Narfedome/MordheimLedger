@@ -80,15 +80,15 @@ public partial class WarbandListViewModel : BaseViewModel
 
 
 
-        var picked = await _warbandArchetypePickerService.PickWarbandArchetypesAsync(SelectionMode.Single);
-        if (picked == null || picked.Count == 0) return;
+        var picked = await _warbandArchetypePickerService.PickWarbandArchetypeAsync();
+        if (picked == null) return;
 
         var name = await ShowPromptAsync(Loc["WarbandsNewTitle"], Loc["PromptName"]);
         if (string.IsNullOrWhiteSpace(name)) return;
 
         await Loading.RunAsync(async () =>
         {
-            await _warbandService.CreateWarbandAsync(name, picked.First());
+            await _warbandService.CreateWarbandAsync(name, picked);
             await LoadWarbandsAsync();
         });
     }

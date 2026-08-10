@@ -1,15 +1,18 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
+using System.Collections.ObjectModel;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit;
 
 public partial class EquipmentListEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly IEquipmentPickerService _equipmentPicker;
+    private readonly ILibraryService _libraryService;
 
     protected override bool CancelResult => false;
 
@@ -39,10 +42,11 @@ public partial class EquipmentListEditDialogViewModel : DialogViewModel<bool>
     public ObservableCollection<EquipmentItem> Items { get; }
 
     public EquipmentListEditDialogViewModel(EquipmentList item, string title, IEquipmentPickerService equipmentPicker,
-        IReadOnlyList<EquipmentItem> initialItems)
+        IReadOnlyList<EquipmentItem> initialItems, ILibraryService libraryService)
     {
         this.item = item;
         this.title = title;
+        _libraryService = libraryService;
         _equipmentPicker = equipmentPicker;
         Items = new ObservableCollection<EquipmentItem>(initialItems);
     }
@@ -62,6 +66,27 @@ public partial class EquipmentListEditDialogViewModel : DialogViewModel<bool>
             if (Items.Any(i => i.Id == equipmentItem.Id)) continue;
             Items.Add(equipmentItem);
         }
+    }
+
+
+    [RelayCommand]
+    private async Task ShowItemDetail(EquipmentItem equipmentItem)
+    {
+        var language = LocalizationService.Instance.Language;
+        var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
+
+        var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
+                .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new EquipmentItemDetailDialog(
+            new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors)));
     }
 
     [RelayCommand]

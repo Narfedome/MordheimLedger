@@ -394,7 +394,7 @@
     <value>Trésorerie de départ</value>
   </data>
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
-    <value>Nombre maximum de guerriers</value>
+    <value>Maximum de guerriers</value>
   </data>
   <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
     <value>Général</value>

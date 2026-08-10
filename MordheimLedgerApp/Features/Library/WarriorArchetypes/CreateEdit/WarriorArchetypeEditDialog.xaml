@@ -139,6 +139,7 @@
                 <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
                                           ItemsSource="{Binding SpecialRules}"
                                           IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"
                                           AddCommand="{Binding AddSpecialRuleCommand}"
                                           RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
             </VerticalStackLayout>

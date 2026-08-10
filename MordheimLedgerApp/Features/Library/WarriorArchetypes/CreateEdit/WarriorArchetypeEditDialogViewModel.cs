@@ -99,6 +99,10 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         }
     }
 
+
+    [RelayCommand]
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
+
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
 

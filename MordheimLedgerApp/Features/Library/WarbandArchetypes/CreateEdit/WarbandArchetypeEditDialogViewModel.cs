@@ -340,7 +340,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     {
         var newItem = new EquipmentList();
         var dialogViewModel = new EquipmentListEditDialogViewModel(newItem, Loc["EquipmentListCreateTitle"],
-            _equipmentPicker, Array.Empty<EquipmentItem>());
+            _equipmentPicker, Array.Empty<EquipmentItem>(), _libraryService);
         if (await ShowDialogAsync(new EquipmentListEditDialog(dialogViewModel)) != true) return;
 
         EquipmentLists.Add(newItem);
@@ -362,7 +362,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         var language = LocalizationService.Instance.Language;
         var initialItems = await _libraryService.GetEquipmentItemsAsync(copy.ItemIds, language);
         var dialogViewModel = new EquipmentListEditDialogViewModel(copy, Loc["EquipmentListEditTitle"],
-            _equipmentPicker, initialItems);
+            _equipmentPicker, initialItems, _libraryService);
         if (await ShowDialogAsync(new EquipmentListEditDialog(dialogViewModel)) != true) return;
 
         var index = EquipmentLists.IndexOf(list);

@@ -49,7 +49,8 @@
                  sélection). -->
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsItemsTab}">
                 <components:ChipListView HeaderText="{loc:Loc EquipmentListItemsPh}"
-                                          ItemsSource="{Binding Items}"
+                                          ItemsSource="{Binding Items}"                                         
+                                      Command="{Binding ShowItemDetailCommand}"
                                           IconGlyph="{x:Static icons:SolidFont.Coins}"
                                           AddCommand="{Binding AddItemCommand}"
                                           RemoveCommand="{Binding RemoveItemCommand}"/>

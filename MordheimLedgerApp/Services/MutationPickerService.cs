@@ -1,5 +1,6 @@
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Features.Library.Mutations;
+using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -42,7 +43,7 @@ public class MutationPickerService : IMutationPickerService
         }
         window.ModalPopped += OnModalPopped;
 
-        await Shell.Current.Navigation.PushModalAsync(modal);
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "MutationPicker.Push");
 
         return await tcs.Task;
     }

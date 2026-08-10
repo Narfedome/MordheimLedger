@@ -17,6 +17,13 @@ namespace MordheimLedgerApp.WinUI
         public App()
         {
             this.InitializeComponent();
+
+            // Diagnostic du crash natif intermittent au sélecteur de règles spéciales (voir
+            // Services/CrashLogger) - spécifique WinUI : capte les exceptions du dispatcher UI qui
+            // échappent à AppDomain.UnhandledException/au débogueur managé. e.Handled=true pour ne PAS
+            // changer le comportement (l'app crashe quand même après log) - juste observer, pas masquer.
+            this.UnhandledException += (_, e) =>
+                MordheimLedgerApp.Services.CrashLogger.LogException("WinUI Application.UnhandledException", e.Exception);
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();

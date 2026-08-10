@@ -24,6 +24,7 @@ public sealed class DialogStack
     /// native.</summary>
     public async Task<TResult?> PushAsync<TResult>(DialogContent<TResult> content, Page currentPage)
     {
+        var dialogName = content.GetType().Name;
         var viewModel = (DialogViewModel<TResult>)content.BindingContext!;
         var tcs = new TaskCompletionSource<TResult?>();
         var handled = false;
@@ -42,10 +43,14 @@ public sealed class DialogStack
         viewModel.CloseRequested += OnClose;
 
         var dialogPage = new DialogPage(content, () => viewModel.CancelCommand.Execute(null));
-        await currentPage.Navigation.PushModalAsync(dialogPage, animated: false);
+        // Sérialisé (voir DialogNavigationGate) : un XxxPickerService peut pousser sa propre page modale
+        // pendant que CE PushModalAsync est encore en train de s'installer (bouton du dialog lui-même
+        // qui ouvre un picker) - deux Push/PopModalAsync concurrents sur la même pile sont un piège
+        // MAUI/Shell connu.
+        await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PushModalAsync(dialogPage, animated: false), $"DialogStack.Push({dialogName})");
 
         var result = await tcs.Task;
-        await currentPage.Navigation.PopModalAsync(animated: false);
+        await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
         return result;
     }
 }

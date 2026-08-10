@@ -138,11 +138,7 @@
         <Setter Property="MinimumHeightRequest" Value="{DynamicResource AppMinTouchTarget}"/>
         <Setter Property="MinimumWidthRequest" Value="{DynamicResource AppMinTouchTarget}"/>
     </Style>
-
-    <Style TargetType="BoxView">
-        <Setter Property="BackgroundColor" Value="{DynamicResource AppText}" />
-    </Style>
-
+    
     <Style TargetType="Button">
         <Setter Property="TextColor" Value="{DynamicResource AppBackground}" />
         <Setter Property="BackgroundColor" Value="{DynamicResource AppAccent}" />

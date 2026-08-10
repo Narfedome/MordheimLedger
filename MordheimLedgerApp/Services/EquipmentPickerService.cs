@@ -1,6 +1,7 @@
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
+using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -54,7 +55,7 @@ public class EquipmentPickerService : IEquipmentPickerService
         }
         window.ModalPopped += OnModalPopped;
 
-        await Shell.Current.Navigation.PushModalAsync(modal);
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "EquipmentPicker.Push");
 
         return await tcs.Task;
     }

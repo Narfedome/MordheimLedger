@@ -1,5 +1,6 @@
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
+using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -44,7 +45,7 @@ public class WarriorArchetypePickerService : IWarriorArchetypePickerService
         }
         window.ModalPopped += OnModalPopped;
 
-        await Shell.Current.Navigation.PushModalAsync(modal);
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "WarriorArchetypePicker.Push");
 
         return await tcs.Task;
     }

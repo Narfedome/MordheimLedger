@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.Dialogs.DialogPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="Transparent">
+    <Grid>
+        <!-- Scrim + capteur de tap "en dehors de la carte" - une vraie Page (donc pleine fenêtre par
+             construction, aucune ambiguïté de taille comme avec CommunityToolkit.Maui Popup) poussée sur
+             la pile modale native (voir DialogStack) plutôt qu'un Popup du toolkit - contrôle total sur
+             la mise en page/le hit-testing, plus de bug d'empilement WinUI. Le tap route vers
+             _onBackdropTapped, pas vers un dismiss natif : ferme CE dialog précis (comme le bouton X),
+             pas toute la pile. -->
+        <BoxView Color="{StaticResource AppSurfaceTranslucent}" Opacity="0.25"
+                 HorizontalOptions="Fill" VerticalOptions="Fill">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBackdropTapped"/>
+            </BoxView.GestureRecognizers>
+        </BoxView>
+        <ContentView x:Name="Presenter" HorizontalOptions="Fill" VerticalOptions="Fill"/>
+    </Grid>
+</ContentPage>

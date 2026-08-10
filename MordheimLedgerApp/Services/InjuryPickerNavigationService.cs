@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -19,6 +20,6 @@ public class InjuryPickerNavigationService : IInjuryPickerNavigationService
         _tcs?.TrySetResult(result);
 
         if (Shell.Current.Navigation.ModalStack.Count > 0)
-            await Shell.Current.Navigation.PopModalAsync();
+            await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PopModalAsync(), "InjuryPicker.Pop");
     }
 }

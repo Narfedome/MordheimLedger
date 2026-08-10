@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit"
                xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
@@ -63,4 +63,4 @@
         </VerticalStackLayout>
         </ScrollView>
     </Border>
-</toolkit:Popup>
+</dialogs:DialogContent>

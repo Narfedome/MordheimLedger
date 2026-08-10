@@ -19,6 +19,7 @@ using MordheimLedgerApp.Features.Settings;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 using Microsoft.Extensions.Logging;
+using MordheimLedgerApp.Features.Warbands.CreateEdit;
 
 namespace MordheimLedgerApp
 {
@@ -81,6 +82,7 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<WarbandArchetypeViewModel>();
+            builder.Services.AddTransient<WarbandEditDialogViewModel>();
             builder.Services.AddTransient<WarbandArchetypeSelectorPage>();
             builder.Services.AddSingleton<IWarbandArchetypePickerNavigationService, WarbandArchetypePickerNavigationService>();
             builder.Services.AddSingleton<IWarbandArchetypePickerService, WarbandArchetypePickerService>();

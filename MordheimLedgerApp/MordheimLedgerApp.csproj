@@ -102,6 +102,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\Warbands\Averland Mercenaries.jpg" />
+	  <None Remove="Resources\Images\Warbands\Beastmen.jpg" />
+	  <None Remove="Resources\Images\Warbands\Carnival of Chaos.jpg" />
+	  <None Remove="Resources\Images\Warbands\Cult of the Possessed.jpg" />
+	  <None Remove="Resources\Images\Warbands\Dwarf Treasure Hunters.jpg" />
+	  <None Remove="Resources\Images\Warbands\Kislevites.jpg" />
+	  <None Remove="Resources\Images\Warbands\Mercenaries.jpg" />
+	  <None Remove="Resources\Images\Warbands\Middenheimers.jpg" />
+	  <None Remove="Resources\Images\Warbands\Orc Mob.jpg" />
+	  <None Remove="Resources\Images\Warbands\Ostlanders.jpg" />
+	  <None Remove="Resources\Images\Warbands\Sisters of Sigmar.jpg" />
+	  <None Remove="Resources\Images\Warbands\Skaven.jpg" />
+	  <None Remove="Resources\Images\Warbands\Undead.jpg" />
+	  <None Remove="Resources\Images\Warbands\Witch Hunters.jpg" />
 	  <None Remove="Resources\WatermarkImages\gold.png" />
 	  <None Remove="Resources\WatermarkImages\green.png" />
 	</ItemGroup>
@@ -137,6 +151,9 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="Components\FaIconButton\FaIconButtonView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Features\Warbands\CreateEdit\WarbandEditDialog.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
@@ -206,10 +223,29 @@
 	<ItemGroup>
 		<CoreSeedJsonFiles Include="..\MordheimLedgerApp.Core\Data\SeedData\*.json" />
 	</ItemGroup>
+	<ItemGroup>
+	  <MauiImage Include="Resources\Images\Warbands\Averland Mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Beastmen.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Carnival of Chaos.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Cult of the Possessed.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Dwarf Treasure Hunters.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Kislevites.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Middenheimers.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Orc Mob.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Ostlanders.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Sisters of Sigmar.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Skaven.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Undead.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\Witch Hunters.jpg" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Features\Warbands\CreateEdit\WarbandEditDialog.xaml.cs">
+	    <DependentUpon>WarbandEditDialog.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 
-	<Target Name="GenerateSeedDatabase" BeforeTargets="BeforeBuild"
-	        Inputs="@(CoreSeedJsonFiles)"
-	        Outputs="$(MSBuildProjectDirectory)\Resources\Raw\seed.db3">
+	<Target Name="GenerateSeedDatabase" BeforeTargets="BeforeBuild" Inputs="@(CoreSeedJsonFiles)" Outputs="$(MSBuildProjectDirectory)\Resources\Raw\seed.db3">
 		<Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\Tools\DbSeedGenerator\DbSeedGenerator.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\Resources\Raw\seed.db3&quot;" />
 	</Target>
 

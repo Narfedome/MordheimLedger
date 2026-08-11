@@ -26,36 +26,19 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
                     </Grid>
-
-                    <!-- Création (IsWizardMode) : pas à pas, ordre fixe Général→Règles→Magie→Équipement→Guerriers
-                 (les listes d'équipement doivent exister avant qu'un guerrier puisse en choisir une - voir
-                 AddWarrior) - onglets remplacés par un simple libellé d'étape, navigation via
-                 Précédent/Suivant en bas. Édition : mêmes 5 onglets que WarbandArchetypeDetailDialog,
-                 librement navigables. Champs modifiables (Entry/Editor/Picker au lieu de Label) et
-                 Guerriers/Équipement en CRUD inline via ChipListView.AddCommand/RemoveCommand plutôt qu'en
-                 lecture seule, dans les deux cas. -->
+                    
                     <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"
                    IsVisible="{Binding IsWizardMode}"/>
 
                     <HorizontalStackLayout Spacing="16" IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}">
                         <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
                                              IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
-                                             IsActive="{Binding IsRulesTab}" FontSize="12"/>
-                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
-                                             IsActive="{Binding IsMagicTab}" FontSize="12"/>
-                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
-                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
                         <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
                                              IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
                     </HorizontalStackLayout>
 
                     <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
                         <VerticalStackLayout Spacing="4">
-                            <!-- Astérisque = champ obligatoire (marqueur statique) ; Label d'erreur en dessous =
-                         retour dynamique (posé par ValidateGeneralStep, vérifié par étape au clic sur
-                         Suivant en mode assistant, sur Enregistrer en mode édition) - les deux coexistent,
-                         l'un indique la règle, l'autre signale qu'elle n'est pas respectée. -->
                             <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
                                 <Label.FormattedText>
                                     <FormattedString>
@@ -68,58 +51,29 @@
                             <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
-                        <Picker Title="{loc:Loc WarbandGradePh}"
-                        ItemsSource="{Binding GradeOptions}"
-                        SelectedItem="{Binding SelectedGradeLabel}"/>
+                        <components:ChipItemView Item="{Binding Archetype}"
+                                        HeaderText="{loc:Loc WarbandArchetype}"
+                                        IconGlyph="{x:Static icons:SolidFont.Users}"
+                                        Command="{Binding ShowArchetypeDetailCommand}"
+                                        AddCommand="{Binding AddArchetypeCommand}"
+                                        RemoveCommand="{Binding RemoveArchetypeCommand}"
+                                                 IsMandatory="True" />
+                        <Label Text="{Binding ArchetypeError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                           IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                                <Entry Text="{Binding Item.StartingTreasury}" Keyboard="Numeric"/>
+                                <Label Text="{Binding Archetype.StartingTreasury}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                                <Entry Text="{Binding Item.MaxWarriors}" Keyboard="Numeric"/>
+                                <Label Text="{Binding Archetype.MaxWarriors}"/>
                             </VerticalStackLayout>
                         </Grid>
                         <VerticalStackLayout Spacing="4">
                             <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Editor Text="{Binding Item.Description}" HeightRequest="80"/>
+                            <Label Text="{Binding Archetype.Description}" HeightRequest="80"/>
                         </VerticalStackLayout>
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
-                        <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
-                                          ItemsSource="{Binding SpecialRules}"
-                                          IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                          Command="{Binding ShowSpecialRuleDetailCommand}"
-                                          AddCommand="{Binding AddSpecialRuleCommand}"
-                                          RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Spacing="16" IsVisible="{Binding IsMagicTab}">
-                        <components:ChipListView HeaderText="{loc:Loc LibMagicSchoolsPh}"
-                                          ItemsSource="{Binding MagicSchools}"
-                                          IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
-                                          IconFontFamily="RpgAwesome"
-                                          Command="{Binding ShowMagicSchoolDetailCommand}"
-                                          AddCommand="{Binding AddMagicSchoolCommand}"
-                                          RemoveCommand="{Binding RemoveMagicSchoolCommand}"/>
-                    </VerticalStackLayout>
-
-                    <!-- Guerriers/Équipement se chargent au premier passage sur leur onglet/étape, comme le récap
-                 en lecture seule - toujours vide pour une bande en cours de création (Item.Id == 0), voir
-                 EnsureWarriorsLoadedAsync/EnsureEquipmentListsLoadedAsync. Équipement avant Guerriers
-                 (ordre inverse du visuel Codex) : un guerrier a besoin des listes d'équipement de la
-                 bande pour choisir la sienne, voir AddWarrior. -->
-                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
-                        <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
-                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
-                        <components:ChipListView ItemsSource="{Binding EquipmentLists}"
-                                          HeaderText="{loc:Loc WarbandArchetypeTabEquipment}"
-                                          IconGlyph="{x:Static icons:SolidFont.ListCheck}"
-                                          Command="{Binding EditEquipmentListCommand}"
-                                          AddCommand="{Binding AddEquipmentListCommand}"
-                                          RemoveCommand="{Binding RemoveEquipmentListCommand}"/>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
@@ -135,8 +89,6 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!-- Boutons toujours ancrés en bas du dialog (ligne Auto de la Grid englobante, hors ScrollView) -
-             plutôt que collés au contenu de l'onglet/étape courante, dont la hauteur varie. -->
             <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding IsWizardMode}">
                 <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

@@ -5,6 +5,7 @@ using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit;
+using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
 using System;
@@ -17,10 +18,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 {
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
-        private const int StepCount = 5;
+        private const int StepCount = 2;
 
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
+        private readonly ILibraryService _libraryService;
         public bool IsWizardMode { get; }
         protected override bool CancelResult => false;
 
@@ -30,60 +32,48 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [ObservableProperty]
         private Warband item;
 
+        [ObservableProperty]
         private string? nameError;
+
+        [ObservableProperty]
+        private string? archetypeError;
 
         [ObservableProperty]
         private string title;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
-        [NotifyPropertyChangedFor(nameof(IsRulesTab))]
-        [NotifyPropertyChangedFor(nameof(IsMagicTab))]
-        [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
         [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
         private int selectedTab;
         public bool IsGeneralTab => SelectedTab == 0;
-        public bool IsRulesTab => SelectedTab == 1;
-        public bool IsMagicTab => SelectedTab == 2;
-        public bool IsEquipmentTab => SelectedTab == 3;
-        public bool IsWarriorsTab => SelectedTab == 4;
+        public bool IsWarriorsTab => SelectedTab == 1;
 
         /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
         public bool CanGoBack => SelectedTab > 0;
         public bool IsLastStep => SelectedTab == StepCount - 1;
         public string StepLabel => string.Format(Loc["LibStepLabel"], SelectedTab + 1, StepCount);
 
-        public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker, IWarbandService warbandService)
+        public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker, IWarbandService warbandService,ILibraryService libraryService)
         {
             this.item = item;
             this.title = title;
             this._warbandArchetypePicker = warbandArchetypePicker;
             IsWizardMode = item.Id == 0;
             _warbandService = warbandService;
+            _libraryService = libraryService;
         }
 
         [RelayCommand]
         private void ShowGeneralTab() => SelectedTab = 0;
 
-        [RelayCommand]
-        private void ShowRulesTab() => SelectedTab = 1;
-
-        [RelayCommand]
-        private void ShowMagicTab() => SelectedTab = 2;
-
-        [RelayCommand]
-        private async Task ShowEquipmentTab()
-        {
-            SelectedTab = 3;
-        }
 
         [RelayCommand]
         private async Task ShowWarriorsTab()
         {
-            SelectedTab = 4;
+            SelectedTab = 1;
         }
 
         /// <summary>Onglet Général : seul champ obligatoire vérifié pour l'instant (Nom). Pose NameError
@@ -93,9 +83,25 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (string.IsNullOrWhiteSpace(Item.Name))
             {
                 NameError = Loc["LibFieldRequired"];
+            }
+            else
+            {
+                NameError = null;
+            }
+            if(Archetype is null)
+            {
+                ArchetypeError = Loc["LibFieldRequired"];
+            }
+            else
+            {
+                ArchetypeError = null;
+            }
+
+            if (!string.IsNullOrEmpty(NameError) || !string.IsNullOrEmpty(ArchetypeError))
+            {
                 return false;
             }
-            NameError = null;
+
             return true;
         }
 
@@ -123,9 +129,27 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         {
 
             var picked = await _warbandArchetypePicker.PickWarbandArchetypeAsync();
-            if (picked == null) return;
+            if (picked.Id == 0) return;
 
             Archetype = picked;
+        }
+
+        [RelayCommand]
+        private void RemoveArchetype() => Archetype = null;
+
+
+        [RelayCommand]
+        private async Task ShowArchetypeDetail(WarbandArchetype rule)
+        {
+            var language = LocalizationService.Instance.Language;
+            WarbandArchetype? fullWarband = null;
+            await Loading.RunAsync(async () =>
+            {
+                fullWarband = await Task.Run(() => _libraryService.GetWarbandArchetypeAsync(Archetype.Id, language));
+            });
+            if (fullWarband is null) return;
+
+            await ShowDialogAsync(new WarbandArchetypeDetailDialog( new WarbandArchetypeDetailDialogViewModel(fullWarband,_libraryService)));
         }
 
         /// <summary>Seul point d'écriture en base de tout le dialog - la bande d'abord (Item.Id devient réel
@@ -148,7 +172,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             var language = LocalizationService.Instance.Language;
             await Loading.RunAsync(async () =>
             {
-                await _warbandService.SaveWarbandAsync(Item);
+                await _warbandService.CreateWarbandAsync(Item.Name,Archetype);
             });
 
             Close(true);

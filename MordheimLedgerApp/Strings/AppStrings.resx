@@ -1083,4 +1083,10 @@
   <data name="PaletteShadowAndGold" xml:space="preserve">
     <value>Ténèbre &amp; Or</value>
   </data>
+  <data name="WarbandArchetype" xml:space="preserve">
+    <value>Archetype</value>
+  </data>
+  <data name="WarbandCreateTitle" xml:space="preserve">
+    <value>Nouvelle bande</value>
+  </data>
 </root>

@@ -102,20 +102,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Images\Warbands\Averland Mercenaries.jpg" />
-	  <None Remove="Resources\Images\Warbands\Beastmen.jpg" />
-	  <None Remove="Resources\Images\Warbands\Carnival of Chaos.jpg" />
-	  <None Remove="Resources\Images\Warbands\Cult of the Possessed.jpg" />
-	  <None Remove="Resources\Images\Warbands\Dwarf Treasure Hunters.jpg" />
-	  <None Remove="Resources\Images\Warbands\Kislevites.jpg" />
-	  <None Remove="Resources\Images\Warbands\Mercenaries.jpg" />
-	  <None Remove="Resources\Images\Warbands\Middenheimers.jpg" />
-	  <None Remove="Resources\Images\Warbands\Orc Mob.jpg" />
-	  <None Remove="Resources\Images\Warbands\Ostlanders.jpg" />
-	  <None Remove="Resources\Images\Warbands\Sisters of Sigmar.jpg" />
-	  <None Remove="Resources\Images\Warbands\Skaven.jpg" />
-	  <None Remove="Resources\Images\Warbands\Undead.jpg" />
-	  <None Remove="Resources\Images\Warbands\Witch Hunters.jpg" />
 	  <None Remove="Resources\WatermarkImages\gold.png" />
 	  <None Remove="Resources\WatermarkImages\green.png" />
 	</ItemGroup>
@@ -150,6 +136,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Components\ChipItem\ChipItemView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Components\FaIconButton\FaIconButtonView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -224,22 +213,25 @@
 		<CoreSeedJsonFiles Include="..\MordheimLedgerApp.Core\Data\SeedData\*.json" />
 	</ItemGroup>
 	<ItemGroup>
-	  <MauiImage Include="Resources\Images\Warbands\Averland Mercenaries.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Beastmen.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Carnival of Chaos.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Cult of the Possessed.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Dwarf Treasure Hunters.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Kislevites.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Mercenaries.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Middenheimers.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Orc Mob.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Ostlanders.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Sisters of Sigmar.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Skaven.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Undead.jpg" />
-	  <MauiImage Include="Resources\Images\Warbands\Witch Hunters.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\averland_mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\beastmem_raiders.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\carnival_of_chaos.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\cult_of_the_possessed.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\dwarf_treasure_hunters.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\kislevites_warriors.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\mercenaries_empire.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\middenheimers_mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\orc_mob.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\ostlanders_mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\sisters_of_sigmar.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\skaven_clan_eschin.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\the_undead.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\witch_hunters.jpg" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Compile Update="Components\ChipItem\ChipItemView.xaml.cs">
+	    <DependentUpon>ChipItemView.xaml</DependentUpon>
+	  </Compile>
 	  <Compile Update="Features\Warbands\CreateEdit\WarbandEditDialog.xaml.cs">
 	    <DependentUpon>WarbandEditDialog.xaml</DependentUpon>
 	  </Compile>

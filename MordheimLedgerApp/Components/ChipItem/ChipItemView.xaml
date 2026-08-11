@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.ChipItemView"
+             x:Name="root">
+
+    <VerticalStackLayout
+        Spacing="8"
+        BindingContext="{x:Reference root}"
+        IsVisible="{Binding ShowSection}">
+
+        <!-- Header -->
+        <Grid ColumnDefinitions="*,Auto">
+
+            <Label
+                Grid.Column="0"
+                Text="{Binding HeaderText}"
+                FontSize="12"
+                TextColor="{DynamicResource AppTextMuted}"
+                IsVisible="{Binding IsMandatory, Converter={StaticResource InverseBoolConverter}}"
+                VerticalOptions="Center" />
+            
+            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{Binding HeaderText}"/>
+                        <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+
+            <components:FaIconButtonView
+                Grid.Column="1"
+                Style="{StaticResource GhostIconButtonStyle}"
+                Icon="{x:Static icons:SolidFont.Plus}"
+                IconSize="12"
+                ButtonWidthRequest="22"
+                ButtonHeightRequest="22"
+                IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
+                Command="{Binding AddCommand}" />
+
+        </Grid>
+
+        <!-- Message lorsqu'il n'y a pas d'item -->
+        <Label
+            Text="{Binding EmptyHintText}"
+            FontSize="11"
+            TextColor="{DynamicResource AppTextMuted}"
+            IsVisible="{Binding HasItem, Converter={StaticResource InverseBoolConverter}}" />
+
+        <!-- Chip -->
+        <Border
+            Style="{StaticResource ChipBorderStyle}"
+            Margin="0,0,4,4" HorizontalOptions="Start"
+            IsVisible="{Binding HasItem}">
+
+            <Border.GestureRecognizers>
+
+                <TapGestureRecognizer
+                    Command="{Binding Source={x:Reference root}, Path=Command}"
+                    CommandParameter="{Binding Source={x:Reference root}, Path=Item}" />
+
+            </Border.GestureRecognizers>
+
+            <!--
+                Ici le BindingContext devient l'objet Item.
+                Les propriétés Name, IconGlyph, etc. sont donc celles de l'objet.
+            -->
+            <Grid
+                BindingContext="{Binding Item}"
+                ColumnDefinitions="Auto,Auto,Auto"
+                ColumnSpacing="4"
+                HeightRequest="36"
+                Margin="8,0">
+
+                <Label
+                    Grid.Column="0"
+                    Text="{Binding IconGlyph, Source={x:Reference root}}"
+                    FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                    FontSize="12"
+                    TextColor="{DynamicResource AppAccent}"
+                    VerticalOptions="Center" />
+
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding Name}"
+                    FontSize="11"
+                    VerticalOptions="Center" />
+
+                <components:FaIconButtonView
+                    Grid.Column="2"
+                    Style="{StaticResource GhostIconButtonStyle}"
+                    Icon="{x:Static icons:SolidFont.Xmark}"
+                    IconSize="10"
+                    Padding="0,0,-8,0"
+                    IsVisible="{Binding RemoveCommand, Source={x:Reference root}, Converter={StaticResource IsNotNullConverter}}"
+                    Command="{Binding RemoveCommand, Source={x:Reference root}}"
+                    CommandParameter="{Binding Source={x:Reference root}, Path=Item}" />
+
+            </Grid>
+
+        </Border>
+
+    </VerticalStackLayout>
+
+</ContentView>

@@ -60,7 +60,7 @@ public partial class WarbandListViewModel : BaseViewModel
         await Loading.RunAsync(async () =>
         {
             var warbands = await _warbandService.GetWarbandsAsync();
-            var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.Id, LocalizationService.Instance.Language)));
+            var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.WarbandArchetypeId, LocalizationService.Instance.Language)));
             Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i] }));
             SelectedRow = null;
             HasWarbands = warbands.Count > 0;

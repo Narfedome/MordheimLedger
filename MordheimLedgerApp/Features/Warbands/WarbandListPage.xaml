@@ -17,7 +17,7 @@
                  [[row-select-vs-open-pattern]]. Pas de trésorerie affichée sur la ligne (visible sur la
                  fiche de détail). -->
             <DataTemplate x:Key="WarbandTemplate" x:DataType="vm:WarbandRow">
-                <Grid ColumnDefinitions="4,*,70" ColumnSpacing="8"
+                <Grid ColumnDefinitions="4,*,70" ColumnSpacing="8" BackgroundColor="{DynamicResource AppBackground}"
                       Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48">
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer

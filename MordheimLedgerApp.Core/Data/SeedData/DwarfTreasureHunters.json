@@ -134,6 +134,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 12,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -143,6 +144,7 @@
       "isHero": true,
       "cost": 85,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 3,
       "weaponSkill": 5,

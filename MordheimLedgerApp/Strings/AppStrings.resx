@@ -288,6 +288,27 @@
   <data name="WarriorsGroupHenchmen" xml:space="preserve">
     <value>Hommes de main</value>
   </data>
+  <data name="WarbandsRosterMinSuffix" xml:space="preserve">
+    <value>min. {0}</value>
+  </data>
+  <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
+    <value>{0} CO restants</value>
+  </data>
+  <data name="WarbandsRosterFullTitle" xml:space="preserve">
+    <value>Effectif complet</value>
+  </data>
+  <data name="WarbandsRosterFullMessage" xml:space="preserve">
+    <value>Cette bande a atteint son effectif maximum.</value>
+  </data>
+  <data name="WarbandsNoRecruitableWarriorsMessage" xml:space="preserve">
+    <value>Aucun type de guerrier recrutable avec le budget ou les emplacements restants.</value>
+  </data>
+  <data name="WarbandsMinWarriorsError" xml:space="preserve">
+    <value>Recrutez au moins {0} guerriers avant de continuer.</value>
+  </data>
+  <data name="WarbandsRequiredWarriorMissing" xml:space="preserve">
+    <value>Cette bande doit inclure {1} {0}.</value>
+  </data>
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Morts</value>
   </data>
@@ -393,8 +414,17 @@
   <data name="WarbandArchetypeTreasuryPh" xml:space="preserve">
     <value>Trésorerie de départ</value>
   </data>
+  <data name="WarbandArchetypePh" xml:space="preserve">
+    <value>Archétype</value>
+  </data>
+  <data name="WarbandChooseArchetypePh" xml:space="preserve">
+    <value>Choisir un archétype</value>
+  </data>
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
     <value>Maximum de guerriers</value>
+  </data>
+  <data name="WarbandArchetypeMinWarriorsPh" xml:space="preserve">
+    <value>Minimum de guerriers</value>
   </data>
   <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
     <value>Général</value>
@@ -434,6 +464,9 @@
   </data>
   <data name="WarriorArchetypeMaxCountPh" xml:space="preserve">
     <value>Nombre maximum</value>
+  </data>
+  <data name="WarriorArchetypeMinCountPh" xml:space="preserve">
+    <value>Nombre minimum</value>
   </data>
   <data name="WarriorArchetypeStartingExperiencePh" xml:space="preserve">
     <value>XP de départ</value>

@@ -41,6 +41,7 @@ public class WarbandSeedData
 
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
+    public int? MinWarriors { get; set; }
     public List<WarriorSeedData> Warriors { get; set; } = new();
 
     /// <summary>Equipment SPECIFIC to this warband (typically rare/restricted items) - the generic common
@@ -81,6 +82,7 @@ public class WarriorSeedData
     public bool IsHero { get; set; }
     public int Cost { get; set; }
     public int? MaxCount { get; set; }
+    public int? MinCount { get; set; }
     public int StartingExperience { get; set; }
     public int Movement { get; set; }
 

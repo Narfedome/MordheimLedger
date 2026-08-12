@@ -26,7 +26,12 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
                     </Grid>
-                    
+
+                    <!-- Création (IsWizardMode) : pas à pas, Général→Guerriers (les guerriers recrutables
+                 dépendent de l'Archetype choisi en Général) - onglets remplacés par un simple libellé
+                 d'étape, navigation via Précédent/Suivant en bas. Pas d'onglets Règles/Magie/Équipement :
+                 une Warband (instance jouée) n'a pas sa propre copie de ces catalogues, elle référence
+                 ceux de son WarbandArchetype (ShowArchetypeDetail ouvre sa fiche récap complète). -->
                     <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"
                    IsVisible="{Binding IsWizardMode}"/>
 
@@ -60,35 +65,42 @@
                                                  IsMandatory="True" />
                         <Label Text="{Binding ArchetypeError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding Archetype, Converter={StaticResource IsNotNullConverter}}">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                 <Label Text="{Binding Archetype.StartingTreasury}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="{loc:Loc WarbandArchetypeMinWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{Binding Archetype.MinWarriors}" TextColor="{DynamicResource AppText}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                 <Label Text="{Binding Archetype.MaxWarriors}"/>
                             </VerticalStackLayout>
                         </Grid>
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Label Text="{Binding Archetype.Description}" HeightRequest="80"/>
-                        </VerticalStackLayout>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
                         <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding RosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Column="1" Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
                         <components:ChipListView ItemsSource="{Binding Warriors}"
                                           HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
                                           IconGlyph="{x:Static icons:SolidFont.Shield}"
-                                          Command="{Binding EditWarriorCommand}"
                                           AddCommand="{Binding AddWarriorCommand}"
                                           RemoveCommand="{Binding RemoveWarriorCommand}"/>
+                        <Label Text="{Binding WarriorsError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding WarriorsError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </ScrollView>
 
+            <!-- Boutons toujours ancrés en bas du dialog (ligne Auto de la Grid englobante, hors ScrollView) -
+             plutôt que collés au contenu de l'onglet/étape courante, dont la hauteur varie. -->
             <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding IsWizardMode}">
                 <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

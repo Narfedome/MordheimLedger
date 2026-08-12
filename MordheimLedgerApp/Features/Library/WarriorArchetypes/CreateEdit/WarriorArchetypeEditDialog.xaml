@@ -55,12 +55,16 @@
                     <CheckBox IsChecked="{Binding Item.CanBuyMutations}" VerticalOptions="Center"/>
                     <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{loc:Loc WarriorArchetypeCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc WarriorArchetypeMinCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.MinCount}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="4">
                         <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         <Entry Text="{Binding Item.MaxCount}" Keyboard="Numeric"/>
                     </VerticalStackLayout>

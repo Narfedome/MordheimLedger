@@ -52,6 +52,7 @@ public static class EntityMapping
         Grade = e.Grade,
         StartingTreasury = e.StartingTreasury,
         MaxWarriors = e.MaxWarriors,
+        MinWarriors = e.MinWarriors,
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
@@ -68,6 +69,7 @@ public static class EntityMapping
         Grade = m.Grade,
         StartingTreasury = m.StartingTreasury,
         MaxWarriors = m.MaxWarriors,
+        MinWarriors = m.MinWarriors,
         DescriptionKey = m.DescriptionKey,
         ImagePath = m.ImagePath
     };
@@ -82,6 +84,7 @@ public static class EntityMapping
         Cost = e.Cost,
         Source = e.Source,
         MaxCount = e.MaxCount,
+        MinCount = e.MinCount,
         Movement = e.Movement,
         MovementOverride = e.MovementOverride,
         WeaponSkill = e.WeaponSkill,
@@ -118,6 +121,7 @@ public static class EntityMapping
         Cost = m.Cost,
         Source = m.Source,
         MaxCount = m.MaxCount,
+        MinCount = m.MinCount,
         Movement = m.Movement,
         MovementOverride = m.MovementOverride,
         WeaponSkill = m.WeaponSkill,

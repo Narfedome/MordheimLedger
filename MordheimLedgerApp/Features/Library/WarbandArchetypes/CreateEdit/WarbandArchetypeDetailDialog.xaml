@@ -51,12 +51,16 @@
                     <Label Text="{loc:Loc WarbandGradePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding GradeLabel}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         <Label Text="{Binding Item.StartingTreasury}" TextColor="{DynamicResource AppText}"/>
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc WarbandArchetypeMinWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding MinWarriorsDisplay}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="4">
                         <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         <Label Text="{Binding MaxWarriorsDisplay}" TextColor="{DynamicResource AppText}"/>
                     </VerticalStackLayout>

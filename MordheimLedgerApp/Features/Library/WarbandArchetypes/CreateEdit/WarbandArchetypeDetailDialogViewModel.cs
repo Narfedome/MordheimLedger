@@ -30,6 +30,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     public WarbandArchetype Item { get; }
     public string GradeLabel { get; }
     public string MaxWarriorsDisplay { get; }
+    public string MinWarriorsDisplay { get; }
 
     [ObservableProperty]
     private List<NamedRef> warriors = new();
@@ -67,6 +68,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
         Title = item.Name;
         GradeLabel = Loc[$"WarbandGrade{item.Grade}"];
         MaxWarriorsDisplay = item.MaxWarriors?.ToString() ?? "—";
+        MinWarriorsDisplay = item.MinWarriors?.ToString() ?? "—";
         _libraryService = libraryService;
     }
 

@@ -179,7 +179,8 @@ public class AppDatabase
             Source = ContentSource.Official,
             Grade = Enum.Parse<WarbandGrade>(data.Grade),
             StartingTreasury = data.StartingTreasury,
-            MaxWarriors = data.MaxWarriors
+            MaxWarriors = data.MaxWarriors,
+            MinWarriors = data.MinWarriors
         };
         warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
@@ -287,6 +288,7 @@ public class AppDatabase
                 IsHero = w.IsHero,
                 Cost = w.Cost,
                 MaxCount = w.MaxCount,
+                MinCount = w.MinCount,
                 StartingExperience = w.StartingExperience,
                 Movement = w.Movement,
                 MovementOverride = w.MovementOverride,

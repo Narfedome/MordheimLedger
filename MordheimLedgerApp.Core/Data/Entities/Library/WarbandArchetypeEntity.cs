@@ -12,6 +12,7 @@ public class WarbandArchetypeEntity
     public WarbandGrade Grade { get; set; }
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
+    public int? MinWarriors { get; set; }
     public string? DescriptionKey { get; set; }
     public string? ImagePath { get; set; }
 }

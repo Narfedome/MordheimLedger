@@ -21,6 +21,11 @@ public class WarriorArchetype
     /// <summary>Null = no recruitment cap tracked (e.g. "0-1 per warband").</summary>
     public int? MaxCount { get; set; }
 
+    /// <summary>Null = no recruitment floor tracked. Non-null only for a warband's sole "no more, no
+    /// less" leader type (e.g. the Vampire for Undead), where it equals MaxCount (exactly one
+    /// required) - never set for merely-capped types (Dregs, Dire Wolves...), where 0 is valid.</summary>
+    public int? MinCount { get; set; }
+
     public int Movement { get; set; }
 
     /// <summary>Non-null overrides the displayed Movement value with free text (e.g. "2D6" for Cave

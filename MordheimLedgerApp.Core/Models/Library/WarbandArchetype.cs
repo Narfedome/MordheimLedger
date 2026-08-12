@@ -23,6 +23,9 @@ public class WarbandArchetype
     /// <summary>Null = no roster cap tracked.</summary>
     public int? MaxWarriors { get; set; }
 
+    /// <summary>Null = no roster floor tracked (e.g. the rulebook's "minimum of three models").</summary>
+    public int? MinWarriors { get; set; }
+
     public string? Description { get; set; }
 
     /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>

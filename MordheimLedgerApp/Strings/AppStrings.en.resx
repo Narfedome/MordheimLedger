@@ -288,6 +288,27 @@
   <data name="WarriorsGroupHenchmen" xml:space="preserve">
     <value>Henchmen</value>
   </data>
+  <data name="WarbandsRosterMinSuffix" xml:space="preserve">
+    <value>min {0}</value>
+  </data>
+  <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
+    <value>{0} gc remaining</value>
+  </data>
+  <data name="WarbandsRosterFullTitle" xml:space="preserve">
+    <value>Roster full</value>
+  </data>
+  <data name="WarbandsRosterFullMessage" xml:space="preserve">
+    <value>This warband has reached its maximum roster size.</value>
+  </data>
+  <data name="WarbandsNoRecruitableWarriorsMessage" xml:space="preserve">
+    <value>No warrior type is recruitable with the remaining budget or roster slots.</value>
+  </data>
+  <data name="WarbandsMinWarriorsError" xml:space="preserve">
+    <value>Recruit at least {0} warriors before continuing.</value>
+  </data>
+  <data name="WarbandsRequiredWarriorMissing" xml:space="preserve">
+    <value>This warband must include {1} {0}.</value>
+  </data>
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Dead</value>
   </data>
@@ -393,8 +414,17 @@
   <data name="WarbandArchetypeTreasuryPh" xml:space="preserve">
     <value>Starting treasury</value>
   </data>
+  <data name="WarbandArchetypePh" xml:space="preserve">
+    <value>Archetype</value>
+  </data>
+  <data name="WarbandChooseArchetypePh" xml:space="preserve">
+    <value>Choose an archetype</value>
+  </data>
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
     <value>Maximum warriors</value>
+  </data>
+  <data name="WarbandArchetypeMinWarriorsPh" xml:space="preserve">
+    <value>Minimum warriors</value>
   </data>
   <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
     <value>General</value>
@@ -434,6 +464,9 @@
   </data>
   <data name="WarriorArchetypeMaxCountPh" xml:space="preserve">
     <value>Maximum count</value>
+  </data>
+  <data name="WarriorArchetypeMinCountPh" xml:space="preserve">
+    <value>Minimum count</value>
   </data>
   <data name="WarriorArchetypeStartingExperiencePh" xml:space="preserve">
     <value>Starting XP</value>

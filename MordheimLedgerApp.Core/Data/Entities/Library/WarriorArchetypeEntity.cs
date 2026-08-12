@@ -16,6 +16,7 @@ public class WarriorArchetypeEntity
     public int Cost { get; set; }
     public ContentSource Source { get; set; }
     public int? MaxCount { get; set; }
+    public int? MinCount { get; set; }
 
     public int Movement { get; set; }
     public string? MovementOverride { get; set; }

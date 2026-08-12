@@ -12,6 +12,7 @@ public partial class WarriorArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     public WarriorArchetype Item { get; }
     public string RoleDisplay { get; }
     public string MaxCountDisplay { get; }
+    public string MinCountDisplay { get; }
     public string EquipmentListDisplay { get; }
 
     /// <summary>Already resolved by the caller (WarbandArchetypeDetailDialogViewModel, which already
@@ -23,6 +24,7 @@ public partial class WarriorArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
         Title = item.Name;
         RoleDisplay = item.IsHero ? Loc["WarriorRoleHeroSingular"] : Loc["WarriorRoleHenchmanSingular"];
         MaxCountDisplay = item.MaxCount?.ToString() ?? "—";
+        MinCountDisplay = item.MinCount?.ToString() ?? "—";
         EquipmentListDisplay = item.EquipmentListId is { } listId
             ? warbandEquipmentLists.FirstOrDefault(l => l.Id == listId)?.Name ?? Loc["WarriorArchetypeEquipmentListNone"]
             : Loc["WarriorArchetypeEquipmentListNone"];

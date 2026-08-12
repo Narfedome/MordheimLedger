@@ -71,12 +71,16 @@
                         <Picker Title="{loc:Loc WarbandGradePh}"
                         ItemsSource="{Binding GradeOptions}"
                         SelectedItem="{Binding SelectedGradeLabel}"/>
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                 <Entry Text="{Binding Item.StartingTreasury}" Keyboard="Numeric"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="{loc:Loc WarbandArchetypeMinWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Entry Text="{Binding Item.MinWarriors}" Keyboard="Numeric"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                 <Entry Text="{Binding Item.MaxWarriors}" Keyboard="Numeric"/>
                             </VerticalStackLayout>

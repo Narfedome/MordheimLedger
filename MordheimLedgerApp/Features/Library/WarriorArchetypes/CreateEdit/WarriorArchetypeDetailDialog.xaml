@@ -36,12 +36,16 @@
                     <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
             </Grid>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                 <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Loc WarriorArchetypeMinCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding MinCountDisplay}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
                     <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding MaxCountDisplay}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
                     <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding Item.StartingExperience}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>

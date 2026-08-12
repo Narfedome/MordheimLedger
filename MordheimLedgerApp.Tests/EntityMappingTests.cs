@@ -80,6 +80,7 @@ public class EntityMappingTests
             Source = ContentSource.Official,
             StartingTreasury = 500,
             MaxWarriors = 15,
+            MinWarriors = 3,
             Description = "The default human warband of the Empire.",
             DescriptionKey = "reiklander-desc"
         };
@@ -92,6 +93,7 @@ public class EntityMappingTests
         Assert.Equal(archetype.Source, roundTripped.Source);
         Assert.Equal(archetype.StartingTreasury, roundTripped.StartingTreasury);
         Assert.Equal(archetype.MaxWarriors, roundTripped.MaxWarriors);
+        Assert.Equal(archetype.MinWarriors, roundTripped.MinWarriors);
         Assert.Equal(archetype.Description, roundTripped.Description);
     }
 
@@ -108,6 +110,7 @@ public class EntityMappingTests
             Cost = 80,
             Source = ContentSource.Official,
             MaxCount = 1,
+            MinCount = 1,
             Movement = 4,
             WeaponSkill = 4,
             BallisticSkill = 3,
@@ -132,6 +135,7 @@ public class EntityMappingTests
         Assert.Equal(archetype.Cost, roundTripped.Cost);
         Assert.Equal(archetype.Source, roundTripped.Source);
         Assert.Equal(archetype.MaxCount, roundTripped.MaxCount);
+        Assert.Equal(archetype.MinCount, roundTripped.MinCount);
         Assert.Equal(archetype.Movement, roundTripped.Movement);
         Assert.Equal(archetype.WeaponSkill, roundTripped.WeaponSkill);
         Assert.Equal(archetype.BallisticSkill, roundTripped.BallisticSkill);

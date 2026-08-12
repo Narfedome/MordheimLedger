@@ -441,6 +441,9 @@
   <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
     <value>Guerriers</value>
   </data>
+  <data name="WarbandCreateTabEquipment" xml:space="preserve">
+    <value>Équipement</value>
+  </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Listes d'équipement</value>
   </data>

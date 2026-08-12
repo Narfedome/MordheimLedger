@@ -40,6 +40,8 @@
                                              IsActive="{Binding IsGeneralTab}" FontSize="12"/>
                         <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
                                              IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
+                        <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
+                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
                     </HorizontalStackLayout>
 
                     <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
@@ -96,6 +98,71 @@
                                           DecrementCommand="{Binding DecrementWarriorCommand}"/>
                         <Label Text="{Binding WarriorsError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding WarriorsError, Converter={StaticResource IsNotNullConverter}}"/>
+                    </VerticalStackLayout>
+
+                    <!-- Achat par groupe pour les Hommes de main (GroupEquipment, même équipement pour
+                         tous - livre des règles), par individu pour les Héros (une section par
+                         WarriorNameSlot, chacun peut différer). Command/CommandParameter des boutons "+"
+                         et de ChipListView.RemoveCommand remontent jusqu'au ViewModel de la page via
+                         RelativeSource AncestorType (même idiome que WarriorEditDialog.xaml) puisque le
+                         BindingContext local ici est la ligne/le slot, pas la page. -->
+                    <VerticalStackLayout Spacing="16" IsVisible="{Binding IsEquipmentTab}">
+                        <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                        <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="16">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:WarriorRecruitRow">
+                                    <VerticalStackLayout Spacing="8">
+                                        <!-- Hommes de main : une seule section, coût × effectif du groupe. -->
+                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <Label Grid.Column="0" FontSize="13">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding Name}"/>
+                                                            <Span Text=" × "/>
+                                                            <Span Text="{Binding Count}"/>
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                                              CommandParameter="{Binding .}"/>
+                                            </Grid>
+                                            <components:ChipListView ItemsSource="{Binding GroupEquipment}"
+                                                              IconGlyph="{x:Static icons:SolidFont.Toolbox}"
+                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
+                                        </VerticalStackLayout>
+
+                                        <!-- Héros : une section par recrue nommée. -->
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding NameSlots}"
+                                                              IsVisible="{Binding IsHero}" Spacing="12">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="local:WarriorNameSlot">
+                                                    <VerticalStackLayout Spacing="6">
+                                                        <Grid ColumnDefinitions="*,Auto">
+                                                            <Label Grid.Column="0" Text="{Binding Name}" FontSize="13"/>
+                                                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                                                          CommandParameter="{Binding .}"/>
+                                                        </Grid>
+                                                        <components:ChipListView ItemsSource="{Binding Equipment}"
+                                                                          IconGlyph="{x:Static icons:SolidFont.Toolbox}"
+                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
+                                                    </VerticalStackLayout>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </ScrollView>

@@ -12,19 +12,23 @@ using System.Collections.ObjectModel;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 {
-    /// <summary>2 étapes (Général/Guerriers) : Règles/Magie/Équipement n'ont pas de sens ici - Item est
-    /// un Warband (l'instance jouée), qui n'a pas sa propre copie de ces catalogues, elle référence ceux
-    /// de son WarbandArchetype (consultables via ShowArchetypeDetail/le Codex). Général = Nom + choix de
+    /// <summary>3 étapes (Général/Guerriers/Équipement) : Règles/Magie n'ont pas de sens ici - Item est un
+    /// Warband (l'instance jouée), qui n'a pas sa propre copie de ces catalogues, elle référence ceux de
+    /// son WarbandArchetype (consultables via ShowArchetypeDetail/le Codex). Général = Nom + choix de
     /// l'Archetype (ChipItemView, sélection unique obligatoire) ; Guerriers = un WarriorRecruitRow par
     /// type recrutable (WarriorRecruitListView : compteur 0/MaxCount + une Entry de nom par recrue
-    /// Héros), aplati en vrais Warrior seulement au Save - rien n'est persisté avant.</summary>
+    /// Héros) ; Équipement = achat par groupe pour les Hommes de main (WarriorRecruitRow.GroupEquipment,
+    /// même équipement pour tous - livre des règles) et par individu pour les Héros
+    /// (WarriorNameSlot.Equipment, chacun peut différer). Tout est aplati en vrais Warrior/
+    /// WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
-        private const int StepCount = 2;
+        private const int StepCount = 3;
 
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
         private readonly ILibraryService _libraryService;
+        private readonly IEquipmentPickerService _equipmentPicker;
         private bool _recruitableLoaded;
 
         public bool IsWizardMode { get; }
@@ -50,12 +54,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
         [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
+        [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
         private int selectedTab;
         public bool IsGeneralTab => SelectedTab == 0;
         public bool IsWarriorsTab => SelectedTab == 1;
+        public bool IsEquipmentTab => SelectedTab == 2;
 
         /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
         public bool CanGoBack => SelectedTab > 0;
@@ -67,6 +73,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// rechargée si l'Archetype change (AddArchetype/RemoveArchetype).</summary>
         [ObservableProperty]
         private ObservableCollection<WarriorRecruitRow> recruitRows = new();
+
+        /// <summary>Sous-ensemble de RecruitRows effectivement recruté (Count > 0) - c'est la seule chose
+        /// pertinente à afficher à l'étape Équipement, pas la liste complète des types disponibles.</summary>
+        public IEnumerable<WarriorRecruitRow> RecruitedRows => RecruitRows.Where(r => r.Count > 0);
 
         public string RosterCountDisplay
         {
@@ -89,19 +99,26 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
-        private int RemainingTreasury => (Archetype?.StartingTreasury ?? 0) - RecruitRows.Sum(r => r.Count * r.Cost);
+        /// <summary>Coût de recrutement de chaque ligne + équipement de groupe (Hommes de main, coût ×
+        /// effectif) + équipement individuel (chaque slot Héros).</summary>
+        private int TotalSpent => RecruitRows.Sum(r => r.Count * r.Cost)
+            + RecruitRows.Sum(r => r.GroupEquipment.Sum(e => e.Cost) * r.Count)
+            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
+
+        private int RemainingTreasury => (Archetype?.StartingTreasury ?? 0) - TotalSpent;
 
         [ObservableProperty]
         private string? warriorsError;
 
         public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker,
-            IWarbandService warbandService, ILibraryService libraryService)
+            IWarbandService warbandService, ILibraryService libraryService, IEquipmentPickerService equipmentPicker)
         {
             this.item = item;
             this.title = title;
             _warbandArchetypePicker = warbandArchetypePicker;
             _warbandService = warbandService;
             _libraryService = libraryService;
+            _equipmentPicker = equipmentPicker;
             IsWizardMode = item.Id == 0;
         }
 
@@ -112,6 +129,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private async Task ShowWarriorsTab()
         {
             SelectedTab = 1;
+            await EnsureRecruitableArchetypesLoadedAsync();
+        }
+
+        [RelayCommand]
+        private async Task ShowEquipmentTab()
+        {
+            SelectedTab = 2;
             await EnsureRecruitableArchetypesLoadedAsync();
         }
 
@@ -178,9 +202,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             });
             if (fullWarrior is null) return;
 
-            // Pas de listes d'équipement chargées à ce stade (pas d'étape Équipement pour l'instant) -
-            // EquipmentListDisplay retombe sur "aucune" dans le dialog récap, comme pour un guerrier
-            // sans EquipmentListId.
+            // Pas de listes d'équipement chargées à ce stade (le nom de la liste, pas son contenu, n'est
+            // pas utile ici) - EquipmentListDisplay retombe sur "aucune" dans le dialog récap.
             await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(fullWarrior, Array.Empty<NamedRef>())));
         }
 
@@ -197,7 +220,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (RemainingTreasury < row.Cost) return;
 
             row.Count++;
-            if (row.IsHero) row.NameSlots.Add(new WarriorNameSlot());
+            if (row.IsHero) row.NameSlots.Add(new WarriorNameSlot(row));
             UpdateRecruitability();
         }
 
@@ -217,6 +240,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         {
             OnPropertyChanged(nameof(RosterCountDisplay));
             OnPropertyChanged(nameof(RemainingTreasuryDisplay));
+            OnPropertyChanged(nameof(RecruitedRows));
 
             if (Archetype is null) return;
             var total = RecruitRows.Sum(r => r.Count);
@@ -225,6 +249,92 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             {
                 var atMaxCount = row.Archetype.MaxCount is { } max && row.Count >= max;
                 row.CanIncrement = !atMaxCount && !rosterFull && RemainingTreasury >= row.Cost;
+            }
+        }
+
+        /// <summary>Achat d'équipement pour une cible : un WarriorRecruitRow (Homme de main - un seul
+        /// achat, appliqué à tout le groupe) ou un WarriorNameSlot (Héros - propre à cette recrue). Même
+        /// logique que WarriorEditDialogViewModel.AddEquipment (picker filtré par EquipmentListId/
+        /// WarriorArchetypeId, choix de matériau pour les armes de corps à corps, arrêt au premier objet
+        /// trop cher) - simplement pas encore de WarriorId réel pour appeler AddWarriorEquipmentAsync,
+        /// donc on garde des EquipmentPick en mémoire jusqu'au Save.</summary>
+        [RelayCommand]
+        private async Task AddEquipment(object target)
+        {
+            WarriorRecruitRow row;
+            ObservableCollection<EquipmentPick> destination;
+            int perUnitCost;
+            switch (target)
+            {
+                case WarriorNameSlot slot:
+                    row = slot.Row;
+                    destination = slot.Equipment;
+                    perUnitCost = 1;
+                    break;
+                case WarriorRecruitRow r:
+                    row = r;
+                    destination = r.GroupEquipment;
+                    perUnitCost = r.Count;
+                    break;
+                default:
+                    return;
+            }
+            if (Archetype is null) return;
+
+            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id);
+            foreach (var equipmentItem in items)
+            {
+                SpecialRule? materialRule = null;
+                if (equipmentItem.Category == EquipmentCategory.MeleeWeapon)
+                {
+                    var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
+                        .Where(r => r.CostMultiplier.HasValue).ToList();
+                    if (materialRules.Count > 0)
+                    {
+                        var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
+                        var index = await ShowActionSheetIndexAsync(Loc["WarriorsMaterialPickerTitle"], options);
+                        if (index > 0) materialRule = materialRules[index - 1];
+                    }
+                }
+
+                var pick = new EquipmentPick(equipmentItem, materialRule);
+
+                // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
+                // main, 1 pour un Héros) - sélection multiple : on s'arrête au premier objet trop cher
+                // plutôt que de tout annuler, même logique que WarriorEditDialogViewModel.AddEquipment.
+                if (RemainingTreasury < pick.Cost * perUnitCost)
+                {
+                    await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
+                    break;
+                }
+
+                destination.Add(pick);
+            }
+
+            UpdateRecruitability();
+        }
+
+        /// <summary>Retire un EquipmentPick de quelle que collection le contient (GroupEquipment d'une
+        /// ligne ou Equipment d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
+        /// laquelle puisque chaque instance n'est ajoutée qu'à une seule collection.</summary>
+        [RelayCommand]
+        private void RemoveEquipment(EquipmentPick pick)
+        {
+            foreach (var row in RecruitRows)
+            {
+                if (row.GroupEquipment.Remove(pick))
+                {
+                    UpdateRecruitability();
+                    return;
+                }
+                foreach (var slot in row.NameSlots)
+                {
+                    if (slot.Equipment.Remove(pick))
+                    {
+                        UpdateRecruitability();
+                        return;
+                    }
+                }
             }
         }
 
@@ -273,16 +383,19 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             return true;
         }
 
-        /// <summary>Mode assistant uniquement (bouton Suivant) - avance d'une étape, Général→Guerriers.
-        /// Validé par étape : en quittant Général, bloque tant que Nom/Archetype ne sont pas renseignés.</summary>
+        /// <summary>Mode assistant uniquement (bouton Suivant) - avance d'une étape, Général→Guerriers→
+        /// Équipement. Validé par étape : en quittant Général, bloque tant que Nom/Archetype ne sont pas
+        /// renseignés ; en quittant Guerriers, bloque tant que ValidateWarriorsStep échoue (effectif/
+        /// noms des héros).</summary>
         [RelayCommand]
         private async Task Next()
         {
             if (IsGeneralTab && !ValidateGeneralStep()) return;
+            if (IsWarriorsTab && !ValidateWarriorsStep()) return;
             if (SelectedTab >= StepCount - 1) return;
             SelectedTab++;
 
-            if (IsWarriorsTab) await EnsureRecruitableArchetypesLoadedAsync();
+            if (IsWarriorsTab || IsEquipmentTab) await EnsureRecruitableArchetypesLoadedAsync();
         }
 
         /// <summary>Mode assistant uniquement (bouton Précédent).</summary>
@@ -294,10 +407,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
         /// <summary>Seul point d'écriture en base de tout le dialog - la bande d'abord (INSERT via
         /// CreateWarbandAsync si Item.Id == 0, sinon UPDATE via SaveWarbandAsync), puis chaque recrue en
-        /// attente (RecruitRows aplaties en Warrior ici, pas avant). Item.Id == 0 est le seul cas
-        /// atteignable aujourd'hui (WarbandListViewModel n'ouvre ce dialog qu'en création) - la branche
-        /// Update est gardée correcte si un futur appelant réutilise ce dialog pour éditer une bande
-        /// existante.</summary>
+        /// attente (RecruitRows aplaties en Warrior + WarriorEquipment ici, pas avant). Item.Id == 0 est
+        /// le seul cas atteignable aujourd'hui (WarbandListViewModel n'ouvre ce dialog qu'en création) -
+        /// la branche Update est gardée correcte si un futur appelant réutilise ce dialog pour éditer une
+        /// bande existante.</summary>
         [RelayCommand]
         private async Task Save()
         {
@@ -317,12 +430,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             await Loading.RunAsync(async () =>
             {
                 int warbandId;
-                var totalCost = RecruitRows.Sum(r => r.Count * r.Cost);
                 if (Item.Id == 0)
                 {
                     var created = await _warbandService.CreateWarbandAsync(Item.Name, Archetype!);
                     warbandId = created.Id;
-                    created.Treasury = Archetype!.StartingTreasury - totalCost;
+                    created.Treasury = Archetype!.StartingTreasury - TotalSpent;
                     await _warbandService.SaveWarbandAsync(created);
                 }
                 else
@@ -336,12 +448,20 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     if (row.IsHero)
                     {
                         foreach (var slot in row.NameSlots)
-                            await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, slot.Name.Trim());
+                        {
+                            var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, slot.Name.Trim());
+                            foreach (var pick in slot.Equipment)
+                                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                        }
                     }
                     else
                     {
                         for (var i = 0; i < row.Count; i++)
-                            await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, row.Archetype.Name);
+                        {
+                            var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, row.Archetype.Name);
+                            foreach (var pick in row.GroupEquipment)
+                                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                        }
                     }
                 }
             });

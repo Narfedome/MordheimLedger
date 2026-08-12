@@ -10,8 +10,23 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 /// ne peut pas réécrire une string immuable en place (voir WarriorRecruitListView.xaml).</summary>
 public partial class WarriorNameSlot : ObservableObject
 {
+    /// <summary>Référence à la ligne parente - nécessaire à l'étape Équipement pour savoir quel
+    /// EquipmentListId/WarriorArchetypeId filtrer au picker quand on achète pour CE héros précis.</summary>
+    public WarriorRecruitRow Row { get; }
+
     [ObservableProperty]
     private string name = string.Empty;
+
+    /// <summary>Équipement propre à cette recrue Héros - contrairement aux Hommes de main (voir
+    /// WarriorRecruitRow.GroupEquipment), chaque héros peut avoir un équipement différent (livre des
+    /// règles : "Every model in each Henchman group must be armed and armoured in the same way", ce qui
+    /// ne s'applique pas aux héros).</summary>
+    public ObservableCollection<EquipmentPick> Equipment { get; } = new();
+
+    public WarriorNameSlot(WarriorRecruitRow row)
+    {
+        Row = row;
+    }
 }
 
 /// <summary>Une ligne du nouvel écran de recrutement (WarriorRecruitListView) : un WarriorArchetype
@@ -40,6 +55,12 @@ public partial class WarriorRecruitRow : ObservableObject
     /// <summary>Un slot par recrue Héros déjà comptée (Count) - une Entry par slot dans
     /// WarriorRecruitListView. Vide pour les Hommes de main (anonymes, pas de nom individuel).</summary>
     public ObservableCollection<WarriorNameSlot> NameSlots { get; } = new();
+
+    /// <summary>Équipement partagé par TOUT le groupe d'Hommes de main de ce type (livre des règles :
+    /// chaque modèle d'un même groupe de Hommes de main doit être équipé identiquement) - une seule
+    /// sélection ici, appliquée à chacune des Count recrues au Save. Vide/non pertinent pour les Héros,
+    /// qui utilisent WarriorNameSlot.Equipment à la place (chacun peut différer).</summary>
+    public ObservableCollection<EquipmentPick> GroupEquipment { get; } = new();
 
     public string CountDisplay => $"{Count}/{(Archetype.MaxCount?.ToString() ?? "∞")}";
 

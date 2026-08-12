@@ -309,6 +309,9 @@
   <data name="WarbandsRequiredWarriorMissing" xml:space="preserve">
     <value>This warband must include {1} {0}.</value>
   </data>
+  <data name="WarbandsWarriorNameRequired" xml:space="preserve">
+    <value>Enter a name for each recruited {0}.</value>
+  </data>
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Dead</value>
   </data>

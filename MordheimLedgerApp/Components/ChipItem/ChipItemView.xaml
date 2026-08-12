@@ -52,57 +52,12 @@
             IsVisible="{Binding HasItem, Converter={StaticResource InverseBoolConverter}}" />
 
         <!-- Chip -->
-        <Border
-            Style="{StaticResource ChipBorderStyle}"
-            Margin="0,0,4,4" HorizontalOptions="Start"
-            IsVisible="{Binding HasItem}">
-
-            <Border.GestureRecognizers>
-
-                <TapGestureRecognizer
-                    Command="{Binding Source={x:Reference root}, Path=Command}"
-                    CommandParameter="{Binding Source={x:Reference root}, Path=Item}" />
-
-            </Border.GestureRecognizers>
-
-            <!--
-                Ici le BindingContext devient l'objet Item.
-                Les propriétés Name, IconGlyph, etc. sont donc celles de l'objet.
-            -->
-            <Grid
-                BindingContext="{Binding Item}"
-                ColumnDefinitions="Auto,Auto,Auto"
-                ColumnSpacing="4"
-                HeightRequest="36"
-                Margin="8,0">
-
-                <Label
-                    Grid.Column="0"
-                    Text="{Binding IconGlyph, Source={x:Reference root}}"
-                    FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
-                    FontSize="12"
-                    TextColor="{DynamicResource AppAccent}"
-                    VerticalOptions="Center" />
-
-                <Label
-                    Grid.Column="1"
-                    Text="{Binding Name}"
-                    FontSize="11"
-                    VerticalOptions="Center" />
-
-                <components:FaIconButtonView
-                    Grid.Column="2"
-                    Style="{StaticResource GhostIconButtonStyle}"
-                    Icon="{x:Static icons:SolidFont.Xmark}"
-                    IconSize="10"
-                    Padding="0,0,-8,0"
-                    IsVisible="{Binding RemoveCommand, Source={x:Reference root}, Converter={StaticResource IsNotNullConverter}}"
-                    Command="{Binding RemoveCommand, Source={x:Reference root}}"
-                    CommandParameter="{Binding Source={x:Reference root}, Path=Item}" />
-
-            </Grid>
-
-        </Border>
+        <components:ChipView Item="{Binding Item, Source={x:Reference root}}"
+                              IconGlyph="{Binding IconGlyph, Source={x:Reference root}}"
+                              IconFontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                              Command="{Binding Command, Source={x:Reference root}}"
+                              RemoveCommand="{Binding RemoveCommand, Source={x:Reference root}}"
+                              IsVisible="{Binding HasItem}"/>
 
     </VerticalStackLayout>
 

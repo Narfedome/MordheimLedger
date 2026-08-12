@@ -88,11 +88,12 @@
                             <Label Grid.Column="0" Text="{Binding RosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                             <Label Grid.Column="1" Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
-                        <components:ChipListView ItemsSource="{Binding Warriors}"
+                        <components:WarriorRecruitListView ItemsSource="{Binding RecruitRows}"
                                           HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
-                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
-                                          AddCommand="{Binding AddWarriorCommand}"
-                                          RemoveCommand="{Binding RemoveWarriorCommand}"/>
+                                          NamePlaceholder="{loc:Loc PromptName}"
+                                          DetailCommand="{Binding ShowWarriorDetailCommand}"
+                                          IncrementCommand="{Binding IncrementWarriorCommand}"
+                                          DecrementCommand="{Binding DecrementWarriorCommand}"/>
                         <Label Text="{Binding WarriorsError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding WarriorsError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>

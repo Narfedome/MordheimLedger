@@ -13,4 +13,5 @@ public class SpecialRuleEntity
     public string? ImagePath { get; set; }
     public int? CostMultiplier { get; set; }
     public string? Abbreviation { get; set; }
+    public int? Rarity { get; set; }
 }

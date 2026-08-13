@@ -39,4 +39,10 @@ public class SpecialRule
     /// stays compact instead of appending the full material name. Null/empty = no suffix shown (see
     /// EquipmentPick.Name/WarriorEquipment.NameDisplay).</summary>
     public string? Abbreviation { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier (material rules) - the Trading Post "Rare X"
+    /// rating for finding this material (e.g. Gromril -&gt; 11, Ithilmar -&gt; 9), same field/meaning as
+    /// EquipmentItem.Rarity. Informational only, no rules engine consumes it - same "no rules engine V1"
+    /// stance as the rest of the Library.</summary>
+    public int? Rarity { get; set; }
 }

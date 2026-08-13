@@ -197,6 +197,9 @@ public class SpecialRuleSeedData
 
     /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Abbreviation.</summary>
     public string? Abbreviation { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Rarity.</summary>
+    public int? Rarity { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

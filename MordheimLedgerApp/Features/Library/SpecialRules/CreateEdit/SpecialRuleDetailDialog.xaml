@@ -37,6 +37,10 @@
                 <Label Text="{loc:Loc SpecialRuleAbbreviationPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Label Text="{Binding Item.Abbreviation}" TextColor="{DynamicResource AppText}"/>
             </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding Item.Rarity, Converter={StaticResource IsNotNullConverter}}">
+                <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding Item.Rarity}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
         </ScrollView>
     </Border>

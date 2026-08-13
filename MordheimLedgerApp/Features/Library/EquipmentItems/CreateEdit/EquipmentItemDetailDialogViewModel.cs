@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 
@@ -52,6 +53,13 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     [RelayCommand]
     private Task ShowWarriorDetail(WarriorArchetype warrior) => ShowChipDetailAsync(warrior.Name, warrior.Description);
 
+    /// <summary>Material rules (CostMultiplier/Rarity set, e.g. Gromril/Ithilmar) get the full
+    /// SpecialRuleDetailDialog recap instead of the generic Nom+Description popup, so the Rare rating and
+    /// price multiplier are visible too - ordinary rules keep the lighter ChipDetailDialog, same as
+    /// every other special-rule chip in the app.</summary>
     [RelayCommand]
-    private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
+    private Task ShowSpecialRuleDetail(SpecialRule rule) =>
+        rule.CostMultiplier.HasValue || rule.Rarity.HasValue
+            ? ShowDialogAsync(new SpecialRuleDetailDialog(new SpecialRuleDetailDialogViewModel(rule)))
+            : ShowChipDetailAsync(rule.Name, rule.Description);
 }

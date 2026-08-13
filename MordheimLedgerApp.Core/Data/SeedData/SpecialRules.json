@@ -69,7 +69,8 @@
       "fr": "Une arme en gromril bénéficie d'un modificateur de sauvegarde supplémentaire de -1, et coûte quatre fois le prix d'une arme normale de son type. Seul un Maître des Runes nain peut forger une arme en gromril, un rare fer météorique - une lame façonnée dans ce métal reste tranchante pendant mille ans."
     },
     "costMultiplier": 4,
-    "abbreviation": "G"
+    "abbreviation": "G",
+    "rarity": 11
   },
   {
     "name": { "en": "Ithilmar Weapon", "fr": "Arme en Ithilmar" },
@@ -78,6 +79,7 @@
       "fr": "Une arme en ithilmar confère à son porteur +1 en Initiative au combat rapproché, et coûte trois fois le prix d'une arme normale de son type. Les lames elfiques sont forgées dans l'ithilmar, un métal d'une valeur inestimable, extrêmement léger mais résistant, que l'on ne trouve que dans les légendaires royaumes elfiques."
     },
     "costMultiplier": 3,
-    "abbreviation": "I"
+    "abbreviation": "I",
+    "rarity": 9
   }
 ]

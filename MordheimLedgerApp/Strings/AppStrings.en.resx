@@ -175,7 +175,7 @@
     <value>Not enough gold in the warband's treasury.</value>
   </data>
   <data name="WarriorsMaterialPickerTitle" xml:space="preserve">
-    <value>Weapon material</value>
+    <value>Material: {0}</value>
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>

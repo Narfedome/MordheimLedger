@@ -129,7 +129,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
                 if (materialRules.Count > 0)
                 {
                     var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
-                    var index = await ShowActionSheetIndexAsync(Loc["WarriorsMaterialPickerTitle"], options);
+                    var index = await ShowActionSheetIndexAsync(string.Format(Loc["WarriorsMaterialPickerTitle"], equipmentItem.Name), options);
                     if (index > 0) materialRule = materialRules[index - 1];
                 }
             }

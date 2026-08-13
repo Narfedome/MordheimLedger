@@ -175,7 +175,7 @@
     <value>Pas assez d'or dans le trésor de la bande.</value>
   </data>
   <data name="WarriorsMaterialPickerTitle" xml:space="preserve">
-    <value>Matériau de l'arme</value>
+    <value>Matériau : {0}</value>
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>

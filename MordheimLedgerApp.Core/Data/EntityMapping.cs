@@ -237,7 +237,8 @@ public static class EntityMapping
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
         CostMultiplier = e.CostMultiplier,
-        Abbreviation = e.Abbreviation
+        Abbreviation = e.Abbreviation,
+        Rarity = e.Rarity
     };
 
     public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
@@ -248,7 +249,8 @@ public static class EntityMapping
         Source = m.Source,
         ImagePath = m.ImagePath,
         CostMultiplier = m.CostMultiplier,
-        Abbreviation = m.Abbreviation
+        Abbreviation = m.Abbreviation,
+        Rarity = m.Rarity
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,

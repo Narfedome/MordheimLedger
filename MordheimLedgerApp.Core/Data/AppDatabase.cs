@@ -567,7 +567,7 @@ public class AppDatabase
         if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
-        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation };
+        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity };
         rule.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
         rule.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
         var entity = rule.ToEntity();

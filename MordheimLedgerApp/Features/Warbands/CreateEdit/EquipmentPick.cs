@@ -21,7 +21,17 @@ public class EquipmentPick
     /// keeps the chip compact instead of appending the material's full name (see SpecialRule.
     /// Abbreviation).</summary>
     public string Name => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
-    public int Cost => Item.Cost * (MaterialRule?.CostMultiplier ?? 1);
+
+    /// <summary>Set true by the caller (WarbandEditDialogViewModel.AddEquipment) when Item.IsFreeDagger
+    /// and the target doesn't already carry one - overrides Cost to 0 for this specific pick. Not
+    /// persisted (no equivalent column on WarriorEquipmentEntity): the actual treasury deduction only
+    /// ever happens once, at purchase time in AddEquipment, so nothing downstream needs to remember it
+    /// after that - this flag only exists so TotalSpent/RemainingTreasury keep computing correctly for
+    /// the rest of the wizard session while this pick sits in a WarriorRecruitRow/HenchmanGroup/
+    /// WarriorNameSlot's in-memory Equipment list.</summary>
+    public bool IsFree { get; set; }
+
+    public int Cost => IsFree ? 0 : Item.Cost * (MaterialRule?.CostMultiplier ?? 1);
 
     public EquipmentPick(EquipmentItem item, SpecialRule? materialRule)
     {

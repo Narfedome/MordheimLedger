@@ -376,6 +376,7 @@
         "fr": "Troll"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 200,
       "maxCount": 1,
       "startingExperience": 0,

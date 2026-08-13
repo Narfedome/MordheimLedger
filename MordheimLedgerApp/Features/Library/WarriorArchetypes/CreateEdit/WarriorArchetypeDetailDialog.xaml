@@ -61,6 +61,8 @@
                    IsVisible="{Binding Item.IsSpellcaster}"/>
             <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" FontSize="12" TextColor="{DynamicResource AppAccent}"
                    IsVisible="{Binding Item.CanBuyMutations}"/>
+            <Label Text="{loc:Loc WarriorArchetypeIsLargeCreature}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                   IsVisible="{Binding Item.IsLargeCreature}"/>
 
             <!-- Profil sur une seule ligne (abréviations françaises officielles) - StatRowView partagé
                  avec AnimalDetailDialog/WarbandDetailPage. -->

@@ -18,14 +18,52 @@ public partial class WarriorNameSlot : ObservableObject
     private string name = string.Empty;
 
     /// <summary>Équipement propre à cette recrue Héros - contrairement aux Hommes de main (voir
-    /// WarriorRecruitRow.GroupEquipment), chaque héros peut avoir un équipement différent (livre des
-    /// règles : "Every model in each Henchman group must be armed and armoured in the same way", ce qui
-    /// ne s'applique pas aux héros).</summary>
+    /// HenchmanGroup.Equipment), chaque héros peut avoir un équipement différent (livre des règles :
+    /// "Every model in each Henchman group must be armed and armoured in the same way", ce qui ne
+    /// s'applique pas aux héros).</summary>
     public ObservableCollection<EquipmentPick> Equipment { get; } = new();
 
     public WarriorNameSlot(WarriorRecruitRow row)
     {
         Row = row;
+    }
+}
+
+/// <summary>Un sous-groupe nommé d'Hommes de main d'un même WarriorRecruitRow, avec son propre
+/// équipement partagé (livre des règles : "Every model in each Henchman group must be armed and
+/// armoured in the same way" - dans le même groupe, pas forcément dans tout le type recruté). Un type
+/// recruté à l'effectif N démarre avec un seul HenchmanGroup (Count = N, nom = celui de l'archétype) -
+/// WarbandEditDialogViewModel.SplitHenchmanGroup permet d'en détacher un second si le joueur veut des
+/// équipements différents au sein du même type (ex. 3 Verminkin à l'épée + 2 au gourdin = 2 groupes
+/// distincts, chacun avec son propre nom - voir "warband roster" dans le livre des règles : chaque
+/// groupe d'Hommes de main doit avoir un nom).</summary>
+public partial class HenchmanGroup : ObservableObject
+{
+    /// <summary>Référence à la ligne parente - même rôle que WarriorNameSlot.Row.</summary>
+    public WarriorRecruitRow Row { get; }
+
+    [ObservableProperty]
+    private string name;
+
+    /// <summary>Combien de guerriers de ce type appartiennent à CE groupe - la somme des Count de tous
+    /// les HenchmanGroups d'une ligne doit toujours égaler WarriorRecruitRow.Count, maintenu par
+    /// IncrementWarrior/DecrementWarrior (qui ne touchent jamais que le dernier groupe) et
+    /// SplitHenchmanGroup (qui transfère des unités du groupe source vers un nouveau groupe).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSplit))]
+    private int count;
+
+    /// <summary>Le bouton Diviser n'a de sens que s'il reste au moins 2 guerriers à répartir entre le
+    /// groupe existant et un nouveau.</summary>
+    public bool CanSplit => Count > 1;
+
+    public ObservableCollection<EquipmentPick> Equipment { get; } = new();
+
+    public HenchmanGroup(WarriorRecruitRow row, string name, int count)
+    {
+        Row = row;
+        this.name = name;
+        this.count = count;
     }
 }
 
@@ -56,11 +94,10 @@ public partial class WarriorRecruitRow : ObservableObject
     /// WarriorRecruitListView. Vide pour les Hommes de main (anonymes, pas de nom individuel).</summary>
     public ObservableCollection<WarriorNameSlot> NameSlots { get; } = new();
 
-    /// <summary>Équipement partagé par TOUT le groupe d'Hommes de main de ce type (livre des règles :
-    /// chaque modèle d'un même groupe de Hommes de main doit être équipé identiquement) - une seule
-    /// sélection ici, appliquée à chacune des Count recrues au Save. Vide/non pertinent pour les Héros,
-    /// qui utilisent WarriorNameSlot.Equipment à la place (chacun peut différer).</summary>
-    public ObservableCollection<EquipmentPick> GroupEquipment { get; } = new();
+    /// <summary>Sous-groupes d'Hommes de main de ce type - vide pour les Héros, qui utilisent NameSlots à
+    /// la place. Un seul groupe par défaut (tout le Count), plusieurs si le joueur a divisé pour donner
+    /// des équipements différents à une partie du type recruté - voir HenchmanGroup.</summary>
+    public ObservableCollection<HenchmanGroup> HenchmanGroups { get; } = new();
 
     public string CountDisplay => $"{Count}/{(Archetype.MaxCount?.ToString() ?? "∞")}";
 

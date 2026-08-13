@@ -35,6 +35,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private Warband? warband;
 
+    /// <summary>Rulebook "calculate the warband rating" - sum over Heroes+Henchmen (active roster, dead
+    /// warriors excluded) of (IsLargeCreature ? 20 : 5) + Experience. Recomputed after every LoadAsync -
+    /// see IWarbandService.GetWarbandRatingAsync for the equivalent lightweight query used by
+    /// WarbandListViewModel, which doesn't otherwise load the full roster.</summary>
+    [ObservableProperty]
+    private int rating;
+
     [ObservableProperty]
     private ObservableCollection<WarriorRow> heroes = new();
 
@@ -111,6 +118,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead));
             Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
+            Rating = Heroes.Concat(Henchmen).Sum(r => (r.Warrior.IsLargeCreature ? 20 : 5) + r.Warrior.Experience);
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);

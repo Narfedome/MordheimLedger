@@ -32,9 +32,17 @@
                            FontSize="{OnIdiom Default=15, Desktop=13}"
                            VerticalOptions="End" Style="{StaticResource TruncatedLabelStyle}"/>
                         
-                    <Label Text="{Binding ArchetypeName}" Margin="8,0,0,4" Grid.Row="1"
+                    <Label Margin="8,0,0,4" Grid.Row="1"
                            FontSize="{OnIdiom Default=10, Desktop=8}"
-                            Style="{StaticResource TruncatedLabelStyle}"/>
+                            Style="{StaticResource TruncatedLabelStyle}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding ArchetypeName}"/>
+                                <Span Text=" · "/>
+                                <Span Text="{Binding RatingDisplay}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
                     </Grid>
                     <Grid Grid.Column="2">
                         <Grid.GestureRecognizers>

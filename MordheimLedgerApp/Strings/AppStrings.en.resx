@@ -174,8 +174,23 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Not enough gold in the warband's treasury.</value>
   </data>
-  <data name="WarriorsMaterialPickerTitle" xml:space="preserve">
-    <value>Material: {0}</value>
+  <data name="WarriorsMaterialHeading" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
+    <value>{0}/{1}</value>
+  </data>
+  <data name="WarbandsSplitGroupTitle" xml:space="preserve">
+    <value>Split group</value>
+  </data>
+  <data name="WarbandsSplitGroupPrompt" xml:space="preserve">
+    <value>How many warriors in the new group? (1-{0})</value>
+  </data>
+  <data name="WarbandsWeaponLimitWarningTitle" xml:space="preserve">
+    <value>Weapon limit exceeded</value>
+  </data>
+  <data name="WarbandsWeaponLimitWarningMessage" xml:space="preserve">
+    <value>{0} exceeds the usual limit (2 close combat weapons, 2 different missile weapons) - double-check a special rule allows it (e.g. Skaven Tail Fighting).</value>
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
@@ -293,6 +308,12 @@
   </data>
   <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
     <value>{0} gc remaining</value>
+  </data>
+  <data name="WarbandRatingPh" xml:space="preserve">
+    <value>Warband Rating</value>
+  </data>
+  <data name="WarbandRatingDisplay" xml:space="preserve">
+    <value>Rating {0}</value>
   </data>
   <data name="EquipmentPickerBudgetDisplay" xml:space="preserve">
     <value>{0} gc spent · {1} gc remaining</value>
@@ -464,6 +485,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possessed (may buy mutations)</value>
+  </data>
+  <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
+    <value>Large creature (flat 20 pts in the Warband Rating)</value>
   </data>
   <data name="WarriorArchetypeRolePh" xml:space="preserve">
     <value>Role</value>

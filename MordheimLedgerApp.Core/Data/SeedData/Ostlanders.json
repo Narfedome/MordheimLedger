@@ -255,6 +255,7 @@
         "fr": "Ogre"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 160,
       "maxCount": 1,
       "startingExperience": 0,

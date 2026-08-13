@@ -18,10 +18,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
     /// son WarbandArchetype (consultables via ShowArchetypeDetail/le Codex). Général = Nom + choix de
     /// l'Archetype (ChipItemView, sélection unique obligatoire) ; Guerriers = un WarriorRecruitRow par
     /// type recrutable (WarriorRecruitListView : compteur 0/MaxCount + une Entry de nom par recrue
-    /// Héros) ; Équipement = achat par groupe pour les Hommes de main (WarriorRecruitRow.GroupEquipment,
-    /// même équipement pour tous - livre des règles) et par individu pour les Héros
-    /// (WarriorNameSlot.Equipment, chacun peut différer). Tout est aplati en vrais Warrior/
-    /// WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
+    /// Héros) ; Équipement = achat par sous-groupe nommé pour les Hommes de main (HenchmanGroup, même
+    /// équipement au sein d'un groupe - livre des règles, SplitHenchmanGroup pour en détacher un second)
+    /// et par individu pour les Héros (WarriorNameSlot.Equipment, chacun peut différer). Tout est aplati
+    /// en vrais Warrior/WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
         private const int StepCount = 3;
@@ -100,10 +100,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
-        /// <summary>Coût de recrutement de chaque ligne + équipement de groupe (Hommes de main, coût ×
-        /// effectif) + équipement individuel (chaque slot Héros).</summary>
+        /// <summary>Coût de recrutement de chaque ligne + équipement de chaque sous-groupe d'Hommes de
+        /// main (coût × effectif de CE sous-groupe, pas de la ligne entière - deux sous-groupes du même
+        /// type peuvent avoir des équipements différents) + équipement individuel (chaque slot Héros).</summary>
         private int TotalSpent => RecruitRows.Sum(r => r.Count * r.Cost)
-            + RecruitRows.Sum(r => r.GroupEquipment.Sum(e => e.Cost) * r.Count)
+            + RecruitRows.SelectMany(r => r.HenchmanGroups).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count)
             + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
 
         private int RemainingTreasury => (Archetype?.StartingTreasury ?? 0) - TotalSpent;
@@ -211,7 +212,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Un guerrier de plus de ce type : bloqué si son MaxCount, l'effectif max de la bande ou
         /// la trésorerie restante ne le permet plus (IncrementCommand.CanIncrement reflète déjà ça sur
         /// le bouton, ce garde-fou couvre le cas où l'état a changé entre-temps). Héros : ajoute un slot
-        /// de nom vide, à renseigner avant de pouvoir Enregistrer (voir ValidateWarriorsStep).</summary>
+        /// de nom vide, à renseigner avant de pouvoir Enregistrer (voir ValidateWarriorsStep). Hommes de
+        /// main : grossit le dernier HenchmanGroup (ou en crée un premier, nommé d'après l'archétype) -
+        /// SplitHenchmanGroup est le seul moyen d'en avoir plusieurs.</summary>
         [RelayCommand]
         private void IncrementWarrior(WarriorRecruitRow row)
         {
@@ -222,6 +225,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
             row.Count++;
             if (row.IsHero) row.NameSlots.Add(new WarriorNameSlot(row));
+            else if (row.HenchmanGroups.Count == 0) row.HenchmanGroups.Add(new HenchmanGroup(row, row.Archetype.Name, 1));
+            else row.HenchmanGroups[^1].Count++;
             UpdateRecruitability();
         }
 
@@ -231,7 +236,34 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (row.Count == 0) return;
             row.Count--;
             if (row.IsHero && row.NameSlots.Count > 0) row.NameSlots.RemoveAt(row.NameSlots.Count - 1);
+            else if (!row.IsHero && row.HenchmanGroups.Count > 0)
+            {
+                var last = row.HenchmanGroups[^1];
+                last.Count--;
+                if (last.Count <= 0) row.HenchmanGroups.RemoveAt(row.HenchmanGroups.Count - 1);
+            }
             UpdateRecruitability();
+        }
+
+        /// <summary>Détache un second HenchmanGroup du groupe tapé - le seul moyen d'obtenir des Hommes de
+        /// main du même type équipés différemment (livre des règles : "if your Henchman group has four
+        /// warriors, and you want to buy them swords, you must buy four swords" - deux équipements
+        /// différents pour le même type = deux groupes). Demande combien d'unités transférer vers le
+        /// nouveau groupe (1..group.Count-1, il doit toujours en rester au moins une de chaque côté) - le
+        /// nouveau groupe démarre sans équipement et reprend le nom de l'archétype par défaut, à
+        /// personnaliser comme n'importe quel nom de groupe.</summary>
+        [RelayCommand]
+        private async Task SplitHenchmanGroup(HenchmanGroup group)
+        {
+            if (group.Count <= 1) return;
+
+            var input = await ShowPromptAsync(Loc["WarbandsSplitGroupTitle"], string.Format(Loc["WarbandsSplitGroupPrompt"], group.Count - 1));
+            if (!int.TryParse(input, out var moved) || moved <= 0 || moved >= group.Count) return;
+
+            group.Count -= moved;
+            var newGroup = new HenchmanGroup(group.Row, group.Row.Archetype.Name, moved);
+            var index = group.Row.HenchmanGroups.IndexOf(group);
+            group.Row.HenchmanGroups.Insert(index + 1, newGroup);
         }
 
         /// <summary>Recalcule les affichages récap (effectif/trésorerie) et CanIncrement de chaque ligne -
@@ -253,12 +285,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
-        /// <summary>Achat d'équipement pour une cible : un WarriorRecruitRow (Homme de main - un seul
-        /// achat, appliqué à tout le groupe) ou un WarriorNameSlot (Héros - propre à cette recrue). Même
-        /// logique que WarriorEditDialogViewModel.AddEquipment (picker filtré par EquipmentListId/
-        /// WarriorArchetypeId, choix de matériau pour les armes de corps à corps, arrêt au premier objet
-        /// trop cher) - simplement pas encore de WarriorId réel pour appeler AddWarriorEquipmentAsync,
-        /// donc on garde des EquipmentPick en mémoire jusqu'au Save.</summary>
+        /// <summary>Achat d'équipement pour une cible : un HenchmanGroup (un seul achat, appliqué à tout le
+        /// sous-groupe) ou un WarriorNameSlot (Héros - propre à cette recrue). Même logique que
+        /// WarriorEditDialogViewModel.AddEquipment (picker filtré par EquipmentListId/WarriorArchetypeId,
+        /// choix de matériau pour les armes de corps à corps via un seul MaterialPickerDialog paginé
+        /// Précédent/Suivant plutôt qu'une ActionSheet par arme, arrêt au premier objet trop cher) -
+        /// simplement pas encore de WarriorId réel pour appeler AddWarriorEquipmentAsync, donc on garde
+        /// des EquipmentPick en mémoire jusqu'au Save.</summary>
         [RelayCommand]
         private async Task AddEquipment(object target)
         {
@@ -272,10 +305,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     destination = slot.Equipment;
                     perUnitCost = 1;
                     break;
-                case WarriorRecruitRow r:
-                    row = r;
-                    destination = r.GroupEquipment;
-                    perUnitCost = r.Count;
+                case HenchmanGroup group:
+                    row = group.Row;
+                    destination = group.Equipment;
+                    perUnitCost = group.Count;
                     break;
                 default:
                     return;
@@ -283,22 +316,35 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (Archetype is null) return;
 
             var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost);
+
+            // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
+            // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient
+            // à choisir "Normal" pour toutes (même comportement qu'annuler l'ancienne ActionSheet par arme).
+            var materialsByItem = new Dictionary<EquipmentItem, SpecialRule?>();
+            var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
+            if (meleeItems.Count > 0)
+            {
+                var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
+                    .Where(r => r.CostMultiplier.HasValue).ToList();
+                if (materialRules.Count > 0)
+                {
+                    var choices = meleeItems.Select(i => new MaterialChoice(i, materialRules, Loc["WarriorsMaterialNormal"])).ToList();
+                    var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
+                    foreach (var choice in choices)
+                        materialsByItem[choice.Item] = confirmed == true ? choice.SelectedMaterial : null;
+                }
+            }
+
             foreach (var equipmentItem in items)
             {
-                SpecialRule? materialRule = null;
-                if (equipmentItem.Category == EquipmentCategory.MeleeWeapon)
+                var materialRule = materialsByItem.GetValueOrDefault(equipmentItem);
+                var pick = new EquipmentPick(equipmentItem, materialRule)
                 {
-                    var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
-                        .Where(r => r.CostMultiplier.HasValue).ToList();
-                    if (materialRules.Count > 0)
-                    {
-                        var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
-                        var index = await ShowActionSheetIndexAsync(string.Format(Loc["WarriorsMaterialPickerTitle"], equipmentItem.Name), options);
-                        if (index > 0) materialRule = materialRules[index - 1];
-                    }
-                }
-
-                var pick = new EquipmentPick(equipmentItem, materialRule);
+                    // La première dague est gratuite par guerrier/groupe (livre des règles : "in addition
+                    // to his free dagger") - une deuxième, achetée délibérément, coûte le prix normal et
+                    // compte dans la limite d'armes (voir EquipmentItem.IsFreeDagger/WeaponLimits).
+                    IsFree = equipmentItem.IsFreeDagger && !destination.Any(p => p.Item.IsFreeDagger)
+                };
 
                 // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
                 // main, 1 pour un Héros) - sélection multiple : on s'arrête au premier objet trop cher
@@ -310,6 +356,20 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 }
 
                 destination.Add(pick);
+            }
+
+            // Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
+            // guerrier, livre des règles "Starting a Warband") - certaines règles spéciales de bande
+            // (ex. Combat de Queue Skaven) autorisent à dépasser, donc jamais bloquant - voir WeaponLimits.
+            if (WeaponLimits.ExceedsLimits(destination.Select(p => p.Item)))
+            {
+                var warriorLabel = target switch
+                {
+                    WarriorNameSlot { Name.Length: > 0 } nameSlot => nameSlot.Name,
+                    HenchmanGroup group => group.Name,
+                    _ => row.Name
+                };
+                await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], warriorLabel));
             }
 
             UpdateRecruitability();
@@ -340,18 +400,21 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, pick.MaterialRule)));
         }
 
-        /// <summary>Retire un EquipmentPick de quelle que collection le contient (GroupEquipment d'une
-        /// ligne ou Equipment d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
+        /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un
+        /// HenchmanGroup ou d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
         /// laquelle puisque chaque instance n'est ajoutée qu'à une seule collection.</summary>
         [RelayCommand]
         private void RemoveEquipment(EquipmentPick pick)
         {
             foreach (var row in RecruitRows)
             {
-                if (row.GroupEquipment.Remove(pick))
+                foreach (var group in row.HenchmanGroups)
                 {
-                    UpdateRecruitability();
-                    return;
+                    if (group.Equipment.Remove(pick))
+                    {
+                        UpdateRecruitability();
+                        return;
+                    }
                 }
                 foreach (var slot in row.NameSlots)
                 {
@@ -399,6 +462,18 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             foreach (var row in RecruitRows.Where(r => r.IsHero))
             {
                 if (row.NameSlots.Any(slot => string.IsNullOrWhiteSpace(slot.Name)))
+                {
+                    WarriorsError = string.Format(Loc["WarbandsWarriorNameRequired"], row.Name);
+                    return false;
+                }
+            }
+
+            // Chaque sous-groupe d'Hommes de main doit avoir un nom (livre des règles : "you will need
+            // to... name each Henchman group") - pré-rempli au nom de l'archétype par IncrementWarrior/
+            // SplitHenchmanGroup, donc ce garde-fou ne mord que si le joueur a vidé le champ.
+            foreach (var row in RecruitRows.Where(r => !r.IsHero))
+            {
+                if (row.HenchmanGroups.Any(group => string.IsNullOrWhiteSpace(group.Name)))
                 {
                     WarriorsError = string.Format(Loc["WarbandsWarriorNameRequired"], row.Name);
                     return false;
@@ -482,11 +557,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     }
                     else
                     {
-                        for (var i = 0; i < row.Count; i++)
+                        foreach (var group in row.HenchmanGroups)
                         {
-                            var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, row.Archetype.Name);
-                            foreach (var pick in row.GroupEquipment)
-                                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                            for (var i = 0; i < group.Count; i++)
+                            {
+                                var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim());
+                                foreach (var pick in group.Equipment)
+                                    await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                            }
                         }
                     }
                 }

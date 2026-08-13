@@ -174,8 +174,23 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Pas assez d'or dans le trésor de la bande.</value>
   </data>
-  <data name="WarriorsMaterialPickerTitle" xml:space="preserve">
-    <value>Matériau : {0}</value>
+  <data name="WarriorsMaterialHeading" xml:space="preserve">
+    <value>Matériau</value>
+  </data>
+  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
+    <value>{0}/{1}</value>
+  </data>
+  <data name="WarbandsSplitGroupTitle" xml:space="preserve">
+    <value>Diviser le groupe</value>
+  </data>
+  <data name="WarbandsSplitGroupPrompt" xml:space="preserve">
+    <value>Combien de guerriers dans le nouveau groupe ? (1-{0})</value>
+  </data>
+  <data name="WarbandsWeaponLimitWarningTitle" xml:space="preserve">
+    <value>Limite d'armes dépassée</value>
+  </data>
+  <data name="WarbandsWeaponLimitWarningMessage" xml:space="preserve">
+    <value>{0} dépasse la limite habituelle (2 armes de corps à corps, 2 armes de tir différentes) - à valider si une règle spéciale l'autorise (ex. Combat de Queue chez les Skavens).</value>
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
@@ -293,6 +308,12 @@
   </data>
   <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
     <value>{0} CO restants</value>
+  </data>
+  <data name="WarbandRatingPh" xml:space="preserve">
+    <value>Valeur de Bande</value>
+  </data>
+  <data name="WarbandRatingDisplay" xml:space="preserve">
+    <value>Valeur {0}</value>
   </data>
   <data name="EquipmentPickerBudgetDisplay" xml:space="preserve">
     <value>{0} CO dépensés · {1} CO restants</value>
@@ -464,6 +485,9 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé (peut acheter des mutations)</value>
+  </data>
+  <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
+    <value>Grande créature (20 pts fixes dans la Valeur de Bande)</value>
   </data>
   <data name="WarriorArchetypeRolePh" xml:space="preserve">
     <value>Rôle</value>

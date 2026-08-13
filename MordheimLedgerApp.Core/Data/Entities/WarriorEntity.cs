@@ -41,4 +41,6 @@ public class WarriorEntity
     /// <summary>Comma-separated SkillCategory member names - see Warrior.AllowedSkillCategories /
     /// WarriorArchetypeEntity.AllowedSkillCategories (same storage convention, copied at recruitment).</summary>
     public string? AllowedSkillCategories { get; set; }
+
+    public bool IsLargeCreature { get; set; }
 }

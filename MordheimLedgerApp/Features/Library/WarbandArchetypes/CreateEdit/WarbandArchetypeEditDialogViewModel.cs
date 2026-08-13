@@ -317,7 +317,8 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             IsSpellcaster = warrior.IsSpellcaster,
             CanBuyMutations = warrior.CanBuyMutations,
             EquipmentListId = warrior.EquipmentListId,
-            AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories)
+            AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories),
+            IsLargeCreature = warrior.IsLargeCreature
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],

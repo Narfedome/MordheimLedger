@@ -70,7 +70,8 @@ public partial class WarbandListViewModel : BaseViewModel
     {
         var warbands = await _warbandService.GetWarbandsAsync();
         var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.WarbandArchetypeId, LocalizationService.Instance.Language)));
-        Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i] }));
+        var ratings = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandRatingAsync(b.Id)));
+        Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i], Rating = ratings[i] }));
         SelectedRow = null;
         HasWarbands = warbands.Count > 0;
         IsInitialized = true;

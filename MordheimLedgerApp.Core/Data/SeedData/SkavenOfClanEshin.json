@@ -292,6 +292,7 @@
         "fr": "Rat-ogre"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 210,
       "maxCount": 1,
       "startingExperience": 0,

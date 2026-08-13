@@ -65,6 +65,15 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarbandEntity>(warbandId);
     }
 
+    public async Task<int> GetWarbandRatingAsync(int warbandId)
+    {
+        await _db.Initialization;
+        var warriors = await _db.Connection.Table<WarriorEntity>()
+            .Where(w => w.WarbandId == warbandId && w.Status == WarriorStatus.Active)
+            .ToListAsync();
+        return warriors.Sum(w => (w.IsLargeCreature ? 20 : 5) + w.Experience);
+    }
+
     public async Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode)
     {
         await _db.Initialization;

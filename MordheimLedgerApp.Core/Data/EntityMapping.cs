@@ -104,7 +104,8 @@ public static class EntityMapping
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
         EquipmentListId = e.EquipmentListId,
-        AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories)
+        AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
+        IsLargeCreature = e.IsLargeCreature
     };
 
     private static List<SkillCategory> ParseSkillCategories(string? csv) =>
@@ -138,7 +139,8 @@ public static class EntityMapping
         CanBuyMutations = m.CanBuyMutations,
         ImagePath = m.ImagePath,
         EquipmentListId = m.EquipmentListId,
-        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
+        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
+        IsLargeCreature = m.IsLargeCreature
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -160,7 +162,8 @@ public static class EntityMapping
         Attacks = archetype.Attacks,
         Leadership = archetype.Leadership,
         EquipmentListId = archetype.EquipmentListId,
-        AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories)
+        AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories),
+        IsLargeCreature = archetype.IsLargeCreature
     };
 
     public static Campaign ToModel(this CampaignEntity e) => new()
@@ -271,7 +274,8 @@ public static class EntityMapping
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        SpecialRules = specialRulesByItemId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
+        SpecialRules = specialRulesByItemId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
+        IsFreeDagger = e.IsFreeDagger
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -351,7 +355,8 @@ public static class EntityMapping
         CostRandomMax = m.CostRandomMax,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
-        ImagePath = m.ImagePath
+        ImagePath = m.ImagePath,
+        IsFreeDagger = m.IsFreeDagger
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>
@@ -389,7 +394,8 @@ public static class EntityMapping
         Injuries = injuries?.ToList() ?? new List<WarriorInjury>(),
         Spells = spells?.ToList() ?? new List<WarriorSpell>(),
         Mutations = mutations?.ToList() ?? new List<WarriorMutation>(),
-        Animal = animal
+        Animal = animal,
+        IsLargeCreature = e.IsLargeCreature
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -414,7 +420,8 @@ public static class EntityMapping
         Leadership = m.Leadership,
         AnimalId = m.Animal?.Id,
         EquipmentListId = m.EquipmentListId,
-        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
+        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
+        IsLargeCreature = m.IsLargeCreature
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>

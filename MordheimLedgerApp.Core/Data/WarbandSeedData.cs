@@ -121,6 +121,10 @@ public class WarriorSeedData
     /// - matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names. Empty/omitted = not
     /// sourced yet, not "may pick nothing" - see WarriorArchetype.AllowedSkillCategories.</summary>
     public List<string> SkillCategories { get; set; } = new();
+
+    /// <summary>True for "large creature" archetypes (Rat Ogre, Ogre, Troll...) - see
+    /// WarriorArchetype.IsLargeCreature.</summary>
+    public bool IsLargeCreature { get; set; }
 }
 
 public class EquipmentSeedData
@@ -154,6 +158,9 @@ public class EquipmentSeedData
     /// (see AppDatabase) - a band file re-declaring an already-seeded item by name doesn't re-attach
     /// rules, same precedent as Description there.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
+    /// <summary>True only for the common pool's Dagger entry - see EquipmentItem.IsFreeDagger.</summary>
+    public bool IsFreeDagger { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames

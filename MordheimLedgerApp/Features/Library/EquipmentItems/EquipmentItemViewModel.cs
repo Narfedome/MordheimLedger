@@ -251,7 +251,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
             ImagePath = s.ImagePath,
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
             RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds),
-            SpecialRules = new List<SpecialRule>(s.SpecialRules)
+            SpecialRules = new List<SpecialRule>(s.SpecialRules),
+            IsFreeDagger = s.IsFreeDagger
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);

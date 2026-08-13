@@ -92,4 +92,11 @@ public class WarriorArchetype
     /// same "no rules engine V1" convention as the other Restricted* lists elsewhere: not enforced in the
     /// Skill picker, just informative.</summary>
     public List<SkillCategory> AllowedSkillCategories { get; set; } = new();
+
+    /// <summary>True for "large creature" archetypes (Rat Ogre, Ogre, Troll...) - the rulebook's Warband
+    /// Rating formula counts these as a flat 20 points instead of the usual 5 per warrior (see
+    /// RulesReference "Starting a Warband" - "calculate the warband rating"). Copied onto Warrior at
+    /// recruitment (see ToWarrior), same snapshot-at-recruit-time convention as the rest of the stat
+    /// line.</summary>
+    public bool IsLargeCreature { get; set; }
 }

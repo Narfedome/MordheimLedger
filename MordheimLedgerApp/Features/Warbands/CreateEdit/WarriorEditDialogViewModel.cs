@@ -116,25 +116,36 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private async Task AddEquipment()
     {
         var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury);
+
+        // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
+        // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient à
+        // choisir "Normal" pour toutes (même comportement qu'annuler l'ancienne ActionSheet par arme).
+        var materialsByItem = new Dictionary<EquipmentItem, SpecialRule?>();
+        var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
+        if (meleeItems.Count > 0)
+        {
+            var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
+                .Where(r => r.CostMultiplier.HasValue).ToList();
+            if (materialRules.Count > 0)
+            {
+                var choices = meleeItems.Select(i => new MaterialChoice(i, materialRules, Loc["WarriorsMaterialNormal"])).ToList();
+                var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
+                foreach (var choice in choices)
+                    materialsByItem[choice.Item] = confirmed == true ? choice.SelectedMaterial : null;
+            }
+        }
+
         foreach (var equipmentItem in items)
         {
-            // Arme de corps à corps : propose un matériau (Gromril/Ithilmar/...) avant de calculer le
-            // prix - toute SpecialRule dotée d'un CostMultiplier est éligible, pas seulement ces deux-là.
-            // Annuler le picker (< 0) revient à choisir "Normal".
-            SpecialRule? materialRule = null;
-            if (equipmentItem.Category == EquipmentCategory.MeleeWeapon)
-            {
-                var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
-                    .Where(r => r.CostMultiplier.HasValue).ToList();
-                if (materialRules.Count > 0)
-                {
-                    var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
-                    var index = await ShowActionSheetIndexAsync(string.Format(Loc["WarriorsMaterialPickerTitle"], equipmentItem.Name), options);
-                    if (index > 0) materialRule = materialRules[index - 1];
-                }
-            }
+            var materialRule = materialsByItem.GetValueOrDefault(equipmentItem);
 
-            var cost = equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
+            // La première dague est gratuite (livre des règles : "in addition to his free dagger") - une
+            // deuxième, achetée délibérément, coûte le prix normal (voir EquipmentItem.IsFreeDagger/
+            // WarbandEditDialogViewModel.AddEquipment pour la même logique côté wizard). Pas besoin de
+            // mémoriser "était-ce gratuit" au-delà de cette déduction ponctuelle - contrairement au wizard
+            // (EquipmentPick.IsFree), le trésor est débité immédiatement et définitivement ici.
+            var isFreeDagger = equipmentItem.IsFreeDagger && !Equipment.Any(e => e.Item.IsFreeDagger);
+            var cost = isFreeDagger ? 0 : equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
 
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.
@@ -150,6 +161,12 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem, materialRule: materialRule);
             Equipment.Add(carried);
         }
+
+        // Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
+        // guerrier) - voir WeaponLimits/WarbandEditDialogViewModel.AddEquipment pour la même logique côté
+        // wizard de création.
+        if (WeaponLimits.ExceedsLimits(Equipment.Select(e => e.Item)))
+            await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], Item.Name));
     }
 
     [RelayCommand]

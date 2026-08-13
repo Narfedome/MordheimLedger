@@ -304,7 +304,8 @@ public class AppDatabase
                 IsSpellcaster = w.IsSpellcaster,
                 CanBuyMutations = w.CanBuyMutations,
                 EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
-                AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList()
+                AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
+                IsLargeCreature = w.IsLargeCreature
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -428,7 +429,8 @@ public class AppDatabase
                 Cost = eq.Cost,
                 Rarity = eq.Rarity,
                 CostRandomMax = eq.CostRandomMax,
-                Source = ContentSource.Official
+                Source = ContentSource.Official,
+                IsFreeDagger = eq.IsFreeDagger
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);

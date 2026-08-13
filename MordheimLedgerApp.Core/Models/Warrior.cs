@@ -72,4 +72,7 @@ public class Warrior
     /// <summary>Null = no animal assigned. Resolved separately from the Animal catalog by WarbandService
     /// (not a join table - a warrior can only have one animal at a time, picking a new one replaces this).</summary>
     public Library.Animal? Animal { get; set; }
+
+    /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.IsLargeCreature.</summary>
+    public bool IsLargeCreature { get; set; }
 }

@@ -294,6 +294,9 @@
   <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
     <value>{0} gc remaining</value>
   </data>
+  <data name="EquipmentPickerBudgetDisplay" xml:space="preserve">
+    <value>{0} gc spent · {1} gc remaining</value>
+  </data>
   <data name="WarbandsRosterFullTitle" xml:space="preserve">
     <value>Roster full</value>
   </data>
@@ -503,6 +506,9 @@
   </data>
   <data name="SpecialRuleCostMultiplierPh" xml:space="preserve">
     <value>Material: price multiplier (e.g. x4) - blank if not applicable</value>
+  </data>
+  <data name="SpecialRuleAbbreviationPh" xml:space="preserve">
+    <value>Material: abbreviation shown on the weapon (e.g. G)</value>
   </data>
   <data name="EquipmentItemEditTitle" xml:space="preserve">
     <value>Edit Item</value>

@@ -15,7 +15,10 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que LibraryTrackView de DmTools -->
+        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que LibraryTrackView de DmTools -
+             BudgetDisplay (dépensé/restant, ce ronde de sélection) uniquement en picker avec un budget
+             posé par l'appelant (EquipmentPickerService.AvailableGold), ex. l'étape Équipement du wizard
+             de création de bande - masqué partout ailleurs (onglet Library, EquipmentList editor). -->
         <Grid Grid.Row="0" ColumnDefinitions="*,auto" Padding="5,0">
             <Button Grid.Column="0"
                     Text="{Binding SelectedCategoryLabel}"
@@ -24,6 +27,9 @@
                     TextColor="{DynamicResource AppAccent}"
                     HorizontalOptions="Start"
                     Padding="0"/>
+            <Label Grid.Column="1" Text="{Binding BudgetDisplay}" FontSize="12"
+                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"
+                   IsVisible="{Binding ShowBudget}"/>
         </Grid>
 
         <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"

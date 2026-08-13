@@ -57,7 +57,7 @@
                                       Command="{Binding ShowWarriorDetailCommand}"/>
 
             <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
-                                      ItemsSource="{Binding Item.SpecialRules}"
+                                      ItemsSource="{Binding DisplayedSpecialRules}"
                                       IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                       Command="{Binding ShowSpecialRuleDetailCommand}"/>
         </VerticalStackLayout>

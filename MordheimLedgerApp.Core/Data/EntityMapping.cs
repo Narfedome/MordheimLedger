@@ -236,7 +236,8 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
-        CostMultiplier = e.CostMultiplier
+        CostMultiplier = e.CostMultiplier,
+        Abbreviation = e.Abbreviation
     };
 
     public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
@@ -246,7 +247,8 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath,
-        CostMultiplier = m.CostMultiplier
+        CostMultiplier = m.CostMultiplier,
+        Abbreviation = m.Abbreviation
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,

@@ -17,7 +17,10 @@ public class EquipmentPick
     /// WarriorEditDialogViewModel.AddEquipment pour le même choix côté guerrier déjà recruté.</summary>
     public SpecialRule? MaterialRule { get; }
 
-    public string Name => Item.Name;
+    /// <summary>"Sword (G)" when a material with an Abbreviation was chosen, plain "Sword" otherwise -
+    /// keeps the chip compact instead of appending the material's full name (see SpecialRule.
+    /// Abbreviation).</summary>
+    public string Name => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
     public int Cost => Item.Cost * (MaterialRule?.CostMultiplier ?? 1);
 
     public EquipmentPick(EquipmentItem item, SpecialRule? materialRule)

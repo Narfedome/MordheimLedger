@@ -5,6 +5,7 @@ using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
@@ -281,7 +282,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
             if (Archetype is null) return;
 
-            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id);
+            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost);
             foreach (var equipmentItem in items)
             {
                 SpecialRule? materialRule = null;
@@ -312,6 +313,31 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
 
             UpdateRecruitability();
+        }
+
+        /// <summary>Tap sur un chip d'équipement acheté (groupe ou slot Héros) - même recap qu'ailleurs
+        /// dans l'app (EquipmentListEditDialogViewModel.ShowItemDetail, EquipmentItemViewModel.ShowDetails),
+        /// pas juste le mini-popup Nom+Description générique (ChipDetailDialog) : un objet d'équipement a
+        /// coût/rareté/restrictions propres, pas seulement une description.</summary>
+        [RelayCommand]
+        private async Task ShowEquipmentDetail(EquipmentPick pick)
+        {
+            var equipmentItem = pick.Item;
+            var language = LocalizationService.Instance.Language;
+            var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
+
+            var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
+                ? new List<WarbandArchetype>()
+                : (await _libraryService.GetWarbandArchetypesAsync(language))
+                    .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+            var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
+                ? new List<WarriorArchetype>()
+                : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
+                    .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+            await ShowDialogAsync(new EquipmentItemDetailDialog(
+                new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, pick.MaterialRule)));
         }
 
         /// <summary>Retire un EquipmentPick de quelle que collection le contient (GroupEquipment d'une

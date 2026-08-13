@@ -216,7 +216,8 @@ public partial class SpecialRuleViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath,
-            CostMultiplier = s.CostMultiplier
+            CostMultiplier = s.CostMultiplier,
+            Abbreviation = s.Abbreviation
         };
 
         var dialogViewModel = new SpecialRuleEditDialogViewModel(copy, Loc["SpecialRuleEditTitle"]);

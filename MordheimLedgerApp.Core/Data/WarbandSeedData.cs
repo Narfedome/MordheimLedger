@@ -194,6 +194,9 @@ public class SpecialRuleSeedData
     /// <summary>Null = not a purchasable material. Non-null marks this rule as a weapon-material option
     /// (e.g. "Gromril" -&gt; 4) - see SpecialRule.CostMultiplier.</summary>
     public int? CostMultiplier { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Abbreviation.</summary>
+    public string? Abbreviation { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

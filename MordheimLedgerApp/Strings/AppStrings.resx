@@ -294,6 +294,9 @@
   <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
     <value>{0} CO restants</value>
   </data>
+  <data name="EquipmentPickerBudgetDisplay" xml:space="preserve">
+    <value>{0} CO dépensés · {1} CO restants</value>
+  </data>
   <data name="WarbandsRosterFullTitle" xml:space="preserve">
     <value>Effectif complet</value>
   </data>
@@ -503,6 +506,9 @@
   </data>
   <data name="SpecialRuleCostMultiplierPh" xml:space="preserve">
     <value>Matériau : multiplicateur de prix (ex. ×4) - vide si non applicable</value>
+  </data>
+  <data name="SpecialRuleAbbreviationPh" xml:space="preserve">
+    <value>Matériau : abréviation affichée sur l'arme (ex. G)</value>
   </data>
   <data name="EquipmentItemEditTitle" xml:space="preserve">
     <value>Modifier l'objet</value>

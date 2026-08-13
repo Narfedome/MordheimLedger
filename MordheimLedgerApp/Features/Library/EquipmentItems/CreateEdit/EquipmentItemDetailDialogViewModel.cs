@@ -27,15 +27,23 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     public string RestrictedWarbandsHeaderText =>
         RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
 
+    /// <summary>Item.SpecialRules (intrinsic to the catalog entry) plus the material chosen for THIS
+    /// specific purchase (Gromril/Ithilmar...), when any - see WarbandEditDialogViewModel/
+    /// WarriorEditDialogViewModel.ShowEquipmentDetail. Item.SpecialRules itself is left untouched (the
+    /// material is a per-purchase choice, not part of the shared catalog entry) - this is a display-only
+    /// merge, same idiom as EquipmentPick.Name/WarriorEquipment.NameDisplay for the abbreviated chip.</summary>
+    public List<SpecialRule> DisplayedSpecialRules { get; }
+
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel,
-        List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
+        List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors, SpecialRule? materialRule = null)
     {
         Item = item;
-        Title = item.Name;
+        Title = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{item.Name} ({abbr})" : item.Name;
         CategoryLabel = categoryLabel;
         RarityDisplay = item.Rarity?.ToString() ?? Loc["LibFilterCommon"];
         RestrictedWarbands = restrictedWarbands;
         RestrictedWarriors = restrictedWarriors;
+        DisplayedSpecialRules = materialRule is null ? item.SpecialRules : item.SpecialRules.Append(materialRule).ToList();
     }
 
     [RelayCommand]

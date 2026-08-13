@@ -12,8 +12,14 @@ public interface IEquipmentPickerService
     /// non-null (recruit picker, the warrior's assigned EquipmentList) switches filtering to the union of
     /// that list and the band's Rare/Trading-Post items; null (EquipmentList editor's own "add item"
     /// picker) keeps the broad common+band browse. warriorArchetypeId: narrows any
-    /// RestrictedToWarriorArchetypeIds-tagged item further, same idea as the Skill picker.</summary>
-    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null);
+    /// RestrictedToWarriorArchetypeIds-tagged item further, same idea as the Skill picker. availableGold:
+    /// non-null shows a live "spent/remaining" line in the picker as items are selected (null hides it -
+    /// the EquipmentList editor's own "add item" picker has no gold budget to track). unitCount: cost
+    /// multiplier applied to the running total shown in that line - a henchman row's effectif for a
+    /// grouped purchase (WarbandEditDialogViewModel.AddEquipment), 1 for an individual purchase; ignores
+    /// any material-rule cost multiplier (Gromril...), only decided after the picker closes.</summary>
+    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
+        int? availableGold = null, int unitCount = 1);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -27,7 +33,8 @@ public class EquipmentPickerService : IEquipmentPickerService
         _libraryService = libraryService;
     }
 
-    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null)
+    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
+        int? availableGold = null, int unitCount = 1)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -40,6 +47,8 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
         viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
         viewModel.AllowedEquipmentListItemIds = equipmentListId is { } id ? await _libraryService.GetEquipmentListItemIdsAsync(id) : null;
+        viewModel.AvailableGold = availableGold;
+        viewModel.UnitCount = unitCount;
         var page = new EquipmentItemSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 

@@ -74,6 +74,30 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// list of its own yet and needs the broad "common + this band's own items" browse instead.</summary>
     public HashSet<int>? AllowedEquipmentListItemIds { get; set; }
 
+    /// <summary>Set only by the roster recruit/purchase picker (EquipmentPickerService) when a gold
+    /// budget applies to this purchase - null (Library CRUD tab, EquipmentList editor's own "add item"
+    /// picker) hides BudgetDisplay entirely. The gold available BEFORE this picker session, not yet
+    /// debited.</summary>
+    public int? AvailableGold { get; set; }
+
+    /// <summary>Cost multiplier applied to BudgetDisplay's running total - a henchman row's effectif for
+    /// a grouped purchase (WarbandEditDialogViewModel.AddEquipment), 1 for an individual purchase.</summary>
+    public int UnitCount { get; set; } = 1;
+
+    public bool ShowBudget => AvailableGold.HasValue;
+
+    /// <summary>Live "spent this session / remaining" line, recomputed on every Select - ignores any
+    /// material-rule cost multiplier (Gromril...), only decided by the caller after the picker closes,
+    /// so this is an estimate, not the exact final cost.</summary>
+    public string BudgetDisplay
+    {
+        get
+        {
+            var spent = SelectedRows.Sum(r => r.Item.Cost) * UnitCount;
+            return string.Format(Loc["EquipmentPickerBudgetDisplay"], spent, (AvailableGold ?? 0) - spent);
+        }
+    }
+
     public EquipmentItemViewModel(ILibraryService libraryService, IEquipmentPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker, ISpecialRulePickerService specialRulePicker)
     {
@@ -144,6 +168,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
+        OnPropertyChanged(nameof(BudgetDisplay));
     }
 
     private string CategoryLabel(EquipmentCategory category) => Loc[$"EquipmentCategory{category}"];
@@ -167,6 +192,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
         if (row.IsSelected) SelectedRows.Add(row);
         else SelectedRows.Remove(row);
         OnPropertyChanged(nameof(HasSelectedRows));
+        OnPropertyChanged(nameof(BudgetDisplay));
     }
 
     [RelayCommand]

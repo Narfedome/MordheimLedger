@@ -33,4 +33,10 @@ public class SpecialRule
     /// correcting the multiplier (or the rule text) here applies everywhere it's used - no rules engine
     /// beyond this one multiplication, same "no rules engine V1" stance as the rest of the Library.</summary>
     public int? CostMultiplier { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier (material rules, e.g. "Gromril" -&gt; "G",
+    /// "Ithilmar" -&gt; "I") - short suffix shown on a purchased weapon's chip ("Sword (G)") so the chip
+    /// stays compact instead of appending the full material name. Null/empty = no suffix shown (see
+    /// EquipmentPick.Name/WarriorEquipment.NameDisplay).</summary>
+    public string? Abbreviation { get; set; }
 }

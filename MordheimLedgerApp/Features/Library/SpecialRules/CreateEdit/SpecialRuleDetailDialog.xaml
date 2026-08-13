@@ -33,6 +33,10 @@
                 <Label Text="{loc:Loc SpecialRuleCostMultiplierPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Label Text="{Binding Item.CostMultiplier, StringFormat='×{0}'}" TextColor="{DynamicResource AppText}"/>
             </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding Item.Abbreviation, Converter={StaticResource IsNotNullConverter}}">
+                <Label Text="{loc:Loc SpecialRuleAbbreviationPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding Item.Abbreviation}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
         </ScrollView>
     </Border>

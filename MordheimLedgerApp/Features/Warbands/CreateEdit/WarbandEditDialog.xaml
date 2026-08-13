@@ -133,9 +133,21 @@
                                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
                                                                               CommandParameter="{Binding .}"/>
                                             </Grid>
-                                            <components:ChipListView ItemsSource="{Binding GroupEquipment}"
-                                                              IconGlyph="{x:Static icons:SolidFont.Toolbox}"
-                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
+                                            <!-- Icône par EquipmentCategory (même EquipmentCategoryIconConverter que
+                                                 WarriorEditDialog), pas un glyphe unique : ChipListView n'a qu'un seul
+                                                 IconGlyph pour toute la liste, donc chip inline par item ici plutôt
+                                                 qu'via ce composant. -->
+                                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding GroupEquipment}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="local:EquipmentPick">
+                                                        <components:ChipView Item="{Binding .}"
+                                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                              IconFontFamily="RpgAwesome"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </FlexLayout>
                                         </VerticalStackLayout>
 
                                         <!-- Héros : une section par recrue nommée. -->
@@ -152,9 +164,17 @@
                                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
                                                                                           CommandParameter="{Binding .}"/>
                                                         </Grid>
-                                                        <components:ChipListView ItemsSource="{Binding Equipment}"
-                                                                          IconGlyph="{x:Static icons:SolidFont.Toolbox}"
-                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
+                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
+                                                            <BindableLayout.ItemTemplate>
+                                                                <DataTemplate x:DataType="local:EquipmentPick">
+                                                                    <components:ChipView Item="{Binding .}"
+                                                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                                          IconFontFamily="RpgAwesome"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
+                                                                </DataTemplate>
+                                                            </BindableLayout.ItemTemplate>
+                                                        </FlexLayout>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>

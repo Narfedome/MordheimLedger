@@ -5,6 +5,7 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
@@ -114,7 +115,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
-        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId);
+        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury);
         foreach (var equipmentItem in items)
         {
             // Arme de corps à corps : propose un matériau (Gromril/Ithilmar/...) avant de calculer le
@@ -156,6 +157,30 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     {
         await _warbandService.RemoveWarriorEquipmentAsync(carried.Id);
         Equipment.Remove(carried);
+    }
+
+    /// <summary>Même recap qu'à l'étape Équipement du wizard de création (WarbandEditDialogViewModel.
+    /// ShowEquipmentDetail) - inclut le matériau choisi (Gromril/Ithilmar...) dans la liste de règles
+    /// spéciales affichée, pas seulement l'abréviation "(G)" du chip.</summary>
+    [RelayCommand]
+    private async Task ShowEquipmentDetail(WarriorEquipment carried)
+    {
+        var equipmentItem = carried.Item;
+        var language = LocalizationService.Instance.Language;
+        var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
+
+        var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
+                .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new EquipmentItemDetailDialog(
+            new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, carried.MaterialRule)));
     }
 
     [RelayCommand]

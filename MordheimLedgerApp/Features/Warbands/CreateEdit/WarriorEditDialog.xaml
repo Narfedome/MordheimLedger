@@ -110,11 +110,15 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:WarriorEquipment">
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                            FontFamily="RpgAwesome" FontSize="12"
                                            TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <Label Text="{Binding NameDisplay}" FontSize="11" VerticalOptions="Center"/>
                                     <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                   Icon="{x:Static icons:SolidFont.Xmark}"
                                                                   IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"

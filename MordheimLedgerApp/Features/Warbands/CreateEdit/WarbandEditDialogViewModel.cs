@@ -315,12 +315,19 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
             if (Archetype is null) return;
 
-            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost);
+            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost,
+                destination.Any(p => p.Item.IsFreeDagger));
 
             // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
             // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient
             // à choisir "Normal" pour toutes (même comportement qu'annuler l'ancienne ActionSheet par arme).
-            var materialsByItem = new Dictionary<EquipmentItem, SpecialRule?>();
+            // File plutôt que Dictionary&lt;EquipmentItem, ...&gt; : items peut contenir le MÊME
+            // EquipmentItem plusieurs fois (le picker permet d'acheter plusieurs exemplaires d'un même
+            // objet, voir EquipmentItemViewModel.ConfirmSelection) - un dictionnaire écraserait le premier
+            // choix (ex. Gromril sur la 1re épée longue) par le second (Normal sur la 2e), les deux
+            // partageant la même clé. La file consomme les choix dans le même ordre que meleeItems, qui
+            // suit lui-même l'ordre de items - correct même avec des objets non-armes intercalés.
+            var meleeMaterials = new Queue<SpecialRule?>();
             var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
             if (meleeItems.Count > 0)
             {
@@ -328,22 +335,36 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     .Where(r => r.CostMultiplier.HasValue).ToList();
                 if (materialRules.Count > 0)
                 {
-                    var choices = meleeItems.Select(i => new MaterialChoice(i, materialRules, Loc["WarriorsMaterialNormal"])).ToList();
+                    // hasFreeDaggerSlot suit l'ordre des items comme la boucle d'achat plus bas, pour que
+                    // le prix affiché ici (MaterialChoice.isFreeEligible) corresponde exactement à ce qui
+                    // sera effectivement facturé - seule la PREMIÈRE dague du lot (existante ou dans ce
+                    // même lot) est éligible, achetée en "Normal" (voir MaterialChoice, un matériau
+                    // Gromril/Ithilmar reste payant même sur cette dague-là).
+                    var hasFreeDaggerSlot = destination.Any(p => p.Item.IsFreeDagger);
+                    var choices = new List<MaterialChoice>();
+                    foreach (var item in meleeItems)
+                    {
+                        choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], item.IsFreeDagger && !hasFreeDaggerSlot));
+                        if (item.IsFreeDagger) hasFreeDaggerSlot = true;
+                    }
                     var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
                     foreach (var choice in choices)
-                        materialsByItem[choice.Item] = confirmed == true ? choice.SelectedMaterial : null;
+                        meleeMaterials.Enqueue(confirmed == true ? choice.SelectedMaterial : null);
                 }
             }
 
             foreach (var equipmentItem in items)
             {
-                var materialRule = materialsByItem.GetValueOrDefault(equipmentItem);
+                var materialRule = equipmentItem.Category == EquipmentCategory.MeleeWeapon && meleeMaterials.Count > 0
+                    ? meleeMaterials.Dequeue()
+                    : null;
                 var pick = new EquipmentPick(equipmentItem, materialRule)
                 {
-                    // La première dague est gratuite par guerrier/groupe (livre des règles : "in addition
-                    // to his free dagger") - une deuxième, achetée délibérément, coûte le prix normal et
-                    // compte dans la limite d'armes (voir EquipmentItem.IsFreeDagger/WeaponLimits).
-                    IsFree = equipmentItem.IsFreeDagger && !destination.Any(p => p.Item.IsFreeDagger)
+                    // La première dague est gratuite par guerrier/groupe, uniquement en "Normal" (livre des
+                    // règles : "in addition to his free dagger") - une deuxième dague, ou un matériau
+                    // délibérément choisi sur celle-ci, coûte le prix normal et compte dans la limite
+                    // d'armes (voir EquipmentItem.IsFreeDagger/WeaponLimits).
+                    IsFree = equipmentItem.IsFreeDagger && materialRule is null && !destination.Any(p => p.Item.IsFreeDagger)
                 };
 
                 // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de

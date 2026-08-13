@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 
@@ -20,6 +21,14 @@ public partial class MaterialOptionRow : ObservableObject
     public string Name { get; }
     public string? Description { get; }
     public int Cost { get; }
+
+    /// <summary>"Gratuit"/"Free" when Cost is 0 (the Normal option of an IsFreeDagger-eligible weapon -
+    /// see MaterialChoice's isFreeEligible constructor param), the usual "{n} CO" otherwise. A material
+    /// row's Cost is never 0 (a Gromril/Ithilmar dagger is a deliberate upgrade, not the free baseline -
+    /// see MaterialChoice constructor), so this only ever reads "Gratuit" on the Normal row.</summary>
+    public string CostDisplay => Cost == 0
+        ? LocalizationService.Instance["LibFreePh"]
+        : $"{Cost} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
 
     [ObservableProperty]
     private bool isSelected;
@@ -47,10 +56,16 @@ public partial class MaterialChoice : ObservableObject
     public SpecialRule? SelectedMaterial => Options.FirstOrDefault(o => o.IsSelected)?.Rule;
     public int SelectedCost => Options.FirstOrDefault(o => o.IsSelected)?.Cost ?? Item.Cost;
 
-    public MaterialChoice(EquipmentItem item, IReadOnlyList<SpecialRule> materialRules, string normalLabel)
+    /// <param name="isFreeEligible">True when Item.IsFreeDagger and the target doesn't already carry one
+    /// (same check as WarbandEditDialogViewModel/WarriorEditDialogViewModel.AddEquipment's IsFree logic) -
+    /// zeroes only the Normal option's cost to "Gratuit". A Gromril/Ithilmar dagger is a deliberate
+    /// upgrade, not the assumed baseline, so material rows always keep their full multiplied price
+    /// regardless of this flag.</param>
+    public MaterialChoice(EquipmentItem item, IReadOnlyList<SpecialRule> materialRules, string normalLabel, bool isFreeEligible = false)
     {
         Item = item;
-        var options = new List<MaterialOptionRow> { new(this, null, normalLabel, null, item.Cost) };
+        var normalCost = isFreeEligible ? 0 : item.Cost;
+        var options = new List<MaterialOptionRow> { new(this, null, normalLabel, null, normalCost) };
         options.AddRange(materialRules.Select(r => new MaterialOptionRow(this, r, r.Name, r.Description, item.Cost * (r.CostMultiplier ?? 1))));
         Options = new ObservableCollection<MaterialOptionRow>(options);
         Options[0].IsSelected = true;

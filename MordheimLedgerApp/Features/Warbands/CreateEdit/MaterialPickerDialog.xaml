@@ -40,7 +40,7 @@
                             <VerticalStackLayout Spacing="4">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
-                                    <Label Grid.Column="1" Text="{Binding Cost, StringFormat='{0} CO'}" FontSize="12"
+                                    <Label Grid.Column="1" Text="{Binding CostDisplay}" FontSize="12"
                                            TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                                 </Grid>
                                 <Label Text="{Binding Description}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"

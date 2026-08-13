@@ -17,9 +17,11 @@ public interface IEquipmentPickerService
     /// the EquipmentList editor's own "add item" picker has no gold budget to track). unitCount: cost
     /// multiplier applied to the running total shown in that line - a henchman row's effectif for a
     /// grouped purchase (WarbandEditDialogViewModel.AddEquipment), 1 for an individual purchase; ignores
-    /// any material-rule cost multiplier (Gromril...), only decided after the picker closes.</summary>
+    /// any material-rule cost multiplier (Gromril...), only decided after the picker closes.
+    /// alreadyHasFreeDagger: true if the target already carries a free dagger (EquipmentItem.
+    /// IsFreeDagger) - the Dagger tile shows its normal price instead of "Gratuit"/"Free" when set.</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
-        int? availableGold = null, int unitCount = 1);
+        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -34,7 +36,7 @@ public class EquipmentPickerService : IEquipmentPickerService
     }
 
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
-        int? availableGold = null, int unitCount = 1)
+        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -49,6 +51,7 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.AllowedEquipmentListItemIds = equipmentListId is { } id ? await _libraryService.GetEquipmentListItemIdsAsync(id) : null;
         viewModel.AvailableGold = availableGold;
         viewModel.UnitCount = unitCount;
+        viewModel.AlreadyHasFreeDagger = alreadyHasFreeDagger;
         var page = new EquipmentItemSelectorPage(viewModel);
         var modal = new NavigationPage(page);
 

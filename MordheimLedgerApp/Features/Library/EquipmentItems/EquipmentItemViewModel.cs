@@ -84,16 +84,22 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// a grouped purchase (WarbandEditDialogViewModel.AddEquipment), 1 for an individual purchase.</summary>
     public int UnitCount { get; set; } = 1;
 
+    /// <summary>Set by the caller alongside AvailableGold - true when the target (warrior/henchman group)
+    /// already carries a free dagger (EquipmentItem.IsFreeDagger), so the Dagger tile shows its normal
+    /// price instead of "Gratuit"/"Free" - see EquipmentItemRow.IsFreeForThisPurchase.</summary>
+    public bool AlreadyHasFreeDagger { get; set; }
+
     public bool ShowBudget => AvailableGold.HasValue;
 
-    /// <summary>Live "spent this session / remaining" line, recomputed on every Select - ignores any
-    /// material-rule cost multiplier (Gromril...), only decided by the caller after the picker closes,
-    /// so this is an estimate, not the exact final cost.</summary>
+    /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
+    /// ignores any material-rule cost multiplier (Gromril...), only decided by the caller after the
+    /// picker closes, so this is an estimate, not the exact final cost. Sums EquipmentItemRow.TotalCost
+    /// (Quantity-aware, and free-dagger-aware), not a flat per-row unit price.</summary>
     public string BudgetDisplay
     {
         get
         {
-            var spent = SelectedRows.Sum(r => r.Item.Cost) * UnitCount;
+            var spent = SelectedRows.Sum(r => r.TotalCost) * UnitCount;
             return string.Format(Loc["EquipmentPickerBudgetDisplay"], spent, (AvailableGold ?? 0) - spent);
         }
     }
@@ -161,7 +167,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
                 group = new EquipmentItemGroup(groupName);
                 groups.Add(group);
             }
-            group.Add(new EquipmentItemRow(item));
+            var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
+            group.Add(new EquipmentItemRow(item, isFreeForThisPurchase));
         }
         EquipmentItemGroups = groups;
 
@@ -179,6 +186,9 @@ public partial class EquipmentItemViewModel : BaseViewModel
         if (newValue != null) newValue.IsSelected = true;
     }
 
+    /// <summary>Tap sur la tuile elle-même (pas sur le stepper +/-) : bascule 0/1 exemplaire, comme avant
+    /// l'ajout du stepper de quantité - IncrementQuantity/DecrementQuantity gèrent le reste une fois
+    /// sélectionnée.</summary>
     [RelayCommand]
     private void Select(EquipmentItemRow row)
     {
@@ -188,10 +198,60 @@ public partial class EquipmentItemViewModel : BaseViewModel
             return;
         }
 
-        row.IsSelected = !row.IsSelected;
-        if (row.IsSelected) SelectedRows.Add(row);
-        else SelectedRows.Remove(row);
+        if (row.Quantity > 0)
+        {
+            row.Quantity = 0;
+            row.IsSelected = false;
+            SelectedRows.Remove(row);
+        }
+        else
+        {
+            row.Quantity = 1;
+            row.IsSelected = true;
+            SelectedRows.Add(row);
+        }
         OnPropertyChanged(nameof(HasSelectedRows));
+        OnPropertyChanged(nameof(BudgetDisplay));
+    }
+
+    /// <summary>Un exemplaire de plus de cette tuile - le stepper reste affiché en permanence (même à
+    /// Quantity == 0), donc "+" doit aussi pouvoir sélectionner la tuile en un seul geste (0 -&gt; 1), pas
+    /// seulement l'incrémenter une fois déjà sélectionnée via Select. Pas de plafond ni de vérification de
+    /// budget ici, même logique "estimation live" que BudgetDisplay ; l'affordabilité réelle est vérifiée
+    /// objet par objet au moment de l'achat (WarbandEditDialogViewModel/WarriorEditDialogViewModel.
+    /// AddEquipment), qui s'arrête au premier objet trop cher.</summary>
+    [RelayCommand]
+    private void IncrementQuantity(EquipmentItemRow row)
+    {
+        row.Quantity++;
+        if (row.Quantity == 1)
+        {
+            row.IsSelected = true;
+            SelectedRows.Add(row);
+            OnPropertyChanged(nameof(HasSelectedRows));
+        }
+        OnPropertyChanged(nameof(BudgetDisplay));
+    }
+
+    /// <summary>Symétrique d'IncrementQuantity - retomber à 0 désélectionne complètement la tuile (même
+    /// état que si on n'avait jamais tapé dessus). Le bouton "-" reste affiché même à Quantity == 0 (voir
+    /// EquipmentItemRow.CanDecrement, qui le grise plutôt que le masquer) - no-op si rien à retirer.</summary>
+    [RelayCommand]
+    private void DecrementQuantity(EquipmentItemRow row)
+    {
+        if (row.Quantity <= 0) return;
+
+        if (row.Quantity == 1)
+        {
+            row.Quantity = 0;
+            row.IsSelected = false;
+            SelectedRows.Remove(row);
+            OnPropertyChanged(nameof(HasSelectedRows));
+        }
+        else
+        {
+            row.Quantity--;
+        }
         OnPropertyChanged(nameof(BudgetDisplay));
     }
 
@@ -273,10 +333,15 @@ public partial class EquipmentItemViewModel : BaseViewModel
         ApplyFilter();
     }
 
+    /// <summary>Répète chaque EquipmentItem Quantity fois (ex. 2 épées longues sélectionnées -&gt; l'objet
+    /// "Épée longue" apparaît 2 fois dans la liste retournée) - les deux appelants (WarbandEditDialogViewModel/
+    /// WarriorEditDialogViewModel.AddEquipment) traitent déjà chaque entrée de la liste comme un achat
+    /// indépendant (matériau propre, coût propre), donc aucun changement requis côté appelant pour que
+    /// plusieurs exemplaires du même objet fonctionnent.</summary>
     [RelayCommand]
     private async Task ConfirmSelection()
     {
-        var items = SelectedRows.Select(r => r.Item).ToList();
+        var items = SelectedRows.SelectMany(r => Enumerable.Repeat(r.Item, r.Quantity)).ToList();
         await _pickerNavigation.ClosePickerAsync(items);
     }
 

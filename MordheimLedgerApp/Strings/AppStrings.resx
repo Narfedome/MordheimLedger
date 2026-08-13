@@ -414,6 +414,9 @@
   <data name="LibGoldCrownsAbbr" xml:space="preserve">
     <value>CO</value>
   </data>
+  <data name="LibFreePh" xml:space="preserve">
+    <value>Gratuit</value>
+  </data>
   <data name="LibRollAbbr" xml:space="preserve">
     <value>Jet</value>
   </data>

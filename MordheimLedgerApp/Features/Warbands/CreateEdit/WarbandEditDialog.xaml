@@ -128,8 +128,11 @@
                                                             <Entry Grid.Column="0" Text="{Binding Name}" FontSize="13" Placeholder="{loc:Loc PromptName}"/>
                                                             <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
                                                                    TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                                            <!-- Font Awesome n'a qu'un seul glyphe "split" (haut+gauche) - Rotation="-90"
+                                                                 le tourne en "gauche+bas", pas de glyphe dédié à chercher. -->
                                                             <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                                                           Icon="{x:Static icons:SolidFont.ArrowsSplitUpAndLeft}"
+                                                                                          Rotation="-90"
                                                                                           Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
                                                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                                                           IsVisible="{Binding CanSplit}"

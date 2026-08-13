@@ -115,12 +115,19 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
-        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury);
+        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury,
+            alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger));
 
         // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
         // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient à
         // choisir "Normal" pour toutes (même comportement qu'annuler l'ancienne ActionSheet par arme).
-        var materialsByItem = new Dictionary<EquipmentItem, SpecialRule?>();
+        // File plutôt que Dictionary&lt;EquipmentItem, ...&gt; : items peut contenir le MÊME EquipmentItem
+        // plusieurs fois (le picker permet d'acheter plusieurs exemplaires d'un même objet, voir
+        // EquipmentItemViewModel.ConfirmSelection) - un dictionnaire écraserait le premier choix (ex.
+        // Gromril sur la 1re épée longue) par le second (Normal sur la 2e), les deux partageant la même
+        // clé. La file consomme les choix dans le même ordre que meleeItems, qui suit lui-même l'ordre de
+        // items - correct même avec des objets non-armes intercalés.
+        var meleeMaterials = new Queue<SpecialRule?>();
         var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
         if (meleeItems.Count > 0)
         {
@@ -128,23 +135,37 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
                 .Where(r => r.CostMultiplier.HasValue).ToList();
             if (materialRules.Count > 0)
             {
-                var choices = meleeItems.Select(i => new MaterialChoice(i, materialRules, Loc["WarriorsMaterialNormal"])).ToList();
+                // hasFreeDaggerSlot suit l'ordre des items comme la boucle d'achat plus bas, pour que le
+                // prix affiché ici (MaterialChoice.isFreeEligible) corresponde exactement à ce qui sera
+                // effectivement facturé - seule la PREMIÈRE dague du lot (existante ou dans ce même lot)
+                // est éligible, achetée en "Normal" (un matériau Gromril/Ithilmar reste payant même sur
+                // cette dague-là - voir MaterialChoice).
+                var hasFreeDaggerSlot = Equipment.Any(e => e.Item.IsFreeDagger);
+                var choices = new List<MaterialChoice>();
+                foreach (var item in meleeItems)
+                {
+                    choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], item.IsFreeDagger && !hasFreeDaggerSlot));
+                    if (item.IsFreeDagger) hasFreeDaggerSlot = true;
+                }
                 var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
                 foreach (var choice in choices)
-                    materialsByItem[choice.Item] = confirmed == true ? choice.SelectedMaterial : null;
+                    meleeMaterials.Enqueue(confirmed == true ? choice.SelectedMaterial : null);
             }
         }
 
         foreach (var equipmentItem in items)
         {
-            var materialRule = materialsByItem.GetValueOrDefault(equipmentItem);
+            var materialRule = equipmentItem.Category == EquipmentCategory.MeleeWeapon && meleeMaterials.Count > 0
+                ? meleeMaterials.Dequeue()
+                : null;
 
-            // La première dague est gratuite (livre des règles : "in addition to his free dagger") - une
-            // deuxième, achetée délibérément, coûte le prix normal (voir EquipmentItem.IsFreeDagger/
-            // WarbandEditDialogViewModel.AddEquipment pour la même logique côté wizard). Pas besoin de
-            // mémoriser "était-ce gratuit" au-delà de cette déduction ponctuelle - contrairement au wizard
-            // (EquipmentPick.IsFree), le trésor est débité immédiatement et définitivement ici.
-            var isFreeDagger = equipmentItem.IsFreeDagger && !Equipment.Any(e => e.Item.IsFreeDagger);
+            // La première dague est gratuite, uniquement en "Normal" (livre des règles : "in addition to
+            // his free dagger") - une deuxième dague, ou un matériau délibérément choisi sur celle-ci,
+            // coûte le prix normal (voir EquipmentItem.IsFreeDagger/WarbandEditDialogViewModel.
+            // AddEquipment pour la même logique côté wizard). Pas besoin de mémoriser "était-ce gratuit"
+            // au-delà de cette déduction ponctuelle - contrairement au wizard (EquipmentPick.IsFree), le
+            // trésor est débité immédiatement et définitivement ici.
+            var isFreeDagger = equipmentItem.IsFreeDagger && materialRule is null && !Equipment.Any(e => e.Item.IsFreeDagger);
             var cost = isFreeDagger ? 0 : equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
 
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher

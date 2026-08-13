@@ -174,6 +174,15 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Not enough gold in the warband's treasury.</value>
   </data>
+  <data name="WarbandsExistingWarbandLabel" xml:space="preserve">
+    <value>Existing warband</value>
+  </data>
+  <data name="WarbandsExistingWarbandTitle" xml:space="preserve">
+    <value>Existing Warband mode</value>
+  </data>
+  <data name="WarbandsExistingWarbandHint" xml:space="preserve">
+    <value>Free treasury entry, no budget limit on recruiting or purchases, and skills already learned can be assigned directly.</value>
+  </data>
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Material</value>
   </data>
@@ -470,6 +479,9 @@
   </data>
   <data name="WarbandCreateTabEquipment" xml:space="preserve">
     <value>Equipment</value>
+  </data>
+  <data name="WarbandCreateTabNames" xml:space="preserve">
+    <value>Names</value>
   </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Equipment Lists</value>

@@ -5,9 +5,10 @@ namespace MordheimLedgerApp.Components;
 
 /// <summary>Liste des types de guerriers recrutables pour la bande en cours de création
 /// (WarbandEditDialogViewModel, étape Guerriers) : une ligne par WarriorRecruitRow avec son chip
-/// (tap = détail), un compteur 0/MaxCount avec stepper +/-, et une Entry par recrue Héros pour son nom
-/// - remplace l'ancien flux ActionSheet "choisir un type puis nommer" par une liste directement
-/// manipulable. La validation (MaxCount/trésorerie/effectif bande) reste côté appelant : Increment/
+/// (tap = détail) et un compteur 0/MaxCount avec stepper +/- - remplace l'ancien flux ActionSheet
+/// "choisir un type puis nommer" par une liste directement manipulable. Le nom de chaque recrue Héros/
+/// groupe d'Hommes de main se saisit à part, à l'étape Noms (voir WarbandEditDialog's IsNamesTab), pas
+/// ici. La validation (MaxCount/trésorerie/effectif bande) reste côté appelant : Increment/
 /// DecrementCommand ne font qu'exposer l'intention, voir WarbandEditDialogViewModel.IncrementWarrior.</summary>
 public partial class WarriorRecruitListView : ContentView
 {
@@ -55,15 +56,6 @@ public partial class WarriorRecruitListView : ContentView
     {
         get => (ICommand?)GetValue(DecrementCommandProperty);
         set => SetValue(DecrementCommandProperty, value);
-    }
-
-    public static readonly BindableProperty NamePlaceholderProperty =
-        BindableProperty.Create(nameof(NamePlaceholder), typeof(string), typeof(WarriorRecruitListView), string.Empty);
-
-    public string NamePlaceholder
-    {
-        get => (string)GetValue(NamePlaceholderProperty);
-        set => SetValue(NamePlaceholderProperty, value);
     }
 
     public WarriorRecruitListView()

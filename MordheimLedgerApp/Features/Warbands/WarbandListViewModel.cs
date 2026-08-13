@@ -16,6 +16,7 @@ public partial class WarbandListViewModel : BaseViewModel
     private readonly IWarbandArchetypePickerService _warbandArchetypePickerService;
     private readonly ILibraryService _libraryService;
     private readonly IEquipmentPickerService _equipmentPickerService;
+    private readonly ISkillPickerService _skillPickerService;
 
     [ObservableProperty]
     private ObservableCollection<WarbandRow> rows = new();
@@ -42,13 +43,15 @@ public partial class WarbandListViewModel : BaseViewModel
 
     public WarbandListViewModel(IWarbandArchetypePickerNavigationService pickerNavigation,
         IWarbandService warbandService, IWarbandArchetypePickerService warbandArchetypePickerService,
-        ILibraryService libraryService, IEquipmentPickerService equipmentPickerService)
+        ILibraryService libraryService, IEquipmentPickerService equipmentPickerService,
+        ISkillPickerService skillPickerService)
     {
         _pickerNavigation = pickerNavigation;
         _warbandService = warbandService;
         _warbandArchetypePickerService = warbandArchetypePickerService;
         _libraryService = libraryService;
         _equipmentPickerService = equipmentPickerService;
+        _skillPickerService = skillPickerService;
     }
 
     partial void OnSelectedRowChanged(WarbandRow? oldValue, WarbandRow? newValue)
@@ -88,7 +91,7 @@ public partial class WarbandListViewModel : BaseViewModel
         // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
         var newItem = new Core.Models.Warband();
         var dialogViewModel = new WarbandEditDialogViewModel(newItem, Loc["WarbandCreateTitle"],
-             _warbandArchetypePickerService, _warbandService, _libraryService, _equipmentPickerService);
+             _warbandArchetypePickerService, _warbandService, _libraryService, _equipmentPickerService, _skillPickerService);
         if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
 
         await LoadWarbandsAsync();

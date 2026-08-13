@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Resources.Icons;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 
@@ -17,15 +19,66 @@ public partial class WarriorNameSlot : ObservableObject
     [ObservableProperty]
     private string name = string.Empty;
 
+    /// <summary>Étiquette affichée à l'étape Équipement (avant que Name ne soit renseigné à l'étape Noms) -
+    /// juste le nom d'archétype si ce héros est seul de son type, suffixé d'un numéro (1, 2...) s'il faut
+    /// le distinguer d'autres héros du même type. Maintenue par WarbandEditDialogViewModel.
+    /// RenumberHeroLabels (appelée après tout Increment/DecrementWarrior) plutôt que calculée ici, ce slot
+    /// n'ayant pas de visibilité sur ses frères dans Row.NameSlots.</summary>
+    [ObservableProperty]
+    private string archetypeLabel = string.Empty;
+
     /// <summary>Équipement propre à cette recrue Héros - contrairement aux Hommes de main (voir
     /// HenchmanGroup.Equipment), chaque héros peut avoir un équipement différent (livre des règles :
     /// "Every model in each Henchman group must be armed and armoured in the same way", ce qui ne
     /// s'applique pas aux héros).</summary>
     public ObservableCollection<EquipmentPick> Equipment { get; } = new();
 
+    /// <summary>Repère visuel affiché à l'étape Noms (à côté du champ Name, une fois compté/équipé) pour
+    /// distinguer les recrues sans devoir revenir à l'étape Équipement - snapshot au moment du binding,
+    /// pas de notification live nécessaire (l'équipement est déjà figé une fois l'étape Noms atteinte).</summary>
+    public string EquipmentSummary => string.Join(", ", Equipment.Select(e => e.Name));
+
+    /// <summary>Compétences déjà apprises - uniquement peuplé/affiché en mode "Bande existante"
+    /// (WarbandEditDialogViewModel.IsExistingWarband), pour importer une bande déjà jouée sur papier.
+    /// Persisté au Save() via WarbandService.AddWarriorSkillAsync, une fois le Warrior recruté (aucun
+    /// WarriorId réel avant, même raison que EquipmentPick).</summary>
+    public ObservableCollection<Skill> Skills { get; } = new();
+
+    /// <summary>XP de cette recrue - uniquement modifiable en mode "Bande existante" (sinon reste la
+    /// StartingExperience de l'archétype, comme WarriorArchetype.ToWarrior l'applique déjà). Persisté au
+    /// Save() par une mise à jour explicite du Warrior fraîchement recruté (RecruitWarriorAsync applique
+    /// toujours StartingExperience en premier).</summary>
+    [ObservableProperty]
+    private int experience;
+
+    /// <summary>Sous-onglet actif en mode Bande existante (0=Équipement, 1=Compétences, 2=XP) - même
+    /// composant TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais local à
+    /// CE slot plutôt qu'à tout le dialog (chaque héros a le sien). Sans effet hors mode Bande existante,
+    /// où seul le panneau Équipement est affiché sans onglets.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEquipmentSection))]
+    [NotifyPropertyChangedFor(nameof(IsSkillsSection))]
+    [NotifyPropertyChangedFor(nameof(IsXpSection))]
+    private int selectedSection;
+
+    public bool IsEquipmentSection => SelectedSection == 0;
+    public bool IsSkillsSection => SelectedSection == 1;
+    public bool IsXpSection => SelectedSection == 2;
+
+    [RelayCommand]
+    private void ShowEquipmentSection() => SelectedSection = 0;
+
+    [RelayCommand]
+    private void ShowSkillsSection() => SelectedSection = 1;
+
+    [RelayCommand]
+    private void ShowXpSection() => SelectedSection = 2;
+
     public WarriorNameSlot(WarriorRecruitRow row)
     {
         Row = row;
+        experience = row.Archetype.StartingExperience;
+        archetypeLabel = row.Archetype.Name;
     }
 }
 
@@ -59,11 +112,40 @@ public partial class HenchmanGroup : ObservableObject
 
     public ObservableCollection<EquipmentPick> Equipment { get; } = new();
 
+    /// <summary>Voir WarriorNameSlot.Skills - même staging mémoire, appliqué à tout le sous-groupe
+    /// (comme Equipment).</summary>
+    public ObservableCollection<Skill> Skills { get; } = new();
+
+    /// <summary>Voir WarriorNameSlot.Experience - appliquée à tout le sous-groupe (comme Equipment/Skills).</summary>
+    [ObservableProperty]
+    private int experience;
+
+    /// <summary>Voir WarriorNameSlot.SelectedSection - même sous-onglets, un état par groupe.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEquipmentSection))]
+    [NotifyPropertyChangedFor(nameof(IsSkillsSection))]
+    [NotifyPropertyChangedFor(nameof(IsXpSection))]
+    private int selectedSection;
+
+    public bool IsEquipmentSection => SelectedSection == 0;
+    public bool IsSkillsSection => SelectedSection == 1;
+    public bool IsXpSection => SelectedSection == 2;
+
+    [RelayCommand]
+    private void ShowEquipmentSection() => SelectedSection = 0;
+
+    [RelayCommand]
+    private void ShowSkillsSection() => SelectedSection = 1;
+
+    [RelayCommand]
+    private void ShowXpSection() => SelectedSection = 2;
+
     public HenchmanGroup(WarriorRecruitRow row, string name, int count)
     {
         Row = row;
         this.name = name;
         this.count = count;
+        experience = row.Archetype.StartingExperience;
     }
 }
 

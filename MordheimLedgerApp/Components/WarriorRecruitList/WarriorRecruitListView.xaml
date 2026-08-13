@@ -47,18 +47,6 @@
                                                               CommandParameter="{Binding .}"/>
                             </HorizontalStackLayout>
                         </Grid>
-
-                        <!-- Un slot de nom par recrue Héros déjà comptée - rien pour les Hommes de main
-                             (anonymes, cf. WarriorRecruitRow). -->
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding NameSlots}"
-                                              IsVisible="{Binding IsHero}" Spacing="8">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate>
-                                    <Entry Text="{Binding Name}"
-                                           Placeholder="{Binding Source={x:Reference root}, Path=NamePlaceholder}"/>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>

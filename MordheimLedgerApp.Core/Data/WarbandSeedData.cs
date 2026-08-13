@@ -42,6 +42,12 @@ public class WarbandSeedData
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
     public int? MinWarriors { get; set; }
+
+    /// <summary>Filename of a MauiImage under Resources/Images/Warbands/ (e.g. "orc_mob.jpg") - resolved
+    /// by MAUI's flat resource lookup, no folder prefix needed. Null/empty = tile falls back to a glyph
+    /// (see LibraryItemImageView).</summary>
+    public string? ImagePath { get; set; }
+
     public List<WarriorSeedData> Warriors { get; set; } = new();
 
     /// <summary>Equipment SPECIFIC to this warband (typically rare/restricted items) - the generic common

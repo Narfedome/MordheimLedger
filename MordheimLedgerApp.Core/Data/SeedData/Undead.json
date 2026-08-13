@@ -1,4 +1,6 @@
 {
+  "grade": "Core",
+  "imagePath": "the_undead.jpg",
   "name": {
     "en": "Undead",
     "fr": "Morts-vivants"
@@ -7,7 +9,6 @@
     "en": "Vampire-led legions of the walking dead, harvesting wyrdstone for their immortal masters in the ruins of Mordheim.",
     "fr": "Des légions de morts-vivants menées par un vampire, récoltant la pierre magique pour leur maître immortel dans les ruines de Mordheim."
   },
-  "grade": "Core",
   "specialRules": [],
   "magicSchools": [
     {

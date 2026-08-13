@@ -180,7 +180,8 @@ public class AppDatabase
             Grade = Enum.Parse<WarbandGrade>(data.Grade),
             StartingTreasury = data.StartingTreasury,
             MaxWarriors = data.MaxWarriors,
-            MinWarriors = data.MinWarriors
+            MinWarriors = data.MinWarriors,
+            ImagePath = data.ImagePath ?? string.Empty
         };
         warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);

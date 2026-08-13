@@ -16,7 +16,17 @@ public abstract partial class BaseViewModel : ObservableObject
     public LoadingService Loading =>
         _loading ??= IPlatformApplication.Current!.Services.GetRequiredService<LoadingService>();
 
-    private static Page CurrentPage => Application.Current!.Windows[0].Page!;
+    // Shell.Current d'abord - c'est l'ancre stable que les ~10 XxxPickerService utilisent déjà pour
+    // leurs propres Push/PopModalAsync (voir DialogNavigationGate). Windows[0].Page n'est PAS un
+    // équivalent fiable une fois le Shell actif : OnboardingViewModel le réassigne lui-même
+    // (Application.Current.Windows[0].Page = _shell) au lancement, et rien ne garantit qu'il continue à
+    // pointer vers le Shell une fois des pages modales empilées par-dessus - ancrer DialogStack dessus
+    // pouvait faire pousser une dialog sur un contexte de navigation différent de celui utilisé par le
+    // sélecteur ouvrant, causant exactement le symptôme observé (la dialog imbriquée s'ouvre comme une
+    // page Shell à part - flèche retour sur Android - au lieu d'une carte superposée). Repli sur
+    // Windows[0].Page uniquement pendant la fenêtre d'onboarding, avant que le Shell ne soit la page
+    // active (OnboardingViewModel appelle déjà ShowActionSheetAsync à ce moment-là).
+    private static Page CurrentPage => (Page?)Shell.Current ?? Application.Current!.Windows[0].Page!;
 
     protected Task<bool> ConfirmDeleteAsync(string itemName) =>
         ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["DialogDeleteConfirm"], itemName));

@@ -52,22 +52,24 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.AvailableGold = availableGold;
         viewModel.UnitCount = unitCount;
         viewModel.AlreadyHasFreeDagger = alreadyHasFreeDagger;
+        // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
+        // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
+        // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).
         var page = new EquipmentItemSelectorPage(viewModel);
-        var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton
         // retour), le TaskCompletionSource ne serait jamais résolu et l'appelant resterait bloqué.
         var window = Shell.Current.Window;
         void OnModalPopped(object? sender, ModalPoppedEventArgs e)
         {
-            if (!ReferenceEquals(e.Modal, modal))
+            if (!ReferenceEquals(e.Modal, page))
                 return;
             window.ModalPopped -= OnModalPopped;
             tcs.TrySetResult(Array.Empty<EquipmentItem>());
         }
         window.ModalPopped += OnModalPopped;
 
-        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "EquipmentPicker.Push");
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(page), "EquipmentPicker.Push");
 
         return await tcs.Task;
     }

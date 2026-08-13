@@ -30,22 +30,22 @@ public class WarriorArchetypePickerService : IWarriorArchetypePickerService
         // données - même trick que SkillPickerService.
         var viewModel = _provider.GetRequiredService<WarriorArchetypeSelectorViewModel>();
         viewModel.AllowedWarbandArchetypeIds = warbandArchetypeIds.ToList();
+        // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi.
         var page = new WarriorArchetypeSelectorPage(viewModel);
-        var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton
         // retour), le TaskCompletionSource ne serait jamais résolu et l'appelant resterait bloqué.
         var window = Shell.Current.Window;
         void OnModalPopped(object? sender, ModalPoppedEventArgs e)
         {
-            if (!ReferenceEquals(e.Modal, modal))
+            if (!ReferenceEquals(e.Modal, page))
                 return;
             window.ModalPopped -= OnModalPopped;
             tcs.TrySetResult(Array.Empty<WarriorArchetype>());
         }
         window.ModalPopped += OnModalPopped;
 
-        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "WarriorArchetypePicker.Push");
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(page), "WarriorArchetypePicker.Push");
 
         return await tcs.Task;
     }

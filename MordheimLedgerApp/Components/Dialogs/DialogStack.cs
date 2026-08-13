@@ -28,11 +28,13 @@ public sealed class DialogStack
         var viewModel = (DialogViewModel<TResult>)content.BindingContext!;
         var tcs = new TaskCompletionSource<TResult?>();
         var handled = false;
+        var poppedNatively = false;
 
         void OnClose(TResult result)
         {
             // Garde-fou : un double Save/Cancel avant que la Page n'ait fini de se dépiler ne doit pas
-            // déclencher deux PopModalAsync.
+            // déclencher deux PopModalAsync (couvre aussi le cas où OnModalPopped ci-dessous et un
+            // Enregistrer/Annuler explicite se produisent quasi en même temps).
             if (handled) return;
             handled = true;
 
@@ -43,6 +45,24 @@ public sealed class DialogStack
         viewModel.CloseRequested += OnClose;
 
         var dialogPage = new DialogPage(content, () => viewModel.CancelCommand.Execute(null));
+
+        // Filet de sécurité (même idiome que les ~10 XxxPickerService) : si la page est dépilée par le
+        // bouton/geste retour d'Android plutôt que par Enregistrer/Annuler/tap sur le fond, aucun
+        // CloseRequested n'est jamais levé - sans ce filet, tcs.Task ne se résoudrait jamais et
+        // l'appelant resterait bloqué indéfiniment. On réutilise CancelCommand (même résultat qu'un tap
+        // sur le fond) plutôt que résoudre tcs directement, pour garder un seul chemin de fermeture -
+        // poppedNatively empêche alors le PopModalAsync plus bas de dépiler une SECONDE fois (la page
+        // est déjà partie).
+        var window = currentPage.Window;
+        void OnModalPopped(object? sender, ModalPoppedEventArgs e)
+        {
+            if (!ReferenceEquals(e.Modal, dialogPage)) return;
+            if (window is not null) window.ModalPopped -= OnModalPopped;
+            poppedNatively = true;
+            viewModel.CancelCommand.Execute(null);
+        }
+        if (window is not null) window.ModalPopped += OnModalPopped;
+
         // Sérialisé (voir DialogNavigationGate) : un XxxPickerService peut pousser sa propre page modale
         // pendant que CE PushModalAsync est encore en train de s'installer (bouton du dialog lui-même
         // qui ouvre un picker) - deux Push/PopModalAsync concurrents sur la même pile sont un piège
@@ -50,7 +70,9 @@ public sealed class DialogStack
         await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PushModalAsync(dialogPage, animated: false), $"DialogStack.Push({dialogName})");
 
         var result = await tcs.Task;
-        await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
+        if (window is not null) window.ModalPopped -= OnModalPopped;
+        if (!poppedNatively)
+            await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
         return result;
     }
 }

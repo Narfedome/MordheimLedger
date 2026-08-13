@@ -111,14 +111,14 @@
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                         <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
 
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="16">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="4">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="local:WarriorRecruitRow">
                                     <VerticalStackLayout Spacing="8">
                                         <!-- Hommes de main : une seule section, coût × effectif du groupe. -->
-                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                        <VerticalStackLayout IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
                                             <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0" FontSize="13">
+                                                <Label Grid.Column="0" FontSize="13" VerticalOptions="Center">
                                                     <Label.FormattedText>
                                                         <FormattedString>
                                                             <Span Text="{Binding Name}"/>
@@ -140,12 +140,12 @@
 
                                         <!-- Héros : une section par recrue nommée. -->
                                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding NameSlots}"
-                                                              IsVisible="{Binding IsHero}" Spacing="12">
+                                                              IsVisible="{Binding IsHero}">
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="local:WarriorNameSlot">
-                                                    <VerticalStackLayout Spacing="6">
+                                                    <VerticalStackLayout >
                                                         <Grid ColumnDefinitions="*,Auto">
-                                                            <Label Grid.Column="0" Text="{Binding Name}" FontSize="13"/>
+                                                            <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalOptions="Center"/>
                                                             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                                                                           Icon="{x:Static icons:SolidFont.Plus}"
                                                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"

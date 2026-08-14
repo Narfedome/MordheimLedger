@@ -26,6 +26,10 @@ public abstract partial class RecruitSlot : ObservableObject
     /// à CE slot/groupe précis.</summary>
     public ObservableCollection<EquipmentPick> Equipment { get; } = new();
 
+    /// <summary>Passe-plat vers Row.Archetype.CanUseEquipment - masque le bouton "+" équipement (les deux
+    /// modes, avec ou sans sous-onglets) pour un type qui n'en porte jamais (Zombie, Rat Ogre...).</summary>
+    public bool CanUseEquipment => Row.Archetype.CanUseEquipment;
+
     /// <summary>Compétences déjà apprises - uniquement peuplé/affiché en mode "Bande existante"
     /// (WarbandEditDialogViewModel.IsExistingWarband), pour importer une bande déjà jouée sur papier.
     /// Persisté au Save() via WarbandService.AddWarriorSkillAsync, une fois le Warrior recruté (aucun
@@ -119,7 +123,7 @@ public partial class HenchmanGroupDraft : RecruitSlot
 
     /// <summary>Le bouton Diviser n'a de sens que s'il reste au moins 2 guerriers à répartir entre le
     /// groupe existant et un nouveau.</summary>
-    public bool CanSplit => Count > 1;
+    public bool CanSplit => Count > 1 && Row.Archetype.CanUseEquipment;
 
     public HenchmanGroupDraft(WarriorRecruitRow row, string name, int count) : base(row)
     {

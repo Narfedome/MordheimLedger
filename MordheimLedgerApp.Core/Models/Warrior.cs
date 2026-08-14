@@ -50,6 +50,10 @@ public class Warrior
     /// equipment usable. Editing the archetype's list later doesn't retroactively change this.</summary>
     public int? EquipmentListId { get; set; }
 
+    /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.CanUseEquipment.
+    /// False hides the "+" equipment button entirely for this warrior/Henchman group.</summary>
+    public bool CanUseEquipment { get; set; } = true;
+
     /// <summary>Which of the 6 rulebook Skill lists this warrior may pick an Advance from - copied from
     /// the recruiting WarriorArchetype at recruitment (see WarriorArchetype.AllowedSkillCategories), so
     /// the End of Game Advance skill picker can filter to it (see EndOfGameDialogViewModel.

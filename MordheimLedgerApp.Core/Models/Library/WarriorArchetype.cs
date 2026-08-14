@@ -86,6 +86,13 @@ public class WarriorArchetype
     /// stat line - editing this later doesn't retroactively change already-recruited warriors.</summary>
     public int? EquipmentListId { get; set; }
 
+    /// <summary>False for archetypes the rulebook explicitly forbids from ever carrying weapons/armour
+    /// (Zombie, Ghoul, Dire Wolf, the Possessed, Rat Ogre, Giant Rats - see their "No Equipment" special
+    /// rule) - hides the "+" equipment button entirely rather than leaving it clickable with no real
+    /// effect. True for every ordinary archetype. Copied onto Warrior at recruitment (see
+    /// EntityMapping.ToWarrior), same snapshot-at-recruit-time convention as the rest of the stat line.</summary>
+    public bool CanUseEquipment { get; set; } = true;
+
     /// <summary>Which of the 6 rulebook Skill lists this archetype may pick an Advance from (its row of
     /// the warband's "skill table", e.g. a Witch Hunter Captain gets all 5 standard categories, a Bear
     /// Tamer only Combat/Strength/Speed) - empty = not seeded/unknown, not "may pick nothing". Data-only,

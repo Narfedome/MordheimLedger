@@ -504,6 +504,9 @@
   <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
     <value>Large creature (flat 20 pts in the Warband Rating)</value>
   </data>
+  <data name="WarriorArchetypeCanUseEquipment" xml:space="preserve">
+    <value>Can carry equipment</value>
+  </data>
   <data name="WarriorArchetypeRolePh" xml:space="preserve">
     <value>Role</value>
   </data>

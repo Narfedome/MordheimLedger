@@ -119,9 +119,15 @@ public class WarriorSeedData
     public bool CanBuyMutations { get; set; }
 
     /// <summary>English Name of one of the parent WarbandSeedData's EquipmentLists entries that this
-    /// archetype's Weapons/Armour line draws from - null/omitted = this archetype never uses equipment
-    /// (Ghouls, Zombies, Trolls, Cave Squigs...).</summary>
+    /// archetype's Weapons/Armour line draws from - null/omitted = no curated list assigned, falls back
+    /// to the full common+band equipment pool in the picker (NOT "never uses equipment" - see
+    /// CanUseEquipment for that).</summary>
     public string? EquipmentListName { get; set; }
+
+    /// <summary>False for archetypes the rulebook explicitly forbids from carrying weapons/armour
+    /// (Ghouls, Zombies, Trolls, Rat Ogre, Giant Rats... - see their "No Equipment" special rule) -
+    /// omitted/true for every ordinary archetype. See WarriorArchetype.CanUseEquipment.</summary>
+    public bool CanUseEquipment { get; set; } = true;
 
     /// <summary>This archetype's row of the warband's "skill table" (e.g. ["Combat","Strength","Speed"])
     /// - matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names. Empty/omitted = not

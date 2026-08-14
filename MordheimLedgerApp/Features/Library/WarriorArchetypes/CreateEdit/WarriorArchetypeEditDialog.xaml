@@ -61,6 +61,12 @@
                     <CheckBox IsChecked="{Binding Item.IsLargeCreature}" VerticalOptions="Center"/>
                     <Label Text="{loc:Loc WarriorArchetypeIsLargeCreature}" VerticalOptions="Center"/>
                 </HorizontalStackLayout>
+                <!-- Zombie/Goule/Loup Funeste/Possédé/Rat-ogre/Rats géants : masque le bouton "+" équipement
+                     partout (wizard, WarriorEditDialog) - voir WarriorArchetype.CanUseEquipment. -->
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox IsChecked="{Binding Item.CanUseEquipment}" VerticalOptions="Center"/>
+                    <Label Text="{loc:Loc WarriorArchetypeCanUseEquipment}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{loc:Loc WarriorArchetypeCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>

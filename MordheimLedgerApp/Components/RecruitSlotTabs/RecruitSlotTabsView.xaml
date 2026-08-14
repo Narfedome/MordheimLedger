@@ -33,6 +33,7 @@
             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                           Icon="{x:Static icons:SolidFont.Plus}"
                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          IsVisible="{Binding Item.CanUseEquipment}"
                                           Command="{Binding AddEquipmentCommand}"
                                           CommandParameter="{Binding Item}"/>
         </Grid>

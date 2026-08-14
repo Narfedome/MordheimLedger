@@ -104,6 +104,7 @@ public static class EntityMapping
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarriorArchetypeId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
         EquipmentListId = e.EquipmentListId,
+        CanUseEquipment = e.CanUseEquipment,
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         IsLargeCreature = e.IsLargeCreature
     };
@@ -139,6 +140,7 @@ public static class EntityMapping
         CanBuyMutations = m.CanBuyMutations,
         ImagePath = m.ImagePath,
         EquipmentListId = m.EquipmentListId,
+        CanUseEquipment = m.CanUseEquipment,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
         IsLargeCreature = m.IsLargeCreature
     };
@@ -162,6 +164,7 @@ public static class EntityMapping
         Attacks = archetype.Attacks,
         Leadership = archetype.Leadership,
         EquipmentListId = archetype.EquipmentListId,
+        CanUseEquipment = archetype.CanUseEquipment,
         AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories),
         IsLargeCreature = archetype.IsLargeCreature
     };
@@ -389,6 +392,7 @@ public static class EntityMapping
         Attacks = e.Attacks,
         Leadership = e.Leadership,
         EquipmentListId = e.EquipmentListId,
+        CanUseEquipment = e.CanUseEquipment,
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         Equipment = equipment?.ToList() ?? new List<WarriorEquipment>(),
         Skills = skills?.ToList() ?? new List<WarriorSkill>(),
@@ -422,6 +426,7 @@ public static class EntityMapping
         Leadership = m.Leadership,
         AnimalId = m.Animal?.Id,
         EquipmentListId = m.EquipmentListId,
+        CanUseEquipment = m.CanUseEquipment,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
         IsLargeCreature = m.IsLargeCreature
     };

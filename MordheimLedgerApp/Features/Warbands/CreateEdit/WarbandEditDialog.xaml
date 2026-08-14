@@ -147,12 +147,17 @@
                                                                                           IsVisible="{Binding CanSplit}"
                                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
                                                                                           CommandParameter="{Binding .}"/>
-                                                            <components:FaIconButtonView Grid.Column="3" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                          Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                          IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                          CommandParameter="{Binding .}"/>
+                                                            <!-- Wrapper : IsVisible ne combine pas plusieurs conditions nativement en XAML,
+                                                                 donc CanUseEquipment (le type ne porte jamais d'équipement, ex. Rat Ogre) se
+                                                                 pose sur ce Grid englobant, IsExistingWarband inverse reste sur le bouton. -->
+                                                            <Grid Grid.Column="3" IsVisible="{Binding CanUseEquipment}">
+                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
+                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                                                              CommandParameter="{Binding .}"/>
+                                                            </Grid>
                                                         </Grid>
                                                         <!-- Hors mode Bande existante : juste l'équipement, sans onglets (comportement
                                                              d'origine). Icône par EquipmentCategory (même EquipmentCategoryIconConverter
@@ -200,12 +205,14 @@
                                                              de les distinguer. -->
                                                         <Grid ColumnDefinitions="*,Auto">
                                                             <Label Grid.Column="0" Text="{Binding ArchetypeLabel}" FontSize="13" VerticalOptions="Center"/>
-                                                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                          Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                          IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                          CommandParameter="{Binding .}"/>
+                                                            <Grid Grid.Column="1" IsVisible="{Binding CanUseEquipment}">
+                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
+                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                                                              CommandParameter="{Binding .}"/>
+                                                            </Grid>
                                                         </Grid>
                                                         <!-- Hors mode Bande existante : juste l'équipement, sans onglets (comportement d'origine). -->
                                                         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}"

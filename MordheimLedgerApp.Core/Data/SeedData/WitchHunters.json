@@ -229,6 +229,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 5,
+      "canUseEquipment": false,
       "description": {
         "en": "Witch Hunters often keep packs of ferocious hunting dogs - with their huge jaws and powerful bite, they are perfect for hunting down (and tearing apart) heretics, mutants and witches.",
         "fr": "Les Répurgateurs ont souvent des meutes de féroces chiens de chasse. Avec leur flair et leurs puissantes mâchoires, ils sont parfaits pour la traque et la mise à mort des mutants, sorciers et autres hérétiques."
@@ -238,6 +239,12 @@
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
+          }
+        },
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
           }
         }
       ]

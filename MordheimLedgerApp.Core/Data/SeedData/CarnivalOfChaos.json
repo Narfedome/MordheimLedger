@@ -190,11 +190,18 @@
       "initiative": 4,
       "attacks": 2,
       "leadership": 10,
+      "canUseEquipment": false,
       "description": {
         "en": "Daemons of Nurgle, identified by their cyclopean face and decayed body - revered by the mortal members of the warband as the Tallymen of Plagues, they take great pleasure in their showy roles as stage actors.",
         "fr": "Les Portepestes sont des démons du dieu du Chaos Nurgle. On les reconnaît à leur œil unique et à leur corps décomposé. Parfois appelés Frères-vers et Comptables de Nurgle, ils sont révérés par les membres mortels de la bande et apprécient leur rôle d'acteur de premier plan."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Cloud of Flies",
@@ -283,11 +290,18 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 10,
+      "canUseEquipment": false,
       "description": {
         "en": "Tiny daemons of Nurgle, seen by his followers as his beloved children - more a nuisance than a real threat individually, but able to overwhelm even the toughest warrior in numbers.",
         "fr": "Les Nurglings sont de minuscules démons de Nurgle, et les suivants de ce dernier les voient comme ses enfants chéris. Au combat, les Nurglings s'avèrent généralement davantage une gêne qu'une véritable menace, mais ils peuvent faire fléchir sous le nombre le plus coriace des guerriers."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Cloud of Flies",

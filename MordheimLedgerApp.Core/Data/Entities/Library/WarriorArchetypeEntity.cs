@@ -35,6 +35,7 @@ public class WarriorArchetypeEntity
     public bool CanBuyMutations { get; set; }
     public string? ImagePath { get; set; }
     public int? EquipmentListId { get; set; }
+    public bool CanUseEquipment { get; set; } = true;
 
     /// <summary>Comma-separated SkillCategory member names (e.g. "Combat,Strength,Speed") - see
     /// WarriorArchetype.AllowedSkillCategories. A plain delimited column rather than a join table since

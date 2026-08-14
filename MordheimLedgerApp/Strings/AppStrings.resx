@@ -504,6 +504,9 @@
   <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
     <value>Grande créature (20 pts fixes dans la Valeur de Bande)</value>
   </data>
+  <data name="WarriorArchetypeCanUseEquipment" xml:space="preserve">
+    <value>Peut porter de l'équipement</value>
+  </data>
   <data name="WarriorArchetypeRolePh" xml:space="preserve">
     <value>Rôle</value>
   </data>

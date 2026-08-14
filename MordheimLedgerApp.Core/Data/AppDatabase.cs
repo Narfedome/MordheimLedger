@@ -305,6 +305,7 @@ public class AppDatabase
                 IsSpellcaster = w.IsSpellcaster,
                 CanBuyMutations = w.CanBuyMutations,
                 EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
+                CanUseEquipment = w.CanUseEquipment,
                 AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
                 IsLargeCreature = w.IsLargeCreature
             };

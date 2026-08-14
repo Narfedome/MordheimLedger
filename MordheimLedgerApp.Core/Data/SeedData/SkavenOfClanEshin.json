@@ -274,6 +274,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 4,
+      "canUseEquipment": false,
       "description": {
         "en": "Mutated creations of Clan Moulder trainees, the size of dogs - they fight alongside the Skaven, overpowering opponents through sheer weight of numbers.",
         "fr": "Les rats géants sont des créations de l'étrange génie des skavens. Ce sont des rats mutants aussi gros que des chiens. Ils combattent aux côtés des skavens ajoutant encore au nombre pour submerger l'ennemi."
@@ -283,6 +284,12 @@
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
+          }
+        },
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
           }
         }
       ]
@@ -306,11 +313,18 @@
       "initiative": 4,
       "attacks": 3,
       "leadership": 4,
+      "canUseEquipment": false,
       "description": {
         "en": "Horrible monsters much in demand as bodyguards to important Skaven.",
         "fr": "Ces horribles monstres sont très demandés comme gardes du corps par les skavens importants."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Causes Fear",

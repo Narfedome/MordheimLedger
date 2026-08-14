@@ -8,6 +8,7 @@
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:stepper="clr-namespace:MordheimLedgerApp.Components.StatStepper"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Library.Animals.CreateEdit.AnimalEditDialog"
                x:DataType="local:AnimalEditDialogViewModel"
@@ -48,61 +49,50 @@
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                 </VerticalStackLayout>
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalCostPh}"/>
-                    <Entry Grid.Column="1" Text="{Binding Item.Rarity}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalRarityPh}"/>
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{loc:Loc AnimalCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc AnimalRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
                 </Grid>
-                <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalCostRandomMaxPh}"/>
-                <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="80"/>
-            </VerticalStackLayout>
-
-            <!-- Profil (abréviations officielles du livre de règles, pas de traduction) -->
-            <Grid IsVisible="{Binding IsProfileTab}"
-                  ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
-                <VerticalStackLayout Grid.Row="0" Grid.Column="0">
-                    <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Movement}" Keyboard="Numeric"/>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc AnimalCostRandomMaxPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="0" Grid.Column="1">
-                    <Label Text="WS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.WeaponSkill}" Keyboard="Numeric"/>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Editor Text="{Binding Item.Description}" HeightRequest="80"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="0" Grid.Column="2">
-                    <Label Text="BS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.BallisticSkill}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="0">
-                    <Label Text="S" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Strength}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="1">
-                    <Label Text="T" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Toughness}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="2">
-                    <Label Text="W" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Wounds}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="0">
-                    <Label Text="I" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Initiative}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="1">
-                    <Label Text="A" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Attacks}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="2">
-                    <Label Text="Ld" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Leadership}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-            </Grid>
-
-            <!-- Réservé à ces bandes (vide = commun à toutes) + règles spéciales propres à l'animal. -->
-            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
+                <!-- Réservé à ces bandes (vide = commun à toutes) - même onglet Général que les autres
+                     dialogs Bibliothèque (Équipement, Mutation...), pas l'onglet Règles. -->
                 <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                           ItemsSource="{Binding RestrictedWarbands}"
                                           IconGlyph="{x:Static icons:SolidFont.Shield}"
                                           AddCommand="{Binding AddRestrictionCommand}"
                                           RemoveCommand="{Binding RemoveRestrictionCommand}"/>
+            </VerticalStackLayout>
+
+            <!-- Profil (abréviations officielles du livre de règles, pas de traduction) - StatStepperView
+                 (label + -/valeur/+), même contrôle que WarriorEditDialog plutôt qu'une grille Label+Entry
+                 maison redondante. -->
+            <Grid IsVisible="{Binding IsProfileTab}"
+                  ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
+                <stepper:StatStepperView Grid.Row="0" Grid.Column="0" Label="M" Value="{Binding Item.Movement}"/>
+                <stepper:StatStepperView Grid.Row="0" Grid.Column="1" Label="WS" Value="{Binding Item.WeaponSkill}"/>
+                <stepper:StatStepperView Grid.Row="0" Grid.Column="2" Label="BS" Value="{Binding Item.BallisticSkill}"/>
+                <stepper:StatStepperView Grid.Row="1" Grid.Column="0" Label="S" Value="{Binding Item.Strength}"/>
+                <stepper:StatStepperView Grid.Row="1" Grid.Column="1" Label="T" Value="{Binding Item.Toughness}"/>
+                <stepper:StatStepperView Grid.Row="1" Grid.Column="2" Label="W" Value="{Binding Item.Wounds}"/>
+                <stepper:StatStepperView Grid.Row="2" Grid.Column="0" Label="I" Value="{Binding Item.Initiative}"/>
+                <stepper:StatStepperView Grid.Row="2" Grid.Column="1" Label="A" Value="{Binding Item.Attacks}"/>
+                <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
+            </Grid>
+
+            <!-- Règles spéciales propres à l'animal. -->
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
                 <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
                                           ItemsSource="{Binding SpecialRules}"
                                           IconGlyph="{x:Static icons:SolidFont.Scroll}"

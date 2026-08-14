@@ -34,10 +34,14 @@
                 <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
-            <Picker Title="{loc:Loc SkillCategoryPh}"
-                    ItemsSource="{Binding CategoryOptions}"
-                    SelectedItem="{Binding SelectedCategoryLabel}"/>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc SkillCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Picker ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding SelectedCategoryLabel}"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+            </VerticalStackLayout>
 
             <!-- Réservé à ces bandes : vide = commun à toutes les bandes (voir Skill.
                  RestrictedToWarbandArchetypeIds). HeaderText dynamique plutôt qu'un titre fixe + un

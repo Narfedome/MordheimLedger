@@ -16,7 +16,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView Grid.Row="0">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -33,12 +33,47 @@
                 <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
-            <Entry Text="{Binding Item.CostMultiplier}" Keyboard="Numeric" Placeholder="{loc:Loc SpecialRuleCostMultiplierPh}"/>
-            <Entry Text="{Binding Item.Abbreviation}" Placeholder="{loc:Loc SpecialRuleAbbreviationPh}"/>
-            <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric" Placeholder="{loc:Loc EquipmentItemRarityPh}"/>
+
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc SpecialRuleTabMaterials}" Command="{Binding ShowMaterialsTabCommand}"
+                                                 IsActive="{Binding IsMaterialsTab}" FontSize="12"
+                                                 IsVisible="{Binding IsMaterialRule}"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
+
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+                </VerticalStackLayout>
+                <HorizontalStackLayout Spacing="10">
+                    <CheckBox IsChecked="{Binding IsMaterialRule}" VerticalOptions="Center"/>
+                    <Label Text="{loc:Loc SpecialRuleIsMaterialRule}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Multiplicateur/Abréviation/Rareté ne sont significatifs que pour une règle "matériau"
+                 (voir SpecialRule.CostMultiplier) - regroupés dans leur propre onglet plutôt que mêlés
+                 aux champs génériques d'une règle spéciale ordinaire. -->
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsMaterialsTab}">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc SpecialRuleCostMultiplierPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.CostMultiplier}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc SpecialRuleAbbreviationPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Abbreviation}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

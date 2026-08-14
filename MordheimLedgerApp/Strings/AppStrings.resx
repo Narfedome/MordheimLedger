@@ -471,6 +471,12 @@
   <data name="WarbandArchetypeTabRules" xml:space="preserve">
     <value>Règles</value>
   </data>
+  <data name="SpecialRuleTabMaterials" xml:space="preserve">
+    <value>Matériaux</value>
+  </data>
+  <data name="SpecialRuleIsMaterialRule" xml:space="preserve">
+    <value>Règle matériau (multiplicateur de coût)</value>
+  </data>
   <data name="WarbandArchetypeTabMagic" xml:space="preserve">
     <value>Magie</value>
   </data>

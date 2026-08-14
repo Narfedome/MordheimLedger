@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>Grants a WarbandArchetype access to a MagicSchool (e.g. Undead -> Nécromancie) - a direct
 /// attach, same shape/rationale as WarbandArchetypeSpecialRuleEntity, not a "restricted to" list.</summary>

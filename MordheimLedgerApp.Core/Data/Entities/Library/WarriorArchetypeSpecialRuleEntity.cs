@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>Attaches a SpecialRule specific to one warrior type (e.g. "Chef" on a Captain) to a
 /// WarriorArchetype - many-to-many, same shape as WarbandArchetypeSpecialRuleEntity but scoped to a

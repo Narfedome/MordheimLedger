@@ -37,6 +37,12 @@ C'est la distinction structurante du modèle de données, demandée explicitemen
   évolue ensuite indépendamment (XP, blessures) — modifier l'archétype après coup n'affecte pas
   les guerriers déjà recrutés.
 
+**Rangement vérifié (2026-08-15)** : les 12 tables de jointure entre deux concepts Library (ex.
+`WarbandArchetypeSkillEntity`, `EquipmentItemSpecialRuleEntity`) vivaient à la racine de
+`Data/Entities/` au lieu de `Data/Entities/Library/`, malgré la règle ci-dessus — repéré lors d'un
+audit d'architecture puis déplacé (`git mv` + namespace `MordheimLedgerApp.Core.Data.Entities.Library`).
+Aucune de ces 12 ne référence de `Warband`/`Warrior` joué, seulement des paires d'archétypes/catalogue.
+
 ## Terminologie
 
 Le code utilise les **termes anglais officiels** du jeu (Warband, Warrior, Hero/Henchman, Hired
@@ -135,8 +141,9 @@ pas encore mergée sur `master`) : passe de polish sur les 8 onglets Codex (Band
 Compétences, Règles Spéciales, Mutations, Montures, Sorts, Blessures) + 3 grilles de tuiles annexes
 (`EquipmentListView`, `WarriorArchetypeView`, `WarriorArchetypeSelectorView` — mêmes styles partagés,
 mais sans bouton info/dialog récap, hors périmètre des 8 types catalogués).
-- Tuiles carrées à taille fixe (130×130, `CodexTileFrameStyle` + `ResponsiveGridSpanBehavior
-  TileWidth="130"` déclaré par fichier — **pas** centralisé en constante malgré la tentation, décision
+- Tuiles carrées à taille fixe (130×130, `CodexTileFrameStyle` — `ResponsiveGridSpanBehavior` est posé
+  tel quel par fichier, sans `TileWidth` explicite, et retombe donc sur son défaut de classe (140) pour
+  le calcul du nombre de colonnes ; **pas** centralisé en constante malgré la tentation, décision
   explicite après essai : cf. règles de collaboration ci-dessous), nom enroulé sur 3 lignes
   (`CodexTileNameLabelStyle`) plutôt que tronqué à 1 (`TruncatedLabelStyle`, toujours utilisé tel quel par
   `WarbandListPage` et `MagicSchoolView` — liste à plat, pas une grille de tuiles, hors périmètre).
@@ -308,8 +315,12 @@ mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`pre
   `dotnet test MordheimLedgerApp.Tests`.
 - **Depuis la passe tuiles du Codex : dev par branche de fonctionnalité** (`feature/<nom>`), plus
   directement sur `master` — la base est maintenant stable, à protéger.
-- La taille des tuiles du Codex (`ResponsiveGridSpanBehavior.TileWidth="130"`, dupliquée dans les 11
-  fichiers) a été temporairement centralisée en constante C# (`DefaultTileWidth`) référencée par XAML
-  via `x:Static`, puis explicitement annulée par l'utilisateur ("on retourne en arrière") en faveur de la
-  duplication d'origine — **ne pas retenter cette centralisation sans redemander**, la décision était
-  volontaire, pas un oubli de nettoyage.
+- La taille des tuiles du Codex (`ResponsiveGridSpanBehavior.TileWidth`, calcul du span de colonnes) a
+  été temporairement centralisée en constante C# (`DefaultTileWidth`) référencée par XAML via
+  `x:Static`, puis explicitement annulée par l'utilisateur ("on retourne en arrière") en faveur du
+  défaut de classe posé tel quel par fichier — **ne pas retenter cette centralisation sans redemander**,
+  la décision était volontaire, pas un oubli de nettoyage. Contrairement à une version antérieure de
+  cette note, aucun fichier XAML ne déclare plus `TileWidth="130"` explicitement aujourd'hui : le span se
+  base sur le défaut de classe (140) plutôt que sur la taille visuelle réelle de la tuile (130,
+  `CodexTileFrameStyle`) — vérifié fonctionnel à l'usage (2026-08-15), donc pas une régression à corriger
+  sans y être invité.

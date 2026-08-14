@@ -144,7 +144,10 @@ public partial class WarriorRecruitRow : ObservableObject
     public string Name => Archetype.Name;
     public int Cost => Archetype.Cost;
     public bool IsHero => Archetype.IsHero;
-    public string IconGlyph => IsHero ? SolidFont.Crown : SolidFont.Users;
+    // UserGroup, pas Users - Users est déjà l'icône de la bande elle-même partout ailleurs dans l'appli
+    // (Shell, tuile vide WarbandListPage, chip d'archétype de ce même wizard). Même icône que
+    // WarriorRoleChipListView côté Bibliothèque, pour rester cohérent.
+    public string IconGlyph => IsHero ? SolidFont.Crown : SolidFont.UserGroup;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CountDisplay))]

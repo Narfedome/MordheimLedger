@@ -477,6 +477,9 @@
   <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
     <value>Guerriers</value>
   </data>
+  <data name="WarbandArchetypeAddWarriorLabel" xml:space="preserve">
+    <value>Ajouter un guerrier</value>
+  </data>
   <data name="WarbandCreateTabEquipment" xml:space="preserve">
     <value>Équipement</value>
   </data>

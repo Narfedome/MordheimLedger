@@ -32,20 +32,23 @@
                  dépendent de l'Archetype choisi en Général) - onglets remplacés par un simple libellé
                  d'étape, navigation via Précédent/Suivant en bas. Pas d'onglets Règles/Magie/Équipement :
                  une Warband (instance jouée) n'a pas sa propre copie de ces catalogues, elle référence
-                 ceux de son WarbandArchetype (ShowArchetypeDetail ouvre sa fiche récap complète). -->
+                 ceux de son WarbandArchetype (ShowArchetypeDetail ouvre sa fiche récap complète).
+                 ScrollableTabStripView (générique, ne connaît pas IsWizardMode) factorise juste le
+                 conteneur scrollable, même composant que WarbandArchetypeEditDialog.xaml. -->
                     <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"
                    IsVisible="{Binding IsWizardMode}"/>
-
-                    <HorizontalStackLayout Spacing="16" IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}">
-                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
-                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
-                                             IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
-                        <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
-                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
-                        <components:TabToggleButton Text="{loc:Loc WarbandCreateTabNames}" Command="{Binding ShowNamesTabCommand}"
-                                             IsActive="{Binding IsNamesTab}" FontSize="12"/>
-                    </HorizontalStackLayout>
+                    <components:ScrollableTabStripView IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}">
+                        <HorizontalStackLayout Spacing="16">
+                            <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                            <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
+                                                 IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
+                            <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
+                                                 IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                            <components:TabToggleButton Text="{loc:Loc WarbandCreateTabNames}" Command="{Binding ShowNamesTabCommand}"
+                                                 IsActive="{Binding IsNamesTab}" FontSize="12"/>
+                        </HorizontalStackLayout>
+                    </components:ScrollableTabStripView>
 
                     <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
                         <VerticalStackLayout Spacing="4">

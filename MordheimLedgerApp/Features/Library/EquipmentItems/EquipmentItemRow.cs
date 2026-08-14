@@ -79,10 +79,10 @@ public partial class EquipmentItemRow : ObservableObject
     {
         EquipmentCategory.MeleeWeapon => RpgFont.RaSword,
         EquipmentCategory.MissileWeapon => RpgFont.RaCrossbow,
-        EquipmentCategory.BlackPowderWeapon => RpgFont.RaRifle,
-        EquipmentCategory.Ammunition => RpgFont.RaAmmoBag,
+        EquipmentCategory.BlackPowderWeapon => RpgFont.RaMusket,
+        EquipmentCategory.Ammunition => RpgFont.RaArrowCluster,
         EquipmentCategory.Armour => RpgFont.RaVest,
-        _ => SolidFont.Box
+        _ => RpgFont.RaBook
     };
 
     public string CategoryIconFont => Item.Category == EquipmentCategory.MiscellaneousEquipment ? "FontSolid" : "RpgAwesome";

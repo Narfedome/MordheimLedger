@@ -7,7 +7,6 @@ public partial class SkillEditDialog : DialogContent<bool>
     public SkillEditDialog(SkillEditDialogViewModel viewModel)
     {
         InitializeComponent();
-        ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
     }
 }

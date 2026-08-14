@@ -13,7 +13,7 @@
     <!-- Anchored near the top on Android/iOS to stay stable when the keyboard opens, centered on
          Windows (no software keyboard to dodge there). -->
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="320">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView>
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -31,6 +31,6 @@
                         Command="{Binding ConfirmCommand}"/>
             </Grid>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

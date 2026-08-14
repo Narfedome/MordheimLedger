@@ -7,7 +7,6 @@ public partial class EquipmentListEditDialog : DialogContent<bool>
     public EquipmentListEditDialog(EquipmentListEditDialogViewModel viewModel)
     {
         InitializeComponent();
-        ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
     }
 }

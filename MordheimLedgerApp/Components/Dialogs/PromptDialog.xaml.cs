@@ -6,7 +6,6 @@ public partial class PromptDialog : DialogContent<string?>
     public PromptDialog(PromptDialogViewModel viewModel)
     {
         InitializeComponent();
-        ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
 
         // Loaded (pas Opened - Popup-spécifique, disparu avec la conversion en DialogContent/ContentView,

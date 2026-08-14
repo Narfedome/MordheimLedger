@@ -17,8 +17,8 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-            <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
-                <VerticalStackLayout x:Name="RootContent" Spacing="16" SizeChanged="OnRootContentSizeChanged">
+            <dialogs:StableHeightScrollView Grid.Row="0">
+                <VerticalStackLayout Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
@@ -304,7 +304,7 @@
                        IsVisible="{Binding NamesError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-            </ScrollView>
+            </dialogs:StableHeightScrollView>
 
             <!-- Boutons toujours ancrés en bas du dialog (ligne Auto de la Grid englobante, hors ScrollView) -
              plutôt que collés au contenu de l'onglet/étape courante, dont la hauteur varie. -->

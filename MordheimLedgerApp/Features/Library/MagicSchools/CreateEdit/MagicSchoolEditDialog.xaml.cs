@@ -7,7 +7,6 @@ public partial class MagicSchoolEditDialog : DialogContent<bool>
     public MagicSchoolEditDialog(MagicSchoolEditDialogViewModel viewModel)
     {
         InitializeComponent();
-        ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
     }
 }

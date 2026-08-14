@@ -16,7 +16,7 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView>
         <VerticalStackLayout Spacing="16">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
@@ -61,6 +61,6 @@
                                       IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                       Command="{Binding ShowSpecialRuleDetailCommand}"/>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

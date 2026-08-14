@@ -16,8 +16,8 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
-        <VerticalStackLayout x:Name="RootContent" Spacing="16" SizeChanged="OnRootContentSizeChanged">
+        <dialogs:StableHeightScrollView>
+        <VerticalStackLayout Spacing="16">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
@@ -110,6 +110,6 @@
                                           Command="{Binding ShowWarriorDetailCommand}"/>
             </VerticalStackLayout>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

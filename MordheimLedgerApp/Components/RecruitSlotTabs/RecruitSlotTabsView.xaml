@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             xmlns:createedit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+             x:Class="MordheimLedgerApp.Components.RecruitSlotTabsView"
+             x:Name="root">
+
+    <VerticalStackLayout Spacing="6" BindingContext="{x:Reference root}">
+        <HorizontalStackLayout Spacing="14">
+            <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
+                                         IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
+            <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
+                                         IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"/>
+            <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
+                                         IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"/>
+        </HorizontalStackLayout>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsEquipmentSection}">
+            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Equipment}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="createedit:EquipmentPick">
+                        <components:ChipView Item="{Binding .}"
+                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding Source={x:Reference root}, Path=ShowEquipmentDetailCommand}"
+                                              RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveEquipmentCommand}"/>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          Command="{Binding AddEquipmentCommand}"
+                                          CommandParameter="{Binding Item}"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsSkillsSection}">
+            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Skills}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="library:Skill">
+                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                       FontFamily="RpgAwesome" FontSize="12"
+                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                              Command="{Binding Source={x:Reference root}, Path=RemoveSkillCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          Command="{Binding AddSkillCommand}"
+                                          CommandParameter="{Binding Item}"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
+            <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+            <Entry Grid.Column="1" Text="{Binding Item.Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

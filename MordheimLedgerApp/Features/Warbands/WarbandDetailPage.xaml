@@ -25,7 +25,13 @@
                 <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
                     <VerticalStackLayout Spacing="6">
                         <Grid ColumnDefinitions="*,Auto,Auto">
-                            <Label Grid.Column="0" Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                            <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                                <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                                <!-- Effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1) - vide donc
+                                     invisible pour un Héros ou un groupe à 1 seul survivant. -->
+                                <Label Text="{Binding HeadCountDisplay}" TextColor="{DynamicResource AppTextMuted}"
+                                       FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
                             <Label Grid.Column="1" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
                             <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Pen}"
@@ -34,6 +40,28 @@
                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EditWarriorCommand}"
                                                           CommandParameter="{Binding .}"/>
                         </Grid>
+
+                        <!-- Stepper d'effectif pour un groupe d'Hommes de main uniquement (livre des règles :
+                             XP/équipement/compétences partagés, seul l'effectif varie individu par individu -
+                             voir Warrior.HeadCount) - descendre à 0 supprime la ligne (IncrementHeadCount/
+                             DecrementHeadCommand, WarbandDetailViewModel). -->
+                        <HorizontalStackLayout Spacing="6"
+                                                IsVisible="{Binding Warrior.IsHero, Converter={StaticResource InverseBoolConverter}}">
+                            <Label Text="{loc:Loc WarriorsGroupHenchmen}" FontSize="10" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Minus}"
+                                                          IconSize="11" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                                          IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=DecrementHeadCountCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                            <Label Text="{Binding HeadCount}" FontSize="12" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                          IconSize="11" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                                          IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=IncrementHeadCountCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                        </HorizontalStackLayout>
 
                         <!-- StatRowView partagé avec AnimalDetailDialog/WarriorArchetypeDetailDialog -
                              abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu

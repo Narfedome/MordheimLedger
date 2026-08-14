@@ -58,6 +58,23 @@ public partial class WarriorRow : ObservableObject
     /// buttons) - Dead is only ever reached via the End of Game wizard, see WarriorStatus.</summary>
     public bool IsDead => Warrior.Status == WarriorStatus.Dead;
 
+    /// <summary>"× 3" next to the name for a Henchman group with more than one living model - empty for
+    /// a Hero (always HeadCount 1) or a lone Henchman, see Warrior.HeadCount.</summary>
+    public string HeadCountDisplay => !Warrior.IsHero && Warrior.HeadCount > 1 ? $"× {Warrior.HeadCount}" : string.Empty;
+
+    /// <summary>Pass-through so the stepper's numeric Label can bind reactively - Warrior.HeadCount
+    /// itself is a plain int on a Core model (no INotifyPropertyChanged there), so a direct
+    /// {Binding Warrior.HeadCount} would never refresh after IncrementHeadCount/DecrementHeadCount.</summary>
+    public int HeadCount => Warrior.HeadCount;
+
+    /// <summary>Called by WarbandDetailViewModel.Increment/DecrementHeadCount right after mutating
+    /// Warrior.HeadCount directly, so the card's bound Labels refresh.</summary>
+    public void RefreshHeadCountDisplay()
+    {
+        OnPropertyChanged(nameof(HeadCountDisplay));
+        OnPropertyChanged(nameof(HeadCount));
+    }
+
     public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRule>? specialRules = null)
     {
         Warrior = warrior;

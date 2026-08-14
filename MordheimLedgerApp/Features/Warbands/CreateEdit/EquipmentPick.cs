@@ -27,7 +27,7 @@ public class EquipmentPick
     /// persisted (no equivalent column on WarriorEquipmentEntity): the actual treasury deduction only
     /// ever happens once, at purchase time in AddEquipment, so nothing downstream needs to remember it
     /// after that - this flag only exists so TotalSpent/RemainingTreasury keep computing correctly for
-    /// the rest of the wizard session while this pick sits in a WarriorRecruitRow/HenchmanGroup/
+    /// the rest of the wizard session while this pick sits in a WarriorRecruitRow/HenchmanGroupDraft/
     /// WarriorNameSlot's in-memory Equipment list.</summary>
     public bool IsFree { get; set; }
 

@@ -107,7 +107,7 @@
                        IsVisible="{Binding WarriorsError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>
 
-                    <!-- Achat par sous-groupe nommé pour les Hommes de main (HenchmanGroup, même équipement
+                    <!-- Achat par sous-groupe nommé pour les Hommes de main (HenchmanGroupDraft, même équipement
                          au sein d'un groupe - livre des règles), par individu pour les Héros (une section
                          par WarriorNameSlot, chacun peut différer). Command/CommandParameter des boutons
                          "+" et de ChipListView.RemoveCommand remontent jusqu'au ViewModel de la page via
@@ -122,14 +122,14 @@
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="local:WarriorRecruitRow">
                                     <VerticalStackLayout Spacing="8">
-                                        <!-- Hommes de main : un ou plusieurs HenchmanGroup nommés (livre des règles :
+                                        <!-- Hommes de main : un ou plusieurs HenchmanGroupDraft nommés (livre des règles :
                                              chaque groupe doit avoir un nom) - un seul par défaut couvrant tout le
                                              Count de la ligne, "Diviser" en détache un second si le joueur veut
-                                             équiper une partie du type différemment (voir HenchmanGroup). -->
+                                             équiper une partie du type différemment (voir HenchmanGroupDraft). -->
                                         <VerticalStackLayout Spacing="8" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}"
-                                                              BindableLayout.ItemsSource="{Binding HenchmanGroups}">
+                                                              BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}">
                                             <BindableLayout.ItemTemplate>
-                                                <DataTemplate x:DataType="local:HenchmanGroup">
+                                                <DataTemplate x:DataType="local:HenchmanGroupDraft">
                                                     <VerticalStackLayout Spacing="2">
                                                         <!-- Nom en lecture seule ici (édité à l'étape Noms) - juste de quoi distinguer
                                                              les groupes entre eux si le joueur en a divisé plusieurs. -->
@@ -145,7 +145,7 @@
                                                                                           Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
                                                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                                                           IsVisible="{Binding CanSplit}"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=SplitHenchmanGroupCommand}"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
                                                                                           CommandParameter="{Binding .}"/>
                                                             <components:FaIconButtonView Grid.Column="3" Style="{StaticResource GhostIconButtonStyle}"
                                                                                           Icon="{x:Static icons:SolidFont.Plus}"
@@ -172,67 +172,15 @@
                                                             </BindableLayout.ItemTemplate>
                                                         </FlexLayout>
                                                         <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
-                                                             (un état par groupe, SelectedSection), même composant TabToggleButton que
-                                                             WarriorEditDialog's Équipement/Compétences/Blessures. -->
-                                                        <VerticalStackLayout Spacing="6"
-                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}">
-                                                            <HorizontalStackLayout Spacing="14">
-                                                                <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
-                                                                                             IsActive="{Binding IsEquipmentSection}" Command="{Binding ShowEquipmentSectionCommand}"/>
-                                                                <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
-                                                                                             IsActive="{Binding IsSkillsSection}" Command="{Binding ShowSkillsSectionCommand}"/>
-                                                                <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
-                                                                                             IsActive="{Binding IsXpSection}" Command="{Binding ShowXpSectionCommand}"/>
-                                                            </HorizontalStackLayout>
-                                                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsEquipmentSection}">
-                                                                <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
-                                                                    <BindableLayout.ItemTemplate>
-                                                                        <DataTemplate x:DataType="local:EquipmentPick">
-                                                                            <components:ChipView Item="{Binding .}"
-                                                                                                  IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                                                  IconFontFamily="RpgAwesome"
-                                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
-                                                                                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
-                                                                        </DataTemplate>
-                                                                    </BindableLayout.ItemTemplate>
-                                                                </FlexLayout>
-                                                                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsSkillsSection}">
-                                                                <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
-                                                                    <BindableLayout.ItemTemplate>
-                                                                        <DataTemplate x:DataType="library:Skill">
-                                                                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                                                                <HorizontalStackLayout Spacing="4">
-                                                                                    <Label Text="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
-                                                                                           FontFamily="RpgAwesome" FontSize="12"
-                                                                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                                                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
-                                                                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"
-                                                                                                                  CommandParameter="{Binding .}"/>
-                                                                                </HorizontalStackLayout>
-                                                                            </Border>
-                                                                        </DataTemplate>
-                                                                    </BindableLayout.ItemTemplate>
-                                                                </FlexLayout>
-                                                                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsXpSection}">
-                                                                <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                                                                <Entry Grid.Column="1" Text="{Binding Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>
-                                                            </Grid>
-                                                        </VerticalStackLayout>
+                                                             (un état par groupe, SelectedSection), factorisés dans RecruitSlotTabsView
+                                                             (même bloc réutilisé côté Héros juste en dessous). -->
+                                                        <components:RecruitSlotTabsView Item="{Binding .}"
+                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}"
+                                                              AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                              RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
+                                                              ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                              AddSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
+                                                              RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -273,66 +221,15 @@
                                                             </BindableLayout.ItemTemplate>
                                                         </FlexLayout>
                                                         <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
-                                                             (un état par héros, SelectedSection). -->
-                                                        <VerticalStackLayout Spacing="6"
-                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}">
-                                                            <HorizontalStackLayout Spacing="14">
-                                                                <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
-                                                                                             IsActive="{Binding IsEquipmentSection}" Command="{Binding ShowEquipmentSectionCommand}"/>
-                                                                <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
-                                                                                             IsActive="{Binding IsSkillsSection}" Command="{Binding ShowSkillsSectionCommand}"/>
-                                                                <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
-                                                                                             IsActive="{Binding IsXpSection}" Command="{Binding ShowXpSectionCommand}"/>
-                                                            </HorizontalStackLayout>
-                                                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsEquipmentSection}">
-                                                                <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
-                                                                    <BindableLayout.ItemTemplate>
-                                                                        <DataTemplate x:DataType="local:EquipmentPick">
-                                                                            <components:ChipView Item="{Binding .}"
-                                                                                                  IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                                                  IconFontFamily="RpgAwesome"
-                                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
-                                                                                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
-                                                                        </DataTemplate>
-                                                                    </BindableLayout.ItemTemplate>
-                                                                </FlexLayout>
-                                                                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsSkillsSection}">
-                                                                <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
-                                                                    <BindableLayout.ItemTemplate>
-                                                                        <DataTemplate x:DataType="library:Skill">
-                                                                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                                                                <HorizontalStackLayout Spacing="4">
-                                                                                    <Label Text="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
-                                                                                           FontFamily="RpgAwesome" FontSize="12"
-                                                                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                                                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
-                                                                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"
-                                                                                                                  CommandParameter="{Binding .}"/>
-                                                                                </HorizontalStackLayout>
-                                                                            </Border>
-                                                                        </DataTemplate>
-                                                                    </BindableLayout.ItemTemplate>
-                                                                </FlexLayout>
-                                                                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsXpSection}">
-                                                                <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                                                                <Entry Grid.Column="1" Text="{Binding Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>
-                                                            </Grid>
-                                                        </VerticalStackLayout>
+                                                             (un état par héros, SelectedSection), même RecruitSlotTabsView que côté
+                                                             Hommes de main ci-dessus. -->
+                                                        <components:RecruitSlotTabsView Item="{Binding .}"
+                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}"
+                                                              AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                              RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
+                                                              ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                              AddSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
+                                                              RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -377,9 +274,9 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="local:WarriorRecruitRow">
                                         <VerticalStackLayout Spacing="8" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}"
-                                                              BindableLayout.ItemsSource="{Binding HenchmanGroups}">
+                                                              BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}">
                                             <BindableLayout.ItemTemplate>
-                                                <DataTemplate x:DataType="local:HenchmanGroup">
+                                                <DataTemplate x:DataType="local:HenchmanGroupDraft">
                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                                                         <Entry Grid.Column="0" Text="{Binding Name}" FontSize="13"/>
                                                         <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"

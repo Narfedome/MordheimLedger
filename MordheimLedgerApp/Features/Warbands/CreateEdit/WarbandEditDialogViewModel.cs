@@ -19,11 +19,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
     /// bande + choix de l'Archetype (ChipItemView, sélection unique obligatoire) ; Guerriers = un
     /// WarriorRecruitRow par type recrutable (WarriorRecruitListView : juste un compteur 0/MaxCount, pas
     /// de nom individuel ici) ; Équipement = achat par sous-groupe nommé pour les Hommes de main
-    /// (HenchmanGroup, même équipement au sein d'un groupe - livre des règles, SplitHenchmanGroup pour en
+    /// (HenchmanGroupDraft, même équipement au sein d'un groupe - livre des règles, SplitHenchmanGroupDraft pour en
     /// détacher un second) et par individu pour les Héros (WarriorNameSlot.Equipment, chacun peut
     /// différer) ; Noms = un champ par recrue Héros/groupe d'Hommes de main, une fois l'équipement connu -
     /// séparé de Guerriers/Équipement pour que le joueur nomme en connaissant déjà l'équipement de chacun
-    /// (PopulateSuggestedNames pré-remplit "{Archétype} ({1re arme non-dague})"). Tout est aplati en vrais
+    /// (PopulateSuggestedNames reprend l'étiquette déjà numérotée à l'étape Équipement, voir
+    /// WarriorNameSlot.ArchetypeLabel). Tout est aplati en vrais
     /// Warrior/WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
@@ -110,7 +111,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// main (coût × effectif de CE sous-groupe, pas de la ligne entière - deux sous-groupes du même
         /// type peuvent avoir des équipements différents) + équipement individuel (chaque slot Héros).</summary>
         private int TotalSpent => RecruitRows.Sum(r => r.Count * r.Cost)
-            + RecruitRows.SelectMany(r => r.HenchmanGroups).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count)
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count)
             + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
 
         /// <summary>En mode Bande existante, la trésorerie affichée reste fixée à ce que l'utilisateur a
@@ -127,7 +128,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Coché = on importe une bande déjà jouée sur papier plutôt qu'un recrutement neuf :
         /// trésorerie libre (TreasuryOverride), aucun contrôle budgétaire (recrutement/achats), et
         /// possibilité d'assigner des compétences déjà apprises pendant l'étape Équipement (voir
-        /// WarriorNameSlot.Skills/HenchmanGroup.Skills). Uniquement pertinent en IsWizardMode.</summary>
+        /// WarriorNameSlot.Skills/HenchmanGroupDraft.Skills). Uniquement pertinent en IsWizardMode.</summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RemainingTreasuryDisplay))]
         private bool isExistingWarband;
@@ -266,8 +267,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// la trésorerie restante ne le permet plus (IncrementCommand.CanIncrement reflète déjà ça sur
         /// le bouton, ce garde-fou couvre le cas où l'état a changé entre-temps). Héros : ajoute un slot
         /// de nom vide, à renseigner avant de pouvoir Enregistrer (voir ValidateWarriorsStep). Hommes de
-        /// main : grossit le dernier HenchmanGroup (ou en crée un premier, nommé d'après l'archétype) -
-        /// SplitHenchmanGroup est le seul moyen d'en avoir plusieurs.</summary>
+        /// main : grossit le dernier HenchmanGroupDraft (ou en crée un premier, nommé d'après l'archétype) -
+        /// SplitHenchmanGroupDraft est le seul moyen d'en avoir plusieurs.</summary>
         [RelayCommand]
         private void IncrementWarrior(WarriorRecruitRow row)
         {
@@ -282,8 +283,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 row.NameSlots.Add(new WarriorNameSlot(row));
                 RenumberHeroLabels(row);
             }
-            else if (row.HenchmanGroups.Count == 0) row.HenchmanGroups.Add(new HenchmanGroup(row, row.Archetype.Name, 1));
-            else row.HenchmanGroups[^1].Count++;
+            else if (row.HenchmanGroupDrafts.Count == 0) row.HenchmanGroupDrafts.Add(new HenchmanGroupDraft(row, row.Archetype.Name, 1));
+            else row.HenchmanGroupDrafts[^1].Count++;
             UpdateRecruitability();
         }
 
@@ -297,25 +298,25 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 row.NameSlots.RemoveAt(row.NameSlots.Count - 1);
                 RenumberHeroLabels(row);
             }
-            else if (!row.IsHero && row.HenchmanGroups.Count > 0)
+            else if (!row.IsHero && row.HenchmanGroupDrafts.Count > 0)
             {
-                var last = row.HenchmanGroups[^1];
+                var last = row.HenchmanGroupDrafts[^1];
                 last.Count--;
-                if (last.Count <= 0) row.HenchmanGroups.RemoveAt(row.HenchmanGroups.Count - 1);
+                if (last.Count <= 0) row.HenchmanGroupDrafts.RemoveAt(row.HenchmanGroupDrafts.Count - 1);
             }
             UpdateRecruitability();
         }
 
-        /// <summary>Détache un second HenchmanGroup du groupe tapé - le seul moyen d'obtenir des Hommes de
+        /// <summary>Détache un second HenchmanGroupDraft du groupe tapé - le seul moyen d'obtenir des Hommes de
         /// main du même type équipés différemment (livre des règles : "if your Henchman group has four
         /// warriors, and you want to buy them swords, you must buy four swords" - deux équipements
         /// différents pour le même type = deux groupes). Demande combien d'unités transférer vers le
         /// nouveau groupe (1..group.Count-1, il doit toujours en rester au moins une de chaque côté) - le
         /// nouveau groupe démarre sans équipement, et les deux groupes sont renumérotés "{Archétype} 1"/
-        /// "{Archétype} 2"... (RenumberHenchmanGroups) plutôt que de partager le même nom d'archétype brut,
+        /// "{Archétype} 2"... (RenumberHenchmanGroupDrafts) plutôt que de partager le même nom d'archétype brut,
         /// toujours personnalisable ensuite comme n'importe quel nom de groupe.</summary>
         [RelayCommand]
-        private async Task SplitHenchmanGroup(HenchmanGroup group)
+        private async Task SplitHenchmanGroupDraft(HenchmanGroupDraft group)
         {
             if (group.Count <= 1) return;
 
@@ -323,10 +324,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (!int.TryParse(input, out var moved) || moved <= 0 || moved >= group.Count) return;
 
             group.Count -= moved;
-            var newGroup = new HenchmanGroup(group.Row, group.Row.Archetype.Name, moved);
-            var index = group.Row.HenchmanGroups.IndexOf(group);
-            group.Row.HenchmanGroups.Insert(index + 1, newGroup);
-            RenumberHenchmanGroups(group.Row);
+            var newGroup = new HenchmanGroupDraft(group.Row, group.Row.Archetype.Name, moved);
+            var index = group.Row.HenchmanGroupDrafts.IndexOf(group);
+            group.Row.HenchmanGroupDrafts.Insert(index + 1, newGroup);
+            RenumberHenchmanGroupDrafts(group.Row);
         }
 
         /// <summary>Voir WarriorNameSlot.ArchetypeLabel - numérote "{Archétype} 1", "{Archétype} 2"...
@@ -341,11 +342,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Même idée que RenumberHeroLabels, mais sur le vrai champ Name (déjà affiché/éditable
         /// dès l'étape Équipement pour les Hommes de main, contrairement au Name des héros) - appelé après
         /// tout Split, seul moyen d'obtenir un second groupe.</summary>
-        private static void RenumberHenchmanGroups(WarriorRecruitRow row)
+        private static void RenumberHenchmanGroupDrafts(WarriorRecruitRow row)
         {
-            var multiple = row.HenchmanGroups.Count > 1;
-            for (var i = 0; i < row.HenchmanGroups.Count; i++)
-                row.HenchmanGroups[i].Name = multiple ? $"{row.Archetype.Name} {i + 1}" : row.Archetype.Name;
+            var multiple = row.HenchmanGroupDrafts.Count > 1;
+            for (var i = 0; i < row.HenchmanGroupDrafts.Count; i++)
+                row.HenchmanGroupDrafts[i].Name = multiple ? $"{row.Archetype.Name} {i + 1}" : row.Archetype.Name;
         }
 
         /// <summary>Recalcule les affichages récap (effectif/trésorerie) et CanIncrement de chaque ligne -
@@ -367,7 +368,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
-        /// <summary>Achat d'équipement pour une cible : un HenchmanGroup (un seul achat, appliqué à tout le
+        /// <summary>Achat d'équipement pour une cible : un HenchmanGroupDraft (un seul achat, appliqué à tout le
         /// sous-groupe) ou un WarriorNameSlot (Héros - propre à cette recrue). Même logique que
         /// WarriorEditDialogViewModel.AddEquipment (picker filtré par EquipmentListId/WarriorArchetypeId,
         /// choix de matériau pour les armes de corps à corps via un seul MaterialPickerDialog paginé
@@ -387,7 +388,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     destination = slot.Equipment;
                     perUnitCost = 1;
                     break;
-                case HenchmanGroup group:
+                case HenchmanGroupDraft group:
                     row = group.Row;
                     destination = group.Equipment;
                     perUnitCost = group.Count;
@@ -469,7 +470,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 var warriorLabel = target switch
                 {
                     WarriorNameSlot { Name.Length: > 0 } nameSlot => nameSlot.Name,
-                    HenchmanGroup group => group.Name,
+                    HenchmanGroupDraft group => group.Name,
                     _ => row.Name
                 };
                 await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], warriorLabel));
@@ -504,14 +505,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un
-        /// HenchmanGroup ou d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
+        /// HenchmanGroupDraft ou d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
         /// laquelle puisque chaque instance n'est ajoutée qu'à une seule collection.</summary>
         [RelayCommand]
         private void RemoveEquipment(EquipmentPick pick)
         {
             foreach (var row in RecruitRows)
             {
-                foreach (var group in row.HenchmanGroups)
+                foreach (var group in row.HenchmanGroupDrafts)
                 {
                     if (group.Equipment.Remove(pick))
                     {
@@ -531,8 +532,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         /// <summary>Mode Bande existante uniquement - assigne une ou plusieurs compétences déjà apprises à
-        /// un HenchmanGroup ou un WarriorNameSlot, en mémoire jusqu'au Save (voir WarriorNameSlot.Skills/
-        /// HenchmanGroup.Skills). Même cible que AddEquipment.</summary>
+        /// un HenchmanGroupDraft ou un WarriorNameSlot, en mémoire jusqu'au Save (voir WarriorNameSlot.Skills/
+        /// HenchmanGroupDraft.Skills). Même cible que AddEquipment.</summary>
         [RelayCommand]
         private async Task AddSkill(object target)
         {
@@ -544,7 +545,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     row = slot.Row;
                     destination = slot.Skills;
                     break;
-                case HenchmanGroup group:
+                case HenchmanGroupDraft group:
                     row = group.Row;
                     destination = group.Skills;
                     break;
@@ -565,7 +566,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         {
             foreach (var row in RecruitRows)
             {
-                foreach (var group in row.HenchmanGroups)
+                foreach (var group in row.HenchmanGroupDrafts)
                 {
                     if (group.Skills.Remove(skill)) return;
                 }
@@ -629,7 +630,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
             foreach (var row in RecruitRows.Where(r => !r.IsHero))
             {
-                if (row.HenchmanGroups.Any(group => string.IsNullOrWhiteSpace(group.Name)))
+                if (row.HenchmanGroupDrafts.Any(group => string.IsNullOrWhiteSpace(group.Name)))
                 {
                     NamesError = string.Format(Loc["WarbandsWarriorNameRequired"], row.Name);
                     return false;
@@ -644,7 +645,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// affichée à l'étape Équipement (WarriorNameSlot.ArchetypeLabel, tenue à jour par
         /// RenumberHeroLabels) - ne touche jamais un nom déjà personnalisé par le joueur (non vide). Les
         /// groupes d'Hommes de main n'ont rien à faire ici : leur Name est déjà tenu à jour en direct par
-        /// RenumberHenchmanGroups, dès l'étape Équipement.</summary>
+        /// RenumberHenchmanGroupDrafts, dès l'étape Équipement.</summary>
         private void PopulateSuggestedNames()
         {
             foreach (var row in RecruitRows.Where(r => r.IsHero && r.Count > 0))
@@ -745,20 +746,20 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     }
                     else
                     {
-                        foreach (var group in row.HenchmanGroups)
+                        // Un seul Warrior par groupe (HeadCount = l'effectif) plutôt qu'une ligne par
+                        // individu - le groupe est mécaniquement une seule entité (livre des règles :
+                        // XP/équipement/compétences partagés par tout le groupe), voir Warrior.HeadCount.
+                        foreach (var group in row.HenchmanGroupDrafts)
                         {
-                            for (var i = 0; i < group.Count; i++)
+                            var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim(), headCount: group.Count);
+                            foreach (var pick in group.Equipment)
+                                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                            foreach (var skill in group.Skills)
+                                await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                            if (IsExistingWarband && group.Experience != warrior.Experience)
                             {
-                                var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim());
-                                foreach (var pick in group.Equipment)
-                                    await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
-                                foreach (var skill in group.Skills)
-                                    await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
-                                if (IsExistingWarband && group.Experience != warrior.Experience)
-                                {
-                                    warrior.Experience = group.Experience;
-                                    await _warbandService.SaveWarriorAsync(warrior);
-                                }
+                                warrior.Experience = group.Experience;
+                                await _warbandService.SaveWarriorAsync(warrior);
                             }
                         }
                     }

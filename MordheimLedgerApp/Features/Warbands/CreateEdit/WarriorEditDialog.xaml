@@ -5,7 +5,6 @@
                xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
-               xmlns:stepper="clr-namespace:MordheimLedgerApp.Components.StatStepper"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
@@ -28,29 +27,21 @@
                                               Command="{Binding DeleteCommand}"/>
             </Grid>
 
-            <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc PromptName}"/>
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Loc PromptName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding Item.Name}"/>
+            </VerticalStackLayout>
             <VerticalStackLayout Spacing="2">
                 <Label Text="{loc:Loc WarriorExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Entry Text="{Binding Item.Experience}" Keyboard="Numeric"/>
             </VerticalStackLayout>
 
-            <!-- Abréviations officielles du livre de règles, pas de traduction - même grille que
-                 WarriorArchetypeEditDialog (étape profil). Steppers +/- (StatStepperView) : les
-                 avances (jets d'Advance) se font quasi toujours de ±1. -->
-            <Grid ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
-                <stepper:StatStepperView Grid.Row="0" Grid.Column="0" Label="M" Value="{Binding Item.Movement}"/>
-                <stepper:StatStepperView Grid.Row="0" Grid.Column="1" Label="WS" Value="{Binding Item.WeaponSkill}"/>
-                <stepper:StatStepperView Grid.Row="0" Grid.Column="2" Label="BS" Value="{Binding Item.BallisticSkill}"/>
-                <stepper:StatStepperView Grid.Row="1" Grid.Column="0" Label="S" Value="{Binding Item.Strength}"/>
-                <stepper:StatStepperView Grid.Row="1" Grid.Column="1" Label="T" Value="{Binding Item.Toughness}"/>
-                <stepper:StatStepperView Grid.Row="1" Grid.Column="2" Label="W" Value="{Binding Item.Wounds}"/>
-                <stepper:StatStepperView Grid.Row="2" Grid.Column="0" Label="I" Value="{Binding Item.Initiative}"/>
-                <stepper:StatStepperView Grid.Row="2" Grid.Column="1" Label="A" Value="{Binding Item.Attacks}"/>
-                <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
-            </Grid>
+            <!-- Abréviations officielles du livre de règles, pas de traduction - StatRowView en mode
+                 édition, même composant que WarriorArchetypeEditDialog (onglet Profil). -->
+            <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}" IsEditable="True"/>
 
             <!-- Surcharge texte optionnelle du Mouvement (ex. "2D6" pour les Squigs des cavernes) -
-                 prioritaire sur le stepper M ci-dessus partout où le Mouvement est affiché, copiée
+                 prioritaire sur la valeur M ci-dessus partout où le Mouvement est affiché, copiée
                  depuis l'archétype au recrutement (voir WarriorArchetype.MovementOverride). -->
             <VerticalStackLayout Spacing="2">
                 <Label Text="{loc:Loc WarriorArchetypeMovementOverridePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>

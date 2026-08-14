@@ -276,7 +276,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
         var newItem = new WarriorArchetype();
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"],
-            _specialRulePicker, EquipmentLists.ToList());
+            _specialRulePicker, EquipmentLists.ToList(), _libraryService);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         Warriors.Add(newItem);
@@ -323,7 +323,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],
-            _specialRulePicker, EquipmentLists.ToList());
+            _specialRulePicker, EquipmentLists.ToList(), _libraryService);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         var index = Warriors.IndexOf(warrior);

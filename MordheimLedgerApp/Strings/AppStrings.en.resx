@@ -471,20 +471,11 @@
   <data name="WarbandArchetypeTabRules" xml:space="preserve">
     <value>Rules</value>
   </data>
-  <data name="SpecialRuleTabMaterials" xml:space="preserve">
-    <value>Materials</value>
-  </data>
-  <data name="SpecialRuleIsMaterialRule" xml:space="preserve">
-    <value>Material rule (cost multiplier)</value>
-  </data>
   <data name="WarbandArchetypeTabMagic" xml:space="preserve">
     <value>Magic</value>
   </data>
   <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
     <value>Warriors</value>
-  </data>
-  <data name="WarbandArchetypeAddWarriorLabel" xml:space="preserve">
-    <value>Add warrior</value>
   </data>
   <data name="WarbandCreateTabEquipment" xml:space="preserve">
     <value>Equipment</value>
@@ -508,10 +499,10 @@
     <value>Hero</value>
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
-    <value>Mutant/Possessed (may buy mutations)</value>
+    <value>Mutant/Possessed</value>
   </data>
   <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
-    <value>Large creature (flat 20 pts in the Warband Rating)</value>
+    <value>Large creature</value>
   </data>
   <data name="WarriorArchetypeCanUseEquipment" xml:space="preserve">
     <value>Can carry equipment</value>
@@ -1184,5 +1175,20 @@
   </data>
   <data name="WarbandCreateTitle" xml:space="preserve">
     <value>New warband</value>
+  </data>
+  <data name="WarbandArchetypeAddWarriorLabel" xml:space="preserve">
+    <value>Add warrior</value>
+  </data>
+  <data name="SpecialRuleTabMaterials" xml:space="preserve">
+    <value>Materials</value>
+  </data>
+  <data name="SpecialRuleIsMaterialRule" xml:space="preserve">
+    <value>Material rule (cost multiplier)</value>
+  </data>
+  <data name="WarriorArchetypeIsChief" xml:space="preserve">
+    <value>Leader</value>
+  </data>
+  <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
+    <value>Never Gains Experience</value>
   </data>
 </root>

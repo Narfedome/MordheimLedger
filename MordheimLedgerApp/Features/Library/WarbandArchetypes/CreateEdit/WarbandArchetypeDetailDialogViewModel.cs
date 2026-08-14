@@ -20,11 +20,13 @@ namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 /// d'aucun appel service (tout vient de l'Item déjà chargé sur la tuile). Chaque onglet ne charge
 /// qu'une fois (_warriorsLoaded/_equipmentListsLoaded), pas à chaque re-sélection.
 ///
-/// Les deux onglets n'affichent que des chips Nom (voir ChipListView) - Warriors/EquipmentLists ne
-/// chargent donc que Id+Name (GetWarriorArchetypeNamesAsync/GetEquipmentListNamesAsync), pas les
-/// WarriorArchetype/EquipmentList complets (SpecialRules, ItemIds...) que personne ne regarde tant que
-/// le chip n'est pas tapé. Le détail complet n'est fetché qu'à la demande, un seul élément à la fois,
-/// dans ShowWarriorDetail/ShowEquipmentListDetail.</summary>
+/// L'onglet Équipement n'affiche que des chips Nom (voir ChipListView) - EquipmentLists ne charge donc
+/// que Id+Name (GetEquipmentListNamesAsync), pas les EquipmentList complètes (ItemIds...) que personne
+/// ne regarde tant que le chip n'est pas tapé, le détail complet n'étant fetché qu'à la demande dans
+/// ShowEquipmentListDetail. L'onglet Guerriers charge en revanche les WarriorArchetype complets (comme
+/// WarbandArchetypeEditDialogViewModel.EnsureWarriorsLoadedAsync) - nécessaire pour IsHero (regroupement
+/// Héros/Hommes de main, voir WarriorRoleChipListView), et ça évite un aller-retour supplémentaire au
+/// tap d'un chip puisque ShowWarriorDetail a déjà l'objet complet sous la main.</summary>
 public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewModel
 {
     public WarbandArchetype Item { get; }
@@ -33,7 +35,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     public string MinWarriorsDisplay { get; }
 
     [ObservableProperty]
-    private List<NamedRef> warriors = new();
+    private List<WarriorArchetype> warriors = new();
 
     [ObservableProperty]
     private List<NamedRef> equipmentLists = new();
@@ -106,7 +108,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
             // temps (sensation de freeze signalée par l'utilisateur, indicateur qui n'apparaît pas au
             // bon moment).
             var language = LocalizationService.Instance.Language;
-            Warriors = await Task.Run(() => _libraryService.GetWarriorArchetypeNamesAsync(Item.Id, language));
+            Warriors = await Task.Run(() => _libraryService.GetWarriorArchetypesAsync(Item.Id, language));
             _warriorsLoaded = true;
         });
     }
@@ -134,20 +136,13 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     }
 
     [RelayCommand]
-    private async Task ShowWarriorDetail(NamedRef warrior)
+    private async Task ShowWarriorDetail(WarriorArchetype warrior)
     {
-        var language = LocalizationService.Instance.Language;
-        WarriorArchetype? fullWarrior = null;
-        await Loading.RunAsync(async () =>
-        {
-            // EquipmentListDisplay a besoin des listes de la bande pour résoudre le nom - garanti chargé
-            // même si l'utilisateur n'est jamais passé par l'onglet Équipement.
-            await EnsureEquipmentListsLoadedAsync();
-            fullWarrior = await Task.Run(() => _libraryService.GetWarriorArchetypeAsync(warrior.Id, language));
-        });
-        if (fullWarrior is null) return;
-
-        await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(fullWarrior, EquipmentLists)));
+        // Déjà l'objet complet (Warriors charge des WarriorArchetype entiers, pas juste Id+Name) - pas
+        // besoin de le refetcher. EquipmentListDisplay a besoin des listes de la bande pour résoudre le
+        // nom - garanti chargé même si l'utilisateur n'est jamais passé par l'onglet Équipement.
+        await EnsureEquipmentListsLoadedAsync();
+        await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(warrior, EquipmentLists)));
     }
 
     [RelayCommand]

@@ -10,14 +10,16 @@
              x:Name="root">
 
     <VerticalStackLayout Spacing="6" BindingContext="{x:Reference root}">
-        <HorizontalStackLayout Spacing="14">
-            <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
-                                         IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
-            <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
-                                         IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"/>
-            <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
-                                         IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"/>
-        </HorizontalStackLayout>
+        <components:ScrollableTabStripView>
+            <HorizontalStackLayout Spacing="14">
+                <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
+                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
+                <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
+                                             IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"/>
+                <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
+                                             IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"/>
+            </HorizontalStackLayout>
+        </components:ScrollableTabStripView>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsEquipmentSection}">
             <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Equipment}">
                 <BindableLayout.ItemTemplate>

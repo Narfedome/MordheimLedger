@@ -21,12 +21,14 @@
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
 
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
-                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}"
-                                             IsActive="{Binding IsSpellsTab}" FontSize="12"/>
-            </HorizontalStackLayout>
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}"
+                                                 IsActive="{Binding IsSpellsTab}" FontSize="12"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
                 <VerticalStackLayout Spacing="4">

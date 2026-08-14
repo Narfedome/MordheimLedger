@@ -30,21 +30,24 @@
             <!-- Onglets Règles/Magie masqués si la bande n'a rien à y montrer (voir HasSpecialRules/
                  HasMagicSchools) - contrairement à WarbandArchetypeEditDialog où ils restent toujours
                  visibles. Même TabToggleButton que WarriorEditDialog
-                 (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). -->
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
-                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
-                                             IsActive="{Binding IsRulesTab}" FontSize="12"
-                                             IsVisible="{Binding HasSpecialRules}"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
-                                             IsActive="{Binding IsMagicTab}" FontSize="12"
-                                             IsVisible="{Binding HasMagicSchools}"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
-                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
-                                             IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
-            </HorizontalStackLayout>
+                 (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). ScrollableTabStripView : jusqu'à
+                 5 onglets dans ce dialog large de 340px. -->
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                                 IsActive="{Binding IsRulesTab}" FontSize="12"
+                                                 IsVisible="{Binding HasSpecialRules}"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
+                                                 IsActive="{Binding IsMagicTab}" FontSize="12"
+                                                 IsVisible="{Binding HasMagicSchools}"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
+                                                 IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
+                                                 IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
                 <VerticalStackLayout Spacing="4">
@@ -101,9 +104,9 @@
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
-                <components:ChipListView ItemsSource="{Binding Warriors}"
-                                          HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
-                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
+                <!-- Regroupé en deux sections Héros/Hommes de main - lecture seule, pas d'AddCommand
+                     (le bouton "+" de WarriorRoleChipListView se masque de lui-même). -->
+                <components:WarriorRoleChipListView ItemsSource="{Binding Warriors}"
                                           Command="{Binding ShowWarriorDetailCommand}"/>
             </VerticalStackLayout>
         </VerticalStackLayout>

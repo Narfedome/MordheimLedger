@@ -243,12 +243,14 @@
              Recruter vit ici (pas en bas de page, isolé) car il n'a de sens que sur l'onglet Roster -
              même logique que "Ajouter une note" ci-dessous, contextuel à l'onglet Historique. -->
         <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="16,0,16,8">
-            <HorizontalStackLayout Grid.Column="0" Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
-                                             IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
-                <components:TabToggleButton Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
-                                             IsActive="{Binding ShowHistory}"/>
-            </HorizontalStackLayout>
+            <components:ScrollableTabStripView Grid.Column="0">
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
+                                                 IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
+                    <components:TabToggleButton Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
+                                                 IsActive="{Binding ShowHistory}"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
             <components:IconTextButton Grid.Column="1"
                                         IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"
                                         Icon="{x:Static icons:SolidFont.Plus}"

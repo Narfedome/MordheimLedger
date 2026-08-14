@@ -7,9 +7,10 @@
              x:Class="MordheimLedgerApp.Components.WarriorRoleChipListView"
              x:Name="root">
 
-    <VerticalStackLayout Spacing="12" BindingContext="{x:Reference root}">
+    <VerticalStackLayout Spacing="4" BindingContext="{x:Reference root}">
         <Grid ColumnDefinitions="*,Auto">
-            <Label Text="{loc:Loc WarbandArchetypeAddWarriorLabel}" Grid.Column="0"  VerticalOptions="Center"/>
+            <Label Text="{loc:Loc WarbandArchetypeAddWarriorLabel}" Grid.Column="0"  VerticalOptions="Center"
+                                          IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"/>
             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                           Icon="{x:Static icons:SolidFont.Plus}"
                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"

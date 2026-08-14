@@ -78,25 +78,28 @@
 
             <!-- Onglets Équipement/Compétences/Blessures - même pattern toggle (pas de vrai TabbedPage)
                  que Roster/Historique sur WarbandDetailPage : la carte guerrier reste lecture seule pour
-                 ces trois listes, tout se gère ici. -->
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
-                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
-                                             IsActive="{Binding IsSkillsTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
-                                             IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
-                <!-- Onglet Sorts : visible seulement si l'archétype de ce guerrier est un lanceur de
-                     sorts (WarriorArchetype.IsSpellcaster) - inutile pour un Homme de main lambda. -->
-                <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
-                                             IsActive="{Binding IsSpellsTab}" FontSize="12"
-                                             IsVisible="{Binding IsSpellcaster}"/>
-                <!-- Onglet Mutations : visible seulement si l'archétype de ce guerrier a
-                     WarriorArchetype.CanBuyMutations (Mutants/Possédés). -->
-                <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" Command="{Binding ShowMutationsTabCommand}"
-                                             IsActive="{Binding IsMutationsTab}" FontSize="12"
-                                             IsVisible="{Binding IsMutant}"/>
-            </HorizontalStackLayout>
+                 ces trois listes, tout se gère ici. ScrollableTabStripView : jusqu'à 5 onglets dans ce
+                 dialog large de 340px. -->
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
+                                                 IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
+                                                 IsActive="{Binding IsSkillsTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
+                                                 IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
+                    <!-- Onglet Sorts : visible seulement si l'archétype de ce guerrier est un lanceur de
+                         sorts (WarriorArchetype.IsSpellcaster) - inutile pour un Homme de main lambda. -->
+                    <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
+                                                 IsActive="{Binding IsSpellsTab}" FontSize="12"
+                                                 IsVisible="{Binding IsSpellcaster}"/>
+                    <!-- Onglet Mutations : visible seulement si l'archétype de ce guerrier a
+                         WarriorArchetype.CanBuyMutations (Mutants/Possédés). -->
+                    <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" Command="{Binding ShowMutationsTabCommand}"
+                                                 IsActive="{Binding IsMutationsTab}" FontSize="12"
+                                                 IsVisible="{Binding IsMutant}"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
                 <Grid ColumnDefinitions="*,Auto">

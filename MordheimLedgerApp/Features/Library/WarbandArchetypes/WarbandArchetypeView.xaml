@@ -78,7 +78,7 @@
                             <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
                                 <components:LibraryItemImageView
                                 ImagePath="{Binding Item.ImagePath}"
-                                DefaultGlyph="{x:Static icons:SolidFont.Shield}"
+                                DefaultGlyph="{x:Static icons:SolidFont.Users}"
                                 WidthRequest="{OnIdiom Default=50, Desktop=70}" HeightRequest="{OnIdiom Default=50, Desktop=70}"
                                 HorizontalOptions="Center" />
                                 <Label Text="{Binding Item.Name}"

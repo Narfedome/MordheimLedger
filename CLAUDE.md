@@ -63,6 +63,38 @@ icône via `Components/FaIconButton/FaIconButtonView` (`GhostIconButtonStyle` = 
 style implicite = fond accent plein) et `Components/IconTextButton/IconTextButton` (icône + texte
 en une seule zone tappable), portés tels quels depuis DmTools.
 
+**Passe cohérence icônes (2026-08-15)** : audit de toutes les icônes de l'app (`SolidFont`/`RpgFont`)
+demandé par l'utilisateur, qui a repéré des glyphes utilisés dans le mauvais contexte. Règle
+dégagée : **un glyphe = un concept dans toute l'app**, jamais deux sens différents pour le même
+glyphe même dans des écrans éloignés. Mordheim se déroule dans le Vieux Monde (Warhammer Fantasy,
+pas 40k) : proscrire tout glyphe RPG Awesome à connotation moderne/militaire (ex. `RaAmmoBag`,
+écarté au profit de `RaArrowCluster` pour la catégorie Munitions - repéré visuellement comme "sacoche
+de chargeur" plutôt que carquois).
+- `EquipmentCategoryIconConverter` (puces objet) et `EquipmentItemRow.CategoryIcon`/`CategoryIconFont`
+  (tuiles Place du Marché) utilisaient deux mappings différents pour le même `EquipmentCategory` -
+  désormais alignés : Armure = `RaVest`, Munitions = `RaArrowCluster`, Divers = `RaPotion`.
+- `SolidFont.Shield` n'est plus utilisé nulle part : remplacé par `SolidFont.Users` partout où il
+  servait à autre chose que "Bandes" à proprement parler (chips "réservé à ces bandes" dans les
+  dialogs Équipement/Animal/Mutation/Compétence, chip "listes d'équipement" et tuile par défaut de
+  `WarbandArchetypeView`) - `Users` couvre maintenant tout ce qui touche à la notion de bande.
+- Domaine magie : `RaBurningBook` = Sorts uniquement (chips + tuile par défaut de `SpellView`) ;
+  `RaCrystalBall` = École de magie (tuile `MagicSchoolView` + chip dans `WarbandArchetypeEditDialog`/
+  `DetailDialog`, y compris le bouton "gérer les écoles de magie" en en-tête de `SpellView` - son
+  action cible les écoles, pas les sorts). `RaBook` réservé à la catégorie de compétence Érudition ;
+  l'onglet Codex garde `SolidFont.BookOpen` (testé avec `RaBook` puis revert, pas de double emploi).
+- `SkillCategoryIconConverter` (Combat/Tir/Érudition/Force/Vitesse/Spécial) n'était câblé que sur les
+  puces (fiche guerrier, dialogs de recrutement) - la grille de tuiles Compétences du Codex
+  (`SkillView.xaml`) affichait un glyphe `Brain` fixe pour toutes les catégories. Corrigé pour utiliser
+  le même converter partout ; `SolidFont.Brain` n'est plus utilisé.
+- **Bug de fond trouvé en cours de route** : `Components/LibraryItemImage/LibraryItemImageView`
+  (icône par défaut des tuiles Codex quand pas d'image) rendait son glyphe via `<Image><FontImageSource>`
+  plutôt qu'un `<Label>`. `FontImageSource` rastérise le glyphe dans un bitmap **carré** de taille fixe
+  et rogne l'encre qui dépasse ce carré - invisible pour les glyphes compacts, visible pour ceux dont
+  l'empreinte est naturellement plus large qu'haute (`RaFootprint`, `RaMuscleUp` repérés coupés à
+  l'écran). Remplacé par un `<Label>` (même mécanisme que les icônes de puce ailleurs dans l'app, qui
+  n'ont jamais eu ce problème) - corrige les 10 usages de `LibraryItemImageView` d'un coup, pas
+  seulement Compétences.
+
 **Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
 d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
 système de favoris à 2 groupes "Favoris"/"My Warbands", finalement abandonné le même jour : pas assez

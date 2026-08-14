@@ -17,11 +17,11 @@ namespace MordheimLedgerApp.Converters
                 EquipmentCategory.MeleeWeapon => RpgFont.RaSword,
                 EquipmentCategory.MissileWeapon => RpgFont.RaCrossbow,
                 EquipmentCategory.BlackPowderWeapon => RpgFont.RaMusket,
-                EquipmentCategory.Ammunition => RpgFont.RaAmmoBag,
-                EquipmentCategory.Armour => RpgFont.RaShield,
-                EquipmentCategory.MiscellaneousEquipment => RpgFont.RaAnvil,
-                _ => RpgFont.RaAnvil
-            } : RpgFont.RaAnvil;
+                EquipmentCategory.Ammunition => RpgFont.RaArrowCluster,
+                EquipmentCategory.Armour => RpgFont.RaVest,
+                EquipmentCategory.MiscellaneousEquipment => RpgFont.RaPotion,
+                _ => RpgFont.RaPotion
+            } : RpgFont.RaPotion;
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
             => throw new NotImplementedException();

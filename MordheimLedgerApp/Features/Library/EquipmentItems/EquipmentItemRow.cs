@@ -73,8 +73,8 @@ public partial class EquipmentItemRow : ObservableObject
     }
 
     /// <summary>Icône de tuile par Category plutôt qu'un unique glyphe "Coins" pour tout le catalogue
-    /// (pas pertinent pour une arme/armure) - un seul glyphe générique "Box" pour Divers, catégorie trop
-    /// hétérogène (livres, potions, reliques...) pour un glyphe dédié.</summary>
+    /// (pas pertinent pour une arme/armure) - même mapping que EquipmentCategoryIconConverter (puces
+    /// objet ailleurs dans l'app), à garder synchronisé.</summary>
     public string CategoryIcon => Item.Category switch
     {
         EquipmentCategory.MeleeWeapon => RpgFont.RaSword,
@@ -82,10 +82,10 @@ public partial class EquipmentItemRow : ObservableObject
         EquipmentCategory.BlackPowderWeapon => RpgFont.RaMusket,
         EquipmentCategory.Ammunition => RpgFont.RaArrowCluster,
         EquipmentCategory.Armour => RpgFont.RaVest,
-        _ => RpgFont.RaBook
+        _ => RpgFont.RaPotion
     };
 
-    public string CategoryIconFont => Item.Category == EquipmentCategory.MiscellaneousEquipment ? "FontSolid" : "RpgAwesome";
+    public string CategoryIconFont => "RpgAwesome";
 
     public EquipmentItemRow(EquipmentItem item, bool isFreeForThisPurchase = false)
     {

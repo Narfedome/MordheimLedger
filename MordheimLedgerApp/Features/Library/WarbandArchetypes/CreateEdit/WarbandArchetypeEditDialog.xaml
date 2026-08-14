@@ -124,7 +124,7 @@
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                         <components:ChipListView ItemsSource="{Binding EquipmentLists}"
                                           HeaderText="{loc:Loc WarbandArchetypeTabEquipment}"
-                                          IconGlyph="{x:Static icons:SolidFont.ListCheck}"
+                                          IconGlyph="{x:Static icons:SolidFont.Users}"
                                           Command="{Binding EditEquipmentListCommand}"
                                           AddCommand="{Binding AddEquipmentListCommand}"
                                           RemoveCommand="{Binding RemoveEquipmentListCommand}"/>

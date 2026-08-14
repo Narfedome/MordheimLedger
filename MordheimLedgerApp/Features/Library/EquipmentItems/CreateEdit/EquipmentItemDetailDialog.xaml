@@ -48,7 +48,7 @@
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                       AlwaysShowSection="True"
                                       ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                      IconGlyph="{x:Static icons:SolidFont.Users}"
                                       Command="{Binding ShowWarbandDetailCommand}"/>
 
             <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarriorsPh}"

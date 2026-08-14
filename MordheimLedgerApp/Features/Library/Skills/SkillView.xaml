@@ -67,7 +67,8 @@
                             <VerticalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
                                 <components:LibraryItemImageView
                                ImagePath="{Binding Item.ImagePath}"
-                               DefaultGlyph="{x:Static icons:SolidFont.Brain}"
+                               DefaultGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                               FontFamily="RpgAwesome"
                                WidthRequest="26" HeightRequest="26"
                                HorizontalOptions="Center" />
                                 <Label Text="{Binding Item.Name}"

@@ -49,7 +49,7 @@
                  temps liste vide - un seul texte selon l'état. -->
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                       ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                      IconGlyph="{x:Static icons:SolidFont.Users}"
                                       AddCommand="{Binding AddRestrictionCommand}"
                                       RemoveCommand="{Binding RemoveRestrictionCommand}"/>
 

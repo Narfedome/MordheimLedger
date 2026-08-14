@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
+             xmlns:services="clr-namespace:MordheimLedgerApp.Services"
+             x:Class="MordheimLedgerApp.Components.PickerSelectorLayout.PickerSelectorLayout"
+             x:Name="root">
+    <ContentView.ControlTemplate>
+        <ControlTemplate>
+            <!-- HorizontalOptions/VerticalOptions="Fill" explicites - même raison que WatermarkedLayout :
+                 sans eux, le Grid peut se dimensionner sur le contenu mesuré plutôt que l'espace
+                 disponible sur WinUI. -->
+            <Grid RowDefinitions="Auto,*" HorizontalOptions="Fill" VerticalOptions="Fill">
+                <header:DetailPageHeaderView Grid.Row="0"
+                                              Title="{Binding Source={x:Reference root}, Path=Title}"
+                                              BackCommand="{Binding Source={x:Reference root}, Path=BackCommand}"/>
+                <Grid Grid.Row="1">
+                    <Image Source="{Binding WatermarkImageSource, Source={x:Static services:ThemeService.Instance}}"
+                           Opacity="0.35"
+                           WidthRequest="200" HeightRequest="200"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           InputTransparent="True" />
+                    <ContentPresenter />
+                </Grid>
+            </Grid>
+        </ControlTemplate>
+    </ContentView.ControlTemplate>
+</ContentView>

@@ -9,6 +9,7 @@
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:BoolToChevronConverter x:Key="BoolToChevronConverter" />
+            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
             <converters:EquipmentCategoryIconConverter x:Key="EquipmentCategoryIconConverter" />
             <converters:SkillCategoryIconConverter x:Key="SkillCategoryIconConverter" />
             <ResourceDictionary.MergedDictionaries>

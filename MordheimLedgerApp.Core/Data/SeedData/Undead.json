@@ -1,4 +1,6 @@
 {
+  "grade": "Core",
+  "imagePath": "the_undead.jpg",
   "name": {
     "en": "Undead",
     "fr": "Morts-vivants"
@@ -7,7 +9,6 @@
     "en": "Vampire-led legions of the walking dead, harvesting wyrdstone for their immortal masters in the ruins of Mordheim.",
     "fr": "Des légions de morts-vivants menées par un vampire, récoltant la pierre magique pour leur maître immortel dans les ruines de Mordheim."
   },
-  "grade": "Core",
   "specialRules": [],
   "magicSchools": [
     {
@@ -19,6 +20,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -28,6 +30,7 @@
       "isHero": true,
       "cost": 110,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 6,
       "weaponSkill": 4,
@@ -169,6 +172,7 @@
       "initiative": 1,
       "attacks": 1,
       "leadership": 5,
+      "canUseEquipment": false,
       "description": {
         "en": "Zombies are the most common Undead, animated by the will of a Necromancer.",
         "fr": "Les zombies sont les morts-vivants les plus répandus, animés par la volonté d'un nécromancien."
@@ -244,6 +248,7 @@
       "initiative": 3,
       "attacks": 2,
       "leadership": 5,
+      "canUseEquipment": false,
       "description": {
         "en": "Ghouls are the descendants of evil and insane men who ate the flesh of the dead to survive the famine.",
         "fr": "Les goules sont les descendantes dégénérées d'hommes qui mangèrent les morts pour survivre à la famine."
@@ -281,6 +286,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 4,
+      "canUseEquipment": false,
       "description": {
         "en": "Dire Wolves are slavering Undead hounds, the animated remains of giant wolves from the Edge of the World Mountains.",
         "fr": "Les loups funestes sont des cadavres animés de loups géants originaires des Montagnes du Bord du Monde, les chiens de guerre des morts-vivants."

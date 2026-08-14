@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.WarriorRoleChipListView"
+             x:Name="root">
+
+    <VerticalStackLayout Spacing="4" BindingContext="{x:Reference root}">
+        <Grid ColumnDefinitions="*,Auto">
+            <Label Text="{loc:Loc WarbandArchetypeAddWarriorLabel}" Grid.Column="0"  VerticalOptions="Center"
+                                          IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"/>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
+                                          Command="{Binding AddCommand}"/>
+        </Grid>
+        <components:ChipListView ItemsSource="{Binding HeroesItems}"
+                                  HeaderText="{loc:Loc WarriorsGroupHeroes}"
+                                  IconGlyph="{x:Static icons:SolidFont.Crown}"
+                                  Command="{Binding Command}"
+                                  RemoveCommand="{Binding RemoveCommand}"/>
+        <components:ChipListView ItemsSource="{Binding HenchmenItems}"
+                                  HeaderText="{loc:Loc WarriorsGroupHenchmen}"
+                                  IconGlyph="{x:Static icons:SolidFont.UserGroup}"
+                                  Command="{Binding Command}"
+                                  RemoveCommand="{Binding RemoveCommand}"/>
+    </VerticalStackLayout>
+</ContentView>

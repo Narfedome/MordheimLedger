@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>Marks a Skill as restricted to a specific WarriorArchetype within its restricted warband(s)
 /// - see WarbandArchetypeSkillEntity for the band-level equivalent, identical shape.</summary>

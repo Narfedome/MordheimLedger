@@ -17,7 +17,7 @@
                  [[row-select-vs-open-pattern]]. Pas de trésorerie affichée sur la ligne (visible sur la
                  fiche de détail). -->
             <DataTemplate x:Key="WarbandTemplate" x:DataType="vm:WarbandRow">
-                <Grid ColumnDefinitions="4,*,70" ColumnSpacing="8"
+                <Grid ColumnDefinitions="4,*,70" ColumnSpacing="8" BackgroundColor="{DynamicResource AppBackground}"
                       Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48">
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer
@@ -26,16 +26,24 @@
                     </Grid.GestureRecognizers>
                     <BoxView Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ChapterDividerStyle}"/>
                     <BoxView Grid.Column="0" Style="{StaticResource SelectionMarkerStyle}"/>
-                    <VerticalStackLayout Grid.Column="1" >
+                    <Grid Grid.Column="1" RowDefinitions="*,auto" RowSpacing="1" >
                         
-                    <Label Text="{Binding Name}"
+                    <Label Text="{Binding Name}" Grid.Row="0"
                            FontSize="{OnIdiom Default=15, Desktop=13}"
-                           VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
+                           VerticalOptions="End" Style="{StaticResource TruncatedLabelStyle}"/>
                         
-                    <Label Text="{Binding ArchetypeName}" Margin="8,0,0,0"
+                    <Label Margin="8,0,0,4" Grid.Row="1"
                            FontSize="{OnIdiom Default=10, Desktop=8}"
-                           VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
-                    </VerticalStackLayout>
+                            Style="{StaticResource TruncatedLabelStyle}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{Binding ArchetypeName}"/>
+                                <Span Text=" · "/>
+                                <Span Text="{Binding RatingDisplay}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    </Grid>
                     <Grid Grid.Column="2">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer

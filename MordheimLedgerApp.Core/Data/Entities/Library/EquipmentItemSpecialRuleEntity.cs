@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>Attaches a SpecialRule to an EquipmentItem - same shape/rationale as
 /// AnimalSpecialRuleEntity.</summary>

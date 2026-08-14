@@ -6,9 +6,10 @@
     },
     "category": "MeleeWeapon",
     "cost": 2,
+    "isFreeDagger": true,
     "description": {
-      "en": "Grants one extra Attack, always used in addition to another weapon.",
-      "fr": "Octroie une Attaque supplémentaire, toujours utilisée en plus d'une autre arme."
+      "en": "Grants one extra Attack, always used in addition to another weapon. The first one is free for every warrior (assumed carried regardless of whether it's shown on the model) - a second, deliberately bought dagger costs the normal price.",
+      "fr": "Octroie une Attaque supplémentaire, toujours utilisée en plus d'une autre arme. La première est gratuite pour chaque guerrier (assumée portée, représentée sur la figurine ou non) - une seconde dague achetée délibérément coûte le prix normal."
     },
     "specialRules": [
       {

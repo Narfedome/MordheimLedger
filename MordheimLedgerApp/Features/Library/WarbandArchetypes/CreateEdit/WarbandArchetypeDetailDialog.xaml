@@ -16,8 +16,8 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
-        <VerticalStackLayout x:Name="RootContent" Spacing="16" SizeChanged="OnRootContentSizeChanged">
+        <dialogs:StableHeightScrollView>
+        <VerticalStackLayout Spacing="16">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
@@ -30,33 +30,40 @@
             <!-- Onglets Règles/Magie masqués si la bande n'a rien à y montrer (voir HasSpecialRules/
                  HasMagicSchools) - contrairement à WarbandArchetypeEditDialog où ils restent toujours
                  visibles. Même TabToggleButton que WarriorEditDialog
-                 (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). -->
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
-                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
-                                             IsActive="{Binding IsRulesTab}" FontSize="12"
-                                             IsVisible="{Binding HasSpecialRules}"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
-                                             IsActive="{Binding IsMagicTab}" FontSize="12"
-                                             IsVisible="{Binding HasMagicSchools}"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
-                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
-                                             IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
-            </HorizontalStackLayout>
+                 (Features/Warbands/CreateEdit/WarriorEditDialog.xaml). ScrollableTabStripView : jusqu'à
+                 5 onglets dans ce dialog large de 340px. -->
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                                 IsActive="{Binding IsRulesTab}" FontSize="12"
+                                                 IsVisible="{Binding HasSpecialRules}"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabMagic}" Command="{Binding ShowMagicTabCommand}"
+                                                 IsActive="{Binding IsMagicTab}" FontSize="12"
+                                                 IsVisible="{Binding HasMagicSchools}"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
+                                                 IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
+                                                 IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
                 <VerticalStackLayout Spacing="4">
                     <Label Text="{loc:Loc WarbandGradePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding GradeLabel}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         <Label Text="{Binding Item.StartingTreasury}" TextColor="{DynamicResource AppText}"/>
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc WarbandArchetypeMinWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding MinWarriorsDisplay}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="4">
                         <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         <Label Text="{Binding MaxWarriorsDisplay}" TextColor="{DynamicResource AppText}"/>
                     </VerticalStackLayout>
@@ -90,19 +97,19 @@
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                 <components:ChipListView ItemsSource="{Binding EquipmentLists}"
                                           HeaderText="{loc:Loc WarbandArchetypeTabEquipment}"
-                                          IconGlyph="{x:Static icons:SolidFont.ListCheck}"
+                                          IconGlyph="{x:Static icons:SolidFont.Users}"
                                           Command="{Binding ShowEquipmentListDetailCommand}"/>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
                 <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
-                <components:ChipListView ItemsSource="{Binding Warriors}"
-                                          HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
-                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
+                <!-- Regroupé en deux sections Héros/Hommes de main - lecture seule, pas d'AddCommand
+                     (le bouton "+" de WarriorRoleChipListView se masque de lui-même). -->
+                <components:WarriorRoleChipListView ItemsSource="{Binding Warriors}"
                                           Command="{Binding ShowWarriorDetailCommand}"/>
             </VerticalStackLayout>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

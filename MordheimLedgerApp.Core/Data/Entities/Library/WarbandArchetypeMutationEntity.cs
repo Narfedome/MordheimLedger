@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>Marks a Mutation as restricted to a specific WarbandArchetype (e.g. Kermesse du Chaos's
 /// "Bénédictions de Nurgle"). Same shape/rationale as WarbandArchetypeEquipmentEntity.</summary>

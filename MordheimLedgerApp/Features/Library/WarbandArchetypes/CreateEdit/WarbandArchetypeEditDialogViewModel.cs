@@ -276,7 +276,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
         var newItem = new WarriorArchetype();
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"],
-            _specialRulePicker, EquipmentLists.ToList());
+            _specialRulePicker, EquipmentLists.ToList(), _libraryService);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         Warriors.Add(newItem);
@@ -317,11 +317,13 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             IsSpellcaster = warrior.IsSpellcaster,
             CanBuyMutations = warrior.CanBuyMutations,
             EquipmentListId = warrior.EquipmentListId,
-            AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories)
+            CanUseEquipment = warrior.CanUseEquipment,
+            AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories),
+            IsLargeCreature = warrior.IsLargeCreature
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],
-            _specialRulePicker, EquipmentLists.ToList());
+            _specialRulePicker, EquipmentLists.ToList(), _libraryService);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         var index = Warriors.IndexOf(warrior);

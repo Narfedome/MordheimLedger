@@ -20,6 +20,10 @@ public class WarriorEntity
     public int Experience { get; set; }
     public WarriorStatus Status { get; set; } = WarriorStatus.Active;
 
+    /// <summary>See Models.Warrior.HeadCount - always 1 for a Hero, living headcount of the Henchman
+    /// group this row represents otherwise.</summary>
+    public int HeadCount { get; set; } = 1;
+
     public int Movement { get; set; }
     public string? MovementOverride { get; set; }
     public int WeaponSkill { get; set; }
@@ -37,8 +41,11 @@ public class WarriorEntity
     public int? AnimalId { get; set; }
 
     public int? EquipmentListId { get; set; }
+    public bool CanUseEquipment { get; set; } = true;
 
     /// <summary>Comma-separated SkillCategory member names - see Warrior.AllowedSkillCategories /
     /// WarriorArchetypeEntity.AllowedSkillCategories (same storage convention, copied at recruitment).</summary>
     public string? AllowedSkillCategories { get; set; }
+
+    public bool IsLargeCreature { get; set; }
 }

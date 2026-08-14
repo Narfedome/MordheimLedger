@@ -5,7 +5,6 @@
                xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
-               xmlns:stepper="clr-namespace:MordheimLedgerApp.Components.StatStepper"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
@@ -17,7 +16,7 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView>
         <VerticalStackLayout Spacing="16">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
@@ -28,29 +27,21 @@
                                               Command="{Binding DeleteCommand}"/>
             </Grid>
 
-            <Entry Text="{Binding Item.Name}" Placeholder="{loc:Loc PromptName}"/>
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Loc PromptName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding Item.Name}"/>
+            </VerticalStackLayout>
             <VerticalStackLayout Spacing="2">
                 <Label Text="{loc:Loc WarriorExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Entry Text="{Binding Item.Experience}" Keyboard="Numeric"/>
             </VerticalStackLayout>
 
-            <!-- Abréviations officielles du livre de règles, pas de traduction - même grille que
-                 WarriorArchetypeEditDialog (étape profil). Steppers +/- (StatStepperView) : les
-                 avances (jets d'Advance) se font quasi toujours de ±1. -->
-            <Grid ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
-                <stepper:StatStepperView Grid.Row="0" Grid.Column="0" Label="M" Value="{Binding Item.Movement}"/>
-                <stepper:StatStepperView Grid.Row="0" Grid.Column="1" Label="WS" Value="{Binding Item.WeaponSkill}"/>
-                <stepper:StatStepperView Grid.Row="0" Grid.Column="2" Label="BS" Value="{Binding Item.BallisticSkill}"/>
-                <stepper:StatStepperView Grid.Row="1" Grid.Column="0" Label="S" Value="{Binding Item.Strength}"/>
-                <stepper:StatStepperView Grid.Row="1" Grid.Column="1" Label="T" Value="{Binding Item.Toughness}"/>
-                <stepper:StatStepperView Grid.Row="1" Grid.Column="2" Label="W" Value="{Binding Item.Wounds}"/>
-                <stepper:StatStepperView Grid.Row="2" Grid.Column="0" Label="I" Value="{Binding Item.Initiative}"/>
-                <stepper:StatStepperView Grid.Row="2" Grid.Column="1" Label="A" Value="{Binding Item.Attacks}"/>
-                <stepper:StatStepperView Grid.Row="2" Grid.Column="2" Label="Ld" Value="{Binding Item.Leadership}"/>
-            </Grid>
+            <!-- Abréviations officielles du livre de règles, pas de traduction - StatRowView en mode
+                 édition, même composant que WarriorArchetypeEditDialog (onglet Profil). -->
+            <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}" IsEditable="True"/>
 
             <!-- Surcharge texte optionnelle du Mouvement (ex. "2D6" pour les Squigs des cavernes) -
-                 prioritaire sur le stepper M ci-dessus partout où le Mouvement est affiché, copiée
+                 prioritaire sur la valeur M ci-dessus partout où le Mouvement est affiché, copiée
                  depuis l'archétype au recrutement (voir WarriorArchetype.MovementOverride). -->
             <VerticalStackLayout Spacing="2">
                 <Label Text="{loc:Loc WarriorArchetypeMovementOverridePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -78,25 +69,28 @@
 
             <!-- Onglets Équipement/Compétences/Blessures - même pattern toggle (pas de vrai TabbedPage)
                  que Roster/Historique sur WarbandDetailPage : la carte guerrier reste lecture seule pour
-                 ces trois listes, tout se gère ici. -->
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
-                                             IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
-                                             IsActive="{Binding IsSkillsTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
-                                             IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
-                <!-- Onglet Sorts : visible seulement si l'archétype de ce guerrier est un lanceur de
-                     sorts (WarriorArchetype.IsSpellcaster) - inutile pour un Homme de main lambda. -->
-                <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
-                                             IsActive="{Binding IsSpellsTab}" FontSize="12"
-                                             IsVisible="{Binding IsSpellcaster}"/>
-                <!-- Onglet Mutations : visible seulement si l'archétype de ce guerrier a
-                     WarriorArchetype.CanBuyMutations (Mutants/Possédés). -->
-                <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" Command="{Binding ShowMutationsTabCommand}"
-                                             IsActive="{Binding IsMutationsTab}" FontSize="12"
-                                             IsVisible="{Binding IsMutant}"/>
-            </HorizontalStackLayout>
+                 ces trois listes, tout se gère ici. ScrollableTabStripView : jusqu'à 5 onglets dans ce
+                 dialog large de 340px. -->
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
+                                                 IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
+                                                 IsActive="{Binding IsSkillsTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
+                                                 IsActive="{Binding IsInjuriesTab}" FontSize="12"/>
+                    <!-- Onglet Sorts : visible seulement si l'archétype de ce guerrier est un lanceur de
+                         sorts (WarriorArchetype.IsSpellcaster) - inutile pour un Homme de main lambda. -->
+                    <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
+                                                 IsActive="{Binding IsSpellsTab}" FontSize="12"
+                                                 IsVisible="{Binding IsSpellcaster}"/>
+                    <!-- Onglet Mutations : visible seulement si l'archétype de ce guerrier a
+                         WarriorArchetype.CanBuyMutations (Mutants/Possédés). -->
+                    <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" Command="{Binding ShowMutationsTabCommand}"
+                                                 IsActive="{Binding IsMutationsTab}" FontSize="12"
+                                                 IsVisible="{Binding IsMutant}"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsEquipmentTab}">
                 <Grid ColumnDefinitions="*,Auto">
@@ -104,17 +98,22 @@
                     <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                                   Icon="{x:Static icons:SolidFont.Plus}"
                                                   IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  IsVisible="{Binding Item.CanUseEquipment}"
                                                   Command="{Binding AddEquipmentCommand}"/>
                 </Grid>
                 <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:WarriorEquipment">
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                            FontFamily="RpgAwesome" FontSize="12"
                                            TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <Label Text="{Binding NameDisplay}" FontSize="11" VerticalOptions="Center"/>
                                     <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                   Icon="{x:Static icons:SolidFont.Xmark}"
                                                                   IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
@@ -253,6 +252,6 @@
                         Command="{Binding SaveCommand}"/>
             </Grid>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

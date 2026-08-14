@@ -12,8 +12,16 @@ public interface IEquipmentPickerService
     /// non-null (recruit picker, the warrior's assigned EquipmentList) switches filtering to the union of
     /// that list and the band's Rare/Trading-Post items; null (EquipmentList editor's own "add item"
     /// picker) keeps the broad common+band browse. warriorArchetypeId: narrows any
-    /// RestrictedToWarriorArchetypeIds-tagged item further, same idea as the Skill picker.</summary>
-    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null);
+    /// RestrictedToWarriorArchetypeIds-tagged item further, same idea as the Skill picker. availableGold:
+    /// non-null shows a live "spent/remaining" line in the picker as items are selected (null hides it -
+    /// the EquipmentList editor's own "add item" picker has no gold budget to track). unitCount: cost
+    /// multiplier applied to the running total shown in that line - a henchman row's effectif for a
+    /// grouped purchase (WarbandEditDialogViewModel.AddEquipment), 1 for an individual purchase; ignores
+    /// any material-rule cost multiplier (Gromril...), only decided after the picker closes.
+    /// alreadyHasFreeDagger: true if the target already carries a free dagger (EquipmentItem.
+    /// IsFreeDagger) - the Dagger tile shows its normal price instead of "Gratuit"/"Free" when set.</summary>
+    Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
+        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -27,7 +35,8 @@ public class EquipmentPickerService : IEquipmentPickerService
         _libraryService = libraryService;
     }
 
-    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null)
+    public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
+        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -40,22 +49,27 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
         viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
         viewModel.AllowedEquipmentListItemIds = equipmentListId is { } id ? await _libraryService.GetEquipmentListItemIdsAsync(id) : null;
+        viewModel.AvailableGold = availableGold;
+        viewModel.UnitCount = unitCount;
+        viewModel.AlreadyHasFreeDagger = alreadyHasFreeDagger;
+        // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
+        // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
+        // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).
         var page = new EquipmentItemSelectorPage(viewModel);
-        var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton
         // retour), le TaskCompletionSource ne serait jamais résolu et l'appelant resterait bloqué.
         var window = Shell.Current.Window;
         void OnModalPopped(object? sender, ModalPoppedEventArgs e)
         {
-            if (!ReferenceEquals(e.Modal, modal))
+            if (!ReferenceEquals(e.Modal, page))
                 return;
             window.ModalPopped -= OnModalPopped;
             tcs.TrySetResult(Array.Empty<EquipmentItem>());
         }
         window.ModalPopped += OnModalPopped;
 
-        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "EquipmentPicker.Push");
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(page), "EquipmentPicker.Push");
 
         return await tcs.Task;
     }

@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "imagePath": "skaven_clan_eschin.jpg",
   "name": {
     "en": "Skaven of Clan Eshin",
     "fr": "Skavens (Clan Eshin)"
@@ -80,6 +81,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 20,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -89,6 +91,7 @@
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 6,
       "weaponSkill": 4,
@@ -271,6 +274,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 4,
+      "canUseEquipment": false,
       "description": {
         "en": "Mutated creations of Clan Moulder trainees, the size of dogs - they fight alongside the Skaven, overpowering opponents through sheer weight of numbers.",
         "fr": "Les rats géants sont des créations de l'étrange génie des skavens. Ce sont des rats mutants aussi gros que des chiens. Ils combattent aux côtés des skavens ajoutant encore au nombre pour submerger l'ennemi."
@@ -281,6 +285,12 @@
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
           }
+        },
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
         }
       ]
     },
@@ -290,6 +300,7 @@
         "fr": "Rat-ogre"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 210,
       "maxCount": 1,
       "startingExperience": 0,
@@ -302,11 +313,18 @@
       "initiative": 4,
       "attacks": 3,
       "leadership": 4,
+      "canUseEquipment": false,
       "description": {
         "en": "Horrible monsters much in demand as bodyguards to important Skaven.",
         "fr": "Ces horribles monstres sont très demandés comme gardes du corps par les skavens importants."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Causes Fear",

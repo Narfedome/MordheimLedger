@@ -19,6 +19,7 @@ using MordheimLedgerApp.Features.Settings;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 using Microsoft.Extensions.Logging;
+using MordheimLedgerApp.Features.Warbands.CreateEdit;
 
 namespace MordheimLedgerApp
 {
@@ -65,7 +66,55 @@ namespace MordheimLedgerApp
                     fonts.AddFont("Font Awesome 7 Brands-Regular-400.otf", "FontBrands");
                     fonts.AddFont("Font Awesome 7 Free-Solid-900.otf", "FontSolid");
                     fonts.AddFont("rpgawesome-webfont.ttf", "RpgAwesome");
-                });
+                })
+#if WINDOWS
+                // ScrollableTabStripView (Components/ScrollableTabStrip) : ni la molette ni
+                // PanGestureRecognizer (drag) ne pilotent le ScrollViewer natif sur WinUI - limitation
+                // connue de MAUI sur Windows, le pan cross-plateforme est câblé pour le tactile/stylet,
+                // pas le clic-glisser souris pur, et le remappage molette verticale→scroll horizontal
+                // natif de WinUI ne traverse pas non plus le wrapper MAUI. Fix ciblé sur le seul
+                // ScrollViewer natif portant cet AutomationId (voir ScrollableTabStripView.xaml) plutôt
+                // qu'un mapping global sur tous les ScrollView de l'appli.
+                .ConfigureMauiHandlers(handlers =>
+                {
+                    Microsoft.Maui.Handlers.ScrollViewHandler.Mapper.AppendToMapping("DragScrollTabStrip", (handler, view) =>
+                    {
+                        if (view.AutomationId != "DragScrollTabStrip") return;
+                        var scrollViewer = handler.PlatformView;
+                        scrollViewer.HorizontalScrollBarVisibility = Microsoft.UI.Xaml.Controls.ScrollBarVisibility.Hidden;
+
+                        scrollViewer.PointerWheelChanged += (_, e) =>
+                        {
+                            var delta = e.GetCurrentPoint(scrollViewer).Properties.MouseWheelDelta;
+                            scrollViewer.ChangeView(scrollViewer.HorizontalOffset - delta, null, null, true);
+                            e.Handled = true;
+                        };
+
+                        Windows.Foundation.Point? dragStart = null;
+                        var dragStartOffset = 0d;
+                        scrollViewer.PointerPressed += (_, e) =>
+                        {
+                            var point = e.GetCurrentPoint(scrollViewer);
+                            if (!point.Properties.IsLeftButtonPressed) return;
+                            dragStart = point.Position;
+                            dragStartOffset = scrollViewer.HorizontalOffset;
+                            scrollViewer.CapturePointer(e.Pointer);
+                        };
+                        scrollViewer.PointerMoved += (_, e) =>
+                        {
+                            if (dragStart is not { } start) return;
+                            var deltaX = e.GetCurrentPoint(scrollViewer).Position.X - start.X;
+                            scrollViewer.ChangeView(dragStartOffset - deltaX, null, null, true);
+                        };
+                        scrollViewer.PointerReleased += (_, e) =>
+                        {
+                            dragStart = null;
+                            scrollViewer.ReleasePointerCapture(e.Pointer);
+                        };
+                    });
+                })
+#endif
+                ;
 
             builder.Services.AddSingleton(new AppDatabase(dbPath));
             builder.Services.AddSingleton<AppShell>();
@@ -81,6 +130,7 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<WarbandArchetypeViewModel>();
+            builder.Services.AddTransient<WarbandEditDialogViewModel>();
             builder.Services.AddTransient<WarbandArchetypeSelectorPage>();
             builder.Services.AddSingleton<IWarbandArchetypePickerNavigationService, WarbandArchetypePickerNavigationService>();
             builder.Services.AddSingleton<IWarbandArchetypePickerService, WarbandArchetypePickerService>();

@@ -16,7 +16,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView Grid.Row="0">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -33,16 +33,27 @@
                 <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
-            <Picker Title="{loc:Loc SpellMagicSchoolPh}"
-                    ItemsSource="{Binding MagicSchoolOptions}"
-                    SelectedItem="{Binding SelectedMagicSchoolLabel}"/>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc SpellMagicSchoolPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Picker ItemsSource="{Binding MagicSchoolOptions}"
+                        SelectedItem="{Binding SelectedMagicSchoolLabel}"/>
+            </VerticalStackLayout>
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <Entry Grid.Column="0" Text="{Binding Item.RollValue}" Keyboard="Numeric" Placeholder="{loc:Loc SpellRollValuePh}"/>
-                <Entry Grid.Column="1" Text="{Binding Item.Difficulty}" Keyboard="Numeric" Placeholder="{loc:Loc SpellDifficultyPh}"/>
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Loc SpellRollValuePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.RollValue}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{loc:Loc SpellDifficultyPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Difficulty}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
             </Grid>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

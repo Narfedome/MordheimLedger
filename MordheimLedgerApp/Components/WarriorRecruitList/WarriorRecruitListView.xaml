@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.WarriorRecruitListView"
+             x:Name="root">
+
+    <VerticalStackLayout Spacing="10" BindingContext="{x:Reference root}">
+        <Label Text="{Binding HeaderText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+
+        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ItemsSource}" Spacing="4">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate>
+                    <VerticalStackLayout>
+                        <!-- Colonne 0 (chip) à largeur fixe plutôt qu'Auto : chaque ligne est un Grid
+                             indépendant (BindableLayout, pas un vrai CollectionView à colonnes partagées),
+                             donc sans largeur fixe la colonne Coût (1) démarrerait à un x différent selon
+                             la longueur du nom de chaque type - avec une largeur fixe, les CO restent
+                             alignés en colonne d'une ligne à l'autre. -->
+                        <Grid ColumnDefinitions="150,*,Auto" ColumnSpacing="10">
+                            <components:ChipView Grid.Column="0" Item="{Binding .}"
+                                                  IconGlyph="{Binding IconGlyph}"
+                                                  Command="{Binding Source={x:Reference root}, Path=DetailCommand}"/>
+                            <Label Grid.Column="1" Text="{Binding Cost, StringFormat='{0} CO'}"
+                                   FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                            <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
+                                <!-- Invisible (pas grisé) quand l'action n'est pas possible - Retirer sur
+                                     un type non recruté, Recruter au plafond/hors budget/effectif complet
+                                     - mais garde sa place (Opacity, pas IsVisible) pour que le compteur ne
+                                     saute pas latéralement selon qu'un seul des deux boutons est affiché. -->
+                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                              Icon="{x:Static icons:SolidFont.Minus}"
+                                                              IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
+                                                              Opacity="{Binding CanDecrement, Converter={StaticResource BoolToOpacityConverter}}"
+                                                              InputTransparent="{Binding CanDecrement, Converter={StaticResource InverseBoolConverter}}"
+                                                              Command="{Binding Source={x:Reference root}, Path=DecrementCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                                <Label Text="{Binding CountDisplay}" FontSize="12" WidthRequest="38"
+                                       HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                                              IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
+                                                              Opacity="{Binding CanIncrement, Converter={StaticResource BoolToOpacityConverter}}"
+                                                              InputTransparent="{Binding CanIncrement, Converter={StaticResource InverseBoolConverter}}"
+                                                              Command="{Binding Source={x:Reference root}, Path=IncrementCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

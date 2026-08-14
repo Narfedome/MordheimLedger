@@ -12,4 +12,6 @@ public class SpecialRuleEntity
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
     public int? CostMultiplier { get; set; }
+    public string? Abbreviation { get; set; }
+    public int? Rarity { get; set; }
 }

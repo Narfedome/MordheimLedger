@@ -51,4 +51,12 @@ public class EquipmentItem
     /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - same shared SpecialRule
     /// catalog as WarbandArchetype/WarriorArchetype/Animal, editable via EquipmentItemEditDialog.</summary>
     public List<SpecialRule> SpecialRules { get; set; } = new();
+
+    /// <summary>True only for the catalog's Dagger entry - the rulebook assumes every warrior already
+    /// carries one for free ("up to two close combat weapons... in addition to his free dagger"), so the
+    /// first one added to a warrior's gear costs nothing and doesn't count against the 2-melee-weapon
+    /// cap (see WeaponLimits); any further Dagger purchase (e.g. dual-wielding) costs the normal Cost and
+    /// counts normally. See EquipmentPick.IsFree/WarbandEditDialogViewModel.AddEquipment for where the
+    /// "already has one" check happens.</summary>
+    public bool IsFreeDagger { get; set; }
 }

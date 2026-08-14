@@ -7,7 +7,6 @@ public partial class InjuryEditDialog : DialogContent<bool>
     public InjuryEditDialog(InjuryEditDialogViewModel viewModel)
     {
         InitializeComponent();
-        ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
     }
 }

@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "imagePath": "mercenaries_empire.jpg",
   "name": {
     "en": "Reiklander Mercenaries",
     "fr": "Mercenaires Reiklander"
@@ -11,6 +12,7 @@
   "specialRules": [],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -20,6 +22,7 @@
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,

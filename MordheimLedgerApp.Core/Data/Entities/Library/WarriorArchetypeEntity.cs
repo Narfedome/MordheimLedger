@@ -16,6 +16,7 @@ public class WarriorArchetypeEntity
     public int Cost { get; set; }
     public ContentSource Source { get; set; }
     public int? MaxCount { get; set; }
+    public int? MinCount { get; set; }
 
     public int Movement { get; set; }
     public string? MovementOverride { get; set; }
@@ -34,9 +35,11 @@ public class WarriorArchetypeEntity
     public bool CanBuyMutations { get; set; }
     public string? ImagePath { get; set; }
     public int? EquipmentListId { get; set; }
+    public bool CanUseEquipment { get; set; } = true;
 
     /// <summary>Comma-separated SkillCategory member names (e.g. "Combat,Strength,Speed") - see
     /// WarriorArchetype.AllowedSkillCategories. A plain delimited column rather than a join table since
     /// SkillCategory is a small fixed enum, not a foreign catalog to look up.</summary>
     public string? AllowedSkillCategories { get; set; }
+    public bool IsLargeCreature { get; set; }
 }

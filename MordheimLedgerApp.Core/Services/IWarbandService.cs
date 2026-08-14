@@ -17,8 +17,15 @@ public interface IWarbandService
 
     Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode);
 
+    /// <summary>Rulebook "calculate the warband rating" - sum over active (non-Dead) warriors of
+    /// (IsLargeCreature ? 20 : 5) + Experience. Lightweight (WarriorEntity columns only, no
+    /// equipment/skills/spells joins) so it's cheap to call once per row in a warband list.</summary>
+    Task<int> GetWarbandRatingAsync(int warbandId);
+
     /// <summary>Copies archetype.Cost/stats onto a new Warrior via WarriorArchetype.ToWarrior().</summary>
-    Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name);
+    /// <param name="headCount">Always 1 for a Hero. For a Henchman group, how many models it starts with
+    /// - see Models.Warrior.HeadCount.</param>
+    Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1);
     Task SaveWarriorAsync(Warrior warrior);
     Task DeleteWarriorAsync(int warriorId);
 

@@ -179,7 +179,9 @@ public class AppDatabase
             Source = ContentSource.Official,
             Grade = Enum.Parse<WarbandGrade>(data.Grade),
             StartingTreasury = data.StartingTreasury,
-            MaxWarriors = data.MaxWarriors
+            MaxWarriors = data.MaxWarriors,
+            MinWarriors = data.MinWarriors,
+            ImagePath = data.ImagePath ?? string.Empty
         };
         warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
@@ -287,6 +289,7 @@ public class AppDatabase
                 IsHero = w.IsHero,
                 Cost = w.Cost,
                 MaxCount = w.MaxCount,
+                MinCount = w.MinCount,
                 StartingExperience = w.StartingExperience,
                 Movement = w.Movement,
                 MovementOverride = w.MovementOverride,
@@ -302,7 +305,9 @@ public class AppDatabase
                 IsSpellcaster = w.IsSpellcaster,
                 CanBuyMutations = w.CanBuyMutations,
                 EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
-                AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList()
+                CanUseEquipment = w.CanUseEquipment,
+                AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
+                IsLargeCreature = w.IsLargeCreature
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -426,7 +431,8 @@ public class AppDatabase
                 Cost = eq.Cost,
                 Rarity = eq.Rarity,
                 CostRandomMax = eq.CostRandomMax,
-                Source = ContentSource.Official
+                Source = ContentSource.Official,
+                IsFreeDagger = eq.IsFreeDagger
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -565,7 +571,7 @@ public class AppDatabase
         if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
-        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier };
+        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity };
         rule.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
         rule.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
         var entity = rule.ToEntity();

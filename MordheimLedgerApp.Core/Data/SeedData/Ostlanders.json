@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "imagePath": "ostlanders_mercenaries.jpg",
   "name": {
     "en": "Ostlander Mercenaries",
     "fr": "Mercenaires Ostlanders"
@@ -30,6 +31,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -39,6 +41,7 @@
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -253,6 +256,7 @@
         "fr": "Ogre"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 160,
       "maxCount": 1,
       "startingExperience": 0,

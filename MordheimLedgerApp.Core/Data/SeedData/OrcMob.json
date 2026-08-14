@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "imagePath": "orc_mob.jpg",
   "name": {
     "en": "Orc Mob",
     "fr": "Horde Orque"
@@ -107,6 +108,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 20,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -116,6 +118,7 @@
       "isHero": true,
       "cost": 80,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -325,11 +328,18 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 5,
+      "canUseEquipment": false,
       "description": {
         "en": "A curious blend of animal and fungus raised by the Goblins, mostly composed of teeth, horns and a nasty temperament - never carries weapons or armour. Movement is 2D6\" (not a fixed value, see Movement rule below). A mob may never field more Squigs than Goblin Warriors.",
         "fr": "Curieux métissage d'animal et de champignon dressé par les Gobelins, se résumant à une énorme mâchoire, une paire de cornes et un tempérament plutôt soupe au lait - ne porte jamais d'armes ni d'armures. Le Mouvement est de 2D6ps (caractéristique non fixe, voir la règle Mouvement ci-dessous). Une bande ne peut jamais compter plus de Squigs que de Guerriers Gobelins."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Movement",
@@ -374,6 +384,7 @@
         "fr": "Troll"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 200,
       "maxCount": 1,
       "startingExperience": 0,
@@ -386,11 +397,18 @@
       "initiative": 1,
       "attacks": 3,
       "leadership": 4,
+      "canUseEquipment": false,
       "description": {
         "en": "Not intelligent enough to recognize the value of gold, but a big enough pile of food can buy a Troll's loyalty. May never be given weapons or armour, though it often carries a big club.",
         "fr": "Les Trolls ne sont pas suffisamment intelligents pour reconnaître la valeur de l'or, mais il est possible de les amadouer avec un gros tas de nourriture. Ne peut jamais recevoir d'armes ni d'armures, bien qu'il porte souvent un gros gourdin."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Causes Fear",

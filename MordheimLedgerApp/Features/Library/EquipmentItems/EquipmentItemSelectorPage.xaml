@@ -3,11 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
-             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:picker="clr-namespace:MordheimLedgerApp.Components.PickerSelectorLayout"
              x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemSelectorPage"
-             Title="{loc:Loc EquipmentItemSelectTitle}">
+             Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
 
-    <components:WatermarkedLayout>
+    <!-- Poussée nue (pas de NavigationPage, voir EquipmentPickerService) - voir PickerSelectorLayout
+         pour le pourquoi. -->
+    <picker:PickerSelectorLayout Title="{loc:Loc EquipmentItemSelectTitle}" BackCommand="{Binding CancelCommand}">
         <local:EquipmentItemView IsCrud="False"/>
-    </components:WatermarkedLayout>
+    </picker:PickerSelectorLayout>
 </ContentPage>

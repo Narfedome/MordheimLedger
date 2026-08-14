@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "imagePath": "sisters_of_sigmar.jpg",
   "name": {
     "en": "The Sisters of Sigmar",
     "fr": "Sœurs de Sigmar"
@@ -83,6 +84,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -92,6 +94,7 @@
       "isHero": true,
       "cost": 70,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,

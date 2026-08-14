@@ -15,7 +15,10 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que LibraryTrackView de DmTools -->
+        <!-- Filtre par catégorie (bouton + ActionSheet), même mécanisme que LibraryTrackView de DmTools -
+             BudgetDisplay (dépensé/restant, ce ronde de sélection) uniquement en picker avec un budget
+             posé par l'appelant (EquipmentPickerService.AvailableGold), ex. l'étape Équipement du wizard
+             de création de bande - masqué partout ailleurs (onglet Library, EquipmentList editor). -->
         <Grid Grid.Row="0" ColumnDefinitions="*,auto" Padding="5,0">
             <Button Grid.Column="0"
                     Text="{Binding SelectedCategoryLabel}"
@@ -24,6 +27,9 @@
                     TextColor="{DynamicResource AppAccent}"
                     HorizontalOptions="Start"
                     Padding="0"/>
+            <Label Grid.Column="1" Text="{Binding BudgetDisplay}" FontSize="12"
+                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"
+                   IsVisible="{Binding ShowBudget}"/>
         </Grid>
 
         <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
@@ -86,6 +92,31 @@
                                 Margin="5,0"/>
                                 <Label Text="{Binding CostDisplay}"
                                 Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
+                                <!-- Stepper de quantité (mode picker uniquement, jamais dans l'onglet
+                                     Library/CRUD - voir IsCrud) : "+" toujours affiché, sélectionne et
+                                     incrémente en un seul geste depuis Quantity == 0 - permet d'acheter
+                                     plusieurs exemplaires du même objet (ex. 2 épées longues) sans fermer/
+                                     rouvrir le picker. "-" masqué (Opacity 0 + InputTransparent, pas
+                                     IsVisible=False qui referme l'espace) tant qu'il n'y a rien à retirer -
+                                     même traitement que WarriorRecruitListView.CanDecrement pour l'effectif
+                                     des Hommes de main à l'étape Guerriers, voir BoolToOpacityConverter. -->
+                                <HorizontalStackLayout Spacing="2" HorizontalOptions="Center"
+                                        IsVisible="{Binding Source={x:Reference root}, Path=IsCrud, Converter={StaticResource InverseBoolConverter}}">
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                 Icon="{x:Static icons:SolidFont.Minus}"
+                                                 IconSize="9" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                 Opacity="{Binding CanDecrement, Converter={StaticResource BoolToOpacityConverter}}"
+                                                 InputTransparent="{Binding CanDecrement, Converter={StaticResource InverseBoolConverter}}"
+                                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.DecrementQuantityCommand}"
+                                                 CommandParameter="{Binding .}"/>
+                                    <Label Text="{Binding Quantity}" FontSize="10" VerticalOptions="Center"
+                                           WidthRequest="12" HorizontalTextAlignment="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                 Icon="{x:Static icons:SolidFont.Plus}"
+                                                 IconSize="9" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.IncrementQuantityCommand}"
+                                                 CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
                             </VerticalStackLayout>
                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                    Icon="{x:Static icons:SolidFont.CircleInfo}"

@@ -16,7 +16,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView Grid.Row="0">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -33,13 +33,20 @@
                 <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
-            <Picker Title="{loc:Loc InjuryCategoryPh}"
-                    ItemsSource="{Binding CategoryOptions}"
-                    SelectedItem="{Binding SelectedCategoryLabel}"/>
-            <Entry Text="{Binding Item.RollRange}" Placeholder="{loc:Loc InjuryRollRangePh}"/>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc InjuryCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Picker ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding SelectedCategoryLabel}"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc InjuryRollRangePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding Item.RollRange}" Placeholder="ex. 21-25"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+            </VerticalStackLayout>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

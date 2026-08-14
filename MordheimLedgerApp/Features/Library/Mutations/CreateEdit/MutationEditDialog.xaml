@@ -17,7 +17,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView Grid.Row="0">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -34,8 +34,14 @@
                 <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
-            <Entry Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc MutationCostPh}"/>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc MutationCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+            </VerticalStackLayout>
 
             <!-- Réservé à ces bandes : vide = commun à toutes les bandes qui peuvent acheter des
                  mutations (voir Mutation.RestrictedToWarbandArchetypeIds). HeaderText dynamique
@@ -43,12 +49,12 @@
                  temps liste vide - un seul texte selon l'état. -->
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                       ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                      IconGlyph="{x:Static icons:SolidFont.Users}"
                                       AddCommand="{Binding AddRestrictionCommand}"
                                       RemoveCommand="{Binding RemoveRestrictionCommand}"/>
 
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

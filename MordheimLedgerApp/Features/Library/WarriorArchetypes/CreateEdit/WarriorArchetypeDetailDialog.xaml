@@ -15,7 +15,7 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView>
         <VerticalStackLayout Spacing="16">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
@@ -36,12 +36,16 @@
                     <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
             </Grid>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                 <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Loc WarriorArchetypeMinCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding MinCountDisplay}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
                     <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding MaxCountDisplay}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
                     <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding Item.StartingExperience}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
@@ -57,6 +61,8 @@
                    IsVisible="{Binding Item.IsSpellcaster}"/>
             <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" FontSize="12" TextColor="{DynamicResource AppAccent}"
                    IsVisible="{Binding Item.CanBuyMutations}"/>
+            <Label Text="{loc:Loc WarriorArchetypeIsLargeCreature}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                   IsVisible="{Binding Item.IsLargeCreature}"/>
 
             <!-- Profil sur une seule ligne (abréviations françaises officielles) - StatRowView partagé
                  avec AnimalDetailDialog/WarbandDetailPage. -->
@@ -72,6 +78,6 @@
                                       IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                       Command="{Binding ShowSpecialRuleDetailCommand}"/>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

@@ -15,4 +15,5 @@ public class EquipmentItemEntity
     public string? DescriptionKey { get; set; }
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
+    public bool IsFreeDagger { get; set; }
 }

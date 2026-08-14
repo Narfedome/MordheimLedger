@@ -1,11 +1,12 @@
 namespace MordheimLedgerApp.Core.Models;
 
 /// <summary>
-/// A single member of a warband — Hero or Henchman alike (both are tracked individually here,
-/// unlike the tabletop rule where Henchmen only advance as a group).
-/// WarriorArchetypeId records which template this warrior was recruited from (for display and for
-/// MaxCount tracking) — the stat fields below are the warrior's own copy, seeded from that
-/// archetype at recruitment, and then advance independently via Experience.
+/// A single warband member (Hero) OR an entire Henchman group (rulebook: "Henchmen groups gain
+/// experience collectively and gain advances together" - a group is mechanically one entity, not N
+/// individuals). WarriorArchetypeId records which template this row was recruited from (for display
+/// and for MaxCount tracking) — the stat fields below are its own copy, seeded from that archetype at
+/// recruitment, then advancing via Experience (individually for a Hero, collectively for the whole
+/// Henchman group this row represents).
 /// </summary>
 public class Warrior
 {
@@ -17,6 +18,12 @@ public class Warrior
     public int Cost { get; set; }
     public int Experience { get; set; }
     public WarriorStatus Status { get; set; } = WarriorStatus.Active;
+
+    /// <summary>Always 1 for a Hero (meaningless otherwise). For a Henchman group, how many living
+    /// models remain in it - the whole point of the group being one row instead of N: casualties just
+    /// decrement this (down to deletion at 0), while XP/equipment/skills stay shared across whoever's
+    /// left, matching the rulebook rather than the historical "Status.Dead per individual" model.</summary>
+    public int HeadCount { get; set; } = 1;
 
     public int Movement { get; set; }
 
@@ -42,6 +49,10 @@ public class Warrior
     /// recruiting WarriorArchetype at recruitment (see WarriorArchetype.EquipmentListId), null = no
     /// equipment usable. Editing the archetype's list later doesn't retroactively change this.</summary>
     public int? EquipmentListId { get; set; }
+
+    /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.CanUseEquipment.
+    /// False hides the "+" equipment button entirely for this warrior/Henchman group.</summary>
+    public bool CanUseEquipment { get; set; } = true;
 
     /// <summary>Which of the 6 rulebook Skill lists this warrior may pick an Advance from - copied from
     /// the recruiting WarriorArchetype at recruitment (see WarriorArchetype.AllowedSkillCategories), so
@@ -72,4 +83,7 @@ public class Warrior
     /// <summary>Null = no animal assigned. Resolved separately from the Animal catalog by WarbandService
     /// (not a join table - a warrior can only have one animal at a time, picking a new one replaces this).</summary>
     public Library.Animal? Animal { get; set; }
+
+    /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.IsLargeCreature.</summary>
+    public bool IsLargeCreature { get; set; }
 }

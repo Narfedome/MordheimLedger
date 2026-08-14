@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.ChipItemView"
+             x:Name="root">
+
+    <VerticalStackLayout
+        Spacing="8"
+        BindingContext="{x:Reference root}"
+        IsVisible="{Binding ShowSection}">
+
+        <!-- Header -->
+        <Grid ColumnDefinitions="*,Auto">
+
+            <Label
+                Grid.Column="0"
+                Text="{Binding HeaderText}"
+                FontSize="12"
+                TextColor="{DynamicResource AppTextMuted}"
+                IsVisible="{Binding IsMandatory, Converter={StaticResource InverseBoolConverter}}"
+                VerticalOptions="Center" />
+            
+            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{Binding HeaderText}"/>
+                        <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+
+            <components:FaIconButtonView
+                Grid.Column="1"
+                Style="{StaticResource GhostIconButtonStyle}"
+                Icon="{x:Static icons:SolidFont.Plus}"
+                IconSize="12"
+                ButtonWidthRequest="22"
+                ButtonHeightRequest="22"
+                IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
+                Command="{Binding AddCommand}" />
+
+        </Grid>
+
+        <!-- Message lorsqu'il n'y a pas d'item -->
+        <Label
+            Text="{Binding EmptyHintText}"
+            FontSize="11"
+            TextColor="{DynamicResource AppTextMuted}"
+            IsVisible="{Binding HasItem, Converter={StaticResource InverseBoolConverter}}" />
+
+        <!-- Chip -->
+        <components:ChipView Item="{Binding Item, Source={x:Reference root}}"
+                              IconGlyph="{Binding IconGlyph, Source={x:Reference root}}"
+                              IconFontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                              Command="{Binding Command, Source={x:Reference root}}"
+                              RemoveCommand="{Binding RemoveCommand, Source={x:Reference root}}"
+                              IsVisible="{Binding HasItem}"/>
+
+    </VerticalStackLayout>
+
+</ContentView>

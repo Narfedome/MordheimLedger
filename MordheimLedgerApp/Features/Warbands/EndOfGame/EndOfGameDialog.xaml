@@ -15,7 +15,7 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="380">
-        <ScrollView x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView>
         <VerticalStackLayout Spacing="16">
             <Label Text="{loc:Loc EndOfGameTitle}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -219,6 +219,6 @@
                         IsVisible="{Binding IsLastStep}"/>
             </Grid>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
     </Border>
 </dialogs:DialogContent>

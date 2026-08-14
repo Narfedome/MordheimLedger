@@ -134,6 +134,7 @@ namespace MordheimLedgerApp.Services
                     ["AppText"]            = Color.FromArgb("#E8E4D8"),
                     ["AppTextMuted"]       = Color.FromArgb("#948C7E"),
                     ["AppBorder"]          = Color.FromArgb("#35303A"),
+                    ["AppMilestone"]       = Color.FromArgb("#C9A227"),
                 }
                 : new()
                 {
@@ -144,6 +145,7 @@ namespace MordheimLedgerApp.Services
                     ["AppText"]            = Color.FromArgb("#201C1F"),
                     ["AppTextMuted"]       = Color.FromArgb("#6B6258"),
                     ["AppBorder"]          = Color.FromArgb("#D8D0BC"),
+                    ["AppMilestone"]       = Color.FromArgb("#C9A227"),
                 },
 
             // Noir & or proche de la couverture du livre de règles (fond quasi-noir, lettrage or antique,
@@ -160,6 +162,7 @@ namespace MordheimLedgerApp.Services
                     ["AppText"]            = Color.FromArgb("#EDE0C0"),
                     ["AppTextMuted"]       = Color.FromArgb("#9C8F72"),
                     ["AppBorder"]          = Color.FromArgb("#332B22"),
+                    ["AppMilestone"]       = Color.FromArgb("#8B2331"),
                 }
                 : new()
                 {
@@ -170,6 +173,7 @@ namespace MordheimLedgerApp.Services
                     ["AppText"]            = Color.FromArgb("#241F16"),
                     ["AppTextMuted"]       = Color.FromArgb("#6B5D42"),
                     ["AppBorder"]          = Color.FromArgb("#D4C79E"),
+                    ["AppMilestone"]       = Color.FromArgb("#8B2331"),
                 },
 
             _ => new()

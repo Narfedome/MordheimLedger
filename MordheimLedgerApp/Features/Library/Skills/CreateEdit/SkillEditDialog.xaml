@@ -17,7 +17,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView Grid.Row="0">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -34,17 +34,21 @@
                 <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
-            <Picker Title="{loc:Loc SkillCategoryPh}"
-                    ItemsSource="{Binding CategoryOptions}"
-                    SelectedItem="{Binding SelectedCategoryLabel}"/>
-            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc SkillCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Picker ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding SelectedCategoryLabel}"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+            </VerticalStackLayout>
 
             <!-- Réservé à ces bandes : vide = commun à toutes les bandes (voir Skill.
                  RestrictedToWarbandArchetypeIds). HeaderText dynamique plutôt qu'un titre fixe + un
                  indice affichés en même temps liste vide - même principe que MutationEditDialog. -->
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                       ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                      IconGlyph="{x:Static icons:SolidFont.Users}"
                                       AddCommand="{Binding AddRestrictionCommand}"
                                       RemoveCommand="{Binding RemoveRestrictionCommand}"/>
 
@@ -59,7 +63,7 @@
                                       RemoveCommand="{Binding RemoveRestrictedWarriorCommand}"/>
 
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

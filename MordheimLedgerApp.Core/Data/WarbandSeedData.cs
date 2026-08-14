@@ -41,6 +41,13 @@ public class WarbandSeedData
 
     public int StartingTreasury { get; set; }
     public int? MaxWarriors { get; set; }
+    public int? MinWarriors { get; set; }
+
+    /// <summary>Filename of a MauiImage under Resources/Images/Warbands/ (e.g. "orc_mob.jpg") - resolved
+    /// by MAUI's flat resource lookup, no folder prefix needed. Null/empty = tile falls back to a glyph
+    /// (see LibraryItemImageView).</summary>
+    public string? ImagePath { get; set; }
+
     public List<WarriorSeedData> Warriors { get; set; } = new();
 
     /// <summary>Equipment SPECIFIC to this warband (typically rare/restricted items) - the generic common
@@ -81,6 +88,7 @@ public class WarriorSeedData
     public bool IsHero { get; set; }
     public int Cost { get; set; }
     public int? MaxCount { get; set; }
+    public int? MinCount { get; set; }
     public int StartingExperience { get; set; }
     public int Movement { get; set; }
 
@@ -111,14 +119,24 @@ public class WarriorSeedData
     public bool CanBuyMutations { get; set; }
 
     /// <summary>English Name of one of the parent WarbandSeedData's EquipmentLists entries that this
-    /// archetype's Weapons/Armour line draws from - null/omitted = this archetype never uses equipment
-    /// (Ghouls, Zombies, Trolls, Cave Squigs...).</summary>
+    /// archetype's Weapons/Armour line draws from - null/omitted = no curated list assigned, falls back
+    /// to the full common+band equipment pool in the picker (NOT "never uses equipment" - see
+    /// CanUseEquipment for that).</summary>
     public string? EquipmentListName { get; set; }
+
+    /// <summary>False for archetypes the rulebook explicitly forbids from carrying weapons/armour
+    /// (Ghouls, Zombies, Trolls, Rat Ogre, Giant Rats... - see their "No Equipment" special rule) -
+    /// omitted/true for every ordinary archetype. See WarriorArchetype.CanUseEquipment.</summary>
+    public bool CanUseEquipment { get; set; } = true;
 
     /// <summary>This archetype's row of the warband's "skill table" (e.g. ["Combat","Strength","Speed"])
     /// - matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names. Empty/omitted = not
     /// sourced yet, not "may pick nothing" - see WarriorArchetype.AllowedSkillCategories.</summary>
     public List<string> SkillCategories { get; set; } = new();
+
+    /// <summary>True for "large creature" archetypes (Rat Ogre, Ogre, Troll...) - see
+    /// WarriorArchetype.IsLargeCreature.</summary>
+    public bool IsLargeCreature { get; set; }
 }
 
 public class EquipmentSeedData
@@ -152,6 +170,9 @@ public class EquipmentSeedData
     /// (see AppDatabase) - a band file re-declaring an already-seeded item by name doesn't re-attach
     /// rules, same precedent as Description there.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
+    /// <summary>True only for the common pool's Dagger entry - see EquipmentItem.IsFreeDagger.</summary>
+    public bool IsFreeDagger { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -192,6 +213,12 @@ public class SpecialRuleSeedData
     /// <summary>Null = not a purchasable material. Non-null marks this rule as a weapon-material option
     /// (e.g. "Gromril" -&gt; 4) - see SpecialRule.CostMultiplier.</summary>
     public int? CostMultiplier { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Abbreviation.</summary>
+    public string? Abbreviation { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Rarity.</summary>
+    public int? Rarity { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

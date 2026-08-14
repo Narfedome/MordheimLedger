@@ -16,4 +16,8 @@ public class WarriorEquipment
     /// SpecialRule with CostMultiplier set is eligible, not just those two - the picker lists whatever
     /// the Library catalog currently has.</summary>
     public SpecialRule? MaterialRule { get; set; }
+
+    /// <summary>"Sword (G)" when MaterialRule has an Abbreviation, plain "Sword" otherwise - same idiom
+    /// as EquipmentPick.Name (the in-memory equivalent before this row exists in the database).</summary>
+    public string NameDisplay => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
 }

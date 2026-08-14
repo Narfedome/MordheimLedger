@@ -17,108 +17,89 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
-        <VerticalStackLayout Spacing="16">
-            <Label Text="{Binding Title}"
+            <dialogs:StableHeightScrollView Grid.Row="0">
+                <VerticalStackLayout Spacing="16">
+                    <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
 
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
-                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc LibTabProfile}" Command="{Binding ShowProfileTabCommand}"
-                                             IsActive="{Binding IsProfileTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
-                                             IsActive="{Binding IsRulesTab}" FontSize="12"/>
-            </HorizontalStackLayout>
+                    <components:ScrollableTabStripView>
+                        <HorizontalStackLayout Spacing="16">
+                            <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                            <components:TabToggleButton Text="{loc:Loc LibTabProfile}" Command="{Binding ShowProfileTabCommand}"
+                                                 IsActive="{Binding IsProfileTab}" FontSize="12"/>
+                            <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                                 IsActive="{Binding IsRulesTab}" FontSize="12"/>
+                        </HorizontalStackLayout>
+                    </components:ScrollableTabStripView>
 
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsGeneralTab}">
-                <VerticalStackLayout Spacing="4">
-                    <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="{loc:Loc AnimalNamePh}"/>
-                                <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                    <Entry Text="{Binding Item.Name}"/>
-                    <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                    <VerticalStackLayout Spacing="12" IsVisible="{Binding IsGeneralTab}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{loc:Loc AnimalNamePh}"/>
+                                        <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Entry Text="{Binding Item.Name}"/>
+                            <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
-                </VerticalStackLayout>
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Entry Grid.Column="0" Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalCostPh}"/>
-                    <Entry Grid.Column="1" Text="{Binding Item.Rarity}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalRarityPh}"/>
-                </Grid>
-                <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric" Placeholder="{loc:Loc AnimalCostRandomMaxPh}"/>
-                <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="80"/>
-            </VerticalStackLayout>
-
-            <!-- Profil (abréviations officielles du livre de règles, pas de traduction) -->
-            <Grid IsVisible="{Binding IsProfileTab}"
-                  ColumnDefinitions="*,*,*" RowDefinitions="auto,auto,auto" RowSpacing="8" ColumnSpacing="8">
-                <VerticalStackLayout Grid.Row="0" Grid.Column="0">
-                    <Label Text="M" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Movement}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="0" Grid.Column="1">
-                    <Label Text="WS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.WeaponSkill}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="0" Grid.Column="2">
-                    <Label Text="BS" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.BallisticSkill}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="0">
-                    <Label Text="S" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Strength}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="1">
-                    <Label Text="T" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Toughness}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="1" Grid.Column="2">
-                    <Label Text="W" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Wounds}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="0">
-                    <Label Text="I" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Initiative}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="1">
-                    <Label Text="A" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Attacks}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Row="2" Grid.Column="2">
-                    <Label Text="Ld" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Entry Text="{Binding Item.Leadership}" Keyboard="Numeric"/>
-                </VerticalStackLayout>
-            </Grid>
-
-            <!-- Réservé à ces bandes (vide = commun à toutes) + règles spéciales propres à l'animal. -->
-            <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
-                <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="{loc:Loc AnimalCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="{loc:Loc AnimalRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{loc:Loc AnimalCostRandomMaxPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Editor Text="{Binding Item.Description}" HeightRequest="80"/>
+                        </VerticalStackLayout>
+                        <!-- Réservé à ces bandes (vide = commun à toutes) - même onglet Général que les autres
+                     dialogs Bibliothèque (Équipement, Mutation...), pas l'onglet Règles. -->
+                        <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                           ItemsSource="{Binding RestrictedWarbands}"
-                                          IconGlyph="{x:Static icons:SolidFont.Shield}"
+                                          IconGlyph="{x:Static icons:SolidFont.Users}"
                                           AddCommand="{Binding AddRestrictionCommand}"
                                           RemoveCommand="{Binding RemoveRestrictionCommand}"/>
-                <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                    </VerticalStackLayout>
+
+                    <!-- Profil (abréviations officielles du livre de règles, pas de traduction) - StatRowView en
+                 mode édition (IsEditable="True" bascule chaque Label en Entry), même composant que
+                 AnimalDetailDialog en lecture seule plutôt qu'une grille Label+Entry maison redondante. -->
+                    <components:StatRowView IsVisible="{Binding IsProfileTab}"
+                                             Item="{Binding Item}" MovementText="{Binding Item.Movement}" IsEditable="True"/>
+
+                    <!-- Règles spéciales propres à l'animal. -->
+                    <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
+                        <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
                                           ItemsSource="{Binding SpecialRules}"
                                           IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                           AddCommand="{Binding AddSpecialRuleCommand}"
                                           RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
-            </VerticalStackLayout>
+                    </VerticalStackLayout>
 
-        </VerticalStackLayout>
-        </ScrollView>
-        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
-            <Button Grid.Column="0"
+                </VerticalStackLayout>
+            </dialogs:StableHeightScrollView>
+            <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"
                     Style="{StaticResource DialogSecondaryButtonStyle}"
                     Command="{Binding CancelCommand}"/>
-            <Button Grid.Column="1"
+                <Button Grid.Column="1"
                     Text="{loc:Loc BtnSave}"
                     Command="{Binding SaveCommand}"/>
-        </Grid>
+            </Grid>
         </Grid>
     </Border>
 </dialogs:DialogContent>

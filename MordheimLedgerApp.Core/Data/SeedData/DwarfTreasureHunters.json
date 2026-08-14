@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "imagePath": "dwarf_treasure_hunters.jpg",
   "name": {
     "en": "Dwarf Treasure Hunters",
     "fr": "Chasseurs de Trésors Nains"
@@ -134,6 +135,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 12,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -143,6 +145,7 @@
       "isHero": true,
       "cost": 85,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 3,
       "weaponSkill": 5,

@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>Attaches a band-wide SpecialRule (applies to every warrior in the band, e.g. "Autonome" for
 /// Ostlanders) to a WarbandArchetype - many-to-many, same shape as WarbandArchetypeEquipmentEntity.

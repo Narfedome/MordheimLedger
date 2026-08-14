@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.ScrollableTabStripView"
+             x:Name="root">
+    <ContentView.ControlTemplate>
+        <ControlTemplate>
+            <!-- Un seul enfant attendu (Content de ContentView n'accepte qu'une View) - l'appelant
+                 enveloppe ses TabToggleButton dans son propre HorizontalStackLayout plutôt que de les
+                 placer un par un ici (sinon seul le dernier survit, chaque enfant XAML réécrivant
+                 Content). Générique : ne connaît rien du concept "wizard"/StepLabel - c'est à l'appelant
+                 de basculer entre son libellé d'étape et cette bande d'onglets. HorizontalOptions/
+                 VerticalOptions="Fill" explicites - même raison que PickerSelectorLayout/WatermarkedLayout :
+                 sans eux, sur WinUI, ce ScrollView se dimensionnait sur le contenu mesuré (les boutons)
+                 plutôt que l'espace disponible du dialog parent, donc aucun dépassement à faire défiler.
+
+                 AutomationId="DragScrollTabStrip" : ni la molette ni PanGestureRecognizer (voir
+                 OnApplyTemplate côté .xaml.cs, actif sur tactile/stylet) ne pilotent le ScrollViewer natif
+                 pour un clic-glisser souris pur sur WinUI - limitation MAUI connue sur Windows. Le vrai
+                 fix vit côté natif (MauiProgram.cs, ConfigureMauiHandlers sous #if WINDOWS), ciblé sur ce
+                 seul ScrollViewer via cet AutomationId plutôt qu'un mapping global à tous les ScrollView
+                 de l'appli - molette + drag souris + scrollbar masquée y sont câblés directement sur le
+                 ScrollViewer WinUI. -->
+            <ScrollView x:Name="TabScrollView" Orientation="Horizontal" HorizontalScrollBarVisibility="Never"
+                        AutomationId="DragScrollTabStrip"
+                        HorizontalOptions="Fill" VerticalOptions="Fill">
+                <ContentPresenter />
+            </ScrollView>
+        </ControlTemplate>
+    </ContentView.ControlTemplate>
+</ContentView>

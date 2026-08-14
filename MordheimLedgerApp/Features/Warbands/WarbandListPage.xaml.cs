@@ -1,4 +1,5 @@
 using CommunityToolkit.Maui.Extensions;
+using MordheimLedgerApp.Features.Library;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -27,15 +28,10 @@ public partial class WarbandListPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
-        // Une popup thémée qui se ferme redéclenche la navigation (cf. CampaignPage de DmTools,
-        // même garde) - sans ça, chaque ActionSheet/Prompt fermé pendant CreateWarbandAsync
-        // rechargeait la liste en fond avant même que le flux de création soit terminé.
-        // Create/Edit/Delete rechargent déjà Rows eux-mêmes après coup, donc seul le tout premier
-        // affichage a besoin de ce chargement initial.
-        if (args.WasPreviousPageACommunityToolkitPopupPage() || _initialized)
+        if (args.WasPreviousPageACommunityToolkitPopupPage())
             return;
 
-        _initialized = true;
-        await _vm.LoadWarbandsCommand.ExecuteAsync(null);
+        if (BindingContext is WarbandListViewModel vm)
+            await vm.InitializeAsync();
     }
 }

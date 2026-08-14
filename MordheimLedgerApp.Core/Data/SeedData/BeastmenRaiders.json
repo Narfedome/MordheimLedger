@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "imagePath": "beastmem_raiders.jpg",
   "name": {
     "en": "Beastmen Raiders",
     "fr": "Pillards Hommes-Bêtes"
@@ -107,6 +108,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -116,6 +118,7 @@
       "isHero": true,
       "cost": 65,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 5,
       "weaponSkill": 4,
@@ -352,6 +355,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 5,
+      "canUseEquipment": false,
       "description": {
         "en": "Titanic, mastiff-like creatures, insanely dangerous in close combat - apart from fangs and a nasty temper, Chaos Hounds carry no weapons or armour and fight without penalty.",
         "fr": "Les Chiens du Chaos sont bien plus gros que les chiens de combat et beaucoup plus dangereux au corps à corps. Mis à part leurs griffes, leurs crocs, et quelques cornes pour les plus altérés, ils n'ont aucun équipement et combattent donc sans aucune pénalité."
@@ -362,6 +366,12 @@
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
           }
+        },
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
         }
       ]
     },
@@ -371,6 +381,7 @@
         "fr": "Minotaure"
       },
       "isHero": false,
+      "isLargeCreature": true,
       "cost": 200,
       "maxCount": 1,
       "startingExperience": 0,

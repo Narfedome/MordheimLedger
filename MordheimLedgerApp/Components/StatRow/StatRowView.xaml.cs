@@ -17,12 +17,25 @@ public partial class StatRowView : ContentView
     // Item.Movement pour Animal) - pas de nom de propriété uniforme à binder faiblement ici, voir le
     // commentaire dans StatRowView.xaml.
     public static readonly BindableProperty MovementTextProperty =
-        BindableProperty.Create(nameof(MovementText), typeof(string), typeof(StatRowView), string.Empty);
+        BindableProperty.Create(nameof(MovementText), typeof(string), typeof(StatRowView), string.Empty, BindingMode.TwoWay);
 
     public string MovementText
     {
         get => (string)GetValue(MovementTextProperty);
         set => SetValue(MovementTextProperty, value);
+    }
+
+    // Bascule Label (lecture seule, tous les appelants existants - WarbandDetailPage/AnimalDetailDialog/
+    // WarriorArchetypeDetailDialog) / Entry (édition - AnimalEditDialog/WarriorArchetypeEditDialog) par
+    // colonne, même Grid/mêmes tailles de police dans les deux cas - un seul composant plutôt qu'une
+    // grille dupliquée par dialog d'édition.
+    public static readonly BindableProperty IsEditableProperty =
+        BindableProperty.Create(nameof(IsEditable), typeof(bool), typeof(StatRowView), false);
+
+    public bool IsEditable
+    {
+        get => (bool)GetValue(IsEditableProperty);
+        set => SetValue(IsEditableProperty, value);
     }
 
     // Défauts calés sur les dialogs récap (Animal/WarriorArchetypeDetailDialog) - WarbandDetailPage

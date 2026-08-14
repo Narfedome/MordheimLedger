@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -15,6 +16,14 @@ public partial class WarbandRow : ObservableObject
 
     [ObservableProperty]
     private string archetypeName = string.Empty;
+
+    /// <summary>Rulebook "calculate the warband rating" - see IWarbandService.GetWarbandRatingAsync.
+    /// Fetched alongside ArchetypeName at list-load time.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RatingDisplay))]
+    private int rating;
+
+    public string RatingDisplay => string.Format(LocalizationService.Instance["WarbandRatingDisplay"], Rating);
 
     [ObservableProperty]
     private bool isSelected;

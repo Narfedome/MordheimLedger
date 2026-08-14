@@ -65,6 +65,15 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarbandEntity>(warbandId);
     }
 
+    public async Task<int> GetWarbandRatingAsync(int warbandId)
+    {
+        await _db.Initialization;
+        var warriors = await _db.Connection.Table<WarriorEntity>()
+            .Where(w => w.WarbandId == warbandId && w.Status == WarriorStatus.Active)
+            .ToListAsync();
+        return warriors.Sum(w => ((w.IsLargeCreature ? 20 : 5) + w.Experience) * w.HeadCount);
+    }
+
     public async Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode)
     {
         await _db.Initialization;
@@ -161,11 +170,12 @@ public class WarbandService : IWarbandService
         return warriors;
     }
 
-    public async Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name)
+    public async Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1)
     {
         await _db.Initialization;
         var warrior = archetype.ToWarrior(name);
         warrior.WarbandId = warbandId;
+        warrior.HeadCount = headCount;
         var entity = warrior.ToEntity();
         await _db.Connection.InsertAsync(entity);
         warrior.Id = entity.Id;

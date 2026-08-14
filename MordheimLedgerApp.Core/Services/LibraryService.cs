@@ -72,16 +72,6 @@ public class LibraryService : ILibraryService
         return row.ToModel(translations, specialRules);
     }
 
-    public async Task<List<NamedRef>> GetWarriorArchetypeNamesAsync(int warbandArchetypeId, string languageCode)
-    {
-        await _db.Initialization;
-        var rows = await _db.Connection.Table<WarriorArchetypeEntity>()
-            .Where(w => w.WarbandArchetypeId == warbandArchetypeId)
-            .ToListAsync();
-        var translations = await ResolveTranslationsAsync(rows.Select(r => r.NameKey), languageCode);
-        return rows.Select(r => new NamedRef { Id = r.Id, Name = EntityMapping.ResolveName(r.NameKey, translations) }).ToList();
-    }
-
     public async Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode)
     {
         await _db.Initialization;

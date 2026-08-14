@@ -7,7 +7,6 @@ public partial class SpellEditDialog : DialogContent<bool>
     public SpellEditDialog(SpellEditDialogViewModel viewModel)
     {
         InitializeComponent();
-        ContentScroll.MaximumHeightRequest = DialogSizing.MaxContentHeight();
         BindingContext = viewModel;
     }
 }

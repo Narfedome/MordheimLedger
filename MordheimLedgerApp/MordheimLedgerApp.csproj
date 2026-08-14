@@ -136,7 +136,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Components\ChipItem\ChipItemView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Components\FaIconButton\FaIconButtonView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Features\Warbands\CreateEdit\WarbandEditDialog.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
@@ -206,10 +212,32 @@
 	<ItemGroup>
 		<CoreSeedJsonFiles Include="..\MordheimLedgerApp.Core\Data\SeedData\*.json" />
 	</ItemGroup>
+	<ItemGroup>
+	  <MauiImage Include="Resources\Images\Warbands\averland_mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\beastmem_raiders.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\carnival_of_chaos.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\cult_of_the_possessed.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\dwarf_treasure_hunters.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\kislevites_warriors.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\mercenaries_empire.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\middenheimers_mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\orc_mob.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\ostlanders_mercenaries.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\sisters_of_sigmar.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\skaven_clan_eschin.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\the_undead.jpg" />
+	  <MauiImage Include="Resources\Images\Warbands\witch_hunters.jpg" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Components\ChipItem\ChipItemView.xaml.cs">
+	    <DependentUpon>ChipItemView.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Features\Warbands\CreateEdit\WarbandEditDialog.xaml.cs">
+	    <DependentUpon>WarbandEditDialog.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 
-	<Target Name="GenerateSeedDatabase" BeforeTargets="BeforeBuild"
-	        Inputs="@(CoreSeedJsonFiles)"
-	        Outputs="$(MSBuildProjectDirectory)\Resources\Raw\seed.db3">
+	<Target Name="GenerateSeedDatabase" BeforeTargets="BeforeBuild" Inputs="@(CoreSeedJsonFiles)" Outputs="$(MSBuildProjectDirectory)\Resources\Raw\seed.db3">
 		<Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\Tools\DbSeedGenerator\DbSeedGenerator.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\Resources\Raw\seed.db3&quot;" />
 	</Target>
 

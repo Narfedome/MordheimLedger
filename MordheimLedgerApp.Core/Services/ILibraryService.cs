@@ -18,10 +18,6 @@ public interface ILibraryService
     /// result, no call.</summary>
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(IEnumerable<int> warbandArchetypeIds, string languageCode);
 
-    /// <summary>Id+Name only, no SpecialRules/Description resolution - for chip lists (e.g.
-    /// WarbandArchetypeDetailDialog's Guerriers tab) that only display a name and fetch the full
-    /// WarriorArchetype on tap via GetWarriorArchetypeAsync(id, ...).</summary>
-    Task<List<NamedRef>> GetWarriorArchetypeNamesAsync(int warbandArchetypeId, string languageCode);
     Task<List<EquipmentItem>> GetEquipmentItemsAsync(string languageCode);
 
     /// <summary>Same resolution as GetEquipmentItemsAsync(languageCode), filtered to specific ids at the
@@ -33,8 +29,8 @@ public interface ILibraryService
     /// what a WarriorArchetype.EquipmentListId actually points at.</summary>
     Task<List<EquipmentList>> GetEquipmentListsAsync(int warbandArchetypeId, string languageCode);
 
-    /// <summary>Id+Name only - same rationale as GetWarriorArchetypeNamesAsync, for
-    /// WarbandArchetypeDetailDialog's Équipement tab (member items resolved lazily on tap, see
+    /// <summary>Id+Name only, no member-items resolution - for WarbandArchetypeDetailDialog's Équipement
+    /// tab, which only displays a name and resolves member items lazily on tap (see
     /// GetEquipmentListItemIdsAsync).</summary>
     Task<List<NamedRef>> GetEquipmentListNamesAsync(int warbandArchetypeId, string languageCode);
 

@@ -1,6 +1,6 @@
 using SQLite;
 
-namespace MordheimLedgerApp.Core.Data.Entities;
+namespace MordheimLedgerApp.Core.Data.Entities.Library;
 
 /// <summary>
 /// Marks an EquipmentItem as restricted to a specific WarbandArchetype (e.g. "Hache Naine" - Dwarf

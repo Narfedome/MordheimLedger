@@ -3,24 +3,31 @@
              x:Class="MordheimLedgerApp.Components.LibraryItemImageView"
              x:Name="root">
 
-    <Image>
-        <Image.Source>
-            <Binding Path="ImagePath" Source="{x:Reference root}" TargetNullValue=""/>
-        </Image.Source>
-        <Image.Triggers>
-            <!-- ImagePath vide (pas encore d'art) : repli sur un glyphe FontAwesome. -->
-            <MultiTrigger TargetType="Image">
-                <MultiTrigger.Conditions>
-                    <BindingCondition Binding="{Binding Source={x:Reference root}, Path=ImagePath}" Value=""/>
-                </MultiTrigger.Conditions>
-                <Setter Property="Source">
-                    <Setter.Value>
-                        <FontImageSource FontFamily="{Binding Source={x:Reference root}, Path=FontFamily}"
-                                         Glyph="{Binding Source={x:Reference root}, Path=DefaultGlyph}"
-                                         Color="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"/>
-                    </Setter.Value>
-                </Setter>
-            </MultiTrigger>
-        </Image.Triggers>
-    </Image>
+    <Grid>
+        <Image Source="{Binding Source={x:Reference root}, Path=ImagePath}">
+            <Image.Triggers>
+                <DataTrigger TargetType="Image" Binding="{Binding Source={x:Reference root}, Path=ImagePath}" Value="">
+                    <Setter Property="IsVisible" Value="False"/>
+                </DataTrigger>
+            </Image.Triggers>
+        </Image>
+
+        <!-- Label plutôt que FontImageSource/Image : FontImageSource rastérise le glyphe dans un
+             bitmap carré de taille fixe et rogne les glyphes dont l'encre naturelle dépasse ce carré
+             (ex. RaFootprint, RaMuscleUp - repéré visuellement, glyphes coupés). Un Label dimensionne
+             son texte normalement, sans ce recadrage, comme les icônes de puce ailleurs dans l'app. -->
+        <Label Text="{Binding Source={x:Reference root}, Path=DefaultGlyph}"
+               FontFamily="{Binding Source={x:Reference root}, Path=FontFamily}"
+               FontSize="{Binding Source={x:Reference root}, Path=HeightRequest}"
+               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
+               HorizontalOptions="Center" VerticalOptions="Center"
+               HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+               LineBreakMode="NoWrap" IsVisible="False">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference root}, Path=ImagePath}" Value="">
+                    <Setter Property="IsVisible" Value="True"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
+    </Grid>
 </ContentView>

@@ -37,6 +37,12 @@ C'est la distinction structurante du modèle de données, demandée explicitemen
   évolue ensuite indépendamment (XP, blessures) — modifier l'archétype après coup n'affecte pas
   les guerriers déjà recrutés.
 
+**Rangement vérifié (2026-08-15)** : les 12 tables de jointure entre deux concepts Library (ex.
+`WarbandArchetypeSkillEntity`, `EquipmentItemSpecialRuleEntity`) vivaient à la racine de
+`Data/Entities/` au lieu de `Data/Entities/Library/`, malgré la règle ci-dessus — repéré lors d'un
+audit d'architecture puis déplacé (`git mv` + namespace `MordheimLedgerApp.Core.Data.Entities.Library`).
+Aucune de ces 12 ne référence de `Warband`/`Warrior` joué, seulement des paires d'archétypes/catalogue.
+
 ## Terminologie
 
 Le code utilise les **termes anglais officiels** du jeu (Warband, Warrior, Hero/Henchman, Hired
@@ -62,6 +68,38 @@ police toute faite : RPG Awesome (armes, crânes, dés...) est le meilleur compr
 icône via `Components/FaIconButton/FaIconButtonView` (`GhostIconButtonStyle` = fond transparent,
 style implicite = fond accent plein) et `Components/IconTextButton/IconTextButton` (icône + texte
 en une seule zone tappable), portés tels quels depuis DmTools.
+
+**Passe cohérence icônes (2026-08-15)** : audit de toutes les icônes de l'app (`SolidFont`/`RpgFont`)
+demandé par l'utilisateur, qui a repéré des glyphes utilisés dans le mauvais contexte. Règle
+dégagée : **un glyphe = un concept dans toute l'app**, jamais deux sens différents pour le même
+glyphe même dans des écrans éloignés. Mordheim se déroule dans le Vieux Monde (Warhammer Fantasy,
+pas 40k) : proscrire tout glyphe RPG Awesome à connotation moderne/militaire (ex. `RaAmmoBag`,
+écarté au profit de `RaArrowCluster` pour la catégorie Munitions - repéré visuellement comme "sacoche
+de chargeur" plutôt que carquois).
+- `EquipmentCategoryIconConverter` (puces objet) et `EquipmentItemRow.CategoryIcon`/`CategoryIconFont`
+  (tuiles Place du Marché) utilisaient deux mappings différents pour le même `EquipmentCategory` -
+  désormais alignés : Armure = `RaVest`, Munitions = `RaArrowCluster`, Divers = `RaPotion`.
+- `SolidFont.Shield` n'est plus utilisé nulle part : remplacé par `SolidFont.Users` partout où il
+  servait à autre chose que "Bandes" à proprement parler (chips "réservé à ces bandes" dans les
+  dialogs Équipement/Animal/Mutation/Compétence, chip "listes d'équipement" et tuile par défaut de
+  `WarbandArchetypeView`) - `Users` couvre maintenant tout ce qui touche à la notion de bande.
+- Domaine magie : `RaBurningBook` = Sorts uniquement (chips + tuile par défaut de `SpellView`) ;
+  `RaCrystalBall` = École de magie (tuile `MagicSchoolView` + chip dans `WarbandArchetypeEditDialog`/
+  `DetailDialog`, y compris le bouton "gérer les écoles de magie" en en-tête de `SpellView` - son
+  action cible les écoles, pas les sorts). `RaBook` réservé à la catégorie de compétence Érudition ;
+  l'onglet Codex garde `SolidFont.BookOpen` (testé avec `RaBook` puis revert, pas de double emploi).
+- `SkillCategoryIconConverter` (Combat/Tir/Érudition/Force/Vitesse/Spécial) n'était câblé que sur les
+  puces (fiche guerrier, dialogs de recrutement) - la grille de tuiles Compétences du Codex
+  (`SkillView.xaml`) affichait un glyphe `Brain` fixe pour toutes les catégories. Corrigé pour utiliser
+  le même converter partout ; `SolidFont.Brain` n'est plus utilisé.
+- **Bug de fond trouvé en cours de route** : `Components/LibraryItemImage/LibraryItemImageView`
+  (icône par défaut des tuiles Codex quand pas d'image) rendait son glyphe via `<Image><FontImageSource>`
+  plutôt qu'un `<Label>`. `FontImageSource` rastérise le glyphe dans un bitmap **carré** de taille fixe
+  et rogne l'encre qui dépasse ce carré - invisible pour les glyphes compacts, visible pour ceux dont
+  l'empreinte est naturellement plus large qu'haute (`RaFootprint`, `RaMuscleUp` repérés coupés à
+  l'écran). Remplacé par un `<Label>` (même mécanisme que les icônes de puce ailleurs dans l'app, qui
+  n'ont jamais eu ce problème) - corrige les 10 usages de `LibraryItemImageView` d'un coup, pas
+  seulement Compétences.
 
 **Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
 d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
@@ -103,8 +141,9 @@ pas encore mergée sur `master`) : passe de polish sur les 8 onglets Codex (Band
 Compétences, Règles Spéciales, Mutations, Montures, Sorts, Blessures) + 3 grilles de tuiles annexes
 (`EquipmentListView`, `WarriorArchetypeView`, `WarriorArchetypeSelectorView` — mêmes styles partagés,
 mais sans bouton info/dialog récap, hors périmètre des 8 types catalogués).
-- Tuiles carrées à taille fixe (130×130, `CodexTileFrameStyle` + `ResponsiveGridSpanBehavior
-  TileWidth="130"` déclaré par fichier — **pas** centralisé en constante malgré la tentation, décision
+- Tuiles carrées à taille fixe (130×130, `CodexTileFrameStyle` — `ResponsiveGridSpanBehavior` est posé
+  tel quel par fichier, sans `TileWidth` explicite, et retombe donc sur son défaut de classe (140) pour
+  le calcul du nombre de colonnes ; **pas** centralisé en constante malgré la tentation, décision
   explicite après essai : cf. règles de collaboration ci-dessous), nom enroulé sur 3 lignes
   (`CodexTileNameLabelStyle`) plutôt que tronqué à 1 (`TruncatedLabelStyle`, toujours utilisé tel quel par
   `WarbandListPage` et `MagicSchoolView` — liste à plat, pas une grille de tuiles, hors périmètre).
@@ -276,8 +315,12 @@ mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`pre
   `dotnet test MordheimLedgerApp.Tests`.
 - **Depuis la passe tuiles du Codex : dev par branche de fonctionnalité** (`feature/<nom>`), plus
   directement sur `master` — la base est maintenant stable, à protéger.
-- La taille des tuiles du Codex (`ResponsiveGridSpanBehavior.TileWidth="130"`, dupliquée dans les 11
-  fichiers) a été temporairement centralisée en constante C# (`DefaultTileWidth`) référencée par XAML
-  via `x:Static`, puis explicitement annulée par l'utilisateur ("on retourne en arrière") en faveur de la
-  duplication d'origine — **ne pas retenter cette centralisation sans redemander**, la décision était
-  volontaire, pas un oubli de nettoyage.
+- La taille des tuiles du Codex (`ResponsiveGridSpanBehavior.TileWidth`, calcul du span de colonnes) a
+  été temporairement centralisée en constante C# (`DefaultTileWidth`) référencée par XAML via
+  `x:Static`, puis explicitement annulée par l'utilisateur ("on retourne en arrière") en faveur du
+  défaut de classe posé tel quel par fichier — **ne pas retenter cette centralisation sans redemander**,
+  la décision était volontaire, pas un oubli de nettoyage. Contrairement à une version antérieure de
+  cette note, aucun fichier XAML ne déclare plus `TileWidth="130"` explicitement aujourd'hui : le span se
+  base sur le défaut de classe (140) plutôt que sur la taille visuelle réelle de la tuile (130,
+  `CodexTileFrameStyle`) — vérifié fonctionnel à l'usage (2026-08-15), donc pas une régression à corriger
+  sans y être invité.

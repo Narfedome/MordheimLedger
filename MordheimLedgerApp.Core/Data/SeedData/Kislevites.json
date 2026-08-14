@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "imagePath": "kislevites_warriors.jpg",
   "name": {
     "en": "Kislevites",
     "fr": "Kislévites"
@@ -32,6 +33,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -41,6 +43,7 @@
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -295,11 +298,18 @@
       "initiative": 2,
       "attacks": 2,
       "leadership": 6,
+      "canUseEquipment": false,
       "description": {
         "en": "Bear Tamers often bring one of their sacred bears into battle - it takes years to win such a creature's trust, but there is no more loyal friend or useful ally when things turn bad.",
         "fr": "Les Dompteurs d'Ours amènent souvent avec eux l'un de leurs ours sacrés. Ces énormes bêtes ne respectent pas grand-chose, et il faut à un humain des années pour gagner leur confiance et leur obéissance. Mais ces efforts ne sont jamais vains car lorsque les choses tournent mal, il n'est pas d'ami plus fidèle et plus sauvagement loyal qu'un ours apprivoisé."
       },
       "specialRules": [
+        {
+          "name": {
+            "en": "No Equipment",
+            "fr": "Sans équipement"
+          }
+        },
         {
           "name": {
             "en": "Trained",

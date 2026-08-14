@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "imagePath": "cult_of_the_possessed.jpg",
   "name": {
     "en": "Cult of the Possessed",
     "fr": "Culte des Possédés"
@@ -19,6 +20,7 @@
   ],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -28,6 +30,7 @@
       "isHero": true,
       "cost": 70,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -83,6 +86,7 @@
       "attacks": 2,
       "leadership": 7,
       "canBuyMutations": true,
+      "canUseEquipment": false,
       "description": {
         "en": "Warriors who have committed the greatest of heresies and given their bodies to daemons - nightmarish creatures, a melding of flesh, metal and black magic, perhaps the most dangerous and loathsome creatures of Mordheim.",
         "fr": "Les Possédés ont commis la plus grave des hérésies, ils ont abandonné leur corps à un démon. Ce sont des êtres monstrueux, mélange de chair, de métal et d'énergie magique pure, peut-être les créatures les plus dangereuses de Mordheim, et certainement les plus effrayantes et les plus écœurantes."

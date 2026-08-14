@@ -21,6 +21,11 @@ public class WarriorArchetype
     /// <summary>Null = no recruitment cap tracked (e.g. "0-1 per warband").</summary>
     public int? MaxCount { get; set; }
 
+    /// <summary>Null = no recruitment floor tracked. Non-null only for a warband's sole "no more, no
+    /// less" leader type (e.g. the Vampire for Undead), where it equals MaxCount (exactly one
+    /// required) - never set for merely-capped types (Dregs, Dire Wolves...), where 0 is valid.</summary>
+    public int? MinCount { get; set; }
+
     public int Movement { get; set; }
 
     /// <summary>Non-null overrides the displayed Movement value with free text (e.g. "2D6" for Cave
@@ -81,10 +86,24 @@ public class WarriorArchetype
     /// stat line - editing this later doesn't retroactively change already-recruited warriors.</summary>
     public int? EquipmentListId { get; set; }
 
+    /// <summary>False for archetypes the rulebook explicitly forbids from ever carrying weapons/armour
+    /// (Zombie, Ghoul, Dire Wolf, the Possessed, Rat Ogre, Giant Rats - see their "No Equipment" special
+    /// rule) - hides the "+" equipment button entirely rather than leaving it clickable with no real
+    /// effect. True for every ordinary archetype. Copied onto Warrior at recruitment (see
+    /// EntityMapping.ToWarrior), same snapshot-at-recruit-time convention as the rest of the stat line.</summary>
+    public bool CanUseEquipment { get; set; } = true;
+
     /// <summary>Which of the 6 rulebook Skill lists this archetype may pick an Advance from (its row of
     /// the warband's "skill table", e.g. a Witch Hunter Captain gets all 5 standard categories, a Bear
     /// Tamer only Combat/Strength/Speed) - empty = not seeded/unknown, not "may pick nothing". Data-only,
     /// same "no rules engine V1" convention as the other Restricted* lists elsewhere: not enforced in the
     /// Skill picker, just informative.</summary>
     public List<SkillCategory> AllowedSkillCategories { get; set; } = new();
+
+    /// <summary>True for "large creature" archetypes (Rat Ogre, Ogre, Troll...) - the rulebook's Warband
+    /// Rating formula counts these as a flat 20 points instead of the usual 5 per warrior (see
+    /// RulesReference "Starting a Warband" - "calculate the warband rating"). Copied onto Warrior at
+    /// recruitment (see ToWarrior), same snapshot-at-recruit-time convention as the rest of the stat
+    /// line.</summary>
+    public bool IsLargeCreature { get; set; }
 }

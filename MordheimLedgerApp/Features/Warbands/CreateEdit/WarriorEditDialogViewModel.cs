@@ -5,6 +5,7 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
@@ -114,26 +115,58 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
-        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId);
+        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury,
+            alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger));
+
+        // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
+        // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient à
+        // choisir "Normal" pour toutes (même comportement qu'annuler l'ancienne ActionSheet par arme).
+        // File plutôt que Dictionary&lt;EquipmentItem, ...&gt; : items peut contenir le MÊME EquipmentItem
+        // plusieurs fois (le picker permet d'acheter plusieurs exemplaires d'un même objet, voir
+        // EquipmentItemViewModel.ConfirmSelection) - un dictionnaire écraserait le premier choix (ex.
+        // Gromril sur la 1re épée longue) par le second (Normal sur la 2e), les deux partageant la même
+        // clé. La file consomme les choix dans le même ordre que meleeItems, qui suit lui-même l'ordre de
+        // items - correct même avec des objets non-armes intercalés.
+        var meleeMaterials = new Queue<SpecialRule?>();
+        var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
+        if (meleeItems.Count > 0)
+        {
+            var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
+                .Where(r => r.CostMultiplier.HasValue).ToList();
+            if (materialRules.Count > 0)
+            {
+                // hasFreeDaggerSlot suit l'ordre des items comme la boucle d'achat plus bas, pour que le
+                // prix affiché ici (MaterialChoice.isFreeEligible) corresponde exactement à ce qui sera
+                // effectivement facturé - seule la PREMIÈRE dague du lot (existante ou dans ce même lot)
+                // est éligible, achetée en "Normal" (un matériau Gromril/Ithilmar reste payant même sur
+                // cette dague-là - voir MaterialChoice).
+                var hasFreeDaggerSlot = Equipment.Any(e => e.Item.IsFreeDagger);
+                var choices = new List<MaterialChoice>();
+                foreach (var item in meleeItems)
+                {
+                    choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], item.IsFreeDagger && !hasFreeDaggerSlot));
+                    if (item.IsFreeDagger) hasFreeDaggerSlot = true;
+                }
+                var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
+                foreach (var choice in choices)
+                    meleeMaterials.Enqueue(confirmed == true ? choice.SelectedMaterial : null);
+            }
+        }
+
         foreach (var equipmentItem in items)
         {
-            // Arme de corps à corps : propose un matériau (Gromril/Ithilmar/...) avant de calculer le
-            // prix - toute SpecialRule dotée d'un CostMultiplier est éligible, pas seulement ces deux-là.
-            // Annuler le picker (< 0) revient à choisir "Normal".
-            SpecialRule? materialRule = null;
-            if (equipmentItem.Category == EquipmentCategory.MeleeWeapon)
-            {
-                var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
-                    .Where(r => r.CostMultiplier.HasValue).ToList();
-                if (materialRules.Count > 0)
-                {
-                    var options = new[] { Loc["WarriorsMaterialNormal"] }.Concat(materialRules.Select(r => r.Name)).ToArray();
-                    var index = await ShowActionSheetIndexAsync(Loc["WarriorsMaterialPickerTitle"], options);
-                    if (index > 0) materialRule = materialRules[index - 1];
-                }
-            }
+            var materialRule = equipmentItem.Category == EquipmentCategory.MeleeWeapon && meleeMaterials.Count > 0
+                ? meleeMaterials.Dequeue()
+                : null;
 
-            var cost = equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
+            // La première dague est gratuite, uniquement en "Normal" (livre des règles : "in addition to
+            // his free dagger") - une deuxième dague, ou un matériau délibérément choisi sur celle-ci,
+            // coûte le prix normal (voir EquipmentItem.IsFreeDagger/WarbandEditDialogViewModel.
+            // AddEquipment pour la même logique côté wizard). Pas besoin de mémoriser "était-ce gratuit"
+            // au-delà de cette déduction ponctuelle - contrairement au wizard (EquipmentPick.IsFree), le
+            // trésor est débité immédiatement et définitivement ici.
+            var isFreeDagger = equipmentItem.IsFreeDagger && materialRule is null && !Equipment.Any(e => e.Item.IsFreeDagger);
+            var cost = isFreeDagger ? 0 : equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
 
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.
@@ -149,6 +182,12 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem, materialRule: materialRule);
             Equipment.Add(carried);
         }
+
+        // Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
+        // guerrier) - voir WeaponLimits/WarbandEditDialogViewModel.AddEquipment pour la même logique côté
+        // wizard de création.
+        if (WeaponLimits.ExceedsLimits(Equipment.Select(e => e.Item)))
+            await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], Item.Name));
     }
 
     [RelayCommand]
@@ -156,6 +195,30 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     {
         await _warbandService.RemoveWarriorEquipmentAsync(carried.Id);
         Equipment.Remove(carried);
+    }
+
+    /// <summary>Même recap qu'à l'étape Équipement du wizard de création (WarbandEditDialogViewModel.
+    /// ShowEquipmentDetail) - inclut le matériau choisi (Gromril/Ithilmar...) dans la liste de règles
+    /// spéciales affichée, pas seulement l'abréviation "(G)" du chip.</summary>
+    [RelayCommand]
+    private async Task ShowEquipmentDetail(WarriorEquipment carried)
+    {
+        var equipmentItem = carried.Item;
+        var language = LocalizationService.Instance.Language;
+        var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
+
+        var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
+                .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new EquipmentItemDetailDialog(
+            new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, carried.MaterialRule)));
     }
 
     [RelayCommand]

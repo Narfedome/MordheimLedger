@@ -18,39 +18,23 @@
          à côté du header et un Xmark sur chaque chip - utilisées par les dialogs éditables
          (WarbandArchetypeEditDialog), sans impact sur les usages en lecture seule qui ne les renseignent
          pas. -->
-    <VerticalStackLayout Spacing="8" BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}">
+    <VerticalStackLayout BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}" Spacing="4">
         <Grid ColumnDefinitions="*,Auto">
-            <Label Grid.Column="0" Text="{Binding HeaderText}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+            <Label Text="{Binding Source={x:Reference root}, Path=HeaderText}" Grid.Column="0" VerticalOptions="Center"/>
             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                           Icon="{x:Static icons:SolidFont.Plus}"
                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                           IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
                                           Command="{Binding AddCommand}"/>
         </Grid>
-        <Label Text="{Binding EmptyHintText}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
-               IsVisible="{Binding HasItems, Converter={StaticResource InverseBoolConverter}}"/>
         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ItemsSource}" IsVisible="{Binding HasItems}">
             <BindableLayout.ItemTemplate>
                 <DataTemplate>
-                    <Border Style="{StaticResource ChipBorderStyle}" Margin="0,0,4,4" >
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={x:Reference root}, Path=Command}"
-                                CommandParameter="{Binding .}"/>
-                        </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="4" HeightRequest="36" Margin="8,0">
-                            <Label Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=IconGlyph}"
-                                   FontFamily="{Binding Source={x:Reference root}, Path=IconFontFamily}"
-                                   FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
-                                                          Icon="{x:Static icons:SolidFont.Xmark}"
-                                                          IconSize="10" Padding="0,0,-8,0"
-                                                          IsVisible="{Binding Source={x:Reference root}, Path=RemoveCommand, Converter={StaticResource IsNotNullConverter}}"
-                                                          Command="{Binding Source={x:Reference root}, Path=RemoveCommand}"
-                                                          CommandParameter="{Binding .}"/>
-                        </Grid>
-                    </Border>
+                    <components:ChipView Item="{Binding .}"
+                                          IconGlyph="{Binding Source={x:Reference root}, Path=IconGlyph}"
+                                          IconFontFamily="{Binding Source={x:Reference root}, Path=IconFontFamily}"
+                                          Command="{Binding Source={x:Reference root}, Path=Command}"
+                                          RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveCommand}"/>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>
         </FlexLayout>

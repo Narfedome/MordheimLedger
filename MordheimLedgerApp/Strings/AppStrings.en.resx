@@ -174,8 +174,32 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Not enough gold in the warband's treasury.</value>
   </data>
-  <data name="WarriorsMaterialPickerTitle" xml:space="preserve">
-    <value>Weapon material</value>
+  <data name="WarbandsExistingWarbandLabel" xml:space="preserve">
+    <value>Existing warband</value>
+  </data>
+  <data name="WarbandsExistingWarbandTitle" xml:space="preserve">
+    <value>Existing Warband mode</value>
+  </data>
+  <data name="WarbandsExistingWarbandHint" xml:space="preserve">
+    <value>Free treasury entry, no budget limit on recruiting or purchases, and skills already learned can be assigned directly.</value>
+  </data>
+  <data name="WarriorsMaterialHeading" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
+    <value>{0}/{1}</value>
+  </data>
+  <data name="WarbandsSplitGroupTitle" xml:space="preserve">
+    <value>Split group</value>
+  </data>
+  <data name="WarbandsSplitGroupPrompt" xml:space="preserve">
+    <value>How many warriors in the new group? (1-{0})</value>
+  </data>
+  <data name="WarbandsWeaponLimitWarningTitle" xml:space="preserve">
+    <value>Weapon limit exceeded</value>
+  </data>
+  <data name="WarbandsWeaponLimitWarningMessage" xml:space="preserve">
+    <value>{0} exceeds the usual limit (2 close combat weapons, 2 different missile weapons) - double-check a special rule allows it (e.g. Skaven Tail Fighting).</value>
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
@@ -288,6 +312,39 @@
   <data name="WarriorsGroupHenchmen" xml:space="preserve">
     <value>Henchmen</value>
   </data>
+  <data name="WarbandsRosterMinSuffix" xml:space="preserve">
+    <value>min {0}</value>
+  </data>
+  <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
+    <value>{0} gc remaining</value>
+  </data>
+  <data name="WarbandRatingPh" xml:space="preserve">
+    <value>Warband Rating</value>
+  </data>
+  <data name="WarbandRatingDisplay" xml:space="preserve">
+    <value>Rating {0}</value>
+  </data>
+  <data name="EquipmentPickerBudgetDisplay" xml:space="preserve">
+    <value>{0} gc spent · {1} gc remaining</value>
+  </data>
+  <data name="WarbandsRosterFullTitle" xml:space="preserve">
+    <value>Roster full</value>
+  </data>
+  <data name="WarbandsRosterFullMessage" xml:space="preserve">
+    <value>This warband has reached its maximum roster size.</value>
+  </data>
+  <data name="WarbandsNoRecruitableWarriorsMessage" xml:space="preserve">
+    <value>No warrior type is recruitable with the remaining budget or roster slots.</value>
+  </data>
+  <data name="WarbandsMinWarriorsError" xml:space="preserve">
+    <value>Recruit at least {0} warriors before continuing.</value>
+  </data>
+  <data name="WarbandsRequiredWarriorMissing" xml:space="preserve">
+    <value>This warband must include {1} {0}.</value>
+  </data>
+  <data name="WarbandsWarriorNameRequired" xml:space="preserve">
+    <value>Enter a name for each recruited {0}.</value>
+  </data>
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Dead</value>
   </data>
@@ -366,6 +423,9 @@
   <data name="LibGoldCrownsAbbr" xml:space="preserve">
     <value>GC</value>
   </data>
+  <data name="LibFreePh" xml:space="preserve">
+    <value>Free</value>
+  </data>
   <data name="LibRollAbbr" xml:space="preserve">
     <value>Roll</value>
   </data>
@@ -393,8 +453,17 @@
   <data name="WarbandArchetypeTreasuryPh" xml:space="preserve">
     <value>Starting treasury</value>
   </data>
+  <data name="WarbandArchetypePh" xml:space="preserve">
+    <value>Archetype</value>
+  </data>
+  <data name="WarbandChooseArchetypePh" xml:space="preserve">
+    <value>Choose an archetype</value>
+  </data>
   <data name="WarbandArchetypeMaxWarriorsPh" xml:space="preserve">
     <value>Maximum warriors</value>
+  </data>
+  <data name="WarbandArchetypeMinWarriorsPh" xml:space="preserve">
+    <value>Minimum warriors</value>
   </data>
   <data name="WarbandArchetypeTabGeneral" xml:space="preserve">
     <value>General</value>
@@ -407,6 +476,12 @@
   </data>
   <data name="WarbandArchetypeTabWarriors" xml:space="preserve">
     <value>Warriors</value>
+  </data>
+  <data name="WarbandCreateTabEquipment" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="WarbandCreateTabNames" xml:space="preserve">
+    <value>Names</value>
   </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Equipment Lists</value>
@@ -424,7 +499,13 @@
     <value>Hero</value>
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
-    <value>Mutant/Possessed (may buy mutations)</value>
+    <value>Mutant/Possessed</value>
+  </data>
+  <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
+    <value>Large creature</value>
+  </data>
+  <data name="WarriorArchetypeCanUseEquipment" xml:space="preserve">
+    <value>Can carry equipment</value>
   </data>
   <data name="WarriorArchetypeRolePh" xml:space="preserve">
     <value>Role</value>
@@ -434,6 +515,9 @@
   </data>
   <data name="WarriorArchetypeMaxCountPh" xml:space="preserve">
     <value>Maximum count</value>
+  </data>
+  <data name="WarriorArchetypeMinCountPh" xml:space="preserve">
+    <value>Minimum count</value>
   </data>
   <data name="WarriorArchetypeStartingExperiencePh" xml:space="preserve">
     <value>Starting XP</value>
@@ -464,6 +548,9 @@
   </data>
   <data name="SpecialRuleCostMultiplierPh" xml:space="preserve">
     <value>Material: price multiplier (e.g. x4) - blank if not applicable</value>
+  </data>
+  <data name="SpecialRuleAbbreviationPh" xml:space="preserve">
+    <value>Material: abbreviation shown on the weapon (e.g. G)</value>
   </data>
   <data name="EquipmentItemEditTitle" xml:space="preserve">
     <value>Edit Item</value>
@@ -1082,5 +1169,26 @@
   </data>
   <data name="PaletteShadowAndGold" xml:space="preserve">
     <value>Shadow &amp; Gold</value>
+  </data>
+  <data name="WarbandArchetype" xml:space="preserve">
+    <value>Archetype</value>
+  </data>
+  <data name="WarbandCreateTitle" xml:space="preserve">
+    <value>New warband</value>
+  </data>
+  <data name="WarbandArchetypeAddWarriorLabel" xml:space="preserve">
+    <value>Add warrior</value>
+  </data>
+  <data name="SpecialRuleTabMaterials" xml:space="preserve">
+    <value>Materials</value>
+  </data>
+  <data name="SpecialRuleIsMaterialRule" xml:space="preserve">
+    <value>Material rule (cost multiplier)</value>
+  </data>
+  <data name="WarriorArchetypeIsChief" xml:space="preserve">
+    <value>Leader</value>
+  </data>
+  <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
+    <value>Never Gains Experience</value>
   </data>
 </root>

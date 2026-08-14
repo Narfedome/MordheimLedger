@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "imagePath": "middenheimers_mercenaries.jpg",
   "name": {
     "en": "Middenheim Mercenaries",
     "fr": "Mercenaires Middenheimers"
@@ -11,6 +12,7 @@
   "specialRules": [],
   "startingTreasury": 500,
   "maxWarriors": 15,
+  "minWarriors": 3,
   "warriors": [
     {
       "name": {
@@ -20,6 +22,7 @@
       "isHero": true,
       "cost": 60,
       "maxCount": 1,
+      "minCount": 1,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,

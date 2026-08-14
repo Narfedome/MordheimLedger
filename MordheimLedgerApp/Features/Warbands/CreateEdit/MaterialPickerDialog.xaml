@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.MaterialPickerDialog"
+               x:DataType="local:MaterialPickerDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+        <VerticalStackLayout Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="{loc:Loc WarriorsMaterialHeading}" Style="{StaticResource DialogTitleLabelStyle}"/>
+                    <Label Text="{Binding Current.Item.Name}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
+                <Label Grid.Column="1" Text="{Binding StepLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                       VerticalOptions="Center" IsVisible="{Binding HasMultiple}"/>
+            </Grid>
+
+            <!-- Une carte tapotable par option (Normal + chaque matériau éligible), liseré accentué sur
+                 celle sélectionnée (SelectableCardBorderStyle, jusqu'ici défini mais inutilisé ailleurs -
+                 exactement le besoin ici). Sélection exclusive gérée par MaterialChoice.Select (drapeau
+                 IsSelected imperatif, même idiome qu'EquipmentItemRow) plutôt qu'un DataTrigger comparant
+                 à la sélection du parent. -->
+            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Current.Options}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="local:MaterialOptionRow">
+                        <Border Style="{StaticResource SelectableCardBorderStyle}" Padding="10,8">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MaterialPickerDialogViewModel}}, Path=SelectMaterialCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{Binding CostDisplay}" FontSize="12"
+                                           TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                </Grid>
+                                <Label Text="{Binding Description}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding Description, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding HasMultiple}">
+                <Button Grid.Column="0" Text="{loc:Loc LibBack}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}"/>
+                <Button Grid.Column="2" Text="{loc:Loc LibNext}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding NextCommand}" IsEnabled="{Binding CanGoNext}"/>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="{loc:Loc BtnCancel}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Grid.Column="1" Text="{loc:Loc BtnSave}" Command="{Binding SaveCommand}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</dialogs:DialogContent>

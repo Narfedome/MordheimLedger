@@ -37,22 +37,22 @@ public class SkillPickerService : ISkillPickerService
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
         viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
         viewModel.AllowedCategories = allowedCategories is { Count: > 0 } ? allowedCategories : null;
+        // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi.
         var page = new SkillSelectorPage(viewModel);
-        var modal = new NavigationPage(page);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton
         // retour), le TaskCompletionSource ne serait jamais résolu et l'appelant resterait bloqué.
         var window = Shell.Current.Window;
         void OnModalPopped(object? sender, ModalPoppedEventArgs e)
         {
-            if (!ReferenceEquals(e.Modal, modal))
+            if (!ReferenceEquals(e.Modal, page))
                 return;
             window.ModalPopped -= OnModalPopped;
             tcs.TrySetResult(Array.Empty<Skill>());
         }
         window.ModalPopped += OnModalPopped;
 
-        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(modal), "SkillPicker.Push");
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(page), "SkillPicker.Push");
 
         return await tcs.Task;
     }

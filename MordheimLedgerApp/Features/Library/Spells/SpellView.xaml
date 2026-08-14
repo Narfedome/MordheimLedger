@@ -30,7 +30,8 @@
                     FontSize="{OnIdiom Default=15, Desktop=13}"
                     HorizontalOptions="Start"
                     Padding="8,4"/>
-            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.HatWizard}"
+            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:RpgFont.RaCrystalBall}"
+                                         IconFont="RpgAwesome"
                                          Command="{Binding ManageMagicSchoolsCommand}"
                                          Tooltip="{loc:Loc LibManageMagicSchools}"
                                          IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}"/>

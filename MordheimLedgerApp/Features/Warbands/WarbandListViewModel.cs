@@ -1,16 +1,22 @@
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
+using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Services;
+using System.Collections.ObjectModel;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
 public partial class WarbandListViewModel : BaseViewModel
 {
+    private readonly IWarbandArchetypePickerNavigationService _pickerNavigation;
     private readonly IWarbandService _warbandService;
     private readonly IWarbandArchetypePickerService _warbandArchetypePickerService;
     private readonly ILibraryService _libraryService;
+    private readonly IEquipmentPickerService _equipmentPickerService;
+    private readonly ISkillPickerService _skillPickerService;
 
     [ObservableProperty]
     private ObservableCollection<WarbandRow> rows = new();
@@ -35,11 +41,17 @@ public partial class WarbandListViewModel : BaseViewModel
 
     public bool CanModifySelectedWarband => SelectedRow != null;
 
-    public WarbandListViewModel(IWarbandService warbandService, ILibraryService libraryService, IWarbandArchetypePickerService warbandArchetypePickerService)
+    public WarbandListViewModel(IWarbandArchetypePickerNavigationService pickerNavigation,
+        IWarbandService warbandService, IWarbandArchetypePickerService warbandArchetypePickerService,
+        ILibraryService libraryService, IEquipmentPickerService equipmentPickerService,
+        ISkillPickerService skillPickerService)
     {
+        _pickerNavigation = pickerNavigation;
         _warbandService = warbandService;
-        _libraryService = libraryService;
         _warbandArchetypePickerService = warbandArchetypePickerService;
+        _libraryService = libraryService;
+        _equipmentPickerService = equipmentPickerService;
+        _skillPickerService = skillPickerService;
     }
 
     partial void OnSelectedRowChanged(WarbandRow? oldValue, WarbandRow? newValue)
@@ -53,14 +65,21 @@ public partial class WarbandListViewModel : BaseViewModel
     {
         await Loading.RunAsync(async () =>
         {
-            var warbands = await _warbandService.GetWarbandsAsync();
-            var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.Id, LocalizationService.Instance.Language)));
-            Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i] }));
-            SelectedRow = null;
-            HasWarbands = warbands.Count > 0;
-            IsInitialized = true;
+            await InitializeAsync();
         });
     }
+
+    public async Task InitializeAsync()
+    {
+        var warbands = await _warbandService.GetWarbandsAsync();
+        var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.WarbandArchetypeId, LocalizationService.Instance.Language)));
+        var ratings = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandRatingAsync(b.Id)));
+        Rows = new ObservableCollection<WarbandRow>(warbands.Select((w, i) => new WarbandRow(w) { ArchetypeName = archetypeNames[i], Rating = ratings[i] }));
+        SelectedRow = null;
+        HasWarbands = warbands.Count > 0;
+        IsInitialized = true;
+    }
+
 
     [RelayCommand]
     private void Select(WarbandRow row) => SelectedRow = row;
@@ -68,29 +87,14 @@ public partial class WarbandListViewModel : BaseViewModel
     [RelayCommand]
     private async Task CreateWarbandAsync()
     {
-        //var archetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
-        //if (archetypes.Count == 0)
-        //{
-        //    await ShowInfoAsync(Loc["WarbandsEmptyLibraryTitle"], Loc["WarbandsEmptyLibraryMessage"]);
-        //    return;
-        //}
+        // Valeurs de départ raisonnables plutôt que 0/null - purement indicatives, l'utilisateur les
+        // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
+        var newItem = new Core.Models.Warband();
+        var dialogViewModel = new WarbandEditDialogViewModel(newItem, Loc["WarbandCreateTitle"],
+             _warbandArchetypePickerService, _warbandService, _libraryService, _equipmentPickerService, _skillPickerService);
+        if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
 
-        //var options = archetypes.Select(a => $"{a.Name} ({a.StartingTreasury}gc)").ToArray();
-        //var index = await ShowActionSheetIndexAsync(Loc["WarbandsChooseType"], options);
-
-
-
-        var picked = await _warbandArchetypePickerService.PickWarbandArchetypesAsync(SelectionMode.Single);
-        if (picked == null || picked.Count == 0) return;
-
-        var name = await ShowPromptAsync(Loc["WarbandsNewTitle"], Loc["PromptName"]);
-        if (string.IsNullOrWhiteSpace(name)) return;
-
-        await Loading.RunAsync(async () =>
-        {
-            await _warbandService.CreateWarbandAsync(name, picked.First());
-            await LoadWarbandsAsync();
-        });
+        await LoadWarbandsAsync();
     }
 
     // Sélection (corps de la ligne) et ouverture (zone dédiée "Jouer" en bout de ligne, cf.

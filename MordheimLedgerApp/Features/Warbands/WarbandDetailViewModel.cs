@@ -35,6 +35,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private Warband? warband;
 
+    /// <summary>Rulebook "calculate the warband rating" - sum over Heroes+Henchmen (active roster, dead
+    /// warriors excluded) of (IsLargeCreature ? 20 : 5) + Experience. Recomputed after every LoadAsync -
+    /// see IWarbandService.GetWarbandRatingAsync for the equivalent lightweight query used by
+    /// WarbandListViewModel, which doesn't otherwise load the full roster.</summary>
+    [ObservableProperty]
+    private int rating;
+
     [ObservableProperty]
     private ObservableCollection<WarriorRow> heroes = new();
 
@@ -111,6 +118,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead));
             Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
+            Rating = Heroes.Concat(Henchmen).Sum(r => (r.Warrior.IsLargeCreature ? 20 : 5) + r.Warrior.Experience);
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
@@ -208,6 +216,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Cost = w.Cost,
             Experience = w.Experience,
             Status = w.Status,
+            HeadCount = w.HeadCount,
             Movement = w.Movement,
             MovementOverride = w.MovementOverride,
             WeaponSkill = w.WeaponSkill,
@@ -257,6 +266,37 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             await LoadAsync(Warband.Id);
         });
+    }
+
+    /// <summary>Grossit l'effectif vivant d'un groupe d'Hommes de main (Warrior.HeadCount) - pas de
+    /// notion de Status.Dead pour un groupe, juste un compteur (livre des règles : XP/équipement/
+    /// compétences restent partagés par tous les survivants).</summary>
+    [RelayCommand]
+    private async Task IncrementHeadCount(WarriorRow row)
+    {
+        row.Warrior.HeadCount++;
+        row.RefreshHeadCountDisplay();
+        await _warbandService.SaveWarriorAsync(row.Warrior);
+    }
+
+    /// <summary>Réduit l'effectif d'un groupe d'Hommes de main - supprime la ligne quand il atteint 0
+    /// plutôt que de garder une ligne à 0 sans rien à afficher.</summary>
+    [RelayCommand]
+    private async Task DecrementHeadCount(WarriorRow row)
+    {
+        if (row.Warrior.HeadCount <= 1)
+        {
+            await Loading.RunAsync(async () =>
+            {
+                await _warbandService.DeleteWarriorAsync(row.Warrior.Id);
+                Henchmen.Remove(row);
+            });
+            return;
+        }
+
+        row.Warrior.HeadCount--;
+        row.RefreshHeadCountDisplay();
+        await _warbandService.SaveWarriorAsync(row.Warrior);
     }
 
     [RelayCommand]

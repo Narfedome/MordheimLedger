@@ -16,17 +16,19 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-        <ScrollView Grid.Row="0" x:Name="ContentScroll" VerticalOptions="Start">
+        <dialogs:StableHeightScrollView Grid.Row="0">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
 
-            <HorizontalStackLayout Spacing="16">
-                <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
-                                             IsActive="{Binding IsGeneralTab}" FontSize="12"/>
-                <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}"
-                                             IsActive="{Binding IsSpellsTab}" FontSize="12"/>
-            </HorizontalStackLayout>
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                 IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}"
+                                                 IsActive="{Binding IsSpellsTab}" FontSize="12"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
                 <VerticalStackLayout Spacing="4">
@@ -57,7 +59,7 @@
                                           RemoveCommand="{Binding RemoveSpellCommand}"/>
             </VerticalStackLayout>
         </VerticalStackLayout>
-        </ScrollView>
+        </dialogs:StableHeightScrollView>
         <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
             <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"

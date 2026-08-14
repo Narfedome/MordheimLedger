@@ -45,13 +45,29 @@
                     <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                 </VerticalStackLayout>
-                <Picker Title="{loc:Loc EquipmentItemCategoryPh}"
-                        ItemsSource="{Binding CategoryOptions}"
-                        SelectedItem="{Binding SelectedCategoryLabel}"/>
-                <Entry Text="{Binding Item.Cost}" Keyboard="Numeric" Placeholder="{loc:Loc EquipmentItemCostPh}"/>
-                <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric" Placeholder="{loc:Loc EquipmentItemRarityPh}"/>
-                <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric" Placeholder="{loc:Loc EquipmentItemCostRandomMaxPh}"/>
-                <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc EquipmentItemCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Picker ItemsSource="{Binding CategoryOptions}"
+                            SelectedItem="{Binding SelectedCategoryLabel}"/>
+                </VerticalStackLayout>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{loc:Loc EquipmentItemCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                </Grid>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc EquipmentItemCostRandomMaxPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+                </VerticalStackLayout>
 
                 <!-- Réservé à ces bandes : vide = commun à toutes les bandes (voir EquipmentItem.
                      RestrictedToWarbandArchetypeIds). HeaderText dynamique plutôt qu'un titre fixe + un

@@ -1,11 +1,12 @@
-namespace MordheimLedgerApp.Services;
+namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>
 /// Reference lookup for the rulebook's Heroes' progression-roll table (2D6, rolled immediately when
 /// a Hero's XP crosses a milestone box on the printed track - see ExperienceMilestones). Purely
 /// descriptive like SeriousInjuryTable: results needing a further 1D6 (6, 8, 9) or an open choice
 /// (7, CC or CT) are left to the player to resolve and apply by hand via the existing stat/skill
-/// editing UI (WarriorEditDialog) - no rules engine in V1, see CLAUDE.md.
+/// editing UI (WarriorEditDialog) - no rules engine in V1, see CLAUDE.md. TryGetTextKey returns a
+/// localization resource key rather than resolved text - Core stays MAUI/localization-free.
 /// Verified against the rulebook via RulesReference/Campagne.md § Expérience.
 /// </summary>
 public static class HeroAdvanceTable
@@ -18,23 +19,18 @@ public static class HeroAdvanceTable
     /// showing descriptive text (see EndOfGameDialogViewModel.PickAdvanceSkill).</summary>
     public static bool IsSkill(int roll) => Array.IndexOf(SkillRolls, roll) >= 0;
 
-    public static bool TryGet(int roll, out string text)
+    public static bool TryGetTextKey(int roll, out string key)
     {
         if (Array.IndexOf(Rolls, roll) < 0)
         {
-            text = string.Empty;
+            key = string.Empty;
             return false;
         }
 
-        text = LocalizationService.Instance[$"AdvanceHero{roll}"];
+        key = $"AdvanceHero{roll}";
         return true;
     }
 
-    /// <summary>Rolls 2D6 and looks up the result.</summary>
-    public static (int Roll, string Text) Roll()
-    {
-        var roll = Random.Shared.Next(1, 7) + Random.Shared.Next(1, 7);
-        TryGet(roll, out var text);
-        return (roll, text);
-    }
+    /// <summary>Rolls 2D6.</summary>
+    public static int RollDice() => Random.Shared.Next(1, 7) + Random.Shared.Next(1, 7);
 }

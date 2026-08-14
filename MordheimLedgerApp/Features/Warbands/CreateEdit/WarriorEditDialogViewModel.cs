@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
@@ -144,7 +145,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
                 var choices = new List<MaterialChoice>();
                 foreach (var item in meleeItems)
                 {
-                    choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], item.IsFreeDagger && !hasFreeDaggerSlot));
+                    choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], EquipmentPricing.IsFreeDaggerEligible(item.IsFreeDagger, hasFreeDaggerSlot)));
                     if (item.IsFreeDagger) hasFreeDaggerSlot = true;
                 }
                 var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
@@ -165,8 +166,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             // AddEquipment pour la même logique côté wizard). Pas besoin de mémoriser "était-ce gratuit"
             // au-delà de cette déduction ponctuelle - contrairement au wizard (EquipmentPick.IsFree), le
             // trésor est débité immédiatement et définitivement ici.
-            var isFreeDagger = equipmentItem.IsFreeDagger && materialRule is null && !Equipment.Any(e => e.Item.IsFreeDagger);
-            var cost = isFreeDagger ? 0 : equipmentItem.Cost * (materialRule?.CostMultiplier ?? 1);
+            var isFreeDagger = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, Equipment.Any(e => e.Item.IsFreeDagger)) && materialRule is null;
+            var cost = EquipmentPricing.CalculateCost(equipmentItem.Cost, materialRule?.CostMultiplier, isFreeDagger);
 
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.

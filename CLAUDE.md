@@ -11,13 +11,46 @@ le chemin peut différer sur les autres PC de l'utilisateur, même auteur, appli
 que de réinventer :
 
 - `MordheimLedgerApp.Core` (net10.0, **sans dépendance MAUI**) : `Models/` (modèles purs),
-  `Data/` (`Entities/` SQLite + `AppDatabase.cs` + `EntityMapping.cs`), `Services/` (CRUD)
+  `Data/` (`Entities/` SQLite + `AppDatabase.cs` + `EntityMapping.cs`), `Services/` (CRUD),
+  `Rules/` (décisions de règles pures - voir § Règles dans Core ci-dessous)
 - `MordheimLedgerApp` (tête MAUI) : `Features/<Domaine>/` (Page + Page.xaml.cs + ViewModel),
   `Components/Dialogs/` (Confirm/Prompt/ActionSheet réutilisables, portés de DmTools),
   `Services/` (LocalizationService/ThemeService/LoadingService), `BaseViewModel`,
   `Resources/Styles/` (Colors/Sizes/Styles = design tokens)
 - `MordheimLedgerApp.Tests` (xUnit) : tests de mapping Entity↔Modèle + tests d'intégration des
-  services sur une base SQLite temporaire (voir `DataServiceTests.cs`)
+  services sur une base SQLite temporaire (voir `DataServiceTests.cs`) + tests de règles pures sur
+  `Core.Rules` (`RulesTests.cs`, aucune base de données)
+
+**Règles dans Core (branche `feature/rules-to-core`, 2026-08-15)** : suite à l'audit de fidélité aux
+mécaniques (§ ci-dessous n'existe que dans l'historique de conversation, pas ce fichier - retenir la
+conclusion), une partie du code de règles vivait dans la tête MAUI (`MordheimLedgerApp/Services/`,
+`Features/Warbands/CreateEdit/`) plutôt que dans Core, donc hors de portée de
+`MordheimLedgerApp.Tests` qui ne référence que Core. Déplacé vers `MordheimLedgerApp.Core/Rules/` :
+`WeaponLimits`, `ExperienceMilestones`, `SeriousInjuryTable`, `HenchmanInjuryTable`,
+`HeroAdvanceTable`, `HenchmanAdvanceTable`, et une nouvelle `RecruitmentRules` (extraite de la
+logique jusque-là inline dans `WarbandEditDialogViewModel.IncrementWarrior`/`UpdateRecruitability`/
+`ValidateWarriorsStep` - MaxCount/MaxWarriors/trésorerie/MinWarriors/MinCount). Les 4 tables de jets
+(D66 Blessures Graves Héros, D6 Blessures Hommes de main, 2D6 Progression Héros/Hommes de main)
+résolvaient jusque-là le texte affiché directement via `LocalizationService.Instance[...]` — c'est
+précisément pourquoi elles vivaient dans la tête MAUI (Core doit rester sans dépendance de
+localisation). Scindé : Core garde le jet de dés + la classification pure (`IsDeath`/`IsSkill`/
+validité du jet) et expose une **clé de ressource** (`TryGetTextKey`, ex. `"InjurySerious34"`) plutôt
+que le texte résolu ; `EndOfGameDialogViewModel` (seul consommateur) résout cette clé via
+`LocalizationService` lui-même. Effet de bord positif : ce découpage rend explicite, pour n'importe
+quelle règle du livre, si elle est déjà appliquée (testée dans `RulesTests.cs`) ou seulement décrite
+en texte libre pour le joueur.
+
+Deuxième passe la même session : la formule de prix des matériaux (Gromril/Ithilmar, multiplicateur
+sur le coût de base) et l'éligibilité de la première dague gratuite étaient dupliquées telles quelles
+dans 4-5 endroits (`EquipmentPick.Cost`, `MaterialChoice`, `WarbandEditDialogViewModel.AddEquipment`,
+`WarriorEditDialogViewModel.AddEquipment`) - consolidées dans `Core.Rules.EquipmentPricing`
+(`IsFreeDaggerEligible`/`CalculateCost`). `RecruitmentRules.CalculateRemainingTreasury` couvre la
+formule de trésorerie restante (StartingTreasury - dépenses, sauf en mode Bande existante où c'est la
+saisie libre `TreasuryOverride` qui prime).
+
+**`Core/Rules/` est désormais le point d'entrée pour toute nouvelle règle du livre** (ex. compléter le
+wizard Fin de Partie avec de nouvelles mécaniques) plutôt que de la coder inline dans un ViewModel -
+décision explicite de l'utilisateur, pas juste un refactor ponctuel.
 
 MVVM via **CommunityToolkit.Mvvm** (`[ObservableProperty]`, `[RelayCommand]`, `ObservableObject`)
 partout, y compris dans les ViewModels de dialogues. Navigation Shell classique avec routes

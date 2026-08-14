@@ -1,4 +1,4 @@
-namespace MordheimLedgerApp.Services;
+namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>
 /// Milestone box positions on the printed warband sheet's XP track - shared by

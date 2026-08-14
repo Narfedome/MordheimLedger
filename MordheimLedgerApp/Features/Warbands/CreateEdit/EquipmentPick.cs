@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 
@@ -31,7 +32,7 @@ public class EquipmentPick
     /// WarriorNameSlot's in-memory Equipment list.</summary>
     public bool IsFree { get; set; }
 
-    public int Cost => IsFree ? 0 : Item.Cost * (MaterialRule?.CostMultiplier ?? 1);
+    public int Cost => EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, IsFree);
 
     public EquipmentPick(EquipmentItem item, SpecialRule? materialRule)
     {

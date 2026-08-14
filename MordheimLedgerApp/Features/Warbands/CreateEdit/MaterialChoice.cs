@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
@@ -64,9 +65,10 @@ public partial class MaterialChoice : ObservableObject
     public MaterialChoice(EquipmentItem item, IReadOnlyList<SpecialRule> materialRules, string normalLabel, bool isFreeEligible = false)
     {
         Item = item;
-        var normalCost = isFreeEligible ? 0 : item.Cost;
+        var normalCost = EquipmentPricing.CalculateCost(item.Cost, materialCostMultiplier: null, isFree: isFreeEligible);
         var options = new List<MaterialOptionRow> { new(this, null, normalLabel, null, normalCost) };
-        options.AddRange(materialRules.Select(r => new MaterialOptionRow(this, r, r.Name, r.Description, item.Cost * (r.CostMultiplier ?? 1))));
+        options.AddRange(materialRules.Select(r =>
+            new MaterialOptionRow(this, r, r.Name, r.Description, EquipmentPricing.CalculateCost(item.Cost, r.CostMultiplier, isFree: false))));
         Options = new ObservableCollection<MaterialOptionRow>(options);
         Options[0].IsSelected = true;
     }

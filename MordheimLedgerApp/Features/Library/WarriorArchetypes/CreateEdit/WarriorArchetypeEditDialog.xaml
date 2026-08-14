@@ -83,6 +83,14 @@
                  WarriorArchetypeEditDialogViewModel.IsHero) pour que ces sections réagissent
                  immédiatement au clic, Item n'ayant pas d'INotifyPropertyChanged. -->
                     <VerticalStackLayout Spacing="12" IsVisible="{Binding IsProfileTab}">
+
+                        <!-- Profil - StatRowView en mode édition (IsEditable="True" bascule chaque Label en
+                     Entry), même composant que WarriorArchetypeDetailDialog/WarbandDetailPage en lecture
+                     seule. Mouvement bindé sur MovementInput (accepte "4" ou une surcharge "2D6" pour les
+                     Squigs des cavernes, résolu vers Item.Movement/Item.MovementOverride au Save - voir
+                     WarriorArchetypeEditDialogViewModel.Save). -->
+                        <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
+                        
                         <HorizontalStackLayout Spacing="10">
                             <CheckBox IsChecked="{Binding IsHero}" VerticalOptions="Center"/>
                             <Label Text="{loc:Loc WarriorArchetypeIsHero}" VerticalOptions="Center"/>
@@ -138,12 +146,6 @@
                             <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
 
-                        <!-- Profil - StatRowView en mode édition (IsEditable="True" bascule chaque Label en
-                     Entry), même composant que WarriorArchetypeDetailDialog/WarbandDetailPage en lecture
-                     seule. Mouvement bindé sur MovementInput (accepte "4" ou une surcharge "2D6" pour les
-                     Squigs des cavernes, résolu vers Item.Movement/Item.MovementOverride au Save - voir
-                     WarriorArchetypeEditDialogViewModel.Save). -->
-                        <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
                     </VerticalStackLayout>
 
                     <!-- Règles spéciales propres à ce type de guerrier - distinctes des règles spéciales de

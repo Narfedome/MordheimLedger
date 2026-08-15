@@ -183,6 +183,15 @@
   <data name="WarbandsExistingWarbandHint" xml:space="preserve">
     <value>Free treasury entry, no budget limit on recruiting or purchases, and skills already learned can be assigned directly.</value>
   </data>
+  <data name="WarbandsSpellRollTitle" xml:space="preserve">
+    <value>Starting Spell</value>
+  </data>
+  <data name="WarbandsSpellRollResult" xml:space="preserve">
+    <value>1D6 roll: {0} → {1}</value>
+  </data>
+  <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
+    <value>No spell matches that roll on this warband's magic school table.</value>
+  </data>
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Material</value>
   </data>

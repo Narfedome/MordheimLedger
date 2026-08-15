@@ -225,6 +225,18 @@ public class RulesTests
         }
     }
 
+    // --- SpellRules -------------------------------------------------------------------------------
+
+    [Fact]
+    public void SpellRules_RollDice_AlwaysBetween1And6()
+    {
+        for (var i = 0; i < 200; i++)
+        {
+            var roll = SpellRules.RollDice();
+            Assert.InRange(roll, 1, 6);
+        }
+    }
+
     // --- RecruitmentRules -----------------------------------------------------------------------
 
     [Fact]

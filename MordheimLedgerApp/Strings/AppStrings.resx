@@ -183,6 +183,15 @@
   <data name="WarbandsExistingWarbandHint" xml:space="preserve">
     <value>Trésorerie libre, recrutement et achats sans limite de budget, et possibilité d'assigner directement les compétences déjà apprises.</value>
   </data>
+  <data name="WarbandsSpellRollTitle" xml:space="preserve">
+    <value>Sort de départ</value>
+  </data>
+  <data name="WarbandsSpellRollResult" xml:space="preserve">
+    <value>Jet de 1D6 : {0} → {1}</value>
+  </data>
+  <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
+    <value>Aucun sort ne correspond à ce jet dans la table de l'école de magie de cette bande.</value>
+  </data>
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Matériau</value>
   </data>

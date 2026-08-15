@@ -587,6 +587,46 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 destination.Add(spell);
         }
 
+        /// <summary>Sort de départ d'un lanceur de sorts fraîchement recruté (hors mode Bande existante,
+        /// où AddSpell reste un choix libre - importer une bande déjà jouée, c'est enregistrer un
+        /// historique déjà déterminé, pas faire un nouveau tirage). Livre des règles : "A Wizard starts
+        /// with one spell, determined randomly - roll 1D6 on the appropriate list", pas un choix libre -
+        /// voir SpellRules.RollDice. Plafonné à un seul sort (bouton masqué une fois tiré, voir
+        /// WarbandEditDialog.xaml) ; retirer la puce (RemoveSpellCommand, déjà câblé) permet de relancer.</summary>
+        [RelayCommand]
+        private async Task RollStartingSpell(object target)
+        {
+            ObservableCollection<Spell> destination;
+            switch (target)
+            {
+                case WarriorNameSlot slot:
+                    destination = slot.Spells;
+                    break;
+                case HenchmanGroupDraft group:
+                    destination = group.Spells;
+                    break;
+                default:
+                    return;
+            }
+            if (Archetype is null) return;
+
+            var magicSchoolIds = Archetype.MagicSchools.Select(s => s.Id).ToHashSet();
+            var available = (await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language))
+                .Where(s => magicSchoolIds.Contains(s.MagicSchoolId)).ToList();
+            if (available.Count == 0) return;
+
+            var roll = SpellRules.RollDice();
+            var spell = available.FirstOrDefault(s => s.RollValue == roll);
+            if (spell is null)
+            {
+                await ShowInfoAsync(Loc["WarbandsSpellRollTitle"], Loc["WarbandsSpellRollEmptyMessage"]);
+                return;
+            }
+
+            destination.Add(spell);
+            await ShowInfoAsync(Loc["WarbandsSpellRollTitle"], string.Format(Loc["WarbandsSpellRollResult"], roll, spell.Name));
+        }
+
         [RelayCommand]
         private Task ShowSpellDetail(Spell spell) => _detailDialogs.ShowSpellDetailDialogAsync(spell);
 

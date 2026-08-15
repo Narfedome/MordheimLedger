@@ -46,8 +46,15 @@ public abstract partial class RecruitSlot : ObservableObject
 
     /// <summary>Sorts déjà appris - même principe que Skills (mode "Bande existante" uniquement), mais
     /// n'a de sens que si Row.Archetype.IsSpellcaster (voir IsSpellcaster/onglet Sorts masqué sinon dans
-    /// RecruitSlotTabsView). Persisté au Save() via WarbandService.AddWarriorSpellAsync.</summary>
+    /// RecruitSlotTabsView). Persisté au Save() via WarbandService.AddWarriorSpellAsync. Hors mode Bande
+    /// existante, alimenté par WarbandEditDialogViewModel.RollStartingSpell (tirage 1D6, livre des
+    /// règles) plutôt qu'un choix libre - voir HasSpells pour le plafond à un seul sort de départ.</summary>
     public ObservableCollection<Spell> Spells { get; } = new();
+
+    /// <summary>Pilote l'affichage exclusif bouton "Lancer 1D6" / puce du sort tiré, hors mode Bande
+    /// existante (WarbandEditDialog.xaml) - un lanceur de sorts fraîchement recruté ne débute qu'avec un
+    /// seul sort (livre des règles), retirer la puce (RemoveSpellCommand) permet de relancer.</summary>
+    public bool HasSpells => Spells.Count > 0;
 
     /// <summary>Passe-plat vers Row.Archetype.IsSpellcaster - masque le sous-onglet Sorts pour un type qui
     /// n'en lance jamais.</summary>
@@ -98,6 +105,7 @@ public abstract partial class RecruitSlot : ObservableObject
         // sans ce relais explicite, laissant le Label de l'étape Noms vide/périmé tant qu'on ne rouvre pas
         // le dialog.
         Equipment.CollectionChanged += (_, _) => OnPropertyChanged(nameof(EquipmentSummary));
+        Spells.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasSpells));
     }
 }
 

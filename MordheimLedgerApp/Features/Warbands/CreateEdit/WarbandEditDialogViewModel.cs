@@ -607,35 +607,49 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 destination.Add(spell);
         }
 
-        /// <summary>Sort de départ d'un lanceur de sorts fraîchement recruté (hors mode Bande existante,
-        /// où AddSpell reste un choix libre - importer une bande déjà jouée, c'est enregistrer un
-        /// historique déjà déterminé, pas faire un nouveau tirage). Livre des règles : "A Wizard starts
-        /// with one spell, determined randomly - roll 1D6 on the appropriate list", pas un choix libre -
-        /// voir SpellRules.RollDice. Plafonné à un seul sort (bouton masqué une fois tiré, voir
+        /// <summary>Remplit RecruitSlot.SpellRoll d'un jet 1D6 aléatoire - ne résout/n'ajoute rien tout
+        /// seul, contrairement à l'ancien RollStartingSpell. Même idiome que EndOfGameDialogViewModel.
+        /// AutoRollAdvance (remplit AdvanceRollEntry.ManualRoll) : le joueur peut aussi taper directement
+        /// le résultat d'un dé physique dans le champ plutôt que passer par ce bouton.</summary>
+        [RelayCommand]
+        private static void AutoRollSpell(object target)
+        {
+            RecruitSlot? slot = target switch
+            {
+                WarriorNameSlot s => s,
+                HenchmanGroupDraft g => g,
+                _ => null
+            };
+            if (slot is null) return;
+
+            slot.SpellRoll = SpellRules.RollDice().ToString();
+        }
+
+        /// <summary>Résout RecruitSlot.SpellRoll (jet physique tapé à la main ou rempli par AutoRollSpell)
+        /// en sort de départ - livre des règles : "A Wizard starts with one spell, determined randomly -
+        /// roll 1D6 on the appropriate list", pas un choix libre (voir AddSpell, réservé à l'import d'une
+        /// bande déjà jouée). Plafonné à un seul sort (ligne de saisie masquée une fois tiré, voir
         /// WarbandEditDialog.xaml) ; retirer la puce (RemoveSpellCommand, déjà câblé) permet de relancer.</summary>
         [RelayCommand]
-        private async Task RollStartingSpell(object target)
+        private async Task ApplyStartingSpell(object target)
         {
-            ObservableCollection<Spell> destination;
-            switch (target)
+            RecruitSlot? slot = target switch
             {
-                case WarriorNameSlot slot:
-                    destination = slot.Spells;
-                    break;
-                case HenchmanGroupDraft group:
-                    destination = group.Spells;
-                    break;
-                default:
-                    return;
+                WarriorNameSlot s => s,
+                HenchmanGroupDraft g => g,
+                _ => null
+            };
+            if (slot is null || Archetype is null) return;
+
+            if (!int.TryParse(slot.SpellRoll, out var roll) || roll < 1 || roll > 6)
+            {
+                await ShowInfoAsync(Loc["WarbandsSpellRollTitle"], Loc["WarbandsSpellRollInvalidMessage"]);
+                return;
             }
-            if (Archetype is null) return;
 
             var magicSchoolIds = Archetype.MagicSchools.Select(s => s.Id).ToHashSet();
             var available = (await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language))
                 .Where(s => magicSchoolIds.Contains(s.MagicSchoolId)).ToList();
-            if (available.Count == 0) return;
-
-            var roll = SpellRules.RollDice();
             var spell = available.FirstOrDefault(s => s.RollValue == roll);
             if (spell is null)
             {
@@ -643,8 +657,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 return;
             }
 
-            destination.Add(spell);
-            await ShowInfoAsync(Loc["WarbandsSpellRollTitle"], string.Format(Loc["WarbandsSpellRollResult"], roll, spell.Name));
+            slot.Spells.Add(spell);
         }
 
         [RelayCommand]

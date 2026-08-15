@@ -81,50 +81,68 @@
                                           Command="{Binding AddSkillCommand}"
                                           CommandParameter="{Binding Item}"/>
         </Grid>
-        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsSpellsSection}">
-            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Spells}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="library:Spell">
-                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSpellDetailCommand}"
-                                                       CommandParameter="{Binding .}"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="4">
-                                <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
-                                       FontFamily="RpgAwesome" FontSize="12"
-                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                              Icon="{x:Static icons:SolidFont.Xmark}"
-                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                              Command="{Binding Source={x:Reference root}, Path=RemoveSpellCommand}"
-                                                              CommandParameter="{Binding .}"/>
-                            </HorizontalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </FlexLayout>
-            <!-- Bande existante : choix libre (on enregistre un historique déjà déterminé sur papier).
-                 Hors Bande existante : sort de départ tiré au 1D6 (livre des règles), pas choisi
-                 librement - le dé se masque une fois le sort obtenu (HasSpells, un seul sort de départ),
-                 retirer la puce (RemoveSpellCommand ci-dessus) permet de relancer. -->
-            <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband}">
-                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                              Command="{Binding AddSpellCommand}"
-                                              CommandParameter="{Binding Item}"/>
+        <VerticalStackLayout Spacing="6" IsVisible="{Binding Item.IsSpellsSection}">
+            <Grid ColumnDefinitions="*,Auto">
+                <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Spells}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:Spell">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSpellDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={x:Reference root}, Path=RemoveSpellCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+                <!-- Bande existante uniquement : choix libre (on enregistre un historique déjà déterminé
+                     sur papier). Hors Bande existante, voir la ligne de saisie du jet ci-dessous. -->
+                <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband}">
+                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddSpellCommand}"
+                                                  CommandParameter="{Binding Item}"/>
+                </Grid>
             </Grid>
-            <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                              Icon="{x:Static icons:SolidFont.Dice}"
-                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                              IsVisible="{Binding Item.HasSpells, Converter={StaticResource InverseBoolConverter}}"
-                                              Command="{Binding RollStartingSpellCommand}"
-                                              CommandParameter="{Binding Item}"/>
+            <!-- Sort de départ tiré au 1D6 (livre des règles), hors Bande existante - même schéma que
+                 AdvanceRollEntry côté Fin de partie (EndOfGameDialog) : le joueur tape le résultat d'un dé
+                 physique dans le champ, ou le bouton dé le remplit au hasard (AutoRollSpellCommand) ; la
+                 coche (ApplyStartingSpellCommand) résout le jet en sort et l'ajoute. Toute la ligne se
+                 masque une fois le sort obtenu (HasSpells, un seul sort de départ) - retirer la puce
+                 ci-dessus (RemoveSpellCommand) permet de relancer. Grid englobant pour combiner les deux
+                 conditions (IsExistingWarband inverse + HasSpells inverse), IsVisible ne les combine pas
+                 nativement en XAML - même idiome qu'ailleurs dans WarbandEditDialog.xaml. -->
+            <Grid IsVisible="{Binding Item.IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
+                <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8"
+                      IsVisible="{Binding Item.HasSpells, Converter={StaticResource InverseBoolConverter}}">
+                    <Entry Grid.Column="0" Text="{Binding Item.SpellRoll}" Keyboard="Numeric"
+                           Placeholder="{loc:Loc WarbandsSpellRollPh}" WidthRequest="60" FontSize="12"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Dice}"
+                                                  Tooltip="{loc:Loc EndOfGameRoll}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AutoRollSpellCommand}"
+                                                  CommandParameter="{Binding Item}"/>
+                    <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Check}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding ApplyStartingSpellCommand}"
+                                                  CommandParameter="{Binding Item}"/>
+                </Grid>
             </Grid>
-        </Grid>
+        </VerticalStackLayout>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
             <Entry Grid.Column="1" Text="{Binding Item.Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>

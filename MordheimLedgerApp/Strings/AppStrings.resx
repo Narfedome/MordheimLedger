@@ -186,8 +186,11 @@
   <data name="WarbandsSpellRollTitle" xml:space="preserve">
     <value>Sort de départ</value>
   </data>
-  <data name="WarbandsSpellRollResult" xml:space="preserve">
-    <value>Jet de 1D6 : {0} → {1}</value>
+  <data name="WarbandsSpellRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
+    <value>Entrez un jet entre 1 et 6.</value>
   </data>
   <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
     <value>Aucun sort ne correspond à ce jet dans la table de l'école de magie de cette bande.</value>

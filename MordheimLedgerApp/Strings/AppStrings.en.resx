@@ -186,8 +186,11 @@
   <data name="WarbandsSpellRollTitle" xml:space="preserve">
     <value>Starting Spell</value>
   </data>
-  <data name="WarbandsSpellRollResult" xml:space="preserve">
-    <value>1D6 roll: {0} → {1}</value>
+  <data name="WarbandsSpellRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
+    <value>Enter a roll between 1 and 6.</value>
   </data>
   <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
     <value>No spell matches that roll on this warband's magic school table.</value>

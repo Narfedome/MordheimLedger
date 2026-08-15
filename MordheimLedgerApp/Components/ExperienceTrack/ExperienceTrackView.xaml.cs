@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Services;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Components.ExperienceTrack;
 

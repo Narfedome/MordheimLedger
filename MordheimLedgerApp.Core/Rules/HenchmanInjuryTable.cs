@@ -1,4 +1,4 @@
-namespace MordheimLedgerApp.Services;
+namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>
 /// Henchmen don't roll on the Heroes' D66 Serious Injury table (see SeriousInjuryTable) - a single D6
@@ -11,23 +11,18 @@ public static class HenchmanInjuryTable
 
     public static bool IsDeath(int roll) => roll is >= 1 and <= DeathThreshold;
 
-    public static bool TryGet(int roll, out string text)
+    public static bool TryGetTextKey(int roll, out string key)
     {
         if (roll is < 1 or > 6)
         {
-            text = string.Empty;
+            key = string.Empty;
             return false;
         }
 
-        text = LocalizationService.Instance[IsDeath(roll) ? "HenchmanInjuryDead" : "HenchmanInjuryRecovered"];
+        key = IsDeath(roll) ? "HenchmanInjuryDead" : "HenchmanInjuryRecovered";
         return true;
     }
 
-    /// <summary>Rolls one D6 and looks up the result.</summary>
-    public static (int Roll, string Text) Roll()
-    {
-        var roll = Random.Shared.Next(1, 7);
-        TryGet(roll, out var text);
-        return (roll, text);
-    }
+    /// <summary>Rolls one D6.</summary>
+    public static int RollDice() => Random.Shared.Next(1, 7);
 }

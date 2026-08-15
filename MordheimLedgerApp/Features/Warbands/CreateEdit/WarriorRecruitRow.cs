@@ -51,17 +51,11 @@ public abstract partial class RecruitSlot : ObservableObject
     /// règles) plutôt qu'un choix libre - voir HasSpells pour le plafond à un seul sort de départ.</summary>
     public ObservableCollection<Spell> Spells { get; } = new();
 
-    /// <summary>Pilote l'affichage exclusif ligne de saisie du jet / puce du sort tiré, hors mode Bande
-    /// existante (WarbandEditDialog.xaml) - un lanceur de sorts fraîchement recruté ne débute qu'avec un
-    /// seul sort (livre des règles), retirer la puce (RemoveSpellCommand) permet de relancer.</summary>
+    /// <summary>Pilote l'affichage exclusif bouton "Lancer" (ouvre SpellRollDialog) / puce du sort tiré,
+    /// hors mode Bande existante (WarbandEditDialog.xaml) - un lanceur de sorts fraîchement recruté ne
+    /// débute qu'avec un seul sort (livre des règles), retirer la puce (RemoveSpellCommand) permet de
+    /// relancer.</summary>
     public bool HasSpells => Spells.Count > 0;
-
-    /// <summary>Saisie du jet 1D6 pour le sort de départ - même idiome que AdvanceRollEntry.ManualRoll
-    /// (EndOfGameDialog) : le joueur tape le résultat d'un dé physique, ou laisse
-    /// WarbandEditDialogViewModel.AutoRollSpell (bouton dé) le remplir au hasard. Rien n'est appliqué à
-    /// la frappe - ApplyStartingSpell (bouton coche) résout le sort correspondant et l'ajoute à Spells.</summary>
-    [ObservableProperty]
-    private string spellRoll = string.Empty;
 
     /// <summary>Passe-plat vers Row.Archetype.IsSpellcaster - masque le sous-onglet Sorts pour un type qui
     /// n'en lance jamais.</summary>
@@ -97,11 +91,10 @@ public abstract partial class RecruitSlot : ObservableObject
 
     /// <summary>Sous-onglet actif (0=Équipement, 1=Compétences, 2=Sorts, 3=XP) - même composant
     /// TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais local à CE
-    /// slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Équipement/Compétences/XP n'ont de sens
-    /// qu'en Bande existante (onglets masqués sinon, voir RecruitSlotTabsView) ; Sorts est le seul
-    /// pertinent hors Bande existante pour un lanceur de sorts, d'où le défaut différent selon le mode
-    /// (voir le constructeur) - sans ça, un sorcier fraîchement recruté démarrerait sur un onglet
-    /// Équipement invisible, contenu orphelin sans bouton pour y accéder.</summary>
+    /// slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Équipement reste l'onglet par défaut
+    /// dans tous les cas (voir le constructeur) - Compétences/XP n'ont de sens qu'en Bande existante
+    /// (onglets masqués sinon, voir RecruitSlotTabsView), Sorts est pertinent dans les deux modes pour un
+    /// lanceur de sorts mais ne devient le défaut que si Équipement lui-même est masqué (!CanUseEquipment).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEquipmentSection))]
     [NotifyPropertyChangedFor(nameof(IsSkillsSection))]
@@ -131,11 +124,12 @@ public abstract partial class RecruitSlot : ObservableObject
         Row = row;
         this.isExistingWarband = isExistingWarband;
         experience = row.Archetype.StartingExperience;
-        // Hors Bande existante, Équipement/Compétences/XP sont des onglets masqués (voir ShowTabsView) -
-        // démarrer dessus laisserait un contenu orphelin sans bouton pour en sortir. Sorts est alors le
-        // seul onglet pertinent pour un lanceur de sorts ; pour tout autre type, RecruitSlotTabsView reste
-        // entièrement masqué (ShowTabsView) donc SelectedSection n'a aucun effet visible.
-        selectedSection = !isExistingWarband && IsSpellcaster ? 2 : 0;
+        // Équipement reste l'onglet par défaut même pour un sorcier fraîchement recruté (Sorts n'a pas
+        // vocation à voler la vedette) - sauf le seul cas où l'onglet Équipement lui-même est masqué
+        // (!CanUseEquipment, ex. un Rat Ogre lanceur de sorts hors Bande existante) : Sorts est alors le
+        // seul onglet visible, et démarrer sur Équipement laisserait un contenu orphelin sans bouton pour
+        // en sortir.
+        selectedSection = !isExistingWarband && IsSpellcaster && !CanUseEquipment ? 2 : 0;
         // EquipmentSummary est calculée (pas [ObservableProperty]) - Equipment.Add/Remove (AddEquipment/
         // RemoveEquipment de WarbandEditDialogViewModel) ne déclenchent donc aucune notification pour elle
         // sans ce relais explicite, laissant le Label de l'étape Noms vide/périmé tant qu'on ne rouvre pas

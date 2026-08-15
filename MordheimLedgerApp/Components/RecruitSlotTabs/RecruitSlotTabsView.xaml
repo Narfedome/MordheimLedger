@@ -81,8 +81,7 @@
                                           Command="{Binding AddSkillCommand}"
                                           CommandParameter="{Binding Item}"/>
         </Grid>
-        <VerticalStackLayout Spacing="6" IsVisible="{Binding Item.IsSpellsSection}">
-            <Grid ColumnDefinitions="*,Auto">
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsSpellsSection}">
                 <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Spells}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="library:Spell">
@@ -106,8 +105,13 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
-                <!-- Bande existante uniquement : choix libre (on enregistre un historique déjà déterminé
-                     sur papier). Hors Bande existante, voir la ligne de saisie du jet ci-dessous. -->
+                <!-- Bande existante : choix libre (on enregistre un historique déjà déterminé sur
+                     papier). Hors Bande existante : ouvre SpellRollDialog (contexte école de magie +
+                     saisie du jet 1D6, livre des règles) plutôt qu'un choix libre - masqué une fois le
+                     sort obtenu (Item.HasSpells, un seul sort de départ), retirer la puce ci-dessus
+                     (RemoveSpellCommand) permet de rouvrir le dialog et relancer. Wrapper : IsVisible ne
+                     combine pas plusieurs conditions nativement en XAML, même idiome qu'ailleurs dans
+                     WarbandEditDialog.xaml. -->
                 <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband}">
                     <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                   Icon="{x:Static icons:SolidFont.Plus}"
@@ -115,34 +119,15 @@
                                                   Command="{Binding AddSpellCommand}"
                                                   CommandParameter="{Binding Item}"/>
                 </Grid>
-            </Grid>
-            <!-- Sort de départ tiré au 1D6 (livre des règles), hors Bande existante - même schéma que
-                 AdvanceRollEntry côté Fin de partie (EndOfGameDialog) : le joueur tape le résultat d'un dé
-                 physique dans le champ, ou le bouton dé le remplit au hasard (AutoRollSpellCommand) ; la
-                 coche (ApplyStartingSpellCommand) résout le jet en sort et l'ajoute. Toute la ligne se
-                 masque une fois le sort obtenu (HasSpells, un seul sort de départ) - retirer la puce
-                 ci-dessus (RemoveSpellCommand) permet de relancer. Grid englobant pour combiner les deux
-                 conditions (IsExistingWarband inverse + HasSpells inverse), IsVisible ne les combine pas
-                 nativement en XAML - même idiome qu'ailleurs dans WarbandEditDialog.xaml. -->
-            <Grid IsVisible="{Binding Item.IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="8"
-                      IsVisible="{Binding Item.HasSpells, Converter={StaticResource InverseBoolConverter}}">
-                    <Entry Grid.Column="0" Text="{Binding Item.SpellRoll}" Keyboard="Numeric"
-                           Placeholder="{loc:Loc WarbandsSpellRollPh}" WidthRequest="60" FontSize="12"/>
-                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
+                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                   Icon="{x:Static icons:SolidFont.Dice}"
-                                                  Tooltip="{loc:Loc EndOfGameRoll}"
                                                   IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                  Command="{Binding AutoRollSpellCommand}"
-                                                  CommandParameter="{Binding Item}"/>
-                    <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Icon="{x:Static icons:SolidFont.Check}"
-                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                  Command="{Binding ApplyStartingSpellCommand}"
+                                                  IsVisible="{Binding Item.HasSpells, Converter={StaticResource InverseBoolConverter}}"
+                                                  Command="{Binding ShowSpellRollDialogCommand}"
                                                   CommandParameter="{Binding Item}"/>
                 </Grid>
-            </Grid>
-        </VerticalStackLayout>
+        </Grid>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
             <Entry Grid.Column="1" Text="{Binding Item.Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>

@@ -154,12 +154,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 foreach (var slot in row.NameSlots)
                 {
                     slot.IsExistingWarband = value;
-                    slot.SelectedSection = !value && slot.IsSpellcaster ? 2 : 0;
+                    slot.SelectedSection = !value && slot.IsSpellcaster && !slot.CanUseEquipment ? 2 : 0;
                 }
                 foreach (var group in row.HenchmanGroupDrafts)
                 {
                     group.IsExistingWarband = value;
-                    group.SelectedSection = !value && group.IsSpellcaster ? 2 : 0;
+                    group.SelectedSection = !value && group.IsSpellcaster && !group.CanUseEquipment ? 2 : 0;
                 }
             }
 
@@ -607,31 +607,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 destination.Add(spell);
         }
 
-        /// <summary>Remplit RecruitSlot.SpellRoll d'un jet 1D6 aléatoire - ne résout/n'ajoute rien tout
-        /// seul, contrairement à l'ancien RollStartingSpell. Même idiome que EndOfGameDialogViewModel.
-        /// AutoRollAdvance (remplit AdvanceRollEntry.ManualRoll) : le joueur peut aussi taper directement
-        /// le résultat d'un dé physique dans le champ plutôt que passer par ce bouton.</summary>
+        /// <summary>Sort de départ d'un lanceur de sorts fraîchement recruté (hors mode Bande existante,
+        /// où AddSpell reste un choix libre - importer une bande déjà jouée, c'est enregistrer un
+        /// historique déjà déterminé, pas faire un nouveau tirage). Ouvre SpellRollDialog (contexte école
+        /// de magie + saisie du jet) plutôt que résoudre inline - une fois validé, ajoute le sort et
+        /// enchaîne sur son récap complet via IDetailDialogService, pour que le joueur voie immédiatement
+        /// ce qu'il a obtenu.</summary>
         [RelayCommand]
-        private static void AutoRollSpell(object target)
-        {
-            RecruitSlot? slot = target switch
-            {
-                WarriorNameSlot s => s,
-                HenchmanGroupDraft g => g,
-                _ => null
-            };
-            if (slot is null) return;
-
-            slot.SpellRoll = SpellRules.RollDice().ToString();
-        }
-
-        /// <summary>Résout RecruitSlot.SpellRoll (jet physique tapé à la main ou rempli par AutoRollSpell)
-        /// en sort de départ - livre des règles : "A Wizard starts with one spell, determined randomly -
-        /// roll 1D6 on the appropriate list", pas un choix libre (voir AddSpell, réservé à l'import d'une
-        /// bande déjà jouée). Plafonné à un seul sort (ligne de saisie masquée une fois tiré, voir
-        /// WarbandEditDialog.xaml) ; retirer la puce (RemoveSpellCommand, déjà câblé) permet de relancer.</summary>
-        [RelayCommand]
-        private async Task ApplyStartingSpell(object target)
+        private async Task ShowSpellRollDialog(object target)
         {
             RecruitSlot? slot = target switch
             {
@@ -641,23 +624,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             };
             if (slot is null || Archetype is null) return;
 
-            if (!int.TryParse(slot.SpellRoll, out var roll) || roll < 1 || roll > 6)
-            {
-                await ShowInfoAsync(Loc["WarbandsSpellRollTitle"], Loc["WarbandsSpellRollInvalidMessage"]);
-                return;
-            }
-
-            var magicSchoolIds = Archetype.MagicSchools.Select(s => s.Id).ToHashSet();
-            var available = (await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language))
-                .Where(s => magicSchoolIds.Contains(s.MagicSchoolId)).ToList();
-            var spell = available.FirstOrDefault(s => s.RollValue == roll);
-            if (spell is null)
-            {
-                await ShowInfoAsync(Loc["WarbandsSpellRollTitle"], Loc["WarbandsSpellRollEmptyMessage"]);
-                return;
-            }
+            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService)));
+            if (spell is null) return;
 
             slot.Spells.Add(spell);
+            await _detailDialogs.ShowSpellDetailDialogAsync(spell);
         }
 
         [RelayCommand]

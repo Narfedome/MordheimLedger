@@ -189,6 +189,9 @@
   <data name="WarbandsSpellRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
+  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
   <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
     <value>Enter a roll between 1 and 6.</value>
   </data>

@@ -102,28 +102,16 @@ public partial class RecruitSlotTabsView : ContentView
         set => SetValue(ShowSpellDetailCommandProperty, value);
     }
 
-    /// <summary>Hors mode Bande existante (Item.IsExistingWarband) : remplit Item.SpellRoll d'un jet 1D6
-    /// aléatoire, sans rien appliquer (voir WarbandEditDialogViewModel.AutoRollSpell) - le joueur peut
-    /// aussi taper directement le résultat d'un dé physique dans le champ.</summary>
-    public static readonly BindableProperty AutoRollSpellCommandProperty =
-        BindableProperty.Create(nameof(AutoRollSpellCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+    /// <summary>Hors mode Bande existante (Item.IsExistingWarband) : ouvre SpellRollDialog (contexte
+    /// école de magie + saisie du jet 1D6, voir WarbandEditDialogViewModel.ShowSpellRollDialog) -
+    /// remplace AddSpellCommand, où le sort de départ est tiré au hasard plutôt que choisi librement.</summary>
+    public static readonly BindableProperty ShowSpellRollDialogCommandProperty =
+        BindableProperty.Create(nameof(ShowSpellRollDialogCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
 
-    public ICommand? AutoRollSpellCommand
+    public ICommand? ShowSpellRollDialogCommand
     {
-        get => (ICommand?)GetValue(AutoRollSpellCommandProperty);
-        set => SetValue(AutoRollSpellCommandProperty, value);
-    }
-
-    /// <summary>Résout Item.SpellRoll en sort de départ et l'ajoute (voir
-    /// WarbandEditDialogViewModel.ApplyStartingSpell) - remplace AddSpellCommand hors mode Bande
-    /// existante, où le sort de départ est tiré au 1D6 plutôt que choisi librement.</summary>
-    public static readonly BindableProperty ApplyStartingSpellCommandProperty =
-        BindableProperty.Create(nameof(ApplyStartingSpellCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
-
-    public ICommand? ApplyStartingSpellCommand
-    {
-        get => (ICommand?)GetValue(ApplyStartingSpellCommandProperty);
-        set => SetValue(ApplyStartingSpellCommandProperty, value);
+        get => (ICommand?)GetValue(ShowSpellRollDialogCommandProperty);
+        set => SetValue(ShowSpellRollDialogCommandProperty, value);
     }
 
     public RecruitSlotTabsView()

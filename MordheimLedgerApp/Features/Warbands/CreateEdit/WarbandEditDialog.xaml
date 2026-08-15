@@ -169,8 +169,7 @@
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
                                                               ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                              AutoRollSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AutoRollSpellCommand}"
-                                                              ApplyStartingSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ApplyStartingSpellCommand}"/>
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -205,8 +204,7 @@
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
                                                               ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                              AutoRollSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AutoRollSpellCommand}"
-                                                              ApplyStartingSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ApplyStartingSpellCommand}"/>
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>

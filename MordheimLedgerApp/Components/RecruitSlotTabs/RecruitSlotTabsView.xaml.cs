@@ -102,6 +102,18 @@ public partial class RecruitSlotTabsView : ContentView
         set => SetValue(ShowSpellDetailCommandProperty, value);
     }
 
+    /// <summary>Hors mode Bande existante (Item.IsExistingWarband) : remplace AddSpellCommand pour le
+    /// sort de départ d'un lanceur de sorts, tiré au 1D6 plutôt que choisi librement (livre des règles -
+    /// voir WarbandEditDialogViewModel.RollStartingSpell).</summary>
+    public static readonly BindableProperty RollStartingSpellCommandProperty =
+        BindableProperty.Create(nameof(RollStartingSpellCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? RollStartingSpellCommand
+    {
+        get => (ICommand?)GetValue(RollStartingSpellCommandProperty);
+        set => SetValue(RollStartingSpellCommandProperty, value);
+    }
+
     public RecruitSlotTabsView()
     {
         InitializeComponent();

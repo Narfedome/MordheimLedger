@@ -10,19 +10,27 @@
              x:Name="root">
 
     <VerticalStackLayout Spacing="6" BindingContext="{x:Reference root}">
+        <!-- Équipement/Compétences/XP n'ont de sens qu'en Bande existante (import d'un historique déjà
+             déterminé) - onglets masqués sinon, voir RecruitSlot.IsExistingWarband/ShowTabsView. Sorts
+             reste visible dans les deux modes pour un lanceur de sorts (livre des règles : sort de départ
+             tiré au 1D6 même en création neuve), avec un bouton "+"/dé différent selon le mode (voir plus
+             bas). -->
         <components:ScrollableTabStripView>
             <HorizontalStackLayout Spacing="14">
                 <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
-                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
+                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"
+                                             IsVisible="{Binding Item.IsExistingWarband}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
-                                             IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"/>
+                                             IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"
+                                             IsVisible="{Binding Item.IsExistingWarband}"/>
                 <!-- Onglet Sorts : masqué si ce type de guerrier n'est pas lanceur de sorts (voir
                      RecruitSlot.IsSpellcaster), même garde que WarriorEditDialog. -->
                 <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" FontSize="11"
                                              IsActive="{Binding Item.IsSpellsSection}" Command="{Binding Item.ShowSpellsSectionCommand}"
                                              IsVisible="{Binding Item.IsSpellcaster}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
-                                             IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"/>
+                                             IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"
+                                             IsVisible="{Binding Item.IsExistingWarband}"/>
             </HorizontalStackLayout>
         </components:ScrollableTabStripView>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsEquipmentSection}">
@@ -98,11 +106,25 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </FlexLayout>
-            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                          Icon="{x:Static icons:SolidFont.Plus}"
-                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                          Command="{Binding AddSpellCommand}"
-                                          CommandParameter="{Binding Item}"/>
+            <!-- Bande existante : choix libre (on enregistre un historique déjà déterminé sur papier).
+                 Hors Bande existante : sort de départ tiré au 1D6 (livre des règles), pas choisi
+                 librement - le dé se masque une fois le sort obtenu (HasSpells, un seul sort de départ),
+                 retirer la puce (RemoveSpellCommand ci-dessus) permet de relancer. -->
+            <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband}">
+                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Plus}"
+                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                              Command="{Binding AddSpellCommand}"
+                                              CommandParameter="{Binding Item}"/>
+            </Grid>
+            <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
+                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Dice}"
+                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                              IsVisible="{Binding Item.HasSpells, Converter={StaticResource InverseBoolConverter}}"
+                                              Command="{Binding RollStartingSpellCommand}"
+                                              CommandParameter="{Binding Item}"/>
+            </Grid>
         </Grid>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>

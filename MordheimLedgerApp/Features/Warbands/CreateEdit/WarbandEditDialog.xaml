@@ -179,44 +179,13 @@
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </FlexLayout>
-                                                        <!-- Sorts : hors mode Bande existante uniquement, pour un lanceur de sorts
-                                                             fraîchement recruté (livre des règles : "A Wizard starts with one
-                                                             spell, determined randomly") - tiré au 1D6, pas choisi librement (voir
-                                                             RollStartingSpellCommand). En mode Bande existante, ce même sort
-                                                             s'assigne via l'onglet Sorts de RecruitSlotTabsView ci-dessous (choix
-                                                             libre : on enregistre un historique déjà déterminé sur papier, pas un
-                                                             nouveau tirage), pas ce bloc-ci. -->
-                                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsSpellcaster}">
-                                                            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}"
-                                                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                                <BindableLayout.ItemTemplate>
-                                                                    <DataTemplate x:DataType="library:Spell">
-                                                                        <components:ChipView Item="{Binding .}"
-                                                                                              IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
-                                                                                              IconFontFamily="RpgAwesome"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"/>
-                                                                    </DataTemplate>
-                                                                </BindableLayout.ItemTemplate>
-                                                            </FlexLayout>
-                                                            <!-- Un seul sort de départ, tiré au 1D6 (livre des règles) - pas de bouton
-                                                                 "+" libre comme Équipement : le dé se masque une fois le sort obtenu
-                                                                 (HasSpells), retirer la puce (RemoveSpellCommand ci-dessus) permet de
-                                                                 relancer. -->
-                                                            <Grid Grid.Column="1" IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Dice}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              IsVisible="{Binding HasSpells, Converter={StaticResource InverseBoolConverter}}"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RollStartingSpellCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
-                                                             (un état par groupe, SelectedSection), factorisés dans RecruitSlotTabsView
-                                                             (même bloc réutilisé côté Héros juste en dessous). -->
+                                                        <!-- Équipement/Compétences/XP (Bande existante) et Sorts (les deux modes,
+                                                             livre des règles : sort de départ tiré au 1D6 même en création neuve)
+                                                             factorisés dans RecruitSlotTabsView (même bloc réutilisé côté Héros
+                                                             juste en dessous) - visible dès qu'au moins un sous-onglet a un sens
+                                                             (voir RecruitSlot.ShowTabsView). -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"
-                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}"
+                                                              IsVisible="{Binding ShowTabsView}"
                                                               AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
                                                               RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
                                                               ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
@@ -225,7 +194,8 @@
                                                               ShowSkillDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
-                                                              ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"/>
+                                                              ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                              RollStartingSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RollStartingSpellCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -267,39 +237,10 @@
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </FlexLayout>
-                                                        <!-- Sorts : hors mode Bande existante uniquement - même bloc que côté
-                                                             Hommes de main ci-dessus (RecruitSlot.IsSpellcaster). -->
-                                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsSpellcaster}">
-                                                            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}"
-                                                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                                <BindableLayout.ItemTemplate>
-                                                                    <DataTemplate x:DataType="library:Spell">
-                                                                        <components:ChipView Item="{Binding .}"
-                                                                                              IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
-                                                                                              IconFontFamily="RpgAwesome"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"/>
-                                                                    </DataTemplate>
-                                                                </BindableLayout.ItemTemplate>
-                                                            </FlexLayout>
-                                                            <!-- Un seul sort de départ, tiré au 1D6 (livre des règles) - pas de bouton
-                                                                 "+" libre comme Équipement : le dé se masque une fois le sort obtenu
-                                                                 (HasSpells), retirer la puce (RemoveSpellCommand ci-dessus) permet de
-                                                                 relancer. -->
-                                                            <Grid Grid.Column="1" IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Dice}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              IsVisible="{Binding HasSpells, Converter={StaticResource InverseBoolConverter}}"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RollStartingSpellCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
-                                                             (un état par héros, SelectedSection), même RecruitSlotTabsView que côté
+                                                        <!-- Équipement/Compétences/XP/Sorts - même RecruitSlotTabsView que côté
                                                              Hommes de main ci-dessus. -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"
-                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}"
+                                                              IsVisible="{Binding ShowTabsView}"
                                                               AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
                                                               RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
                                                               ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
@@ -308,7 +249,8 @@
                                                               ShowSkillDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
-                                                              ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"/>
+                                                              ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                              RollStartingSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RollStartingSpellCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>

@@ -60,6 +60,25 @@ public abstract partial class RecruitSlot : ObservableObject
     /// n'en lance jamais.</summary>
     public bool IsSpellcaster => Row.Archetype.IsSpellcaster;
 
+    /// <summary>Copie de WarbandEditDialogViewModel.IsExistingWarband, tenue à jour à la création du slot
+    /// (WarbandEditDialogViewModel.IncrementWarrior/SplitHenchmanGroupDraft) et rétroactivement si la
+    /// case est basculée après coup (OnIsExistingWarbandChanged) - RecruitSlot n'a pas de référence au
+    /// dialog lui-même, donc pas moyen de lire cette valeur en direct depuis ici. Pilote quels
+    /// sous-onglets de RecruitSlotTabsView ont un sens : Équipement/Compétences/XP seulement en Bande
+    /// existante (import d'un historique déjà déterminé), Sorts dans les deux modes (voir
+    /// IsSpellcaster/ShowTabsView) mais avec un bouton différent (choix libre vs tirage 1D6, voir
+    /// RecruitSlotTabsView.xaml).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowTabsView))]
+    private bool isExistingWarband;
+
+    /// <summary>Pilote la visibilité de RecruitSlotTabsView - visible dès qu'il y a au moins un
+    /// sous-onglet pertinent à montrer : Équipement/Compétences/XP (Bande existante) ou Sorts (lanceur de
+    /// sorts, les deux modes - livre des règles : sort de départ tiré au 1D6 même en création neuve).
+    /// Hors Bande existante et hors lanceur de sorts, aucun sous-onglet n'a de sens (l'Équipement se gère
+    /// via le bloc "+" hors-onglet juste au-dessus, voir WarbandEditDialog.xaml) - composant masqué.</summary>
+    public bool ShowTabsView => IsExistingWarband || IsSpellcaster;
+
     /// <summary>XP de cette recrue/ce groupe - uniquement modifiable en mode "Bande existante" (sinon
     /// reste la StartingExperience de l'archétype, comme WarriorArchetype.ToWarrior l'applique déjà).
     /// Persisté au Save() par une mise à jour explicite du Warrior fraîchement recruté (RecruitWarriorAsync
@@ -67,11 +86,13 @@ public abstract partial class RecruitSlot : ObservableObject
     [ObservableProperty]
     private int experience;
 
-    /// <summary>Sous-onglet actif en mode Bande existante (0=Équipement, 1=Compétences, 2=Sorts, 3=XP) -
-    /// même composant TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais
-    /// local à CE slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Sans effet hors mode Bande
-    /// existante, où seul le panneau Équipement est affiché sans onglets. Sorts n'a de sens que pour un
-    /// lanceur de sorts (voir IsSpellcaster, onglet masqué sinon dans RecruitSlotTabsView).</summary>
+    /// <summary>Sous-onglet actif (0=Équipement, 1=Compétences, 2=Sorts, 3=XP) - même composant
+    /// TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais local à CE
+    /// slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Équipement/Compétences/XP n'ont de sens
+    /// qu'en Bande existante (onglets masqués sinon, voir RecruitSlotTabsView) ; Sorts est le seul
+    /// pertinent hors Bande existante pour un lanceur de sorts, d'où le défaut différent selon le mode
+    /// (voir le constructeur) - sans ça, un sorcier fraîchement recruté démarrerait sur un onglet
+    /// Équipement invisible, contenu orphelin sans bouton pour y accéder.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEquipmentSection))]
     [NotifyPropertyChangedFor(nameof(IsSkillsSection))]
@@ -96,10 +117,16 @@ public abstract partial class RecruitSlot : ObservableObject
     [RelayCommand]
     private void ShowXpSection() => SelectedSection = 3;
 
-    protected RecruitSlot(WarriorRecruitRow row)
+    protected RecruitSlot(WarriorRecruitRow row, bool isExistingWarband)
     {
         Row = row;
+        this.isExistingWarband = isExistingWarband;
         experience = row.Archetype.StartingExperience;
+        // Hors Bande existante, Équipement/Compétences/XP sont des onglets masqués (voir ShowTabsView) -
+        // démarrer dessus laisserait un contenu orphelin sans bouton pour en sortir. Sorts est alors le
+        // seul onglet pertinent pour un lanceur de sorts ; pour tout autre type, RecruitSlotTabsView reste
+        // entièrement masqué (ShowTabsView) donc SelectedSection n'a aucun effet visible.
+        selectedSection = !isExistingWarband && IsSpellcaster ? 2 : 0;
         // EquipmentSummary est calculée (pas [ObservableProperty]) - Equipment.Add/Remove (AddEquipment/
         // RemoveEquipment de WarbandEditDialogViewModel) ne déclenchent donc aucune notification pour elle
         // sans ce relais explicite, laissant le Label de l'étape Noms vide/périmé tant qu'on ne rouvre pas
@@ -125,7 +152,7 @@ public partial class WarriorNameSlot : RecruitSlot
     [ObservableProperty]
     private string archetypeLabel = string.Empty;
 
-    public WarriorNameSlot(WarriorRecruitRow row) : base(row)
+    public WarriorNameSlot(WarriorRecruitRow row, bool isExistingWarband) : base(row, isExistingWarband)
     {
         archetypeLabel = row.Archetype.Name;
     }
@@ -156,7 +183,7 @@ public partial class HenchmanGroupDraft : RecruitSlot
     /// groupe existant et un nouveau.</summary>
     public bool CanSplit => Count > 1 && Row.Archetype.CanUseEquipment;
 
-    public HenchmanGroupDraft(WarriorRecruitRow row, string name, int count) : base(row)
+    public HenchmanGroupDraft(WarriorRecruitRow row, string name, int count, bool isExistingWarband) : base(row, isExistingWarband)
     {
         this.name = name;
         this.count = count;

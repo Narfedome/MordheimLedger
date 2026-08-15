@@ -143,6 +143,26 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         partial void OnIsExistingWarbandChanged(bool value)
         {
             if (value && Archetype is not null) TreasuryOverride = Archetype.StartingTreasury;
+
+            // Propage rétroactivement aux slots déjà créés (le joueur a coché/décoché après être
+            // retourné en arrière depuis l'étape Équipement) - sans ça, RecruitSlot.IsExistingWarband
+            // resterait figé sur sa valeur de construction. Réinitialise aussi SelectedSection au défaut
+            // du nouveau mode (voir RecruitSlot constructeur) : sans ça, un slot resterait bloqué sur un
+            // onglet qui vient de devenir masqué (ex. "Compétences" en quittant Bande existante).
+            foreach (var row in RecruitRows)
+            {
+                foreach (var slot in row.NameSlots)
+                {
+                    slot.IsExistingWarband = value;
+                    slot.SelectedSection = !value && slot.IsSpellcaster ? 2 : 0;
+                }
+                foreach (var group in row.HenchmanGroupDrafts)
+                {
+                    group.IsExistingWarband = value;
+                    group.SelectedSection = !value && group.IsSpellcaster ? 2 : 0;
+                }
+            }
+
             UpdateRecruitability();
             if (value) ShowExistingWarbandHint();
         }
@@ -281,10 +301,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             row.Count++;
             if (row.IsHero)
             {
-                row.NameSlots.Add(new WarriorNameSlot(row));
+                row.NameSlots.Add(new WarriorNameSlot(row, IsExistingWarband));
                 RenumberHeroLabels(row);
             }
-            else if (row.HenchmanGroupDrafts.Count == 0) row.HenchmanGroupDrafts.Add(new HenchmanGroupDraft(row, row.Archetype.Name, 1));
+            else if (row.HenchmanGroupDrafts.Count == 0) row.HenchmanGroupDrafts.Add(new HenchmanGroupDraft(row, row.Archetype.Name, 1, IsExistingWarband));
             else row.HenchmanGroupDrafts[^1].Count++;
             UpdateRecruitability();
         }
@@ -325,7 +345,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (!int.TryParse(input, out var moved) || moved <= 0 || moved >= group.Count) return;
 
             group.Count -= moved;
-            var newGroup = new HenchmanGroupDraft(group.Row, group.Row.Archetype.Name, moved);
+            var newGroup = new HenchmanGroupDraft(group.Row, group.Row.Archetype.Name, moved, group.IsExistingWarband);
             var index = group.Row.HenchmanGroupDrafts.IndexOf(group);
             group.Row.HenchmanGroupDrafts.Insert(index + 1, newGroup);
             RenumberHenchmanGroupDrafts(group.Row);

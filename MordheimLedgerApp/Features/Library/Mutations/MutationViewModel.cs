@@ -12,6 +12,7 @@ namespace MordheimLedgerApp.Features.Library.Mutations;
 public partial class MutationViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IMutationPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private List<WarbandArchetype> _warbandArchetypes = new();
@@ -56,10 +57,11 @@ public partial class MutationViewModel : BaseViewModel
     /// is empty (common) or contains this id are shown - see WarriorEditDialogViewModel.AddMutation.</summary>
     public int? AllowedWarbandArchetypeId { get; set; }
 
-    public MutationViewModel(ILibraryService libraryService, IMutationPickerNavigationService pickerNavigation,
+    public MutationViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, IMutationPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _pickerNavigation = pickerNavigation;
         _warbandPicker = warbandPicker;
 
@@ -221,13 +223,8 @@ public partial class MutationViewModel : BaseViewModel
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Mutation>());
 
-    /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.
-    /// AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
+    /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
+    /// WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task ShowDetails(MutationRow row)
-    {
-        var restrictedWarbands = _warbandArchetypes.Where(w => row.Item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-        var dialogViewModel = new MutationDetailDialogViewModel(row.Item, restrictedWarbands);
-        await ShowDialogAsync(new MutationDetailDialog(dialogViewModel));
-    }
+    private Task ShowDetails(MutationRow row) => _detailDialogs.ShowMutationDetailDialogAsync(row.Item);
 }

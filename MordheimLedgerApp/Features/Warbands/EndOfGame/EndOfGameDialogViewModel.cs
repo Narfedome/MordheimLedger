@@ -28,6 +28,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 {
     private readonly ISkillPickerService _skillPicker;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly int _warbandArchetypeId;
 
     protected override bool CancelResult => false;
@@ -76,9 +77,10 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => CurrentStep == ActiveSteps[^1];
     public string StepLabel => string.Format(Loc["LibStepLabel"], ActiveSteps.IndexOf(CurrentStep) + 1, ActiveSteps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<Warrior> activeWarriors, ISkillPickerService skillPicker, int warbandArchetypeId)
+    public EndOfGameDialogViewModel(IEnumerable<Warrior> activeWarriors, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId)
     {
         _skillPicker = skillPicker;
+        _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
@@ -211,6 +213,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         foreach (var skill in skills)
             entry.SelectedSkills.Add(skill);
     }
+
+    [RelayCommand]
+    private Task ShowSkillDetail(Skill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill);
 
     [RelayCommand]
     private void Save() => Close(true);

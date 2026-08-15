@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
-using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 
@@ -35,8 +35,10 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     /// merge, same idiom as EquipmentPick.Name/WarriorEquipment.NameDisplay for the abbreviated chip.</summary>
     public List<SpecialRule> DisplayedSpecialRules { get; }
 
+    private readonly IDetailDialogService _detailDialogs;
+
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel,
-        List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors, SpecialRule? materialRule = null)
+        List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors, IDetailDialogService detailDialogs, SpecialRule? materialRule = null)
     {
         Item = item;
         Title = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{item.Name} ({abbr})" : item.Name;
@@ -45,6 +47,7 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
         RestrictedWarbands = restrictedWarbands;
         RestrictedWarriors = restrictedWarriors;
         DisplayedSpecialRules = materialRule is null ? item.SpecialRules : item.SpecialRules.Append(materialRule).ToList();
+        _detailDialogs = detailDialogs;
     }
 
     [RelayCommand]
@@ -60,6 +63,6 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     [RelayCommand]
     private Task ShowSpecialRuleDetail(SpecialRule rule) =>
         rule.CostMultiplier.HasValue || rule.Rarity.HasValue
-            ? ShowDialogAsync(new SpecialRuleDetailDialog(new SpecialRuleDetailDialogViewModel(rule)))
+            ? _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule)
             : ShowChipDetailAsync(rule.Name, rule.Description);
 }

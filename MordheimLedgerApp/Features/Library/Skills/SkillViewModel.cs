@@ -12,6 +12,7 @@ namespace MordheimLedgerApp.Features.Library.Skills;
 public partial class SkillViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly ISkillPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly IWarriorArchetypePickerService _warriorPicker;
@@ -69,10 +70,11 @@ public partial class SkillViewModel : BaseViewModel
     /// only ever sees Combat/Strength/Speed skills, never Academic ones.</summary>
     public IReadOnlyList<SkillCategory>? AllowedCategories { get; set; }
 
-    public SkillViewModel(ILibraryService libraryService, ISkillPickerNavigationService pickerNavigation,
+    public SkillViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, ISkillPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker, IWarriorArchetypePickerService warriorPicker)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _pickerNavigation = pickerNavigation;
         _warbandPicker = warbandPicker;
         _warriorPicker = warriorPicker;
@@ -236,20 +238,8 @@ public partial class SkillViewModel : BaseViewModel
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Skill>());
 
-    /// <summary>Read-only recap popup (tile info button) - same dual restriction-id resolution as Edit's
-    /// initialWarriors fetch. AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
+    /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
+    /// WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task ShowDetails(SkillRow row)
-    {
-        var item = row.Item;
-        var restrictedWarbands = _warbandArchetypes.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarriorArchetype>()
-            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, LocalizationService.Instance.Language))
-                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-        var dialogViewModel = new SkillDetailDialogViewModel(item, CategoryLabel(item.Category), restrictedWarbands, restrictedWarriors);
-        await ShowDialogAsync(new SkillDetailDialog(dialogViewModel));
-    }
+    private Task ShowDetails(SkillRow row) => _detailDialogs.ShowSkillDetailDialogAsync(row.Item);
 }

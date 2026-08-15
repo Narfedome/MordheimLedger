@@ -44,6 +44,15 @@ public abstract partial class RecruitSlot : ObservableObject
     /// WarriorId réel avant, même raison que EquipmentPick).</summary>
     public ObservableCollection<Skill> Skills { get; } = new();
 
+    /// <summary>Sorts déjà appris - même principe que Skills (mode "Bande existante" uniquement), mais
+    /// n'a de sens que si Row.Archetype.IsSpellcaster (voir IsSpellcaster/onglet Sorts masqué sinon dans
+    /// RecruitSlotTabsView). Persisté au Save() via WarbandService.AddWarriorSpellAsync.</summary>
+    public ObservableCollection<Spell> Spells { get; } = new();
+
+    /// <summary>Passe-plat vers Row.Archetype.IsSpellcaster - masque le sous-onglet Sorts pour un type qui
+    /// n'en lance jamais.</summary>
+    public bool IsSpellcaster => Row.Archetype.IsSpellcaster;
+
     /// <summary>XP de cette recrue/ce groupe - uniquement modifiable en mode "Bande existante" (sinon
     /// reste la StartingExperience de l'archétype, comme WarriorArchetype.ToWarrior l'applique déjà).
     /// Persisté au Save() par une mise à jour explicite du Warrior fraîchement recruté (RecruitWarriorAsync
@@ -51,19 +60,22 @@ public abstract partial class RecruitSlot : ObservableObject
     [ObservableProperty]
     private int experience;
 
-    /// <summary>Sous-onglet actif en mode Bande existante (0=Équipement, 1=Compétences, 2=XP) - même
-    /// composant TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais local à
-    /// CE slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Sans effet hors mode Bande existante,
-    /// où seul le panneau Équipement est affiché sans onglets.</summary>
+    /// <summary>Sous-onglet actif en mode Bande existante (0=Équipement, 1=Compétences, 2=Sorts, 3=XP) -
+    /// même composant TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais
+    /// local à CE slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Sans effet hors mode Bande
+    /// existante, où seul le panneau Équipement est affiché sans onglets. Sorts n'a de sens que pour un
+    /// lanceur de sorts (voir IsSpellcaster, onglet masqué sinon dans RecruitSlotTabsView).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEquipmentSection))]
     [NotifyPropertyChangedFor(nameof(IsSkillsSection))]
+    [NotifyPropertyChangedFor(nameof(IsSpellsSection))]
     [NotifyPropertyChangedFor(nameof(IsXpSection))]
     private int selectedSection;
 
     public bool IsEquipmentSection => SelectedSection == 0;
     public bool IsSkillsSection => SelectedSection == 1;
-    public bool IsXpSection => SelectedSection == 2;
+    public bool IsSpellsSection => SelectedSection == 2;
+    public bool IsXpSection => SelectedSection == 3;
 
     [RelayCommand]
     private void ShowEquipmentSection() => SelectedSection = 0;
@@ -72,7 +84,10 @@ public abstract partial class RecruitSlot : ObservableObject
     private void ShowSkillsSection() => SelectedSection = 1;
 
     [RelayCommand]
-    private void ShowXpSection() => SelectedSection = 2;
+    private void ShowSpellsSection() => SelectedSection = 2;
+
+    [RelayCommand]
+    private void ShowXpSection() => SelectedSection = 3;
 
     protected RecruitSlot(WarriorRecruitRow row)
     {

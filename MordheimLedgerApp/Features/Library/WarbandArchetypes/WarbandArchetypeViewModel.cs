@@ -12,6 +12,7 @@ namespace MordheimLedgerApp.Features.Library.WarbandArchetypes;
 public partial class WarbandArchetypeViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly IEquipmentPickerService _equipmentPicker;
@@ -55,11 +56,12 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0 || SelectedRow != null;
 
-    public WarbandArchetypeViewModel(ILibraryService libraryService, ISpecialRulePickerService specialRulePicker,
+    public WarbandArchetypeViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, IEquipmentPickerService equipmentPicker,
         IWarbandArchetypePickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _specialRulePicker = specialRulePicker;
         _magicSchoolPicker = magicSchoolPicker;
         _equipmentPicker = equipmentPicker;
@@ -176,7 +178,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
         var newItem = new WarbandArchetype { StartingTreasury = 500, MaxWarriors = 10 };
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"],
-            _specialRulePicker, _magicSchoolPicker, _libraryService, _equipmentPicker);
+            _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await LoadData();
@@ -205,7 +207,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         };
 
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"],
-            _specialRulePicker, _magicSchoolPicker, _libraryService, _equipmentPicker);
+            _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await LoadData();
@@ -229,7 +231,5 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     /// tuiles (seul CommandParameter change) - sans ça, AsyncRelayCommand désactive tout le monde
     /// (CanExecute lié à IsRunning) pendant qu'un dialog est ouvert pour UNE tuile, pas juste elle.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private Task ShowDetails(WarbandArchetypeRow row) =>
-        ShowDialogAsync(new WarbandArchetypeDetailDialog(
-            new WarbandArchetypeDetailDialogViewModel(row.Item, _libraryService)));
+    private Task ShowDetails(WarbandArchetypeRow row) => _detailDialogs.ShowWarbandArchetypeDetailDialogAsync(row.Item);
 }

@@ -6,7 +6,6 @@ using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
@@ -16,6 +15,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly Warband _warband;
     private readonly IWarbandService _warbandService;
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
@@ -87,7 +87,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public ObservableCollection<WarriorMutation> Mutations { get; }
 
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
-        ILibraryService libraryService, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
+        ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
         IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
         IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker)
     {
@@ -96,6 +96,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _warband = warband;
         _warbandService = warbandService;
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
@@ -202,25 +203,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// ShowEquipmentDetail) - inclut le matériau choisi (Gromril/Ithilmar...) dans la liste de règles
     /// spéciales affichée, pas seulement l'abréviation "(G)" du chip.</summary>
     [RelayCommand]
-    private async Task ShowEquipmentDetail(WarriorEquipment carried)
-    {
-        var equipmentItem = carried.Item;
-        var language = LocalizationService.Instance.Language;
-        var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
-
-        var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
-            ? new List<WarriorArchetype>()
-            : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
-                .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, carried.MaterialRule)));
-    }
+    private Task ShowEquipmentDetail(WarriorEquipment carried) =>
+        _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule);
 
     [RelayCommand]
     private async Task AddSkill()
@@ -241,6 +225,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
+    private Task ShowSkillDetail(WarriorSkill learned) => _detailDialogs.ShowSkillDetailDialogAsync(learned.Item);
+
+    [RelayCommand]
     private async Task AddInjury()
     {
         var injuries = await _injuryPicker.PickInjuriesAsync();
@@ -257,6 +244,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         await _warbandService.RemoveWarriorInjuryAsync(tracked.Id);
         Injuries.Remove(tracked);
     }
+
+    [RelayCommand]
+    private Task ShowInjuryDetail(WarriorInjury tracked) => _detailDialogs.ShowInjuryDetailDialogAsync(tracked.Item);
 
     [RelayCommand]
     private async Task AddSpell()
@@ -277,6 +267,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
+    private Task ShowSpellDetail(WarriorSpell learned) => _detailDialogs.ShowSpellDetailDialogAsync(learned.Item);
+
+    [RelayCommand]
     private async Task AddMutation()
     {
         var mutations = await _mutationPicker.PickMutationsAsync(_warband.WarbandArchetypeId);
@@ -293,6 +286,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         await _warbandService.RemoveWarriorMutationAsync(bought.Id);
         Mutations.Remove(bought);
     }
+
+    [RelayCommand]
+    private Task ShowMutationDetail(WarriorMutation bought) => _detailDialogs.ShowMutationDetailDialogAsync(bought.Item);
 
     /// <summary>Animal n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Animal,
     /// soumis comme les stats au bouton Enregistrer/Annuler (pas de persistance immédiate ni de méthode
@@ -317,6 +313,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         Item.Animal = null;
         OnPropertyChanged(nameof(Item));
     }
+
+    [RelayCommand]
+    private Task ShowAnimalDetail() => Item.Animal is null ? Task.CompletedTask : _detailDialogs.ShowAnimalDetailDialogAsync(Item.Animal);
 
     [RelayCommand]
     private async Task Delete()

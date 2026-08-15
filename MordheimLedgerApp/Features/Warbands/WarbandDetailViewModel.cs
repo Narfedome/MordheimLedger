@@ -6,13 +6,6 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.Animals.CreateEdit;
-using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
-using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
-using MordheimLedgerApp.Features.Library.Mutations.CreateEdit;
-using MordheimLedgerApp.Features.Library.Skills.CreateEdit;
-using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
-using MordheimLedgerApp.Features.Library.Spells.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
 using MordheimLedgerApp.Services;
@@ -24,6 +17,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 {
     private readonly IWarbandService _warbandService;
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
@@ -34,6 +28,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private Dictionary<int, string> _archetypeNames = new();
     private List<SpecialRule> _bandWideSpecialRules = new();
+    private List<MagicSchool> _bandMagicSchools = new();
     private List<int> _bandMagicSchoolIds = new();
 
     [ObservableProperty]
@@ -73,12 +68,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private bool showHistory;
 
-    public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService,
+    public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
         ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IAnimalPickerService animalPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
@@ -118,7 +114,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             _archetypeNames = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.Name);
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
-            _bandMagicSchoolIds = warbandArchetype?.MagicSchools.Select(s => s.Id).ToList() ?? new List<int>();
+            _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
+            _bandMagicSchoolIds = _bandMagicSchools.Select(s => s.Id).ToList();
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
@@ -134,10 +131,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     private WarriorRow ToRow(Warrior warrior)
     {
-        var archetypeRules = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId)?.SpecialRules
-            ?? new List<SpecialRule>();
+        var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId);
+        var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
         var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
-        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), mergedRules);
+        // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
+        // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
+        var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
+        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), mergedRules, magicSchools);
     }
 
     [RelayCommand]
@@ -247,7 +247,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var isSpellcaster = archetype?.IsSpellcaster ?? false;
         var isMutant = archetype?.CanBuyMutations ?? false;
         var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
-            _libraryService, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchoolIds,
+            _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchoolIds,
             _mutationPicker, isMutant, _animalPicker);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
@@ -308,85 +308,39 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     // Puces de la carte guerrier (Règles spéciales/Blessures/Sorts/Mutations/Monture/Équipement/
     // Compétences) tapables - ouvrent le même dialog récap en lecture seule que la Bibliothèque/le
-    // recrutement (voir WarriorEditDialogViewModel.ShowEquipmentDetail pour le précédent exact), pas
-    // le popup générique ChipDetailDialog (Nom+Description seuls) : depuis la fiche de bande, on veut
-    // le profil complet (stats, restrictions, matériau...), pas juste un résumé.
+    // recrutement, via IDetailDialogService (voir ce service pour pourquoi il existe : cette
+    // résolution de restrictions était dupliquée à la main dans ~28 endroits avant lui).
     [RelayCommand]
-    private Task ShowSpecialRuleDetail(SpecialRule rule) =>
-        ShowDialogAsync(new SpecialRuleDetailDialog(new SpecialRuleDetailDialogViewModel(rule)));
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
 
     [RelayCommand]
-    private Task ShowInjuryDetail(WarriorInjury injury) =>
-        ShowDialogAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(injury.Item)));
+    private Task ShowInjuryDetail(WarriorInjury injury) => _detailDialogs.ShowInjuryDetailDialogAsync(injury.Item);
 
     [RelayCommand]
-    private Task ShowSpellDetail(WarriorSpell spell) =>
-        ShowDialogAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(spell.Item)));
+    private Task ShowSpellDetail(WarriorSpell spell) => _detailDialogs.ShowSpellDetailDialogAsync(spell.Item);
 
     [RelayCommand]
-    private async Task ShowMutationDetail(WarriorMutation mutation)
+    private Task ShowMutationDetail(WarriorMutation mutation) => _detailDialogs.ShowMutationDetailDialogAsync(mutation.Item);
+
+    [RelayCommand]
+    private Task ShowAnimalDetail(Animal animal) => _detailDialogs.ShowAnimalDetailDialogAsync(animal);
+
+    [RelayCommand]
+    private Task ShowEquipmentDetail(WarriorEquipment equipment) =>
+        _detailDialogs.ShowEquipmentDetailDialogAsync(equipment.Item, equipment.MaterialRule);
+
+    [RelayCommand]
+    private Task ShowSkillDetail(WarriorSkill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill.Item);
+
+    /// <summary>École de magie de la bande (puce band-wide, pas liée à un guerrier précis) - même popup
+    /// Nom+Description+Sorts que WarbandArchetypeDetailDialogViewModel.ShowMagicSchoolDetail, pas de
+    /// XxxDetailDialog dédié pour MagicSchool dans IDetailDialogService (voir ChipDetailDialogViewModel).</summary>
+    [RelayCommand]
+    private async Task ShowMagicSchoolDetail(MagicSchool school)
     {
-        var item = mutation.Item;
         var language = LocalizationService.Instance.Language;
-        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new MutationDetailDialog(new MutationDetailDialogViewModel(item, restrictedWarbands)));
-    }
-
-    [RelayCommand]
-    private async Task ShowAnimalDetail(Animal animal)
-    {
-        var language = LocalizationService.Instance.Language;
-        var restrictedWarbands = animal.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => animal.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new AnimalDetailDialog(new AnimalDetailDialogViewModel(animal, restrictedWarbands)));
-    }
-
-    [RelayCommand]
-    private async Task ShowEquipmentDetail(WarriorEquipment equipment)
-    {
-        var item = equipment.Item;
-        var language = LocalizationService.Instance.Language;
-        var categoryLabel = Loc[$"EquipmentCategory{item.Category}"];
-
-        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0 || item.RestrictedToWarriorArchetypeIds.Count == 0
-            ? new List<WarriorArchetype>()
-            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
-                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, restrictedWarriors, equipment.MaterialRule)));
-    }
-
-    [RelayCommand]
-    private async Task ShowSkillDetail(WarriorSkill skill)
-    {
-        var item = skill.Item;
-        var language = LocalizationService.Instance.Language;
-        var categoryLabel = Loc[$"SkillCategory{item.Category}"];
-
-        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarriorArchetype>()
-            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
-                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new SkillDetailDialog(new SkillDetailDialogViewModel(item, categoryLabel, restrictedWarbands, restrictedWarriors)));
+        var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
+        await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(school.Name, school.Description, spells)));
     }
 
     [RelayCommand]
@@ -404,7 +358,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             return;
         }
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker, Warband.WarbandArchetypeId);
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>

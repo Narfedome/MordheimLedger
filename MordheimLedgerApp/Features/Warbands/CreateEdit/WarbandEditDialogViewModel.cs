@@ -6,9 +6,6 @@ using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
-using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
-using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
 
@@ -34,8 +31,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
         private readonly ILibraryService _libraryService;
+        private readonly IDetailDialogService _detailDialogs;
         private readonly IEquipmentPickerService _equipmentPicker;
         private readonly ISkillPickerService _skillPicker;
+        private readonly ISpellPickerService _spellPicker;
         private bool _recruitableLoaded;
 
         public bool IsWizardMode { get; }
@@ -157,16 +156,18 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker,
-            IWarbandService warbandService, ILibraryService libraryService, IEquipmentPickerService equipmentPicker,
-            ISkillPickerService skillPicker)
+            IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker,
+            ISkillPickerService skillPicker, ISpellPickerService spellPicker)
         {
             this.item = item;
             this.title = title;
             _warbandArchetypePicker = warbandArchetypePicker;
             _warbandService = warbandService;
             _libraryService = libraryService;
+            _detailDialogs = detailDialogs;
             _equipmentPicker = equipmentPicker;
             _skillPicker = skillPicker;
+            _spellPicker = spellPicker;
             IsWizardMode = item.Id == 0;
         }
 
@@ -231,7 +232,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             });
             if (fullWarband is null) return;
 
-            await ShowDialogAsync(new WarbandArchetypeDetailDialog(new WarbandArchetypeDetailDialogViewModel(fullWarband, _libraryService)));
+            await _detailDialogs.ShowWarbandArchetypeDetailDialogAsync(fullWarband);
         }
 
         private async Task EnsureRecruitableArchetypesLoadedAsync()
@@ -261,7 +262,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
             // Pas de listes d'équipement chargées à ce stade (le nom de la liste, pas son contenu, n'est
             // pas utile ici) - EquipmentListDisplay retombe sur "aucune" dans le dialog récap.
-            await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(fullWarrior, Array.Empty<NamedRef>())));
+            await _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(fullWarrior, Array.Empty<NamedRef>());
         }
 
         /// <summary>Un guerrier de plus de ce type : bloqué si son MaxCount, l'effectif max de la bande ou
@@ -481,25 +482,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// pas juste le mini-popup Nom+Description générique (ChipDetailDialog) : un objet d'équipement a
         /// coût/rareté/restrictions propres, pas seulement une description.</summary>
         [RelayCommand]
-        private async Task ShowEquipmentDetail(EquipmentPick pick)
-        {
-            var equipmentItem = pick.Item;
-            var language = LocalizationService.Instance.Language;
-            var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
-
-            var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
-                ? new List<WarbandArchetype>()
-                : (await _libraryService.GetWarbandArchetypesAsync(language))
-                    .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-            var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
-                ? new List<WarriorArchetype>()
-                : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
-                    .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-            await ShowDialogAsync(new EquipmentItemDetailDialog(
-                new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, pick.MaterialRule)));
-        }
+        private Task ShowEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule);
 
         /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un
         /// HenchmanGroupDraft ou d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
@@ -556,6 +539,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 destination.Add(skill);
         }
 
+        [RelayCommand]
+        private Task ShowSkillDetail(Skill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill);
+
         /// <summary>Retire une compétence de quelle que collection la contient - même idiome que
         /// RemoveEquipment.</summary>
         [RelayCommand]
@@ -570,6 +556,53 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 foreach (var slot in row.NameSlots)
                 {
                     if (slot.Skills.Remove(skill)) return;
+                }
+            }
+        }
+
+        /// <summary>Mode Bande existante uniquement, sous-onglet Sorts (masqué si le type recruté n'est
+        /// pas lanceur de sorts - voir RecruitSlot.IsSpellcaster) - assigne un ou plusieurs sorts déjà
+        /// appris, filtrés par les écoles de magie de la bande (Archetype.MagicSchools, déjà pleinement
+        /// résolu par le picker - voir GetWarbandArchetypesAsync). Même cible/idiome qu'AddSkill.</summary>
+        [RelayCommand]
+        private async Task AddSpell(object target)
+        {
+            ObservableCollection<Spell> destination;
+            switch (target)
+            {
+                case WarriorNameSlot slot:
+                    destination = slot.Spells;
+                    break;
+                case HenchmanGroupDraft group:
+                    destination = group.Spells;
+                    break;
+                default:
+                    return;
+            }
+            if (Archetype is null) return;
+
+            var magicSchoolIds = Archetype.MagicSchools.Select(s => s.Id).ToList();
+            var spells = await _spellPicker.PickSpellsAsync(magicSchoolIds);
+            foreach (var spell in spells)
+                destination.Add(spell);
+        }
+
+        [RelayCommand]
+        private Task ShowSpellDetail(Spell spell) => _detailDialogs.ShowSpellDetailDialogAsync(spell);
+
+        /// <summary>Retire un sort de quelle que collection le contient - même idiome que RemoveSkill.</summary>
+        [RelayCommand]
+        private void RemoveSpell(Spell spell)
+        {
+            foreach (var row in RecruitRows)
+            {
+                foreach (var group in row.HenchmanGroupDrafts)
+                {
+                    if (group.Spells.Remove(spell)) return;
+                }
+                foreach (var slot in row.NameSlots)
+                {
+                    if (slot.Spells.Remove(spell)) return;
                 }
             }
         }
@@ -731,6 +764,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
                             foreach (var skill in slot.Skills)
                                 await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                            foreach (var spell in slot.Spells)
+                                await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
                             if (IsExistingWarband && slot.Experience != warrior.Experience)
                             {
                                 warrior.Experience = slot.Experience;
@@ -750,6 +785,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
                             foreach (var skill in group.Skills)
                                 await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                            foreach (var spell in group.Spells)
+                                await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
                             if (IsExistingWarband && group.Experience != warrior.Experience)
                             {
                                 warrior.Experience = group.Experience;

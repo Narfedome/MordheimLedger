@@ -29,6 +29,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IEquipmentPickerService _equipmentPicker;
 
     private bool _warriorsLoaded;
@@ -109,13 +110,14 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     public string StepLabel => string.Format(Loc["LibStepLabel"], SelectedTab + 1, StepCount);
 
     public WarbandArchetypeEditDialogViewModel(WarbandArchetype item, string title, ISpecialRulePickerService specialRulePicker,
-        IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IEquipmentPickerService equipmentPicker)
+        IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker)
     {
         this.item = item;
         this.title = title;
         _specialRulePicker = specialRulePicker;
         _magicSchoolPicker = magicSchoolPicker;
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _equipmentPicker = equipmentPicker;
         IsWizardMode = item.Id == 0;
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
@@ -342,7 +344,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     {
         var newItem = new EquipmentList();
         var dialogViewModel = new EquipmentListEditDialogViewModel(newItem, Loc["EquipmentListCreateTitle"],
-            _equipmentPicker, Array.Empty<EquipmentItem>(), _libraryService);
+            _equipmentPicker, Array.Empty<EquipmentItem>(), _libraryService, _detailDialogs);
         if (await ShowDialogAsync(new EquipmentListEditDialog(dialogViewModel)) != true) return;
 
         EquipmentLists.Add(newItem);
@@ -364,7 +366,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         var language = LocalizationService.Instance.Language;
         var initialItems = await _libraryService.GetEquipmentItemsAsync(copy.ItemIds, language);
         var dialogViewModel = new EquipmentListEditDialogViewModel(copy, Loc["EquipmentListEditTitle"],
-            _equipmentPicker, initialItems, _libraryService);
+            _equipmentPicker, initialItems, _libraryService, _detailDialogs);
         if (await ShowDialogAsync(new EquipmentListEditDialog(dialogViewModel)) != true) return;
 
         var index = EquipmentLists.IndexOf(list);

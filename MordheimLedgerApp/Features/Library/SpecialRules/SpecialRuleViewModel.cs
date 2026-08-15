@@ -12,6 +12,7 @@ namespace MordheimLedgerApp.Features.Library.SpecialRules;
 public partial class SpecialRuleViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly ISpecialRulePickerNavigationService _pickerNavigation;
     private List<SpecialRule> _allItems = new();
     private HashSet<int> _warbandRuleIds = new();
@@ -57,9 +58,10 @@ public partial class SpecialRuleViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public SpecialRuleViewModel(ILibraryService libraryService, ISpecialRulePickerNavigationService pickerNavigation)
+    public SpecialRuleViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, ISpecialRulePickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _pickerNavigation = pickerNavigation;
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
@@ -251,6 +253,5 @@ public partial class SpecialRuleViewModel : BaseViewModel
     /// <summary>Read-only recap popup (tile info button) - simplest of the 8, just Name/Description.
     /// AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task ShowDetails(SpecialRuleRow row) =>
-        await ShowDialogAsync(new SpecialRuleDetailDialog(new SpecialRuleDetailDialogViewModel(row.Item)));
+    private Task ShowDetails(SpecialRuleRow row) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(row.Item);
 }

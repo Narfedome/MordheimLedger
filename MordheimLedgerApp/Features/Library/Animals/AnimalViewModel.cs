@@ -12,6 +12,7 @@ namespace MordheimLedgerApp.Features.Library.Animals;
 public partial class AnimalViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IAnimalPickerNavigationService _pickerNavigation;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
@@ -53,10 +54,11 @@ public partial class AnimalViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public AnimalViewModel(ILibraryService libraryService, IAnimalPickerNavigationService pickerNavigation,
+    public AnimalViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, IAnimalPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker, ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _pickerNavigation = pickerNavigation;
         _warbandPicker = warbandPicker;
         _specialRulePicker = specialRulePicker;
@@ -222,14 +224,8 @@ public partial class AnimalViewModel : BaseViewModel
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Animal>());
 
-    /// <summary>Read-only recap popup (tile info button) - same restriction-id resolution as GroupNameFor.
-    /// SpecialRules needs no such resolution - Animal.SpecialRules is already a List&lt;SpecialRule&gt;.
-    /// AllowConcurrentExecutions : voir WarbandArchetypeViewModel.ShowDetails.</summary>
+    /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
+    /// WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task ShowDetails(AnimalRow row)
-    {
-        var restrictedWarbands = _warbandArchetypes.Where(w => row.Item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-        var dialogViewModel = new AnimalDetailDialogViewModel(row.Item, restrictedWarbands);
-        await ShowDialogAsync(new AnimalDetailDialog(dialogViewModel));
-    }
+    private Task ShowDetails(AnimalRow row) => _detailDialogs.ShowAnimalDetailDialogAsync(row.Item);
 }

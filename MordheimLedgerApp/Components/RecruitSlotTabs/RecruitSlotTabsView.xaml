@@ -16,6 +16,11 @@
                                              IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
                                              IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"/>
+                <!-- Onglet Sorts : masqué si ce type de guerrier n'est pas lanceur de sorts (voir
+                     RecruitSlot.IsSpellcaster), même garde que WarriorEditDialog. -->
+                <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" FontSize="11"
+                                             IsActive="{Binding Item.IsSpellsSection}" Command="{Binding Item.ShowSpellsSectionCommand}"
+                                             IsVisible="{Binding Item.IsSpellcaster}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
                                              IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"/>
             </HorizontalStackLayout>
@@ -44,6 +49,10 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="library:Skill">
                         <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSkillDetailCommand}"
+                                                       CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
                             <HorizontalStackLayout Spacing="4">
                                 <Label Text="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                        FontFamily="RpgAwesome" FontSize="12"
@@ -63,6 +72,36 @@
                                           Icon="{x:Static icons:SolidFont.Plus}"
                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                           Command="{Binding AddSkillCommand}"
+                                          CommandParameter="{Binding Item}"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsSpellsSection}">
+            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Spells}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="library:Spell">
+                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSpellDetailCommand}"
+                                                       CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="4">
+                                <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
+                                       FontFamily="RpgAwesome" FontSize="12"
+                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                              Command="{Binding Source={x:Reference root}, Path=RemoveSpellCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          Command="{Binding AddSpellCommand}"
                                           CommandParameter="{Binding Item}"/>
         </Grid>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">

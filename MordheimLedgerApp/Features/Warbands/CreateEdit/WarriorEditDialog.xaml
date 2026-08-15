@@ -54,7 +54,11 @@
                 <Label Text="{loc:Loc WarriorAnimalHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Grid ColumnDefinitions="*,Auto,Auto">
                     <Label Grid.Column="0" Text="{Binding Item.Animal.Name}" VerticalOptions="Center"
-                           TextColor="{DynamicResource AppText}"/>
+                           TextColor="{DynamicResource AppText}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowAnimalDetailCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
                     <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                                   Icon="{x:Static icons:RpgFont.RaPawprint}"
                                                   IconSize="14" ButtonWidthRequest="28" ButtonHeightRequest="28"
@@ -138,6 +142,10 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:WarriorSkill">
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                            FontFamily="RpgAwesome" FontSize="12"
@@ -167,6 +175,10 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:WarriorInjury">
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowInjuryDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{x:Static icons:RpgFont.RaBrokenBone}"
                                            FontFamily="RpgAwesome" FontSize="12"
@@ -196,6 +208,10 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:WarriorSpell">
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
                                            FontFamily="RpgAwesome" FontSize="12"
@@ -225,6 +241,10 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:WarriorMutation">
                             <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowMutationDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
                                 <HorizontalStackLayout Spacing="4">
                                     <Label Text="{x:Static icons:RpgFont.RaBiohazard}"
                                            FontFamily="RpgAwesome" FontSize="12"

@@ -610,9 +610,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Sort de départ d'un lanceur de sorts fraîchement recruté (hors mode Bande existante,
         /// où AddSpell reste un choix libre - importer une bande déjà jouée, c'est enregistrer un
         /// historique déjà déterminé, pas faire un nouveau tirage). Ouvre SpellRollDialog (contexte école
-        /// de magie + saisie du jet) plutôt que résoudre inline - une fois validé, ajoute le sort et
-        /// enchaîne sur son récap complet via IDetailDialogService, pour que le joueur voie immédiatement
-        /// ce qu'il a obtenu.</summary>
+        /// de magie + saisie du jet, résolution et récap à la demande gérés dans le dialog lui-même) -
+        /// n'ajoute le sort que si le joueur ferme via Accept (résultat non-null), Annuler renvoie null.</summary>
         [RelayCommand]
         private async Task ShowSpellRollDialog(object target)
         {
@@ -624,11 +623,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             };
             if (slot is null || Archetype is null) return;
 
-            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService)));
+            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService, _detailDialogs)));
             if (spell is null) return;
 
             slot.Spells.Add(spell);
-            await _detailDialogs.ShowSpellDetailDialogAsync(spell);
         }
 
         [RelayCommand]

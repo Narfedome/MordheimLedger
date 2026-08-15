@@ -32,6 +32,12 @@ public class Spell
     /// on an already-invalid value.</summary>
     public int RollValue { get; set; } = 1;
 
+    /// <summary>"3 - Fireball" - display text for chips of spells a caster actually knows/is about to
+    /// know (RecruitSlotTabsView's fresh-recruit Spells picks), where the roll that grants this specific
+    /// spell is useful context. Distinct from Name (kept plain - used as dialog Title/Codex tile text
+    /// elsewhere, must not carry the roll prefix).</summary>
+    public string RollDisplay => $"{RollValue} - {Name}";
+
     /// <summary>Target number to cast ("Difficulté X") - null for tables that don't use one.</summary>
     public int? Difficulty { get; set; }
 

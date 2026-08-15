@@ -94,7 +94,10 @@
                                     <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
                                            FontFamily="RpgAwesome" FontSize="12"
                                            TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+                                    <!-- RollDisplay ("3 - Fireball") plutôt que Name seul - le jet qui a
+                                         déterminé ce sort est une info utile ici (tiré au hasard, pas
+                                         choisi - voir Spell.RollDisplay). -->
+                                    <Label Text="{Binding RollDisplay}" FontSize="11" VerticalOptions="Center"/>
                                     <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                   Icon="{x:Static icons:SolidFont.Xmark}"
                                                                   IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"

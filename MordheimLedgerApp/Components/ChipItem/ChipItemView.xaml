@@ -17,12 +17,12 @@
             <Label
                 Grid.Column="0"
                 Text="{Binding HeaderText}"
-                FontSize="12"
+                FontSize="{Binding HeaderFontSize}"
                 TextColor="{DynamicResource AppTextMuted}"
                 IsVisible="{Binding IsMandatory, Converter={StaticResource InverseBoolConverter}}"
                 VerticalOptions="Center" />
-            
-            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
+
+            <Label FontSize="{Binding HeaderFontSize}" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="{Binding HeaderText}"/>

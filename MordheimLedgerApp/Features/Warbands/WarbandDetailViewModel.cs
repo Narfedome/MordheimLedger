@@ -6,6 +6,13 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.Animals.CreateEdit;
+using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
+using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
+using MordheimLedgerApp.Features.Library.Mutations.CreateEdit;
+using MordheimLedgerApp.Features.Library.Skills.CreateEdit;
+using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
+using MordheimLedgerApp.Features.Library.Spells.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
 using MordheimLedgerApp.Services;
@@ -297,6 +304,89 @@ public partial class WarbandDetailViewModel : BaseViewModel
         row.Warrior.HeadCount--;
         row.RefreshHeadCountDisplay();
         await _warbandService.SaveWarriorAsync(row.Warrior);
+    }
+
+    // Puces de la carte guerrier (Règles spéciales/Blessures/Sorts/Mutations/Monture/Équipement/
+    // Compétences) tapables - ouvrent le même dialog récap en lecture seule que la Bibliothèque/le
+    // recrutement (voir WarriorEditDialogViewModel.ShowEquipmentDetail pour le précédent exact), pas
+    // le popup générique ChipDetailDialog (Nom+Description seuls) : depuis la fiche de bande, on veut
+    // le profil complet (stats, restrictions, matériau...), pas juste un résumé.
+    [RelayCommand]
+    private Task ShowSpecialRuleDetail(SpecialRule rule) =>
+        ShowDialogAsync(new SpecialRuleDetailDialog(new SpecialRuleDetailDialogViewModel(rule)));
+
+    [RelayCommand]
+    private Task ShowInjuryDetail(WarriorInjury injury) =>
+        ShowDialogAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(injury.Item)));
+
+    [RelayCommand]
+    private Task ShowSpellDetail(WarriorSpell spell) =>
+        ShowDialogAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(spell.Item)));
+
+    [RelayCommand]
+    private async Task ShowMutationDetail(WarriorMutation mutation)
+    {
+        var item = mutation.Item;
+        var language = LocalizationService.Instance.Language;
+        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new MutationDetailDialog(new MutationDetailDialogViewModel(item, restrictedWarbands)));
+    }
+
+    [RelayCommand]
+    private async Task ShowAnimalDetail(Animal animal)
+    {
+        var language = LocalizationService.Instance.Language;
+        var restrictedWarbands = animal.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => animal.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new AnimalDetailDialog(new AnimalDetailDialogViewModel(animal, restrictedWarbands)));
+    }
+
+    [RelayCommand]
+    private async Task ShowEquipmentDetail(WarriorEquipment equipment)
+    {
+        var item = equipment.Item;
+        var language = LocalizationService.Instance.Language;
+        var categoryLabel = Loc[$"EquipmentCategory{item.Category}"];
+
+        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0 || item.RestrictedToWarriorArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
+                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new EquipmentItemDetailDialog(
+            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, restrictedWarriors, equipment.MaterialRule)));
+    }
+
+    [RelayCommand]
+    private async Task ShowSkillDetail(WarriorSkill skill)
+    {
+        var item = skill.Item;
+        var language = LocalizationService.Instance.Language;
+        var categoryLabel = Loc[$"SkillCategory{item.Category}"];
+
+        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : (await _libraryService.GetWarbandArchetypesAsync(language))
+                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarriorArchetype>()
+            : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
+                .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
+
+        await ShowDialogAsync(new SkillDetailDialog(new SkillDetailDialogViewModel(item, categoryLabel, restrictedWarbands, restrictedWarriors)));
     }
 
     [RelayCommand]

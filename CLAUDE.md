@@ -11,13 +11,46 @@ le chemin peut différer sur les autres PC de l'utilisateur, même auteur, appli
 que de réinventer :
 
 - `MordheimLedgerApp.Core` (net10.0, **sans dépendance MAUI**) : `Models/` (modèles purs),
-  `Data/` (`Entities/` SQLite + `AppDatabase.cs` + `EntityMapping.cs`), `Services/` (CRUD)
+  `Data/` (`Entities/` SQLite + `AppDatabase.cs` + `EntityMapping.cs`), `Services/` (CRUD),
+  `Rules/` (décisions de règles pures - voir § Règles dans Core ci-dessous)
 - `MordheimLedgerApp` (tête MAUI) : `Features/<Domaine>/` (Page + Page.xaml.cs + ViewModel),
   `Components/Dialogs/` (Confirm/Prompt/ActionSheet réutilisables, portés de DmTools),
   `Services/` (LocalizationService/ThemeService/LoadingService), `BaseViewModel`,
   `Resources/Styles/` (Colors/Sizes/Styles = design tokens)
 - `MordheimLedgerApp.Tests` (xUnit) : tests de mapping Entity↔Modèle + tests d'intégration des
-  services sur une base SQLite temporaire (voir `DataServiceTests.cs`)
+  services sur une base SQLite temporaire (voir `DataServiceTests.cs`) + tests de règles pures sur
+  `Core.Rules` (`RulesTests.cs`, aucune base de données)
+
+**Règles dans Core (branche `feature/rules-to-core`, 2026-08-15)** : suite à l'audit de fidélité aux
+mécaniques (§ ci-dessous n'existe que dans l'historique de conversation, pas ce fichier - retenir la
+conclusion), une partie du code de règles vivait dans la tête MAUI (`MordheimLedgerApp/Services/`,
+`Features/Warbands/CreateEdit/`) plutôt que dans Core, donc hors de portée de
+`MordheimLedgerApp.Tests` qui ne référence que Core. Déplacé vers `MordheimLedgerApp.Core/Rules/` :
+`WeaponLimits`, `ExperienceMilestones`, `SeriousInjuryTable`, `HenchmanInjuryTable`,
+`HeroAdvanceTable`, `HenchmanAdvanceTable`, et une nouvelle `RecruitmentRules` (extraite de la
+logique jusque-là inline dans `WarbandEditDialogViewModel.IncrementWarrior`/`UpdateRecruitability`/
+`ValidateWarriorsStep` - MaxCount/MaxWarriors/trésorerie/MinWarriors/MinCount). Les 4 tables de jets
+(D66 Blessures Graves Héros, D6 Blessures Hommes de main, 2D6 Progression Héros/Hommes de main)
+résolvaient jusque-là le texte affiché directement via `LocalizationService.Instance[...]` — c'est
+précisément pourquoi elles vivaient dans la tête MAUI (Core doit rester sans dépendance de
+localisation). Scindé : Core garde le jet de dés + la classification pure (`IsDeath`/`IsSkill`/
+validité du jet) et expose une **clé de ressource** (`TryGetTextKey`, ex. `"InjurySerious34"`) plutôt
+que le texte résolu ; `EndOfGameDialogViewModel` (seul consommateur) résout cette clé via
+`LocalizationService` lui-même. Effet de bord positif : ce découpage rend explicite, pour n'importe
+quelle règle du livre, si elle est déjà appliquée (testée dans `RulesTests.cs`) ou seulement décrite
+en texte libre pour le joueur.
+
+Deuxième passe la même session : la formule de prix des matériaux (Gromril/Ithilmar, multiplicateur
+sur le coût de base) et l'éligibilité de la première dague gratuite étaient dupliquées telles quelles
+dans 4-5 endroits (`EquipmentPick.Cost`, `MaterialChoice`, `WarbandEditDialogViewModel.AddEquipment`,
+`WarriorEditDialogViewModel.AddEquipment`) - consolidées dans `Core.Rules.EquipmentPricing`
+(`IsFreeDaggerEligible`/`CalculateCost`). `RecruitmentRules.CalculateRemainingTreasury` couvre la
+formule de trésorerie restante (StartingTreasury - dépenses, sauf en mode Bande existante où c'est la
+saisie libre `TreasuryOverride` qui prime).
+
+**`Core/Rules/` est désormais le point d'entrée pour toute nouvelle règle du livre** (ex. compléter le
+wizard Fin de Partie avec de nouvelles mécaniques) plutôt que de la coder inline dans un ViewModel -
+décision explicite de l'utilisateur, pas juste un refactor ponctuel.
 
 MVVM via **CommunityToolkit.Mvvm** (`[ObservableProperty]`, `[RelayCommand]`, `ObservableObject`)
 partout, y compris dans les ViewModels de dialogues. Navigation Shell classique avec routes
@@ -135,6 +168,54 @@ que deviné :
   Chasseur de Sorcières démarre à 20 XP, déjà reflété dans son profil) — copié sur le `Warrior` par
   `ToWarrior()` au recrutement, à renseigner par archétype (0 par défaut, correct pour la plupart des
   types génériques).
+
+**Refonte carte guerrier (2026-08-16)** : trois correctifs sur `WarbandDetailPage`.
+- `StatRowView` en lecture seule affiche maintenant une vraie grille tabulaire (filet horizontal sous
+  les abréviations + filets verticaux entre colonnes, valeurs en gras) — comparé à 3 pistes visuelles,
+  celle-ci retenue. Le mode édition (Entry) n'est pas concerné.
+- Puces de la carte guerrier (Règles spéciales/Blessures/Sorts/Mutations/Monture) migrées vers le
+  composant partagé `ChipListView` (déjà utilisé côté Bibliothèque, header+FlexLayout+chip en un seul
+  tag) au lieu d'un `FlexLayout`+`DataTemplate`+`Border` dupliqué à la main par section. Équipement et
+  Compétences (icône par item - catégorie d'équipement/de compétence) restent dans un `FlexLayout`
+  manuel **mais réutilisent `ChipView`** (la puce elle-même, sans le header/`FlexLayout` que
+  `ChipListView` embarque) à l'intérieur : `IconGlyph="{Binding Item.Category, Converter=
+  {StaticResource EquipmentCategoryIconConverter}}"` fonctionne tel quel car le contexte du
+  `DataTemplate` est déjà l'item porté (`WarriorEquipment`/`WarriorSkill`) - même motif exact que
+  `WarbandEditDialogViewModel`'s Equipment step (`EquipmentPick`/`ChipView` avec le même converter). Pas
+  besoin d'étendre `ChipListView` avec un converter dynamique - fausse piste explorée puis abandonnée,
+  `ChipListView.IconGlyph` reste un simple glyphe fixe pour toute la liste, adapté aux 5 autres puces
+  (une seule icône par notion) mais pas à Équipement/Compétences. A nécessité d'ajouter un passe-plat
+  `Name` sur `WarriorInjury`/`WarriorSpell`/`WarriorMutation`/`WarriorSkill` (`=> Item.Name`) et
+  `WarriorEquipment` (`=> NameDisplay`) - `ChipView` lie son Label directement sur `Name`.
+  `ChipListView`/`ChipItemView` ont chacun gagné un `HeaderFontSize` bindable (défauts 14/12 -
+  comportement inchangé pour les ~15 usages existants côté Bibliothèque qui ne le précisent pas) et
+  `ChipListView` un `HeaderTextColor` (défaut null, appliqué seulement si renseigné via un
+  `DataTrigger`) pour que les headers de la carte guerrier soient homogènes entre eux (10/AppTextMuted
+  partout, y compris Équipement/Compétences qui gardaient déjà ce style en dur).
+- Tap sur une puce de la carte guerrier ouvre le même dialog récap en lecture seule complet que la
+  Bibliothèque/le recrutement (`XxxDetailDialog`/`XxxDetailDialogViewModel` par type - Équipement/
+  Compétence/Sort/Mutation/Blessure/Règle spéciale/Monture), pas le popup générique `ChipDetailDialog`
+  (Nom+Description seuls, gardé pour son usage d'origine côté Bibliothèque). Précédent direct :
+  `WarriorEditDialogViewModel.ShowEquipmentDetail`. Répète volontairement la même logique de
+  résolution des restrictions (bandes/guerriers autorisés) déjà dupliquée 2-3 fois ailleurs
+  (WarriorEditDialogViewModel/WarbandEditDialogViewModel/les `XxxViewModel.ShowDetails` de la
+  Bibliothèque) plutôt que de la centraliser - pas demandé, hors périmètre de cette passe.
+- **Bug trouvé en branchant ces dialogs** : `WarbandService.GetWarriorsAsync` résolvait chaque
+  EquipmentItem/Skill/Mutation/Animal porté par un guerrier via un simple `FindAsync` + `ToModel
+  (translations)` minimal - `SpecialRules`/`RestrictedToWarbandArchetypeIds`/
+  `RestrictedToWarriorArchetypeIds` restaient donc vides pour tout guerrier déjà recruté (invisible
+  jusqu'à ce que ces dialogs récap se mettent à les afficher). Corrigé en injectant `ILibraryService`
+  dans `WarbandService` et en réutilisant ses méthodes déjà pleinement résolues
+  (`GetEquipmentItemsAsync`/`GetSkillsAsync`/`GetMutationsAsync`/`GetAnimalsAsync`, chargées une fois
+  par appel à `GetWarriorsAsync` plutôt qu'un `FindAsync` par ligne portée). Test de non-régression :
+  `WarbandMutationTests.RecruitedWarrior_CarriedEquipment_HasSpecialRulesResolved`.
+- `ExperienceTrackView` sur mobile : le nombre de cases par ligne (30 pour un Héros, comme sur la
+  feuille imprimée en 3 lignes) reste fixe à dessein — ne pas le recalculer depuis la largeur
+  disponible (essayé puis annulé, ça casse la mise en page "3 lignes" voulue). C'est la case
+  elle-même (`BoxSize`, bindable property) qui rétrécit sur un écran étroit, entre `DefaultBoxSize`
+  (12) et `MinBoxSize` (7). Nécessite que l'appelant (`WarbandDetailPage.xaml`) NE pose PAS
+  `HorizontalOptions="Center"` sur l'instance : ça la ferait se réduire à son propre contenu, rendant
+  la mesure de largeur circulaire — le centrage visuel se fait déjà à l'intérieur du composant.
 
 **Tuiles du Codex + dialogs récap en lecture seule** (branche `feature/codex-tile-recap-ui`, 2 commits,
 pas encore mergée sur `master`) : passe de polish sur les 8 onglets Codex (Bandes, Trading Post,

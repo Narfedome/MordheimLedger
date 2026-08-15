@@ -4,16 +4,18 @@
              xmlns:local="clr-namespace:MordheimLedgerApp.Components.ExperienceTrack"
              x:Class="MordheimLedgerApp.Components.ExperienceTrack.ExperienceTrackView"
              x:Name="root">
-    <!-- Box positions, milestone spacing and the row split (forced line breaks every RowSize boxes,
-         independent of the container's width) are computed in code-behind (Rebuild) - see the tier
-         tables there. -->
+    <!-- Box positions and milestone spacing are computed in code-behind (Rebuild) - see the tier
+         tables there. Row split is fixed (30 boxes/row for Heroes, matching the printed sheet's 3
+         rows) ; BoxSize shrinks instead on a narrow screen (see UpdateBoxSize) so the row count never
+         changes. -->
     <VerticalStackLayout x:Name="TrackLayout" Spacing="1" HorizontalOptions="Center">
         <BindableLayout.ItemTemplate>
             <DataTemplate x:DataType="local:ExperienceRow">
                 <HorizontalStackLayout Spacing="1" BindableLayout.ItemsSource="{Binding Boxes}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:ExperienceBox">
-                            <Border WidthRequest="12" HeightRequest="12" Padding="0"
+                            <Border WidthRequest="{OnIdiom Default=10, Desktop=12}"
+                                    HeightRequest="{OnIdiom Default=10, Desktop=12}" Padding="0"
                                     StrokeShape="Rectangle" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
                                     BackgroundColor="Transparent">
                                 <Border.Triggers>

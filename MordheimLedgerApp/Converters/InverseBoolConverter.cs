@@ -21,6 +21,17 @@ namespace MordheimLedgerApp.Converters
             => throw new NotImplementedException();
     }
 
+    /// <summary>Contrairement à IsNotNullConverter, collapse aussi sur chaîne vide (ex.
+    /// RecruitSlot.EquipmentSummary, toujours non-null mais vide tant qu'aucun objet n'est acheté).</summary>
+    public class StringNotEmptyConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => !string.IsNullOrEmpty(value as string);
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => throw new NotImplementedException();
+    }
+
     /// <summary>Opacity 0/1 plutôt qu'IsVisible=False : MAUI n'a pas de vrai "Hidden" (IsVisible=False
     /// retire l'élément du layout, l'espace se referme) - utilisé quand un bouton doit rester
     /// invisible tout en gardant sa place (ex. stepper +/- de WarriorRecruitListView, pour que le

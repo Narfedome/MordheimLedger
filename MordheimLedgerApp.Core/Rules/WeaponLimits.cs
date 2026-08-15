@@ -1,13 +1,13 @@
 using MordheimLedgerApp.Core.Models.Library;
 
-namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
+namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>Rulebook "Starting a Warband" - weapons and armour: "up to two close combat weapons... up to
 /// two different missile weapons" per warrior. Informational only, never blocks a purchase - some
 /// warband special rules (e.g. Skaven "Tail Fighting") let a warrior exceed this, and the app has no
 /// rules engine to model every such exception (see project conventions). Callers show a non-blocking
 /// warning when ExceedsLimits returns true; the purchase itself always goes through.</summary>
-internal static class WeaponLimits
+public static class WeaponLimits
 {
     private const int MaxMeleeWeapons = 2;
     private const int MaxMissileWeaponTypes = 2;

@@ -4,6 +4,7 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
@@ -117,7 +118,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>En mode Bande existante, la trésorerie affichée reste fixée à ce que l'utilisateur a
         /// saisi (TreasuryOverride) - jamais décrémentée par les recrues/achats, contrairement au mode
         /// création normale.</summary>
-        private int RemainingTreasury => IsExistingWarband ? TreasuryOverride : (Archetype?.StartingTreasury ?? 0) - TotalSpent;
+        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(Archetype?.StartingTreasury ?? 0, TotalSpent, IsExistingWarband, TreasuryOverride);
 
         [ObservableProperty]
         private string? warriorsError;
@@ -273,9 +274,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private void IncrementWarrior(WarriorRecruitRow row)
         {
             if (Archetype is null) return;
-            if (row.Archetype.MaxCount is { } max && row.Count >= max) return;
-            if (Archetype.MaxWarriors is { } maxWarriors && RecruitRows.Sum(r => r.Count) >= maxWarriors) return;
-            if (!IsExistingWarband && RemainingTreasury < row.Cost) return;
+            if (!RecruitmentRules.CanRecruit(row.Count, row.Archetype.MaxCount, RecruitRows.Sum(r => r.Count),
+                    Archetype.MaxWarriors, IsExistingWarband, RemainingTreasury, row.Cost)) return;
 
             row.Count++;
             if (row.IsHero)
@@ -360,12 +360,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
             if (Archetype is null) return;
             var total = RecruitRows.Sum(r => r.Count);
-            var rosterFull = Archetype.MaxWarriors is { } maxWarriors && total >= maxWarriors;
             foreach (var row in RecruitRows)
-            {
-                var atMaxCount = row.Archetype.MaxCount is { } max && row.Count >= max;
-                row.CanIncrement = !atMaxCount && !rosterFull && (IsExistingWarband || RemainingTreasury >= row.Cost);
-            }
+                row.CanIncrement = RecruitmentRules.CanRecruit(row.Count, row.Archetype.MaxCount, total,
+                    Archetype.MaxWarriors, IsExistingWarband, RemainingTreasury, row.Cost);
         }
 
         /// <summary>Achat d'équipement pour une cible : un HenchmanGroupDraft (un seul achat, appliqué à tout le
@@ -427,7 +424,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     var choices = new List<MaterialChoice>();
                     foreach (var item in meleeItems)
                     {
-                        choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], item.IsFreeDagger && !hasFreeDaggerSlot));
+                        choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], EquipmentPricing.IsFreeDaggerEligible(item.IsFreeDagger, hasFreeDaggerSlot)));
                         if (item.IsFreeDagger) hasFreeDaggerSlot = true;
                     }
                     var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
@@ -447,7 +444,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     // règles : "in addition to his free dagger") - une deuxième dague, ou un matériau
                     // délibérément choisi sur celle-ci, coûte le prix normal et compte dans la limite
                     // d'armes (voir EquipmentItem.IsFreeDagger/WeaponLimits).
-                    IsFree = equipmentItem.IsFreeDagger && materialRule is null && !destination.Any(p => p.Item.IsFreeDagger)
+                    IsFree = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, destination.Any(p => p.Item.IsFreeDagger)) && materialRule is null
                 };
 
                 // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
@@ -594,19 +591,16 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (Archetype is null) return false;
 
             var total = RecruitRows.Sum(r => r.Count);
-            if (total < (Archetype.MinWarriors ?? 0))
+            if (!RecruitmentRules.MeetsMinWarriors(total, Archetype.MinWarriors))
             {
                 WarriorsError = string.Format(Loc["WarbandsMinWarriorsError"], Archetype.MinWarriors);
                 return false;
             }
 
-            foreach (var row in RecruitRows.Where(r => r.Archetype.MinCount is > 0))
+            foreach (var row in RecruitRows.Where(r => !RecruitmentRules.MeetsMinCount(r.Count, r.Archetype.MinCount)))
             {
-                if (row.Count < row.Archetype.MinCount)
-                {
-                    WarriorsError = string.Format(Loc["WarbandsRequiredWarriorMissing"], row.Name, row.Archetype.MinCount);
-                    return false;
-                }
+                WarriorsError = string.Format(Loc["WarbandsRequiredWarriorMissing"], row.Name, row.Archetype.MinCount);
+                return false;
             }
 
             WarriorsError = null;

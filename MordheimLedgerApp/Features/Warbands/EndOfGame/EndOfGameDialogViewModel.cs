@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -111,7 +112,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AutoRoll(WarriorOutcomeRow row)
     {
-        var (roll, text) = row.Warrior.IsHero ? SeriousInjuryTable.Roll() : HenchmanInjuryTable.Roll();
+        var roll = row.Warrior.IsHero ? SeriousInjuryTable.RollDice() : HenchmanInjuryTable.RollDice();
+        var text = ResolveInjuryText(row.Warrior.IsHero, roll)!;
         row.ManualRoll = roll.ToString();
         row.InjuryResultText = text;
         row.ApplyInjuryRoll(roll);
@@ -129,13 +131,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             return;
         }
 
-        // out var across a ternary's branches isn't definite-assignment-friendly - explicit if/else.
-        string text;
-        bool found;
-        if (row.Warrior.IsHero) found = SeriousInjuryTable.TryGet(roll, out text);
-        else found = HenchmanInjuryTable.TryGet(roll, out text);
-
-        if (!found)
+        var text = ResolveInjuryText(row.Warrior.IsHero, roll);
+        if (text is null)
         {
             await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
             return;
@@ -146,6 +143,17 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
     }
 
+    // Le jet/la classification (mort ou non) vivent dans Core.Rules, sans dépendance à la
+    // localisation - cette résolution de clé -> texte affiché reste ici côté tête MAUI.
+    private string? ResolveInjuryText(bool isHero, int roll)
+    {
+        bool found;
+        string key;
+        if (isHero) found = SeriousInjuryTable.TryGetTextKey(roll, out key);
+        else found = HenchmanInjuryTable.TryGetTextKey(roll, out key);
+        return found ? Loc[key] : null;
+    }
+
     // Un guerrier peut franchir plusieurs paliers d'un coup - chaque AdvanceRollEntry (une par palier,
     // voir WarriorOutcomeRow.SyncAdvanceRolls) est un jet 2D6 indépendant sur la table de progression,
     // même pattern que AutoRoll/ShowInjuryResult mais purement descriptif : aucune stat n'est modifiée
@@ -154,7 +162,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AutoRollAdvance(AdvanceRollEntry entry)
     {
-        var (roll, text) = entry.IsHero ? HeroAdvanceTable.Roll() : HenchmanAdvanceTable.Roll();
+        var roll = entry.IsHero ? HeroAdvanceTable.RollDice() : HenchmanAdvanceTable.RollDice();
+        var text = ResolveAdvanceText(entry.IsHero, roll)!;
         entry.ManualRoll = roll.ToString();
         entry.ResultText = text;
         await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
@@ -169,12 +178,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             return;
         }
 
-        string text;
-        bool found;
-        if (entry.IsHero) found = HeroAdvanceTable.TryGet(roll, out text);
-        else found = HenchmanAdvanceTable.TryGet(roll, out text);
-
-        if (!found)
+        var text = ResolveAdvanceText(entry.IsHero, roll);
+        if (text is null)
         {
             await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
             return;
@@ -182,6 +187,15 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 
         entry.ResultText = text;
         await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
+    }
+
+    private string? ResolveAdvanceText(bool isHero, int roll)
+    {
+        bool found;
+        string key;
+        if (isHero) found = HeroAdvanceTable.TryGetTextKey(roll, out key);
+        else found = HenchmanAdvanceTable.TryGetTextKey(roll, out key);
+        return found ? Loc[key] : null;
     }
 
     // Résultat "Compétence" (voir HeroAdvanceTable.IsSkill) : le joueur choisit directement une

@@ -11,4 +11,7 @@ public class WarriorSpell
     public int Id { get; set; }
     public int WarriorId { get; set; }
     public Spell Item { get; set; } = null!;
+
+    /// <summary>Passe-plat vers Item.Name - voir WarriorInjury.Name.</summary>
+    public string Name => Item.Name;
 }

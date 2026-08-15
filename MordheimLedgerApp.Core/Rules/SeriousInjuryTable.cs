@@ -1,15 +1,16 @@
-namespace MordheimLedgerApp.Services;
+namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>
 /// Reference lookup for the rulebook's Heroes' Serious Injury table (D66: two D6, first die = tens
 /// digit) - Henchmen use a completely different, simpler mechanic, see HenchmanInjuryTable. Pure
 /// flavor/reference text - deliberately does not mutate any Warrior stat itself (see the roadmap's
-/// "no rules engine in V1" boundary, also documented on Core/Models/WarriorStatus.cs): the resulting
+/// "no rules engine in V1" boundary, also documented on Models/WarriorStatus.cs): the resulting
 /// text becomes (find-or-create) a Library Injury linked onto the Warrior (see
 /// WarbandDetailViewModel.EndOfGame). Status IS auto-derived from the roll though (see IsDeath) - the
 /// 11-15 results are unambiguously "Mort", so the End of Game wizard sets WarriorStatus.Dead itself
-/// instead of asking the player to also pick it by hand. Lives in the App layer (not Core) because the
-/// entries are looked up through LocalizationService - Core stays MAUI/localization-free.
+/// instead of asking the player to also pick it by hand. TryGetTextKey returns a localization resource
+/// key rather than resolved text - Core stays MAUI/localization-free, the caller (App layer) resolves
+/// the key via LocalizationService.
 ///
 /// Verified against the rulebook (p. 118-119) via RulesReference/Campagne.md. The "Blessures
 /// multiples" result (16, 21) means rolling 1D6 more sub-rolls on this same table (rerolling any
@@ -31,15 +32,15 @@ public static class SeriousInjuryTable
 
     private static readonly int[] DeathRolls = [11, 12, 13, 14, 15];
 
-    public static bool TryGet(int roll, out string text)
+    public static bool TryGetTextKey(int roll, out string key)
     {
         if (Array.IndexOf(Rolls, roll) < 0)
         {
-            text = string.Empty;
+            key = string.Empty;
             return false;
         }
 
-        text = LocalizationService.Instance[$"InjurySerious{roll}"];
+        key = $"InjurySerious{roll}";
         return true;
     }
 
@@ -48,11 +49,6 @@ public static class SeriousInjuryTable
     /// this single-roll check can't resolve on its own.</summary>
     public static bool IsDeath(int roll) => Array.IndexOf(DeathRolls, roll) >= 0;
 
-    /// <summary>Rolls two D6 (D66: first die = tens digit) and looks up the result.</summary>
-    public static (int Roll, string Text) Roll()
-    {
-        var roll = Random.Shared.Next(1, 7) * 10 + Random.Shared.Next(1, 7);
-        TryGet(roll, out var text);
-        return (roll, text);
-    }
+    /// <summary>Rolls two D6 (D66: first die = tens digit).</summary>
+    public static int RollDice() => Random.Shared.Next(1, 7) * 10 + Random.Shared.Next(1, 7);
 }

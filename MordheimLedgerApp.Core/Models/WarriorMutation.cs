@@ -9,4 +9,7 @@ public class WarriorMutation
     public int Id { get; set; }
     public int WarriorId { get; set; }
     public Mutation Item { get; set; } = null!;
+
+    /// <summary>Passe-plat vers Item.Name - voir WarriorInjury.Name.</summary>
+    public string Name => Item.Name;
 }

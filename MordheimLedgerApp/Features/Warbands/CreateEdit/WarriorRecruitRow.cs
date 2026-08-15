@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Resources.Icons;
+using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -12,8 +13,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 /// sous-onglets Équipement/Compétences/XP (WarbandEditDialog.xaml, mode Bande existante), donc
 /// factorisés ici plutôt que dupliqués deux fois. Ce que chaque sous-classe garde de propre : le nom
 /// (Name, pas ici - WarriorNameSlot et HenchmanGroupDraft le typent différemment : personnel vs de groupe) et
-/// ce qui n'a de sens que pour l'un des deux (ArchetypeLabel/EquipmentSummary pour les héros,
-/// Count/CanSplit pour les groupes).</summary>
+/// ce qui n'a de sens que pour l'un des deux (ArchetypeLabel pour les héros, Count/CanSplit pour les
+/// groupes).</summary>
 public abstract partial class RecruitSlot : ObservableObject
 {
     /// <summary>Référence à la ligne parente - nécessaire à l'étape Équipement pour savoir quel
@@ -25,6 +26,13 @@ public abstract partial class RecruitSlot : ObservableObject
     /// chaque héros peut avoir un équipement différent - cette collection sert donc les deux cas, propre
     /// à CE slot/groupe précis.</summary>
     public ObservableCollection<EquipmentPick> Equipment { get; } = new();
+
+    /// <summary>Repère visuel affiché à l'étape Noms (à côté du champ Name, une fois compté/équipé) pour
+    /// distinguer les recrues sans devoir revenir à l'étape Équipement - snapshot au moment du binding,
+    /// pas de notification live nécessaire (l'équipement est déjà figé une fois l'étape Noms atteinte).
+    /// Commun aux héros (WarriorNameSlot) et groupes d'Hommes de main (HenchmanGroupDraft), tous deux
+    /// portant leur propre Equipment - chaîne vide (jamais null) tant que rien n'est acheté.</summary>
+    public string EquipmentSummary => string.Join(", ", Equipment.Select(e => e.Name));
 
     /// <summary>Passe-plat vers Row.Archetype.CanUseEquipment - masque le bouton "+" équipement (les deux
     /// modes, avec ou sans sous-onglets) pour un type qui n'en porte jamais (Zombie, Rat Ogre...).</summary>
@@ -70,6 +78,11 @@ public abstract partial class RecruitSlot : ObservableObject
     {
         Row = row;
         experience = row.Archetype.StartingExperience;
+        // EquipmentSummary est calculée (pas [ObservableProperty]) - Equipment.Add/Remove (AddEquipment/
+        // RemoveEquipment de WarbandEditDialogViewModel) ne déclenchent donc aucune notification pour elle
+        // sans ce relais explicite, laissant le Label de l'étape Noms vide/périmé tant qu'on ne rouvre pas
+        // le dialog.
+        Equipment.CollectionChanged += (_, _) => OnPropertyChanged(nameof(EquipmentSummary));
     }
 }
 
@@ -88,11 +101,6 @@ public partial class WarriorNameSlot : RecruitSlot
     /// n'ayant pas de visibilité sur ses frères dans Row.NameSlots.</summary>
     [ObservableProperty]
     private string archetypeLabel = string.Empty;
-
-    /// <summary>Repère visuel affiché à l'étape Noms (à côté du champ Name, une fois compté/équipé) pour
-    /// distinguer les recrues sans devoir revenir à l'étape Équipement - snapshot au moment du binding,
-    /// pas de notification live nécessaire (l'équipement est déjà figé une fois l'étape Noms atteinte).</summary>
-    public string EquipmentSummary => string.Join(", ", Equipment.Select(e => e.Name));
 
     public WarriorNameSlot(WarriorRecruitRow row) : base(row)
     {
@@ -143,6 +151,9 @@ public partial class WarriorRecruitRow : ObservableObject
     /// <summary>Lu par ChipView (Grid.BindingContext = Item = cette ligne) pour afficher le nom.</summary>
     public string Name => Archetype.Name;
     public int Cost => Archetype.Cost;
+
+    /// <summary>"CO"/"GC" en toutes lettres, même formule que MutationRow.CostDisplay.</summary>
+    public string CostDisplay => $"{Cost} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
     public bool IsHero => Archetype.IsHero;
     // UserGroup, pas Users - Users est déjà l'icône de la bande elle-même partout ailleurs dans l'appli
     // (Shell, tuile vide WarbandListPage, chip d'archétype de ce même wizard). Même icône que

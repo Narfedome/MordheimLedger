@@ -19,7 +19,7 @@ public class WarbandMutationTests : IDisposable
         _dbPath = Path.Combine(Path.GetTempPath(), $"mordheimledger-tests-{Guid.NewGuid()}.db3");
         _db = new AppDatabase(_dbPath);
         _library = new LibraryService(_db);
-        _warbands = new WarbandService(_db);
+        _warbands = new WarbandService(_db, _library);
     }
 
     public void Dispose()
@@ -60,6 +60,27 @@ public class WarbandMutationTests : IDisposable
         var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
         var persisted = Assert.Single(roster);
         Assert.Equal("Otto", persisted.Name);
+    }
+
+    /// <summary>Regression test for a real bug: GetWarriorsAsync used to resolve each carried
+    /// EquipmentItem via a minimal FindAsync+ToModel(translations) call, leaving SpecialRules (and
+    /// restrictions) empty for every already-recruited warrior's equipment - invisible until the
+    /// warband-detail chip dialogs started actually displaying them.</summary>
+    [Fact]
+    public async Task RecruitedWarrior_CarriedEquipment_HasSpecialRulesResolved()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
+        var recruited = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
+
+        var equipmentWithRule = (await _library.GetEquipmentItemsAsync("en")).First(i => i.SpecialRules.Count > 0);
+        await _warbands.AddWarriorEquipmentAsync(recruited.Id, equipmentWithRule);
+
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var warrior = Assert.Single(roster);
+        var carried = Assert.Single(warrior.Equipment);
+        Assert.NotEmpty(carried.Item.SpecialRules);
     }
 
     [Fact]

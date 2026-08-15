@@ -8,4 +8,8 @@ public class WarriorInjury
     public int Id { get; set; }
     public int WarriorId { get; set; }
     public Injury Item { get; set; } = null!;
+
+    /// <summary>Passe-plat vers Item.Name - ChipView (composant de puce partagé) lie son Label
+    /// directement sur Name, quel que soit le type réel qu'on lui passe.</summary>
+    public string Name => Item.Name;
 }

@@ -20,7 +20,17 @@
          pas. -->
     <VerticalStackLayout BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}" Spacing="4">
         <Grid ColumnDefinitions="*,Auto">
-            <Label Text="{Binding Source={x:Reference root}, Path=HeaderText}" Grid.Column="0" VerticalOptions="Center"/>
+            <!-- HeaderFontSize a toujours une valeur (14 par défaut) donc bindée directement ;
+                 HeaderTextColor reste null par défaut (usages existants inchangés) - un DataTrigger
+                 n'applique TextColor que si l'appelant l'a renseigné. -->
+            <Label Text="{Binding HeaderText}" Grid.Column="0" VerticalOptions="Center"
+                   FontSize="{Binding HeaderFontSize}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding HeaderTextColor, Converter={StaticResource IsNotNullConverter}}" Value="True">
+                        <Setter Property="TextColor" Value="{Binding HeaderTextColor}"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                           Icon="{x:Static icons:SolidFont.Plus}"
                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"

@@ -22,7 +22,7 @@
                             <components:ChipView Grid.Column="0" Item="{Binding .}"
                                                   IconGlyph="{Binding IconGlyph}"
                                                   Command="{Binding Source={x:Reference root}, Path=DetailCommand}"/>
-                            <Label Grid.Column="1" Text="{Binding Cost, StringFormat='{0} CO'}"
+                            <Label Grid.Column="1" Text="{Binding CostDisplay}"
                                    FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                             <HorizontalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center">
                                 <!-- Invisible (pas grisé) quand l'action n'est pas possible - Retirer sur

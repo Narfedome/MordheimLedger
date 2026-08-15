@@ -23,7 +23,7 @@
                  l'affiche. -->
             <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
                 <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
-                    <VerticalStackLayout Spacing="6">
+                    <VerticalStackLayout Spacing="2">
                         <Grid ColumnDefinitions="*,Auto,Auto">
                             <HorizontalStackLayout Grid.Column="0" Spacing="6">
                                 <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
@@ -67,7 +67,7 @@
                              abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
                              de cartes guerrier d'affilée. -->
-                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}"
+                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,0,0,8"
                                                  AbbrFontSize="10" ValueFontSize="13"/>
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
@@ -75,99 +75,50 @@
                              SpecialRules (règles bande-entière), pas stockées sur le Warrior. Pour
                              changer les règles d'un type de guerrier, ça se passe dans la Bibliothèque
                              (WarriorArchetypeEditDialog/WarbandArchetypeEditDialog), pas ici. -->
-                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasSpecialRules}">
-                            <Label Text="{loc:Loc WarriorsSpecialRulesHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SpecialRules}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="library:SpecialRule">
-                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="{x:Static icons:SolidFont.Scroll}" FontSize="12"
-                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </VerticalStackLayout>
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
+                                                  ItemsSource="{Binding SpecialRules}"
+                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowSpecialRuleDetailCommand}"/>
 
                         <!-- Blessures : lecture seule ici (pas de bouton "+"/"x") - gérées depuis le
                              dialog d'édition (voir WarriorEditDialog). Alimenté à la fois par le jet de
                              Fin de partie et par les ajouts manuels. Même style de puce que
                              Équipement/Compétences. -->
-                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasInjuries}">
-                            <Label Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Injuries}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:WarriorInjury">
-                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="{x:Static icons:RpgFont.RaBrokenBone}"
-                                                       FontFamily="RpgAwesome" FontSize="12"
-                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </VerticalStackLayout>
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsInjuriesHeading}"
+                                                  ItemsSource="{Binding Injuries}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowInjuryDetailCommand}"/>
 
                         <!-- Sorts connus : lecture seule, gérés depuis l'onglet Sorts de WarriorEditDialog
                              (visible seulement si l'archétype de ce guerrier est un lanceur de sorts). -->
-                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasSpells}">
-                            <Label Text="{loc:Loc WarriorsSpellsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:WarriorSpell">
-                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
-                                                       FontFamily="RpgAwesome" FontSize="12"
-                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </VerticalStackLayout>
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsSpellsHeading}"
+                                                  ItemsSource="{Binding Spells}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowSpellDetailCommand}"/>
 
                         <!-- Mutations : lecture seule, gérées depuis l'onglet Mutations de
                              WarriorEditDialog (visible seulement si l'archétype de ce guerrier a
                              CanBuyMutations). -->
-                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasMutations}">
-                            <Label Text="{loc:Loc WarriorsMutationsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Mutations}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:WarriorMutation">
-                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="{x:Static icons:RpgFont.RaBiohazard}"
-                                                       FontFamily="RpgAwesome" FontSize="12"
-                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </Border>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </VerticalStackLayout>
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsMutationsHeading}"
+                                                  ItemsSource="{Binding Mutations}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaBiohazard}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowMutationDetailCommand}"/>
 
                         <!-- Animal : lecture seule, un seul chip (champ 0..1, pas une liste) - gérée
                              depuis WarriorEditDialog. -->
-                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasAnimal}">
-                            <Label Text="{loc:Loc WarriorAnimalHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4" HorizontalOptions="Start">
-                                <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{x:Static icons:RpgFont.RaPawprint}"
-                                           FontFamily="RpgAwesome" FontSize="12"
-                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <Label Text="{Binding Animal.Name}" FontSize="11" VerticalOptions="Center"/>
-                                </HorizontalStackLayout>
-                            </Border>
-                        </VerticalStackLayout>
+                        <components:ChipItemView HeaderText="{loc:Loc WarriorAnimalHeading}"
+                                                  Item="{Binding Animal}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaPawprint}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowAnimalDetailCommand}"/>
 
                         <!-- Équipement/Compétences : lecture seule ici, même traitement que Blessures -
                              gérées depuis le dialog d'édition (voir WarriorEditDialog, onglets dédiés). -->
@@ -176,14 +127,10 @@
                             <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:WarriorEquipment">
-                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                       FontFamily="RpgAwesome" FontSize="12"
-                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                <Label Text="{Binding NameDisplay}" FontSize="11" VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </Border>
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowEquipmentDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
@@ -194,21 +141,22 @@
                             <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:WarriorSkill">
-                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
-                                                       FontFamily="RpgAwesome" FontSize="12"
-                                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                <Label Text="{Binding Item.Name}" FontSize="11" VerticalOptions="Center"/>
-                                            </HorizontalStackLayout>
-                                        </Border>
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowSkillDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
                         </VerticalStackLayout>
 
                         <Label Text="{loc:Loc WarriorsExperienceHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                        <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}" HorizontalOptions="Center"/>
+                        <!-- Pas de HorizontalOptions="Center" ici : ExperienceTrackView a besoin de sa
+                             largeur réellement disponible (voir CalculateRowSize) pour choisir combien
+                             de cases tiennent par ligne - un Center le ferait se réduire à son propre
+                             contenu, rendant ce calcul circulaire. Le centrage visuel se fait déjà à
+                             l'intérieur du composant (TrackLayout). -->
+                        <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}"/>
                     </VerticalStackLayout>
                 </Border>
             </DataTemplate>

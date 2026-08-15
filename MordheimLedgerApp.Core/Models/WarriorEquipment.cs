@@ -20,4 +20,8 @@ public class WarriorEquipment
     /// <summary>"Sword (G)" when MaterialRule has an Abbreviation, plain "Sword" otherwise - same idiom
     /// as EquipmentPick.Name (the in-memory equivalent before this row exists in the database).</summary>
     public string NameDisplay => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
+
+    /// <summary>Alias for NameDisplay - ChipView (composant de puce partagé) lie son Label directement
+    /// sur Name, quel que soit le type réel qu'on lui passe (voir WarriorInjury.Name).</summary>
+    public string Name => NameDisplay;
 }

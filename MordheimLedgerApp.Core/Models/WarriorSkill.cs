@@ -8,4 +8,7 @@ public class WarriorSkill
     public int Id { get; set; }
     public int WarriorId { get; set; }
     public Skill Item { get; set; } = null!;
+
+    /// <summary>Passe-plat vers Item.Name - voir WarriorInjury.Name.</summary>
+    public string Name => Item.Name;
 }

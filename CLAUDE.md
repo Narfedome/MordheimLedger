@@ -169,6 +169,54 @@ que deviné :
   `ToWarrior()` au recrutement, à renseigner par archétype (0 par défaut, correct pour la plupart des
   types génériques).
 
+**Refonte carte guerrier (2026-08-16)** : trois correctifs sur `WarbandDetailPage`.
+- `StatRowView` en lecture seule affiche maintenant une vraie grille tabulaire (filet horizontal sous
+  les abréviations + filets verticaux entre colonnes, valeurs en gras) — comparé à 3 pistes visuelles,
+  celle-ci retenue. Le mode édition (Entry) n'est pas concerné.
+- Puces de la carte guerrier (Règles spéciales/Blessures/Sorts/Mutations/Monture) migrées vers le
+  composant partagé `ChipListView` (déjà utilisé côté Bibliothèque, header+FlexLayout+chip en un seul
+  tag) au lieu d'un `FlexLayout`+`DataTemplate`+`Border` dupliqué à la main par section. Équipement et
+  Compétences (icône par item - catégorie d'équipement/de compétence) restent dans un `FlexLayout`
+  manuel **mais réutilisent `ChipView`** (la puce elle-même, sans le header/`FlexLayout` que
+  `ChipListView` embarque) à l'intérieur : `IconGlyph="{Binding Item.Category, Converter=
+  {StaticResource EquipmentCategoryIconConverter}}"` fonctionne tel quel car le contexte du
+  `DataTemplate` est déjà l'item porté (`WarriorEquipment`/`WarriorSkill`) - même motif exact que
+  `WarbandEditDialogViewModel`'s Equipment step (`EquipmentPick`/`ChipView` avec le même converter). Pas
+  besoin d'étendre `ChipListView` avec un converter dynamique - fausse piste explorée puis abandonnée,
+  `ChipListView.IconGlyph` reste un simple glyphe fixe pour toute la liste, adapté aux 5 autres puces
+  (une seule icône par notion) mais pas à Équipement/Compétences. A nécessité d'ajouter un passe-plat
+  `Name` sur `WarriorInjury`/`WarriorSpell`/`WarriorMutation`/`WarriorSkill` (`=> Item.Name`) et
+  `WarriorEquipment` (`=> NameDisplay`) - `ChipView` lie son Label directement sur `Name`.
+  `ChipListView`/`ChipItemView` ont chacun gagné un `HeaderFontSize` bindable (défauts 14/12 -
+  comportement inchangé pour les ~15 usages existants côté Bibliothèque qui ne le précisent pas) et
+  `ChipListView` un `HeaderTextColor` (défaut null, appliqué seulement si renseigné via un
+  `DataTrigger`) pour que les headers de la carte guerrier soient homogènes entre eux (10/AppTextMuted
+  partout, y compris Équipement/Compétences qui gardaient déjà ce style en dur).
+- Tap sur une puce de la carte guerrier ouvre le même dialog récap en lecture seule complet que la
+  Bibliothèque/le recrutement (`XxxDetailDialog`/`XxxDetailDialogViewModel` par type - Équipement/
+  Compétence/Sort/Mutation/Blessure/Règle spéciale/Monture), pas le popup générique `ChipDetailDialog`
+  (Nom+Description seuls, gardé pour son usage d'origine côté Bibliothèque). Précédent direct :
+  `WarriorEditDialogViewModel.ShowEquipmentDetail`. Répète volontairement la même logique de
+  résolution des restrictions (bandes/guerriers autorisés) déjà dupliquée 2-3 fois ailleurs
+  (WarriorEditDialogViewModel/WarbandEditDialogViewModel/les `XxxViewModel.ShowDetails` de la
+  Bibliothèque) plutôt que de la centraliser - pas demandé, hors périmètre de cette passe.
+- **Bug trouvé en branchant ces dialogs** : `WarbandService.GetWarriorsAsync` résolvait chaque
+  EquipmentItem/Skill/Mutation/Animal porté par un guerrier via un simple `FindAsync` + `ToModel
+  (translations)` minimal - `SpecialRules`/`RestrictedToWarbandArchetypeIds`/
+  `RestrictedToWarriorArchetypeIds` restaient donc vides pour tout guerrier déjà recruté (invisible
+  jusqu'à ce que ces dialogs récap se mettent à les afficher). Corrigé en injectant `ILibraryService`
+  dans `WarbandService` et en réutilisant ses méthodes déjà pleinement résolues
+  (`GetEquipmentItemsAsync`/`GetSkillsAsync`/`GetMutationsAsync`/`GetAnimalsAsync`, chargées une fois
+  par appel à `GetWarriorsAsync` plutôt qu'un `FindAsync` par ligne portée). Test de non-régression :
+  `WarbandMutationTests.RecruitedWarrior_CarriedEquipment_HasSpecialRulesResolved`.
+- `ExperienceTrackView` sur mobile : le nombre de cases par ligne (30 pour un Héros, comme sur la
+  feuille imprimée en 3 lignes) reste fixe à dessein — ne pas le recalculer depuis la largeur
+  disponible (essayé puis annulé, ça casse la mise en page "3 lignes" voulue). C'est la case
+  elle-même (`BoxSize`, bindable property) qui rétrécit sur un écran étroit, entre `DefaultBoxSize`
+  (12) et `MinBoxSize` (7). Nécessite que l'appelant (`WarbandDetailPage.xaml`) NE pose PAS
+  `HorizontalOptions="Center"` sur l'instance : ça la ferait se réduire à son propre contenu, rendant
+  la mesure de largeur circulaire — le centrage visuel se fait déjà à l'intérieur du composant.
+
 **Tuiles du Codex + dialogs récap en lecture seule** (branche `feature/codex-tile-recap-ui`, 2 commits,
 pas encore mergée sur `master`) : passe de polish sur les 8 onglets Codex (Bandes, Trading Post,
 Compétences, Règles Spéciales, Mutations, Montures, Sorts, Blessures) + 3 grilles de tuiles annexes

@@ -16,6 +16,18 @@ public partial class ChipItemView : ContentView
         get => (string)GetValue(HeaderTextProperty);
         set => SetValue(HeaderTextProperty, value);
     }
+
+    // Défaut 12 = comportement inchangé pour les usages existants qui ne la précisent pas - voir
+    // ChipListView.HeaderFontSize pour le même principe côté liste.
+    public static readonly BindableProperty HeaderFontSizeProperty =
+        BindableProperty.Create(nameof(HeaderFontSize), typeof(double), typeof(ChipItemView), 12.0);
+
+    public double HeaderFontSize
+    {
+        get => (double)GetValue(HeaderFontSizeProperty);
+        set => SetValue(HeaderFontSizeProperty, value);
+    }
+
     public static readonly BindableProperty IsMandatoryProperty =
         BindableProperty.Create(
             nameof(IsMandatory),

@@ -17,71 +17,103 @@
          Movement est à part (MovementText, maintenant TwoWay) : Animal n'a pas de MovementDisplay/
          MovementOverride contrairement à WarriorArchetype/Warrior, donc pas de nom de propriété uniforme
          à binder faiblement pour cette seule colonne - l'appelant fournit soit Item.Movement (Animal),
-         soit son propre proxy de saisie libre "2D6" (WarriorArchetypeEditDialogViewModel.MovementInput). -->
+         soit son propre proxy de saisie libre "2D6" (WarriorArchetypeEditDialogViewModel.MovementInput).
+
+         Grille 17 colonnes (9 stats + 8 fines colonnes séparatrices de 1px) x 3 lignes (Abrégé / filet
+         horizontal / Valeur) en lecture seule, pour un vrai rendu "tableau" (demande explicite -
+         comparé à 3 pistes visuelles, celle-ci choisie). Filets (BoxView AppBorder) masqués en mode
+         édition : un formulaire à cases Entry n'a pas besoin du même quadrillage. -->
     <Grid BindingContext="{Binding Source={x:Reference root}, Path=Item}"
-          ColumnDefinitions="*,*,*,*,*,*,*,*,*" ColumnSpacing="4">
-        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatMovementAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Source={x:Reference root}, Path=MovementText}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Source={x:Reference root}, Path=MovementText}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatWeaponSkillAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding WeaponSkill}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding WeaponSkill}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="2" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatBallisticSkillAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding BallisticSkill}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding BallisticSkill}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="3" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatStrengthAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Strength}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Strength}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="4" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatToughnessAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Toughness}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Toughness}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="5" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatWoundsAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Wounds}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Wounds}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="6" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatInitiativeAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Initiative}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Initiative}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="7" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatAttacksAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Attacks}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Attacks}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
-        <VerticalStackLayout Grid.Column="8" HorizontalOptions="Center">
-            <Label Text="{loc:Loc StatLeadershipAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
-            <Label Text="{Binding Leadership}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
-            <Entry Text="{Binding Leadership}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
-                   IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
-        </VerticalStackLayout>
+          RowDefinitions="Auto,1,Auto"
+          ColumnDefinitions="*,8,*,8,*,8,*,8,*,8,*,8,*,8,*,8,*" ColumnSpacing="0" RowSpacing="4">
+
+        <!-- Filet horizontal sous les abréviations, sur toute la largeur. -->
+        <BoxView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="17" HeightRequest="1"
+                 Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+
+        <!-- Filets verticaux entre chaque colonne de stat (colonnes impaires 1,3,5,7,9,11,13,15) -
+             colonne séparatrice plus large (8) que le filet lui-même (1, centré dedans) pour laisser
+             un peu d'air de chaque côté, comme l'ancien ColumnSpacing="4". -->
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="3" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="5" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="7" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="9" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="11" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="13" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <BoxView Grid.Row="0" Grid.RowSpan="3" Grid.Column="15" WidthRequest="1" HorizontalOptions="Center" Color="{DynamicResource AppBorder}"
+                 IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+
+        <!-- Mouvement -->
+        <Label Grid.Row="0" Grid.Column="0" Text="{loc:Loc StatMovementAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=MovementText}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=MovementText}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- CC -->
+        <Label Grid.Row="0" Grid.Column="2" Text="{loc:Loc StatWeaponSkillAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="2" Text="{Binding WeaponSkill}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="2" Text="{Binding WeaponSkill}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- CT -->
+        <Label Grid.Row="0" Grid.Column="4" Text="{loc:Loc StatBallisticSkillAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="4" Text="{Binding BallisticSkill}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="4" Text="{Binding BallisticSkill}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- F -->
+        <Label Grid.Row="0" Grid.Column="6" Text="{loc:Loc StatStrengthAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="6" Text="{Binding Strength}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="6" Text="{Binding Strength}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- E -->
+        <Label Grid.Row="0" Grid.Column="8" Text="{loc:Loc StatToughnessAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="8" Text="{Binding Toughness}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="8" Text="{Binding Toughness}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- PV -->
+        <Label Grid.Row="0" Grid.Column="10" Text="{loc:Loc StatWoundsAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="10" Text="{Binding Wounds}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="10" Text="{Binding Wounds}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- I -->
+        <Label Grid.Row="0" Grid.Column="12" Text="{loc:Loc StatInitiativeAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="12" Text="{Binding Initiative}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="12" Text="{Binding Initiative}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- A -->
+        <Label Grid.Row="0" Grid.Column="14" Text="{loc:Loc StatAttacksAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="14" Text="{Binding Attacks}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="14" Text="{Binding Attacks}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
+        <!-- Cd -->
+        <Label Grid.Row="0" Grid.Column="16" Text="{loc:Loc StatLeadershipAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+        <Label Grid.Row="2" Grid.Column="16" Text="{Binding Leadership}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+        <Entry Grid.Row="2" Grid.Column="16" Text="{Binding Leadership}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
+
     </Grid>
 </ContentView>

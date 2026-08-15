@@ -21,7 +21,7 @@ public class SeededDatabaseFixture : IAsyncLifetime
         _dbPath = Path.Combine(Path.GetTempPath(), $"mordheimledger-tests-{Guid.NewGuid()}.db3");
         Db = new AppDatabase(_dbPath);
         Library = new LibraryService(Db);
-        Warbands = new WarbandService(Db);
+        Warbands = new WarbandService(Db, Library);
     }
 
     public Task InitializeAsync() => Db.Initialization;

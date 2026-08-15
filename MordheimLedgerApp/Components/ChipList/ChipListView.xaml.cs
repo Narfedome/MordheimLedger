@@ -16,6 +16,29 @@ public partial class ChipListView : ContentView
         set => SetValue(HeaderTextProperty, value);
     }
 
+    // Non renseignée (défaut) : taille de police par défaut du Label (comportement identique à avant
+    // l'ajout de cette propriété, pour ne rien changer aux usages existants qui ne la précisent pas).
+    public static readonly BindableProperty HeaderFontSizeProperty =
+        BindableProperty.Create(nameof(HeaderFontSize), typeof(double), typeof(ChipListView), 14.0);
+
+    public double HeaderFontSize
+    {
+        get => (double)GetValue(HeaderFontSizeProperty);
+        set => SetValue(HeaderFontSizeProperty, value);
+    }
+
+    // Non renseignée (défaut, null) : pas de TextColor explicite sur le header (comportement inchangé
+    // pour les usages existants) - voir ChipListView.xaml, un DataTrigger applique TextColor seulement
+    // si cette propriété est renseignée.
+    public static readonly BindableProperty HeaderTextColorProperty =
+        BindableProperty.Create(nameof(HeaderTextColor), typeof(Color), typeof(ChipListView), null);
+
+    public Color? HeaderTextColor
+    {
+        get => (Color?)GetValue(HeaderTextColorProperty);
+        set => SetValue(HeaderTextColorProperty, value);
+    }
+
     public static readonly BindableProperty ItemsSourceProperty =
         BindableProperty.Create(nameof(ItemsSource), typeof(IEnumerable), typeof(ChipListView),
             propertyChanged: (bindable, oldValue, newValue) => ((ChipListView)bindable).OnItemsSourceChanged((IEnumerable?)oldValue, (IEnumerable?)newValue));

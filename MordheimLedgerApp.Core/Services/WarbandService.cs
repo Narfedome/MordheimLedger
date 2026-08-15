@@ -9,8 +9,13 @@ namespace MordheimLedgerApp.Core.Services;
 public class WarbandService : IWarbandService
 {
     private readonly AppDatabase _db;
+    private readonly ILibraryService _library;
 
-    public WarbandService(AppDatabase db) => _db = db;
+    public WarbandService(AppDatabase db, ILibraryService library)
+    {
+        _db = db;
+        _library = library;
+    }
 
     public async Task<List<Warband>> GetWarbandsAsync()
     {
@@ -79,6 +84,17 @@ public class WarbandService : IWarbandService
         await _db.Initialization;
         var warriorRows = await _db.Connection.Table<WarriorEntity>().Where(w => w.WarbandId == warbandId).ToListAsync();
 
+        // Chargées une seule fois via LibraryService (résolution complète : restrictions +
+        // SpecialRules, comme le Codex) plutôt qu'un FindAsync+ToModel(translations) minimal par ligne
+        // portée - ce dernier laissait EquipmentItem.SpecialRules/RestrictedToXxxIds vides pour tout
+        // objet/monture porté par un guerrier déjà recruté (repéré : SpecialRules manquantes dans le
+        // dialog récap ouvert depuis la fiche de bande). Skill/Mutation n'ont pas de SpecialRules mais
+        // ont le même trou sur leurs restrictions.
+        var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
+        var skillById = (await _library.GetSkillsAsync(languageCode)).ToDictionary(s => s.Id);
+        var mutationById = (await _library.GetMutationsAsync(languageCode)).ToDictionary(m => m.Id);
+        var animalById = (await _library.GetAnimalsAsync(languageCode)).ToDictionary(a => a.Id);
+
         var warriors = new List<Warrior>();
         foreach (var row in warriorRows)
         {
@@ -86,37 +102,27 @@ public class WarbandService : IWarbandService
             var carried = new List<WarriorEquipment>();
             foreach (var carriedRow in carriedRows)
             {
-                var itemEntity = await _db.Connection.FindAsync<EquipmentItemEntity>(carriedRow.EquipmentItemId);
-                if (itemEntity is not null)
+                if (!equipmentById.TryGetValue(carriedRow.EquipmentItemId, out var item)) continue;
+
+                SpecialRule? materialRule = null;
+                if (carriedRow.MaterialSpecialRuleId is { } materialRuleId)
                 {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [itemEntity.NameKey, itemEntity.DescriptionKey], languageCode);
-
-                    SpecialRule? materialRule = null;
-                    if (carriedRow.MaterialSpecialRuleId is { } materialRuleId)
+                    var materialEntity = await _db.Connection.FindAsync<SpecialRuleEntity>(materialRuleId);
+                    if (materialEntity is not null)
                     {
-                        var materialEntity = await _db.Connection.FindAsync<SpecialRuleEntity>(materialRuleId);
-                        if (materialEntity is not null)
-                        {
-                            var materialTranslations = await TranslationResolver.ResolveAsync(_db, [materialEntity.NameKey, materialEntity.DescriptionKey], languageCode);
-                            materialRule = materialEntity.ToModel(materialTranslations);
-                        }
+                        var materialTranslations = await TranslationResolver.ResolveAsync(_db, [materialEntity.NameKey, materialEntity.DescriptionKey], languageCode);
+                        materialRule = materialEntity.ToModel(materialTranslations);
                     }
-
-                    carried.Add(carriedRow.ToModel(itemEntity.ToModel(translations), materialRule));
                 }
+
+                carried.Add(carriedRow.ToModel(item, materialRule));
             }
 
             var learnedRows = await _db.Connection.Table<WarriorSkillEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
             var learned = new List<WarriorSkill>();
             foreach (var learnedRow in learnedRows)
-            {
-                var skillEntity = await _db.Connection.FindAsync<SkillEntity>(learnedRow.SkillId);
-                if (skillEntity is not null)
-                {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [skillEntity.NameKey, skillEntity.DescriptionKey], languageCode);
-                    learned.Add(learnedRow.ToModel(skillEntity.ToModel(translations)));
-                }
-            }
+                if (skillById.TryGetValue(learnedRow.SkillId, out var skill))
+                    learned.Add(learnedRow.ToModel(skill));
 
             var injuryRows = await _db.Connection.Table<WarriorInjuryEntity>().Where(i => i.WarriorId == row.Id).ToListAsync();
             var injuries = new List<WarriorInjury>();
@@ -145,25 +151,12 @@ public class WarbandService : IWarbandService
             var mutationRows = await _db.Connection.Table<WarriorMutationEntity>().Where(m => m.WarriorId == row.Id).ToListAsync();
             var mutations = new List<WarriorMutation>();
             foreach (var mutationRow in mutationRows)
-            {
-                var mutationEntity = await _db.Connection.FindAsync<MutationEntity>(mutationRow.MutationId);
-                if (mutationEntity is not null)
-                {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [mutationEntity.NameKey, mutationEntity.DescriptionKey], languageCode);
-                    mutations.Add(mutationRow.ToModel(mutationEntity.ToModel(translations)));
-                }
-            }
+                if (mutationById.TryGetValue(mutationRow.MutationId, out var mutation))
+                    mutations.Add(mutationRow.ToModel(mutation));
 
             Animal? animal = null;
             if (row.AnimalId is { } animalId)
-            {
-                var animalEntity = await _db.Connection.FindAsync<AnimalEntity>(animalId);
-                if (animalEntity is not null)
-                {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [animalEntity.NameKey, animalEntity.DescriptionKey], languageCode);
-                    animal = animalEntity.ToModel(translations);
-                }
-            }
+                animalById.TryGetValue(animalId, out animal);
 
             warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal));
         }

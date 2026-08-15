@@ -179,6 +179,30 @@
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </FlexLayout>
+                                                        <!-- Sorts : hors mode Bande existante uniquement, pour un lanceur de sorts
+                                                             fraîchement recruté (livre des règles : "starts with one spell chosen
+                                                             by the player") - en mode Bande existante, ce même achat passe par
+                                                             l'onglet Sorts de RecruitSlotTabsView ci-dessous, pas ce bloc-ci. -->
+                                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsSpellcaster}">
+                                                            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}"
+                                                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
+                                                                <BindableLayout.ItemTemplate>
+                                                                    <DataTemplate x:DataType="library:Spell">
+                                                                        <components:ChipView Item="{Binding .}"
+                                                                                              IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                                                                              IconFontFamily="RpgAwesome"
+                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"/>
+                                                                    </DataTemplate>
+                                                                </BindableLayout.ItemTemplate>
+                                                            </FlexLayout>
+                                                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                          IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
+                                                                                          CommandParameter="{Binding .}"/>
+                                                        </Grid>
                                                         <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
                                                              (un état par groupe, SelectedSection), factorisés dans RecruitSlotTabsView
                                                              (même bloc réutilisé côté Héros juste en dessous). -->
@@ -234,6 +258,28 @@
                                                                 </DataTemplate>
                                                             </BindableLayout.ItemTemplate>
                                                         </FlexLayout>
+                                                        <!-- Sorts : hors mode Bande existante uniquement - même bloc que côté
+                                                             Hommes de main ci-dessus (RecruitSlot.IsSpellcaster). -->
+                                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsSpellcaster}">
+                                                            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Spells}"
+                                                                        IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
+                                                                <BindableLayout.ItemTemplate>
+                                                                    <DataTemplate x:DataType="library:Spell">
+                                                                        <components:ChipView Item="{Binding .}"
+                                                                                              IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                                                                              IconFontFamily="RpgAwesome"
+                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"/>
+                                                                    </DataTemplate>
+                                                                </BindableLayout.ItemTemplate>
+                                                            </FlexLayout>
+                                                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                          IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
+                                                                                          CommandParameter="{Binding .}"/>
+                                                        </Grid>
                                                         <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
                                                              (un état par héros, SelectedSection), même RecruitSlotTabsView que côté
                                                              Hommes de main ci-dessus. -->

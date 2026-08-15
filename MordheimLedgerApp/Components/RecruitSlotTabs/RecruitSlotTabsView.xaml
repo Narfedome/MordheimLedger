@@ -10,16 +10,15 @@
              x:Name="root">
 
     <VerticalStackLayout Spacing="6" BindingContext="{x:Reference root}">
-        <!-- Équipement/Compétences/XP n'ont de sens qu'en Bande existante (import d'un historique déjà
-             déterminé) - onglets masqués sinon, voir RecruitSlot.IsExistingWarband/ShowTabsView. Sorts
-             reste visible dans les deux modes pour un lanceur de sorts (livre des règles : sort de départ
-             tiré au 1D6 même en création neuve), avec un bouton "+"/dé différent selon le mode (voir plus
-             bas). -->
+        <!-- Équipement est toujours pertinent (les deux modes) - seuls Compétences/XP n'ont de sens qu'en
+             Bande existante (import d'un historique déjà déterminé), masqués sinon (voir
+             RecruitSlot.IsExistingWarband). Sorts reste visible dans les deux modes pour un lanceur de
+             sorts (livre des règles : sort de départ tiré au 1D6 même en création neuve), avec un bouton
+             "+"/dé différent selon le mode (voir plus bas). -->
         <components:ScrollableTabStripView>
             <HorizontalStackLayout Spacing="14">
                 <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
-                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"
-                                             IsVisible="{Binding Item.IsExistingWarband}"/>
+                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
                                              IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"
                                              IsVisible="{Binding Item.IsExistingWarband}"/>

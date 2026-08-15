@@ -64,20 +64,22 @@ public abstract partial class RecruitSlot : ObservableObject
     /// (WarbandEditDialogViewModel.IncrementWarrior/SplitHenchmanGroupDraft) et rétroactivement si la
     /// case est basculée après coup (OnIsExistingWarbandChanged) - RecruitSlot n'a pas de référence au
     /// dialog lui-même, donc pas moyen de lire cette valeur en direct depuis ici. Pilote quels
-    /// sous-onglets de RecruitSlotTabsView ont un sens : Équipement/Compétences/XP seulement en Bande
-    /// existante (import d'un historique déjà déterminé), Sorts dans les deux modes (voir
-    /// IsSpellcaster/ShowTabsView) mais avec un bouton différent (choix libre vs tirage 1D6, voir
-    /// RecruitSlotTabsView.xaml).</summary>
+    /// sous-onglets de RecruitSlotTabsView ont un sens : Compétences/XP seulement en Bande existante
+    /// (import d'un historique déjà déterminé) - Équipement reste pertinent dans les deux modes (voir
+    /// ShowTabsView), Sorts aussi pour un lanceur de sorts (IsSpellcaster) mais avec un bouton différent
+    /// selon le mode (choix libre vs tirage 1D6, voir RecruitSlotTabsView.xaml).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowTabsView))]
     private bool isExistingWarband;
 
     /// <summary>Pilote la visibilité de RecruitSlotTabsView - visible dès qu'il y a au moins un
-    /// sous-onglet pertinent à montrer : Équipement/Compétences/XP (Bande existante) ou Sorts (lanceur de
+    /// sous-onglet pertinent à montrer : Équipement (CanUseEquipment, les deux modes désormais - plus de
+    /// bloc "+" hors-onglet séparé), Compétences/XP (Bande existante uniquement) ou Sorts (lanceur de
     /// sorts, les deux modes - livre des règles : sort de départ tiré au 1D6 même en création neuve).
-    /// Hors Bande existante et hors lanceur de sorts, aucun sous-onglet n'a de sens (l'Équipement se gère
-    /// via le bloc "+" hors-onglet juste au-dessus, voir WarbandEditDialog.xaml) - composant masqué.</summary>
-    public bool ShowTabsView => IsExistingWarband || IsSpellcaster;
+    /// Composant entièrement masqué seulement pour un type qui ne coche aucune de ces trois raisons
+    /// (ex. un Zombie hors Bande existante : pas d'équipement, pas de compétences/XP libres, pas de
+    /// sorts).</summary>
+    public bool ShowTabsView => CanUseEquipment || IsExistingWarband || IsSpellcaster;
 
     /// <summary>XP de cette recrue/ce groupe - uniquement modifiable en mode "Bande existante" (sinon
     /// reste la StartingExperience de l'archétype, comme WarriorArchetype.ToWarrior l'applique déjà).

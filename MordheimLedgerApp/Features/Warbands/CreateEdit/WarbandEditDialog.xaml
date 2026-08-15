@@ -135,8 +135,10 @@
                                                 <DataTemplate x:DataType="local:HenchmanGroupDraft">
                                                     <VerticalStackLayout Spacing="2">
                                                         <!-- Nom en lecture seule ici (édité à l'étape Noms) - juste de quoi distinguer
-                                                             les groupes entre eux si le joueur en a divisé plusieurs. -->
-                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4">
+                                                             les groupes entre eux si le joueur en a divisé plusieurs. Équipement se
+                                                             gère désormais entièrement via l'onglet Équipement de RecruitSlotTabsView
+                                                             ci-dessous (les deux modes), plus de "+" ni de puces dupliquées ici. -->
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                                                             <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalOptions="Center"/>
                                                             <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
                                                                    TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
@@ -150,40 +152,12 @@
                                                                                           IsVisible="{Binding CanSplit}"
                                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
                                                                                           CommandParameter="{Binding .}"/>
-                                                            <!-- Wrapper : IsVisible ne combine pas plusieurs conditions nativement en XAML,
-                                                                 donc CanUseEquipment (le type ne porte jamais d'équipement, ex. Rat Ogre) se
-                                                                 pose sur ce Grid englobant, IsExistingWarband inverse reste sur le bouton. -->
-                                                            <Grid Grid.Column="3" IsVisible="{Binding CanUseEquipment}">
-                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
                                                         </Grid>
-                                                        <!-- Hors mode Bande existante : juste l'équipement, sans onglets (comportement
-                                                             d'origine). Icône par EquipmentCategory (même EquipmentCategoryIconConverter
-                                                             que WarriorEditDialog), pas un glyphe unique : ChipListView n'a qu'un seul
-                                                             IconGlyph pour toute la liste, donc chip inline par item ici plutôt qu'via ce
-                                                             composant. -->
-                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}"
-                                                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                            <BindableLayout.ItemTemplate>
-                                                                <DataTemplate x:DataType="local:EquipmentPick">
-                                                                    <components:ChipView Item="{Binding .}"
-                                                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                                          IconFontFamily="RpgAwesome"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
-                                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
-                                                                </DataTemplate>
-                                                            </BindableLayout.ItemTemplate>
-                                                        </FlexLayout>
-                                                        <!-- Équipement/Compétences/XP (Bande existante) et Sorts (les deux modes,
-                                                             livre des règles : sort de départ tiré au 1D6 même en création neuve)
-                                                             factorisés dans RecruitSlotTabsView (même bloc réutilisé côté Héros
-                                                             juste en dessous) - visible dès qu'au moins un sous-onglet a un sens
-                                                             (voir RecruitSlot.ShowTabsView). -->
+                                                        <!-- Équipement (les deux modes désormais)/Compétences/XP (Bande existante
+                                                             uniquement) et Sorts (les deux modes, livre des règles : sort de départ
+                                                             tiré au 1D6 même en création neuve) factorisés dans RecruitSlotTabsView
+                                                             (même bloc réutilisé côté Héros juste en dessous) - visible dès qu'au
+                                                             moins un sous-onglet a un sens (voir RecruitSlot.ShowTabsView). -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"
                                                               IsVisible="{Binding ShowTabsView}"
                                                               AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
@@ -213,32 +187,12 @@
                                                              d'en-tête partagé au niveau de la ligne recrutée, juste un numéro
                                                              ajouté par WarbandEditDialogViewModel.RenumberHeroLabels si besoin
                                                              de les distinguer. -->
-                                                        <Grid ColumnDefinitions="*,Auto">
-                                                            <Label Grid.Column="0" Text="{Binding ArchetypeLabel}" FontSize="13" VerticalOptions="Center"/>
-                                                            <Grid Grid.Column="1" IsVisible="{Binding CanUseEquipment}">
-                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <!-- Hors mode Bande existante : juste l'équipement, sans onglets (comportement d'origine). -->
-                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}"
-                                                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                            <BindableLayout.ItemTemplate>
-                                                                <DataTemplate x:DataType="local:EquipmentPick">
-                                                                    <components:ChipView Item="{Binding .}"
-                                                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                                          IconFontFamily="RpgAwesome"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
-                                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
-                                                                </DataTemplate>
-                                                            </BindableLayout.ItemTemplate>
-                                                        </FlexLayout>
-                                                        <!-- Équipement/Compétences/XP/Sorts - même RecruitSlotTabsView que côté
-                                                             Hommes de main ci-dessus. -->
+                                                        <!-- Équipement se gère désormais entièrement via l'onglet Équipement de
+                                                             RecruitSlotTabsView ci-dessous (les deux modes), plus de "+" ni de puces
+                                                             dupliquées ici. -->
+                                                        <Label Text="{Binding ArchetypeLabel}" FontSize="13" VerticalOptions="Center"/>
+                                                        <!-- Équipement (les deux modes désormais)/Compétences/XP/Sorts - même
+                                                             RecruitSlotTabsView que côté Hommes de main ci-dessus. -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"
                                                               IsVisible="{Binding ShowTabsView}"
                                                               AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"

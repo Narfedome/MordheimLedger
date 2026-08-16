@@ -44,6 +44,13 @@ public partial class AnimalViewModel : BaseViewModel
     [ObservableProperty]
     private AnimalRow? selectedRow;
 
+    /// <summary>Null (onglet Library CRUD) = pas de filtre, tout le catalogue est parcouru. Non-null
+    /// (mode picker, posé par AnimalPickerService avant construction de la page) = ne garde que les
+    /// animaux communs (RestrictedToWarbandArchetypeIds vide) ou explicitement restreints à cette bande -
+    /// même principe qu'EquipmentItemViewModel.AllowedWarbandArchetypeId, mais Animal n'a qu'une
+    /// restriction bande (pas de RestrictedToWarriorArchetypeIds, contrairement à EquipmentItem/Skill).</summary>
+    public int? AllowedWarbandArchetypeId { get; set; }
+
     /// <summary>Set by AnimalSelectorPage right after construction - même bascule multi-sélection
     /// qu'InjuryViewModel.IsSelectorMode (le picker ne renvoie en pratique qu'un animal : le premier
     /// résultat coché remplace l'animal actuel du guerrier, voir WarriorEditDialogViewModel.PickAnimal).</summary>
@@ -90,7 +97,10 @@ public partial class AnimalViewModel : BaseViewModel
 
     private async Task LoadData()
     {
-        _allItems = await _libraryService.GetAnimalsAsync(LocalizationService.Instance.Language);
+        var loaded = await _libraryService.GetAnimalsAsync(LocalizationService.Instance.Language);
+        _allItems = AllowedWarbandArchetypeId is { } warbandId
+            ? loaded.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId)).ToList()
+            : loaded;
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
 
         var previousFilter = string.IsNullOrEmpty(SelectedGroupFilter) ? AllGroupsLabel : SelectedGroupFilter;

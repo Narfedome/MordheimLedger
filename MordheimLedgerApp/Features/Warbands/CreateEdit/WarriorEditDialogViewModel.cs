@@ -352,7 +352,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task SelectAnimal()
     {
-        var animals = await _animalPicker.PickAnimalsAsync();
+        var animals = await _animalPicker.PickAnimalsAsync(_warband.WarbandArchetypeId);
         if (animals.Count > 0)
         {
             Item.Animal = animals[0];

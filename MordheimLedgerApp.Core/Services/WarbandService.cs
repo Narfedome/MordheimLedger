@@ -93,7 +93,6 @@ public class WarbandService : IWarbandService
         var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
         var skillById = (await _library.GetSkillsAsync(languageCode)).ToDictionary(s => s.Id);
         var mutationById = (await _library.GetMutationsAsync(languageCode)).ToDictionary(m => m.Id);
-        var animalById = (await _library.GetAnimalsAsync(languageCode)).ToDictionary(a => a.Id);
 
         var warriors = new List<Warrior>();
         foreach (var row in warriorRows)
@@ -154,9 +153,9 @@ public class WarbandService : IWarbandService
                 if (mutationById.TryGetValue(mutationRow.MutationId, out var mutation))
                     mutations.Add(mutationRow.ToModel(mutation));
 
-            Animal? animal = null;
+            EquipmentItem? animal = null;
             if (row.AnimalId is { } animalId)
-                animalById.TryGetValue(animalId, out animal);
+                equipmentById.TryGetValue(animalId, out animal);
 
             warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal));
         }

@@ -14,12 +14,19 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     public string CategoryLabel { get; }
     public string RarityDisplay { get; }
 
+    /// <summary>Shows the StatRowView profile block only for a mount (Category == Animal) - meaningless
+    /// for any other category. See EquipmentItemEditDialogViewModel's editable counterpart.</summary>
+    public bool IsAnimalCategory => Item.Category == EquipmentCategory.Animal;
+
     /// <summary>"30 - 48" when CostRandomMax is set (worst-case total, see EquipmentItem.CostRandomMax),
     /// otherwise just "30".</summary>
     public string CostDisplay => Item.CostRandomMax is { } max ? $"{Item.Cost} - {Item.Cost + max}" : Item.Cost.ToString();
 
     /// <summary>Already resolved by the caller (EquipmentItemViewModel.ShowDetails) from the ids on
-    /// Item - same idiom as SkillViewModel.Edit's initialWarriors fetch.</summary>
+    /// Item - same idiom as SkillViewModel.Edit's initialWarriors fetch. Shown as-is, however long -
+    /// deliberately no complement/collapse here (see WarbandRestrictionEditor's doc comment: a read-only
+    /// recap has no "+" to feed a second list, so the same "never auto-recompute" rule that shaped the
+    /// Edit dialog just means showing the real literal data plainly, same as before that feature).</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 

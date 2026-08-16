@@ -2,7 +2,6 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.Animals.CreateEdit;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
 using MordheimLedgerApp.Features.Library.Mutations.CreateEdit;
@@ -42,7 +41,6 @@ public interface IDetailDialogService
     Task ShowSkillDetailDialogAsync(Skill item);
     Task ShowSpecialRuleDetailDialogAsync(SpecialRule item);
     Task ShowMutationDetailDialogAsync(Mutation item);
-    Task ShowAnimalDetailDialogAsync(Animal item);
     Task ShowSpellDetailDialogAsync(Spell item);
     Task ShowInjuryDetailDialogAsync(Injury item);
 }
@@ -115,17 +113,6 @@ public class DetailDialogService : IDetailDialogService
                 .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         await ShowAsync(new MutationDetailDialog(new MutationDetailDialogViewModel(item, restrictedWarbands)));
-    }
-
-    public async Task ShowAnimalDetailDialogAsync(Animal item)
-    {
-        var language = LocalizationService.Instance.Language;
-        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowAsync(new AnimalDetailDialog(new AnimalDetailDialogViewModel(item, restrictedWarbands)));
     }
 
     public Task ShowSpellDetailDialogAsync(Spell item) =>

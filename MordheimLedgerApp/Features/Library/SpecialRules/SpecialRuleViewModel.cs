@@ -17,20 +17,20 @@ public partial class SpecialRuleViewModel : BaseViewModel
     private List<SpecialRule> _allItems = new();
     private HashSet<int> _warbandRuleIds = new();
     private HashSet<int> _warriorRuleIds = new();
-    private HashSet<int> _animalRuleIds = new();
     private HashSet<int> _itemRuleIds = new();
     private bool _suppressFilterReload;
 
-    /// <summary>Sections of the grid, one per group (Bandes/Guerriers/Montures/Objets, joined if a rule
-    /// is attached to several types) - always grouped internally (cf. MutationViewModel.MutationGroups),
-    /// the header is just hidden outside the "All" filter (see ShowGroupHeaders).</summary>
+    /// <summary>Sections of the grid, one per group (Bandes/Guerriers/Objets, joined if a rule is
+    /// attached to several types) - always grouped internally (cf. MutationViewModel.MutationGroups), the
+    /// header is just hidden outside the "All" filter (see ShowGroupHeaders). Montures used to be their
+    /// own group here - now just an EquipmentCategory, so a mount's rules fall under Objets like any
+    /// other EquipmentItem's.</summary>
     [ObservableProperty]
     private ObservableCollection<SpecialRuleGroup> specialRuleGroups = new();
 
     private string AllGroupsLabel => Loc["LibFilterAll"];
     private string WarbandGroupLabel => Loc["LibFilterSpecialRuleWarbands"];
     private string WarriorGroupLabel => Loc["LibFilterSpecialRuleWarriors"];
-    private string AnimalGroupLabel => Loc["LibFilterSpecialRuleAnimals"];
     private string ItemGroupLabel => Loc["LibFilterSpecialRuleItems"];
     private string UncategorizedGroupLabel => Loc["LibFilterUncategorized"];
 
@@ -91,7 +91,6 @@ public partial class SpecialRuleViewModel : BaseViewModel
         var labels = new List<string>();
         if (_warbandRuleIds.Contains(item.Id)) labels.Add(WarbandGroupLabel);
         if (_warriorRuleIds.Contains(item.Id)) labels.Add(WarriorGroupLabel);
-        if (_animalRuleIds.Contains(item.Id)) labels.Add(AnimalGroupLabel);
         if (_itemRuleIds.Contains(item.Id) || item.CostMultiplier != null) labels.Add(ItemGroupLabel);
         return labels.Count > 0 ? string.Join(", ", labels) : UncategorizedGroupLabel;
     }
@@ -99,14 +98,14 @@ public partial class SpecialRuleViewModel : BaseViewModel
     private async Task LoadData()
     {
         _allItems = await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language);
-        (_warbandRuleIds, _warriorRuleIds, _animalRuleIds, _itemRuleIds) = await _libraryService.GetSpecialRuleAttachmentsAsync();
+        (_warbandRuleIds, _warriorRuleIds, _itemRuleIds) = await _libraryService.GetSpecialRuleAttachmentsAsync();
 
         // Sélecteur ouvert pour un contexte précis (WarbandArchetypeEditDialog/WarriorArchetypeEditDialog) :
         // ne propose que les règles déjà attachées à ce type-là quelque part, PLUS celles jamais
         // attachées nulle part (comportement permissif par défaut - sans ça, une règle tout juste créée
         // via le "+" du sélecteur, donc encore sans aucune attache réelle, n'apparaîtrait pas dans son
-        // propre sélecteur). Hors sélecteur, ou sélecteur sans contexte (Animal/EquipmentItem) :
-        // catalogue complet, comportement inchangé.
+        // propre sélecteur). Hors sélecteur, ou sélecteur sans contexte (EquipmentItem) : catalogue
+        // complet, comportement inchangé.
         if (IsSelectorMode && _pickerNavigation.RequestedFilterKind is { } filterKind)
         {
             var relevantIds = filterKind == SpecialRuleFilterKind.Warband ? _warbandRuleIds : _warriorRuleIds;
@@ -116,7 +115,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
             // (WarriorEquipment.MaterialRule). Sans ça elle repasse "jamais attachée nulle part" et
             // resurgit dans tous les sélecteurs filtrés malgré le fix du regroupement Codex.
             var materialRuleIds = _allItems.Where(i => i.CostMultiplier != null).Select(i => i.Id);
-            var everAttachedAnywhere = new HashSet<int>(_warbandRuleIds.Concat(_warriorRuleIds).Concat(_animalRuleIds).Concat(_itemRuleIds).Concat(materialRuleIds));
+            var everAttachedAnywhere = new HashSet<int>(_warbandRuleIds.Concat(_warriorRuleIds).Concat(_itemRuleIds).Concat(materialRuleIds));
             _allItems = _allItems.Where(i => relevantIds.Contains(i.Id) || !everAttachedAnywhere.Contains(i.Id)).ToList();
         }
 

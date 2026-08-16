@@ -411,6 +411,15 @@
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Common to every warband</value>
   </data>
+  <data name="LibRestrictedToAllExceptPh" xml:space="preserve">
+    <value>Every warband except</value>
+  </data>
+  <data name="LibRestrictionSwitchToExcludePh" xml:space="preserve">
+    <value>Switch to "all except..." mode</value>
+  </data>
+  <data name="LibRestrictionSwitchToIncludePh" xml:space="preserve">
+    <value>Switch to "only..." mode</value>
+  </data>
   <data name="LibNoDescription" xml:space="preserve">
     <value>No description.</value>
   </data>
@@ -573,6 +582,9 @@
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Miscellaneous Equipment</value>
   </data>
+  <data name="EquipmentCategoryAnimal" xml:space="preserve">
+    <value>Animals</value>
+  </data>
   <data name="TabSkills" xml:space="preserve">
     <value>Skills</value>
   </data>
@@ -659,30 +671,6 @@
   </data>
   <data name="WarriorsMutationsHeading" xml:space="preserve">
     <value>Mutations</value>
-  </data>
-  <data name="LibTabAnimals" xml:space="preserve">
-    <value>Animals</value>
-  </data>
-  <data name="AnimalNamePh" xml:space="preserve">
-    <value>Animal name</value>
-  </data>
-  <data name="AnimalCostPh" xml:space="preserve">
-    <value>Cost (gc)</value>
-  </data>
-  <data name="AnimalRarityPh" xml:space="preserve">
-    <value>Rarity (blank = common)</value>
-  </data>
-  <data name="AnimalCostRandomMaxPh" xml:space="preserve">
-    <value>Max random supplement (e.g. 2D6 = 12)</value>
-  </data>
-  <data name="AnimalCreateTitle" xml:space="preserve">
-    <value>New animal</value>
-  </data>
-  <data name="AnimalEditTitle" xml:space="preserve">
-    <value>Edit animal</value>
-  </data>
-  <data name="AnimalSelectTitle" xml:space="preserve">
-    <value>Select animal</value>
   </data>
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Select warbands</value>
@@ -1109,9 +1097,6 @@
   </data>
   <data name="LibFilterSpecialRuleWarriors" xml:space="preserve">
     <value>Warriors</value>
-  </data>
-  <data name="LibFilterSpecialRuleAnimals" xml:space="preserve">
-    <value>Mounts</value>
   </data>
   <data name="LibFilterSpecialRuleItems" xml:space="preserve">
     <value>Items</value>

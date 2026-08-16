@@ -49,8 +49,9 @@ public partial class WarriorRow : ObservableObject
     /// résolu par WarbandDetailViewModel.ToRow, même idiome que SpecialRules band-wide.</summary>
     public ObservableCollection<MagicSchool> MagicSchools { get; }
 
-    /// <summary>Mirrors Warrior.Animal - read-only display, managed via WarriorEditDialog.</summary>
-    public Animal? Animal => Warrior.Animal;
+    /// <summary>Mirrors Warrior.Animal (an EquipmentItem, Category == Animal) - read-only display,
+    /// managed via WarriorEditDialog.</summary>
+    public EquipmentItem? Animal => Warrior.Animal;
 
     public bool HasEquipment => Equipment.Count > 0;
     public bool HasSkills => Skills.Count > 0;

@@ -21,8 +21,6 @@ public partial class WarbandListViewModel : BaseViewModel
     private readonly ISpellPickerService _spellPickerService;
     private readonly IInjuryPickerService _injuryPickerService;
     private readonly IMutationPickerService _mutationPickerService;
-    private readonly IAnimalPickerService _animalPickerService;
-
     [ObservableProperty]
     private ObservableCollection<WarbandRow> rows = new();
 
@@ -50,7 +48,7 @@ public partial class WarbandListViewModel : BaseViewModel
         IWarbandService warbandService, IWarbandArchetypePickerService warbandArchetypePickerService,
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPickerService,
         ISkillPickerService skillPickerService, ISpellPickerService spellPickerService, IInjuryPickerService injuryPickerService,
-        IMutationPickerService mutationPickerService, IAnimalPickerService animalPickerService)
+        IMutationPickerService mutationPickerService)
     {
         _pickerNavigation = pickerNavigation;
         _warbandService = warbandService;
@@ -62,7 +60,6 @@ public partial class WarbandListViewModel : BaseViewModel
         _spellPickerService = spellPickerService;
         _injuryPickerService = injuryPickerService;
         _mutationPickerService = mutationPickerService;
-        _animalPickerService = animalPickerService;
     }
 
     partial void OnSelectedRowChanged(WarbandRow? oldValue, WarbandRow? newValue)
@@ -103,7 +100,7 @@ public partial class WarbandListViewModel : BaseViewModel
         var newItem = new Core.Models.Warband();
         var dialogViewModel = new WarbandEditDialogViewModel(newItem, Loc["WarbandCreateTitle"],
              _warbandArchetypePickerService, _warbandService, _libraryService, _detailDialogs, _equipmentPickerService, _skillPickerService,
-             _spellPickerService, _injuryPickerService, _mutationPickerService, _animalPickerService);
+             _spellPickerService, _injuryPickerService, _mutationPickerService);
         if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
 
         await LoadWarbandsAsync();
@@ -140,7 +137,7 @@ public partial class WarbandListViewModel : BaseViewModel
 
         var dialogViewModel = new WarbandEditDialogViewModel(row.Warband, Loc["WarbandEditTitle"],
             _warbandArchetypePickerService, _warbandService, _libraryService, _detailDialogs, _equipmentPickerService, _skillPickerService,
-            _spellPickerService, _injuryPickerService, _mutationPickerService, _animalPickerService)
+            _spellPickerService, _injuryPickerService, _mutationPickerService)
         {
             Archetype = archetype
         };

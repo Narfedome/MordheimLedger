@@ -20,7 +20,7 @@ public interface ISpecialRulePickerNavigationService
 
     /// <summary>Set by SpecialRulePickerService.PickSpecialRulesAsync right before pushing the modal - read
     /// by SpecialRuleViewModel.LoadData (selector mode only) to filter the catalog. Null = unfiltered
-    /// (Animal/EquipmentItem callers, unchanged behavior).</summary>
+    /// (EquipmentItem callers, including Animal-category items, unchanged behavior).</summary>
     SpecialRuleFilterKind? RequestedFilterKind { get; set; }
 }
 

@@ -362,8 +362,10 @@ venir). Les deux bandes ont chacune leur propre `MagicSchool` distincte (Rituels
 du Chaos) bien que thématiquement proches — confirmé sur mordheimer.net, ne pas les fusionner. La
 Roulotte de la Peste de Kermesse (véhicule à 4 profils combinés) reste hors périmètre V1. Horde Orque
 intégrée ensuite (1re bande à peupler `Mounts` dans son JSON — Sanglier de guerre, restreint à cette
-bande, avec ses propres SpecialRules "Charge Furieuse"/"Peau Épaisse"). Cette bande a aussi fait
-apparaître un cas non couvert par le modèle : le Mouvement des Squigs des cavernes n'est pas une
+bande, avec ses propres SpecialRules "Charge Furieuse"/"Peau Épaisse" — **retiré depuis, voir la note
+sur la fusion Animal/Equipment plus bas : c'est du contenu Blazing Saddles 1b, pas le roster core d'Orc
+Mob**). Cette bande a aussi fait apparaître un cas non couvert par le modèle : le Mouvement des Squigs
+des cavernes n'est pas une
 caractéristique fixe (2D6ps à chaque déplacement, comme sur la fiche officielle et mordheimer.net) alors
 que `WarriorArchetype.Movement`/`Warrior.Movement` sont des `int`. Décision avec l'utilisateur (plutôt que
 d'improviser un 0 ou une moyenne) : ajout de `MovementOverride` (`string?`, nullable) sur `WarriorArchetype`
@@ -378,7 +380,110 @@ par une autre bande dans un JSON importé plus tard. L'Arme Obsidienne et l'Armu
 des Possédés (censées être partagées par 6 bandes selon le livre de règles, dont les Pillards
 Hommes-Bêtes) sont pour l'instant restreintes à la seule bande Culte des Possédés en attendant un vrai
 mécanisme de partage multi-bandes pour l'Équipement — à généraliser si/quand ça bloque un futur import
-(probablement aux Pillards Hommes-Bêtes).
+(probablement aux Pillards Hommes-Bêtes). **Toujours vrai après le refactor ci-dessous** : le nouveau
+mécanisme `RestrictedToWarbandNames` ne couvre que les 3 catalogues **communs** (Equipment.json/
+Skills.json/Mutations.json), pas un objet déclaré dans le fichier propre à une bande (comme l'Arme
+Obsidienne, déclarée dans `CultOfThePossessed.json`) — la même résolution différée pourrait s'étendre à
+ce cas si besoin, pas fait faute de cas d'usage réel pour l'instant.
+
+**Fait (branche `feature/detail-dialog-service`, 2026-08-16) — restrictions multi-bandes génériques +
+fusion Animal dans Equipment** : en complétant les restrictions des montures (Cheval/Destrier réservés
+aux bandes humaines, Chien de guerre à toutes sauf les Skavens), une première passe avait dupliqué
+l'entrée dans chaque fichier de bande concerné (8 copies de Cheval/Destrier, 14 de Chien de guerre) car
+`RestrictedToThisWarband: bool` ne sait exprimer qu'une seule bande par entrée — décision reprise après
+coup par l'utilisateur ("on a de la duplication de partout, c'est pas bon") en faveur d'un vrai
+mécanisme. Deux volets :
+1. **Restriction multi-bandes dans l'import JSON** : nouveau champ optionnel `RestrictedToWarbandNames`
+   (liste de noms de fichier, ex. `["Reiklanders", "Kislevites"]`) sur `EquipmentSeedData`/
+   `SkillSeedData`/`MutationSeedData` (`WarbandSeedData.cs`), à côté de `RestrictedToThisWarband` qui
+   reste pertinent pour une entrée propre à une seule bande. Comme les 6 catalogues communs seedent
+   avant les 15 fichiers de bande (`AppDatabase.SeedOfficialContentAsync`), aucune `WarbandArchetypeId`
+   n'existe encore au moment de lire ce champ — résolution différée via `_warbandArchetypeIdsByFileStem`
+   (peuplé dans `SeedWarbandFromJsonAsync`) + `_pendingSharedRestrictions`
+   (`PendingSharedRestriction`/`SharedRestrictionKind`), résolus en une passe finale après le dernier
+   `SeedWarbandFromJsonAsync("Kislevites.json")`.
+2. **Animal devient une catégorie d'`EquipmentItem`** (`EquipmentCategory.Animal`), sur demande explicite
+   de l'utilisateur ("les animaux sont considérés comme équipement dans les règles ... on devrait faire
+   en sorte que ce soit un héritier des équipements") : `Animal.cs`/`AnimalEntity.cs`/
+   `WarbandArchetypeAnimalEntity.cs`/`AnimalSpecialRuleEntity.cs`/`AnimalSeedData`/`Animals.json`
+   supprimés entièrement, `EquipmentItem`/`EquipmentItemEntity` gagnent les 9 champs de profil (nullable,
+   seulement renseignés pour la catégorie Animal). `Warrior.Animal` est retypé `EquipmentItem?` (toujours
+   un champ 0..1, pas une table de jointure). Toute l'UI dédiée (`Features/Library/Animals/*`,
+   `AnimalPickerService`/`AnimalPickerNavigationService`, l'onglet Codex "Montures") est supprimée : les
+   montures apparaissent désormais comme une catégorie filtrable dans l'onglet Trading Post existant.
+   `IEquipmentPickerService.PickEquipmentAsync` gagne un paramètre optionnel `lockedCategory` (verrouille
+   le picker sur une catégorie et désactive son bouton de changement) réutilisé par
+   `WarriorEditDialogViewModel.SelectAnimal` pour ouvrir le même picker d'équipement que le reste,
+   pré-filtré sur Animaux, plutôt qu'un picker dédié. Cheval/Destrier (8 bandes humaines) et Chien de
+   guerre (toutes sauf Skavens, 14 bandes) rejoignent `Equipment.json` avec `restrictedToWarbandNames`.
+   **Le Sanglier de guerre est retiré entièrement** plutôt que migré : vérifié sur mordheimer.net, c'est
+   du contenu *Blazing Saddles* (Mordheim Annual 2002, Grade **1b**), pas le roster core d'Orc Mob
+   (Grade **1a**, Town Cryer #6) — repéré par l'utilisateur, confirmé par la fiche mordheimer.net de
+   l'objet ("WAR BOAR — Blazing Saddles (1b)") qui liste bien Cheval/Destrier/Chien de guerre comme
+   `core`. Pas d'équivalent pour l'instant : aucune bande importée ne contient de contenu Blazing
+   Saddles, donc rien à réintroduire ailleurs tant qu'un import futur ne l'exige pas explicitement.
+   **Petit bug corrigé au passage** : `EquipmentItemViewModel.Edit()` recopiait l'`EquipmentItem`
+   sélectionné dans une copie défensive sans les 9 champs de profil (Mouvement/CC/CT/F/E/PV/I/A/Cd) —
+   la catégorie Animal ouvrait donc `EquipmentItemEditDialog` avec un profil vide alors que l'objet en
+   base avait bien ses stats. Corrigé en complétant l'initialiseur de la copie.
+
+**Fait (2026-08-16, même session) — helper d'édition Inclure/Exclure pour les restrictions par bande** :
+signalé par l'utilisateur juste après le refactor ci-dessus - éditer une restriction "quasi-universelle"
+(Chien de guerre : toutes les bandes sauf Skavens) dans `EquipmentItemEditDialog` affichait une douzaine
+de chips à la fois, dialog ingérable. Priorité donnée explicitement à l'UI plutôt qu'au JSON ("pour moi
+c'est surtout l'ui... ça fait une longueur ingérable dans le dialogue") - `RestrictedToWarbandNames`
+(JSON, voir ci-dessus) reste une simple liste d'inclusion, inchangée.
+- Nouveau `Components/WarbandRestrictionEditor.cs` : petit `ObservableObject` réutilisable (au sens
+  propre du mot "helper" employé par l'utilisateur) qui factorise le bloc "chips + picker de bandes +
+  Add/Remove" jusque-là dupliqué à l'identique dans `EquipmentItemEditDialogViewModel`/
+  `SkillEditDialogViewModel`/`MutationEditDialogViewModel`. Ajoute un mode **Exclure**, purement une
+  commodité d'édition/affichage - aucun changement de modèle/schéma, `RestrictedToWarbandArchetypeIds`
+  reste une simple liste d'inclusion.
+  **Révisé dans la foulée** (l'utilisateur a signalé juste après : en repassant "toutes sauf X" à zéro
+  exclusion il fallait que ça revienne à "commun à toutes" — corrigé une première fois par calcul du
+  complément, puis l'utilisateur a demandé plus simple : *"dans une liste ou dans une autre il faut
+  laisser la liste vide et elle doit n'être alimentée que par l'utilisateur quand on appuie sur le +...
+  l'excluse ou la restriction en soit c'est 2 listes, si un élément est dans l'une, elle n'est pas dans
+  l'autre et inversement"* — confirmé via `AskUserQuestion` : **jamais de recalcul automatique**, ni à
+  l'ouverture ni au bascule). Design final : **deux listes littérales indépendantes** `_included`/
+  `_excluded`, jamais dérivées l'une de l'autre par complément. `_included` est initialisée depuis
+  `RestrictedToWarbandArchetypeIds` (données réelles) ; `_excluded` démarre **toujours vide**, y compris
+  en rouvrant un objet déjà très restreint (Chien de guerre 14/15 bandes) ou en basculant de mode en
+  cours d'édition - alimentée uniquement par le "+". Les deux restent mutuellement exclusives (ajouter
+  une bande à la liste active la retire de l'autre) mais rien ne les garde synchronisées au-delà.
+  `SelectedIds` calcule le complément contre `AllWarbandArchetypes` **seulement en mode Exclure et
+  seulement au moment de lire la valeur à persister** (jamais pour l'affichage des chips) - une liste
+  exclue vide se persiste bien comme liste vide ("commun à toutes"), pas comme "toutes les bandes
+  listées explicitement". Conséquence assumée : rouvrir un item déjà "toutes sauf Skavens" en mode
+  Exclure ne pré-remplit plus "Skavens" — l'utilisateur le retape. Acceptable car ce cas (bandes très
+  restreintes) vient presque toujours du seed JSON (`RestrictedToWarbandNames`, jamais édité via cette
+  UI), pas de cette UI elle-même, dont le vrai usage est de créer une nouvelle règle "tout sauf X" à la
+  main - un bouton `IconTextButton` (glyphe `RightLeft`) sous chaque `ChipListView` bascule le mode,
+  toujours Inclure par défaut à l'ouverture (plus d'heuristique de devinette).
+- `SkillEditDialogViewModel` est le seul cas à deux niveaux (restriction bande + restriction guerrier
+  narrowée aux bandes restreintes) - `WarbandRestrictionEditor.Changed` (event) notifie quand l'ensemble
+  inclus change (peu importe si via le mode Inclure ou Exclure) pour purger les guerriers dont la bande
+  n'est plus incluse, et le picker de guerriers (`AddRestrictedWarriorCommand`) narrowe toujours sur
+  `WarbandRestriction.SelectedIds` (l'ensemble inclus réel), jamais sur les chips affichés qui peuvent
+  être les bandes exclues.
+- Nouvelles clés resx : `LibRestrictedToAllExceptPh`/`LibRestrictionSwitchToExcludePh`/
+  `LibRestrictionSwitchToIncludePh` (fr/en).
+- **Extension aux dialogs récap en lecture seule tentée puis retirée** : une première passe avait ajouté
+  `Components/WarbandRestrictionDisplay.cs` (contrepartie statique, sans picker) à
+  `EquipmentItemDetailDialogViewModel`/`SkillDetailDialogViewModel`/`MutationDetailDialogViewModel`,
+  calculant le même complément que l'éditeur pour collapser l'affichage. **Entièrement annulée** une fois
+  le design de l'éditeur simplifié en deux listes jamais recalculées (ci-dessus) : le complément
+  auto-calculé était exactement le genre de magie que l'utilisateur venait de faire retirer côté édition,
+  et une recap en lecture seule n'a de toute façon pas de "+" pour reconstruire la liste si elle se
+  trompe. Les 3 `XxxDetailDialogViewModel` et les 3 méthodes de `DetailDialogService` sont revenus à
+  l'affichage brut d'origine (`RestrictedWarbands` = la liste réelle telle quelle, aussi longue soit-elle
+  - ex. Chien de guerre y montre bien ses 14 bandes). `WarbandRestrictionDisplay.cs` supprimé.
+- **Contrôle unique** (suite à la remarque de l'utilisateur "on ne le ferait pas en control unique...
+  pour centraliser la gestion") : le bloc `ChipListView` + `IconTextButton` de bascule, jusque-là
+  dupliqué à l'identique dans les 3 dialogs d'édition, est remplacé par `Components/WarbandRestriction/
+  WarbandRestrictionEditorView.xaml(.cs)` (une seule `BindableProperty Editor`, type
+  `WarbandRestrictionEditor`) - chaque dialog se réduit à
+  `<components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>`.
 
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
 `get_page_text`) fonctionne.

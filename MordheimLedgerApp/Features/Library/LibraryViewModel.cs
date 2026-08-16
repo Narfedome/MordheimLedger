@@ -6,21 +6,21 @@ using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
-using MordheimLedgerApp.Features.Library.Animals;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
 
 /// <summary>
-/// Single "Codex" Shell tab hosting the 8 catalog sections (types de bande, Place du Marché,
-/// Compétences, Blessures, Sorts, Règles spéciales, Mutations, Animaux) that used to each be their own
+/// Single "Codex" Shell tab hosting the 7 catalog sections (types de bande, Place du Marché,
+/// Compétences, Blessures, Sorts, Règles spéciales, Mutations) that used to each be their own
 /// top-level TabBar tab - consolidated to declutter the bottom nav bar on Android. Same toggle pattern
 /// (index + IsXTab, no real TabbedPage) already used by WarbandDetailPage's Roster/Historique and
 /// WarriorEditDialog's Équipement/Compétences/Blessures. Each section keeps its own existing
 /// ViewModel/*View ContentView unchanged - this container only owns the toggle and BindingContext
-/// wiring, no catalog logic of its own.
+/// wiring, no catalog logic of its own. Animals used to be an 8th section here (AnimalView) - now just
+/// an EquipmentCategory, browsed/edited via the Place du Marché tab's category filter instead.
 ///
-/// MagicSchool is deliberately NOT one of these tabs, unlike the other 8 catalogs - too nested a
+/// MagicSchool is deliberately NOT one of these tabs, unlike the other 7 catalogs - too nested a
 /// concept for a top-level Codex entry (same call as DmTools' Category, managed from within the Track
 /// library rather than its own TabBar tab). It's reached instead via SpellViewModel.ManageMagicSchools
 /// (see SpellView.xaml's "Gérer les écoles de magie" icon), which pushes MagicSchoolListPage as a
@@ -28,12 +28,12 @@ namespace MordheimLedgerApp.Features.Library;
 /// </summary>
 public partial class LibraryViewModel : BaseViewModel
 {
-    /// <summary>Translation keys for the 8 sections, in SelectedTab order - single source of truth for
+    /// <summary>Translation keys for the 7 sections, in SelectedTab order - single source of truth for
     /// both the ActionSheet options and SelectedTabLabel, see SelectTab/RefreshSelectedTabLabel.</summary>
     private static readonly string[] TabKeys =
     [
         "TabWarbands", "LibTabTradingPost", "TabSkills", "TabInjuries",
-        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabAnimals"
+        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations"
     ];
 
     public WarbandArchetypeViewModel WarbandArchetypes { get; }
@@ -43,7 +43,6 @@ public partial class LibraryViewModel : BaseViewModel
     public SpellViewModel Spells { get; }
     public SpecialRuleViewModel SpecialRules { get; }
     public MutationViewModel Mutations { get; }
-    public AnimalViewModel Animals { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
@@ -53,7 +52,6 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsSpellsTab))]
     [NotifyPropertyChangedFor(nameof(IsSpecialRulesTab))]
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
-    [NotifyPropertyChangedFor(nameof(IsAnimalsTab))]
     private int selectedTab;
 
     /// <summary>Displayed on the single section-picker Button - see SelectTab. Distinct from a direct
@@ -69,9 +67,8 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsSpellsTab => SelectedTab == 4;
     public bool IsSpecialRulesTab => SelectedTab == 5;
     public bool IsMutationsTab => SelectedTab == 6;
-    public bool IsAnimalsTab => SelectedTab == 7;
 
-    // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 7 autres ne le sont qu'au
+    // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 6 autres ne le sont qu'au
     // premier passage sur leur onglet, voir EnsureTabLoadedAsync.
     private bool _equipmentItemsLoaded;
     private bool _skillsLoaded;
@@ -79,11 +76,10 @@ public partial class LibraryViewModel : BaseViewModel
     private bool _spellsLoaded;
     private bool _specialRulesLoaded;
     private bool _mutationsLoaded;
-    private bool _animalsLoaded;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
-        MutationViewModel mutations, AnimalViewModel animals)
+        MutationViewModel mutations)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
@@ -92,7 +88,6 @@ public partial class LibraryViewModel : BaseViewModel
         Spells = spells;
         SpecialRules = specialRules;
         Mutations = mutations;
-        Animals = animals;
         RefreshSelectedTabLabel();
     }
 
@@ -147,9 +142,6 @@ public partial class LibraryViewModel : BaseViewModel
                 break;
             case 6:
                 if (!_mutationsLoaded) { await Mutations.InitializeAsync(); _mutationsLoaded = true; }
-                break;
-            case 7:
-                if (!_animalsLoaded) { await Animals.InitializeAsync(); _animalsLoaded = true; }
                 break;
         }
     }

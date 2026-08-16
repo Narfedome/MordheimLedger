@@ -69,14 +69,18 @@
                     <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
                 </VerticalStackLayout>
 
+                <!-- Profil (Mouvement/CC/CT/F/E/PV/I/A/Cd) - uniquement pour la catégorie Animal (une
+                     monture, ex. Cheval de guerre) : ces 9 champs n'ont pas de sens pour les autres
+                     catégories. Même composant StatRowView que WarriorArchetypeEditDialog. -->
+                <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAnimalCategory}">
+                    <Label Text="{loc:Loc LibTabProfile}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}" IsEditable="True"/>
+                </VerticalStackLayout>
+
                 <!-- Réservé à ces bandes : vide = commun à toutes les bandes (voir EquipmentItem.
-                     RestrictedToWarbandArchetypeIds). HeaderText dynamique plutôt qu'un titre fixe + un
-                     indice affichés en même temps liste vide - même principe que MutationEditDialog. -->
-                <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
-                                          ItemsSource="{Binding RestrictedWarbands}"
-                                          IconGlyph="{x:Static icons:SolidFont.Users}"
-                                          AddCommand="{Binding AddRestrictionCommand}"
-                                          RemoveCommand="{Binding RemoveRestrictionCommand}"/>
+                     RestrictedToWarbandArchetypeIds). Contrôle unique factorisant chips + bascule
+                     Inclure/Exclure (ex. Chien de guerre "toutes sauf Skavens"). -->
+                <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
             </VerticalStackLayout>
 
             <!-- Règles spéciales propres à l'objet (ex. "Parry", "Cutting Edge"). -->

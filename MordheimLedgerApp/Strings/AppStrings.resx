@@ -411,6 +411,15 @@
   <data name="LibRestrictedToAllHint" xml:space="preserve">
     <value>Commun à toutes les bandes</value>
   </data>
+  <data name="LibRestrictedToAllExceptPh" xml:space="preserve">
+    <value>Toutes les bandes sauf</value>
+  </data>
+  <data name="LibRestrictionSwitchToExcludePh" xml:space="preserve">
+    <value>Basculer en mode "toutes sauf..."</value>
+  </data>
+  <data name="LibRestrictionSwitchToIncludePh" xml:space="preserve">
+    <value>Basculer en mode "uniquement..."</value>
+  </data>
   <data name="LibNoDescription" xml:space="preserve">
     <value>Aucune description.</value>
   </data>
@@ -573,6 +582,9 @@
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Équipement divers</value>
   </data>
+  <data name="EquipmentCategoryAnimal" xml:space="preserve">
+    <value>Animaux</value>
+  </data>
   <data name="TabSkills" xml:space="preserve">
     <value>Compétences</value>
   </data>
@@ -659,30 +671,6 @@
   </data>
   <data name="WarriorsMutationsHeading" xml:space="preserve">
     <value>Mutations</value>
-  </data>
-  <data name="LibTabAnimals" xml:space="preserve">
-    <value>Animaux</value>
-  </data>
-  <data name="AnimalNamePh" xml:space="preserve">
-    <value>Nom de l'animal</value>
-  </data>
-  <data name="AnimalCostPh" xml:space="preserve">
-    <value>Coût (CO)</value>
-  </data>
-  <data name="AnimalRarityPh" xml:space="preserve">
-    <value>Rareté (vide = commun)</value>
-  </data>
-  <data name="AnimalCostRandomMaxPh" xml:space="preserve">
-    <value>Supplément aléatoire max. (ex. 2D6 = 12)</value>
-  </data>
-  <data name="AnimalCreateTitle" xml:space="preserve">
-    <value>Nouvel animal</value>
-  </data>
-  <data name="AnimalEditTitle" xml:space="preserve">
-    <value>Modifier l'animal</value>
-  </data>
-  <data name="AnimalSelectTitle" xml:space="preserve">
-    <value>Choisir un animal</value>
   </data>
   <data name="WarbandArchetypeSelectTitle" xml:space="preserve">
     <value>Choisir des bandes</value>
@@ -1109,9 +1097,6 @@
   </data>
   <data name="LibFilterSpecialRuleWarriors" xml:space="preserve">
     <value>Guerriers</value>
-  </data>
-  <data name="LibFilterSpecialRuleAnimals" xml:space="preserve">
-    <value>Montures</value>
   </data>
   <data name="LibFilterSpecialRuleItems" xml:space="preserve">
     <value>Objets</value>

@@ -60,9 +60,6 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorArchetypeSpecialRuleEntity>();
         await _db.CreateTableAsync<MutationEntity>();
         await _db.CreateTableAsync<WarriorMutationEntity>();
-        await _db.CreateTableAsync<AnimalEntity>();
-        await _db.CreateTableAsync<WarbandArchetypeAnimalEntity>();
-        await _db.CreateTableAsync<AnimalSpecialRuleEntity>();
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMutationEntity>();
@@ -97,9 +94,6 @@ public class AppDatabase
         await _db.DropTableAsync<WarriorArchetypeSpecialRuleEntity>();
         await _db.DropTableAsync<MutationEntity>();
         await _db.DropTableAsync<WarriorMutationEntity>();
-        await _db.DropTableAsync<AnimalEntity>();
-        await _db.DropTableAsync<WarbandArchetypeAnimalEntity>();
-        await _db.DropTableAsync<AnimalSpecialRuleEntity>();
         await _db.DropTableAsync<MagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMutationEntity>();
@@ -122,29 +116,30 @@ public class AppDatabase
         _mutationIdsByEnglishName.Clear();
         _magicSchoolIdsByEnglishName.Clear();
         _equipmentIdsByEnglishName.Clear();
+        _warbandArchetypeIdsByFileStem.Clear();
+        _pendingSharedRestrictions.Clear();
         await CreateAllTablesAsync();
         await SeedOfficialContentAsync();
     }
 
     private async Task SeedOfficialContentAsync()
     {
-        // The 7 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
-        // Skills.json, Injuries.json, MagicSchools.json, Animals.json) must seed before any warband file
-        // below - warband JSON files only declare rules/equipment/mutations/schools/animals that are
-        // genuinely THEIRS, and find-or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a
-        // plain unrestricted insert (Equipment/Skill/Injury/Animal) relies on the canonical row already
-        // existing by the time a warband references it. Injuries.json isn't referenced by any warband
-        // file at all (no per-band injury tables in the rulebook), it just needs to seed once. Animals.json
-        // holds the core rulebook's non-band-specific animals (Cheval/Destrier/Chien de guerre) - band-only
-        // ones (e.g. Orc Mob's Sanglier de guerre) stay declared directly in their own warband file, same
-        // split as Equipment.json vs. band-declared equipment.
+        // The 6 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
+        // Skills.json, Injuries.json, MagicSchools.json) must seed before any warband file below - warband
+        // JSON files only declare rules/equipment/mutations/schools that are genuinely THEIRS, and find-
+        // or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted insert
+        // (Equipment/Skill/Injury) relies on the canonical row already existing by the time a warband
+        // references it. Injuries.json isn't referenced by any warband file at all (no per-band injury
+        // tables in the rulebook), it just needs to seed once. Equipment.json's core rulebook mounts
+        // (Cheval/Destrier/Chien de guerre, EquipmentCategory.Animal) carry RestrictedToWarbandNames
+        // instead of a single-band flag - band-only mounts (e.g. Orc Mob's Sanglier de guerre) stay
+        // declared directly in their own warband file, same split as any other band-declared equipment.
         await SeedSpecialRulesAsync();
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
-        await SeedAnimalsAsync();
 
         await SeedWarbandFromJsonAsync("Undead.json");
         await SeedWarbandFromJsonAsync("DwarfTreasureHunters.json");
@@ -161,6 +156,32 @@ public class AppDatabase
         await SeedWarbandFromJsonAsync("SkavenOfClanEshin.json");
         await SeedWarbandFromJsonAsync("SistersOfSigmar.json");
         await SeedWarbandFromJsonAsync("Kislevites.json");
+
+        // Deferred resolution: common-catalog entries (Equipment/Skill/Mutation) that named several
+        // bands via RestrictedToWarbandNames couldn't resolve a WarbandArchetypeId at seed time, since
+        // none of the 15 warband files above had been seeded yet. Every band now exists, so resolve each
+        // file-stem name against _warbandArchetypeIdsByFileStem (throws on an unknown stem - same
+        // fail-fast precedent as the other XxxIdsByEnglishName dictionaries, surfaces a JSON typo at
+        // first launch) and insert the matching join row.
+        foreach (var pending in _pendingSharedRestrictions)
+        {
+            foreach (var stem in pending.WarbandFileStems)
+            {
+                var warbandArchetypeId = _warbandArchetypeIdsByFileStem[stem];
+                switch (pending.Kind)
+                {
+                    case SharedRestrictionKind.Equipment:
+                        await _db.InsertAsync(new WarbandArchetypeEquipmentEntity { WarbandArchetypeId = warbandArchetypeId, EquipmentItemId = pending.ItemId });
+                        break;
+                    case SharedRestrictionKind.Skill:
+                        await _db.InsertAsync(new WarbandArchetypeSkillEntity { WarbandArchetypeId = warbandArchetypeId, SkillId = pending.ItemId });
+                        break;
+                    case SharedRestrictionKind.Mutation:
+                        await _db.InsertAsync(new WarbandArchetypeMutationEntity { WarbandArchetypeId = warbandArchetypeId, MutationId = pending.ItemId });
+                        break;
+                }
+            }
+        }
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
@@ -187,6 +208,7 @@ public class AppDatabase
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
         var warbandEntity = warband.ToEntity();
         await _db.InsertAsync(warbandEntity);
+        _warbandArchetypeIdsByFileStem[Path.GetFileNameWithoutExtension(fileName)] = warbandEntity.Id;
 
         foreach (var sr in data.SpecialRules)
         {
@@ -367,38 +389,6 @@ public class AppDatabase
 
         foreach (var mu in data.Mutations)
             await FindOrCreateMutationAsync(mu, warbandEntity.Id);
-
-        foreach (var mo in data.Animals)
-        {
-            var animal = new Animal
-            {
-                Cost = mo.Cost,
-                Rarity = mo.Rarity,
-                Movement = mo.Movement,
-                WeaponSkill = mo.WeaponSkill,
-                BallisticSkill = mo.BallisticSkill,
-                Strength = mo.Strength,
-                Toughness = mo.Toughness,
-                Wounds = mo.Wounds,
-                Initiative = mo.Initiative,
-                Attacks = mo.Attacks,
-                Leadership = mo.Leadership,
-                Source = ContentSource.Official
-            };
-            animal.NameKey = await SeedTranslationAsync(mo.Name.En, mo.Name.Fr);
-            animal.DescriptionKey = mo.Description is null ? null : await SeedTranslationAsync(mo.Description.En, mo.Description.Fr);
-            var animalEntity = animal.ToEntity();
-            await _db.InsertAsync(animalEntity);
-
-            if (mo.RestrictedToThisWarband)
-                await _db.InsertAsync(new WarbandArchetypeAnimalEntity { WarbandArchetypeId = warbandEntity.Id, AnimalId = animalEntity.Id });
-
-            foreach (var sr in mo.SpecialRules)
-            {
-                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
-                await _db.InsertAsync(new AnimalSpecialRuleEntity { AnimalId = animalEntity.Id, SpecialRuleId = ruleId });
-            }
-        }
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file that is a bare top-level array (the 5
@@ -432,7 +422,16 @@ public class AppDatabase
                 Rarity = eq.Rarity,
                 CostRandomMax = eq.CostRandomMax,
                 Source = ContentSource.Official,
-                IsFreeDagger = eq.IsFreeDagger
+                IsFreeDagger = eq.IsFreeDagger,
+                Movement = eq.Movement,
+                WeaponSkill = eq.WeaponSkill,
+                BallisticSkill = eq.BallisticSkill,
+                Strength = eq.Strength,
+                Toughness = eq.Toughness,
+                Wounds = eq.Wounds,
+                Initiative = eq.Initiative,
+                Attacks = eq.Attacks,
+                Leadership = eq.Leadership
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -445,41 +444,9 @@ public class AppDatabase
                 var ruleId = await FindOrCreateSpecialRuleAsync(sr);
                 await _db.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = itemEntity.Id, SpecialRuleId = ruleId });
             }
-        }
-    }
 
-    /// <summary>Plain insert, no dedup - Animals.json only holds core rulebook animals with no band
-    /// affiliation (Cheval/Destrier/Chien de guerre), so nothing else can reference them by name.</summary>
-    private async Task SeedAnimalsAsync()
-    {
-        foreach (var an in await LoadSeedArrayAsync<AnimalSeedData>("Animals.json"))
-        {
-            var animal = new Animal
-            {
-                Cost = an.Cost,
-                Rarity = an.Rarity,
-                CostRandomMax = an.CostRandomMax,
-                Movement = an.Movement,
-                WeaponSkill = an.WeaponSkill,
-                BallisticSkill = an.BallisticSkill,
-                Strength = an.Strength,
-                Toughness = an.Toughness,
-                Wounds = an.Wounds,
-                Initiative = an.Initiative,
-                Attacks = an.Attacks,
-                Leadership = an.Leadership,
-                Source = ContentSource.Official
-            };
-            animal.NameKey = await SeedTranslationAsync(an.Name.En, an.Name.Fr);
-            animal.DescriptionKey = an.Description is null ? null : await SeedTranslationAsync(an.Description.En, an.Description.Fr);
-            var animalEntity = animal.ToEntity();
-            await _db.InsertAsync(animalEntity);
-
-            foreach (var sr in an.SpecialRules)
-            {
-                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
-                await _db.InsertAsync(new AnimalSpecialRuleEntity { AnimalId = animalEntity.Id, SpecialRuleId = ruleId });
-            }
+            if (eq.RestrictedToWarbandNames is { Count: > 0 } eqWarbandNames)
+                _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Equipment, itemEntity.Id, eqWarbandNames));
         }
     }
 
@@ -502,7 +469,11 @@ public class AppDatabase
             };
             skill.NameKey = await SeedTranslationAsync(sk.Name.En, sk.Name.Fr);
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
-            await _db.InsertAsync(skill.ToEntity());
+            var skillEntity = skill.ToEntity();
+            await _db.InsertAsync(skillEntity);
+
+            if (sk.RestrictedToWarbandNames is { Count: > 0 } skWarbandNames)
+                _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Skill, skillEntity.Id, skWarbandNames));
         }
     }
 
@@ -600,6 +571,9 @@ public class AppDatabase
         if (seed.RestrictedToThisWarband && warbandArchetypeId is not null)
             await _db.InsertAsync(new WarbandArchetypeMutationEntity { WarbandArchetypeId = warbandArchetypeId.Value, MutationId = entity.Id });
 
+        if (seed.RestrictedToWarbandNames is { Count: > 0 } muWarbandNames)
+            _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Mutation, entity.Id, muWarbandNames));
+
         _mutationIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
     }
@@ -632,4 +606,20 @@ public class AppDatabase
     /// Warrior-Priest for Witch Hunters, Heroines for Sisters of Sigmar - one catalog row, two sets of
     /// restriction rows). Also consumed when resolving EquipmentListSeedData.ItemNames.</summary>
     private readonly Dictionary<string, int> _equipmentIdsByEnglishName = new();
+
+    /// <summary>Warband JSON file stem (e.g. "Reiklanders", from SeedWarbandFromJsonAsync's fileName
+    /// without extension) -> WarbandArchetypeEntity id, populated as each of the 15 warband files seeds.
+    /// Lets a common-catalog entry (Equipment/Skill/Mutation) declared BEFORE any warband exists still
+    /// name several bands via RestrictedToWarbandNames - see _pendingSharedRestrictions.</summary>
+    private readonly Dictionary<string, int> _warbandArchetypeIdsByFileStem = new();
+
+    private enum SharedRestrictionKind { Equipment, Skill, Mutation }
+
+    private record struct PendingSharedRestriction(SharedRestrictionKind Kind, int ItemId, List<string> WarbandFileStems);
+
+    /// <summary>Common-catalog restrictions naming several bands (RestrictedToWarbandNames) can't resolve
+    /// a WarbandArchetypeId at the point they're seeded (SeedEquipmentAsync/SeedSkillsAsync/
+    /// FindOrCreateMutationAsync all run before any warband file) - collected here and resolved in one
+    /// pass at the end of SeedOfficialContentAsync, once every band exists.</summary>
+    private readonly List<PendingSharedRestriction> _pendingSharedRestrictions = new();
 }

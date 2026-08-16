@@ -19,9 +19,13 @@ public interface IEquipmentPickerService
     /// grouped purchase (WarbandEditDialogViewModel.AddEquipment), 1 for an individual purchase; ignores
     /// any material-rule cost multiplier (Gromril...), only decided after the picker closes.
     /// alreadyHasFreeDagger: true if the target already carries a free dagger (EquipmentItem.
-    /// IsFreeDagger) - the Dagger tile shows its normal price instead of "Gratuit"/"Free" when set.</summary>
+    /// IsFreeDagger) - the Dagger tile shows its normal price instead of "Gratuit"/"Free" when set.
+    /// lockedCategory: non-null pre-filters the picker to this category and locks the category-change
+    /// button (see EquipmentItemViewModel.LockedCategory) - used by WarriorEditDialogViewModel.
+    /// SelectAnimal to reuse this same picker pre-filtered to EquipmentCategory.Animal instead of a
+    /// separate Animal-only picker.</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
-        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false);
+        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -36,7 +40,7 @@ public class EquipmentPickerService : IEquipmentPickerService
     }
 
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
-        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false)
+        int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -52,6 +56,7 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.AvailableGold = availableGold;
         viewModel.UnitCount = unitCount;
         viewModel.AlreadyHasFreeDagger = alreadyHasFreeDagger;
+        viewModel.LockedCategory = lockedCategory;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
         // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
         // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).

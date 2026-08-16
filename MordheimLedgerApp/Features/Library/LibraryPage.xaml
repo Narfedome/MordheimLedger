@@ -9,7 +9,6 @@
              xmlns:spells="clr-namespace:MordheimLedgerApp.Features.Library.Spells"
              xmlns:specialRules="clr-namespace:MordheimLedgerApp.Features.Library.SpecialRules"
              xmlns:mutations="clr-namespace:MordheimLedgerApp.Features.Library.Mutations"
-             xmlns:animals="clr-namespace:MordheimLedgerApp.Features.Library.Animals"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Library.LibraryPage"
@@ -18,7 +17,7 @@
     <components:WatermarkedLayout>
     <Grid RowDefinitions="Auto,*">
         <!-- Sélecteur de section (Bandes/Marché/Compétences/Blessures/...) : un seul bouton affichant la
-             section active, ouvrant un ActionSheet listant les 8 au tap - même mécanisme que le filtre
+             section active, ouvrant un ActionSheet listant les 7 au tap - même mécanisme que le filtre
              par catégorie de SkillView/MutationView (SelectCategoryCommand), préféré à 8 boutons côte à
              côte pour rester compact quel que soit le nombre de sections. -->
         <Grid Grid.Row="0" ColumnDefinitions="*,auto" Margin="16,4,16,0">
@@ -53,8 +52,6 @@
             IsVisible="{Binding IsSpecialRulesTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
         <mutations:MutationView Grid.Row="1" BindingContext="{Binding Mutations}"
             IsVisible="{Binding IsMutationsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
-        <animals:AnimalView Grid.Row="1" BindingContext="{Binding Animals}"
-            IsVisible="{Binding IsAnimalsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

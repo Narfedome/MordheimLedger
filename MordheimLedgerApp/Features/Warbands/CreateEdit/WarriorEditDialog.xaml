@@ -104,10 +104,10 @@
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
 
-                <!-- Monture : considérée comme de l'équipement dans le livre des règles (regroupée ici
-                     malgré tout), même si le modèle de données la sépare (Warrior.Animal, champ 0..1 -
-                     plus simple qu'une liste) - champ objet unique optionnel via ChipItemView (Item
-                     nullable, AddCommand="sélectionner"/RemoveCommand="effacer"/Command="détail"). -->
+                <!-- Monture : un EquipmentItem de catégorie Animal, mais Warrior.Animal reste un champ
+                     0..1 dédié (plus simple qu'une liste, un guerrier n'a qu'une monture à la fois) -
+                     champ objet unique optionnel via ChipItemView (Item nullable,
+                     AddCommand="sélectionner"/RemoveCommand="effacer"/Command="détail"). -->
                 <components:ChipItemView HeaderText="{loc:Loc WarriorAnimalHeading}"
                                           Item="{Binding Item.Animal}"
                                           IconGlyph="{x:Static icons:RpgFont.RaPawprint}"

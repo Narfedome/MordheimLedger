@@ -90,6 +90,14 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// price instead of "Gratuit"/"Free" - see EquipmentItemRow.IsFreeForThisPurchase.</summary>
     public bool AlreadyHasFreeDagger { get; set; }
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants the picker locked
+    /// onto one category - e.g. WarriorEditDialogViewModel.SelectAnimal reuses this same picker pre-
+    /// filtered to Animals instead of a separate Animal-only picker. Non-null hides the category-change
+    /// button (see EquipmentItemView.xaml) and forces SelectedCategory to this value in LoadData.</summary>
+    public EquipmentCategory? LockedCategory { get; set; }
+
+    public bool IsCategoryLocked => LockedCategory.HasValue;
+
     public bool ShowBudget => AvailableGold.HasValue;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
@@ -127,6 +135,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     {
         _allItems = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+        if (LockedCategory is { } locked) SelectedCategory = locked;
         RefreshSelectedCategoryLabel();
         ApplyFilter();
     }
@@ -314,7 +323,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
             RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds),
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
-            IsFreeDagger = s.IsFreeDagger
+            IsFreeDagger = s.IsFreeDagger,
+            Movement = s.Movement,
+            WeaponSkill = s.WeaponSkill,
+            BallisticSkill = s.BallisticSkill,
+            Strength = s.Strength,
+            Toughness = s.Toughness,
+            Wounds = s.Wounds,
+            Initiative = s.Initiative,
+            Attacks = s.Attacks,
+            Leadership = s.Leadership
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);

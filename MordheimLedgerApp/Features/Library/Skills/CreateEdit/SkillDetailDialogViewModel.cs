@@ -11,7 +11,8 @@ public partial class SkillDetailDialogViewModel : ReadOnlyDialogViewModel
     public string CategoryLabel { get; }
 
     /// <summary>Already resolved by the caller (SkillViewModel.ShowDetails), same fetch-then-filter
-    /// idiom as SkillViewModel.Edit's initialWarriors.</summary>
+    /// idiom as SkillViewModel.Edit's initialWarriors. Shown as-is - no complement/collapse here, see
+    /// EquipmentItemDetailDialogViewModel.RestrictedWarbands.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 

@@ -65,10 +65,6 @@ public class WarbandSeedData
     /// independently need the exact same band-specific mutation.</summary>
     public List<MutationSeedData> Mutations { get; set; } = new();
 
-    /// <summary>Animals introduced by this warband (e.g. "Sanglier de guerre" for Orques) - like
-    /// Equipment, typically warband-specific via RestrictedToThisWarband.</summary>
-    public List<AnimalSeedData> Animals { get; set; } = new();
-
     /// <summary>Skills SPECIFIC to this warband (its unique "special skill" table, e.g. Orc Mob's
     /// Waaagh!/'Ard 'Ead/...) - the generic common pool (Combat Master, Step Aside, ...) still lives
     /// once in Data/SeedData/Skills.json, seeded before any warband file. See
@@ -157,8 +153,20 @@ public class EquipmentSeedData
     public LocalizedText? Description { get; set; }
 
     /// <summary>True = only this warband can buy/carry it (see WarbandArchetypeEquipmentEntity) - the
-    /// Rare/Trading-Post channel, bought any time and not tied to a starting EquipmentList.</summary>
+    /// Rare/Trading-Post channel, bought any time and not tied to a starting EquipmentList. Meant for an
+    /// entry declared directly inside a per-band file (e.g. Orc Mob's own "Sanglier de guerre"). For a
+    /// COMMON catalog entry (Equipment.json) restricted to several named bands at once, use
+    /// RestrictedToWarbandNames instead - the two are mutually exclusive in practice, never both set.</summary>
     public bool RestrictedToThisWarband { get; set; }
+
+    /// <summary>File-name stems (e.g. "Reiklanders", "Marienburgers" - the SeedWarbandFromJsonAsync
+    /// argument minus ".json") of every warband allowed to buy this COMMON catalog entry (Equipment.json
+    /// only - a per-band file's own entries use RestrictedToThisWarband instead, they only ever concern
+    /// the one band that declares them). Resolved in a deferred pass once every warband has been seeded
+    /// (see AppDatabase.SeedOfficialContentAsync) since no WarbandArchetype exists yet when Equipment.json
+    /// itself is seeded. Null/empty = no multi-band restriction (still common to everyone, matching the
+    /// default RestrictedToWarbandArchetypeIds = empty on the runtime model).</summary>
+    public List<string>? RestrictedToWarbandNames { get; set; }
 
     /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that
     /// alone may have this item (e.g. Averlanders' "Long bow" in the shared Scout list - Bergjaeger
@@ -166,13 +174,26 @@ public class EquipmentSeedData
     public List<string>? RestrictedToWarriorNames { get; set; }
 
     /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - find-or-created by
-    /// English Name, same as AnimalSeedData.SpecialRules. Only applied when this item is newly created
-    /// (see AppDatabase) - a band file re-declaring an already-seeded item by name doesn't re-attach
-    /// rules, same precedent as Description there.</summary>
+    /// English Name. Only applied when this item is newly created (see AppDatabase) - a band file
+    /// re-declaring an already-seeded item by name doesn't re-attach rules, same precedent as
+    /// Description there.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 
     /// <summary>True only for the common pool's Dagger entry - see EquipmentItem.IsFreeDagger.</summary>
     public bool IsFreeDagger { get; set; }
+
+    /// <summary>Profile stats, only meaningful when Category is "Animal" (a mount, e.g. Warhorse/War
+    /// Boar - considered equipment by the rulebook, folded into this same catalog rather than a separate
+    /// Animal content type) - null for every other category. See EquipmentItem's equivalent fields.</summary>
+    public int? Movement { get; set; }
+    public int? WeaponSkill { get; set; }
+    public int? BallisticSkill { get; set; }
+    public int? Strength { get; set; }
+    public int? Toughness { get; set; }
+    public int? Wounds { get; set; }
+    public int? Initiative { get; set; }
+    public int? Attacks { get; set; }
+    public int? Leadership { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -231,8 +252,14 @@ public class MutationSeedData
     public LocalizedText? Description { get; set; }
     public int Cost { get; set; }
 
-    /// <summary>True = only this warband may buy it (see WarbandArchetypeMutationEntity).</summary>
+    /// <summary>True = only this warband may buy it (see WarbandArchetypeMutationEntity) - meant for an
+    /// entry declared directly inside a per-band file. For a COMMON catalog entry (Mutations.json)
+    /// restricted to several named bands at once, use RestrictedToWarbandNames instead.</summary>
     public bool RestrictedToThisWarband { get; set; }
+
+    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - only meaningful for an
+    /// entry declared in the common Mutations.json catalog.</summary>
+    public List<string>? RestrictedToWarbandNames { get; set; }
 }
 
 /// <summary>One Skill catalog entry - either from the common pool (Data/SeedData/Skills.json, always
@@ -246,9 +273,14 @@ public class SkillSeedData
 
     public LocalizedText? Description { get; set; }
 
-    /// <summary>True = only the declaring warband may pick it (see WarbandArchetypeSkillEntity).
-    /// Always false for the common pool (Skills.json).</summary>
+    /// <summary>True = only the declaring warband may pick it (see WarbandArchetypeSkillEntity) - meant
+    /// for an entry declared directly inside a per-band file. For a COMMON catalog entry (Skills.json)
+    /// restricted to several named bands at once, use RestrictedToWarbandNames instead.</summary>
     public bool RestrictedToThisWarband { get; set; }
+
+    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - only meaningful for an
+    /// entry declared in the common Skills.json catalog.</summary>
+    public List<string>? RestrictedToWarbandNames { get; set; }
 
     /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that alone
     /// may pick this skill (e.g. "Da Cunnin' Plan" -&gt; ["Orc Boss"]) - null/empty = every warrior of the
@@ -277,33 +309,4 @@ public class MagicSchoolWithSpellsSeedData
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
     public List<SpellSeedData> Spells { get; set; } = new();
-}
-
-public class AnimalSeedData
-{
-    public LocalizedText Name { get; set; } = new();
-    public LocalizedText? Description { get; set; }
-    public int Cost { get; set; }
-    public int? Rarity { get; set; }
-
-    /// <summary>Null = Cost is fixed. Otherwise the maximum value of a random supplement rolled on top of
-    /// Cost at purchase time (e.g. "25 + 2D6 gc" -> Cost 25, CostRandomMax 12) - see
-    /// EquipmentItem.CostRandomMax.</summary>
-    public int? CostRandomMax { get; set; }
-
-    public int Movement { get; set; }
-    public int WeaponSkill { get; set; }
-    public int BallisticSkill { get; set; }
-    public int Strength { get; set; }
-    public int Toughness { get; set; }
-    public int Wounds { get; set; }
-    public int Initiative { get; set; }
-    public int Attacks { get; set; }
-    public int Leadership { get; set; }
-
-    /// <summary>True = only this warband may buy/ride it (see WarbandArchetypeAnimalEntity).</summary>
-    public bool RestrictedToThisWarband { get; set; }
-
-    /// <summary>Find-or-created by English Name, same as WarbandSeedData.SpecialRules.</summary>
-    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 }

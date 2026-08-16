@@ -23,7 +23,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private readonly IInjuryPickerService _injuryPicker;
     private readonly ISpellPickerService _spellPicker;
     private readonly IMutationPickerService _mutationPicker;
-    private readonly IAnimalPickerService _animalPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private Dictionary<int, string> _archetypeNames = new();
@@ -69,7 +68,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IAnimalPickerService animalPicker)
+        ISpellPickerService spellPicker, IMutationPickerService mutationPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
@@ -79,7 +78,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
         _injuryPicker = injuryPicker;
         _spellPicker = spellPicker;
         _mutationPicker = mutationPicker;
-        _animalPicker = animalPicker;
 
         // Le roster affiche des noms d'Équipement/Compétences/Blessures résolus dans la langue courante
         // - sans ça, ils resteraient périmés si la langue change pendant que cette page est déjà
@@ -202,7 +200,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         var dialogViewModel = new WarriorEditDialogViewModel(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
             _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchools,
-            _mutationPicker, isMutant, _animalPicker, specialRules);
+            _mutationPicker, isMutant, specialRules);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
         // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
@@ -247,7 +245,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private Task ShowMutationDetail(WarriorMutation mutation) => _detailDialogs.ShowMutationDetailDialogAsync(mutation.Item);
 
     [RelayCommand]
-    private Task ShowAnimalDetail(Animal animal) => _detailDialogs.ShowAnimalDetailDialogAsync(animal);
+    private Task ShowAnimalDetail(EquipmentItem animal) => _detailDialogs.ShowEquipmentDetailDialogAsync(animal);
 
     [RelayCommand]
     private Task ShowEquipmentDetail(WarriorEquipment equipment) =>

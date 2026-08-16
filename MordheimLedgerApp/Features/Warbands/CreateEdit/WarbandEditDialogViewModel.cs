@@ -38,7 +38,6 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private readonly ISpellPickerService _spellPicker;
         private readonly IInjuryPickerService _injuryPicker;
         private readonly IMutationPickerService _mutationPicker;
-        private readonly IAnimalPickerService _animalPicker;
         private bool _recruitableLoaded;
 
         /// <summary>Guerriers déjà en base retirés cette session (decrement confirmé sous leur effectif
@@ -260,7 +259,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker,
             IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker,
             ISkillPickerService skillPicker, ISpellPickerService spellPicker, IInjuryPickerService injuryPicker,
-            IMutationPickerService mutationPicker, IAnimalPickerService animalPicker)
+            IMutationPickerService mutationPicker)
         {
             this.item = item;
             this.title = title;
@@ -273,7 +272,6 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             _spellPicker = spellPicker;
             _injuryPicker = injuryPicker;
             _mutationPicker = mutationPicker;
-            _animalPicker = animalPicker;
             IsWizardMode = item.Id == 0;
         }
 

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.WarbandRestrictionEditorView"
+             x:Name="root">
+
+    <!-- Centralise le bloc "ChipListView + bouton bascule Inclure/Exclure" jusque-là dupliqué à
+         l'identique dans EquipmentItemEditDialog/SkillEditDialog/MutationEditDialog - un seul endroit à
+         faire évoluer si ce couple change (icônes, style du bouton bascule...). Editor porte tout l'état
+         (WarbandRestrictionEditor) ; BindingContext posé sur le VerticalStackLayout plutôt que sur la
+         racine ContentView, même raison que ChipListView.xaml (garder le DataType racine neutre). -->
+    <VerticalStackLayout BindingContext="{Binding Editor, Source={x:Reference root}}" Spacing="4">
+        <components:ChipListView HeaderText="{Binding HeaderText}"
+                                  ItemsSource="{Binding DisplayedWarbands}"
+                                  IconGlyph="{x:Static icons:SolidFont.Users}"
+                                  AddCommand="{Binding AddCommand}"
+                                  RemoveCommand="{Binding RemoveCommand}"/>
+        <components:IconTextButton Icon="{x:Static icons:SolidFont.RightLeft}"
+                                    Text="{Binding ToggleModeLabel}"
+                                    TextColor="{DynamicResource AppTextMuted}"
+                                    IconSize="11" FontSize="11"
+                                    HorizontalOptions="Start"
+                                    Command="{Binding ToggleModeCommand}"/>
+    </VerticalStackLayout>
+</ContentView>

@@ -22,7 +22,6 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly ISpellPickerService _spellPicker;
     private readonly IReadOnlyList<MagicSchool> _magicSchools;
     private readonly IMutationPickerService _mutationPicker;
-    private readonly IAnimalPickerService _animalPicker;
 
     /// <summary>Mode Libre (voir WarbandEditDialogViewModel.IsExistingWarband, transmis tel quel par
     /// l'appelant) : AddEquipment n'impacte plus la trésorerie (aucune vérification, aucune déduction) et
@@ -120,7 +119,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
         IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<MagicSchool> magicSchools,
-        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker, IReadOnlyList<SpecialRule> specialRules,
+        IMutationPickerService mutationPicker, bool isMutant, IReadOnlyList<SpecialRule> specialRules,
         bool skipCosts = false)
     {
         this.item = item;
@@ -137,7 +136,6 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _magicSchools = magicSchools;
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
-        _animalPicker = animalPicker;
         SpecialRules = specialRules;
         _skipCosts = skipCosts;
         movementInput = item.MovementOverride ?? item.Movement.ToString();
@@ -348,11 +346,14 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 
     /// <summary>Animal n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Animal,
     /// soumis comme les stats au bouton Enregistrer/Annuler (pas de persistance immédiate ni de méthode
-    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.AnimalId).</summary>
+    /// de service dédiée - SaveWarriorAsync côté appelant écrit WarriorEntity.AnimalId). Réutilise le
+    /// picker d'équipement partagé, verrouillé sur EquipmentCategory.Animal, plutôt qu'un picker dédié -
+    /// une monture est juste un EquipmentItem de cette catégorie. Pas de budget passé (availableGold
+    /// omis) : le choix d'une monture n'est pas traité comme un achat ici, même comportement qu'avant.</summary>
     [RelayCommand]
     private async Task SelectAnimal()
     {
-        var animals = await _animalPicker.PickAnimalsAsync(_warband.WarbandArchetypeId);
+        var animals = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, lockedCategory: EquipmentCategory.Animal);
         if (animals.Count > 0)
         {
             Item.Animal = animals[0];
@@ -371,7 +372,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
-    private Task ShowAnimalDetail() => Item.Animal is null ? Task.CompletedTask : _detailDialogs.ShowAnimalDetailDialogAsync(Item.Animal);
+    private Task ShowAnimalDetail() => Item.Animal is null ? Task.CompletedTask : _detailDialogs.ShowEquipmentDetailDialogAsync(Item.Animal);
 
     [RelayCommand]
     private async Task Delete()

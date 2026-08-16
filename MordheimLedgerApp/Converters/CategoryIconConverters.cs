@@ -20,6 +20,7 @@ namespace MordheimLedgerApp.Converters
                 EquipmentCategory.Ammunition => RpgFont.RaArrowCluster,
                 EquipmentCategory.Armour => RpgFont.RaVest,
                 EquipmentCategory.MiscellaneousEquipment => RpgFont.RaPotion,
+                EquipmentCategory.Animal => RpgFont.RaPawprint,
                 _ => RpgFont.RaPotion
             } : RpgFont.RaPotion;
 

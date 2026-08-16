@@ -17,7 +17,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <dialogs:StableHeightScrollView>
-        <VerticalStackLayout Spacing="16">
+        <VerticalStackLayout Spacing="8">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
@@ -43,6 +43,13 @@
             <VerticalStackLayout Spacing="4">
                 <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+
+            <!-- Profil - uniquement pour la catégorie Animal (une monture), voir
+                 EquipmentItemEditDialog pour le même principe en édition. -->
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAnimalCategory}">
+                <Label Text="{loc:Loc LibTabProfile}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}"/>
             </VerticalStackLayout>
 
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"

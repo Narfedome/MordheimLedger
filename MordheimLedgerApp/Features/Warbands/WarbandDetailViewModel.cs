@@ -29,7 +29,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private Dictionary<int, string> _archetypeNames = new();
     private List<SpecialRule> _bandWideSpecialRules = new();
     private List<MagicSchool> _bandMagicSchools = new();
-    private List<int> _bandMagicSchoolIds = new();
 
     [ObservableProperty]
     private int warbandId;
@@ -115,7 +114,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
             _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
-            _bandMagicSchoolIds = _bandMagicSchools.Select(s => s.Id).ToList();
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
@@ -247,7 +245,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var isSpellcaster = archetype?.IsSpellcaster ?? false;
         var isMutant = archetype?.CanBuyMutations ?? false;
         var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
-            _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchoolIds,
+            _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchools,
             _mutationPicker, isMutant, _animalPicker);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 

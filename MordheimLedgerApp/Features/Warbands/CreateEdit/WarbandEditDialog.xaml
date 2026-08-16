@@ -64,23 +64,34 @@
                             <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
-                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsWizardMode}">
+                        <!-- Mode Libre : trésorerie en saisie libre, aucun coût appliqué (recrutement,
+                             achats, édition du roster actuel) - même flag IsExistingWarband qu'avant,
+                             mais désormais pertinent aussi en édition d'une bande déjà sauvegardée (plus
+                             seulement à la création), d'où le libellé reformulé. -->
+                        <HorizontalStackLayout Spacing="10">
                             <CheckBox IsChecked="{Binding IsExistingWarband}" VerticalOptions="Center"/>
-                            <Label Text="{loc:Loc WarbandsExistingWarbandLabel}" VerticalOptions="Center"/>
+                            <Label Text="{loc:Loc WarbandsFreeModeLabel}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
+                        <!-- Ajouter/Retirer l'archétype masqués hors création (ArchetypeAddCommandOrNull/
+                             ArchetypeRemoveCommandOrNull renvoient null si !IsWizardMode) - en changer
+                             invaliderait les WarriorArchetypeId déjà liés aux guerriers recrutés. La puce
+                             reste tapable (récap complet) dans les deux cas. -->
                         <components:ChipItemView Item="{Binding Archetype}"
                                         HeaderText="{loc:Loc WarbandArchetype}"
                                         IconGlyph="{x:Static icons:SolidFont.Users}"
                                         Command="{Binding ShowArchetypeDetailCommand}"
-                                        AddCommand="{Binding AddArchetypeCommand}"
-                                        RemoveCommand="{Binding RemoveArchetypeCommand}"
+                                        AddCommand="{Binding ArchetypeAddCommandOrNull}"
+                                        RemoveCommand="{Binding ArchetypeRemoveCommandOrNull}"
                                                  IsMandatory="True" />
                         <Label Text="{Binding ArchetypeError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding Archetype, Converter={StaticResource IsNotNullConverter}}">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                                <Label Text="{Binding Archetype.StartingTreasury}" IsVisible="{Binding IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"/>
+                                <!-- RosterStartingTreasury : trésor de départ théorique de l'archétype à
+                                     la création, trésorerie RÉELLE actuelle de la bande en édition
+                                     (Item.Treasury) - voir WarbandEditDialogViewModel. -->
+                                <Label Text="{Binding RosterStartingTreasury}" IsVisible="{Binding IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"/>
                                 <Entry Text="{Binding TreasuryOverride}" Keyboard="Numeric" IsVisible="{Binding IsExistingWarband}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
@@ -97,6 +108,7 @@
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
                         <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Grid.Column="0" Text="{Binding RosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                             <Label Grid.Column="1" Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -181,16 +193,18 @@
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="local:WarriorNameSlot">
                                                     <VerticalStackLayout >
-                                                        <!-- ArchetypeLabel (pas Name, le nom personnel du héros - vide tant que
-                                                             l'étape Noms n'a pas été atteinte) : chaque héros reste une ligne
-                                                             indépendante, même si plusieurs partagent le même archétype - pas
-                                                             d'en-tête partagé au niveau de la ligne recrutée, juste un numéro
-                                                             ajouté par WarbandEditDialogViewModel.RenumberHeroLabels si besoin
-                                                             de les distinguer. -->
+                                                        <!-- DisplayLabel : ArchetypeLabel (pas encore nommé, vide tant que l'étape
+                                                             Noms n'a pas été atteinte) pour une nouvelle recrue de cette session,
+                                                             ou directement le nom personnel pour un héros déjà recruté (bande
+                                                             rouverte pour édition - déjà connu, pas la peine d'attendre l'étape
+                                                             Noms). Chaque héros reste une ligne indépendante, même si plusieurs
+                                                             partagent le même archétype - pas d'en-tête partagé au niveau de la
+                                                             ligne recrutée, juste un numéro ajouté par WarbandEditDialogViewModel.
+                                                             RenumberHeroLabels si besoin de les distinguer. -->
                                                         <!-- Équipement se gère désormais entièrement via l'onglet Équipement de
                                                              RecruitSlotTabsView ci-dessous (les deux modes), plus de "+" ni de puces
                                                              dupliquées ici. -->
-                                                        <Label Text="{Binding ArchetypeLabel}" FontSize="13" VerticalOptions="Center"/>
+                                                        <Label Text="{Binding DisplayLabel}" FontSize="13" VerticalOptions="Center"/>
                                                         <!-- Équipement (les deux modes désormais)/Compétences/XP/Sorts - même
                                                              RecruitSlotTabsView que côté Hommes de main ci-dessus. -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"

@@ -8,6 +8,7 @@ using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 {
@@ -35,10 +36,28 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private readonly IEquipmentPickerService _equipmentPicker;
         private readonly ISkillPickerService _skillPicker;
         private readonly ISpellPickerService _spellPicker;
+        private readonly IInjuryPickerService _injuryPicker;
+        private readonly IMutationPickerService _mutationPicker;
+        private readonly IAnimalPickerService _animalPicker;
         private bool _recruitableLoaded;
+
+        /// <summary>Guerriers déjà en base retirés cette session (decrement confirmé sous leur effectif
+        /// d'origine, voir DecrementWarrior) - le slot correspondant quitte NameSlots/HenchmanGroupDrafts
+        /// immédiatement, donc Save() ne le reverrait plus dans sa boucle normale ; cette liste est le
+        /// seul endroit qui se souvient encore de la suppression à effectuer (avec remboursement) au
+        /// moment d'Enregistrer. Vidée jamais explicitement : ne vit que le temps d'un Save() réussi
+        /// (Close(true) juste après), et le ViewModel n'est pas réutilisé après.</summary>
+        private readonly List<Warrior> _pendingFullDeletions = new();
 
         public bool IsWizardMode { get; }
         protected override bool CancelResult => false;
+
+        /// <summary>Masque les boutons Ajouter/Retirer de la puce Archetype hors création (Item.Id != 0,
+        /// donc IsWizardMode false) - changer l'archétype d'une bande déjà recrutée invaliderait tous les
+        /// WarriorArchetypeId déjà liés à ses guerriers, ça n'a plus de sens une fois la bande créée. La
+        /// puce elle-même (nom/récap) reste affichée et tapable (ShowArchetypeDetailCommand, inchangé).</summary>
+        public ICommand? ArchetypeAddCommandOrNull => IsWizardMode ? AddArchetypeCommand : null;
+        public ICommand? ArchetypeRemoveCommandOrNull => IsWizardMode ? RemoveArchetypeCommand : null;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RosterCountDisplay))]
@@ -86,12 +105,17 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// pertinente à afficher à l'étape Équipement, pas la liste complète des types disponibles.</summary>
         public IEnumerable<WarriorRecruitRow> RecruitedRows => RecruitRows.Where(r => r.Count > 0);
 
+        /// <summary>Effectif total vérifié contre Archetype.MaxWarriors - Count contient déjà le roster
+        /// existant (pré-rempli par EnsureRecruitableArchetypesLoadedAsync quand Item.Id != 0), pas
+        /// besoin d'additionner un terme séparé.</summary>
+        private int TotalWarriorCount => RecruitRows.Sum(r => r.Count);
+
         public string RosterCountDisplay
         {
             get
             {
                 if (Archetype is null) return string.Empty;
-                var total = RecruitRows.Sum(r => r.Count);
+                var total = TotalWarriorCount;
                 var countText = Archetype.MaxWarriors is { } max ? $"{total}/{max}" : total.ToString();
                 if (Archetype.MinWarriors is { } min) countText += $" ({string.Format(Loc["WarbandsRosterMinSuffix"], min)})";
                 return countText;
@@ -107,17 +131,29 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
-        /// <summary>Coût de recrutement de chaque ligne + équipement de chaque sous-groupe d'Hommes de
-        /// main (coût × effectif de CE sous-groupe, pas de la ligne entière - deux sous-groupes du même
-        /// type peuvent avoir des équipements différents) + équipement individuel (chaque slot Héros).</summary>
-        private int TotalSpent => RecruitRows.Sum(r => r.Count * r.Cost)
-            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count)
-            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
+        /// <summary>Coût de recrutement de chaque ligne (seulement les têtes ajoutées cette session -
+        /// Count - ExistingCount, le roster déjà en base est déjà payé) + équipement de chaque
+        /// sous-groupe d'Hommes de main (coût × effectif de CE sous-groupe, pas de la ligne entière - deux
+        /// sous-groupes du même type peuvent avoir des équipements différents) + équipement individuel
+        /// (chaque slot Héros) - dans les deux cas, seuls les EquipmentPick sans ExistingId comptent (un
+        /// pick avec ExistingId représente un WarriorEquipment déjà payé, voir RecruitSlot constructeur).
+        /// Limite acceptée : si un groupe déjà existant grossit (nouvelle tête ajoutée à un groupe déjà
+        /// équipé), un nouvel achat d'équipement pour "tout le groupe" est facturé au Count actuel
+        /// (l'effectif après ajout), pas seulement pour la tête ajoutée - pas de rescaling plus fin tenté.</summary>
+        private int TotalSpent => RecruitRows.Sum(r => (r.Count - r.ExistingCount) * r.Cost)
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost) * g.Count)
+            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost));
 
-        /// <summary>En mode Bande existante, la trésorerie affichée reste fixée à ce que l'utilisateur a
-        /// saisi (TreasuryOverride) - jamais décrémentée par les recrues/achats, contrairement au mode
-        /// création normale.</summary>
-        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(Archetype?.StartingTreasury ?? 0, TotalSpent, IsExistingWarband, TreasuryOverride);
+        /// <summary>Trésorerie de départ pour le calcul du "restant" ci-dessous : la trésorerie RÉELLE
+        /// actuelle de la bande (Item.Treasury) quand on édite une bande déjà sauvegardée (Item.Id != 0),
+        /// pas le trésor de départ théorique de l'archétype - une bande déjà jouée a presque toujours une
+        /// trésorerie différente de son StartingTreasury d'origine (dépenses/revenus passés).</summary>
+        public int RosterStartingTreasury => Item.Id != 0 ? Item.Treasury : Archetype?.StartingTreasury ?? 0;
+
+        /// <summary>En mode Libre, la trésorerie affichée reste fixée à ce que l'utilisateur a saisi
+        /// (TreasuryOverride) - jamais décrémentée par les recrues/achats, contrairement au mode Coûts
+        /// appliqués.</summary>
+        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(RosterStartingTreasury, TotalSpent, IsExistingWarband, TreasuryOverride);
 
         [ObservableProperty]
         private string? warriorsError;
@@ -127,22 +163,26 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
         /// <summary>Coché = on importe une bande déjà jouée sur papier plutôt qu'un recrutement neuf :
         /// trésorerie libre (TreasuryOverride), aucun contrôle budgétaire (recrutement/achats), et
-        /// possibilité d'assigner des compétences déjà apprises pendant l'étape Équipement (voir
-        /// WarriorNameSlot.Skills/HenchmanGroupDraft.Skills). Uniquement pertinent en IsWizardMode.</summary>
+        /// possibilité d'assigner des compétences/sorts déjà appris pendant l'étape Équipement (voir
+        /// WarriorNameSlot.Skills/HenchmanGroupDraft.Skills). Pertinent dans les deux modes (création ET
+        /// édition d'une bande déjà sauvegardée, voir Item.Id) - libellé XAML "Mode libre" plutôt que
+        /// "Bande existante" (qui ne fait plus sens hors création), même flag et même comportement dans
+        /// les deux cas. Transmis à EditExistingWarrior comme skipCosts pour que "Roster actuel" respecte
+        /// aussi ce mode.</summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RemainingTreasuryDisplay))]
         private bool isExistingWarband;
 
-        /// <summary>Trésorerie saisie librement par l'utilisateur en mode Bande existante - remplace
-        /// StartingTreasury - TotalSpent (voir RemainingTreasury) puisque les achats/recrues ne doivent
-        /// pas être décomptés dans ce mode.</summary>
+        /// <summary>Trésorerie saisie librement par l'utilisateur en mode Libre - remplace
+        /// RosterStartingTreasury - TotalSpent (voir RemainingTreasury) puisque les achats/recrues ne
+        /// doivent pas être décomptés dans ce mode.</summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RemainingTreasuryDisplay))]
         private int treasuryOverride;
 
         partial void OnIsExistingWarbandChanged(bool value)
         {
-            if (value && Archetype is not null) TreasuryOverride = Archetype.StartingTreasury;
+            if (value) TreasuryOverride = RosterStartingTreasury;
 
             // Propage rétroactivement aux slots déjà créés (le joueur a coché/décoché après être
             // retourné en arrière depuis l'étape Équipement) - sans ça, RecruitSlot.IsExistingWarband
@@ -177,7 +217,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
         public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker,
             IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker,
-            ISkillPickerService skillPicker, ISpellPickerService spellPicker)
+            ISkillPickerService skillPicker, ISpellPickerService spellPicker, IInjuryPickerService injuryPicker,
+            IMutationPickerService mutationPicker, IAnimalPickerService animalPicker)
         {
             this.item = item;
             this.title = title;
@@ -188,6 +229,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             _equipmentPicker = equipmentPicker;
             _skillPicker = skillPicker;
             _spellPicker = spellPicker;
+            _injuryPicker = injuryPicker;
+            _mutationPicker = mutationPicker;
+            _animalPicker = animalPicker;
             IsWizardMode = item.Id == 0;
         }
 
@@ -255,16 +299,44 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             await _detailDialogs.ShowWarbandArchetypeDetailDialogAsync(fullWarband);
         }
 
+        /// <summary>Charge le catalogue recrutable ET, si Item.Id != 0 (bande rouverte pour édition), le
+        /// roster déjà en base - fusionnés en un seul passage plutôt que deux méthodes séparées : le
+        /// roster existant se pré-remplit directement DANS RecruitRows (un WarriorNameSlot/
+        /// HenchmanGroupDraft par Warrior déjà recruté, voir RecruitSlot.ExistingWarrior), pas dans une
+        /// liste à part - retour utilisateur explicite : l'édition doit rester le même wizard 4 étapes que
+        /// la création, pas un flux parallèle.</summary>
         private async Task EnsureRecruitableArchetypesLoadedAsync()
         {
             if (_recruitableLoaded || Archetype is null) return;
             var language = LocalizationService.Instance.Language;
             List<WarriorArchetype> loaded = new();
+            List<Warrior> existingWarriors = new();
             await Loading.RunAsync(async () =>
             {
                 loaded = await Task.Run(() => _libraryService.GetWarriorArchetypesAsync(Archetype.Id, language));
+                if (Item.Id != 0)
+                    existingWarriors = await Task.Run(() => _warbandService.GetWarriorsAsync(Item.Id, language));
             });
-            RecruitRows = new ObservableCollection<WarriorRecruitRow>(loaded.Select(a => new WarriorRecruitRow(a)));
+
+            var isEditingWarband = Item.Id != 0;
+            var rows = new ObservableCollection<WarriorRecruitRow>();
+            foreach (var archetype in loaded)
+            {
+                var row = new WarriorRecruitRow(archetype, isEditingWarband);
+                // Triés par Id pour un ordre stable (ordre de recrutement d'origine) - plusieurs groupes
+                // d'Hommes de main du même archétype si le joueur en avait déjà scindé un (voir
+                // SplitHenchmanGroupDraft), chacun devient son propre HenchmanGroupDraft ici.
+                foreach (var w in existingWarriors.Where(w => w.WarriorArchetypeId == archetype.Id && w.Status != WarriorStatus.Dead).OrderBy(w => w.Id))
+                {
+                    if (w.IsHero)
+                        row.NameSlots.Add(new WarriorNameSlot(row, IsExistingWarband, existingWarrior: w));
+                    else
+                        row.HenchmanGroupDrafts.Add(new HenchmanGroupDraft(row, w.Name, w.HeadCount, IsExistingWarband, existingWarrior: w));
+                    row.Count += w.HeadCount;
+                }
+                rows.Add(row);
+            }
+            RecruitRows = rows;
             _recruitableLoaded = true;
             UpdateRecruitability();
         }
@@ -295,7 +367,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private void IncrementWarrior(WarriorRecruitRow row)
         {
             if (Archetype is null) return;
-            if (!RecruitmentRules.CanRecruit(row.Count, row.Archetype.MaxCount, RecruitRows.Sum(r => r.Count),
+            if (!RecruitmentRules.CanRecruit(row.Count, row.Archetype.MaxCount, TotalWarriorCount,
                     Archetype.MaxWarriors, IsExistingWarband, RemainingTreasury, row.Cost)) return;
 
             row.Count++;
@@ -309,21 +381,49 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             UpdateRecruitability();
         }
 
+        /// <summary>Cas nouvelle recrue de cette session (dernier slot/groupe pas encore backé par un
+        /// Warrior réel) : comportement d'origine, aucune confirmation - rien n'est encore en base.
+        /// Cas slot déjà existant (bande rouverte pour édition) et la réduction va passer sous son
+        /// effectif réellement recruté (BaselineHeadCount) : demande confirmation (remboursement au Save,
+        /// pas avant) - retour utilisateur explicite, décrémenter sous l'effectif existant supprime
+        /// réellement le guerrier plutôt que d'être bloqué.</summary>
         [RelayCommand]
-        private void DecrementWarrior(WarriorRecruitRow row)
+        private async Task DecrementWarrior(WarriorRecruitRow row)
         {
             if (row.Count == 0) return;
-            row.Count--;
+
             if (row.IsHero && row.NameSlots.Count > 0)
             {
+                var last = row.NameSlots[^1];
+                if (last.ExistingWarrior is { } existingHero)
+                {
+                    if (!await ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["WarriorDeleteConfirm"], last.DisplayLabel)))
+                        return;
+                    _pendingFullDeletions.Add(existingHero);
+                }
+                row.Count--;
                 row.NameSlots.RemoveAt(row.NameSlots.Count - 1);
                 RenumberHeroLabels(row);
             }
             else if (!row.IsHero && row.HenchmanGroupDrafts.Count > 0)
             {
                 var last = row.HenchmanGroupDrafts[^1];
+                if (last.ExistingWarrior is not null && last.Count <= last.BaselineHeadCount)
+                {
+                    if (!await ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["WarriorDeleteConfirm"], last.Name)))
+                        return;
+                }
+                row.Count--;
                 last.Count--;
-                if (last.Count <= 0) row.HenchmanGroupDrafts.RemoveAt(row.HenchmanGroupDrafts.Count - 1);
+                if (last.Count <= 0)
+                {
+                    if (last.ExistingWarrior is { } existingGroup) _pendingFullDeletions.Add(existingGroup);
+                    row.HenchmanGroupDrafts.RemoveAt(row.HenchmanGroupDrafts.Count - 1);
+                }
+            }
+            else
+            {
+                row.Count--;
             }
             UpdateRecruitability();
         }
@@ -380,7 +480,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             OnPropertyChanged(nameof(RecruitedRows));
 
             if (Archetype is null) return;
-            var total = RecruitRows.Sum(r => r.Count);
+            var total = TotalWarriorCount;
             foreach (var row in RecruitRows)
                 row.CanIncrement = RecruitmentRules.CanRecruit(row.Count, row.Archetype.MaxCount, total,
                     Archetype.MaxWarriors, IsExistingWarband, RemainingTreasury, row.Cost);
@@ -665,8 +765,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         {
             if (Archetype is null) return false;
 
-            var total = RecruitRows.Sum(r => r.Count);
-            if (!RecruitmentRules.MeetsMinWarriors(total, Archetype.MinWarriors))
+            if (!RecruitmentRules.MeetsMinWarriors(TotalWarriorCount, Archetype.MinWarriors))
             {
                 WarriorsError = string.Format(Loc["WarbandsMinWarriorsError"], Archetype.MinWarriors);
                 return false;
@@ -750,12 +849,43 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (SelectedTab > 0) SelectedTab--;
         }
 
-        /// <summary>Seul point d'écriture en base de tout le dialog - la bande d'abord (INSERT via
-        /// CreateWarbandAsync si Item.Id == 0, sinon UPDATE via SaveWarbandAsync), puis chaque recrue en
-        /// attente (RecruitRows aplaties en Warrior + WarriorEquipment ici, pas avant). Item.Id == 0 est
-        /// le seul cas atteignable aujourd'hui (WarbandListViewModel n'ouvre ce dialog qu'en création) -
-        /// la branche Update est gardée correcte si un futur appelant réutilise ce dialog pour éditer une
-        /// bande existante.</summary>
+        /// <summary>Synchronise un slot backé par un Warrior déjà en base (bande rouverte pour édition) -
+        /// diff Équipement/Compétences/Sorts contre la baseline chargée à l'ouverture (voir RecruitSlot.
+        /// BaselineEquipment/BaselineSkills/BaselineSpells) plutôt que de tout recréer : un pick sans
+        /// ExistingId est un nouvel achat (AddWarriorEquipmentAsync), une entrée de baseline absente de la
+        /// collection courante a été retirée (RemoveWarriorEquipmentAsync) - même identité d'objet pour
+        /// Compétences/Sorts (voir RecruitSlot constructeur, Skills/Spells portent directement Item).</summary>
+        private async Task SyncExistingSlotAsync(Warrior w, RecruitSlot slot, string name, int? newHeadCount)
+        {
+            var dirty = false;
+            if (w.Name != name) { w.Name = name; dirty = true; }
+            if (newHeadCount is { } headCount && w.HeadCount != headCount) { w.HeadCount = headCount; dirty = true; }
+            if (IsExistingWarband && w.Experience != slot.Experience) { w.Experience = slot.Experience; dirty = true; }
+            if (dirty) await _warbandService.SaveWarriorAsync(w);
+
+            foreach (var pick in slot.Equipment.Where(p => p.ExistingId is null))
+                await _warbandService.AddWarriorEquipmentAsync(w.Id, pick.Item, materialRule: pick.MaterialRule);
+            foreach (var baseline in slot.BaselineEquipment.Where(b => slot.Equipment.All(p => p.ExistingId != b.Id)))
+                await _warbandService.RemoveWarriorEquipmentAsync(baseline.Id);
+
+            foreach (var skill in slot.Skills.Where(s => slot.BaselineSkills.All(b => b.Item != s)))
+                await _warbandService.AddWarriorSkillAsync(w.Id, skill);
+            foreach (var baseline in slot.BaselineSkills.Where(b => !slot.Skills.Contains(b.Item)))
+                await _warbandService.RemoveWarriorSkillAsync(baseline.Id);
+
+            foreach (var spell in slot.Spells.Where(s => slot.BaselineSpells.All(b => b.Item != s)))
+                await _warbandService.AddWarriorSpellAsync(w.Id, spell);
+            foreach (var baseline in slot.BaselineSpells.Where(b => !slot.Spells.Contains(b.Item)))
+                await _warbandService.RemoveWarriorSpellAsync(baseline.Id);
+        }
+
+        /// <summary>Point d'écriture en base pour la bande, les NOUVELLES recrues de cette session
+        /// (RecruitWarriorAsync) ET la synchronisation du roster déjà existant (SyncExistingSlotAsync) -
+        /// unifiés dans le même Save() plutôt qu'un panier différé + une persistance immédiate séparée
+        /// (retour utilisateur explicite : même wizard, tout différé jusqu'à Enregistrer, y compris les
+        /// changements sur des guerriers déjà en base). Les suppressions confirmées pendant la session
+        /// (DecrementWarrior sous l'effectif existant) ne s'exécutent qu'ici aussi (_pendingFullDeletions),
+        /// avec leur remboursement.</summary>
         [RelayCommand]
         private async Task Save()
         {
@@ -781,6 +911,17 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
             await Loading.RunAsync(async () =>
             {
+                // Remboursement de ce que TotalSpent ne verra pas (les têtes/groupes déjà comptés comme
+                // "existants", exclus de TotalSpent) : suppression complète (Cost du guerrier + son
+                // équipement d'origine) et réduction partielle d'un groupe d'Hommes de main (Cost du type
+                // × têtes retirées) - seulement pertinent en mode Coûts appliqués, ignoré en mode Libre où
+                // TreasuryOverride prime de toute façon.
+                var deletionRefund = _pendingFullDeletions.Sum(w => w.Cost + w.Equipment.Sum(e => e.Item.Cost * e.Quantity));
+                var partialGroupRefund = RecruitRows.SelectMany(r => r.HenchmanGroupDrafts.Select(g => (Row: r, Group: g)))
+                    .Where(t => t.Group.ExistingWarrior != null && t.Group.Count < t.Group.BaselineHeadCount)
+                    .Sum(t => t.Row.Cost * (t.Group.BaselineHeadCount - t.Group.Count));
+                var refunds = deletionRefund + partialGroupRefund;
+
                 int warbandId;
                 if (Item.Id == 0)
                 {
@@ -792,6 +933,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 else
                 {
                     warbandId = Item.Id;
+                    Item.Treasury = IsExistingWarband ? TreasuryOverride : RosterStartingTreasury - TotalSpent + refunds;
                     await _warbandService.SaveWarbandAsync(Item);
                 }
 
@@ -801,6 +943,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     {
                         foreach (var slot in row.NameSlots)
                         {
+                            if (slot.ExistingWarrior is { } existingHero)
+                            {
+                                await SyncExistingSlotAsync(existingHero, slot, slot.Name.Trim(), newHeadCount: null);
+                                continue;
+                            }
+
                             var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, slot.Name.Trim());
                             foreach (var pick in slot.Equipment)
                                 await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
@@ -822,6 +970,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                         // XP/équipement/compétences partagés par tout le groupe), voir Warrior.HeadCount.
                         foreach (var group in row.HenchmanGroupDrafts)
                         {
+                            if (group.ExistingWarrior is { } existingGroup)
+                            {
+                                await SyncExistingSlotAsync(existingGroup, group, group.Name.Trim(), newHeadCount: group.Count);
+                                continue;
+                            }
+
                             var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim(), headCount: group.Count);
                             foreach (var pick in group.Equipment)
                                 await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
@@ -837,6 +991,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                         }
                     }
                 }
+
+                foreach (var warrior in _pendingFullDeletions)
+                    await _warbandService.DeleteWarriorAsync(warrior.Id);
             });
 
             Close(true);

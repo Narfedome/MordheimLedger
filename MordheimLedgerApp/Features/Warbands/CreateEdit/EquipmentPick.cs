@@ -34,6 +34,13 @@ public class EquipmentPick
 
     public int Cost => EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, IsFree);
 
+    /// <summary>Null = pick à acheter au Save (comportement d'origine). Non-null = id du WarriorEquipment
+    /// déjà en base que ce pick représente (bande rouverte pour édition, voir RecruitSlot constructeur) -
+    /// déjà payé, exclu de TotalSpent (WarbandEditDialogViewModel) et laissé tel quel par Save() plutôt
+    /// que racheté ; sert aussi à détecter un retrait (Save() compare la liste courante à ce que
+    /// RecruitSlot.BaselineEquipment portait).</summary>
+    public int? ExistingId { get; init; }
+
     public EquipmentPick(EquipmentItem item, SpecialRule? materialRule)
     {
         Item = item;

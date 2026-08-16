@@ -10,10 +10,12 @@
              x:Name="root">
 
     <VerticalStackLayout Spacing="6" BindingContext="{x:Reference root}">
-        <!-- Équipement est toujours pertinent (les deux modes) - seuls Compétences/XP n'ont de sens qu'en
-             Bande existante (import d'un historique déjà déterminé), masqués sinon (voir
-             RecruitSlot.IsExistingWarband). Sorts reste visible dans les deux modes pour un lanceur de
-             sorts (livre des règles : sort de départ tiré au 1D6 même en création neuve), avec un bouton
+        <!-- Équipement est toujours pertinent (les deux modes) - XP n'a de sens qu'en Bande existante
+             (import d'un historique déjà déterminé), masqué sinon (voir RecruitSlot.IsExistingWarband).
+             Compétences suit la même règle, OU s'ouvre aussi dès qu'on édite une bande déjà sauvegardée
+             (RecruitSlot.ShowSkillsTab) - gérer les compétences d'un guerrier déjà en jeu n'est pas
+             réservé au mode Libre. Sorts reste visible dans les deux modes pour un lanceur de sorts
+             (livre des règles : sort de départ tiré au 1D6 même en création neuve), avec un bouton
              "+"/dé différent selon le mode (voir plus bas). -->
         <components:ScrollableTabStripView>
             <HorizontalStackLayout Spacing="14">
@@ -21,7 +23,7 @@
                                              IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
                                              IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"
-                                             IsVisible="{Binding Item.IsExistingWarband}"/>
+                                             IsVisible="{Binding Item.ShowSkillsTab}"/>
                 <!-- Onglet Sorts : masqué si ce type de guerrier n'est pas lanceur de sorts (voir
                      RecruitSlot.IsSpellcaster), même garde que WarriorEditDialog. -->
                 <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" FontSize="11"

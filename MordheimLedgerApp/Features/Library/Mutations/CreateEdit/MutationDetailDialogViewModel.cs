@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 
@@ -10,21 +11,21 @@ public partial class MutationDetailDialogViewModel : ReadOnlyDialogViewModel
     public Mutation Item { get; }
 
     /// <summary>Already resolved by the caller (MutationViewModel.ShowDetails) from the ids on Item -
-    /// same idiom as MutationViewModel.GroupNameFor, no service call needed here. Shown as-is - no
-    /// complement/collapse here, see EquipmentItemDetailDialogViewModel.RestrictedWarbands.</summary>
+    /// same idiom as MutationViewModel.GroupNameFor, no service call needed here. Collapsed to its
+    /// complement against allWarbandArchetypes when it covers more than half the catalog - see
+    /// WarbandRestrictionDisplay.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
 
-    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice séparé affichés en même temps liste
-    /// vide : "Réservé à ces bandes" tant qu'il y a des restrictions, remplacé par "Commun à toutes les
-    /// bandes" dès que la liste est vidée - jamais les deux empilés.</summary>
-    public string RestrictedWarbandsHeaderText =>
-        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+    /// <summary>Reflects whichever of Include/Exclude RestrictedWarbands ended up collapsed to - see
+    /// WarbandRestrictionDisplay.HeaderTextFor.</summary>
+    public string RestrictedWarbandsHeaderText { get; }
 
-    public MutationDetailDialogViewModel(Mutation item, List<WarbandArchetype> restrictedWarbands)
+    public MutationDetailDialogViewModel(Mutation item, List<WarbandArchetype> restrictedWarbands, List<WarbandArchetype> allWarbandArchetypes)
     {
         Item = item;
         Title = item.Name;
-        RestrictedWarbands = restrictedWarbands;
+        RestrictedWarbands = WarbandRestrictionDisplay.DisplayedFor(restrictedWarbands, allWarbandArchetypes);
+        RestrictedWarbandsHeaderText = WarbandRestrictionDisplay.HeaderTextFor(restrictedWarbands, allWarbandArchetypes);
     }
 
     [RelayCommand]

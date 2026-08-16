@@ -69,10 +69,10 @@ public class DetailDialogService : IDetailDialogService
         var language = LocalizationService.Instance.Language;
         var categoryLabel = LocalizationService.Instance[$"EquipmentCategory{item.Category}"];
 
+        var allWarbands = await _libraryService.GetWarbandArchetypesAsync(language);
         var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
             ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+            : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0 || item.RestrictedToWarriorArchetypeIds.Count == 0
             ? new List<WarriorArchetype>()
@@ -80,7 +80,7 @@ public class DetailDialogService : IDetailDialogService
                 .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
 
         await ShowAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, restrictedWarriors, this, materialRule)));
+            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, this, materialRule)));
     }
 
     public async Task ShowSkillDetailDialogAsync(Skill item)
@@ -88,17 +88,17 @@ public class DetailDialogService : IDetailDialogService
         var language = LocalizationService.Instance.Language;
         var categoryLabel = LocalizationService.Instance[$"SkillCategory{item.Category}"];
 
+        var allWarbands = await _libraryService.GetWarbandArchetypesAsync(language);
         var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
             ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+            : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         var restrictedWarriors = item.RestrictedToWarbandArchetypeIds.Count == 0
             ? new List<WarriorArchetype>()
             : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
                 .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
 
-        await ShowAsync(new SkillDetailDialog(new SkillDetailDialogViewModel(item, categoryLabel, restrictedWarbands, restrictedWarriors)));
+        await ShowAsync(new SkillDetailDialog(new SkillDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors)));
     }
 
     public Task ShowSpecialRuleDetailDialogAsync(SpecialRule item) =>
@@ -107,12 +107,12 @@ public class DetailDialogService : IDetailDialogService
     public async Task ShowMutationDetailDialogAsync(Mutation item)
     {
         var language = LocalizationService.Instance.Language;
+        var allWarbands = await _libraryService.GetWarbandArchetypesAsync(language);
         var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
             ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+            : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
-        await ShowAsync(new MutationDetailDialog(new MutationDetailDialogViewModel(item, restrictedWarbands)));
+        await ShowAsync(new MutationDetailDialog(new MutationDetailDialogViewModel(item, restrictedWarbands, allWarbands)));
     }
 
     public Task ShowSpellDetailDialogAsync(Spell item) =>

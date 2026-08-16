@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 
@@ -11,23 +12,23 @@ public partial class SkillDetailDialogViewModel : ReadOnlyDialogViewModel
     public string CategoryLabel { get; }
 
     /// <summary>Already resolved by the caller (SkillViewModel.ShowDetails), same fetch-then-filter
-    /// idiom as SkillViewModel.Edit's initialWarriors. Shown as-is - no complement/collapse here, see
-    /// EquipmentItemDetailDialogViewModel.RestrictedWarbands.</summary>
+    /// idiom as SkillViewModel.Edit's initialWarriors. Collapsed to its complement against
+    /// allWarbandArchetypes when it covers more than half the catalog - see WarbandRestrictionDisplay.</summary>
     public List<WarbandArchetype> RestrictedWarbands { get; }
     public List<WarriorArchetype> RestrictedWarriors { get; }
 
-    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
-    /// même principe que SkillEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
-    public string RestrictedWarbandsHeaderText =>
-        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+    /// <summary>Reflects whichever of Include/Exclude RestrictedWarbands ended up collapsed to - see
+    /// WarbandRestrictionDisplay.HeaderTextFor.</summary>
+    public string RestrictedWarbandsHeaderText { get; }
 
     public SkillDetailDialogViewModel(Skill item, string categoryLabel,
-        List<WarbandArchetype> restrictedWarbands, List<WarriorArchetype> restrictedWarriors)
+        List<WarbandArchetype> restrictedWarbands, List<WarbandArchetype> allWarbandArchetypes, List<WarriorArchetype> restrictedWarriors)
     {
         Item = item;
         Title = item.Name;
         CategoryLabel = categoryLabel;
-        RestrictedWarbands = restrictedWarbands;
+        RestrictedWarbands = WarbandRestrictionDisplay.DisplayedFor(restrictedWarbands, allWarbandArchetypes);
+        RestrictedWarbandsHeaderText = WarbandRestrictionDisplay.HeaderTextFor(restrictedWarbands, allWarbandArchetypes);
         RestrictedWarriors = restrictedWarriors;
     }
 

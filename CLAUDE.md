@@ -445,21 +445,29 @@ c'est surtout l'ui... ça fait une longueur ingérable dans le dialogue") - `Res
   laisser la liste vide et elle doit n'être alimentée que par l'utilisateur quand on appuie sur le +...
   l'excluse ou la restriction en soit c'est 2 listes, si un élément est dans l'une, elle n'est pas dans
   l'autre et inversement"* — confirmé via `AskUserQuestion` : **jamais de recalcul automatique**, ni à
-  l'ouverture ni au bascule). Design final : **deux listes littérales indépendantes** `_included`/
-  `_excluded`, jamais dérivées l'une de l'autre par complément. `_included` est initialisée depuis
-  `RestrictedToWarbandArchetypeIds` (données réelles) ; `_excluded` démarre **toujours vide**, y compris
-  en rouvrant un objet déjà très restreint (Chien de guerre 14/15 bandes) ou en basculant de mode en
-  cours d'édition - alimentée uniquement par le "+". Les deux restent mutuellement exclusives (ajouter
-  une bande à la liste active la retire de l'autre) mais rien ne les garde synchronisées au-delà.
-  `SelectedIds` calcule le complément contre `AllWarbandArchetypes` **seulement en mode Exclure et
-  seulement au moment de lire la valeur à persister** (jamais pour l'affichage des chips) - une liste
-  exclue vide se persiste bien comme liste vide ("commun à toutes"), pas comme "toutes les bandes
-  listées explicitement". Conséquence assumée : rouvrir un item déjà "toutes sauf Skavens" en mode
-  Exclure ne pré-remplit plus "Skavens" — l'utilisateur le retape. Acceptable car ce cas (bandes très
-  restreintes) vient presque toujours du seed JSON (`RestrictedToWarbandNames`, jamais édité via cette
-  UI), pas de cette UI elle-même, dont le vrai usage est de créer une nouvelle règle "tout sauf X" à la
-  main - un bouton `IconTextButton` (glyphe `RightLeft`) sous chaque `ChipListView` bascule le mode,
-  toujours Inclure par défaut à l'ouverture (plus d'heuristique de devinette).
+  l'ouverture ni au bascule). Design : **deux listes littérales indépendantes** `_included`/`_excluded`,
+  jamais dérivées l'une de l'autre par complément *pendant l'édition*. `_included` est initialisée
+  depuis `RestrictedToWarbandArchetypeIds` (données réelles) ; basculer de mode en cours d'édition
+  n'alimente/ne recalcule jamais rien, chaque liste ne grandit que via le "+". Les deux restent
+  mutuellement exclusives (ajouter une bande à la liste active la retire de l'autre) mais rien ne les
+  garde synchronisées au-delà. `SelectedIds` calcule le complément contre `AllWarbandArchetypes`
+  **seulement en mode Exclure et seulement au moment de lire la valeur à persister** (jamais pour
+  l'affichage des chips) - une liste exclue vide se persiste bien comme liste vide ("commun à toutes"),
+  pas comme "toutes les bandes listées explicitement".
+  **Revenu dessus une 3e fois** (l'utilisateur, en reprenant le contrôle : *"si on exclue un bande et
+  qu'on réouvre l'edit, on a toute les bande en restrinct pour"* - conséquence directe de "jamais de
+  recalcul même à l'ouverture" : rouvrir Chien de guerre montrait ses 14 bandes en mode Inclure).
+  Distinction retenue après confirmation `AskUserQuestion` : le risque initial (bug du 2026-08-16)
+  venait de recalculer le complément à **chaque bascule pendant l'édition**, y compris depuis un item
+  vraiment non-restreint (0 incluse) où "le complément" n'a aucun sens (ça note "tout exclu"). Calculer
+  le complément **une seule fois, à la construction du dialog**, à partir des données déjà sauvegardées,
+  n'a pas ce problème (lecture fidèle de l'existant, rien à corrompre) - seulement si la restriction est
+  **réellement partielle** (`_included.Count` strictement entre 0 et le total de bandes). Dans ce cas
+  précis, `_excluded` est peuplée une fois par complément et le mode de départ choisi pour afficher le
+  moins de chips possible (`_included.Count > total/2` ⇒ Exclure) ; un item non-restreint (0 incluse) ou
+  explicitement listé en entier démarre toujours en mode Inclure, `_excluded` vide - pas de changement
+  là. Toucher ensuite au bouton bascule (`IconTextButton`, glyphe `RightLeft`) en cours d'édition ne
+  recalcule toujours rien, comme avant.
 - `SkillEditDialogViewModel` est le seul cas à deux niveaux (restriction bande + restriction guerrier
   narrowée aux bandes restreintes) - `WarbandRestrictionEditor.Changed` (event) notifie quand l'ensemble
   inclus change (peu importe si via le mode Inclure ou Exclure) pour purger les guerriers dont la bande
@@ -468,16 +476,29 @@ c'est surtout l'ui... ça fait une longueur ingérable dans le dialogue") - `Res
   être les bandes exclues.
 - Nouvelles clés resx : `LibRestrictedToAllExceptPh`/`LibRestrictionSwitchToExcludePh`/
   `LibRestrictionSwitchToIncludePh` (fr/en).
-- **Extension aux dialogs récap en lecture seule tentée puis retirée** : une première passe avait ajouté
-  `Components/WarbandRestrictionDisplay.cs` (contrepartie statique, sans picker) à
-  `EquipmentItemDetailDialogViewModel`/`SkillDetailDialogViewModel`/`MutationDetailDialogViewModel`,
-  calculant le même complément que l'éditeur pour collapser l'affichage. **Entièrement annulée** une fois
-  le design de l'éditeur simplifié en deux listes jamais recalculées (ci-dessus) : le complément
-  auto-calculé était exactement le genre de magie que l'utilisateur venait de faire retirer côté édition,
-  et une recap en lecture seule n'a de toute façon pas de "+" pour reconstruire la liste si elle se
-  trompe. Les 3 `XxxDetailDialogViewModel` et les 3 méthodes de `DetailDialogService` sont revenus à
-  l'affichage brut d'origine (`RestrictedWarbands` = la liste réelle telle quelle, aussi longue soit-elle
-  - ex. Chien de guerre y montre bien ses 14 bandes). `WarbandRestrictionDisplay.cs` supprimé.
+- **Extension aux dialogs récap en lecture seule : retirée puis réintroduite dans la même session.**
+  Première passe : `Components/WarbandRestrictionDisplay.cs` (contrepartie statique de l'éditeur, sans
+  picker) calculait le complément pour `EquipmentItemDetailDialogViewModel`/`SkillDetailDialogViewModel`/
+  `MutationDetailDialogViewModel`. Retirée entièrement quand le design de l'éditeur est passé aux deux
+  listes jamais recalculées (ci-dessus) - par excès de prudence, en assimilant à tort la règle de
+  l'éditeur ("jamais de recalcul, pour ne pas corrompre une sauvegarde") à la lecture seule, qui n'a
+  pourtant aucun chemin de sauvegarde à corrompre. L'utilisateur a fait remarquer la conséquence
+  concrète : exclure une seule bande (ex. Skavens) affiche ensuite "Réservé à" 14 bandes dans le
+  readonly - exactement le mur de chips que toute cette fonctionnalité visait à éviter. Confirmé via
+  `AskUserQuestion` : le calcul du complément est **sûr en lecture seule** (recalculé à chaque ouverture
+  depuis les données réelles, jamais persisté) contrairement à l'éditeur (où togglé sans y toucher puis
+  sauvegarder écrirait la mauvaise chose). `WarbandRestrictionDisplay.cs` réintroduit tel quel, reconnecté
+  aux 3 `XxxDetailDialogViewModel` + aux 3 méthodes de `DetailDialogService` (qui gardent désormais la
+  liste complète des bandes récupérée pour `restrictedWarbands`, au lieu de la jeter après le filtre).
+  **Bug distinct corrigé juste avant, dans `WarbandRestrictionEditor.SelectedIds`** (éditeur, pas la
+  recap) : en mode Exclure avec `_excluded` vide (bascule en Exclure puis sauvegarde sans rien exclure),
+  `Where(...All(...))` sur une liste vide est vacuously vrai pour toute bande, donc ça persistait le
+  catalogue entier explicitement au lieu d'une liste vide ("commun à toutes"). `_excluded.Count == 0` est
+  maintenant spécial-cassé vers la liste vide, cohérent avec ce que `HeaderText` affichait déjà. Signalé
+  par l'utilisateur en deux temps : d'abord ce cas à zéro exclusion (corrigé), puis séparément le cas à
+  une exclusion réelle (Chien de guerre en montre bien 14 en readonly, correct côté données - c'est le
+  retrait de `WarbandRestrictionDisplay` qui en faisait un mur de chips, résolu par sa réintroduction
+  ci-dessus).
 - **Contrôle unique** (suite à la remarque de l'utilisateur "on ne le ferait pas en control unique...
   pour centraliser la gestion") : le bloc `ChipListView` + `IconTextButton` de bascule, jusque-là
   dupliqué à l'identique dans les 3 dialogs d'édition, est remplacé par `Components/WarbandRestriction/

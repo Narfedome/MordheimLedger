@@ -144,6 +144,46 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost) * g.Count)
             + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost));
 
+        /// <summary>Ce qui doit revenir à la trésorerie suite à des actions sur le roster déjà existant -
+        /// suppression complète confirmée (Cost du guerrier + son équipement d'origine, voir
+        /// DecrementWarrior/_pendingFullDeletions), réduction partielle d'un groupe d'Hommes de main (Cost
+        /// du type × têtes retirées) et retrait d'un objet d'équipement déjà payé (bouton "x" sur une puce
+        /// d'un guerrier existant - RemoveEquipment, retiré de la collection mais jusqu'ici jamais
+        /// remboursé). Les deux premiers termes ne regardent que les guerriers/groupes concernés ; le
+        /// troisième parcourt tout le roster restant (les slots pleinement supprimés n'y figurent plus,
+        /// déjà couverts par le premier terme via l'équipement d'origine complet du Warrior).</summary>
+        private int TotalRefunds => _pendingFullDeletions.Sum(w => w.Cost + RefundableEquipmentCost(w.Equipment, _ => true))
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts.Select(g => (Row: r, Group: g)))
+                .Where(t => t.Group.ExistingWarrior != null && t.Group.Count < t.Group.BaselineHeadCount)
+                .Sum(t => t.Row.Cost * (t.Group.BaselineHeadCount - t.Group.Count))
+            + RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
+                .Where(s => s.ExistingWarrior != null)
+                .Sum(s => RefundableEquipmentCost(s.BaselineEquipment, b => s.Equipment.All(p => p.ExistingId != b.Id)));
+
+        /// <summary>Combien de la baseline fournie (l'équipement d'ORIGINE d'un guerrier, avant toute
+        /// modification cette session) rembourser réellement - la dague gratuite (livre des règles : "in
+        /// addition to his free dagger") ne doit jamais générer de remboursement, alors que
+        /// WarriorEquipment ne retient aucune trace d'avoir été gratuite à l'achat (EquipmentPick.IsFree,
+        /// qui le sait, n'est jamais persisté). Reconstruit donc l'éligibilité "première dague, sans
+        /// matériau" en rejouant la baseline complète dans l'ordre d'achat (Id croissant, seul ordre
+        /// disponible) avec la même règle qu'à l'achat (EquipmentPricing.IsFreeDaggerEligible), puis ne
+        /// somme que les entrées retenues par shouldRefund - fullBaseline doit toujours être la liste
+        /// COMPLÈTE d'origine (pas déjà filtrée), sans quoi la reconstruction de l'ordre/éligibilité serait
+        /// faussée.</summary>
+        private static int RefundableEquipmentCost(IEnumerable<WarriorEquipment> fullBaseline, Func<WarriorEquipment, bool> shouldRefund)
+        {
+            var total = 0;
+            var hasFreeDagger = false;
+            foreach (var we in fullBaseline.OrderBy(e => e.Id))
+            {
+                var isFree = we.MaterialRule is null && EquipmentPricing.IsFreeDaggerEligible(we.Item.IsFreeDagger, hasFreeDagger);
+                if (isFree) hasFreeDagger = true;
+                if (shouldRefund(we))
+                    total += EquipmentPricing.CalculateCost(we.Item.Cost, we.MaterialRule?.CostMultiplier, isFree) * we.Quantity;
+            }
+            return total;
+        }
+
         /// <summary>Trésorerie de départ pour le calcul du "restant" ci-dessous : la trésorerie RÉELLE
         /// actuelle de la bande (Item.Treasury) quand on édite une bande déjà sauvegardée (Item.Id != 0),
         /// pas le trésor de départ théorique de l'archétype - une bande déjà jouée a presque toujours une
@@ -152,8 +192,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
         /// <summary>En mode Libre, la trésorerie affichée reste fixée à ce que l'utilisateur a saisi
         /// (TreasuryOverride) - jamais décrémentée par les recrues/achats, contrairement au mode Coûts
-        /// appliqués.</summary>
-        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(RosterStartingTreasury, TotalSpent, IsExistingWarband, TreasuryOverride);
+        /// appliqués. TotalRefunds vient en déduction de TotalSpent (donc s'ajoute au restant affiché) -
+        /// même calcul que Save() applique réellement à Item.Treasury, pour que le montant affiché en
+        /// direct pendant la session corresponde exactement à ce qui sera écrit en base.</summary>
+        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(RosterStartingTreasury, TotalSpent - TotalRefunds, IsExistingWarband, TreasuryOverride);
 
         [ObservableProperty]
         private string? warriorsError;
@@ -911,16 +953,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
             await Loading.RunAsync(async () =>
             {
-                // Remboursement de ce que TotalSpent ne verra pas (les têtes/groupes déjà comptés comme
-                // "existants", exclus de TotalSpent) : suppression complète (Cost du guerrier + son
-                // équipement d'origine) et réduction partielle d'un groupe d'Hommes de main (Cost du type
-                // × têtes retirées) - seulement pertinent en mode Coûts appliqués, ignoré en mode Libre où
-                // TreasuryOverride prime de toute façon.
-                var deletionRefund = _pendingFullDeletions.Sum(w => w.Cost + w.Equipment.Sum(e => e.Item.Cost * e.Quantity));
-                var partialGroupRefund = RecruitRows.SelectMany(r => r.HenchmanGroupDrafts.Select(g => (Row: r, Group: g)))
-                    .Where(t => t.Group.ExistingWarrior != null && t.Group.Count < t.Group.BaselineHeadCount)
-                    .Sum(t => t.Row.Cost * (t.Group.BaselineHeadCount - t.Group.Count));
-                var refunds = deletionRefund + partialGroupRefund;
+                // TotalRefunds capturé avant que la boucle ci-dessous ne synchronise le roster existant -
+                // même valeur affichée en direct pendant la session (RemainingTreasury), seulement
+                // pertinent en mode Coûts appliqués (ignoré en mode Libre où TreasuryOverride prime).
+                var refunds = TotalRefunds;
 
                 int warbandId;
                 if (Item.Id == 0)

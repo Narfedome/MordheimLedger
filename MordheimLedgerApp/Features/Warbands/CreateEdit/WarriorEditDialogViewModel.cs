@@ -39,14 +39,34 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [ObservableProperty]
     private string title;
 
+    /// <summary>Règles spéciales bande-entière + propres à l'archétype de ce guerrier, déjà fusionnées et
+    /// dédupliquées par l'appelant (WarbandDetailViewModel.ToRow.mergedRules, transmis via
+    /// WarriorRow.SpecialRules) - lecture seule ici (se changent depuis la Bibliothèque, pas depuis ce
+    /// dialog), affichées dans l'onglet Profil au même titre que sur la carte guerrier
+    /// (WarbandDetailPage.xaml).</summary>
+    public IReadOnlyList<SpecialRule> SpecialRules { get; }
+
+    /// <summary>Champ texte unique pour le Mouvement - accepte un nombre ("4") ou une surcharge libre
+    /// ("2D6" pour les Squigs des cavernes), résolu vers Item.Movement/Item.MovementOverride au Save
+    /// selon que ça parse comme int ou non - même mécanisme qu'à la Bibliothèque
+    /// (WarriorArchetypeEditDialogViewModel.MovementInput), affiché directement dans la colonne M de
+    /// StatRowView plutôt qu'un champ "Surcharge Mouvement" séparé en plus.</summary>
+    [ObservableProperty]
+    private string movementInput;
+
     /// <summary>Set when Delete succeeds - the caller (WarbandDetailViewModel.EditWarrior) checks this
     /// instead of trying to SaveWarriorAsync a warrior that no longer exists.</summary>
     public bool WasDeleted { get; private set; }
 
-    /// <summary>Onglets Équipement/Compétences/Blessures/Sorts/Mutations - même pattern toggle (pas de
-    /// vrai TabbedPage) que Roster/Historique sur WarbandDetailPage, adapté à 5 sections avec un index
-    /// plutôt que des bools séparés (précédent local : CurrentStep/IsStepN de EndOfGameDialogViewModel).</summary>
+    /// <summary>Onglets Profil/Équipement/Compétences/Blessures/Sorts/Mutations - même pattern toggle
+    /// (pas de vrai TabbedPage) que Roster/Historique sur WarbandDetailPage, adapté à 6 sections avec un
+    /// index plutôt que des bools séparés (précédent local : CurrentStep/IsStepN de
+    /// EndOfGameDialogViewModel). Profil (Nom/XP/stats/Mouvement/Animal) sorti de la zone toujours
+    /// visible au-dessus des onglets vers son propre onglet, par défaut - même précédent que l'onglet
+    /// Profil de WarriorArchetypeEditDialog (Bibliothèque), pour désencombrer un dialog qui avait grossi
+    /// jusqu'à empiler 5 champs fixes au-dessus de 5 onglets.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsProfilTab))]
     [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
     [NotifyPropertyChangedFor(nameof(IsSkillsTab))]
     [NotifyPropertyChangedFor(nameof(IsInjuriesTab))]
@@ -54,11 +74,12 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
     private int selectedTab;
 
-    public bool IsEquipmentTab => SelectedTab == 0;
-    public bool IsSkillsTab => SelectedTab == 1;
-    public bool IsInjuriesTab => SelectedTab == 2;
-    public bool IsSpellsTab => SelectedTab == 3;
-    public bool IsMutationsTab => SelectedTab == 4;
+    public bool IsProfilTab => SelectedTab == 0;
+    public bool IsEquipmentTab => SelectedTab == 1;
+    public bool IsSkillsTab => SelectedTab == 2;
+    public bool IsInjuriesTab => SelectedTab == 3;
+    public bool IsSpellsTab => SelectedTab == 4;
+    public bool IsMutationsTab => SelectedTab == 5;
 
     /// <summary>Set by the caller (WarbandDetailViewModel.EditWarrior, which already looks up the
     /// warrior's WarriorArchetype) from WarriorArchetype.IsSpellcaster - gates the Sorts tab, hidden
@@ -70,19 +91,22 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public bool IsMutant { get; }
 
     [RelayCommand]
-    private void ShowEquipmentTab() => SelectedTab = 0;
+    private void ShowProfilTab() => SelectedTab = 0;
 
     [RelayCommand]
-    private void ShowSkillsTab() => SelectedTab = 1;
+    private void ShowEquipmentTab() => SelectedTab = 1;
 
     [RelayCommand]
-    private void ShowInjuriesTab() => SelectedTab = 2;
+    private void ShowSkillsTab() => SelectedTab = 2;
 
     [RelayCommand]
-    private void ShowSpellsTab() => SelectedTab = 3;
+    private void ShowInjuriesTab() => SelectedTab = 3;
 
     [RelayCommand]
-    private void ShowMutationsTab() => SelectedTab = 4;
+    private void ShowSpellsTab() => SelectedTab = 4;
+
+    [RelayCommand]
+    private void ShowMutationsTab() => SelectedTab = 5;
 
     /// <summary>Équipement/Compétences/Blessures/Sorts/Mutations sont toutes persistées immédiatement
     /// (pas soumises à Enregistrer/Annuler) - regroupées ici depuis la carte guerrier (WarbandDetailPage,
@@ -96,7 +120,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
         IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<MagicSchool> magicSchools,
-        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker, bool skipCosts = false)
+        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker, IReadOnlyList<SpecialRule> specialRules,
+        bool skipCosts = false)
     {
         this.item = item;
         this.title = title;
@@ -113,7 +138,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
         _animalPicker = animalPicker;
+        SpecialRules = specialRules;
         _skipCosts = skipCosts;
+        movementInput = item.MovementOverride ?? item.Movement.ToString();
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);
@@ -360,5 +387,21 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
-    private void Save() => Close(true);
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
+
+    [RelayCommand]
+    private void Save()
+    {
+        if (int.TryParse(MovementInput, out var movement))
+        {
+            Item.Movement = movement;
+            Item.MovementOverride = null;
+        }
+        else
+        {
+            Item.MovementOverride = MovementInput;
+        }
+
+        Close(true);
+    }
 }

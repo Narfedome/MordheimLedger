@@ -50,19 +50,16 @@ public interface ILibraryService
     /// WarbandArchetype.SpecialRules/WarriorArchetype.SpecialRules.</summary>
     Task<List<SpecialRule>> GetSpecialRulesAsync(string languageCode);
 
-    /// <summary>Ids of SpecialRules attached to each of the 4 join tables (WarbandArchetype/
-    /// WarriorArchetype/Animal/EquipmentItem) - see LibraryService for details. Kept as 4 separate sets
-    /// (not merged) so the Codex can group by actual attachment type and the Warband/Warrior pickers can
-    /// filter by it - see SpecialRuleViewModel.</summary>
-    Task<(HashSet<int> WarbandRuleIds, HashSet<int> WarriorRuleIds, HashSet<int> AnimalRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync();
+    /// <summary>Ids of SpecialRules attached to each of the 3 join tables (WarbandArchetype/
+    /// WarriorArchetype/EquipmentItem - Animal is now just an EquipmentItem with Category == Animal, so
+    /// its rules are already covered by ItemRuleIds) - see LibraryService for details. Kept as 3 separate
+    /// sets (not merged) so the Codex can group by actual attachment type and the Warband/Warrior pickers
+    /// can filter by it - see SpecialRuleViewModel.</summary>
+    Task<(HashSet<int> WarbandRuleIds, HashSet<int> WarriorRuleIds, HashSet<int> ItemRuleIds)> GetSpecialRuleAttachmentsAsync();
 
     /// <summary>The flat global Mutation catalog (see Models.Library.Mutation) - not restricted per
     /// warband, shared verbatim across every Chaos-adjacent band.</summary>
     Task<List<Mutation>> GetMutationsAsync(string languageCode);
-
-    /// <summary>The Animal catalog (see Models.Library.Animal) - has its own stat profile, separate from
-    /// EquipmentItem.</summary>
-    Task<List<Animal>> GetAnimalsAsync(string languageCode);
 
     /// <summary>The MagicSchool catalog (e.g. "Nécromancie") - see Models.Library.MagicSchool.</summary>
     Task<List<MagicSchool>> GetMagicSchoolsAsync(string languageCode);
@@ -94,7 +91,6 @@ public interface ILibraryService
     Task SaveSpellAsync(Spell spell, string languageCode);
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
     Task SaveMutationAsync(Mutation mutation, string languageCode);
-    Task SaveAnimalAsync(Animal animal, string languageCode);
     Task SaveMagicSchoolAsync(MagicSchool school, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
@@ -106,6 +102,5 @@ public interface ILibraryService
     Task DeleteSpellAsync(int spellId);
     Task DeleteSpecialRuleAsync(int specialRuleId);
     Task DeleteMutationAsync(int mutationId);
-    Task DeleteAnimalAsync(int animalId);
     Task DeleteMagicSchoolAsync(int magicSchoolId);
 }

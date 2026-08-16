@@ -634,51 +634,5 @@
       ]
     }
   ],
-  "spells": [],
-  "animals": [
-    {
-      "name": {
-        "en": "War Boar",
-        "fr": "Sanglier de guerre"
-      },
-      "description": {
-        "en": "Huge, fierce and bad-tempered - the biggest Orcs invariably claim the right to ride these into the ruins of Mordheim.",
-        "fr": "Énorme, féroce et soupe au lait : les orques les plus gros se réservent immanquablement le droit de le chevaucher dans les ruines de Mordheim."
-      },
-      "cost": 90,
-      "rarity": 11,
-      "movement": 7,
-      "weaponSkill": 3,
-      "ballisticSkill": 0,
-      "strength": 3,
-      "toughness": 4,
-      "wounds": 1,
-      "initiative": 3,
-      "attacks": 1,
-      "leadership": 3,
-      "restrictedToThisWarband": true,
-      "specialRules": [
-        {
-          "name": {
-            "en": "Furious Charge",
-            "fr": "Charge Furieuse"
-          },
-          "description": {
-            "en": "The War Boar gains +2 Strength when it charges - this bonus applies only to the boar, not its rider.",
-            "fr": "Le sanglier de guerre gagne un bonus de +2 en Force lorsqu'il charge - ce bonus ne s'applique qu'au sanglier, pas à son cavalier."
-          }
-        },
-        {
-          "name": {
-            "en": "Thick Skin",
-            "fr": "Peau Épaisse"
-          },
-          "description": {
-            "en": "The rider's armour save is increased by +2 instead of the usual +1 while mounted on a War Boar.",
-            "fr": "La sauvegarde d'armure du cavalier est augmentée de +2 au lieu de +1 habituel tant qu'il est monté sur un sanglier de guerre."
-          }
-        }
-      ]
-    }
-  ]
+  "spells": []
 }

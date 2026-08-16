@@ -278,7 +278,16 @@ public static class EntityMapping
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         SpecialRules = specialRulesByItemId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
-        IsFreeDagger = e.IsFreeDagger
+        IsFreeDagger = e.IsFreeDagger,
+        Movement = e.Movement,
+        WeaponSkill = e.WeaponSkill,
+        BallisticSkill = e.BallisticSkill,
+        Strength = e.Strength,
+        Toughness = e.Toughness,
+        Wounds = e.Wounds,
+        Initiative = e.Initiative,
+        Attacks = e.Attacks,
+        Leadership = e.Leadership
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -359,7 +368,16 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath,
-        IsFreeDagger = m.IsFreeDagger
+        IsFreeDagger = m.IsFreeDagger,
+        Movement = m.Movement,
+        WeaponSkill = m.WeaponSkill,
+        BallisticSkill = m.BallisticSkill,
+        Strength = m.Strength,
+        Toughness = m.Toughness,
+        Wounds = m.Wounds,
+        Initiative = m.Initiative,
+        Attacks = m.Attacks,
+        Leadership = m.Leadership
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>
@@ -367,10 +385,11 @@ public static class EntityMapping
     /// <param name="injuries">Tracked injuries, loaded separately via the join table.</param>
     /// <param name="spells">Learned spells, loaded separately via the join table.</param>
     /// <param name="mutations">Bought mutations, loaded separately via the join table.</param>
-    /// <param name="animal">Ridden animal, resolved separately from AnimalEntity - not a join, see WarriorEntity.AnimalId.</param>
+    /// <param name="animal">Ridden mount (an EquipmentItem, Category == Animal), resolved separately -
+    /// not a join, see WarriorEntity.AnimalId.</param>
     public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null,
         IEnumerable<WarriorInjury>? injuries = null, IEnumerable<WarriorSpell>? spells = null, IEnumerable<WarriorMutation>? mutations = null,
-        Animal? animal = null) => new()
+        EquipmentItem? animal = null) => new()
     {
         Id = e.Id,
         WarbandId = e.WarbandId,
@@ -534,53 +553,6 @@ public static class EntityMapping
         Id = m.Id,
         WarriorId = m.WarriorId,
         MutationId = m.Item.Id
-    };
-
-    public static Animal ToModel(this AnimalEntity e, IReadOnlyDictionary<string, string> translations,
-        IReadOnlyDictionary<int, List<int>>? restrictions = null, IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByAnimalId = null) => new()
-    {
-        Id = e.Id,
-        Name = ResolveName(e.NameKey, translations),
-        Cost = e.Cost,
-        Rarity = e.Rarity,
-        CostRandomMax = e.CostRandomMax,
-        Movement = e.Movement,
-        WeaponSkill = e.WeaponSkill,
-        BallisticSkill = e.BallisticSkill,
-        Strength = e.Strength,
-        Toughness = e.Toughness,
-        Wounds = e.Wounds,
-        Initiative = e.Initiative,
-        Attacks = e.Attacks,
-        Leadership = e.Leadership,
-        Description = ResolveDescription(e.DescriptionKey, translations),
-        NameKey = e.NameKey,
-        DescriptionKey = e.DescriptionKey,
-        Source = e.Source,
-        ImagePath = e.ImagePath ?? string.Empty,
-        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        SpecialRules = specialRulesByAnimalId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
-    };
-
-    public static AnimalEntity ToEntity(this Animal m) => new()
-    {
-        Id = m.Id,
-        NameKey = m.NameKey ?? string.Empty,
-        Cost = m.Cost,
-        Rarity = m.Rarity,
-        CostRandomMax = m.CostRandomMax,
-        Movement = m.Movement,
-        WeaponSkill = m.WeaponSkill,
-        BallisticSkill = m.BallisticSkill,
-        Strength = m.Strength,
-        Toughness = m.Toughness,
-        Wounds = m.Wounds,
-        Initiative = m.Initiative,
-        Attacks = m.Attacks,
-        Leadership = m.Leadership,
-        DescriptionKey = m.DescriptionKey,
-        Source = m.Source,
-        ImagePath = m.ImagePath
     };
 
     public static HistoryEntry ToModel(this HistoryEntryEntity e) => new()

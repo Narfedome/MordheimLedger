@@ -36,8 +36,8 @@ public class WarriorEntity
     public int Leadership { get; set; }
 
     /// <summary>Null = no animal assigned. The warrior's stats aren't merged with the animal's - it's
-    /// tracked as its own separate profile, resolved from AnimalEntity by WarbandService (see
-    /// Models.Warrior.Animal).</summary>
+    /// tracked as its own separate profile, resolved from EquipmentItemEntity (Category == Animal) by
+    /// WarbandService (see Models.Warrior.Animal).</summary>
     public int? AnimalId { get; set; }
 
     public int? EquipmentListId { get; set; }

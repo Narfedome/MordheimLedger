@@ -6,7 +6,8 @@ namespace MordheimLedgerApp.Services;
 
 public interface ISpecialRulePickerService
 {
-    /// <summary>Null (Animal/EquipmentItem callers) shows the full unfiltered catalog. Warband/Warrior
+    /// <summary>Null (EquipmentItem callers, including Animal-category items) shows the full unfiltered
+    /// catalog. Warband/Warrior
     /// restrict the selector to rules actually attached at that level - see SpecialRuleFilterKind.</summary>
     Task<IReadOnlyList<SpecialRule>> PickSpecialRulesAsync(SpecialRuleFilterKind? filterKind = null);
 }

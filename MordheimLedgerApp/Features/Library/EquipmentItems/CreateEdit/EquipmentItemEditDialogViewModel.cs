@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Services;
@@ -10,7 +11,6 @@ namespace MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly Dictionary<string, EquipmentCategory> _categoryByLabel = new();
-    private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
 
     protected override bool CancelResult => false;
@@ -25,6 +25,10 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
     [ObservableProperty]
     private string selectedCategoryLabel = string.Empty;
+
+    /// <summary>Shows the StatRowView profile block (Movement/WS/BS/S/T/W/I/A/Ld) only when the selected
+    /// category is Animal - those 9 fields are meaningless for any other EquipmentCategory.</summary>
+    public bool IsAnimalCategory => Item.Category == EquipmentCategory.Animal;
 
     /// <summary>Null = pas d'erreur. Texte affiché sous le champ Nom - même mécanisme que
     /// WarbandArchetypeEditDialogViewModel.NameError.</summary>
@@ -41,13 +45,10 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
     /// <summary>Édité en mémoire ici, recopié sur Item.RestrictedToWarbandArchetypeIds à la sauvegarde -
     /// même principe que WarriorArchetypeEditDialogViewModel.SpecialRules. Vide = commun à toutes les
-    /// bandes (voir EquipmentItem.RestrictedToWarbandArchetypeIds).</summary>
-    public ObservableCollection<WarbandArchetype> RestrictedWarbands { get; }
-
-    /// <summary>Un seul texte plutôt qu'un titre fixe + un indice affichés en même temps liste vide -
-    /// même principe que MutationEditDialogViewModel.RestrictedWarbandsHeaderText.</summary>
-    public string RestrictedWarbandsHeaderText =>
-        RestrictedWarbands.Count > 0 ? Loc["LibRestrictedToWarbandsPh"] : Loc["LibRestrictedToAllHint"];
+    /// bandes (voir EquipmentItem.RestrictedToWarbandArchetypeIds). Include/Exclude mode toggle + chip
+    /// collapse factored into WarbandRestrictionEditor - shared with SkillEditDialogViewModel/
+    /// MutationEditDialogViewModel, which duplicate this exact editor.</summary>
+    public WarbandRestrictionEditor WarbandRestriction { get; }
 
     public ObservableCollection<SpecialRule> SpecialRules { get; }
 
@@ -56,7 +57,6 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     {
         this.item = item;
         this.title = title;
-        _warbandPicker = warbandPicker;
         _specialRulePicker = specialRulePicker;
 
         foreach (var category in Enum.GetValues<EquipmentCategory>())
@@ -67,8 +67,7 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
         }
 
         selectedCategoryLabel = Loc[$"EquipmentCategory{item.Category}"];
-        RestrictedWarbands = new ObservableCollection<WarbandArchetype>(
-            allWarbandArchetypes.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)));
+        WarbandRestriction = new WarbandRestrictionEditor(item.RestrictedToWarbandArchetypeIds, allWarbandArchetypes, warbandPicker);
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
     }
 
@@ -76,6 +75,7 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
     {
         if (_categoryByLabel.TryGetValue(value, out var category))
             Item.Category = category;
+        OnPropertyChanged(nameof(IsAnimalCategory));
     }
 
     [RelayCommand]
@@ -83,25 +83,6 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
 
     [RelayCommand]
     private void ShowRulesTab() => SelectedTab = 1;
-
-    [RelayCommand]
-    private async Task AddRestriction()
-    {
-        var picked = await _warbandPicker.PickWarbandArchetypesAsync();
-        foreach (var warband in picked)
-        {
-            if (RestrictedWarbands.Any(w => w.Id == warband.Id)) continue;
-            RestrictedWarbands.Add(warband);
-        }
-        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
-    }
-
-    [RelayCommand]
-    private void RemoveRestriction(WarbandArchetype warband)
-    {
-        RestrictedWarbands.Remove(warband);
-        OnPropertyChanged(nameof(RestrictedWarbandsHeaderText));
-    }
 
     [RelayCommand]
     private async Task AddSpecialRule()
@@ -137,7 +118,7 @@ public partial class EquipmentItemEditDialogViewModel : DialogViewModel<bool>
             return;
         }
 
-        Item.RestrictedToWarbandArchetypeIds = RestrictedWarbands.Select(w => w.Id).ToList();
+        Item.RestrictedToWarbandArchetypeIds = WarbandRestriction.SelectedIds;
         Item.SpecialRules = SpecialRules.ToList();
         Close(true);
     }

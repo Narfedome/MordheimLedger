@@ -23,6 +23,7 @@
             <Button Grid.Column="0"
                     Text="{Binding SelectedCategoryLabel}"
                     Command="{Binding SelectCategoryCommand}"
+                    IsEnabled="{Binding IsCategoryLocked, Converter={StaticResource InverseBoolConverter}}"
                     BackgroundColor="Transparent"
                     TextColor="{DynamicResource AppAccent}"
                     HorizontalOptions="Start"

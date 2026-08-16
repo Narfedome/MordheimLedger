@@ -256,7 +256,10 @@
       ],
       "specialRules": [
         {
-          "name": { "en": "Barbed Arrowheads", "fr": "Pointes Barbelées" },
+          "name": {
+            "en": "Barbed Arrowheads",
+            "fr": "Pointes Barbelées"
+          },
           "description": {
             "en": "A model using a Short Bow, Bow, Long Bow or Elf Bow may use these arrows. They add +1 to all Injury rolls.",
             "fr": "Une figurine utilisant un Arc court, un Arc, un Arc long ou un Arc elfique peut utiliser ces flèches. Elles ajoutent +1 à tous les jets de Blessure."

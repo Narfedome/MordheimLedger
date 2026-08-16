@@ -253,11 +253,11 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Empty(greatClaw.RestrictedToWarbandArchetypeIds);
     }
 
-    /// <summary>Orc Mob is the first warband to use both the Animal catalog (War Boar, restricted) and a
-    /// non-fixed Movement characteristic (Cave Squigs roll 2D6" instead of a fixed value) - see
-    /// WarriorArchetype.MovementOverride/MovementDisplay, added specifically for this case.</summary>
+    /// <summary>Orc Mob is the first warband to use a non-fixed Movement characteristic (Cave Squigs roll
+    /// 2D6" instead of a fixed value) - see WarriorArchetype.MovementOverride/MovementDisplay, added
+    /// specifically for this case.</summary>
     [Fact]
-    public async Task OrcMob_SquigMovementOverride_AndWarBoarAnimal()
+    public async Task OrcMob_SquigMovementOverride()
     {
         var orcs = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Orc Mob");
         var warriors = await _library.GetWarriorArchetypesAsync(orcs.Id, "en");
@@ -270,11 +270,38 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var boss = warriors.Single(w => w.Name == "Orc Boss");
         Assert.Equal(boss.Movement.ToString(), boss.MovementDisplay);
         Assert.Contains(boss.SpecialRules, r => r.Name == "Leader");
+    }
 
-        var animals = await _library.GetAnimalsAsync("en");
-        var warBoar = animals.Single(m => m.Name == "War Boar");
-        Assert.Equal([orcs.Id], warBoar.RestrictedToWarbandArchetypeIds);
-        Assert.Contains(warBoar.SpecialRules, r => r.Name == "Furious Charge");
+    /// <summary>Covers the deferred multi-band resolution added for common-catalog entries
+    /// (EquipmentSeedData.RestrictedToWarbandNames, resolved in AppDatabase.SeedOfficialContentAsync
+    /// after all 15 warbands exist) via the two Equipment.json mounts that use it: Warhorse (human
+    /// warbands only) and Wardog (every warband except Skaven). War Boar was removed from Orc Mob's own
+    /// equipment - it's Blazing Saddles (Mordheim Annual 2002, Grade 1b optional rules), not part of Orc
+    /// Mob's own core (Grade 1a, Town Cryer #6) roster, confirmed on mordheimer.net.</summary>
+    [Fact]
+    public async Task Equipment_MultiBandRestrictions_ResolveAcrossWarbands()
+    {
+        var warbands = await _library.GetWarbandArchetypesAsync("en");
+        var reiklanders = warbands.Single(w => w.Name == "Reiklander Mercenaries").Id;
+        var kislevites = warbands.Single(w => w.Name == "Kislevites").Id;
+        var orcMob = warbands.Single(w => w.Name == "Orc Mob").Id;
+        var skaven = warbands.Single(w => w.Name == "Skaven of Clan Eshin").Id;
+
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+
+        var warhorse = equipment.Single(i => i.Name == "Warhorse");
+        Assert.Equal(EquipmentCategory.Animal, warhorse.Category);
+        Assert.Contains(reiklanders, warhorse.RestrictedToWarbandArchetypeIds);
+        Assert.Contains(kislevites, warhorse.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(orcMob, warhorse.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(skaven, warhorse.RestrictedToWarbandArchetypeIds);
+
+        var wardog = equipment.Single(i => i.Name == "Wardog");
+        Assert.Contains(reiklanders, wardog.RestrictedToWarbandArchetypeIds);
+        Assert.Contains(orcMob, wardog.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(skaven, wardog.RestrictedToWarbandArchetypeIds);
+
+        Assert.DoesNotContain(equipment, i => i.Name == "War Boar");
     }
 
     /// <summary>Undead is a 1-equipment-list band (all equipped warriors share it) - the simplest shape,

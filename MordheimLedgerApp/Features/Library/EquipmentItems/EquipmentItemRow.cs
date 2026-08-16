@@ -82,6 +82,7 @@ public partial class EquipmentItemRow : ObservableObject
         EquipmentCategory.BlackPowderWeapon => RpgFont.RaMusket,
         EquipmentCategory.Ammunition => RpgFont.RaArrowCluster,
         EquipmentCategory.Armour => RpgFont.RaVest,
+        EquipmentCategory.Animal => RpgFont.RaPawprint,
         _ => RpgFont.RaPotion
     };
 

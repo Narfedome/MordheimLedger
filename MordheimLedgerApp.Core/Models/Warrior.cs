@@ -80,9 +80,10 @@ public class Warrior
     /// Only meaningful for warriors whose archetype has CanBuyMutations set — empty otherwise.</summary>
     public List<WarriorMutation> Mutations { get; set; } = new();
 
-    /// <summary>Null = no animal assigned. Resolved separately from the Animal catalog by WarbandService
-    /// (not a join table - a warrior can only have one animal at a time, picking a new one replaces this).</summary>
-    public Library.Animal? Animal { get; set; }
+    /// <summary>Null = no animal assigned. An EquipmentItem with Category == Animal, resolved separately
+    /// by WarbandService (not a join table - a warrior can only have one animal at a time, picking a new
+    /// one replaces this).</summary>
+    public Library.EquipmentItem? Animal { get; set; }
 
     /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.IsLargeCreature.</summary>
     public bool IsLargeCreature { get; set; }

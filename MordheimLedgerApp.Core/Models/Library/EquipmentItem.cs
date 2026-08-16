@@ -59,4 +59,18 @@ public class EquipmentItem
     /// counts normally. See EquipmentPick.IsFree/WarbandEditDialogViewModel.AddEquipment for where the
     /// "already has one" check happens.</summary>
     public bool IsFreeDagger { get; set; }
+
+    /// <summary>Profile stats, only meaningful when Category is Animal (a mount, e.g. Warhorse/War
+    /// Boar) - null for every other category. The rulebook treats mounts as equipment, so they live in
+    /// this same catalog rather than a separate content type; these fields are simply unused outside
+    /// EquipmentCategory.Animal. See StatRowView for the shared display/edit grid.</summary>
+    public int? Movement { get; set; }
+    public int? WeaponSkill { get; set; }
+    public int? BallisticSkill { get; set; }
+    public int? Strength { get; set; }
+    public int? Toughness { get; set; }
+    public int? Wounds { get; set; }
+    public int? Initiative { get; set; }
+    public int? Attacks { get; set; }
+    public int? Leadership { get; set; }
 }

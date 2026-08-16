@@ -44,13 +44,9 @@
             </VerticalStackLayout>
 
             <!-- Réservé à ces bandes : vide = commun à toutes les bandes (voir Skill.
-                 RestrictedToWarbandArchetypeIds). HeaderText dynamique plutôt qu'un titre fixe + un
-                 indice affichés en même temps liste vide - même principe que MutationEditDialog. -->
-            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
-                                      ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Users}"
-                                      AddCommand="{Binding AddRestrictionCommand}"
-                                      RemoveCommand="{Binding RemoveRestrictionCommand}"/>
+                 RestrictedToWarbandArchetypeIds). Contrôle unique factorisant chips + bascule
+                 Inclure/Exclure. -->
+            <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
 
             <!-- Réservé à ces guerriers : n'apparaît qu'une fois au moins une bande sélectionnée
                  ci-dessus - vide = tout guerrier des bandes sélectionnées (voir Skill.

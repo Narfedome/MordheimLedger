@@ -176,17 +176,22 @@
     </ContentPage.Resources>
 
     <components:WatermarkedLayout>
-    <Grid RowDefinitions="Auto,Auto,Auto,*">
+    <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" x:Name="Header" ColumnDefinitions="*,Auto">
             <header:DetailPageHeaderView Grid.Column="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
             <components:IconTextButton Grid.Column="1" Margin="0,0,16,0"
+                                        IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}"
                                         Icon="{x:Static icons:SolidFont.FlagCheckered}"
                                         Text="{loc:Loc EndOfGameTitle}"
                                         TextColor="{DynamicResource AppAccent}"
                                         Command="{Binding EndOfGameCommand}"/>
         </Grid>
 
-        <Label Grid.Row="1" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
+        <!-- Contenu de la page (trésorerie/rating, onglets Roster/Historique, recruter, roster,
+             historique) entièrement masqué pendant Loading.IsLoading - seul le header (titre + retour)
+             reste visible, pour ne pas bloquer la navigation pendant un chargement/rechargement. -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
+        <Label Grid.Row="0" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
             <Label.FormattedText>
                 <FormattedString>
                     <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
@@ -202,7 +207,7 @@
              détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab.
              Recruter vit ici (pas en bas de page, isolé) car il n'a de sens que sur l'onglet Roster -
              même logique que "Ajouter une note" ci-dessous, contextuel à l'onglet Historique. -->
-        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="16,0,16,8">
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="16,0,16,8">
             <components:ScrollableTabStripView Grid.Column="0">
                 <HorizontalStackLayout Spacing="16">
                     <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
@@ -222,7 +227,7 @@
         <!-- Pas de CollectionView ici (virtualisation inutile pour un roster de quelques dizaines de
              guerriers max, et une CollectionView imbriquée dans un ScrollView pose des soucis de
              hauteur) : un simple ScrollView + BindableLayout par groupe. -->
-        <ScrollView Grid.Row="3" x:Name="RosterScroll" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
+        <ScrollView Grid.Row="2" x:Name="RosterScroll" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
             <VerticalStackLayout Spacing="0" Margin="0,8">
 
                 <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
@@ -291,7 +296,7 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Grid Grid.Row="3" RowDefinitions="Auto,*" Margin="0,8" IsVisible="{Binding ShowHistory}">
+        <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="0,8" IsVisible="{Binding ShowHistory}">
             <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="16,0,16,8">
                 <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                      Command="{Binding AddNoteCommand}"
@@ -312,6 +317,12 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>
+        </Grid>
+
+        <!-- Même emplacement (Grid.Row="1") que le contenu qu'il remplace pendant le chargement - même
+             idiome que les dialogs (ActivityIndicator + Loading.IsLoading). -->
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                            HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="60" HeightRequest="60"/>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

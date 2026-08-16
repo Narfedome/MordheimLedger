@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Components.Dialogs
 {
@@ -22,6 +23,15 @@ namespace MordheimLedgerApp.Components.Dialogs
 
         public bool HasRelatedSpells => RelatedSpells.Count > 0;
 
+        // Résolu via le service locator (même idiome que BaseViewModel.Loading) plutôt qu'injecté au
+        // constructeur : ChipDetailDialogViewModel est instancié par DialogViewModel<TResult>.
+        // ShowChipDetailAsync, partagé par ~15 dialogs Edit/ReadOnly qui n'ont eux-mêmes aucune raison
+        // de connaître IDetailDialogService - seul ce popup imbriqué (le cas MagicSchool, RelatedSpells)
+        // en a besoin.
+        private IDetailDialogService? _detailDialogs;
+        private IDetailDialogService DetailDialogs =>
+            _detailDialogs ??= IPlatformApplication.Current!.Services.GetRequiredService<IDetailDialogService>();
+
         public ChipDetailDialogViewModel(string name, string? description, IReadOnlyList<Spell>? relatedSpells = null)
         {
             Title = name;
@@ -29,7 +39,10 @@ namespace MordheimLedgerApp.Components.Dialogs
             RelatedSpells = new ObservableCollection<Spell>(relatedSpells ?? Array.Empty<Spell>());
         }
 
+        /// <summary>Recap complet (jet/difficulté/école) au lieu du mini-popup Nom+Description générique -
+        /// même correctif que EquipmentItemDetailDialogViewModel.ShowSpecialRuleDetail pour les règles de
+        /// matériau : un Sort a des attributs propres qu'un simple Nom+Description ne montre pas.</summary>
         [RelayCommand]
-        private Task ShowSpellDetail(Spell spell) => ShowChipDetailAsync(spell.Name, spell.Description);
+        private Task ShowSpellDetail(Spell spell) => DetailDialogs.ShowSpellDetailDialogAsync(spell);
     }
 }

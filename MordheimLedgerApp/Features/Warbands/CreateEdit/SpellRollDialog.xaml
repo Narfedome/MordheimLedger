@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="library:Spell"
+               x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.SpellRollDialog"
+               x:DataType="local:SpellRollDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="320">
+        <VerticalStackLayout Spacing="14">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{loc:Loc WarbandsSpellRollTitle}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+
+            <!-- Contexte : école(s) de magie de la bande - même puce tapotable (Nom+Description+Sorts)
+                 que partout ailleurs dans l'appli (WarbandDetailPage/WarbandArchetypeDetailDialog). -->
+            <components:ChipListView HeaderText="{loc:Loc LibMagicSchoolsPh}"
+                                      ItemsSource="{Binding MagicSchools}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowMagicSchoolDetailCommand}"/>
+
+            <!-- Avant résolution : saisie du jet (physique ou dé) - la puce ci-dessous prend le relais
+                 une fois résolue (IsVisible inverse sur HasResolvedSpell). -->
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding HasResolvedSpell, Converter={StaticResource InverseBoolConverter}}">
+                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                    <Entry Grid.Column="0" Text="{Binding SpellRoll}" Keyboard="Numeric"
+                           Placeholder="{loc:Loc WarbandsSpellRollPh}" WidthRequest="70"/>
+                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                  Command="{Binding AutoRollCommand}"
+                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                </Grid>
+                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <!-- Après résolution : le sort obtenu, tapotable (récap complet à la demande, pas
+                 automatique) - le "x" de la puce (RemoveCommand=RerollCommand) revient à la saisie sans
+                 fermer le dialog. -->
+            <components:ChipItemView HeaderText="{loc:Loc WarriorsSpellsHeading}"
+                                      Item="{Binding ResolvedSpell}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowResolvedSpellDetailCommand}"
+                                      RemoveCommand="{Binding RerollCommand}"/>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="{loc:Loc BtnCancel}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding CancelCommand}"/>
+                <Button Grid.Column="1" Text="{loc:Loc WarbandsSpellRollConfirm}" Command="{Binding RollCommand}"
+                        IsVisible="{Binding HasResolvedSpell, Converter={StaticResource InverseBoolConverter}}"/>
+                <Button Grid.Column="1" Text="{loc:Loc BtnSave}" Command="{Binding AcceptCommand}"
+                        IsVisible="{Binding HasResolvedSpell}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</dialogs:DialogContent>

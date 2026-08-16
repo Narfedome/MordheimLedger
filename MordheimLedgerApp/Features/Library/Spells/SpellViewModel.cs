@@ -18,6 +18,7 @@ namespace MordheimLedgerApp.Features.Library.Spells;
 public partial class SpellViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly ISpellPickerNavigationService _pickerNavigation;
     private List<MagicSchool> _magicSchools = new();
     private bool _suppressFilterReload;
@@ -58,9 +59,10 @@ public partial class SpellViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public SpellViewModel(ILibraryService libraryService, ISpellPickerNavigationService pickerNavigation)
+    public SpellViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, ISpellPickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _pickerNavigation = pickerNavigation;
 
         // Voir WarbandArchetypeViewModel - rechargement explicite requis sur changement de langue
@@ -161,12 +163,10 @@ public partial class SpellViewModel : BaseViewModel
     [RelayCommand]
     private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<Spell>());
 
-    /// <summary>Read-only recap popup (tile info button) - no restriction resolution needed,
-    /// MagicSchool is already resolved on the loaded Item. AllowConcurrentExecutions : voir
+    /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
     /// WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task ShowDetails(SpellRow row) =>
-        await ShowDialogAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(row.Item)));
+    private Task ShowDetails(SpellRow row) => _detailDialogs.ShowSpellDetailDialogAsync(row.Item);
 
     [RelayCommand]
     private async Task Create()

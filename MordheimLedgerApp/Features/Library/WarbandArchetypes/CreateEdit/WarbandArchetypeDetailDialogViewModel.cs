@@ -4,7 +4,6 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit;
-using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
@@ -41,6 +40,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     private List<NamedRef> equipmentLists = new();
 
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private bool _warriorsLoaded;
     private bool _equipmentListsLoaded;
 
@@ -64,7 +64,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
     public bool HasSpecialRules => Item.SpecialRules.Count > 0;
     public bool HasMagicSchools => Item.MagicSchools.Count > 0;
 
-    public WarbandArchetypeDetailDialogViewModel(WarbandArchetype item, ILibraryService libraryService)
+    public WarbandArchetypeDetailDialogViewModel(WarbandArchetype item, ILibraryService libraryService, IDetailDialogService detailDialogs)
     {
         Item = item;
         Title = item.Name;
@@ -72,6 +72,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
         MaxWarriorsDisplay = item.MaxWarriors?.ToString() ?? "—";
         MinWarriorsDisplay = item.MinWarriors?.ToString() ?? "—";
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
     }
 
     [RelayCommand]
@@ -142,7 +143,7 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
         // besoin de le refetcher. EquipmentListDisplay a besoin des listes de la bande pour résoudre le
         // nom - garanti chargé même si l'utilisateur n'est jamais passé par l'onglet Équipement.
         await EnsureEquipmentListsLoadedAsync();
-        await ShowDialogAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(warrior, EquipmentLists)));
+        await _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(warrior, EquipmentLists);
     }
 
     [RelayCommand]
@@ -158,6 +159,6 @@ public partial class WarbandArchetypeDetailDialogViewModel : ReadOnlyDialogViewM
 
         var equipmentList = new EquipmentList { Id = list.Id, Name = list.Name, WarbandArchetypeId = Item.Id };
         await ShowDialogAsync(new EquipmentListDetailDialog(
-            new EquipmentListDetailDialogViewModel(equipmentList, items, _libraryService)));
+            new EquipmentListDetailDialogViewModel(equipmentList, items, _detailDialogs)));
     }
 }

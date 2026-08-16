@@ -43,6 +43,12 @@ public partial class WarriorRow : ObservableObject
     /// Mutations tab, only shown when the warrior's archetype has WarriorArchetype.CanBuyMutations).</summary>
     public ObservableCollection<WarriorMutation> Mutations { get; }
 
+    /// <summary>Bande entière (WarbandArchetype.MagicSchools), pas propre à ce guerrier - un lanceur de
+    /// sorts pioche dans les écoles de SA bande, il n'a pas sa propre affiliation. Vide (et donc
+    /// invisible, voir HasMagicSchools) pour tout guerrier dont l'archétype n'est pas IsSpellcaster -
+    /// résolu par WarbandDetailViewModel.ToRow, même idiome que SpecialRules band-wide.</summary>
+    public ObservableCollection<MagicSchool> MagicSchools { get; }
+
     /// <summary>Mirrors Warrior.Animal - read-only display, managed via WarriorEditDialog.</summary>
     public Animal? Animal => Warrior.Animal;
 
@@ -53,6 +59,7 @@ public partial class WarriorRow : ObservableObject
     public bool HasSpells => Spells.Count > 0;
     public bool HasMutations => Mutations.Count > 0;
     public bool HasAnimal => Animal is not null;
+    public bool HasMagicSchools => MagicSchools.Count > 0;
 
     /// <summary>Drives the read-only treatment of the card in the "Morts" group (hides Edit/Add/Remove
     /// buttons) - Dead is only ever reached via the End of Game wizard, see WarriorStatus.</summary>
@@ -75,7 +82,7 @@ public partial class WarriorRow : ObservableObject
         OnPropertyChanged(nameof(HeadCount));
     }
 
-    public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRule>? specialRules = null)
+    public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRule>? specialRules = null, IEnumerable<MagicSchool>? magicSchools = null)
     {
         Warrior = warrior;
         RoleName = roleName;
@@ -85,5 +92,6 @@ public partial class WarriorRow : ObservableObject
         Spells = new ObservableCollection<WarriorSpell>(warrior.Spells);
         Mutations = new ObservableCollection<WarriorMutation>(warrior.Mutations);
         SpecialRules = new ObservableCollection<SpecialRule>(specialRules ?? Enumerable.Empty<SpecialRule>());
+        MagicSchools = new ObservableCollection<MagicSchool>(magicSchools ?? Enumerable.Empty<MagicSchool>());
     }
 }

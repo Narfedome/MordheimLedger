@@ -12,6 +12,10 @@ public class WarriorSpell
     public int WarriorId { get; set; }
     public Spell Item { get; set; } = null!;
 
-    /// <summary>Passe-plat vers Item.Name - voir WarriorInjury.Name.</summary>
-    public string Name => Item.Name;
+    /// <summary>Passe-plat vers Item.RollDisplay ("3 - Fireball"), pas juste Item.Name - contrairement à
+    /// WarriorInjury.Name/WarriorSkill.Name, un sort connu affiche aussi le jet qui l'a déterminé (livre
+    /// des règles : sort de départ/nouveau sort tirés au hasard, pas choisis - voir Spell.RollDisplay). Le
+    /// seul consommateur de cette propriété est l'affichage en puce (ChipListView/ChipView, WarbandDetailPage/
+    /// WarriorEditDialog) - pas de risque de double-préfixage ailleurs.</summary>
+    public string Name => Item.RollDisplay;
 }

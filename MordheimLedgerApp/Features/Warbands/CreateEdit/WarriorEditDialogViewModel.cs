@@ -6,7 +6,6 @@ using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
@@ -16,13 +15,21 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly Warband _warband;
     private readonly IWarbandService _warbandService;
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISkillPickerService _skillPicker;
     private readonly IInjuryPickerService _injuryPicker;
     private readonly ISpellPickerService _spellPicker;
-    private readonly IReadOnlyList<int> _allowedMagicSchoolIds;
+    private readonly IReadOnlyList<MagicSchool> _magicSchools;
     private readonly IMutationPickerService _mutationPicker;
     private readonly IAnimalPickerService _animalPicker;
+
+    /// <summary>Mode Libre (voir WarbandEditDialogViewModel.IsExistingWarband, transmis tel quel par
+    /// l'appelant) : AddEquipment n'impacte plus la trésorerie (aucune vérification, aucune déduction) et
+    /// AddSpell repasse en choix libre au lieu du tirage 1D6 - même esprit "on enregistre un historique
+    /// déjà déterminé" déjà appliqué ailleurs dans l'app pour ce mode. False = comportement d'origine
+    /// (coûts réels), inchangé pour l'appelant existant (WarbandDetailViewModel.EditWarrior).</summary>
+    private readonly bool _skipCosts;
 
     protected override bool CancelResult => false;
 
@@ -87,24 +94,26 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public ObservableCollection<WarriorMutation> Mutations { get; }
 
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
-        ILibraryService libraryService, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
-        IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<int> allowedMagicSchoolIds,
-        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker)
+        ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
+        IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<MagicSchool> magicSchools,
+        IMutationPickerService mutationPicker, bool isMutant, IAnimalPickerService animalPicker, bool skipCosts = false)
     {
         this.item = item;
         this.title = title;
         _warband = warband;
         _warbandService = warbandService;
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _equipmentPicker = equipmentPicker;
         _skillPicker = skillPicker;
         _injuryPicker = injuryPicker;
         _spellPicker = spellPicker;
         IsSpellcaster = isSpellcaster;
-        _allowedMagicSchoolIds = allowedMagicSchoolIds;
+        _magicSchools = magicSchools;
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
         _animalPicker = animalPicker;
+        _skipCosts = skipCosts;
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);
@@ -171,14 +180,19 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.
-            if (_warband.Treasury < cost)
+            // Mode Libre (_skipCosts) : aucune vérification ni déduction, même esprit que WarbandEditDialogViewModel
+            // en mode Bande existante - on enregistre un historique déjà déterminé, pas un nouvel achat.
+            if (!_skipCosts)
             {
-                await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-                break;
-            }
+                if (_warband.Treasury < cost)
+                {
+                    await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
+                    break;
+                }
 
-            _warband.Treasury -= cost;
-            await _warbandService.SaveWarbandAsync(_warband);
+                _warband.Treasury -= cost;
+                await _warbandService.SaveWarbandAsync(_warband);
+            }
 
             var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem, materialRule: materialRule);
             Equipment.Add(carried);
@@ -202,25 +216,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// ShowEquipmentDetail) - inclut le matériau choisi (Gromril/Ithilmar...) dans la liste de règles
     /// spéciales affichée, pas seulement l'abréviation "(G)" du chip.</summary>
     [RelayCommand]
-    private async Task ShowEquipmentDetail(WarriorEquipment carried)
-    {
-        var equipmentItem = carried.Item;
-        var language = LocalizationService.Instance.Language;
-        var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
-
-        var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
-            ? new List<WarriorArchetype>()
-            : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
-                .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors, carried.MaterialRule)));
-    }
+    private Task ShowEquipmentDetail(WarriorEquipment carried) =>
+        _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule);
 
     [RelayCommand]
     private async Task AddSkill()
@@ -241,6 +238,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
+    private Task ShowSkillDetail(WarriorSkill learned) => _detailDialogs.ShowSkillDetailDialogAsync(learned.Item);
+
+    [RelayCommand]
     private async Task AddInjury()
     {
         var injuries = await _injuryPicker.PickInjuriesAsync();
@@ -259,14 +259,33 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
+    private Task ShowInjuryDetail(WarriorInjury tracked) => _detailDialogs.ShowInjuryDetailDialogAsync(tracked.Item);
+
+    /// <summary>Mode Libre (_skipCosts) : choix libre parmi les écoles de la bande (on enregistre un
+    /// historique déjà déterminé). Sinon : tirage 1D6 via SpellRollDialog, même mécanisme que le sort de
+    /// départ des recrues fraîches (WarbandEditDialogViewModel.ShowSpellRollDialog) - livre des règles,
+    /// un lanceur de sorts obtient toujours un sort au hasard, jamais un choix libre. Pas de plafond ici
+    /// (contrairement au sort de départ) : un guerrier déjà en jeu peut apprendre plusieurs sorts au fil
+    /// des parties (Avancement).</summary>
+    [RelayCommand]
     private async Task AddSpell()
     {
-        var spells = await _spellPicker.PickSpellsAsync(_allowedMagicSchoolIds);
-        foreach (var spell in spells)
+        if (_skipCosts)
         {
-            var learned = await _warbandService.AddWarriorSpellAsync(Item.Id, spell);
-            Spells.Add(learned);
+            var freeSpells = await _spellPicker.PickSpellsAsync(_magicSchools.Select(s => s.Id).ToList());
+            foreach (var spell in freeSpells)
+            {
+                var learned = await _warbandService.AddWarriorSpellAsync(Item.Id, spell);
+                Spells.Add(learned);
+            }
+            return;
         }
+
+        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(_magicSchools.ToList(), _libraryService, _detailDialogs)));
+        if (rolled is null) return;
+
+        var rolledLearned = await _warbandService.AddWarriorSpellAsync(Item.Id, rolled);
+        Spells.Add(rolledLearned);
     }
 
     [RelayCommand]
@@ -275,6 +294,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         await _warbandService.RemoveWarriorSpellAsync(learned.Id);
         Spells.Remove(learned);
     }
+
+    [RelayCommand]
+    private Task ShowSpellDetail(WarriorSpell learned) => _detailDialogs.ShowSpellDetailDialogAsync(learned.Item);
 
     [RelayCommand]
     private async Task AddMutation()
@@ -293,6 +315,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         await _warbandService.RemoveWarriorMutationAsync(bought.Id);
         Mutations.Remove(bought);
     }
+
+    [RelayCommand]
+    private Task ShowMutationDetail(WarriorMutation bought) => _detailDialogs.ShowMutationDetailDialogAsync(bought.Item);
 
     /// <summary>Animal n'est pas un onglet ni une liste : c'est un simple champ 0..1 sur Item.Animal,
     /// soumis comme les stats au bouton Enregistrer/Annuler (pas de persistance immédiate ni de méthode
@@ -317,6 +342,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         Item.Animal = null;
         OnPropertyChanged(nameof(Item));
     }
+
+    [RelayCommand]
+    private Task ShowAnimalDetail() => Item.Animal is null ? Task.CompletedTask : _detailDialogs.ShowAnimalDetailDialogAsync(Item.Animal);
 
     [RelayCommand]
     private async Task Delete()

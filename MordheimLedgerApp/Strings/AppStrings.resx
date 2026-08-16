@@ -174,14 +174,29 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Pas assez d'or dans le trésor de la bande.</value>
   </data>
-  <data name="WarbandsExistingWarbandLabel" xml:space="preserve">
-    <value>Bande existante</value>
+  <data name="WarbandsFreeModeLabel" xml:space="preserve">
+    <value>Mode libre (aucun coût appliqué)</value>
   </data>
   <data name="WarbandsExistingWarbandTitle" xml:space="preserve">
-    <value>Mode Bande existante</value>
+    <value>Mode libre</value>
   </data>
   <data name="WarbandsExistingWarbandHint" xml:space="preserve">
-    <value>Trésorerie libre, recrutement et achats sans limite de budget, et possibilité d'assigner directement les compétences déjà apprises.</value>
+    <value>Trésorerie libre, recrutement/achats/édition du roster sans limite de budget, et possibilité d'assigner directement les compétences et sorts déjà appris.</value>
+  </data>
+  <data name="WarbandsSpellRollTitle" xml:space="preserve">
+    <value>Sort de départ</value>
+  </data>
+  <data name="WarbandsSpellRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
+    <value>Valider</value>
+  </data>
+  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
+    <value>Entrez un jet entre 1 et 6.</value>
+  </data>
+  <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
+    <value>Aucun sort ne correspond à ce jet dans la table de l'école de magie de cette bande.</value>
   </data>
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Matériau</value>
@@ -1175,6 +1190,9 @@
   </data>
   <data name="WarbandCreateTitle" xml:space="preserve">
     <value>Nouvelle bande</value>
+  </data>
+  <data name="WarbandEditTitle" xml:space="preserve">
+    <value>Modifier la bande</value>
   </data>
   <data name="WarbandArchetypeAddWarriorLabel" xml:space="preserve">
     <value>Ajouter un guerrier</value>

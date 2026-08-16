@@ -66,6 +66,54 @@ public partial class RecruitSlotTabsView : ContentView
         set => SetValue(RemoveSkillCommandProperty, value);
     }
 
+    public static readonly BindableProperty ShowSkillDetailCommandProperty =
+        BindableProperty.Create(nameof(ShowSkillDetailCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? ShowSkillDetailCommand
+    {
+        get => (ICommand?)GetValue(ShowSkillDetailCommandProperty);
+        set => SetValue(ShowSkillDetailCommandProperty, value);
+    }
+
+    public static readonly BindableProperty AddSpellCommandProperty =
+        BindableProperty.Create(nameof(AddSpellCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? AddSpellCommand
+    {
+        get => (ICommand?)GetValue(AddSpellCommandProperty);
+        set => SetValue(AddSpellCommandProperty, value);
+    }
+
+    public static readonly BindableProperty RemoveSpellCommandProperty =
+        BindableProperty.Create(nameof(RemoveSpellCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? RemoveSpellCommand
+    {
+        get => (ICommand?)GetValue(RemoveSpellCommandProperty);
+        set => SetValue(RemoveSpellCommandProperty, value);
+    }
+
+    public static readonly BindableProperty ShowSpellDetailCommandProperty =
+        BindableProperty.Create(nameof(ShowSpellDetailCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? ShowSpellDetailCommand
+    {
+        get => (ICommand?)GetValue(ShowSpellDetailCommandProperty);
+        set => SetValue(ShowSpellDetailCommandProperty, value);
+    }
+
+    /// <summary>Hors mode Bande existante (Item.IsExistingWarband) : ouvre SpellRollDialog (contexte
+    /// école de magie + saisie du jet 1D6, voir WarbandEditDialogViewModel.ShowSpellRollDialog) -
+    /// remplace AddSpellCommand, où le sort de départ est tiré au hasard plutôt que choisi librement.</summary>
+    public static readonly BindableProperty ShowSpellRollDialogCommandProperty =
+        BindableProperty.Create(nameof(ShowSpellRollDialogCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? ShowSpellRollDialogCommand
+    {
+        get => (ICommand?)GetValue(ShowSpellRollDialogCommandProperty);
+        set => SetValue(ShowSpellRollDialogCommandProperty, value);
+    }
+
     public RecruitSlotTabsView()
     {
         InitializeComponent();

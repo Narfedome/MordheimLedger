@@ -7,6 +7,7 @@
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGameDialog"
                x:DataType="local:EndOfGameDialogViewModel"
@@ -148,9 +149,21 @@
                                                                 IsVisible="{Binding HasSkillSelected, Converter={StaticResource InverseBoolConverter}}"
                                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
                                                                 CommandParameter="{Binding .}"/>
-                                                        <Label Text="{Binding SelectedSkillsText}" FontSize="12"
-                                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"
-                                                               IsVisible="{Binding HasSkillSelected}"/>
+                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SelectedSkills}"
+                                                                    IsVisible="{Binding HasSkillSelected}">
+                                                            <BindableLayout.ItemTemplate>
+                                                                <DataTemplate x:DataType="library:Skill">
+                                                                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,0">
+                                                                        <Border.GestureRecognizers>
+                                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                                                                   CommandParameter="{Binding .}"/>
+                                                                        </Border.GestureRecognizers>
+                                                                        <Label Text="{Binding Name}" FontSize="12"
+                                                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
+                                                                    </Border>
+                                                                </DataTemplate>
+                                                            </BindableLayout.ItemTemplate>
+                                                        </FlexLayout>
                                                     </HorizontalStackLayout>
                                                 </VerticalStackLayout>
                                             </DataTemplate>

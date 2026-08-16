@@ -64,23 +64,34 @@
                             <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
-                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsWizardMode}">
+                        <!-- Mode Libre : trésorerie en saisie libre, aucun coût appliqué (recrutement,
+                             achats, édition du roster actuel) - même flag IsExistingWarband qu'avant,
+                             mais désormais pertinent aussi en édition d'une bande déjà sauvegardée (plus
+                             seulement à la création), d'où le libellé reformulé. -->
+                        <HorizontalStackLayout Spacing="10">
                             <CheckBox IsChecked="{Binding IsExistingWarband}" VerticalOptions="Center"/>
-                            <Label Text="{loc:Loc WarbandsExistingWarbandLabel}" VerticalOptions="Center"/>
+                            <Label Text="{loc:Loc WarbandsFreeModeLabel}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
+                        <!-- Ajouter/Retirer l'archétype masqués hors création (ArchetypeAddCommandOrNull/
+                             ArchetypeRemoveCommandOrNull renvoient null si !IsWizardMode) - en changer
+                             invaliderait les WarriorArchetypeId déjà liés aux guerriers recrutés. La puce
+                             reste tapable (récap complet) dans les deux cas. -->
                         <components:ChipItemView Item="{Binding Archetype}"
                                         HeaderText="{loc:Loc WarbandArchetype}"
                                         IconGlyph="{x:Static icons:SolidFont.Users}"
                                         Command="{Binding ShowArchetypeDetailCommand}"
-                                        AddCommand="{Binding AddArchetypeCommand}"
-                                        RemoveCommand="{Binding RemoveArchetypeCommand}"
+                                        AddCommand="{Binding ArchetypeAddCommandOrNull}"
+                                        RemoveCommand="{Binding ArchetypeRemoveCommandOrNull}"
                                                  IsMandatory="True" />
                         <Label Text="{Binding ArchetypeError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding Archetype, Converter={StaticResource IsNotNullConverter}}">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                                <Label Text="{Binding Archetype.StartingTreasury}" IsVisible="{Binding IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"/>
+                                <!-- RosterStartingTreasury : trésor de départ théorique de l'archétype à
+                                     la création, trésorerie RÉELLE actuelle de la bande en édition
+                                     (Item.Treasury) - voir WarbandEditDialogViewModel. -->
+                                <Label Text="{Binding RosterStartingTreasury}" IsVisible="{Binding IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"/>
                                 <Entry Text="{Binding TreasuryOverride}" Keyboard="Numeric" IsVisible="{Binding IsExistingWarband}"/>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="4">
@@ -97,6 +108,7 @@
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
                         <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Grid.Column="0" Text="{Binding RosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                             <Label Grid.Column="1" Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -135,8 +147,10 @@
                                                 <DataTemplate x:DataType="local:HenchmanGroupDraft">
                                                     <VerticalStackLayout Spacing="2">
                                                         <!-- Nom en lecture seule ici (édité à l'étape Noms) - juste de quoi distinguer
-                                                             les groupes entre eux si le joueur en a divisé plusieurs. -->
-                                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4">
+                                                             les groupes entre eux si le joueur en a divisé plusieurs. Équipement se
+                                                             gère désormais entièrement via l'onglet Équipement de RecruitSlotTabsView
+                                                             ci-dessous (les deux modes), plus de "+" ni de puces dupliquées ici. -->
+                                                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
                                                             <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalOptions="Center"/>
                                                             <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
                                                                    TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
@@ -150,45 +164,24 @@
                                                                                           IsVisible="{Binding CanSplit}"
                                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
                                                                                           CommandParameter="{Binding .}"/>
-                                                            <!-- Wrapper : IsVisible ne combine pas plusieurs conditions nativement en XAML,
-                                                                 donc CanUseEquipment (le type ne porte jamais d'équipement, ex. Rat Ogre) se
-                                                                 pose sur ce Grid englobant, IsExistingWarband inverse reste sur le bouton. -->
-                                                            <Grid Grid.Column="3" IsVisible="{Binding CanUseEquipment}">
-                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
                                                         </Grid>
-                                                        <!-- Hors mode Bande existante : juste l'équipement, sans onglets (comportement
-                                                             d'origine). Icône par EquipmentCategory (même EquipmentCategoryIconConverter
-                                                             que WarriorEditDialog), pas un glyphe unique : ChipListView n'a qu'un seul
-                                                             IconGlyph pour toute la liste, donc chip inline par item ici plutôt qu'via ce
-                                                             composant. -->
-                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}"
-                                                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                            <BindableLayout.ItemTemplate>
-                                                                <DataTemplate x:DataType="local:EquipmentPick">
-                                                                    <components:ChipView Item="{Binding .}"
-                                                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                                          IconFontFamily="RpgAwesome"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
-                                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
-                                                                </DataTemplate>
-                                                            </BindableLayout.ItemTemplate>
-                                                        </FlexLayout>
-                                                        <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
-                                                             (un état par groupe, SelectedSection), factorisés dans RecruitSlotTabsView
-                                                             (même bloc réutilisé côté Héros juste en dessous). -->
+                                                        <!-- Équipement (les deux modes désormais)/Compétences/XP (Bande existante
+                                                             uniquement) et Sorts (les deux modes, livre des règles : sort de départ
+                                                             tiré au 1D6 même en création neuve) factorisés dans RecruitSlotTabsView
+                                                             (même bloc réutilisé côté Héros juste en dessous) - visible dès qu'au
+                                                             moins un sous-onglet a un sens (voir RecruitSlot.ShowTabsView). -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"
-                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}"
+                                                              IsVisible="{Binding ShowTabsView}"
                                                               AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
                                                               RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
                                                               ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
                                                               AddSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
-                                                              RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"/>
+                                                              RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"
+                                                              ShowSkillDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                              AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
+                                                              RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
+                                                              ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -200,46 +193,32 @@
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="local:WarriorNameSlot">
                                                     <VerticalStackLayout >
-                                                        <!-- ArchetypeLabel (pas Name, le nom personnel du héros - vide tant que
-                                                             l'étape Noms n'a pas été atteinte) : chaque héros reste une ligne
-                                                             indépendante, même si plusieurs partagent le même archétype - pas
-                                                             d'en-tête partagé au niveau de la ligne recrutée, juste un numéro
-                                                             ajouté par WarbandEditDialogViewModel.RenumberHeroLabels si besoin
-                                                             de les distinguer. -->
-                                                        <Grid ColumnDefinitions="*,Auto">
-                                                            <Label Grid.Column="0" Text="{Binding ArchetypeLabel}" FontSize="13" VerticalOptions="Center"/>
-                                                            <Grid Grid.Column="1" IsVisible="{Binding CanUseEquipment}">
-                                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"
-                                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
-                                                                                              CommandParameter="{Binding .}"/>
-                                                            </Grid>
-                                                        </Grid>
-                                                        <!-- Hors mode Bande existante : juste l'équipement, sans onglets (comportement d'origine). -->
-                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}"
-                                                                    IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
-                                                            <BindableLayout.ItemTemplate>
-                                                                <DataTemplate x:DataType="local:EquipmentPick">
-                                                                    <components:ChipView Item="{Binding .}"
-                                                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                                          IconFontFamily="RpgAwesome"
-                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
-                                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"/>
-                                                                </DataTemplate>
-                                                            </BindableLayout.ItemTemplate>
-                                                        </FlexLayout>
-                                                        <!-- Mode Bande existante uniquement - sous-onglets Équipement/Compétences/XP
-                                                             (un état par héros, SelectedSection), même RecruitSlotTabsView que côté
-                                                             Hommes de main ci-dessus. -->
+                                                        <!-- DisplayLabel : ArchetypeLabel (pas encore nommé, vide tant que l'étape
+                                                             Noms n'a pas été atteinte) pour une nouvelle recrue de cette session,
+                                                             ou directement le nom personnel pour un héros déjà recruté (bande
+                                                             rouverte pour édition - déjà connu, pas la peine d'attendre l'étape
+                                                             Noms). Chaque héros reste une ligne indépendante, même si plusieurs
+                                                             partagent le même archétype - pas d'en-tête partagé au niveau de la
+                                                             ligne recrutée, juste un numéro ajouté par WarbandEditDialogViewModel.
+                                                             RenumberHeroLabels si besoin de les distinguer. -->
+                                                        <!-- Équipement se gère désormais entièrement via l'onglet Équipement de
+                                                             RecruitSlotTabsView ci-dessous (les deux modes), plus de "+" ni de puces
+                                                             dupliquées ici. -->
+                                                        <Label Text="{Binding DisplayLabel}" FontSize="13" VerticalOptions="Center"/>
+                                                        <!-- Équipement (les deux modes désormais)/Compétences/XP/Sorts - même
+                                                             RecruitSlotTabsView que côté Hommes de main ci-dessus. -->
                                                         <components:RecruitSlotTabsView Item="{Binding .}"
-                                                              IsVisible="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=IsExistingWarband}"
+                                                              IsVisible="{Binding ShowTabsView}"
                                                               AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
                                                               RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
                                                               ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
                                                               AddSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
-                                                              RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"/>
+                                                              RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"
+                                                              ShowSkillDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                              AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
+                                                              RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
+                                                              ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>

@@ -174,14 +174,29 @@
   <data name="WarbandsInsufficientFundsMessage" xml:space="preserve">
     <value>Not enough gold in the warband's treasury.</value>
   </data>
-  <data name="WarbandsExistingWarbandLabel" xml:space="preserve">
-    <value>Existing warband</value>
+  <data name="WarbandsFreeModeLabel" xml:space="preserve">
+    <value>Free mode (no costs applied)</value>
   </data>
   <data name="WarbandsExistingWarbandTitle" xml:space="preserve">
-    <value>Existing Warband mode</value>
+    <value>Free mode</value>
   </data>
   <data name="WarbandsExistingWarbandHint" xml:space="preserve">
-    <value>Free treasury entry, no budget limit on recruiting or purchases, and skills already learned can be assigned directly.</value>
+    <value>Free treasury entry, no budget limit on recruiting/purchases/editing the roster, and skills and spells already learned can be assigned directly.</value>
+  </data>
+  <data name="WarbandsSpellRollTitle" xml:space="preserve">
+    <value>Starting Spell</value>
+  </data>
+  <data name="WarbandsSpellRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
+    <value>Enter a roll between 1 and 6.</value>
+  </data>
+  <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
+    <value>No spell matches that roll on this warband's magic school table.</value>
   </data>
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Material</value>
@@ -1175,6 +1190,9 @@
   </data>
   <data name="WarbandCreateTitle" xml:space="preserve">
     <value>New warband</value>
+  </data>
+  <data name="WarbandEditTitle" xml:space="preserve">
+    <value>Edit warband</value>
   </data>
   <data name="WarbandArchetypeAddWarriorLabel" xml:space="preserve">
     <value>Add warrior</value>

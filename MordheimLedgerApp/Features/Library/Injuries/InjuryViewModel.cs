@@ -12,6 +12,7 @@ namespace MordheimLedgerApp.Features.Library.Injuries;
 public partial class InjuryViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IInjuryPickerNavigationService _pickerNavigation;
     private List<Injury> _allItems = new();
 
@@ -46,9 +47,10 @@ public partial class InjuryViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
-    public InjuryViewModel(ILibraryService libraryService, IInjuryPickerNavigationService pickerNavigation)
+    public InjuryViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, IInjuryPickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _pickerNavigation = pickerNavigation;
         selectedCategoryLabel = Loc["LibFilterAll"];
 
@@ -198,6 +200,5 @@ public partial class InjuryViewModel : BaseViewModel
     /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
     /// WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private async Task ShowDetails(InjuryRow row) =>
-        await ShowDialogAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(row.Item)));
+    private Task ShowDetails(InjuryRow row) => _detailDialogs.ShowInjuryDetailDialogAsync(row.Item);
 }

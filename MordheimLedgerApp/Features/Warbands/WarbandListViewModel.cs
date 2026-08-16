@@ -15,8 +15,13 @@ public partial class WarbandListViewModel : BaseViewModel
     private readonly IWarbandService _warbandService;
     private readonly IWarbandArchetypePickerService _warbandArchetypePickerService;
     private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
     private readonly IEquipmentPickerService _equipmentPickerService;
     private readonly ISkillPickerService _skillPickerService;
+    private readonly ISpellPickerService _spellPickerService;
+    private readonly IInjuryPickerService _injuryPickerService;
+    private readonly IMutationPickerService _mutationPickerService;
+    private readonly IAnimalPickerService _animalPickerService;
 
     [ObservableProperty]
     private ObservableCollection<WarbandRow> rows = new();
@@ -43,15 +48,21 @@ public partial class WarbandListViewModel : BaseViewModel
 
     public WarbandListViewModel(IWarbandArchetypePickerNavigationService pickerNavigation,
         IWarbandService warbandService, IWarbandArchetypePickerService warbandArchetypePickerService,
-        ILibraryService libraryService, IEquipmentPickerService equipmentPickerService,
-        ISkillPickerService skillPickerService)
+        ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPickerService,
+        ISkillPickerService skillPickerService, ISpellPickerService spellPickerService, IInjuryPickerService injuryPickerService,
+        IMutationPickerService mutationPickerService, IAnimalPickerService animalPickerService)
     {
         _pickerNavigation = pickerNavigation;
         _warbandService = warbandService;
         _warbandArchetypePickerService = warbandArchetypePickerService;
         _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
         _equipmentPickerService = equipmentPickerService;
         _skillPickerService = skillPickerService;
+        _spellPickerService = spellPickerService;
+        _injuryPickerService = injuryPickerService;
+        _mutationPickerService = mutationPickerService;
+        _animalPickerService = animalPickerService;
     }
 
     partial void OnSelectedRowChanged(WarbandRow? oldValue, WarbandRow? newValue)
@@ -91,7 +102,8 @@ public partial class WarbandListViewModel : BaseViewModel
         // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
         var newItem = new Core.Models.Warband();
         var dialogViewModel = new WarbandEditDialogViewModel(newItem, Loc["WarbandCreateTitle"],
-             _warbandArchetypePickerService, _warbandService, _libraryService, _equipmentPickerService, _skillPickerService);
+             _warbandArchetypePickerService, _warbandService, _libraryService, _detailDialogs, _equipmentPickerService, _skillPickerService,
+             _spellPickerService, _injuryPickerService, _mutationPickerService, _animalPickerService);
         if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
 
         await LoadWarbandsAsync();
@@ -107,16 +119,33 @@ public partial class WarbandListViewModel : BaseViewModel
         await Shell.Current.GoToAsync($"{nameof(WarbandDetailPage)}?warbandId={row.Warband.Id}");
     }
 
+    /// <summary>Rouvre la bande sélectionnée dans le même dialog que la création (WarbandEditDialogViewModel,
+    /// Item.Id != 0 donc IsWizardMode false - onglets librement navigables) au lieu d'un simple prompt de
+    /// renommage : équipement/compétences/sorts du roster déjà recruté (via "Roster actuel", voir
+    /// EditExistingWarrior) et de nouvelles recrues sont désormais modifiables, dans l'un des deux modes
+    /// (Coûts appliqués/Libre, voir IsExistingWarband). L'archétype de la bande n'est pas rechargé par le
+    /// dialog lui-même (il n'a de sens à choisir qu'à la création) - on le pré-charge ici et on l'assigne
+    /// directement à Archetype avant l'ouverture.</summary>
     [RelayCommand]
     private async Task EditSelectedWarbandAsync()
     {
         if (SelectedRow is not { } row) return;
 
-        var newName = await ShowPromptAsync(Loc["DialogRename"], Loc["PromptName"], initialValue: row.Name);
-        if (string.IsNullOrWhiteSpace(newName) || newName == row.Name) return;
+        var language = LocalizationService.Instance.Language;
+        WarbandArchetype? archetype = null;
+        await Loading.RunAsync(async () =>
+        {
+            archetype = await Task.Run(() => _libraryService.GetWarbandArchetypeAsync(row.Warband.WarbandArchetypeId, language));
+        });
 
-        row.Warband.Name = newName.Trim();
-        await _warbandService.SaveWarbandAsync(row.Warband);
+        var dialogViewModel = new WarbandEditDialogViewModel(row.Warband, Loc["WarbandEditTitle"],
+            _warbandArchetypePickerService, _warbandService, _libraryService, _detailDialogs, _equipmentPickerService, _skillPickerService,
+            _spellPickerService, _injuryPickerService, _mutationPickerService, _animalPickerService)
+        {
+            Archetype = archetype
+        };
+        if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
+
         await LoadWarbandsAsync();
     }
 

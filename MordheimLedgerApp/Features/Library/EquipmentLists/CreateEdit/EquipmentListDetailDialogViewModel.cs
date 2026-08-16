@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
-using MordheimLedgerApp.Core.Services;
-using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit;
@@ -20,33 +18,16 @@ public partial class EquipmentListDetailDialogViewModel : ReadOnlyDialogViewMode
     /// Item.ItemIds - same idiom as every other XxxDetailDialogViewModel.</summary>
     public List<EquipmentItem> Items { get; }
 
-    private readonly ILibraryService _libraryService;
+    private readonly IDetailDialogService _detailDialogs;
 
-    public EquipmentListDetailDialogViewModel(EquipmentList item, List<EquipmentItem> items, ILibraryService libraryService)
+    public EquipmentListDetailDialogViewModel(EquipmentList item, List<EquipmentItem> items, IDetailDialogService detailDialogs)
     {
         Item = item;
         Title = item.Name;
         Items = items;
-        _libraryService = libraryService;
+        _detailDialogs = detailDialogs;
     }
 
     [RelayCommand]
-    private async Task ShowItemDetail(EquipmentItem equipmentItem)
-    {
-        var language = LocalizationService.Instance.Language;
-        var categoryLabel = Loc[$"EquipmentCategory{equipmentItem.Category}"];
-
-        var restrictedWarbands = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0
-            ? new List<WarbandArchetype>()
-            : (await _libraryService.GetWarbandArchetypesAsync(language))
-                .Where(w => equipmentItem.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
-
-        var restrictedWarriors = equipmentItem.RestrictedToWarbandArchetypeIds.Count == 0 || equipmentItem.RestrictedToWarriorArchetypeIds.Count == 0
-            ? new List<WarriorArchetype>()
-            : (await _libraryService.GetWarriorArchetypesAsync(equipmentItem.RestrictedToWarbandArchetypeIds, language))
-                .Where(w => equipmentItem.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
-
-        await ShowDialogAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(equipmentItem, categoryLabel, restrictedWarbands, restrictedWarriors)));
-    }
+    private Task ShowItemDetail(EquipmentItem equipmentItem) => _detailDialogs.ShowEquipmentDetailDialogAsync(equipmentItem);
 }

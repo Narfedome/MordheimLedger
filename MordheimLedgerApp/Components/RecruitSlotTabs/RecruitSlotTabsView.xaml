@@ -10,14 +10,28 @@
              x:Name="root">
 
     <VerticalStackLayout Spacing="6" BindingContext="{x:Reference root}">
+        <!-- Équipement est toujours pertinent (les deux modes) - XP n'a de sens qu'en Bande existante
+             (import d'un historique déjà déterminé), masqué sinon (voir RecruitSlot.IsExistingWarband).
+             Compétences suit la même règle, OU s'ouvre aussi dès qu'on édite une bande déjà sauvegardée
+             (RecruitSlot.ShowSkillsTab) - gérer les compétences d'un guerrier déjà en jeu n'est pas
+             réservé au mode Libre. Sorts reste visible dans les deux modes pour un lanceur de sorts
+             (livre des règles : sort de départ tiré au 1D6 même en création neuve), avec un bouton
+             "+"/dé différent selon le mode (voir plus bas). -->
         <components:ScrollableTabStripView>
             <HorizontalStackLayout Spacing="14">
                 <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
                                              IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
-                                             IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"/>
+                                             IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"
+                                             IsVisible="{Binding Item.ShowSkillsTab}"/>
+                <!-- Onglet Sorts : masqué si ce type de guerrier n'est pas lanceur de sorts (voir
+                     RecruitSlot.IsSpellcaster), même garde que WarriorEditDialog. -->
+                <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" FontSize="11"
+                                             IsActive="{Binding Item.IsSpellsSection}" Command="{Binding Item.ShowSpellsSectionCommand}"
+                                             IsVisible="{Binding Item.IsSpellcaster}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
-                                             IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"/>
+                                             IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"
+                                             IsVisible="{Binding Item.IsExistingWarband}"/>
             </HorizontalStackLayout>
         </components:ScrollableTabStripView>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsEquipmentSection}">
@@ -44,6 +58,10 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="library:Skill">
                         <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSkillDetailCommand}"
+                                                       CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
                             <HorizontalStackLayout Spacing="4">
                                 <Label Text="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                        FontFamily="RpgAwesome" FontSize="12"
@@ -64,6 +82,56 @@
                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                           Command="{Binding AddSkillCommand}"
                                           CommandParameter="{Binding Item}"/>
+        </Grid>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsSpellsSection}">
+                <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Spells}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:Spell">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSpellDetailCommand}"
+                                                           CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
+                                           FontFamily="RpgAwesome" FontSize="12"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                    <!-- RollDisplay ("3 - Fireball") plutôt que Name seul - le jet qui a
+                                         déterminé ce sort est une info utile ici (tiré au hasard, pas
+                                         choisi - voir Spell.RollDisplay). -->
+                                    <Label Text="{Binding RollDisplay}" FontSize="11" VerticalOptions="Center"/>
+                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                                  Command="{Binding Source={x:Reference root}, Path=RemoveSpellCommand}"
+                                                                  CommandParameter="{Binding .}"/>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+                <!-- Bande existante : choix libre (on enregistre un historique déjà déterminé sur
+                     papier). Hors Bande existante : ouvre SpellRollDialog (contexte école de magie +
+                     saisie du jet 1D6, livre des règles) plutôt qu'un choix libre - masqué une fois le
+                     sort obtenu (Item.HasSpells, un seul sort de départ), retirer la puce ci-dessus
+                     (RemoveSpellCommand) permet de rouvrir le dialog et relancer. Wrapper : IsVisible ne
+                     combine pas plusieurs conditions nativement en XAML, même idiome qu'ailleurs dans
+                     WarbandEditDialog.xaml. -->
+                <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband}">
+                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddSpellCommand}"
+                                                  CommandParameter="{Binding Item}"/>
+                </Grid>
+                <Grid Grid.Column="1" IsVisible="{Binding Item.IsExistingWarband, Converter={StaticResource InverseBoolConverter}}">
+                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Dice}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  IsVisible="{Binding Item.HasSpells, Converter={StaticResource InverseBoolConverter}}"
+                                                  Command="{Binding ShowSpellRollDialogCommand}"
+                                                  CommandParameter="{Binding Item}"/>
+                </Grid>
         </Grid>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>

@@ -92,6 +92,18 @@
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowInjuryDetailCommand}"/>
 
+                        <!-- École(s) de magie : celle(s) de LA BANDE (pas propre au guerrier - voir
+                             WarriorRow.MagicSchools), résolue seulement pour les guerriers lanceurs de
+                             sorts (WarriorArchetype.IsSpellcaster) - invisible pour tous les autres
+                             (HasMagicSchools vide). Même popup récap (Nom+Description+Sorts) que
+                             l'onglet Magie du Codex/WarbandArchetypeDetailDialog. -->
+                        <components:ChipListView HeaderText="{loc:Loc LibMagicSchoolsPh}"
+                                                  ItemsSource="{Binding MagicSchools}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowMagicSchoolDetailCommand}"/>
+
                         <!-- Sorts connus : lecture seule, gérés depuis l'onglet Sorts de WarriorEditDialog
                              (visible seulement si l'archétype de ce guerrier est un lanceur de sorts). -->
                         <components:ChipListView HeaderText="{loc:Loc WarriorsSpellsHeading}"

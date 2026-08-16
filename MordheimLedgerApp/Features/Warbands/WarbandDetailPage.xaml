@@ -41,28 +41,6 @@
                                                           CommandParameter="{Binding .}"/>
                         </Grid>
 
-                        <!-- Stepper d'effectif pour un groupe d'Hommes de main uniquement (livre des règles :
-                             XP/équipement/compétences partagés, seul l'effectif varie individu par individu -
-                             voir Warrior.HeadCount) - descendre à 0 supprime la ligne (IncrementHeadCount/
-                             DecrementHeadCommand, WarbandDetailViewModel). -->
-                        <HorizontalStackLayout Spacing="6"
-                                                IsVisible="{Binding Warrior.IsHero, Converter={StaticResource InverseBoolConverter}}">
-                            <Label Text="{loc:Loc WarriorsGroupHenchmen}" FontSize="10" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                          Icon="{x:Static icons:SolidFont.Minus}"
-                                                          IconSize="11" ButtonWidthRequest="24" ButtonHeightRequest="24"
-                                                          IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}"
-                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=DecrementHeadCountCommand}"
-                                                          CommandParameter="{Binding .}"/>
-                            <Label Text="{Binding HeadCount}" FontSize="12" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                          Icon="{x:Static icons:SolidFont.Plus}"
-                                                          IconSize="11" ButtonWidthRequest="24" ButtonHeightRequest="24"
-                                                          IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}"
-                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=IncrementHeadCountCommand}"
-                                                          CommandParameter="{Binding .}"/>
-                        </HorizontalStackLayout>
-
                         <!-- StatRowView partagé avec AnimalDetailDialog/WarriorArchetypeDetailDialog -
                              abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
@@ -205,10 +183,11 @@
 
         <!-- Roster / Historique : pas de précédent DmTools pour des "onglets" internes à une page de
              détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab.
-             Recruter vit ici (pas en bas de page, isolé) car il n'a de sens que sur l'onglet Roster -
-             même logique que "Ajouter une note" ci-dessous, contextuel à l'onglet Historique. -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="16,0,16,8">
-            <components:ScrollableTabStripView Grid.Column="0">
+             Recruter (et l'effectif des groupes d'Hommes de main) ne se gère plus depuis ici - retour
+             utilisateur explicite : ces changements de roster passent désormais par Fin de Partie
+             (l'étape "entre deux parties" du livre des règles), pas en action libre à tout moment. -->
+        <Grid Grid.Row="1" Margin="16,0,16,8">
+            <components:ScrollableTabStripView>
                 <HorizontalStackLayout Spacing="16">
                     <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
                                                  IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
@@ -216,12 +195,6 @@
                                                  IsActive="{Binding ShowHistory}"/>
                 </HorizontalStackLayout>
             </components:ScrollableTabStripView>
-            <components:IconTextButton Grid.Column="1"
-                                        IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"
-                                        Icon="{x:Static icons:SolidFont.Plus}"
-                                        Text="{loc:Loc BtnRecruit}"
-                                        TextColor="{DynamicResource AppAccent}"
-                                        Command="{Binding RecruitWarriorCommand}"/>
         </Grid>
 
         <!-- Pas de CollectionView ici (virtualisation inutile pour un roster de quelques dizaines de

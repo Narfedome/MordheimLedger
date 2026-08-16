@@ -303,21 +303,6 @@
   <data name="OnboardingStart" xml:space="preserve">
     <value>Commencer</value>
   </data>
-  <data name="BtnRecruit" xml:space="preserve">
-    <value>Recruter</value>
-  </data>
-  <data name="DialogRecruit" xml:space="preserve">
-    <value>Recruter</value>
-  </data>
-  <data name="WarriorsChooseType" xml:space="preserve">
-    <value>Choisir un guerrier à recruter</value>
-  </data>
-  <data name="WarriorsEmptyLibraryTitle" xml:space="preserve">
-    <value>Bibliothèque vide</value>
-  </data>
-  <data name="WarriorsEmptyLibraryMessage" xml:space="preserve">
-    <value>Ce type de bande n'a pas encore de guerrier recrutable.</value>
-  </data>
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Trésorerie :</value>
   </data>

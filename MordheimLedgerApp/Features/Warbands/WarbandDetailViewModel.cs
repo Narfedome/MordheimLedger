@@ -148,64 +148,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private void ShowHistoryTab() => ShowHistory = true;
 
     [RelayCommand]
-    private async Task RecruitWarriorAsync()
-    {
-        if (Warband is null) return;
-        if (_recruitableArchetypes.Count == 0)
-        {
-            await ShowInfoAsync(Loc["WarriorsEmptyLibraryTitle"], Loc["WarriorsEmptyLibraryMessage"]);
-            return;
-        }
-
-        var heroArchetypes = _recruitableArchetypes.Where(a => a.IsHero).ToList();
-        var henchmanArchetypes = _recruitableArchetypes.Where(a => !a.IsHero).ToList();
-
-        // Une seule liste (un warband n'a jamais assez de types recrutables pour justifier un écran à
-        // part) avec des en-têtes Héros/Hommes de main non sélectionnables - seulement si les deux
-        // groupes ont des types, sinon la liste reste plate.
-        var candidates = new List<WarriorArchetype>();
-        var sheetOptions = new List<ActionSheetOption>();
-        var showHeaders = heroArchetypes.Count > 0 && henchmanArchetypes.Count > 0;
-
-        void AddGroup(string headerKey, List<WarriorArchetype> group)
-        {
-            if (group.Count == 0) return;
-            if (showHeaders) sheetOptions.Add(new ActionSheetOption(-1, Loc[headerKey], IsHeader: true));
-            foreach (var a in group)
-            {
-                sheetOptions.Add(new ActionSheetOption(candidates.Count, $"{a.Name} ({a.Cost}gc)"));
-                candidates.Add(a);
-            }
-        }
-        AddGroup("WarriorsGroupHeroes", heroArchetypes);
-        AddGroup("WarriorsGroupHenchmen", henchmanArchetypes);
-
-        var index = await ShowActionSheetIndexAsync(Loc["WarriorsChooseType"], sheetOptions);
-        if (index < 0) return;
-
-        var archetype = candidates[index];
-        if (Warband.Treasury < archetype.Cost)
-        {
-            await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-            return;
-        }
-
-        var name = await ShowPromptAsync(Loc["DialogRecruit"], Loc["PromptName"]);
-        if (string.IsNullOrWhiteSpace(name)) return;
-
-        await Loading.RunAsync(async () =>
-        {
-            Warband.Treasury -= archetype.Cost;
-            await _warbandService.SaveWarbandAsync(Warband);
-            OnPropertyChanged(nameof(Warband));
-
-            var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, name);
-            var row = ToRow(warrior);
-            (archetype.IsHero ? Heroes : Henchmen).Add(row);
-        });
-    }
-
-    [RelayCommand]
     private async Task EditWarrior(WarriorRow row)
     {
         if (Warband is null) return;
@@ -242,11 +184,25 @@ public partial class WarbandDetailViewModel : BaseViewModel
         };
 
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == w.WarriorArchetypeId);
+        await OpenWarriorEditDialogAsync(copy, archetype, row.Equipment);
+    }
+
+    /// <summary>Ouvre WarriorEditDialog sur warrior (déjà en base - un guerrier fraîchement recruté ou
+    /// une copie défensive d'un guerrier existant, voir RecruitWarriorAsync/EditWarrior) et applique le
+    /// résultat - factorisé ici, les deux appelants ne différaient que par la provenance du Warrior et
+    /// l'équipement à rembourser en cas de suppression.</summary>
+    private async Task OpenWarriorEditDialogAsync(Warrior warrior, WarriorArchetype? archetype, IEnumerable<WarriorEquipment> equipmentForRefund)
+    {
+        if (Warband is null) return;
+
         var isSpellcaster = archetype?.IsSpellcaster ?? false;
         var isMutant = archetype?.CanBuyMutations ?? false;
-        var dialogViewModel = new WarriorEditDialogViewModel(copy, Loc["WarriorEditTitle"], Warband, _warbandService,
+        var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
+        var specialRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id).ToList();
+
+        var dialogViewModel = new WarriorEditDialogViewModel(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
             _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchools,
-            _mutationPicker, isMutant, _animalPicker, row.SpecialRules);
+            _mutationPicker, isMutant, _animalPicker, specialRules);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 
         // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
@@ -256,52 +212,22 @@ public partial class WarbandDetailViewModel : BaseViewModel
         {
             // WasDeleted : le guerrier n'existe plus en base (supprimé depuis le dialog) - le
             // ré-enregistrer écraserait rien puisqu'il n'y a plus de ligne à mettre à jour. Rembourse
-            // son coût de recrutement + tout son équipement (row.Equipment, pas copy.Equipment qui
-            // n'est jamais rempli dans ce dialog) ; pas les compétences/blessures, qui n'ont pas de coût.
+            // son coût de recrutement + son équipement d'ORIGINE (equipmentForRefund, snapshot avant
+            // ouverture du dialog - vide pour un recrutement fraîchement créé) ; pas les compétences/
+            // blessures, qui n'ont pas de coût.
             if (dialogViewModel.WasDeleted)
             {
-                var refund = copy.Cost + row.Equipment.Sum(e => e.Item.Cost * e.Quantity);
+                var refund = warrior.Cost + equipmentForRefund.Sum(e => e.Item.Cost * e.Quantity);
                 Warband.Treasury += refund;
                 await _warbandService.SaveWarbandAsync(Warband);
             }
             else if (saved == true)
             {
-                await _warbandService.SaveWarriorAsync(copy);
+                await _warbandService.SaveWarriorAsync(warrior);
             }
 
             await LoadAsync(Warband.Id);
         });
-    }
-
-    /// <summary>Grossit l'effectif vivant d'un groupe d'Hommes de main (Warrior.HeadCount) - pas de
-    /// notion de Status.Dead pour un groupe, juste un compteur (livre des règles : XP/équipement/
-    /// compétences restent partagés par tous les survivants).</summary>
-    [RelayCommand]
-    private async Task IncrementHeadCount(WarriorRow row)
-    {
-        row.Warrior.HeadCount++;
-        row.RefreshHeadCountDisplay();
-        await _warbandService.SaveWarriorAsync(row.Warrior);
-    }
-
-    /// <summary>Réduit l'effectif d'un groupe d'Hommes de main - supprime la ligne quand il atteint 0
-    /// plutôt que de garder une ligne à 0 sans rien à afficher.</summary>
-    [RelayCommand]
-    private async Task DecrementHeadCount(WarriorRow row)
-    {
-        if (row.Warrior.HeadCount <= 1)
-        {
-            await Loading.RunAsync(async () =>
-            {
-                await _warbandService.DeleteWarriorAsync(row.Warrior.Id);
-                Henchmen.Remove(row);
-            });
-            return;
-        }
-
-        row.Warrior.HeadCount--;
-        row.RefreshHeadCountDisplay();
-        await _warbandService.SaveWarriorAsync(row.Warrior);
     }
 
     // Puces de la carte guerrier (Règles spéciales/Blessures/Sorts/Mutations/Monture/Équipement/

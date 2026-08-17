@@ -358,6 +358,17 @@ public partial class WarbandDetailViewModel : BaseViewModel
                     sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
                 }
 
+                // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table,
+                // chacun devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus.
+                foreach (var sub in row.MultipleInjuryRolls)
+                {
+                    if (string.IsNullOrWhiteSpace(sub.InjuryResultText)) continue;
+
+                    var subInjury = await GetOrCreateInjuryAsync(sub.InjuryResultText);
+                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, subInjury);
+                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, sub.InjuryResultText));
+                }
+
                 if (changed)
                     await _warbandService.SaveWarriorAsync(warrior);
             }

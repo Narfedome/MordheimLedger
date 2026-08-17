@@ -879,6 +879,24 @@
   <data name="EndOfGameInvalidAdvanceRoll" xml:space="preserve">
     <value>Jet invalide (2 à 12).</value>
   </data>
+  <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
+    <value>Blessures multiples</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryLabel" xml:space="preserve">
+    <value>Jet {0}/{1}</value>
+  </data>
+  <data name="EndOfGameOutOfActionHint" xml:space="preserve">
+    <value>Cochez les guerriers hors de combat à la fin de la partie.</value>
+  </data>
+  <data name="EndOfGameInjuryProgressLabel" xml:space="preserve">
+    <value>Blessé {0}/{1}</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryCountPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameInvalidMultipleInjuryCount" xml:space="preserve">
+    <value>Jet invalide (1 à 6).</value>
+  </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} a progressé : {1}</value>
   </data>

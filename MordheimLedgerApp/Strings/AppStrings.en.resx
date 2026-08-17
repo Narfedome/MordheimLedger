@@ -879,6 +879,24 @@
   <data name="EndOfGameInvalidAdvanceRoll" xml:space="preserve">
     <value>Invalid roll (2 to 12).</value>
   </data>
+  <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
+    <value>Multiple Injuries</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryLabel" xml:space="preserve">
+    <value>Roll {0}/{1}</value>
+  </data>
+  <data name="EndOfGameOutOfActionHint" xml:space="preserve">
+    <value>Check the warriors who are out of action at the end of the game.</value>
+  </data>
+  <data name="EndOfGameInjuryProgressLabel" xml:space="preserve">
+    <value>Injured {0}/{1}</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryCountPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameInvalidMultipleInjuryCount" xml:space="preserve">
+    <value>Invalid roll (1 to 6).</value>
+  </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} advanced: {1}</value>
   </data>

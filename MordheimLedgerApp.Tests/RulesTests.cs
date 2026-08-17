@@ -149,6 +149,23 @@ public class RulesTests
             Assert.True(SeriousInjuryTable.TryGetTextKey(SeriousInjuryTable.RollDice(), out _));
     }
 
+    [Theory]
+    [InlineData(16)]
+    [InlineData(21)]
+    public void SeriousInjuryTable_16And21_IsMultipleInjuries(int roll)
+    {
+        Assert.True(SeriousInjuryTable.IsMultipleInjuries(roll));
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(61)]
+    [InlineData(66)]
+    public void SeriousInjuryTable_OtherResults_IsNotMultipleInjuries(int roll)
+    {
+        Assert.False(SeriousInjuryTable.IsMultipleInjuries(roll));
+    }
+
     // --- HenchmanInjuryTable (D6) ---------------------------------------------------------------
 
     [Theory]

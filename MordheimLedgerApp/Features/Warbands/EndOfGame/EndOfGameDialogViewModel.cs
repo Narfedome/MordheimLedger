@@ -26,10 +26,18 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// Progression de HasMilestone - une "carte pleine écran" par guerrier concerné dans les deux cas
 /// (décision explicite du 2026-08-17 pour ne pas surcharger un seul écran avec tous les guerriers
 /// concernés à la fois - Hors de combat/Expérience restent des vues d'ensemble, ce sont Blessure et
-/// Progression qui se découpent guerrier par guerrier). Décocher un guerrier sur l'étape "Hors de
-/// combat" fait disparaître son étape Blessure ET efface tout ce qui y avait été saisi
-/// (WarriorOutcomeRow.OnIsOutOfActionChanged) - il n'y a plus de blessure à montrer. Le Statut n'est
+/// Progression qui se découpent guerrier par guerrier). Décocher un Héros sur l'étape "Hors de combat"
+/// fait disparaître son étape Blessure ET efface tout ce qui y avait été saisi
+/// (WarriorOutcomeRow.OnOutOfActionCountChanged) - il n'y a plus de blessure à montrer. Le Statut n'est
 /// plus une saisie manuelle du tout - voir WarriorOutcomeRow.ApplyInjuryRoll.
+///
+/// Un groupe d'Hommes de main (HeadCount potentiellement &gt; 1) n'a pas une simple case à cocher mais
+/// un stepper "combien de figurines hors de combat" (IncrementOutOfAction/DecrementOutOfAction) - la
+/// règle du livre veut un jet de Blessure Grave par figurine concernée, pas un seul jet pour tout le
+/// groupe (confirmé par l'utilisateur, 2026-08-17). Son étape Blessure affiche alors autant de jets D6
+/// indépendants que de figurines indiquées (WarriorOutcomeRow.FigureInjuryRolls), chacun pouvant tuer sa
+/// figurine sans affecter les autres - WarbandDetailViewModel.EndOfGame décompte les morts pour
+/// décrémenter Warrior.HeadCount à l'enregistrement (jamais pendant le wizard lui-même).
 /// </summary>
 public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 {
@@ -172,7 +180,62 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void Next()
     {
+        if (!ValidateCurrentStep()) return;
         if (StepIndex < Steps.Count - 1) StepIndex++;
+    }
+
+    /// <summary>Bloque le passage à l'étape suivante tant qu'un jet visible de l'étape courante est vide
+    /// ou invalide - seules les étapes Blessure et Progression ont des jets à valider (Résultat/Hors de
+    /// combat/Expérience/Trésor n'en ont pas). Pose RollError/MultipleInjuryCountError sur chaque jet
+    /// fautif (affiché sous le champ, voir XAML) plutôt qu'un message global - l'erreur s'efface
+    /// d'elle-même dès que le joueur corrige la saisie (voir WarriorOutcomeRow/InjurySubRollEntry/
+    /// AdvanceRollEntry.OnManualRollChanged), donc jamais recalculée ici pour les jets déjà valides.</summary>
+    private bool ValidateCurrentStep()
+    {
+        return Current.Kind switch
+        {
+            StepKind.Injury => ValidateInjuryStep(CurrentInjuryWarrior!),
+            StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceWarrior!),
+            _ => true
+        };
+    }
+
+    private bool ValidateInjuryStep(WarriorOutcomeRow row)
+    {
+        var valid = true;
+
+        if (row.Warrior.IsHero)
+        {
+            valid &= CheckRoll(string.IsNullOrWhiteSpace(row.InjuryResultText), () => row.RollError = Loc["EndOfGameRollRequired"]);
+
+            if (row.ShowMultipleInjuriesSection)
+            {
+                valid &= CheckRoll(row.MultipleInjuryRolls.Count == 0, () => row.MultipleInjuryCountError = Loc["EndOfGameRollRequired"]);
+                foreach (var sub in row.MultipleInjuryRolls)
+                    valid &= CheckRoll(string.IsNullOrWhiteSpace(sub.InjuryResultText), () => sub.RollError = Loc["EndOfGameRollRequired"]);
+            }
+        }
+        else
+        {
+            foreach (var figure in row.FigureInjuryRolls)
+                valid &= CheckRoll(string.IsNullOrWhiteSpace(figure.InjuryResultText), () => figure.RollError = Loc["EndOfGameRollRequired"]);
+        }
+
+        return valid;
+    }
+
+    private bool ValidateAdvanceStep(WarriorOutcomeRow row)
+    {
+        var valid = true;
+        foreach (var advance in row.AdvanceRolls)
+            valid &= CheckRoll(string.IsNullOrWhiteSpace(advance.ResultText), () => advance.RollError = Loc["EndOfGameRollRequired"]);
+        return valid;
+    }
+
+    private static bool CheckRoll(bool isMissing, Action setError)
+    {
+        if (isMissing) setError();
+        return !isMissing;
     }
 
     [RelayCommand]
@@ -181,19 +244,31 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (StepIndex > 0) StepIndex--;
     }
 
-    // Lance les dés à la place du joueur (D66 pour un Héros, D6 pour un Homme de main - deux tables
-    // totalement différentes, voir SeriousInjuryTable/HenchmanInjuryTable) et affiche le résultat dans
-    // une popup - le champ ManualRoll reste modifiable ensuite si le joueur préfère un jet physique.
-    // Dans les deux cas (dé ou saisie manuelle), la résolution texte + ApplyInjuryRoll se fait
-    // automatiquement dès que ManualRoll contient un jet complet et valide (voir
-    // WarriorOutcomeRow.OnManualRollChanged) - décision explicite du 2026-08-17 : plus de bouton "Voir
-    // le résultat" à cliquer après une saisie physique, le résultat apparaît tout seul.
+    // Étape "Hors de combat" : un Héros (toujours HeadCount 1) se coche/décoche, mais un groupe
+    // d'Hommes de main compte plusieurs figurines - le jet de Blessure Grave se fait par figurine
+    // hors de combat, pas une fois pour tout le groupe (règle confirmée par l'utilisateur, 2026-08-17).
+    // Ces deux commandes pilotent le stepper +/- du groupe, borné à [0, HeadCount] ; le clic est la
+    // seule voie d'entrée (pas de saisie libre), donc pas de validation nécessaire ici.
     [RelayCommand]
-    private async Task AutoRoll(WarriorOutcomeRow row)
+    private void IncrementOutOfAction(WarriorOutcomeRow row) =>
+        row.OutOfActionCount = Math.Min(row.Warrior.HeadCount, row.OutOfActionCount + 1);
+
+    [RelayCommand]
+    private void DecrementOutOfAction(WarriorOutcomeRow row) =>
+        row.OutOfActionCount = Math.Max(0, row.OutOfActionCount - 1);
+
+    // Lance les dés à la place du joueur (D66 pour un Héros, D6 pour un Homme de main - deux tables
+    // totalement différentes, voir SeriousInjuryTable/HenchmanInjuryTable) - le champ ManualRoll reste
+    // modifiable ensuite si le joueur préfère un jet physique. Dans les deux cas (dé ou saisie
+    // manuelle), la résolution texte + ApplyInjuryRoll se fait automatiquement dès que ManualRoll
+    // contient un jet complet et valide (voir WarriorOutcomeRow.OnManualRollChanged) et s'affiche tout
+    // de suite sous le champ - plus de popup de confirmation après un clic sur le dé (décision
+    // explicite du 2026-08-17, devenue redondante avec cet affichage automatique).
+    [RelayCommand]
+    private void AutoRoll(WarriorOutcomeRow row)
     {
         var roll = row.Warrior.IsHero ? SeriousInjuryTable.RollDice() : HenchmanInjuryTable.RollDice();
         row.ManualRoll = roll.ToString();
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), row.InjuryResultText);
     }
 
     // Résultat "Blessures multiples" (16/21, Héros uniquement) : le joueur lance 1D6 pour savoir
@@ -204,19 +279,18 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void AutoRollMultipleInjuryCount(WarriorOutcomeRow row) => row.MultipleInjuryCountRoll = Random.Shared.Next(1, 7).ToString();
 
-    // Un résultat "Blessures multiples" déclenche autant de sous-jets sur cette même table que le 1D6
-    // ci-dessus l'a déterminé - WarriorOutcomeRow.OnMultipleInjuryCountRollChanged a déjà peuplé les
-    // entrées vides. Même résolution automatique que le jet principal (InjurySubRollEntry.
-    // OnManualRollChanged), y compris pour un résultat qui devrait en théorie être relancé
-    // (Mort/Capturé/Blessures multiples, cf. livre) - décision explicite : l'appli n'impose ni ne
-    // relance rien elle-même, le résultat du joueur est accepté tel quel comme n'importe quel autre
-    // jet de cette table.
+    // Sert deux cas distincts qui partagent la même forme (voir la doc d'InjurySubRollEntry) : les
+    // sous-jets "Blessures multiples" d'un Héros (D66, entry.IsHero true) et les jets par figurine d'un
+    // groupe d'Hommes de main hors de combat (D6, entry.IsHero false). Même résolution automatique que
+    // le jet principal (InjurySubRollEntry.OnManualRollChanged), y compris pour un résultat qui devrait
+    // en théorie être relancé (Mort/Capturé/Blessures multiples, cf. livre, Héros uniquement) -
+    // décision explicite : l'appli n'impose ni ne relance rien elle-même, le résultat du joueur est
+    // accepté tel quel comme n'importe quel autre jet de cette table.
     [RelayCommand]
-    private async Task AutoRollSubInjury(InjurySubRollEntry entry)
+    private void AutoRollSubInjury(InjurySubRollEntry entry)
     {
-        var roll = SeriousInjuryTable.RollDice();
+        var roll = entry.IsHero ? SeriousInjuryTable.RollDice() : HenchmanInjuryTable.RollDice();
         entry.ManualRoll = roll.ToString();
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), entry.InjuryResultText);
     }
 
     // Un guerrier peut franchir plusieurs paliers d'un coup - chaque AdvanceRollEntry (une par palier,
@@ -225,11 +299,10 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     // automatiquement (les sous-jets 1D6 des résultats 6/8/9 et le choix CC/CT du 7 restent à résoudre
     // par le joueur, cf. HeroAdvanceTable/HenchmanAdvanceTable).
     [RelayCommand]
-    private async Task AutoRollAdvance(AdvanceRollEntry entry)
+    private void AutoRollAdvance(AdvanceRollEntry entry)
     {
         var roll = entry.IsHero ? HeroAdvanceTable.RollDice() : HenchmanAdvanceTable.RollDice();
         entry.ManualRoll = roll.ToString();
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), entry.ResultText);
     }
 
     // Résultat "Compétence" (voir HeroAdvanceTable.IsSkill) : le joueur choisit directement une
@@ -291,26 +364,57 @@ public partial class WarriorOutcomeRow : ObservableObject
 
     public int ExperienceGained => int.TryParse(ExperienceGainedText, out var xp) ? xp : 0;
 
+    public bool IsHero => Warrior.IsHero;
+    public int HeadCount => Warrior.HeadCount;
+
+    /// <summary>Nombre de figurines hors de combat à la fin de la partie - toujours 0 ou 1 pour un Héros
+    /// (HeadCount vaut 1), mais peut monter jusqu'à HeadCount pour un groupe d'Hommes de main : chaque
+    /// figurine hors de combat a son propre jet de Blessure Grave (règle confirmée, voir
+    /// SyncFigureInjuryRolls) - pas un seul jet pour tout le groupe. Piloté par le stepper +/- de
+    /// l'étape "Hors de combat" (IncrementOutOfAction/DecrementOutOfAction) pour un groupe, par la case
+    /// à cocher IsOutOfAction pour un Héros.</summary>
     [ObservableProperty]
-    private bool isOutOfAction;
+    [NotifyPropertyChangedFor(nameof(IsOutOfAction))]
+    [NotifyPropertyChangedFor(nameof(OutOfActionLabel))]
+    private int outOfActionCount;
 
-    /// <summary>Décoché sur l'étape "Hors de combat" : ce guerrier n'a plus d'étape Blessure dans le
-    /// wizard (voir EndOfGameDialogViewModel.Steps), donc plus rien à y montrer - tout ce qui avait pu
-    /// être saisi pour lui (jet principal, sous-jets de Blessures multiples, statut dérivé) est
-    /// effacé plutôt que laissé orphelin.</summary>
-    partial void OnIsOutOfActionChanged(bool value)
+    /// <summary>Wrapper booléen pour la case à cocher d'un Héros (HeadCount toujours 1, donc 0/1
+    /// suffit) - un groupe d'Hommes de main utilise directement OutOfActionCount via le stepper, jamais
+    /// cette case.</summary>
+    public bool IsOutOfAction
     {
-        if (value) return;
+        get => OutOfActionCount > 0;
+        set => OutOfActionCount = value ? 1 : 0;
+    }
 
-        ManualRoll = string.Empty;
-        InjuryResultText = string.Empty;
-        MultipleInjuryCountRoll = string.Empty;
-        if (MultipleInjuryRolls.Count > 0)
+    public string OutOfActionLabel => $"{OutOfActionCount}/{HeadCount}";
+
+    /// <summary>OutOfActionCount change (case cochée/décochée pour un Héros, stepper +/- pour un groupe
+    /// d'Hommes de main) : ce guerrier n'a plus d'étape Blessure dans le wizard si la valeur retombe à 0
+    /// (voir EndOfGameDialogViewModel.Steps), donc plus rien à y montrer. Héros et groupe divergent
+    /// ensuite : un Héros efface son unique jet (ManualRoll/InjuryResultText/Blessures multiples/statut
+    /// dérivé) ; un groupe resynchronise juste FigureInjuryRolls sur le nouveau compte (peut aussi
+    /// grandir, contrairement au cas Héros qui ne vaut jamais plus que 1).</summary>
+    partial void OnOutOfActionCountChanged(int value)
+    {
+        if (Warrior.IsHero)
         {
-            MultipleInjuryRolls.Clear();
-            OnPropertyChanged(nameof(HasMultipleInjuryRolls));
+            if (value > 0) return;
+
+            ManualRoll = string.Empty;
+            InjuryResultText = string.Empty;
+            MultipleInjuryCountRoll = string.Empty;
+            if (MultipleInjuryRolls.Count > 0)
+            {
+                MultipleInjuryRolls.Clear();
+                OnPropertyChanged(nameof(HasMultipleInjuryRolls));
+            }
+            SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == Warrior.Status).Key;
         }
-        SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == Warrior.Status).Key;
+        else
+        {
+            SyncFigureInjuryRolls();
+        }
     }
 
     /// <summary>Le score D66 (Héros) ou D6 (Homme de main) - saisi à la main (jet physique) ou rempli
@@ -321,10 +425,18 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowMultipleInjuriesSection))]
     private string manualRoll = string.Empty;
 
+    /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
+    /// suivante (EndOfGameDialogViewModel.Next) sans jet valide - jamais posé par une simple frappe,
+    /// seulement par cette validation ; effacé dès que le jet redevient valide (ci-dessous), pas
+    /// seulement au prochain essai de Suivant.</summary>
+    [ObservableProperty]
+    private string? rollError;
+
     partial void OnManualRollChanged(string value)
     {
         InjuryResultText = string.Empty;
         if (int.TryParse(value, out var roll)) ResolveInjuryResult(roll);
+        if (!string.IsNullOrWhiteSpace(InjuryResultText)) RollError = null;
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -376,10 +488,18 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     private string multipleInjuryCountRoll = string.Empty;
 
+    /// <summary>Même principe que RollError, pour le champ 1D6 "combien de sous-jets" plutôt que le jet
+    /// principal.</summary>
+    [ObservableProperty]
+    private string? multipleInjuryCountError;
+
     partial void OnMultipleInjuryCountRollChanged(string value)
     {
         if (int.TryParse(value, out var count) && count is >= 1 and <= 6)
+        {
             PopulateMultipleInjuryRolls(count);
+            MultipleInjuryCountError = null;
+        }
     }
 
     /// <summary>Un sous-jet D66 par point du 1D6 ci-dessus - peuplée par SetMultipleInjuryCount une
@@ -387,6 +507,12 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// concerné par les Blessures multiples.</summary>
     public ObservableCollection<InjurySubRollEntry> MultipleInjuryRolls { get; } = new();
     public bool HasMultipleInjuryRolls => MultipleInjuryRolls.Count > 0;
+
+    /// <summary>Un jet D6 par figurine hors de combat dans un groupe d'Hommes de main (OutOfActionCount)
+    /// - sans objet pour un Héros, qui utilise ManualRoll/InjuryResultText ci-dessus à la place (une
+    /// seule figurine, un seul jet). Peuplée/resynchronisée par SyncFigureInjuryRolls à chaque
+    /// changement d'OutOfActionCount.</summary>
+    public ObservableCollection<InjurySubRollEntry> FigureInjuryRolls { get; } = new();
 
     /// <summary>Plus de saisie manuelle : uniquement modifié par ApplyInjuryRoll (résultat "Mort",
     /// jets 11-15) ou remis à l'état d'origine par OnIsOutOfActionChanged. Reste sur Warrior.Status
@@ -424,6 +550,8 @@ public partial class WarriorOutcomeRow : ObservableObject
             if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(InjuryResultText);
             foreach (var sub in MultipleInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(sub.InjuryResultText)) parts.Add(sub.InjuryResultText);
+            foreach (var figure in FigureInjuryRolls)
+                if (!string.IsNullOrWhiteSpace(figure.InjuryResultText)) parts.Add(figure.InjuryResultText);
             foreach (var advance in AdvanceRolls)
             {
                 if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
@@ -469,12 +597,34 @@ public partial class WarriorOutcomeRow : ObservableObject
         MultipleInjuryRolls.Clear();
         for (var i = 1; i <= count; i++)
         {
-            var entry = new InjurySubRollEntry(i, count);
+            var entry = new InjurySubRollEntry(i, count, isHero: true, labelKey: "EndOfGameMultipleInjuryLabel");
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             MultipleInjuryRolls.Add(entry);
         }
 
         OnPropertyChanged(nameof(HasMultipleInjuryRolls));
+    }
+
+    /// <summary>Ajuste FigureInjuryRolls pour qu'il compte exactement un jet D6 par figurine hors de
+    /// combat (OutOfActionCount), en préservant les jets déjà faits quand le nombre ne diminue pas -
+    /// même principe que SyncAdvanceRolls/PopulateMultipleInjuryRolls, mais additif comme SyncAdvanceRolls
+    /// (pas de reset complet) puisque le joueur peut ajuster le stepper dans un sens ou dans l'autre
+    /// avant de lancer les dés. Total est mis à jour sur les entrées déjà là (label "Figurine i/N") au
+    /// lieu d'être figé à leur création, contrairement à AdvanceRollEntry/InjurySubRollEntry des
+    /// Blessures multiples dont le total ne varie jamais après coup.</summary>
+    private void SyncFigureInjuryRolls()
+    {
+        while (FigureInjuryRolls.Count < OutOfActionCount)
+        {
+            var entry = new InjurySubRollEntry(FigureInjuryRolls.Count + 1, OutOfActionCount, isHero: false, labelKey: "EndOfGameFigureLabel");
+            entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+            FigureInjuryRolls.Add(entry);
+        }
+        while (FigureInjuryRolls.Count > OutOfActionCount)
+            FigureInjuryRolls.RemoveAt(FigureInjuryRolls.Count - 1);
+
+        foreach (var entry in FigureInjuryRolls)
+            entry.UpdateTotal(OutOfActionCount);
     }
 
     /// <summary>Ajuste AdvanceRolls pour qu'il compte exactement un AdvanceRollEntry par palier
@@ -510,6 +660,11 @@ public partial class AdvanceRollEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsSkillResult))]
     private string manualRoll = string.Empty;
 
+    /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
+    /// EndOfGameDialogViewModel.Next si ce jet est encore vide/invalide à ce moment-là.</summary>
+    [ObservableProperty]
+    private string? rollError;
+
     partial void OnManualRollChanged(string value)
     {
         ResultText = string.Empty;
@@ -518,7 +673,11 @@ public partial class AdvanceRollEntry : ObservableObject
         bool found;
         string key;
         found = IsHero ? HeroAdvanceTable.TryGetTextKey(roll, out key) : HenchmanAdvanceTable.TryGetTextKey(roll, out key);
-        if (found) ResultText = _loc[key];
+        if (found)
+        {
+            ResultText = _loc[key];
+            RollError = null;
+        }
     }
 
     /// <summary>Texte descriptif du résultat une fois résolu - purement informatif, voir
@@ -553,35 +712,74 @@ public partial class AdvanceRollEntry : ObservableObject
     }
 }
 
-/// <summary>One D66 sub-roll stacked from a "Blessures multiples" result (16/21) on the Heroes'
-/// Serious Injuries table - see WarriorOutcomeRow.MultipleInjuryRolls/PopulateMultipleInjuryRolls. Same
-/// automatic resolution as the main injury roll (OnManualRollChanged) - including accepting a sub-roll
-/// that lands on Dead/Captured/Multiple Injuries again, which the rulebook says to re-roll but the app
-/// leaves to the player rather than enforcing itself (see SeriousInjuryTable's doc comment).</summary>
+/// <summary>One injury roll stacked under a WarriorOutcomeRow, in one of two unrelated situations that
+/// happen to share the exact same shape (an indexed D66/D6 roll auto-resolving to text): (1) a Hero's
+/// D66 sub-roll from a "Blessures multiples" result (16/21) - see
+/// WarriorOutcomeRow.MultipleInjuryRolls/PopulateMultipleInjuryRolls; (2) one D6 roll per Henchman
+/// group model marked out of action - see WarriorOutcomeRow.FigureInjuryRolls/SyncFigureInjuryRolls.
+/// IsHero picks which table resolves ManualRoll (always Hero/D66 for case 1, always Henchman/D6 for
+/// case 2 - never mixed within one collection). Same "accept the result as-is" stance as the main
+/// injury roll for a sub-roll landing on Dead/Captured/Multiple Injuries again: the rulebook says to
+/// re-roll but the app leaves that to the player rather than enforcing it (see SeriousInjuryTable's doc
+/// comment).</summary>
 public partial class InjurySubRollEntry : ObservableObject
 {
     private readonly LocalizationService _loc = LocalizationService.Instance;
+    private readonly string _labelKey;
 
     public int Index { get; }
-    public int Total { get; }
-    public string Label => string.Format(_loc["EndOfGameMultipleInjuryLabel"], Index, Total);
+    public int Total { get; set; }
+    public bool IsHero { get; }
+    public string Label => string.Format(_loc[_labelKey], Index, Total);
 
     [ObservableProperty]
     private string manualRoll = string.Empty;
 
+    /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
+    /// EndOfGameDialogViewModel.Next si ce jet est encore vide/invalide à ce moment-là.</summary>
+    [ObservableProperty]
+    private string? rollError;
+
     partial void OnManualRollChanged(string value)
     {
         InjuryResultText = string.Empty;
-        if (int.TryParse(value, out var roll) && SeriousInjuryTable.TryGetTextKey(roll, out var key))
+        if (!int.TryParse(value, out var roll)) return;
+
+        bool found;
+        string key;
+        found = IsHero ? SeriousInjuryTable.TryGetTextKey(roll, out key) : HenchmanInjuryTable.TryGetTextKey(roll, out key);
+        if (found)
+        {
             InjuryResultText = _loc[key];
+            RollError = null;
+        }
     }
 
     [ObservableProperty]
     private string injuryResultText = string.Empty;
 
-    public InjurySubRollEntry(int index, int total)
+    /// <summary>True si le jet actuellement saisi est un résultat de mort (Héros 11-15, Homme de main
+    /// 1-2) - utilisé par WarbandDetailViewModel.EndOfGame pour compter les figurines perdues dans un
+    /// groupe d'Hommes de main (voir WarriorOutcomeRow.FigureInjuryRolls). Sans objet pour les sous-jets
+    /// de Blessures multiples d'un Héros (déjà géré au niveau du jet principal, voir ApplyInjuryRoll).</summary>
+    public bool IsDeath => int.TryParse(ManualRoll, out var roll) && (IsHero ? SeriousInjuryTable.IsDeath(roll) : HenchmanInjuryTable.IsDeath(roll));
+
+    public InjurySubRollEntry(int index, int total, bool isHero, string labelKey)
     {
         Index = index;
         Total = total;
+        IsHero = isHero;
+        _labelKey = labelKey;
+    }
+
+    /// <summary>Steps.SyncFigureInjuryRolls-style syncs (voir WarriorOutcomeRow.SyncFigureInjuryRolls)
+    /// n'ajoutent/ne retirent qu'en bout de liste et préservent les entrées existantes - mais Total (le
+    /// nombre total affiché dans Label, ex. "Figurine 2/3") doit rester à jour sur celles-ci quand le
+    /// compte global change.</summary>
+    public void UpdateTotal(int total)
+    {
+        if (Total == total) return;
+        Total = total;
+        OnPropertyChanged(nameof(Label));
     }
 }

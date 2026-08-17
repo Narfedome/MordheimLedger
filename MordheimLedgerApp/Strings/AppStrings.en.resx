@@ -786,6 +786,9 @@
   <data name="EndOfGameRoll" xml:space="preserve">
     <value>Roll</value>
   </data>
+  <data name="EndOfGameRollRequired" xml:space="preserve">
+    <value>Roll required before continuing.</value>
+  </data>
   <data name="HistoryAddNote" xml:space="preserve">
     <value>Add a note</value>
   </data>
@@ -806,6 +809,12 @@
   </data>
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} was taken out of action: {1}</value>
+  </data>
+  <data name="HistoryHenchmanDeathSentence" xml:space="preserve">
+    <value>{0} loses {1} model(s), {2} remaining.</value>
+  </data>
+  <data name="HistoryHenchmanWipedSentence" xml:space="preserve">
+    <value>{0} is wiped out.</value>
   </data>
   <data name="WarriorEditTitle" xml:space="preserve">
     <value>Edit Warrior</value>
@@ -836,9 +845,6 @@
   </data>
   <data name="WarriorRoleHeroSingular" xml:space="preserve">
     <value>Hero</value>
-  </data>
-  <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
-    <value>Result ({0})</value>
   </data>
   <data name="EndOfGameInjuriesHeading" xml:space="preserve">
     <value>Serious Injuries</value>
@@ -875,6 +881,9 @@
   </data>
   <data name="EndOfGameMultipleInjuryLabel" xml:space="preserve">
     <value>Roll {0}/{1}</value>
+  </data>
+  <data name="EndOfGameFigureLabel" xml:space="preserve">
+    <value>Model {0}/{1}</value>
   </data>
   <data name="EndOfGameOutOfActionHint" xml:space="preserve">
     <value>Check the warriors who are out of action at the end of the game.</value>

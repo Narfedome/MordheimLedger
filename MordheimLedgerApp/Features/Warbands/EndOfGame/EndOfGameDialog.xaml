@@ -29,9 +29,11 @@
                         SelectedItem="{Binding SelectedResult}"/>
             </VerticalStackLayout>
 
-            <!-- Étape : Hors de combat - vue d'ensemble, juste les cases à cocher, aucun outil de jet
-                 ici (chaque guerrier coché reçoit sa propre étape Blessure juste après, une carte par
-                 écran plutôt que toutes en même temps). -->
+            <!-- Étape : Hors de combat - vue d'ensemble, aucun outil de jet ici (chaque guerrier/groupe
+                 concerné reçoit sa propre étape Blessure juste après, une carte par écran plutôt que
+                 toutes en même temps). Un Héros (toujours 1 figurine) se coche/décoche ; un groupe
+                 d'Hommes de main indique combien de figurines sont hors de combat via un stepper - le
+                 jet de Blessure Grave se fait par figurine, pas une fois pour tout le groupe. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsOutOfActionStep}">
                 <Label Text="{loc:Loc EndOfGameOutOfAction}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameOutOfActionHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -44,7 +46,18 @@
                                         <Label Text="{Binding Name}" FontAttributes="Bold"/>
                                         <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                     </VerticalStackLayout>
-                                    <CheckBox Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"
+                                              IsVisible="{Binding IsHero}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
+                                                            IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementOutOfActionCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                        <Label Text="{Binding OutOfActionLabel}" WidthRequest="36" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementOutOfActionCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                    </HorizontalStackLayout>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -52,8 +65,10 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape : Blessure - une carte par guerrier coché hors de combat, un seul à la fois
-                 (CurrentInjuryWarrior), pas une liste. -->
+            <!-- Étape : Blessure - une carte par guerrier/groupe coché hors de combat, un seul à la
+                 fois (CurrentInjuryWarrior), pas une liste. Héros et groupe d'Hommes de main divergent
+                 ici : un Héros a un seul jet (+ ses éventuels sous-jets de Blessures multiples) ;
+                 un groupe a un jet D6 indépendant par figurine hors de combat (FigureInjuryRolls). -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsInjuryStep}">
                 <Grid ColumnDefinitions="*,Auto">
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameInjuriesHeading}" FontAttributes="Bold"/>
@@ -65,63 +80,104 @@
                             <Label Grid.Column="0" Text="{Binding CurrentInjuryWarrior.Name}" FontAttributes="Bold"/>
                             <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                             <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de mort (voir
-                                 ApplyInjuryRoll), pas de saisie manuelle. -->
+                                 ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe
+                                 perd des figurines (HeadCount) plutôt que de passer Mort d'un coup. -->
                             <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
                                    IsVisible="{Binding CurrentInjuryWarrior.IsDead}"
                                    TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
                         </Grid>
-                        <!-- Le joueur peut soit laisser l'appli tirer les dés (Dice = jet aléatoire +
-                             popup de résultat immédiate), soit lancer ses propres dés à la table et
-                             saisir le score lui-même : dès que la saisie est un jet complet et valide,
-                             le résultat s'affiche tout seul sous le champ (pas de bouton à cliquer). -->
-                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
-                            <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
-                                   Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70">
-                                <Entry.Behaviors>
-                                    <components:DigitsOnlyBehavior/>
-                                </Entry.Behaviors>
-                            </Entry>
-                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
-                                                          Command="{Binding AutoRollCommand}"
-                                                          CommandParameter="{Binding CurrentInjuryWarrior}"
-                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
-                        </Grid>
-                        <Label Text="{Binding CurrentInjuryWarrior.InjuryResultText}" FontSize="12"/>
 
-                        <!-- Résultat "Blessures multiples" (16/21, Héros) : 1D6 pour savoir combien de
-                             sous-jets faire sur cette même table, puis un jet D66 par sous-jet. -->
-                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowMultipleInjuriesSection}" Spacing="6">
-                            <Label Text="{loc:Loc EndOfGameMultipleInjuriesHeading}" FontSize="12"
-                                   FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <!-- Héros : un seul jet (+ Blessures multiples éventuelles). Le joueur peut soit
+                             laisser l'appli tirer les dés (Dice = jet aléatoire + popup de résultat
+                             immédiate), soit lancer ses propres dés à la table et saisir le score
+                             lui-même : dès que la saisie est un jet complet et valide, le résultat
+                             s'affiche tout seul sous le champ (pas de bouton à cliquer). -->
+                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero}" Spacing="8">
                             <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
-                                <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountRoll}" Keyboard="Numeric"
-                                       Placeholder="{loc:Loc EndOfGameMultipleInjuryCountPh}" WidthRequest="70">
+                                <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
+                                       Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
                                 </Entry>
-                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
-                                                              Command="{Binding AutoRollMultipleInjuryCountCommand}"
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollCommand}"
                                                               CommandParameter="{Binding CurrentInjuryWarrior}"
                                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
                             </Grid>
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.MultipleInjuryRolls}" Spacing="6">
+                            <Label Text="{Binding CurrentInjuryWarrior.RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            <Label Text="{Binding CurrentInjuryWarrior.InjuryResultText}" FontSize="12"/>
+
+                            <!-- Résultat "Blessures multiples" (16/21) : 1D6 pour savoir combien de
+                                 sous-jets faire sur cette même table, puis un jet D66 par sous-jet. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowMultipleInjuriesSection}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameMultipleInjuriesHeading}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameMultipleInjuryCountPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollMultipleInjuryCountCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.MultipleInjuryCountError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.MultipleInjuryRolls}" Spacing="6">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                                  CommandParameter="{Binding .}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Groupe d'Hommes de main : un jet D6 indépendant par figurine hors de combat
+                             (FigureInjuryRolls, déjà peuplé au nombre indiqué à l'étape précédente),
+                             même résolution automatique que côté Héros ci-dessus. -->
+                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero, Converter={StaticResource InverseBoolConverter}}" Spacing="10">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.FigureInjuryRolls}" Spacing="6">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="local:InjurySubRollEntry">
                                         <VerticalStackLayout Spacing="4">
                                             <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
                                             <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                                                 <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                                       Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
                                                     <Entry.Behaviors>
                                                         <components:DigitsOnlyBehavior/>
                                                     </Entry.Behaviors>
                                                 </Entry>
-                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
                                                                               CommandParameter="{Binding .}"
                                                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
                                             </Grid>
+                                            <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
                                             <Label Text="{Binding InjuryResultText}" FontSize="12"/>
                                         </VerticalStackLayout>
                                     </DataTemplate>
@@ -193,11 +249,13 @@
                                                     <components:DigitsOnlyBehavior/>
                                                 </Entry.Behaviors>
                                             </Entry>
-                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
                                                                           CommandParameter="{Binding .}"
                                                                           Tooltip="{loc:Loc EndOfGameRoll}"/>
                                         </Grid>
+                                        <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
                                         <Label Text="{Binding ResultText}" FontSize="12"/>
                                         <!-- Résultat "Compétence" (Héros 2-5/10-12 uniquement, voir
                                              HeroAdvanceTable.IsSkill) : choix direct dans la Bibliothèque,

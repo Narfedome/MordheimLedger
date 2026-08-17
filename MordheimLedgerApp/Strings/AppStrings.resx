@@ -786,6 +786,9 @@
   <data name="EndOfGameRoll" xml:space="preserve">
     <value>Tirer</value>
   </data>
+  <data name="EndOfGameRollRequired" xml:space="preserve">
+    <value>Jet requis avant de continuer.</value>
+  </data>
   <data name="HistoryAddNote" xml:space="preserve">
     <value>Ajouter une note</value>
   </data>
@@ -806,6 +809,12 @@
   </data>
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} a été mis hors de combat : {1}</value>
+  </data>
+  <data name="HistoryHenchmanDeathSentence" xml:space="preserve">
+    <value>{0} perd {1} figurine(s), {2} restante(s).</value>
+  </data>
+  <data name="HistoryHenchmanWipedSentence" xml:space="preserve">
+    <value>{0} est anéanti.</value>
   </data>
   <data name="WarriorEditTitle" xml:space="preserve">
     <value>Modifier le guerrier</value>
@@ -836,9 +845,6 @@
   </data>
   <data name="WarriorRoleHeroSingular" xml:space="preserve">
     <value>Héros</value>
-  </data>
-  <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
-    <value>Résultat ({0})</value>
   </data>
   <data name="EndOfGameInjuriesHeading" xml:space="preserve">
     <value>Blessures Graves</value>
@@ -875,6 +881,9 @@
   </data>
   <data name="EndOfGameMultipleInjuryLabel" xml:space="preserve">
     <value>Jet {0}/{1}</value>
+  </data>
+  <data name="EndOfGameFigureLabel" xml:space="preserve">
+    <value>Figurine {0}/{1}</value>
   </data>
   <data name="EndOfGameOutOfActionHint" xml:space="preserve">
     <value>Cochez les guerriers hors de combat à la fin de la partie.</value>

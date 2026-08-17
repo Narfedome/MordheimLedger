@@ -368,7 +368,39 @@ public partial class WarbandDetailViewModel : BaseViewModel
                     sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, sub.InjuryResultText));
                 }
 
-                if (changed)
+                // Un jet D6 par figurine hors de combat dans ce groupe d'Hommes de main (règle
+                // confirmée avec l'utilisateur, 2026-08-17 - pas un seul jet pour tout le groupe, voir
+                // EndOfGameDialogViewModel.WarriorOutcomeRow.FigureInjuryRolls). Chaque résultat devient
+                // sa propre Injury comme pour un Héros ; celles qui tombent sur "Mort" décrémentent
+                // HeadCount d'autant plutôt que de faire basculer tout le groupe à WarriorStatus.Dead -
+                // le groupe ne passe Mort (via suppression, voir plus bas) que si HeadCount tombe à 0.
+                var headCountWiped = false;
+                if (row.FigureInjuryRolls.Count > 0)
+                {
+                    var deaths = 0;
+                    foreach (var figure in row.FigureInjuryRolls)
+                    {
+                        if (string.IsNullOrWhiteSpace(figure.InjuryResultText)) continue;
+
+                        var figureInjury = await GetOrCreateInjuryAsync(figure.InjuryResultText);
+                        await _warbandService.AddWarriorInjuryAsync(warrior.Id, figureInjury);
+                        if (figure.IsDeath) deaths++;
+                    }
+
+                    if (deaths > 0)
+                    {
+                        warrior.HeadCount -= deaths;
+                        changed = true;
+                        headCountWiped = warrior.HeadCount <= 0;
+                        sentences.Add(headCountWiped
+                            ? string.Format(Loc["HistoryHenchmanWipedSentence"], warrior.Name)
+                            : string.Format(Loc["HistoryHenchmanDeathSentence"], warrior.Name, deaths, warrior.HeadCount));
+                    }
+                }
+
+                if (headCountWiped)
+                    await _warbandService.DeleteWarriorAsync(warrior.Id);
+                else if (changed)
                     await _warbandService.SaveWarriorAsync(warrior);
             }
 

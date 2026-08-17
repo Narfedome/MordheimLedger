@@ -357,33 +357,57 @@
                         <!-- Branche résolue : montant d'or/pierres de sorcière éditable, ou objet trouvé
                              (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
                         <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExplorationGold}">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationGold}">
                                 <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationGoldLabel}" VerticalOptions="Center"/>
                                 <Entry Grid.Column="1" Text="{Binding ExplorationGoldAmount}" Keyboard="Numeric" WidthRequest="70">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
                                 </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationGoldCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
                             </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExplorationItem}" ColumnSpacing="10">
+                            <!-- Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), un seul
+                                 exemplaire est trouvé - ni champ ni dé, juste "x1" en lecture seule (voir
+                                 ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
+                                 trancher au joueur. -->
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationItem}">
                                 <Label Grid.Column="0" Text="{Binding ResolvedExplorationOutcome.EquipmentItemName}"
                                        FontAttributes="Bold" VerticalOptions="Center"/>
-                                <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70">
+                                <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
+                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding ShowExplorationItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                       IsVisible="{Binding ShowExplorationItemQuantityRoll}">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
                                 </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationItemQuantityCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
                             </Grid>
 
-                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExplorationWyrdstone}">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationWyrdstone}">
                                 <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationWyrdstoneLabel}" VerticalOptions="Center"/>
                                 <Entry Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}" Keyboard="Numeric" WidthRequest="70">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
                                 </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationWyrdstoneCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
                             </Grid>
+
+                            <!-- Un seul des trois Grid ci-dessus est jamais visible à la fois
+                                 (IsExplorationGold/Item/Wyrdstone mutuellement exclusifs) - une seule
+                                 Label d'erreur partagée suffit. -->
+                            <Label Text="{Binding ExplorationAmountError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding ExplorationAmountError, Converter={StaticResource IsNotNullConverter}}"/>
 
                             <!-- Branche sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
                                  Charrette Renversée 5-6) - purement informatif, consigné dans

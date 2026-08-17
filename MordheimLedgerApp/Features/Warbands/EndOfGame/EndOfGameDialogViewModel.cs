@@ -210,6 +210,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsExplorationWyrdstone))]
     [NotifyPropertyChangedFor(nameof(IsExplorationNone))]
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
     private ExplorationOutcome? resolvedExplorationOutcome;
 
     /// <summary>Texte affiché pour une branche Kind.None (voir IsExplorationNone) - le Note de la
@@ -221,15 +222,24 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsExplorationItem => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Item;
     public bool IsExplorationWyrdstone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Wyrdstone;
 
+    /// <summary>Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), on ne trouve qu'un
+    /// seul exemplaire d'un objet - ItemQuantityFormula vaut alors "1", une quantité fixe et non un jet
+    /// (voir ApplyResolvedOutcome, qui la renseigne directement sans rien demander au joueur). Le dé de
+    /// relance (AutoRollExplorationItemQuantityCommand) et le champ ne sont utiles que si la formule est
+    /// un vrai jet ("D3", "D6"...).</summary>
+    public bool ShowExplorationItemQuantityRoll =>
+        ResolvedExplorationOutcome?.ItemQuantityFormula?.Contains('D', StringComparison.OrdinalIgnoreCase) == true;
+
     /// <summary>Branche retenue sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
     /// Charrette Renversée 5-6) - reste purement informatif (Note ou Description du résultat), juste
     /// consigné dans l'Historique à la sauvegarde (voir WarbandDetailViewModel.EndOfGame) plutôt que
     /// silencieusement perdu.</summary>
     public bool IsExplorationNone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.None;
 
-    /// <summary>Montant d'or résolu (formule roulée automatiquement dès la branche retenue) - reste un
-    /// Entry modifiable comme tous les autres jets de ce wizard, un jet physique du joueur prime
-    /// toujours sur le tirage automatique.</summary>
+    /// <summary>Montant d'or - jamais rempli automatiquement dès la branche retenue (revenu sur ce point
+    /// le 2026-08-17 : même idiome que tous les autres jets de ce wizard, l'appli ne décide jamais à la
+    /// place du joueur - vide tant qu'il n'a pas tapé son jet physique ou cliqué le dé, voir
+    /// AutoRollExplorationGold).</summary>
     [ObservableProperty]
     private string explorationGoldAmount = string.Empty;
 
@@ -241,6 +251,17 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// sorcière (voir ExplorationOutcome.GoldFormula).</summary>
     [ObservableProperty]
     private string explorationWyrdstoneAmount = string.Empty;
+
+    /// <summary>Même principe que RollError - posé uniquement par ValidateExplorationResultStep si le
+    /// montant Or/Objet/Pierres de sorcière de la branche résolue est encore vide, effacé dès qu'il est
+    /// renseigné. Un seul champ partagé : IsExplorationGold/Item/Wyrdstone sont mutuellement exclusifs,
+    /// un seul des trois est jamais visible à la fois.</summary>
+    [ObservableProperty]
+    private string? explorationAmountError;
+
+    partial void OnExplorationGoldAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
+    partial void OnExplorationItemQuantityChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
+    partial void OnExplorationWyrdstoneAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
 
     private void SyncExplorationDice()
     {
@@ -270,6 +291,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ExplorationGoldAmount = string.Empty;
         ExplorationItemQuantity = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
+        ExplorationAmountError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -292,6 +314,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ExplorationGoldAmount = string.Empty;
         ExplorationItemQuantity = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
+        ExplorationAmountError = null;
 
         if (TriggeredExplorationResult is null || !int.TryParse(value, out var roll)) return;
 
@@ -300,17 +323,18 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (outcome is not null) ApplyResolvedOutcome(outcome);
     }
 
+    /// <summary>Retient la branche - ne tire plus rien automatiquement pour Or/Objet-à-jet/Pierres de
+    /// sorcière (revenu sur ce point le 2026-08-17) : le joueur tape son jet physique ou clique le dé
+    /// (AutoRollExplorationGold/ItemQuantity/Wyrdstone), jamais un tirage silencieux à la résolution de
+    /// la branche. Seule exception : une quantité d'objet FIXE ("1", pas un jet - voir
+    /// ShowExplorationItemQuantityRoll) se renseigne directement, ce n'est pas un hasard à faire trancher
+    /// au joueur.</summary>
     private void ApplyResolvedOutcome(ExplorationOutcome outcome)
     {
         ResolvedExplorationOutcome = outcome;
-        if (outcome.Kind == ExplorationOutcomeKind.Gold && outcome.GoldFormula is not null)
-            ExplorationGoldAmount = DiceFormula.Roll(outcome.GoldFormula).ToString();
-        else if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is not null)
-            ExplorationItemQuantity = DiceFormula.Roll(outcome.ItemQuantityFormula).ToString();
-        else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone && outcome.GoldFormula is not null)
-            ExplorationWyrdstoneAmount = DiceFormula.Roll(outcome.GoldFormula).ToString();
-        // Kind.None : rien à tirer, ResolvedExplorationOutcome suffit (voir IsExplorationNone) - juste
-        // consigné dans l'Historique à la sauvegarde.
+        if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is { } formula
+            && !formula.Contains('D', StringComparison.OrdinalIgnoreCase))
+            ExplorationItemQuantity = formula;
     }
 
     [RelayCommand]
@@ -318,6 +342,27 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 
     [RelayCommand]
     private void AutoRollExplorationSubRoll() => ExplorationSubRoll = ExplorationChart.RollDie().ToString();
+
+    // Le montant Or/pierres de sorcière/quantité d'objet reste vide tant que le joueur n'a pas tapé son
+    // jet physique ou cliqué l'un de ces trois dés - même idiome que tous les autres jets du wizard
+    // (ManualRoll, ExplorationSubRoll...), aucun tirage automatique à la résolution de la branche.
+    [RelayCommand]
+    private void AutoRollExplorationGold()
+    {
+        if (ResolvedExplorationOutcome?.GoldFormula is { } formula) ExplorationGoldAmount = DiceFormula.Roll(formula).ToString();
+    }
+
+    [RelayCommand]
+    private void AutoRollExplorationItemQuantity()
+    {
+        if (ResolvedExplorationOutcome?.ItemQuantityFormula is { } formula) ExplorationItemQuantity = DiceFormula.Roll(formula).ToString();
+    }
+
+    [RelayCommand]
+    private void AutoRollExplorationWyrdstone()
+    {
+        if (ResolvedExplorationOutcome?.GoldFormula is { } formula) ExplorationWyrdstoneAmount = DiceFormula.Roll(formula).ToString();
+    }
 
     public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults)
     {
@@ -410,9 +455,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 
     /// <summary>Bloque tant que les dés d'Exploration ne sont pas tous renseignés, et - si le résultat
     /// déclenché a plusieurs branches à choix exclusif (Groupe A, ex. Cadavre) - tant que le sous-jet
-    /// qui les départage n'a pas résolu de branche. Un jet qui ne déclenche rien (pas de doublon) ou un
-    /// résultat sans sous-jet (branche unique, ex. Masures en Ruine) n'a rien de plus à valider - dans
-    /// ces deux cas, l'étape ExplorationResult n'existe même pas (voir Steps).</summary>
+    /// qui les départage n'a pas résolu de branche. Un jet qui ne déclenche rien (pas de doublon) n'a
+    /// rien de plus à valider (l'étape ExplorationResult n'existe même pas, voir Steps).</summary>
     private bool ValidateExplorationRollStep()
     {
         var valid = true;
@@ -421,10 +465,24 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         return valid;
     }
 
+    /// <summary>Bloque tant que le sous-jet (s'il y en a un) n'a pas résolu de branche, puis tant que le
+    /// montant Or/Objet/Pierres de sorcière de la branche résolue est vide - jamais auto-rempli (voir
+    /// ApplyResolvedOutcome), donc à valider comme n'importe quel autre jet de ce wizard. Une branche
+    /// Kind.None (rien à saisir) ou l'absence de branche (ex. Catacombes, aucune Outcome du tout) n'ont
+    /// rien de plus à valider.</summary>
     private bool ValidateExplorationResultStep()
     {
-        if (!ShowExplorationSubRoll) return true;
-        return CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationSubRollError = Loc["EndOfGameRollRequired"]);
+        if (ShowExplorationSubRoll && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationSubRollError = Loc["EndOfGameRollRequired"]))
+            return false;
+
+        var amountMissing = ResolvedExplorationOutcome?.Kind switch
+        {
+            ExplorationOutcomeKind.Gold => string.IsNullOrWhiteSpace(ExplorationGoldAmount),
+            ExplorationOutcomeKind.Item => string.IsNullOrWhiteSpace(ExplorationItemQuantity),
+            ExplorationOutcomeKind.Wyrdstone => string.IsNullOrWhiteSpace(ExplorationWyrdstoneAmount),
+            _ => false
+        };
+        return CheckRoll(amountMissing == true, () => ExplorationAmountError = Loc["EndOfGameRollRequired"]);
     }
 
     private static bool CheckRoll(bool isMissing, Action setError)

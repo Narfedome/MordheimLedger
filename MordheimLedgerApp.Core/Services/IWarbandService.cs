@@ -34,6 +34,18 @@ public interface IWarbandService
     Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null);
     Task RemoveWarriorEquipmentAsync(int warriorEquipmentId);
 
+    /// <summary>Equipment held by the warband itself, not yet assigned to a warrior - see
+    /// Models.WarbandEquipment. Fed by the End of Game wizard's Exploration step (loot found this way
+    /// isn't tied to a specific warrior at the table either) and drained by EquipWarbandItemToWarriorAsync
+    /// once the player decides who carries it.</summary>
+    Task<List<WarbandEquipment>> GetWarbandEquipmentAsync(int warbandId, string languageCode);
+    Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null);
+    Task RemoveWarbandEquipmentAsync(int warbandEquipmentId);
+
+    /// <summary>Moves an entire WarbandEquipment row (its full Quantity, never a partial split) onto a
+    /// warrior - deletes the stash row, creates the equivalent WarriorEquipment row.</summary>
+    Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId);
+
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);
     Task RemoveWarriorSkillAsync(int warriorSkillId);
 

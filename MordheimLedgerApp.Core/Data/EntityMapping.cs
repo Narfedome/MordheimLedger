@@ -29,6 +29,7 @@ public static class EntityMapping
         WarbandArchetypeId = e.WarbandArchetypeId,
         Name = e.Name,
         Treasury = e.Treasury,
+        WyrdstoneShards = e.WyrdstoneShards,
         Notes = e.Notes
     };
 
@@ -39,6 +40,7 @@ public static class EntityMapping
         WarbandArchetypeId = m.WarbandArchetypeId,
         Name = m.Name,
         Treasury = m.Treasury,
+        WyrdstoneShards = m.WyrdstoneShards,
         Notes = m.Notes
     };
 
@@ -234,6 +236,60 @@ public static class EntityMapping
         ImagePath = m.ImagePath,
         Category = m.Category,
         RollRange = m.RollRange
+    };
+
+    public static ExplorationResult ToModel(this ExplorationResultEntity e, IReadOnlyDictionary<string, string> translations,
+        IEnumerable<ExplorationOutcome>? outcomes = null) => new()
+    {
+        Id = e.Id,
+        DiceCount = e.DiceCount,
+        Value = e.Value,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations) ?? string.Empty,
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        RollsIndependently = e.RollsIndependently,
+        Outcomes = outcomes?.ToList() ?? new List<ExplorationOutcome>()
+    };
+
+    public static ExplorationResultEntity ToEntity(this ExplorationResult m) => new()
+    {
+        Id = m.Id,
+        DiceCount = m.DiceCount,
+        Value = m.Value,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey ?? string.Empty,
+        Source = m.Source,
+        RollsIndependently = m.RollsIndependently
+    };
+
+    public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e) => new()
+    {
+        Id = e.Id,
+        ExplorationResultId = e.ExplorationResultId,
+        SubRollMin = e.SubRollMin,
+        SubRollMax = e.SubRollMax,
+        Kind = e.Kind,
+        GoldFormula = e.GoldFormula,
+        EquipmentItemName = e.EquipmentItemName,
+        ItemQuantityFormula = e.ItemQuantityFormula,
+        MaterialRuleName = e.MaterialRuleName,
+        Note = e.Note
+    };
+
+    public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
+    {
+        Id = m.Id,
+        ExplorationResultId = m.ExplorationResultId,
+        SubRollMin = m.SubRollMin,
+        SubRollMax = m.SubRollMax,
+        Kind = m.Kind,
+        GoldFormula = m.GoldFormula,
+        EquipmentItemName = m.EquipmentItemName,
+        ItemQuantityFormula = m.ItemQuantityFormula,
+        MaterialRuleName = m.MaterialRuleName,
+        Note = m.Note
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -462,6 +518,24 @@ public static class EntityMapping
     {
         Id = e.Id,
         WarriorId = e.WarriorId,
+        Item = item,
+        Quantity = e.Quantity,
+        MaterialRule = materialRule
+    };
+
+    public static WarbandEquipmentEntity ToEntity(this WarbandEquipment m) => new()
+    {
+        Id = m.Id,
+        WarbandId = m.WarbandId,
+        EquipmentItemId = m.Item.Id,
+        Quantity = m.Quantity,
+        MaterialSpecialRuleId = m.MaterialRule?.Id
+    };
+
+    public static WarbandEquipment ToModel(this WarbandEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null) => new()
+    {
+        Id = e.Id,
+        WarbandId = e.WarbandId,
         Item = item,
         Quantity = e.Quantity,
         MaterialRule = materialRule

@@ -60,6 +60,18 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private bool deadExpanded;
 
+    /// <summary>Objets trouvés mais pas encore assignés à un guerrier (voir Models.WarbandEquipment,
+    /// alimenté par l'étape Exploration du wizard Fin de Partie) - affiché en pense-bête sur cette page,
+    /// avec une action pour les faire porter par un guerrier (EquipInventoryItem).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasInventory))]
+    private ObservableCollection<WarbandEquipment> inventory = new();
+
+    public bool HasInventory => Inventory.Count > 0;
+
+    [ObservableProperty]
+    private bool inventoryExpanded = true;
+
     [ObservableProperty]
     private ObservableCollection<HistoryEntry> historyEntries = new();
 
@@ -100,6 +112,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleDead() => DeadExpanded = !DeadExpanded;
 
+    [RelayCommand]
+    private void ToggleInventory() => InventoryExpanded = !InventoryExpanded;
+
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -120,9 +135,30 @@ public partial class WarbandDetailViewModel : BaseViewModel
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
             Rating = Heroes.Concat(Henchmen).Sum(r => (r.Warrior.IsLargeCreature ? 20 : 5) + r.Warrior.Experience);
 
+            var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);
+            Inventory = new ObservableCollection<WarbandEquipment>(inventory);
+
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
         });
+    }
+
+    /// <summary>Fait porter un objet de l'inventaire de bande par un guerrier choisi via un simple
+    /// ActionSheet (Héros puis Hommes de main) - déplace la ligne entière (toute sa Quantity, jamais un
+    /// partage, voir IWarbandService.EquipWarbandItemToWarriorAsync) plutôt qu'un picker dédié, l'appli a
+    /// déjà cet idiome pour un choix ponctuel dans une liste plate (voir BaseViewModel.
+    /// ShowActionSheetIndexAsync).</summary>
+    [RelayCommand]
+    private async Task EquipInventoryItem(WarbandEquipment item)
+    {
+        var candidates = Heroes.Concat(Henchmen).ToList();
+        if (candidates.Count == 0) return;
+
+        var index = await ShowActionSheetIndexAsync(Loc["InventoryEquipTitle"], candidates.Select(r => r.Warrior.Name).ToArray());
+        if (index < 0 || index >= candidates.Count) return;
+
+        await _warbandService.EquipWarbandItemToWarriorAsync(item.Id, candidates[index].Warrior.Id);
+        await LoadAsync(WarbandId);
     }
 
     private WarriorRow ToRow(Warrior warrior)
@@ -279,18 +315,71 @@ public partial class WarbandDetailViewModel : BaseViewModel
             return;
         }
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId);
+        var language = LocalizationService.Instance.Language;
+        var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
+
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
         {
             var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], dialogViewModel.SelectedResult) };
 
-            if (dialogViewModel.TreasuryFound != 0)
+            // Étape Exploration : au plus une Outcome résolue par jet (ExplorationChart.DetectMultiples
+            // ne déclenche jamais plusieurs entrées de la table à la fois, voir Core.Rules). L'or/objet
+            // trouvé de cette façon s'ajoute à la trésorerie/à un guerrier exactement comme n'importe
+            // quel autre gain de la partie.
+            if (dialogViewModel.ResolvedExplorationOutcome is { } outcome)
             {
-                Warband.Treasury += dialogViewModel.TreasuryFound;
-                await _warbandService.SaveWarbandAsync(Warband);
-                sentences.Add(string.Format(Loc["HistoryTreasurySentence"], dialogViewModel.TreasuryFound));
+                if (outcome.Kind == ExplorationOutcomeKind.Gold
+                    && int.TryParse(dialogViewModel.ExplorationGoldAmount, out var gold) && gold != 0)
+                {
+                    Warband.Treasury += gold;
+                    await _warbandService.SaveWarbandAsync(Warband);
+                    sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
+                }
+                else if (outcome.Kind == ExplorationOutcomeKind.Item
+                    && outcome.EquipmentItemName is { } itemName
+                    && int.TryParse(dialogViewModel.ExplorationItemQuantity, out var quantity) && quantity > 0)
+                {
+                    // EquipmentItemName est le nom ANGLAIS du catalogue (voir ExplorationOutcome) - on
+                    // résout donc l'Id contre la liste en anglais (seul l'Id compte pour
+                    // AddWarbandEquipmentAsync, voir WarbandService), puis on ré-affiche le nom dans la
+                    // langue courante pour la phrase d'Historique plutôt que de laisser filtrer le nom
+                    // anglais dans un historique par ailleurs entièrement localisé. L'objet rejoint
+                    // l'inventaire de la bande (pas de guerrier assigné pendant l'assistant, voir
+                    // WarbandEquipment) - à équiper plus tard depuis la fiche de bande.
+                    var englishCatalog = await _libraryService.GetEquipmentItemsAsync("en");
+                    var englishItem = englishCatalog.FirstOrDefault(e => e.Name == itemName);
+                    if (englishItem is not null)
+                    {
+                        // Même mécanisme que MaterialRuleName pour les objets achetés normalement (voir
+                        // WarriorEquipment.MaterialRule) : "Hache de Gromril" est une Hache de base + la
+                        // SpecialRule "Gromril Weapon", pas un objet distinct du catalogue.
+                        SpecialRule? materialRule = null;
+                        if (outcome.MaterialRuleName is { } materialRuleName)
+                        {
+                            var englishRules = await _libraryService.GetSpecialRulesAsync("en");
+                            materialRule = englishRules.FirstOrDefault(r => r.Name == materialRuleName);
+                        }
+
+                        await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule);
+                        var displayCatalog = language == "en" ? englishCatalog : await _libraryService.GetEquipmentItemsAsync(language);
+                        var displayName = displayCatalog.FirstOrDefault(e => e.Id == englishItem.Id)?.Name ?? englishItem.Name;
+                        sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
+                    }
+                }
+                else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
+                    && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)
+                {
+                    Warband.WyrdstoneShards += shards;
+                    await _warbandService.SaveWarbandAsync(Warband);
+                    sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], shards));
+                }
+                else if (outcome.Kind == ExplorationOutcomeKind.None)
+                {
+                    sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
+                }
             }
 
             List<Injury>? injuryCatalog = null;
@@ -298,7 +387,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
             // Find-or-create par nom (résolu dans la langue courante, comme le catalogue lui-même) dans
             // le catalogue Injury - la table Blessures Graves a un texte fixe par jet, donc pas de
             // risque de quasi-doublons.
-            var language = LocalizationService.Instance.Language;
             async Task<Injury> GetOrCreateInjuryAsync(string name)
             {
                 injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);

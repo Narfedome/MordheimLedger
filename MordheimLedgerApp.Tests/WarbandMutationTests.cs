@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 
@@ -108,5 +109,45 @@ public class WarbandMutationTests : IDisposable
 
         Assert.Null(await _warbands.GetWarbandAsync(warband.Id));
         Assert.Empty(await _warbands.GetWarriorsAsync(warband.Id, "en"));
+    }
+
+    [Fact]
+    public async Task ExplorationResults_DuplicatedByADoubleSeed_AreBackfilledOnNextLaunch()
+    {
+        // Reproduit le bug trouvé le 2026-08-17 sur une base de dev existante : une seconde exécution de
+        // SeedExplorationResultsAsync (hors du garde-fou normal "catalogue vide") insère un doublon pour
+        // "Corpse" (2,3) avec ses propres clés de traduction jamais enregistrées dans TranslationEntity -
+        // exactement le symptôme observé (nom/description affichant la clé brute au lieu du texte
+        // résolu, le wizard tombant sur cette copie cassée via FirstOrDefault).
+        await _db.Initialization;
+
+        var brokenDuplicate = new ExplorationResultEntity
+        {
+            DiceCount = 2, Value = 3,
+            NameKey = Guid.NewGuid().ToString("N"), DescriptionKey = Guid.NewGuid().ToString("N"),
+            Source = ContentSource.Official, RollsIndependently = false
+        };
+        await _db.Connection.InsertAsync(brokenDuplicate);
+        await _db.Connection.InsertAsync(new ExplorationOutcomeEntity
+        {
+            ExplorationResultId = brokenDuplicate.Id, SubRollMin = 1, SubRollMax = 6,
+            Kind = ExplorationOutcomeKind.Gold, GoldFormula = "D6"
+        });
+
+        // Rouvrir la même base de données (nouvelle instance AppDatabase sur le même fichier) rejoue
+        // InitializeAsync : le garde-fou de seed ne se redéclenche pas (catalogue déjà peuplé), mais le
+        // backfill tourne à chaque lancement, comme en conditions réelles au prochain démarrage de l'app.
+        // La connexion _db du test reste ouverte en parallèle (SQLite autorise plusieurs connexions sur
+        // le même fichier) - Dispose() la fermera normalement à la fin du test.
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var results = await reopenedLibrary.GetExplorationResultsAsync("en");
+        Assert.Equal(30, results.Count);
+        var corpse = results.Single(r => r.DiceCount == 2 && r.Value == 3);
+        Assert.Equal("Corpse", corpse.Name);
+
+        await reopenedDb.Connection.CloseAsync();
     }
 }

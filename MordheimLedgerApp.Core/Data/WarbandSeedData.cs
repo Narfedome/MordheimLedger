@@ -305,6 +305,35 @@ public class InjurySeedData
     public LocalizedText? Description { get; set; }
 }
 
+/// <summary>One entry of the rulebook's Exploration chart (Data/SeedData/ExplorationResults.json,
+/// common - not declared per-band). See Models.Library.ExplorationResult.</summary>
+public class ExplorationResultSeedData
+{
+    public int DiceCount { get; set; }
+    public int Value { get; set; }
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText Description { get; set; } = new();
+    public bool RollsIndependently { get; set; }
+    public List<ExplorationOutcomeSeedData> Outcomes { get; set; } = new();
+}
+
+/// <summary>One mechanized branch of an ExplorationResultSeedData - see
+/// Models.Library.ExplorationOutcome for the field-by-field meaning.</summary>
+public class ExplorationOutcomeSeedData
+{
+    public int? SubRollMin { get; set; }
+    public int? SubRollMax { get; set; }
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationOutcomeKind member name.</summary>
+    public string Kind { get; set; } = "None";
+
+    public string? GoldFormula { get; set; }
+    public string? EquipmentItemName { get; set; }
+    public string? ItemQuantityFormula { get; set; }
+    public string? MaterialRuleName { get; set; }
+    public string? Note { get; set; }
+}
+
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the
 /// explicit owner of a school's spells, referenced by warband files via WarbandSeedData.MagicSchools
 /// (name-only, no Description, no Spells) to link a spellcaster without redeclaring the table.</summary>

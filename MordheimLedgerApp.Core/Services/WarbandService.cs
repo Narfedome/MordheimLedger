@@ -103,17 +103,7 @@ public class WarbandService : IWarbandService
             {
                 if (!equipmentById.TryGetValue(carriedRow.EquipmentItemId, out var item)) continue;
 
-                SpecialRule? materialRule = null;
-                if (carriedRow.MaterialSpecialRuleId is { } materialRuleId)
-                {
-                    var materialEntity = await _db.Connection.FindAsync<SpecialRuleEntity>(materialRuleId);
-                    if (materialEntity is not null)
-                    {
-                        var materialTranslations = await TranslationResolver.ResolveAsync(_db, [materialEntity.NameKey, materialEntity.DescriptionKey], languageCode);
-                        materialRule = materialEntity.ToModel(materialTranslations);
-                    }
-                }
-
+                var materialRule = await ResolveMaterialRuleAsync(carriedRow.MaterialSpecialRuleId, languageCode);
                 carried.Add(carriedRow.ToModel(item, materialRule));
             }
 
@@ -205,6 +195,64 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+    }
+
+    private async Task<SpecialRule?> ResolveMaterialRuleAsync(int? materialSpecialRuleId, string languageCode)
+    {
+        if (materialSpecialRuleId is not { } id) return null;
+        var entity = await _db.Connection.FindAsync<SpecialRuleEntity>(id);
+        if (entity is null) return null;
+
+        var translations = await TranslationResolver.ResolveAsync(_db, [entity.NameKey, entity.DescriptionKey], languageCode);
+        return entity.ToModel(translations);
+    }
+
+    public async Task<List<WarbandEquipment>> GetWarbandEquipmentAsync(int warbandId, string languageCode)
+    {
+        await _db.Initialization;
+        var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
+        var rows = await _db.Connection.Table<WarbandEquipmentEntity>().Where(e => e.WarbandId == warbandId).ToListAsync();
+
+        var result = new List<WarbandEquipment>();
+        foreach (var row in rows)
+        {
+            if (!equipmentById.TryGetValue(row.EquipmentItemId, out var item)) continue;
+            var materialRule = await ResolveMaterialRuleAsync(row.MaterialSpecialRuleId, languageCode);
+            result.Add(row.ToModel(item, materialRule));
+        }
+        return result;
+    }
+
+    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null)
+    {
+        await _db.Initialization;
+        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule };
+        var entity = stashed.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        stashed.Id = entity.Id;
+        return stashed;
+    }
+
+    public async Task RemoveWarbandEquipmentAsync(int warbandEquipmentId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+    }
+
+    public async Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId)
+    {
+        await _db.Initialization;
+        var stashRow = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId)
+            ?? throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} introuvable.");
+
+        // "en" suffit ici : seul l'Id compte pour AddWarriorEquipmentAsync (voir WarriorEquipment.ToEntity),
+        // même idiome que la résolution par nom anglais de l'étape Exploration du wizard.
+        var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
+        var materialRule = await ResolveMaterialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
+
+        var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule);
+        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+        return carried;
     }
 
     public async Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill)

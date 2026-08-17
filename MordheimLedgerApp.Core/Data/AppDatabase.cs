@@ -37,6 +37,7 @@ public class AppDatabase
         // Runs on every launch, not just first: fixes existing data rather than seeding new data (see
         // the method's own doc comment).
         await BackfillNeverGainsExperienceAsync();
+        await BackfillDuplicateExplorationResultsAsync();
     }
 
     /// <summary>One-time-per-row data fix for campaigns that started before WarriorArchetype/
@@ -92,6 +93,46 @@ public class AppDatabase
         }
     }
 
+    /// <summary>One-time-per-row cleanup for a local database where SeedExplorationResultsAsync ended
+    /// up running more than once (found on a dev machine 2026-08-17: 60 ExplorationResultEntity rows
+    /// instead of 30, every (DiceCount,Value) pair duplicated, one copy per run - each run mints fresh
+    /// NameKey/DescriptionKey GUIDs via SeedTranslationAsync, so the two copies never collide, they just
+    /// silently coexist). SeedExplorationResultsAsync has no dedup guard of its own by design - same
+    /// "plain insert" precedent as Injury/EquipmentItem, relying entirely on InitializeAsync's "catalog
+    /// empty" gate to only ever run once. That gate held for every OTHER catalog on the affected machine
+    /// (WarbandArchetype/Injury/EquipmentItem counts were all normal) - only Exploration data was
+    /// duplicated, meaning something invoked SeedExplorationResultsAsync on its own outside the normal
+    /// single-pass seed at some point (most likely a one-off manual/dev invocation against a live
+    /// database while iterating on this feature, not a general seeding bug). Runs unconditionally
+    /// (not gated) so it repairs any already-affected local database on next launch - cheap no-op once
+    /// no (DiceCount,Value) pair has more than one row, which is true for a fresh install. Keeps, per
+    /// duplicated pair, the row whose NameKey actually resolves against TranslationEntity (falls back to
+    /// the lowest Id if none do, which shouldn't happen in practice) and deletes every other row plus its
+    /// ExplorationOutcomeEntity children - never merges/edits a kept row, only removes full duplicates.</summary>
+    private async Task BackfillDuplicateExplorationResultsAsync()
+    {
+        var results = await _db.Table<ExplorationResultEntity>().ToListAsync();
+        var duplicateGroups = results.GroupBy(r => (r.DiceCount, r.Value)).Where(g => g.Count() > 1).ToList();
+        if (duplicateGroups.Count == 0) return;
+
+        var translationKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Select(t => t.Key)
+            .ToHashSet();
+
+        foreach (var group in duplicateGroups)
+        {
+            var keep = group.FirstOrDefault(r => translationKeys.Contains(r.NameKey)) ?? group.OrderBy(r => r.Id).First();
+            foreach (var toDelete in group.Where(r => r.Id != keep.Id))
+            {
+                var outcomes = await _db.Table<ExplorationOutcomeEntity>()
+                    .Where(o => o.ExplorationResultId == toDelete.Id).ToListAsync();
+                foreach (var outcome in outcomes)
+                    await _db.DeleteAsync<ExplorationOutcomeEntity>(outcome.Id);
+                await _db.DeleteAsync<ExplorationResultEntity>(toDelete.Id);
+            }
+        }
+    }
+
     private async Task CreateAllTablesAsync()
     {
         await _db.CreateTableAsync<CampaignEntity>();
@@ -103,6 +144,7 @@ public class AppDatabase
         await _db.CreateTableAsync<SkillEntity>();
         await _db.CreateTableAsync<InjuryEntity>();
         await _db.CreateTableAsync<WarriorEquipmentEntity>();
+        await _db.CreateTableAsync<WarbandEquipmentEntity>();
         await _db.CreateTableAsync<WarriorSkillEntity>();
         await _db.CreateTableAsync<WarriorInjuryEntity>();
         await _db.CreateTableAsync<WarriorSpellEntity>();
@@ -124,6 +166,8 @@ public class AppDatabase
         await _db.CreateTableAsync<EquipmentListItemEntity>();
         await _db.CreateTableAsync<WarriorArchetypeEquipmentEntity>();
         await _db.CreateTableAsync<EquipmentItemSpecialRuleEntity>();
+        await _db.CreateTableAsync<ExplorationResultEntity>();
+        await _db.CreateTableAsync<ExplorationOutcomeEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -181,22 +225,24 @@ public class AppDatabase
 
     private async Task SeedOfficialContentAsync()
     {
-        // The 6 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
-        // Skills.json, Injuries.json, MagicSchools.json) must seed before any warband file below - warband
-        // JSON files only declare rules/equipment/mutations/schools that are genuinely THEIRS, and find-
-        // or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted insert
-        // (Equipment/Skill/Injury) relies on the canonical row already existing by the time a warband
-        // references it. Injuries.json isn't referenced by any warband file at all (no per-band injury
-        // tables in the rulebook), it just needs to seed once. Equipment.json's core rulebook mounts
-        // (Cheval/Destrier/Chien de guerre, EquipmentCategory.Animal) carry RestrictedToWarbandNames
-        // instead of a single-band flag - band-only mounts (e.g. Orc Mob's Sanglier de guerre) stay
-        // declared directly in their own warband file, same split as any other band-declared equipment.
+        // The 7 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
+        // Skills.json, Injuries.json, MagicSchools.json, ExplorationResults.json) must seed before any
+        // warband file below - warband JSON files only declare rules/equipment/mutations/schools that
+        // are genuinely THEIRS, and find-or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or
+        // a plain unrestricted insert (Equipment/Skill/Injury) relies on the canonical row already
+        // existing by the time a warband references it. Injuries.json/ExplorationResults.json aren't
+        // referenced by any warband file at all (no per-band injury/exploration tables in the rulebook),
+        // they just need to seed once. Equipment.json's core rulebook mounts (Cheval/Destrier/Chien de
+        // guerre, EquipmentCategory.Animal) carry RestrictedToWarbandNames instead of a single-band flag
+        // - band-only mounts (e.g. Orc Mob's Sanglier de guerre) stay declared directly in their own
+        // warband file, same split as any other band-declared equipment.
         await SeedSpecialRulesAsync();
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
+        await SeedExplorationResultsAsync();
 
         await SeedWarbandFromJsonAsync("Undead.json");
         await SeedWarbandFromJsonAsync("DwarfTreasureHunters.json");
@@ -551,6 +597,44 @@ public class AppDatabase
             injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);
             injury.DescriptionKey = inj.Description is null ? null : await SeedTranslationAsync(inj.Description.En, inj.Description.Fr);
             await _db.InsertAsync(injury.ToEntity());
+        }
+    }
+
+    /// <summary>Plain insert, no dedup - the rulebook's Exploration chart (doubles through
+    /// six-of-a-kind), common to every warband. EquipmentOutcome.EquipmentItemName is stored as-is (a
+    /// plain name, not an id): it's resolved by lookup against the Trading Post catalog by the End of
+    /// Game wizard at roll time, not at seed time - see Models.Library.ExplorationOutcome.</summary>
+    private async Task SeedExplorationResultsAsync()
+    {
+        foreach (var res in await LoadSeedArrayAsync<ExplorationResultSeedData>("ExplorationResults.json"))
+        {
+            var result = new ExplorationResult
+            {
+                DiceCount = res.DiceCount,
+                Value = res.Value,
+                RollsIndependently = res.RollsIndependently,
+                Source = ContentSource.Official
+            };
+            result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);
+            result.DescriptionKey = await SeedTranslationAsync(res.Description.En, res.Description.Fr);
+            var resultEntity = result.ToEntity();
+            await _db.InsertAsync(resultEntity);
+
+            foreach (var outcome in res.Outcomes)
+            {
+                await _db.InsertAsync(new ExplorationOutcomeEntity
+                {
+                    ExplorationResultId = resultEntity.Id,
+                    SubRollMin = outcome.SubRollMin,
+                    SubRollMax = outcome.SubRollMax,
+                    Kind = Enum.Parse<ExplorationOutcomeKind>(outcome.Kind),
+                    GoldFormula = outcome.GoldFormula,
+                    EquipmentItemName = outcome.EquipmentItemName,
+                    ItemQuantityFormula = outcome.ItemQuantityFormula,
+                    MaterialRuleName = outcome.MaterialRuleName,
+                    Note = outcome.Note
+                });
+            }
         }
     }
 

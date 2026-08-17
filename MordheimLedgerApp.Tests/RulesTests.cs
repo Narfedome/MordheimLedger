@@ -371,4 +371,138 @@ public class RulesTests
         // Gromril = ×11 per CLAUDE.md (Gromril 11, Ithilmar 9).
         Assert.Equal(330, EquipmentPricing.CalculateCost(baseCost: 30, materialCostMultiplier: 11, isFree: false));
     }
+
+    // --- DiceFormula -----------------------------------------------------------------------------
+
+    [Fact]
+    public void DiceFormula_FlatInteger_ReturnsItself()
+    {
+        Assert.Equal(100, DiceFormula.Roll("100"));
+    }
+
+    [Fact]
+    public void DiceFormula_D6_IsWithinRange()
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            var roll = DiceFormula.Roll("D6");
+            Assert.InRange(roll, 1, 6);
+        }
+    }
+
+    [Fact]
+    public void DiceFormula_2D6_IsWithinRange()
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            var roll = DiceFormula.Roll("2D6");
+            Assert.InRange(roll, 2, 12);
+        }
+    }
+
+    [Fact]
+    public void DiceFormula_D3_IsWithinRange()
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            var roll = DiceFormula.Roll("D3");
+            Assert.InRange(roll, 1, 3);
+        }
+    }
+
+    [Fact]
+    public void DiceFormula_D6PlusFlat_AddsAfterSum()
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            var roll = DiceFormula.Roll("D6+1");
+            Assert.InRange(roll, 2, 7);
+        }
+    }
+
+    [Fact]
+    public void DiceFormula_D6TimesFlat_MultipliesSum()
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            var roll = DiceFormula.Roll("D6x10");
+            Assert.InRange(roll, 10, 60);
+            Assert.Equal(0, roll % 10);
+        }
+    }
+
+    [Fact]
+    public void DiceFormula_2D6TimesFlat_MultipliesSum()
+    {
+        for (var i = 0; i < 50; i++)
+        {
+            var roll = DiceFormula.Roll("2D6x5");
+            Assert.InRange(roll, 10, 60);
+            Assert.Equal(0, roll % 5);
+        }
+    }
+
+    [Fact]
+    public void DiceFormula_InvalidFormula_Throws()
+    {
+        Assert.Throws<FormatException>(() => DiceFormula.Roll("banana"));
+    }
+
+    // --- ExplorationChart --------------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(3, false, 0, 3)]
+    [InlineData(3, true, 0, 4)]
+    [InlineData(4, true, 1, 6)]
+    [InlineData(6, true, 2, 6)] // hard-capped at 6 even though sources would allow 9
+    public void ExplorationChart_ComputeDiceCount_CapsAtSix(int heroes, bool won, int bonus, int expected)
+    {
+        Assert.Equal(expected, ExplorationChart.ComputeDiceCount(heroes, won, bonus));
+    }
+
+    [Fact]
+    public void ExplorationChart_DetectMultiples_NoRepeat_ReturnsNull()
+    {
+        Assert.Null(ExplorationChart.DetectMultiples([1, 2, 3, 4]));
+    }
+
+    [Fact]
+    public void ExplorationChart_DetectMultiples_SimpleDouble()
+    {
+        Assert.Equal((2, 3), ExplorationChart.DetectMultiples([3, 3, 1, 2]));
+    }
+
+    [Fact]
+    public void ExplorationChart_DetectMultiples_TripleBeatsDouble_RegardlessOfFace()
+    {
+        // Rulebook example: double 3 and triple 5 -> only the triple 5 counts.
+        Assert.Equal((3, 5), ExplorationChart.DetectMultiples([3, 3, 5, 5, 5]));
+    }
+
+    [Fact]
+    public void ExplorationChart_DetectMultiples_TieOnCount_HighestFaceWins()
+    {
+        // Rulebook example: double 1 and double 3 -> the double 3 counts.
+        Assert.Equal((2, 3), ExplorationChart.DetectMultiples([1, 1, 3, 3]));
+    }
+
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(5, 1)]
+    [InlineData(6, 2)]
+    [InlineData(11, 2)]
+    [InlineData(12, 3)]
+    [InlineData(17, 3)]
+    [InlineData(18, 4)]
+    [InlineData(24, 4)]
+    [InlineData(25, 5)]
+    [InlineData(30, 5)]
+    [InlineData(31, 6)]
+    [InlineData(35, 6)]
+    [InlineData(36, 7)]
+    [InlineData(50, 7)]
+    public void ExplorationChart_ShardsFound_MatchesTable(int diceSum, int expectedShards)
+    {
+        Assert.Equal(expectedShards, ExplorationChart.ShardsFound(diceSum));
+    }
 }

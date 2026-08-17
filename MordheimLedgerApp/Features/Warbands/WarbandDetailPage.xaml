@@ -266,6 +266,48 @@
                                      BindableLayout.ItemsSource="{Binding DeadWarriors}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
+                <!-- Inventaire de bande : objets trouvés (ex. étape Exploration du wizard Fin de
+                     Partie) pas encore assignés à un guerrier - voir Models.WarbandEquipment. Masqué
+                     entièrement si vide plutôt qu'un groupe permanent à 0, contrairement à Héros/Hommes
+                     de main/Morts qui existent toujours. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasInventory}">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleInventoryCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc InventoryHeading}"/>
+                                <Span Text="{Binding Inventory.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding InventoryExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleInventoryCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding InventoryExpanded}" Spacing="0"
+                                     BindableLayout.ItemsSource="{Binding Inventory}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarbandEquipment">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Margin="16,4">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontSize="12"
+                                               TextColor="{DynamicResource AppTextMuted}"/>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="{loc:Loc InventoryEquip}"
+                                            Style="{StaticResource DialogSecondaryButtonStyle}"
+                                            FontSize="12" Padding="10,4" VerticalOptions="Center"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EquipInventoryItemCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
 

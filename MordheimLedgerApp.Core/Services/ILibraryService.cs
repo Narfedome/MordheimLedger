@@ -41,6 +41,11 @@ public interface ILibraryService
     Task<List<Skill>> GetSkillsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 
+    /// <summary>Every entry of the rulebook's Exploration chart (doubles through six-of-a-kind), each
+    /// with its Outcomes already loaded - see Models.Library.ExplorationResult. Reference data seeded
+    /// from the rulebook only, no editor screen yet.</summary>
+    Task<List<ExplorationResult>> GetExplorationResultsAsync(string languageCode);
+
     /// <summary>Every entry of every spell/prayer/ritual table (see Spell.MagicSchool) - purely
     /// reference data, no in-app casting/rolling ("no rules engine V1").</summary>
     Task<List<Spell>> GetSpellsAsync(string languageCode);

@@ -348,6 +348,15 @@
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Dead</value>
   </data>
+  <data name="InventoryHeading" xml:space="preserve">
+    <value>Inventory</value>
+  </data>
+  <data name="InventoryEquip" xml:space="preserve">
+    <value>Equip</value>
+  </data>
+  <data name="InventoryEquipTitle" xml:space="preserve">
+    <value>Carried by</value>
+  </data>
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Experience</value>
   </data>
@@ -771,11 +780,17 @@
   <data name="EndOfGameResultDraw" xml:space="preserve">
     <value>Draw</value>
   </data>
-  <data name="EndOfGameTreasuryPh" xml:space="preserve">
-    <value>Treasury found (gc)</value>
-  </data>
-  <data name="EndOfGameTreasuryHeading" xml:space="preserve">
+  <data name="EndOfGameExplorationHeading" xml:space="preserve">
     <value>Income</value>
+  </data>
+  <data name="EndOfGameExplorationDiceHint" xml:space="preserve">
+    <value>Roll one dice per surviving Hero who didn't go out of action, plus one if you won the battle (maximum 6 dice).</value>
+  </data>
+  <data name="EndOfGameExplorationGoldLabel" xml:space="preserve">
+    <value>Gold found (gc)</value>
+  </data>
+  <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
+    <value>Wyrdstone shards found</value>
   </data>
   <data name="EndOfGameXpPh" xml:space="preserve">
     <value>XP gained</value>
@@ -800,6 +815,15 @@
   </data>
   <data name="HistoryTreasurySentence" xml:space="preserve">
     <value>Treasury: +{0} gc.</value>
+  </data>
+  <data name="HistoryExplorationItemSentence" xml:space="preserve">
+    <value>The warband found {0}x {1} (added to the inventory).</value>
+  </data>
+  <data name="HistoryExplorationWyrdstoneSentence" xml:space="preserve">
+    <value>The warband found {0} shard(s) of wyrdstone.</value>
+  </data>
+  <data name="HistoryExplorationNoteSentence" xml:space="preserve">
+    <value>Exploration: {0}.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} gained {1} XP.</value>

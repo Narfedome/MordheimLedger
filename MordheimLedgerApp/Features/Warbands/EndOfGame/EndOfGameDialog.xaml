@@ -291,10 +291,108 @@
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Étape : Revenus (livre - trésor trouvé) -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsTreasuryStep}">
-                <Label Text="{loc:Loc EndOfGameTreasuryHeading}" FontAttributes="Bold"/>
-                <Entry Text="{Binding TreasuryFound}" Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameTreasuryPh}"/>
+            <!-- Étape : Exploration - jet (livre, chapitre "Revenus"). Nombre de dés calculé
+                 automatiquement (1D6 par Héros survivant + 1D6 si victoire, plafonné à 6 - voir
+                 Core.Rules.ExplorationChart), le joueur saisit ou tire chaque dé. La résolution du
+                 résultat éventuellement déclenché (au plus un, voir ExplorationChart.DetectMultiples)
+                 vit dans une étape séparée juste après (IsExplorationResultStep, n'apparaît que si un
+                 doublon/triple/etc a effectivement été trouvé) plutôt que sur ce même écran - même
+                 découpage "une étape par sujet" que Hors de combat/Blessure ailleurs dans ce wizard. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExplorationRollStep}">
+                <Label Text="{loc:Loc EndOfGameExplorationHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameExplorationDiceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:ExplorationDieEntry">
+                            <VerticalStackLayout Spacing="4" Margin="0,0,10,10">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6">
+                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollExplorationDieCommand}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape : Exploration - résultat. N'apparaît dans le wizard que si le jet précédent a
+                 déclenché un résultat (voir EndOfGameDialogViewModel.Steps) - jamais plusieurs à la
+                 fois. Les objets trouvés vont dans l'inventaire de bande (pas de choix de guerrier ici,
+                 voir WarbandEquipment) - à équiper plus tard depuis la fiche de bande. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExplorationResultStep}">
+                <Label Text="{Binding TriggeredExplorationResult.Name}" FontAttributes="Bold"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding TriggeredExplorationResult.Description}" FontSize="12"/>
+
+                        <!-- Sous-jet D6 départageant les branches à choix exclusif (Groupe A, ex.
+                             Cadavre) - sans objet pour un résultat à une seule branche déjà résolue. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowExplorationSubRoll}" Spacing="6">
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Text="{Binding ExplorationSubRoll}" Keyboard="Numeric"
+                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationSubRollCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+                            <Label Text="{Binding ExplorationSubRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding ExplorationSubRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Branche résolue : montant d'or/pierres de sorcière éditable, ou objet trouvé
+                             (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
+                        <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExplorationGold}">
+                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationGoldLabel}" VerticalOptions="Center"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationGoldAmount}" Keyboard="Numeric" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExplorationItem}" ColumnSpacing="10">
+                                <Label Grid.Column="0" Text="{Binding ResolvedExplorationOutcome.EquipmentItemName}"
+                                       FontAttributes="Bold" VerticalOptions="Center"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsExplorationWyrdstone}">
+                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationWyrdstoneLabel}" VerticalOptions="Center"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}" Keyboard="Numeric" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                            </Grid>
+
+                            <!-- Branche sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
+                                 Charrette Renversée 5-6) - purement informatif, consigné dans
+                                 l'Historique à la sauvegarde plutôt que silencieusement perdu. -->
+                            <Label IsVisible="{Binding IsExplorationNone}" Text="{Binding ExplorationNoteText}"
+                                   FontSize="12" FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
             <!-- Étape : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
@@ -309,12 +407,12 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
-                <Label>
+                <Label IsVisible="{Binding HasExplorationResult}">
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="{loc:Loc EndOfGameTreasuryPh}"/>
+                            <Span Text="{loc:Loc EndOfGameExplorationHeading}"/>
                             <Span Text=" : "/>
-                            <Span Text="{Binding TreasuryFound}"/>
+                            <Span Text="{Binding TriggeredExplorationResult.Name}"/>
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>

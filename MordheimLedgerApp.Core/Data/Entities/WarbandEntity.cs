@@ -15,5 +15,6 @@ public class WarbandEntity
 
     public string Name { get; set; } = string.Empty;
     public int Treasury { get; set; }
+    public int WyrdstoneShards { get; set; }
     public string? Notes { get; set; }
 }

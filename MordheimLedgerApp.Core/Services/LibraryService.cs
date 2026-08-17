@@ -160,6 +160,19 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations)).ToList();
     }
 
+    public async Task<List<ExplorationResult>> GetExplorationResultsAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<ExplorationResultEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var outcomesByResultId = (await _db.Connection.Table<ExplorationOutcomeEntity>().ToListAsync())
+            .Select(o => o.ToModel())
+            .GroupBy(o => o.ExplorationResultId)
+            .ToDictionary(g => g.Key, g => (IEnumerable<ExplorationOutcome>)g.ToList());
+        return rows.Select(r => r.ToModel(translations, outcomesByResultId.GetValueOrDefault(r.Id)))
+            .OrderBy(r => r.DiceCount).ThenBy(r => r.Value).ToList();
+    }
+
     public async Task<List<Spell>> GetSpellsAsync(string languageCode)
     {
         await _db.Initialization;

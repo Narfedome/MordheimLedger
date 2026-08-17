@@ -139,6 +139,58 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(henchmanInjuries, i => i.Name == "Full Recovery" && i.RollRange == "3-6");
     }
 
+    [Fact]
+    public async Task ExplorationResults_SeedsChartWithMechanizedOutcomes()
+    {
+        var results = await _library.GetExplorationResultsAsync("en");
+        Assert.Equal(30, results.Count);
+
+        // Corpse (3 3): a single-roll D6 sub-table mixing a Gold branch and four Item branches.
+        var corpse = results.Single(r => r.DiceCount == 2 && r.Value == 3);
+        Assert.Equal("Corpse", corpse.Name);
+        Assert.False(corpse.RollsIndependently);
+        Assert.Equal(5, corpse.Outcomes.Count);
+        Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 1, SubRollMax: 2, Kind: ExplorationOutcomeKind.Gold, GoldFormula: "D6" });
+        Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 6, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, EquipmentItemName: "Light Armour" });
+
+        // Shattered Building (5 5): a flat, automatic bonus-wyrdstone outcome (no sub-roll).
+        var shatteredBuilding = results.Single(r => r.DiceCount == 5 && r.Value == 5);
+        var wyrdstoneOutcome = Assert.Single(shatteredBuilding.Outcomes);
+        Assert.Equal(ExplorationOutcomeKind.Wyrdstone, wyrdstoneOutcome.Kind);
+        Assert.Equal("D3", wyrdstoneOutcome.GoldFormula);
+        Assert.Null(wyrdstoneOutcome.SubRollMin);
+
+        // Hidden Treasure (6 2): every Outcome checked independently against its own "N+" threshold.
+        var hiddenTreasure = results.Single(r => r.DiceCount == 6 && r.Value == 2);
+        Assert.True(hiddenTreasure.RollsIndependently);
+        Assert.Equal(8, hiddenTreasure.Outcomes.Count);
+
+        // Well (1 1): a Toughness test gates a single bonus wyrdstone shard - Auto (no sub-roll), the
+        // player applies it manually once they've made the test at the table.
+        var well = results.Single(r => r.DiceCount == 2 && r.Value == 1);
+        var wellOutcome = Assert.Single(well.Outcomes);
+        Assert.Equal(ExplorationOutcomeKind.Wyrdstone, wellOutcome.Kind);
+        Assert.Null(wellOutcome.SubRollMin);
+        Assert.False(string.IsNullOrWhiteSpace(well.Description));
+
+        // Catacombs (4 6): a purely tactical/battlefield effect (no gold/item/wyrdstone anywhere in the
+        // rulebook text) - genuinely nothing to mechanize, stays pure text.
+        var catacombs = results.Single(r => r.DiceCount == 4 && r.Value == 6);
+        Assert.Empty(catacombs.Outcomes);
+
+        // Straggler (2 4): conditional on the warband's type, no die roll involved - every applicable
+        // branch is its own Auto outcome, the player applies whichever matches their warband.
+        var straggler = results.Single(r => r.DiceCount == 2 && r.Value == 4);
+        Assert.True(straggler.RollsIndependently);
+        Assert.Contains(straggler.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Gold, GoldFormula: "2D6" });
+        Assert.All(straggler.Outcomes, o => Assert.Null(o.SubRollMin));
+
+        // Dwarf Smithy (6 3): a "Gromril Axe" branch is just the base "Axe" plus the Gromril Weapon
+        // material rule, not a distinct catalog item - see ExplorationOutcome.MaterialRuleName.
+        var dwarfSmithy = results.Single(r => r.DiceCount == 6 && r.Value == 3);
+        Assert.Contains(dwarfSmithy.Outcomes, o => o is { EquipmentItemName: "Axe", MaterialRuleName: "Gromril Weapon" });
+    }
+
     /// <summary>Every MagicSchool now carries a flavor-text Description (sourced from mordheimer.net's
     /// school pages) in both languages - used to be null for all 7 schools until this was filled in.</summary>
     [Fact]

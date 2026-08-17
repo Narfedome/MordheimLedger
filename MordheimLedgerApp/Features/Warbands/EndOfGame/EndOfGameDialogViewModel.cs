@@ -13,11 +13,13 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>
 /// Wizard qui suit la "Séquence d'après-bataille" du livre de règles : Résultat, Hors de combat,
-/// une étape Blessure par guerrier coché hors de combat, Expérience, Progression, Trésor,
-/// Récapitulatif - dans cet ordre (Blessures Graves puis Expérience puis Revenus, à faire "devant
-/// témoin" juste après la partie ; le reste de la séquence - vente de pierre magique, disponibilité
-/// des vétérans, personnages spéciaux, achats... - n'est pas dans ce dialog, soit hors périmètre V1
-/// soit déjà couvert ailleurs dans l'appli, ex. Recruter/Ajouter un objet sur la carte guerrier).
+/// une étape Blessure par guerrier coché hors de combat, Expérience, Progression, Exploration
+/// (chapitre "Revenus" - jet + résolution de la table d'Exploration, voir Core.Rules.ExplorationChart
+/// et Models.Library.ExplorationResult/ExplorationOutcome), Récapitulatif - dans cet ordre (Blessures
+/// Graves puis Expérience puis Revenus, à faire "devant témoin" juste après la partie ; le reste de la
+/// séquence - vente de pierre de sorcière, disponibilité des vétérans, personnages spéciaux, achats...
+/// - n'est pas dans ce dialog, soit hors périmètre de cette passe (voir le plan de séquencement) soit
+/// déjà couvert ailleurs dans l'appli, ex. Recruter/Ajouter un objet sur la carte guerrier).
 /// Résultat n'est pas une étape du livre à proprement parler, gardé en premier comme contexte léger
 /// pour la phrase d'Historique.
 ///
@@ -44,6 +46,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly ISkillPickerService _skillPicker;
     private readonly IDetailDialogService _detailDialogs;
     private readonly int _warbandArchetypeId;
+    private readonly List<ExplorationResult> _explorationResults;
 
     protected override bool CancelResult => false;
 
@@ -54,15 +57,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private string selectedResult;
 
     [ObservableProperty]
-    private int treasuryFound;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsResultStep))]
     [NotifyPropertyChangedFor(nameof(IsOutOfActionStep))]
     [NotifyPropertyChangedFor(nameof(IsInjuryStep))]
     [NotifyPropertyChangedFor(nameof(IsExperienceStep))]
     [NotifyPropertyChangedFor(nameof(IsAdvanceStep))]
-    [NotifyPropertyChangedFor(nameof(IsTreasuryStep))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationRollStep))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationResultStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
@@ -73,10 +74,20 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(StepLabel))]
     private int stepIndex;
 
-    private enum StepKind { Result, OutOfAction, Injury, Experience, Advance, Treasury, Recap }
+    partial void OnStepIndexChanged(int value)
+    {
+        if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
+    }
+
+    private enum StepKind { Result, OutOfAction, Injury, Experience, Advance, ExplorationRoll, ExplorationResult, Recap }
 
     private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null);
 
+    /// <summary>ExplorationResult ne s'ajoute que si un résultat a effectivement été déclenché par le
+    /// jet précédent (au plus un, voir ExplorationChart.DetectMultiples) - même principe que les étapes
+    /// Blessure/Progression qui n'apparaissent que pour les guerriers concernés, plutôt qu'une seule
+    /// étape monolithique jet+résolution (retravaillé le 2026-08-17 suite à un retour explicite sur
+    /// l'UX).</summary>
     private List<WizardStep> Steps
     {
         get
@@ -85,7 +96,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             steps.AddRange(WarriorRows.Where(r => r.IsOutOfAction).Select(r => new WizardStep(StepKind.Injury, r)));
             steps.Add(new(StepKind.Experience));
             steps.AddRange(WarriorRows.Where(r => r.HasMilestone).Select(r => new WizardStep(StepKind.Advance, r)));
-            steps.Add(new(StepKind.Treasury));
+            steps.Add(new(StepKind.ExplorationRoll));
+            if (TriggeredExplorationResult is not null) steps.Add(new(StepKind.ExplorationResult));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -105,7 +117,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsInjuryStep => Current.Kind == StepKind.Injury;
     public bool IsExperienceStep => Current.Kind == StepKind.Experience;
     public bool IsAdvanceStep => Current.Kind == StepKind.Advance;
-    public bool IsTreasuryStep => Current.Kind == StepKind.Treasury;
+    public bool IsExplorationRollStep => Current.Kind == StepKind.ExplorationRoll;
+    public bool IsExplorationResultStep => Current.Kind == StepKind.ExplorationResult;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
     /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
@@ -146,11 +159,172 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId)
+    // --- Étape Exploration (Séquence d'après-bataille, "Revenus") ------------------------------
+    //
+    // Un D6 par Héros survivant sans être hors de combat (jamais les Hommes de main) + 1D6 si la
+    // bande a gagné, plafonné à 6 dés (voir Core.Rules.ExplorationChart - règle du livre confirmée
+    // par l'utilisateur le 2026-08-17). Le nombre de dés ne peut varier qu'entre Result/HorsDeCombat
+    // (déjà résolus quand on atteint cette étape) et le moment où on l'atteint, donc SyncExplorationDice
+    // n'a besoin d'être appelée qu'en y entrant (OnStepIndexChanged) plutôt qu'à chaque frappe.
+    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction);
+    public bool WonLastGame => ResultOptions.Count > 0 && SelectedResult == ResultOptions[0];
+    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame);
+
+    public ObservableCollection<ExplorationDieEntry> ExplorationDice { get; } = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasExplorationResult))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationSubRoll))]
+    [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
+    // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
+    // par StepLabel et la visibilité du bouton "Suivant"/"Enregistrer" (IsLastStep) doivent donc suivre
+    // en direct, pas seulement au prochain changement de StepIndex/WarriorRows (même classe de bug que
+    // le HasExplorationResult manquant corrigé plus tôt : sans ces deux lignes, l'UI resterait figée sur
+    // l'ancien total tant que rien d'autre ne la rafraîchit).
+    [NotifyPropertyChangedFor(nameof(StepLabel))]
+    [NotifyPropertyChangedFor(nameof(IsLastStep))]
+    private ExplorationResult? triggeredExplorationResult;
+
+    /// <summary>Un seul résultat peut être déclenché par jet (voir ExplorationChart.DetectMultiples) -
+    /// null tant que tous les dés ne sont pas renseignés, ou si aucun doublon n'a été trouvé (issue
+    /// normale de la table, pas une erreur).</summary>
+    public bool HasExplorationResult => TriggeredExplorationResult is not null;
+
+    /// <summary>Un résultat à plusieurs branches mutuellement exclusives (Groupe A, ex. Cadavre : 1-2
+    /// po, 3 Dague, 4 Hache...) se départage par un sous-jet D6 - un résultat à une seule branche (ex.
+    /// Masures en Ruine) ou dont aucune Outcome n'a de sous-jet n'en a pas besoin. Les résultats à choix
+    /// du joueur (Groupe B, RollsIndependently) ne sont pas encore gérés par cette étape (à venir, voir
+    /// le plan de séquencement) - ShowExplorationSubRoll reste false pour eux pour l'instant.</summary>
+    public bool ShowExplorationSubRoll => TriggeredExplorationResult is { RollsIndependently: false } r
+        && r.Outcomes.Count > 1 && r.Outcomes.All(o => o.SubRollMin.HasValue);
+
+    [ObservableProperty]
+    private string explorationSubRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? explorationSubRollError;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsExplorationGold))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationItem))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationWyrdstone))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationNone))]
+    [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
+    private ExplorationOutcome? resolvedExplorationOutcome;
+
+    /// <summary>Texte affiché pour une branche Kind.None (voir IsExplorationNone) - le Note de la
+    /// branche retenue (ex. "Skavens : vente aux agents du Clan Eshin"), ou à défaut le nom du résultat
+    /// déclenché si la branche n'en porte pas.</summary>
+    public string ExplorationNoteText => ResolvedExplorationOutcome?.Note ?? TriggeredExplorationResult?.Name ?? string.Empty;
+
+    public bool IsExplorationGold => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold;
+    public bool IsExplorationItem => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Item;
+    public bool IsExplorationWyrdstone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Wyrdstone;
+
+    /// <summary>Branche retenue sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
+    /// Charrette Renversée 5-6) - reste purement informatif (Note ou Description du résultat), juste
+    /// consigné dans l'Historique à la sauvegarde (voir WarbandDetailViewModel.EndOfGame) plutôt que
+    /// silencieusement perdu.</summary>
+    public bool IsExplorationNone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.None;
+
+    /// <summary>Montant d'or résolu (formule roulée automatiquement dès la branche retenue) - reste un
+    /// Entry modifiable comme tous les autres jets de ce wizard, un jet physique du joueur prime
+    /// toujours sur le tirage automatique.</summary>
+    [ObservableProperty]
+    private string explorationGoldAmount = string.Empty;
+
+    [ObservableProperty]
+    private string explorationItemQuantity = string.Empty;
+
+    /// <summary>Même principe que ExplorationGoldAmount, pour une branche Kind.Wyrdstone (ex. Puits,
+    /// Bâtiment Éventré, La Fosse) - GoldFormula est réutilisé tel quel comme formule de pierres de
+    /// sorcière (voir ExplorationOutcome.GoldFormula).</summary>
+    [ObservableProperty]
+    private string explorationWyrdstoneAmount = string.Empty;
+
+    private void SyncExplorationDice()
+    {
+        var count = ExplorationDiceCount;
+        while (ExplorationDice.Count < count)
+        {
+            var entry = new ExplorationDieEntry(ExplorationDice.Count + 1);
+            entry.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(ExplorationDieEntry.ManualRoll)) ResolveExplorationResult();
+            };
+            ExplorationDice.Add(entry);
+        }
+        while (ExplorationDice.Count > count)
+            ExplorationDice.RemoveAt(ExplorationDice.Count - 1);
+    }
+
+    /// <summary>Recalcule le résultat déclenché dès que tous les dés d'Exploration sont renseignés -
+    /// réinitialise tout l'état en aval (sous-jet, branche résolue, or/objet) à chaque nouveau tirage
+    /// plutôt que de laisser une résolution obsolète affichée.</summary>
+    private void ResolveExplorationResult()
+    {
+        TriggeredExplorationResult = null;
+        ExplorationSubRoll = string.Empty;
+        ExplorationSubRollError = null;
+        ResolvedExplorationOutcome = null;
+        ExplorationGoldAmount = string.Empty;
+        ExplorationItemQuantity = string.Empty;
+        ExplorationWyrdstoneAmount = string.Empty;
+
+        if (ExplorationDice.Any(d => d.Value is null)) return;
+
+        var multiple = ExplorationChart.DetectMultiples(ExplorationDice.Select(d => d.Value!.Value).ToList());
+        if (multiple is null) return;
+
+        TriggeredExplorationResult = _explorationResults
+            .FirstOrDefault(r => r.DiceCount == multiple.Value.DiceCount && r.Value == multiple.Value.Value);
+
+        // Une seule branche sans sous-jet (ex. Masures en Ruine) se résout tout de suite, pas besoin
+        // d'un jet supplémentaire.
+        if (TriggeredExplorationResult is { Outcomes.Count: 1 } single && single.Outcomes[0].SubRollMin is null)
+            ApplyResolvedOutcome(single.Outcomes[0]);
+    }
+
+    partial void OnExplorationSubRollChanged(string value)
+    {
+        ExplorationSubRollError = null;
+        ResolvedExplorationOutcome = null;
+        ExplorationGoldAmount = string.Empty;
+        ExplorationItemQuantity = string.Empty;
+        ExplorationWyrdstoneAmount = string.Empty;
+
+        if (TriggeredExplorationResult is null || !int.TryParse(value, out var roll)) return;
+
+        var outcome = TriggeredExplorationResult.Outcomes
+            .FirstOrDefault(o => o.SubRollMin.HasValue && roll >= o.SubRollMin && roll <= o.SubRollMax);
+        if (outcome is not null) ApplyResolvedOutcome(outcome);
+    }
+
+    private void ApplyResolvedOutcome(ExplorationOutcome outcome)
+    {
+        ResolvedExplorationOutcome = outcome;
+        if (outcome.Kind == ExplorationOutcomeKind.Gold && outcome.GoldFormula is not null)
+            ExplorationGoldAmount = DiceFormula.Roll(outcome.GoldFormula).ToString();
+        else if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is not null)
+            ExplorationItemQuantity = DiceFormula.Roll(outcome.ItemQuantityFormula).ToString();
+        else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone && outcome.GoldFormula is not null)
+            ExplorationWyrdstoneAmount = DiceFormula.Roll(outcome.GoldFormula).ToString();
+        // Kind.None : rien à tirer, ResolvedExplorationOutcome suffit (voir IsExplorationNone) - juste
+        // consigné dans l'Historique à la sauvegarde.
+    }
+
+    [RelayCommand]
+    private void AutoRollExplorationDie(ExplorationDieEntry entry) => entry.ManualRoll = ExplorationChart.RollDie().ToString();
+
+    [RelayCommand]
+    private void AutoRollExplorationSubRoll() => ExplorationSubRoll = ExplorationChart.RollDie().ToString();
+
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
+        _explorationResults = explorationResults;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
@@ -196,6 +370,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         {
             StepKind.Injury => ValidateInjuryStep(CurrentInjuryWarrior!),
             StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceWarrior!),
+            StepKind.ExplorationRoll => ValidateExplorationRollStep(),
+            StepKind.ExplorationResult => ValidateExplorationResultStep(),
             _ => true
         };
     }
@@ -230,6 +406,25 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         foreach (var advance in row.AdvanceRolls)
             valid &= CheckRoll(string.IsNullOrWhiteSpace(advance.ResultText), () => advance.RollError = Loc["EndOfGameRollRequired"]);
         return valid;
+    }
+
+    /// <summary>Bloque tant que les dés d'Exploration ne sont pas tous renseignés, et - si le résultat
+    /// déclenché a plusieurs branches à choix exclusif (Groupe A, ex. Cadavre) - tant que le sous-jet
+    /// qui les départage n'a pas résolu de branche. Un jet qui ne déclenche rien (pas de doublon) ou un
+    /// résultat sans sous-jet (branche unique, ex. Masures en Ruine) n'a rien de plus à valider - dans
+    /// ces deux cas, l'étape ExplorationResult n'existe même pas (voir Steps).</summary>
+    private bool ValidateExplorationRollStep()
+    {
+        var valid = true;
+        foreach (var die in ExplorationDice)
+            valid &= CheckRoll(die.Value is null, () => die.RollError = Loc["EndOfGameRollRequired"]);
+        return valid;
+    }
+
+    private bool ValidateExplorationResultStep()
+    {
+        if (!ShowExplorationSubRoll) return true;
+        return CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationSubRollError = Loc["EndOfGameRollRequired"]);
     }
 
     private static bool CheckRoll(bool isMissing, Action setError)
@@ -782,4 +977,29 @@ public partial class InjurySubRollEntry : ObservableObject
         Total = total;
         OnPropertyChanged(nameof(Label));
     }
+}
+
+/// <summary>One D6 of the Exploration roll (see EndOfGameDialogViewModel.ExplorationDice/
+/// SyncExplorationDice) - as many entries as ExplorationDiceCount computes, each independently
+/// filled by hand or by AutoRollExplorationDie. Value is null while empty/invalid (1-6 only), same
+/// "string Entry, not int" idiom as every other roll field in this wizard.</summary>
+public partial class ExplorationDieEntry : ObservableObject
+{
+    public int Index { get; }
+
+    [ObservableProperty]
+    private string manualRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? rollError;
+
+    public int? Value => int.TryParse(ManualRoll, out var v) && v is >= 1 and <= 6 ? v : null;
+
+    partial void OnManualRollChanged(string value)
+    {
+        OnPropertyChanged(nameof(Value));
+        if (Value is not null) RollError = null;
+    }
+
+    public ExplorationDieEntry(int index) => Index = index;
 }

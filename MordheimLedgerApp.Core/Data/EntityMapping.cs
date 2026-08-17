@@ -106,7 +106,8 @@ public static class EntityMapping
         EquipmentListId = e.EquipmentListId,
         CanUseEquipment = e.CanUseEquipment,
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
-        IsLargeCreature = e.IsLargeCreature
+        IsLargeCreature = e.IsLargeCreature,
+        GainsExperience = e.GainsExperience
     };
 
     private static List<SkillCategory> ParseSkillCategories(string? csv) =>
@@ -142,7 +143,8 @@ public static class EntityMapping
         EquipmentListId = m.EquipmentListId,
         CanUseEquipment = m.CanUseEquipment,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
-        IsLargeCreature = m.IsLargeCreature
+        IsLargeCreature = m.IsLargeCreature,
+        GainsExperience = m.GainsExperience
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -166,7 +168,8 @@ public static class EntityMapping
         EquipmentListId = archetype.EquipmentListId,
         CanUseEquipment = archetype.CanUseEquipment,
         AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories),
-        IsLargeCreature = archetype.IsLargeCreature
+        IsLargeCreature = archetype.IsLargeCreature,
+        GainsExperience = archetype.GainsExperience
     };
 
     public static Campaign ToModel(this CampaignEntity e) => new()
@@ -419,7 +422,8 @@ public static class EntityMapping
         Spells = spells?.ToList() ?? new List<WarriorSpell>(),
         Mutations = mutations?.ToList() ?? new List<WarriorMutation>(),
         Animal = animal,
-        IsLargeCreature = e.IsLargeCreature
+        IsLargeCreature = e.IsLargeCreature,
+        GainsExperience = e.GainsExperience
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -447,7 +451,8 @@ public static class EntityMapping
         EquipmentListId = m.EquipmentListId,
         CanUseEquipment = m.CanUseEquipment,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
-        IsLargeCreature = m.IsLargeCreature
+        IsLargeCreature = m.IsLargeCreature,
+        GainsExperience = m.GainsExperience
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>

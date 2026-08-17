@@ -42,7 +42,7 @@
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2">
                                         <Label Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Text="{Binding RoleLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                     </VerticalStackLayout>
                                     <CheckBox Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
                                 </Grid>
@@ -63,10 +63,7 @@
                     <VerticalStackLayout Spacing="8">
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <Label Grid.Column="0" Text="{Binding CurrentInjuryWarrior.Name}" FontAttributes="Bold"/>
-                            <!-- Héros et Hommes de main ont des tables de Blessures Graves totalement
-                                 différentes (D66 vs D6) - toujours afficher le rôle pour lever
-                                 l'ambiguïté. -->
-                            <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                             <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de mort (voir
                                  ApplyInjuryRoll), pas de saisie manuelle. -->
                             <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
@@ -75,56 +72,55 @@
                         </Grid>
                         <!-- Le joueur peut soit laisser l'appli tirer les dés (Dice = jet aléatoire +
                              popup de résultat immédiate), soit lancer ses propres dés à la table et
-                             saisir le score lui-même (Entry + Eye = affiche le résultat correspondant
-                             sans en tirer un nouveau). -->
-                        <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                             saisir le score lui-même : dès que la saisie est un jet complet et valide,
+                             le résultat s'affiche tout seul sous le champ (pas de bouton à cliquer). -->
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                             <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
-                                   Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70"/>
+                                   Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70">
+                                <Entry.Behaviors>
+                                    <components:DigitsOnlyBehavior/>
+                                </Entry.Behaviors>
+                            </Entry>
                             <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
                                                           Command="{Binding AutoRollCommand}"
                                                           CommandParameter="{Binding CurrentInjuryWarrior}"
                                                           Tooltip="{loc:Loc EndOfGameRoll}"/>
-                            <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                          Command="{Binding ShowInjuryResultCommand}"
-                                                          CommandParameter="{Binding CurrentInjuryWarrior}"
-                                                          Tooltip="{loc:Loc EndOfGameShowResult}"/>
                         </Grid>
                         <Label Text="{Binding CurrentInjuryWarrior.InjuryResultText}" FontSize="12"/>
 
                         <!-- Résultat "Blessures multiples" (16/21, Héros) : 1D6 pour savoir combien de
-                             sous-jets faire sur cette même table, puis un jet D66 par sous-jet - chacun
-                             avec ses propres outils Tirer/Voir le résultat. -->
+                             sous-jets faire sur cette même table, puis un jet D66 par sous-jet. -->
                         <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowMultipleInjuriesSection}" Spacing="6">
                             <Label Text="{loc:Loc EndOfGameMultipleInjuriesHeading}" FontSize="12"
                                    FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                                 <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountRoll}" Keyboard="Numeric"
-                                       Placeholder="{loc:Loc EndOfGameMultipleInjuryCountPh}" WidthRequest="70"/>
+                                       Placeholder="{loc:Loc EndOfGameMultipleInjuryCountPh}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
                                 <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
                                                               Command="{Binding AutoRollMultipleInjuryCountCommand}"
                                                               CommandParameter="{Binding CurrentInjuryWarrior}"
                                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                              Command="{Binding ShowMultipleInjuryCountResultCommand}"
-                                                              CommandParameter="{Binding CurrentInjuryWarrior}"
-                                                              Tooltip="{loc:Loc EndOfGameShowResult}"/>
                             </Grid>
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.MultipleInjuryRolls}" Spacing="6">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="local:InjurySubRollEntry">
                                         <VerticalStackLayout Spacing="4">
                                             <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                            <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                                                 <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                                       Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70"/>
+                                                       Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
                                                 <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
                                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
                                                                               CommandParameter="{Binding .}"
                                                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowSubInjuryResultCommand}"
-                                                                              CommandParameter="{Binding .}"
-                                                                              Tooltip="{loc:Loc EndOfGameShowResult}"/>
                                             </Grid>
                                             <Label Text="{Binding InjuryResultText}" FontSize="12"/>
                                         </VerticalStackLayout>
@@ -145,17 +141,22 @@
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:WarriorOutcomeRow">
-                            <!-- Un guerrier mort (étape Blessure) ne gagne plus d'XP - retiré de cette
-                                 étape plutôt que juste grisé. -->
+                            <!-- Un guerrier mort (étape Blessure) ou qui ne gagne jamais d'XP (règle
+                                 "Never Gains Experience", ex. Zombies) n'a rien à faire ici - retiré de
+                                 cette étape plutôt que juste grisé, voir ShowsInExperienceStep. -->
                             <Border Style="{StaticResource SectionCardBorderStyle}"
-                                    IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}">
+                                    IsVisible="{Binding ShowsInExperienceStep}">
                                 <VerticalStackLayout Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                                     </Grid>
-                                    <Entry Text="{Binding ExperienceGained}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameXpPh}"/>
+                                    <Entry Text="{Binding ExperienceGainedText}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameXpPh}">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
@@ -163,75 +164,73 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape : Progression - seulement si au moins un guerrier a franchi un palier d'XP à
-                 l'étape précédente (HasAnyMilestone, voir Steps dans le ViewModel : le wizard saute
-                 carrément cette étape sinon). Un guerrier qui saute plusieurs paliers d'un coup a une
-                 carte par palier (AdvanceRolls), chacune avec ses propres outils Tirer/Voir le
-                 résultat - même principe que les Blessures Graves, purement descriptif. -->
+            <!-- Étape : Progression - une carte par guerrier ayant franchi un palier d'XP à l'étape
+                 précédente (CurrentAdvanceWarrior, même principe que CurrentInjuryWarrior - le wizard
+                 saute entièrement cette étape si personne n'a franchi de palier, voir Steps dans le
+                 ViewModel). Un guerrier qui saute plusieurs paliers d'un coup a une carte par palier
+                 (AdvanceRolls) empilée dans cette même étape - même résolution automatique que les
+                 Blessures Graves, purement descriptif. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsAdvanceStep}">
-                <Label Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasMilestone}">
-                                <VerticalStackLayout Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
-                                    </Grid>
-                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding AdvanceRolls}" Spacing="6">
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate x:DataType="local:AdvanceRollEntry">
-                                                <VerticalStackLayout Spacing="4">
-                                                    <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
-                                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                                               Placeholder="{loc:Loc EndOfGameAdvanceRollPh}" WidthRequest="70"/>
-                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
-                                                                                      CommandParameter="{Binding .}"
-                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowAdvanceResultCommand}"
-                                                                                      CommandParameter="{Binding .}"
-                                                                                      Tooltip="{loc:Loc EndOfGameShowResult}"/>
-                                                    </Grid>
-                                                    <Label Text="{Binding ResultText}" FontSize="12"/>
-                                                    <!-- Résultat "Compétence" (Héros 2-5/10-12 uniquement, voir
-                                                         HeroAdvanceTable.IsSkill) : choix direct dans la Bibliothèque,
-                                                         rattachée au guerrier à l'enregistrement du wizard. -->
-                                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsSkillResult}">
-                                                        <Button Text="{loc:Loc EndOfGamePickSkill}"
-                                                                Style="{StaticResource DialogSecondaryButtonStyle}"
-                                                                FontSize="12" Padding="8,4"
-                                                                IsVisible="{Binding HasSkillSelected, Converter={StaticResource InverseBoolConverter}}"
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
-                                                                CommandParameter="{Binding .}"/>
-                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SelectedSkills}"
-                                                                    IsVisible="{Binding HasSkillSelected}">
-                                                            <BindableLayout.ItemTemplate>
-                                                                <DataTemplate x:DataType="library:Skill">
-                                                                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,0">
-                                                                        <Border.GestureRecognizers>
-                                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
-                                                                                                   CommandParameter="{Binding .}"/>
-                                                                        </Border.GestureRecognizers>
-                                                                        <Label Text="{Binding Name}" FontSize="12"
-                                                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
-                                                                    </Border>
-                                                                </DataTemplate>
-                                                            </BindableLayout.ItemTemplate>
-                                                        </FlexLayout>
-                                                    </HorizontalStackLayout>
-                                                </VerticalStackLayout>
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding AdvanceProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding CurrentAdvanceWarrior.Name}" FontAttributes="Bold"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceWarrior.AdvanceRolls}" Spacing="6">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:AdvanceRollEntry">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                            <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameAdvanceRollPh}" WidthRequest="70">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding ResultText}" FontSize="12"/>
+                                        <!-- Résultat "Compétence" (Héros 2-5/10-12 uniquement, voir
+                                             HeroAdvanceTable.IsSkill) : choix direct dans la Bibliothèque,
+                                             rattachée au guerrier à l'enregistrement du wizard. -->
+                                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsSkillResult}">
+                                            <Button Text="{loc:Loc EndOfGamePickSkill}"
+                                                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                                                    FontSize="12" Padding="8,4"
+                                                    IsVisible="{Binding HasSkillSelected, Converter={StaticResource InverseBoolConverter}}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
+                                                    CommandParameter="{Binding .}"/>
+                                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SelectedSkills}"
+                                                        IsVisible="{Binding HasSkillSelected}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="library:Skill">
+                                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,0">
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                                                       CommandParameter="{Binding .}"/>
+                                                            </Border.GestureRecognizers>
+                                                            <Label Text="{Binding Name}" FontSize="12"
+                                                                   FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </FlexLayout>
+                                        </HorizontalStackLayout>
                                     </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
             <!-- Étape : Revenus (livre - trésor trouvé) -->

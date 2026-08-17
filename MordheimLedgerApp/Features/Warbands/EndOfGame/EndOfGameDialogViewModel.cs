@@ -7,6 +7,8 @@ using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Services;
 
+using MordheimLedgerApp.Features.Warbands;
+
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>
@@ -20,13 +22,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// pour la phrase d'Historique.
 ///
 /// Steps est reconstruite à chaque accès plutôt que mise en cache (mêmes bases que WarriorRows,
-/// jamais réaffectée) : le nombre d'étapes Blessure dépend de IsOutOfAction (une étape "carte
-/// pleine écran" par guerrier coché, décision explicite du 2026-08-17 pour ne pas surcharger un seul
-/// écran avec tous les guerriers hors de combat à la fois - la coche elle-même reste groupée sur une
-/// première étape de vue d'ensemble), et l'étape Progression dépend de HasAnyMilestone. Décocher un
-/// guerrier sur l'étape "Hors de combat" fait disparaître son étape Blessure ET efface tout ce qui y
-/// avait été saisi (WarriorOutcomeRow.OnIsOutOfActionChanged) - il n'y a plus de blessure à montrer.
-/// Le Statut n'est plus une saisie manuelle du tout - voir WarriorOutcomeRow.ApplyInjuryRoll.
+/// jamais réaffectée) : le nombre d'étapes Blessure dépend de IsOutOfAction et le nombre d'étapes
+/// Progression de HasMilestone - une "carte pleine écran" par guerrier concerné dans les deux cas
+/// (décision explicite du 2026-08-17 pour ne pas surcharger un seul écran avec tous les guerriers
+/// concernés à la fois - Hors de combat/Expérience restent des vues d'ensemble, ce sont Blessure et
+/// Progression qui se découpent guerrier par guerrier). Décocher un guerrier sur l'étape "Hors de
+/// combat" fait disparaître son étape Blessure ET efface tout ce qui y avait été saisi
+/// (WarriorOutcomeRow.OnIsOutOfActionChanged) - il n'y a plus de blessure à montrer. Le Statut n'est
+/// plus une saisie manuelle du tout - voir WarriorOutcomeRow.ApplyInjuryRoll.
 /// </summary>
 public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 {
@@ -55,6 +58,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
+    [NotifyPropertyChangedFor(nameof(CurrentAdvanceWarrior))]
+    [NotifyPropertyChangedFor(nameof(AdvanceProgressLabel))]
     [NotifyPropertyChangedFor(nameof(CanGoBack))]
     [NotifyPropertyChangedFor(nameof(IsLastStep))]
     [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -64,11 +69,6 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 
     private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null);
 
-    /// <summary>True si au moins un guerrier franchit un palier d'XP cette partie - pilote l'étape
-    /// Progression (voir Steps), évalué à chaque accès (pas mis en cache) puisque ça dépend des PX
-    /// saisis à l'étape Expérience juste avant.</summary>
-    public bool HasAnyMilestone => WarriorRows.Any(r => r.HasMilestone);
-
     private List<WizardStep> Steps
     {
         get
@@ -76,7 +76,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             var steps = new List<WizardStep> { new(StepKind.Result), new(StepKind.OutOfAction) };
             steps.AddRange(WarriorRows.Where(r => r.IsOutOfAction).Select(r => new WizardStep(StepKind.Injury, r)));
             steps.Add(new(StepKind.Experience));
-            if (HasAnyMilestone) steps.Add(new(StepKind.Advance));
+            steps.AddRange(WarriorRows.Where(r => r.HasMilestone).Select(r => new WizardStep(StepKind.Advance, r)));
             steps.Add(new(StepKind.Treasury));
             steps.Add(new(StepKind.Recap));
             return steps;
@@ -117,11 +117,28 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         }
     }
 
+    /// <summary>Le seul guerrier affiché à l'étape Progression courante - une étape par guerrier ayant
+    /// franchi un palier d'XP, même principe que CurrentInjuryWarrior (voir la doc de classe).</summary>
+    public WarriorOutcomeRow? CurrentAdvanceWarrior => Current.Warrior;
+
+    public string AdvanceProgressLabel
+    {
+        get
+        {
+            var warrior = CurrentAdvanceWarrior;
+            if (warrior is null) return string.Empty;
+
+            var withMilestone = WarriorRows.Where(r => r.HasMilestone).ToList();
+            var index = withMilestone.IndexOf(warrior);
+            return index < 0 ? string.Empty : string.Format(Loc["EndOfGameAdvanceProgressLabel"], index + 1, withMilestone.Count);
+        }
+    }
+
     public bool CanGoBack => StepIndex > 0;
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<Warrior> activeWarriors, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -132,12 +149,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ResultOptions.Add(Loc["EndOfGameResultDraw"]);
         selectedResult = ResultOptions[0];
 
-        WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriors.Select(w => new WarriorOutcomeRow(w)));
+        WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
+            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience)));
 
-        // Le nombre d'étapes dépend de IsOutOfAction (une étape Blessure par guerrier coché) et de
-        // HasAnyMilestone (étape Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit
-        // quand même StepLabel/IsLastStep tout de suite pour que le joueur voie le compte à jour
-        // pendant qu'il coche des guerriers, plutôt que d'attendre le prochain Next/Back.
+        // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
+        // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/
+        // IsLastStep tout de suite pour que le joueur voie le compte à jour pendant qu'il coche des
+        // guerriers ou saisit des PX, plutôt que d'attendre le prochain Next/Back.
         foreach (var row in WarriorRows)
         {
             row.PropertyChanged += (_, e) =>
@@ -164,152 +182,54 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     }
 
     // Lance les dés à la place du joueur (D66 pour un Héros, D6 pour un Homme de main - deux tables
-    // totalement différentes, voir SeriousInjuryTable/HenchmanInjuryTable) et affiche tout de suite le
-    // résultat complet dans une popup - le champ ManualRoll reste modifiable ensuite si le joueur
-    // préfère un jet physique.
+    // totalement différentes, voir SeriousInjuryTable/HenchmanInjuryTable) et affiche le résultat dans
+    // une popup - le champ ManualRoll reste modifiable ensuite si le joueur préfère un jet physique.
+    // Dans les deux cas (dé ou saisie manuelle), la résolution texte + ApplyInjuryRoll se fait
+    // automatiquement dès que ManualRoll contient un jet complet et valide (voir
+    // WarriorOutcomeRow.OnManualRollChanged) - décision explicite du 2026-08-17 : plus de bouton "Voir
+    // le résultat" à cliquer après une saisie physique, le résultat apparaît tout seul.
     [RelayCommand]
     private async Task AutoRoll(WarriorOutcomeRow row)
     {
         var roll = row.Warrior.IsHero ? SeriousInjuryTable.RollDice() : HenchmanInjuryTable.RollDice();
-        var text = ResolveInjuryText(row.Warrior.IsHero, roll)!;
         row.ManualRoll = roll.ToString();
-        row.InjuryResultText = text;
-        row.ApplyInjuryRoll(roll);
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    // Pour un jet fait à la table (dés physiques) : le joueur saisit son score dans ManualRoll, ce
-    // bouton affiche juste le résultat correspondant sans en tirer un nouveau.
-    [RelayCommand]
-    private async Task ShowInjuryResult(WarriorOutcomeRow row)
-    {
-        if (!int.TryParse(row.ManualRoll, out var roll))
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
-            return;
-        }
-
-        var text = ResolveInjuryText(row.Warrior.IsHero, roll);
-        if (text is null)
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
-            return;
-        }
-
-        row.InjuryResultText = text;
-        row.ApplyInjuryRoll(roll);
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    // Le jet/la classification (mort ou non) vivent dans Core.Rules, sans dépendance à la
-    // localisation - cette résolution de clé -> texte affiché reste ici côté tête MAUI.
-    private string? ResolveInjuryText(bool isHero, int roll)
-    {
-        bool found;
-        string key;
-        if (isHero) found = SeriousInjuryTable.TryGetTextKey(roll, out key);
-        else found = HenchmanInjuryTable.TryGetTextKey(roll, out key);
-        return found ? Loc[key] : null;
+        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), row.InjuryResultText);
     }
 
     // Résultat "Blessures multiples" (16/21, Héros uniquement) : le joueur lance 1D6 pour savoir
     // combien de sous-jets faire sur cette même table (règle du livre : "Roll D6 times on this
-    // table" = un nombre déterminé par 1D6, pas un compte fixe) - AutoRollMultipleInjuryCount tire ce
-    // 1D6 à la place du joueur, ShowMultipleInjuryCountResult valide un jet physique saisi à la main.
-    // Les deux délèguent à WarriorOutcomeRow.SetMultipleInjuryCount qui (re)peuple MultipleInjuryRolls.
+    // table" = un nombre déterminé par 1D6, pas un compte fixe). Comme AutoRoll ci-dessus, une saisie
+    // manuelle valide (1 à 6) peuple MultipleInjuryRolls toute seule (WarriorOutcomeRow.
+    // OnMultipleInjuryCountRollChanged) - ce bouton ne fait que tirer le 1D6 à la place du joueur.
     [RelayCommand]
-    private void AutoRollMultipleInjuryCount(WarriorOutcomeRow row) => row.SetMultipleInjuryCount(Random.Shared.Next(1, 7));
-
-    [RelayCommand]
-    private async Task ShowMultipleInjuryCountResult(WarriorOutcomeRow row)
-    {
-        if (!int.TryParse(row.MultipleInjuryCountRoll, out var count) || count is < 1 or > 6)
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidMultipleInjuryCount"]);
-            return;
-        }
-
-        row.SetMultipleInjuryCount(count);
-    }
+    private void AutoRollMultipleInjuryCount(WarriorOutcomeRow row) => row.MultipleInjuryCountRoll = Random.Shared.Next(1, 7).ToString();
 
     // Un résultat "Blessures multiples" déclenche autant de sous-jets sur cette même table que le 1D6
-    // ci-dessus l'a déterminé - WarriorOutcomeRow.SetMultipleInjuryCount a déjà peuplé les entrées
-    // vides. Même paire de commandes Tirer/Voir le résultat que le jet principal, y compris pour un
-    // résultat qui devrait en théorie être relancé (Mort/Capturé/Blessures multiples, cf. livre) -
-    // décision explicite : l'appli n'impose ni ne relance rien elle-même, le résultat du joueur est
-    // accepté tel quel comme n'importe quel autre jet de cette table.
+    // ci-dessus l'a déterminé - WarriorOutcomeRow.OnMultipleInjuryCountRollChanged a déjà peuplé les
+    // entrées vides. Même résolution automatique que le jet principal (InjurySubRollEntry.
+    // OnManualRollChanged), y compris pour un résultat qui devrait en théorie être relancé
+    // (Mort/Capturé/Blessures multiples, cf. livre) - décision explicite : l'appli n'impose ni ne
+    // relance rien elle-même, le résultat du joueur est accepté tel quel comme n'importe quel autre
+    // jet de cette table.
     [RelayCommand]
     private async Task AutoRollSubInjury(InjurySubRollEntry entry)
     {
         var roll = SeriousInjuryTable.RollDice();
-        var text = ResolveInjuryText(true, roll)!;
         entry.ManualRoll = roll.ToString();
-        entry.InjuryResultText = text;
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    [RelayCommand]
-    private async Task ShowSubInjuryResult(InjurySubRollEntry entry)
-    {
-        if (!int.TryParse(entry.ManualRoll, out var roll))
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
-            return;
-        }
-
-        var text = ResolveInjuryText(true, roll);
-        if (text is null)
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
-            return;
-        }
-
-        entry.InjuryResultText = text;
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
+        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), entry.InjuryResultText);
     }
 
     // Un guerrier peut franchir plusieurs paliers d'un coup - chaque AdvanceRollEntry (une par palier,
     // voir WarriorOutcomeRow.SyncAdvanceRolls) est un jet 2D6 indépendant sur la table de progression,
-    // même pattern que AutoRoll/ShowInjuryResult mais purement descriptif : aucune stat n'est modifiée
+    // même résolution automatique que AutoRoll mais purement descriptif : aucune stat n'est modifiée
     // automatiquement (les sous-jets 1D6 des résultats 6/8/9 et le choix CC/CT du 7 restent à résoudre
     // par le joueur, cf. HeroAdvanceTable/HenchmanAdvanceTable).
     [RelayCommand]
     private async Task AutoRollAdvance(AdvanceRollEntry entry)
     {
         var roll = entry.IsHero ? HeroAdvanceTable.RollDice() : HenchmanAdvanceTable.RollDice();
-        var text = ResolveAdvanceText(entry.IsHero, roll)!;
         entry.ManualRoll = roll.ToString();
-        entry.ResultText = text;
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    [RelayCommand]
-    private async Task ShowAdvanceResult(AdvanceRollEntry entry)
-    {
-        if (!int.TryParse(entry.ManualRoll, out var roll))
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
-            return;
-        }
-
-        var text = ResolveAdvanceText(entry.IsHero, roll);
-        if (text is null)
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
-            return;
-        }
-
-        entry.ResultText = text;
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    private string? ResolveAdvanceText(bool isHero, int roll)
-    {
-        bool found;
-        string key;
-        if (isHero) found = HeroAdvanceTable.TryGetTextKey(roll, out key);
-        else found = HenchmanAdvanceTable.TryGetTextKey(roll, out key);
-        return found ? Loc[key] : null;
+        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), entry.ResultText);
     }
 
     // Résultat "Compétence" (voir HeroAdvanceTable.IsSkill) : le joueur choisit directement une
@@ -343,13 +263,33 @@ public partial class WarriorOutcomeRow : ObservableObject
     public Warrior Warrior { get; }
     public string Name => Warrior.Name;
 
+    /// <summary>The archetype's name (e.g. "Zombie", "Capitaine") shown instead of a plain Héros/Homme
+    /// de main label on every step of this wizard - same value as WarriorRow.RoleName, passed in by
+    /// the caller (WarbandDetailViewModel.EndOfGame already has it resolved for the roster).</summary>
+    public string ArchetypeName { get; }
+
+    /// <summary>Copie de Warrior.GainsExperience (donc, en amont, WarriorArchetype.GainsExperience -
+    /// false pour les types comme Zombie, voir sa doc). Exclut ce guerrier de l'étape Expérience
+    /// (ShowsInExperienceStep) et donc, en cascade, de la Progression (HasMilestone).</summary>
+    public bool GainsExperience { get; }
+
+    /// <summary>Un guerrier mort (étape Blessure) ou qui ne gagne jamais d'XP n'a rien à faire à
+    /// l'étape Expérience - retiré de la liste plutôt que juste grisé/désactivé.</summary>
+    public bool ShowsInExperienceStep => !IsDead && GainsExperience;
+
+    /// <summary>Saisie libre du PX gagné cette partie (scénario + survie + bonus outsider - non calculé,
+    /// voir la doc de classe d'EndOfGameDialogViewModel) - texte plutôt qu'int pour que le champ parte
+    /// vide au lieu d'afficher "0" par défaut, même motif que ManualRoll plus bas.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(ExperienceGained))]
     [NotifyPropertyChangedFor(nameof(MilestoneCount))]
     [NotifyPropertyChangedFor(nameof(HasMilestone))]
-    private int experienceGained;
+    private string experienceGainedText = string.Empty;
 
-    partial void OnExperienceGainedChanged(int value) => SyncAdvanceRolls();
+    partial void OnExperienceGainedTextChanged(string value) => SyncAdvanceRolls();
+
+    public int ExperienceGained => int.TryParse(ExperienceGainedText, out var xp) ? xp : 0;
 
     [ObservableProperty]
     private bool isOutOfAction;
@@ -374,16 +314,21 @@ public partial class WarriorOutcomeRow : ObservableObject
     }
 
     /// <summary>Le score D66 (Héros) ou D6 (Homme de main) - saisi à la main (jet physique) ou rempli
-    /// par AutoRoll.</summary>
+    /// par AutoRoll. Dès que la valeur est un jet complet et valide, InjuryResultText se résout tout
+    /// seul (OnManualRollChanged) - pas de bouton "Voir le résultat" à cliquer après une saisie
+    /// physique, décision explicite du 2026-08-17.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowMultipleInjuriesSection))]
     private string manualRoll = string.Empty;
 
-    /// <summary>Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples",
-    /// les sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
-    /// affichés pour un résultat qui ne les déclenche plus.</summary>
     partial void OnManualRollChanged(string value)
     {
+        InjuryResultText = string.Empty;
+        if (int.TryParse(value, out var roll)) ResolveInjuryResult(roll);
+
+        // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
+        // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
+        // affichés pour un résultat qui ne les déclenche plus.
         if (!Warrior.IsHero || ShowMultipleInjuriesSection) return;
         if (MultipleInjuryCountRoll.Length == 0 && MultipleInjuryRolls.Count == 0) return;
 
@@ -391,6 +336,20 @@ public partial class WarriorOutcomeRow : ObservableObject
         MultipleInjuryRolls.Clear();
         OnPropertyChanged(nameof(HasMultipleInjuryRolls));
         OnPropertyChanged(nameof(SummaryText));
+    }
+
+    /// <summary>Le jet/la classification (mort ou non) vivent dans Core.Rules, sans dépendance à la
+    /// localisation - cette résolution de clé -> texte affiché reste ici côté tête MAUI (WarriorOutcomeRow
+    /// a déjà accès à LocalizationService via _loc, comme pour SelectedStatusLabel).</summary>
+    private void ResolveInjuryResult(int roll)
+    {
+        bool found;
+        string key;
+        found = Warrior.IsHero ? SeriousInjuryTable.TryGetTextKey(roll, out key) : HenchmanInjuryTable.TryGetTextKey(roll, out key);
+        if (!found) return;
+
+        InjuryResultText = _loc[key];
+        ApplyInjuryRoll(roll);
     }
 
     /// <summary>Texte complet du résultat une fois consulté (via AutoRoll ou ShowInjuryResult) -
@@ -411,10 +370,17 @@ public partial class WarriorOutcomeRow : ObservableObject
     public bool ShowMultipleInjuriesSection => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && SeriousInjuryTable.IsMultipleInjuries(roll);
 
     /// <summary>Le score du 1D6 tiré pour savoir combien de sous-jets faire - saisi à la main ou
-    /// rempli par AutoRollMultipleInjuryCount, voir SetMultipleInjuryCount.</summary>
+    /// rempli par AutoRollMultipleInjuryCount. Dès que la valeur est 1 à 6, MultipleInjuryRolls se
+    /// peuple tout seul (OnMultipleInjuryCountRollChanged), même principe que ManualRoll ci-dessus.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     private string multipleInjuryCountRoll = string.Empty;
+
+    partial void OnMultipleInjuryCountRollChanged(string value)
+    {
+        if (int.TryParse(value, out var count) && count is >= 1 and <= 6)
+            PopulateMultipleInjuryRolls(count);
+    }
 
     /// <summary>Un sous-jet D66 par point du 1D6 ci-dessus - peuplée par SetMultipleInjuryCount une
     /// fois ce 1D6 résolu. Vide tant qu'il ne l'est pas, et pour tout guerrier/résultat qui n'est pas
@@ -429,6 +395,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     [NotifyPropertyChangedFor(nameof(IsDead))]
+    [NotifyPropertyChangedFor(nameof(ShowsInExperienceStep))]
     private string selectedStatusLabel = string.Empty;
 
     public WarriorStatus Status => _statusByLabel.GetValueOrDefault(SelectedStatusLabel, Warrior.Status);
@@ -438,12 +405,12 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// ExperienceMilestones) - peut dépasser 1 si le guerrier cumule assez de PX pour sauter
     /// plusieurs paliers d'un coup, d'où AdvanceRolls plutôt qu'un jet unique.</summary>
     public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience, Warrior.Experience + ExperienceGained);
-    public bool HasMilestone => MilestoneCount > 0;
+    public bool HasMilestone => GainsExperience && MilestoneCount > 0;
 
     /// <summary>Héros et Hommes de main utilisent deux tables de Blessures Graves totalement
-    /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce label et ce
-    /// placeholder gardent la distinction visible sur l'étape Blessure de chaque guerrier.</summary>
-    public string RoleLabel => _loc[Warrior.IsHero ? "WarriorRoleHeroSingular" : "WarriorRoleHenchmanSingular"];
+    /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce placeholder garde la
+    /// distinction visible sur l'étape Blessure de chaque guerrier (ArchetypeName, affiché à côté,
+    /// n'en dit rien explicitement).</summary>
     public string RollPlaceholder => _loc[Warrior.IsHero ? "EndOfGameRollPh" : "EndOfGameHenchmanRollPh"];
 
     /// <summary>Ligne affichée à l'étape Récapitulatif - ne liste que ce qui a réellement changé.</summary>
@@ -469,9 +436,11 @@ public partial class WarriorOutcomeRow : ObservableObject
         }
     }
 
-    public WarriorOutcomeRow(Warrior warrior)
+    public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience)
     {
         Warrior = warrior;
+        ArchetypeName = archetypeName;
+        GainsExperience = gainsExperience;
 
         foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
             _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;
@@ -493,10 +462,10 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// <summary>(Re)peuple MultipleInjuryRolls avec exactement <paramref name="count"/> sous-jets (le
     /// résultat du 1D6 tiré pour savoir combien en faire, cf. règle "Blessures multiples") - remplace
     /// entièrement les entrées précédentes, un nouveau tirage du 1D6 recommence à zéro plutôt que de
-    /// s'ajouter aux sous-jets déjà saisis.</summary>
-    public void SetMultipleInjuryCount(int count)
+    /// s'ajouter aux sous-jets déjà saisis. N'écrit pas MultipleInjuryCountRoll lui-même : appelée
+    /// depuis OnMultipleInjuryCountRollChanged, qui réagit déjà à ce champ.</summary>
+    private void PopulateMultipleInjuryRolls(int count)
     {
-        MultipleInjuryCountRoll = count.ToString();
         MultipleInjuryRolls.Clear();
         for (var i = 1; i <= count; i++)
         {
@@ -535,12 +504,24 @@ public partial class AdvanceRollEntry : ObservableObject
     public bool IsHero { get; }
     public string Label => string.Format(_loc["EndOfGameMilestoneLabel"], Index);
 
-    /// <summary>Le score 2D6 - saisi à la main (jet physique) ou rempli par AutoRollAdvance.</summary>
+    /// <summary>Le score 2D6 - saisi à la main (jet physique) ou rempli par AutoRollAdvance. Dès que la
+    /// valeur est un jet complet et valide, ResultText se résout tout seul (OnManualRollChanged).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSkillResult))]
     private string manualRoll = string.Empty;
 
-    /// <summary>Texte descriptif du résultat une fois consulté - purement informatif, voir
+    partial void OnManualRollChanged(string value)
+    {
+        ResultText = string.Empty;
+        if (!int.TryParse(value, out var roll)) return;
+
+        bool found;
+        string key;
+        found = IsHero ? HeroAdvanceTable.TryGetTextKey(roll, out key) : HenchmanAdvanceTable.TryGetTextKey(roll, out key);
+        if (found) ResultText = _loc[key];
+    }
+
+    /// <summary>Texte descriptif du résultat une fois résolu - purement informatif, voir
     /// HeroAdvanceTable/HenchmanAdvanceTable.</summary>
     [ObservableProperty]
     private string resultText = string.Empty;
@@ -573,10 +554,10 @@ public partial class AdvanceRollEntry : ObservableObject
 }
 
 /// <summary>One D66 sub-roll stacked from a "Blessures multiples" result (16/21) on the Heroes'
-/// Serious Injuries table - see WarriorOutcomeRow.MultipleInjuryRolls/SetMultipleInjuryCount. Same
-/// Tirer/Voir le résultat pattern as the main injury roll - including accepting a sub-roll that lands
-/// on Dead/Captured/Multiple Injuries again, which the rulebook says to re-roll but the app leaves to
-/// the player rather than enforcing itself (see SeriousInjuryTable's doc comment).</summary>
+/// Serious Injuries table - see WarriorOutcomeRow.MultipleInjuryRolls/PopulateMultipleInjuryRolls. Same
+/// automatic resolution as the main injury roll (OnManualRollChanged) - including accepting a sub-roll
+/// that lands on Dead/Captured/Multiple Injuries again, which the rulebook says to re-roll but the app
+/// leaves to the player rather than enforcing itself (see SeriousInjuryTable's doc comment).</summary>
 public partial class InjurySubRollEntry : ObservableObject
 {
     private readonly LocalizationService _loc = LocalizationService.Instance;
@@ -587,6 +568,13 @@ public partial class InjurySubRollEntry : ObservableObject
 
     [ObservableProperty]
     private string manualRoll = string.Empty;
+
+    partial void OnManualRollChanged(string value)
+    {
+        InjuryResultText = string.Empty;
+        if (int.TryParse(value, out var roll) && SeriousInjuryTable.TryGetTextKey(roll, out var key))
+            InjuryResultText = _loc[key];
+    }
 
     [ObservableProperty]
     private string injuryResultText = string.Empty;

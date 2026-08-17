@@ -837,12 +837,6 @@
   <data name="WarriorRoleHeroSingular" xml:space="preserve">
     <value>Hero</value>
   </data>
-  <data name="EndOfGameShowResult" xml:space="preserve">
-    <value>Show result</value>
-  </data>
-  <data name="EndOfGameInvalidRoll" xml:space="preserve">
-    <value>Invalid roll (11 to 66, each digit between 1 and 6).</value>
-  </data>
   <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
     <value>Result ({0})</value>
   </data>
@@ -876,9 +870,6 @@
   <data name="EndOfGameAdvanceRollPh" xml:space="preserve">
     <value>2D6</value>
   </data>
-  <data name="EndOfGameInvalidAdvanceRoll" xml:space="preserve">
-    <value>Invalid roll (2 to 12).</value>
-  </data>
   <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
     <value>Multiple Injuries</value>
   </data>
@@ -891,11 +882,11 @@
   <data name="EndOfGameInjuryProgressLabel" xml:space="preserve">
     <value>Injured {0}/{1}</value>
   </data>
+  <data name="EndOfGameAdvanceProgressLabel" xml:space="preserve">
+    <value>Advance {0}/{1}</value>
+  </data>
   <data name="EndOfGameMultipleInjuryCountPh" xml:space="preserve">
     <value>1D6</value>
-  </data>
-  <data name="EndOfGameInvalidMultipleInjuryCount" xml:space="preserve">
-    <value>Invalid roll (1 to 6).</value>
   </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} advanced: {1}</value>

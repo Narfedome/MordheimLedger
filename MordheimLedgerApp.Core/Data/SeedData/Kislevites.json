@@ -286,6 +286,7 @@
         "fr": "Ours Apprivoisé"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 125,
       "maxCount": 1,
       "startingExperience": 0,

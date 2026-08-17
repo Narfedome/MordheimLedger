@@ -87,4 +87,8 @@ public class Warrior
 
     /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.IsLargeCreature.</summary>
     public bool IsLargeCreature { get; set; }
+
+    /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.GainsExperience. Used
+    /// by the End of Game wizard to exclude this warrior from the Experience/Advance steps entirely.</summary>
+    public bool GainsExperience { get; set; } = true;
 }

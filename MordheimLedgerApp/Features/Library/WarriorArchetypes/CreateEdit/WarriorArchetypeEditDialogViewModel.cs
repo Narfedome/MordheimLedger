@@ -113,7 +113,11 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         isLargeCreature = item.IsLargeCreature;
         canUseEquipment = item.CanUseEquipment;
         isChief = item.SpecialRules.Any(r => r.Name is "Leader" or "Chef");
-        neverGainsExperience = item.SpecialRules.Any(r => r.Name is "Never Gains Experience" or "Ne gagne jamais d'Expérience");
+        // Lu depuis le flag lui-même (GainsExperience), pas re-dérivé du nom de la règle attachée à
+        // chaque ouverture - c'est précisément pour ne plus dépendre d'un texte éditable que ce flag a
+        // été ajouté (voir sa doc). La migration des archétypes seedés avant son existence est gérée une
+        // fois pour toutes par AppDatabase.BackfillNeverGainsExperienceAsync, pas ici.
+        neverGainsExperience = !item.GainsExperience;
 
         var noneLabel = Loc["WarriorArchetypeEquipmentListNone"];
         EquipmentListOptions.Add(noneLabel);
@@ -176,6 +180,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     partial void OnNeverGainsExperienceChanged(bool value)
     {
+        Item.GainsExperience = !value;
         if (value) _ = AddSuggestedRuleAsync("Never Gains Experience", "Ne gagne jamais d'Expérience");
         else RemoveSuggestedRule("Never Gains Experience", "Ne gagne jamais d'Expérience");
     }

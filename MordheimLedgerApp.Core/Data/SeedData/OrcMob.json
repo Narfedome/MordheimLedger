@@ -315,6 +315,7 @@
         "fr": "Squigs des cavernes"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": 5,
       "startingExperience": 0,
@@ -385,6 +386,7 @@
       },
       "isHero": false,
       "isLargeCreature": true,
+      "gainsExperience": false,
       "cost": 200,
       "maxCount": 1,
       "startingExperience": 0,

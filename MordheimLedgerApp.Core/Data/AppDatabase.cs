@@ -33,6 +33,63 @@ public class AppDatabase
         // nothing the player made is at risk of being duplicated).
         if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
             await SeedOfficialContentAsync();
+
+        // Runs on every launch, not just first: fixes existing data rather than seeding new data (see
+        // the method's own doc comment).
+        await BackfillNeverGainsExperienceAsync();
+    }
+
+    /// <summary>One-time-per-row data fix for campaigns that started before WarriorArchetype/
+    /// Warrior.GainsExperience existed (2026-08-17): the new column's SQLite-added default is `true`
+    /// even for archetypes (Zombie, etc.) that already carry the "Never Gains Experience"/"Ne gagne
+    /// jamais d'Expérience" special rule - so the flag would silently disagree with the rule already
+    /// shown on the warrior's sheet until something corrects it. Unlike the "editing an archetype
+    /// doesn't retroactively change already-recruited warriors" rule elsewhere in this app (a
+    /// deliberate design choice about future edits), this is a missing-initial-value bug, not an edit -
+    /// so both the archetype template AND any already-recruited Warrior snapshot get corrected here,
+    /// once. Runs unconditionally (not gated by the "catalog empty" seed check, which only fires on a
+    /// brand new install) so it fixes any existing local database on next launch - cheap no-op every
+    /// run after the first since the WHERE-equivalent filters (GainsExperience still true) then match
+    /// nothing. A fresh install never hits this: Equipment/SpecialRules.json-derived seed data already
+    /// sets GainsExperience: false directly (see WarbandSeedData.WarriorSeedData), so nothing here is
+    /// ever stale for it.</summary>
+    private async Task BackfillNeverGainsExperienceAsync()
+    {
+        var ruleKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.Value is "Never Gains Experience" or "Ne gagne jamais d'Expérience")
+            .Select(t => t.Key)
+            .ToHashSet();
+        if (ruleKeys.Count == 0) return;
+
+        var ruleIds = (await _db.Table<SpecialRuleEntity>().ToListAsync())
+            .Where(r => ruleKeys.Contains(r.NameKey))
+            .Select(r => r.Id)
+            .ToHashSet();
+        if (ruleIds.Count == 0) return;
+
+        var archetypeIds = (await _db.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync())
+            .Where(j => ruleIds.Contains(j.SpecialRuleId))
+            .Select(j => j.WarriorArchetypeId)
+            .ToHashSet();
+        if (archetypeIds.Count == 0) return;
+
+        var staleArchetypes = (await _db.Table<WarriorArchetypeEntity>().ToListAsync())
+            .Where(a => archetypeIds.Contains(a.Id) && a.GainsExperience)
+            .ToList();
+        foreach (var archetype in staleArchetypes)
+        {
+            archetype.GainsExperience = false;
+            await _db.UpdateAsync(archetype);
+        }
+
+        var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
+            .Where(w => archetypeIds.Contains(w.WarriorArchetypeId) && w.GainsExperience)
+            .ToList();
+        foreach (var warrior in staleWarriors)
+        {
+            warrior.GainsExperience = false;
+            await _db.UpdateAsync(warrior);
+        }
     }
 
     private async Task CreateAllTablesAsync()
@@ -329,7 +386,8 @@ public class AppDatabase
                 EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
                 CanUseEquipment = w.CanUseEquipment,
                 AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
-                IsLargeCreature = w.IsLargeCreature
+                IsLargeCreature = w.IsLargeCreature,
+                GainsExperience = w.GainsExperience
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);

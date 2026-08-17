@@ -106,4 +106,13 @@ public class WarriorArchetype
     /// recruitment (see ToWarrior), same snapshot-at-recruit-time convention as the rest of the stat
     /// line.</summary>
     public bool IsLargeCreature { get; set; }
+
+    /// <summary>False for archetypes the rulebook explicitly excludes from Experience/Advance rolls
+    /// (Zombie, Dire Wolf... - see their "Never Gains Experience" special rule). True for every ordinary
+    /// archetype. Copied onto Warrior at recruitment (see EntityMapping.ToWarrior), same
+    /// snapshot-at-recruit-time convention as CanUseEquipment/IsLargeCreature above - a real flag rather
+    /// than matching the special rule's (editable, user-renameable) name, decided explicitly over the
+    /// initial string-matching approach once it started gating actual behavior (End of Game wizard)
+    /// rather than just suggesting a chip to attach in the archetype editor.</summary>
+    public bool GainsExperience { get; set; } = true;
 }

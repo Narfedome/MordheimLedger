@@ -270,17 +270,16 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
-        var activeWarriors = Heroes.Concat(Henchmen)
-            .Select(r => r.Warrior)
-            .Where(w => w.Status == WarriorStatus.Active)
+        var activeWarriorRows = Heroes.Concat(Henchmen)
+            .Where(r => r.Warrior.Status == WarriorStatus.Active)
             .ToList();
-        if (activeWarriors.Count == 0)
+        if (activeWarriorRows.Count == 0)
         {
             await ShowInfoAsync(Loc["EndOfGameTitle"], Loc["EndOfGameNoWarriors"]);
             return;
         }
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId);
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>

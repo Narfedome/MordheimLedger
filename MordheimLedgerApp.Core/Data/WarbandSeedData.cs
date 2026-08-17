@@ -133,6 +133,10 @@ public class WarriorSeedData
     /// <summary>True for "large creature" archetypes (Rat Ogre, Ogre, Troll...) - see
     /// WarriorArchetype.IsLargeCreature.</summary>
     public bool IsLargeCreature { get; set; }
+
+    /// <summary>False for archetypes carrying the "Never Gains Experience" special rule (Zombie...) -
+    /// omitted/true for every ordinary archetype. See WarriorArchetype.GainsExperience.</summary>
+    public bool GainsExperience { get; set; } = true;
 }
 
 public class EquipmentSeedData

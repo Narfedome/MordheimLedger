@@ -321,7 +321,8 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             EquipmentListId = warrior.EquipmentListId,
             CanUseEquipment = warrior.CanUseEquipment,
             AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories),
-            IsLargeCreature = warrior.IsLargeCreature
+            IsLargeCreature = warrior.IsLargeCreature,
+            GainsExperience = warrior.GainsExperience
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],

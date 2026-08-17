@@ -48,4 +48,5 @@ public class WarriorEntity
     public string? AllowedSkillCategories { get; set; }
 
     public bool IsLargeCreature { get; set; }
+    public bool GainsExperience { get; set; } = true;
 }

@@ -262,6 +262,7 @@
         "fr": "Rats géants"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": null,
       "startingExperience": 0,

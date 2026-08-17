@@ -160,6 +160,7 @@
         "fr": "Zombie"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": null,
       "startingExperience": 0,
@@ -274,6 +275,7 @@
         "fr": "Loup Funeste"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 50,
       "maxCount": 5,
       "startingExperience": 0,

@@ -31,13 +31,22 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:WarbandEquipment">
                         <Border Style="{StaticResource SectionCardBorderStyle}">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                 <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
                                     <Label Text="{Binding Name}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontSize="12"
                                            TextColor="{DynamicResource AppTextMuted}"/>
                                 </VerticalStackLayout>
-                                <Button Grid.Column="1" Text="{loc:Loc InventoryEquip}"
+                                <!-- Uniquement pour une trouvaille explicitement désignée vendable par
+                                     le livre (voir WarbandEquipment.IsSellable, ex. Charrette Renversée)
+                                     - pas un "vendre n'importe quel objet", absent des règles core. -->
+                                <Button Grid.Column="1" Text="{loc:Loc InventorySell}"
+                                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                                        FontSize="12" Padding="10,4" VerticalOptions="Center"
+                                        IsVisible="{Binding IsSellable}"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandInventoryDialogViewModel}}, Path=SellCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                <Button Grid.Column="2" Text="{loc:Loc InventoryEquip}"
                                         Style="{StaticResource DialogSecondaryButtonStyle}"
                                         FontSize="12" Padding="10,4" VerticalOptions="Center"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandInventoryDialogViewModel}}, Path=EquipCommand}"

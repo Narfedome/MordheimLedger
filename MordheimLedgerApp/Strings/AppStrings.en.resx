@@ -357,6 +357,9 @@
   <data name="InventoryEquipTitle" xml:space="preserve">
     <value>Carried by</value>
   </data>
+  <data name="InventorySell" xml:space="preserve">
+    <value>Sell</value>
+  </data>
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Experience</value>
   </data>
@@ -590,6 +593,12 @@
   </data>
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Miscellaneous Equipment</value>
+  </data>
+  <data name="EquipmentCategoryConsumable" xml:space="preserve">
+    <value>Consumable</value>
+  </data>
+  <data name="EquipmentCategoryDrugsAndPoisons" xml:space="preserve">
+    <value>Drugs and Poisons</value>
   </data>
   <data name="EquipmentCategoryAnimal" xml:space="preserve">
     <value>Animals</value>

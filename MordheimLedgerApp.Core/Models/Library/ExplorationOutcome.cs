@@ -48,6 +48,21 @@ public class ExplorationOutcome
     /// plain base item, no material.</summary>
     public string? MaterialRuleName { get; set; }
 
+    /// <summary>A second, independent EquipmentItemName granted by the same branch alongside the first
+    /// (e.g. Overturned Cart 5-6: "a jewelled sword AND dagger") - null for every other branch. Kept as
+    /// two real catalog items rather than one invented bundle SKU so each can be equipped/sold
+    /// separately; always found in quantity 1, unlike ItemQuantityFormula which only governs the
+    /// primary EquipmentItemName.</summary>
+    public string? SecondaryEquipmentItemName { get; set; }
+
+    /// <summary>Multiplies EquipmentItemName's (and SecondaryEquipmentItemName's) normal Cost when sold
+    /// back at the Trading Post - null for almost every branch (the core rules have no generic "sell
+    /// equipment" mechanic), non-null only where the book explicitly calls out an above-market resale
+    /// value (Overturned Cart's ornate sword/dagger, "worth twice the normal value if sold" -&gt; 2).
+    /// Carried onto the resulting Models.WarbandEquipment row(s) and doubles as that row's "sellable"
+    /// flag in WarbandInventoryDialog - no separate bool.</summary>
+    public int? SellMultiplier { get; set; }
+
     /// <summary>Short disambiguating label shown alongside this branch - two uses: (1) a rare fallback
     /// for a branch that reads as Gold/Item in the rulebook but can't be wired up that way yet (Kind
     /// stays None, e.g. "Elven Cloak" for an item missing from the Trading Post catalog); (2) a context

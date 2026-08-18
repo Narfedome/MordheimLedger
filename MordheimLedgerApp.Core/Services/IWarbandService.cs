@@ -39,12 +39,24 @@ public interface IWarbandService
     /// isn't tied to a specific warrior at the table either) and drained by EquipWarbandItemToWarriorAsync
     /// once the player decides who carries it.</summary>
     Task<List<WarbandEquipment>> GetWarbandEquipmentAsync(int warbandId, string languageCode);
-    Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null);
+
+    /// <param name="sellMultiplier">See WarbandEquipment.SellMultiplier - null unless this find is
+    /// explicitly called out by the rulebook as sellable at above-market value (e.g. Overturned Cart's
+    /// ornate sword/dagger).</param>
+    Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? sellMultiplier = null);
     Task RemoveWarbandEquipmentAsync(int warbandEquipmentId);
 
     /// <summary>Moves an entire WarbandEquipment row (its full Quantity, never a partial split) onto a
     /// warrior - deletes the stash row, creates the equivalent WarriorEquipment row.</summary>
     Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId);
+
+    /// <summary>Sells an entire WarbandEquipment row (its full Quantity) back for
+    /// Item.Cost * Quantity * SellMultiplier gc, credited to the warband's Treasury - only meaningful
+    /// for a row with a non-null SellMultiplier (see WarbandEquipment.IsSellable); throws if called on
+    /// one without, since the app never lets the player initiate this for an ordinary find (no generic
+    /// "sell any equipment" mechanic). Returns the gold amount credited, for the caller's History
+    /// sentence/UI feedback.</summary>
+    Task<int> SellWarbandItemAsync(int warbandEquipmentId);
 
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);
     Task RemoveWarriorSkillAsync(int warriorSkillId);

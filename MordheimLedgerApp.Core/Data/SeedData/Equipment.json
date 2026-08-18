@@ -1159,6 +1159,32 @@
   },
   {
     "name": {
+      "en": "Hunting Arrows",
+      "fr": "Flèches de Chasse"
+    },
+    "category": "Ammunition",
+    "cost": 25,
+    "costRandomMax": 6,
+    "rarity": 8,
+    "description": {
+      "en": "The best hunting arrows are made by the hunters of Drakwald forest. They have sharp, barbed arrowheads which cause excruciating pain when they hit their target. A skilled archer can severely injure his target with a single arrow.",
+      "fr": "Les meilleures flèches de chasse sont fabriquées par les chasseurs de la forêt de Drakwald. Leurs pointes aiguisées et barbelées provoquent des blessures très douloureuses et permettent à un archer accompli de provoquer de gros dégâts d'une seule flèche."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Barbed Arrowheads",
+          "fr": "Pointes Barbelées"
+        },
+        "description": {
+          "en": "A model using a Short Bow, Bow, Long Bow or Elf Bow may use these arrows. They add +1 to all Injury rolls.",
+          "fr": "Un modèle utilisant un Arc Court, un Arc Simple, un Arc Long ou un Arc Elfique peut utiliser ces flèches. Elles ajoutent +1 à tous les jets de Blessure."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
       "en": "Banner",
       "fr": "Bannière"
     },
@@ -1187,7 +1213,7 @@
       "en": "Bugman's Ale",
       "fr": "Bière de Bugman"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Consumable",
     "cost": 50,
     "costRandomMax": 18,
     "rarity": 9,
@@ -1213,7 +1239,7 @@
       "en": "Caltrops",
       "fr": "Chausse-trapes"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Ammunition",
     "cost": 15,
     "costRandomMax": 12,
     "rarity": 6,
@@ -1291,7 +1317,7 @@
       "en": "Fire Arrows",
       "fr": "Flèches Incendiaires"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Ammunition",
     "cost": 30,
     "costRandomMax": 6,
     "rarity": 9,
@@ -1317,7 +1343,7 @@
       "en": "Fire Bomb",
       "fr": "Bombe Incendiaire"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Ammunition",
     "cost": 35,
     "costRandomMax": 12,
     "rarity": 9,
@@ -1343,7 +1369,7 @@
       "en": "Flash Powder",
       "fr": "Poudre Éclair"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Ammunition",
     "cost": 25,
     "costRandomMax": 12,
     "rarity": 8,
@@ -1489,7 +1515,7 @@
       "en": "Crimson Shade",
       "fr": "Ombre Cramoisie"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "DrugsAndPoisons",
     "cost": 35,
     "costRandomMax": 6,
     "rarity": 8,
@@ -1525,7 +1551,7 @@
       "en": "Mandrake Root",
       "fr": "Racine de Mandragore"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "DrugsAndPoisons",
     "cost": 25,
     "costRandomMax": 6,
     "rarity": 8,
@@ -1610,7 +1636,7 @@
       "en": "Superior Blackpowder",
       "fr": "Poudre Noire Supérieure"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Ammunition",
     "cost": 30,
     "rarity": 11,
     "description": {
@@ -1787,7 +1813,7 @@
       "en": "Black Lotus",
       "fr": "Lotus Noir"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "DrugsAndPoisons",
     "cost": 10,
     "costRandomMax": 6,
     "rarity": 9,
@@ -1813,7 +1839,7 @@
       "en": "Dark Venom",
       "fr": "Venin Sombre"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "DrugsAndPoisons",
     "cost": 30,
     "costRandomMax": 12,
     "rarity": 8,
@@ -1839,7 +1865,7 @@
       "en": "Tears of Shallaya",
       "fr": "Larmes de Shallaya"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Consumable",
     "cost": 10,
     "costRandomMax": 12,
     "rarity": 7,
@@ -1890,7 +1916,7 @@
       "en": "Tome of Magic",
       "fr": "Grimoire"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Consumable",
     "cost": 200,
     "costRandomMax": 150,
     "rarity": 12,
@@ -1916,7 +1942,7 @@
       "en": "Healing Herbs",
       "fr": "Herbes Curatives"
     },
-    "category": "MiscellaneousEquipment",
+    "category": "Consumable",
     "cost": 20,
     "costRandomMax": 12,
     "rarity": 8,

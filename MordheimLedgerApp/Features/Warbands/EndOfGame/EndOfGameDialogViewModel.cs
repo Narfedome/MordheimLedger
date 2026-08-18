@@ -48,12 +48,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly int _warbandArchetypeId;
     private readonly List<ExplorationResult> _explorationResults;
 
-    /// <summary>Nom anglais -> nom résolu dans la langue courante, pour l'unique champ de ce wizard qui
-    /// référence le catalogue Équipement par nom anglais brut plutôt que par Id (ExplorationOutcome.
-    /// EquipmentItemName, voir sa doc) - sans ça, "Axe" s'affichait tel quel même en français. Construit
-    /// une seule fois par l'appelant (WarbandDetailViewModel.EndOfGame) plutôt que refait à chaque
-    /// résolution de branche.</summary>
-    private readonly IReadOnlyDictionary<string, string> _equipmentDisplayNamesByEnglishName;
+    /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
+    /// wizard qui référence le catalogue Équipement par nom anglais brut plutôt que par Id
+    /// (ExplorationOutcome.EquipmentItemName, voir sa doc) - sans ça, "Axe" s'affichait tel quel même en
+    /// français. Construit une seule fois par l'appelant (WarbandDetailViewModel.EndOfGame) plutôt que
+    /// refait à chaque résolution de branche. L'item entier (pas juste son nom) permet d'afficher un
+    /// vrai ChipView tapable (icône de catégorie + popup détail via _detailDialogs) plutôt qu'un simple
+    /// Label - même langage d'interaction que le reste de l'app pour toute référence Équipement.</summary>
+    private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName;
 
     protected override bool CancelResult => false;
 
@@ -166,13 +168,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, string> equipmentDisplayNamesByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
         _explorationResults = explorationResults;
-        _equipmentDisplayNamesByEnglishName = equipmentDisplayNamesByEnglishName;
+        _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);

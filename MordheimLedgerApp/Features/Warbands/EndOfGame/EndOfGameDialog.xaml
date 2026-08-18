@@ -407,8 +407,22 @@
                                  ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
                                  trancher au joueur. -->
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationItem}">
-                                <Label Grid.Column="0" Text="{Binding ResolvedExplorationItemDisplayName}"
-                                       FontAttributes="Bold" VerticalOptions="Center"/>
+                                <!-- ChipView tapable (icône de catégorie + popup détail), même langage
+                                     d'interaction que toute autre référence Équipement dans l'app -
+                                     ResolvedExplorationSecondaryItem s'affiche en plus si présent (ex.
+                                     Charrette Renversée : Épée + Dague, voir ExplorationOutcome.
+                                     SecondaryEquipmentItemName). -->
+                                <HorizontalStackLayout Grid.Column="0" Spacing="0">
+                                    <components:ChipView Item="{Binding ResolvedExplorationItem}"
+                                                          IconGlyph="{Binding ResolvedExplorationItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                          IconFontFamily="RpgAwesome"
+                                                          Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                    <components:ChipView Item="{Binding ResolvedExplorationSecondaryItem}"
+                                                          IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}"
+                                                          IconGlyph="{Binding ResolvedExplorationSecondaryItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                          IconFontFamily="RpgAwesome"
+                                                          Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                </HorizontalStackLayout>
                                 <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
                                        VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
                                        IsVisible="{Binding ShowExplorationItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
@@ -450,9 +464,9 @@
                             <Label Text="{Binding ExplorationAmountError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                    IsVisible="{Binding ExplorationAmountError, Converter={StaticResource IsNotNullConverter}}"/>
 
-                            <!-- Branche sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
-                                 Charrette Renversée 5-6) - purement informatif, consigné dans
-                                 l'Historique à la sauvegarde plutôt que silencieusement perdu. -->
+                            <!-- Branche sans effet trésorerie/inventaire (ex. Traînard/"autres bandes")
+                                 - purement informatif, consigné dans l'Historique à la sauvegarde plutôt
+                                 que silencieusement perdu. -->
                             <Label IsVisible="{Binding IsExplorationNone}" Text="{Binding ExplorationNoteText}"
                                    FontSize="12" FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"/>
                         </VerticalStackLayout>
@@ -464,7 +478,10 @@
                              exemplaire (même convention que ShowExplorationItemQuantityRoll), pas de
                              champ ni de dé ici non plus. -->
                         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusItem}">
-                            <Label Grid.Column="0" Text="{Binding BonusItemDisplayName}" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <components:ChipView Grid.Column="0" Item="{Binding BonusItem}"
+                                                  IconGlyph="{Binding BonusItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
                             <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
                     </VerticalStackLayout>

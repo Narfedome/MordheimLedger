@@ -277,6 +277,8 @@ public static class EntityMapping
         EquipmentItemName = e.EquipmentItemName,
         ItemQuantityFormula = e.ItemQuantityFormula,
         MaterialRuleName = e.MaterialRuleName,
+        SecondaryEquipmentItemName = e.SecondaryEquipmentItemName,
+        SellMultiplier = e.SellMultiplier,
         Note = e.Note,
         StatTestPass = e.StatTestPass,
         CausesSickness = e.CausesSickness
@@ -293,6 +295,8 @@ public static class EntityMapping
         EquipmentItemName = m.EquipmentItemName,
         ItemQuantityFormula = m.ItemQuantityFormula,
         MaterialRuleName = m.MaterialRuleName,
+        SecondaryEquipmentItemName = m.SecondaryEquipmentItemName,
+        SellMultiplier = m.SellMultiplier,
         Note = m.Note,
         StatTestPass = m.StatTestPass,
         CausesSickness = m.CausesSickness
@@ -535,7 +539,8 @@ public static class EntityMapping
         WarbandId = m.WarbandId,
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity,
-        MaterialSpecialRuleId = m.MaterialRule?.Id
+        MaterialSpecialRuleId = m.MaterialRule?.Id,
+        SellMultiplier = m.SellMultiplier
     };
 
     public static WarbandEquipment ToModel(this WarbandEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null) => new()
@@ -544,7 +549,8 @@ public static class EntityMapping
         WarbandId = e.WarbandId,
         Item = item,
         Quantity = e.Quantity,
-        MaterialRule = materialRule
+        MaterialRule = materialRule,
+        SellMultiplier = e.SellMultiplier
     };
 
     public static WarriorEquipmentEntity ToEntity(this WarriorEquipment m) => new()

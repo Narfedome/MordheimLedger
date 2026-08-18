@@ -34,7 +34,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
     [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
-    [NotifyPropertyChangedFor(nameof(BonusItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(ShowStatTest))]
     [NotifyPropertyChangedFor(nameof(StatTestFieldLabel))]
     // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
@@ -73,17 +73,26 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
-    [NotifyPropertyChangedFor(nameof(ResolvedExplorationItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(ResolvedExplorationItem))]
+    [NotifyPropertyChangedFor(nameof(ResolvedExplorationSecondaryItem))]
     [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
-    [NotifyPropertyChangedFor(nameof(BonusItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
     private ExplorationOutcome? resolvedExplorationOutcome;
 
-    /// <summary>ResolvedExplorationOutcome.EquipmentItemName résolu dans la langue courante - ce champ
-    /// est le nom ANGLAIS du catalogue (voir ExplorationOutcome), jamais à afficher tel quel.</summary>
-    public string? ResolvedExplorationItemDisplayName => ResolvedExplorationOutcome?.EquipmentItemName is { } name
-        ? _equipmentDisplayNamesByEnglishName.GetValueOrDefault(name, name) : null;
+    /// <summary>ResolvedExplorationOutcome.EquipmentItemName résolu en EquipmentItem (langue courante) -
+    /// ce champ est le nom ANGLAIS du catalogue (voir ExplorationOutcome), jamais à afficher tel quel.
+    /// L'item entier (pas juste son nom) plutôt qu'un Label : la carte s'affiche en ChipView tapable
+    /// (icône de catégorie + popup détail via ShowExplorationItemDetail), même langage d'interaction que
+    /// toute autre référence Équipement dans l'app.</summary>
+    public EquipmentItem? ResolvedExplorationItem => ResolvedExplorationOutcome?.EquipmentItemName is { } name
+        ? _equipmentItemsByEnglishName.GetValueOrDefault(name) : null;
+
+    /// <summary>Second objet du même branch (ex. Charrette Renversée : Épée + Dague, voir
+    /// ExplorationOutcome.SecondaryEquipmentItemName) - null pour tout le reste de la table.</summary>
+    public EquipmentItem? ResolvedExplorationSecondaryItem => ResolvedExplorationOutcome?.SecondaryEquipmentItemName is { } name
+        ? _equipmentItemsByEnglishName.GetValueOrDefault(name) : null;
 
     /// <summary>Texte affiché pour une branche Kind.None (voir IsExplorationNone) - le Note de la
     /// branche retenue (ex. "Skavens : vente aux agents du Clan Eshin"), ou à défaut le nom du résultat
@@ -114,10 +123,13 @@ public partial class EndOfGameDialogViewModel
 
     public bool HasBonusItem => BonusItemOutcome is not null;
 
-    /// <summary>BonusItemOutcome.EquipmentItemName résolu dans la langue courante - même besoin que
-    /// ResolvedExplorationItemDisplayName.</summary>
-    public string? BonusItemDisplayName => BonusItemOutcome?.EquipmentItemName is { } name
-        ? _equipmentDisplayNamesByEnglishName.GetValueOrDefault(name, name) : null;
+    /// <summary>BonusItemOutcome.EquipmentItemName résolu en EquipmentItem - même besoin que
+    /// ResolvedExplorationItem.</summary>
+    public EquipmentItem? BonusItem => BonusItemOutcome?.EquipmentItemName is { } name
+        ? _equipmentItemsByEnglishName.GetValueOrDefault(name) : null;
+
+    [RelayCommand]
+    private Task ShowExplorationItemDetail(EquipmentItem item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item);
 
     /// <summary>Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), on ne trouve qu'un
     /// seul exemplaire d'un objet - ItemQuantityFormula vaut alors "1", une quantité fixe et non un jet
@@ -221,7 +233,7 @@ public partial class EndOfGameDialogViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
-    [NotifyPropertyChangedFor(nameof(BonusItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(BonusItem))]
     private string explorationGoldAmount = string.Empty;
 
     [ObservableProperty]

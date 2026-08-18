@@ -20,6 +20,14 @@ public class WarbandEquipment
     /// WarriorEquipment.MaterialRule, same idiom.</summary>
     public SpecialRule? MaterialRule { get; set; }
 
+    /// <summary>Set only for a find the rulebook explicitly calls sellable at above-market value (see
+    /// ExplorationOutcome.SellMultiplier) - null for everything else, since there's no generic "sell any
+    /// equipment" mechanic. Doubles as the presence flag for the "Vendre" action in
+    /// WarbandInventoryDialog: IsSellable below, no separate bool.</summary>
+    public int? SellMultiplier { get; set; }
+
+    public bool IsSellable => SellMultiplier.HasValue;
+
     public string NameDisplay => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
 
     /// <summary>Alias for NameDisplay - ChipView binds its Label directly to Name, same idiom as

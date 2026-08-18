@@ -73,7 +73,7 @@
     "outcomes": [
       { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Mordheim Map", "itemQuantityFormula": "1" },
       { "subRollMin": 3, "subRollMax": 4, "kind": "Gold", "goldFormula": "2D6" },
-      { "subRollMin": 5, "subRollMax": 6, "kind": "None", "note": "Épée et dague ornées (valeur x2 à la revente)" }
+      { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Sword", "secondaryEquipmentItemName": "Dagger", "itemQuantityFormula": "1", "sellMultiplier": 2 }
     ]
   },
   {
@@ -150,7 +150,7 @@
       { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Short Bow", "itemQuantityFormula": "D3" },
       { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Bow", "itemQuantityFormula": "D3" },
       { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Long bow", "itemQuantityFormula": "D3" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Quiver of Hunting Arrows", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Hunting Arrows", "itemQuantityFormula": "1" },
       { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Crossbow", "itemQuantityFormula": "D3" }
     ]
   },

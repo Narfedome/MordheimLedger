@@ -45,21 +45,22 @@ public partial class WarbandDetailViewModel
 
         // ExplorationOutcome.EquipmentItemName référence le catalogue par nom ANGLAIS brut (voir sa
         // doc) plutôt que par Id - construit une seule fois ici (Id introuvable autrement en anglais
-        // uniquement) et transmis au wizard pour qu'il affiche le nom résolu dans la langue courante
+        // uniquement) et transmis au wizard sous forme d'EquipmentItem entier (pas juste son nom) pour
+        // qu'il affiche un vrai ChipView tapable (icône + popup détail) résolu dans la langue courante,
         // au lieu du nom anglais tel quel (ex. "Axe" affiché même en français avant ce correctif).
         var englishEquipment = await _libraryService.GetEquipmentItemsAsync("en");
         var localizedEquipment = language == "en" ? englishEquipment : await _libraryService.GetEquipmentItemsAsync(language);
-        var equipmentDisplayNames = englishEquipment.ToDictionary(e => e.Name,
-            e => localizedEquipment.FirstOrDefault(l => l.Id == e.Id)?.Name ?? e.Name);
+        var equipmentItemsByEnglishName = englishEquipment.ToDictionary(e => e.Name,
+            e => localizedEquipment.FirstOrDefault(l => l.Id == e.Id) ?? e);
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentDisplayNames);
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentItemsByEnglishName);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
         {
             var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], dialogViewModel.SelectedResult) };
 
-            await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentDisplayNames, sentences);
+            await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentItemsByEnglishName, sentences);
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -77,18 +78,18 @@ public partial class WarbandDetailViewModel
     /// pierre magique trouvé de cette façon s'ajoute à la trésorerie/à l'inventaire exactement comme
     /// n'importe quel autre gain de la partie.</summary>
     private async Task ApplyExplorationOutcomeAsync(EndOfGameDialogViewModel dialogViewModel, List<EquipmentItem> englishEquipment,
-        Dictionary<string, string> equipmentDisplayNames, List<string> sentences)
+        Dictionary<string, EquipmentItem> equipmentItemsByEnglishName, List<string> sentences)
     {
         if (Warband is null) return;
 
         // Même résolution nom-anglais-vers-Id que le chargement de la page, réutilisée ici pour
         // AddWarbandEquipmentAsync (seul l'Id compte, voir WarbandService) et pour la phrase
-        // d'Historique (equipmentDisplayNames donne directement le nom dans la langue courante).
-        // Partagée entre la branche Objet "normale" (ResolvedExplorationOutcome) et l'objet bonus sur
-        // le même dé que l'or (BonusItemOutcome, ex. Boutique - voir EndOfGameDialogViewModel).
-        async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, int quantity)
+        // d'Historique (equipmentItemsByEnglishName donne directement l'item résolu dans la langue
+        // courante). Partagée entre la branche Objet "normale" (ResolvedExplorationOutcome) et l'objet
+        // bonus sur le même dé que l'or (BonusItemOutcome, ex. Boutique - voir EndOfGameDialogViewModel).
+        async Task AddOneItemToInventoryAsync(string itemName, int quantity, string? materialRuleName, int? sellMultiplier)
         {
-            if (itemOutcome.EquipmentItemName is not { } itemName || quantity <= 0) return;
+            if (quantity <= 0) return;
 
             var englishItem = englishEquipment.FirstOrDefault(e => e.Name == itemName);
             if (englishItem is null) return;
@@ -97,14 +98,29 @@ public partial class WarbandDetailViewModel
             // WarriorEquipment.MaterialRule) : "Hache de Gromril" est une Hache de base + la
             // SpecialRule "Gromril Weapon", pas un objet distinct du catalogue.
             SpecialRule? materialRule = null;
-            if (itemOutcome.MaterialRuleName is { } materialRuleName)
+            if (materialRuleName is { } name)
             {
                 var englishRules = await _libraryService.GetSpecialRulesAsync("en");
-                materialRule = englishRules.FirstOrDefault(r => r.Name == materialRuleName);
+                materialRule = englishRules.FirstOrDefault(r => r.Name == name);
             }
 
-            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule);
-            sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, equipmentDisplayNames.GetValueOrDefault(itemName, itemName)));
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule, sellMultiplier);
+            var displayName = equipmentItemsByEnglishName.GetValueOrDefault(itemName)?.Name ?? itemName;
+            sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
+        }
+
+        // Charrette Renversée (5-6) est le seul cas où un branch Item donne DEUX objets distincts d'un
+        // coup ("a jewelled sword AND dagger") - toujours en un seul exemplaire chacun, indépendamment
+        // de la formule de quantité de l'objet principal (voir ExplorationOutcome.
+        // SecondaryEquipmentItemName). Les deux restent des objets réels du catalogue (pas un bundle
+        // inventé) pour rester équipables/vendables séparément - même SellMultiplier pour les deux,
+        // trouvés ensemble.
+        async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, int quantity)
+        {
+            if (itemOutcome.EquipmentItemName is { } primaryName)
+                await AddOneItemToInventoryAsync(primaryName, quantity, itemOutcome.MaterialRuleName, itemOutcome.SellMultiplier);
+            if (itemOutcome.SecondaryEquipmentItemName is { } secondaryName)
+                await AddOneItemToInventoryAsync(secondaryName, 1, itemOutcome.MaterialRuleName, itemOutcome.SellMultiplier);
         }
 
         if (dialogViewModel.ResolvedExplorationOutcome is { } outcome)

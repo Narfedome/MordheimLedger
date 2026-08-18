@@ -223,10 +223,10 @@ public class WarbandService : IWarbandService
         return result;
     }
 
-    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null)
+    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? sellMultiplier = null)
     {
         await _db.Initialization;
-        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule };
+        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule, SellMultiplier = sellMultiplier };
         var entity = stashed.ToEntity();
         await _db.Connection.InsertAsync(entity);
         stashed.Id = entity.Id;
@@ -237,6 +237,27 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+    }
+
+    public async Task<int> SellWarbandItemAsync(int warbandEquipmentId)
+    {
+        await _db.Initialization;
+        var stashRow = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId)
+            ?? throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} introuvable.");
+        if (stashRow.SellMultiplier is not { } multiplier)
+            throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} n'est pas vendable (SellMultiplier null).");
+
+        // "en" suffit ici : seul Cost compte, même idiome que EquipWarbandItemToWarriorAsync.
+        var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
+        var gold = item.Cost * stashRow.Quantity * multiplier;
+
+        var warband = await GetWarbandAsync(stashRow.WarbandId)
+            ?? throw new InvalidOperationException($"Warband {stashRow.WarbandId} introuvable.");
+        warband.Treasury += gold;
+        await SaveWarbandAsync(warband);
+
+        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+        return gold;
     }
 
     public async Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId)

@@ -357,6 +357,9 @@
   <data name="InventoryEquipTitle" xml:space="preserve">
     <value>Faire porter par</value>
   </data>
+  <data name="InventorySell" xml:space="preserve">
+    <value>Vendre</value>
+  </data>
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Expérience</value>
   </data>
@@ -583,13 +586,19 @@
     <value>Arme à poudre noire</value>
   </data>
   <data name="EquipmentCategoryAmmunition" xml:space="preserve">
-    <value>Munitions</value>
+    <value>Projectiles et Munitions</value>
   </data>
   <data name="EquipmentCategoryArmour" xml:space="preserve">
     <value>Armure</value>
   </data>
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Équipement divers</value>
+  </data>
+  <data name="EquipmentCategoryConsumable" xml:space="preserve">
+    <value>Consommable</value>
+  </data>
+  <data name="EquipmentCategoryDrugsAndPoisons" xml:space="preserve">
+    <value>Drogues et Poisons</value>
   </data>
   <data name="EquipmentCategoryAnimal" xml:space="preserve">
     <value>Animaux</value>

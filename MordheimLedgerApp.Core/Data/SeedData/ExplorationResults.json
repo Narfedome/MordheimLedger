@@ -73,7 +73,7 @@
     "outcomes": [
       { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Mordheim Map", "itemQuantityFormula": "1" },
       { "subRollMin": 3, "subRollMax": 4, "kind": "Gold", "goldFormula": "2D6" },
-      { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Sword", "secondaryEquipmentItemName": "Dagger", "itemQuantityFormula": "1", "sellMultiplier": 2 }
+      { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Sword", "secondaryEquipmentItemName": "Dagger", "itemQuantityFormula": "1", "materialRuleName": "Ornate Weapon" }
     ]
   },
   {

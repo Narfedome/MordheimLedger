@@ -43,10 +43,10 @@ public partial class WarbandInventoryDialogViewModel : ReadOnlyDialogViewModel
         if (Inventory.Count == 0) Close(true);
     }
 
-    /// <summary>Uniquement visible dans le XAML pour un item.IsSellable (voir WarbandEquipment -
-    /// exclusif à quelques trouvailles explicitement désignées vendables par le livre, ex. Charrette
-    /// Renversée) - le service refuse tout item sans SellMultiplier, cette garde ici est une défense en
-    /// profondeur, pas le seul verrou.</summary>
+    /// <summary>Uniquement visible dans le XAML pour un item.IsSellable (voir WarbandEquipment - vrai
+    /// seulement si son MaterialRule a SpecialRule.IsResaleUpgrade, ex. "Arme Ornée" de Charrette
+    /// Renversée) - le service refuse tout item dont le matériau n'a pas ce flag, cette garde ici est une
+    /// défense en profondeur, pas le seul verrou.</summary>
     [RelayCommand]
     private async Task Sell(WarbandEquipment item)
     {

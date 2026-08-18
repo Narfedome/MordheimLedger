@@ -45,4 +45,13 @@ public class SpecialRule
     /// EquipmentItem.Rarity. Informational only, no rules engine consumes it - same "no rules engine V1"
     /// stance as the rest of the Library.</summary>
     public int? Rarity { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - false for every purchase-time material
+    /// (Gromril/Ithilmar: a normal upgrade a warrior buys and keeps, never resold) except one so far,
+    /// "Ornate Weapon" (Overturned Cart's "worth twice the normal value if sold"): true marks a material
+    /// whose CostMultiplier ALSO represents a resale value, letting Models.WarbandEquipment.IsSellable
+    /// derive straight from it instead of a separate ad-hoc field - see IWarbandService.
+    /// SellWarbandItemAsync, which reuses Core.Rules.EquipmentPricing.CalculateCost (the same formula as
+    /// a purchase) rather than a bespoke sell-price calculation.</summary>
+    public bool IsResaleUpgrade { get; set; }
 }

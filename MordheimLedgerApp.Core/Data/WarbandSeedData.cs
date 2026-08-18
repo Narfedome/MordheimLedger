@@ -244,6 +244,10 @@ public class SpecialRuleSeedData
 
     /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Rarity.</summary>
     public int? Rarity { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.IsResaleUpgrade. False/absent
+    /// for every material except "Ornate Weapon".</summary>
+    public bool IsResaleUpgrade { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see
@@ -338,7 +342,6 @@ public class ExplorationOutcomeSeedData
     public string? ItemQuantityFormula { get; set; }
     public string? MaterialRuleName { get; set; }
     public string? SecondaryEquipmentItemName { get; set; }
-    public int? SellMultiplier { get; set; }
     public string? Note { get; set; }
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }

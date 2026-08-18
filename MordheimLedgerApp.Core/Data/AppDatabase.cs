@@ -645,7 +645,6 @@ public class AppDatabase
                     ItemQuantityFormula = outcome.ItemQuantityFormula,
                     MaterialRuleName = outcome.MaterialRuleName,
                     SecondaryEquipmentItemName = outcome.SecondaryEquipmentItemName,
-                    SellMultiplier = outcome.SellMultiplier,
                     Note = outcome.Note,
                     StatTestPass = outcome.StatTestPass,
                     CausesSickness = outcome.CausesSickness
@@ -700,7 +699,7 @@ public class AppDatabase
         if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
-        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity };
+        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity, IsResaleUpgrade = seed.IsResaleUpgrade };
         rule.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
         rule.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
         var entity = rule.ToEntity();

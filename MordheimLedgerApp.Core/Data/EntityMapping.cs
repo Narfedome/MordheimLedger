@@ -278,7 +278,6 @@ public static class EntityMapping
         ItemQuantityFormula = e.ItemQuantityFormula,
         MaterialRuleName = e.MaterialRuleName,
         SecondaryEquipmentItemName = e.SecondaryEquipmentItemName,
-        SellMultiplier = e.SellMultiplier,
         Note = e.Note,
         StatTestPass = e.StatTestPass,
         CausesSickness = e.CausesSickness
@@ -296,7 +295,6 @@ public static class EntityMapping
         ItemQuantityFormula = m.ItemQuantityFormula,
         MaterialRuleName = m.MaterialRuleName,
         SecondaryEquipmentItemName = m.SecondaryEquipmentItemName,
-        SellMultiplier = m.SellMultiplier,
         Note = m.Note,
         StatTestPass = m.StatTestPass,
         CausesSickness = m.CausesSickness
@@ -313,7 +311,8 @@ public static class EntityMapping
         ImagePath = e.ImagePath ?? string.Empty,
         CostMultiplier = e.CostMultiplier,
         Abbreviation = e.Abbreviation,
-        Rarity = e.Rarity
+        Rarity = e.Rarity,
+        IsResaleUpgrade = e.IsResaleUpgrade
     };
 
     public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
@@ -325,7 +324,8 @@ public static class EntityMapping
         ImagePath = m.ImagePath,
         CostMultiplier = m.CostMultiplier,
         Abbreviation = m.Abbreviation,
-        Rarity = m.Rarity
+        Rarity = m.Rarity,
+        IsResaleUpgrade = m.IsResaleUpgrade
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,
@@ -539,8 +539,7 @@ public static class EntityMapping
         WarbandId = m.WarbandId,
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity,
-        MaterialSpecialRuleId = m.MaterialRule?.Id,
-        SellMultiplier = m.SellMultiplier
+        MaterialSpecialRuleId = m.MaterialRule?.Id
     };
 
     public static WarbandEquipment ToModel(this WarbandEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null) => new()
@@ -549,8 +548,7 @@ public static class EntityMapping
         WarbandId = e.WarbandId,
         Item = item,
         Quantity = e.Quantity,
-        MaterialRule = materialRule,
-        SellMultiplier = e.SellMultiplier
+        MaterialRule = materialRule
     };
 
     public static WarriorEquipmentEntity ToEntity(this WarriorEquipment m) => new()

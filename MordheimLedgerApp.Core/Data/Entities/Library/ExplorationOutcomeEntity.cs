@@ -21,7 +21,6 @@ public class ExplorationOutcomeEntity
     public string? ItemQuantityFormula { get; set; }
     public string? MaterialRuleName { get; set; }
     public string? SecondaryEquipmentItemName { get; set; }
-    public int? SellMultiplier { get; set; }
     public string? Note { get; set; }
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }

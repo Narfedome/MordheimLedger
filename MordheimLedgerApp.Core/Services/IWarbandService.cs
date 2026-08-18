@@ -40,10 +40,7 @@ public interface IWarbandService
     /// once the player decides who carries it.</summary>
     Task<List<WarbandEquipment>> GetWarbandEquipmentAsync(int warbandId, string languageCode);
 
-    /// <param name="sellMultiplier">See WarbandEquipment.SellMultiplier - null unless this find is
-    /// explicitly called out by the rulebook as sellable at above-market value (e.g. Overturned Cart's
-    /// ornate sword/dagger).</param>
-    Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? sellMultiplier = null);
+    Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null);
     Task RemoveWarbandEquipmentAsync(int warbandEquipmentId);
 
     /// <summary>Moves an entire WarbandEquipment row (its full Quantity, never a partial split) onto a
@@ -51,11 +48,13 @@ public interface IWarbandService
     Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId);
 
     /// <summary>Sells an entire WarbandEquipment row (its full Quantity) back for
-    /// Item.Cost * Quantity * SellMultiplier gc, credited to the warband's Treasury - only meaningful
-    /// for a row with a non-null SellMultiplier (see WarbandEquipment.IsSellable); throws if called on
-    /// one without, since the app never lets the player initiate this for an ordinary find (no generic
-    /// "sell any equipment" mechanic). Returns the gold amount credited, for the caller's History
-    /// sentence/UI feedback.</summary>
+    /// Core.Rules.EquipmentPricing.CalculateCost(Item.Cost, MaterialRule.CostMultiplier) * Quantity gc -
+    /// same formula as a purchase, applied in reverse - credited to the warband's Treasury. Only
+    /// meaningful for a row whose MaterialRule has SpecialRule.IsResaleUpgrade set (see
+    /// WarbandEquipment.IsSellable, e.g. "Ornate Weapon" from Overturned Cart) - throws if called on one
+    /// without, since the app never lets the player initiate this for an ordinary find or a normal
+    /// Gromril/Ithilmar purchase (no generic "sell any equipment" mechanic). Returns the gold amount
+    /// credited, for the caller's History sentence/UI feedback.</summary>
     Task<int> SellWarbandItemAsync(int warbandEquipmentId);
 
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);

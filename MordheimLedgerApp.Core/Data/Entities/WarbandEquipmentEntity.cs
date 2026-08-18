@@ -15,5 +15,4 @@ public class WarbandEquipmentEntity
     public int EquipmentItemId { get; set; }
     public int Quantity { get; set; } = 1;
     public int? MaterialSpecialRuleId { get; set; }
-    public int? SellMultiplier { get; set; }
 }

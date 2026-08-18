@@ -81,5 +81,15 @@
     "costMultiplier": 3,
     "abbreviation": "I",
     "rarity": 9
+  },
+  {
+    "name": { "en": "Ornate Weapon", "fr": "Arme Ornée" },
+    "description": {
+      "en": "This weapon is finely decorated and inlaid with jewels - it fights exactly like a normal weapon of its kind, but is worth twice the normal price if sold.",
+      "fr": "Cette arme est finement décorée et incrustée de bijoux - elle combat exactement comme une arme normale de son type, mais vaut le double du prix normal si elle est revendue."
+    },
+    "costMultiplier": 2,
+    "abbreviation": "O",
+    "isResaleUpgrade": true
   }
 ]

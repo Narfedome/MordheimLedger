@@ -3,6 +3,7 @@ using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Core.Services;
 
@@ -223,10 +224,10 @@ public class WarbandService : IWarbandService
         return result;
     }
 
-    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? sellMultiplier = null)
+    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null)
     {
         await _db.Initialization;
-        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule, SellMultiplier = sellMultiplier };
+        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule };
         var entity = stashed.ToEntity();
         await _db.Connection.InsertAsync(entity);
         stashed.Id = entity.Id;
@@ -244,12 +245,16 @@ public class WarbandService : IWarbandService
         await _db.Initialization;
         var stashRow = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId)
             ?? throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} introuvable.");
-        if (stashRow.SellMultiplier is not { } multiplier)
-            throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} n'est pas vendable (SellMultiplier null).");
 
-        // "en" suffit ici : seul Cost compte, même idiome que EquipWarbandItemToWarriorAsync.
+        // "en" suffit ici : seuls Cost/CostMultiplier comptent, même idiome que EquipWarbandItemToWarriorAsync.
+        var materialRule = await ResolveMaterialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
+        if (materialRule?.IsResaleUpgrade != true)
+            throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} n'est pas vendable (pas de matériau IsResaleUpgrade).");
+
         var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
-        var gold = item.Cost * stashRow.Quantity * multiplier;
+        // Même formule que l'achat (Core.Rules.EquipmentPricing.CalculateCost) - "vaut le double du prix
+        // normal à la revente" est exactement CostMultiplier appliqué au Cost de base, pas un champ à part.
+        var gold = EquipmentPricing.CalculateCost(item.Cost, materialRule.CostMultiplier, isFree: false) * stashRow.Quantity;
 
         var warband = await GetWarbandAsync(stashRow.WarbandId)
             ?? throw new InvalidOperationException($"Warband {stashRow.WarbandId} introuvable.");

@@ -57,6 +57,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// Label - même langage d'interaction que le reste de l'app pour toute référence Équipement.</summary>
     private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName;
 
+    /// <summary>Même idée que _equipmentItemsByEnglishName, pour ExplorationOutcome.MaterialRuleName (ex.
+    /// "Ornate Weapon") - permet au ChipView d'afficher "Épée (O)" comme n'importe quel objet en Gromril/
+    /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
+    private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
+
     protected override bool CancelResult => false;
 
     public ObservableCollection<string> ResultOptions { get; } = new();
@@ -168,13 +173,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
         _explorationResults = explorationResults;
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
+        _specialRulesByEnglishName = specialRulesByEnglishName;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);

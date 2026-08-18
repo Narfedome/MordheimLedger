@@ -14,4 +14,5 @@ public class SpecialRuleEntity
     public int? CostMultiplier { get; set; }
     public string? Abbreviation { get; set; }
     public int? Rarity { get; set; }
+    public bool IsResaleUpgrade { get; set; }
 }

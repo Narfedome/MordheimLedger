@@ -414,12 +414,12 @@
                                      SecondaryEquipmentItemName). -->
                                 <HorizontalStackLayout Grid.Column="0" Spacing="0">
                                     <components:ChipView Item="{Binding ResolvedExplorationItem}"
-                                                          IconGlyph="{Binding ResolvedExplorationItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                          IconGlyph="{Binding ResolvedExplorationItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                           IconFontFamily="RpgAwesome"
                                                           Command="{Binding ShowExplorationItemDetailCommand}"/>
                                     <components:ChipView Item="{Binding ResolvedExplorationSecondaryItem}"
                                                           IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}"
-                                                          IconGlyph="{Binding ResolvedExplorationSecondaryItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                          IconGlyph="{Binding ResolvedExplorationSecondaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                           IconFontFamily="RpgAwesome"
                                                           Command="{Binding ShowExplorationItemDetailCommand}"/>
                                 </HorizontalStackLayout>
@@ -479,7 +479,7 @@
                              champ ni de dé ici non plus. -->
                         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusItem}">
                             <components:ChipView Grid.Column="0" Item="{Binding BonusItem}"
-                                                  IconGlyph="{Binding BonusItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconGlyph="{Binding BonusItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                   IconFontFamily="RpgAwesome"
                                                   Command="{Binding ShowExplorationItemDetailCommand}"/>
                             <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>

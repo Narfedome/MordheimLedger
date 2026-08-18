@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
@@ -81,18 +82,30 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
     private ExplorationOutcome? resolvedExplorationOutcome;
 
-    /// <summary>ResolvedExplorationOutcome.EquipmentItemName résolu en EquipmentItem (langue courante) -
-    /// ce champ est le nom ANGLAIS du catalogue (voir ExplorationOutcome), jamais à afficher tel quel.
-    /// L'item entier (pas juste son nom) plutôt qu'un Label : la carte s'affiche en ChipView tapable
-    /// (icône de catégorie + popup détail via ShowExplorationItemDetail), même langage d'interaction que
-    /// toute autre référence Équipement dans l'app.</summary>
-    public EquipmentItem? ResolvedExplorationItem => ResolvedExplorationOutcome?.EquipmentItemName is { } name
-        ? _equipmentItemsByEnglishName.GetValueOrDefault(name) : null;
+    /// <summary>ResolvedExplorationOutcome.EquipmentItemName + MaterialRuleName résolus (langue courante),
+    /// enveloppés dans un WarbandEquipment jetable (jamais persisté - juste réutilisé pour son
+    /// NameDisplay/Name "Épée (O)", exactement le même rendu qu'un objet en Gromril/Ithilmar dans
+    /// l'inventaire) plutôt qu'un simple EquipmentItem qui perdrait le matériau à l'affichage. La carte
+    /// s'affiche en ChipView tapable (icône de catégorie + popup détail via ShowExplorationItemDetail),
+    /// même langage d'interaction que toute autre référence Équipement dans l'app.</summary>
+    public WarbandEquipment? ResolvedExplorationItem =>
+        BuildDisplayItem(ResolvedExplorationOutcome?.EquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
 
     /// <summary>Second objet du même branch (ex. Charrette Renversée : Épée + Dague, voir
-    /// ExplorationOutcome.SecondaryEquipmentItemName) - null pour tout le reste de la table.</summary>
-    public EquipmentItem? ResolvedExplorationSecondaryItem => ResolvedExplorationOutcome?.SecondaryEquipmentItemName is { } name
-        ? _equipmentItemsByEnglishName.GetValueOrDefault(name) : null;
+    /// ExplorationOutcome.SecondaryEquipmentItemName) - null pour tout le reste de la table. Même
+    /// MaterialRuleName que ResolvedExplorationItem (un seul matériau pour les deux, trouvés ensemble).</summary>
+    public WarbandEquipment? ResolvedExplorationSecondaryItem =>
+        BuildDisplayItem(ResolvedExplorationOutcome?.SecondaryEquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+
+    private WarbandEquipment? BuildDisplayItem(string? itemName, string? materialRuleName)
+    {
+        if (itemName is not { } name) return null;
+        var item = _equipmentItemsByEnglishName.GetValueOrDefault(name);
+        if (item is null) return null;
+
+        var materialRule = materialRuleName is { } ruleName ? _specialRulesByEnglishName.GetValueOrDefault(ruleName) : null;
+        return new WarbandEquipment { Item = item, MaterialRule = materialRule };
+    }
 
     /// <summary>Texte affiché pour une branche Kind.None (voir IsExplorationNone) - le Note de la
     /// branche retenue (ex. "Skavens : vente aux agents du Clan Eshin"), ou à défaut le nom du résultat
@@ -123,13 +136,13 @@ public partial class EndOfGameDialogViewModel
 
     public bool HasBonusItem => BonusItemOutcome is not null;
 
-    /// <summary>BonusItemOutcome.EquipmentItemName résolu en EquipmentItem - même besoin que
+    /// <summary>BonusItemOutcome.EquipmentItemName + MaterialRuleName résolus - même besoin que
     /// ResolvedExplorationItem.</summary>
-    public EquipmentItem? BonusItem => BonusItemOutcome?.EquipmentItemName is { } name
-        ? _equipmentItemsByEnglishName.GetValueOrDefault(name) : null;
+    public WarbandEquipment? BonusItem =>
+        BuildDisplayItem(BonusItemOutcome?.EquipmentItemName, BonusItemOutcome?.MaterialRuleName);
 
     [RelayCommand]
-    private Task ShowExplorationItemDetail(EquipmentItem item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item);
+    private Task ShowExplorationItemDetail(WarbandEquipment item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item.Item, item.MaterialRule);
 
     /// <summary>Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), on ne trouve qu'un
     /// seul exemplaire d'un objet - ItemQuantityFormula vaut alors "1", une quantité fixe et non un jet

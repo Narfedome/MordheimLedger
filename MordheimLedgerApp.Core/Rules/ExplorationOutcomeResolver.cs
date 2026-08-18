@@ -1,0 +1,54 @@
+using MordheimLedgerApp.Core.Models.Library;
+
+namespace MordheimLedgerApp.Core.Rules;
+
+/// <summary>
+/// Which ExplorationOutcome branch of an already-triggered ExplorationResult applies, given whatever
+/// the player has entered so far (a sub-roll, a stat test, a shared die also used for a bonus check).
+/// Extracted from EndOfGameDialogViewModel (2026-08-18) after two bugs slipped through undetected there
+/// - this logic is real rules resolution, not UI orchestration, and belongs where MordheimLedgerApp.Tests
+/// can actually reach it (same "rules-to-Core" precedent as SeriousInjuryTable/HeroAdvanceTable, see
+/// CLAUDE.md). ExplorationChart (dice count/multiples/shards) resolves WHICH ExplorationResult a roll
+/// triggers; this class takes over once that's known, resolving WHICH of its Outcomes applies. Pure
+/// functions only - the caller still owns all UI state (which field is bound to what, whether a roll has
+/// been entered yet).
+/// </summary>
+public static class ExplorationOutcomeResolver
+{
+    /// <summary>The single branch without a sub-roll (SubRollMin null) - covers a result with exactly one
+    /// flat outcome (e.g. Ruined Hovels) and the "always applies" half of a result that also has a
+    /// sub-roll-gated bonus branch on the same die (e.g. Shop's gold, see ResolveBonusItemOutcome). Null
+    /// for a result gated behind a stat test instead (see ResolveStatTestOutcome) - its Auto-shaped
+    /// branches (Pass/Fail) must never resolve on their own before the test is actually made.</summary>
+    public static ExplorationOutcome? ResolveAutoOutcome(ExplorationResult result) =>
+        result.StatTestField is not null ? null : result.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
+
+    /// <summary>The mutually-exclusive branch a single sub-roll picks (e.g. Corpse: 1-2 gold, 3 dagger,
+    /// 4 axe...) - null if no branch's range contains the roll (shouldn't happen for a well-formed sub-
+    /// roll table, since the rulebook's ranges are always exhaustive over 1-6).</summary>
+    public static ExplorationOutcome? ResolveSubRollOutcome(ExplorationResult result, int subRoll) =>
+        result.Outcomes.FirstOrDefault(o => o.SubRollMin.HasValue && subRoll >= o.SubRollMin && subRoll <= o.SubRollMax);
+
+    /// <summary>A stat test (e.g. Well: roll &lt;= Toughness) compares an already-entered roll to an
+    /// already-known stat - computing Pass/Fail here is arithmetic on values the player already
+    /// supplied/the roster already has, not a random decision made on the player's behalf.</summary>
+    public static ExplorationOutcome? ResolveStatTestOutcome(ExplorationResult result, int roll, int statValue)
+    {
+        var passed = roll <= statValue;
+        return result.Outcomes.FirstOrDefault(o => o.StatTestPass == passed);
+    }
+
+    /// <summary>Shop (2,2) is the one entry in the whole chart where an Auto branch (gold) and a
+    /// sub-roll-gated branch (a bonus item) share the SAME die - "on a roll of 1 you ALSO find a Lucky
+    /// Charm", not an alternative branch. <paramref name="resolvedAutoOutcome"/> must itself be the
+    /// result's Auto Gold branch - passing anything else (e.g. Corpse's sub-roll-selected Gold branch)
+    /// always returns null. This is a hard parameter shape, not a bool the caller could get wrong: bug
+    /// found 2026-08-18 was exactly this check missing, so a Corpse gold roll of "4" spuriously matched
+    /// Corpse's own sub-roll-4 Axe branch (same numeric value, completely unrelated die).</summary>
+    public static ExplorationOutcome? ResolveBonusItemOutcome(ExplorationResult result, ExplorationOutcome? resolvedAutoOutcome, int roll)
+    {
+        if (resolvedAutoOutcome is not { Kind: ExplorationOutcomeKind.Gold, SubRollMin: null }) return null;
+        return result.Outcomes.FirstOrDefault(o =>
+            o.Kind == ExplorationOutcomeKind.Item && o.SubRollMin.HasValue && roll >= o.SubRollMin && roll <= o.SubRollMax);
+    }
+}

@@ -5,7 +5,7 @@
     "name": { "en": "Well", "fr": "Puits" },
     "description": {
       "en": "The public wells, of which there were several in Mordheim, were covered by rooves raised up on pillars and adorned with carvings and fountains. Unfortunately, like all the other wells, this one is in a parlous state and undoubtedly polluted with wyrdstone. Choose one of your Heroes and roll a D6. If the result is equal to or lower than his Toughness, he finds one shard of wyrdstone at the bottom of the well. If he fails, the Hero swallows tainted water and must miss the next game through sickness.",
-      "fr": "Les puits publics de Mordheim étaient couverts de toitures posées sur des piliers, ornées de sculptures et de fontaines. Comme tous les autres, celui-ci est dans un triste état et sans doute pollué par de la pierre de sorcière. Choisissez un de vos Héros et lancez un D6. Si le résultat est inférieur ou égal à son Endurance, il trouve une pierre de sorcière au fond du puits. En cas d'échec, le Héros avale de l'eau souillée et doit manquer la prochaine partie pour cause de maladie."
+      "fr": "Les puits publics de Mordheim étaient couverts de toitures posées sur des piliers, ornées de sculptures et de fontaines. Comme tous les autres, celui-ci est dans un triste état et sans doute pollué par de la pierre magique. Choisissez un de vos Héros et lancez un D6. Si le résultat est inférieur ou égal à son Endurance, il trouve une pierre magique au fond du puits. En cas d'échec, le Héros avale de l'eau souillée et doit manquer la prochaine partie pour cause de maladie."
     },
     "rollsIndependently": false,
     "statTestField": "Toughness",
@@ -325,7 +325,7 @@
     "name": { "en": "Shattered Building", "fr": "Bâtiment Éventré" },
     "description": {
       "en": "The comet destroyed this building almost completely, making it unsafe for all but the most daring to explore. But places such as this are the best for searching for wyrdstone shards. You find D3 shards of wyrdstone amongst the ruins. In addition, take a Leadership test against the warband leader's Leadership value - if passed, a wardog that was guarding the building joins the warband.",
-      "fr": "La comète a presque entièrement détruit ce bâtiment, le rendant dangereux pour tous sauf les plus téméraires. Mais ce genre d'endroit est le meilleur pour dénicher des pierres de sorcière. Vous trouvez D3 pierres de sorcière parmi les décombres. Faites de plus un test de Commandement du chef de bande - en cas de réussite, un chien de guerre qui gardait les lieux rejoint la bande."
+      "fr": "La comète a presque entièrement détruit ce bâtiment, le rendant dangereux pour tous sauf les plus téméraires. Mais ce genre d'endroit est le meilleur pour dénicher des pierres magiques. Vous trouvez D3 pierres magiques parmi les décombres. Faites de plus un test de Commandement du chef de bande - en cas de réussite, un chien de guerre qui gardait les lieux rejoint la bande."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -349,7 +349,7 @@
     "name": { "en": "The Pit", "fr": "La Fosse" },
     "description": {
       "en": "You have come within sight of the Pit, the huge crater created by the comet - glowing wyrdstone everywhere, but the domain of the Shadow Lord. If you wish, you can send one Hero to search for wyrdstone. Roll a D6: on a 1 the Hero is devoured by the guardians of the Pit and never seen again; on 2 or more he returns with D6+1 shards of wyrdstone.",
-      "fr": "Vous voici en vue de la Fosse, l'immense cratère creusé par la comète - de la pierre de sorcière luit partout, mais c'est le domaine du Seigneur des Ombres. Si vous le souhaitez, un Héros peut y chercher de la pierre de sorcière. Lancez un D6 : sur un 1, le Héros est dévoré par les gardiens de la Fosse et jamais revu ; sur 2 ou plus, il revient avec D6+1 pierres de sorcière."
+      "fr": "Vous voici en vue de la Fosse, l'immense cratère creusé par la comète - de la pierre magique luit partout, mais c'est le domaine du Seigneur des Ombres. Si vous le souhaitez, un Héros peut y chercher de la pierre magique. Lancez un D6 : sur un 1, le Héros est dévoré par les gardiens de la Fosse et jamais revu ; sur 2 ou plus, il revient avec D6+1 pierres magiques."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -363,7 +363,7 @@
     "name": { "en": "Hidden Treasure", "fr": "Trésor Caché" },
     "description": {
       "en": "In the depths of Mordheim, you come across a hidden chest bearing the coat-of-arms of one of the town's noble families. Roll for every item on the list separately: D3 Pieces of wyrdstone (4+), 5D6x5 gc (Auto), Holy Relic (5+), Suit of Heavy Armour (5+), D3 Gems worth 10 gc each (4+), Elven Cloak (5+), Holy Tome (5+), Magical Artefact (5+).",
-      "fr": "Dans les profondeurs de Mordheim, vous découvrez un coffre caché portant les armoiries d'une des familles nobles de la ville. Lancez séparément pour chaque objet de la liste : D3 pierres de sorcière (4+), 5D6x5 CG (Auto), Relique Sainte (5+), Armure lourde complète (5+), D3 Gemmes valant 10 CG chacune (4+), Cape Elfique (5+), Grimoire Sacré (5+), Artefact Magique (5+)."
+      "fr": "Dans les profondeurs de Mordheim, vous découvrez un coffre caché portant les armoiries d'une des familles nobles de la ville. Lancez séparément pour chaque objet de la liste : D3 pierres magiques (4+), 5D6x5 CG (Auto), Relique Sainte (5+), Armure lourde complète (5+), D3 Gemmes valant 10 CG chacune (4+), Cape Elfique (5+), Grimoire Sacré (5+), Artefact Magique (5+)."
     },
     "rollsIndependently": true,
     "outcomes": [

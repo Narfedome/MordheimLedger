@@ -165,12 +165,21 @@
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" x:Name="Header" ColumnDefinitions="*,Auto">
             <header:DetailPageHeaderView Grid.Column="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
-            <components:IconTextButton Grid.Column="1" Margin="0,0,16,0"
-                                        IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}"
-                                        Icon="{x:Static icons:SolidFont.FlagCheckered}"
-                                        Text="{loc:Loc EndOfGameTitle}"
-                                        TextColor="{DynamicResource AppAccent}"
-                                        Command="{Binding EndOfGameCommand}"/>
+            <HorizontalStackLayout Grid.Column="1" Spacing="16" Margin="0,0,16,0"
+                                    IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                <!-- Masqué entièrement si vide, comme l'était l'ancienne section dépliable du roster
+                     (voir Models.WarbandEquipment) - rien à réattribuer tant qu'aucun objet n'a été
+                     trouvé (ex. étape Exploration du wizard Fin de Partie). -->
+                <components:IconTextButton IsVisible="{Binding HasInventory}"
+                                            Icon="{x:Static icons:SolidFont.BoxOpen}"
+                                            Text="{loc:Loc InventoryHeading}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding ShowInventoryCommand}"/>
+                <components:IconTextButton Icon="{x:Static icons:SolidFont.FlagCheckered}"
+                                            Text="{loc:Loc EndOfGameTitle}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding EndOfGameCommand}"/>
+            </HorizontalStackLayout>
         </Grid>
 
         <!-- Contenu de la page (trésorerie/rating, onglets Roster/Historique, recruter, roster,
@@ -273,48 +282,6 @@
                 <VerticalStackLayout IsVisible="{Binding DeadExpanded}"
                                      BindableLayout.ItemsSource="{Binding DeadWarriors}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
-
-                <!-- Inventaire de bande : objets trouvés (ex. étape Exploration du wizard Fin de
-                     Partie) pas encore assignés à un guerrier - voir Models.WarbandEquipment. Masqué
-                     entièrement si vide plutôt qu'un groupe permanent à 0, contrairement à Héros/Hommes
-                     de main/Morts qui existent toujours. -->
-                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasInventory}">
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ToggleInventoryCommand}"/>
-                    </Grid.GestureRecognizers>
-                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
-                        <Label.FormattedText>
-                            <FormattedString>
-                                <Span Text="{loc:Loc InventoryHeading}"/>
-                                <Span Text="{Binding Inventory.Count, StringFormat=' · {0}'}"/>
-                            </FormattedString>
-                        </Label.FormattedText>
-                    </Label>
-                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Icon="{Binding InventoryExpanded, Converter={StaticResource BoolToChevronConverter}}"
-                                                  Command="{Binding ToggleInventoryCommand}"/>
-                </Grid>
-                <VerticalStackLayout IsVisible="{Binding InventoryExpanded}" Spacing="0"
-                                     BindableLayout.ItemsSource="{Binding Inventory}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:WarbandEquipment">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" Margin="16,4">
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
-                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontSize="12"
-                                               TextColor="{DynamicResource AppTextMuted}"/>
-                                    </VerticalStackLayout>
-                                    <Button Grid.Column="1" Text="{loc:Loc InventoryEquip}"
-                                            Style="{StaticResource DialogSecondaryButtonStyle}"
-                                            FontSize="12" Padding="10,4" VerticalOptions="Center"
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EquipInventoryItemCommand}"
-                                            CommandParameter="{Binding .}"/>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
 
             </VerticalStackLayout>
         </ScrollView>

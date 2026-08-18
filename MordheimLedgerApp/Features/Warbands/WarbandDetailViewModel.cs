@@ -8,6 +8,7 @@ using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
+using MordheimLedgerApp.Features.Warbands.Inventory;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
@@ -61,16 +62,14 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private bool deadExpanded;
 
     /// <summary>Objets trouvés mais pas encore assignés à un guerrier (voir Models.WarbandEquipment,
-    /// alimenté par l'étape Exploration du wizard Fin de Partie) - affiché en pense-bête sur cette page,
-    /// avec une action pour les faire porter par un guerrier (EquipInventoryItem).</summary>
+    /// alimenté par l'étape Exploration du wizard Fin de Partie) - un bouton en en-tête de page
+    /// (visible seulement si HasInventory) ouvre WarbandInventoryDialog pour les réattribuer, plutôt
+    /// qu'une section dépliable dans le roster (retour utilisateur explicite, 2026-08-18).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasInventory))]
     private ObservableCollection<WarbandEquipment> inventory = new();
 
     public bool HasInventory => Inventory.Count > 0;
-
-    [ObservableProperty]
-    private bool inventoryExpanded = true;
 
     [ObservableProperty]
     private ObservableCollection<HistoryEntry> historyEntries = new();
@@ -112,9 +111,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleDead() => DeadExpanded = !DeadExpanded;
 
-    [RelayCommand]
-    private void ToggleInventory() => InventoryExpanded = !InventoryExpanded;
-
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -143,21 +139,17 @@ public partial class WarbandDetailViewModel : BaseViewModel
         });
     }
 
-    /// <summary>Fait porter un objet de l'inventaire de bande par un guerrier choisi via un simple
-    /// ActionSheet (Héros puis Hommes de main) - déplace la ligne entière (toute sa Quantity, jamais un
-    /// partage, voir IWarbandService.EquipWarbandItemToWarriorAsync) plutôt qu'un picker dédié, l'appli a
-    /// déjà cet idiome pour un choix ponctuel dans une liste plate (voir BaseViewModel.
-    /// ShowActionSheetIndexAsync).</summary>
+    /// <summary>Ouvre l'inventaire de bande dans un dialog dédié (WarbandInventoryDialog) où chaque objet
+    /// peut être réattribué à un guerrier via un simple ActionSheet - toujours recharger le roster à la
+    /// fermeture, quel que soit le mode de fermeture (X ou auto-fermeture sur liste vide côté dialog),
+    /// même logique que OpenWarriorEditDialogAsync : le dialog persiste ses changements immédiatement,
+    /// pas de distinction Enregistrer/Annuler à respecter ici.</summary>
     [RelayCommand]
-    private async Task EquipInventoryItem(WarbandEquipment item)
+    private async Task ShowInventory()
     {
         var candidates = Heroes.Concat(Henchmen).ToList();
-        if (candidates.Count == 0) return;
-
-        var index = await ShowActionSheetIndexAsync(Loc["InventoryEquipTitle"], candidates.Select(r => r.Warrior.Name).ToArray());
-        if (index < 0 || index >= candidates.Count) return;
-
-        await _warbandService.EquipWarbandItemToWarriorAsync(item.Id, candidates[index].Warrior.Id);
+        var dialogViewModel = new WarbandInventoryDialogViewModel(Inventory, candidates, _warbandService);
+        await ShowDialogAsync(new WarbandInventoryDialog(dialogViewModel));
         await LoadAsync(WarbandId);
     }
 
@@ -299,254 +291,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var language = LocalizationService.Instance.Language;
         var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
         await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(school.Name, school.Description, spells)));
-    }
-
-    [RelayCommand]
-    private async Task EndOfGame()
-    {
-        if (Warband is null) return;
-
-        // Un guerrier Malade (voir WarriorStatus.Sick) manque LA bataille que ce wizard s'apprête à
-        // enregistrer - le filtre Status == Active d'activeWarriorRows ci-dessous l'exclut déjà tout
-        // seul (aucune étape Blessure/Expérience/Hors de combat/Exploration ne le concerne cette fois),
-        // rien de plus à faire pour le "masquer". Capturé ICI, avant tout traitement, pour ne nettoyer
-        // en fin de méthode QUE les guerriers déjà Malades en entrant - jamais un guerrier qui vient de
-        // le devenir PENDANT cette même session (ex. Puits en échec) : celui-là doit rester Malade pour
-        // la prochaine fin de partie, pas celle-ci (revenu sur ce point le 2026-08-18 : l'ancienne
-        // version effaçait le statut avant même de construire activeWarriorRows, donc le guerrier
-        // participait normalement à la fin de partie censée représenter la partie qu'il ratait).
-        var previouslySickWarriors = Heroes.Concat(Henchmen).Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
-
-        var activeWarriorRows = Heroes.Concat(Henchmen)
-            .Where(r => r.Warrior.Status == WarriorStatus.Active)
-            .ToList();
-        if (activeWarriorRows.Count == 0)
-        {
-            await ShowInfoAsync(Loc["EndOfGameTitle"], Loc["EndOfGameNoWarriors"]);
-            return;
-        }
-
-        var language = LocalizationService.Instance.Language;
-        var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
-
-        // ExplorationOutcome.EquipmentItemName référence le catalogue par nom ANGLAIS brut (voir sa
-        // doc) plutôt que par Id - construit une seule fois ici (Id introuvable autrement en anglais
-        // uniquement) et transmis au wizard pour qu'il affiche le nom résolu dans la langue courante
-        // au lieu du nom anglais tel quel (ex. "Axe" affiché même en français avant ce correctif).
-        var englishEquipment = await _libraryService.GetEquipmentItemsAsync("en");
-        var localizedEquipment = language == "en" ? englishEquipment : await _libraryService.GetEquipmentItemsAsync(language);
-        var equipmentDisplayNames = englishEquipment.ToDictionary(e => e.Name,
-            e => localizedEquipment.FirstOrDefault(l => l.Id == e.Id)?.Name ?? e.Name);
-
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentDisplayNames);
-        if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
-
-        await Loading.RunAsync(async () =>
-        {
-            var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], dialogViewModel.SelectedResult) };
-
-            // Même résolution nom-anglais-vers-Id qu'au-dessus, réutilisée ici pour
-            // AddWarbandEquipmentAsync (seul l'Id compte, voir WarbandService) et pour la phrase
-            // d'Historique (equipmentDisplayNames donne directement le nom dans la langue courante).
-            // Partagée entre la branche Objet "normale" (ResolvedExplorationOutcome) et l'objet bonus sur
-            // le même dé que l'or (BonusItemOutcome, ex. Boutique - voir EndOfGameDialogViewModel).
-            async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, int quantity)
-            {
-                if (itemOutcome.EquipmentItemName is not { } itemName || quantity <= 0) return;
-
-                var englishItem = englishEquipment.FirstOrDefault(e => e.Name == itemName);
-                if (englishItem is null) return;
-
-                // Même mécanisme que MaterialRuleName pour les objets achetés normalement (voir
-                // WarriorEquipment.MaterialRule) : "Hache de Gromril" est une Hache de base + la
-                // SpecialRule "Gromril Weapon", pas un objet distinct du catalogue.
-                SpecialRule? materialRule = null;
-                if (itemOutcome.MaterialRuleName is { } materialRuleName)
-                {
-                    var englishRules = await _libraryService.GetSpecialRulesAsync("en");
-                    materialRule = englishRules.FirstOrDefault(r => r.Name == materialRuleName);
-                }
-
-                await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule);
-                sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, equipmentDisplayNames.GetValueOrDefault(itemName, itemName)));
-            }
-
-            // Étape Exploration : au plus une Outcome "principale" résolue par jet (ExplorationChart.
-            // DetectMultiples ne déclenche jamais plusieurs entrées de la table à la fois, voir
-            // Core.Rules), plus un éventuel objet bonus sur ce même jet (Boutique - voir
-            // BonusItemOutcome). L'or/objet/pierre de sorcière trouvé de cette façon s'ajoute à la
-            // trésorerie/à l'inventaire exactement comme n'importe quel autre gain de la partie.
-            if (dialogViewModel.ResolvedExplorationOutcome is { } outcome)
-            {
-                if (outcome.Kind == ExplorationOutcomeKind.Gold
-                    && int.TryParse(dialogViewModel.ExplorationGoldAmount, out var gold) && gold != 0)
-                {
-                    Warband.Treasury += gold;
-                    await _warbandService.SaveWarbandAsync(Warband);
-                    sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
-                }
-                else if (outcome.Kind == ExplorationOutcomeKind.Item
-                    && int.TryParse(dialogViewModel.ExplorationItemQuantity, out var quantity))
-                {
-                    await AddExplorationItemToInventoryAsync(outcome, quantity);
-                }
-                else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
-                    && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)
-                {
-                    Warband.WyrdstoneShards += shards;
-                    await _warbandService.SaveWarbandAsync(Warband);
-                    sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], shards));
-                }
-                else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.CausesSickness && dialogViewModel.StatTestSickHero is { } sickHero)
-                {
-                    // Puits en échec (test d'Endurance) - voir WarriorStatus.Sick. Le statut lui-même
-                    // n'est PAS posé ici : la boucle principale plus bas resynchronise warrior.Status
-                    // depuis row.Status (Actif/Mort uniquement) pour CE guerrier plus tard dans la même
-                    // méthode, ce qui écraserait silencieusement Sick en Actif si on le posait déjà ici
-                    // (bug trouvé le 2026-08-18 : le statut Malade ne "prenait" jamais). Posé après la
-                    // boucle à la place, voir plus bas.
-                    sentences.Add(string.Format(Loc["HistorySicknessSentence"], sickHero.Name));
-                }
-                else if (outcome.Kind == ExplorationOutcomeKind.None)
-                {
-                    sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
-                }
-            }
-
-            if (dialogViewModel.BonusItemOutcome is { } bonusOutcome)
-                await AddExplorationItemToInventoryAsync(bonusOutcome, 1);
-
-            List<Injury>? injuryCatalog = null;
-
-            // Find-or-create par nom (résolu dans la langue courante, comme le catalogue lui-même) dans
-            // le catalogue Injury - la table Blessures Graves a un texte fixe par jet, donc pas de
-            // risque de quasi-doublons.
-            async Task<Injury> GetOrCreateInjuryAsync(string name)
-            {
-                injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
-                var injury = injuryCatalog.FirstOrDefault(i => i.Name == name);
-                if (injury is null)
-                {
-                    injury = new Injury { Name = name, Source = ContentSource.Official };
-                    await _libraryService.SaveInjuryAsync(injury, language);
-                    injuryCatalog.Add(injury);
-                }
-                return injury;
-            }
-
-            foreach (var row in dialogViewModel.WarriorRows)
-            {
-                var warrior = row.Warrior;
-                var changed = false;
-
-                if (row.ExperienceGained != 0)
-                {
-                    warrior.Experience += row.ExperienceGained;
-                    sentences.Add(string.Format(Loc["HistoryXpSentence"], warrior.Name, row.ExperienceGained));
-                    changed = true;
-                }
-
-                foreach (var advance in row.AdvanceRolls)
-                {
-                    if (string.IsNullOrWhiteSpace(advance.ResultText)) continue;
-
-                    // Aucun résultat d'Advance (compétence ou stat) ne touche Injuries - ça prêterait à
-                    // confusion avec une vraie blessure. La vraie compétence choisie est rattachée au
-                    // guerrier ; les résultats de stat/choix (pas d'équivalent structuré dans le modèle,
-                    // "no rules engine V1") ne vivent que dans l'Historique de la bande, à appliquer à la
-                    // main via l'édition du guerrier.
-                    var text = advance.SelectedSkills.Count > 0
-                        ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
-                        : advance.ResultText;
-                    sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], warrior.Name, text));
-
-                    foreach (var skill in advance.SelectedSkills)
-                        await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
-                }
-
-                if (row.Status != warrior.Status)
-                {
-                    warrior.Status = row.Status;
-                    changed = true;
-                    if (warrior.Status == WarriorStatus.Dead)
-                        sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
-                }
-
-                if (!string.IsNullOrWhiteSpace(row.InjuryResultText))
-                {
-                    var injury = await GetOrCreateInjuryAsync(row.InjuryResultText);
-                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
-                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
-                }
-
-                // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table,
-                // chacun devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus.
-                foreach (var sub in row.MultipleInjuryRolls)
-                {
-                    if (string.IsNullOrWhiteSpace(sub.InjuryResultText)) continue;
-
-                    var subInjury = await GetOrCreateInjuryAsync(sub.InjuryResultText);
-                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, subInjury);
-                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, sub.InjuryResultText));
-                }
-
-                // Un jet D6 par figurine hors de combat dans ce groupe d'Hommes de main (règle
-                // confirmée avec l'utilisateur, 2026-08-17 - pas un seul jet pour tout le groupe, voir
-                // EndOfGameDialogViewModel.WarriorOutcomeRow.FigureInjuryRolls). Chaque résultat devient
-                // sa propre Injury comme pour un Héros ; celles qui tombent sur "Mort" décrémentent
-                // HeadCount d'autant plutôt que de faire basculer tout le groupe à WarriorStatus.Dead -
-                // le groupe ne passe Mort (via suppression, voir plus bas) que si HeadCount tombe à 0.
-                var headCountWiped = false;
-                if (row.FigureInjuryRolls.Count > 0)
-                {
-                    var deaths = 0;
-                    foreach (var figure in row.FigureInjuryRolls)
-                    {
-                        if (string.IsNullOrWhiteSpace(figure.InjuryResultText)) continue;
-
-                        var figureInjury = await GetOrCreateInjuryAsync(figure.InjuryResultText);
-                        await _warbandService.AddWarriorInjuryAsync(warrior.Id, figureInjury);
-                        if (figure.IsDeath) deaths++;
-                    }
-
-                    if (deaths > 0)
-                    {
-                        warrior.HeadCount -= deaths;
-                        changed = true;
-                        headCountWiped = warrior.HeadCount <= 0;
-                        sentences.Add(headCountWiped
-                            ? string.Format(Loc["HistoryHenchmanWipedSentence"], warrior.Name)
-                            : string.Format(Loc["HistoryHenchmanDeathSentence"], warrior.Name, deaths, warrior.HeadCount));
-                    }
-                }
-
-                if (headCountWiped)
-                    await _warbandService.DeleteWarriorAsync(warrior.Id);
-                else if (changed)
-                    await _warbandService.SaveWarriorAsync(warrior);
-            }
-
-            // La partie qu'ils manquaient (voir previouslySickWarriors ci-dessus) vient d'être
-            // enregistrée par CE wizard - ils redeviennent Actifs pour la PROCHAINE fin de partie,
-            // jamais celle-ci.
-            foreach (var row in previouslySickWarriors)
-            {
-                row.Warrior.Status = WarriorStatus.Active;
-                await _warbandService.SaveWarriorAsync(row.Warrior);
-            }
-
-            // Puits en échec (test d'Endurance, voir plus haut) - posé ici, APRÈS la boucle principale
-            // qui aurait sinon resynchronisé warrior.Status depuis row.Status (Actif/Mort uniquement) et
-            // écrasé Sick en Actif.
-            if (dialogViewModel.StatTestSickHero is { } newlySickHero)
-            {
-                newlySickHero.Warrior.Status = WarriorStatus.Sick;
-                await _warbandService.SaveWarriorAsync(newlySickHero.Warrior);
-            }
-
-            await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
-            await LoadAsync(Warband.Id);
-        });
     }
 
     [RelayCommand]

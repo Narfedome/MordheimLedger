@@ -505,4 +505,107 @@ public class RulesTests
     {
         Assert.Equal(expectedShards, ExplorationChart.ShardsFound(diceSum));
     }
+
+    // --- ExplorationOutcomeResolver -----------------------------------------------------------------
+    //
+    // Fixtures mirror the real seed shapes (see Data/SeedData/ExplorationResults.json) rather than
+    // minimal synthetic ones, so a fixture drifting out of sync with the actual JSON would be obvious.
+
+    private static ExplorationOutcome Outcome(ExplorationOutcomeKind kind, int? subRollMin = null, int? subRollMax = null, bool? statTestPass = null) =>
+        new() { Kind = kind, SubRollMin = subRollMin, SubRollMax = subRollMax, StatTestPass = statTestPass };
+
+    // Corpse (2,3): five mutually exclusive sub-roll branches, no Auto branch at all.
+    private static ExplorationResult Corpse() => new()
+    {
+        DiceCount = 2, Value = 3,
+        Outcomes =
+        [
+            Outcome(ExplorationOutcomeKind.Gold, 1, 2),
+            Outcome(ExplorationOutcomeKind.Item, 3, 3),
+            Outcome(ExplorationOutcomeKind.Item, 4, 4),
+            Outcome(ExplorationOutcomeKind.Item, 5, 5),
+            Outcome(ExplorationOutcomeKind.Item, 6, 6)
+        ]
+    };
+
+    // Shop (2,2): Auto gold branch + a sub-roll-gated bonus item on the SAME die (roll of 1).
+    private static ExplorationResult Shop() => new()
+    {
+        DiceCount = 2, Value = 2,
+        Outcomes = [Outcome(ExplorationOutcomeKind.Gold), Outcome(ExplorationOutcomeKind.Item, 1, 1)]
+    };
+
+    // Well (2,1): stat test, Pass = wyrdstone, Fail = sickness (no sub-roll at all).
+    private static ExplorationResult Well() => new()
+    {
+        DiceCount = 2, Value = 1, StatTestField = ExplorationStatField.Toughness,
+        Outcomes = [Outcome(ExplorationOutcomeKind.Wyrdstone, statTestPass: true), Outcome(ExplorationOutcomeKind.None, statTestPass: false)]
+    };
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveAutoOutcome_SingleFlatBranch()
+    {
+        var ruinedHovels = new ExplorationResult { Outcomes = [Outcome(ExplorationOutcomeKind.Gold)] };
+        Assert.Equal(ExplorationOutcomeKind.Gold, ExplorationOutcomeResolver.ResolveAutoOutcome(ruinedHovels)?.Kind);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveAutoOutcome_NullForSubRollOnlyResult()
+    {
+        Assert.Null(ExplorationOutcomeResolver.ResolveAutoOutcome(Corpse()));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveAutoOutcome_NullWhenStatTestGated()
+    {
+        // Well's branches are Auto-shaped (no sub-roll) but must never resolve before the stat test.
+        Assert.Null(ExplorationOutcomeResolver.ResolveAutoOutcome(Well()));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveSubRollOutcome_PicksMatchingRange()
+    {
+        var outcome = ExplorationOutcomeResolver.ResolveSubRollOutcome(Corpse(), 4);
+        Assert.Equal(ExplorationOutcomeKind.Item, outcome?.Kind);
+        Assert.Equal(4, outcome?.SubRollMin);
+    }
+
+    [Theory]
+    [InlineData(3, true)]  // roll == stat: still a pass ("equal to or lower than")
+    [InlineData(4, false)] // roll one above stat: fails
+    public void ExplorationOutcomeResolver_ResolveStatTestOutcome_ComparesRollToStat(int roll, bool expectedPass)
+    {
+        var outcome = ExplorationOutcomeResolver.ResolveStatTestOutcome(Well(), roll, statValue: 3);
+        Assert.Equal(expectedPass, outcome?.StatTestPass);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveBonusItemOutcome_Shop_MatchesOnSameDie()
+    {
+        var shop = Shop();
+        var goldOutcome = ExplorationOutcomeResolver.ResolveAutoOutcome(shop);
+        var bonus = ExplorationOutcomeResolver.ResolveBonusItemOutcome(shop, goldOutcome, roll: 1);
+        Assert.Equal(ExplorationOutcomeKind.Item, bonus?.Kind);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveBonusItemOutcome_Shop_NoBonusOutsideRange()
+    {
+        var shop = Shop();
+        var goldOutcome = ExplorationOutcomeResolver.ResolveAutoOutcome(shop);
+        Assert.Null(ExplorationOutcomeResolver.ResolveBonusItemOutcome(shop, goldOutcome, roll: 4));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveBonusItemOutcome_Regression_CorpseGoldNeverTriggersBonus()
+    {
+        // Bug found 2026-08-18: a Corpse gold roll of "4" spuriously matched Corpse's own sub-roll-4
+        // Axe branch, because the original check never verified the resolved Gold outcome was itself
+        // an Auto branch. Corpse's Gold branch is sub-roll-selected (1-2), never Auto - so no bonus
+        // should ever resolve for it, regardless of the roll value passed in.
+        var corpse = Corpse();
+        var goldOutcome = ExplorationOutcomeResolver.ResolveSubRollOutcome(corpse, 1); // picks the 1-2 Gold branch
+        Assert.Equal(ExplorationOutcomeKind.Gold, goldOutcome?.Kind);
+        Assert.Null(ExplorationOutcomeResolver.ResolveBonusItemOutcome(corpse, goldOutcome, roll: 4));
+    }
 }

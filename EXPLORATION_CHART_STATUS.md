@@ -1,7 +1,7 @@
 # Table d'Exploration — état d'implémentation
 
 Suivi de l'assistant Fin de Partie, étape Revenus/Exploration (voir le plan de séquencement).
-Mis à jour à chaque avancée — dernière mise à jour : **2026-08-18** (test de caractéristique du Puits).
+Mis à jour à chaque avancée — dernière mise à jour : **2026-08-18** (refactor du wizard Fin de Partie).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -9,7 +9,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 
 | Groupe | Mécanisme | Statut |
 |---|---|---|
-| A — branche(s) fixe(s) | Or/Objet/Pierre de sorcière résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
+| A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
 | B — choix du joueur (`RollsIndependently`) | Plusieurs branches selon le type de bande, aucune UI de sélection encore | **0/6 ⏳** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **⏳** (pas commencé) |
@@ -18,7 +18,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 
 | Dés | Résultat | Statut | Note |
 |---|---|---|---|
-| 2,1 | Puits | ✅ | Vrai test d'Endurance (choix du Héros, jet comparé à sa stat) - réussite = pierre de sorcière, échec = statut `Malade` (indisponible prochaine partie, effacé auto au Fin de Partie suivant) |
+| 2,1 | Puits | ✅ | Vrai test d'Endurance (choix du Héros, jet comparé à sa stat) - réussite = pierre magique, échec = statut `Malade` (indisponible prochaine partie, effacé auto au Fin de Partie suivant) |
 | 2,2 | Boutique | ✅ | Or (D6) + Porte-bonheur bonus si le même jet vaut 1 (`BonusItemOutcome`) |
 | 2,3 | Cadavre | ✅ | Premier cas validé (sous-jet à branches exclusives) |
 | 2,4 | Traînard | ⏳ | Groupe B — Skavens/Possédés/Morts-Vivants/autres |
@@ -40,7 +40,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | 5,2 | Laboratoire de l'Alchimiste | ✅ | Branche unique |
 | 5,3 | Bijoutier | ✅ | |
 | 5,4 | Maison du Marchand | ✅ | Branche unique |
-| 5,5 | Bâtiment Éventré | ✅ | Pierre de sorcière |
+| 5,5 | Bâtiment Éventré | ✅ | Pierre magique |
 | 5,6 | Entrée des Catacombes | ⏳ | Groupe C — relance permanente, `NextGameNotes`/`HasCatacombReroll` pas construits |
 | 6,1 | La Fosse | ✅ | Branche 1 (Héros dévoré) consignée en Historique |
 | 6,2 | Trésor Caché | ⏳ | Groupe B + référence la table Artefacts Magiques (Groupe D) |
@@ -54,9 +54,11 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 - **Groupe B** (Traînard/Taverne/Prisonniers/Cimetière/Trésor Caché/Bande Massacrée) : UI de sélection de branche par le joueur, plus les sous-mécaniques Recrutement gratuit (`Kind.Recruit`) et Expérience répartie (`Kind.Experience`) qu'elles impliquent (voir le plan de séquencement).
 - **Groupe C** (Une Faveur Rendue/Catacombes/Entrée des Catacombes) : `Warband.NextGameNotes` (pense-bête sur la fiche de bande) + `Warband.HasCatacombReroll`/`PendingExplorationBonusDie` pour les effets mécanisables.
 - **Groupe D** (Artefacts Magiques) : 6 `EquipmentItem` à ajouter au catalogue, référencés par Trésor Caché et Villa d'un Noble.
-- **Vente de la pierre de sorcière** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
+- **Vente de la pierre magique** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
 
 ## Journal
 
 - **2026-08-18** — Socle (jet de dés, détection du résultat unique, sous-jet à branches exclusives) validé sur Cadavre ; reste du Groupe A à branches fixes complété ; correctifs Wyrdstone/branches `None`/règle Gromril ; découpage en deux étapes (jet puis résultat) ; suppression du tirage automatique (le joueur tape son jet ou clique le dé) ; quantité d'objet fixe (`x1`) sans jet sauf indication contraire ; Boutique (forme mixte Or+Objet sur le même dé) ; correction de l'affichage des noms d'objet (anglais → langue courante) ; inventaire de bande (`WarbandEquipment`) pour les objets trouvés non assignés à un guerrier.
 - **2026-08-18 (suite)** — Corrigé un bug où le jet d'or de n'importe quel résultat (ex. Cadavre) pouvait déclencher à tort le Porte-bonheur bonus de Boutique (`BonusItemOutcome` ne vérifiait pas que la branche Or résolue était bien la branche Auto de Boutique). Puits : vrai test de caractéristique (`ExplorationResult.StatTestField`/`ExplorationOutcome.StatTestPass`, réutilisable pour Taverne/Bâtiment Éventré) - choix d'un Héros, jet comparé à son Endurance (calcul automatique, pas un tirage aléatoire), échec → nouveau statut `WarriorStatus.Sick` (« Malade », badge sur la fiche, effacé automatiquement au Fin de Partie suivant).
+- **2026-08-18 (refactor)** — Les deux bugs ci-dessus venaient de règles réelles mélangées à de l'orchestration UI dans des fichiers devenus gargantuesques, sans couverture de test possible. Chantier dédié (plan complet, pas de nouvelle mécanique) : (1) résolution des `Outcome` (Auto/sous-jet/test de caractéristique/objet bonus) extraite vers `Core.Rules.ExplorationOutcomeResolver`, testée (9 tests, dont une régression explicite du bug Boutique/Cadavre) ; (2) `EndOfGameDialogViewModel.cs` (1211 lignes) découpé en fichier central + `.Injury.cs`/`.Advance.cs`/`.Exploration.cs` (partial class) + 4 fichiers de classes annexes (`WarriorOutcomeRow`/`AdvanceRollEntry`/`InjurySubRollEntry`/`ExplorationDieEntry`) ; (3) `WarbandDetailViewModel.EndOfGame()` (une méthode de ~250 lignes) déplacé vers `WarbandDetailViewModel.EndOfGame.cs` et décomposé en 3 phases nommées (`ApplyExplorationOutcomeAsync`/`ApplyWarriorOutcomesAsync`/`ApplySicknessLifecycleAsync`), avec l'invariant d'ordre (Sickness après Warriors) rendu explicite en commentaire à l'appel plutôt qu'implicite. Aucun changement de comportement voulu - 140/140 tests passent, build MAUI clean après chaque étape.
+- **2026-08-18 (terminologie)** — "Wyrdstone Shard(s)" reste en anglais tel quel côté EN (déjà le cas partout). Côté FR, remplacé "pierre de sorcière" par **"pierre magique"** (terme officiel du core book, confirmé dans `RulesReference/Campagne.md`/`MarcheEtMagie.md` - "fragments de pierre magique", "Pendule en pierre magique") - correction dans `ExplorationResults.json` (Puits/Bâtiment Éventré/La Fosse/Trésor Caché) et 2 clés `AppStrings.resx`. Le reste du catalogue (Skavens, Morts-Vivants, Culte des Possédés, Nains Chasseurs de Trésors, compétence Chasseur de Pierre Magique) utilisait déjà ce terme - seul le contenu Exploration ajouté cette session avait dévié.

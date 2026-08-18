@@ -790,7 +790,7 @@
     <value>Or trouvé (CG)</value>
   </data>
   <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
-    <value>Pierres de sorcière trouvées</value>
+    <value>Pierres magiques trouvées</value>
   </data>
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choisir un Héros</value>
@@ -829,7 +829,7 @@
     <value>La bande a trouvé {0}x {1} (ajouté à l'inventaire).</value>
   </data>
   <data name="HistoryExplorationWyrdstoneSentence" xml:space="preserve">
-    <value>La bande a trouvé {0} pierre(s) de sorcière.</value>
+    <value>La bande a trouvé {0} pierre(s) magique(s).</value>
   </data>
   <data name="HistoryExplorationNoteSentence" xml:space="preserve">
     <value>Exploration : {0}.</value>

@@ -387,7 +387,7 @@
                                    IsVisible="{Binding StatTestError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
 
-                        <!-- Branche résolue : montant d'or/pierres de sorcière éditable, ou objet trouvé
+                        <!-- Branche résolue : montant d'or/pierres magiques éditable, ou objet trouvé
                              (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
                         <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationGold}">

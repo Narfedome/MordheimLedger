@@ -792,6 +792,15 @@
   <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
     <value>Wyrdstone shards found</value>
   </data>
+  <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
+    <value>Choose a Hero</value>
+  </data>
+  <data name="EndOfGameStatFieldToughness" xml:space="preserve">
+    <value>Toughness</value>
+  </data>
+  <data name="EndOfGameStatFieldLeadership" xml:space="preserve">
+    <value>Leadership</value>
+  </data>
   <data name="EndOfGameXpPh" xml:space="preserve">
     <value>XP gained</value>
   </data>
@@ -825,6 +834,9 @@
   <data name="HistoryExplorationNoteSentence" xml:space="preserve">
     <value>Exploration: {0}.</value>
   </data>
+  <data name="HistorySicknessSentence" xml:space="preserve">
+    <value>{0} is sick and will miss the next game.</value>
+  </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} gained {1} XP.</value>
   </data>
@@ -851,6 +863,9 @@
   </data>
   <data name="WarriorStatusDead" xml:space="preserve">
     <value>Dead</value>
+  </data>
+  <data name="WarriorStatusSick" xml:space="preserve">
+    <value>Sick</value>
   </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>

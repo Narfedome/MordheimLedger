@@ -250,6 +250,7 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
         RollsIndependently = e.RollsIndependently,
+        StatTestField = e.StatTestField,
         Outcomes = outcomes?.ToList() ?? new List<ExplorationOutcome>()
     };
 
@@ -261,7 +262,8 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey ?? string.Empty,
         Source = m.Source,
-        RollsIndependently = m.RollsIndependently
+        RollsIndependently = m.RollsIndependently,
+        StatTestField = m.StatTestField
     };
 
     public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e) => new()
@@ -275,7 +277,9 @@ public static class EntityMapping
         EquipmentItemName = e.EquipmentItemName,
         ItemQuantityFormula = e.ItemQuantityFormula,
         MaterialRuleName = e.MaterialRuleName,
-        Note = e.Note
+        Note = e.Note,
+        StatTestPass = e.StatTestPass,
+        CausesSickness = e.CausesSickness
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -289,7 +293,9 @@ public static class EntityMapping
         EquipmentItemName = m.EquipmentItemName,
         ItemQuantityFormula = m.ItemQuantityFormula,
         MaterialRuleName = m.MaterialRuleName,
-        Note = m.Note
+        Note = m.Note,
+        StatTestPass = m.StatTestPass,
+        CausesSickness = m.CausesSickness
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()

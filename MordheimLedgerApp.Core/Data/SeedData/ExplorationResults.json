@@ -8,8 +8,10 @@
       "fr": "Les puits publics de Mordheim étaient couverts de toitures posées sur des piliers, ornées de sculptures et de fontaines. Comme tous les autres, celui-ci est dans un triste état et sans doute pollué par de la pierre de sorcière. Choisissez un de vos Héros et lancez un D6. Si le résultat est inférieur ou égal à son Endurance, il trouve une pierre de sorcière au fond du puits. En cas d'échec, le Héros avale de l'eau souillée et doit manquer la prochaine partie pour cause de maladie."
     },
     "rollsIndependently": false,
+    "statTestField": "Toughness",
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Wyrdstone", "goldFormula": "1", "note": "Test d'Endurance réussi" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Wyrdstone", "goldFormula": "1", "statTestPass": true },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Le Héros avale de l'eau souillée et doit manquer la prochaine partie pour cause de maladie.", "statTestPass": false, "causesSickness": true }
     ]
   },
   {
@@ -18,7 +20,7 @@
     "name": { "en": "Shop", "fr": "Boutique" },
     "description": {
       "en": "The Merchants Guild shop has been thoroughly ransacked. Even so, there are still items scattered around the single, long room, mingled in with the rubble. After a thorough search you find loot worth D6 gc. If you roll a 1 you will also find a Lucky Charm.",
-      "fr": "La boutique de la Guilde des Marchands a été entièrement pillée. Malgré tout, des objets traînent encore dans l'unique et longue salle, mêlés aux décombres. Après une fouille minutieuse, vous trouvez un butin d'une valeur de D6 po. Sur un résultat de 1, vous trouvez également un Porte-bonheur."
+      "fr": "La boutique de la Guilde des Marchands a été entièrement pillée. Malgré tout, des objets traînent encore dans l'unique et longue salle, mêlés aux décombres. Après une fouille minutieuse, vous trouvez un butin d'une valeur de D6 CG. Sur un résultat de 1, vous trouvez également un Porte-bonheur."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -32,7 +34,7 @@
     "name": { "en": "Corpse", "fr": "Cadavre" },
     "description": {
       "en": "You find a still-warm corpse. A chipped dagger sticks out of his back. Surprisingly, his possessions have not been looted. Roll a D6 to see what you find when you search the corpse: 1-2 D6 gc, 3 Dagger, 4 Axe, 5 Sword, 6 Suit of light armour.",
-      "fr": "Vous trouvez un cadavre encore chaud, une dague ébréchée plantée dans le dos. Étonnamment, ses possessions n'ont pas été pillées. Lancez un D6 pour savoir ce que vous trouvez en le fouillant : 1-2 D6 po, 3 Dague, 4 Hache, 5 Épée, 6 Armure légère complète."
+      "fr": "Vous trouvez un cadavre encore chaud, une dague ébréchée plantée dans le dos. Étonnamment, ses possessions n'ont pas été pillées. Lancez un D6 pour savoir ce que vous trouvez en le fouillant : 1-2 D6 CG, 3 Dague, 4 Hache, 5 Épée, 6 Armure légère complète."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -49,7 +51,7 @@
     "name": { "en": "Straggler", "fr": "Traînard" },
     "description": {
       "en": "Your warband encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly possessions. Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc. Possessed warbands can sacrifice the unfortunate individual for the glory of the Chaos gods - the leader gains +1 Experience. Undead warbands can kill the man and gain a Zombie for no cost. Any other warband can interrogate the man and gain insight into the city: next time you roll on the Exploration chart, roll one dice more than usual and discard any one dice.",
-      "fr": "Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens. Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 po. Une bande des Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience. Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement. Toute autre bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix."
+      "fr": "Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens. Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CG. Une bande des Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience. Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement. Toute autre bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -65,7 +67,7 @@
     "name": { "en": "Overturned Cart", "fr": "Charrette Renversée" },
     "description": {
       "en": "Stuck in a ruined gateway is an overturned wagon. Roll a D6 to see what you find: 1-2 Mordheim Map, 3-4 a purse with 2D6 gc, 5-6 a jewelled sword and dagger (worth twice the normal value if sold).",
-      "fr": "Un chariot renversé est coincé dans un porche en ruine. Lancez un D6 pour savoir ce que vous trouvez : 1-2 Carte de Mordheim, 3-4 une bourse contenant 2D6 po, 5-6 une épée et une dague ornées de bijoux (valeur double du prix normal à la revente)."
+      "fr": "Un chariot renversé est coincé dans un porche en ruine. Lancez un D6 pour savoir ce que vous trouvez : 1-2 Carte de Mordheim, 3-4 une bourse contenant 2D6 CG, 5-6 une épée et une dague ornées de bijoux (valeur double du prix normal à la revente)."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -80,7 +82,7 @@
     "name": { "en": "Ruined Hovels", "fr": "Masures en Ruine" },
     "description": {
       "en": "The street consists of ruined hovels, which are leaning over at alarming angles. Not much worth looting here. You find loot worth D6 gc amidst the ruins.",
-      "fr": "La rue n'est bordée que de masures en ruine, penchées à un angle inquiétant. Il n'y a pas grand-chose à piller ici. Vous trouvez tout de même un butin d'une valeur de D6 po parmi les décombres."
+      "fr": "La rue n'est bordée que de masures en ruine, penchées à un angle inquiétant. Il n'y a pas grand-chose à piller ici. Vous trouvez tout de même un butin d'une valeur de D6 CG parmi les décombres."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -93,7 +95,7 @@
     "name": { "en": "Tavern", "fr": "Taverne" },
     "description": {
       "en": "The ruin of a tavern is recognisable by its sign still hanging on the wall. The cellars are cut into rock and still full of barrels. The warband's leader must take a Leadership test. If he passes, the warband gains 4D6 gc worth of wines and ales which can be sold immediately. If he fails, the men drink most of it - you have D6 gc worth of alcohol left. Undead, Witch Hunter and Sisters of Sigmar warbands automatically pass this test.",
-      "fr": "Une taverne en ruine, reconnaissable à son enseigne encore accrochée au mur. Les caves, taillées dans la roche, sont toujours pleines de tonneaux. Le chef de bande doit réussir un test de Commandement. En cas de réussite, la bande gagne 4D6 po de vins et bières revendables immédiatement. En cas d'échec, les hommes en boivent l'essentiel - il ne reste que D6 po d'alcool en arrivant au campement. Les bandes de Morts-Vivants, Chasseurs de Sorcières et Sœurs de Sigmar réussissent ce test automatiquement."
+      "fr": "Une taverne en ruine, reconnaissable à son enseigne encore accrochée au mur. Les caves, taillées dans la roche, sont toujours pleines de tonneaux. Le chef de bande doit réussir un test de Commandement. En cas de réussite, la bande gagne 4D6 CG de vins et bières revendables immédiatement. En cas d'échec, les hommes en boivent l'essentiel - il ne reste que D6 CG d'alcool en arrivant au campement. Les bandes de Morts-Vivants, Chasseurs de Sorcières et Sœurs de Sigmar réussissent ce test automatiquement."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -107,7 +109,7 @@
     "name": { "en": "Smithy", "fr": "Forge" },
     "description": {
       "en": "The furnace and toppled anvil make it obvious what work was done here. Roll a D6 to determine what you find: 1 Sword, 2 Double-handed weapon, 3 Flail, 4 D3 Halberds, 5 Lance, 6 2D6 gc worth of metal.",
-      "fr": "Le fourneau et l'enclume renversée ne laissent aucun doute sur le travail effectué ici. Lancez un D6 pour savoir ce que vous trouvez : 1 Épée, 2 Arme à deux mains, 3 Fléau, 4 D3 Hallebardes, 5 Lance, 6 2D6 po de métal récupéré."
+      "fr": "Le fourneau et l'enclume renversée ne laissent aucun doute sur le travail effectué ici. Lancez un D6 pour savoir ce que vous trouvez : 1 Épée, 2 Arme à deux mains, 3 Fléau, 4 D3 Hallebardes, 5 Lance, 6 2D6 CG de métal récupéré."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -125,7 +127,7 @@
     "name": { "en": "Prisoners", "fr": "Prisonniers" },
     "description": {
       "en": "A muffled sound comes from one of the buildings - a group of finely dressed people locked in a cellar. Possessed warbands can sacrifice the victims and gain D3 Experience distributed amongst their Heroes. Undead warbands can kill the prisoners and gain D3 Zombies at no cost. Skaven can sell the prisoners into slavery for 3D6 gc. Other warbands can escort the prisoners out of the city for 2D6 gc, and one prisoner may join the warband as a new Henchman if you can equip him.",
-      "fr": "Un bruit étouffé provient de l'un des bâtiments - un groupe de gens bien vêtus enfermés dans une cave. Une bande des Possédés peut sacrifier les victimes et gagner D3 Expérience répartis entre ses Héros. Une bande de Morts-Vivants peut tuer les prisonniers et gagner D3 Zombies gratuitement. Les Skavens peuvent les vendre en esclavage pour 3D6 po. Les autres bandes peuvent escorter les prisonniers hors de la ville pour 2D6 po, et l'un d'eux peut rejoindre la bande comme nouvel Homme de main s'il peut être équipé."
+      "fr": "Un bruit étouffé provient de l'un des bâtiments - un groupe de gens bien vêtus enfermés dans une cave. Une bande des Possédés peut sacrifier les victimes et gagner D3 Expérience répartis entre ses Héros. Une bande de Morts-Vivants peut tuer les prisonniers et gagner D3 Zombies gratuitement. Les Skavens peuvent les vendre en esclavage pour 3D6 CG. Les autres bandes peuvent escorter les prisonniers hors de la ville pour 2D6 CG, et l'un d'eux peut rejoindre la bande comme nouvel Homme de main s'il peut être équipé."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -158,7 +160,7 @@
     "name": { "en": "Market Hall", "fr": "Halle du Marché" },
     "description": {
       "en": "The market hall was raised up on pillars, with the timbered corn exchange above the open market place. The remains of the last market day are still lying around on the cobbles. You find several items worth 2D6 gc in total.",
-      "fr": "La halle du marché reposait sur des piliers, avec la bourse aux grains en bois au-dessus de la place ouverte. Les restes du dernier jour de marché traînent encore sur les pavés. Vous trouvez plusieurs objets d'une valeur totale de 2D6 po."
+      "fr": "La halle du marché reposait sur des piliers, avec la bourse aux grains en bois au-dessus de la place ouverte. Les restes du dernier jour de marché traînent encore sur les pavés. Vous trouvez plusieurs objets d'une valeur totale de 2D6 CG."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -200,7 +202,7 @@
     "name": { "en": "Shrine", "fr": "Sanctuaire" },
     "description": {
       "en": "Your warband stumbles across a ruined shrine, so badly damaged it is hard to tell which god was worshipped here. Your warband may strip the shrine and gain 3D6 gc worth of loot. Sisters of Sigmar or Witch Hunter warbands may instead save some holy relics, gaining 3D6 gc from their patrons and a blessing: one chosen weapon always wounds Undead or Possessed models on a to-wound roll of 2+.",
-      "fr": "Votre bande tombe sur un sanctuaire en ruine, si endommagé qu'il est difficile de savoir quel dieu y était vénéré. Votre bande peut dépouiller le sanctuaire et gagner un butin de 3D6 po. Une bande Sœurs de Sigmar ou Chasseurs de Sorcières peut à la place sauver quelques reliques saintes : elle gagne 3D6 po de la part de ses mécènes et une bénédiction - une arme au choix blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+."
+      "fr": "Votre bande tombe sur un sanctuaire en ruine, si endommagé qu'il est difficile de savoir quel dieu y était vénéré. Votre bande peut dépouiller le sanctuaire et gagner un butin de 3D6 CG. Une bande Sœurs de Sigmar ou Chasseurs de Sorcières peut à la place sauver quelques reliques saintes : elle gagne 3D6 CG de la part de ses mécènes et une bénédiction - une arme au choix blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -213,7 +215,7 @@
     "name": { "en": "Townhouse", "fr": "Maison de Ville" },
     "description": {
       "en": "This three-storey house was once part of a tenement block overlooking a narrow alleyway. It remains largely intact. Your warband finds 3D6 gc worth of loot.",
-      "fr": "Cette maison de trois étages faisait autrefois partie d'un immeuble surplombant une ruelle étroite. Elle est restée largement intacte. Votre bande y trouve un butin d'une valeur de 3D6 po."
+      "fr": "Cette maison de trois étages faisait autrefois partie d'un immeuble surplombant une ruelle étroite. Elle est restée largement intacte. Votre bande y trouve un butin d'une valeur de 3D6 CG."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -243,7 +245,7 @@
     "name": { "en": "Graveyard", "fr": "Cimetière" },
     "description": {
       "en": "You find an old graveyard, crammed with ivy-covered sepulchres. Any warband apart from Witch Hunters and Sisters of Sigmar may loot the crypts and gains D6x10 gc worth of loot - but the next time you play against Sisters of Sigmar or Witch Hunters, their entire warband will hate all your models. Witch Hunters and Sisters of Sigmar may instead seal the graves, gaining D6 Experience distributed amongst their Heroes.",
-      "fr": "Vous trouvez un vieux cimetière, encombré de tombeaux couverts de lierre. Toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar peut piller les cryptes et gagner un butin de D6x10 po - mais lors de la prochaine partie contre les Chasseurs de Sorcières ou les Sœurs de Sigmar, toute leur bande haïra vos figurines. Les Chasseurs de Sorcières et Sœurs de Sigmar peuvent à la place sceller les tombes et gagner D6 Expérience répartis entre leurs Héros."
+      "fr": "Vous trouvez un vieux cimetière, encombré de tombeaux couverts de lierre. Toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar peut piller les cryptes et gagner un butin de D6x10 CG - mais lors de la prochaine partie contre les Chasseurs de Sorcières ou les Sœurs de Sigmar, toute leur bande haïra vos figurines. Les Chasseurs de Sorcières et Sœurs de Sigmar peuvent à la place sceller les tombes et gagner D6 Expérience répartis entre leurs Héros."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -268,7 +270,7 @@
     "name": { "en": "Moneylender's House", "fr": "Maison du Prêteur sur Gages" },
     "description": {
       "en": "A grand mansion, strongly built from stone, has survived the cataclysm remarkably well. The door has been smashed open with axes. Inside, hidden amongst the debris, you find D6x10 gc to add to your treasury.",
-      "fr": "Une grande demeure de pierre a remarquablement bien survécu au cataclysme. La porte a été fracassée à coups de hache. À l'intérieur, caché dans les décombres, vous trouvez D6x10 po à ajouter à votre trésorerie."
+      "fr": "Une grande demeure de pierre a remarquablement bien survécu au cataclysme. La porte a été fracassée à coups de hache. À l'intérieur, caché dans les décombres, vous trouvez D6x10 CG à ajouter à votre trésorerie."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -281,7 +283,7 @@
     "name": { "en": "Alchemist's Laboratory", "fr": "Laboratoire de l'Alchimiste" },
     "description": {
       "en": "A narrow stairway leads down to a crypt-like dwelling that was once an alchemist's workshop. In the ruins you find loot worth 3D6 gc and a battered old notebook. One of your Heroes may study the Alchemist's notebook: he may choose from Academic skills whenever he gains a new skill, in addition to those normally available to him.",
-      "fr": "Un escalier étroit descend vers une demeure semblable à une crypte, autrefois l'atelier d'un alchimiste. Dans les ruines vous trouvez un butin d'une valeur de 3D6 po et un vieux carnet abîmé. Un de vos Héros peut étudier le carnet de l'alchimiste : il peut désormais choisir des compétences d'Érudition à chaque nouvelle compétence, en plus de celles qui lui sont normalement accessibles."
+      "fr": "Un escalier étroit descend vers une demeure semblable à une crypte, autrefois l'atelier d'un alchimiste. Dans les ruines vous trouvez un butin d'une valeur de 3D6 CG et un vieux carnet abîmé. Un de vos Héros peut étudier le carnet de l'alchimiste : il peut désormais choisir des compétences d'Érudition à chaque nouvelle compétence, en plus de celles qui lui sont normalement accessibles."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -294,7 +296,7 @@
     "name": { "en": "Jewelsmith", "fr": "Bijoutier" },
     "description": {
       "en": "The houses in the jewellers' quarter have all been well and truly looted long ago, but some small valuable items may have been overlooked. Roll a D6: 1-2 Quartz stones worth D6x5 gc, 3-4 Amethyst worth 20 gc, 5 Necklace worth 50 gc, 6 A ruby worth D6x15 gc. If not sold, one Hero may display the gems and gains +1 to rolls for locating rare items.",
-      "fr": "Les maisons du quartier des joailliers ont toutes été pillées depuis longtemps, mais quelques petits objets de valeur ont pu échapper aux pilleurs. Lancez un D6 : 1-2 Pierres de quartz valant D6x5 po, 3-4 Améthyste valant 20 po, 5 Collier valant 50 po, 6 Un rubis valant D6x15 po. Si les gemmes ne sont pas revendues, un Héros peut les exhiber fièrement et gagne +1 sur les jets pour dénicher des objets rares."
+      "fr": "Les maisons du quartier des joailliers ont toutes été pillées depuis longtemps, mais quelques petits objets de valeur ont pu échapper aux pilleurs. Lancez un D6 : 1-2 Pierres de quartz valant D6x5 CG, 3-4 Améthyste valant 20 CG, 5 Collier valant 50 CG, 6 Un rubis valant D6x15 CG. Si les gemmes ne sont pas revendues, un Héros peut les exhiber fièrement et gagne +1 sur les jets pour dénicher des objets rares."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -310,7 +312,7 @@
     "name": { "en": "Merchant's House", "fr": "Maison du Marchand" },
     "description": {
       "en": "The merchant's house stands by the waterfront, its vaulted stone undercroft still stacked with barrels and bales of cloth. Inside you find several valuable objects which can be sold for 2D6x5 gc. If you roll a double, instead of money you find the symbol of the Order of Freetraders: a Hero in possession of this gains the Haggle skill.",
-      "fr": "La maison du marchand se dresse près des quais, sa cave voûtée en pierre encore encombrée de tonneaux et de balles de tissu. Vous y trouvez plusieurs objets de valeur revendables pour 2D6x5 po. Si vous obtenez un double, vous trouvez à la place le symbole de l'Ordre des Libres Marchands : le Héros qui le porte gagne la compétence Marchandage."
+      "fr": "La maison du marchand se dresse près des quais, sa cave voûtée en pierre encore encombrée de tonneaux et de balles de tissu. Vous y trouvez plusieurs objets de valeur revendables pour 2D6x5 CG. Si vous obtenez un double, vous trouvez à la place le symbole de l'Ordre des Libres Marchands : le Héros qui le porte gagne la compétence Marchandage."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -361,7 +363,7 @@
     "name": { "en": "Hidden Treasure", "fr": "Trésor Caché" },
     "description": {
       "en": "In the depths of Mordheim, you come across a hidden chest bearing the coat-of-arms of one of the town's noble families. Roll for every item on the list separately: D3 Pieces of wyrdstone (4+), 5D6x5 gc (Auto), Holy Relic (5+), Suit of Heavy Armour (5+), D3 Gems worth 10 gc each (4+), Elven Cloak (5+), Holy Tome (5+), Magical Artefact (5+).",
-      "fr": "Dans les profondeurs de Mordheim, vous découvrez un coffre caché portant les armoiries d'une des familles nobles de la ville. Lancez séparément pour chaque objet de la liste : D3 pierres de sorcière (4+), 5D6x5 po (Auto), Relique Sainte (5+), Armure lourde complète (5+), D3 Gemmes valant 10 po chacune (4+), Cape Elfique (5+), Grimoire Sacré (5+), Artefact Magique (5+)."
+      "fr": "Dans les profondeurs de Mordheim, vous découvrez un coffre caché portant les armoiries d'une des familles nobles de la ville. Lancez séparément pour chaque objet de la liste : D3 pierres de sorcière (4+), 5D6x5 CG (Auto), Relique Sainte (5+), Armure lourde complète (5+), D3 Gemmes valant 10 CG chacune (4+), Cape Elfique (5+), Grimoire Sacré (5+), Artefact Magique (5+)."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -399,7 +401,7 @@
     "name": { "en": "Slaughtered Warband", "fr": "Bande Massacrée" },
     "description": {
       "en": "You find the remains of an entire warband, torn apart by some monstrous creature. After dealing with the dead as your warband sees fit, roll for every item separately: 3D6x5 gc (Auto), D3 Suits of Light Armour (4+), Suit of Heavy Armour (5+), D6 Daggers (Auto), Mordheim Map (4+), D3 Halberds (5+), D3 Swords (3+), D3 Shields (2+), D3 Bows (4+), D3 Helmets (2+).",
-      "fr": "Vous trouvez les restes d'une bande entière, déchiquetée par une créature monstrueuse. Après avoir traité les morts selon les usages de votre bande, lancez séparément pour chaque objet : 3D6x5 po (Auto), D3 Armures légères complètes (4+), Armure lourde complète (5+), D6 Dagues (Auto), Carte de Mordheim (4+), D3 Hallebardes (5+), D3 Épées (3+), D3 Boucliers (2+), D3 Arcs (4+), D3 Casques (2+)."
+      "fr": "Vous trouvez les restes d'une bande entière, déchiquetée par une créature monstrueuse. Après avoir traité les morts selon les usages de votre bande, lancez séparément pour chaque objet : 3D6x5 CG (Auto), D3 Armures légères complètes (4+), Armure lourde complète (5+), D6 Dagues (Auto), Carte de Mordheim (4+), D3 Hallebardes (5+), D3 Épées (3+), D3 Boucliers (2+), D3 Arcs (4+), D3 Casques (2+)."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -421,7 +423,7 @@
     "name": { "en": "Fighting Arena", "fr": "Arène de Combat" },
     "description": {
       "en": "During better times, Mordheim was famous for its duellists and pit fighters. You have found one of the areas used to train these warriors, filled with training equipment and practice weapons. You find a training manual, which you can either sell for 100 gc or let a Hero read: he may then choose from Combat skills whenever he gains a new skill, and his WS may be increased one point above his normal racial maximum.",
-      "fr": "En des temps meilleurs, Mordheim était célèbre pour ses duellistes et ses combattants de fosse. Vous avez trouvé l'un des lieux d'entraînement de ces guerriers, rempli de matériel et d'armes d'exercice. Vous trouvez un manuel d'entraînement, que vous pouvez revendre 100 po ou faire lire à un Héros : il peut alors choisir des compétences de Combat à chaque nouvelle compétence, et sa CC peut dépasser d'un point son maximum racial normal."
+      "fr": "En des temps meilleurs, Mordheim était célèbre pour ses duellistes et ses combattants de fosse. Vous avez trouvé l'un des lieux d'entraînement de ces guerriers, rempli de matériel et d'armes d'exercice. Vous trouvez un manuel d'entraînement, que vous pouvez revendre 100 CG ou faire lire à un Héros : il peut alors choisir des compétences de Combat à chaque nouvelle compétence, et sa CC peut dépasser d'un point son maximum racial normal."
     },
     "rollsIndependently": false,
     "outcomes": [
@@ -434,7 +436,7 @@
     "name": { "en": "Noble's Villa", "fr": "Villa d'un Noble" },
     "description": {
       "en": "You find a fine house, partially ruined and thoroughly ransacked. Roll a D6: 1-2 D6x10 gc worth of items and money, 3-4 D6 vials of Crimson Shade, 5-6 a hidden magical artefact concealed behind a secret door - roll on the Magical Artefacts table: 1 The Boots and Rope of Pieter, 2 The Count of Ventimiglia's Misericordia, 3 Att'la's Plate Mail, 4 Bow of Seeking, 5 Executioner's Hood, 6 All-seeing Eye of Numas. In a campaign none of these six items can appear more than once - re-roll if it is already in someone's possession.",
-      "fr": "Vous trouvez une belle maison, partiellement en ruine et entièrement pillée. Lancez un D6 : 1-2 D6x10 po d'objets et d'argent, 3-4 D6 fioles d'Ombre Cramoisie, 5-6 un artefact magique caché dissimulé derrière une porte secrète - lancez sur la table des Artefacts Magiques : 1 Les Bottes et la Corde de Pieter, 2 La Miséricorde du Comte de Ventimiglia, 3 la Cotte de Mailles d'Att'la, 4 l'Arc de la Traque, 5 la Cagoule du Bourreau, 6 l'Œil Omniscient de Numas. Dans une campagne, aucun de ces six objets ne peut apparaître plus d'une fois - relancez si l'objet est déjà en possession de quelqu'un."
+      "fr": "Vous trouvez une belle maison, partiellement en ruine et entièrement pillée. Lancez un D6 : 1-2 D6x10 CG d'objets et d'argent, 3-4 D6 fioles d'Ombre Cramoisie, 5-6 un artefact magique caché dissimulé derrière une porte secrète - lancez sur la table des Artefacts Magiques : 1 Les Bottes et la Corde de Pieter, 2 La Miséricorde du Comte de Ventimiglia, 3 la Cotte de Mailles d'Att'la, 4 l'Arc de la Traque, 5 la Cagoule du Bourreau, 6 l'Œil Omniscient de Numas. Dans une campagne, aucun de ces six objets ne peut apparaître plus d'une fois - relancez si l'objet est déjà en possession de quelqu'un."
     },
     "rollsIndependently": false,
     "outcomes": [

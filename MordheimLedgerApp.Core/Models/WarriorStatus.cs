@@ -8,5 +8,12 @@ namespace MordheimLedgerApp.Core.Models;
 public enum WarriorStatus
 {
     Active = 0,
-    Dead = 1
+    Dead = 1,
+
+    /// <summary>Missed the next game through sickness/injury outside the Serious Injury table (e.g.
+    /// the Exploration chart's "Puits" result) - deliberately not permanent like Dead: cleared
+    /// automatically the next time the End of Game wizard runs for this warband (see
+    /// WarbandDetailViewModel.EndOfGame), representing that the missed game has now happened. Still
+    /// shown on the roster in the meantime as a reminder not to field the warrior.</summary>
+    Sick = 2
 }

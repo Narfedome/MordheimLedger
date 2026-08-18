@@ -48,6 +48,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly int _warbandArchetypeId;
     private readonly List<ExplorationResult> _explorationResults;
 
+    /// <summary>Nom anglais -> nom résolu dans la langue courante, pour l'unique champ de ce wizard qui
+    /// référence le catalogue Équipement par nom anglais brut plutôt que par Id (ExplorationOutcome.
+    /// EquipmentItemName, voir sa doc) - sans ça, "Axe" s'affichait tel quel même en français. Construit
+    /// une seule fois par l'appelant (WarbandDetailViewModel.EndOfGame) plutôt que refait à chaque
+    /// résolution de branche.</summary>
+    private readonly IReadOnlyDictionary<string, string> _equipmentDisplayNamesByEnglishName;
+
     protected override bool CancelResult => false;
 
     public ObservableCollection<string> ResultOptions { get; } = new();
@@ -176,6 +183,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(HasExplorationResult))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationSubRoll))]
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
+    [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
+    [NotifyPropertyChangedFor(nameof(HasBonusItem))]
+    [NotifyPropertyChangedFor(nameof(BonusItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(ShowStatTest))]
+    [NotifyPropertyChangedFor(nameof(StatTestFieldLabel))]
     // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
     // par StepLabel et la visibilité du bouton "Suivant"/"Enregistrer" (IsLastStep) doivent donc suivre
     // en direct, pas seulement au prochain changement de StepIndex/WarriorRows (même classe de bug que
@@ -211,7 +223,18 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsExplorationNone))]
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
+    [NotifyPropertyChangedFor(nameof(ResolvedExplorationItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
+    [NotifyPropertyChangedFor(nameof(HasBonusItem))]
+    [NotifyPropertyChangedFor(nameof(BonusItemDisplayName))]
+    [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
     private ExplorationOutcome? resolvedExplorationOutcome;
+
+    /// <summary>ResolvedExplorationOutcome.EquipmentItemName résolu dans la langue courante - ce champ
+    /// est le nom ANGLAIS du catalogue (voir ExplorationOutcome), jamais à afficher tel quel.</summary>
+    public string? ResolvedExplorationItemDisplayName => ResolvedExplorationOutcome?.EquipmentItemName is { } name
+        ? _equipmentDisplayNamesByEnglishName.GetValueOrDefault(name, name) : null;
 
     /// <summary>Texte affiché pour une branche Kind.None (voir IsExplorationNone) - le Note de la
     /// branche retenue (ex. "Skavens : vente aux agents du Clan Eshin"), ou à défaut le nom du résultat
@@ -222,6 +245,35 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsExplorationItem => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Item;
     public bool IsExplorationWyrdstone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Wyrdstone;
 
+    /// <summary>Boutique (2,2) est le seul cas de la table où une branche Auto (ici Or, "D6 po") et une
+    /// branche à sous-jet (ici Objet, "sur un 1, en plus, un Porte-bonheur") coexistent sur LE MÊME dé -
+    /// "en plus" et non une branche alternative. Dérivée directement d'ExplorationGoldAmount (déjà le
+    /// jet du joueur pour l'or) plutôt que de lui redemander un second jet pour la même information.
+    /// Aucun autre résultat de la table n'a cette forme (Puits/Bâtiment Éventré n'ont qu'une branche
+    /// Wyrdstone seule) - pas généralisé au-delà de ce cas réel.
+    ///
+    /// Bug corrigé le 2026-08-18 : la condition d'origine ne vérifiait que TriggeredExplorationResult,
+    /// donc pour Cadavre (branches Or/Dague/Hache/Épée/Armure toutes à sous-jet exclusif, voir
+    /// ShowExplorationSubRoll) un jet d'or de "4" déclenchait à tort le bonus Hache (sous-jet 4 de
+    /// Cadavre) alors que ces deux dés n'ont AUCUN rapport pour ce résultat - seul Boutique réutilise
+    /// intentionnellement le même dé pour les deux. D'où l'exigence supplémentaire que la branche Or
+    /// RÉSOLUE soit elle-même la branche Auto (SubRollMin null) : ça n'arrive que via le chemin
+    /// "branche Auto" de ResolveExplorationResult (Boutique, ou tout futur résultat de même forme),
+    /// jamais via une branche Or choisie par sous-jet (Cadavre).</summary>
+    public ExplorationOutcome? BonusItemOutcome => TriggeredExplorationResult is not null
+        && ResolvedExplorationOutcome is { Kind: ExplorationOutcomeKind.Gold, SubRollMin: null }
+        && int.TryParse(ExplorationGoldAmount, out var roll)
+        ? TriggeredExplorationResult.Outcomes.FirstOrDefault(o =>
+            o.Kind == ExplorationOutcomeKind.Item && o.SubRollMin.HasValue && roll >= o.SubRollMin && roll <= o.SubRollMax)
+        : null;
+
+    public bool HasBonusItem => BonusItemOutcome is not null;
+
+    /// <summary>BonusItemOutcome.EquipmentItemName résolu dans la langue courante - même besoin que
+    /// ResolvedExplorationItemDisplayName.</summary>
+    public string? BonusItemDisplayName => BonusItemOutcome?.EquipmentItemName is { } name
+        ? _equipmentDisplayNamesByEnglishName.GetValueOrDefault(name, name) : null;
+
     /// <summary>Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), on ne trouve qu'un
     /// seul exemplaire d'un objet - ItemQuantityFormula vaut alors "1", une quantité fixe et non un jet
     /// (voir ApplyResolvedOutcome, qui la renseigne directement sans rien demander au joueur). Le dé de
@@ -230,17 +282,101 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool ShowExplorationItemQuantityRoll =>
         ResolvedExplorationOutcome?.ItemQuantityFormula?.Contains('D', StringComparison.OrdinalIgnoreCase) == true;
 
+    /// <summary>Même idée que ShowExplorationItemQuantityRoll côté Wyrdstone (ex. Puits : toujours "1"
+    /// pierre, pas un jet) - le Bâtiment Éventré/La Fosse ont de vraies formules ("D3"/"D6+1") et
+    /// gardent leur champ + dé normalement.</summary>
+    public bool ShowExplorationWyrdstoneRoll =>
+        ResolvedExplorationOutcome?.GoldFormula?.Contains('D', StringComparison.OrdinalIgnoreCase) == true;
+
     /// <summary>Branche retenue sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
     /// Charrette Renversée 5-6) - reste purement informatif (Note ou Description du résultat), juste
     /// consigné dans l'Historique à la sauvegarde (voir WarbandDetailViewModel.EndOfGame) plutôt que
     /// silencieusement perdu.</summary>
     public bool IsExplorationNone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.None;
 
+    // --- Test de caractéristique (Puits/Endurance, Taverne et Bâtiment Éventré/Commandement) --------
+    //
+    // Choisir un Héros et comparer un D6 à une de ses stats pour départager Réussite/Échec - une autre
+    // façon de choisir la branche résolue (ResolvedExplorationOutcome), au même niveau que le sous-jet
+    // classique (ShowExplorationSubRoll) ou la branche Auto seule. Comparer un jet déjà saisi à une
+    // stat déjà connue est de l'arithmétique, pas une décision aléatoire prise à la place du joueur -
+    // contrairement au tirage lui-même (jamais automatique, voir ExplorationGoldAmount et consorts).
+    public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
+
+    public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatTestStatValue))]
+    [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
+    private WarriorOutcomeRow? statTestHero;
+
+    [ObservableProperty]
+    private string statTestRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? statTestError;
+
+    /// <summary>Valeur de la stat testée pour le Héros choisi - affichée à côté du jet pour que le
+    /// joueur puisse comparer sans avoir à rouvrir la fiche du guerrier.</summary>
+    public int? StatTestStatValue => StatTestHero is null || TriggeredExplorationResult?.StatTestField is not { } statField ? null
+        // "statField", pas "field" - "field" est un mot-clé contextuel (backing field des propriétés
+        // auto-implémentées) depuis C# 13 : l'utiliser comme nom de variable de motif DANS un getter de
+        // propriété capture silencieusement le mauvais symbole (CS0266 sur les branches du switch).
+        : statField switch
+        {
+            ExplorationStatField.Toughness => StatTestHero.Warrior.Toughness,
+            ExplorationStatField.Leadership => StatTestHero.Warrior.Leadership,
+            _ => null
+        };
+
+    public string StatTestFieldLabel => TriggeredExplorationResult?.StatTestField switch
+    {
+        ExplorationStatField.Toughness => Loc["EndOfGameStatFieldToughness"],
+        ExplorationStatField.Leadership => Loc["EndOfGameStatFieldLeadership"],
+        _ => string.Empty
+    };
+
+    partial void OnStatTestHeroChanged(WarriorOutcomeRow? value) => ResolveStatTest();
+
+    partial void OnStatTestRollChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value)) StatTestError = null;
+        ResolveStatTest();
+    }
+
+    private void ResolveStatTest()
+    {
+        ResolvedExplorationOutcome = null;
+        ExplorationGoldAmount = string.Empty;
+        ExplorationItemQuantity = string.Empty;
+        ExplorationWyrdstoneAmount = string.Empty;
+        ExplorationAmountError = null;
+
+        if (TriggeredExplorationResult?.StatTestField is null || StatTestHero is null || !int.TryParse(StatTestRoll, out var roll))
+            return;
+
+        var passed = roll <= StatTestStatValue;
+        var outcome = TriggeredExplorationResult.Outcomes.FirstOrDefault(o => o.StatTestPass == passed);
+        if (outcome is not null) ApplyResolvedOutcome(outcome);
+    }
+
+    [RelayCommand]
+    private void AutoRollStatTest() => StatTestRoll = ExplorationChart.RollDie().ToString();
+
+    /// <summary>Guerrier à marquer WarriorStatus.Sick à la sauvegarde (voir WarbandDetailViewModel.
+    /// EndOfGame) - seul le Puits en a besoin pour l'instant (ExplorationOutcome.CausesSickness),
+    /// Taverne/Bâtiment Éventré n'ont pas de conséquence de ce genre en cas d'échec.</summary>
+    public WarriorOutcomeRow? StatTestSickHero => ResolvedExplorationOutcome?.CausesSickness == true ? StatTestHero : null;
+
     /// <summary>Montant d'or - jamais rempli automatiquement dès la branche retenue (revenu sur ce point
     /// le 2026-08-17 : même idiome que tous les autres jets de ce wizard, l'appli ne décide jamais à la
     /// place du joueur - vide tant qu'il n'a pas tapé son jet physique ou cliqué le dé, voir
-    /// AutoRollExplorationGold).</summary>
+    /// AutoRollExplorationGold). Ce même jet alimente aussi BonusItemOutcome (voir sa doc) - la relire à
+    /// chaque frappe est donc nécessaire, pas seulement décorative.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
+    [NotifyPropertyChangedFor(nameof(HasBonusItem))]
+    [NotifyPropertyChangedFor(nameof(BonusItemDisplayName))]
     private string explorationGoldAmount = string.Empty;
 
     [ObservableProperty]
@@ -292,6 +428,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ExplorationItemQuantity = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
+        StatTestHero = null;
+        StatTestRoll = string.Empty;
+        StatTestError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -301,10 +440,18 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         TriggeredExplorationResult = _explorationResults
             .FirstOrDefault(r => r.DiceCount == multiple.Value.DiceCount && r.Value == multiple.Value.Value);
 
-        // Une seule branche sans sous-jet (ex. Masures en Ruine) se résout tout de suite, pas besoin
-        // d'un jet supplémentaire.
-        if (TriggeredExplorationResult is { Outcomes.Count: 1 } single && single.Outcomes[0].SubRollMin is null)
-            ApplyResolvedOutcome(single.Outcomes[0]);
+        // Un résultat à test de caractéristique (Puits...) attend le choix du Héros + son jet avant de
+        // résoudre quoi que ce soit (voir ResolveStatTest) - ses branches sont des Auto (SubRollMin
+        // null) mais ne doivent PAS se résoudre toutes seules comme Masures en Ruine/Boutique.
+        if (TriggeredExplorationResult?.StatTestField is not null) return;
+
+        // Une branche Auto (sans sous-jet) se résout tout de suite, qu'elle soit seule (ex. Masures en
+        // Ruine) ou accompagnée d'une branche à sous-jet optionnelle sur le MÊME dé (ex. Boutique - voir
+        // BonusItemOutcome, qui se déduit du jet d'or plutôt que d'en redemander un second). Ce n'est
+        // que quand TOUTES les branches ont un sous-jet (ex. Cadavre, mutuellement exclusives) que
+        // ShowExplorationSubRoll prend le relais.
+        var autoOutcome = TriggeredExplorationResult?.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
+        if (autoOutcome is not null) ApplyResolvedOutcome(autoOutcome);
     }
 
     partial void OnExplorationSubRollChanged(string value)
@@ -332,9 +479,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private void ApplyResolvedOutcome(ExplorationOutcome outcome)
     {
         ResolvedExplorationOutcome = outcome;
-        if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is { } formula
-            && !formula.Contains('D', StringComparison.OrdinalIgnoreCase))
-            ExplorationItemQuantity = formula;
+        if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is { } itemFormula
+            && !itemFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
+            ExplorationItemQuantity = itemFormula;
+        else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone && outcome.GoldFormula is { } wyrdstoneFormula
+            && !wyrdstoneFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
+            ExplorationWyrdstoneAmount = wyrdstoneFormula;
     }
 
     [RelayCommand]
@@ -364,12 +514,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (ResolvedExplorationOutcome?.GoldFormula is { } formula) ExplorationWyrdstoneAmount = DiceFormula.Roll(formula).ToString();
     }
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, string> equipmentDisplayNamesByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
         _explorationResults = explorationResults;
+        _equipmentDisplayNamesByEnglishName = equipmentDisplayNamesByEnglishName;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
@@ -473,6 +624,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private bool ValidateExplorationResultStep()
     {
         if (ShowExplorationSubRoll && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationSubRollError = Loc["EndOfGameRollRequired"]))
+            return false;
+
+        if (ShowStatTest && !CheckRoll(ResolvedExplorationOutcome is null, () => StatTestError = Loc["EndOfGameRollRequired"]))
             return false;
 
         var amountMissing = ResolvedExplorationOutcome?.Kind switch

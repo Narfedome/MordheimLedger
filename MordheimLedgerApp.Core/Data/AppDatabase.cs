@@ -37,7 +37,10 @@ public class AppDatabase
         // Runs on every launch, not just first: fixes existing data rather than seeding new data (see
         // the method's own doc comment).
         await BackfillNeverGainsExperienceAsync();
-        await BackfillDuplicateExplorationResultsAsync();
+
+        // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
+        // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
+        await ResyncExplorationResultsAsync();
     }
 
     /// <summary>One-time-per-row data fix for campaigns that started before WarriorArchetype/
@@ -93,44 +96,42 @@ public class AppDatabase
         }
     }
 
-    /// <summary>One-time-per-row cleanup for a local database where SeedExplorationResultsAsync ended
-    /// up running more than once (found on a dev machine 2026-08-17: 60 ExplorationResultEntity rows
-    /// instead of 30, every (DiceCount,Value) pair duplicated, one copy per run - each run mints fresh
-    /// NameKey/DescriptionKey GUIDs via SeedTranslationAsync, so the two copies never collide, they just
-    /// silently coexist). SeedExplorationResultsAsync has no dedup guard of its own by design - same
-    /// "plain insert" precedent as Injury/EquipmentItem, relying entirely on InitializeAsync's "catalog
-    /// empty" gate to only ever run once. That gate held for every OTHER catalog on the affected machine
-    /// (WarbandArchetype/Injury/EquipmentItem counts were all normal) - only Exploration data was
-    /// duplicated, meaning something invoked SeedExplorationResultsAsync on its own outside the normal
-    /// single-pass seed at some point (most likely a one-off manual/dev invocation against a live
-    /// database while iterating on this feature, not a general seeding bug). Runs unconditionally
-    /// (not gated) so it repairs any already-affected local database on next launch - cheap no-op once
-    /// no (DiceCount,Value) pair has more than one row, which is true for a fresh install. Keeps, per
-    /// duplicated pair, the row whose NameKey actually resolves against TranslationEntity (falls back to
-    /// the lowest Id if none do, which shouldn't happen in practice) and deletes every other row plus its
-    /// ExplorationOutcomeEntity children - never merges/edits a kept row, only removes full duplicates.</summary>
-    private async Task BackfillDuplicateExplorationResultsAsync()
+    /// <summary>Wipes and re-seeds the Exploration chart from Data/SeedData/ExplorationResults.json on
+    /// EVERY launch, unconditionally - not gated behind InitializeAsync's "catalog empty" check like the
+    /// rest of SeedOfficialContentAsync. Two problems this solves at once:
+    /// (1) Found 2026-08-17: SeedExplorationResultsAsync got invoked a second time against a live dev
+    ///     database outside the normal single-pass seed, silently doubling every row (no dedup guard of
+    ///     its own, same "plain insert" precedent as Injury/EquipmentItem).
+    /// (2) Found 2026-08-18, the more fundamental issue: an ALREADY-SEEDED database never re-seeds
+    ///     anything (the empty-catalog gate only fires once, ever), so an edit to ExplorationResults.json
+    ///     - like adding Puits/StatTestField - silently never reached a machine that had already run the
+    ///     seed once before that edit existed. Every other Library catalog has a real CRUD editor and a
+    ///     "no rules engine" boundary that makes this a non-issue; Exploration is pure reference content
+    ///     with no editor and, critically, no other table holding a foreign key into
+    ///     ExplorationResultEntity/ExplorationOutcomeEntity (History entries are plain strings, not
+    ///     references) - nothing is lost by deleting and recreating it wholesale every launch. Cheap
+    ///     (30 rows) compared to re-running the ~22-pass full catalog+warband seed this replaces having
+    ///     to trigger manually.</summary>
+    private async Task ResyncExplorationResultsAsync()
     {
-        var results = await _db.Table<ExplorationResultEntity>().ToListAsync();
-        var duplicateGroups = results.GroupBy(r => (r.DiceCount, r.Value)).Where(g => g.Count() > 1).ToList();
-        if (duplicateGroups.Count == 0) return;
-
-        var translationKeys = (await _db.Table<TranslationEntity>().ToListAsync())
-            .Select(t => t.Key)
-            .ToHashSet();
-
-        foreach (var group in duplicateGroups)
+        var staleResults = await _db.Table<ExplorationResultEntity>().ToListAsync();
+        if (staleResults.Count > 0)
         {
-            var keep = group.FirstOrDefault(r => translationKeys.Contains(r.NameKey)) ?? group.OrderBy(r => r.Id).First();
-            foreach (var toDelete in group.Where(r => r.Id != keep.Id))
-            {
-                var outcomes = await _db.Table<ExplorationOutcomeEntity>()
-                    .Where(o => o.ExplorationResultId == toDelete.Id).ToListAsync();
-                foreach (var outcome in outcomes)
-                    await _db.DeleteAsync<ExplorationOutcomeEntity>(outcome.Id);
-                await _db.DeleteAsync<ExplorationResultEntity>(toDelete.Id);
-            }
+            var staleOutcomes = await _db.Table<ExplorationOutcomeEntity>().ToListAsync();
+            foreach (var outcome in staleOutcomes)
+                await _db.DeleteAsync<ExplorationOutcomeEntity>(outcome.Id);
+
+            var staleKeys = staleResults.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }).ToHashSet();
+            var staleTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+                .Where(t => staleKeys.Contains(t.Key));
+            foreach (var translation in staleTranslations)
+                await _db.DeleteAsync<TranslationEntity>(translation.Id);
+
+            foreach (var result in staleResults)
+                await _db.DeleteAsync<ExplorationResultEntity>(result.Id);
         }
+
+        await SeedExplorationResultsAsync();
     }
 
     private async Task CreateAllTablesAsync()
@@ -202,6 +203,9 @@ public class AppDatabase
         await _db.DropTableAsync<EquipmentListItemEntity>();
         await _db.DropTableAsync<WarriorArchetypeEquipmentEntity>();
         await _db.DropTableAsync<EquipmentItemSpecialRuleEntity>();
+        await _db.DropTableAsync<ExplorationResultEntity>();
+        await _db.DropTableAsync<ExplorationOutcomeEntity>();
+        await _db.DropTableAsync<WarbandEquipmentEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -221,6 +225,12 @@ public class AppDatabase
         _pendingSharedRestrictions.Clear();
         await CreateAllTablesAsync();
         await SeedOfficialContentAsync();
+
+        // Pas dans SeedOfficialContentAsync (voir ResyncExplorationResultsAsync, appelée à chaque
+        // lancement plutôt que gardée derrière son garde-fou "catalogue vide") - après un DropTableAsync
+        // complet ci-dessus, la table est garantie vide, un seed direct suffit ici (pas besoin du
+        // nettoyage préalable que fait ResyncExplorationResultsAsync sur une base déjà peuplée).
+        await SeedExplorationResultsAsync();
     }
 
     private async Task SeedOfficialContentAsync()
@@ -242,7 +252,8 @@ public class AppDatabase
         await SeedSkillsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
-        await SeedExplorationResultsAsync();
+        // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
+        // InitializeAsync plutôt que gardée derrière le garde-fou "catalogue vide" de cette méthode.
 
         await SeedWarbandFromJsonAsync("Undead.json");
         await SeedWarbandFromJsonAsync("DwarfTreasureHunters.json");
@@ -613,6 +624,7 @@ public class AppDatabase
                 DiceCount = res.DiceCount,
                 Value = res.Value,
                 RollsIndependently = res.RollsIndependently,
+                StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
                 Source = ContentSource.Official
             };
             result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);
@@ -632,7 +644,9 @@ public class AppDatabase
                     EquipmentItemName = outcome.EquipmentItemName,
                     ItemQuantityFormula = outcome.ItemQuantityFormula,
                     MaterialRuleName = outcome.MaterialRuleName,
-                    Note = outcome.Note
+                    Note = outcome.Note,
+                    StatTestPass = outcome.StatTestPass,
+                    CausesSickness = outcome.CausesSickness
                 });
             }
         }

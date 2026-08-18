@@ -306,6 +306,17 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
+        // Un guerrier Malade (voir WarriorStatus.Sick) manque LA bataille que ce wizard s'apprête à
+        // enregistrer - le filtre Status == Active d'activeWarriorRows ci-dessous l'exclut déjà tout
+        // seul (aucune étape Blessure/Expérience/Hors de combat/Exploration ne le concerne cette fois),
+        // rien de plus à faire pour le "masquer". Capturé ICI, avant tout traitement, pour ne nettoyer
+        // en fin de méthode QUE les guerriers déjà Malades en entrant - jamais un guerrier qui vient de
+        // le devenir PENDANT cette même session (ex. Puits en échec) : celui-là doit rester Malade pour
+        // la prochaine fin de partie, pas celle-ci (revenu sur ce point le 2026-08-18 : l'ancienne
+        // version effaçait le statut avant même de construire activeWarriorRows, donc le guerrier
+        // participait normalement à la fin de partie censée représenter la partie qu'il ratait).
+        var previouslySickWarriors = Heroes.Concat(Henchmen).Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
+
         var activeWarriorRows = Heroes.Concat(Henchmen)
             .Where(r => r.Warrior.Status == WarriorStatus.Active)
             .ToList();
@@ -318,17 +329,53 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var language = LocalizationService.Instance.Language;
         var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults);
+        // ExplorationOutcome.EquipmentItemName référence le catalogue par nom ANGLAIS brut (voir sa
+        // doc) plutôt que par Id - construit une seule fois ici (Id introuvable autrement en anglais
+        // uniquement) et transmis au wizard pour qu'il affiche le nom résolu dans la langue courante
+        // au lieu du nom anglais tel quel (ex. "Axe" affiché même en français avant ce correctif).
+        var englishEquipment = await _libraryService.GetEquipmentItemsAsync("en");
+        var localizedEquipment = language == "en" ? englishEquipment : await _libraryService.GetEquipmentItemsAsync(language);
+        var equipmentDisplayNames = englishEquipment.ToDictionary(e => e.Name,
+            e => localizedEquipment.FirstOrDefault(l => l.Id == e.Id)?.Name ?? e.Name);
+
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentDisplayNames);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
         {
             var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], dialogViewModel.SelectedResult) };
 
-            // Étape Exploration : au plus une Outcome résolue par jet (ExplorationChart.DetectMultiples
-            // ne déclenche jamais plusieurs entrées de la table à la fois, voir Core.Rules). L'or/objet
-            // trouvé de cette façon s'ajoute à la trésorerie/à un guerrier exactement comme n'importe
-            // quel autre gain de la partie.
+            // Même résolution nom-anglais-vers-Id qu'au-dessus, réutilisée ici pour
+            // AddWarbandEquipmentAsync (seul l'Id compte, voir WarbandService) et pour la phrase
+            // d'Historique (equipmentDisplayNames donne directement le nom dans la langue courante).
+            // Partagée entre la branche Objet "normale" (ResolvedExplorationOutcome) et l'objet bonus sur
+            // le même dé que l'or (BonusItemOutcome, ex. Boutique - voir EndOfGameDialogViewModel).
+            async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, int quantity)
+            {
+                if (itemOutcome.EquipmentItemName is not { } itemName || quantity <= 0) return;
+
+                var englishItem = englishEquipment.FirstOrDefault(e => e.Name == itemName);
+                if (englishItem is null) return;
+
+                // Même mécanisme que MaterialRuleName pour les objets achetés normalement (voir
+                // WarriorEquipment.MaterialRule) : "Hache de Gromril" est une Hache de base + la
+                // SpecialRule "Gromril Weapon", pas un objet distinct du catalogue.
+                SpecialRule? materialRule = null;
+                if (itemOutcome.MaterialRuleName is { } materialRuleName)
+                {
+                    var englishRules = await _libraryService.GetSpecialRulesAsync("en");
+                    materialRule = englishRules.FirstOrDefault(r => r.Name == materialRuleName);
+                }
+
+                await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule);
+                sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, equipmentDisplayNames.GetValueOrDefault(itemName, itemName)));
+            }
+
+            // Étape Exploration : au plus une Outcome "principale" résolue par jet (ExplorationChart.
+            // DetectMultiples ne déclenche jamais plusieurs entrées de la table à la fois, voir
+            // Core.Rules), plus un éventuel objet bonus sur ce même jet (Boutique - voir
+            // BonusItemOutcome). L'or/objet/pierre de sorcière trouvé de cette façon s'ajoute à la
+            // trésorerie/à l'inventaire exactement comme n'importe quel autre gain de la partie.
             if (dialogViewModel.ResolvedExplorationOutcome is { } outcome)
             {
                 if (outcome.Kind == ExplorationOutcomeKind.Gold
@@ -339,35 +386,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
                     sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
                 }
                 else if (outcome.Kind == ExplorationOutcomeKind.Item
-                    && outcome.EquipmentItemName is { } itemName
-                    && int.TryParse(dialogViewModel.ExplorationItemQuantity, out var quantity) && quantity > 0)
+                    && int.TryParse(dialogViewModel.ExplorationItemQuantity, out var quantity))
                 {
-                    // EquipmentItemName est le nom ANGLAIS du catalogue (voir ExplorationOutcome) - on
-                    // résout donc l'Id contre la liste en anglais (seul l'Id compte pour
-                    // AddWarbandEquipmentAsync, voir WarbandService), puis on ré-affiche le nom dans la
-                    // langue courante pour la phrase d'Historique plutôt que de laisser filtrer le nom
-                    // anglais dans un historique par ailleurs entièrement localisé. L'objet rejoint
-                    // l'inventaire de la bande (pas de guerrier assigné pendant l'assistant, voir
-                    // WarbandEquipment) - à équiper plus tard depuis la fiche de bande.
-                    var englishCatalog = await _libraryService.GetEquipmentItemsAsync("en");
-                    var englishItem = englishCatalog.FirstOrDefault(e => e.Name == itemName);
-                    if (englishItem is not null)
-                    {
-                        // Même mécanisme que MaterialRuleName pour les objets achetés normalement (voir
-                        // WarriorEquipment.MaterialRule) : "Hache de Gromril" est une Hache de base + la
-                        // SpecialRule "Gromril Weapon", pas un objet distinct du catalogue.
-                        SpecialRule? materialRule = null;
-                        if (outcome.MaterialRuleName is { } materialRuleName)
-                        {
-                            var englishRules = await _libraryService.GetSpecialRulesAsync("en");
-                            materialRule = englishRules.FirstOrDefault(r => r.Name == materialRuleName);
-                        }
-
-                        await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule);
-                        var displayCatalog = language == "en" ? englishCatalog : await _libraryService.GetEquipmentItemsAsync(language);
-                        var displayName = displayCatalog.FirstOrDefault(e => e.Id == englishItem.Id)?.Name ?? englishItem.Name;
-                        sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
-                    }
+                    await AddExplorationItemToInventoryAsync(outcome, quantity);
                 }
                 else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
                     && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)
@@ -376,11 +397,24 @@ public partial class WarbandDetailViewModel : BaseViewModel
                     await _warbandService.SaveWarbandAsync(Warband);
                     sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], shards));
                 }
+                else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.CausesSickness && dialogViewModel.StatTestSickHero is { } sickHero)
+                {
+                    // Puits en échec (test d'Endurance) - voir WarriorStatus.Sick. Le statut lui-même
+                    // n'est PAS posé ici : la boucle principale plus bas resynchronise warrior.Status
+                    // depuis row.Status (Actif/Mort uniquement) pour CE guerrier plus tard dans la même
+                    // méthode, ce qui écraserait silencieusement Sick en Actif si on le posait déjà ici
+                    // (bug trouvé le 2026-08-18 : le statut Malade ne "prenait" jamais). Posé après la
+                    // boucle à la place, voir plus bas.
+                    sentences.Add(string.Format(Loc["HistorySicknessSentence"], sickHero.Name));
+                }
                 else if (outcome.Kind == ExplorationOutcomeKind.None)
                 {
                     sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
                 }
             }
+
+            if (dialogViewModel.BonusItemOutcome is { } bonusOutcome)
+                await AddExplorationItemToInventoryAsync(bonusOutcome, 1);
 
             List<Injury>? injuryCatalog = null;
 
@@ -490,6 +524,24 @@ public partial class WarbandDetailViewModel : BaseViewModel
                     await _warbandService.DeleteWarriorAsync(warrior.Id);
                 else if (changed)
                     await _warbandService.SaveWarriorAsync(warrior);
+            }
+
+            // La partie qu'ils manquaient (voir previouslySickWarriors ci-dessus) vient d'être
+            // enregistrée par CE wizard - ils redeviennent Actifs pour la PROCHAINE fin de partie,
+            // jamais celle-ci.
+            foreach (var row in previouslySickWarriors)
+            {
+                row.Warrior.Status = WarriorStatus.Active;
+                await _warbandService.SaveWarriorAsync(row.Warrior);
+            }
+
+            // Puits en échec (test d'Endurance, voir plus haut) - posé ici, APRÈS la boucle principale
+            // qui aurait sinon resynchronisé warrior.Status depuis row.Status (Actif/Mort uniquement) et
+            // écrasé Sick en Actif.
+            if (dialogViewModel.StatTestSickHero is { } newlySickHero)
+            {
+                newlySickHero.Warrior.Status = WarriorStatus.Sick;
+                await _warbandService.SaveWarriorAsync(newlySickHero.Warrior);
             }
 
             await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));

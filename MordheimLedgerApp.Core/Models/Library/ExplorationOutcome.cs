@@ -60,4 +60,16 @@ public class ExplorationOutcome
     /// Deliberately not localized like the rest of this Library catalog: short/secondary content, not
     /// primary UI text - add a NoteKey translation slot later if that turns out to matter.</summary>
     public string? Note { get; set; }
+
+    /// <summary>Only meaningful when the owning ExplorationResult.StatTestField is set - true = this
+    /// branch applies when the chosen Hero's roll succeeded (roll &lt;= stat), false = when it failed,
+    /// null = not a stat-test branch (every other Outcome in the table).</summary>
+    public bool? StatTestPass { get; set; }
+
+    /// <summary>True only for Puits' failure branch ("swallows tainted water and must miss the next
+    /// game through sickness") - the End of Game wizard sets the chosen Hero's Warrior.Status to
+    /// WarriorStatus.Sick when this branch resolves. False/default for every other branch, including
+    /// every other stat-test failure in the table (Taverne/Bâtiment Éventré's failures don't sicken
+    /// anyone, they just give less/nothing).</summary>
+    public bool CausesSickness { get; set; }
 }

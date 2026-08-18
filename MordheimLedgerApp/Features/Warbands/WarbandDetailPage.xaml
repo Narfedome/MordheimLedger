@@ -31,6 +31,14 @@
                                      invisible pour un Héros ou un groupe à 1 seul survivant. -->
                                 <Label Text="{Binding HeadCountDisplay}" TextColor="{DynamicResource AppTextMuted}"
                                        FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
+                                <!-- Pense-bête visuel seulement (voir WarriorRow.IsSick) - masqué tant
+                                     qu'il est Actif, s'efface tout seul à la fin de partie suivante,
+                                     rien à cliquer ici (contrairement à un ChipView catalogue). -->
+                                <Border Style="{StaticResource ChipBorderStyle}" IsVisible="{Binding IsSick}"
+                                        Padding="6,2" Stroke="{DynamicResource AppDanger}" VerticalOptions="Center">
+                                    <Label Text="{loc:Loc WarriorStatusSick}" FontSize="11" FontAttributes="Bold"
+                                           TextColor="{DynamicResource AppDanger}"/>
+                                </Border>
                             </HorizontalStackLayout>
                             <Label Grid.Column="1" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
                             <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"

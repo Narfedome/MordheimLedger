@@ -354,6 +354,39 @@
                                    IsVisible="{Binding ExplorationSubRollError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
 
+                        <!-- Test de caractéristique (Puits/Endurance, Taverne et Bâtiment Éventré/
+                             Commandement plus tard) : choisir un Héros, comparer son jet à sa stat -
+                             l'appli calcule elle-même Réussite/Échec (arithmétique sur des valeurs déjà
+                             connues, pas une décision aléatoire) et bascule vers la branche
+                             correspondante ci-dessous. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
+                            <Picker Title="{loc:Loc EndOfGameStatTestHeroPh}"
+                                    ItemsSource="{Binding StatTestEligibleHeroes}" ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding StatTestHero}"/>
+                            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding StatTestHero, Converter={StaticResource IsNotNullConverter}}">
+                                <Entry Grid.Column="0" Text="{Binding StatTestRoll}" Keyboard="Numeric"
+                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollStatTestCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding StatTestFieldLabel}"/>
+                                            <Span Text=" "/>
+                                            <Span Text="{Binding StatTestStatValue}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Grid>
+                            <Label Text="{Binding StatTestError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding StatTestError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
                         <!-- Branche résolue : montant d'or/pierres de sorcière éditable, ou objet trouvé
                              (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
                         <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">
@@ -374,7 +407,7 @@
                                  ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
                                  trancher au joueur. -->
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationItem}">
-                                <Label Grid.Column="0" Text="{Binding ResolvedExplorationOutcome.EquipmentItemName}"
+                                <Label Grid.Column="0" Text="{Binding ResolvedExplorationItemDisplayName}"
                                        FontAttributes="Bold" VerticalOptions="Center"/>
                                 <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
                                        VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
@@ -391,16 +424,24 @@
                                                               IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
                             </Grid>
 
+                            <!-- Même convention que l'Objet ci-dessus : une quantité fixe (ex. Puits :
+                                 toujours 1 pierre) s'affiche en lecture seule, sans jet (voir
+                                 ShowExplorationWyrdstoneRoll). -->
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationWyrdstone}">
                                 <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationWyrdstoneLabel}" VerticalOptions="Center"/>
-                                <Entry Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}" Keyboard="Numeric" WidthRequest="70">
+                                <Label Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}"
+                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding ShowExplorationWyrdstoneRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}" Keyboard="Numeric" WidthRequest="70"
+                                       IsVisible="{Binding ShowExplorationWyrdstoneRoll}">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
                                 </Entry>
                                 <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                               Command="{Binding AutoRollExplorationWyrdstoneCommand}"
-                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              IsVisible="{Binding ShowExplorationWyrdstoneRoll}"/>
                             </Grid>
 
                             <!-- Un seul des trois Grid ci-dessus est jamais visible à la fois
@@ -415,6 +456,17 @@
                             <Label IsVisible="{Binding IsExplorationNone}" Text="{Binding ExplorationNoteText}"
                                    FontSize="12" FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"/>
                         </VerticalStackLayout>
+
+                        <!-- Objet bonus sur le même dé que l'or (ex. Boutique : "sur un 1, en plus, un
+                             Porte-bonheur") - voir BonusItemOutcome, déduit d'ExplorationGoldAmount sans
+                             second jet. Indépendant du bloc ResolvedExplorationOutcome ci-dessus
+                             (peut s'afficher en plus de l'or, jamais à la place). Toujours un seul
+                             exemplaire (même convention que ShowExplorationItemQuantityRoll), pas de
+                             champ ni de dé ici non plus. -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusItem}">
+                            <Label Grid.Column="0" Text="{Binding BonusItemDisplayName}" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

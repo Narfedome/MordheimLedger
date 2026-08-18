@@ -14,4 +14,5 @@ public class ExplorationResultEntity
     public string DescriptionKey { get; set; } = string.Empty;
     public ContentSource Source { get; set; }
     public bool RollsIndependently { get; set; }
+    public ExplorationStatField? StatTestField { get; set; }
 }

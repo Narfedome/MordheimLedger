@@ -165,12 +165,18 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.True(hiddenTreasure.RollsIndependently);
         Assert.Equal(8, hiddenTreasure.Outcomes.Count);
 
-        // Well (1 1): a Toughness test gates a single bonus wyrdstone shard - Auto (no sub-roll), the
-        // player applies it manually once they've made the test at the table.
+        // Well (1 1): a Toughness test gates one bonus wyrdstone shard (pass) against sickness (fail) -
+        // both branches Auto (no sub-roll), the wizard picks Pass/Fail itself by comparing the chosen
+        // Hero's roll to their Toughness (see EndOfGameDialogViewModel.ResolveStatTest).
         var well = results.Single(r => r.DiceCount == 2 && r.Value == 1);
-        var wellOutcome = Assert.Single(well.Outcomes);
-        Assert.Equal(ExplorationOutcomeKind.Wyrdstone, wellOutcome.Kind);
-        Assert.Null(wellOutcome.SubRollMin);
+        Assert.Equal(ExplorationStatField.Toughness, well.StatTestField);
+        Assert.Equal(2, well.Outcomes.Count);
+        var wellPass = well.Outcomes.Single(o => o.StatTestPass == true);
+        Assert.Equal(ExplorationOutcomeKind.Wyrdstone, wellPass.Kind);
+        Assert.Null(wellPass.SubRollMin);
+        var wellFail = well.Outcomes.Single(o => o.StatTestPass == false);
+        Assert.Equal(ExplorationOutcomeKind.None, wellFail.Kind);
+        Assert.True(wellFail.CausesSickness);
         Assert.False(string.IsNullOrWhiteSpace(well.Description));
 
         // Catacombs (4 6): a purely tactical/battlefield effect (no gold/item/wyrdstone anywhere in the

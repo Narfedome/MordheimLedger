@@ -314,6 +314,12 @@ public class ExplorationResultSeedData
     public LocalizedText Name { get; set; } = new();
     public LocalizedText Description { get; set; } = new();
     public bool RollsIndependently { get; set; }
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationStatField member name (e.g.
+    /// "Toughness") - null (the vast majority) for entries with no stat test. See
+    /// Models.Library.ExplorationResult.StatTestField.</summary>
+    public string? StatTestField { get; set; }
+
     public List<ExplorationOutcomeSeedData> Outcomes { get; set; } = new();
 }
 
@@ -332,6 +338,8 @@ public class ExplorationOutcomeSeedData
     public string? ItemQuantityFormula { get; set; }
     public string? MaterialRuleName { get; set; }
     public string? Note { get; set; }
+    public bool? StatTestPass { get; set; }
+    public bool CausesSickness { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

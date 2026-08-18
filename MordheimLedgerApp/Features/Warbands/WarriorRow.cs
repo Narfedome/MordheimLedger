@@ -66,6 +66,12 @@ public partial class WarriorRow : ObservableObject
     /// buttons) - Dead is only ever reached via the End of Game wizard, see WarriorStatus.</summary>
     public bool IsDead => Warrior.Status == WarriorStatus.Dead;
 
+    /// <summary>Manqué la partie précédente pour cause de maladie (ex. le Puits de la table
+    /// d'Exploration, échec du test d'Endurance) - juste un pense-bête visuel, effacé automatiquement
+    /// au prochain Fin de Partie (voir WarbandDetailViewModel.EndOfGame), pas un statut permanent comme
+    /// IsDead.</summary>
+    public bool IsSick => Warrior.Status == WarriorStatus.Sick;
+
     /// <summary>"× 3" next to the name for a Henchman group with more than one living model - empty for
     /// a Hero (always HeadCount 1) or a lone Henchman, see Warrior.HeadCount.</summary>
     public string HeadCountDisplay => !Warrior.IsHero && Warrior.HeadCount > 1 ? $"× {Warrior.HeadCount}" : string.Empty;

@@ -46,5 +46,13 @@ public class ExplorationResult
     /// there's no die involved either way, left false/default.</summary>
     public bool RollsIndependently { get; set; }
 
+    /// <summary>Non-null = this result requires choosing a Hero and comparing a D6 roll against this
+    /// stat (e.g. Puits/Toughness, Taverne and Bâtiment Éventré/Leadership) - the wizard shows a Hero
+    /// picker + roll field instead of (or alongside) the usual sub-roll, computes pass/fail itself
+    /// (comparing an already-known stat to an already-entered roll is arithmetic, not a decision made
+    /// for the player - see EndOfGameDialogViewModel), and picks the Outcome whose StatTestPass matches.
+    /// Null = no stat test, the vast majority of entries.</summary>
+    public ExplorationStatField? StatTestField { get; set; }
+
     public List<ExplorationOutcome> Outcomes { get; set; } = new();
 }

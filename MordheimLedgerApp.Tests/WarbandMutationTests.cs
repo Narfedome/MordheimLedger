@@ -118,7 +118,10 @@ public class WarbandMutationTests : IDisposable
         // SeedExplorationResultsAsync (hors du garde-fou normal "catalogue vide") insère un doublon pour
         // "Corpse" (2,3) avec ses propres clés de traduction jamais enregistrées dans TranslationEntity -
         // exactement le symptôme observé (nom/description affichant la clé brute au lieu du texte
-        // résolu, le wizard tombant sur cette copie cassée via FirstOrDefault).
+        // résolu, le wizard tombant sur cette copie cassée via FirstOrDefault). Depuis le 2026-08-18,
+        // ResyncExplorationResultsAsync (remplace l'ancien backfill ciblé sur ce seul symptôme) revide et
+        // reseede tout le catalogue à chaque lancement plutôt que de juste dédupliquer - ce doublon
+        // disparaît donc comme n'importe quel autre état périmé, plus seulement le cas des clés cassées.
         await _db.Initialization;
 
         var brokenDuplicate = new ExplorationResultEntity

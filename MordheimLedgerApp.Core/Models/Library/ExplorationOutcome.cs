@@ -59,6 +59,13 @@ public class ExplorationOutcome
     /// primary EquipmentItemName.</summary>
     public string? SecondaryEquipmentItemName { get; set; }
 
+    /// <summary>The player's choice between EquipmentItemName and THIS item instead - only one is ever
+    /// granted (an "OR", unlike SecondaryEquipmentItemName's "AND"), e.g. Armourer 1-2: "D3 Shields or
+    /// Bucklers (choose which)". Null for every other branch. Shares ItemQuantityFormula/MaterialRuleName
+    /// with EquipmentItemName - the choice only picks which catalog item, not a different quantity or
+    /// material.</summary>
+    public string? AlternativeEquipmentItemName { get; set; }
+
     /// <summary>Short disambiguating label shown alongside this branch - two uses: (1) a rare fallback
     /// for a branch that reads as Gold/Item in the rulebook but can't be wired up that way yet (Kind
     /// stays None, e.g. "Elven Cloak" for an item missing from the Trading Post catalog); (2) a context

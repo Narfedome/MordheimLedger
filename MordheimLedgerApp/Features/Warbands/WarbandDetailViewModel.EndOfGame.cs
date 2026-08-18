@@ -119,10 +119,14 @@ public partial class WarbandDetailViewModel
         // de la formule de quantité de l'objet principal (voir ExplorationOutcome.
         // SecondaryEquipmentItemName). Les deux restent des objets réels du catalogue (pas un bundle
         // inventé) pour rester équipables/vendables séparément - même MaterialRuleName pour les deux,
-        // trouvés ensemble.
-        async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, int quantity)
+        // trouvés ensemble. primaryItemName vient de dialogViewModel.ChosenExplorationItemName (pas
+        // directement itemOutcome.EquipmentItemName) pour tenir compte d'un éventuel choix du joueur
+        // entre deux objets (ex. Armurerie 1-2 : Bouclier OU Rondache, voir
+        // ExplorationOutcome.AlternativeEquipmentItemName) - sans effet sur SecondaryEquipmentItemName,
+        // qui n'est jamais soumis à un choix (toujours "ET", jamais "OU").
+        async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, string? primaryItemName, int quantity)
         {
-            if (itemOutcome.EquipmentItemName is { } primaryName)
+            if (primaryItemName is { } primaryName)
                 await AddOneItemToInventoryAsync(primaryName, quantity, itemOutcome.MaterialRuleName);
             if (itemOutcome.SecondaryEquipmentItemName is { } secondaryName)
                 await AddOneItemToInventoryAsync(secondaryName, 1, itemOutcome.MaterialRuleName);
@@ -140,7 +144,7 @@ public partial class WarbandDetailViewModel
             else if (outcome.Kind == ExplorationOutcomeKind.Item
                 && int.TryParse(dialogViewModel.ExplorationItemQuantity, out var quantity))
             {
-                await AddExplorationItemToInventoryAsync(outcome, quantity);
+                await AddExplorationItemToInventoryAsync(outcome, dialogViewModel.ChosenExplorationItemName, quantity);
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
                 && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)
@@ -165,7 +169,7 @@ public partial class WarbandDetailViewModel
         }
 
         if (dialogViewModel.BonusItemOutcome is { } bonusOutcome)
-            await AddExplorationItemToInventoryAsync(bonusOutcome, 1);
+            await AddExplorationItemToInventoryAsync(bonusOutcome, bonusOutcome.EquipmentItemName, 1);
     }
 
     private async Task ApplyWarriorOutcomesAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)

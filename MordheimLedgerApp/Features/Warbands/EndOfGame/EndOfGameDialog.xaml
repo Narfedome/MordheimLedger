@@ -407,26 +407,69 @@
                                  ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
                                  trancher au joueur. -->
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationItem}">
-                                <!-- ChipView tapable (icône de catégorie + popup détail), même langage
-                                     d'interaction que toute autre référence Équipement dans l'app -
-                                     ResolvedExplorationSecondaryItem s'affiche en plus si présent (ex.
-                                     Charrette Renversée : Épée + Dague, voir ExplorationOutcome.
-                                     SecondaryEquipmentItemName). -->
-                                <HorizontalStackLayout Grid.Column="0" Spacing="0">
-                                    <components:ChipView Item="{Binding ResolvedExplorationItem}"
-                                                          IconGlyph="{Binding ResolvedExplorationItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                          IconFontFamily="RpgAwesome"
-                                                          Command="{Binding ShowExplorationItemDetailCommand}"/>
-                                    <components:ChipView Item="{Binding ResolvedExplorationSecondaryItem}"
-                                                          IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}"
-                                                          IconGlyph="{Binding ResolvedExplorationSecondaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                          IconFontFamily="RpgAwesome"
-                                                          Command="{Binding ShowExplorationItemDetailCommand}"/>
-                                </HorizontalStackLayout>
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <!-- Choix du joueur entre 2 objets (ex. Armurerie 1-2 : Bouclier OU
+                                         Rondache, voir ExplorationOutcome.AlternativeEquipmentItemName) -
+                                         invisible pour toute autre branche Item. 2 RadioButton plutôt
+                                         qu'un Picker : les deux options tiennent affichées d'un coup,
+                                         pas de tap "pour ouvrir" en plus pour un choix binaire.
+                                         RadioButtonGroup.SelectedValue lié directement au nom ANGLAIS du
+                                         catalogue (Value de chaque RadioButton), pas un index - voir
+                                         EndOfGameDialogViewModel.SelectedExplorationItemName. Chaque
+                                         option affiche le vrai ChipView tapable (icône + popup détail) en
+                                         FRÈRE du RadioButton, jamais dans RadioButton.Content : un View
+                                         arbitraire en Content ne s'affichait pas côté Windows/WinUI
+                                         (repéré le 2026-08-18 - cercle vide, contenu flottant ailleurs à
+                                         l'écran) ; en frère plutôt qu'imbriqué, le tap du ChipView (popup
+                                         détail) et celui du RadioButton (sélection) ne se marchent pas
+                                         dessus, chacun sur sa propre cible. -->
+                                    <VerticalStackLayout Spacing="0" IsVisible="{Binding HasExplorationItemChoice}"
+                                                          RadioButtonGroup.GroupName="ExplorationItemChoice"
+                                                          RadioButtonGroup.SelectedValue="{Binding SelectedExplorationItemName, Mode=TwoWay}">
+                                        <HorizontalStackLayout Spacing="6">
+                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.EquipmentItemName}"/>
+                                            <components:ChipView Item="{Binding ExplorationItemChoicePrimaryItem}"
+                                                                  IconGlyph="{Binding ExplorationItemChoicePrimaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.AlternativeEquipmentItemName}"/>
+                                            <components:ChipView Item="{Binding ExplorationItemChoiceAlternativeItem}"
+                                                                  IconGlyph="{Binding ExplorationItemChoiceAlternativeItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    <!-- ChipView tapable (icône de catégorie + popup détail), même langage
+                                         d'interaction que toute autre référence Équipement dans l'app -
+                                         ResolvedExplorationSecondaryItem s'affiche en plus si présent (ex.
+                                         Charrette Renversée : Épée + Dague, voir ExplorationOutcome.
+                                         SecondaryEquipmentItemName - un "ET", jamais en même temps qu'un
+                                         choix "OU"). Masqué pour une branche à choix : les 2 ChipView
+                                         ci-dessus montrent déjà chaque option, cette ligne ferait doublon
+                                         avec celle du choix retenu. -->
+                                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding HasExplorationItemChoice, Converter={StaticResource InverseBoolConverter}}">
+                                        <components:ChipView Item="{Binding ResolvedExplorationItem}"
+                                                              IconGlyph="{Binding ResolvedExplorationItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                        <components:ChipView Item="{Binding ResolvedExplorationSecondaryItem}"
+                                                              IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}"
+                                                              IconGlyph="{Binding ResolvedExplorationSecondaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                                <!-- VerticalOptions="Center" explicite sur les 3 : la colonne 0 grandit
+                                     désormais (2 RadioButton + chip) pour une branche à choix, la
+                                     colonne "jet" doit rester centrée sur la hauteur de la ligne plutôt
+                                     que collée en haut. -->
                                 <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
                                        VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
                                        IsVisible="{Binding ShowExplorationItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
                                 <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                       VerticalOptions="Center"
                                        IsVisible="{Binding ShowExplorationItemQuantityRoll}">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
@@ -435,6 +478,7 @@
                                 <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                               Command="{Binding AutoRollExplorationItemQuantityCommand}"
                                                               Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              VerticalOptions="Center"
                                                               IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
                             </Grid>
 

@@ -645,6 +645,7 @@ public class AppDatabase
                     ItemQuantityFormula = outcome.ItemQuantityFormula,
                     MaterialRuleName = outcome.MaterialRuleName,
                     SecondaryEquipmentItemName = outcome.SecondaryEquipmentItemName,
+                    AlternativeEquipmentItemName = outcome.AlternativeEquipmentItemName,
                     Note = outcome.Note,
                     StatTestPass = outcome.StatTestPass,
                     CausesSickness = outcome.CausesSickness

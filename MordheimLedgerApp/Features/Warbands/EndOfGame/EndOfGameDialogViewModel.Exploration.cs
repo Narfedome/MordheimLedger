@@ -76,6 +76,10 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
     [NotifyPropertyChangedFor(nameof(ResolvedExplorationItem))]
     [NotifyPropertyChangedFor(nameof(ResolvedExplorationSecondaryItem))]
+    [NotifyPropertyChangedFor(nameof(HasExplorationItemChoice))]
+    [NotifyPropertyChangedFor(nameof(ExplorationItemChoicePrimaryItem))]
+    [NotifyPropertyChangedFor(nameof(ExplorationItemChoiceAlternativeItem))]
+    [NotifyPropertyChangedFor(nameof(ChosenExplorationItemName))]
     [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
     [NotifyPropertyChangedFor(nameof(BonusItem))]
@@ -87,15 +91,54 @@ public partial class EndOfGameDialogViewModel
     /// NameDisplay/Name "Épée (O)", exactement le même rendu qu'un objet en Gromril/Ithilmar dans
     /// l'inventaire) plutôt qu'un simple EquipmentItem qui perdrait le matériau à l'affichage. La carte
     /// s'affiche en ChipView tapable (icône de catégorie + popup détail via ShowExplorationItemDetail),
-    /// même langage d'interaction que toute autre référence Équipement dans l'app.</summary>
+    /// même langage d'interaction que toute autre référence Équipement dans l'app. Passe par
+    /// ChosenExplorationItemName plutôt que directement EquipmentItemName pour tenir compte d'un éventuel
+    /// choix du joueur (voir HasExplorationItemChoice).</summary>
     public WarbandEquipment? ResolvedExplorationItem =>
-        BuildDisplayItem(ResolvedExplorationOutcome?.EquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+        BuildDisplayItem(ChosenExplorationItemName, ResolvedExplorationOutcome?.MaterialRuleName);
 
     /// <summary>Second objet du même branch (ex. Charrette Renversée : Épée + Dague, voir
     /// ExplorationOutcome.SecondaryEquipmentItemName) - null pour tout le reste de la table. Même
     /// MaterialRuleName que ResolvedExplorationItem (un seul matériau pour les deux, trouvés ensemble).</summary>
     public WarbandEquipment? ResolvedExplorationSecondaryItem =>
         BuildDisplayItem(ResolvedExplorationOutcome?.SecondaryEquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+
+    /// <summary>Vrai seulement pour une branche à choix (ex. Armurerie 1-2 : "D3 Boucliers ou Rondaches,
+    /// au choix") - AlternativeEquipmentItemName est alors non-null, et le XAML remplace le ChipView unique
+    /// par 2 RadioButton (plus direct qu'un Picker pour un choix binaire - revenu sur ce point le
+    /// 2026-08-18, un Picker impose un tap "pour ouvrir" en plus alors que les deux options tiennent
+    /// très bien affichées d'un coup).</summary>
+    public bool HasExplorationItemChoice => ResolvedExplorationOutcome?.AlternativeEquipmentItemName is not null;
+
+    /// <summary>Objet "principal" (EquipmentItemName) affiché à côté du premier RadioButton - même
+    /// WarbandEquipment jetable que ResolvedExplorationItem/BuildDisplayItem (icône de catégorie + nom),
+    /// pour que chaque option de choix se présente comme n'importe quel autre chip équipement de l'app,
+    /// pas un simple Label texte. Rendu comme icône+Label FRÈRE du RadioButton dans le XAML plutôt que
+    /// dans RadioButton.Content lui-même : un View arbitraire posé en Content ne s'affichait pas côté
+    /// Windows/WinUI (repéré le 2026-08-18 - le RadioButton restait vide, le contenu flottait ailleurs
+    /// sur l'écran), le ControlTemplate natif de la plateforme n'attend visiblement qu'une chaîne.</summary>
+    public WarbandEquipment? ExplorationItemChoicePrimaryItem =>
+        BuildDisplayItem(ResolvedExplorationOutcome?.EquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+
+    /// <summary>Même chose pour AlternativeEquipmentItemName, le second RadioButton.</summary>
+    public WarbandEquipment? ExplorationItemChoiceAlternativeItem =>
+        BuildDisplayItem(ResolvedExplorationOutcome?.AlternativeEquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+
+    /// <summary>Nom ANGLAIS de l'objet coché - lié à RadioButtonGroup.SelectedValue (voir le XAML), pas
+    /// un index : chaque RadioButton a directement EquipmentItemName/AlternativeEquipmentItemName comme
+    /// Value, donc cette propriété EST déjà le nom à utiliser, aucune traduction supplémentaire requise
+    /// côté ChosenExplorationItemName. EquipmentItemName (l'objet "principal") par défaut, jamais forcé à
+    /// un choix actif (même logique que SelectedResult à l'étape Résultat).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ResolvedExplorationItem))]
+    private string? selectedExplorationItemName;
+
+    /// <summary>L'EquipmentItemName réellement retenu une fois le choix du joueur pris en compte (voir
+    /// HasExplorationItemChoice) - c'est ce nom, pas ExplorationOutcome.EquipmentItemName brut, que
+    /// WarbandDetailViewModel.EndOfGame doit ajouter à l'inventaire.</summary>
+    public string? ChosenExplorationItemName => HasExplorationItemChoice
+        ? SelectedExplorationItemName
+        : ResolvedExplorationOutcome?.EquipmentItemName;
 
     private WarbandEquipment? BuildDisplayItem(string? itemName, string? materialRuleName)
     {
@@ -346,6 +389,7 @@ public partial class EndOfGameDialogViewModel
     private void ApplyResolvedOutcome(ExplorationOutcome outcome)
     {
         ResolvedExplorationOutcome = outcome;
+        SelectedExplorationItemName = outcome.EquipmentItemName;
         if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is { } itemFormula
             && !itemFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
             ExplorationItemQuantity = itemFormula;

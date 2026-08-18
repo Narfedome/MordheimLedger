@@ -278,6 +278,7 @@ public static class EntityMapping
         ItemQuantityFormula = e.ItemQuantityFormula,
         MaterialRuleName = e.MaterialRuleName,
         SecondaryEquipmentItemName = e.SecondaryEquipmentItemName,
+        AlternativeEquipmentItemName = e.AlternativeEquipmentItemName,
         Note = e.Note,
         StatTestPass = e.StatTestPass,
         CausesSickness = e.CausesSickness
@@ -295,6 +296,7 @@ public static class EntityMapping
         ItemQuantityFormula = m.ItemQuantityFormula,
         MaterialRuleName = m.MaterialRuleName,
         SecondaryEquipmentItemName = m.SecondaryEquipmentItemName,
+        AlternativeEquipmentItemName = m.AlternativeEquipmentItemName,
         Note = m.Note,
         StatTestPass = m.StatTestPass,
         CausesSickness = m.CausesSickness

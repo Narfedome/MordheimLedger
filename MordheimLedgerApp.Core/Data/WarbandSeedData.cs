@@ -342,6 +342,7 @@ public class ExplorationOutcomeSeedData
     public string? ItemQuantityFormula { get; set; }
     public string? MaterialRuleName { get; set; }
     public string? SecondaryEquipmentItemName { get; set; }
+    public string? AlternativeEquipmentItemName { get; set; }
     public string? Note { get; set; }
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }

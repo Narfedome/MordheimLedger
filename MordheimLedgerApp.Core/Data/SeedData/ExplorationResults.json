@@ -228,11 +228,11 @@
     "name": { "en": "Armourer", "fr": "Armurerie" },
     "description": {
       "en": "A breastplate hanging from a pole drew your attention to this place. The forge has been smashed, but rooting through the soot you find various half-finished items. Roll a D6: 1-2 D3 Shields or Bucklers (choose which), 3 D3 Helmets, 4 D3 Suits of Light Armour, 5 D3 Suits of Heavy Armour, 6 Suit of Ithilmar Armour.",
-      "fr": "Un plastron accroché à un poteau a attiré votre attention sur cet endroit. La forge est détruite, mais en fouillant dans la suie vous trouvez divers objets à moitié terminés. Lancez un D6 : 1-2 D3 Boucliers ou Écus (au choix), 3 D3 Casques, 4 D3 Armures légères complètes, 5 D3 Armures lourdes complètes, 6 Armure d'Ithilmar complète."
+      "fr": "Un plastron accroché à un poteau a attiré votre attention sur cet endroit. La forge est détruite, mais en fouillant dans la suie vous trouvez divers objets à moitié terminés. Lancez un D6 : 1-2 D3 Boucliers ou Rondaches (au choix), 3 D3 Casques, 4 D3 Armures légères complètes, 5 D3 Armures lourdes complètes, 6 Armure d'Ithilmar complète."
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Shield", "itemQuantityFormula": "D3" },
+      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Shield", "alternativeEquipmentItemName": "Buckler", "itemQuantityFormula": "D3" },
       { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Helmet", "itemQuantityFormula": "D3" },
       { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Light Armour", "itemQuantityFormula": "D3" },
       { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Heavy Armour", "itemQuantityFormula": "D3" },

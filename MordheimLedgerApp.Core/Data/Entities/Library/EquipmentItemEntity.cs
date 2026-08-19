@@ -27,4 +27,5 @@ public class EquipmentItemEntity
     public int? Initiative { get; set; }
     public int? Attacks { get; set; }
     public int? Leadership { get; set; }
+    public SkillCategory? GrantsSkillCategory { get; set; }
 }

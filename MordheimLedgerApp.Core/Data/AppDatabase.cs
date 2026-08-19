@@ -546,7 +546,8 @@ public class AppDatabase
                 Wounds = eq.Wounds,
                 Initiative = eq.Initiative,
                 Attacks = eq.Attacks,
-                Leadership = eq.Leadership
+                Leadership = eq.Leadership,
+                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);

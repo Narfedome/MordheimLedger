@@ -34,12 +34,15 @@ public partial class EndOfGameDialogViewModel
     // compétence existante de la Bibliothèque, comme le "+" Compétences de la carte guerrier -
     // rattachée au guerrier par WarbandDetailViewModel.EndOfGame à l'enregistrement du wizard, pas
     // tout de suite (même logique différée que les autres résultats de cette étape).
+    // SkillEligibility.EffectiveAllowedCategories plutôt que Warrior.AllowedSkillCategories brut :
+    // certains objets trouvés élargissent les listes accessibles tant qu'ils sont portés (ex. Carnet de
+    // l'Alchimiste -> Érudition, voir EquipmentItem.GrantsSkillCategory).
     [RelayCommand]
     private async Task PickAdvanceSkill(AdvanceRollEntry entry)
     {
         var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry));
         var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
-            row.Warrior.AllowedSkillCategories);
+            SkillEligibility.EffectiveAllowedCategories(row.Warrior));
         foreach (var skill in skills)
             entry.SelectedSkills.Add(skill);
     }

@@ -198,6 +198,10 @@ public class EquipmentSeedData
     public int? Initiative { get; set; }
     public int? Attacks { get; set; }
     public int? Leadership { get; set; }
+
+    /// <summary>Matches a MordheimLedgerApp.Core.Models.Library.SkillCategory member name - see
+    /// EquipmentItem.GrantsSkillCategory. Null for almost every item.</summary>
+    public string? GrantsSkillCategory { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames

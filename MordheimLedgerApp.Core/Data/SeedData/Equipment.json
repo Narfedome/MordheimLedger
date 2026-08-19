@@ -1939,6 +1939,32 @@
   },
   {
     "name": {
+      "en": "Alchemist's Notebook",
+      "fr": "Carnet de l'Alchimiste"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 20,
+    "rarity": 11,
+    "grantsSkillCategory": "Academic",
+    "description": {
+      "en": "A battered old notebook filled with an alchemist's scrawled research. One of your Heroes may study it: he may choose from Academic skills whenever he gains a new skill, in addition to those normally available to him.",
+      "fr": "Un vieux carnet abîmé rempli des recherches griffonnées d'un alchimiste. Un de vos Héros peut l'étudier : il peut désormais choisir des compétences d'Érudition à chaque nouvelle compétence, en plus de celles qui lui sont normalement accessibles."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Alchemical Study",
+          "fr": "Étude Alchimique"
+        },
+        "description": {
+          "en": "The Hero carrying this notebook may choose from Academic skills whenever he gains a new skill, in addition to those normally available to him.",
+          "fr": "Le Héros qui porte ce carnet peut choisir des compétences d'Érudition à chaque nouvelle compétence, en plus de celles qui lui sont normalement accessibles."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
       "en": "Healing Herbs",
       "fr": "Herbes Curatives"
     },

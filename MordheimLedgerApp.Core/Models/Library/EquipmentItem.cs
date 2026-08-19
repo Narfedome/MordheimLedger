@@ -73,4 +73,12 @@ public class EquipmentItem
     public int? Initiative { get; set; }
     public int? Attacks { get; set; }
     public int? Leadership { get; set; }
+
+    /// <summary>Null for almost every item. Non-null marks an item that permanently expands its
+    /// carrier's Advance-roll skill choices - e.g. the Alchemist's Notebook grants Academic on top of
+    /// whatever skill lists the Warrior already has. Computed live from whichever items the Warrior
+    /// currently carries (see Core.Rules.SkillEligibility.EffectiveAllowedCategories) rather than baked
+    /// into Warrior.AllowedSkillCategories at find time - same "no rules engine V1" stance as the rest
+    /// of the Library, just enough logic to resolve which skill lists are on offer, nothing else.</summary>
+    public SkillCategory? GrantsSkillCategory { get; set; }
 }

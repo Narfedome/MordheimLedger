@@ -358,7 +358,8 @@ public static class EntityMapping
         Wounds = e.Wounds,
         Initiative = e.Initiative,
         Attacks = e.Attacks,
-        Leadership = e.Leadership
+        Leadership = e.Leadership,
+        GrantsSkillCategory = e.GrantsSkillCategory
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -448,7 +449,8 @@ public static class EntityMapping
         Wounds = m.Wounds,
         Initiative = m.Initiative,
         Attacks = m.Attacks,
-        Leadership = m.Leadership
+        Leadership = m.Leadership,
+        GrantsSkillCategory = m.GrantsSkillCategory
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>

@@ -52,11 +52,12 @@ public class ExplorationOutcome
     /// material.</summary>
     public string? MaterialRuleName { get; set; }
 
-    /// <summary>A second, independent EquipmentItemName granted by the same branch alongside the first
-    /// (e.g. Overturned Cart 5-6: "a jewelled sword AND dagger") - null for every other branch. Kept as
-    /// two real catalog items rather than one invented bundle SKU so each can be equipped/sold
-    /// separately; always found in quantity 1, unlike ItemQuantityFormula which only governs the
-    /// primary EquipmentItemName.</summary>
+    /// <summary>A second item granted by the same branch alongside the first, independent of Kind (e.g.
+    /// Overturned Cart 5-6, Kind.Item: "a jewelled sword AND dagger"; Alchemist's Laboratory, Kind.Gold:
+    /// gold AND an Alchemist's Notebook - see EquipmentItem.GrantsSkillCategory) - null for every other
+    /// branch. Kept as a real catalog item rather than an invented bundle SKU so it can be
+    /// equipped/sold separately; always found in quantity 1, unlike ItemQuantityFormula which only
+    /// governs the primary EquipmentItemName.</summary>
     public string? SecondaryEquipmentItemName { get; set; }
 
     /// <summary>The player's choice between EquipmentItemName and THIS item instead - only one is ever

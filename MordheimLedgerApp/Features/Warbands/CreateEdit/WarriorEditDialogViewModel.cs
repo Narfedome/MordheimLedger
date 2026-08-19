@@ -244,10 +244,14 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private Task ShowEquipmentDetail(WarriorEquipment carried) =>
         _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule);
 
+    // SkillEligibility.EffectiveAllowedCategories plutôt que Item.AllowedSkillCategories brut : certains
+    // objets déjà portés élargissent les listes accessibles (ex. Carnet de l'Alchimiste -> Érudition,
+    // voir EquipmentItem.GrantsSkillCategory) - même besoin que PickAdvanceSkill du wizard Fin de
+    // Partie, ce guerrier peut tout aussi bien gagner une compétence ici, hors wizard.
     [RelayCommand]
     private async Task AddSkill()
     {
-        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId, Item.AllowedSkillCategories);
+        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId, SkillEligibility.EffectiveAllowedCategories(Item));
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);

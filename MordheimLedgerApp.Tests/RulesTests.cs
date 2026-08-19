@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
@@ -607,5 +608,37 @@ public class RulesTests
         var goldOutcome = ExplorationOutcomeResolver.ResolveSubRollOutcome(corpse, 1); // picks the 1-2 Gold branch
         Assert.Equal(ExplorationOutcomeKind.Gold, goldOutcome?.Kind);
         Assert.Null(ExplorationOutcomeResolver.ResolveBonusItemOutcome(corpse, goldOutcome, roll: 4));
+    }
+
+    // --- SkillEligibility -----------------------------------------------------------------------
+
+    private static Warrior WarriorWith(List<SkillCategory> allowedCategories, params EquipmentItem[] carriedItems) =>
+        new()
+        {
+            AllowedSkillCategories = allowedCategories,
+            Equipment = carriedItems.Select(item => new WarriorEquipment { Item = item }).ToList()
+        };
+
+    [Fact]
+    public void SkillEligibility_NoGrantingItem_ReturnsWarriorsOwnCategoriesOnly()
+    {
+        var warrior = WarriorWith([SkillCategory.Combat, SkillCategory.Strength], new EquipmentItem { Id = 1 });
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Strength], SkillEligibility.EffectiveAllowedCategories(warrior));
+    }
+
+    [Fact]
+    public void SkillEligibility_CarriedNotebook_AddsAcademic()
+    {
+        var notebook = new EquipmentItem { Id = 1, GrantsSkillCategory = SkillCategory.Academic };
+        var warrior = WarriorWith([SkillCategory.Combat], notebook);
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Academic], SkillEligibility.EffectiveAllowedCategories(warrior));
+    }
+
+    [Fact]
+    public void SkillEligibility_AlreadyHasGrantedCategory_NoDuplicate()
+    {
+        var notebook = new EquipmentItem { Id = 1, GrantsSkillCategory = SkillCategory.Academic };
+        var warrior = WarriorWith([SkillCategory.Academic], notebook);
+        Assert.Equal([SkillCategory.Academic], SkillEligibility.EffectiveAllowedCategories(warrior));
     }
 }

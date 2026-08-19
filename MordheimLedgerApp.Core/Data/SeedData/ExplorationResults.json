@@ -283,11 +283,11 @@
     "name": { "en": "Alchemist's Laboratory", "fr": "Laboratoire de l'Alchimiste" },
     "description": {
       "en": "A narrow stairway leads down to a crypt-like dwelling that was once an alchemist's workshop. In the ruins you find loot worth 3D6 gc and a battered old notebook. One of your Heroes may study the Alchemist's notebook: he may choose from Academic skills whenever he gains a new skill, in addition to those normally available to him.",
-      "fr": "Un escalier étroit descend vers une demeure semblable à une crypte, autrefois l'atelier d'un alchimiste. Dans les ruines vous trouvez un butin d'une valeur de 3D6 CG et un vieux carnet abîmé. Un de vos Héros peut étudier le carnet de l'alchimiste : il peut désormais choisir des compétences d'Érudition à chaque nouvelle compétence, en plus de celles qui lui sont normalement accessibles."
+      "fr": "Vous trouvez 3D6 CG dans les ruines, ainsi qu'un vieux calepin. L'un de vos Héros peut l'étudier : lorsqu'un jet de progression lui fait gagner une nouvelle compétence, le savoir qu'il y trouve lui permet de choisir dans la liste de compétences d'Érudition en plus de ses listes habituelles."
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "secondaryEquipmentItemName": "Alchemist's Notebook" }
     ]
   },
   {

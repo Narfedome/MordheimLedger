@@ -114,24 +114,6 @@ public partial class WarbandDetailViewModel
             sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
         }
 
-        // Charrette Renversée (5-6) est le seul cas où un branch Item donne DEUX objets distincts d'un
-        // coup ("a jewelled sword AND dagger") - toujours en un seul exemplaire chacun, indépendamment
-        // de la formule de quantité de l'objet principal (voir ExplorationOutcome.
-        // SecondaryEquipmentItemName). Les deux restent des objets réels du catalogue (pas un bundle
-        // inventé) pour rester équipables/vendables séparément - même MaterialRuleName pour les deux,
-        // trouvés ensemble. primaryItemName vient de dialogViewModel.ChosenExplorationItemName (pas
-        // directement itemOutcome.EquipmentItemName) pour tenir compte d'un éventuel choix du joueur
-        // entre deux objets (ex. Armurerie 1-2 : Bouclier OU Rondache, voir
-        // ExplorationOutcome.AlternativeEquipmentItemName) - sans effet sur SecondaryEquipmentItemName,
-        // qui n'est jamais soumis à un choix (toujours "ET", jamais "OU").
-        async Task AddExplorationItemToInventoryAsync(ExplorationOutcome itemOutcome, string? primaryItemName, int quantity)
-        {
-            if (primaryItemName is { } primaryName)
-                await AddOneItemToInventoryAsync(primaryName, quantity, itemOutcome.MaterialRuleName);
-            if (itemOutcome.SecondaryEquipmentItemName is { } secondaryName)
-                await AddOneItemToInventoryAsync(secondaryName, 1, itemOutcome.MaterialRuleName);
-        }
-
         if (dialogViewModel.ResolvedExplorationOutcome is { } outcome)
         {
             if (outcome.Kind == ExplorationOutcomeKind.Gold
@@ -142,9 +124,13 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Item
+                && dialogViewModel.ChosenExplorationItemName is { } primaryName
                 && int.TryParse(dialogViewModel.ExplorationItemQuantity, out var quantity))
             {
-                await AddExplorationItemToInventoryAsync(outcome, dialogViewModel.ChosenExplorationItemName, quantity);
+                // ChosenExplorationItemName plutôt que outcome.EquipmentItemName brut : tient compte d'un
+                // éventuel choix du joueur entre deux objets (ex. Armurerie 1-2 : Bouclier OU Rondache,
+                // voir ExplorationOutcome.AlternativeEquipmentItemName).
+                await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleName);
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
                 && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)
@@ -166,10 +152,22 @@ public partial class WarbandDetailViewModel
             {
                 sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
             }
+
+            // Second objet du même branch, INDÉPENDANT du Kind ci-dessus (ex. Charrette Renversée, Kind
+            // Item : Épée + Dague ornées ; Laboratoire de l'Alchimiste, Kind Gold : Or + Carnet de
+            // l'Alchimiste) - toujours en un seul exemplaire, jamais soumis à un choix du joueur
+            // (SecondaryEquipmentItemName est toujours un "ET", jamais un "OU" - contrairement à
+            // EquipmentItemName/AlternativeEquipmentItemName ci-dessus). Le Carnet de l'Alchimiste n'a
+            // besoin d'aucune autre logique ici : c'est un objet du catalogue comme un autre
+            // (EquipmentItem.GrantsSkillCategory, voir Core.Rules.SkillEligibility) - une fois porté par
+            // un guerrier, l'étape Progression existante (PickAdvanceSkill) en tient compte
+            // automatiquement, rien à mémoriser côté Warrior/Warband à la sauvegarde de CE wizard.
+            if (outcome.SecondaryEquipmentItemName is { } secondaryName)
+                await AddOneItemToInventoryAsync(secondaryName, 1, outcome.MaterialRuleName);
         }
 
-        if (dialogViewModel.BonusItemOutcome is { } bonusOutcome)
-            await AddExplorationItemToInventoryAsync(bonusOutcome, bonusOutcome.EquipmentItemName, 1);
+        if (dialogViewModel.BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemName is { } bonusItemName)
+            await AddOneItemToInventoryAsync(bonusItemName, 1, bonusOutcome.MaterialRuleName);
     }
 
     private async Task ApplyWarriorOutcomesAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)

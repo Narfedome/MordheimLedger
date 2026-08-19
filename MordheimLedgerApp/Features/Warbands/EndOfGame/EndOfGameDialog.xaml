@@ -442,21 +442,17 @@
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                     <!-- ChipView tapable (icône de catégorie + popup détail), même langage
-                                         d'interaction que toute autre référence Équipement dans l'app -
-                                         ResolvedExplorationSecondaryItem s'affiche en plus si présent (ex.
-                                         Charrette Renversée : Épée + Dague, voir ExplorationOutcome.
-                                         SecondaryEquipmentItemName - un "ET", jamais en même temps qu'un
-                                         choix "OU"). Masqué pour une branche à choix : les 2 ChipView
-                                         ci-dessus montrent déjà chaque option, cette ligne ferait doublon
-                                         avec celle du choix retenu. -->
+                                         d'interaction que toute autre référence Équipement dans l'app.
+                                         ResolvedExplorationSecondaryItem (ex. Charrette Renversée : Épée
+                                         + Dague, voir ExplorationOutcome.SecondaryEquipmentItemName) ne
+                                         s'affiche PAS ici - une section dédiée plus bas, hors de ce Grid
+                                         IsExplorationItem, la montre pour n'importe quel Kind (ex.
+                                         Laboratoire de l'Alchimiste : Or + Carnet), pas seulement Item -
+                                         éviter de l'afficher deux fois. Masqué pour une branche à choix :
+                                         les 2 RadioButton du bloc ci-dessus montrent déjà chaque option. -->
                                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding HasExplorationItemChoice, Converter={StaticResource InverseBoolConverter}}">
                                         <components:ChipView Item="{Binding ResolvedExplorationItem}"
                                                               IconGlyph="{Binding ResolvedExplorationItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                              IconFontFamily="RpgAwesome"
-                                                              Command="{Binding ShowExplorationItemDetailCommand}"/>
-                                        <components:ChipView Item="{Binding ResolvedExplorationSecondaryItem}"
-                                                              IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}"
-                                                              IconGlyph="{Binding ResolvedExplorationSecondaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                               IconFontFamily="RpgAwesome"
                                                               Command="{Binding ShowExplorationItemDetailCommand}"/>
                                     </HorizontalStackLayout>
@@ -513,7 +509,22 @@
                                  que silencieusement perdu. -->
                             <Label IsVisible="{Binding IsExplorationNone}" Text="{Binding ExplorationNoteText}"
                                    FontSize="12" FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"/>
+
                         </VerticalStackLayout>
+
+                        <!-- Second objet du même branch, indépendant du Kind (ex. Charrette Renversée,
+                             Kind Item : Épée + Dague ornées ; Laboratoire de l'Alchimiste, Kind Gold :
+                             Or + Carnet de l'Alchimiste) - voir ExplorationOutcome.
+                             SecondaryEquipmentItemName. Volontairement en dehors du Grid IsExplorationItem
+                             ci-dessus (qui ne s'affiche que pour Kind.Item) : ce second objet peut
+                             accompagner N'IMPORTE quel Kind, pas seulement Item. -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}">
+                            <components:ChipView Grid.Column="0" Item="{Binding ResolvedExplorationSecondaryItem}"
+                                                  IconGlyph="{Binding ResolvedExplorationSecondaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
 
                         <!-- Objet bonus sur le même dé que l'or (ex. Boutique : "sur un 1, en plus, un
                              Porte-bonheur") - voir BonusItemOutcome, déduit d'ExplorationGoldAmount sans

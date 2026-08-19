@@ -16,38 +16,42 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 
 ## Détail (ordre des dés, pour tester avec de vrais dés)
 
-| Dés | Résultat | Statut | Note |
-|---|---|---|---|
-| 2,1 | Puits | ✅ | Vrai test d'Endurance (choix du Héros, jet comparé à sa stat) - réussite = pierre magique, échec = statut `Malade` (indisponible prochaine partie, effacé auto au Fin de Partie suivant) |
-| 2,2 | Boutique | ✅ | Or (D6) + Porte-bonheur bonus si le même jet vaut 1 (`BonusItemOutcome`) |
-| 2,3 | Cadavre | ✅ | Premier cas validé (sous-jet à branches exclusives) |
-| 2,4 | Traînard | ⏳ | Groupe B — Skavens/Possédés/Morts-Vivants/autres |
-| 2,5 | Charrette Renversée | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (`SellMultiplier`, bouton "Vendre" dans l'inventaire de bande) |
-| 2,6 | Masures en Ruine | ✅ | Branche unique |
-| 3,1 | Taverne | ⏳ | Groupe B — test de Commandement |
-| 3,2 | Forge | ✅ | |
-| 3,3 | Prisonniers | ⏳ | Groupe B |
-| 3,4 | Atelier du Fléchier | ✅ | |
-| 3,5 | Halle du Marché | ✅ | Branche unique |
-| 3,6 | Une Faveur Rendue | ⏳ | Groupe C — Mercenaire à Louer gratuit, `NextGameNotes` pas construit |
-| 4,1 | Armurier à Poudre | ✅ | |
-| 4,2 | Sanctuaire | 🔧 | Or (3D6) fait ; la bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement) rejoint le Groupe B, en attente de son UI de choix - voir Hors périmètre |
-| 4,3 | Maison de Ville | ✅ | Branche unique |
-| 4,4 | Armurerie | ✅ | Branche 1-2 : choix du joueur Bouclier ou Rondache (`AlternativeEquipmentItemName`) |
-| 4,5 | Cimetière | ⏳ | Groupe B |
-| 4,6 | Catacombes | ⏳ | Groupe C — déploiement spécial, `NextGameNotes` pas construit |
-| 5,1 | Maison du Prêteur | ✅ | Branche unique |
-| 5,2 | Laboratoire de l'Alchimiste | ✅ | Branche unique |
-| 5,3 | Bijoutier | ✅ | |
-| 5,4 | Maison du Marchand | ✅ | Branche unique |
-| 5,5 | Bâtiment Éventré | ✅ | Pierre magique |
-| 5,6 | Entrée des Catacombes | ⏳ | Groupe C — relance permanente, `NextGameNotes`/`HasCatacombReroll` pas construits |
-| 6,1 | La Fosse | ✅ | Branche 1 (Héros dévoré) consignée en Historique |
-| 6,2 | Trésor Caché | ⏳ | Groupe B + référence la table Artefacts Magiques (Groupe D) |
-| 6,3 | Forge Naine | ✅ | Règle Gromril attachée sur les 3 branches concernées |
-| 6,4 | Bande Massacrée | ⏳ | Groupe B |
-| 6,5 | Arène de Combat | ✅ | Branche unique |
-| 6,6 | Villa d'un Noble | ✅* | *Branches 1-4 complètes ; branche 5-6 (artefact magique) consignée en Historique mais ne donne pas encore un objet nommé réel (Groupe D) |
+Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, ❌ = Groupe B/C (choix conditionné à la bande/texte
+pur, pas encore d'UI), — = implémenté mais pas encore rejoué en vrai (au-delà du Laboratoire de
+l'Alchimiste, dernier point testé le 2026-08-18).
+
+| Dés | Résultat | Statut | Testé | Note |
+|---|---|---|---|---|
+| 2,1 | Puits | ✅ | ✅ | Vrai test d'Endurance (choix du Héros, jet comparé à sa stat) - réussite = pierre magique, échec = statut `Malade` (indisponible prochaine partie, effacé auto au Fin de Partie suivant) |
+| 2,2 | Boutique | ✅ | ✅ | Or (D6) + Porte-bonheur bonus si le même jet vaut 1 (`BonusItemOutcome`) |
+| 2,3 | Cadavre | ✅ | ✅ | Premier cas validé (sous-jet à branches exclusives) |
+| 2,4 | Traînard | ⏳ | ❌ | Groupe B — Skavens/Possédés/Morts-Vivants/autres |
+| 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (`SellMultiplier`, bouton "Vendre" dans l'inventaire de bande) |
+| 2,6 | Masures en Ruine | ✅ | ✅ | Branche unique |
+| 3,1 | Taverne | ⏳ | ❌ | Groupe B — test de Commandement |
+| 3,2 | Forge | ✅ | ✅ | |
+| 3,3 | Prisonniers | ⏳ | ❌ | Groupe B |
+| 3,4 | Atelier du Fléchier | ✅ | ✅ | |
+| 3,5 | Halle du Marché | ✅ | ✅ | Branche unique |
+| 3,6 | Une Faveur Rendue | ⏳ | ❌ | Groupe C — Mercenaire à Louer gratuit, `NextGameNotes` pas construit |
+| 4,1 | Armurier à Poudre | ✅ | ✅ | |
+| 4,2 | Sanctuaire | 🔧 | ❌ | Or (3D6) fait ; la bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement) rejoint le Groupe B, en attente de son UI de choix - voir Hors périmètre |
+| 4,3 | Maison de Ville | ✅ | ✅ | Branche unique |
+| 4,4 | Armurerie | ✅ | ✅ | Branche 1-2 : choix du joueur Bouclier ou Rondache (`AlternativeEquipmentItemName`) |
+| 4,5 | Cimetière | ⏳ | ❌ | Groupe B |
+| 4,6 | Catacombes | ⏳ | ❌ | Groupe C — déploiement spécial, `NextGameNotes` pas construit |
+| 5,1 | Maison du Prêteur | ✅ | ✅ | Branche unique |
+| 5,2 | Laboratoire de l'Alchimiste | ✅ | ✅ | Or (3D6) + carnet trouvé (`SecondaryEquipmentItemName`) - le Héros qui le porte débloque Érudition en plus de ses listes habituelles dès sa prochaine compétence gagnée (`EquipmentItem.GrantsSkillCategory`, voir `Core.Rules.SkillEligibility`) |
+| 5,3 | Bijoutier | ✅ | — | |
+| 5,4 | Maison du Marchand | ✅ | — | Branche unique |
+| 5,5 | Bâtiment Éventré | ✅ | — | Pierre magique |
+| 5,6 | Entrée des Catacombes | ⏳ | ❌ | Groupe C — relance permanente, `NextGameNotes`/`HasCatacombReroll` pas construits |
+| 6,1 | La Fosse | ✅ | — | Branche 1 (Héros dévoré) consignée en Historique |
+| 6,2 | Trésor Caché | ⏳ | ❌ | Groupe B + référence la table Artefacts Magiques (Groupe D) |
+| 6,3 | Forge Naine | ✅ | — | Règle Gromril attachée sur les 3 branches concernées |
+| 6,4 | Bande Massacrée | ⏳ | ❌ | Groupe B |
+| 6,5 | Arène de Combat | ✅ | — | Branche unique |
+| 6,6 | Villa d'un Noble | ✅* | — | *Branches 1-4 complètes ; branche 5-6 (artefact magique) consignée en Historique mais ne donne pas encore un objet nommé réel (Groupe D) |
 
 ## Hors périmètre pour l'instant
 
@@ -66,4 +70,17 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 - **2026-08-18 (catégories d'équipement)** — Suite au repérage de Flèches de Chasse manquante, ajout de deux catégories `EquipmentCategory` : `Consumable`/"Consommable" et `DrugsAndPoisons`/"Drogues et Poisons", pour désengorger `MiscellaneousEquipment` (30 objets avant ce passage). `Ammunition` (déjà dans l'enum, jamais utilisée) renommée en FR "Projectiles et Munitions" plutôt que dupliquée. Reclassement complet des 30 objets Divers : **Consommable** (Bière de Bugman, Larmes de Shallaya, Grimoire, Herbes Curatives - bu/appliqué/lu une fois) ; **Drogues et Poisons** (Ombre Cramoisie, Racine de Mandragore, Lotus Noir, Venin Sombre) ; **Projectiles et Munitions** (Chausse-trapes, Flèches Incendiaires, Bombe Incendiaire, Poudre Éclair, Poudre Noire Supérieure - jeté/tiré sur l'ennemi ou rechargé dans une arme) ; le reste (17 objets : Bannière, Cape Elfique, Lanterne, Rossignols, Porte-bonheur, Carte de Mordheim, Filet, Patte de lapin, Corde à grappin, Longue-vue, Torche, Cor de Guerre, Pendule de Malepierre, Ail, Livre de Cuisine Halfling, Cartes de Tarot, Vêtements en Soie de Cathay) reste en Équipement Divers - porté/outil permanent, rien à consommer/tirer.
 - **2026-08-18 (Atelier du Fléchier + chips)** — Bug trouvé par test utilisateur : la branche 5 de l'Atelier du Fléchier référençait `"Quiver of Hunting Arrows"`, un nom absent du catalogue (résolution par nom exact - voir ExplorationOutcome.EquipmentItemName), donc silencieusement sans effet ; corrigé vers `"Hunting Arrows"` (le nom réellement seedé). Un balayage systématique JSON de toutes les références `equipmentItemName`/`secondaryEquipmentItemName` de la table contre le catalogue confirme que c'était la seule branche déjà **✅** (implémentée) cassée - Trésor Caché référence aussi `Holy Relic`/`Holy Tome`, absents du catalogue, mais ce résultat est encore Groupe B (⏳), pas un bug actif. Au passage, la Vue Fin de Partie affiche maintenant l'objet trouvé (branche Item + objet bonus) via un vrai `ChipView` tapable (icône de catégorie + popup détail) plutôt qu'un `Label` texte - même langage d'interaction que le reste de l'app pour toute référence Équipement (`EndOfGameDialogViewModel` reçoit désormais un dictionnaire nom-anglais→`EquipmentItem` entier, plus seulement un nom affiché).
 - **2026-08-18 (Charrette Renversée révisée - matériau plutôt que champ ad-hoc)** — Retour de l'utilisateur : le `SellMultiplier` ajouté plus haut dupliquait un mécanisme déjà existant (Gromril/Ithilmar, `SpecialRule.CostMultiplier` appliqué via `MaterialRuleName`). Remplacé par un vrai matériau **"Arme Ornée"** (`SpecialRules.json`, `costMultiplier: 2`, même forme que Gromril/Ithilmar) référencé par `MaterialRuleName` sur la branche 5-6 (au lieu de `sellMultiplier: 2`). Nouveau champ `SpecialRule.IsResaleUpgrade` (bool, false pour Gromril/Ithilmar - un achat normal ne se revend pas - true uniquement pour Arme Ornée) : `WarbandEquipment.IsSellable` en dérive directement (`MaterialRule?.IsResaleUpgrade == true`), et `IWarbandService.SellWarbandItemAsync` calcule le prix de revente avec **la même formule que l'achat** (`Core.Rules.EquipmentPricing.CalculateCost`) plutôt qu'un calcul de revente à part - `ExplorationOutcome.SellMultiplier`/`WarbandEquipment.SellMultiplier`/`WarbandEquipmentEntity.SellMultiplier` supprimés entièrement, plus petite surface de code pour un résultat identique. Bénéfice annexe : l'inventaire affiche maintenant "Épée (O)"/"Dague (O)" comme n'importe quel objet en Gromril/Ithilmar (`WarbandEquipment.NameDisplay`), au lieu d'un nom nu.
-- **2026-08-18 (Sanctuaire reclassé, choix Bouclier/Rondache de l'Armurerie)** — Sanctuaire (4,2) repassé à 🔧 : sa branche Or reste faite, mais sa bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières, choix du joueur sur une arme déjà portée) a la même forme que le Groupe B (choix conditionné à la bande) et est explicitement reportée avec lui plutôt que traitée comme un cas isolé. Séparément, l'Armurerie (4,4) avait une vraie divergence au texte du livre : la branche 1-2 ("D3 Shields or Bucklers, choose which") ne proposait que le Bouclier (Shield), jamais la Rondache (Buckler). Contrairement à Sanctuaire, ce choix ne dépend d'aucune bande et ne modifie rien d'existant - juste "lequel des deux objets trouvés", donc pas concerné par le report Groupe B. Nouveau champ `ExplorationOutcome.AlternativeEquipmentItemName` (un "OU", à distinguer de `SecondaryEquipmentItemName` qui est un "ET" - Charrette Renversée) : la branche Item du wizard affiche un `Picker` à 2 options (masqué pour toute autre branche) quand il est renseigné, et le nom réellement ajouté à l'inventaire (`EndOfGameDialogViewModel.ChosenExplorationItemName`) suit le choix du joueur plutôt que l'`EquipmentItemName` brut. Correctif texte du livre au passage : la description FR (déjà en place avant cette session) disait "Boucliers ou **Écus**" - "Écu" ne correspond à aucun objet du catalogue, la traduction réelle de Buckler est **Rondache** (voir Equipment.json) - corrigé pour matcher ce que le Picker affiche réellement.
+- **2026-08-18 (Sanctuaire reclassé, choix Bouclier/Rondache de l'Armurerie)** — Sanctuaire (4,2) repassé à 🔧 : sa branche Or reste faite, mais sa bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières, choix du joueur sur une arme déjà portée) a la même forme que le Groupe B (choix conditionné à la bande) et est explicitement reportée avec lui plutôt que traitée comme un cas isolé. Séparément, l'Armurerie (4,4) avait une vraie divergence au texte du livre : la branche 1-2 ("D3 Shields or Bucklers, choose which") ne proposait que le Bouclier (Shield), jamais la Rondache (Buckler). Contrairement à Sanctuaire, ce choix ne dépend d'aucune bande et ne modifie rien d'existant - juste "lequel des deux objets trouvés", donc pas concerné par le report Groupe B. Nouveau champ `ExplorationOutcome.AlternativeEquipmentItemName` (un "OU", à distinguer de `SecondaryEquipmentItemName` qui est un "ET" - Charrette Renversée) : la branche Item du wizard affiche 2 `RadioButton` (masqués pour toute autre branche) quand il est renseigné, chacun accompagné d'un vrai `ChipView` tapable (icône + popup détail) en frère, pas en `RadioButton.Content` (un View arbitraire posé en Content ne s'affiche pas côté Windows/WinUI - repéré en testant), et le nom réellement ajouté à l'inventaire (`EndOfGameDialogViewModel.ChosenExplorationItemName`) suit le choix du joueur plutôt que l'`EquipmentItemName` brut. Correctif texte du livre au passage : la description FR (déjà en place avant cette session) disait "Boucliers ou **Écus**" - "Écu" ne correspond à aucun objet du catalogue, la traduction réelle de Buckler est **Rondache** (voir Equipment.json) - corrigé pour matcher ce que les RadioButton affichent réellement.
+- **2026-08-18 (Laboratoire de l'Alchimiste)** — Deuxième mécanique "permanente" de la table après le
+  test de caractéristique du Puits, mais de forme différente : pas un jet, un choix optionnel ("un de
+  vos Héros PEUT l'étudier") qui modifie durablement ce Héros plutôt que de produire un gain immédiat.
+  Nouveau champ `ExplorationOutcome.GrantsSkillCategory` (`SkillCategory?`, "Academic" ici) - coexiste
+  avec la branche Or existante (Or 3D6 + ce choix, comme le Porte-bonheur de Boutique coexiste avec son
+  Or) plutôt que de remplacer le Kind. Étape wizard : `ChipListView` des Héros vivants (même
+  éligibilité que le test du Puits), tap pour choisir - ne rien choisir est un état valide, aucune
+  validation ne bloque Suivant. À la sauvegarde, la catégorie s'ajoute une fois à
+  `Warrior.AllowedSkillCategories` du Héros choisi (persistée aussitôt) : l'étape Progression existante
+  (`PickAdvanceSkill`) filtre déjà par cette liste, donc l'accès à Érudition s'applique automatiquement
+  dès la prochaine compétence gagnée par ce Héros, sans aucun câblage supplémentaire ni maintenant ni
+  lors d'une future Fin de Partie. Traduction FR de la branche également corrigée sur demande de
+  l'utilisateur (le texte alors en place divergeait de la sienne).

@@ -379,7 +379,7 @@
       { "subRollMin": 4, "subRollMax": null, "kind": "Gold", "goldFormula": "D3x10" },
       { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Elven Cloak", "itemQuantityFormula": "1" },
       { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Holy Tome", "itemQuantityFormula": "1" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "None", "note": "Artefact magique (voir table dédiée)" }
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "triggersArtefactRoll": true }
     ]
   },
   {
@@ -441,13 +441,13 @@
     "name": { "en": "Noble's Villa", "fr": "Villa d'un Noble" },
     "description": {
       "en": "You find a fine house, partially ruined and thoroughly ransacked. Roll a D6: 1-2 D6x10 gc worth of items and money, 3-4 D6 vials of Crimson Shade, 5-6 a hidden magical artefact concealed behind a secret door - roll on the Magical Artefacts table: 1 The Boots and Rope of Pieter, 2 The Count of Ventimiglia's Misericordia, 3 Att'la's Plate Mail, 4 Bow of Seeking, 5 Executioner's Hood, 6 All-seeing Eye of Numas. In a campaign none of these six items can appear more than once - re-roll if it is already in someone's possession.",
-      "fr": "Vous trouvez une belle maison, partiellement en ruine et entièrement pillée. Lancez un D6 : 1-2 D6x10 CO d'objets et d'argent, 3-4 D6 fioles d'Ombre Cramoisie, 5-6 un artefact magique caché dissimulé derrière une porte secrète - lancez sur la table des Artefacts Magiques : 1 Les Bottes et la Corde de Pieter, 2 La Miséricorde du Comte de Ventimiglia, 3 la Cotte de Mailles d'Att'la, 4 l'Arc de la Traque, 5 la Cagoule du Bourreau, 6 l'Œil Omniscient de Numas. Dans une campagne, aucun de ces six objets ne peut apparaître plus d'une fois - relancez si l'objet est déjà en possession de quelqu'un."
+      "fr": "Vous trouvez une belle maison, partiellement en ruine et entièrement pillée. Lancez un D6 : 1-2 D6x10 CO d'objets et d'argent, 3-4 D6 fioles d'Ombre Cramoisie, 5-6 un artefact magique caché dissimulé derrière une porte secrète - lancez sur la table des Artefacts Magiques : 1 Les Bottes et la Corde de Pieter, 2 La Miséricorde du Comte de Ventimiglia, 3 l'Armure d'Att'la, 4 l'Arc Traqueur, 5 la Cagoule d'Exécuteur, 6 l'Œil Omniscient de Numas. Dans une campagne, aucun de ces six objets ne peut apparaître plus d'une fois - relancez si l'objet est déjà en possession de quelqu'un."
     },
     "rollsIndependently": false,
     "outcomes": [
       { "subRollMin": 1, "subRollMax": 2, "kind": "Gold", "goldFormula": "D6x10" },
       { "subRollMin": 3, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Crimson Shade", "itemQuantityFormula": "D6" },
-      { "subRollMin": 5, "subRollMax": 6, "kind": "None", "note": "Artefact magique (voir texte)" }
+      { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "triggersArtefactRoll": true }
     ]
   }
 ]

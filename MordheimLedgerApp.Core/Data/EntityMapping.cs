@@ -293,7 +293,8 @@ public static class EntityMapping
         StatTestPass = e.StatTestPass,
         CausesSickness = e.CausesSickness,
         RequiresDoubleRoll = e.RequiresDoubleRoll,
-        CausesDeath = e.CausesDeath
+        CausesDeath = e.CausesDeath,
+        TriggersArtefactRoll = e.TriggersArtefactRoll
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -314,7 +315,8 @@ public static class EntityMapping
         StatTestPass = m.StatTestPass,
         CausesSickness = m.CausesSickness,
         RequiresDoubleRoll = m.RequiresDoubleRoll,
-        CausesDeath = m.CausesDeath
+        CausesDeath = m.CausesDeath,
+        TriggersArtefactRoll = m.TriggersArtefactRoll
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -377,7 +379,8 @@ public static class EntityMapping
         GrantsSkillCategory = e.GrantsSkillCategory,
         GrantsSpecificSkillName = e.GrantsSpecificSkillName,
         GrantsRareItemSearchBonus = e.GrantsRareItemSearchBonus,
-        IsSellable = e.IsSellable
+        IsSellable = e.IsSellable,
+        GrantsBonusExplorationDice = e.GrantsBonusExplorationDice
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -471,7 +474,8 @@ public static class EntityMapping
         GrantsSkillCategory = m.GrantsSkillCategory,
         GrantsSpecificSkillName = m.GrantsSpecificSkillName,
         GrantsRareItemSearchBonus = m.GrantsRareItemSearchBonus,
-        IsSellable = m.IsSellable
+        IsSellable = m.IsSellable,
+        GrantsBonusExplorationDice = m.GrantsBonusExplorationDice
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>

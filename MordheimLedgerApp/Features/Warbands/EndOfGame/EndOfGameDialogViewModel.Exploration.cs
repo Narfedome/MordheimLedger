@@ -25,7 +25,12 @@ public partial class EndOfGameDialogViewModel
     // n'a besoin d'être appelée qu'en y entrant (OnStepIndexChanged) plutôt qu'à chaque frappe.
     public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction);
     public bool WonLastGame => ResultOptions.Count > 0 && SelectedResult == ResultOptions[0];
-    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame);
+
+    /// <summary>Dés bonus depuis l'équipement porté par les guerriers encore debout (ex. l'Œil
+    /// Omniscient de Numas - voir Core.Rules.ExplorationDiceBonus) - premier vrai usage du paramètre
+    /// bonusDice de ComputeDiceCount, jusqu'ici toujours appelé à 0.</summary>
+    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame,
+        ExplorationDiceBonus.EffectiveBonusDice(WarriorRows.Where(r => !r.IsOutOfAction).Select(r => r.Warrior)));
 
     public ObservableCollection<ExplorationDieEntry> ExplorationDice { get; } = new();
 
@@ -144,6 +149,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
     [NotifyPropertyChangedFor(nameof(PitDevouredHero))]
+    [NotifyPropertyChangedFor(nameof(ShowArtefactRoll))]
     private ExplorationOutcome? resolvedExplorationOutcome;
 
     /// <summary>ResolvedExplorationOutcome.EquipmentItemName + MaterialRuleName résolus (langue courante),
@@ -223,8 +229,45 @@ public partial class EndOfGameDialogViewModel
     public string ExplorationNoteText => ResolvedExplorationOutcome?.Note ?? TriggeredExplorationResult?.Name ?? string.Empty;
 
     public bool IsExplorationGold => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold;
-    public bool IsExplorationItem => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Item;
+
+    /// <summary>False for a branch that TriggersArtefactRoll (see ShowArtefactRoll) even though its
+    /// Kind is still Item - that branch's item isn't known yet (a second D6 roll on the Magical
+    /// Artefacts table decides it), so the normal quantity/choice/chip UI gated on this flag would be
+    /// meaningless here.</summary>
+    public bool IsExplorationItem => ResolvedExplorationOutcome is { Kind: ExplorationOutcomeKind.Item, TriggersArtefactRoll: false };
+
     public bool IsExplorationWyrdstone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Wyrdstone;
+
+    // --- Table des Artefacts Magiques (Villa d'un Noble) --------------------------------------
+    //
+    // La seule branche qui, une fois résolue, exige encore un SECOND jet - un D6 sur la table fixe des
+    // 6 Artefacts Magiques du livre (voir ExplorationOutcome.TriggersArtefactRoll/Core.Rules.
+    // MagicalArtefactTable) - contrairement à toute autre branche Item, l'objet précis n'est connu
+    // qu'après ce second jet.
+
+    public bool ShowArtefactRoll => ResolvedExplorationOutcome?.TriggersArtefactRoll == true;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ResolvedArtefactItemName))]
+    [NotifyPropertyChangedFor(nameof(ResolvedArtefactItem))]
+    private string artefactRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? artefactRollError;
+
+    /// <summary>Nom ANGLAIS de l'objet du catalogue tiré sur la table - null tant que le jet n'est pas
+    /// renseigné.</summary>
+    public string? ResolvedArtefactItemName => ShowArtefactRoll && int.TryParse(ArtefactRoll, out var roll)
+        ? MagicalArtefactTable.RollForItemName(roll) : null;
+
+    /// <summary>Même besoin que ResolvedExplorationItem - un WarbandEquipment jetable pour le ChipView
+    /// tapable (icône + popup détail), jamais de matériau pour un artefact unique.</summary>
+    public WarbandEquipment? ResolvedArtefactItem => BuildDisplayItem(ResolvedArtefactItemName, null);
+
+    partial void OnArtefactRollChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ArtefactRollError = null; }
+
+    [RelayCommand]
+    private void AutoRollArtefact() => ArtefactRoll = ExplorationChart.RollDie().ToString();
 
     /// <summary>Boutique (2,2) est le seul cas de la table où une branche Auto (ici Or, "D6 po") et une
     /// branche à sous-jet (ici Objet, "sur un 1, en plus, un Porte-bonheur") coexistent sur LE MÊME dé -
@@ -578,6 +621,8 @@ public partial class EndOfGameDialogViewModel
         // Passe par SelectedSentHeroOption (pas SentHero directement) pour que le Picker affiche "Passer
         // son chemin" comme valeur par défaut plutôt qu'un placeholder vide - voir SentHeroOptions.
         SelectedSentHeroOption = SentHeroOptions[0];
+        ArtefactRoll = string.Empty;
+        ArtefactRollError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -608,6 +653,8 @@ public partial class EndOfGameDialogViewModel
         ExplorationItemFoundValue = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
+        ArtefactRoll = string.Empty;
+        ArtefactRollError = null;
 
         if (TriggeredExplorationResult is null || !int.TryParse(value, out var roll)) return;
 
@@ -703,11 +750,16 @@ public partial class EndOfGameDialogViewModel
             && !CheckRoll(string.IsNullOrWhiteSpace(BonusStatTestRoll), () => BonusStatTestError = Loc["EndOfGameRollRequired"]))
             return false;
 
+        // Le jet sur la table des Artefacts Magiques (Villa d'un Noble) se valide à part - la quantité
+        // d'objet normale (switch ci-dessous) ne s'applique pas à cette branche, voir IsExplorationItem.
+        if (ShowArtefactRoll && !CheckRoll(string.IsNullOrWhiteSpace(ArtefactRoll), () => ArtefactRollError = Loc["EndOfGameRollRequired"]))
+            return false;
+
         var amountMissing = ResolvedExplorationOutcome?.Kind switch
         {
             ExplorationOutcomeKind.Gold => string.IsNullOrWhiteSpace(ExplorationGoldAmount),
-            ExplorationOutcomeKind.Item => string.IsNullOrWhiteSpace(ExplorationItemQuantity)
-                || (ShowExplorationItemFoundValueRoll && string.IsNullOrWhiteSpace(ExplorationItemFoundValue)),
+            ExplorationOutcomeKind.Item => !ShowArtefactRoll && (string.IsNullOrWhiteSpace(ExplorationItemQuantity)
+                || (ShowExplorationItemFoundValueRoll && string.IsNullOrWhiteSpace(ExplorationItemFoundValue))),
             ExplorationOutcomeKind.Wyrdstone => string.IsNullOrWhiteSpace(ExplorationWyrdstoneAmount),
             _ => false
         };

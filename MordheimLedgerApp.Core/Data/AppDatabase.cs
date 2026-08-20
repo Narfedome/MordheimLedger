@@ -551,7 +551,8 @@ public class AppDatabase
                 GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
                 GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
                 GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
-                IsSellable = eq.IsSellable
+                IsSellable = eq.IsSellable,
+                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -659,7 +660,8 @@ public class AppDatabase
                     StatTestPass = outcome.StatTestPass,
                     CausesSickness = outcome.CausesSickness,
                     RequiresDoubleRoll = outcome.RequiresDoubleRoll,
-                    CausesDeath = outcome.CausesDeath
+                    CausesDeath = outcome.CausesDeath,
+                    TriggersArtefactRoll = outcome.TriggersArtefactRoll
                 });
             }
         }

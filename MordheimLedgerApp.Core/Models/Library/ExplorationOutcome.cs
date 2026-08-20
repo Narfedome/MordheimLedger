@@ -114,4 +114,12 @@ public class ExplorationOutcome
     /// consequence targets whichever Hero the player chose to send, not a Hero picked for a stat test).
     /// False/default for every other branch.</summary>
     public bool CausesDeath { get; set; }
+
+    /// <summary>True marks a branch that grants a random entry from the rulebook's fixed 6-item Magical
+    /// Artefacts table (Villa d'un Noble's 5-6 sub-roll; also referenced, but not yet wizard-wired
+    /// since it needs Groupe B/RollsIndependently support, by Trésor Caché's "Artefact Magique (5+)"
+    /// row) rather than a single fixed EquipmentItemName - the actual item only resolves once the
+    /// player makes a SECOND, dedicated D6 roll on that table (see Core.Rules.MagicalArtefactTable).
+    /// EquipmentItemName stays null on a branch like this. False/default for every other branch.</summary>
+    public bool TriggersArtefactRoll { get; set; }
 }

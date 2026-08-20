@@ -1,7 +1,8 @@
 # Table d'Exploration — état d'implémentation
 
 Suivi de l'assistant Fin de Partie, étape Revenus/Exploration (voir le plan de séquencement).
-Mis à jour à chaque avancée — dernière mise à jour : **2026-08-18** (refactor du wizard Fin de Partie).
+Mis à jour à chaque avancée — dernière mise à jour : **2026-08-20** (Table des Artefacts Magiques,
+La Fosse, Arène de Combat).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -12,13 +13,13 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
 | B — choix du joueur (`RollsIndependently`) | Plusieurs branches selon le type de bande, aucune UI de sélection encore | **0/6 ⏳** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
-| D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **⏳** (pas commencé) |
+| D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
 ## Détail (ordre des dés, pour tester avec de vrais dés)
 
 Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, ❌ = Groupe B/C (choix conditionné à la bande/texte
-pur, pas encore d'UI), — = implémenté mais pas encore rejoué en vrai (au-delà du Laboratoire de
-l'Alchimiste, dernier point testé le 2026-08-18).
+pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (dernier point à jour :
+2026-08-20).
 
 | Dés | Résultat | Statut | Testé | Note |
 |---|---|---|---|---|
@@ -43,21 +44,20 @@ l'Alchimiste, dernier point testé le 2026-08-18).
 | 5,1 | Maison du Prêteur | ✅ | ✅ | Branche unique |
 | 5,2 | Laboratoire de l'Alchimiste | ✅ | ✅ | Or (3D6) + carnet trouvé (`SecondaryEquipmentItemName`) - le Héros qui le porte débloque Érudition en plus de ses listes habituelles dès sa prochaine compétence gagnée (`EquipmentItem.GrantsSkillCategory`, voir `Core.Rules.SkillEligibility`) |
 | 5,3 | Bijoutier | ✅ | ✅ | 4 gemmes réelles (Pierres de Quartz/Améthyste/Collier/Rubis), vendables directement (`EquipmentItem.IsSellable`, pas un matériau - ce sont les objets eux-mêmes qui ont de la valeur) - valeur trouvée fixe au catalogue pour Améthyste/Collier, jetée en D6x5/D6x15 pour Quartz/Rubis (`ExplorationOutcome.FoundValueFormula` → `WarbandEquipment.FoundValueOverride`, affichée dans l'inventaire de bande et dans le popup détail au lieu du prix catalogue). Si gardée sur un Héros plutôt que vendue : +1 sur les jets d'objets rares (`EquipmentItem.GrantsRareItemSearchBonus`, `Core.Rules.RareItemSearchBonus` - la recherche d'objets rares elle-même n'est pas encore construite, ce n'est qu'une préparation de données) |
-| 5,4 | Maison du Marchand | ✅ | — | Or (2D6x5) normalement, mais un double sur le 2D6 donne le Symbole de l'Ordre des Libres Marchands (`ExplorationResult.RequiresDoubleRoll` + `ExplorationOutcome.RequiresDoubleRoll`, 2 champs de dé dédiés - le total seul ne suffit pas à détecter un double). Un seul jet de 2D6 sert aux deux fins : si ce n'est pas un double, l'or (2D6x5) est calculé directement depuis ces 2 dés (`Core.Rules.DiceFormula.Apply`) plutôt que redemander un jet séparé - le livre ne prévoit qu'un seul lancer ici. Le Héros qui porte le symbole peut choisir Marchandage à sa prochaine Progression, même hors de ses listes habituelles (`EquipmentItem.GrantsSpecificSkillName`, `Core.Rules.SkillEligibility.EffectiveExtraSkillNames`, picker de compétence étendu) |
-| 5,5 | Bâtiment Éventré | ✅ | — | Pierre magique (D3) toujours trouvée + test de Commandement ADDITIONNEL du chef de bande (`ExplorationResult.BonusStatTestField`, `Core.Rules.ExplorationOutcomeResolver.ResolveBonusStatTestOutcome` - s'ajoute à la pierre magique plutôt que la remplacer, contrairement à Puits) - en cas de réussite, un Chien de guerre rejoint la bande. Toujours le chef de bande, jamais un choix du joueur : nouveau `Warrior.IsLeader`/`WarriorArchetype.IsLeader` (flag explicite dans chaque JSON de bande, un seul par bande), pas de concept de "chef" avant cette passe. Jet en 2D6 (pas 1D6) : les tests de Commandement sont une exception explicite à la règle générale des tests de caractéristique (RulesReference `Regles.md`) - `Core.Rules.ExplorationChart.RollStatTest`, appliqué aussi rétroactivement au test de Puits (Endurance, resté en 1D6, correct) pour que le même mécanisme serve les deux |
+| 5,4 | Maison du Marchand | ✅ | ✅ | Or (2D6x5) normalement, mais un double sur le 2D6 donne le Symbole de l'Ordre des Libres Marchands (`ExplorationResult.RequiresDoubleRoll` + `ExplorationOutcome.RequiresDoubleRoll`, 2 champs de dé dédiés - le total seul ne suffit pas à détecter un double). Un seul jet de 2D6 sert aux deux fins : si ce n'est pas un double, l'or (2D6x5) est calculé directement depuis ces 2 dés (`Core.Rules.DiceFormula.Apply`) plutôt que redemander un jet séparé - le livre ne prévoit qu'un seul lancer ici. Le Héros qui porte le symbole peut choisir Marchandage à sa prochaine Progression, même hors de ses listes habituelles (`EquipmentItem.GrantsSpecificSkillName`, `Core.Rules.SkillEligibility.EffectiveExtraSkillNames`, picker de compétence étendu) |
+| 5,5 | Bâtiment Éventré | ✅ | ✅ | Pierre magique (D3) toujours trouvée + test de Commandement ADDITIONNEL du chef de bande (`ExplorationResult.BonusStatTestField`, `Core.Rules.ExplorationOutcomeResolver.ResolveBonusStatTestOutcome` - s'ajoute à la pierre magique plutôt que la remplacer, contrairement à Puits) - en cas de réussite, un Chien de guerre rejoint la bande. Toujours le chef de bande, jamais un choix du joueur : nouveau `Warrior.IsLeader`/`WarriorArchetype.IsLeader` (flag explicite dans chaque JSON de bande, un seul par bande), pas de concept de "chef" avant cette passe. Jet en 2D6 (pas 1D6) : les tests de Commandement sont une exception explicite à la règle générale des tests de caractéristique (RulesReference `Regles.md`) - `Core.Rules.ExplorationChart.RollStatTest`, appliqué aussi rétroactivement au test de Puits (Endurance, resté en 1D6, correct) pour que le même mécanisme serve les deux |
 | 5,6 | Entrée des Catacombes | ⏳ | ❌ | Groupe C — relance permanente, `NextGameNotes`/`HasCatacombReroll` pas construits |
-| 6,1 | La Fosse | ✅ | — | Envoi d'un Héros optionnel (`ExplorationResult.RequiresSentHero`, Picker sans stat comparée - "si vous le souhaitez", refuser d'envoyer quelqu'un est valide) - sous-jet 1 : le Héros envoyé est dévoré, `Warrior.Status` passe à `Dead` + phrase d'Historique dédiée (`ExplorationOutcome.CausesDeath`, même mécanisme que Sick du Puits - posé après `ApplyWarriorOutcomesAsync` pour éviter l'écrasement par sa resynchronisation de statut) ; sous-jet 2-6 : D6+1 pierres magiques, indépendant de qui a été envoyé |
-| 6,2 | Trésor Caché | ⏳ | ❌ | Groupe B + référence la table Artefacts Magiques (Groupe D) |
-| 6,3 | Forge Naine | ✅ | — | Règle Gromril attachée sur les 3 branches concernées |
+| 6,1 | La Fosse | ✅ | ✅ | Envoi d'un Héros optionnel (`ExplorationResult.RequiresSentHero`, Picker sans stat comparée - "si vous le souhaitez", refuser d'envoyer quelqu'un est valide) - sous-jet 1 : le Héros envoyé est dévoré, `Warrior.Status` passe à `Dead` + phrase d'Historique dédiée (`ExplorationOutcome.CausesDeath`, même mécanisme que Sick du Puits - posé après `ApplyWarriorOutcomesAsync` pour éviter l'écrasement par sa resynchronisation de statut) ; sous-jet 2-6 : D6+1 pierres magiques, indépendant de qui a été envoyé |
+| 6,2 | Trésor Caché | ⏳ | ❌ | Groupe B — branche Artefact (sous-jet 5-6) désormais data-complète (`TriggersArtefactRoll`, Groupe D résolu), mais l'entrée entière reste non câblée dans le wizard (sélection de branche par le joueur, comme le reste du Groupe B) |
+| 6,3 | Forge Naine | ✅ | ✅ | Règle Gromril attachée sur les 3 branches concernées |
 | 6,4 | Bande Massacrée | ⏳ | ❌ | Groupe B |
-| 6,5 | Arène de Combat | ✅ | — | Manuel d'Entraînement réel et vendable (100 CG, `EquipmentItem.IsSellable`, comme les gemmes du Bijoutier) plutôt que de l'or brut - le Héros qui le porte débloque Combat en plus de ses listes habituelles (`GrantsSkillCategory`, comme le Carnet de l'Alchimiste). Le bonus "+1 CC au-delà du maximum racial" reste purement descriptif (texte de la SpecialRule "Formation au Combat") - au bon vouloir des joueurs, pas de plafond de caractéristiques suivi par l'appli |
-| 6,6 | Villa d'un Noble | ✅* | — | *Branches 1-4 complètes ; branche 5-6 (artefact magique) consignée en Historique mais ne donne pas encore un objet nommé réel (Groupe D) |
+| 6,5 | Arène de Combat | ✅ | ✅ | Manuel d'Entraînement réel et vendable (100 CG, `EquipmentItem.IsSellable`, comme les gemmes du Bijoutier) plutôt que de l'or brut - le Héros qui le porte débloque Combat en plus de ses listes habituelles (`GrantsSkillCategory`, comme le Carnet de l'Alchimiste). Le bonus "+1 CC au-delà du maximum racial" reste purement descriptif (texte de la SpecialRule "Formation au Combat") - au bon vouloir des joueurs, pas de plafond de caractéristiques suivi par l'appli |
+| 6,6 | Villa d'un Noble | ✅ | ✅ | Branches 1-4 inchangées ; branche 5-6 déclenche un second jet de D6 sur la table des Artefacts Magiques (`ExplorationOutcome.TriggersArtefactRoll`, `Core.Rules.MagicalArtefactTable.RollForItemName`) qui résout un objet réel parmi les 6 (Groupe D, désormais construit) |
 
 ## Hors périmètre pour l'instant
 
 - **Groupe B** (Traînard/Taverne/Prisonniers/Cimetière/Trésor Caché/Bande Massacrée) : UI de sélection de branche par le joueur, plus les sous-mécaniques Recrutement gratuit (`Kind.Recruit`) et Expérience répartie (`Kind.Experience`) qu'elles impliquent (voir le plan de séquencement). **Sanctuaire** (4,2) rejoint cette liste pour sa bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement, choix du joueur sur un objet déjà porté, pas une trouvaille) - même mécanique de choix conditionné à la bande que le reste du Groupe B, discuté puis explicitement reporté au 2026-08-18 plutôt que traité comme un cas isolé. Sa branche Or (3D6, toutes bandes) reste ✅.
 - **Groupe C** (Une Faveur Rendue/Catacombes/Entrée des Catacombes) : `Warband.NextGameNotes` (pense-bête sur la fiche de bande) + `Warband.HasCatacombReroll`/`PendingExplorationBonusDie` pour les effets mécanisables.
-- **Groupe D** (Artefacts Magiques) : 6 `EquipmentItem` à ajouter au catalogue, référencés par Trésor Caché et Villa d'un Noble.
 - **Vente de la pierre magique** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
 
 ## Journal
@@ -84,3 +84,58 @@ l'Alchimiste, dernier point testé le 2026-08-18).
   dès la prochaine compétence gagnée par ce Héros, sans aucun câblage supplémentaire ni maintenant ni
   lors d'une future Fin de Partie. Traduction FR de la branche également corrigée sur demande de
   l'utilisateur (le texte alors en place divergeait de la sienne).
+- **2026-08-20 (tests de caractéristique - règle du 6, La Fosse, Arène de Combat, artefacts)** —
+  Plusieurs passes. (1) `Core.Rules.ExplorationChart.PassesStatTest` encode l'exception du livre "un 6
+  est toujours un échec" pour les tests de caractéristique en 1D6 (Puits) - n'affecte PAS les tests de
+  Commandement en 2D6 (aucune exception équivalente au livre). (2) La Fosse (6,1) : Héros envoyé
+  optionnel (`ExplorationResult.RequiresSentHero`, "Passer son chemin" comme choix par défaut explicite
+  plutôt qu'un picker vide) - sous-jet 1 dévore le Héros (`ExplorationOutcome.CausesDeath`,
+  `Warrior.Status = Dead`, phrase d'Historique dédiée) ; sous-jet 2-6 : D6+1 pierres magiques,
+  indépendant du Héros envoyé. (3) Terminologie pierre magique reconfirmée cohérente (Puits/Bâtiment
+  Éventré/La Fosse/Wyrdstone Shards) - gap trouvé au passage : `Warband.WyrdstoneShards` ne s'affichait
+  nulle part dans l'UI, corrigé. (4) Devise FR corrigée : **"CO" (Couronne d'Or) est la bonne
+  abréviation française, "CG"/"gc" (Gold Crown) est anglais uniquement** - toute occurrence "CG" dans
+  du texte FR (9 clés `AppStrings.resx`, `Equipment.json`, `ExplorationResults.json`) remplacée par
+  "CO" ; `AppStrings.en.resx` déjà correct, non touché. (5) Arène de Combat (6,5) : Manuel
+  d'Entraînement réel et vendable (100 CO, `IsSellable`) qui débloque Combat en plus des listes
+  habituelles (`GrantsSkillCategory`, même mécanisme que le Carnet de l'Alchimiste) - le bonus "+1 CC
+  au-delà du maximum racial" reste purement descriptif, aucun plafond de caractéristiques suivi par
+  l'appli (décision explicite, pas de moteur de règles V1). (6) **Table des Artefacts Magiques**
+  (Groupe D) : 6 objets uniques catalogués (Bottes et Corde de Pieter, Miséricorde du Comte de
+  Ventimiglia, Armure d'Att'la, Arc Traqueur, Cagoule d'Exécuteur, Œil Omniscient de Numas), noms FR
+  alignés sur la traduction officielle du livre (VF fournie par l'utilisateur, corrige 3 noms inventés
+  faute de référence au moment de l'écriture initiale : "Cotte de Mailles d'Att'la"→"Armure d'Att'la",
+  "Arc de la Traque"→"Arc Traqueur", "Cagoule du Bourreau"→"Cagoule d'Exécuteur"), résolue par
+  `Core.Rules.MagicalArtefactTable.RollForItemName` (lookup pur, pas en base - référencée par 2 entrées
+  de la table d'Exploration, pas liée à un seul jet). Réutilise les règles déjà en base quand pertinent
+  (Parade (Épée), Pointes Barbelées, Modificateur de sauvegarde (Arc Elfique) comme stubs ; **Frénésie** promue de
+  règle inline (Champignons Fous, Horde Orque) en entrée partagée `SpecialRules.json`, la Cagoule
+  d'Exécuteur gardant sa propre règle distincte pour l'override "ne prend jamais fin"). Œil Omniscient de
+  Numas câblé pour de vrai : `EquipmentItem.GrantsBonusExplorationDice` + nouveau
+  `Core.Rules.ExplorationDiceBonus.EffectiveBonusDice`, branché sur le paramètre `bonusDice` de
+  `ComputeDiceCount` (jusque-là jamais alimenté). Villa d'un Noble (6,6) branche 5-6 et Trésor Caché
+  (6,2) branche Artefact gagnent `ExplorationOutcome.TriggersArtefactRoll` (l'objet précis vient d'un
+  second D6, `EquipmentItemName` reste null sur cette branche) - Villa d'un Noble est désormais
+  entièrement câblée (second jet + ajout à l'inventaire), Trésor Caché reste Groupe B dans son
+  ensemble. (7) Nouvelle catégorie `EquipmentCategory.MagicalArtefact` créée pour ces 6 objets plutôt
+  que de les répartir dans Arme/Armure/Divers (demande explicite) - exclue des pickers d'achat/liste de
+  départ (`EquipmentItemViewModel.ApplyFilter`, uniquement dans le bloc `AllowedWarbandArchetypeId`,
+  donc toujours visible en consultation Codex), icône `RaRuneStone` (glyphe pas encore utilisé
+  ailleurs, cf. convention "un glyphe = un concept").
+- **2026-08-20 (Artefacts Magiques - complément de description après texte officiel complet)** —
+  L'utilisateur a fourni le texte anglais intégral du livre + la VF officielle (p.141) pour les 6
+  artefacts, permettant de corriger des lacunes passées inaperçues faute de référence complète au
+  moment de l'écriture initiale (§ ci-dessus). Trois noms FR renommés pour matcher la traduction
+  officielle plutôt qu'une traduction improvisée : "Cotte de Mailles d'Att'la"→**"Armure d'Att'la"**,
+  "Arc de la Traque"→**"Arc Traqueur"**, "Cagoule du Bourreau"→**"Cagoule d'Exécuteur"** (mis à jour
+  partout : nom de l'objet, nom de sa règle propre, et la description de Villa d'un Noble qui énumère
+  les 6 noms). Deux vraies lacunes mécaniques comblées : (1) l'Armure d'Att'la est explicitement une
+  **Armure de Gromril** gravée de 3 runes (précision absente du texte initial, ajoutée en description -
+  purement descriptif, aucun système de sauvegarde d'armure suivi par l'appli pour l'instant, comme
+  pour toute autre armure) ; (2) l'Arc Traqueur doit être traité comme un **Arc Elfique** (modificateur
+  de sauvegarde -1, règle déjà existante "Save Modifier (Elf Bow)"/"Modificateur de sauvegarde (Arc
+  Elfique)", ajoutée en stub) et ses flèches comptent comme des **Flèches de Chasse** (+1 aux jets de
+  Blessure) - ce second point était déjà correctement câblé (stub "Barbed Arrowheads"/"Pointes
+  Barbelées" déjà attaché), seul le texte de la règle propre à l'objet ne le rendait pas explicite,
+  corrigé. Cagoule d'Exécuteur et Œil Omniscient de Numas : texte affiné pour coller de plus près au
+  libellé officiel (aucun changement mécanique, les deux étaient déjà complets).

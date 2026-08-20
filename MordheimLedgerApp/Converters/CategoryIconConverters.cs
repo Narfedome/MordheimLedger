@@ -23,6 +23,7 @@ namespace MordheimLedgerApp.Converters
                 EquipmentCategory.Animal => RpgFont.RaPawprint,
                 EquipmentCategory.Consumable => RpgFont.RaVial,
                 EquipmentCategory.DrugsAndPoisons => RpgFont.RaPoisonCloud,
+                EquipmentCategory.MagicalArtefact => RpgFont.RaRuneStone,
                 _ => RpgFont.RaPotion
             } : RpgFont.RaPotion;
 

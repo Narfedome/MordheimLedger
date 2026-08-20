@@ -2224,5 +2224,150 @@
         }
       }
     ]
+  },
+  {
+    "name": {
+      "en": "Boots and Rope of Pieter",
+      "fr": "Bottes et Corde de Pieter"
+    },
+    "category": "MagicalArtefact",
+    "cost": 0,
+    "description": {
+      "en": "Pieter, the master thief of the Guild of Shadows, was the most famous of all the cat burglars of Mordheim. He earned the nickname 'Spider' for his daring robberies. The secret of his success was a pair of enchanted boots and a magical rope which he had acquired from far-off Araby.",
+      "fr": "Pieter, le maître voleur de la Guilde des Ombres, était le plus célèbre de tous les cambrioleurs de Mordheim. Il devait son surnom d'« Araignée » à ses vols audacieux. Le secret de sa réussite tenait à une paire de bottes enchantées et une corde magique qu'il avait acquises dans les lointaines contrées d'Araby."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Boots and Rope of Pieter", "fr": "Bottes et Corde de Pieter" },
+        "description": {
+          "en": "A model wearing these boots may move normally (including running and charging) on any kind of terrain, including vertical surfaces - simply add the horizontal and vertical distances moved together, no Initiative test needed (except to jump across gaps).",
+          "fr": "Un modèle portant ces bottes se déplace normalement (y compris en course ou en charge) sur n'importe quel type de terrain, y compris les surfaces verticales - additionnez simplement les distances parcourues horizontalement et verticalement, sans test d'Initiative nécessaire (sauf pour sauter par-dessus un trou)."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "The Count of Ventimiglia's Misericordia",
+      "fr": "Miséricorde du Comte de Ventimiglia"
+    },
+    "category": "MagicalArtefact",
+    "cost": 0,
+    "description": {
+      "en": "This dagger was used by the notorious Tilean gentleman-pirate known as the 'Black Corsair'. It is claimed that he found it in ancient Elven ruins and legend also has it that the dagger's blade cannot be damaged in any way.",
+      "fr": "Cette dague fut utilisée par le célèbre gentilhomme-pirate tiléen connu sous le nom de « Corsaire Noir ». On raconte qu'il la trouva dans d'antiques ruines elfiques, et la légende veut que la lame de cette dague ne puisse jamais être endommagée."
+    },
+    "specialRules": [
+      { "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } },
+      {
+        "name": { "en": "The Count of Ventimiglia's Misericordia", "fr": "Miséricorde du Comte de Ventimiglia" },
+        "description": {
+          "en": "The dagger is treated as a sword (see Parry). Opponents wounded by it are stunned on a roll of 1-3 (Undead are knocked down instead), and put out of action on a 4-6.",
+          "fr": "Cette dague est traitée comme une épée (voir Parade). Les adversaires blessés par elle sont étourdis sur un jet de 1-3 (les Morts-Vivants sont mis à terre à la place), et mis hors de combat sur un jet de 4-6."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Att'la's Plate Mail",
+      "fr": "Armure d'Att'la"
+    },
+    "category": "MagicalArtefact",
+    "cost": 0,
+    "description": {
+      "en": "This armour was given as a present by the Dwarf Lord Kurgan to the warlord Att'la in the time of Sigmar Heldenhammer. Att'la's Plate Mail is a suit of Gromril Armour (see Gromril Armour) with the following three runes inscribed on it.",
+      "fr": "Cette armure fut offerte par le Seigneur Nain Kurgan au chef de guerre Att'la, du temps de Sigmar Heldenhammer. L'Armure d'Att'la est une armure en gromril (voir Armure de Gromril) gravée des trois runes suivantes."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Rune of Spell Eating", "fr": "Rune Dévoreuse de Sorts" },
+        "description": {
+          "en": "The Hero wearing this armour is immune to all spells.",
+          "fr": "Le Héros qui porte cette armure est immunisé à tous les sorts."
+        }
+      },
+      {
+        "name": { "en": "Rune of Passage", "fr": "Rune de Passage" },
+        "description": {
+          "en": "The Hero can move through solid objects, like walls (this does not mean he can see through them).",
+          "fr": "Le Héros peut se déplacer à travers des objets solides, comme les murs (cela ne signifie pas qu'il peut voir à travers)."
+        }
+      },
+      {
+        "name": { "en": "Rune of Fortitude", "fr": "Rune de Robustesse" },
+        "description": {
+          "en": "The Hero has an extra Wound - this may take his total Wounds above his race's maximum.",
+          "fr": "Le Héros gagne un Point de Vie supplémentaire - cela peut faire dépasser à son total le maximum normal de sa race."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Bow of Seeking",
+      "fr": "Arc Traqueur"
+    },
+    "category": "MagicalArtefact",
+    "cost": 0,
+    "description": {
+      "en": "This bow was a gift to Count Steinhardt from the Elf lords of the Forest of Shadows.",
+      "fr": "Cet arc fut offert au Comte Steinhardt par les seigneurs elfes de la Forêt des Ombres."
+    },
+    "specialRules": [
+      { "name": { "en": "Save Modifier (Elf Bow)", "fr": "Modificateur de sauvegarde (Arc Elfique)" } },
+      { "name": { "en": "Barbed Arrowheads", "fr": "Pointes Barbelées" } },
+      {
+        "name": { "en": "Bow of Seeking", "fr": "Arc Traqueur" },
+        "description": {
+          "en": "Treat this bow as an Elf Bow (see Save Modifier) that always hits its target on a 2+, regardless of any to-hit modifiers, even if the target is behind cover - any arrow shot pursues its target. Such is its deadly precision that every arrow shot with it counts as a Hunting Arrow (+1 on all Injury rolls, see Barbed Arrowheads). Pick any enemy model in range, not just the closest, as long as the shooter is aware of the target's presence and position (even the tip of a target's weapon is enough). If any Dwarf is an eligible target, the arrows always deviate from their intended target to try to hit the Dwarf instead. This bow cannot be used to shoot at Elves.",
+          "fr": "Considérez cet arc comme un Arc Elfique (voir Modificateur de sauvegarde) qui touche toujours sa cible sur un jet de 2+, quels que soient les modificateurs, même si la cible est à couvert - toute flèche tirée poursuit sa cible. Sa précision est si redoutable que chaque flèche tirée avec lui compte comme une Flèche de Chasse (+1 à tous les jets de Blessure, voir Pointes Barbelées). Choisissez n'importe quel modèle ennemi à portée, pas seulement le plus proche, tant que le tireur a conscience de la présence et de la position de la cible (même l'extrémité d'une arme de la cible suffit). Si un Nain est une cible éligible, les flèches dévient toujours de leur cible initiale pour tenter de toucher le Nain à la place. Cet arc ne peut évidemment pas être utilisé pour tirer sur des Elfes."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Executioner's Hood",
+      "fr": "Cagoule d'Exécuteur"
+    },
+    "category": "MagicalArtefact",
+    "cost": 0,
+    "description": {
+      "en": "Recovered from a shipwrecked Dark Elf vessel, this hood carries evil glowing runes which fill the wearer with unreasoning rage.",
+      "fr": "Récupérée sur l'épave d'un navire elfe noir, cette cagoule porte des runes maléfiques luisantes qui emplissent son porteur d'une rage irraisonnée."
+    },
+    "specialRules": [
+      { "name": { "en": "Frenzy", "fr": "Frénésie" } },
+      {
+        "name": { "en": "Executioner's Hood", "fr": "Cagoule d'Exécuteur" },
+        "description": {
+          "en": "A warrior wearing this becomes subject to and always will be frenzied (see Frenzy), even if he is knocked down or stunned. He also adds +1 to his Strength in close combat, such is the power of his fury. The wearer never leaves combat under any circumstances, and will always attack opponents in base contact until they are taken out of action. If there are any stunned or knocked down models within the wearer's charge range at the beginning of his turn, he will charge and attack the closest one, even if they are members of his own warband - fight the hand-to-hand combat until one of the warriors is taken out of action.",
+          "fr": "Un guerrier coiffé de cette cagoule devient frénétique et le restera (voir Frénésie), même s'il est mis à terre ou sonné. Il gagne également +1 Force au corps à corps, tant sa fureur est puissante. Le porteur ne quitte jamais le combat en aucune circonstance et attaque toujours les adversaires à son contact jusqu'à ce qu'ils soient mis hors de combat. Si des figurines sonnées ou à terre se trouvent à portée de charge du porteur au début de son tour, il chargera et attaquera la plus proche, même si elle fait partie de sa propre bande - le corps à corps dure alors jusqu'à ce que l'un des guerriers soit mis hors de combat."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "All-seeing Eye of Numas",
+      "fr": "Œil Omniscient de Numas"
+    },
+    "category": "MagicalArtefact",
+    "cost": 0,
+    "grantsBonusExplorationDice": 1,
+    "description": {
+      "en": "This jewel was recovered from the ruins of Numas far in the south. It gives its wielder horrific nightmares that predict his future.",
+      "fr": "Ce joyau fut récupéré dans les ruines de Numas, loin au sud. Il donne à son porteur d'horribles cauchemars qui prédisent son avenir."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "All-seeing Eye of Numas", "fr": "Œil Omniscient de Numas" },
+        "description": {
+          "en": "The bearer can see all models on the table, even hidden or out of sight, and can guide his warband through the ruins (roll two dice instead of one for him after battle when rolling on the Exploration chart). He also has an additional 6+ save (unmodified by Strength or weapon) against all shooting attacks and close combat strikes, as he can sense the attacks before they are made. All animals (wardogs, horses, etc) fight in Frenzy against the bearer.",
+          "fr": "Le porteur voit tous les modèles sur la table, même cachés ou hors de vue, et peut guider sa bande à travers les ruines (lancez deux dés au lieu d'un pour lui après la bataille lors du jet sur la table d'Exploration). Il bénéficie aussi d'une sauvegarde supplémentaire de 6+ (non modifiée par la Force ou les armes) contre toutes les attaques de tir et les coups au corps à corps, car il perçoit les attaques avant qu'elles ne soient portées. Tous les animaux (chiens de guerre, chevaux, etc.) combattent en Frénésie contre lui."
+        }
+      }
+    ]
   }
 ]

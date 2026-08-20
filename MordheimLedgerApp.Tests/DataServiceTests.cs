@@ -203,6 +203,25 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.True(trainingManual.IsSellable);
         Assert.Equal(SkillCategory.Combat, trainingManual.GrantsSkillCategory);
 
+        // Noble's Villa (6 6): the 5-6 branch doesn't name a fixed item - it needs a SECOND D6 roll on
+        // the Magical Artefacts table (TriggersArtefactRoll) before the wizard knows which of the 6 it
+        // is (see Core.Rules.MagicalArtefactTable).
+        var nobleVilla = results.Single(r => r.DiceCount == 6 && r.Value == 6);
+        Assert.Equal(3, nobleVilla.Outcomes.Count);
+        Assert.Contains(nobleVilla.Outcomes, o => o is { SubRollMin: 5, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, TriggersArtefactRoll: true, EquipmentItemName: null });
+
+        // All 6 Magical Artefacts exist in the catalog under the exact English names the table resolves
+        // to, and the All-seeing Eye of Numas is the one item wired to the (previously unused)
+        // ExplorationChart.ComputeDiceCount bonusDice parameter.
+        var allEquipment = await _library.GetEquipmentItemsAsync("en");
+        foreach (var artefactName in new[]
+                 {
+                     "Boots and Rope of Pieter", "The Count of Ventimiglia's Misericordia", "Att'la's Plate Mail",
+                     "Bow of Seeking", "Executioner's Hood", "All-seeing Eye of Numas"
+                 })
+            Assert.Equal(EquipmentCategory.MagicalArtefact, allEquipment.Single(i => i.Name == artefactName).Category);
+        Assert.Equal(1, allEquipment.Single(i => i.Name == "All-seeing Eye of Numas").GrantsBonusExplorationDice);
+
         // Catacombs (4 6): a purely tactical/battlefield effect (no gold/item/wyrdstone anywhere in the
         // rulebook text) - genuinely nothing to mechanize, stays pure text.
         var catacombs = results.Single(r => r.DiceCount == 4 && r.Value == 6);

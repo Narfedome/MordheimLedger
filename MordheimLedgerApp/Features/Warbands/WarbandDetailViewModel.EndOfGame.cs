@@ -142,6 +142,14 @@ public partial class WarbandDetailViewModel
                     && int.TryParse(dialogViewModel.ExplorationItemFoundValue, out var foundValue) ? foundValue : null;
                 await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleName, foundValueOverride);
             }
+            else if (outcome.TriggersArtefactRoll && dialogViewModel.ResolvedArtefactItemName is { } artefactName)
+            {
+                // Villa d'un Noble, sous-jet 5-6 : l'objet précis vient du second D6 sur la table des
+                // Artefacts Magiques (voir Core.Rules.MagicalArtefactTable), jamais de
+                // ChosenExplorationItemName - c'est pourquoi ce cas ne tombe pas dans le "else if"
+                // Kind.Item ci-dessus (EquipmentItemName reste null sur cette branche).
+                await AddOneItemToInventoryAsync(artefactName, 1, null);
+            }
             else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
                 && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)
             {

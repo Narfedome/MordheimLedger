@@ -215,6 +215,9 @@ public class EquipmentSeedData
 
     /// <summary>See EquipmentItem.IsSellable. False/absent for almost every item.</summary>
     public bool IsSellable { get; set; }
+
+    /// <summary>See EquipmentItem.GrantsBonusExplorationDice. Null for almost every item.</summary>
+    public int? GrantsBonusExplorationDice { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -385,6 +388,10 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.CausesDeath. False/absent for almost every
     /// outcome - so far only the Pit's (La Fosse) "devoured" branch.</summary>
     public bool CausesDeath { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.TriggersArtefactRoll. False/absent for almost
+    /// every outcome - so far only Noble's Villa (Villa d'un Noble) and Hidden Treasure (Trésor Caché).</summary>
+    public bool TriggersArtefactRoll { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

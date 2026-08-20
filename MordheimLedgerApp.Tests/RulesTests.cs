@@ -811,4 +811,51 @@ public class RulesTests
         var warrior = WarriorWith([], ruby, necklace);
         Assert.Equal(2, RareItemSearchBonus.EffectiveBonus(warrior));
     }
+
+    // --- ExplorationDiceBonus --------------------------------------------------------------------
+
+    [Fact]
+    public void ExplorationDiceBonus_NoGrantingItem_IsZero()
+    {
+        var warrior = WarriorWith([], new EquipmentItem { Id = 1 });
+        Assert.Equal(0, ExplorationDiceBonus.EffectiveBonusDice([warrior]));
+    }
+
+    [Fact]
+    public void ExplorationDiceBonus_CarriedEyeOfNumas_ReturnsItsBonus()
+    {
+        var eye = new EquipmentItem { Id = 1, GrantsBonusExplorationDice = 1 };
+        var warrior = WarriorWith([], eye);
+        Assert.Equal(1, ExplorationDiceBonus.EffectiveBonusDice([warrior]));
+    }
+
+    [Fact]
+    public void ExplorationDiceBonus_SumsAcrossMultipleWarriors()
+    {
+        var eye = new EquipmentItem { Id = 1, GrantsBonusExplorationDice = 1 };
+        var bearer = WarriorWith([], eye);
+        var other = WarriorWith([], new EquipmentItem { Id = 2 });
+        Assert.Equal(1, ExplorationDiceBonus.EffectiveBonusDice([bearer, other]));
+    }
+
+    // --- MagicalArtefactTable ---------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(1, "Boots and Rope of Pieter")]
+    [InlineData(2, "The Count of Ventimiglia's Misericordia")]
+    [InlineData(3, "Att'la's Plate Mail")]
+    [InlineData(4, "Bow of Seeking")]
+    [InlineData(5, "Executioner's Hood")]
+    [InlineData(6, "All-seeing Eye of Numas")]
+    public void MagicalArtefactTable_RollForItemName_MatchesRulebookTable(int roll, string expectedName)
+    {
+        Assert.Equal(expectedName, MagicalArtefactTable.RollForItemName(roll));
+    }
+
+    [Fact]
+    public void MagicalArtefactTable_RollForItemName_OutOfRange_ReturnsNull()
+    {
+        Assert.Null(MagicalArtefactTable.RollForItemName(0));
+        Assert.Null(MagicalArtefactTable.RollForItemName(7));
+    }
 }

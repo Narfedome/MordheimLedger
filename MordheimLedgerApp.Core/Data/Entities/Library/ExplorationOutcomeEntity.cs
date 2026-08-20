@@ -28,4 +28,5 @@ public class ExplorationOutcomeEntity
     public bool CausesSickness { get; set; }
     public bool RequiresDoubleRoll { get; set; }
     public bool CausesDeath { get; set; }
+    public bool TriggersArtefactRoll { get; set; }
 }

@@ -481,6 +481,29 @@
                                                               IsVisible="{Binding ShowExplorationGoldRoll}"/>
                             </Grid>
 
+                            <!-- Table des Artefacts Magiques (Villa d'un Noble) : la branche résolue ne
+                                 dit pas encore QUEL objet - un second D6 sur cette table fixe le
+                                 détermine (voir ShowArtefactRoll/Core.Rules.MagicalArtefactTable). Porte
+                                 son propre libellé, contrairement au sous-jet juste au-dessus - "sur
+                                 quelle table on relance" n'est pas déductible du contexte comme l'est le
+                                 premier jet (retour utilisateur 2026-08-20). -->
+                            <VerticalStackLayout IsVisible="{Binding ShowArtefactRoll}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameArtefactTableLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding ArtefactRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollArtefactCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding ArtefactRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding ArtefactRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+
                             <!-- Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), un seul
                                  exemplaire est trouvé - ni champ ni dé, juste "x1" en lecture seule (voir
                                  ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
@@ -643,6 +666,16 @@
                         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusStatTestOutcome}">
                             <components:ChipView Grid.Column="0" Item="{Binding BonusStatTestItem}"
                                                   IconGlyph="{Binding BonusStatTestItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Objet tiré sur la table des Artefacts Magiques (Villa d'un Noble) une fois le
+                             second D6 saisi - voir ResolvedArtefactItem. -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ResolvedArtefactItem, Converter={StaticResource IsNotNullConverter}}">
+                            <components:ChipView Grid.Column="0" Item="{Binding ResolvedArtefactItem}"
+                                                  IconGlyph="{Binding ResolvedArtefactItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                   IconFontFamily="RpgAwesome"
                                                   Command="{Binding ShowExplorationItemDetailCommand}"/>
                             <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>

@@ -603,6 +603,9 @@
   <data name="EquipmentCategoryDrugsAndPoisons" xml:space="preserve">
     <value>Drogues et Poisons</value>
   </data>
+  <data name="EquipmentCategoryMagicalArtefact" xml:space="preserve">
+    <value>Artefact Magique</value>
+  </data>
   <data name="EquipmentCategoryAnimal" xml:space="preserve">
     <value>Animaux</value>
   </data>
@@ -830,6 +833,9 @@
   </data>
   <data name="EndOfGameRoll" xml:space="preserve">
     <value>Tirer</value>
+  </data>
+  <data name="EndOfGameArtefactTableLabel" xml:space="preserve">
+    <value>Table des Artefacts Magiques (1-6)</value>
   </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Jet requis avant de continuer.</value>

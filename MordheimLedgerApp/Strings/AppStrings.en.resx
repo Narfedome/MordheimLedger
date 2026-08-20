@@ -603,6 +603,9 @@
   <data name="EquipmentCategoryDrugsAndPoisons" xml:space="preserve">
     <value>Drugs and Poisons</value>
   </data>
+  <data name="EquipmentCategoryMagicalArtefact" xml:space="preserve">
+    <value>Magical Artefact</value>
+  </data>
   <data name="EquipmentCategoryAnimal" xml:space="preserve">
     <value>Animals</value>
   </data>
@@ -830,6 +833,9 @@
   </data>
   <data name="EndOfGameRoll" xml:space="preserve">
     <value>Roll</value>
+  </data>
+  <data name="EndOfGameArtefactTableLabel" xml:space="preserve">
+    <value>Magical Artefacts table (1-6)</value>
   </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Roll required before continuing.</value>

@@ -22,5 +22,13 @@ public enum EquipmentCategory
     /// <summary>Recreational drugs and blade poisons (e.g. Black Lotus, Mandrake Root, Dark Venom) -
     /// same split as Consumable above, kept distinct from it since these usually carry a real
     /// downside/risk rather than a plain benefit.</summary>
-    DrugsAndPoisons = 8
+    DrugsAndPoisons = 8,
+
+    /// <summary>The rulebook's 6 unique Magical Artefacts (see Core.Rules.MagicalArtefactTable, e.g.
+    /// Att'la's Plate Mail, Bow of Seeking) - found only via the Exploration chart, never purchasable at
+    /// the Trading Post regardless of weapon/armour shape, so kept out of the weapon/armour categories
+    /// they'd otherwise fall under (user request, 2026-08-20). See EquipmentItemViewModel.ApplyFilter,
+    /// which excludes this category from purchase pickers specifically (Library/Codex browsing still
+    /// shows it like any other category).</summary>
+    MagicalArtefact = 9
 }

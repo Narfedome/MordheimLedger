@@ -103,4 +103,12 @@ public class EquipmentItem
     /// material (contrast SpecialRule.IsResaleUpgrade, e.g. "Ornate Weapon"). False/default for
     /// everything else - see Models.WarbandEquipment.IsSellable, which checks both.</summary>
     public bool IsSellable { get; set; }
+
+    /// <summary>Null for almost every item. Non-null marks an item that grants this many EXTRA dice to
+    /// the warband's post-battle Exploration roll while carried by a warrior (e.g. the All-seeing Eye
+    /// of Numas - Œil Omniscient de Numas: "roll two dice instead of one for the bearer"). Computed live
+    /// from currently-carried equipment, same idiom as GrantsSkillCategory - see Core.Rules.
+    /// ExplorationDiceBonus, fed into Core.Rules.ExplorationChart.ComputeDiceCount's bonusDice
+    /// parameter.</summary>
+    public int? GrantsBonusExplorationDice { get; set; }
 }

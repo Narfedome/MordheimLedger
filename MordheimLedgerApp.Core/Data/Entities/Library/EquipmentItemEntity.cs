@@ -31,4 +31,5 @@ public class EquipmentItemEntity
     public string? GrantsSpecificSkillName { get; set; }
     public int? GrantsRareItemSearchBonus { get; set; }
     public bool IsSellable { get; set; }
+    public int? GrantsBonusExplorationDice { get; set; }
 }

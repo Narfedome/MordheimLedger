@@ -98,5 +98,12 @@
       "en": "The Hero carrying this may display it proudly instead of selling it, gaining +1 to his rolls for locating rare items.",
       "fr": "Le Héros qui porte cet objet peut l'exhiber fièrement au lieu de le revendre, ce qui lui donne +1 sur ses jets pour dénicher des objets rares."
     }
+  },
+  {
+    "name": { "en": "Frenzy", "fr": "Frénésie" },
+    "description": {
+      "en": "A frenzied warrior must always charge any enemy within charge range, fights with double Attacks in hand-to-hand combat (an extra Attack for a second weapon isn't doubled), and is immune to all other psychology while within charge range. Being knocked down or stunned ends his frenzy for the rest of the battle.",
+      "fr": "Un guerrier frénétique doit toujours charger tout ennemi à portée de charge, combat avec le double de ses Attaques au corps à corps (l'Attaque supplémentaire pour une arme dans chaque main n'est pas doublée), et est immunisé à toute autre règle de psychologie tant qu'il reste à portée de charge. Être mis à terre ou étourdi met fin à sa frénésie pour le reste de la bataille."
+    }
   }
 ]

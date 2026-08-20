@@ -65,7 +65,22 @@ public partial class WarbandDetailViewModel
         // besoin de résoudre un objet Skill localisé comme les deux dictionnaires ci-dessus.
         var skillIdsByEnglishName = (await _libraryService.GetSkillsAsync("en")).ToDictionary(s => s.Name, s => s.Id);
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName, skillIdsByEnglishName);
+        // ExplorationOutcome.RestrictedToWarbandArchetypeNames (Groupe B "conditionné par la bande" -
+        // Traînard, Prisonniers, Cimetière, bénédiction du Sanctuaire) matche par nom anglais, pas Id -
+        // même besoin que les dictionnaires ci-dessus.
+        var warbandArchetypeName = (await _libraryService.GetWarbandArchetypesAsync("en"))
+            .First(a => a.Id == Warband.WarbandArchetypeId).Name;
+
+        // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - limité aux
+        // archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
+        var englishWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en");
+        var localizedWarriorArchetypes = language == "en" ? englishWarriorArchetypes : await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, language);
+        var warriorArchetypesByEnglishName = englishWarriorArchetypes.ToDictionary(a => a.Name,
+            a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
+
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId,
+            warbandArchetypeName, Warband.PendingExplorationBonusDie, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
+            warriorArchetypesByEnglishName, skillIdsByEnglishName);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -93,6 +108,16 @@ public partial class WarbandDetailViewModel
         Dictionary<string, EquipmentItem> equipmentItemsByEnglishName, List<SpecialRule> englishSpecialRules, List<string> sentences)
     {
         if (Warband is null) return;
+
+        // Le dé bonus en attente (Traînard, voir Warband.PendingExplorationBonusDie) a été montré comme
+        // rappel textuel à cette étape (dialogViewModel.ShowPendingExplorationBonusDieReminder) - une
+        // fois cette Fin de Partie sauvegardée, il est consommé qu'il ait servi ou non (même logique que
+        // n'importe quelle ressource trouvée-mais-pas-utilisée).
+        if (Warband.PendingExplorationBonusDie)
+        {
+            Warband.PendingExplorationBonusDie = false;
+            await _warbandService.SaveWarbandAsync(Warband);
+        }
 
         // Même résolution nom-anglais-vers-Id que le chargement de la page, réutilisée ici pour
         // AddWarbandEquipmentAsync (seul l'Id compte, voir WarbandService) et pour la phrase
@@ -173,6 +198,55 @@ public partial class WarbandDetailViewModel
                 // ApplyWarriorOutcomesAsync pour la même raison (celle-ci resynchronise sinon
                 // warrior.Status depuis row.Status et écraserait silencieusement Mort en Actif).
                 sentences.Add(string.Format(Loc["HistoryPitDevouredSentence"], devouredHero.Name));
+            }
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsNextExplorationBonusDie)
+            {
+                // Traînard, branche "autres bandes" - voir Warband.PendingExplorationBonusDie, consommé
+                // (et son rappel affiché) au tout début de cette méthode lors de la PROCHAINE Fin de
+                // Partie, pas celle-ci.
+                Warband.PendingExplorationBonusDie = true;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
+            }
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsLeaderExperience is { } leaderXp)
+            {
+                // Traînard, branche Possédés - même idiome que BonusStatTestLeader (Bâtiment Éventré) :
+                // pas d'erreur bloquante si le chef n'est pas disponible cette partie (mort/malade/hors
+                // de combat), le bonus est simplement indisponible.
+                var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                if (leader is not null)
+                {
+                    leader.Warrior.Experience += leaderXp;
+                    await _warbandService.SaveWarriorAsync(leader.Warrior);
+                    sentences.Add(string.Format(Loc["HistoryLeaderExperienceSentence"], leader.Warrior.Name, leaderXp));
+                }
+                else
+                {
+                    sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
+                }
+            }
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeName is { } henchmanName)
+            {
+                // Traînard, branche Morts-Vivants ("Zombie") - fusionne dans un groupe d'Hommes de main
+                // déjà existant de ce même archétype plutôt que de créer une ligne séparée : un Zombie ne
+                // peut porter aucun équipement (CanUseEquipment false), donc deux groupes du même
+                // archétype seraient de toute façon rigoureusement identiques.
+                var archetype = (await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en"))
+                    .FirstOrDefault(a => a.Name == henchmanName);
+                if (archetype is not null)
+                {
+                    var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == archetype.Id);
+                    if (existingGroup is not null)
+                    {
+                        existingGroup.Warrior.HeadCount += 1;
+                        await _warbandService.SaveWarriorAsync(existingGroup.Warrior);
+                    }
+                    else
+                    {
+                        await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, archetype.Name, headCount: 1);
+                    }
+                    sentences.Add(string.Format(Loc["HistoryFreeHenchmanSentence"], archetype.Name));
+                }
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None)
             {

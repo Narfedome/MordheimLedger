@@ -55,10 +55,10 @@
     },
     "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Skavens : vente aux agents du Clan Eshin" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Autres bandes : un dé supplémentaire au prochain jet d'Exploration" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Skavens : vente aux agents du Clan Eshin", "restrictedToWarbandArchetypeNames": ["Skaven of Clan Eshin"] },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsLeaderExperience": 1 },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie" },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Autres bandes : un dé supplémentaire au prochain jet d'Exploration", "grantsNextExplorationBonusDie": true }
     ]
   },
   {

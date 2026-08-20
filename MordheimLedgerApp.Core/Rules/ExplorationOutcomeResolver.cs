@@ -22,9 +22,32 @@ public static class ExplorationOutcomeResolver
     /// branches (Pass/Fail) must never resolve on their own before the test is actually made. Same
     /// deferral for a result gated behind a paired-dice double check (see ResolveDoubleRollOutcome) -
     /// e.g. Merchant's House's Gold/Item branches must wait for both dice, not resolve to whichever
-    /// happens to come first in Outcomes.</summary>
+    /// happens to come first in Outcomes. Also null for a RollsIndependently result (Groupe B, e.g.
+    /// Straggler) - EVERY one of its Outcomes has SubRollMin null too (they're mutually exclusive by
+    /// warband identity, not a sub-roll), so without this guard the FIRST one in the JSON would silently
+    /// win regardless of which warband is playing - a real bug found 2026-08-20 while building
+    /// ResolveWarbandOutcome, the resolver that actually owns this shape now.</summary>
     public static ExplorationOutcome? ResolveAutoOutcome(ExplorationResult result) =>
-        result.StatTestField is not null || result.RequiresDoubleRoll ? null : result.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
+        result.RollsIndependently || result.StatTestField is not null || result.RequiresDoubleRoll
+            ? null : result.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
+
+    /// <summary>The branch a RollsIndependently result resolves to based on which warband is playing
+    /// (Groupe B "conditional on warband type" shape - Straggler, Prisoners, Graveyard, Shrine's
+    /// blessing - confirmed with the user 2026-08-20: the rulebook's "a Skaven warband CAN..." phrasing
+    /// means the branch is strictly determined by warband identity, never a free choice among all of
+    /// them). Prefers an Outcome specifically restricted to warbandArchetypeName (see ExplorationOutcome.
+    /// RestrictedToWarbandArchetypeNames); falls back to the one unrestricted "catch-all" Outcome for
+    /// every other warband. Null if the result isn't actually this shape (no Outcome carries a
+    /// restriction at all - Tavern/Hidden Treasure/Slaughtered Warband are RollsIndependently too but
+    /// resolved by ResolveStatTestOutcome/a per-item threshold roll instead, not this).</summary>
+    public static ExplorationOutcome? ResolveWarbandOutcome(ExplorationResult result, string warbandArchetypeName)
+    {
+        if (!result.RollsIndependently || !result.Outcomes.Any(o => o.RestrictedToWarbandArchetypeNames.Count > 0))
+            return null;
+
+        return result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeNames.Contains(warbandArchetypeName))
+            ?? result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+    }
 
     /// <summary>The mutually-exclusive branch a single sub-roll picks (e.g. Corpse: 1-2 gold, 3 dagger,
     /// 4 axe...) - null if no branch's range contains the roll (shouldn't happen for a well-formed sub-

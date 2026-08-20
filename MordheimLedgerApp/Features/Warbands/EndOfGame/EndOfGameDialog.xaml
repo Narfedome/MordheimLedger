@@ -301,6 +301,10 @@
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExplorationRollStep}">
                 <Label Text="{loc:Loc EndOfGameExplorationHeading}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameExplorationDiceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <!-- Traînard, "autres bandes" : purement un rappel textuel, ne change pas le nombre de
+                     dés affiché plus bas - voir ExplorationDiceCount pour pourquoi. -->
+                <Label Text="{loc:Loc EndOfGamePendingBonusDieReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       IsVisible="{Binding ShowPendingExplorationBonusDieReminder}"/>
 
                 <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
                     <BindableLayout.ItemTemplate>
@@ -334,7 +338,12 @@
                 <Label Text="{Binding TriggeredExplorationResult.Name}" FontAttributes="Bold"/>
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="{Binding TriggeredExplorationResult.Description}" FontSize="12"/>
+                        <!-- Groupe B "conditionné par la bande" (ex. Traînard) : la description complète
+                             du livre énumère TOUTES les branches (Skavens/Possédés/Morts-Vivants/
+                             autres), alors qu'une seule s'applique à la bande jouée - affiche seulement
+                             le texte de cette branche plutôt que le paragraphe entier. Voir
+                             ExplorationResultDescriptionText. -->
+                        <Label Text="{Binding ExplorationResultDescriptionText}" FontSize="12"/>
 
                         <!-- Héros envoyé (La Fosse) : optionnel ("si vous le souhaitez") - "Passer son
                              chemin" apparaît comme une vraie option du Picker, sélectionnée par défaut,
@@ -626,8 +635,10 @@
 
                             <!-- Branche sans effet trésorerie/inventaire (ex. Traînard/"autres bandes")
                                  - purement informatif, consigné dans l'Historique à la sauvegarde plutôt
-                                 que silencieusement perdu. -->
-                            <Label IsVisible="{Binding IsExplorationNone}" Text="{Binding ExplorationNoteText}"
+                                 que silencieusement perdu. Masqué pour un résultat "conditionné par la
+                                 bande" (voir ExplorationResultDescriptionText plus haut) : ce même texte
+                                 y est déjà affiché, pas la peine de le répéter ici. -->
+                            <Label IsVisible="{Binding ShowExplorationNoteInBranchSection}" Text="{Binding ExplorationNoteText}"
                                    FontSize="12" FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"/>
 
                         </VerticalStackLayout>
@@ -678,6 +689,16 @@
                                                   IconGlyph="{Binding ResolvedArtefactItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                   IconFontFamily="RpgAwesome"
                                                   Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Homme de main gratuit (ex. Traînard, Morts-Vivants : un Zombie rejoint la
+                             bande) - voir ResolvedFreeHenchman. Toujours 1 exemplaire, jamais de champ/
+                             dé ici (aucun jet ne le concerne). -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ResolvedFreeHenchman, Converter={StaticResource IsNotNullConverter}}">
+                            <components:ChipView Grid.Column="0" Item="{Binding ResolvedFreeHenchman}"
+                                                  IconGlyph="{x:Static icons:SolidFont.UserGroup}"
+                                                  Command="{Binding ShowFreeHenchmanDetailCommand}"/>
                             <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
                     </VerticalStackLayout>

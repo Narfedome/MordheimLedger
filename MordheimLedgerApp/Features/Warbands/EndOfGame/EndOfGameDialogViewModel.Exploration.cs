@@ -28,9 +28,18 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Dés bonus depuis l'équipement porté par les guerriers encore debout (ex. l'Œil
     /// Omniscient de Numas - voir Core.Rules.ExplorationDiceBonus) - premier vrai usage du paramètre
-    /// bonusDice de ComputeDiceCount, jusqu'ici toujours appelé à 0.</summary>
+    /// bonusDice de ComputeDiceCount, jusqu'ici toujours appelé à 0. Ne compte PAS
+    /// _pendingExplorationBonusDie (Traînard) : contrairement à l'Œil de Numas ("lancez deux dés au lieu
+    /// d'un", un vrai dé de plus gardé), le texte du Traînard est "lancez un dé de PLUS que d'habitude et
+    /// écartez-en un au choix" - un dé physique en trop que le joueur écarte lui-même avant de saisir ses
+    /// valeurs finales, donc le nombre de dés GARDÉS (ExplorationDiceCount) ne change pas du tout ; seul
+    /// un rappel textuel a du sens ici (voir ShowPendingExplorationBonusDieReminder plus bas).</summary>
     public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame,
         ExplorationDiceBonus.EffectiveBonusDice(WarriorRows.Where(r => !r.IsOutOfAction).Select(r => r.Warrior)));
+
+    /// <summary>Rappel purement textuel (voir ExplorationDiceCount pour pourquoi ça ne change PAS le
+    /// nombre de dés affichés) - affiché une fois à l'étape du jet d'Exploration.</summary>
+    public bool ShowPendingExplorationBonusDieReminder => _pendingExplorationBonusDie;
 
     public ObservableCollection<ExplorationDieEntry> ExplorationDice { get; } = new();
 
@@ -38,6 +47,9 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(HasExplorationResult))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationSubRoll))]
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
+    [NotifyPropertyChangedFor(nameof(IsWarbandConditionedResult))]
+    [NotifyPropertyChangedFor(nameof(ExplorationResultDescriptionText))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationNoteInBranchSection))]
     [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
     [NotifyPropertyChangedFor(nameof(BonusItem))]
@@ -135,6 +147,9 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(IsExplorationWyrdstone))]
     [NotifyPropertyChangedFor(nameof(IsExplorationNone))]
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
+    [NotifyPropertyChangedFor(nameof(ExplorationResultDescriptionText))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationNoteInBranchSection))]
+    [NotifyPropertyChangedFor(nameof(ResolvedFreeHenchman))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemFoundValueRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
@@ -227,6 +242,34 @@ public partial class EndOfGameDialogViewModel
     /// branche retenue (ex. "Skavens : vente aux agents du Clan Eshin"), ou à défaut le nom du résultat
     /// déclenché si la branche n'en porte pas.</summary>
     public string ExplorationNoteText => ResolvedExplorationOutcome?.Note ?? TriggeredExplorationResult?.Name ?? string.Empty;
+
+    /// <summary>Vrai pour un résultat Groupe B "conditionné par la bande" (Traînard, Prisonniers,
+    /// Cimetière, bénédiction du Sanctuaire - voir Core.Rules.ExplorationOutcomeResolver.
+    /// ResolveWarbandOutcome) : la description complète du livre énumère TOUTES les branches par bande,
+    /// alors qu'une seule s'applique à la bande jouée - retour utilisateur 2026-08-20, ne montrer que
+    /// cette branche plutôt que le paragraphe entier.</summary>
+    public bool IsWarbandConditionedResult => TriggeredExplorationResult?.Outcomes.Any(o => o.RestrictedToWarbandArchetypeNames.Count > 0) == true;
+
+    /// <summary>Texte affiché en haut de l'étape Résultat - la description complète du livre, sauf pour
+    /// un résultat conditionné par la bande où seul le Note de la branche déjà résolue (Skavens/
+    /// Possédés/Morts-Vivants/autres...) est montré.</summary>
+    public string ExplorationResultDescriptionText => IsWarbandConditionedResult
+        ? ResolvedExplorationOutcome?.Note ?? string.Empty
+        : TriggeredExplorationResult?.Description ?? string.Empty;
+
+    /// <summary>Le bloc Note de la branche résolue (plus bas, sous Or/Objet/Pierre magique) ne doit pas
+    /// répéter ce que ExplorationResultDescriptionText affiche déjà en haut pour un résultat conditionné
+    /// par la bande.</summary>
+    public bool ShowExplorationNoteInBranchSection => IsExplorationNone && !IsWarbandConditionedResult;
+
+    /// <summary>ExplorationOutcome.GrantsFreeHenchmanArchetypeName résolu (ex. "Zombie", Traînard) -
+    /// affiché en ChipView tapable (même langage d'interaction que tout objet trouvé) plutôt qu'en
+    /// simple texte, pour que le joueur voie ce qui rejoint sa bande avant même de valider le wizard.</summary>
+    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeName is { } name
+        ? _warriorArchetypesByEnglishName.GetValueOrDefault(name) : null;
+
+    [RelayCommand]
+    private Task ShowFreeHenchmanDetail(WarriorArchetype archetype) => _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(archetype, Array.Empty<NamedRef>());
 
     public bool IsExplorationGold => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold;
 
@@ -642,6 +685,11 @@ public partial class EndOfGameDialogViewModel
         // ResolveAutoOutcome renvoie null pour lui, voir Core.Rules.ExplorationOutcomeResolver.
         var autoOutcome = ExplorationOutcomeResolver.ResolveAutoOutcome(TriggeredExplorationResult);
         if (autoOutcome is not null) ApplyResolvedOutcome(autoOutcome);
+        else if (ExplorationOutcomeResolver.ResolveWarbandOutcome(TriggeredExplorationResult, _warbandArchetypeName) is { } warbandOutcome)
+            // Groupe B "conditionné par la bande" (Traînard, Prisonniers, Cimetière, bénédiction du
+            // Sanctuaire) : la branche applicable se résout d'elle-même depuis l'archétype de la bande
+            // jouée, aucune saisie du joueur ne la départage (voir ResolveWarbandOutcome).
+            ApplyResolvedOutcome(warbandOutcome);
     }
 
     partial void OnExplorationSubRollChanged(string value)

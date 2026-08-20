@@ -227,12 +227,24 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var catacombs = results.Single(r => r.DiceCount == 4 && r.Value == 6);
         Assert.Empty(catacombs.Outcomes);
 
-        // Straggler (2 4): conditional on the warband's type, no die roll involved - every applicable
-        // branch is its own Auto outcome, the player applies whichever matches their warband.
+        // Straggler (2 4): Groupe B "conditioned on warband identity" (2026-08-20: the wizard now
+        // resolves the applicable branch automatically from the warband's archetype - see Core.Rules.
+        // ExplorationOutcomeResolver.ResolveWarbandOutcome - instead of the player picking manually) -
+        // one Outcome restricted to each of Skaven/Cult of the Possessed/Undead, plus one unrestricted
+        // catch-all for every other warband that also grants a next-Exploration bonus die.
         var straggler = results.Single(r => r.DiceCount == 2 && r.Value == 4);
         Assert.True(straggler.RollsIndependently);
-        Assert.Contains(straggler.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Gold, GoldFormula: "2D6" });
+        Assert.Equal(4, straggler.Outcomes.Count);
         Assert.All(straggler.Outcomes, o => Assert.Null(o.SubRollMin));
+        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"]) && o.Kind == ExplorationOutcomeKind.Gold && o.GoldFormula == "2D6");
+        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Cult of the Possessed"]));
+        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
+        var stragglerCatchAll = Assert.Single(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        Assert.True(stragglerCatchAll.GrantsNextExplorationBonusDie);
+        var stragglerPossessed = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Cult of the Possessed"]));
+        Assert.Equal(1, stragglerPossessed.GrantsLeaderExperience);
+        var stragglerUndead = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
+        Assert.Equal("Zombie", stragglerUndead.GrantsFreeHenchmanArchetypeName);
 
         // Dwarf Smithy (6 3): a "Gromril Axe" branch is just the base "Axe" plus the Gromril Weapon
         // material rule, not a distinct catalog item - see ExplorationOutcome.MaterialRuleName.

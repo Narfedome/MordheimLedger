@@ -29,4 +29,12 @@ public class ExplorationOutcomeEntity
     public bool RequiresDoubleRoll { get; set; }
     public bool CausesDeath { get; set; }
     public bool TriggersArtefactRoll { get; set; }
+
+    /// <summary>Comma-separated English WarbandArchetype.Name(s) - see Models.Library.ExplorationOutcome.
+    /// RestrictedToWarbandArchetypeNames. Null/empty = the catch-all branch.</summary>
+    public string? RestrictedToWarbandArchetypeNamesCsv { get; set; }
+
+    public bool GrantsNextExplorationBonusDie { get; set; }
+    public int? GrantsLeaderExperience { get; set; }
+    public string? GrantsFreeHenchmanArchetypeName { get; set; }
 }

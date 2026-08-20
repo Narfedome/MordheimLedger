@@ -801,6 +801,9 @@
   <data name="EndOfGameExplorationDiceHint" xml:space="preserve">
     <value>Roll one dice per surviving Hero who didn't go out of action, plus one if you won the battle (maximum 6 dice).</value>
   </data>
+  <data name="EndOfGamePendingBonusDieReminder" xml:space="preserve">
+    <value>Thanks to your last exploration: roll one dice more than usual and discard any one dice before entering your rolls.</value>
+  </data>
   <data name="EndOfGameExplorationGoldLabel" xml:space="preserve">
     <value>Gold found (gc)</value>
   </data>
@@ -866,6 +869,12 @@
   </data>
   <data name="HistoryPitDevouredSentence" xml:space="preserve">
     <value>{0} was sent into the Pit and devoured by its guardians.</value>
+  </data>
+  <data name="HistoryLeaderExperienceSentence" xml:space="preserve">
+    <value>{0} gains {1} Experience.</value>
+  </data>
+  <data name="HistoryFreeHenchmanSentence" xml:space="preserve">
+    <value>{0} joins the warband for free.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} gained {1} XP.</value>

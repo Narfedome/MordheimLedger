@@ -79,15 +79,50 @@ public class ExplorationOutcome
     /// <summary>Short disambiguating label shown alongside this branch - two uses: (1) a rare fallback
     /// for a branch that reads as Gold/Item in the rulebook but can't be wired up that way yet (Kind
     /// stays None, e.g. "Elven Cloak" for an item missing from the Trading Post catalog); (2) a context
-    /// label on ANY Kind for an ExplorationResult whose branches are chosen by the player rather than by
-    /// a sub-roll - several entries (e.g. "Straggler", "Tavern") are conditional on the warband's type
-    /// or on a Leadership/Toughness test the app doesn't simulate, so every applicable branch is listed
-    /// as its own Auto outcome (SubRollMin/Max both null) labelled with when it applies (e.g. "Skaven",
-    /// "Test de Commandement réussi") and the player picks whichever matches, same "the player rolls
-    /// physically and reports the outcome" idiom used for every dice field in the End of Game wizard.
-    /// Deliberately not localized like the rest of this Library catalog: short/secondary content, not
-    /// primary UI text - add a NoteKey translation slot later if that turns out to matter.</summary>
+    /// label on ANY Kind for an ExplorationResult whose branches are conditional on the warband's type
+    /// (e.g. "Skaven", "Undead") - one Auto outcome (SubRollMin/Max both null) per applicable warband,
+    /// see RestrictedToWarbandArchetypeNames for how the wizard now picks the right one automatically
+    /// (2026-08-20 - supersedes an earlier plan, described in an older revision of this comment, to show
+    /// every branch and let the player pick manually: confirmed with the user that the rulebook's "a
+    /// Skaven warband CAN..." phrasing means the branch is strictly determined by warband identity, not a
+    /// free choice among all of them). Deliberately not localized like the rest of this Library catalog:
+    /// short/secondary content, not primary UI text - add a NoteKey translation slot later if that turns
+    /// out to matter.</summary>
     public string? Note { get; set; }
+
+    /// <summary>English WarbandArchetype.Name(s) this branch is restricted to (e.g. "Skaven of Clan
+    /// Eshin") - only meaningful when the owning ExplorationResult.RollsIndependently is true and at
+    /// least one sibling Outcome also sets this (a "branch determined by warband identity" result:
+    /// Straggler, Prisoners, Graveyard, Shrine's blessing). Empty = the catch-all branch for every
+    /// warband not more specifically claimed by a sibling - see Core.Rules.ExplorationOutcomeResolver.
+    /// ResolveWarbandOutcome. Plain string list resolved by name at consumption time, same idiom as
+    /// EquipmentItemName/MaterialRuleName - this is fixed rulebook content with no editor, so no join
+    /// table/Id resolution is needed (unlike EquipmentItem/Skill/Mutation's editable
+    /// RestrictedToWarbandArchetypeIds).</summary>
+    public List<string> RestrictedToWarbandArchetypeNames { get; set; } = new();
+
+    /// <summary>True only for Straggler's "any other warband" branch ("interrogate the man... next time
+    /// you roll on the Exploration chart, roll one dice more than usual and discard any one dice") - the
+    /// End of Game wizard sets Warband.PendingExplorationBonusDie when this branch resolves, consumed as
+    /// a +1 to Core.Rules.ExplorationChart.ComputeDiceCount's bonusDice the NEXT time this warband opens
+    /// the End of Game wizard (see EndOfGameDialogViewModel.ExplorationDiceCount). False/default for
+    /// every other branch.</summary>
+    public bool GrantsNextExplorationBonusDie { get; set; }
+
+    /// <summary>Fixed Experience granted directly to the warband's leader (Warrior.IsLeader), no roll
+    /// involved - so far only Straggler's Possessed branch ("the leader gains +1 Experience"). Null for
+    /// every other branch. Silently skipped (no error) if the leader isn't available this game (dead/
+    /// sick/out of action), same "unavailable, not blocking" idiom as BonusStatTestLeader.</summary>
+    public int? GrantsLeaderExperience { get; set; }
+
+    /// <summary>English WarriorArchetype.Name of a Henchman that joins the warband for free - so far
+    /// only Straggler's Undead branch ("gain a Zombie at no cost"). Resolved against the CURRENT
+    /// warband's own roster (never another warband's), same plain-string-reference idiom as
+    /// EquipmentItemName. If the warband already has a Henchman group of this same archetype, the new
+    /// recruit merges into it (HeadCount + 1) rather than creating a separate row - Zombie-type Henchmen
+    /// (CanUseEquipment false) never carry equipment that could tell two groups of the same archetype
+    /// apart, so they're always the same group regardless. Null for every other branch.</summary>
+    public string? GrantsFreeHenchmanArchetypeName { get; set; }
 
     /// <summary>Only meaningful when the owning ExplorationResult.StatTestField is set - true = this
     /// branch applies when the chosen Hero's roll succeeded (roll &lt;= stat), false = when it failed,

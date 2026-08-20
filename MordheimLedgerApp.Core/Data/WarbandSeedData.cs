@@ -392,6 +392,22 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.TriggersArtefactRoll. False/absent for almost
     /// every outcome - so far only Noble's Villa (Villa d'un Noble) and Hidden Treasure (Trésor Caché).</summary>
     public bool TriggersArtefactRoll { get; set; }
+
+    /// <summary>English WarbandArchetype.Name(s) - see Models.Library.ExplorationOutcome.
+    /// RestrictedToWarbandArchetypeNames. Null/absent (almost every outcome) = no restriction.</summary>
+    public List<string>? RestrictedToWarbandArchetypeNames { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsNextExplorationBonusDie. False/absent for
+    /// almost every outcome - so far only Straggler's (Traînard) "any other warband" branch.</summary>
+    public bool GrantsNextExplorationBonusDie { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsLeaderExperience. Null/absent for almost
+    /// every outcome - so far only Straggler's (Traînard) Possessed branch.</summary>
+    public int? GrantsLeaderExperience { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsFreeHenchmanArchetypeName. Null/absent for
+    /// almost every outcome - so far only Straggler's (Traînard) Undead branch ("Zombie").</summary>
+    public string? GrantsFreeHenchmanArchetypeName { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

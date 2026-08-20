@@ -30,6 +30,7 @@ public static class EntityMapping
         Name = e.Name,
         Treasury = e.Treasury,
         WyrdstoneShards = e.WyrdstoneShards,
+        PendingExplorationBonusDie = e.PendingExplorationBonusDie,
         Notes = e.Notes
     };
 
@@ -41,6 +42,7 @@ public static class EntityMapping
         Name = m.Name,
         Treasury = m.Treasury,
         WyrdstoneShards = m.WyrdstoneShards,
+        PendingExplorationBonusDie = m.PendingExplorationBonusDie,
         Notes = m.Notes
     };
 
@@ -294,7 +296,12 @@ public static class EntityMapping
         CausesSickness = e.CausesSickness,
         RequiresDoubleRoll = e.RequiresDoubleRoll,
         CausesDeath = e.CausesDeath,
-        TriggersArtefactRoll = e.TriggersArtefactRoll
+        TriggersArtefactRoll = e.TriggersArtefactRoll,
+        RestrictedToWarbandArchetypeNames = string.IsNullOrEmpty(e.RestrictedToWarbandArchetypeNamesCsv)
+            ? new() : e.RestrictedToWarbandArchetypeNamesCsv.Split(',').ToList(),
+        GrantsNextExplorationBonusDie = e.GrantsNextExplorationBonusDie,
+        GrantsLeaderExperience = e.GrantsLeaderExperience,
+        GrantsFreeHenchmanArchetypeName = e.GrantsFreeHenchmanArchetypeName
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -316,7 +323,12 @@ public static class EntityMapping
         CausesSickness = m.CausesSickness,
         RequiresDoubleRoll = m.RequiresDoubleRoll,
         CausesDeath = m.CausesDeath,
-        TriggersArtefactRoll = m.TriggersArtefactRoll
+        TriggersArtefactRoll = m.TriggersArtefactRoll,
+        RestrictedToWarbandArchetypeNamesCsv = m.RestrictedToWarbandArchetypeNames.Count > 0
+            ? string.Join(",", m.RestrictedToWarbandArchetypeNames) : null,
+        GrantsNextExplorationBonusDie = m.GrantsNextExplorationBonusDie,
+        GrantsLeaderExperience = m.GrantsLeaderExperience,
+        GrantsFreeHenchmanArchetypeName = m.GrantsFreeHenchmanArchetypeName
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()

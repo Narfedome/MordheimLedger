@@ -569,8 +569,28 @@ public class RulesTests
     // Fixtures mirror the real seed shapes (see Data/SeedData/ExplorationResults.json) rather than
     // minimal synthetic ones, so a fixture drifting out of sync with the actual JSON would be obvious.
 
-    private static ExplorationOutcome Outcome(ExplorationOutcomeKind kind, int? subRollMin = null, int? subRollMax = null, bool? statTestPass = null, bool requiresDoubleRoll = false) =>
-        new() { Kind = kind, SubRollMin = subRollMin, SubRollMax = subRollMax, StatTestPass = statTestPass, RequiresDoubleRoll = requiresDoubleRoll };
+    private static ExplorationOutcome Outcome(ExplorationOutcomeKind kind, int? subRollMin = null, int? subRollMax = null, bool? statTestPass = null,
+        bool requiresDoubleRoll = false, List<string>? restrictedToWarbandArchetypeNames = null, bool grantsNextExplorationBonusDie = false) =>
+        new()
+        {
+            Kind = kind, SubRollMin = subRollMin, SubRollMax = subRollMax, StatTestPass = statTestPass, RequiresDoubleRoll = requiresDoubleRoll,
+            RestrictedToWarbandArchetypeNames = restrictedToWarbandArchetypeNames ?? [],
+            GrantsNextExplorationBonusDie = grantsNextExplorationBonusDie
+        };
+
+    // Straggler (2,4): Groupe B "conditionné par la bande" - une branche par bande spécifique, une
+    // branche catch-all (sans restriction) pour toutes les autres.
+    private static ExplorationResult Straggler() => new()
+    {
+        DiceCount = 2, Value = 4, RollsIndependently = true,
+        Outcomes =
+        [
+            Outcome(ExplorationOutcomeKind.Gold, restrictedToWarbandArchetypeNames: ["Skaven of Clan Eshin"]),
+            Outcome(ExplorationOutcomeKind.None, restrictedToWarbandArchetypeNames: ["Cult of the Possessed"]),
+            Outcome(ExplorationOutcomeKind.None, restrictedToWarbandArchetypeNames: ["Undead"]),
+            Outcome(ExplorationOutcomeKind.None, grantsNextExplorationBonusDie: true)
+        ]
+    };
 
     // Corpse (2,3): five mutually exclusive sub-roll branches, no Auto branch at all.
     private static ExplorationResult Corpse() => new()
@@ -693,6 +713,44 @@ public class RulesTests
     public void ExplorationOutcomeResolver_ResolveAutoOutcome_NullForDoubleRollGatedResult()
     {
         Assert.Null(ExplorationOutcomeResolver.ResolveAutoOutcome(MerchantsHouse()));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveAutoOutcome_NullForRollsIndependentlyResult()
+    {
+        // Regression (2026-08-20): every Straggler Outcome has SubRollMin null (they're picked by
+        // warband identity, not a sub-roll) - without the RollsIndependently guard, ResolveAutoOutcome
+        // would silently grab the FIRST one (Skaven gold) regardless of who's actually playing.
+        Assert.Null(ExplorationOutcomeResolver.ResolveAutoOutcome(Straggler()));
+    }
+
+    [Theory]
+    [InlineData("Skaven of Clan Eshin", ExplorationOutcomeKind.Gold)]
+    [InlineData("Cult of the Possessed", ExplorationOutcomeKind.None)]
+    [InlineData("Undead", ExplorationOutcomeKind.None)]
+    public void ExplorationOutcomeResolver_ResolveWarbandOutcome_MatchesRestrictedBranch(string warbandName, ExplorationOutcomeKind expectedKind)
+    {
+        var outcome = ExplorationOutcomeResolver.ResolveWarbandOutcome(Straggler(), warbandName);
+        Assert.Equal(expectedKind, outcome?.Kind);
+        Assert.Contains(warbandName, outcome!.RestrictedToWarbandArchetypeNames);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveWarbandOutcome_FallsBackToCatchAllForUnlistedWarband()
+    {
+        var outcome = ExplorationOutcomeResolver.ResolveWarbandOutcome(Straggler(), "Witch Hunters");
+        Assert.NotNull(outcome);
+        Assert.Empty(outcome!.RestrictedToWarbandArchetypeNames);
+        Assert.True(outcome.GrantsNextExplorationBonusDie);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveWarbandOutcome_NullWhenResultNotThisShape()
+    {
+        // Corpse is a normal sub-roll result, not a "conditioned by warband identity" one - no Outcome
+        // carries a restriction, so ResolveWarbandOutcome must not claim it (even though Corpse isn't
+        // RollsIndependently either, both guards matter independently).
+        Assert.Null(ExplorationOutcomeResolver.ResolveWarbandOutcome(Corpse(), "Skaven of Clan Eshin"));
     }
 
     [Fact]

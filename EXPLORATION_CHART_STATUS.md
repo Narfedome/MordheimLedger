@@ -11,7 +11,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | Groupe | Mécanisme | Statut |
 |---|---|---|
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
-| B — choix du joueur (`RollsIndependently`) | Plusieurs branches selon le type de bande, aucune UI de sélection encore | **0/6 ⏳** |
+| B — conditionné par la bande (`RollsIndependently`) | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), ou un test de Commandement/des jets indépendants par objet selon l'entrée | **1/6 ✅** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
@@ -26,7 +26,7 @@ pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (der
 | 2,1 | Puits | ✅ | ✅ | Vrai test d'Endurance (choix du Héros, jet comparé à sa stat) - réussite = pierre magique, échec = statut `Malade` (indisponible prochaine partie, effacé auto au Fin de Partie suivant). Un jet de 6 est un échec automatique quelle que soit la stat (RulesReference "Tests de caractéristiques", `Core.Rules.ExplorationChart.PassesStatTest` - manquant jusqu'à cette passe, corrigé aussi pour le test de Commandement additionnel de Bâtiment Éventré, où l'exception ne s'applique PAS) |
 | 2,2 | Boutique | ✅ | ✅ | Or (D6) + Porte-bonheur bonus si le même jet vaut 1 (`BonusItemOutcome`) |
 | 2,3 | Cadavre | ✅ | ✅ | Premier cas validé (sous-jet à branches exclusives) |
-| 2,4 | Traînard | ⏳ | ❌ | Groupe B — Skavens/Possédés/Morts-Vivants/autres |
+| 2,4 | Traînard | ✅ | ✅ | Groupe B — branche résolue automatiquement depuis l'archétype de la bande jouée (`Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome`, `ExplorationOutcome.RestrictedToWarbandArchetypeNames`) : Skavens (Or 2D6), Possédés (+1 XP au chef, `GrantsLeaderExperience`), Morts-Vivants (Zombie gratuit avec ChipView tapable, fusionné dans un groupe existant s'il y en a un, `GrantsFreeHenchmanArchetypeName`), toute autre bande (dé bonus au prochain jet d'Exploration - `Warband.PendingExplorationBonusDie`, rappel textuel affiché au jet suivant, ne change pas le nombre de dés gardés). L'étape Résultat n'affiche que le texte de la branche réellement applicable (`ExplorationResultDescriptionText`), pas le paragraphe du livre qui énumère les 4 branches |
 | 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (matériau "Arme Ornée", `SpecialRule.IsResaleUpgrade`, bouton "Vendre" dans l'inventaire de bande) |
 | 2,6 | Masures en Ruine | ✅ | ✅ | Branche unique |
 | 3,1 | Taverne | ⏳ | ❌ | Groupe B — test de Commandement |
@@ -139,3 +139,44 @@ pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (der
   Barbelées" déjà attaché), seul le texte de la règle propre à l'objet ne le rendait pas explicite,
   corrigé. Cagoule d'Exécuteur et Œil Omniscient de Numas : texte affiné pour coller de plus près au
   libellé officiel (aucun changement mécanique, les deux étaient déjà complets).
+- **2026-08-20 (démarrage du Groupe B - Traînard)** — Confirmé avec l'utilisateur : le texte du livre
+  ("une bande Skaven PEUT...") signifie que la branche applicable à un résultat "conditionné par la
+  bande" est strictement déterminée par l'archétype de la bande jouée, jamais un choix libre entre
+  toutes les branches listées - contredit un plan antérieur (décrit dans une ancienne révision du
+  commentaire de `ExplorationOutcome.Note`) qui prévoyait d'afficher toutes les branches et de laisser
+  le joueur pointer la sienne. Nouveau mécanisme générique réutilisable par les 3 autres entrées de
+  cette forme (Prisonniers/Cimetière/bénédiction du Sanctuaire) : `ExplorationOutcome.
+  RestrictedToWarbandArchetypeNames` (liste de noms anglais, référence par nom comme EquipmentItemName -
+  contenu figé sans éditeur, pas besoin d'une vraie table de jointure comme pour Équipement/Compétence/
+  Mutation) + `Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome` (branche la plus spécifique
+  au nom de la bande, sinon la branche catch-all sans restriction). **Bug latent corrigé au passage** :
+  `ResolveAutoOutcome` ne vérifiait pas `RollsIndependently` - pour Traînard (4 branches, toutes sans
+  sous-jet), il aurait silencieusement résolu la PREMIÈRE branche (Or Skavens) quelle que soit la bande
+  jouée, dès le premier jet déclenchant ce résultat en jeu réel (jamais observé, ce résultat n'avait
+  jamais été testé). La branche "autres bandes" ("lancez un dé de plus que d'habitude et écartez-en un")
+  n'ajoute PAS de dé à `ExplorationDiceCount` - contrairement à l'Œil Omniscient de Numas (un vrai dé
+  de plus gardé), c'est un dé physique en trop que le joueur écarte lui-même avant de saisir ses valeurs
+  finales ; nouveau `Warband.PendingExplorationBonusDie` (bool) porte juste un rappel textuel affiché au
+  prochain jet d'Exploration, consommé (qu'il ait servi ou non) à la Fin de Partie suivante. Les
+  branches Possédés/Morts-Vivants sont automatisées dans la passe suivante (voir plus bas), pas restées
+  en texte pur.
+- **2026-08-20 (Traînard - automatisation XP/recrutement + description filtrée)** — Retour utilisateur :
+  "on a les infos nécessaires" pour automatiser les branches Possédés/Morts-Vivants plutôt que les
+  laisser en texte pur. Deux nouveaux champs `ExplorationOutcome` : `GrantsLeaderExperience` (int?, +1
+  fixe pour Possédés - appliqué directement au guerrier `IsLeader`, comme `BonusStatTestLeader`, sans
+  erreur bloquante si le chef est indisponible cette partie) et `GrantsFreeHenchmanArchetypeName`
+  (string?, "Zombie" pour Morts-Vivants - résolu via `ILibraryService.GetWarriorArchetypesAsync` scopé à
+  la bande jouée, recruté via `IWarbandService.RecruitWarriorAsync`/`archetype.ToWarrior`). Fusionne dans
+  un groupe d'Hommes de main déjà existant du même archétype plutôt que de créer une ligne séparée (les
+  Zombies ne portent jamais d'équipement, `CanUseEquipment: false` - deux groupes seraient de toute façon
+  rigoureusement identiques) - incrémente juste `Warrior.HeadCount`. Le Zombie s'affiche dans le wizard en
+  vrai `ChipView` tapable (icône `SolidFont.UserGroup`, déjà la convention Homme de main ailleurs dans
+  l'app) ouvrant le dialog récap existant (`IDetailDialogService.ShowWarriorArchetypeDetailDialogAsync`,
+  déjà là pour le Codex - juste jamais branché depuis ce wizard avant) plutôt qu'un simple texte, même
+  langage d'interaction que tout objet trouvé. Second retour, même échange : la description complète du
+  livre énumère les 4 branches (Skavens/Possédés/Morts-Vivants/autres) alors qu'une seule s'applique
+  réellement à la bande jouée - l'étape Résultat n'affiche maintenant que le texte de cette branche
+  (`ExplorationResultDescriptionText`, bascule sur `ResolvedExplorationOutcome.Note` pour tout résultat
+  "conditionné par la bande" au lieu de `TriggeredExplorationResult.Description`), généralisable aux 3
+  autres entrées de cette forme (Prisonniers/Cimetière/bénédiction du Sanctuaire) sans travail
+  supplémentaire.

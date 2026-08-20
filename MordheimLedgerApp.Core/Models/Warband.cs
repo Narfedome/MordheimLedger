@@ -19,5 +19,13 @@ public class Warband
     /// (the only place shards convert to Treasury gold).</summary>
     public int WyrdstoneShards { get; set; }
 
+    /// <summary>Set true when a past Exploration result granted "an extra dice next time you roll on the
+    /// Exploration chart, discard one" (so far only Straggler's "any other warband" branch - see
+    /// Models.Library.ExplorationOutcome.GrantsNextExplorationBonusDie) - consumed as a one-time +1 to
+    /// Core.Rules.ExplorationChart.ComputeDiceCount's bonusDice the NEXT time the End of Game wizard's
+    /// Exploration step opens for this warband, then cleared regardless of whether a new dice actually
+    /// changed anything (same "spend it either way" idiom as any other found-but-unused resource).</summary>
+    public bool PendingExplorationBonusDie { get; set; }
+
     public string? Notes { get; set; }
 }

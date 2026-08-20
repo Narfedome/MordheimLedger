@@ -661,7 +661,12 @@ public class AppDatabase
                     CausesSickness = outcome.CausesSickness,
                     RequiresDoubleRoll = outcome.RequiresDoubleRoll,
                     CausesDeath = outcome.CausesDeath,
-                    TriggersArtefactRoll = outcome.TriggersArtefactRoll
+                    TriggersArtefactRoll = outcome.TriggersArtefactRoll,
+                    RestrictedToWarbandArchetypeNamesCsv = outcome.RestrictedToWarbandArchetypeNames is { Count: > 0 } names
+                        ? string.Join(",", names) : null,
+                    GrantsNextExplorationBonusDie = outcome.GrantsNextExplorationBonusDie,
+                    GrantsLeaderExperience = outcome.GrantsLeaderExperience,
+                    GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName
                 });
             }
         }

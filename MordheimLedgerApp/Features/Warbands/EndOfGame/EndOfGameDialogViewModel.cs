@@ -46,6 +46,19 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly ISkillPickerService _skillPicker;
     private readonly IDetailDialogService _detailDialogs;
     private readonly int _warbandArchetypeId;
+
+    /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
+    /// Eshin") - needed alongside _warbandArchetypeId because a Groupe B "conditional on warband type"
+    /// Exploration branch (Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome) matches by name,
+    /// not Id (see ExplorationOutcome.RestrictedToWarbandArchetypeNames - a plain string reference, same
+    /// idiom as EquipmentItemName, since this is fixed rulebook content with no editor).</summary>
+    private readonly string _warbandArchetypeName;
+
+    /// <summary>Captured once at dialog construction (see Warband.PendingExplorationBonusDie) - read by
+    /// ExplorationDiceCount, never reassigned mid-wizard: the flag itself is only cleared on the Warband
+    /// once this Fin de Partie is actually saved (WarbandDetailViewModel.EndOfGame).</summary>
+    private readonly bool _pendingExplorationBonusDie;
+
     private readonly List<ExplorationResult> _explorationResults;
 
     /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
@@ -61,6 +74,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// "Ornate Weapon") - permet au ChipView d'afficher "Épée (O)" comme n'importe quel objet en Gromril/
     /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
     private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
+
+    /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
+    /// ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - même besoin que
+    /// _equipmentItemsByEnglishName, mais limité aux archétypes de LA bande jouée (une branche
+    /// conditionnée à une bande ne référence jamais l'archétype d'une autre).</summary>
+    private readonly IReadOnlyDictionary<string, WarriorArchetype> _warriorArchetypesByEnglishName;
 
     /// <summary>Nom anglais -> Id de compétence, pour résoudre EquipmentItem.GrantsSpecificSkillName
     /// (voir Core.Rules.SkillEligibility.EffectiveExtraSkillNames) vers les ids que _skillPicker attend -
@@ -179,13 +198,16 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
+        _warbandArchetypeName = warbandArchetypeName;
+        _pendingExplorationBonusDie = pendingExplorationBonusDie;
         _explorationResults = explorationResults;
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
+        _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
         _specialRulesByEnglishName = specialRulesByEnglishName;
         _skillIdsByEnglishName = skillIdsByEnglishName;
 

@@ -332,7 +332,10 @@ public partial class EquipmentItemViewModel : BaseViewModel
             Wounds = s.Wounds,
             Initiative = s.Initiative,
             Attacks = s.Attacks,
-            Leadership = s.Leadership
+            Leadership = s.Leadership,
+            GrantsSkillCategory = s.GrantsSkillCategory,
+            GrantsRareItemSearchBonus = s.GrantsRareItemSearchBonus,
+            IsSellable = s.IsSellable
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);

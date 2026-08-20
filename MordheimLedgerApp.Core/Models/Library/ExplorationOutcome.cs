@@ -41,6 +41,15 @@ public class ExplorationOutcome
     /// - only meaningful alongside Kind.Item.</summary>
     public string? ItemQuantityFormula { get; set; }
 
+    /// <summary>Dice formula for this Kind.Item outcome's found resale value, when it isn't just the
+    /// catalog EquipmentItem.Cost as-is (e.g. Jewelsmith's Quartz Stones "D6x5 gc", Ruby "D6x15 gc") -
+    /// rolled once by the player at find time, same idiom as GoldFormula, then stored per-instance on
+    /// the resulting Models.WarbandEquipment row (see WarbandEquipment.FoundValueOverride) since a
+    /// single catalog Cost can't represent a value that varies per find. Null (the common case) = Item.
+    /// Cost/MaterialRuleName pricing applies unchanged (e.g. Jewelsmith's fixed-value Amethyst/
+    /// Necklace).</summary>
+    public string? FoundValueFormula { get; set; }
+
     /// <summary>English Name of an existing SpecialRule (a "material rule" like "Gromril Weapon"/
     /// "Ithilmar Weapon"/"Ornate Weapon" - see SpecialRules.json's CostMultiplier entries) applied on top
     /// of EquipmentItemName (and SecondaryEquipmentItemName, when present - same material for both, e.g.

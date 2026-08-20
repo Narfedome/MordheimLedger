@@ -19,6 +19,7 @@ public class ExplorationOutcomeEntity
     public string? GoldFormula { get; set; }
     public string? EquipmentItemName { get; set; }
     public string? ItemQuantityFormula { get; set; }
+    public string? FoundValueFormula { get; set; }
     public string? MaterialRuleName { get; set; }
     public string? SecondaryEquipmentItemName { get; set; }
     public string? AlternativeEquipmentItemName { get; set; }

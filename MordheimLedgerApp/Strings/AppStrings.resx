@@ -801,6 +801,9 @@
   <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
     <value>Pierres magiques trouvées</value>
   </data>
+  <data name="EndOfGameExplorationFoundValueLabel" xml:space="preserve">
+    <value>Valeur trouvée (CG)</value>
+  </data>
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choisir un Héros</value>
   </data>

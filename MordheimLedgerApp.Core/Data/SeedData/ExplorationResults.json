@@ -300,10 +300,10 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 2, "kind": "Gold", "goldFormula": "D6x5" },
-      { "subRollMin": 3, "subRollMax": 4, "kind": "Gold", "goldFormula": "20" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Gold", "goldFormula": "50" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Gold", "goldFormula": "D6x15" }
+      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Quartz Stones", "itemQuantityFormula": "1", "foundValueFormula": "D6x5" },
+      { "subRollMin": 3, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Amethyst", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Necklace", "itemQuantityFormula": "1" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Ruby", "itemQuantityFormula": "1", "foundValueFormula": "D6x15" }
     ]
   },
   {

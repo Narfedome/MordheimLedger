@@ -277,7 +277,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     [RelayCommand]
     private Task ShowEquipmentDetail(WarriorEquipment equipment) =>
-        _detailDialogs.ShowEquipmentDetailDialogAsync(equipment.Item, equipment.MaterialRule);
+        _detailDialogs.ShowEquipmentDetailDialogAsync(equipment.Item, equipment.MaterialRule, equipment.FoundValueOverride);
 
     [RelayCommand]
     private Task ShowSkillDetail(WarriorSkill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill.Item);

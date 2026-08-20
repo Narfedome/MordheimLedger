@@ -547,7 +547,9 @@ public class AppDatabase
                 Initiative = eq.Initiative,
                 Attacks = eq.Attacks,
                 Leadership = eq.Leadership,
-                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null
+                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
+                GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
+                IsSellable = eq.IsSellable
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -644,6 +646,7 @@ public class AppDatabase
                     GoldFormula = outcome.GoldFormula,
                     EquipmentItemName = outcome.EquipmentItemName,
                     ItemQuantityFormula = outcome.ItemQuantityFormula,
+                    FoundValueFormula = outcome.FoundValueFormula,
                     MaterialRuleName = outcome.MaterialRuleName,
                     SecondaryEquipmentItemName = outcome.SecondaryEquipmentItemName,
                     AlternativeEquipmentItemName = outcome.AlternativeEquipmentItemName,

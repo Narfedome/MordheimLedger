@@ -26,7 +26,7 @@ l'Alchimiste, dernier point testé le 2026-08-18).
 | 2,2 | Boutique | ✅ | ✅ | Or (D6) + Porte-bonheur bonus si le même jet vaut 1 (`BonusItemOutcome`) |
 | 2,3 | Cadavre | ✅ | ✅ | Premier cas validé (sous-jet à branches exclusives) |
 | 2,4 | Traînard | ⏳ | ❌ | Groupe B — Skavens/Possédés/Morts-Vivants/autres |
-| 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (`SellMultiplier`, bouton "Vendre" dans l'inventaire de bande) |
+| 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (matériau "Arme Ornée", `SpecialRule.IsResaleUpgrade`, bouton "Vendre" dans l'inventaire de bande) |
 | 2,6 | Masures en Ruine | ✅ | ✅ | Branche unique |
 | 3,1 | Taverne | ⏳ | ❌ | Groupe B — test de Commandement |
 | 3,2 | Forge | ✅ | ✅ | |
@@ -42,7 +42,7 @@ l'Alchimiste, dernier point testé le 2026-08-18).
 | 4,6 | Catacombes | ⏳ | ❌ | Groupe C — déploiement spécial, `NextGameNotes` pas construit |
 | 5,1 | Maison du Prêteur | ✅ | ✅ | Branche unique |
 | 5,2 | Laboratoire de l'Alchimiste | ✅ | ✅ | Or (3D6) + carnet trouvé (`SecondaryEquipmentItemName`) - le Héros qui le porte débloque Érudition en plus de ses listes habituelles dès sa prochaine compétence gagnée (`EquipmentItem.GrantsSkillCategory`, voir `Core.Rules.SkillEligibility`) |
-| 5,3 | Bijoutier | ✅ | — | |
+| 5,3 | Bijoutier | ✅ | — | 4 gemmes réelles (Pierres de Quartz/Améthyste/Collier/Rubis), vendables directement (`EquipmentItem.IsSellable`, pas un matériau - ce sont les objets eux-mêmes qui ont de la valeur) - valeur trouvée fixe au catalogue pour Améthyste/Collier, jetée en D6x5/D6x15 pour Quartz/Rubis (`ExplorationOutcome.FoundValueFormula` → `WarbandEquipment.FoundValueOverride`, affichée dans l'inventaire de bande et dans le popup détail au lieu du prix catalogue). Si gardée sur un Héros plutôt que vendue : +1 sur les jets d'objets rares (`EquipmentItem.GrantsRareItemSearchBonus`, `Core.Rules.RareItemSearchBonus` - la recherche d'objets rares elle-même n'est pas encore construite, ce n'est qu'une préparation de données) |
 | 5,4 | Maison du Marchand | ✅ | — | Branche unique |
 | 5,5 | Bâtiment Éventré | ✅ | — | Pierre magique |
 | 5,6 | Entrée des Catacombes | ⏳ | ❌ | Groupe C — relance permanente, `NextGameNotes`/`HasCatacombReroll` pas construits |

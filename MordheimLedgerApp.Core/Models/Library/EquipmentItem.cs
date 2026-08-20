@@ -81,4 +81,18 @@ public class EquipmentItem
     /// into Warrior.AllowedSkillCategories at find time - same "no rules engine V1" stance as the rest
     /// of the Library, just enough logic to resolve which skill lists are on offer, nothing else.</summary>
     public SkillCategory? GrantsSkillCategory { get; set; }
+
+    /// <summary>Null for almost every item. Non-null marks an item that grants this bonus to a future
+    /// Rare Item search roll while carried by a Hero (e.g. the Jewelsmith's gems - Bijoutier - +1 if
+    /// kept instead of sold). The Rare Item search feature itself isn't built yet (Trading Post) - this
+    /// field and Core.Rules.RareItemSearchBonus exist so the bonus is ready to apply automatically the
+    /// moment that feature lands, same "resolve the numbers now, no rules engine V1 beyond that" stance
+    /// as GrantsSkillCategory.</summary>
+    public int? GrantsRareItemSearchBonus { get; set; }
+
+    /// <summary>True marks this catalog item as itself a sellable find (e.g. the Jewelsmith's gems -
+    /// Bijoutier) - the item IS the valuable thing, not a weapon carrying an optional resale-upgrade
+    /// material (contrast SpecialRule.IsResaleUpgrade, e.g. "Ornate Weapon"). False/default for
+    /// everything else - see Models.WarbandEquipment.IsSellable, which checks both.</summary>
+    public bool IsSellable { get; set; }
 }

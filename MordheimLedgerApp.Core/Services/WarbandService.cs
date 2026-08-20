@@ -182,10 +182,10 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
     }
 
-    public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null)
+    public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null)
     {
         await _db.Initialization;
-        var carried = new WarriorEquipment { WarriorId = warriorId, Item = item, Quantity = quantity, MaterialRule = materialRule };
+        var carried = new WarriorEquipment { WarriorId = warriorId, Item = item, Quantity = quantity, MaterialRule = materialRule, FoundValueOverride = foundValueOverride };
         var entity = carried.ToEntity();
         await _db.Connection.InsertAsync(entity);
         carried.Id = entity.Id;
@@ -224,10 +224,10 @@ public class WarbandService : IWarbandService
         return result;
     }
 
-    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null)
+    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null)
     {
         await _db.Initialization;
-        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule };
+        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule, FoundValueOverride = foundValueOverride };
         var entity = stashed.ToEntity();
         await _db.Connection.InsertAsync(entity);
         stashed.Id = entity.Id;
@@ -248,13 +248,18 @@ public class WarbandService : IWarbandService
 
         // "en" suffit ici : seuls Cost/CostMultiplier comptent, même idiome que EquipWarbandItemToWarriorAsync.
         var materialRule = await ResolveMaterialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
-        if (materialRule?.IsResaleUpgrade != true)
-            throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} n'est pas vendable (pas de matériau IsResaleUpgrade).");
-
         var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
-        // Même formule que l'achat (Core.Rules.EquipmentPricing.CalculateCost) - "vaut le double du prix
-        // normal à la revente" est exactement CostMultiplier appliqué au Cost de base, pas un champ à part.
-        var gold = EquipmentPricing.CalculateCost(item.Cost, materialRule.CostMultiplier, isFree: false) * stashRow.Quantity;
+        // Vendable soit par le matériau (Ornate Weapon...), soit par l'objet lui-même (les gemmes du
+        // Bijoutier - voir Models.WarbandEquipment.IsSellable, même distinction).
+        if (materialRule?.IsResaleUpgrade != true && !item.IsSellable)
+            throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} n'est pas vendable.");
+
+        // FoundValueOverride (ex. gemmes du Bijoutier à valeur aléatoire, voir WarbandEquipment.
+        // FoundValueOverride) prime quand renseigné - la valeur a déjà été fixée au moment de la
+        // trouvaille. Sinon même formule que l'achat (Core.Rules.EquipmentPricing.CalculateCost) - "vaut
+        // le double du prix normal à la revente" est exactement CostMultiplier appliqué au Cost de base
+        // (×1, donc Cost tel quel, quand il n'y a pas de matériau) - pas un champ à part.
+        var gold = (stashRow.FoundValueOverride ?? EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: false)) * stashRow.Quantity;
 
         var warband = await GetWarbandAsync(stashRow.WarbandId)
             ?? throw new InvalidOperationException($"Warband {stashRow.WarbandId} introuvable.");
@@ -276,7 +281,7 @@ public class WarbandService : IWarbandService
         var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
         var materialRule = await ResolveMaterialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
 
-        var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule);
+        var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule, stashRow.FoundValueOverride);
         await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
         return carried;
     }

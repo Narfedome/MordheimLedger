@@ -94,7 +94,7 @@ public partial class WarbandDetailViewModel
         // d'Historique (equipmentItemsByEnglishName donne directement l'item résolu dans la langue
         // courante). Partagée entre la branche Objet "normale" (ResolvedExplorationOutcome) et l'objet
         // bonus sur le même dé que l'or (BonusItemOutcome, ex. Boutique - voir EndOfGameDialogViewModel).
-        async Task AddOneItemToInventoryAsync(string itemName, int quantity, string? materialRuleName)
+        async Task AddOneItemToInventoryAsync(string itemName, int quantity, string? materialRuleName, int? foundValueOverride = null)
         {
             if (quantity <= 0) return;
 
@@ -109,7 +109,7 @@ public partial class WarbandDetailViewModel
             var materialRule = materialRuleName is { } name
                 ? englishSpecialRules.FirstOrDefault(r => r.Name == name) : null;
 
-            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule);
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule, foundValueOverride);
             var displayName = equipmentItemsByEnglishName.GetValueOrDefault(itemName)?.Name ?? itemName;
             sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
         }
@@ -129,8 +129,13 @@ public partial class WarbandDetailViewModel
             {
                 // ChosenExplorationItemName plutôt que outcome.EquipmentItemName brut : tient compte d'un
                 // éventuel choix du joueur entre deux objets (ex. Armurerie 1-2 : Bouclier OU Rondache,
-                // voir ExplorationOutcome.AlternativeEquipmentItemName).
-                await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleName);
+                // voir ExplorationOutcome.AlternativeEquipmentItemName). foundValueOverride : seulement
+                // pour une branche dont la valeur trouvée n'est pas le Cost fixe du catalogue (ex.
+                // Bijoutier - Pierres de Quartz/Rubis, voir ExplorationOutcome.FoundValueFormula/
+                // WarbandEquipment.FoundValueOverride) - null pour toute autre branche Item.
+                int? foundValueOverride = outcome.FoundValueFormula is not null
+                    && int.TryParse(dialogViewModel.ExplorationItemFoundValue, out var foundValue) ? foundValue : null;
+                await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleName, foundValueOverride);
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
                 && int.TryParse(dialogViewModel.ExplorationWyrdstoneAmount, out var shards) && shards != 0)

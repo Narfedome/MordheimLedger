@@ -36,6 +36,13 @@
                                     <Label Text="{Binding Name}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Quantity, StringFormat='x{0}'}" FontSize="12"
                                            TextColor="{DynamicResource AppTextMuted}"/>
+                                    <!-- Valeur de revente réelle (voir WarbandEquipment.SellValue) -
+                                         invisible avant cette passe, le joueur n'avait aucun moyen de la
+                                         voir avant d'appuyer sur "Vendre". -->
+                                    <HorizontalStackLayout Spacing="3" IsVisible="{Binding IsSellable}">
+                                        <Label Text="{Binding SellValue}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Text="{loc:Loc LibGoldCrownsAbbr}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </HorizontalStackLayout>
                                 </VerticalStackLayout>
                                 <!-- Uniquement pour une trouvaille explicitement désignée vendable par
                                      le livre (voir WarbandEquipment.IsSellable, ex. Charrette Renversée)

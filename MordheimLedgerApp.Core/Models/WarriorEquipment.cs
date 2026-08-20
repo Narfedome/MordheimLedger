@@ -17,6 +17,13 @@ public class WarriorEquipment
     /// the Library catalog currently has.</summary>
     public SpecialRule? MaterialRule { get; set; }
 
+    /// <summary>Same idiom as Models.WarbandEquipment.FoundValueOverride - carried over when a stashed
+    /// find (e.g. the Jewelsmith's Ruby) is equipped onto a warrior (see IWarbandService.
+    /// EquipWarbandItemToWarriorAsync), so the item's detail popup keeps showing what was actually
+    /// rolled instead of falling back to the catalog's generic range once it leaves the warband stash.
+    /// Not used for resale (no "sell what a warrior carries" flow exists).</summary>
+    public int? FoundValueOverride { get; set; }
+
     /// <summary>"Sword (G)" when MaterialRule has an Abbreviation, plain "Sword" otherwise - same idiom
     /// as EquipmentPick.Name (the in-memory equivalent before this row exists in the database).</summary>
     public string NameDisplay => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;

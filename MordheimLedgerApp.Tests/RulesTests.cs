@@ -641,4 +641,30 @@ public class RulesTests
         var warrior = WarriorWith([SkillCategory.Academic], notebook);
         Assert.Equal([SkillCategory.Academic], SkillEligibility.EffectiveAllowedCategories(warrior));
     }
+
+    // --- RareItemSearchBonus -------------------------------------------------------------------
+
+    [Fact]
+    public void RareItemSearchBonus_NoGrantingItem_IsZero()
+    {
+        var warrior = WarriorWith([], new EquipmentItem { Id = 1 });
+        Assert.Equal(0, RareItemSearchBonus.EffectiveBonus(warrior));
+    }
+
+    [Fact]
+    public void RareItemSearchBonus_OneGrantingItem_ReturnsItsBonus()
+    {
+        var ruby = new EquipmentItem { Id = 1, GrantsRareItemSearchBonus = 1 };
+        var warrior = WarriorWith([], new EquipmentItem { Id = 2 }, ruby);
+        Assert.Equal(1, RareItemSearchBonus.EffectiveBonus(warrior));
+    }
+
+    [Fact]
+    public void RareItemSearchBonus_MultipleGrantingItems_Sums()
+    {
+        var ruby = new EquipmentItem { Id = 1, GrantsRareItemSearchBonus = 1 };
+        var necklace = new EquipmentItem { Id = 2, GrantsRareItemSearchBonus = 1 };
+        var warrior = WarriorWith([], ruby, necklace);
+        Assert.Equal(2, RareItemSearchBonus.EffectiveBonus(warrior));
+    }
 }

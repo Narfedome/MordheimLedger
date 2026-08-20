@@ -276,6 +276,7 @@ public static class EntityMapping
         GoldFormula = e.GoldFormula,
         EquipmentItemName = e.EquipmentItemName,
         ItemQuantityFormula = e.ItemQuantityFormula,
+        FoundValueFormula = e.FoundValueFormula,
         MaterialRuleName = e.MaterialRuleName,
         SecondaryEquipmentItemName = e.SecondaryEquipmentItemName,
         AlternativeEquipmentItemName = e.AlternativeEquipmentItemName,
@@ -294,6 +295,7 @@ public static class EntityMapping
         GoldFormula = m.GoldFormula,
         EquipmentItemName = m.EquipmentItemName,
         ItemQuantityFormula = m.ItemQuantityFormula,
+        FoundValueFormula = m.FoundValueFormula,
         MaterialRuleName = m.MaterialRuleName,
         SecondaryEquipmentItemName = m.SecondaryEquipmentItemName,
         AlternativeEquipmentItemName = m.AlternativeEquipmentItemName,
@@ -359,7 +361,9 @@ public static class EntityMapping
         Initiative = e.Initiative,
         Attacks = e.Attacks,
         Leadership = e.Leadership,
-        GrantsSkillCategory = e.GrantsSkillCategory
+        GrantsSkillCategory = e.GrantsSkillCategory,
+        GrantsRareItemSearchBonus = e.GrantsRareItemSearchBonus,
+        IsSellable = e.IsSellable
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -450,7 +454,9 @@ public static class EntityMapping
         Initiative = m.Initiative,
         Attacks = m.Attacks,
         Leadership = m.Leadership,
-        GrantsSkillCategory = m.GrantsSkillCategory
+        GrantsSkillCategory = m.GrantsSkillCategory,
+        GrantsRareItemSearchBonus = m.GrantsRareItemSearchBonus,
+        IsSellable = m.IsSellable
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>
@@ -534,7 +540,8 @@ public static class EntityMapping
         WarriorId = e.WarriorId,
         Item = item,
         Quantity = e.Quantity,
-        MaterialRule = materialRule
+        MaterialRule = materialRule,
+        FoundValueOverride = e.FoundValueOverride
     };
 
     public static WarbandEquipmentEntity ToEntity(this WarbandEquipment m) => new()
@@ -543,7 +550,8 @@ public static class EntityMapping
         WarbandId = m.WarbandId,
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity,
-        MaterialSpecialRuleId = m.MaterialRule?.Id
+        MaterialSpecialRuleId = m.MaterialRule?.Id,
+        FoundValueOverride = m.FoundValueOverride
     };
 
     public static WarbandEquipment ToModel(this WarbandEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null) => new()
@@ -552,7 +560,8 @@ public static class EntityMapping
         WarbandId = e.WarbandId,
         Item = item,
         Quantity = e.Quantity,
-        MaterialRule = materialRule
+        MaterialRule = materialRule,
+        FoundValueOverride = e.FoundValueOverride
     };
 
     public static WarriorEquipmentEntity ToEntity(this WarriorEquipment m) => new()
@@ -561,7 +570,8 @@ public static class EntityMapping
         WarriorId = m.WarriorId,
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity,
-        MaterialSpecialRuleId = m.MaterialRule?.Id
+        MaterialSpecialRuleId = m.MaterialRule?.Id,
+        FoundValueOverride = m.FoundValueOverride
     };
 
     /// <param name="item">The catalog skill this row references, loaded separately.</param>

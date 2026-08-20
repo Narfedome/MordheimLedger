@@ -91,5 +91,12 @@
     "costMultiplier": 2,
     "abbreviation": "O",
     "isResaleUpgrade": true
+  },
+  {
+    "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" },
+    "description": {
+      "en": "The Hero carrying this may display it proudly instead of selling it, gaining +1 to his rolls for locating rare items.",
+      "fr": "Le Héros qui porte cet objet peut l'exhiber fièrement au lieu de le revendre, ce qui lui donne +1 sur ses jets pour dénicher des objets rares."
+    }
   }
 ]

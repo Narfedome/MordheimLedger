@@ -801,6 +801,9 @@
   <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
     <value>Wyrdstone shards found</value>
   </data>
+  <data name="EndOfGameExplorationFoundValueLabel" xml:space="preserve">
+    <value>Found value (gc)</value>
+  </data>
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choose a Hero</value>
   </data>

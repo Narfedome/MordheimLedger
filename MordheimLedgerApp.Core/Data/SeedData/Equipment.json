@@ -1965,6 +1965,76 @@
   },
   {
     "name": {
+      "en": "Quartz Stones",
+      "fr": "Pierres de Quartz"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 5,
+    "costRandomMax": 25,
+    "isSellable": true,
+    "grantsRareItemSearchBonus": 1,
+    "description": {
+      "en": "A handful of quartz stones worth D6x5 gc if sold. If not sold, a Hero may display them proudly and gains +1 to his rolls for locating rare items.",
+      "fr": "Une poignée de pierres de quartz valant D6x5 CG si elles sont revendues. Si elles ne sont pas revendues, un Héros peut les exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+    },
+    "specialRules": [
+      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+    ]
+  },
+  {
+    "name": {
+      "en": "Amethyst",
+      "fr": "Améthyste"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 20,
+    "isSellable": true,
+    "grantsRareItemSearchBonus": 1,
+    "description": {
+      "en": "An amethyst worth 20 gc if sold. If not sold, a Hero may display it proudly and gains +1 to his rolls for locating rare items.",
+      "fr": "Une améthyste valant 20 CG si elle est revendue. Si elle n'est pas revendue, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+    },
+    "specialRules": [
+      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+    ]
+  },
+  {
+    "name": {
+      "en": "Necklace",
+      "fr": "Collier"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 50,
+    "isSellable": true,
+    "grantsRareItemSearchBonus": 1,
+    "description": {
+      "en": "A necklace worth 50 gc if sold. If not sold, a Hero may display it proudly and gains +1 to his rolls for locating rare items.",
+      "fr": "Un collier valant 50 CG si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+    },
+    "specialRules": [
+      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+    ]
+  },
+  {
+    "name": {
+      "en": "Ruby",
+      "fr": "Rubis"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 15,
+    "costRandomMax": 75,
+    "isSellable": true,
+    "grantsRareItemSearchBonus": 1,
+    "description": {
+      "en": "A ruby worth D6x15 gc if sold. If not sold, a Hero may display it proudly and gains +1 to his rolls for locating rare items.",
+      "fr": "Un rubis valant D6x15 CG si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+    },
+    "specialRules": [
+      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+    ]
+  },
+  {
+    "name": {
       "en": "Healing Herbs",
       "fr": "Herbes Curatives"
     },

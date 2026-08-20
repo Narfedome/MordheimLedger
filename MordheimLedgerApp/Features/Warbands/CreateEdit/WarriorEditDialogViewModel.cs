@@ -242,7 +242,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// spéciales affichée, pas seulement l'abréviation "(G)" du chip.</summary>
     [RelayCommand]
     private Task ShowEquipmentDetail(WarriorEquipment carried) =>
-        _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule);
+        _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule, carried.FoundValueOverride);
 
     // SkillEligibility.EffectiveAllowedCategories plutôt que Item.AllowedSkillCategories brut : certains
     // objets déjà portés élargissent les listes accessibles (ex. Carnet de l'Alchimiste -> Érudition,

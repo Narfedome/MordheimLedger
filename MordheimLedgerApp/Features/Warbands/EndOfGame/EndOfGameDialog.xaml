@@ -478,6 +478,24 @@
                                                               IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
                             </Grid>
 
+                            <!-- Valeur de revente trouvée (ex. Bijoutier : Pierres de Quartz "D6x5 CG",
+                                 Rubis "D6x15 CG") - uniquement pour une branche Item dont la valeur
+                                 n'est pas le Cost fixe du catalogue (voir
+                                 ExplorationOutcome.FoundValueFormula/ShowExplorationItemFoundValueRoll).
+                                 Même idiome que l'Or : jamais rempli automatiquement, le joueur tape son
+                                 jet physique ou clique le dé. -->
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding ShowExplorationItemFoundValueRoll}">
+                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationFoundValueLabel}" VerticalOptions="Center"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationItemFoundValue}" Keyboard="Numeric" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationItemFoundValueCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+
                             <!-- Même convention que l'Objet ci-dessus : une quantité fixe (ex. Puits :
                                  toujours 1 pierre) s'affiche en lecture seule, sans jet (voir
                                  ShowExplorationWyrdstoneRoll). -->

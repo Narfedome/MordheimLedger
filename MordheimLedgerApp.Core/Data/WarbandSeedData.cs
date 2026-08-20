@@ -202,6 +202,12 @@ public class EquipmentSeedData
     /// <summary>Matches a MordheimLedgerApp.Core.Models.Library.SkillCategory member name - see
     /// EquipmentItem.GrantsSkillCategory. Null for almost every item.</summary>
     public string? GrantsSkillCategory { get; set; }
+
+    /// <summary>See EquipmentItem.GrantsRareItemSearchBonus. Null for almost every item.</summary>
+    public int? GrantsRareItemSearchBonus { get; set; }
+
+    /// <summary>See EquipmentItem.IsSellable. False/absent for almost every item.</summary>
+    public bool IsSellable { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -344,6 +350,7 @@ public class ExplorationOutcomeSeedData
     public string? GoldFormula { get; set; }
     public string? EquipmentItemName { get; set; }
     public string? ItemQuantityFormula { get; set; }
+    public string? FoundValueFormula { get; set; }
     public string? MaterialRuleName { get; set; }
     public string? SecondaryEquipmentItemName { get; set; }
     public string? AlternativeEquipmentItemName { get; set; }

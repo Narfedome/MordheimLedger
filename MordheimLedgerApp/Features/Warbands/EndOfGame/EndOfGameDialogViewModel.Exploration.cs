@@ -73,6 +73,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(IsExplorationNone))]
     [NotifyPropertyChangedFor(nameof(ExplorationNoteText))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationItemFoundValueRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
     [NotifyPropertyChangedFor(nameof(ResolvedExplorationItem))]
     [NotifyPropertyChangedFor(nameof(ResolvedExplorationSecondaryItem))]
@@ -95,7 +96,14 @@ public partial class EndOfGameDialogViewModel
     /// ChosenExplorationItemName plutôt que directement EquipmentItemName pour tenir compte d'un éventuel
     /// choix du joueur (voir HasExplorationItemChoice).</summary>
     public WarbandEquipment? ResolvedExplorationItem =>
-        BuildDisplayItem(ChosenExplorationItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+        BuildDisplayItem(ChosenExplorationItemName, ResolvedExplorationOutcome?.MaterialRuleName, ParsedExplorationItemFoundValue);
+
+    /// <summary>The player's found-value roll, parsed - null while unfilled or for a branch that
+    /// doesn't need one (see ShowExplorationItemFoundValueRoll). Threaded into ResolvedExplorationItem
+    /// so the ChipView's detail popup shows the actual rolled value (e.g. "45") instead of the catalog's
+    /// generic worst-case range once the player has entered it.</summary>
+    private int? ParsedExplorationItemFoundValue =>
+        ResolvedExplorationOutcome?.FoundValueFormula is not null && int.TryParse(ExplorationItemFoundValue, out var value) ? value : null;
 
     /// <summary>Second objet du même branch (ex. Charrette Renversée : Épée + Dague, voir
     /// ExplorationOutcome.SecondaryEquipmentItemName) - null pour tout le reste de la table. Même
@@ -140,14 +148,14 @@ public partial class EndOfGameDialogViewModel
         ? SelectedExplorationItemName
         : ResolvedExplorationOutcome?.EquipmentItemName;
 
-    private WarbandEquipment? BuildDisplayItem(string? itemName, string? materialRuleName)
+    private WarbandEquipment? BuildDisplayItem(string? itemName, string? materialRuleName, int? foundValueOverride = null)
     {
         if (itemName is not { } name) return null;
         var item = _equipmentItemsByEnglishName.GetValueOrDefault(name);
         if (item is null) return null;
 
         var materialRule = materialRuleName is { } ruleName ? _specialRulesByEnglishName.GetValueOrDefault(ruleName) : null;
-        return new WarbandEquipment { Item = item, MaterialRule = materialRule };
+        return new WarbandEquipment { Item = item, MaterialRule = materialRule, FoundValueOverride = foundValueOverride };
     }
 
     /// <summary>Texte affiché pour une branche Kind.None (voir IsExplorationNone) - le Note de la
@@ -185,7 +193,7 @@ public partial class EndOfGameDialogViewModel
         BuildDisplayItem(BonusItemOutcome?.EquipmentItemName, BonusItemOutcome?.MaterialRuleName);
 
     [RelayCommand]
-    private Task ShowExplorationItemDetail(WarbandEquipment item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item.Item, item.MaterialRule);
+    private Task ShowExplorationItemDetail(WarbandEquipment item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item.Item, item.MaterialRule, item.FoundValueOverride);
 
     /// <summary>Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), on ne trouve qu'un
     /// seul exemplaire d'un objet - ItemQuantityFormula vaut alors "1", une quantité fixe et non un jet
@@ -194,6 +202,13 @@ public partial class EndOfGameDialogViewModel
     /// un vrai jet ("D3", "D6"...).</summary>
     public bool ShowExplorationItemQuantityRoll =>
         ResolvedExplorationOutcome?.ItemQuantityFormula?.Contains('D', StringComparison.OrdinalIgnoreCase) == true;
+
+    /// <summary>True only for a branch whose found item's resale value isn't the catalog's fixed Cost
+    /// (e.g. Jewelsmith's Quartz Stones/Ruby - see ExplorationOutcome.FoundValueFormula) - always a real
+    /// dice formula when set (unlike ShowExplorationItemQuantityRoll, there's no "fixed value" case that
+    /// would skip the roll: a formula-free found value just uses Item.Cost directly and this stays
+    /// false).</summary>
+    public bool ShowExplorationItemFoundValueRoll => ResolvedExplorationOutcome?.FoundValueFormula is not null;
 
     /// <summary>Même idée que ShowExplorationItemQuantityRoll côté Wyrdstone (ex. Puits : toujours "1"
     /// pierre, pas un jet) - le Bâtiment Éventré/La Fosse ont de vraies formules ("D3"/"D6+1") et
@@ -262,6 +277,7 @@ public partial class EndOfGameDialogViewModel
         ResolvedExplorationOutcome = null;
         ExplorationGoldAmount = string.Empty;
         ExplorationItemQuantity = string.Empty;
+        ExplorationItemFoundValue = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
 
@@ -295,6 +311,14 @@ public partial class EndOfGameDialogViewModel
     [ObservableProperty]
     private string explorationItemQuantity = string.Empty;
 
+    /// <summary>Found resale value for a branch whose item's value isn't the catalog's fixed Cost (see
+    /// ShowExplorationItemFoundValueRoll) - same "never auto-filled, player types the physical roll or
+    /// clicks the die" idiom as ExplorationGoldAmount. Stored on the resulting WarbandEquipment row as
+    /// FoundValueOverride at save time (see WarbandDetailViewModel.EndOfGame).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ResolvedExplorationItem))]
+    private string explorationItemFoundValue = string.Empty;
+
     /// <summary>Même principe que ExplorationGoldAmount, pour une branche Kind.Wyrdstone (ex. Puits,
     /// Bâtiment Éventré, La Fosse) - GoldFormula est réutilisé tel quel comme formule de pierres
     /// magiques (voir ExplorationOutcome.GoldFormula).</summary>
@@ -310,6 +334,7 @@ public partial class EndOfGameDialogViewModel
 
     partial void OnExplorationGoldAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
     partial void OnExplorationItemQuantityChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
+    partial void OnExplorationItemFoundValueChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
     partial void OnExplorationWyrdstoneAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
 
     private void SyncExplorationDice()
@@ -339,6 +364,7 @@ public partial class EndOfGameDialogViewModel
         ResolvedExplorationOutcome = null;
         ExplorationGoldAmount = string.Empty;
         ExplorationItemQuantity = string.Empty;
+        ExplorationItemFoundValue = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
         StatTestHero = null;
@@ -371,6 +397,7 @@ public partial class EndOfGameDialogViewModel
         ResolvedExplorationOutcome = null;
         ExplorationGoldAmount = string.Empty;
         ExplorationItemQuantity = string.Empty;
+        ExplorationItemFoundValue = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
 
@@ -420,6 +447,12 @@ public partial class EndOfGameDialogViewModel
     }
 
     [RelayCommand]
+    private void AutoRollExplorationItemFoundValue()
+    {
+        if (ResolvedExplorationOutcome?.FoundValueFormula is { } formula) ExplorationItemFoundValue = DiceFormula.Roll(formula).ToString();
+    }
+
+    [RelayCommand]
     private void AutoRollExplorationWyrdstone()
     {
         if (ResolvedExplorationOutcome?.GoldFormula is { } formula) ExplorationWyrdstoneAmount = DiceFormula.Roll(formula).ToString();
@@ -453,7 +486,8 @@ public partial class EndOfGameDialogViewModel
         var amountMissing = ResolvedExplorationOutcome?.Kind switch
         {
             ExplorationOutcomeKind.Gold => string.IsNullOrWhiteSpace(ExplorationGoldAmount),
-            ExplorationOutcomeKind.Item => string.IsNullOrWhiteSpace(ExplorationItemQuantity),
+            ExplorationOutcomeKind.Item => string.IsNullOrWhiteSpace(ExplorationItemQuantity)
+                || (ShowExplorationItemFoundValueRoll && string.IsNullOrWhiteSpace(ExplorationItemFoundValue)),
             ExplorationOutcomeKind.Wyrdstone => string.IsNullOrWhiteSpace(ExplorationWyrdstoneAmount),
             _ => false
         };

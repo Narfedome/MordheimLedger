@@ -182,6 +182,20 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.True(wellFail.CausesSickness);
         Assert.False(string.IsNullOrWhiteSpace(well.Description));
 
+        // Tavern (3 1): same StatTestField-gated shape as Well, but always the leader (no Hero picker,
+        // StatTestTargetsLeader) and some warbands skip the roll entirely (AutoPassStatTestWarbandArchetypeNames).
+        // Only ONE Outcome (Pass) - a failed test produces nothing at all (2026-08-20 correction: same
+        // "no Outcome at all for a failure" shape as Shattered Building's bonus War Dog test), not the
+        // smaller consolation Gold the book's D6 text originally suggested.
+        var tavern = results.Single(r => r.DiceCount == 3 && r.Value == 1);
+        Assert.Equal(ExplorationStatField.Leadership, tavern.StatTestField);
+        Assert.True(tavern.StatTestTargetsLeader);
+        Assert.False(tavern.RollsIndependently);
+        Assert.Equal(["Undead", "Witch Hunters", "The Sisters of Sigmar"], tavern.AutoPassStatTestWarbandArchetypeNames);
+        var tavernPass = Assert.Single(tavern.Outcomes);
+        Assert.True(tavernPass.StatTestPass);
+        Assert.Equal("4D6", tavernPass.GoldFormula);
+
         // The Pit (6 1): sending a Hero is optional (RequiresSentHero) - a sub-roll of 1 devours them
         // (CausesDeath), 2-6 returns D6+1 wyrdstone regardless of who was sent.
         var pit = results.Single(r => r.DiceCount == 6 && r.Value == 1);

@@ -102,13 +102,15 @@
     "value": 1,
     "name": { "en": "Tavern", "fr": "Taverne" },
     "description": {
-      "en": "The ruin of a tavern is recognisable by its sign still hanging on the wall. The cellars are cut into rock and still full of barrels. The warband's leader must take a Leadership test. If he passes, the warband gains 4D6 gc worth of wines and ales which can be sold immediately. If he fails, the men drink most of it - you have D6 gc worth of alcohol left. Undead, Witch Hunter and Sisters of Sigmar warbands automatically pass this test.",
-      "fr": "Une taverne en ruine, reconnaissable à son enseigne encore accrochée au mur. Les caves, taillées dans la roche, sont toujours pleines de tonneaux. Le chef de bande doit réussir un test de Commandement. En cas de réussite, la bande gagne 4D6 CO de vins et bières revendables immédiatement. En cas d'échec, les hommes en boivent l'essentiel - il ne reste que D6 CO d'alcool en arrivant au campement. Les bandes de Morts-Vivants, Chasseurs de Sorcières et Sœurs de Sigmar réussissent ce test automatiquement."
+      "en": "The ruin of a tavern is recognisable by its sign still hanging on the wall. The cellars are cut into rock and still full of barrels. The warband's leader must take a Leadership test. If he passes, the warband gains 4D6 gc worth of wines and ales which can be sold immediately. If he fails, there is nothing left to salvage. Undead, Witch Hunter and Sisters of Sigmar warbands automatically pass this test.",
+      "fr": "Une taverne en ruine, reconnaissable à son enseigne encore accrochée au mur. Les caves, taillées dans la roche, sont toujours pleines de tonneaux. Le chef de bande doit réussir un test de Commandement. En cas de réussite, la bande gagne 4D6 CO de vins et bières revendables immédiatement. En cas d'échec, il ne reste rien à récupérer. Les bandes de Morts-Vivants, Chasseurs de Sorcières et Sœurs de Sigmar réussissent ce test automatiquement."
     },
-    "rollsIndependently": true,
+    "rollsIndependently": false,
+    "statTestField": "Leadership",
+    "statTestTargetsLeader": true,
+    "autoPassStatTestWarbandArchetypeNames": ["Undead", "Witch Hunters", "The Sisters of Sigmar"],
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "4D6", "note": "Test de Commandement réussi" },
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "D6", "note": "Test de Commandement échoué" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "4D6", "note": "Test de Commandement réussi", "statTestPass": true }
     ]
   },
   {

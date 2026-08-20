@@ -11,15 +11,14 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | Groupe | Mécanisme | Statut |
 |---|---|---|
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
-| B — conditionné par la bande (`RollsIndependently`) | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), ou un test de Commandement/des jets indépendants par objet selon l'entrée | **1/6 ✅** |
+| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **2/6 ✅** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
 ## Détail (ordre des dés, pour tester avec de vrais dés)
 
 Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, ❌ = Groupe B/C (choix conditionné à la bande/texte
-pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (dernier point à jour :
-2026-08-20).
+pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier point à jour : 2026-08-20).
 
 | Dés | Résultat | Statut | Testé | Note |
 |---|---|---|---|---|
@@ -29,7 +28,7 @@ pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (der
 | 2,4 | Traînard | ✅ | ✅ | Groupe B — branche résolue automatiquement depuis l'archétype de la bande jouée (`Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome`, `ExplorationOutcome.RestrictedToWarbandArchetypeNames`) : Skavens (Or 2D6), Possédés (+1 XP au chef, `GrantsLeaderExperience`), Morts-Vivants (Zombie gratuit avec ChipView tapable, fusionné dans un groupe existant s'il y en a un, `GrantsFreeHenchmanArchetypeName`), toute autre bande (dé bonus au prochain jet d'Exploration - `Warband.PendingExplorationBonusDie`, rappel textuel affiché au jet suivant, ne change pas le nombre de dés gardés). L'étape Résultat n'affiche que la phrase d'intro partagée (`ExplorationResult.ShortDescription`) + la vraie phrase de la branche résolue (`ExplorationOutcome.BranchText`, traduit EN/FR), pas le paragraphe complet du livre qui énumère les 4 branches - `Description` reste inchangée, gardée comme référence complète |
 | 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (matériau "Arme Ornée", `SpecialRule.IsResaleUpgrade`, bouton "Vendre" dans l'inventaire de bande) |
 | 2,6 | Masures en Ruine | ✅ | ✅ | Branche unique |
-| 3,1 | Taverne | ⏳ | ❌ | Groupe B — test de Commandement |
+| 3,1 | Taverne | ✅ | — | Réutilise le test de caractéristique gating de Puits (`StatTestField`), avec deux ajouts : cible toujours le chef (`ExplorationResult.StatTestTargetsLeader`, pas de Picker - même ciblage que le test additionnel de Bâtiment Éventré, `Warrior.IsLeader`) et certaines bandes du livre réussissent automatiquement sans jet (`AutoPassStatTestWarbandArchetypeNames` : Morts-Vivants/Chasseurs de Sorcières/Sœurs de Sigmar) - bannière textuelle affichée à la place du jet dans ce cas. Réussite = 4D6 CO ; un Échec ne produit rien (une seule branche dans `Outcomes`, même forme que le test additionnel de Bâtiment Éventré - corrigé le 2026-08-20, voir Journal) |
 | 3,2 | Forge | ✅ | ✅ | |
 | 3,3 | Prisonniers | ⏳ | ❌ | Groupe B |
 | 3,4 | Atelier du Fléchier | ✅ | ✅ | |
@@ -194,3 +193,36 @@ pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (der
   résolution de traductions, et pour passer les traductions à `ExplorationOutcomeEntity.ToModel`,
   jusque-là parameterless puisque rien sur Outcome n'était traduit). `Note` reste tel quel (tag interne
   court, toujours non traduit) pour ses autres usages existants ailleurs dans la table - pas touché.
+- **2026-08-20 (Taverne)** — Deuxième entrée Groupe B, forme différente de Traînard : un vrai test de
+  caractéristique gating comme Puits (`StatTestField`, réutilisé tel quel - `ResolveStatTestOutcome`,
+  `PassesStatTest`, `RollStatTest` en 2D6 pour Commandement, aucun changement côté Core.Rules), pas une
+  résolution par identité de bande. Demande explicite de l'utilisateur : reprendre le ciblage "toujours
+  le chef" déjà construit pour le test additionnel de Bâtiment Éventré (`Warrior.IsLeader`) plutôt que le
+  Picker de Puits. Deux champs neufs sur `ExplorationResult` : `StatTestTargetsLeader` (bool - la
+  résolution auto-remplit `StatTestHero` avec le chef au lieu d'afficher `StatTestEligibleHeroes`, voir
+  `ShowStatTestHeroPicker`/`StatTestHeroDisplayPrefix` pour le nom réinjecté dans le libellé du jet à la
+  place du Picker disparu) et `AutoPassStatTestWarbandArchetypeNames` (liste de noms anglais - Morts-
+  Vivants/Chasseurs de Sorcières/Sœurs de Sigmar réussissent sans lancer de dé, `StatTestAutoPasses`
+  résout directement la branche Réussite dès que le résultat se déclenche, bannière textuelle affichée à
+  la place du jet). Chef indisponible cette partie (mort/malade/hors de combat) : même idiome que
+  `BonusStatTestLeader` - rien à valider, pas d'erreur bloquante, juste indisponible
+  (`StatTestLeaderUnavailable`). `RollsIndependently` repassé à `false` (c'était un reliquat de l'ancien
+  plan "Groupe B = choix libre du joueur", abandonné le 2026-08-20 pour Traînard mais pas encore
+  nettoyé ici) - `ResolveWarbandOutcome`/`IsWarbandConditionedResult` restent inertes pour cette entrée
+  (aucun Outcome n'a de `RestrictedToWarbandArchetypeNames`), donc la description complète du livre
+  continue de s'afficher normalement, pas de ShortDescription/BranchText nécessaires ici.
+- **2026-08-20 (Taverne - correction Échec)** — Retour utilisateur après premier test en jeu : "peu
+  importe le résultat, on peut tirer l'or gagné" - la branche Échec (D6 CO, texte "les hommes en
+  boivent l'essentiel") restait accessible/tirable quel que soit le jet, comme si le test n'avait aucun
+  effet réel. Confirmé par l'utilisateur : la vraie règle est "réussi = 4D6 CO, sinon rien" (le texte
+  "D6 CO d'alcool restant" de l'import initial était inexact) - demande explicite de reprendre la forme
+  déjà utilisée pour le test additionnel de Bâtiment Éventré (Chien de guerre) : une SEULE `Outcome`
+  (Réussite) dans le tableau, aucune pour l'Échec. `Core.Rules.ExplorationOutcomeResolver.
+  ResolveStatTestOutcome` gère déjà ce cas nativement (`Outcomes.FirstOrDefault(o => o.StatTestPass ==
+  passed)` renvoie `null` s'il n'y a aucune branche Échec, donc rien ne se résout/s'affiche) - seul un
+  vrai bug annexe restait : `ValidateExplorationResultStep` bloquait la progression après un Échec parce
+  qu'il vérifiait `ResolvedExplorationOutcome is null` (indiscernable de "pas encore joué" une fois
+  l'Échec sans branche) au lieu de `StatTestRoll` (a-t-on tapé un jet, peu importe son issue) - même
+  correctif déjà appliqué à `BonusStatTestField`/`BonusStatTestRoll` pour exactement la même raison,
+  généralisé ici. Description FR/EN corrigée en cohérence ("il ne reste rien à récupérer" plutôt que
+  "D6 CO d'alcool").

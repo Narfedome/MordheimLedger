@@ -816,6 +816,9 @@
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choose a Hero</value>
   </data>
+  <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
+    <value>Automatically passed for this warband.</value>
+  </data>
   <data name="EndOfGameSentHeroPh" xml:space="preserve">
     <value>Send a Hero (optional)</value>
   </data>

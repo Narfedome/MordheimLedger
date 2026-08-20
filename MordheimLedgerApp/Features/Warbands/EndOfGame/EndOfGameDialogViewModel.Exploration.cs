@@ -54,6 +54,11 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
     [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(ShowStatTest))]
+    [NotifyPropertyChangedFor(nameof(ShowStatTestHeroPicker))]
+    [NotifyPropertyChangedFor(nameof(StatTestLeaderUnavailable))]
+    [NotifyPropertyChangedFor(nameof(StatTestAutoPasses))]
+    [NotifyPropertyChangedFor(nameof(ShowStatTestRoll))]
+    [NotifyPropertyChangedFor(nameof(StatTestHeroDisplayPrefix))]
     [NotifyPropertyChangedFor(nameof(StatTestFieldLabel))]
     [NotifyPropertyChangedFor(nameof(StatTestRollPlaceholder))]
     [NotifyPropertyChangedFor(nameof(ShowDoubleRollCheck))]
@@ -377,7 +382,7 @@ public partial class EndOfGameDialogViewModel
     /// silencieusement perdu.</summary>
     public bool IsExplorationNone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.None;
 
-    // --- Test de caractéristique (Puits/Endurance, Taverne plus tard) --------------------------
+    // --- Test de caractéristique (Puits/Endurance, Taverne/Commandement) ------------------------
     //
     // Choisir un Héros et comparer son jet à une de ses stats pour départager Réussite/Échec - une
     // autre façon de choisir la branche résolue (ResolvedExplorationOutcome), au même niveau que le
@@ -386,15 +391,45 @@ public partial class EndOfGameDialogViewModel
     // joueur - contrairement au tirage lui-même (jamais automatique, voir ExplorationGoldAmount et
     // consorts). Le nombre de dés dépend de la stat testée (voir ExplorationChart.RollStatTest et
     // StatTestRollPlaceholder) - 2D6 pour Commandement (RulesReference "Tests de Commandement", une
-    // exception explicite), 1D6 pour tout le reste.
+    // exception explicite), 1D6 pour tout le reste. Taverne réutilise EXACTEMENT ce mécanisme (contraste
+    // avec le test additionnel de Bâtiment Éventré, voir ShowBonusStatTest plus bas) avec deux ajouts :
+    // toujours le chef (StatTestTargetsLeader, StatTestHero renseigné automatiquement plutôt que par un
+    // Picker - voir ShowStatTestHeroPicker) et une réussite automatique pour certaines bandes du livre
+    // (AutoPassStatTestWarbandArchetypeNames, voir StatTestAutoPasses).
     public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
 
     public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
 
+    /// <summary>Faux pour un test ciblant toujours le chef (ex. Taverne) - StatTestHero est alors
+    /// renseigné automatiquement (voir ResolveExplorationResult), aucun choix du joueur nécessaire, donc
+    /// aucun Picker à afficher. Vrai pour Puits (le joueur choisit qui envoyer).</summary>
+    public bool ShowStatTestHeroPicker => ShowStatTest && TriggeredExplorationResult?.StatTestTargetsLeader != true;
+
+    /// <summary>Vrai pour un test ciblant le chef (voir ShowStatTestHeroPicker) dont le chef n'est pas
+    /// disponible cette partie (mort/malade/hors de combat) - même idiome que BonusStatTestLeader :
+    /// personne ne peut commander à sa place, rien à valider, ni erreur bloquante ni jet à saisir.</summary>
+    public bool StatTestLeaderUnavailable => ShowStatTest && TriggeredExplorationResult?.StatTestTargetsLeader == true && StatTestHero is null;
+
+    /// <summary>Vrai pour un test de Commandement gating (Taverne) auto-réussi pour certaines bandes du
+    /// livre (Morts-Vivants/Chasseurs de Sorcières/Sœurs de Sigmar) - aucun jet à saisir, la branche
+    /// Réussite se résout directement dès que le résultat se déclenche (voir ResolveExplorationResult).</summary>
+    public bool StatTestAutoPasses => TriggeredExplorationResult?.AutoPassStatTestWarbandArchetypeNames.Contains(_warbandArchetypeName) == true;
+
+    /// <summary>Le bloc jet+dé (voir ShowStatTest) ne s'affiche que si un Héros/chef est effectivement
+    /// désigné ET que la bande ne réussit pas ce test automatiquement.</summary>
+    public bool ShowStatTestRoll => StatTestHero is not null && !StatTestAutoPasses;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StatTestStatValue))]
     [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
+    [NotifyPropertyChangedFor(nameof(StatTestLeaderUnavailable))]
+    [NotifyPropertyChangedFor(nameof(ShowStatTestRoll))]
+    [NotifyPropertyChangedFor(nameof(StatTestHeroDisplayPrefix))]
     private WarriorOutcomeRow? statTestHero;
+
+    /// <summary>"{Nom} - " devant le champ de jet pour un test ciblant le chef (aucun Picker qui montre
+    /// déjà son nom, voir ShowStatTestHeroPicker) - vide pour Puits, où le Picker suffit.</summary>
+    public string StatTestHeroDisplayPrefix => !ShowStatTestHeroPicker && StatTestHero is not null ? $"{StatTestHero.Name} - " : string.Empty;
 
     [ObservableProperty]
     private string statTestRoll = string.Empty;
@@ -679,6 +714,18 @@ public partial class EndOfGameDialogViewModel
             .FirstOrDefault(r => r.DiceCount == multiple.Value.DiceCount && r.Value == multiple.Value.Value);
         if (TriggeredExplorationResult is null) return;
 
+        // Test de caractéristique ciblant toujours le chef (Taverne/Commandement, voir
+        // ShowStatTestHeroPicker) : renseigne StatTestHero automatiquement (déclenche ResolveStatTest via
+        // OnStatTestHeroChanged, sans effet tant qu'aucun jet n'est saisi) - aucun choix du joueur. Si en
+        // plus la bande jouée réussit ce test automatiquement (StatTestAutoPasses), résout directement la
+        // branche Réussite sans attendre de jet du tout.
+        if (TriggeredExplorationResult.StatTestTargetsLeader)
+        {
+            StatTestHero = WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+            if (StatTestAutoPasses && TriggeredExplorationResult.Outcomes.FirstOrDefault(o => o.StatTestPass == true) is { } passOutcome)
+                ApplyResolvedOutcome(passOutcome);
+        }
+
         // Une branche Auto (sans sous-jet) se résout tout de suite, qu'elle soit seule (ex. Masures en
         // Ruine) ou accompagnée d'une branche à sous-jet optionnelle sur le MÊME dé (ex. Boutique - voir
         // BonusItemOutcome, qui se déduit du jet d'or plutôt que d'en redemander un second). Ce n'est
@@ -786,7 +833,17 @@ public partial class EndOfGameDialogViewModel
         if (ShowExplorationSubRoll && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationSubRollError = Loc["EndOfGameRollRequired"]))
             return false;
 
-        if (ShowStatTest && !CheckRoll(ResolvedExplorationOutcome is null, () => StatTestError = Loc["EndOfGameRollRequired"]))
+        // StatTestLeaderUnavailable = test ciblant le chef (Taverne) mais chef indisponible cette partie
+        // (mort/malade/hors de combat) - même idiome que BonusStatTestLeader ci-dessous : personne ne
+        // peut commander à sa place, rien à valider plutôt qu'une erreur bloquante impossible à résoudre.
+        // StatTestAutoPasses : aucun jet à saisir, déjà résolu (voir ResolveExplorationResult). Vérifie
+        // StatTestRoll (pas ResolvedExplorationOutcome) - depuis que Taverne n'a plus qu'une seule
+        // branche (Réussite, retour utilisateur 2026-08-20 : un Échec ne doit rien produire, comme le
+        // test additionnel de Bâtiment Éventré), un Échec résout ResolvedExplorationOutcome à null tout
+        // comme "pas encore joué" - StatTestRoll seul distingue les deux, même idiome que BonusStatTestRoll
+        // ci-dessous.
+        if (ShowStatTest && !StatTestLeaderUnavailable && !StatTestAutoPasses
+            && !CheckRoll(string.IsNullOrWhiteSpace(StatTestRoll), () => StatTestError = Loc["EndOfGameRollRequired"]))
             return false;
 
         if (ShowDoubleRollCheck && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationDoubleRollError = Loc["EndOfGameRollRequired"]))

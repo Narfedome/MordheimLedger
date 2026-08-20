@@ -258,6 +258,9 @@ public static class EntityMapping
         Source = e.Source,
         RollsIndependently = e.RollsIndependently,
         StatTestField = e.StatTestField,
+        StatTestTargetsLeader = e.StatTestTargetsLeader,
+        AutoPassStatTestWarbandArchetypeNames = string.IsNullOrEmpty(e.AutoPassStatTestWarbandArchetypeNamesCsv)
+            ? new() : e.AutoPassStatTestWarbandArchetypeNamesCsv.Split(',').ToList(),
         RequiresDoubleRoll = e.RequiresDoubleRoll,
         BonusStatTestField = e.BonusStatTestField,
         RequiresSentHero = e.RequiresSentHero,
@@ -275,6 +278,9 @@ public static class EntityMapping
         Source = m.Source,
         RollsIndependently = m.RollsIndependently,
         StatTestField = m.StatTestField,
+        StatTestTargetsLeader = m.StatTestTargetsLeader,
+        AutoPassStatTestWarbandArchetypeNamesCsv = m.AutoPassStatTestWarbandArchetypeNames.Count > 0
+            ? string.Join(",", m.AutoPassStatTestWarbandArchetypeNames) : null,
         RequiresDoubleRoll = m.RequiresDoubleRoll,
         BonusStatTestField = m.BonusStatTestField,
         RequiresSentHero = m.RequiresSentHero

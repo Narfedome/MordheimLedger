@@ -816,6 +816,9 @@
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choisir un Héros</value>
   </data>
+  <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
+    <value>Réussi automatiquement pour cette bande.</value>
+  </data>
   <data name="EndOfGameSentHeroPh" xml:space="preserve">
     <value>Envoyer un Héros (optionnel)</value>
   </data>

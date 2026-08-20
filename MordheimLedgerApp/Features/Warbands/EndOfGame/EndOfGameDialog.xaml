@@ -371,17 +371,21 @@
                                    IsVisible="{Binding ExplorationSubRollError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
 
-                        <!-- Test de caractéristique (Puits/Endurance, Taverne plus tard) : choisir un
-                             Héros, comparer son jet à sa stat - l'appli calcule elle-même Réussite/Échec
-                             (arithmétique sur des valeurs déjà connues, pas une décision aléatoire) et
-                             bascule vers la branche correspondante ci-dessous. Bâtiment Éventré/
-                             Commandement n'utilise PAS ce bloc : son test est additionnel (voir plus bas,
-                             ShowBonusStatTest), pas une branche exclusive comme celui-ci. -->
+                        <!-- Test de caractéristique (Puits/Endurance, Taverne/Commandement) : comparer un
+                             jet à une stat - l'appli calcule elle-même Réussite/Échec (arithmétique sur
+                             des valeurs déjà connues, pas une décision aléatoire) et bascule vers la
+                             branche correspondante ci-dessous. Bâtiment Éventré/Commandement n'utilise
+                             PAS ce bloc : son test est additionnel (voir plus bas, ShowBonusStatTest),
+                             pas une branche exclusive comme celui-ci. Taverne cible toujours le chef
+                             (pas de Picker, voir ShowStatTestHeroPicker) et certaines bandes du livre
+                             réussissent automatiquement (voir StatTestAutoPasses). -->
                         <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
-                            <Picker Title="{loc:Loc EndOfGameStatTestHeroPh}"
+                            <Picker IsVisible="{Binding ShowStatTestHeroPicker}" Title="{loc:Loc EndOfGameStatTestHeroPh}"
                                     ItemsSource="{Binding StatTestEligibleHeroes}" ItemDisplayBinding="{Binding Name}"
                                     SelectedItem="{Binding StatTestHero}"/>
-                            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding StatTestHero, Converter={StaticResource IsNotNullConverter}}">
+                            <Label Text="{loc:Loc EndOfGameStatTestAutoPass}" FontSize="12" FontAttributes="Italic"
+                                   TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding StatTestAutoPasses}"/>
+                            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding ShowStatTestRoll}">
                                 <Entry Grid.Column="0" Text="{Binding StatTestRoll}" Keyboard="Numeric"
                                        Placeholder="{Binding StatTestRollPlaceholder}" WidthRequest="70">
                                     <Entry.Behaviors>
@@ -394,6 +398,9 @@
                                 <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}">
                                     <Label.FormattedText>
                                         <FormattedString>
+                                            <!-- Vide quand un Picker affiche déjà le nom choisi (Puits) -
+                                                 voir StatTestHeroDisplayPrefix. -->
+                                            <Span Text="{Binding StatTestHeroDisplayPrefix}"/>
                                             <Span Text="{Binding StatTestFieldLabel}"/>
                                             <Span Text=" "/>
                                             <Span Text="{Binding StatTestStatValue}"/>

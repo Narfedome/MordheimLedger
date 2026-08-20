@@ -54,20 +54,39 @@ public class ExplorationResult
 
     /// <summary>False (most entries) = a single roll picks exactly one mutually exclusive Outcome.
     /// True (e.g. "Hidden Treasure") = every Outcome is checked independently against its own
-    /// threshold - see ExplorationOutcome's doc comment for the full mechanic. Some entries (e.g.
-    /// "Straggler", "Tavern") have no sub-roll at all: every Outcome is Auto (SubRollMin/Max null) and
-    /// the player just picks whichever applies (their warband's type, or the result of a Leadership/
-    /// Toughness test the app doesn't simulate) - RollsIndependently is largely moot for these since
-    /// there's no die involved either way, left false/default.</summary>
+    /// threshold - see ExplorationOutcome's doc comment for the full mechanic. "Straggler" also sets
+    /// this (every Outcome Auto, SubRollMin/Max null) for a THIRD, unrelated shape - see
+    /// ExplorationOutcome.RestrictedToWarbandArchetypeNames/Core.Rules.ExplorationOutcomeResolver.
+    /// ResolveWarbandOutcome. "Tavern" does NOT set this any more (2026-08-20): it's a plain
+    /// StatTestField-gated test like Well, just leader-targeted - see StatTestTargetsLeader.</summary>
     public bool RollsIndependently { get; set; }
 
-    /// <summary>Non-null = this result requires choosing a Hero and comparing a D6 roll against this
-    /// stat (e.g. Puits/Toughness, Taverne and Bâtiment Éventré/Leadership) - the wizard shows a Hero
-    /// picker + roll field instead of (or alongside) the usual sub-roll, computes pass/fail itself
-    /// (comparing an already-known stat to an already-entered roll is arithmetic, not a decision made
-    /// for the player - see EndOfGameDialogViewModel), and picks the Outcome whose StatTestPass matches.
-    /// Null = no stat test, the vast majority of entries.</summary>
+    /// <summary>Non-null = this result requires comparing a D6 (or 2D6 for Leadership) roll against this
+    /// stat (e.g. Puits/Toughness, Taverne/Leadership) - the wizard shows a roll field (plus, for Puits,
+    /// a Hero picker - see StatTestTargetsLeader) instead of (or alongside) the usual sub-roll, computes
+    /// pass/fail itself (comparing an already-known stat to an already-entered roll is arithmetic, not a
+    /// decision made for the player - see EndOfGameDialogViewModel), and picks the Outcome whose
+    /// StatTestPass matches. Null = no stat test, the vast majority of entries.</summary>
     public ExplorationStatField? StatTestField { get; set; }
+
+    /// <summary>True = this StatTestField-gated test always targets the warband's leader (Warrior.
+    /// IsLeader), never a Hero the player picks (e.g. Taverne/Commandement: "The warband's leader must
+    /// take a Leadership test") - the wizard sets StatTestHero automatically instead of showing
+    /// StatTestEligibleHeroes' picker (see EndOfGameDialogViewModel.ShowStatTestHeroPicker). If the
+    /// leader isn't available this game (dead/sick/out of action), the test is simply skipped, no
+    /// blocking error - same "unavailable, not forced" idiom as BonusStatTestField's leader lookup.
+    /// False (e.g. Puits/Endurance) = the player picks who takes the test. Meaningless when StatTestField
+    /// is null.</summary>
+    public bool StatTestTargetsLeader { get; set; }
+
+    /// <summary>English WarbandArchetype.Name(s) that automatically pass this StatTestField-gated test,
+    /// no roll needed (e.g. Taverne: "Undead, Witch Hunter and Sisters of Sigmar warbands automatically
+    /// pass this test") - the wizard resolves straight to the Outcome whose StatTestPass is true as soon
+    /// as the result triggers, skipping the roll field entirely (see EndOfGameDialogViewModel.
+    /// StatTestAutoPasses). Empty (almost every entry) = no such exception, the test always requires a
+    /// roll. Plain string reference resolved at consumption time, same idiom as
+    /// ExplorationOutcome.RestrictedToWarbandArchetypeNames - fixed rulebook content, no editor.</summary>
+    public List<string> AutoPassStatTestWarbandArchetypeNames { get; set; } = new();
 
     /// <summary>True = this result's Auto branches are mutually exclusive on whether a paired 2D6 roll
     /// shows a double (e.g. Merchant's House - Maison du Marchand: normal roll -&gt; 2D6x5 gc, a double

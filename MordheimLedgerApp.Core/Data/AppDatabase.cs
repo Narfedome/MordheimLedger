@@ -631,6 +631,8 @@ public class AppDatabase
                 Value = res.Value,
                 RollsIndependently = res.RollsIndependently,
                 StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
+                StatTestTargetsLeader = res.StatTestTargetsLeader,
+                AutoPassStatTestWarbandArchetypeNames = res.AutoPassStatTestWarbandArchetypeNames ?? new(),
                 RequiresDoubleRoll = res.RequiresDoubleRoll,
                 BonusStatTestField = res.BonusStatTestField is { } bonusField ? Enum.Parse<ExplorationStatField>(bonusField) : null,
                 RequiresSentHero = res.RequiresSentHero,

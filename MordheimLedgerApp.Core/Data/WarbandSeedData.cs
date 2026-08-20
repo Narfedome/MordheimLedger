@@ -349,6 +349,14 @@ public class ExplorationResultSeedData
     /// Models.Library.ExplorationResult.StatTestField.</summary>
     public string? StatTestField { get; set; }
 
+    /// <summary>See Models.Library.ExplorationResult.StatTestTargetsLeader. False/absent for almost every
+    /// entry - so far only Tavern (Taverne).</summary>
+    public bool StatTestTargetsLeader { get; set; }
+
+    /// <summary>See Models.Library.ExplorationResult.AutoPassStatTestWarbandArchetypeNames. Null/absent
+    /// for almost every entry - so far only Tavern (Taverne).</summary>
+    public List<string>? AutoPassStatTestWarbandArchetypeNames { get; set; }
+
     /// <summary>See Models.Library.ExplorationResult.RequiresDoubleRoll. False/absent for almost every
     /// entry - so far only Merchant's House (Maison du Marchand).</summary>
     public bool RequiresDoubleRoll { get; set; }

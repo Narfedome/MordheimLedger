@@ -41,8 +41,16 @@ public partial class EndOfGameDialogViewModel
     private async Task PickAdvanceSkill(AdvanceRollEntry entry)
     {
         var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry));
+        // EffectiveExtraSkillNames -> ids via _skillIdsByEnglishName : mêmes objets (ex. le symbole de
+        // l'Ordre des Libres Marchands) que la Charrette/le Carnet de l'Alchimiste - une compétence
+        // précise débloquée hors catégorie plutôt qu'une liste entière, voir EquipmentItem.
+        // GrantsSpecificSkillName.
+        var extraSkillIds = SkillEligibility.EffectiveExtraSkillNames(row.Warrior)
+            .Select(name => _skillIdsByEnglishName.GetValueOrDefault(name))
+            .Where(id => id != 0)
+            .ToList();
         var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
-            SkillEligibility.EffectiveAllowedCategories(row.Warrior));
+            SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds);
         foreach (var skill in skills)
             entry.SelectedSkills.Add(skill);
     }

@@ -12,9 +12,12 @@ public interface ISkillPickerService
     /// down, null = no further filtering (e.g. picking for a Warrior whose archetype isn't relevant).
     /// allowedCategories: further restrict to these SkillCategory values (the warrior's own "skill
     /// table" row, e.g. WarriorArchetype/Warrior.AllowedSkillCategories) - null/omitted = no category
-    /// filtering.</summary>
+    /// filtering. extraAllowedSkillIds: specific Skill ids shown regardless of category (see
+    /// Core.Rules.SkillEligibility.EffectiveExtraSkillNames, resolved to ids by the caller since this
+    /// picker's catalog is language-specific) - e.g. Merchant's House's Order of Freetraders symbol
+    /// unlocking Haggle alone, not its whole Academic category.</summary>
     Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
-        IReadOnlyList<SkillCategory>? allowedCategories = null);
+        IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null);
 }
 
 public class SkillPickerService : ISkillPickerService
@@ -24,7 +27,7 @@ public class SkillPickerService : ISkillPickerService
     public SkillPickerService(IServiceProvider provider) => _provider = provider;
 
     public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
-        IReadOnlyList<SkillCategory>? allowedCategories = null)
+        IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
 
@@ -37,6 +40,7 @@ public class SkillPickerService : ISkillPickerService
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
         viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
         viewModel.AllowedCategories = allowedCategories is { Count: > 0 } ? allowedCategories : null;
+        viewModel.AllowedExtraSkillIds = extraAllowedSkillIds is { Count: > 0 } ? extraAllowedSkillIds : null;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi.
         var page = new SkillSelectorPage(viewModel);
 

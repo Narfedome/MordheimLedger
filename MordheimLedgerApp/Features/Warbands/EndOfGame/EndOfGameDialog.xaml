@@ -387,19 +387,54 @@
                                    IsVisible="{Binding StatTestError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
 
+                        <!-- Double au 2D6 (Maison du Marchand) : 2 dés séparés, indispensables ici car
+                             le total seul (2D6x5) ne dit pas si c'était un double (ex. 6 peut venir de
+                             3+3 comme de 1+5) - voir ShowDoubleRollCheck. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowDoubleRollCheck}" Spacing="6">
+                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Text="{Binding ExplorationDoubleDie1}" Keyboard="Numeric" WidthRequest="50">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationDoubleDie1Command}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                <Entry Grid.Column="2" Text="{Binding ExplorationDoubleDie2}" Keyboard="Numeric" WidthRequest="50">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationDoubleDie2Command}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+                            <Label Text="{Binding ExplorationDoubleRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding ExplorationDoubleRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
                         <!-- Branche résolue : montant d'or/pierres magiques éditable, ou objet trouvé
                              (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
                         <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">
+                            <!-- Résolue via le double au 2D6 (Maison du Marchand, voir ShowDoubleRollCheck) :
+                                 le montant est déjà calculé depuis les 2 dés tapés plus haut (voir
+                                 ShowExplorationGoldRoll/ResolveDoubleRoll) - lecture seule, pas de second
+                                 jet redondant pour le même 2D6x5. -->
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationGold}">
                                 <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationGoldLabel}" VerticalOptions="Center"/>
-                                <Entry Grid.Column="1" Text="{Binding ExplorationGoldAmount}" Keyboard="Numeric" WidthRequest="70">
+                                <Label Grid.Column="1" Text="{Binding ExplorationGoldAmount}"
+                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding ShowExplorationGoldRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationGoldAmount}" Keyboard="Numeric" WidthRequest="70"
+                                       IsVisible="{Binding ShowExplorationGoldRoll}">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
                                 </Entry>
                                 <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                               Command="{Binding AutoRollExplorationGoldCommand}"
-                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              IsVisible="{Binding ShowExplorationGoldRoll}"/>
                             </Grid>
 
                             <!-- Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), un seul

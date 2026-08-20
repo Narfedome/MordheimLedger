@@ -38,6 +38,8 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(ShowStatTest))]
     [NotifyPropertyChangedFor(nameof(StatTestFieldLabel))]
+    [NotifyPropertyChangedFor(nameof(ShowDoubleRollCheck))]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationGoldRoll))]
     // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
     // par StepLabel et la visibilité du bouton "Suivant"/"Enregistrer" (IsLastStep) doivent donc suivre
     // en direct, pas seulement au prochain changement de StepIndex/WarriorRows (même classe de bug que
@@ -59,6 +61,12 @@ public partial class EndOfGameDialogViewModel
     /// le plan de séquencement) - ShowExplorationSubRoll reste false pour eux pour l'instant.</summary>
     public bool ShowExplorationSubRoll => TriggeredExplorationResult is { RollsIndependently: false } r
         && r.Outcomes.Count > 1 && r.Outcomes.All(o => o.SubRollMin.HasValue);
+
+    /// <summary>Un résultat gated par un double au 2D6 (voir ExplorationResult.RequiresDoubleRoll, seul
+    /// cas actuel : Maison du Marchand) montre 2 champs de dé au lieu du sous-jet classique - la seule
+    /// façon dont ce résultat précis départage ses branches, jamais en même temps que
+    /// ShowExplorationSubRoll/ShowStatTest.</summary>
+    public bool ShowDoubleRollCheck => TriggeredExplorationResult?.RequiresDoubleRoll == true;
 
     [ObservableProperty]
     private string explorationSubRoll = string.Empty;
@@ -216,6 +224,13 @@ public partial class EndOfGameDialogViewModel
     public bool ShowExplorationWyrdstoneRoll =>
         ResolvedExplorationOutcome?.GoldFormula?.Contains('D', StringComparison.OrdinalIgnoreCase) == true;
 
+    /// <summary>False only for a Gold branch resolved via the double-roll check (ShowDoubleRollCheck,
+    /// e.g. Merchant's House) - ExplorationGoldAmount is already computed from the SAME 2D6 the player
+    /// typed for the double check (see ResolveDoubleRoll/DiceFormula.Apply), so showing an editable/
+    /// rerollable field here would invite a second, contradictory roll for the same formula. True
+    /// (every other Gold branch) shows the usual editable Entry + dice.</summary>
+    public bool ShowExplorationGoldRoll => !ShowDoubleRollCheck;
+
     /// <summary>Branche retenue sans effet trésorerie/inventaire (ex. Traînard/"autres bandes",
     /// Charrette Renversée 5-6) - reste purement informatif (Note ou Description du résultat), juste
     /// consigné dans l'Historique à la sauvegarde (voir WarbandDetailViewModel.EndOfGame) plutôt que
@@ -291,6 +306,64 @@ public partial class EndOfGameDialogViewModel
 
     [RelayCommand]
     private void AutoRollStatTest() => StatTestRoll = ExplorationChart.RollDie().ToString();
+
+    // --- Double au 2D6 (Maison du Marchand) ----------------------------------------------------
+    //
+    // Le seul résultat de la table qui départage ses branches par "les 2 dés sont-ils identiques"
+    // plutôt qu'un sous-jet ou un test de caractéristique (voir ShowDoubleRollCheck) - 2 champs de dé
+    // distincts, indispensables ici puisque le total seul (2D6x5) ne permet pas de reconstituer si
+    // c'était un double (ex. un total de 6 peut venir de 3+3 comme de 1+5/2+4/4+2/5+1).
+
+    [ObservableProperty]
+    private string explorationDoubleDie1 = string.Empty;
+
+    [ObservableProperty]
+    private string explorationDoubleDie2 = string.Empty;
+
+    [ObservableProperty]
+    private string? explorationDoubleRollError;
+
+    partial void OnExplorationDoubleDie1Changed(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value)) ExplorationDoubleRollError = null;
+        ResolveDoubleRoll();
+    }
+
+    partial void OnExplorationDoubleDie2Changed(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value)) ExplorationDoubleRollError = null;
+        ResolveDoubleRoll();
+    }
+
+    private void ResolveDoubleRoll()
+    {
+        ResolvedExplorationOutcome = null;
+        ExplorationGoldAmount = string.Empty;
+        ExplorationItemQuantity = string.Empty;
+        ExplorationItemFoundValue = string.Empty;
+        ExplorationWyrdstoneAmount = string.Empty;
+        ExplorationAmountError = null;
+
+        if (TriggeredExplorationResult is null || !int.TryParse(ExplorationDoubleDie1, out var die1) || !int.TryParse(ExplorationDoubleDie2, out var die2))
+            return;
+
+        var outcome = ExplorationOutcomeResolver.ResolveDoubleRollOutcome(TriggeredExplorationResult, die1, die2);
+        if (outcome is null) return;
+        ApplyResolvedOutcome(outcome);
+
+        // Le même 2D6 sert à la fois à départager Or/Objet ET, si ce n'est pas un double, à calculer
+        // l'or lui-même - un second jet "pour de vrai" redemanderait au joueur de relancer physiquement
+        // les mêmes dés, ce que le livre ne prévoit pas ici (un seul 2D6, contrairement à Boutique où
+        // le bonus partage le dé de l'Or sans que l'un dérive de l'autre).
+        if (outcome.Kind == ExplorationOutcomeKind.Gold && outcome.GoldFormula is { } formula)
+            ExplorationGoldAmount = DiceFormula.Apply(formula, [die1, die2]).ToString();
+    }
+
+    [RelayCommand]
+    private void AutoRollExplorationDoubleDie1() => ExplorationDoubleDie1 = ExplorationChart.RollDie().ToString();
+
+    [RelayCommand]
+    private void AutoRollExplorationDoubleDie2() => ExplorationDoubleDie2 = ExplorationChart.RollDie().ToString();
 
     /// <summary>Guerrier à marquer WarriorStatus.Sick à la sauvegarde (voir WarbandDetailViewModel.
     /// EndOfGame) - seul le Puits en a besoin pour l'instant (ExplorationOutcome.CausesSickness),
@@ -370,6 +443,9 @@ public partial class EndOfGameDialogViewModel
         StatTestHero = null;
         StatTestRoll = string.Empty;
         StatTestError = null;
+        ExplorationDoubleDie1 = string.Empty;
+        ExplorationDoubleDie2 = string.Empty;
+        ExplorationDoubleRollError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -481,6 +557,9 @@ public partial class EndOfGameDialogViewModel
             return false;
 
         if (ShowStatTest && !CheckRoll(ResolvedExplorationOutcome is null, () => StatTestError = Loc["EndOfGameRollRequired"]))
+            return false;
+
+        if (ShowDoubleRollCheck && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationDoubleRollError = Loc["EndOfGameRollRequired"]))
             return false;
 
         var amountMissing = ResolvedExplorationOutcome?.Kind switch

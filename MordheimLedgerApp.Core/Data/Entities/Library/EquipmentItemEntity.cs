@@ -28,6 +28,7 @@ public class EquipmentItemEntity
     public int? Attacks { get; set; }
     public int? Leadership { get; set; }
     public SkillCategory? GrantsSkillCategory { get; set; }
+    public string? GrantsSpecificSkillName { get; set; }
     public int? GrantsRareItemSearchBonus { get; set; }
     public bool IsSellable { get; set; }
 }

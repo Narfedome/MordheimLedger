@@ -94,6 +94,12 @@ public class ExplorationOutcome
     /// null = not a stat-test branch (every other Outcome in the table).</summary>
     public bool? StatTestPass { get; set; }
 
+    /// <summary>Only meaningful when the owning ExplorationResult.RequiresDoubleRoll is set - true =
+    /// this branch applies when the paired 2D6 roll shows a double (e.g. Merchant's House's Order of
+    /// Freetraders symbol), false/default = the normal branch. Same Pass/Fail-style pairing as
+    /// StatTestPass, just keyed on a raw double instead of a stat comparison.</summary>
+    public bool RequiresDoubleRoll { get; set; }
+
     /// <summary>True only for Puits' failure branch ("swallows tainted water and must miss the next
     /// game through sickness") - the End of Game wizard sets the chosen Hero's Warrior.Status to
     /// WarriorStatus.Sick when this branch resolves. False/default for every other branch, including

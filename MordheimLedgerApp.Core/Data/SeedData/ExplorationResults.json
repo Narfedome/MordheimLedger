@@ -315,8 +315,10 @@
       "fr": "La maison du marchand se dresse près des quais, sa cave voûtée en pierre encore encombrée de tonneaux et de balles de tissu. Vous y trouvez plusieurs objets de valeur revendables pour 2D6x5 CG. Si vous obtenez un double, vous trouvez à la place le symbole de l'Ordre des Libres Marchands : le Héros qui le porte gagne la compétence Marchandage."
     },
     "rollsIndependently": false,
+    "requiresDoubleRoll": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6x5" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6x5" },
+      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemName": "Order of Freetraders Symbol", "itemQuantityFormula": "1", "requiresDoubleRoll": true }
     ]
   },
   {

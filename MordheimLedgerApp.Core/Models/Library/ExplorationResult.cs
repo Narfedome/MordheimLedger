@@ -54,5 +54,13 @@ public class ExplorationResult
     /// Null = no stat test, the vast majority of entries.</summary>
     public ExplorationStatField? StatTestField { get; set; }
 
+    /// <summary>True = this result's Auto branches are mutually exclusive on whether a paired 2D6 roll
+    /// shows a double (e.g. Merchant's House - Maison du Marchand: normal roll -&gt; 2D6x5 gc, a double
+    /// -&gt; the Order of Freetraders symbol instead) - defers ResolveAutoOutcome exactly like
+    /// StatTestField does, until the wizard's two-dice input resolves which Outcome.RequiresDoubleRoll
+    /// value applies (see Core.Rules.ExplorationOutcomeResolver.ResolveDoubleRollOutcome). False (the
+    /// vast majority) = no such check, StatTestField/RollsIndependently/plain sub-roll resolve as usual.</summary>
+    public bool RequiresDoubleRoll { get; set; }
+
     public List<ExplorationOutcome> Outcomes { get; set; } = new();
 }

@@ -203,6 +203,9 @@ public class EquipmentSeedData
     /// EquipmentItem.GrantsSkillCategory. Null for almost every item.</summary>
     public string? GrantsSkillCategory { get; set; }
 
+    /// <summary>See EquipmentItem.GrantsSpecificSkillName. Null for almost every item.</summary>
+    public string? GrantsSpecificSkillName { get; set; }
+
     /// <summary>See EquipmentItem.GrantsRareItemSearchBonus. Null for almost every item.</summary>
     public int? GrantsRareItemSearchBonus { get; set; }
 
@@ -334,6 +337,10 @@ public class ExplorationResultSeedData
     /// Models.Library.ExplorationResult.StatTestField.</summary>
     public string? StatTestField { get; set; }
 
+    /// <summary>See Models.Library.ExplorationResult.RequiresDoubleRoll. False/absent for almost every
+    /// entry - so far only Merchant's House (Maison du Marchand).</summary>
+    public bool RequiresDoubleRoll { get; set; }
+
     public List<ExplorationOutcomeSeedData> Outcomes { get; set; } = new();
 }
 
@@ -357,6 +364,10 @@ public class ExplorationOutcomeSeedData
     public string? Note { get; set; }
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.RequiresDoubleRoll. False/absent for almost every
+    /// outcome.</summary>
+    public bool RequiresDoubleRoll { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

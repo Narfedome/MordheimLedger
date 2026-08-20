@@ -251,7 +251,15 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddSkill()
     {
-        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId, SkillEligibility.EffectiveAllowedCategories(Item));
+        // Résolution "en" -> ids : EffectiveExtraSkillNames est en anglais (locale-agnostic côté Core),
+        // le picker lui-même travaille sur son propre catalogue localisé - même idiome que les
+        // résolutions XxxByEnglishName du wizard Fin de Partie.
+        var extraSkillNames = SkillEligibility.EffectiveExtraSkillNames(Item);
+        var extraSkillIds = extraSkillNames.Count == 0 ? null : (await _libraryService.GetSkillsAsync("en"))
+            .Where(s => extraSkillNames.Contains(s.Name)).Select(s => s.Id).ToList();
+
+        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId,
+            SkillEligibility.EffectiveAllowedCategories(Item), extraSkillIds);
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);

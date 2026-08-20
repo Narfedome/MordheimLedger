@@ -548,6 +548,7 @@ public class AppDatabase
                 Attacks = eq.Attacks,
                 Leadership = eq.Leadership,
                 GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
+                GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
                 GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
                 IsSellable = eq.IsSellable
             };
@@ -628,6 +629,7 @@ public class AppDatabase
                 Value = res.Value,
                 RollsIndependently = res.RollsIndependently,
                 StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
+                RequiresDoubleRoll = res.RequiresDoubleRoll,
                 Source = ContentSource.Official
             };
             result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);
@@ -652,7 +654,8 @@ public class AppDatabase
                     AlternativeEquipmentItemName = outcome.AlternativeEquipmentItemName,
                     Note = outcome.Note,
                     StatTestPass = outcome.StatTestPass,
-                    CausesSickness = outcome.CausesSickness
+                    CausesSickness = outcome.CausesSickness,
+                    RequiresDoubleRoll = outcome.RequiresDoubleRoll
                 });
             }
         }

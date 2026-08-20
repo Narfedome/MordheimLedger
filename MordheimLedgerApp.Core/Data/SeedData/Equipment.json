@@ -2035,6 +2035,28 @@
   },
   {
     "name": {
+      "en": "Order of Freetraders Symbol",
+      "fr": "Symbole de l'Ordre des Libres Marchands"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 0,
+    "grantsSpecificSkillName": "Haggle",
+    "description": {
+      "en": "A small pewter token stamped with the mark of the Order of Freetraders. A Hero in possession of this symbol may choose the Haggle skill, whatever his usual skill lists.",
+      "fr": "Un petit jeton d'étain frappé du sceau de l'Ordre des Libres Marchands. Le Héros qui porte ce symbole peut choisir la compétence Marchandage, quelles que soient ses listes de compétences habituelles."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Mark of the Freetraders", "fr": "Sceau des Libres Marchands" },
+        "description": {
+          "en": "The Hero carrying this symbol may choose the Haggle skill at his next Advance, whatever his usual skill lists.",
+          "fr": "Le Héros qui porte ce symbole peut choisir la compétence Marchandage à sa prochaine Progression, quelles que soient ses listes de compétences habituelles."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
       "en": "Healing Herbs",
       "fr": "Herbes Curatives"
     },

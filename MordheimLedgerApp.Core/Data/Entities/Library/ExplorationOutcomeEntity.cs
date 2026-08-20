@@ -26,4 +26,5 @@ public class ExplorationOutcomeEntity
     public string? Note { get; set; }
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }
+    public bool RequiresDoubleRoll { get; set; }
 }

@@ -60,7 +60,12 @@ public partial class WarbandDetailViewModel
         var specialRulesByEnglishName = englishSpecialRules.ToDictionary(r => r.Name,
             r => localizedSpecialRules.FirstOrDefault(l => l.Id == r.Id) ?? r);
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName);
+        // Pour EquipmentItem.GrantsSpecificSkillName (ex. Haggle du symbole de la Maison du Marchand) -
+        // seul l'Id compte pour le picker de compétence (son propre catalogue est déjà localisé), pas
+        // besoin de résoudre un objet Skill localisé comme les deux dictionnaires ci-dessus.
+        var skillIdsByEnglishName = (await _libraryService.GetSkillsAsync("en")).ToDictionary(s => s.Name, s => s.Id);
+
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName, skillIdsByEnglishName);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>

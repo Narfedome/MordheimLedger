@@ -15,4 +15,5 @@ public class ExplorationResultEntity
     public ContentSource Source { get; set; }
     public bool RollsIndependently { get; set; }
     public ExplorationStatField? StatTestField { get; set; }
+    public bool RequiresDoubleRoll { get; set; }
 }

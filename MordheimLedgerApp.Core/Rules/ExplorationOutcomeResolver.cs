@@ -19,9 +19,12 @@ public static class ExplorationOutcomeResolver
     /// flat outcome (e.g. Ruined Hovels) and the "always applies" half of a result that also has a
     /// sub-roll-gated bonus branch on the same die (e.g. Shop's gold, see ResolveBonusItemOutcome). Null
     /// for a result gated behind a stat test instead (see ResolveStatTestOutcome) - its Auto-shaped
-    /// branches (Pass/Fail) must never resolve on their own before the test is actually made.</summary>
+    /// branches (Pass/Fail) must never resolve on their own before the test is actually made. Same
+    /// deferral for a result gated behind a paired-dice double check (see ResolveDoubleRollOutcome) -
+    /// e.g. Merchant's House's Gold/Item branches must wait for both dice, not resolve to whichever
+    /// happens to come first in Outcomes.</summary>
     public static ExplorationOutcome? ResolveAutoOutcome(ExplorationResult result) =>
-        result.StatTestField is not null ? null : result.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
+        result.StatTestField is not null || result.RequiresDoubleRoll ? null : result.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
 
     /// <summary>The mutually-exclusive branch a single sub-roll picks (e.g. Corpse: 1-2 gold, 3 dagger,
     /// 4 axe...) - null if no branch's range contains the roll (shouldn't happen for a well-formed sub-
@@ -50,5 +53,17 @@ public static class ExplorationOutcomeResolver
         if (resolvedAutoOutcome is not { Kind: ExplorationOutcomeKind.Gold, SubRollMin: null }) return null;
         return result.Outcomes.FirstOrDefault(o =>
             o.Kind == ExplorationOutcomeKind.Item && o.SubRollMin.HasValue && roll >= o.SubRollMin && roll <= o.SubRollMax);
+    }
+
+    /// <summary>Merchant's House (Maison du Marchand) is the one entry gated behind a paired 2D6 double
+    /// check instead of a sub-roll or stat test - normally 2D6x5 gc, but a double instead grants the
+    /// Order of Freetraders symbol. Comparing two already-entered dice for equality is arithmetic, not a
+    /// decision made for the player - only meaningful when ExplorationResult.RequiresDoubleRoll is set,
+    /// null otherwise (mirrors ResolveStatTestOutcome's shape for a Pass/Fail-style pair).</summary>
+    public static ExplorationOutcome? ResolveDoubleRollOutcome(ExplorationResult result, int die1, int die2)
+    {
+        if (!result.RequiresDoubleRoll) return null;
+        var isDouble = die1 == die2;
+        return result.Outcomes.FirstOrDefault(o => o.RequiresDoubleRoll == isDouble);
     }
 }

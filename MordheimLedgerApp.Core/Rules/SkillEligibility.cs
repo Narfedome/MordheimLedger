@@ -19,4 +19,16 @@ public static class SkillEligibility
                 .Select(e => e.Item.GrantsSkillCategory!.Value))
             .Distinct()
             .ToList();
+
+    /// <summary>English Names of specific Skills unlocked by carried equipment regardless of category
+    /// (e.g. Merchant's House's Order of Freetraders symbol - Maison du Marchand - unlocks Haggle
+    /// specifically, see EquipmentItem.GrantsSpecificSkillName) - narrower than EffectiveAllowedCategories,
+    /// which opens a whole list. Resolved to actual Skill ids by the caller (the picker's catalog is
+    /// language-specific, this stays locale-agnostic like the rest of Core).</summary>
+    public static List<string> EffectiveExtraSkillNames(Warrior warrior) =>
+        warrior.Equipment
+            .Where(e => e.Item.GrantsSpecificSkillName is not null)
+            .Select(e => e.Item.GrantsSpecificSkillName!)
+            .Distinct()
+            .ToList();
 }

@@ -251,6 +251,7 @@ public static class EntityMapping
         Source = e.Source,
         RollsIndependently = e.RollsIndependently,
         StatTestField = e.StatTestField,
+        RequiresDoubleRoll = e.RequiresDoubleRoll,
         Outcomes = outcomes?.ToList() ?? new List<ExplorationOutcome>()
     };
 
@@ -263,7 +264,8 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey ?? string.Empty,
         Source = m.Source,
         RollsIndependently = m.RollsIndependently,
-        StatTestField = m.StatTestField
+        StatTestField = m.StatTestField,
+        RequiresDoubleRoll = m.RequiresDoubleRoll
     };
 
     public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e) => new()
@@ -282,7 +284,8 @@ public static class EntityMapping
         AlternativeEquipmentItemName = e.AlternativeEquipmentItemName,
         Note = e.Note,
         StatTestPass = e.StatTestPass,
-        CausesSickness = e.CausesSickness
+        CausesSickness = e.CausesSickness,
+        RequiresDoubleRoll = e.RequiresDoubleRoll
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -301,7 +304,8 @@ public static class EntityMapping
         AlternativeEquipmentItemName = m.AlternativeEquipmentItemName,
         Note = m.Note,
         StatTestPass = m.StatTestPass,
-        CausesSickness = m.CausesSickness
+        CausesSickness = m.CausesSickness,
+        RequiresDoubleRoll = m.RequiresDoubleRoll
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -362,6 +366,7 @@ public static class EntityMapping
         Attacks = e.Attacks,
         Leadership = e.Leadership,
         GrantsSkillCategory = e.GrantsSkillCategory,
+        GrantsSpecificSkillName = e.GrantsSpecificSkillName,
         GrantsRareItemSearchBonus = e.GrantsRareItemSearchBonus,
         IsSellable = e.IsSellable
     };
@@ -455,6 +460,7 @@ public static class EntityMapping
         Attacks = m.Attacks,
         Leadership = m.Leadership,
         GrantsSkillCategory = m.GrantsSkillCategory,
+        GrantsSpecificSkillName = m.GrantsSpecificSkillName,
         GrantsRareItemSearchBonus = m.GrantsRareItemSearchBonus,
         IsSellable = m.IsSellable
     };

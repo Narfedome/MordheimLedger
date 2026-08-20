@@ -449,6 +449,24 @@ public class RulesTests
         Assert.Throws<FormatException>(() => DiceFormula.Roll("banana"));
     }
 
+    [Fact]
+    public void DiceFormula_Apply_2D6x5_MultipliesGivenSum()
+    {
+        Assert.Equal(30, DiceFormula.Apply("2D6x5", [3, 3]));
+    }
+
+    [Fact]
+    public void DiceFormula_Apply_D6Plus1_AddsAfterGivenSum()
+    {
+        Assert.Equal(5, DiceFormula.Apply("D6+1", [4]));
+    }
+
+    [Fact]
+    public void DiceFormula_Apply_FlatInteger_IgnoresGivenDice()
+    {
+        Assert.Equal(100, DiceFormula.Apply("100", [3, 3]));
+    }
+
     // --- ExplorationChart --------------------------------------------------------------------------
 
     [Theory]
@@ -512,8 +530,8 @@ public class RulesTests
     // Fixtures mirror the real seed shapes (see Data/SeedData/ExplorationResults.json) rather than
     // minimal synthetic ones, so a fixture drifting out of sync with the actual JSON would be obvious.
 
-    private static ExplorationOutcome Outcome(ExplorationOutcomeKind kind, int? subRollMin = null, int? subRollMax = null, bool? statTestPass = null) =>
-        new() { Kind = kind, SubRollMin = subRollMin, SubRollMax = subRollMax, StatTestPass = statTestPass };
+    private static ExplorationOutcome Outcome(ExplorationOutcomeKind kind, int? subRollMin = null, int? subRollMax = null, bool? statTestPass = null, bool requiresDoubleRoll = false) =>
+        new() { Kind = kind, SubRollMin = subRollMin, SubRollMax = subRollMax, StatTestPass = statTestPass, RequiresDoubleRoll = requiresDoubleRoll };
 
     // Corpse (2,3): five mutually exclusive sub-roll branches, no Auto branch at all.
     private static ExplorationResult Corpse() => new()
@@ -541,6 +559,13 @@ public class RulesTests
     {
         DiceCount = 2, Value = 1, StatTestField = ExplorationStatField.Toughness,
         Outcomes = [Outcome(ExplorationOutcomeKind.Wyrdstone, statTestPass: true), Outcome(ExplorationOutcomeKind.None, statTestPass: false)]
+    };
+
+    // Merchant's House (5,4): paired 2D6 double check, normal roll = gold, a double = the item instead.
+    private static ExplorationResult MerchantsHouse() => new()
+    {
+        DiceCount = 5, Value = 4, RequiresDoubleRoll = true,
+        Outcomes = [Outcome(ExplorationOutcomeKind.Gold), Outcome(ExplorationOutcomeKind.Item, requiresDoubleRoll: true)]
     };
 
     [Fact]
@@ -610,6 +635,30 @@ public class RulesTests
         Assert.Null(ExplorationOutcomeResolver.ResolveBonusItemOutcome(corpse, goldOutcome, roll: 4));
     }
 
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveAutoOutcome_NullForDoubleRollGatedResult()
+    {
+        Assert.Null(ExplorationOutcomeResolver.ResolveAutoOutcome(MerchantsHouse()));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveDoubleRollOutcome_NoDouble_ReturnsGold()
+    {
+        Assert.Equal(ExplorationOutcomeKind.Gold, ExplorationOutcomeResolver.ResolveDoubleRollOutcome(MerchantsHouse(), 2, 5)?.Kind);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveDoubleRollOutcome_Double_ReturnsItem()
+    {
+        Assert.Equal(ExplorationOutcomeKind.Item, ExplorationOutcomeResolver.ResolveDoubleRollOutcome(MerchantsHouse(), 3, 3)?.Kind);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveDoubleRollOutcome_NullWhenResultNotGated()
+    {
+        Assert.Null(ExplorationOutcomeResolver.ResolveDoubleRollOutcome(Corpse(), 3, 3));
+    }
+
     // --- SkillEligibility -----------------------------------------------------------------------
 
     private static Warrior WarriorWith(List<SkillCategory> allowedCategories, params EquipmentItem[] carriedItems) =>
@@ -640,6 +689,21 @@ public class RulesTests
         var notebook = new EquipmentItem { Id = 1, GrantsSkillCategory = SkillCategory.Academic };
         var warrior = WarriorWith([SkillCategory.Academic], notebook);
         Assert.Equal([SkillCategory.Academic], SkillEligibility.EffectiveAllowedCategories(warrior));
+    }
+
+    [Fact]
+    public void SkillEligibility_NoGrantingItem_NoExtraSkillNames()
+    {
+        var warrior = WarriorWith([], new EquipmentItem { Id = 1 });
+        Assert.Empty(SkillEligibility.EffectiveExtraSkillNames(warrior));
+    }
+
+    [Fact]
+    public void SkillEligibility_CarriedSymbol_GrantsSpecificSkillName()
+    {
+        var symbol = new EquipmentItem { Id = 1, GrantsSpecificSkillName = "Haggle" };
+        var warrior = WarriorWith([SkillCategory.Combat], symbol);
+        Assert.Equal(["Haggle"], SkillEligibility.EffectiveExtraSkillNames(warrior));
     }
 
     // --- RareItemSearchBonus -------------------------------------------------------------------

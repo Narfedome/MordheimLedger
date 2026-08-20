@@ -62,6 +62,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
     private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
 
+    /// <summary>Nom anglais -> Id de compétence, pour résoudre EquipmentItem.GrantsSpecificSkillName
+    /// (voir Core.Rules.SkillEligibility.EffectiveExtraSkillNames) vers les ids que _skillPicker attend -
+    /// le picker travaille sur son propre catalogue localisé, ce dictionnaire ne sert qu'à traverser la
+    /// frontière anglais->id une fois, ici, plutôt qu'à chaque PickAdvanceSkill.</summary>
+    private readonly IReadOnlyDictionary<string, int> _skillIdsByEnglishName;
+
     protected override bool CancelResult => false;
 
     public ObservableCollection<string> ResultOptions { get; } = new();
@@ -173,7 +179,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -181,6 +187,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _explorationResults = explorationResults;
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
         _specialRulesByEnglishName = specialRulesByEnglishName;
+        _skillIdsByEnglishName = skillIdsByEnglishName;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);

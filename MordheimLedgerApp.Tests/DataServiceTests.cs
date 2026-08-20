@@ -246,6 +246,18 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var stragglerUndead = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
         Assert.Equal("Zombie", stragglerUndead.GrantsFreeHenchmanArchetypeName);
 
+        // ShortDescription/BranchText (2026-08-20): the wizard shows just the shared intro sentence plus
+        // the resolved branch's own sentence for a warband-conditioned result, instead of the full
+        // multi-branch Description - both must actually be localized (unlike Note, which never was).
+        Assert.Equal("Your warband encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly possessions.", straggler.ShortDescription);
+        Assert.Equal("Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc.",
+            straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"])).BranchText);
+        var frResults = await _library.GetExplorationResultsAsync("fr");
+        var frStraggler = frResults.Single(r => r.DiceCount == 2 && r.Value == 4);
+        Assert.Equal("Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens.", frStraggler.ShortDescription);
+        Assert.Equal("Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO.",
+            frStraggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"])).BranchText);
+
         // Dwarf Smithy (6 3): a "Gromril Axe" branch is just the base "Axe" plus the Gromril Weapon
         // material rule, not a distinct catalog item - see ExplorationOutcome.MaterialRuleName.
         var dwarfSmithy = results.Single(r => r.DiceCount == 6 && r.Value == 3);

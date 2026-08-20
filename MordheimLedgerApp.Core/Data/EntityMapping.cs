@@ -251,8 +251,10 @@ public static class EntityMapping
         Value = e.Value,
         Name = ResolveName(e.NameKey, translations),
         Description = ResolveDescription(e.DescriptionKey, translations) ?? string.Empty,
+        ShortDescription = ResolveDescription(e.ShortDescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
+        ShortDescriptionKey = e.ShortDescriptionKey,
         Source = e.Source,
         RollsIndependently = e.RollsIndependently,
         StatTestField = e.StatTestField,
@@ -269,6 +271,7 @@ public static class EntityMapping
         Value = m.Value,
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey ?? string.Empty,
+        ShortDescriptionKey = m.ShortDescriptionKey,
         Source = m.Source,
         RollsIndependently = m.RollsIndependently,
         StatTestField = m.StatTestField,
@@ -277,7 +280,7 @@ public static class EntityMapping
         RequiresSentHero = m.RequiresSentHero
     };
 
-    public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e) => new()
+    public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e, IReadOnlyDictionary<string, string> translations) => new()
     {
         Id = e.Id,
         ExplorationResultId = e.ExplorationResultId,
@@ -292,6 +295,8 @@ public static class EntityMapping
         SecondaryEquipmentItemName = e.SecondaryEquipmentItemName,
         AlternativeEquipmentItemName = e.AlternativeEquipmentItemName,
         Note = e.Note,
+        BranchText = ResolveDescription(e.BranchTextKey, translations),
+        BranchTextKey = e.BranchTextKey,
         StatTestPass = e.StatTestPass,
         CausesSickness = e.CausesSickness,
         RequiresDoubleRoll = e.RequiresDoubleRoll,
@@ -319,6 +324,7 @@ public static class EntityMapping
         SecondaryEquipmentItemName = m.SecondaryEquipmentItemName,
         AlternativeEquipmentItemName = m.AlternativeEquipmentItemName,
         Note = m.Note,
+        BranchTextKey = m.BranchTextKey,
         StatTestPass = m.StatTestPass,
         CausesSickness = m.CausesSickness,
         RequiresDoubleRoll = m.RequiresDoubleRoll,

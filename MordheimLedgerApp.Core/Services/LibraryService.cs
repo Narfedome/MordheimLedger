@@ -164,9 +164,13 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<ExplorationResultEntity>().ToListAsync();
-        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        var outcomesByResultId = (await _db.Connection.Table<ExplorationOutcomeEntity>().ToListAsync())
-            .Select(o => o.ToModel())
+        var outcomeEntities = await _db.Connection.Table<ExplorationOutcomeEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(
+            rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey, r.ShortDescriptionKey })
+                .Concat(outcomeEntities.Select(o => o.BranchTextKey)),
+            languageCode);
+        var outcomesByResultId = outcomeEntities
+            .Select(o => o.ToModel(translations))
             .GroupBy(o => o.ExplorationResultId)
             .ToDictionary(g => g.Key, g => (IEnumerable<ExplorationOutcome>)g.ToList());
         return rows.Select(r => r.ToModel(translations, outcomesByResultId.GetValueOrDefault(r.Id)))

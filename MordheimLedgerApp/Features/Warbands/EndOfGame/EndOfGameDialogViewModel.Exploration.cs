@@ -251,10 +251,13 @@ public partial class EndOfGameDialogViewModel
     public bool IsWarbandConditionedResult => TriggeredExplorationResult?.Outcomes.Any(o => o.RestrictedToWarbandArchetypeNames.Count > 0) == true;
 
     /// <summary>Texte affiché en haut de l'étape Résultat - la description complète du livre, sauf pour
-    /// un résultat conditionné par la bande où seul le Note de la branche déjà résolue (Skavens/
-    /// Possédés/Morts-Vivants/autres...) est montré.</summary>
+    /// un résultat conditionné par la bande où seule la phrase d'intro partagée (ExplorationResult.
+    /// ShortDescription) est montrée, suivie de la vraie phrase de la branche résolue
+    /// (ExplorationOutcome.BranchText, correctement traduite) plutôt que le paragraphe entier énumérant
+    /// les 4 branches - retour utilisateur 2026-08-20 : la première version de ce correctif réutilisait
+    /// Note (jamais traduit, un simple tag interne) et perdait la phrase d'intro.</summary>
     public string ExplorationResultDescriptionText => IsWarbandConditionedResult
-        ? ResolvedExplorationOutcome?.Note ?? string.Empty
+        ? string.Join(" ", new[] { TriggeredExplorationResult?.ShortDescription, ResolvedExplorationOutcome?.BranchText }.Where(s => !string.IsNullOrEmpty(s)))
         : TriggeredExplorationResult?.Description ?? string.Empty;
 
     /// <summary>Le bloc Note de la branche résolue (plus bas, sous Or/Objet/Pierre magique) ne doit pas

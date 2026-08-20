@@ -4,13 +4,15 @@ namespace MordheimLedgerApp.Core.Models.Library;
 /// One entry of the rulebook's Exploration chart (Post-Battle Sequence, Income section) - triggered
 /// when a warband's Exploration roll (see the End of Game wizard) lands on two or more dice showing the
 /// same value. DiceCount/Value identify which entry a given roll maps to (e.g. three 5's -&gt;
-/// DiceCount=3, Value=5 -&gt; "Market Hall"). Description carries the full rulebook text and is always
-/// shown to the player; Outcomes only covers the branches worth mechanizing (adding gold or bonus
-/// wyrdstone shards to the warband, or offering a specific EquipmentItem to equip) - free Henchmen, Experience,
-/// permanent warband traits, unlocked skill lists etc. stay pure text, same "no rules engine" boundary
-/// used for combat/stat rules elsewhere, not extended to treasury/equipment bookkeeping which the app
-/// already models well (decision confirmed 2026-08-17, reversing an earlier "descriptive text only"
-/// take once it became clear the boundary was meant for combat rules specifically).
+/// DiceCount=3, Value=5 -&gt; "Market Hall"). Description carries the full rulebook text verbatim (every
+/// branch included) as the authoritative reference, shown to the player for most entries - see
+/// ShortDescription for the one case where the wizard shows something else instead. Outcomes covers the
+/// branches worth mechanizing (gold/wyrdstone/a specific EquipmentItem, and - since 2026-08-20, see
+/// Straggler - leader Experience and a free Henchman recruit too) - permanent warband traits, unlocked
+/// skill lists etc. still stay pure text, same "no rules engine" boundary used for combat/stat rules
+/// elsewhere, not extended to treasury/equipment/roster bookkeeping which the app already models well
+/// (decision confirmed 2026-08-17, reversing an earlier "descriptive text only" take once it became
+/// clear the boundary was meant for combat rules specifically).
 ///
 /// Seeded from the rulebook only for now - no Library editor screen yet (same precedent as
 /// SeriousInjuryTable/HeroAdvanceTable: reference content consumed by the wizard). Source is kept ready
@@ -31,9 +33,22 @@ public class ExplorationResult
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
 
-    /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>
+    /// <summary>Just the shared intro sentence every branch follows (e.g. Straggler: "Your warband
+    /// encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly
+    /// possessions.") - null for every entry except a "conditioned by warband identity" result (see
+    /// ExplorationOutcome.RestrictedToWarbandArchetypeNames/BranchText). The wizard's Result step shows
+    /// this + the resolved branch's own BranchText instead of the full multi-branch Description for
+    /// those entries (retrofitted 2026-08-20 after showing the full Description there turned out to
+    /// bury the one branch that actually applies to the playing warband among three others that don't -
+    /// see EndOfGameDialogViewModel.ExplorationResultDescriptionText). Description itself is untouched,
+    /// still the authoritative full-text reference.</summary>
+    public string? ShortDescription { get; set; }
+
+    /// <summary>Translation slot backing Name/Description/ShortDescription - persistence-only, not for
+    /// display.</summary>
     public string? NameKey { get; set; }
     public string? DescriptionKey { get; set; }
+    public string? ShortDescriptionKey { get; set; }
 
     public ContentSource Source { get; set; }
 

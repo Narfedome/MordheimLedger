@@ -638,11 +638,15 @@ public class AppDatabase
             };
             result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);
             result.DescriptionKey = await SeedTranslationAsync(res.Description.En, res.Description.Fr);
+            if (res.ShortDescription is { } shortDescription)
+                result.ShortDescriptionKey = await SeedTranslationAsync(shortDescription.En, shortDescription.Fr);
             var resultEntity = result.ToEntity();
             await _db.InsertAsync(resultEntity);
 
             foreach (var outcome in res.Outcomes)
             {
+                var branchTextKey = outcome.BranchText is { } branchText
+                    ? await SeedTranslationAsync(branchText.En, branchText.Fr) : null;
                 await _db.InsertAsync(new ExplorationOutcomeEntity
                 {
                     ExplorationResultId = resultEntity.Id,
@@ -657,6 +661,7 @@ public class AppDatabase
                     SecondaryEquipmentItemName = outcome.SecondaryEquipmentItemName,
                     AlternativeEquipmentItemName = outcome.AlternativeEquipmentItemName,
                     Note = outcome.Note,
+                    BranchTextKey = branchTextKey,
                     StatTestPass = outcome.StatTestPass,
                     CausesSickness = outcome.CausesSickness,
                     RequiresDoubleRoll = outcome.RequiresDoubleRoll,

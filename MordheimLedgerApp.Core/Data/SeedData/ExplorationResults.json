@@ -51,14 +51,22 @@
     "name": { "en": "Straggler", "fr": "Traînard" },
     "description": {
       "en": "Your warband encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly possessions. Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc. Possessed warbands can sacrifice the unfortunate individual for the glory of the Chaos gods - the leader gains +1 Experience. Undead warbands can kill the man and gain a Zombie for no cost. Any other warband can interrogate the man and gain insight into the city: next time you roll on the Exploration chart, roll one dice more than usual and discard any one dice.",
-      "fr": "Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens. Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO. Une bande des Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience. Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement. Toute autre bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix."
+      "fr": "Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens. Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO. Une bande de Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience. Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement. Toute autre bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix."
+    },
+    "shortDescription": {
+      "en": "Your warband encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly possessions.",
+      "fr": "Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens."
     },
     "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Skavens : vente aux agents du Clan Eshin", "restrictedToWarbandArchetypeNames": ["Skaven of Clan Eshin"] },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsLeaderExperience": 1 },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Autres bandes : un dé supplémentaire au prochain jet d'Exploration", "grantsNextExplorationBonusDie": true }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Skavens : vente aux agents du Clan Eshin", "restrictedToWarbandArchetypeNames": ["Skaven of Clan Eshin"],
+        "branchText": { "en": "Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc.", "fr": "Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsLeaderExperience": 1,
+        "branchText": { "en": "Possessed warbands can sacrifice the unfortunate individual for the glory of the Chaos gods - the leader gains +1 Experience.", "fr": "Une bande des Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie",
+        "branchText": { "en": "Undead warbands can kill the man and gain a Zombie for no cost.", "fr": "Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Autres bandes : un dé supplémentaire au prochain jet d'Exploration", "grantsNextExplorationBonusDie": true,
+        "branchText": { "en": "Any other warband can interrogate the man and gain insight into the city: next time you roll on the Exploration chart, roll one dice more than usual and discard any one dice.", "fr": "La bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix." } }
     ]
   },
   {

@@ -26,7 +26,7 @@ pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (der
 | 2,1 | Puits | ✅ | ✅ | Vrai test d'Endurance (choix du Héros, jet comparé à sa stat) - réussite = pierre magique, échec = statut `Malade` (indisponible prochaine partie, effacé auto au Fin de Partie suivant). Un jet de 6 est un échec automatique quelle que soit la stat (RulesReference "Tests de caractéristiques", `Core.Rules.ExplorationChart.PassesStatTest` - manquant jusqu'à cette passe, corrigé aussi pour le test de Commandement additionnel de Bâtiment Éventré, où l'exception ne s'applique PAS) |
 | 2,2 | Boutique | ✅ | ✅ | Or (D6) + Porte-bonheur bonus si le même jet vaut 1 (`BonusItemOutcome`) |
 | 2,3 | Cadavre | ✅ | ✅ | Premier cas validé (sous-jet à branches exclusives) |
-| 2,4 | Traînard | ✅ | ✅ | Groupe B — branche résolue automatiquement depuis l'archétype de la bande jouée (`Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome`, `ExplorationOutcome.RestrictedToWarbandArchetypeNames`) : Skavens (Or 2D6), Possédés (+1 XP au chef, `GrantsLeaderExperience`), Morts-Vivants (Zombie gratuit avec ChipView tapable, fusionné dans un groupe existant s'il y en a un, `GrantsFreeHenchmanArchetypeName`), toute autre bande (dé bonus au prochain jet d'Exploration - `Warband.PendingExplorationBonusDie`, rappel textuel affiché au jet suivant, ne change pas le nombre de dés gardés). L'étape Résultat n'affiche que le texte de la branche réellement applicable (`ExplorationResultDescriptionText`), pas le paragraphe du livre qui énumère les 4 branches |
+| 2,4 | Traînard | ✅ | ✅ | Groupe B — branche résolue automatiquement depuis l'archétype de la bande jouée (`Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome`, `ExplorationOutcome.RestrictedToWarbandArchetypeNames`) : Skavens (Or 2D6), Possédés (+1 XP au chef, `GrantsLeaderExperience`), Morts-Vivants (Zombie gratuit avec ChipView tapable, fusionné dans un groupe existant s'il y en a un, `GrantsFreeHenchmanArchetypeName`), toute autre bande (dé bonus au prochain jet d'Exploration - `Warband.PendingExplorationBonusDie`, rappel textuel affiché au jet suivant, ne change pas le nombre de dés gardés). L'étape Résultat n'affiche que la phrase d'intro partagée (`ExplorationResult.ShortDescription`) + la vraie phrase de la branche résolue (`ExplorationOutcome.BranchText`, traduit EN/FR), pas le paragraphe complet du livre qui énumère les 4 branches - `Description` reste inchangée, gardée comme référence complète |
 | 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (matériau "Arme Ornée", `SpecialRule.IsResaleUpgrade`, bouton "Vendre" dans l'inventaire de bande) |
 | 2,6 | Masures en Ruine | ✅ | ✅ | Branche unique |
 | 3,1 | Taverne | ⏳ | ❌ | Groupe B — test de Commandement |
@@ -175,8 +175,22 @@ pur, pas encore d'UI). Tout résultat au Statut ✅ a été rejoué en vrai (der
   déjà là pour le Codex - juste jamais branché depuis ce wizard avant) plutôt qu'un simple texte, même
   langage d'interaction que tout objet trouvé. Second retour, même échange : la description complète du
   livre énumère les 4 branches (Skavens/Possédés/Morts-Vivants/autres) alors qu'une seule s'applique
-  réellement à la bande jouée - l'étape Résultat n'affiche maintenant que le texte de cette branche
-  (`ExplorationResultDescriptionText`, bascule sur `ResolvedExplorationOutcome.Note` pour tout résultat
-  "conditionné par la bande" au lieu de `TriggeredExplorationResult.Description`), généralisable aux 3
-  autres entrées de cette forme (Prisonniers/Cimetière/bénédiction du Sanctuaire) sans travail
-  supplémentaire.
+  réellement à la bande jouée - première version du correctif basée sur `ResolvedExplorationOutcome.Note`
+  (voir `ExplorationResultDescriptionText`), revue juste après (voir entrée suivante).
+- **2026-08-20 (Traînard - Note n'était pas la bonne base pour l'affichage)** — Retour utilisateur sur le
+  correctif ci-dessus : deux défauts. (1) `Note` n'est **jamais traduit** ("Deliberately not localized",
+  décision d'origine documentée sur le champ) - un joueur EN aurait vu le texte FR ("Skavens : vente aux
+  agents du Clan Eshin") tel quel. (2) La phrase d'intro partagée ("Votre bande croise l'un des
+  survivants de Mordheim...") disparaissait complètement, `Note` ne portant que le texte propre à la
+  branche. Solution retenue par l'utilisateur : garder deux versions distinctes de la description -
+  `Description` (déjà là, verbatim complète, gardée intacte comme trace/référence de l'évènement réel du
+  livre) + deux nouveaux champs traduits (même mécanisme `XxxKey`/`TranslationEntity` que Name/
+  Description, pas le raccourci non-traduit de Note) : `ExplorationResult.ShortDescription` (juste la
+  phrase d'intro, un seul champ pour tout le résultat) et `ExplorationOutcome.BranchText` (la vraie
+  phrase complète du livre pour CETTE branche seule, un par branche). `ExplorationResultDescriptionText`
+  concatène maintenant ShortDescription + BranchText de la branche résolue pour un résultat "conditionné
+  par la bande", les deux correctement résolus dans la langue courante via `LibraryService.
+  GetExplorationResultsAsync` (élargi pour inclure `ShortDescriptionKey`/`BranchTextKey` dans sa
+  résolution de traductions, et pour passer les traductions à `ExplorationOutcomeEntity.ToModel`,
+  jusque-là parameterless puisque rien sur Outcome n'était traduit). `Note` reste tel quel (tag interne
+  court, toujours non traduit) pour ses autres usages existants ailleurs dans la table - pas touché.

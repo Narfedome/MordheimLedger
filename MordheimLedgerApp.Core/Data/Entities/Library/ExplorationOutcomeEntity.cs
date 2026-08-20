@@ -24,6 +24,7 @@ public class ExplorationOutcomeEntity
     public string? SecondaryEquipmentItemName { get; set; }
     public string? AlternativeEquipmentItemName { get; set; }
     public string? Note { get; set; }
+    public string? BranchTextKey { get; set; }
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }
     public bool RequiresDoubleRoll { get; set; }

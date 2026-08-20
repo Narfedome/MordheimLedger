@@ -337,6 +337,11 @@ public class ExplorationResultSeedData
     public int Value { get; set; }
     public LocalizedText Name { get; set; } = new();
     public LocalizedText Description { get; set; } = new();
+
+    /// <summary>See Models.Library.ExplorationResult.ShortDescription. Null (almost every entry) = the
+    /// wizard shows Description as-is.</summary>
+    public LocalizedText? ShortDescription { get; set; }
+
     public bool RollsIndependently { get; set; }
 
     /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationStatField member name (e.g.
@@ -378,6 +383,11 @@ public class ExplorationOutcomeSeedData
     public string? SecondaryEquipmentItemName { get; set; }
     public string? AlternativeEquipmentItemName { get; set; }
     public string? Note { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.BranchText. Null for almost every outcome - so far
+    /// only "conditioned by warband identity" branches (Straggler).</summary>
+    public LocalizedText? BranchText { get; set; }
+
     public bool? StatTestPass { get; set; }
     public bool CausesSickness { get; set; }
 

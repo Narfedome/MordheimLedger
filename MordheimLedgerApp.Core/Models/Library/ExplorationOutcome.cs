@@ -76,19 +76,26 @@ public class ExplorationOutcome
     /// material.</summary>
     public string? AlternativeEquipmentItemName { get; set; }
 
-    /// <summary>Short disambiguating label shown alongside this branch - two uses: (1) a rare fallback
-    /// for a branch that reads as Gold/Item in the rulebook but can't be wired up that way yet (Kind
-    /// stays None, e.g. "Elven Cloak" for an item missing from the Trading Post catalog); (2) a context
-    /// label on ANY Kind for an ExplorationResult whose branches are conditional on the warband's type
-    /// (e.g. "Skaven", "Undead") - one Auto outcome (SubRollMin/Max both null) per applicable warband,
-    /// see RestrictedToWarbandArchetypeNames for how the wizard now picks the right one automatically
-    /// (2026-08-20 - supersedes an earlier plan, described in an older revision of this comment, to show
-    /// every branch and let the player pick manually: confirmed with the user that the rulebook's "a
-    /// Skaven warband CAN..." phrasing means the branch is strictly determined by warband identity, not a
-    /// free choice among all of them). Deliberately not localized like the rest of this Library catalog:
-    /// short/secondary content, not primary UI text - add a NoteKey translation slot later if that turns
-    /// out to matter.</summary>
+    /// <summary>Short disambiguating label shown alongside this branch - an internal/technical tag (e.g.
+    /// "Skavens : vente aux agents du Clan Eshin") used where a compact identifier is enough - not shown
+    /// to the player as-is any more (see BranchText for that). Deliberately not localized: short/
+    /// secondary content, French-only today regardless of UI language, acceptable since nothing user-
+    /// facing reads it directly.</summary>
     public string? Note { get; set; }
+
+    /// <summary>The rulebook's own full sentence for THIS branch alone (e.g. "A Skaven warband can sell
+    /// the straggler to agents of Clan Eshin and gain 2D6 gc.") - only meaningful for a "conditioned by
+    /// warband identity" result (RestrictedToWarbandArchetypeNames), shown in the wizard instead of the
+    /// Note label so the player reads a real sentence, properly localized, rather than a terse tag.
+    /// Contrast ExplorationResult.ShortDescription (the shared intro sentence every branch follows) -
+    /// together they replace the full multi-branch Description on the wizard's Result step (see
+    /// EndOfGameDialogViewModel.ExplorationResultDescriptionText). Retrofitted 2026-08-20 after Note
+    /// turned out to matter for real UI display, not just an internal tag as originally planned - see
+    /// BranchTextKey for the translation slot.</summary>
+    public string? BranchText { get; set; }
+
+    /// <summary>Translation slot backing BranchText - persistence-only, not for display.</summary>
+    public string? BranchTextKey { get; set; }
 
     /// <summary>English WarbandArchetype.Name(s) this branch is restricted to (e.g. "Skaven of Clan
     /// Eshin") - only meaningful when the owning ExplorationResult.RollsIndependently is true and at

@@ -306,6 +306,9 @@
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Treasury:</value>
   </data>
+  <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
+    <value>Wyrdstone:</value>
+  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Heroes</value>
   </data>
@@ -807,6 +810,12 @@
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choose a Hero</value>
   </data>
+  <data name="EndOfGameSentHeroPh" xml:space="preserve">
+    <value>Send a Hero (optional)</value>
+  </data>
+  <data name="EndOfGamePassByOption" xml:space="preserve">
+    <value>Move on</value>
+  </data>
   <data name="EndOfGameStatFieldToughness" xml:space="preserve">
     <value>Toughness</value>
   </data>
@@ -848,6 +857,9 @@
   </data>
   <data name="HistorySicknessSentence" xml:space="preserve">
     <value>{0} is sick and will miss the next game.</value>
+  </data>
+  <data name="HistoryPitDevouredSentence" xml:space="preserve">
+    <value>{0} was sent into the Pit and devoured by its guardians.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} gained {1} XP.</value>

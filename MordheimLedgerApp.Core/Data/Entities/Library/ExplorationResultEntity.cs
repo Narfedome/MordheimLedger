@@ -17,4 +17,5 @@ public class ExplorationResultEntity
     public ExplorationStatField? StatTestField { get; set; }
     public bool RequiresDoubleRoll { get; set; }
     public ExplorationStatField? BonusStatTestField { get; set; }
+    public bool RequiresSentHero { get; set; }
 }

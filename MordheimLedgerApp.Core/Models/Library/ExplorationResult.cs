@@ -71,5 +71,14 @@ public class ExplorationResult
     /// ResolveBonusStatTestOutcome. Null (the vast majority) = no such bonus test.</summary>
     public ExplorationStatField? BonusStatTestField { get; set; }
 
+    /// <summary>True = this result requires choosing a Hero to send in BEFORE its sub-roll can resolve
+    /// (e.g. the Pit - La Fosse: "you can send one Hero to search for wyrdstone... on a 1 he's devoured")
+    /// - unlike StatTestField/BonusStatTestField, no stat is compared, the Hero is simply put at risk by
+    /// whichever branch the sub-roll picks (see ExplorationOutcome.CausesDeath). Sending is OPTIONAL per
+    /// the rulebook ("if you wish") - the wizard just leaves the sub-roll hidden and the branch
+    /// unresolved (no reward, no risk) until a Hero is actually chosen, never forcing a pick. False (the
+    /// vast majority) = no such requirement, the sub-roll (if any) is available immediately.</summary>
+    public bool RequiresSentHero { get; set; }
+
     public List<ExplorationOutcome> Outcomes { get; set; } = new();
 }

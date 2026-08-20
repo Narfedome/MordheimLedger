@@ -106,4 +106,12 @@ public class ExplorationOutcome
     /// every other stat-test failure in the table (Taverne/Bâtiment Éventré's failures don't sicken
     /// anyone, they just give less/nothing).</summary>
     public bool CausesSickness { get; set; }
+
+    /// <summary>True only for the Pit's (La Fosse) "devoured" sub-roll branch (1 on a D6: "the Hero is
+    /// devoured by the guardians of the Pit and never seen again") - the End of Game wizard sets the
+    /// sent Hero's Warrior.Status to WarriorStatus.Dead when this branch resolves, same idiom as
+    /// CausesSickness. Only ever meaningful alongside ExplorationResult.RequiresSentHero (the branch's
+    /// consequence targets whichever Hero the player chose to send, not a Hero picked for a stat test).
+    /// False/default for every other branch.</summary>
+    public bool CausesDeath { get; set; }
 }

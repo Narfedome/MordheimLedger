@@ -158,6 +158,14 @@ public partial class WarbandDetailViewModel
                 // 2026-08-18 : le statut Malade ne "prenait" jamais).
                 sentences.Add(string.Format(Loc["HistorySicknessSentence"], sickHero.Name));
             }
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.CausesDeath && dialogViewModel.PitDevouredHero is { } devouredHero)
+            {
+                // La Fosse, sous-jet 1 (Héros dévoré) - même principe que la Maladie du Puits ci-dessus :
+                // le statut Mort n'est PAS posé ici, ApplyPitDeathAsync le pose plus tard, APRÈS
+                // ApplyWarriorOutcomesAsync pour la même raison (celle-ci resynchronise sinon
+                // warrior.Status depuis row.Status et écraserait silencieusement Mort en Actif).
+                sentences.Add(string.Format(Loc["HistoryPitDevouredSentence"], devouredHero.Name));
+            }
             else if (outcome.Kind == ExplorationOutcomeKind.None)
             {
                 sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], dialogViewModel.ExplorationNoteText));
@@ -302,8 +310,10 @@ public partial class WarbandDetailViewModel
 
     /// <summary>Doit être appelée APRÈS ApplyWarriorOutcomesAsync (voir l'invariant documenté à
     /// l'appel dans EndOfGame ci-dessus) - celle-ci resynchronise warrior.Status depuis row.Status
-    /// (Actif/Mort uniquement) pour chaque guerrier, ce qui écraserait silencieusement un statut Sick
-    /// posé avant elle (bug trouvé le 2026-08-18).</summary>
+    /// (Actif/Mort uniquement) pour chaque guerrier, ce qui écraserait silencieusement un statut Sick/
+    /// Mort posé avant elle par un mécanisme d'Exploration (bug trouvé le 2026-08-18 pour Sick ; même
+    /// principe appliqué à La Fosse). Regroupe tous les statuts posés hors du flux Blessure normal, pas
+    /// seulement la Maladie malgré le nom.</summary>
     private async Task ApplySicknessLifecycleAsync(EndOfGameDialogViewModel dialogViewModel, List<WarriorRow> previouslySickWarriors)
     {
         // La partie qu'ils manquaient (voir previouslySickWarriors dans EndOfGame) vient d'être
@@ -320,6 +330,13 @@ public partial class WarbandDetailViewModel
         {
             newlySickHero.Warrior.Status = WarriorStatus.Sick;
             await _warbandService.SaveWarriorAsync(newlySickHero.Warrior);
+        }
+
+        // La Fosse, sous-jet 1 (Héros envoyé dévoré, voir EndOfGame/ApplyExplorationOutcomeAsync).
+        if (dialogViewModel.PitDevouredHero is { } devouredHero)
+        {
+            devouredHero.Warrior.Status = WarriorStatus.Dead;
+            await _warbandService.SaveWarriorAsync(devouredHero.Warrior);
         }
     }
 }

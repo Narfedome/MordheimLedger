@@ -182,6 +182,14 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.True(wellFail.CausesSickness);
         Assert.False(string.IsNullOrWhiteSpace(well.Description));
 
+        // The Pit (6 1): sending a Hero is optional (RequiresSentHero) - a sub-roll of 1 devours them
+        // (CausesDeath), 2-6 returns D6+1 wyrdstone regardless of who was sent.
+        var pit = results.Single(r => r.DiceCount == 6 && r.Value == 1);
+        Assert.True(pit.RequiresSentHero);
+        Assert.Equal(2, pit.Outcomes.Count);
+        Assert.Contains(pit.Outcomes, o => o is { SubRollMin: 1, SubRollMax: 1, Kind: ExplorationOutcomeKind.None, CausesDeath: true });
+        Assert.Contains(pit.Outcomes, o => o is { SubRollMin: 2, SubRollMax: 6, Kind: ExplorationOutcomeKind.Wyrdstone, GoldFormula: "D6+1" });
+
         // Catacombs (4 6): a purely tactical/battlefield effect (no gold/item/wyrdstone anywhere in the
         // rulebook text) - genuinely nothing to mechanize, stays pure text.
         var catacombs = results.Single(r => r.DiceCount == 4 && r.Value == 6);

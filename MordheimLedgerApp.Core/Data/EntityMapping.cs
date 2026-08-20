@@ -256,6 +256,7 @@ public static class EntityMapping
         StatTestField = e.StatTestField,
         RequiresDoubleRoll = e.RequiresDoubleRoll,
         BonusStatTestField = e.BonusStatTestField,
+        RequiresSentHero = e.RequiresSentHero,
         Outcomes = outcomes?.ToList() ?? new List<ExplorationOutcome>()
     };
 
@@ -270,7 +271,8 @@ public static class EntityMapping
         RollsIndependently = m.RollsIndependently,
         StatTestField = m.StatTestField,
         RequiresDoubleRoll = m.RequiresDoubleRoll,
-        BonusStatTestField = m.BonusStatTestField
+        BonusStatTestField = m.BonusStatTestField,
+        RequiresSentHero = m.RequiresSentHero
     };
 
     public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e) => new()
@@ -290,7 +292,8 @@ public static class EntityMapping
         Note = e.Note,
         StatTestPass = e.StatTestPass,
         CausesSickness = e.CausesSickness,
-        RequiresDoubleRoll = e.RequiresDoubleRoll
+        RequiresDoubleRoll = e.RequiresDoubleRoll,
+        CausesDeath = e.CausesDeath
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -310,7 +313,8 @@ public static class EntityMapping
         Note = m.Note,
         StatTestPass = m.StatTestPass,
         CausesSickness = m.CausesSickness,
-        RequiresDoubleRoll = m.RequiresDoubleRoll
+        RequiresDoubleRoll = m.RequiresDoubleRoll,
+        CausesDeath = m.CausesDeath
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()

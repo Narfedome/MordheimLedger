@@ -306,6 +306,9 @@
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Trésorerie :</value>
   </data>
+  <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
+    <value>Pierres magiques :</value>
+  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Héros</value>
   </data>
@@ -807,6 +810,12 @@
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choisir un Héros</value>
   </data>
+  <data name="EndOfGameSentHeroPh" xml:space="preserve">
+    <value>Envoyer un Héros (optionnel)</value>
+  </data>
+  <data name="EndOfGamePassByOption" xml:space="preserve">
+    <value>Passer son chemin</value>
+  </data>
   <data name="EndOfGameStatFieldToughness" xml:space="preserve">
     <value>Endurance</value>
   </data>
@@ -848,6 +857,9 @@
   </data>
   <data name="HistorySicknessSentence" xml:space="preserve">
     <value>{0} est malade et manquera la prochaine partie.</value>
+  </data>
+  <data name="HistoryPitDevouredSentence" xml:space="preserve">
+    <value>{0} a été envoyé dans la Fosse et a été dévoré par ses gardiens.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} a gagné {1} PX.</value>

@@ -539,6 +539,31 @@ public class RulesTests
             Assert.InRange(ExplorationChart.RollStatTest(ExplorationStatField.Leadership), 2, 12);
     }
 
+    [Fact]
+    public void ExplorationChart_PassesStatTest_RollOfSix_AlwaysFailsRegardlessOfStat()
+    {
+        // RulesReference "Tests de caractéristiques": a roll of 6 is always a failure, even if the
+        // tested stat is 6 or higher (e.g. a Toughness of 6 would otherwise pass 6 <= 6).
+        Assert.False(ExplorationChart.PassesStatTest(ExplorationStatField.Toughness, roll: 6, statValue: 6));
+        Assert.False(ExplorationChart.PassesStatTest(ExplorationStatField.Toughness, roll: 6, statValue: 10));
+    }
+
+    [Fact]
+    public void ExplorationChart_PassesStatTest_Leadership_RollOfSix_ComparesNormally()
+    {
+        // The roll-of-6 auto-fail is specific to the general 1D6 rule - Commandement tests (2D6) have no
+        // such stated exception, so a 6 (a perfectly ordinary 2D6 sum) is just compared to Cd as usual.
+        Assert.True(ExplorationChart.PassesStatTest(ExplorationStatField.Leadership, roll: 6, statValue: 6));
+        Assert.False(ExplorationChart.PassesStatTest(ExplorationStatField.Leadership, roll: 6, statValue: 5));
+    }
+
+    [Fact]
+    public void ExplorationChart_PassesStatTest_NormalRoll_ComparesToStat()
+    {
+        Assert.True(ExplorationChart.PassesStatTest(ExplorationStatField.Toughness, roll: 3, statValue: 3));
+        Assert.False(ExplorationChart.PassesStatTest(ExplorationStatField.Toughness, roll: 4, statValue: 3));
+    }
+
     // --- ExplorationOutcomeResolver -----------------------------------------------------------------
     //
     // Fixtures mirror the real seed shapes (see Data/SeedData/ExplorationResults.json) rather than
@@ -625,6 +650,13 @@ public class RulesTests
     {
         var outcome = ExplorationOutcomeResolver.ResolveStatTestOutcome(Well(), roll, statValue: 3);
         Assert.Equal(expectedPass, outcome?.StatTestPass);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveStatTestOutcome_RollOfSix_FailsEvenIfStatIsHighEnough()
+    {
+        var outcome = ExplorationOutcomeResolver.ResolveStatTestOutcome(Well(), roll: 6, statValue: 6);
+        Assert.Equal(false, outcome?.StatTestPass);
     }
 
     [Fact]

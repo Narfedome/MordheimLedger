@@ -34,10 +34,13 @@ public static class ExplorationOutcomeResolver
 
     /// <summary>A stat test (e.g. Well: roll &lt;= Toughness) compares an already-entered roll to an
     /// already-known stat - computing Pass/Fail here is arithmetic on values the player already
-    /// supplied/the roster already has, not a random decision made on the player's behalf.</summary>
+    /// supplied/the roster already has, not a random decision made on the player's behalf. Delegates to
+    /// ExplorationChart.PassesStatTest for the actual comparison (including the "a 1D6 roll of 6 always
+    /// fails" exception) - null if the result isn't actually stat-test-gated.</summary>
     public static ExplorationOutcome? ResolveStatTestOutcome(ExplorationResult result, int roll, int statValue)
     {
-        var passed = roll <= statValue;
+        if (result.StatTestField is not { } field) return null;
+        var passed = ExplorationChart.PassesStatTest(field, roll, statValue);
         return result.Outcomes.FirstOrDefault(o => o.StatTestPass == passed);
     }
 
@@ -76,8 +79,8 @@ public static class ExplorationOutcomeResolver
     /// ExplorationResult.BonusStatTestField is set, null otherwise.</summary>
     public static ExplorationOutcome? ResolveBonusStatTestOutcome(ExplorationResult result, int roll, int statValue)
     {
-        if (result.BonusStatTestField is null) return null;
-        var passed = roll <= statValue;
+        if (result.BonusStatTestField is not { } field) return null;
+        var passed = ExplorationChart.PassesStatTest(field, roll, statValue);
         return result.Outcomes.FirstOrDefault(o => o.StatTestPass == passed);
     }
 }

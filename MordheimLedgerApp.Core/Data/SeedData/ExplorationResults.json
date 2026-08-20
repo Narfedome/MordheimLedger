@@ -356,8 +356,9 @@
       "fr": "Vous voici en vue de la Fosse, l'immense cratère creusé par la comète - de la pierre magique luit partout, mais c'est le domaine du Seigneur des Ombres. Si vous le souhaitez, un Héros peut y chercher de la pierre magique. Lancez un D6 : sur un 1, le Héros est dévoré par les gardiens de la Fosse et jamais revu ; sur 2 ou plus, il revient avec D6+1 pierres magiques."
     },
     "rollsIndependently": false,
+    "requiresSentHero": true,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 1, "kind": "None", "note": "Le Héros est dévoré et perdu définitivement" },
+      { "subRollMin": 1, "subRollMax": 1, "kind": "None", "note": "Le Héros envoyé est dévoré et perdu définitivement", "causesDeath": true },
       { "subRollMin": 2, "subRollMax": 6, "kind": "Wyrdstone", "goldFormula": "D6+1" }
     ]
   },

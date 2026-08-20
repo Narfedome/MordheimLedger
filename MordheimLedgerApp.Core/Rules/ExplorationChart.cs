@@ -29,6 +29,18 @@ public static class ExplorationChart
     public static int RollStatTest(ExplorationStatField field) =>
         field == ExplorationStatField.Leadership ? RollDie() + RollDie() : RollDie();
 
+    /// <summary>Whether a stat test roll succeeds - roll ≤ stat, EXCEPT a "Tests de caractéristique"
+    /// roll of exactly 6 is ALWAYS an automatic failure regardless of the stat value (RulesReference
+    /// "Tests de caractéristiques", p.23: "Sur un résultat de 6, le test est automatiquement raté, quelle
+    /// que soit la valeur de la caractéristique"). That exception belongs to the general 1D6 rule only -
+    /// "Tests de Commandement" (2D6, see RollStatTest) states no such exception, so a Leadership roll of
+    /// 6 (a perfectly ordinary 2D6 sum, e.g. 2+4 or 3+3) is compared normally.</summary>
+    public static bool PassesStatTest(ExplorationStatField field, int roll, int statValue)
+    {
+        if (field != ExplorationStatField.Leadership && roll == 6) return false;
+        return roll <= statValue;
+    }
+
     /// <summary>Finds the single Exploration chart entry (if any) triggered by a set of dice results -
     /// "choose the most numerous multiples if you score more than one set" (a triple always beats a
     /// double, regardless of face value), and "in case of two doubles or triples, look up the highest

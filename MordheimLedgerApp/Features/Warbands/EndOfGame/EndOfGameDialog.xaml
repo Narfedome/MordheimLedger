@@ -336,6 +336,14 @@
                     <VerticalStackLayout Spacing="8">
                         <Label Text="{Binding TriggeredExplorationResult.Description}" FontSize="12"/>
 
+                        <!-- Héros envoyé (La Fosse) : optionnel ("si vous le souhaitez") - "Passer son
+                             chemin" apparaît comme une vraie option du Picker, sélectionnée par défaut,
+                             plutôt qu'un champ vide ambigu. Ne rien changer laisse simplement le sous-jet
+                             caché, aucune erreur bloquante. Voir ShowSentHeroPicker/SentHeroOptions. -->
+                        <Picker IsVisible="{Binding ShowSentHeroPicker}" Title="{loc:Loc EndOfGameSentHeroPh}"
+                                ItemsSource="{Binding SentHeroOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                SelectedItem="{Binding SelectedSentHeroOption}"/>
+
                         <!-- Sous-jet D6 départageant les branches à choix exclusif (Groupe A, ex.
                              Cadavre) - sans objet pour un résultat à une seule branche déjà résolue. -->
                         <VerticalStackLayout IsVisible="{Binding ShowExplorationSubRoll}" Spacing="6">

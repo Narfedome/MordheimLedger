@@ -48,6 +48,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(BonusStatTestOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusStatTestOutcome))]
     [NotifyPropertyChangedFor(nameof(BonusStatTestItem))]
+    [NotifyPropertyChangedFor(nameof(ShowSentHeroPicker))]
     // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
     // par StepLabel et la visibilité du bouton "Suivant"/"Enregistrer" (IsLastStep) doivent donc suivre
     // en direct, pas seulement au prochain changement de StepIndex/WarriorRows (même classe de bug que
@@ -62,13 +63,54 @@ public partial class EndOfGameDialogViewModel
     /// normale de la table, pas une erreur).</summary>
     public bool HasExplorationResult => TriggeredExplorationResult is not null;
 
+    // --- Héros envoyé (La Fosse) ----------------------------------------------------------------
+    //
+    // Le seul résultat où le joueur choisit d'exposer un Héros à un risque AVANT même de savoir ce que
+    // le sous-jet donnera (voir ExplorationResult.RequiresSentHero) - contrairement à StatTestHero
+    // (Puits), il n'y a aucune stat comparée, juste "qui part explorer". Envoyer quelqu'un est
+    // OPTIONNEL ("si vous le souhaitez") : ne rien choisir laisse simplement le sous-jet caché
+    // (ShowExplorationSubRoll), sans forcer de décision.
+
+    public bool ShowSentHeroPicker => TriggeredExplorationResult?.RequiresSentHero == true;
+
+    public List<WarriorOutcomeRow> SentHeroEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+
+    /// <summary>Wraps the Picker's actual items - a leading "Passer son chemin" pseudo-option (Hero
+    /// null) followed by every eligible Hero. Retour explicite de l'utilisateur : un Picker vide/placeholder
+    /// ne communiquait pas clairement que "ne rien choisir" est une réponse complète et valide ("si vous
+    /// le souhaitez") plutôt qu'un champ oublié - la faire apparaître comme une option normale du Picker,
+    /// sélectionnée par défaut, lève l'ambiguïté.</summary>
+    public List<SentHeroOption> SentHeroOptions =>
+        new List<SentHeroOption> { new(Loc["EndOfGamePassByOption"], null) }
+            .Concat(SentHeroEligibleHeroes.Select(h => new SentHeroOption(h.Name, h)))
+            .ToList();
+
+    public sealed record SentHeroOption(string DisplayName, WarriorOutcomeRow? Hero);
+
+    [ObservableProperty]
+    private SentHeroOption? selectedSentHeroOption;
+
+    partial void OnSelectedSentHeroOptionChanged(SentHeroOption? value) => SentHero = value?.Hero;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowExplorationSubRoll))]
+    private WarriorOutcomeRow? sentHero;
+
+    /// <summary>Héros à marquer WarriorStatus.Dead à la sauvegarde (voir WarbandDetailViewModel.
+    /// EndOfGame) - seule La Fosse en a besoin pour l'instant (ExplorationOutcome.CausesDeath), même
+    /// idiome que StatTestSickHero pour le Puits.</summary>
+    public WarriorOutcomeRow? PitDevouredHero => ResolvedExplorationOutcome?.CausesDeath == true ? SentHero : null;
+
     /// <summary>Un résultat à plusieurs branches mutuellement exclusives (Groupe A, ex. Cadavre : 1-2
     /// po, 3 Dague, 4 Hache...) se départage par un sous-jet D6 - un résultat à une seule branche (ex.
     /// Masures en Ruine) ou dont aucune Outcome n'a de sous-jet n'en a pas besoin. Les résultats à choix
     /// du joueur (Groupe B, RollsIndependently) ne sont pas encore gérés par cette étape (à venir, voir
-    /// le plan de séquencement) - ShowExplorationSubRoll reste false pour eux pour l'instant.</summary>
+    /// le plan de séquencement) - ShowExplorationSubRoll reste false pour eux pour l'instant. Pour un
+    /// résultat RequiresSentHero (ex. La Fosse), reste caché tant qu'aucun Héros n'a été envoyé - "si
+    /// vous le souhaitez" : refuser d'envoyer quelqu'un est une issue valide, pas d'erreur bloquante.</summary>
     public bool ShowExplorationSubRoll => TriggeredExplorationResult is { RollsIndependently: false } r
-        && r.Outcomes.Count > 1 && r.Outcomes.All(o => o.SubRollMin.HasValue);
+        && r.Outcomes.Count > 1 && r.Outcomes.All(o => o.SubRollMin.HasValue)
+        && (!r.RequiresSentHero || SentHero is not null);
 
     /// <summary>Un résultat gated par un double au 2D6 (voir ExplorationResult.RequiresDoubleRoll, seul
     /// cas actuel : Maison du Marchand) montre 2 champs de dé au lieu du sous-jet classique - la seule
@@ -101,6 +143,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
     [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(StatTestSickHero))]
+    [NotifyPropertyChangedFor(nameof(PitDevouredHero))]
     private ExplorationOutcome? resolvedExplorationOutcome;
 
     /// <summary>ResolvedExplorationOutcome.EquipmentItemName + MaterialRuleName résolus (langue courante),
@@ -532,6 +575,9 @@ public partial class EndOfGameDialogViewModel
         ExplorationDoubleRollError = null;
         BonusStatTestRoll = string.Empty;
         BonusStatTestError = null;
+        // Passe par SelectedSentHeroOption (pas SentHero directement) pour que le Picker affiche "Passer
+        // son chemin" comme valeur par défaut plutôt qu'un placeholder vide - voir SentHeroOptions.
+        SelectedSentHeroOption = SentHeroOptions[0];
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 

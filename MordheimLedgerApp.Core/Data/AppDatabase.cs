@@ -632,6 +632,7 @@ public class AppDatabase
                 StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
                 RequiresDoubleRoll = res.RequiresDoubleRoll,
                 BonusStatTestField = res.BonusStatTestField is { } bonusField ? Enum.Parse<ExplorationStatField>(bonusField) : null,
+                RequiresSentHero = res.RequiresSentHero,
                 Source = ContentSource.Official
             };
             result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);
@@ -657,7 +658,8 @@ public class AppDatabase
                     Note = outcome.Note,
                     StatTestPass = outcome.StatTestPass,
                     CausesSickness = outcome.CausesSickness,
-                    RequiresDoubleRoll = outcome.RequiresDoubleRoll
+                    RequiresDoubleRoll = outcome.RequiresDoubleRoll,
+                    CausesDeath = outcome.CausesDeath
                 });
             }
         }

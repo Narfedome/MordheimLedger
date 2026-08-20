@@ -350,6 +350,10 @@ public class ExplorationResultSeedData
     /// Shattered Building (Bâtiment Éventré).</summary>
     public string? BonusStatTestField { get; set; }
 
+    /// <summary>See Models.Library.ExplorationResult.RequiresSentHero. False/absent for almost every
+    /// entry - so far only the Pit (La Fosse).</summary>
+    public bool RequiresSentHero { get; set; }
+
     public List<ExplorationOutcomeSeedData> Outcomes { get; set; } = new();
 }
 
@@ -377,6 +381,10 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.RequiresDoubleRoll. False/absent for almost every
     /// outcome.</summary>
     public bool RequiresDoubleRoll { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.CausesDeath. False/absent for almost every
+    /// outcome - so far only the Pit's (La Fosse) "devoured" branch.</summary>
+    public bool CausesDeath { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

@@ -192,6 +192,9 @@
                     <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
                     <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
                     <Span Text=" · "/>
+                    <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
+                    <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>
+                    <Span Text=" · "/>
                     <Span Text="{loc:Loc WarbandRatingPh}"/>
                     <Span Text="{Binding Rating, StringFormat=' {0}'}"/>
                 </FormattedString>

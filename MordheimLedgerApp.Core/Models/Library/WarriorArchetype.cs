@@ -115,4 +115,14 @@ public class WarriorArchetype
     /// initial string-matching approach once it started gating actual behavior (End of Game wizard)
     /// rather than just suggesting a chip to attach in the archetype editor.</summary>
     public bool GainsExperience { get; set; } = true;
+
+    /// <summary>True for the one archetype that represents a warband's leader (e.g. the Mercenary
+    /// Captain, the Vampire for Undead, the Orc Boss - every warband has exactly one). Explicit flag
+    /// rather than derived from MinCount/MaxCount == 1 (that pairing happens to coincide with the leader
+    /// today, but isn't itself a statement about leadership - a future "exactly one required" archetype
+    /// that isn't the leader would silently break that inference). Copied onto Warrior at recruitment
+    /// (see ToWarrior), same snapshot-at-recruit-time convention as IsLargeCreature/GainsExperience -
+    /// identifies "the warband leader" for rulebook rules that target them specifically (e.g. Shattered
+    /// Building's Leadership test - Bâtiment Éventré).</summary>
+    public bool IsLeader { get; set; }
 }

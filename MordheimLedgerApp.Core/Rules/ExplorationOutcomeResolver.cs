@@ -66,4 +66,18 @@ public static class ExplorationOutcomeResolver
         var isDouble = die1 == die2;
         return result.Outcomes.FirstOrDefault(o => o.RequiresDoubleRoll == isDouble);
     }
+
+    /// <summary>Shattered Building (Bâtiment Éventré) is the one entry with an ADDITIONAL stat test for a
+    /// bonus Outcome, on top of its Auto branch (D3 wyrdstone, always found) - "in addition, take a
+    /// Leadership test... if passed, a Wardog joins", not an alternative branch (contrast
+    /// ResolveStatTestOutcome, which GATES the whole resolution instead of adding to it). Only a Pass
+    /// branch needs to exist in Outcomes - a Fail (or no roll yet) simply resolves to null, same "nothing
+    /// happens" as every other stat-test failure with no consequence. Only meaningful when
+    /// ExplorationResult.BonusStatTestField is set, null otherwise.</summary>
+    public static ExplorationOutcome? ResolveBonusStatTestOutcome(ExplorationResult result, int roll, int statValue)
+    {
+        if (result.BonusStatTestField is null) return null;
+        var passed = roll <= statValue;
+        return result.Outcomes.FirstOrDefault(o => o.StatTestPass == passed);
+    }
 }

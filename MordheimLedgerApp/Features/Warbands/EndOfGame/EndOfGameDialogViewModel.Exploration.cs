@@ -38,8 +38,16 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(BonusItem))]
     [NotifyPropertyChangedFor(nameof(ShowStatTest))]
     [NotifyPropertyChangedFor(nameof(StatTestFieldLabel))]
+    [NotifyPropertyChangedFor(nameof(StatTestRollPlaceholder))]
     [NotifyPropertyChangedFor(nameof(ShowDoubleRollCheck))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationGoldRoll))]
+    [NotifyPropertyChangedFor(nameof(ShowBonusStatTest))]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestFieldLabel))]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestRollPlaceholder))]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestStatValue))]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestOutcome))]
+    [NotifyPropertyChangedFor(nameof(HasBonusStatTestOutcome))]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestItem))]
     // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
     // par StepLabel et la visibilité du bouton "Suivant"/"Enregistrer" (IsLastStep) doivent donc suivre
     // en direct, pas seulement au prochain changement de StepIndex/WarriorRows (même classe de bug que
@@ -237,13 +245,16 @@ public partial class EndOfGameDialogViewModel
     /// silencieusement perdu.</summary>
     public bool IsExplorationNone => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.None;
 
-    // --- Test de caractéristique (Puits/Endurance, Taverne et Bâtiment Éventré/Commandement) --------
+    // --- Test de caractéristique (Puits/Endurance, Taverne plus tard) --------------------------
     //
-    // Choisir un Héros et comparer un D6 à une de ses stats pour départager Réussite/Échec - une autre
-    // façon de choisir la branche résolue (ResolvedExplorationOutcome), au même niveau que le sous-jet
-    // classique (ShowExplorationSubRoll) ou la branche Auto seule. Comparer un jet déjà saisi à une
-    // stat déjà connue est de l'arithmétique, pas une décision aléatoire prise à la place du joueur -
-    // contrairement au tirage lui-même (jamais automatique, voir ExplorationGoldAmount et consorts).
+    // Choisir un Héros et comparer son jet à une de ses stats pour départager Réussite/Échec - une
+    // autre façon de choisir la branche résolue (ResolvedExplorationOutcome), au même niveau que le
+    // sous-jet classique (ShowExplorationSubRoll) ou la branche Auto seule. Comparer un jet déjà saisi
+    // à une stat déjà connue est de l'arithmétique, pas une décision aléatoire prise à la place du
+    // joueur - contrairement au tirage lui-même (jamais automatique, voir ExplorationGoldAmount et
+    // consorts). Le nombre de dés dépend de la stat testée (voir ExplorationChart.RollStatTest et
+    // StatTestRollPlaceholder) - 2D6 pour Commandement (RulesReference "Tests de Commandement", une
+    // exception explicite), 1D6 pour tout le reste.
     public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
 
     public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
@@ -279,6 +290,11 @@ public partial class EndOfGameDialogViewModel
         _ => string.Empty
     };
 
+    /// <summary>Dice notation shown as the roll field's placeholder - "2D6" for a Commandement test,
+    /// plain "D6" otherwise (see ExplorationChart.RollStatTest). Not localized: dice notation reads the
+    /// same in FR/EN, no LocalizationService key needed.</summary>
+    public string StatTestRollPlaceholder => TriggeredExplorationResult?.StatTestField == ExplorationStatField.Leadership ? "2D6" : "D6";
+
     partial void OnStatTestHeroChanged(WarriorOutcomeRow? value) => ResolveStatTest();
 
     partial void OnStatTestRollChanged(string value)
@@ -305,7 +321,75 @@ public partial class EndOfGameDialogViewModel
     }
 
     [RelayCommand]
-    private void AutoRollStatTest() => StatTestRoll = ExplorationChart.RollDie().ToString();
+    private void AutoRollStatTest()
+    {
+        if (TriggeredExplorationResult?.StatTestField is { } field) StatTestRoll = ExplorationChart.RollStatTest(field).ToString();
+    }
+
+    // --- Test de Commandement additionnel du chef (Bâtiment Éventré) --------------------------
+    //
+    // Contrairement à ShowStatTest (qui GATE toute la résolution, Puits), ce test s'AJOUTE à une
+    // branche Auto déjà résolue (les pierres magiques) - voir ExplorationResult.BonusStatTestField.
+    // Toujours le chef de bande (Warrior.IsLeader), jamais un choix du joueur : pas de Picker.
+
+    /// <summary>Vrai seulement pour Bâtiment Éventré (seul résultat à porter BonusStatTestField).</summary>
+    public bool ShowBonusStatTest => TriggeredExplorationResult?.BonusStatTestField is not null;
+
+    /// <summary>Null si le chef n'est pas dans WarriorRows (mort/malade cette partie, voir
+    /// activeWarriorRows côté WarbandDetailViewModel.EndOfGame) - le test est alors simplement
+    /// indisponible plutôt qu'une erreur bloquante, personne ne peut commander à sa place.</summary>
+    public WarriorOutcomeRow? BonusStatTestLeader => WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestOutcome))]
+    [NotifyPropertyChangedFor(nameof(HasBonusStatTestOutcome))]
+    [NotifyPropertyChangedFor(nameof(BonusStatTestItem))]
+    private string bonusStatTestRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? bonusStatTestError;
+
+    public int? BonusStatTestStatValue => BonusStatTestLeader is null || TriggeredExplorationResult?.BonusStatTestField is not { } statField ? null
+        : statField switch
+        {
+            ExplorationStatField.Toughness => BonusStatTestLeader.Warrior.Toughness,
+            ExplorationStatField.Leadership => BonusStatTestLeader.Warrior.Leadership,
+            _ => null
+        };
+
+    public string BonusStatTestFieldLabel => TriggeredExplorationResult?.BonusStatTestField switch
+    {
+        ExplorationStatField.Toughness => Loc["EndOfGameStatFieldToughness"],
+        ExplorationStatField.Leadership => Loc["EndOfGameStatFieldLeadership"],
+        _ => string.Empty
+    };
+
+    /// <summary>Même idée que StatTestRollPlaceholder - "2D6" pour Commandement (le seul cas connu pour
+    /// ce test additionnel, Bâtiment Éventré), "D6" sinon.</summary>
+    public string BonusStatTestRollPlaceholder => TriggeredExplorationResult?.BonusStatTestField == ExplorationStatField.Leadership ? "2D6" : "D6";
+
+    /// <summary>Résolu en direct depuis le jet + la stat du chef, jamais stocké dans
+    /// ResolvedExplorationOutcome (qui reste réservé à la branche Auto/pierres magiques) - les deux
+    /// coexistent, l'un n'écrase pas l'autre.</summary>
+    public ExplorationOutcome? BonusStatTestOutcome => TriggeredExplorationResult is not null
+        && BonusStatTestStatValue is { } statValue && int.TryParse(BonusStatTestRoll, out var roll)
+        ? ExplorationOutcomeResolver.ResolveBonusStatTestOutcome(TriggeredExplorationResult, roll, statValue)
+        : null;
+
+    public bool HasBonusStatTestOutcome => BonusStatTestOutcome is not null;
+
+    /// <summary>BonusStatTestOutcome.EquipmentItemName résolu - même besoin que ResolvedExplorationItem/
+    /// BonusItem.</summary>
+    public WarbandEquipment? BonusStatTestItem =>
+        BuildDisplayItem(BonusStatTestOutcome?.EquipmentItemName, BonusStatTestOutcome?.MaterialRuleName);
+
+    partial void OnBonusStatTestRollChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) BonusStatTestError = null; }
+
+    [RelayCommand]
+    private void AutoRollBonusStatTest()
+    {
+        if (TriggeredExplorationResult?.BonusStatTestField is { } field) BonusStatTestRoll = ExplorationChart.RollStatTest(field).ToString();
+    }
 
     // --- Double au 2D6 (Maison du Marchand) ----------------------------------------------------
     //
@@ -446,6 +530,8 @@ public partial class EndOfGameDialogViewModel
         ExplorationDoubleDie1 = string.Empty;
         ExplorationDoubleDie2 = string.Empty;
         ExplorationDoubleRollError = null;
+        BonusStatTestRoll = string.Empty;
+        BonusStatTestError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -560,6 +646,15 @@ public partial class EndOfGameDialogViewModel
             return false;
 
         if (ShowDoubleRollCheck && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationDoubleRollError = Loc["EndOfGameRollRequired"]))
+            return false;
+
+        // BonusStatTestLeader null = personne pour commander (mort/malade cette partie) - rien à
+        // valider, le bonus est simplement indisponible plutôt qu'une erreur bloquante. Vérifie
+        // BonusStatTestRoll (pas ResolvedExplorationOutcome, réservé à la branche Auto) puisqu'un Échec
+        // ne produit aucune Outcome (voir ResolveBonusStatTestOutcome) - null y signifierait aussi bien
+        // "pas encore joué" que "raté", ambigu pour la validation.
+        if (ShowBonusStatTest && BonusStatTestLeader is not null
+            && !CheckRoll(string.IsNullOrWhiteSpace(BonusStatTestRoll), () => BonusStatTestError = Loc["EndOfGameRollRequired"]))
             return false;
 
         var amountMissing = ResolvedExplorationOutcome?.Kind switch

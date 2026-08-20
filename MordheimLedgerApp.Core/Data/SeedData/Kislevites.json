@@ -44,6 +44,7 @@
       "cost": 60,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,

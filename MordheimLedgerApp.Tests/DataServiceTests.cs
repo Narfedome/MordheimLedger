@@ -153,12 +153,15 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 1, SubRollMax: 2, Kind: ExplorationOutcomeKind.Gold, GoldFormula: "D6" });
         Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 6, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, EquipmentItemName: "Light Armour" });
 
-        // Shattered Building (5 5): a flat, automatic bonus-wyrdstone outcome (no sub-roll).
+        // Shattered Building (5 5): a flat, automatic wyrdstone outcome (no sub-roll) PLUS an additional
+        // Leadership test for a bonus Wardog (see ExplorationResult.BonusStatTestField).
         var shatteredBuilding = results.Single(r => r.DiceCount == 5 && r.Value == 5);
-        var wyrdstoneOutcome = Assert.Single(shatteredBuilding.Outcomes);
-        Assert.Equal(ExplorationOutcomeKind.Wyrdstone, wyrdstoneOutcome.Kind);
+        Assert.Equal(ExplorationStatField.Leadership, shatteredBuilding.BonusStatTestField);
+        Assert.Equal(2, shatteredBuilding.Outcomes.Count);
+        var wyrdstoneOutcome = Assert.Single(shatteredBuilding.Outcomes, o => o.Kind == ExplorationOutcomeKind.Wyrdstone);
         Assert.Equal("D3", wyrdstoneOutcome.GoldFormula);
         Assert.Null(wyrdstoneOutcome.SubRollMin);
+        Assert.Contains(shatteredBuilding.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, EquipmentItemName: "Wardog", StatTestPass: true });
 
         // Hidden Treasure (6 2): every Outcome checked independently against its own "N+" threshold.
         var hiddenTreasure = results.Single(r => r.DiceCount == 6 && r.Value == 2);
@@ -231,6 +234,17 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
             var band = archetypes.Single(a => a.Name == bandName);
             var warrior = (await _library.GetWarriorArchetypesAsync(band.Id, "en")).Single(w => w.Name == warriorName);
             Assert.Contains(warrior.SpecialRules, r => r.Id == leaderId);
+        }
+
+        // WarriorArchetype.IsLeader is a separate, explicit flag (not derived from the "Leader" special
+        // rule text above, which only 4 of the 15 warbands happen to carry) - every warband has exactly
+        // one IsLeader archetype, and it's the same warrior these 4 bands already flag as "Leader".
+        foreach (var (bandName, warriorName) in leaderBearers)
+        {
+            var band = archetypes.Single(a => a.Name == bandName);
+            var bandWarriors = await _library.GetWarriorArchetypesAsync(band.Id, "en");
+            Assert.Single(bandWarriors, w => w.IsLeader);
+            Assert.True(bandWarriors.Single(w => w.Name == warriorName).IsLeader);
         }
 
         // Band-wide rules (not tied to one warrior type) live on the WarbandArchetype itself.

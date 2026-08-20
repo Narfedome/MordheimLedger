@@ -330,8 +330,10 @@
       "fr": "La comète a presque entièrement détruit ce bâtiment, le rendant dangereux pour tous sauf les plus téméraires. Mais ce genre d'endroit est le meilleur pour dénicher des pierres magiques. Vous trouvez D3 pierres magiques parmi les décombres. Faites de plus un test de Commandement du chef de bande - en cas de réussite, un chien de guerre qui gardait les lieux rejoint la bande."
     },
     "rollsIndependently": false,
+    "bonusStatTestField": "Leadership",
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Wyrdstone", "goldFormula": "D3" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Wyrdstone", "goldFormula": "D3" },
+      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemName": "Wardog", "itemQuantityFormula": "1", "statTestPass": true }
     ]
   },
   {

@@ -354,18 +354,19 @@
                                    IsVisible="{Binding ExplorationSubRollError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
 
-                        <!-- Test de caractéristique (Puits/Endurance, Taverne et Bâtiment Éventré/
-                             Commandement plus tard) : choisir un Héros, comparer son jet à sa stat -
-                             l'appli calcule elle-même Réussite/Échec (arithmétique sur des valeurs déjà
-                             connues, pas une décision aléatoire) et bascule vers la branche
-                             correspondante ci-dessous. -->
+                        <!-- Test de caractéristique (Puits/Endurance, Taverne plus tard) : choisir un
+                             Héros, comparer son jet à sa stat - l'appli calcule elle-même Réussite/Échec
+                             (arithmétique sur des valeurs déjà connues, pas une décision aléatoire) et
+                             bascule vers la branche correspondante ci-dessous. Bâtiment Éventré/
+                             Commandement n'utilise PAS ce bloc : son test est additionnel (voir plus bas,
+                             ShowBonusStatTest), pas une branche exclusive comme celui-ci. -->
                         <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
                             <Picker Title="{loc:Loc EndOfGameStatTestHeroPh}"
                                     ItemsSource="{Binding StatTestEligibleHeroes}" ItemDisplayBinding="{Binding Name}"
                                     SelectedItem="{Binding StatTestHero}"/>
                             <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding StatTestHero, Converter={StaticResource IsNotNullConverter}}">
                                 <Entry Grid.Column="0" Text="{Binding StatTestRoll}" Keyboard="Numeric"
-                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                       Placeholder="{Binding StatTestRollPlaceholder}" WidthRequest="70">
                                     <Entry.Behaviors>
                                         <components:DigitsOnlyBehavior/>
                                     </Entry.Behaviors>
@@ -385,6 +386,41 @@
                             </Grid>
                             <Label Text="{Binding StatTestError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                    IsVisible="{Binding StatTestError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Test de Commandement ADDITIONNEL du chef (Bâtiment Éventré) : s'ajoute à une
+                             branche Auto déjà résolue (les pierres magiques) au lieu de la remplacer -
+                             voir ShowBonusStatTest. Toujours le chef de bande (Warrior.IsLeader), jamais
+                             un choix du joueur - pas de Picker, juste son nom affiché. Invisible si le
+                             chef n'est pas disponible cette partie (mort/malade) : personne ne peut
+                             commander à sa place. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowBonusStatTest}" Spacing="6">
+                            <VerticalStackLayout IsVisible="{Binding BonusStatTestLeader, Converter={StaticResource IsNotNullConverter}}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding BonusStatTestRoll}" Keyboard="Numeric"
+                                           Placeholder="{Binding BonusStatTestRollPlaceholder}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollBonusStatTestCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding BonusStatTestLeader.Warrior.Name}"/>
+                                                <Span Text=" - "/>
+                                                <Span Text="{Binding BonusStatTestFieldLabel}"/>
+                                                <Span Text=" "/>
+                                                <Span Text="{Binding BonusStatTestStatValue}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </Grid>
+                                <Label Text="{Binding BonusStatTestError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding BonusStatTestError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
                         <!-- Double au 2D6 (Maison du Marchand) : 2 dés séparés, indispensables ici car
@@ -588,6 +624,17 @@
                         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusItem}">
                             <components:ChipView Grid.Column="0" Item="{Binding BonusItem}"
                                                   IconGlyph="{Binding BonusItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Objet du test de Commandement additionnel du chef (ex. Bâtiment Éventré :
+                             Chien de guerre si réussi) - voir BonusStatTestOutcome, même convention
+                             qu'au-dessus (toujours 1 exemplaire, pas de champ/dé pour la quantité). -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusStatTestOutcome}">
+                            <components:ChipView Grid.Column="0" Item="{Binding BonusStatTestItem}"
+                                                  IconGlyph="{Binding BonusStatTestItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                   IconFontFamily="RpgAwesome"
                                                   Command="{Binding ShowExplorationItemDetailCommand}"/>
                             <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>

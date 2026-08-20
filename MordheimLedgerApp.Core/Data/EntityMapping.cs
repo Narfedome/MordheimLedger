@@ -109,7 +109,8 @@ public static class EntityMapping
         CanUseEquipment = e.CanUseEquipment,
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         IsLargeCreature = e.IsLargeCreature,
-        GainsExperience = e.GainsExperience
+        GainsExperience = e.GainsExperience,
+        IsLeader = e.IsLeader
     };
 
     private static List<SkillCategory> ParseSkillCategories(string? csv) =>
@@ -146,7 +147,8 @@ public static class EntityMapping
         CanUseEquipment = m.CanUseEquipment,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
         IsLargeCreature = m.IsLargeCreature,
-        GainsExperience = m.GainsExperience
+        GainsExperience = m.GainsExperience,
+        IsLeader = m.IsLeader
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -171,7 +173,8 @@ public static class EntityMapping
         CanUseEquipment = archetype.CanUseEquipment,
         AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories),
         IsLargeCreature = archetype.IsLargeCreature,
-        GainsExperience = archetype.GainsExperience
+        GainsExperience = archetype.GainsExperience,
+        IsLeader = archetype.IsLeader
     };
 
     public static Campaign ToModel(this CampaignEntity e) => new()
@@ -252,6 +255,7 @@ public static class EntityMapping
         RollsIndependently = e.RollsIndependently,
         StatTestField = e.StatTestField,
         RequiresDoubleRoll = e.RequiresDoubleRoll,
+        BonusStatTestField = e.BonusStatTestField,
         Outcomes = outcomes?.ToList() ?? new List<ExplorationOutcome>()
     };
 
@@ -265,7 +269,8 @@ public static class EntityMapping
         Source = m.Source,
         RollsIndependently = m.RollsIndependently,
         StatTestField = m.StatTestField,
-        RequiresDoubleRoll = m.RequiresDoubleRoll
+        RequiresDoubleRoll = m.RequiresDoubleRoll,
+        BonusStatTestField = m.BonusStatTestField
     };
 
     public static ExplorationOutcome ToModel(this ExplorationOutcomeEntity e) => new()
@@ -505,7 +510,8 @@ public static class EntityMapping
         Mutations = mutations?.ToList() ?? new List<WarriorMutation>(),
         Animal = animal,
         IsLargeCreature = e.IsLargeCreature,
-        GainsExperience = e.GainsExperience
+        GainsExperience = e.GainsExperience,
+        IsLeader = e.IsLeader
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -534,7 +540,8 @@ public static class EntityMapping
         CanUseEquipment = m.CanUseEquipment,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
         IsLargeCreature = m.IsLargeCreature,
-        GainsExperience = m.GainsExperience
+        GainsExperience = m.GainsExperience,
+        IsLeader = m.IsLeader
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>

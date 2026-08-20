@@ -137,6 +137,10 @@ public class WarriorSeedData
     /// <summary>False for archetypes carrying the "Never Gains Experience" special rule (Zombie...) -
     /// omitted/true for every ordinary archetype. See WarriorArchetype.GainsExperience.</summary>
     public bool GainsExperience { get; set; } = true;
+
+    /// <summary>True for the one archetype that represents this warband's leader (e.g. the Mercenary
+    /// Captain) - exactly one per warband file. See WarriorArchetype.IsLeader.</summary>
+    public bool IsLeader { get; set; }
 }
 
 public class EquipmentSeedData
@@ -340,6 +344,11 @@ public class ExplorationResultSeedData
     /// <summary>See Models.Library.ExplorationResult.RequiresDoubleRoll. False/absent for almost every
     /// entry - so far only Merchant's House (Maison du Marchand).</summary>
     public bool RequiresDoubleRoll { get; set; }
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationStatField member name - see
+    /// Models.Library.ExplorationResult.BonusStatTestField. Null for almost every entry - so far only
+    /// Shattered Building (Bâtiment Éventré).</summary>
+    public string? BonusStatTestField { get; set; }
 
     public List<ExplorationOutcomeSeedData> Outcomes { get; set; } = new();
 }

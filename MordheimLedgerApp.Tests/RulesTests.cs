@@ -525,6 +525,20 @@ public class RulesTests
         Assert.Equal(expectedShards, ExplorationChart.ShardsFound(diceSum));
     }
 
+    [Fact]
+    public void ExplorationChart_RollStatTest_Toughness_IsWithinD6Range()
+    {
+        for (var i = 0; i < 50; i++)
+            Assert.InRange(ExplorationChart.RollStatTest(ExplorationStatField.Toughness), 1, 6);
+    }
+
+    [Fact]
+    public void ExplorationChart_RollStatTest_Leadership_IsWithin2D6Range()
+    {
+        for (var i = 0; i < 50; i++)
+            Assert.InRange(ExplorationChart.RollStatTest(ExplorationStatField.Leadership), 2, 12);
+    }
+
     // --- ExplorationOutcomeResolver -----------------------------------------------------------------
     //
     // Fixtures mirror the real seed shapes (see Data/SeedData/ExplorationResults.json) rather than
@@ -566,6 +580,14 @@ public class RulesTests
     {
         DiceCount = 5, Value = 4, RequiresDoubleRoll = true,
         Outcomes = [Outcome(ExplorationOutcomeKind.Gold), Outcome(ExplorationOutcomeKind.Item, requiresDoubleRoll: true)]
+    };
+
+    // Shattered Building (5,5): Auto wyrdstone (always found) + an ADDITIONAL Leadership test for a
+    // bonus item (Wardog) - only a Pass branch exists, Fail resolves to nothing.
+    private static ExplorationResult ShatteredBuilding() => new()
+    {
+        DiceCount = 5, Value = 5, BonusStatTestField = ExplorationStatField.Leadership,
+        Outcomes = [Outcome(ExplorationOutcomeKind.Wyrdstone), Outcome(ExplorationOutcomeKind.Item, statTestPass: true)]
     };
 
     [Fact]
@@ -657,6 +679,32 @@ public class RulesTests
     public void ExplorationOutcomeResolver_ResolveDoubleRollOutcome_NullWhenResultNotGated()
     {
         Assert.Null(ExplorationOutcomeResolver.ResolveDoubleRollOutcome(Corpse(), 3, 3));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveAutoOutcome_ResolvesEvenWithBonusStatTestField()
+    {
+        // Contrast StatTestField (gates everything, ResolveAutoOutcome returns null) - BonusStatTestField
+        // is additive, the Auto wyrdstone branch must resolve immediately regardless.
+        Assert.Equal(ExplorationOutcomeKind.Wyrdstone, ExplorationOutcomeResolver.ResolveAutoOutcome(ShatteredBuilding())?.Kind);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveBonusStatTestOutcome_Pass_ReturnsItem()
+    {
+        Assert.Equal(ExplorationOutcomeKind.Item, ExplorationOutcomeResolver.ResolveBonusStatTestOutcome(ShatteredBuilding(), roll: 3, statValue: 8)?.Kind);
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveBonusStatTestOutcome_Fail_ReturnsNull()
+    {
+        Assert.Null(ExplorationOutcomeResolver.ResolveBonusStatTestOutcome(ShatteredBuilding(), roll: 9, statValue: 8));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_ResolveBonusStatTestOutcome_NullWhenResultHasNoBonusTest()
+    {
+        Assert.Null(ExplorationOutcomeResolver.ResolveBonusStatTestOutcome(Corpse(), roll: 1, statValue: 8));
     }
 
     // --- SkillEligibility -----------------------------------------------------------------------

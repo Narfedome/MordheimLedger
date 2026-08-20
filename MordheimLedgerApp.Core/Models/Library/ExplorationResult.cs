@@ -62,5 +62,14 @@ public class ExplorationResult
     /// vast majority) = no such check, StatTestField/RollsIndependently/plain sub-roll resolve as usual.</summary>
     public bool RequiresDoubleRoll { get; set; }
 
+    /// <summary>Non-null = this result ALSO offers an additional stat test for a bonus Outcome, on top
+    /// of whatever its Auto/sub-roll branches already resolve (e.g. Shattered Building - Bâtiment
+    /// Éventré: D3 wyrdstone always, "in addition" a Leadership test that may grant a Wardog) - contrast
+    /// StatTestField, which GATES the whole resolution instead of adding to it. Always tests the
+    /// warband LEADER specifically (Warrior.IsLeader), never a Hero the player picks - no other rulebook
+    /// entry needs a different target yet. See Core.Rules.ExplorationOutcomeResolver.
+    /// ResolveBonusStatTestOutcome. Null (the vast majority) = no such bonus test.</summary>
+    public ExplorationStatField? BonusStatTestField { get; set; }
+
     public List<ExplorationOutcome> Outcomes { get; set; } = new();
 }

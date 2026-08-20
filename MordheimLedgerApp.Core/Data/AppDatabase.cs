@@ -444,7 +444,8 @@ public class AppDatabase
                 CanUseEquipment = w.CanUseEquipment,
                 AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
                 IsLargeCreature = w.IsLargeCreature,
-                GainsExperience = w.GainsExperience
+                GainsExperience = w.GainsExperience,
+                IsLeader = w.IsLeader
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -630,6 +631,7 @@ public class AppDatabase
                 RollsIndependently = res.RollsIndependently,
                 StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
                 RequiresDoubleRoll = res.RequiresDoubleRoll,
+                BonusStatTestField = res.BonusStatTestField is { } bonusField ? Enum.Parse<ExplorationStatField>(bonusField) : null,
                 Source = ContentSource.Official
             };
             result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);

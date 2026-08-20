@@ -178,6 +178,13 @@ public partial class WarbandDetailViewModel
 
         if (dialogViewModel.BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemName is { } bonusItemName)
             await AddOneItemToInventoryAsync(bonusItemName, 1, bonusOutcome.MaterialRuleName);
+
+        // Test de Commandement additionnel du chef (ex. Bâtiment Éventré : Chien de guerre si réussi) -
+        // voir ExplorationResult.BonusStatTestField/EndOfGameDialogViewModel.BonusStatTestOutcome,
+        // indépendant du Kind principal ci-dessus (coexiste avec les pierres magiques, ne les remplace
+        // pas).
+        if (dialogViewModel.BonusStatTestOutcome is { } bonusStatOutcome && bonusStatOutcome.EquipmentItemName is { } bonusStatItemName)
+            await AddOneItemToInventoryAsync(bonusStatItemName, 1, bonusStatOutcome.MaterialRuleName);
     }
 
     private async Task ApplyWarriorOutcomesAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)

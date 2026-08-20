@@ -1,3 +1,5 @@
+using MordheimLedgerApp.Core.Models.Library;
+
 namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>
@@ -17,6 +19,15 @@ public static class ExplorationChart
         Math.Min(survivingHeroCount + (wonLastGame ? 1 : 0) + bonusDice, 6);
 
     public static int RollDie() => Random.Shared.Next(1, 7);
+
+    /// <summary>Rolls the dice for a stat test (Puits/Toughness, Bâtiment Éventré's bonus Leadership
+    /// test...) - 2D6 for a Commandement/Leadership test specifically (RulesReference "Tests de
+    /// Commandement", p.23: "jet de 2D6, réussi si le total ≤ Cd" - an explicit exception, not the
+    /// general rule below), 1D6 for every other stat (RulesReference "Tests de caractéristique": "jet de
+    /// 1D6, réussi si résultat ≤ valeur de la caractéristique"). Used by both StatTestField (Puits) and
+    /// BonusStatTestField (Bâtiment Éventré) - same rule regardless of which mechanism is asking.</summary>
+    public static int RollStatTest(ExplorationStatField field) =>
+        field == ExplorationStatField.Leadership ? RollDie() + RollDie() : RollDie();
 
     /// <summary>Finds the single Exploration chart entry (if any) triggered by a set of dice results -
     /// "choose the most numerous multiples if you score more than one set" (a triple always beats a

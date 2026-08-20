@@ -91,4 +91,12 @@ public class Warrior
     /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.GainsExperience. Used
     /// by the End of Game wizard to exclude this warrior from the Experience/Advance steps entirely.</summary>
     public bool GainsExperience { get; set; } = true;
+
+    /// <summary>True for the one warrior recruited from a warband's sole mandatory "no more, no less"
+    /// leader-type archetype (WarriorArchetype.MinCount.HasValue, e.g. the Captain/Vampire/Orc Boss -
+    /// every warband has exactly one) - copied at recruitment, same idiom as IsHero/GainsExperience.
+    /// Identifies "the warband leader" for rulebook rules that target them specifically (e.g. Shattered
+    /// Building's Leadership test - Bâtiment Éventré), rather than any Hero the player picks. False for
+    /// every other warrior, including every other Hero.</summary>
+    public bool IsLeader { get; set; }
 }

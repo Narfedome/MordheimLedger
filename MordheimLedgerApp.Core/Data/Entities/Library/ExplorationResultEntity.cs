@@ -16,4 +16,5 @@ public class ExplorationResultEntity
     public bool RollsIndependently { get; set; }
     public ExplorationStatField? StatTestField { get; set; }
     public bool RequiresDoubleRoll { get; set; }
+    public ExplorationStatField? BonusStatTestField { get; set; }
 }

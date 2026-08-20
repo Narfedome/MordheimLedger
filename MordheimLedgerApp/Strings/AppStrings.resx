@@ -319,7 +319,7 @@
     <value>min. {0}</value>
   </data>
   <data name="WarbandsRosterTreasuryRemaining" xml:space="preserve">
-    <value>{0} CG restants</value>
+    <value>{0} CO restants</value>
   </data>
   <data name="WarbandRatingPh" xml:space="preserve">
     <value>Valeur de Bande</value>
@@ -328,7 +328,7 @@
     <value>Valeur {0}</value>
   </data>
   <data name="EquipmentPickerBudgetDisplay" xml:space="preserve">
-    <value>{0} CG dépensés · {1} CG restants</value>
+    <value>{0} CO dépensés · {1} CO restants</value>
   </data>
   <data name="WarbandsRosterFullTitle" xml:space="preserve">
     <value>Effectif complet</value>
@@ -445,7 +445,7 @@
     <value>Détails</value>
   </data>
   <data name="LibGoldCrownsAbbr" xml:space="preserve">
-    <value>CG</value>
+    <value>CO</value>
   </data>
   <data name="LibFreePh" xml:space="preserve">
     <value>Gratuit</value>
@@ -679,7 +679,7 @@
     <value>Nom de la mutation</value>
   </data>
   <data name="MutationCostPh" xml:space="preserve">
-    <value>Coût (CG)</value>
+    <value>Coût (CO)</value>
   </data>
   <data name="MutationCreateTitle" xml:space="preserve">
     <value>Nouvelle mutation</value>
@@ -799,13 +799,13 @@
     <value>Lancez un dé par Héros survivant sans être hors de combat, plus un si vous avez gagné la bataille (maximum 6 dés).</value>
   </data>
   <data name="EndOfGameExplorationGoldLabel" xml:space="preserve">
-    <value>Or trouvé (CG)</value>
+    <value>Or trouvé (CO)</value>
   </data>
   <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
     <value>Pierres magiques trouvées</value>
   </data>
   <data name="EndOfGameExplorationFoundValueLabel" xml:space="preserve">
-    <value>Valeur trouvée (CG)</value>
+    <value>Valeur trouvée (CO)</value>
   </data>
   <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
     <value>Choisir un Héros</value>
@@ -844,7 +844,7 @@
     <value>Bataille : {0}.</value>
   </data>
   <data name="HistoryTreasurySentence" xml:space="preserve">
-    <value>Trésorerie : +{0} CG.</value>
+    <value>Trésorerie : +{0} CO.</value>
   </data>
   <data name="HistoryExplorationItemSentence" xml:space="preserve">
     <value>La bande a trouvé {0}x {1} (ajouté à l'inventaire).</value>
@@ -1120,7 +1120,7 @@
     <value>Rancune : récupère totalement mais hait désormais (1D6) le responsable ou sa bande.</value>
   </data>
   <data name="InjurySerious61" xml:space="preserve">
-    <value>Capturé : rançon, échange, ou vendu comme esclave (1D6×5 CG). Équipement gardé si échangé ou revendu vivant.</value>
+    <value>Capturé : rançon, échange, ou vendu comme esclave (1D6×5 CO). Équipement gardé si échangé ou revendu vivant.</value>
   </data>
   <data name="InjurySerious62" xml:space="preserve">
     <value>Endurci : devient immunisé à la Peur de façon permanente.</value>
@@ -1132,7 +1132,7 @@
     <value>Horribles balafres : provoque désormais la Peur, de façon permanente.</value>
   </data>
   <data name="InjurySerious65" xml:space="preserve">
-    <value>Vendu aux arènes : combat un gladiateur (Francs-Tireurs). Victoire : +50 CG, +2 XP, rejoint la bande avec son équipement. Défaite : relancez en ne gardant que 11-35 ; s'il survit, rejoint la bande sans armure ni armes.</value>
+    <value>Vendu aux arènes : combat un gladiateur (Francs-Tireurs). Victoire : +50 CO, +2 XP, rejoint la bande avec son équipement. Défaite : relancez en ne gardant que 11-35 ; s'il survit, rejoint la bande sans armure ni armes.</value>
   </data>
   <data name="InjurySerious66" xml:space="preserve">
     <value>Survie miraculeuse : survit et rejoint la bande, gagne 1 point d'expérience.</value>

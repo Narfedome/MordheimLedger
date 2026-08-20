@@ -50,7 +50,7 @@ l'Alchimiste, dernier point testé le 2026-08-18).
 | 6,2 | Trésor Caché | ⏳ | ❌ | Groupe B + référence la table Artefacts Magiques (Groupe D) |
 | 6,3 | Forge Naine | ✅ | — | Règle Gromril attachée sur les 3 branches concernées |
 | 6,4 | Bande Massacrée | ⏳ | ❌ | Groupe B |
-| 6,5 | Arène de Combat | ✅ | — | Branche unique |
+| 6,5 | Arène de Combat | ✅ | — | Manuel d'Entraînement réel et vendable (100 CG, `EquipmentItem.IsSellable`, comme les gemmes du Bijoutier) plutôt que de l'or brut - le Héros qui le porte débloque Combat en plus de ses listes habituelles (`GrantsSkillCategory`, comme le Carnet de l'Alchimiste). Le bonus "+1 CC au-delà du maximum racial" reste purement descriptif (texte de la SpecialRule "Formation au Combat") - au bon vouloir des joueurs, pas de plafond de caractéristiques suivi par l'appli |
 | 6,6 | Villa d'un Noble | ✅* | — | *Branches 1-4 complètes ; branche 5-6 (artefact magique) consignée en Historique mais ne donne pas encore un objet nommé réel (Groupe D) |
 
 ## Hors périmètre pour l'instant

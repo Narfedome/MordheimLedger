@@ -190,6 +190,19 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(pit.Outcomes, o => o is { SubRollMin: 1, SubRollMax: 1, Kind: ExplorationOutcomeKind.None, CausesDeath: true });
         Assert.Contains(pit.Outcomes, o => o is { SubRollMin: 2, SubRollMax: 6, Kind: ExplorationOutcomeKind.Wyrdstone, GoldFormula: "D6+1" });
 
+        // Fighting Arena (6 5): a real, sellable Training Manual (100 gc) that unlocks Combat skills for
+        // whichever Hero carries it - not flat gold (the sell-only case would silently drop the "give it
+        // to a Hero instead" alternative, same class of gap already fixed for the Jewelsmith/Alchemist's
+        // Lab).
+        var fightingArena = results.Single(r => r.DiceCount == 6 && r.Value == 5);
+        var trainingManualOutcome = Assert.Single(fightingArena.Outcomes);
+        Assert.Equal(ExplorationOutcomeKind.Item, trainingManualOutcome.Kind);
+        Assert.Equal("Training Manual", trainingManualOutcome.EquipmentItemName);
+        var trainingManual = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Name == "Training Manual");
+        Assert.Equal(100, trainingManual.Cost);
+        Assert.True(trainingManual.IsSellable);
+        Assert.Equal(SkillCategory.Combat, trainingManual.GrantsSkillCategory);
+
         // Catacombs (4 6): a purely tactical/battlefield effect (no gold/item/wyrdstone anywhere in the
         // rulebook text) - genuinely nothing to mechanize, stays pure text.
         var catacombs = results.Single(r => r.DiceCount == 4 && r.Value == 6);

@@ -1965,6 +1965,29 @@
   },
   {
     "name": {
+      "en": "Training Manual",
+      "fr": "Manuel d'Entraînement"
+    },
+    "category": "MiscellaneousEquipment",
+    "cost": 100,
+    "isSellable": true,
+    "grantsSkillCategory": "Combat",
+    "description": {
+      "en": "You find a training manual, which you can sell for 100 gc or give to one of your Heroes. When a progress roll grants him a new skill, the knowledge he finds within lets him choose from the list of Combat skills, in addition to his usual lists, and his Weapon Skill may now advance one point beyond the normal maximum.",
+      "fr": "Vous trouvez un manuel d'entraînement, que vous pouvez vendre pour 100CO ou donner à l'un de vos Héros. Lorsqu'un jet de progression lui fait gagner une nouvelle compétence, le savoir qu'il y trouve lui permet de choisir dans la liste de compétences de Combat, en plus de ses listes habituelles, et sa CC peut dorénavant progresser d'un point de plus que le maximum normal."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Combat Training", "fr": "Formation au Combat" },
+        "description": {
+          "en": "The Hero carrying this manual may choose from Combat skills whenever he gains a new skill, in addition to those normally available to him, and his Weapon Skill may advance one point beyond the normal maximum.",
+          "fr": "Le Héros qui porte ce manuel peut choisir des compétences de Combat à chaque nouvelle compétence, en plus de celles qui lui sont normalement accessibles, et sa CC peut progresser d'un point au-delà du maximum normal."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
       "en": "Quartz Stones",
       "fr": "Pierres de Quartz"
     },
@@ -1975,7 +1998,7 @@
     "grantsRareItemSearchBonus": 1,
     "description": {
       "en": "A handful of quartz stones worth D6x5 gc if sold. If not sold, a Hero may display them proudly and gains +1 to his rolls for locating rare items.",
-      "fr": "Une poignée de pierres de quartz valant D6x5 CG si elles sont revendues. Si elles ne sont pas revendues, un Héros peut les exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+      "fr": "Une poignée de pierres de quartz valant D6x5 CO si elles sont revendues. Si elles ne sont pas revendues, un Héros peut les exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
       { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
@@ -1992,7 +2015,7 @@
     "grantsRareItemSearchBonus": 1,
     "description": {
       "en": "An amethyst worth 20 gc if sold. If not sold, a Hero may display it proudly and gains +1 to his rolls for locating rare items.",
-      "fr": "Une améthyste valant 20 CG si elle est revendue. Si elle n'est pas revendue, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+      "fr": "Une améthyste valant 20 CO si elle est revendue. Si elle n'est pas revendue, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
       { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
@@ -2009,7 +2032,7 @@
     "grantsRareItemSearchBonus": 1,
     "description": {
       "en": "A necklace worth 50 gc if sold. If not sold, a Hero may display it proudly and gains +1 to his rolls for locating rare items.",
-      "fr": "Un collier valant 50 CG si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+      "fr": "Un collier valant 50 CO si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
       { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
@@ -2027,7 +2050,7 @@
     "grantsRareItemSearchBonus": 1,
     "description": {
       "en": "A ruby worth D6x15 gc if sold. If not sold, a Hero may display it proudly and gains +1 to his rolls for locating rare items.",
-      "fr": "Un rubis valant D6x15 CG si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
+      "fr": "Un rubis valant D6x15 CO si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
       { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }

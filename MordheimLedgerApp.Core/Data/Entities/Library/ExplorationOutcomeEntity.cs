@@ -41,4 +41,5 @@ public class ExplorationOutcomeEntity
     public string? GrantsFreeHenchmanArchetypeName { get; set; }
     public bool GrantsOptionalEquippedHenchman { get; set; }
     public string? NextGameNoteTextKey { get; set; }
+    public bool GrantsWeaponBlessing { get; set; }
 }

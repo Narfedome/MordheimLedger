@@ -104,8 +104,9 @@ public class WarbandService : IWarbandService
             {
                 if (!equipmentById.TryGetValue(carriedRow.EquipmentItemId, out var item)) continue;
 
-                var materialRule = await ResolveMaterialRuleAsync(carriedRow.MaterialSpecialRuleId, languageCode);
-                carried.Add(carriedRow.ToModel(item, materialRule));
+                var materialRule = await ResolveSpecialRuleAsync(carriedRow.MaterialSpecialRuleId, languageCode);
+                var blessingRule = await ResolveSpecialRuleAsync(carriedRow.BlessingSpecialRuleId, languageCode);
+                carried.Add(carriedRow.ToModel(item, materialRule, blessingRule));
             }
 
             var learnedRows = await _db.Connection.Table<WarriorSkillEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
@@ -198,9 +199,21 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarriorEquipmentEntity>(warriorEquipmentId);
     }
 
-    private async Task<SpecialRule?> ResolveMaterialRuleAsync(int? materialSpecialRuleId, string languageCode)
+    public async Task SetWarriorEquipmentBlessingRuleAsync(int warriorEquipmentId, int? blessingSpecialRuleId)
     {
-        if (materialSpecialRuleId is not { } id) return null;
+        await _db.Initialization;
+        var entity = await _db.Connection.FindAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+        if (entity is null) return;
+        entity.BlessingSpecialRuleId = blessingSpecialRuleId;
+        await _db.Connection.UpdateAsync(entity);
+    }
+
+    /// <summary>Resolves a plain SpecialRule id to a localized model - shared by MaterialRule and
+    /// BlessingRule resolution (both are just "an optional SpecialRule attached to a carried/stashed
+    /// item"), despite the name predating BlessingRule.</summary>
+    private async Task<SpecialRule?> ResolveSpecialRuleAsync(int? specialRuleId, string languageCode)
+    {
+        if (specialRuleId is not { } id) return null;
         var entity = await _db.Connection.FindAsync<SpecialRuleEntity>(id);
         if (entity is null) return null;
 
@@ -218,7 +231,7 @@ public class WarbandService : IWarbandService
         foreach (var row in rows)
         {
             if (!equipmentById.TryGetValue(row.EquipmentItemId, out var item)) continue;
-            var materialRule = await ResolveMaterialRuleAsync(row.MaterialSpecialRuleId, languageCode);
+            var materialRule = await ResolveSpecialRuleAsync(row.MaterialSpecialRuleId, languageCode);
             result.Add(row.ToModel(item, materialRule));
         }
         return result;
@@ -247,7 +260,7 @@ public class WarbandService : IWarbandService
             ?? throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} introuvable.");
 
         // "en" suffit ici : seuls Cost/CostMultiplier comptent, même idiome que EquipWarbandItemToWarriorAsync.
-        var materialRule = await ResolveMaterialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
+        var materialRule = await ResolveSpecialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
         var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
         // Vendable soit par le matériau (Ornate Weapon...), soit par l'objet lui-même (les gemmes du
         // Bijoutier - voir Models.WarbandEquipment.IsSellable, même distinction).
@@ -279,7 +292,7 @@ public class WarbandService : IWarbandService
         // "en" suffit ici : seul l'Id compte pour AddWarriorEquipmentAsync (voir WarriorEquipment.ToEntity),
         // même idiome que la résolution par nom anglais de l'étape Exploration du wizard.
         var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
-        var materialRule = await ResolveMaterialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
+        var materialRule = await ResolveSpecialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
 
         var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule, stashRow.FoundValueOverride);
         await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);

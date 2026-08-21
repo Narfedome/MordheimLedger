@@ -828,6 +828,12 @@
   <data name="EndOfGameDoNotRecruitOption" xml:space="preserve">
     <value>Do not recruit</value>
   </data>
+  <data name="EndOfGameWeaponBlessingPh" xml:space="preserve">
+    <value>Weapon to bless</value>
+  </data>
+  <data name="EndOfGameDoNotBlessOption" xml:space="preserve">
+    <value>Do not bless a weapon</value>
+  </data>
   <data name="EndOfGameEquippedHenchmanGroupPh" xml:space="preserve">
     <value>Group to reinforce</value>
   </data>
@@ -896,6 +902,9 @@
   </data>
   <data name="HistoryEquippedHenchmanSentence" xml:space="preserve">
     <value>A prisoner joins the {0} group as a new Henchman (equipment: {1} gc).</value>
+  </data>
+  <data name="HistoryWeaponBlessingSentence" xml:space="preserve">
+    <value>{0} blesses a weapon: {1}.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} gained {1} XP.</value>

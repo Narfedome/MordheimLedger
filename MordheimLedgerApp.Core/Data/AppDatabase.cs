@@ -742,7 +742,8 @@ public class AppDatabase
                     GrantsDistributedHeroExperienceFormula = outcome.GrantsDistributedHeroExperienceFormula,
                     GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName,
                     GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman,
-                    NextGameNoteTextKey = nextGameNoteTextKey
+                    NextGameNoteTextKey = nextGameNoteTextKey,
+                    GrantsWeaponBlessing = outcome.GrantsWeaponBlessing
                 });
             }
         }

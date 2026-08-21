@@ -597,6 +597,25 @@
                                        IsVisible="{Binding EquippedHenchmanError, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>
 
+                            <!-- Bénédiction d'arme (Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières) -
+                                 choix optionnel parmi les armes déjà portées par un Héros (jamais un
+                                 groupe d'Hommes de main ni la réserve de la bande - voir WeaponBlessingOptions),
+                                 aucune validation nécessaire ("Ne pas bénir d'arme" est une réponse
+                                 complète, même idiome que SentHeroOptions). -->
+                            <VerticalStackLayout IsVisible="{Binding HasWeaponBlessingGrant}" Spacing="6">
+                                <Picker Title="{loc:Loc EndOfGameWeaponBlessingPh}"
+                                        ItemsSource="{Binding WeaponBlessingOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                        SelectedItem="{Binding SelectedWeaponBlessingOption}"/>
+                                <!-- Aperçu du chip une fois béni ("Épée (G, B)") - voir BlessedWeaponPreview,
+                                     jamais persisté tel quel, juste pour que le joueur voie le résultat tout
+                                     de suite (retour utilisateur 2026-08-21). -->
+                                <components:ChipView Item="{Binding BlessedWeaponPreview}"
+                                                      IconGlyph="{Binding BlessedWeaponPreview.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      IsVisible="{Binding BlessedWeaponPreview, Converter={StaticResource IsNotNullConverter}}"
+                                                      Command="{Binding ShowBlessedWeaponDetailCommand}"/>
+                            </VerticalStackLayout>
+
                             <!-- Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), un seul
                                  exemplaire est trouvé - ni champ ni dé, juste "x1" en lecture seule (voir
                                  ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire

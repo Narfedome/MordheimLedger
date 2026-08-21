@@ -222,9 +222,17 @@
       "en": "Your warband stumbles across a ruined shrine, so badly damaged it is hard to tell which god was worshipped here. Your warband may strip the shrine and gain 3D6 gc worth of loot. Sisters of Sigmar or Witch Hunter warbands may instead save some holy relics, gaining 3D6 gc from their patrons and a blessing: one chosen weapon always wounds Undead or Possessed models on a to-wound roll of 2+.",
       "fr": "Votre bande tombe sur un sanctuaire en ruine, si endommagé qu'il est difficile de savoir quel dieu y était vénéré. Votre bande peut dépouiller le sanctuaire et gagner un butin de 3D6 CO. Une bande Sœurs de Sigmar ou Chasseurs de Sorcières peut à la place sauver quelques reliques saintes : elle gagne 3D6 CO de la part de ses mécènes et une bénédiction - une arme au choix blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+."
     },
-    "rollsIndependently": false,
+    "shortDescription": {
+      "en": "Your warband stumbles across a ruined shrine, so badly damaged it is hard to tell which god was worshipped here.",
+      "fr": "Votre bande tombe sur un sanctuaire en ruine, si endommagé qu'il est difficile de savoir quel dieu y était vénéré."
+    },
+    "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Sœurs de Sigmar/Chasseurs de Sorcières : reliques saintes + bénédiction d'arme",
+        "restrictedToWarbandArchetypeNames": ["The Sisters of Sigmar", "Witch Hunters"], "grantsWeaponBlessing": true,
+        "branchText": { "en": "Sisters of Sigmar or Witch Hunter warbands may instead save some holy relics, gaining 3D6 gc from their patrons and a blessing: one chosen weapon always wounds Undead or Possessed models on a to-wound roll of 2+.", "fr": "Une bande Sœurs de Sigmar ou Chasseurs de Sorcières peut à la place sauver quelques reliques saintes : elle gagne 3D6 CO de la part de ses mécènes et une bénédiction - une arme au choix blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Toute autre bande : dépouille le sanctuaire",
+        "branchText": { "en": "Your warband may strip the shrine and gain 3D6 gc worth of loot.", "fr": "Votre bande peut dépouiller le sanctuaire et gagner un butin de 3D6 CO." } }
     ]
   },
   {

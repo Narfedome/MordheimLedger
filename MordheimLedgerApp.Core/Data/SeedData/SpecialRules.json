@@ -93,6 +93,14 @@
     "isResaleUpgrade": true
   },
   {
+    "name": { "en": "Blessed Weapon", "fr": "Arme Bénie" },
+    "description": {
+      "en": "Blessed by the patrons of the Sisters of Sigmar or the Witch Hunters at a ruined shrine - this weapon always wounds Undead or Possessed models on a to-wound roll of 2+.",
+      "fr": "Bénie par les mécènes des Sœurs de Sigmar ou des Chasseurs de Sorcières dans un sanctuaire en ruine - cette arme blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+."
+    },
+    "abbreviation": "B"
+  },
+  {
     "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" },
     "description": {
       "en": "The Hero carrying this may display it proudly instead of selling it, gaining +1 to his rolls for locating rare items.",

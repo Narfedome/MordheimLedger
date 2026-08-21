@@ -198,4 +198,16 @@ public class ExplorationOutcome
 
     /// <summary>Translation slot backing NextGameNoteText - persistence-only, not for display.</summary>
     public string? NextGameNoteTextKey { get; set; }
+
+    /// <summary>True only for Shrine's Sisters of Sigmar/Witch Hunters branch ("she gains gc from her
+    /// patrons and a blessing: one chosen weapon always wounds Undead or Possessed models on a to-wound
+    /// roll of 2+") - coexists with Kind.Gold on this same branch (same 3D6 as the catch-all, only the
+    /// blessing differs), same "independent of Kind" idiom as GrantsOptionalEquippedHenchman. The player
+    /// picks one of a Hero's own already-carried weapons (never a Henchman group's - a group's Equipment
+    /// is shared across several models, not a single weapon to bless - nor the warband's unassigned
+    /// stash) via EndOfGameDialogViewModel.WeaponBlessingOptions; the chosen WarriorEquipment.MaterialRule
+    /// is set to the "Blessed Weapon" SpecialRule (see SpecialRules.json), same mechanism as a Gromril/
+    /// Ithilmar purchase rather than a bespoke bool flag - reuses the existing chip/abbreviation display
+    /// as-is. False/default for every other branch.</summary>
+    public bool GrantsWeaponBlessing { get; set; }
 }

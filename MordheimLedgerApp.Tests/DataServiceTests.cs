@@ -312,6 +312,23 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal("You find an old graveyard, crammed with ivy-covered sepulchres.", graveyard.ShortDescription);
         Assert.Equal("Witch Hunters and Sisters of Sigmar may instead seal the graves, gaining D6 Experience distributed amongst their Heroes.", graveyardSisters.BranchText);
 
+        // Shrine (4 2): both branches grant the SAME Gold 3D6 (unlike Graveyard/Prisoners, where the
+        // restricted branch differs) - only GrantsWeaponBlessing sets the Sisters of Sigmar/Witch Hunters
+        // branch apart (2026-08-21). Converted from a single unconditional outcome (rollsIndependently
+        // false) to the Group B shape once this branch needed mechanizing.
+        var shrine = results.Single(r => r.DiceCount == 4 && r.Value == 2);
+        Assert.True(shrine.RollsIndependently);
+        Assert.Equal(2, shrine.Outcomes.Count);
+        var shrineSisters = shrine.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["The Sisters of Sigmar", "Witch Hunters"]));
+        Assert.Equal(ExplorationOutcomeKind.Gold, shrineSisters.Kind);
+        Assert.Equal("3D6", shrineSisters.GoldFormula);
+        Assert.True(shrineSisters.GrantsWeaponBlessing);
+        var shrineCatchAll = Assert.Single(shrine.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        Assert.Equal(ExplorationOutcomeKind.Gold, shrineCatchAll.Kind);
+        Assert.Equal("3D6", shrineCatchAll.GoldFormula);
+        Assert.False(shrineCatchAll.GrantsWeaponBlessing);
+        Assert.Equal("Your warband stumbles across a ruined shrine, so badly damaged it is hard to tell which god was worshipped here.", shrine.ShortDescription);
+
         // ShortDescription/BranchText (2026-08-20): the wizard shows just the shared intro sentence plus
         // the resolved branch's own sentence for a warband-conditioned result, instead of the full
         // multi-branch Description - both must actually be localized (unlike Note, which never was).
@@ -382,6 +399,20 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(dwarfs.SpecialRules, r => r.Name == "Hard to Kill");
         var ostlanders = archetypes.Single(a => a.Name == "Ostlander Mercenaries");
         Assert.Contains(ostlanders.SpecialRules, r => r.Name == "Self-Reliant");
+    }
+
+    /// <summary>"Blessed Weapon" (Shrine's Sisters of Sigmar/Witch Hunters branch, see
+    /// ExplorationOutcome.GrantsWeaponBlessing) reuses the same MaterialRule mechanism as Gromril/
+    /// Ithilmar/Ornate Weapon (abbreviation shown in the carried-weapon chip) rather than a bespoke bool
+    /// flag - no CostMultiplier (the blessing doesn't change the weapon's price) and not a resale
+    /// upgrade, unlike Ornate Weapon.</summary>
+    [Fact]
+    public async Task SpecialRules_BlessedWeapon_IsAbbreviatedMaterialRuleNotResaleUpgrade()
+    {
+        var blessed = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Blessed Weapon");
+        Assert.Equal("B", blessed.Abbreviation);
+        Assert.Null(blessed.CostMultiplier);
+        Assert.False(blessed.IsResaleUpgrade);
     }
 
     /// <summary>Reikland/Middenheim/Marienburg share the same base Mercenary roster (see

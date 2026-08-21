@@ -828,6 +828,12 @@
   <data name="EndOfGameDoNotRecruitOption" xml:space="preserve">
     <value>Ne pas recruter</value>
   </data>
+  <data name="EndOfGameWeaponBlessingPh" xml:space="preserve">
+    <value>Arme à bénir</value>
+  </data>
+  <data name="EndOfGameDoNotBlessOption" xml:space="preserve">
+    <value>Ne pas bénir d'arme</value>
+  </data>
   <data name="EndOfGameEquippedHenchmanGroupPh" xml:space="preserve">
     <value>Groupe à renforcer</value>
   </data>
@@ -896,6 +902,9 @@
   </data>
   <data name="HistoryEquippedHenchmanSentence" xml:space="preserve">
     <value>Un prisonnier rejoint le groupe {0} comme nouvel Homme de main (équipement : {1} CO).</value>
+  </data>
+  <data name="HistoryWeaponBlessingSentence" xml:space="preserve">
+    <value>{0} bénit son arme : {1}.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} a gagné {1} PX.</value>

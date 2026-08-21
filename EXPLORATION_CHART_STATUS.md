@@ -2,7 +2,8 @@
 
 Suivi de l'assistant Fin de Partie, étape Revenus/Exploration (voir le plan de séquencement).
 Mis à jour à chaque avancée — dernière mise à jour : **2026-08-21** (Cimetière ; Progression reconnectée
-sur l'XP d'Exploration ; pense-bête "prochaine partie" `Warband.NextGameNote`).
+sur l'XP d'Exploration ; pense-bête "prochaine partie" `Warband.NextGameNote` ; Sanctuaire/bénédiction
+d'arme).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -11,7 +12,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | Groupe | Mécanisme | Statut |
 |---|---|---|
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
-| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **4/6 ✅** |
+| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **5/6 ✅** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
@@ -35,10 +36,10 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 | 3,5 | Halle du Marché | ✅ | ✅ | Branche unique |
 | 3,6 | Une Faveur Rendue | ⏳ | ❌ | Groupe C — Mercenaire à Louer gratuit, `NextGameNotes` pas construit |
 | 4,1 | Armurier à Poudre | ✅ | ✅ | |
-| 4,2 | Sanctuaire | 🔧 | ❌ | Or (3D6) fait ; la bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement) rejoint le Groupe B, en attente de son UI de choix - voir Hors périmètre |
+| 4,2 | Sanctuaire | ✅ | ✅ | Groupe B — les deux branches donnent le même Or (3D6), seule la bénédiction distingue Sœurs de Sigmar/Chasseurs de Sorcières (`GrantsWeaponBlessing`) : le joueur choisit une arme déjà portée par un Héros (jamais un groupe d'Hommes de main ni la réserve de la bande) via un Picker, la SpecialRule "Blessed Weapon" (`Abbreviation` "B") s'attache à cette `WarriorEquipment` précise via `MaterialRule` - même mécanisme qu'un achat en Gromril/Ithilmar, aucun nouveau champ/affichage |
 | 4,3 | Maison de Ville | ✅ | ✅ | Branche unique |
 | 4,4 | Armurerie | ✅ | ✅ | Branche 1-2 : choix du joueur Bouclier ou Rondache (`AlternativeEquipmentItemName`) |
-| 4,5 | Cimetière | ✅ | — | Groupe B — miroir de Prisonniers : le catch-all (Or D6x10, toute bande) est ici la branche non restreinte, Chasseurs de Sorcières/Sœurs de Sigmar (seule branche `RestrictedToWarbandArchetypeNames`) prennent D6 Expérience répartis entre les Héros à la place (`GrantsDistributedHeroExperienceFormula` réutilisé tel quel - aucun code Core.Rules/wizard nouveau, l'infrastructure Groupe B existante couvre déjà cette forme). La conséquence "haïe par les Chasseurs de Sorcières/Sœurs de Sigmar à la prochaine partie" du catch-all est mécanisée en pense-bête (`ExplorationOutcome.NextGameNoteText` → `Warband.NextGameNote`, bannière sur la fiche de bande - voir Journal 2026-08-21) |
+| 4,5 | Cimetière | ✅ | ✅ | Groupe B — miroir de Prisonniers : le catch-all (Or D6x10, toute bande) est ici la branche non restreinte, Chasseurs de Sorcières/Sœurs de Sigmar (seule branche `RestrictedToWarbandArchetypeNames`) prennent D6 Expérience répartis entre les Héros à la place (`GrantsDistributedHeroExperienceFormula` réutilisé tel quel - aucun code Core.Rules/wizard nouveau, l'infrastructure Groupe B existante couvre déjà cette forme). La conséquence "haïe par les Chasseurs de Sorcières/Sœurs de Sigmar à la prochaine partie" du catch-all est mécanisée en pense-bête (`ExplorationOutcome.NextGameNoteText` → `Warband.NextGameNote`, bannière sur la fiche de bande - voir Journal 2026-08-21) |
 | 4,6 | Catacombes | ⏳ | ❌ | Groupe C — déploiement spécial, `NextGameNotes` pas construit |
 | 5,1 | Maison du Prêteur | ✅ | ✅ | Branche unique |
 | 5,2 | Laboratoire de l'Alchimiste | ✅ | ✅ | Or (3D6) + carnet trouvé (`SecondaryEquipmentItemName`) - le Héros qui le porte débloque Érudition en plus de ses listes habituelles dès sa prochaine compétence gagnée (`EquipmentItem.GrantsSkillCategory`, voir `Core.Rules.SkillEligibility`) |
@@ -55,7 +56,11 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 
 ## Hors périmètre pour l'instant
 
-- **Groupe B** (Traînard/Taverne/Prisonniers/Cimetière/Trésor Caché/Bande Massacrée) : UI de sélection de branche par le joueur, plus les sous-mécaniques Recrutement gratuit (`Kind.Recruit`) et Expérience répartie (`Kind.Experience`) qu'elles impliquent (voir le plan de séquencement). **Sanctuaire** (4,2) rejoint cette liste pour sa bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement, choix du joueur sur un objet déjà porté, pas une trouvaille) - même mécanique de choix conditionné à la bande que le reste du Groupe B, discuté puis explicitement reporté au 2026-08-18 plutôt que traité comme un cas isolé. Sa branche Or (3D6, toutes bandes) reste ✅.
+- **Groupe B restant** : Trésor Caché (6,2) et Bande Massacrée (6,4) - mécanique DIFFÉRENTE du reste du
+  Groupe B (Traînard/Taverne/Prisonniers/Cimetière/Sanctuaire, tous ✅ - une seule branche résolue depuis
+  l'archétype de la bande) : ici chaque objet/montant de la liste se jette INDÉPENDAMMENT contre son
+  propre seuil ("4+", "5+"...), plusieurs peuvent se déclencher à la fois - aucune UI de ce genre
+  n'existe encore dans le wizard, nécessite un mockup avant implémentation (voir le plan de séquencement).
 - **Groupe C** (Une Faveur Rendue/Catacombes/Entrée des Catacombes) : `Warband.NextGameNote` (pense-bête sur la fiche de bande, voir Journal 2026-08-21 - construit et déjà branché pour Cimetière, réutilisable tel quel) + `Warband.HasCatacombReroll` (relance permanente, encore à construire) pour les effets mécanisables. Une Faveur Rendue exige en plus les Mercenaires à Louer (Hired Swords), pas encore implémentés.
 - **Vente de la pierre magique** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
 
@@ -386,3 +391,44 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   générique (`Warband.NextGameNote`/`ExplorationOutcome.NextGameNoteText`, pas un champ dédié "haine
   Sœurs/Chasseurs") pour être réutilisée telle quelle par Catacombes/Une Faveur Rendue plus tard, sans
   nouveau champ ni nouvelle bannière à construire.
+- **2026-08-21 (Sanctuaire - bénédiction d'arme)** — Repris juste après Cimetière ("le reste avant Une
+  Faveur Rendue, qui exige les Mercenaires à Louer pas encore implémentés"). Converti de branche unique
+  (`rollsIndependently: false`, Or 3D6 pour tout le monde) vers la forme Groupe B habituelle : les DEUX
+  branches donnent le même Or 3D6 (contraste avec Cimetière/Prisonniers où le montant diffère aussi) -
+  seule `GrantsWeaponBlessing` distingue la branche Sœurs de Sigmar/Chasseurs de Sorcières. Mockup en 2
+  itérations avant implémentation : (1) Picker "Guerrier — Arme" listant les armes du roster, "Ne pas
+  bénir d'arme" par défaut ; (2) restreint aux HÉROS uniquement sur retour utilisateur - un groupe
+  d'Hommes de main partage son Equipment entre plusieurs figurines, "une arme au choix" n'y désigne pas
+  une pièce unique à bénir ; l'inventaire de bande (réserve non assignée) explicitement écarté aussi
+  ("Oublie l'inventaire"). Décision de conception clé (suggérée par l'utilisateur) : la bénédiction
+  réutilise l'ESPRIT du mécanisme MaterialRule existant (comme Gromril/Ithilmar/Arme Ornée - un
+  `SpecialRule` avec `Abbreviation` attaché à la `WarriorEquipment`, affiché via `NameDisplay`) plutôt
+  qu'un bool ad-hoc - nouvelle `SpecialRule` "Blessed Weapon"/"Arme Bénie" (`Abbreviation` "B", pas de
+  `CostMultiplier`, pas `IsResaleUpgrade`) dans `SpecialRules.json`. Filtré aux catégories arme
+  (corps-à-corps/tir/poudre noire) - une armure n'a pas de sens à bénir ici.
+  **Corrigé dans la foulée** : première passe posait la bénédiction directement sur `MaterialRule`,
+  écrasant un matériau déjà présent - l'utilisateur a signalé qu'une arme en Gromril/Ithilmar/Ornée peut
+  très bien être bénie EN PLUS ("attention une arme bénie peut être aussi en gromril/ithilmar/ornée").
+  `WarriorEquipment` gagne donc un second slot indépendant, `BlessingRule` (jamais dérivé de/ne touche
+  jamais `MaterialRule`) - `NameDisplay` combine désormais les deux abréviations si présentes ("Épée (G,
+  B)"), plain si aucune. Nouvelle colonne `WarriorEquipmentEntity.BlessingSpecialRuleId` + méthode
+  `IWarbandService.SetWarriorEquipmentBlessingRuleAsync` (le service n'avait jusque-là aucun moyen de
+  modifier une arme DÉJÀ possédée après coup, seulement à l'achat) ; `WarbandService.
+  ResolveMaterialRuleAsync` renommé `ResolveSpecialRuleAsync` (partagé par les deux slots, plus
+  seulement le matériau). Nouveau test `BlessedWeapon_CoexistsWithExistingMaterialRule` couvrant
+  exactement ce cas (Hache en Gromril qui se fait aussi bénir → "Axe (G, B)", les deux `SpecialRule`
+  résolues indépendamment). Retour utilisateur additionnel : aperçu en direct dans le wizard
+  (`EndOfGameDialogViewModel.BlessedWeaponPreview`, une `WarriorEquipment` jetable jamais persistée
+  combinant le `MaterialRule` réel de l'arme choisie + la SpecialRule "Blessed Weapon" déjà résolue) -
+  un vrai `ChipView` sous le Picker montre le résultat ("Épée (G, B)") avant même de valider le wizard.
+  **3 oublis corrigés dans la foulée** (signalés par l'utilisateur après test) : (1) le chip d'aperçu du
+  wizard n'était pas tapable, aucun popup détail au clic - nouvelle commande `ShowBlessedWeaponDetail` ;
+  (2) `EquipmentItemDetailDialogViewModel` (popup détail, ouvert aussi bien depuis la carte guerrier de
+  `WarbandDetailPage` que depuis le wizard) ne connaissait que `materialRule`, jamais `blessingRule` - le
+  titre du popup n'affichait donc que "(G)" (jamais "(G, B)") et la règle "Béni" n'apparaissait pas dans
+  la liste des règles spéciales affichées, malgré le chip lui-même montrant bien "(G, B)" à l'extérieur.
+  `IDetailDialogService.ShowEquipmentDetailDialogAsync` gagne un 4e paramètre optionnel `blessingRule`,
+  fil tiré jusqu'aux 2 appelants qui passent une vraie `WarriorEquipment` (`WarbandDetailViewModel.
+  ShowEquipmentDetail`, `WarriorEditDialogViewModel.ShowEquipmentDetail`) - `EquipmentPick` (choix en
+  mémoire avant recrutement) n'a délibérément pas cette règle, une bénédiction ne peut par construction
+  s'appliquer qu'à un guerrier déjà recruté.

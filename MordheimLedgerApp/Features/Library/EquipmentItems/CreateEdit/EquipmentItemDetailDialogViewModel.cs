@@ -46,26 +46,32 @@ public partial class EquipmentItemDetailDialogViewModel : ReadOnlyDialogViewMode
     public string RestrictedWarbandsHeaderText { get; }
 
     /// <summary>Item.SpecialRules (intrinsic to the catalog entry) plus the material chosen for THIS
-    /// specific purchase (Gromril/Ithilmar...), when any - see WarbandEditDialogViewModel/
-    /// WarriorEditDialogViewModel.ShowEquipmentDetail. Item.SpecialRules itself is left untouched (the
-    /// material is a per-purchase choice, not part of the shared catalog entry) - this is a display-only
-    /// merge, same idiom as EquipmentPick.Name/WarriorEquipment.NameDisplay for the abbreviated chip.</summary>
+    /// specific purchase (Gromril/Ithilmar...) and/or a blessing attached after the fact (Shrine's
+    /// "Blessed Weapon", see WarriorEquipment.BlessingRule), when either is set - see
+    /// WarbandEditDialogViewModel/WarriorEditDialogViewModel/WarbandDetailViewModel.ShowEquipmentDetail.
+    /// Item.SpecialRules itself is left untouched (both are per-instance, not part of the shared catalog
+    /// entry) - this is a display-only merge, same idiom as EquipmentPick.Name/WarriorEquipment.
+    /// NameDisplay for the abbreviated chip.</summary>
     public List<SpecialRule> DisplayedSpecialRules { get; }
 
     private readonly IDetailDialogService _detailDialogs;
 
     public EquipmentItemDetailDialogViewModel(EquipmentItem item, string categoryLabel, List<WarbandArchetype> restrictedWarbands,
         List<WarbandArchetype> allWarbandArchetypes, List<WarriorArchetype> restrictedWarriors, IDetailDialogService detailDialogs,
-        SpecialRule? materialRule = null, int? foundValueOverride = null)
+        SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null)
     {
         Item = item;
-        Title = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{item.Name} ({abbr})" : item.Name;
+        var abbrs = new[] { materialRule?.Abbreviation, blessingRule?.Abbreviation }.Where(a => !string.IsNullOrEmpty(a)).ToList();
+        Title = abbrs.Count > 0 ? $"{item.Name} ({string.Join(", ", abbrs)})" : item.Name;
         CategoryLabel = categoryLabel;
         RarityDisplay = item.Rarity?.ToString() ?? Loc["LibFilterCommon"];
         RestrictedWarbands = WarbandRestrictionDisplay.DisplayedFor(restrictedWarbands, allWarbandArchetypes);
         RestrictedWarbandsHeaderText = WarbandRestrictionDisplay.HeaderTextFor(restrictedWarbands, allWarbandArchetypes);
         RestrictedWarriors = restrictedWarriors;
-        DisplayedSpecialRules = materialRule is null ? item.SpecialRules : item.SpecialRules.Append(materialRule).ToList();
+        DisplayedSpecialRules = item.SpecialRules
+            .Concat(materialRule is null ? [] : new[] { materialRule })
+            .Concat(blessingRule is null ? [] : new[] { blessingRule })
+            .ToList();
         FoundValueOverride = foundValueOverride;
         _detailDialogs = detailDialogs;
     }

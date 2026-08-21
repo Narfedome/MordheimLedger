@@ -317,6 +317,18 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryEquippedHenchmanSentence"], recruitGroup.ArchetypeName, equipmentCost));
             }
 
+            // Sanctuaire, branche Sœurs de Sigmar/Chasseurs de Sorcières - attache la SpecialRule
+            // "Blessed Weapon" sur l'arme choisie (déjà portée par un Héros, voir EndOfGameDialogViewModel.
+            // WeaponBlessingOptions), même mécanisme qu'un achat en Gromril/Ithilmar plutôt qu'un nouveau
+            // champ - indépendant du Kind ci-dessus (coexiste avec l'or des reliques, Kind.Gold).
+            if (outcome.GrantsWeaponBlessing && dialogViewModel.SelectedWeaponBlessingOption?.Equipment is { } blessedEquipment
+                && englishSpecialRules.FirstOrDefault(r => r.Name == "Blessed Weapon") is { } blessedRule)
+            {
+                await _warbandService.SetWarriorEquipmentBlessingRuleAsync(blessedEquipment.Id, blessedRule.Id);
+                sentences.Add(string.Format(Loc["HistoryWeaponBlessingSentence"],
+                    dialogViewModel.SelectedWeaponBlessingOption.Hero!.Name, blessedEquipment.Item.Name));
+            }
+
             // Rappel "prochaine partie" (Cimetière catch-all) - indépendant du Kind ci-dessus, même
             // principe que SecondaryEquipmentItemName/GrantsOptionalEquippedHenchman.
             if (outcome.NextGameNoteText is { } nextGameNote)

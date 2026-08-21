@@ -158,6 +158,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(HasDistributedHeroExperienceGrant))]
     [NotifyPropertyChangedFor(nameof(DistributedExperienceRemaining))]
     [NotifyPropertyChangedFor(nameof(HasOptionalEquippedHenchmanGrant))]
+    [NotifyPropertyChangedFor(nameof(HasWeaponBlessingGrant))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemFoundValueRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
@@ -345,6 +346,55 @@ public partial class EndOfGameDialogViewModel
         || RecruitmentRules.CanAffordEquippedHenchman(
             _currentTreasury + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0),
             SelectedEquippedHenchmanGroupOption.EquipmentCost);
+
+    // --- Bénédiction d'arme (Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières) ---------------
+    //
+    // "une arme au choix blesse désormais automatiquement..." - le joueur choisit une arme parmi celles
+    // déjà portées par un Héros (jamais un groupe d'Hommes de main, dont l'Equipment est partagé par
+    // plusieurs figurines et ne désigne donc pas une arme unique à bénir ; jamais la réserve de la bande
+    // non plus - retour utilisateur 2026-08-21). La bénédiction attache la SpecialRule "Blessed Weapon"
+    // (voir SpecialRules.json) sur cette WarriorEquipment précise via WarriorEquipment.MaterialRule -
+    // même mécanisme qu'un achat en Gromril/Ithilmar, pas un bool dédié : le chip/l'abréviation existants
+    // ("B") s'affichent tels quels, aucun nouveau code d'affichage nécessaire.
+
+    public bool HasWeaponBlessingGrant => ResolvedExplorationOutcome?.GrantsWeaponBlessing == true;
+
+    public sealed record WeaponBlessingOption(string DisplayName, WarriorOutcomeRow? Hero, WarriorEquipment? Equipment);
+
+    /// <summary>"Ne pas bénir d'arme" en premier/par défaut (même idiome que EquippedHenchmanGroupOptions/
+    /// SentHeroOptions), suivi d'une entrée par arme RÉELLEMENT portée par un Héros vivant - filtré aux
+    /// catégories arme (corps-à-corps/tir/poudre noire), une armure ou un objet divers n'a pas de sens à
+    /// bénir ici.</summary>
+    public List<WeaponBlessingOption> WeaponBlessingOptions =>
+        new List<WeaponBlessingOption> { new(Loc["EndOfGameDoNotBlessOption"], null, null) }
+            .Concat(WarriorRows.Where(r => r.IsHero && !r.IsDead)
+                .SelectMany(hero => hero.Warrior.Equipment
+                    .Where(e => e.Item.Category is EquipmentCategory.MeleeWeapon or EquipmentCategory.MissileWeapon or EquipmentCategory.BlackPowderWeapon)
+                    .Select(e => new WeaponBlessingOption($"{hero.Name} — {e.NameDisplay}", hero, e))))
+            .ToList();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BlessedWeaponPreview))]
+    private WeaponBlessingOption? selectedWeaponBlessingOption;
+
+    /// <summary>Aperçu jetable (jamais persisté tel quel - même idiome que BuildDisplayItem/
+    /// ResolvedExplorationItem) du chip de l'arme choisie une fois bénie : combine son MaterialRule
+    /// existant (Gromril/Ithilmar/Ornée, s'il y en a un) avec la SpecialRule "Blessed Weapon" déjà
+    /// résolue dans _specialRulesByEnglishName, pour que le joueur voie tout de suite "Épée (G, B)"
+    /// avant même de valider le wizard - retour utilisateur explicite (2026-08-21).</summary>
+    public WarriorEquipment? BlessedWeaponPreview => SelectedWeaponBlessingOption?.Equipment is { } equipment
+        ? new WarriorEquipment
+        {
+            Item = equipment.Item,
+            MaterialRule = equipment.MaterialRule,
+            BlessingRule = _specialRulesByEnglishName.GetValueOrDefault("Blessed Weapon"),
+            Quantity = equipment.Quantity
+        }
+        : null;
+
+    [RelayCommand]
+    private Task ShowBlessedWeaponDetail(WarriorEquipment item) =>
+        _detailDialogs.ShowEquipmentDetailDialogAsync(item.Item, item.MaterialRule, blessingRule: item.BlessingRule);
 
     // --- Expérience répartie entre les Héros (Prisonniers, Possédés) --------------------------
     //
@@ -828,6 +878,7 @@ public partial class EndOfGameDialogViewModel
         }
         SelectedEquippedHenchmanGroupOption = EquippedHenchmanGroupOptions[0];
         EquippedHenchmanError = null;
+        SelectedWeaponBlessingOption = WeaponBlessingOptions[0];
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 

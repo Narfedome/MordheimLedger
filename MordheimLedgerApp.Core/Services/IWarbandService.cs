@@ -37,6 +37,13 @@ public interface IWarbandService
     Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null);
     Task RemoveWarriorEquipmentAsync(int warriorEquipmentId);
 
+    /// <summary>Sets/clears BlessingRule on an ALREADY-carried weapon after the fact - so far only the
+    /// Shrine's blessing (Sisters of Sigmar/Witch Hunters, see ExplorationOutcome.GrantsWeaponBlessing),
+    /// which attaches the "Blessed Weapon" SpecialRule to a Hero's already-owned weapon rather than a
+    /// material chosen at purchase time (see AddWarriorEquipmentAsync). A SEPARATE slot from MaterialRule
+    /// (never touches it) - a weapon already Gromril/Ithilmar that also gets blessed keeps both.</summary>
+    Task SetWarriorEquipmentBlessingRuleAsync(int warriorEquipmentId, int? blessingSpecialRuleId);
+
     /// <summary>Equipment held by the warband itself, not yet assigned to a warrior - see
     /// Models.WarbandEquipment. Fed by the End of Game wizard's Exploration step (loot found this way
     /// isn't tied to a specific warrior at the table either) and drained by EquipWarbandItemToWarriorAsync

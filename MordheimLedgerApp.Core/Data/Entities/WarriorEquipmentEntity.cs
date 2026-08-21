@@ -14,5 +14,6 @@ public class WarriorEquipmentEntity
     public int EquipmentItemId { get; set; }
     public int Quantity { get; set; } = 1;
     public int? MaterialSpecialRuleId { get; set; }
+    public int? BlessingSpecialRuleId { get; set; }
     public int? FoundValueOverride { get; set; }
 }

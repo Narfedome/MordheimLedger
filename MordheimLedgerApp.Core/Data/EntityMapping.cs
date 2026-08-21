@@ -322,7 +322,8 @@ public static class EntityMapping
         GrantsFreeHenchmanArchetypeName = e.GrantsFreeHenchmanArchetypeName,
         GrantsOptionalEquippedHenchman = e.GrantsOptionalEquippedHenchman,
         NextGameNoteText = ResolveDescription(e.NextGameNoteTextKey, translations),
-        NextGameNoteTextKey = e.NextGameNoteTextKey
+        NextGameNoteTextKey = e.NextGameNoteTextKey,
+        GrantsWeaponBlessing = e.GrantsWeaponBlessing
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -353,7 +354,8 @@ public static class EntityMapping
         GrantsDistributedHeroExperienceFormula = m.GrantsDistributedHeroExperienceFormula,
         GrantsFreeHenchmanArchetypeName = m.GrantsFreeHenchmanArchetypeName,
         GrantsOptionalEquippedHenchman = m.GrantsOptionalEquippedHenchman,
-        NextGameNoteTextKey = m.NextGameNoteTextKey
+        NextGameNoteTextKey = m.NextGameNoteTextKey,
+        GrantsWeaponBlessing = m.GrantsWeaponBlessing
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -610,13 +612,16 @@ public static class EntityMapping
     /// <param name="item">The catalog item this row references, loaded separately.</param>
     /// <param name="materialRule">The chosen material rule, loaded separately - see
     /// WarriorEquipment.MaterialRule.</param>
-    public static WarriorEquipment ToModel(this WarriorEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null) => new()
+    /// <param name="blessingRule">The attached blessing rule, loaded separately - see
+    /// WarriorEquipment.BlessingRule. Independent of materialRule - both can be set at once.</param>
+    public static WarriorEquipment ToModel(this WarriorEquipmentEntity e, EquipmentItem item, SpecialRule? materialRule = null, SpecialRule? blessingRule = null) => new()
     {
         Id = e.Id,
         WarriorId = e.WarriorId,
         Item = item,
         Quantity = e.Quantity,
         MaterialRule = materialRule,
+        BlessingRule = blessingRule,
         FoundValueOverride = e.FoundValueOverride
     };
 
@@ -647,6 +652,7 @@ public static class EntityMapping
         EquipmentItemId = m.Item.Id,
         Quantity = m.Quantity,
         MaterialSpecialRuleId = m.MaterialRule?.Id,
+        BlessingSpecialRuleId = m.BlessingRule?.Id,
         FoundValueOverride = m.FoundValueOverride
     };
 

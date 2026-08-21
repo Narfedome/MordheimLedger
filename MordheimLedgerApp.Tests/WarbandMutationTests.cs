@@ -111,6 +111,32 @@ public class WarbandMutationTests : IDisposable
         Assert.NotEmpty(carried.Item.SpecialRules);
     }
 
+    /// <summary>Shrine's blessing (see ExplorationOutcome.GrantsWeaponBlessing) attaches "Blessed
+    /// Weapon" via WarriorEquipment.BlessingRule - a SEPARATE slot from MaterialRule (Gromril/Ithilmar/
+    /// Ornate), confirmed by the user 2026-08-21: a weapon already in Gromril that also gets blessed
+    /// keeps BOTH, shown as "(G, B)" rather than the blessing overwriting the material.</summary>
+    [Fact]
+    public async Task BlessedWeapon_CoexistsWithExistingMaterialRule()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
+        var recruited = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
+
+        var axe = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Name == "Axe");
+        var gromril = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Gromril Weapon");
+        var blessed = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Blessed Weapon");
+
+        var carried = await _warbands.AddWarriorEquipmentAsync(recruited.Id, axe, materialRule: gromril);
+        await _warbands.SetWarriorEquipmentBlessingRuleAsync(carried.Id, blessed.Id);
+
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var reloaded = Assert.Single(Assert.Single(roster).Equipment);
+        Assert.Equal("Gromril Weapon", reloaded.MaterialRule?.Name);
+        Assert.Equal("Blessed Weapon", reloaded.BlessingRule?.Name);
+        Assert.Equal("Axe (G, B)", reloaded.NameDisplay);
+    }
+
     [Fact]
     public async Task EditingOfficialArchetype_FlipsSourceToModified()
     {

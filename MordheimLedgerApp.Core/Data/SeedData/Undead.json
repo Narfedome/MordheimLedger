@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Undead",
   "imagePath": "the_undead.jpg",
   "name": {
     "en": "Undead",

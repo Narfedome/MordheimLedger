@@ -520,6 +520,80 @@
                                        IsVisible="{Binding ArtefactRollError, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>
 
+                            <!-- Expérience répartie entre plusieurs Héros (Prisonniers, Possédés) -
+                                 contrairement à GrantsLeaderExperience (Traînard : +1 fixe au seul chef,
+                                 aucun choix), le joueur répartit lui-même un total jeté (D3, son propre
+                                 jet physique comme partout ailleurs) entre ses Héros via un steppeur +/-
+                                 chacun - forme confirmée par mockup avant implémentation (2026-08-20).
+                                 Bloqué tant que DistributedExperienceRemaining n'est pas exactement 0
+                                 (voir ValidateExplorationResultStep). -->
+                            <VerticalStackLayout IsVisible="{Binding HasDistributedHeroExperienceGrant}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding DistributedExperienceTotal}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollDistributedExperienceCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding DistributedExperienceRemaining, Converter={StaticResource IsNotNullConverter}}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{loc:Loc EndOfGameDistributedExperienceRemainingLabel}"/>
+                                                <Span Text=" "/>
+                                                <Span Text="{Binding DistributedExperienceRemaining}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </Grid>
+                                <Label Text="{Binding DistributedExperienceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding DistributedExperienceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DistributedExperienceEligibleHeroes}" Spacing="4"
+                                                      IsVisible="{Binding DistributedExperienceRemaining, Converter={StaticResource IsNotNullConverter}}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                <Label Grid.Column="0" Text="{Binding Name}" VerticalOptions="Center"/>
+                                                <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementDistributedExperienceCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                    <Label Text="{Binding DistributedExplorationExperience}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementDistributedExperienceCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                </HorizontalStackLayout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Recrutement conditionné à l'équipement (Prisonniers, "autres bandes") -
+                                 "en utilisant les mêmes caractéristiques que le groupe existant" : le
+                                 joueur choisit lequel des groupes d'Hommes de main RÉELS de la bande
+                                 renforcer plutôt qu'un archétype fixe (contraste ResolvedFreeHenchman,
+                                 Traînard/Zombie) - "Ne pas recruter" par défaut (premier du Picker),
+                                 tableau de trésorerie masqué tant qu'il reste choisi (mock confirmé
+                                 2026-08-21). Le recrutement est gratuit, seul le coût de l'équipement
+                                 répliqué (déjà dans le libellé du Picker) doit tenir dans la trésorerie -
+                                 pas de bouton dédié, seul le "Suivant" du wizard bloque si le solde
+                                 passerait négatif (voir CanAffordEquippedHenchman). -->
+                            <VerticalStackLayout IsVisible="{Binding HasOptionalEquippedHenchmanGrant}" Spacing="6">
+                                <Picker Title="{loc:Loc EndOfGameEquippedHenchmanGroupPh}"
+                                        ItemsSource="{Binding EquippedHenchmanGroupOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                        SelectedItem="{Binding SelectedEquippedHenchmanGroupOption}"/>
+                                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowEquippedHenchmanTreasury}">
+                                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquippedHenchmanTreasuryAfterLabel}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{Binding EquippedHenchmanTreasuryAfter}" VerticalOptions="Center"/>
+                                </Grid>
+                                <Label Text="{Binding EquippedHenchmanError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding EquippedHenchmanError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+
                             <!-- Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), un seul
                                  exemplaire est trouvé - ni champ ni dé, juste "x1" en lecture seule (voir
                                  ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
@@ -699,14 +773,28 @@
                             <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
 
-                        <!-- Homme de main gratuit (ex. Traînard, Morts-Vivants : un Zombie rejoint la
-                             bande) - voir ResolvedFreeHenchman. Toujours 1 exemplaire, jamais de champ/
-                             dé ici (aucun jet ne le concerne). -->
-                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ResolvedFreeHenchman, Converter={StaticResource IsNotNullConverter}}">
+                        <!-- Homme de main gratuit (ex. Traînard/Prisonniers, Morts-Vivants : Zombie(s)
+                             rejoignent la bande) - voir ResolvedFreeHenchman. Quantité fixe (1, Traînard)
+                             en lecture seule, ou jet+dé si le livre en donne plusieurs (D3, Prisonniers -
+                             ExplorationOutcome.ItemQuantityFormula réutilisé tel quel, même champ que pour
+                             un Objet, voir ShowExplorationItemQuantityRoll). -->
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding ResolvedFreeHenchman, Converter={StaticResource IsNotNullConverter}}">
                             <components:ChipView Grid.Column="0" Item="{Binding ResolvedFreeHenchman}"
                                                   IconGlyph="{x:Static icons:SolidFont.UserGroup}"
                                                   Command="{Binding ShowFreeHenchmanDetailCommand}"/>
-                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
+                                   VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                   IsVisible="{Binding ShowExplorationItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                            <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                   VerticalOptions="Center" IsVisible="{Binding ShowExplorationItemQuantityRoll}">
+                                <Entry.Behaviors>
+                                    <components:DigitsOnlyBehavior/>
+                                </Entry.Behaviors>
+                            </Entry>
+                            <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding AutoRollExplorationItemQuantityCommand}"
+                                                          Tooltip="{loc:Loc EndOfGameRoll}" VerticalOptions="Center"
+                                                          IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
                         </Grid>
                     </VerticalStackLayout>
                 </Border>

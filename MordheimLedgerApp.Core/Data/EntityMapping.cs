@@ -48,7 +48,8 @@ public static class EntityMapping
 
     public static WarbandArchetype ToModel(this WarbandArchetypeEntity e, IReadOnlyDictionary<string, string> translations,
         IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarbandId = null,
-        IReadOnlyDictionary<int, List<MagicSchool>>? magicSchoolsByWarbandId = null) => new()
+        IReadOnlyDictionary<int, List<MagicSchool>>? magicSchoolsByWarbandId = null,
+        IReadOnlyDictionary<int, Race>? racesById = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -62,7 +63,9 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         ImagePath = e.ImagePath ?? string.Empty,
         SpecialRules = specialRulesByWarbandId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
-        MagicSchools = magicSchoolsByWarbandId?.GetValueOrDefault(e.Id) ?? new List<MagicSchool>()
+        MagicSchools = magicSchoolsByWarbandId?.GetValueOrDefault(e.Id) ?? new List<MagicSchool>(),
+        RaceId = e.RaceId,
+        Race = racesById?.GetValueOrDefault(e.RaceId)
     };
 
     public static WarbandArchetypeEntity ToEntity(this WarbandArchetype m) => new()
@@ -75,7 +78,8 @@ public static class EntityMapping
         MaxWarriors = m.MaxWarriors,
         MinWarriors = m.MinWarriors,
         DescriptionKey = m.DescriptionKey,
-        ImagePath = m.ImagePath
+        ImagePath = m.ImagePath,
+        RaceId = m.RaceId
     };
 
     public static WarriorArchetype ToModel(this WarriorArchetypeEntity e, IReadOnlyDictionary<string, string> translations,
@@ -312,7 +316,9 @@ public static class EntityMapping
             ? new() : e.RestrictedToWarbandArchetypeNamesCsv.Split(',').ToList(),
         GrantsNextExplorationBonusDie = e.GrantsNextExplorationBonusDie,
         GrantsLeaderExperience = e.GrantsLeaderExperience,
-        GrantsFreeHenchmanArchetypeName = e.GrantsFreeHenchmanArchetypeName
+        GrantsDistributedHeroExperienceFormula = e.GrantsDistributedHeroExperienceFormula,
+        GrantsFreeHenchmanArchetypeName = e.GrantsFreeHenchmanArchetypeName,
+        GrantsOptionalEquippedHenchman = e.GrantsOptionalEquippedHenchman
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -340,7 +346,9 @@ public static class EntityMapping
             ? string.Join(",", m.RestrictedToWarbandArchetypeNames) : null,
         GrantsNextExplorationBonusDie = m.GrantsNextExplorationBonusDie,
         GrantsLeaderExperience = m.GrantsLeaderExperience,
-        GrantsFreeHenchmanArchetypeName = m.GrantsFreeHenchmanArchetypeName
+        GrantsDistributedHeroExperienceFormula = m.GrantsDistributedHeroExperienceFormula,
+        GrantsFreeHenchmanArchetypeName = m.GrantsFreeHenchmanArchetypeName,
+        GrantsOptionalEquippedHenchman = m.GrantsOptionalEquippedHenchman
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -472,6 +480,24 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
         ImagePath = m.ImagePath
+    };
+
+    public static Race ToModel(this RaceEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source
+    };
+
+    public static RaceEntity ToEntity(this Race m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source
     };
 
     public static EquipmentItemEntity ToEntity(this EquipmentItem m) => new()

@@ -44,6 +44,33 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(archetype.Id, warband.WarbandArchetypeId);
     }
 
+    /// <summary>Race (2026-08-20): every warband archetype resolves to exactly one Race, seeded from
+    /// each band's own JSON "race" field (SeedWarbandFromJsonAsync) - Reiklander Mercenaries are Human,
+    /// same as most mercenary/Order bands.</summary>
+    [Fact]
+    public async Task WarbandArchetype_ResolvesRace()
+    {
+        var archetype = await GetReiklandersAsync();
+
+        Assert.NotEqual(0, archetype.RaceId);
+        Assert.NotNull(archetype.Race);
+        Assert.Equal("Human", archetype.Race!.Name);
+    }
+
+    /// <summary>Carnival of Chaos and Cult of the Possessed are human in body but corrupted by Chaos -
+    /// a distinct "Chaos Human" race, not plain "Human" (correction 2026-08-21: both were initially
+    /// seeded as plain Human, same mistake a careless read of the roster would make).</summary>
+    [Fact]
+    public async Task WarbandArchetype_ChaosWarbands_ResolveChaosHumanRace()
+    {
+        var archetypes = await _library.GetWarbandArchetypesAsync("en");
+        var kermesse = archetypes.Single(a => a.Name == "Carnival of Chaos");
+        var possessed = archetypes.Single(a => a.Name == "Cult of the Possessed");
+
+        Assert.Equal("Chaos Human", kermesse.Race!.Name);
+        Assert.Equal("Chaos Human", possessed.Race!.Name);
+    }
+
     [Fact]
     public async Task RecruitWarrior_PreFillsStatsFromArchetype_AndPersists()
     {

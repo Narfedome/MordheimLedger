@@ -48,4 +48,16 @@ public class WarbandArchetype
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>This band's race/species (Humain, Skaven, Orque, Nain...) - see Race, introduced
+    /// 2026-08-20 for the Prisonniers "escort as a Henchman if you can equip him" branch, whose book
+    /// text restricts joining to "one of your human Henchman groups" (a Skaven/Orc/Dwarf/... band
+    /// simply has none). 0 = not set yet (pre-migration data - see AppDatabase.
+    /// BackfillWarbandArchetypeRaceAsync, which fixes every existing row on next launch).</summary>
+    public int RaceId { get; set; }
+
+    /// <summary>Resolved from RaceId - null only when the caller didn't ask for it (see
+    /// LibraryService.GetWarbandArchetypesAsync's optional racesById) or, transiently, for a row not
+    /// yet backfilled.</summary>
+    public Race? Race { get; set; }
 }

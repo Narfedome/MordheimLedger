@@ -54,6 +54,10 @@
                     <Label Text="{loc:Loc WarbandGradePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Label Text="{Binding GradeLabel}" TextColor="{DynamicResource AppText}"/>
                 </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc RaceNamePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Race.Name}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
                 <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>

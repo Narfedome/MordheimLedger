@@ -26,6 +26,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     private const int StepCount = 5;
 
     private readonly Dictionary<string, WarbandGrade> _gradeByLabel = new();
+    private readonly Dictionary<string, Race> _raceByLabel = new();
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly ILibraryService _libraryService;
@@ -67,6 +68,15 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     [ObservableProperty]
     private string selectedGradeLabel = string.Empty;
+
+    /// <summary>Race/espèce de la bande (Humain, Skaven, Orque...) - voir Models.Library.Race, un
+    /// catalogue éditable (WarbandArchetypeViewModel.ManageRaces) plutôt qu'un enum, à la différence de
+    /// Grade ci-dessus. Un Picker suffit (contrairement à MagicSchools, multi-sélection) : une bande n'a
+    /// jamais qu'UNE race.</summary>
+    public ObservableCollection<string> RaceOptions { get; } = new();
+
+    [ObservableProperty]
+    private string selectedRaceLabel = string.Empty;
 
     /// <summary>Édité en mémoire ici, recopié sur Item.SpecialRules à la sauvegarde (voir Save) - même
     /// principe que WarriorArchetypeEditDialogViewModel.SpecialRules.</summary>
@@ -110,7 +120,8 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     public string StepLabel => string.Format(Loc["LibStepLabel"], SelectedTab + 1, StepCount);
 
     public WarbandArchetypeEditDialogViewModel(WarbandArchetype item, string title, ISpecialRulePickerService specialRulePicker,
-        IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker)
+        IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IDetailDialogService detailDialogs,
+        IEquipmentPickerService equipmentPicker, IReadOnlyList<Race> allRaces)
     {
         this.item = item;
         this.title = title;
@@ -130,6 +141,19 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             GradeOptions.Add(label);
         }
         selectedGradeLabel = Loc[$"WarbandGrade{item.Grade}"];
+
+        foreach (var race in allRaces)
+        {
+            _raceByLabel[race.Name] = race;
+            RaceOptions.Add(race.Name);
+        }
+        selectedRaceLabel = allRaces.FirstOrDefault(r => r.Id == item.RaceId)?.Name ?? string.Empty;
+    }
+
+    partial void OnSelectedRaceLabelChanged(string value)
+    {
+        if (_raceByLabel.TryGetValue(value, out var race))
+            Item.RaceId = race.Id;
     }
 
     partial void OnSelectedGradeLabelChanged(string value)

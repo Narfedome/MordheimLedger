@@ -37,6 +37,7 @@ public class AppDatabase
         // Runs on every launch, not just first: fixes existing data rather than seeding new data (see
         // the method's own doc comment).
         await BackfillNeverGainsExperienceAsync();
+        await BackfillWarbandArchetypeRaceAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
         // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
@@ -93,6 +94,62 @@ public class AppDatabase
         {
             warrior.GainsExperience = false;
             await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>English WarbandArchetype.Name -> English Race.Name, for the fixed 15 bands seeded
+    /// before WarbandArchetype.RaceId existed (2026-08-20) - hardcoded here rather than re-reading each
+    /// band's own JSON file's new "race" field, simpler for a one-time fix that only ever targets these
+    /// 15 already-known bands (a future 16th band goes through SeedWarbandFromJsonAsync normally, which
+    /// already resolves RaceId from its own JSON at insert time).</summary>
+    private static readonly Dictionary<string, string> _raceNameByWarbandEnglishName = new()
+    {
+        ["Averlander Mercenaries"] = "Human",
+        ["Beastmen Raiders"] = "Beastman",
+        ["Carnival of Chaos"] = "Chaos Human",
+        ["Cult of the Possessed"] = "Chaos Human",
+        ["Dwarf Treasure Hunters"] = "Dwarf",
+        ["Kislevites"] = "Human",
+        ["Marienburg Mercenaries"] = "Human",
+        ["Middenheim Mercenaries"] = "Human",
+        ["Orc Mob"] = "Orc",
+        ["Ostlander Mercenaries"] = "Human",
+        ["Reiklander Mercenaries"] = "Human",
+        ["The Sisters of Sigmar"] = "Human",
+        ["Skaven of Clan Eshin"] = "Skaven",
+        ["Undead"] = "Undead",
+        ["Witch Hunters"] = "Human"
+    };
+
+    /// <summary>One-time-per-row data fix for warbands seeded before WarbandArchetype.RaceId existed
+    /// (2026-08-20) - same idiom as BackfillNeverGainsExperienceAsync: runs unconditionally on every
+    /// launch (not gated by the "catalog empty" check, which only fires on a brand new install), cheap
+    /// no-op once every row has a real RaceId. A fresh install never hits this: SeedWarbandFromJsonAsync
+    /// already sets RaceId directly from each band's own JSON "race" field. Ensures Races.json is seeded
+    /// first (FindOrCreateRaceAsync is DB-aware, safe to call even though SeedOfficialContentAsync -
+    /// and therefore _raceIdsByEnglishName - never ran this launch), then maps each stale
+    /// WarbandArchetype to its race by English Name (_raceNameByWarbandEnglishName).</summary>
+    private async Task BackfillWarbandArchetypeRaceAsync()
+    {
+        var staleArchetypes = (await _db.Table<WarbandArchetypeEntity>().ToListAsync())
+            .Where(a => a.RaceId == 0)
+            .ToList();
+        if (staleArchetypes.Count == 0) return;
+
+        foreach (var seed in await LoadSeedArrayAsync<RaceSeedData>("Races.json"))
+            await FindOrCreateRaceAsync(seed);
+
+        var englishNamesByKey = (await _db.Table<TranslationEntity>().Where(t => t.LanguageCode == "en").ToListAsync())
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        foreach (var archetype in staleArchetypes)
+        {
+            if (!englishNamesByKey.TryGetValue(archetype.NameKey, out var englishName)) continue;
+            if (!_raceNameByWarbandEnglishName.TryGetValue(englishName, out var raceName)) continue;
+            if (!_raceIdsByEnglishName.TryGetValue(raceName, out var raceId)) continue;
+
+            archetype.RaceId = raceId;
+            await _db.UpdateAsync(archetype);
         }
     }
 
@@ -162,6 +219,7 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorMutationEntity>();
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
+        await _db.CreateTableAsync<RaceEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMutationEntity>();
         await _db.CreateTableAsync<EquipmentListEntity>();
         await _db.CreateTableAsync<EquipmentListItemEntity>();
@@ -252,6 +310,7 @@ public class AppDatabase
         await SeedSkillsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
+        await SeedRacesAsync();
         // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
         // InitializeAsync plutôt que gardée derrière le garde-fou "catalogue vide" de cette méthode.
 
@@ -316,7 +375,12 @@ public class AppDatabase
             StartingTreasury = data.StartingTreasury,
             MaxWarriors = data.MaxWarriors,
             MinWarriors = data.MinWarriors,
-            ImagePath = data.ImagePath ?? string.Empty
+            ImagePath = data.ImagePath ?? string.Empty,
+            // Indexeur direct (pas GetValueOrDefault) : une bande sans "race" reconnue dans Races.json
+            // (typo, ou Races.json pas encore seedé avant celle-ci) doit planter au premier lancement
+            // plutôt que silencieusement RaceId=0 - même précédent fail-fast que
+            // _warbandArchetypeIdsByFileStem plus bas.
+            RaceId = _raceIdsByEnglishName[data.Race]
         };
         warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
@@ -673,7 +737,9 @@ public class AppDatabase
                         ? string.Join(",", names) : null,
                     GrantsNextExplorationBonusDie = outcome.GrantsNextExplorationBonusDie,
                     GrantsLeaderExperience = outcome.GrantsLeaderExperience,
-                    GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName
+                    GrantsDistributedHeroExperienceFormula = outcome.GrantsDistributedHeroExperienceFormula,
+                    GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName,
+                    GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman
                 });
             }
         }
@@ -779,6 +845,48 @@ public class AppDatabase
         await _db.InsertAsync(entity);
 
         _magicSchoolIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
+    }
+
+    private async Task SeedRacesAsync()
+    {
+        foreach (var seed in await LoadSeedArrayAsync<RaceSeedData>("Races.json"))
+            await FindOrCreateRaceAsync(seed);
+    }
+
+    /// <summary>English Name -> already-created RaceEntity id, same rationale as
+    /// _magicSchoolIdsByEnglishName - a race like "Human" is shared across most of the 15 warband files.
+    /// Unlike the other FindOrCreateXAsync helpers, also checks the DATABASE (not just this in-memory
+    /// dict) before creating: BackfillWarbandArchetypeRaceAsync calls this too, on a launch where
+    /// SeedOfficialContentAsync (and therefore this dict) never ran because the catalog wasn't empty -
+    /// without the DB check, an already-seeded machine would get a duplicate Race row every launch.</summary>
+    private readonly Dictionary<string, int> _raceIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateRaceAsync(RaceSeedData seed)
+    {
+        if (_raceIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var existingKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en" && t.Value == seed.Name.En)
+            .Select(t => t.Key).ToHashSet();
+        if (existingKeys.Count > 0)
+        {
+            var existingRace = (await _db.Table<RaceEntity>().ToListAsync()).FirstOrDefault(r => existingKeys.Contains(r.NameKey));
+            if (existingRace is not null)
+            {
+                _raceIdsByEnglishName[seed.Name.En] = existingRace.Id;
+                return existingRace.Id;
+            }
+        }
+
+        var race = new Race { Source = ContentSource.Official };
+        race.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        race.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = race.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _raceIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 

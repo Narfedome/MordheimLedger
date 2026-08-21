@@ -44,6 +44,16 @@ public partial class WarriorOutcomeRow : ObservableObject
 
     public int ExperienceGained => int.TryParse(ExperienceGainedText, out var xp) ? xp : 0;
 
+    /// <summary>Points d'Expérience alloués à ce Héros via le steppeur de répartition (Prisonniers,
+    /// Possédés - voir ExplorationOutcome.GrantsDistributedHeroExperienceFormula) - totalement distinct
+    /// d'ExperienceGained (l'étape Expérience, plus tôt dans le wizard, pour l'XP de bataille normale) :
+    /// deux sources d'XP différentes, jamais mélangées pour éviter qu'un retour en arrière sur l'étape
+    /// Expérience affiche une valeur modifiée par une étape plus tardive. Remis à 0 à chaque nouveau
+    /// résultat d'Exploration déclenché (EndOfGameDialogViewModel.ResolveExplorationResult), pas
+    /// seulement quand ce guerrier change.</summary>
+    [ObservableProperty]
+    private int distributedExplorationExperience;
+
     public bool IsHero => Warrior.IsHero;
     public int HeadCount => Warrior.HeadCount;
 

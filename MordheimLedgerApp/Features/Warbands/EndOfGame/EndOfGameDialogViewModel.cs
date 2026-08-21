@@ -59,6 +59,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// once this Fin de Partie is actually saved (WarbandDetailViewModel.EndOfGame).</summary>
     private readonly bool _pendingExplorationBonusDie;
 
+    /// <summary>Snapshot of Warband.Treasury at dialog-open time (see EquippedHenchmanTreasuryAfter,
+    /// Prisonniers' "autres bandes" branch) - the wizard never writes to the real Warband mid-dialog
+    /// (only WarbandDetailViewModel.EndOfGame does, at Save), so this stays a plain frozen number for
+    /// the affordability preview rather than a live reference.</summary>
+    private readonly int _currentTreasury;
+
     private readonly List<ExplorationResult> _explorationResults;
 
     /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
@@ -198,13 +204,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
         _warbandArchetypeName = warbandArchetypeName;
         _pendingExplorationBonusDie = pendingExplorationBonusDie;
+        _currentTreasury = currentTreasury;
         _explorationResults = explorationResults;
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
         _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
@@ -232,6 +239,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                     OnPropertyChanged(nameof(StepLabel));
                     OnPropertyChanged(nameof(IsLastStep));
                 }
+
+                // Répartition d'Expérience entre Héros (Prisonniers, Possédés) : DistributedExperienceRemaining
+                // s'appuie sur la somme des DistributedExplorationExperience de chaque Héros, un objet
+                // différent du ViewModel lui-même - remonte le changement manuellement, même principe que
+                // ExplorationDieEntry ailleurs dans ce fichier.
+                if (e.PropertyName == nameof(WarriorOutcomeRow.DistributedExplorationExperience))
+                    OnPropertyChanged(nameof(DistributedExperienceRemaining));
             };
         }
     }

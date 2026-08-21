@@ -75,6 +75,14 @@
                         <Picker Title="{loc:Loc WarbandGradePh}"
                         ItemsSource="{Binding GradeOptions}"
                         SelectedItem="{Binding SelectedGradeLabel}"/>
+                        <!-- Race/espèce (Humain, Skaven, Orque...) - catalogue éditable (voir
+                             WarbandArchetypeViewModel.ManageRaces, bouton "gérer" en en-tête de l'onglet
+                             Bandes), pas un enum comme Grade ci-dessus. Un simple Picker suffit : une
+                             bande n'a jamais qu'UNE race, contrairement aux Écoles de Magie (multi-
+                             sélection, voir plus bas). -->
+                        <Picker Title="{loc:Loc RaceNamePh}"
+                        ItemsSource="{Binding RaceOptions}"
+                        SelectedItem="{Binding SelectedRaceLabel}"/>
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
                                 <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>

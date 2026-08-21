@@ -24,7 +24,8 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         var specialRules = await LoadWarbandSpecialRulesAsync(languageCode);
         var magicSchools = await LoadWarbandMagicSchoolsAsync(languageCode);
-        return rows.Select(r => r.ToModel(translations, specialRules, magicSchools)).ToList();
+        var racesById = (await GetRacesAsync(languageCode)).ToDictionary(r => r.Id);
+        return rows.Select(r => r.ToModel(translations, specialRules, magicSchools, racesById)).ToList();
     }
 
     public async Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id, string languageCode)
@@ -35,7 +36,16 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync([row.NameKey, row.DescriptionKey], languageCode);
         var specialRules = await LoadWarbandSpecialRulesAsync(languageCode);
         var magicSchools = await LoadWarbandMagicSchoolsAsync(languageCode);
-        return row.ToModel(translations, specialRules, magicSchools);
+        var racesById = (await GetRacesAsync(languageCode)).ToDictionary(r => r.Id);
+        return row.ToModel(translations, specialRules, magicSchools, racesById);
+    }
+
+    public async Task<List<Race>> GetRacesAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<RaceEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        return rows.Select(r => r.ToModel(translations)).OrderBy(r => r.Name).ToList();
     }
 
     public async Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId, string languageCode)
@@ -581,6 +591,24 @@ public class LibraryService : ILibraryService
         await _db.Connection.UpdateAsync(school.ToEntity());
     }
 
+    public async Task SaveRaceAsync(Race race, string languageCode)
+    {
+        await _db.Initialization;
+        await ApplyTranslationsAsync(race, languageCode);
+
+        if (race.Id == 0)
+        {
+            var entity = race.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            race.Id = entity.Id;
+            return;
+        }
+
+        var existing = await _db.Connection.FindAsync<RaceEntity>(race.Id);
+        if (existing?.Source == ContentSource.Official) race.Source = ContentSource.Modified;
+        await _db.Connection.UpdateAsync(race.ToEntity());
+    }
+
     /// <summary>Writes Name (and Description, when non-blank) as the translation value for
     /// languageCode, allocating a key on first save - shared by all 5 Save*Async methods above since
     /// they otherwise only differ in entity type.</summary>
@@ -659,6 +687,14 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
+    private async Task ApplyTranslationsAsync(Race m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
     public async Task DeleteWarbandArchetypeAsync(int warbandArchetypeId)
     {
         await _db.Initialization;
@@ -729,5 +765,11 @@ public class LibraryService : ILibraryService
         await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeMagicSchoolEntity WHERE MagicSchoolId = ?", magicSchoolId);
 
         await _db.Connection.DeleteAsync<MagicSchoolEntity>(magicSchoolId);
+    }
+
+    public async Task DeleteRaceAsync(int raceId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<RaceEntity>(raceId);
     }
 }

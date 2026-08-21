@@ -825,6 +825,15 @@
   <data name="EndOfGamePassByOption" xml:space="preserve">
     <value>Passer son chemin</value>
   </data>
+  <data name="EndOfGameDoNotRecruitOption" xml:space="preserve">
+    <value>Ne pas recruter</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanGroupPh" xml:space="preserve">
+    <value>Groupe à renforcer</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanTreasuryAfterLabel" xml:space="preserve">
+    <value>Trésorerie après recrutement</value>
+  </data>
   <data name="EndOfGameStatFieldToughness" xml:space="preserve">
     <value>Endurance</value>
   </data>
@@ -845,6 +854,9 @@
   </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Jet requis avant de continuer.</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
+    <value>Trésorerie insuffisante pour équiper ce prisonnier - choisis un autre groupe ou "Ne pas recruter".</value>
   </data>
   <data name="HistoryAddNote" xml:space="preserve">
     <value>Ajouter une note</value>
@@ -877,7 +889,13 @@
     <value>{0} gagne {1} Expérience.</value>
   </data>
   <data name="HistoryFreeHenchmanSentence" xml:space="preserve">
-    <value>{0} rejoint la bande gratuitement.</value>
+    <value>La bande accueille {0}x {1} gratuitement.</value>
+  </data>
+  <data name="HistoryDistributedExperienceSentence" xml:space="preserve">
+    <value>Expérience répartie entre les Héros : {0}.</value>
+  </data>
+  <data name="HistoryEquippedHenchmanSentence" xml:space="preserve">
+    <value>Un prisonnier rejoint le groupe {0} comme nouvel Homme de main (équipement : {1} CO).</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} a gagné {1} PX.</value>
@@ -914,6 +932,9 @@
   </data>
   <data name="EndOfGameHenchmanRollPh" xml:space="preserve">
     <value>D6</value>
+  </data>
+  <data name="EndOfGameDistributedExperienceRemainingLabel" xml:space="preserve">
+    <value>Restant :</value>
   </data>
   <data name="HenchmanInjuryDead" xml:space="preserve">
     <value>Mort. Le guerrier est perdu.</value>
@@ -1163,6 +1184,18 @@
   </data>
   <data name="LibManageMagicSchools" xml:space="preserve">
     <value>Gérer les écoles de magie</value>
+  </data>
+  <data name="LibManageRaces" xml:space="preserve">
+    <value>Gérer les races</value>
+  </data>
+  <data name="RaceCreateTitle" xml:space="preserve">
+    <value>Nouvelle race</value>
+  </data>
+  <data name="RaceEditTitle" xml:space="preserve">
+    <value>Modifier la race</value>
+  </data>
+  <data name="RaceNamePh" xml:space="preserve">
+    <value>Race</value>
   </data>
   <data name="WarbandGradePh" xml:space="preserve">
     <value>Grade</value>

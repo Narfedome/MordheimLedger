@@ -260,6 +260,36 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var stragglerUndead = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
         Assert.Equal("Zombie", stragglerUndead.GrantsFreeHenchmanArchetypeName);
 
+        // Prisoners (3 3): same "conditioned on warband identity" shape as Straggler - Skaven gold,
+        // Undead's free Henchman grant (this time D3 Zombies, a real dice formula rather than
+        // Straggler's fixed 1 - see ItemQuantityFormula reused for a Henchman grant's quantity),
+        // (2026-08-20) Possessed's D3 Experience distributed among Heroes, and (2026-08-21) the "escort
+        // for gold, optionally recruit if you can equip him" catch-all branch's conditional recruit
+        // (GrantsOptionalEquippedHenchman - the player picks which of the warband's OWN existing
+        // Henchman groups the prisoner joins, cost checked against Warband.Treasury, not a fixed
+        // archetype/formula like the other three branches) are all mechanized.
+        var prisoners = results.Single(r => r.DiceCount == 3 && r.Value == 3);
+        Assert.True(prisoners.RollsIndependently);
+        Assert.Equal(4, prisoners.Outcomes.Count);
+        var prisonersSkaven = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"]));
+        Assert.Equal(ExplorationOutcomeKind.Gold, prisonersSkaven.Kind);
+        Assert.Equal("3D6", prisonersSkaven.GoldFormula);
+        Assert.False(prisonersSkaven.GrantsOptionalEquippedHenchman);
+        var prisonersUndead = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
+        Assert.Equal("Zombie", prisonersUndead.GrantsFreeHenchmanArchetypeName);
+        Assert.Equal("D3", prisonersUndead.ItemQuantityFormula);
+        var prisonersPossessed = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Cult of the Possessed"]));
+        Assert.Null(prisonersPossessed.GrantsLeaderExperience);
+        Assert.Equal("D3", prisonersPossessed.GrantsDistributedHeroExperienceFormula);
+        var prisonersCatchAll = Assert.Single(prisoners.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        Assert.Equal(ExplorationOutcomeKind.Gold, prisonersCatchAll.Kind);
+        Assert.Equal("2D6", prisonersCatchAll.GoldFormula);
+        Assert.Null(prisonersCatchAll.GrantsFreeHenchmanArchetypeName);
+        Assert.Null(prisonersCatchAll.GrantsDistributedHeroExperienceFormula);
+        Assert.True(prisonersCatchAll.GrantsOptionalEquippedHenchman);
+        Assert.Equal("A muffled sound comes from one of the buildings - a group of finely dressed people locked in a cellar.", prisoners.ShortDescription);
+        Assert.Equal("Undead warbands can kill the prisoners and gain D3 Zombies at no cost.", prisonersUndead.BranchText);
+
         // ShortDescription/BranchText (2026-08-20): the wizard shows just the shared intro sentence plus
         // the resolved branch's own sentence for a warband-conditioned result, instead of the full
         // multi-branch Description - both must actually be localized (unlike Note, which never was).

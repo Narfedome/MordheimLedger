@@ -63,7 +63,7 @@
         "branchText": { "en": "Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc.", "fr": "Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO." } },
       { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsLeaderExperience": 1,
         "branchText": { "en": "Possessed warbands can sacrifice the unfortunate individual for the glory of the Chaos gods - the leader gains +1 Experience.", "fr": "Une bande des Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience." } },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie",
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie", "itemQuantityFormula": "1",
         "branchText": { "en": "Undead warbands can kill the man and gain a Zombie for no cost.", "fr": "Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement." } },
       { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Autres bandes : un dé supplémentaire au prochain jet d'Exploration", "grantsNextExplorationBonusDie": true,
         "branchText": { "en": "Any other warband can interrogate the man and gain insight into the city: next time you roll on the Exploration chart, roll one dice more than usual and discard any one dice.", "fr": "La bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix." } }
@@ -139,12 +139,20 @@
       "en": "A muffled sound comes from one of the buildings - a group of finely dressed people locked in a cellar. Possessed warbands can sacrifice the victims and gain D3 Experience distributed amongst their Heroes. Undead warbands can kill the prisoners and gain D3 Zombies at no cost. Skaven can sell the prisoners into slavery for 3D6 gc. Other warbands can escort the prisoners out of the city for 2D6 gc, and one prisoner may join the warband as a new Henchman if you can equip him.",
       "fr": "Un bruit étouffé provient de l'un des bâtiments - un groupe de gens bien vêtus enfermés dans une cave. Une bande des Possédés peut sacrifier les victimes et gagner D3 Expérience répartis entre ses Héros. Une bande de Morts-Vivants peut tuer les prisonniers et gagner D3 Zombies gratuitement. Les Skavens peuvent les vendre en esclavage pour 3D6 CO. Les autres bandes peuvent escorter les prisonniers hors de la ville pour 2D6 CO, et l'un d'eux peut rejoindre la bande comme nouvel Homme de main s'il peut être équipé."
     },
+    "shortDescription": {
+      "en": "A muffled sound comes from one of the buildings - a group of finely dressed people locked in a cellar.",
+      "fr": "Un bruit étouffé provient de l'un des bâtiments - un groupe de gens bien vêtus enfermés dans une cave."
+    },
     "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Skavens : vente en esclavage" },
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Autres bandes : escorte hors de la ville (un prisonnier peut rejoindre la bande comme Homme de main)" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, D3 Expérience répartis entre les Héros" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent D3 Zombies gratuits" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Skavens : vente en esclavage", "restrictedToWarbandArchetypeNames": ["Skaven of Clan Eshin"],
+        "branchText": { "en": "Skaven can sell the prisoners into slavery for 3D6 gc.", "fr": "Les Skavens peuvent les vendre en esclavage pour 3D6 CO." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Autres bandes : escorte hors de la ville (un prisonnier peut rejoindre la bande comme Homme de main)", "grantsOptionalEquippedHenchman": true,
+        "branchText": { "en": "Other warbands can escort the prisoners out of the city for 2D6 gc, and one prisoner may join the warband as a new Henchman if you can equip him.", "fr": "Les autres bandes peuvent escorter les prisonniers hors de la ville pour 2D6 CO, et l'un d'eux peut rejoindre la bande comme nouvel Homme de main s'il peut être équipé." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, D3 Expérience répartis entre les Héros", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsDistributedHeroExperienceFormula": "D3",
+        "branchText": { "en": "Possessed warbands can sacrifice the victims and gain D3 Experience distributed amongst their Heroes.", "fr": "Une bande des Possédés peut sacrifier les victimes et gagner D3 Expérience répartis entre ses Héros." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent D3 Zombies gratuits", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie", "itemQuantityFormula": "D3",
+        "branchText": { "en": "Undead warbands can kill the prisoners and gain D3 Zombies at no cost.", "fr": "Une bande de Morts-Vivants peut tuer les prisonniers et gagner D3 Zombies gratuitement." } }
     ]
   },
   {

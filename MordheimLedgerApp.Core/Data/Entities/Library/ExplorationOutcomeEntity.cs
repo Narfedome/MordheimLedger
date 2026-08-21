@@ -37,5 +37,7 @@ public class ExplorationOutcomeEntity
 
     public bool GrantsNextExplorationBonusDie { get; set; }
     public int? GrantsLeaderExperience { get; set; }
+    public string? GrantsDistributedHeroExperienceFormula { get; set; }
     public string? GrantsFreeHenchmanArchetypeName { get; set; }
+    public bool GrantsOptionalEquippedHenchman { get; set; }
 }

@@ -122,6 +122,15 @@ public class ExplorationOutcome
     /// sick/out of action), same "unavailable, not blocking" idiom as BonusStatTestLeader.</summary>
     public int? GrantsLeaderExperience { get; set; }
 
+    /// <summary>Dice formula for Experience distributed among ALL Heroes, as the player chooses to
+    /// split it (e.g. Prisoners' Possessed branch: "D3 Experience distributed amongst their Heroes") -
+    /// contrast GrantsLeaderExperience, a flat amount to the single leader only with no distribution
+    /// choice. The wizard shows a roll field for the total (still the player's own physical roll, never
+    /// auto-rolled) plus a +/- stepper per Hero (see EndOfGameDialogViewModel.
+    /// DistributedExperienceRemaining, which must reach exactly 0 before the player can continue - a
+    /// mockup confirmed this shape with the user 2026-08-20). Null for every other branch.</summary>
+    public string? GrantsDistributedHeroExperienceFormula { get; set; }
+
     /// <summary>English WarriorArchetype.Name of a Henchman that joins the warband for free - so far
     /// only Straggler's Undead branch ("gain a Zombie at no cost"). Resolved against the CURRENT
     /// warband's own roster (never another warband's), same plain-string-reference idiom as
@@ -164,4 +173,17 @@ public class ExplorationOutcome
     /// player makes a SECOND, dedicated D6 roll on that table (see Core.Rules.MagicalArtefactTable).
     /// EquipmentItemName stays null on a branch like this. False/default for every other branch.</summary>
     public bool TriggersArtefactRoll { get; set; }
+
+    /// <summary>True only for Prisoners' "other warbands" catch-all branch ("one prisoner may join the
+    /// warband as a new Henchman if you can equip him") - contrast GrantsFreeHenchmanArchetypeName (a
+    /// FIXED archetype from the book, e.g. Zombie): here the player picks which of the warband's OWN
+    /// existing Henchman groups the freed prisoner joins (RAW is ambiguous for a warband with no human
+    /// Henchman group - Elves, Dwarfs... - resolved by simply listing whichever groups THIS warband
+    /// actually has, no race gate). The recruit itself is free (no archetype Cost deducted, unlike a
+    /// normal recruit) - only the cost of replicating the chosen group's CURRENT equipment loadout
+    /// (Warrior.Equipment, shared per group) must fit the warband's treasury, confirmed via mockup
+    /// (2026-08-21). Coexists with Kind.Gold on this same branch (the 2D6 escort fee) - not
+    /// Kind.None-exclusive like GrantsDistributedHeroExperienceFormula/GrantsFreeHenchmanArchetypeName.
+    /// False/default for every other branch.</summary>
+    public bool GrantsOptionalEquippedHenchman { get; set; }
 }

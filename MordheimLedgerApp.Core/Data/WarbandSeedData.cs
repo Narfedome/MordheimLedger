@@ -25,6 +25,12 @@ public class WarbandSeedData
     /// MordheimLedgerApp.Core.Models.Library.WarbandGrade member names exactly (e.g. "Grade1a").</summary>
     public string Grade { get; set; } = nameof(Models.Library.WarbandGrade.Core);
 
+    /// <summary>English Name reference into Data/SeedData/Races.json (e.g. "Human", "Skaven") - resolved
+    /// once at seed time (see AppDatabase.FindOrCreateRaceAsync/SeedRacesAsync, seeded before any
+    /// warband file, same idiom as MagicSchools above). Every band declares exactly one - see
+    /// Models.Library.WarbandArchetype.RaceId.</summary>
+    public string Race { get; set; } = string.Empty;
+
     /// <summary>Rules SPECIFIC to this warband (e.g. "Ancient Enemies" for Kislevites) - genuinely
     /// common rules (Leader, Wizard, Causes Fear, ...) now live once in Data/SeedData/SpecialRules.json,
     /// seeded before any warband file, so they're never redeclared here anymore. Still find-or-created by
@@ -247,6 +253,15 @@ public class MagicSchoolSeedData
     public LocalizedText? Description { get; set; }
 }
 
+/// <summary>One race/species entry (Data/SeedData/Races.json, common - not declared per-band) - see
+/// Models.Library.Race. Find-or-created by English Name at seed time, same shape as
+/// MagicSchoolSeedData.</summary>
+public class RaceSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+}
+
 /// <summary>One named, reusable SpecialRule entry (see WarbandSeedData.SpecialRules/WarriorSeedData.
 /// SpecialRules) - find-or-created by English Name at seed time so the same rule attached across
 /// multiple warbands/warrior types resolves to a single shared catalog row instead of duplicate text.</summary>
@@ -426,6 +441,14 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.GrantsFreeHenchmanArchetypeName. Null/absent for
     /// almost every outcome - so far only Straggler's (Traînard) Undead branch ("Zombie").</summary>
     public string? GrantsFreeHenchmanArchetypeName { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsDistributedHeroExperienceFormula. Null for
+    /// almost every outcome - so far only Prisoners' Possessed branch ("D3").</summary>
+    public string? GrantsDistributedHeroExperienceFormula { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsOptionalEquippedHenchman. False/absent for
+    /// almost every outcome - so far only Prisoners' "other warbands" catch-all branch.</summary>
+    public bool GrantsOptionalEquippedHenchman { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

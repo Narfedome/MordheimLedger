@@ -155,6 +155,9 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(ExplorationResultDescriptionText))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationNoteInBranchSection))]
     [NotifyPropertyChangedFor(nameof(ResolvedFreeHenchman))]
+    [NotifyPropertyChangedFor(nameof(HasDistributedHeroExperienceGrant))]
+    [NotifyPropertyChangedFor(nameof(DistributedExperienceRemaining))]
+    [NotifyPropertyChangedFor(nameof(HasOptionalEquippedHenchmanGrant))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemFoundValueRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
@@ -278,6 +281,116 @@ public partial class EndOfGameDialogViewModel
 
     [RelayCommand]
     private Task ShowFreeHenchmanDetail(WarriorArchetype archetype) => _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(archetype, Array.Empty<NamedRef>());
+
+    // --- Recrutement conditionné à l'équipement (Prisonniers, "autres bandes") -----------------
+    //
+    // Contrairement à GrantsFreeHenchmanArchetypeName (archétype FIXE du livre, ex. Zombie) et
+    // GrantsDistributedHeroExperienceFormula (répartition libre entre Héros), cette branche laisse le
+    // joueur choisir un groupe d'Hommes de main DÉJÀ existant dans la bande à renforcer - "en utilisant
+    // les mêmes caractéristiques que le groupe existant" (règle du livre, RAW ambigu pour une bande sans
+    // groupe humain - Nains/Elfes/Orcs... - résolu simplement ici en listant les groupes RÉELLEMENT
+    // présents dans CETTE bande, peu importe leur race). Le recrutement lui-même est GRATUIT (aucun Cost
+    // d'archétype déduit, contrairement à Core.Rules.RecruitmentRules.CanRecruit) - seul le coût de
+    // l'équipement à répliquer (le loadout ACTUEL du groupe, partagé pour tout le groupe - voir
+    // Warrior.Equipment) doit être couvert par la trésorerie. Confirmé via mockup (2026-08-21) : "Ne pas
+    // recruter" est l'option par défaut (première de la liste, aucun tableau de trésorerie affiché tant
+    // qu'elle reste choisie, tableau réduit à une seule ligne sinon - le coût lui-même reste visible dans
+    // le libellé du Picker) ; pas de bouton dédié Recruter/Refuser, seul le "Suivant" du wizard valide
+    // (bloqué si le solde choisi passerait négatif, même idiome que les autres jets de cette étape).
+
+    public bool HasOptionalEquippedHenchmanGrant => ResolvedExplorationOutcome?.GrantsOptionalEquippedHenchman == true;
+
+    public sealed record EquippedHenchmanGroupOption(string DisplayName, WarriorOutcomeRow? Group, int EquipmentCost);
+
+    /// <summary>"Ne pas recruter" toujours en premier/sélectionné par défaut (retour utilisateur
+    /// 2026-08-21), suivi d'un groupe d'Hommes de main par groupe RÉEL de la bande (jamais un groupe mort
+    /// cette partie - voir IsDead) - le coût affiché est celui de son équipement ACTUEL (Warrior.
+    /// Equipment), répliqué tel quel pour le nouveau membre.</summary>
+    public List<EquippedHenchmanGroupOption> EquippedHenchmanGroupOptions =>
+        new List<EquippedHenchmanGroupOption> { new(Loc["EndOfGameDoNotRecruitOption"], null, 0) }
+            .Concat(WarriorRows.Where(r => !r.IsHero && !r.IsDead).Select(r =>
+                new EquippedHenchmanGroupOption($"{r.ArchetypeName} (x{r.HeadCount}) — {EquippedHenchmanGroupCost(r)} CO", r, EquippedHenchmanGroupCost(r))))
+            .ToList();
+
+    private static int EquippedHenchmanGroupCost(WarriorOutcomeRow group) =>
+        group.Warrior.Equipment.Sum(e => EquipmentPricing.CalculateCost(e.Item.Cost, e.MaterialRule?.CostMultiplier, isFree: false));
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowEquippedHenchmanTreasury))]
+    [NotifyPropertyChangedFor(nameof(EquippedHenchmanTreasuryAfter))]
+    [NotifyPropertyChangedFor(nameof(CanAffordEquippedHenchman))]
+    private EquippedHenchmanGroupOption? selectedEquippedHenchmanGroupOption;
+
+    partial void OnSelectedEquippedHenchmanGroupOptionChanged(EquippedHenchmanGroupOption? value)
+    {
+        if (value?.Group is not null) EquippedHenchmanError = null;
+    }
+
+    [ObservableProperty]
+    private string? equippedHenchmanError;
+
+    /// <summary>Masqué tant que "Ne pas recruter" reste choisi (mock confirmé 2026-08-21) - inutile
+    /// d'afficher un calcul de trésorerie pour une option qui n'en change rien.</summary>
+    public bool ShowEquippedHenchmanTreasury => SelectedEquippedHenchmanGroupOption?.Group is not null;
+
+    /// <summary>Trésorerie actuelle (au moment d'ouvrir ce wizard, voir _currentTreasury) + l'or de CETTE
+    /// branche (le même 2D6 que ExplorationGoldAmount, l'escorte hors de la ville) - le coût de
+    /// l'équipement du groupe choisi. Peut afficher un total négatif (voir CanAffordEquippedHenchman) :
+    /// c'est justement le signal qui bloque la progression.</summary>
+    public int EquippedHenchmanTreasuryAfter => _currentTreasury
+        + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
+        - (SelectedEquippedHenchmanGroupOption?.EquipmentCost ?? 0);
+
+    public bool CanAffordEquippedHenchman => SelectedEquippedHenchmanGroupOption?.Group is null
+        || RecruitmentRules.CanAffordEquippedHenchman(
+            _currentTreasury + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0),
+            SelectedEquippedHenchmanGroupOption.EquipmentCost);
+
+    // --- Expérience répartie entre les Héros (Prisonniers, Possédés) --------------------------
+    //
+    // Contrairement à GrantsLeaderExperience (Traînard : +1 fixe au seul chef, aucun choix), cette
+    // branche jette un total (D3) que le joueur répartit ENTRE plusieurs Héros comme il le souhaite -
+    // confirmé via un mockup (steppeur +/- par Héros, 2026-08-20). Le total lui-même reste le jet
+    // physique du joueur (jamais auto-rempli, même idiome que tout le reste du wizard) ; seule la
+    // RÉPARTITION est un choix libre, pas un hasard.
+
+    public bool HasDistributedHeroExperienceGrant => ResolvedExplorationOutcome?.GrantsDistributedHeroExperienceFormula is not null;
+
+    public List<WarriorOutcomeRow> DistributedExperienceEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DistributedExperienceRemaining))]
+    private string distributedExperienceTotal = string.Empty;
+
+    [ObservableProperty]
+    private string? distributedExperienceError;
+
+    partial void OnDistributedExperienceTotalChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) DistributedExperienceError = null; }
+
+    /// <summary>Null tant que le total n'est pas encore un nombre valide - distinct de 0 (déjà entièrement
+    /// réparti), qui doit rester une valeur affichable/validable normalement.</summary>
+    public int? DistributedExperienceRemaining => int.TryParse(DistributedExperienceTotal, out var total)
+        ? total - DistributedExperienceEligibleHeroes.Sum(h => h.DistributedExplorationExperience)
+        : null;
+
+    [RelayCommand]
+    private void AutoRollDistributedExperience()
+    {
+        if (ResolvedExplorationOutcome?.GrantsDistributedHeroExperienceFormula is { } formula)
+            DistributedExperienceTotal = DiceFormula.Roll(formula).ToString();
+    }
+
+    [RelayCommand]
+    private void IncrementDistributedExperience(WarriorOutcomeRow hero)
+    {
+        if (DistributedExperienceRemaining is > 0) hero.DistributedExplorationExperience++;
+    }
+
+    [RelayCommand]
+    private void DecrementDistributedExperience(WarriorOutcomeRow hero)
+    {
+        if (hero.DistributedExplorationExperience > 0) hero.DistributedExplorationExperience--;
+    }
 
     public bool IsExplorationGold => ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold;
 
@@ -630,6 +743,8 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(BonusItemOutcome))]
     [NotifyPropertyChangedFor(nameof(HasBonusItem))]
     [NotifyPropertyChangedFor(nameof(BonusItem))]
+    [NotifyPropertyChangedFor(nameof(EquippedHenchmanTreasuryAfter))]
+    [NotifyPropertyChangedFor(nameof(CanAffordEquippedHenchman))]
     private string explorationGoldAmount = string.Empty;
 
     [ObservableProperty]
@@ -704,6 +819,11 @@ public partial class EndOfGameDialogViewModel
         SelectedSentHeroOption = SentHeroOptions[0];
         ArtefactRoll = string.Empty;
         ArtefactRollError = null;
+        DistributedExperienceTotal = string.Empty;
+        DistributedExperienceError = null;
+        foreach (var hero in WarriorRows) hero.DistributedExplorationExperience = 0;
+        SelectedEquippedHenchmanGroupOption = EquippedHenchmanGroupOptions[0];
+        EquippedHenchmanError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -770,8 +890,11 @@ public partial class EndOfGameDialogViewModel
     {
         ResolvedExplorationOutcome = outcome;
         SelectedExplorationItemName = outcome.EquipmentItemName;
-        if (outcome.Kind == ExplorationOutcomeKind.Item && outcome.ItemQuantityFormula is { } itemFormula
-            && !itemFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
+        // ItemQuantityFormula réutilisé tel quel pour la quantité d'un Homme de main gratuit (ex.
+        // Prisonniers : D3 Zombies) - même champ, même convention ("1" fixe se renseigne directement,
+        // "D3" laisse le champ+dé au joueur), pas seulement pour Kind.Item.
+        if ((outcome.Kind == ExplorationOutcomeKind.Item || outcome.GrantsFreeHenchmanArchetypeName is not null)
+            && outcome.ItemQuantityFormula is { } itemFormula && !itemFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
             ExplorationItemQuantity = itemFormula;
         else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone && outcome.GoldFormula is { } wyrdstoneFormula
             && !wyrdstoneFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
@@ -863,6 +986,21 @@ public partial class EndOfGameDialogViewModel
         if (ShowArtefactRoll && !CheckRoll(string.IsNullOrWhiteSpace(ArtefactRoll), () => ArtefactRollError = Loc["EndOfGameRollRequired"]))
             return false;
 
+        // Expérience répartie entre Héros (Prisonniers, Possédés) : bloque tant que le total n'est pas
+        // saisi OU qu'il reste des points non distribués (DistributedExperienceRemaining != 0) - le
+        // joueur doit avoir explicitement affecté chaque point à un Héros, pas juste renseigné le total.
+        if (HasDistributedHeroExperienceGrant
+            && !CheckRoll(string.IsNullOrWhiteSpace(DistributedExperienceTotal) || DistributedExperienceRemaining != 0,
+                () => DistributedExperienceError = Loc["EndOfGameRollRequired"]))
+            return false;
+
+        // Recrutement conditionné à l'équipement (Prisonniers) : "Ne pas recruter" (Group null) n'a rien
+        // à valider - seul un groupe choisi dont le coût dépasserait la trésorerie disponible bloque la
+        // progression (voir CanAffordEquippedHenchman).
+        if (HasOptionalEquippedHenchmanGrant && SelectedEquippedHenchmanGroupOption?.Group is not null
+            && !CheckRoll(!CanAffordEquippedHenchman, () => EquippedHenchmanError = Loc["EndOfGameEquippedHenchmanUnaffordable"]))
+            return false;
+
         var amountMissing = ResolvedExplorationOutcome?.Kind switch
         {
             ExplorationOutcomeKind.Gold => string.IsNullOrWhiteSpace(ExplorationGoldAmount),
@@ -871,6 +1009,12 @@ public partial class EndOfGameDialogViewModel
             ExplorationOutcomeKind.Wyrdstone => string.IsNullOrWhiteSpace(ExplorationWyrdstoneAmount),
             _ => false
         };
-        return CheckRoll(amountMissing == true, () => ExplorationAmountError = Loc["EndOfGameRollRequired"]);
+
+        // Un Homme de main gratuit à quantité variable (ex. Prisonniers : D3 Zombies) n'a pas de Kind
+        // dédié dans le switch ci-dessus (c'est toujours Kind.None) - se valide à part, même principe.
+        var henchmanQuantityMissing = ResolvedFreeHenchman is not null && ShowExplorationItemQuantityRoll
+            && string.IsNullOrWhiteSpace(ExplorationItemQuantity);
+
+        return CheckRoll(amountMissing == true || henchmanQuantityMissing, () => ExplorationAmountError = Loc["EndOfGameRollRequired"]);
     }
 }

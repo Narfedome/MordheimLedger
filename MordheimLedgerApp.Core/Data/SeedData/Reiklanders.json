@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Human",
   "imagePath": "mercenaries_empire.jpg",
   "name": {
     "en": "Reiklander Mercenaries",

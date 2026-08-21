@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Human",
   "imagePath": "witch_hunters.jpg",
   "name": {
     "en": "Witch Hunters",

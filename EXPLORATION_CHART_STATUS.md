@@ -1,8 +1,9 @@
 # Table d'Exploration — état d'implémentation
 
 Suivi de l'assistant Fin de Partie, étape Revenus/Exploration (voir le plan de séquencement).
-Mis à jour à chaque avancée — dernière mise à jour : **2026-08-20** (Table des Artefacts Magiques,
-La Fosse, Arène de Combat).
+Mis à jour à chaque avancée — dernière mise à jour : **2026-08-21** (Prisonniers : recrutement
+conditionné à l'équipement de la branche "autres bandes" ; correction Race Kermesse du Chaos/Culte
+des Possédés → Humain du Chaos).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -11,7 +12,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | Groupe | Mécanisme | Statut |
 |---|---|---|
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
-| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **2/6 ✅** |
+| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **3/6 ✅** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
@@ -28,9 +29,9 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 | 2,4 | Traînard | ✅ | ✅ | Groupe B — branche résolue automatiquement depuis l'archétype de la bande jouée (`Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome`, `ExplorationOutcome.RestrictedToWarbandArchetypeNames`) : Skavens (Or 2D6), Possédés (+1 XP au chef, `GrantsLeaderExperience`), Morts-Vivants (Zombie gratuit avec ChipView tapable, fusionné dans un groupe existant s'il y en a un, `GrantsFreeHenchmanArchetypeName`), toute autre bande (dé bonus au prochain jet d'Exploration - `Warband.PendingExplorationBonusDie`, rappel textuel affiché au jet suivant, ne change pas le nombre de dés gardés). L'étape Résultat n'affiche que la phrase d'intro partagée (`ExplorationResult.ShortDescription`) + la vraie phrase de la branche résolue (`ExplorationOutcome.BranchText`, traduit EN/FR), pas le paragraphe complet du livre qui énumère les 4 branches - `Description` reste inchangée, gardée comme référence complète |
 | 2,5 | Charrette Renversée | ✅ | ✅ | Branche 5-6 : Épée + Dague ornées, réellement ajoutées à l'inventaire (`SecondaryEquipmentItemName`) et vendables à x2 leur valeur normale (matériau "Arme Ornée", `SpecialRule.IsResaleUpgrade`, bouton "Vendre" dans l'inventaire de bande) |
 | 2,6 | Masures en Ruine | ✅ | ✅ | Branche unique |
-| 3,1 | Taverne | ✅ | — | Réutilise le test de caractéristique gating de Puits (`StatTestField`), avec deux ajouts : cible toujours le chef (`ExplorationResult.StatTestTargetsLeader`, pas de Picker - même ciblage que le test additionnel de Bâtiment Éventré, `Warrior.IsLeader`) et certaines bandes du livre réussissent automatiquement sans jet (`AutoPassStatTestWarbandArchetypeNames` : Morts-Vivants/Chasseurs de Sorcières/Sœurs de Sigmar) - bannière textuelle affichée à la place du jet dans ce cas. Réussite = 4D6 CO ; un Échec ne produit rien (une seule branche dans `Outcomes`, même forme que le test additionnel de Bâtiment Éventré - corrigé le 2026-08-20, voir Journal) |
+| 3,1 | Taverne | ✅ | ✅ | Réutilise le test de caractéristique gating de Puits (`StatTestField`), avec deux ajouts : cible toujours le chef (`ExplorationResult.StatTestTargetsLeader`, pas de Picker - même ciblage que le test additionnel de Bâtiment Éventré, `Warrior.IsLeader`) et certaines bandes du livre réussissent automatiquement sans jet (`AutoPassStatTestWarbandArchetypeNames` : Morts-Vivants/Chasseurs de Sorcières/Sœurs de Sigmar) - bannière textuelle affichée à la place du jet dans ce cas. Réussite = 4D6 CO ; un Échec ne produit rien (une seule branche dans `Outcomes`, même forme que le test additionnel de Bâtiment Éventré - corrigé le 2026-08-20, voir Journal) |
 | 3,2 | Forge | ✅ | ✅ | |
-| 3,3 | Prisonniers | ⏳ | ❌ | Groupe B |
+| 3,3 | Prisonniers | ✅ | ✅ | Groupe B — même principe que Traînard (`ResolveWarbandOutcome`) : Skavens (Or 3D6), Morts-Vivants (D3 Zombies gratuits - `GrantsFreeHenchmanArchetypeName`+`ItemQuantityFormula` réutilisé pour la quantité, jet+dé si D3 plutôt que fixe, ChipView tapable), Possédés (D3 Expérience répartis entre les Héros au choix du joueur via un steppeur +/- par Héros - `GrantsDistributedHeroExperienceFormula`, forme confirmée par mockup avant implémentation), toute autre bande (Or 2D6 + recrutement optionnel du prisonnier comme Homme de main gratuit dans un groupe EXISTANT de la bande choisi par le joueur - `GrantsOptionalEquippedHenchman`, seul le coût de l'équipement répliqué du groupe est déduit de la trésorerie, jamais de Cost d'archétype ; bloqué si le solde passerait négatif, `Core.Rules.RecruitmentRules.CanAffordEquippedHenchman`, forme confirmée par mockup 2026-08-21) |
 | 3,4 | Atelier du Fléchier | ✅ | ✅ | |
 | 3,5 | Halle du Marché | ✅ | ✅ | Branche unique |
 | 3,6 | Une Faveur Rendue | ⏳ | ❌ | Groupe C — Mercenaire à Louer gratuit, `NextGameNotes` pas construit |
@@ -226,3 +227,97 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   correctif déjà appliqué à `BonusStatTestField`/`BonusStatTestRoll` pour exactement la même raison,
   généralisé ici. Description FR/EN corrigée en cohérence ("il ne reste rien à récupérer" plutôt que
   "D6 CO d'alcool").
+- **2026-08-20 (Prisonniers)** — Troisième entrée Groupe B, même mécanisme que Traînard ("même principe
+  que le Traînard", confirmé par l'utilisateur) : `ResolveWarbandOutcome`/`RestrictedToWarbandArchetypeNames`
+  inchangés, aucun nouveau concept côté Core.Rules. Seule vraie extension : Morts-Vivants gagnent D3
+  Zombies (pas 1 fixe comme le Zombie de Traînard) - `ExplorationOutcome.ItemQuantityFormula` (déjà
+  utilisé pour la quantité d'un Objet trouvé) réutilisé tel quel pour la quantité d'un Homme de main
+  gratuit plutôt qu'un champ dédié : `ApplyResolvedOutcome` l'auto-remplit pour une quantité fixe (ex.
+  Traînard, "1") ou laisse le champ+dé au joueur si c'est un vrai jet (D3), `ValidateExplorationResultStep`
+  bloque tant qu'il est vide dans ce second cas, et `WarbandDetailViewModel.EndOfGame` parse
+  `ExplorationItemQuantity` (repli sur 1) plutôt que d'ajouter toujours 1 Zombie. Décision initiale de
+  NE PAS automatiser deux branches, contrairement à Traînard : la répartition de D3 Expérience entre
+  PLUSIEURS Héros (contrairement au +1 XP fixe au seul chef de Traînard, ici un vrai choix de répartition
+  du joueur) et le recrutement optionnel "un prisonnier peut rejoindre la bande comme Homme de main s'il
+  peut être équipé" (dépend du choix ET du budget du joueur, contrairement au Zombie gratuit sans
+  condition) - les deux laissées en texte pur (`Note`/`BranchText`) dans cette première passe, la
+  répartition d'XP automatisée juste après (voir entrée suivante), le recrutement conditionné à
+  l'équipement toujours en attente (l'utilisateur creuse comment le brancher sur la réserve
+  d'équipement de la bande).
+- **2026-08-20 (Prisonniers - répartition d'XP entre Héros)** — Retour utilisateur : "on va pousser pour
+  la répartition de point d'xp... on lance le d3 et on assigne comme on le souhaite la valeur" - confirmé
+  via un mockup (steppeur +/- par Héros, compteur "Restant" qui doit tomber à 0) avant implémentation,
+  même démarche que le mockup jet-double du 2026-08-20 plus tôt dans la session. Nouveau champ
+  `ExplorationOutcome.GrantsDistributedHeroExperienceFormula` (contraste avec `GrantsLeaderExperience` de
+  Traînard : un total jeté par le joueur - jamais auto-rempli, même idiome que tout autre jet du wizard -
+  réparti librement entre plusieurs Héros plutôt qu'un montant fixe donné au seul chef). Nouveau
+  `WarriorOutcomeRow.DistributedExplorationExperience` (int, distinct d'`ExperienceGained` de l'étape
+  Expérience plus tôt dans le wizard - deux sources d'XP différentes, jamais mélangées pour qu'un retour
+  en arrière sur cette étape n'affiche pas une valeur modifiée par l'étape Exploration plus tardive).
+  `EndOfGameDialogViewModel.DistributedExperienceRemaining` (Total - somme des allocations) bloque la
+  progression tant qu'il n'est pas exactement 0 (`ValidateExplorationResultStep`) - chaque
+  `WarriorOutcomeRow` remonte son changement au ViewModel parent via `PropertyChanged` (même principe que
+  les `ExplorationDieEntry`/`AdvanceRollEntry` ailleurs dans ce fichier, puisque c'est un objet différent
+  du ViewModel qui expose la somme). Steppeurs +/- (`IncrementDistributedExperienceCommand`/
+  `DecrementDistributedExperienceCommand`) copiés du motif déjà utilisé pour Hors de Combat
+  (`IncrementOutOfAction`/`DecrementOutOfAction`), sans désactivation visuelle des boutons aux bornes -
+  la garde vit dans la commande elle-même (silencieusement sans effet une fois à 0), pas dans l'état
+  `IsEnabled` du bouton.
+- **2026-08-20 (nouveau catalogue Race)** — En creusant la branche "autres bandes" de Prisonniers
+  ("un prisonnier peut rejoindre la bande comme Homme de main s'il peut être équipé"), l'utilisateur a
+  relevé une vraie ambiguïté RAW : certaines retranscriptions précisent "one of your **human** Henchman
+  groups" - une bande Skaven/Orque/Naine n'a par définition aucun groupe humain, donc RAW elle gagne
+  l'or (2D6) mais jamais ce recrutement. L'appli n'avait jusque-là aucune notion de race/espèce sur
+  `WarbandArchetype` pour trancher cette question. Demande explicite de l'utilisateur : un vrai
+  catalogue Library éditable (pas un enum en dur) - "un peu la même chose que ce qu'on a pour les
+  écoles de magie" (confirmé par question posée). Construit : `Models.Library.Race` (Id/Nom/
+  Description, Official/Modified/Custom, même forme que `MagicSchool` - aucune liste de restriction,
+  contrairement aux catalogues à 8 qui en ont une) + `WarbandArchetype.RaceId`/`Race` (résolu via
+  `LibraryService.GetWarbandArchetypesAsync`, comme les Écoles de Magie mais en un-vers-un, pas une
+  liste). Seedé (`Data/SeedData/Races.json` : Humain/Skaven/Orque/Nain/Elfe/Mort-Vivant/Homme-Bête -
+  Elfe et Homme-Bête ajoutés en prévision, aucune bande actuelle ne les utilise sauf Homme-Bête pour
+  Pillards Hommes-Bêtes) et chacune des 15 bandes existantes déclare désormais son "race" dans son
+  propre JSON. UI complète calquée sur `MagicSchoolListPage`/`MagicSchoolEditDialog` mais simplifiée
+  (pas de picker multi-sélection ni de sous-onglet, une bande n'a jamais qu'UNE race assignée par un
+  simple Picker sur `WarbandArchetypeEditDialog`) : nouvel onglet "Bandes" gagne un bouton "Gérer les
+  Races" (icône `SolidFont.PersonRays`, glyphe pas encore utilisé ailleurs) ouvrant `RaceListPage`
+  (Créer/Renommer/Supprimer, popup récap générique `ChipDetailDialog`). **Migration nécessaire** : les
+  15 `WarbandArchetypeEntity` déjà seedées sur la machine de l'utilisateur (sessions précédentes)
+  n'avaient pas ce nouveau champ - `AppDatabase.BackfillWarbandArchetypeRaceAsync` (même idiome que
+  `BackfillNeverGainsExperienceAsync`, tourne inconditionnellement à chaque lancement) sème Races.json
+  si besoin (via une variante DB-aware de `FindOrCreateRaceAsync`, pas seulement le dictionnaire en
+  mémoire habituel - nécessaire puisque `SeedOfficialContentAsync` entier est sauté sur une base déjà
+  peuplée) puis mappe chaque bande à sa race via une table nom-anglais→race codée en dur (les 15 bandes
+  sont fixes et connues, pas besoin de re-parser leur JSON pour ce correctif ponctuel). Bug annexe
+  corrigé au passage : `RaceEntity` manquait de `CreateTableAsync` dans `CreateAllTablesAsync`
+  ("no such table" en test). **Le recrutement conditionné ("si vous pouvez l'équiper") lui-même n'est
+  toujours PAS câblé** - seule l'infrastructure Race existe maintenant ; l'utilisateur creuse encore
+  comment vérifier "la bande peut payer son équipement" (réserve d'équipement de la bande ?) avant
+  d'implémenter la branche complète.
+- **2026-08-21 (Prisonniers, "autres bandes" - recrutement conditionné)** — Tranché : "regarder la
+  trésorerie de la bande et donner la possibilité de recruter si on a la trésorerie pour acheter les
+  items (et uniquement les items, pas de prix sur le henchman)" - le recrutement lui-même est
+  **gratuit** (jamais de `Cost` d'archétype déduit, contrairement à un recrutement normal), seul le coût
+  de l'équipement à répliquer doit tenir dans la trésorerie. Forme confirmée par mockup en 3 itérations
+  avant implémentation : (1) Picker des groupes d'Hommes de main **réellement existants** dans la bande
+  plutôt qu'un choix d'archétype - contourne l'ambiguïté RAW "groupe humain" en listant simplement ce
+  que CETTE bande a vraiment (une bande Naine/Skaven/Elfe n'a pas de groupe humain de toute façon, donc
+  la liste est naturellement vide pour elle, pas besoin d'un gate Race explicite) ; (2) "Ne pas recruter"
+  déplacé en première option/valeur par défaut, tableau de trésorerie masqué tant qu'elle reste
+  choisie ; (3) bouton dédié Recruter/Refuser supprimé - seul le "Suivant" du wizard valide, bloqué si
+  le solde choisi passerait négatif (`CanAffordEquippedHenchman`, même idiome d'erreur que les autres
+  jets de cette étape, pas de bouton désactivé). Nouveau champ `ExplorationOutcome.
+  GrantsOptionalEquippedHenchman` (bool, catch-all uniquement) ; le coût de l'équipement à répliquer est
+  calculé en direct depuis le loadout ACTUEL du groupe choisi (`Warrior.Equipment`, partagé pour tout le
+  groupe - pas de nouvelle donnée à saisir), via `Core.Rules.EquipmentPricing.CalculateCost` déjà
+  existant. Nouvelle règle pure `Core.Rules.RecruitmentRules.CanAffordEquippedHenchman` (comparaison
+  simple, mais gardée testable/centralisée comme le reste des règles de recrutement). À la sauvegarde :
+  `+1 HeadCount` sur le groupe choisi, trésorerie décrémentée du coût d'équipement (jamais du Cost
+  d'archétype).
+- **2026-08-21 (correction Race)** — L'utilisateur a repéré que Kermesse du Chaos et Culte des Possédés
+  avaient été seedées avec la race "Humain" comme n'importe quelle bande de Mercenaires - erreur : ce
+  sont des humains corrompus par le Chaos, une race à part ("Humain du Chaos" créée dans `Races.json`,
+  FR/EN, description dédiée) plutôt que le même `Race` que Reiklander/Witch Hunters/Sœurs de Sigmar. Les
+  deux bandes + la table de backfill (`_raceNameByWarbandEnglishName`, pour une base déjà migrée sur une
+  autre machine) mis à jour en conséquence ; nouveau test `WarbandArchetype_ChaosWarbands_
+  ResolveChaosHumanRace`.

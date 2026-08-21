@@ -334,6 +334,22 @@ public class RulesTests
             isExistingWarband: true, treasuryOverride: 250));
     }
 
+    // Prisoners' "escort" catch-all branch (see Models.Library.ExplorationOutcome.
+    // GrantsOptionalEquippedHenchman) - the recruit itself is free, only the replicated equipment cost
+    // is checked against the treasury.
+    [Fact]
+    public void RecruitmentRules_CanAffordEquippedHenchman_TrueWhenTreasuryCoversCost()
+    {
+        Assert.True(RecruitmentRules.CanAffordEquippedHenchman(availableTreasury: 50, equipmentCost: 32));
+        Assert.True(RecruitmentRules.CanAffordEquippedHenchman(availableTreasury: 32, equipmentCost: 32));
+    }
+
+    [Fact]
+    public void RecruitmentRules_CanAffordEquippedHenchman_FalseWhenTreasuryTooLow()
+    {
+        Assert.False(RecruitmentRules.CanAffordEquippedHenchman(availableTreasury: 31, equipmentCost: 32));
+    }
+
     // --- EquipmentPricing -----------------------------------------------------------------------
 
     [Fact]

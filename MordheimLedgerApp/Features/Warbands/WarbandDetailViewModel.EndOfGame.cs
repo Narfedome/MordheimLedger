@@ -79,7 +79,7 @@ public partial class WarbandDetailViewModel
             a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
 
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId,
-            warbandArchetypeName, Warband.PendingExplorationBonusDie, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
+            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
@@ -227,25 +227,46 @@ public partial class WarbandDetailViewModel
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeName is { } henchmanName)
             {
-                // Traînard, branche Morts-Vivants ("Zombie") - fusionne dans un groupe d'Hommes de main
-                // déjà existant de ce même archétype plutôt que de créer une ligne séparée : un Zombie ne
-                // peut porter aucun équipement (CanUseEquipment false), donc deux groupes du même
-                // archétype seraient de toute façon rigoureusement identiques.
+                // Traînard/Prisonniers, branche Morts-Vivants ("Zombie") - fusionne dans un groupe
+                // d'Hommes de main déjà existant de ce même archétype plutôt que de créer une ligne
+                // séparée : un Zombie ne peut porter aucun équipement (CanUseEquipment false), donc deux
+                // groupes du même archétype seraient de toute façon rigoureusement identiques. Quantité :
+                // 1 fixe (Traînard) ou un jet du joueur (D3, Prisonniers - voir ExplorationOutcome.
+                // ItemQuantityFormula réutilisé tel quel, ExplorationItemQuantity) ; repli sur 1 si vide
+                // (jamais le cas en pratique - ValidateExplorationResultStep bloque déjà sinon).
                 var archetype = (await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en"))
                     .FirstOrDefault(a => a.Name == henchmanName);
                 if (archetype is not null)
                 {
+                    var henchmanQuantity = int.TryParse(dialogViewModel.ExplorationItemQuantity, out var parsedQuantity) ? parsedQuantity : 1;
                     var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == archetype.Id);
                     if (existingGroup is not null)
                     {
-                        existingGroup.Warrior.HeadCount += 1;
+                        existingGroup.Warrior.HeadCount += henchmanQuantity;
                         await _warbandService.SaveWarriorAsync(existingGroup.Warrior);
                     }
                     else
                     {
-                        await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, archetype.Name, headCount: 1);
+                        await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, archetype.Name, headCount: henchmanQuantity);
                     }
-                    sentences.Add(string.Format(Loc["HistoryFreeHenchmanSentence"], archetype.Name));
+                    sentences.Add(string.Format(Loc["HistoryFreeHenchmanSentence"], henchmanQuantity, archetype.Name));
+                }
+            }
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsDistributedHeroExperienceFormula is not null)
+            {
+                // Prisonniers, branche Possédés - le total (D3) a déjà été réparti par le joueur via le
+                // steppeur +/- de chaque Héros (dialogViewModel.DistributedExperienceRemaining vérifié à
+                // 0 par ValidateExplorationResultStep) ; ici on ne fait qu'appliquer chaque allocation.
+                var recipients = dialogViewModel.WarriorRows.Where(r => r.DistributedExplorationExperience > 0).ToList();
+                foreach (var recipient in recipients)
+                {
+                    recipient.Warrior.Experience += recipient.DistributedExplorationExperience;
+                    await _warbandService.SaveWarriorAsync(recipient.Warrior);
+                }
+                if (recipients.Count > 0)
+                {
+                    var breakdown = string.Join(", ", recipients.Select(r => $"{r.Warrior.Name} (+{r.DistributedExplorationExperience})"));
+                    sentences.Add(string.Format(Loc["HistoryDistributedExperienceSentence"], breakdown));
                 }
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None)
@@ -264,6 +285,26 @@ public partial class WarbandDetailViewModel
             // automatiquement, rien à mémoriser côté Warrior/Warband à la sauvegarde de CE wizard.
             if (outcome.SecondaryEquipmentItemName is { } secondaryName)
                 await AddOneItemToInventoryAsync(secondaryName, 1, outcome.MaterialRuleName);
+
+            // Prisonniers, branche "autres bandes" - le prisonnier rejoint gratuitement le groupe
+            // d'Hommes de main choisi par le joueur (+1 HeadCount, voir EndOfGameDialogViewModel.
+            // SelectedEquippedHenchmanGroupOption) ; seul le coût de l'équipement répliqué (déjà validé
+            // affordable, voir CanAffordEquippedHenchman) est déduit de la trésorerie - jamais de Cost
+            // d'archétype, contrairement à un recrutement normal. Indépendant du Kind ci-dessus (coexiste
+            // avec l'or de l'escorte, Kind.Gold), même principe que SecondaryEquipmentItemName.
+            if (outcome.GrantsOptionalEquippedHenchman && dialogViewModel.SelectedEquippedHenchmanGroupOption?.Group is { } recruitGroup)
+            {
+                recruitGroup.Warrior.HeadCount += 1;
+                await _warbandService.SaveWarriorAsync(recruitGroup.Warrior);
+
+                var equipmentCost = dialogViewModel.SelectedEquippedHenchmanGroupOption.EquipmentCost;
+                if (equipmentCost > 0)
+                {
+                    Warband.Treasury -= equipmentCost;
+                    await _warbandService.SaveWarbandAsync(Warband);
+                }
+                sentences.Add(string.Format(Loc["HistoryEquippedHenchmanSentence"], recruitGroup.ArchetypeName, equipmentCost));
+            }
         }
 
         if (dialogViewModel.BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemName is { } bonusItemName)

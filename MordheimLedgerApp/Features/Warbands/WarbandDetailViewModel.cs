@@ -34,7 +34,13 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private int warbandId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNextGameNote))]
     private Warband? warband;
+
+    /// <summary>Warband.NextGameNote non-null (voir sa doc) - une bannière dédiée sur cette page plutôt
+    /// qu'une entrée d'Historique de plus, pour rester visible tant qu'elle s'applique (jusqu'à la Fin de
+    /// Partie suivante, qui la consomme - voir WarbandDetailViewModel.EndOfGame.ApplyExplorationOutcomeAsync).</summary>
+    public bool HasNextGameNote => !string.IsNullOrWhiteSpace(Warband?.NextGameNote);
 
     /// <summary>Rulebook "calculate the warband rating" - sum over Heroes+Henchmen (active roster, dead
     /// warriors excluded) of (IsLargeCreature ? 20 : 5) + Experience. Recomputed after every LoadAsync -

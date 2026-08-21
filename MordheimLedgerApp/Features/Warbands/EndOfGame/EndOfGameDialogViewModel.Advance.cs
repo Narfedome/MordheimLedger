@@ -10,10 +10,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// de comportement, pur déplacement de membres.</summary>
 public partial class EndOfGameDialogViewModel
 {
-    private bool ValidateAdvanceStep(WarriorOutcomeRow row)
+    /// <summary>Prend directement la collection à valider (AdvanceRolls ou ExplorationAdvanceRolls, voir
+    /// EndOfGameDialogViewModel.CurrentAdvanceRolls) plutôt qu'un WarriorOutcomeRow - le même guerrier
+    /// peut traverser cette étape deux fois (voir WizardStep.IsExplorationAdvance), chaque passage ne
+    /// devant valider que SES propres jets.</summary>
+    private bool ValidateAdvanceStep(IEnumerable<AdvanceRollEntry> rolls)
     {
         var valid = true;
-        foreach (var advance in row.AdvanceRolls)
+        foreach (var advance in rolls)
             valid &= CheckRoll(string.IsNullOrWhiteSpace(advance.ResultText), () => advance.RollError = Loc["EndOfGameRollRequired"]);
         return valid;
     }
@@ -40,7 +44,7 @@ public partial class EndOfGameDialogViewModel
     [RelayCommand]
     private async Task PickAdvanceSkill(AdvanceRollEntry entry)
     {
-        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry));
+        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry) || r.ExplorationAdvanceRolls.Contains(entry));
         // EffectiveExtraSkillNames -> ids via _skillIdsByEnglishName : mêmes objets (ex. le symbole de
         // l'Ordre des Libres Marchands) que la Charrette/le Carnet de l'Alchimiste - une compétence
         // précise débloquée hors catégorie plutôt qu'une liste entière, voir EquipmentItem.

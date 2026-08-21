@@ -290,6 +290,28 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal("A muffled sound comes from one of the buildings - a group of finely dressed people locked in a cellar.", prisoners.ShortDescription);
         Assert.Equal("Undead warbands can kill the prisoners and gain D3 Zombies at no cost.", prisonersUndead.BranchText);
 
+        // Graveyard (4 5): the mirror-image of Prisoners' shape - the CATCH-ALL branch (Gold D6x10) is
+        // the one shown in ResolveWarbandOutcome's own doc comment as the motivating example, while
+        // Witch Hunters/Sisters of Sigmar (the only two RESTRICTED archetypes) take D6 Experience
+        // distributed among Heroes instead (GrantsDistributedHeroExperienceFormula reused as-is, no new
+        // Core.Rules/wizard code needed - the existing Group B infrastructure already covers this shape
+        // generically). The "hated by Witch Hunters/Sisters next game" consequence of the catch-all
+        // branch is mechanized as a NextGameNoteText reminder (2026-08-21, Warband.NextGameNote) - the
+        // app has no concept of opponent identity, so this stays a banner the player reads and applies
+        // manually, not an enforced game rule.
+        var graveyard = results.Single(r => r.DiceCount == 4 && r.Value == 5);
+        Assert.True(graveyard.RollsIndependently);
+        Assert.Equal(2, graveyard.Outcomes.Count);
+        var graveyardCatchAll = Assert.Single(graveyard.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        Assert.Equal(ExplorationOutcomeKind.Gold, graveyardCatchAll.Kind);
+        Assert.Equal("D6x10", graveyardCatchAll.GoldFormula);
+        Assert.Equal("Next game: Witch Hunters/Sisters of Sigmar hate you (crypts looted at the Graveyard).", graveyardCatchAll.NextGameNoteText);
+        var graveyardSisters = graveyard.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Witch Hunters", "The Sisters of Sigmar"]));
+        Assert.Equal(ExplorationOutcomeKind.None, graveyardSisters.Kind);
+        Assert.Equal("D6", graveyardSisters.GrantsDistributedHeroExperienceFormula);
+        Assert.Equal("You find an old graveyard, crammed with ivy-covered sepulchres.", graveyard.ShortDescription);
+        Assert.Equal("Witch Hunters and Sisters of Sigmar may instead seal the graves, gaining D6 Experience distributed amongst their Heroes.", graveyardSisters.BranchText);
+
         // ShortDescription/BranchText (2026-08-20): the wizard shows just the shared intro sentence plus
         // the resolved branch's own sentence for a warband-conditioned result, instead of the full
         // multi-branch Description - both must actually be localized (unlike Note, which never was).

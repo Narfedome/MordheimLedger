@@ -177,7 +177,8 @@ public class LibraryService : ILibraryService
         var outcomeEntities = await _db.Connection.Table<ExplorationOutcomeEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(
             rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey, r.ShortDescriptionKey })
-                .Concat(outcomeEntities.Select(o => o.BranchTextKey)),
+                .Concat(outcomeEntities.Select(o => o.BranchTextKey))
+                .Concat(outcomeEntities.Select(o => o.NextGameNoteTextKey)),
             languageCode);
         var outcomesByResultId = outcomeEntities
             .Select(o => o.ToModel(translations))

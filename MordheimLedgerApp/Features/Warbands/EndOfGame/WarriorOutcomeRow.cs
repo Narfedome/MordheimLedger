@@ -38,21 +38,54 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(ExperienceGained))]
     [NotifyPropertyChangedFor(nameof(MilestoneCount))]
     [NotifyPropertyChangedFor(nameof(HasMilestone))]
+    [NotifyPropertyChangedFor(nameof(ExplorationMilestoneCount))]
+    [NotifyPropertyChangedFor(nameof(HasExplorationMilestone))]
     private string experienceGainedText = string.Empty;
 
-    partial void OnExperienceGainedTextChanged(string value) => SyncAdvanceRolls();
+    partial void OnExperienceGainedTextChanged(string value)
+    {
+        SyncAdvanceRolls();
+        // ExplorationMilestoneCount's starting point (Warrior.Experience + ExperienceGained) shifts too -
+        // only reachable in practice if the player backs up to the Experience step after already having
+        // assigned Exploration XP, but kept in sync regardless rather than left stale.
+        SyncExplorationAdvanceRolls();
+    }
 
     public int ExperienceGained => int.TryParse(ExperienceGainedText, out var xp) ? xp : 0;
 
     /// <summary>Points d'Expérience alloués à ce Héros via le steppeur de répartition (Prisonniers,
-    /// Possédés - voir ExplorationOutcome.GrantsDistributedHeroExperienceFormula) - totalement distinct
-    /// d'ExperienceGained (l'étape Expérience, plus tôt dans le wizard, pour l'XP de bataille normale) :
-    /// deux sources d'XP différentes, jamais mélangées pour éviter qu'un retour en arrière sur l'étape
-    /// Expérience affiche une valeur modifiée par une étape plus tardive. Remis à 0 à chaque nouveau
-    /// résultat d'Exploration déclenché (EndOfGameDialogViewModel.ResolveExplorationResult), pas
-    /// seulement quand ce guerrier change.</summary>
+    /// Possédés, Cimetière - voir ExplorationOutcome.GrantsDistributedHeroExperienceFormula) -
+    /// totalement distinct d'ExperienceGained (l'étape Expérience, plus tôt dans le wizard, pour l'XP de
+    /// bataille normale) : deux sources d'XP différentes, jamais mélangées pour éviter qu'un retour en
+    /// arrière sur l'étape Expérience affiche une valeur modifiée par une étape plus tardive. Remis à 0 à
+    /// chaque nouveau résultat d'Exploration déclenché (EndOfGameDialogViewModel.ResolveExplorationResult),
+    /// pas seulement quand ce guerrier change.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExplorationBonusExperience))]
+    [NotifyPropertyChangedFor(nameof(ExplorationMilestoneCount))]
+    [NotifyPropertyChangedFor(nameof(HasExplorationMilestone))]
     private int distributedExplorationExperience;
+
+    partial void OnDistributedExplorationExperienceChanged(int value) => SyncExplorationAdvanceRolls();
+
+    /// <summary>Montant fixe accordé par une branche d'Exploration ciblant TOUJOURS le chef, sans jet ni
+    /// choix du joueur (Traînard, branche Possédés - "le chef gagne +1 Expérience", voir
+    /// ExplorationOutcome.GrantsLeaderExperience) - renseigné par EndOfGameDialogViewModel sur la seule
+    /// ligne dont Warrior.IsLeader est vrai quand cette branche se résout (0 pour tout autre guerrier),
+    /// même idiome que DistributedExplorationExperience mais sans steppeur puisqu'il n'y a rien à
+    /// répartir.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExplorationBonusExperience))]
+    [NotifyPropertyChangedFor(nameof(ExplorationMilestoneCount))]
+    [NotifyPropertyChangedFor(nameof(HasExplorationMilestone))]
+    private int leaderExplorationExperience;
+
+    partial void OnLeaderExplorationExperienceChanged(int value) => SyncExplorationAdvanceRolls();
+
+    /// <summary>Total de l'XP accordée par l'Exploration pour ce guerrier, toutes sources confondues
+    /// (répartition Héros + chef fixe - jamais les deux en même temps en pratique aujourd'hui, mais rien
+    /// n'empêche qu'un futur résultat les cumule).</summary>
+    public int ExplorationBonusExperience => DistributedExplorationExperience + LeaderExplorationExperience;
 
     public bool IsHero => Warrior.IsHero;
     public int HeadCount => Warrior.HeadCount;
@@ -166,6 +199,11 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// deux peuvent coexister le même End of Game.</summary>
     public ObservableCollection<AdvanceRollEntry> AdvanceRolls { get; } = new();
 
+    /// <summary>Même mécanique qu'AdvanceRolls (mêmes AdvanceRollEntry/tables de jet), pour les paliers
+    /// franchis uniquement par ExplorationBonusExperience - voir ExplorationMilestoneCount pour pourquoi
+    /// c'est une deuxième collection plutôt que la même, synchronisée par SyncExplorationAdvanceRolls.</summary>
+    public ObservableCollection<AdvanceRollEntry> ExplorationAdvanceRolls { get; } = new();
+
     /// <summary>True dès que le jet principal (ManualRoll) donne "Blessures multiples" (16, 21,
     /// Héros uniquement) - pilote l'affichage du bloc "combien de sous-jets" (1D6) dans le XAML, avant
     /// même que ce 1D6 ait été tiré.</summary>
@@ -223,6 +261,21 @@ public partial class WarriorOutcomeRow : ObservableObject
     public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience, Warrior.Experience + ExperienceGained);
     public bool HasMilestone => GainsExperience && MilestoneCount > 0;
 
+    /// <summary>Paliers franchis UNIQUEMENT par l'XP accordée en Exploration (ExplorationBonusExperience),
+    /// comptés à partir du point où l'étape Progression normale s'est déjà arrêtée (Warrior.Experience +
+    /// ExperienceGained) plutôt que depuis Warrior.Experience directement - évite de recompter/refaire
+    /// jeter un palier déjà traité par MilestoneCount ci-dessus. Nécessaire parce que l'Exploration
+    /// (chapitre "Revenus") a lieu APRÈS la Progression dans la séquence officielle du livre (voir la doc
+    /// de classe d'EndOfGameDialogViewModel) : un palier uniquement atteint grâce à cet XP-là ne peut être
+    /// détecté qu'une fois l'Exploration résolue, jamais pendant la Progression elle-même. Réutilise
+    /// exactement la même mécanique (ExperienceMilestones, AdvanceRollEntry, HeroAdvanceTable/
+    /// HenchmanAdvanceTable) via une deuxième carte Progression insérée après l'étape Exploration - voir
+    /// EndOfGameDialogViewModel.Steps/WizardStep.IsExplorationAdvance.</summary>
+    public int ExplorationMilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero,
+        Warrior.Experience + ExperienceGained, Warrior.Experience + ExperienceGained + ExplorationBonusExperience);
+
+    public bool HasExplorationMilestone => GainsExperience && ExplorationMilestoneCount > 0;
+
     /// <summary>Héros et Hommes de main utilisent deux tables de Blessures Graves totalement
     /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce placeholder garde la
     /// distinction visible sur l'étape Blessure de chaque guerrier (ArchetypeName, affiché à côté,
@@ -242,7 +295,7 @@ public partial class WarriorOutcomeRow : ObservableObject
                 if (!string.IsNullOrWhiteSpace(sub.InjuryResultText)) parts.Add(sub.InjuryResultText);
             foreach (var figure in FigureInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(figure.InjuryResultText)) parts.Add(figure.InjuryResultText);
-            foreach (var advance in AdvanceRolls)
+            foreach (var advance in AdvanceRolls.Concat(ExplorationAdvanceRolls))
             {
                 if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
                 else if (!string.IsNullOrWhiteSpace(advance.ResultText)) parts.Add(advance.ResultText);
@@ -330,5 +383,20 @@ public partial class WarriorOutcomeRow : ObservableObject
         }
         while (AdvanceRolls.Count > MilestoneCount)
             AdvanceRolls.RemoveAt(AdvanceRolls.Count - 1);
+    }
+
+    /// <summary>Même principe que SyncAdvanceRolls, pour ExplorationAdvanceRolls/ExplorationMilestoneCount
+    /// - appelée à chaque changement de DistributedExplorationExperience/LeaderExplorationExperience (le
+    /// total d'XP Exploration) ou d'ExperienceGained (son point de départ, voir ExplorationMilestoneCount).</summary>
+    private void SyncExplorationAdvanceRolls()
+    {
+        while (ExplorationAdvanceRolls.Count < ExplorationMilestoneCount)
+        {
+            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero);
+            entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+            ExplorationAdvanceRolls.Add(entry);
+        }
+        while (ExplorationAdvanceRolls.Count > ExplorationMilestoneCount)
+            ExplorationAdvanceRolls.RemoveAt(ExplorationAdvanceRolls.Count - 1);
     }
 }

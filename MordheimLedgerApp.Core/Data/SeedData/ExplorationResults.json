@@ -265,10 +265,18 @@
       "en": "You find an old graveyard, crammed with ivy-covered sepulchres. Any warband apart from Witch Hunters and Sisters of Sigmar may loot the crypts and gains D6x10 gc worth of loot - but the next time you play against Sisters of Sigmar or Witch Hunters, their entire warband will hate all your models. Witch Hunters and Sisters of Sigmar may instead seal the graves, gaining D6 Experience distributed amongst their Heroes.",
       "fr": "Vous trouvez un vieux cimetière, encombré de tombeaux couverts de lierre. Toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar peut piller les cryptes et gagner un butin de D6x10 CO - mais lors de la prochaine partie contre les Chasseurs de Sorcières ou les Sœurs de Sigmar, toute leur bande haïra vos figurines. Les Chasseurs de Sorcières et Sœurs de Sigmar peuvent à la place sceller les tombes et gagner D6 Expérience répartis entre leurs Héros."
     },
+    "shortDescription": {
+      "en": "You find an old graveyard, crammed with ivy-covered sepulchres.",
+      "fr": "Vous trouvez un vieux cimetière, encombré de tombeaux couverts de lierre."
+    },
     "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "D6x10", "note": "Toute bande sauf Chasseurs de Sorcières/Sœurs de Sigmar (attire leur haine à la prochaine rencontre)" },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Chasseurs de Sorcières/Sœurs de Sigmar : D6 Expérience répartis entre les Héros" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "D6x10", "note": "Toute bande sauf Chasseurs de Sorcières/Sœurs de Sigmar (attire leur haine à la prochaine rencontre)",
+        "branchText": { "en": "Any warband apart from Witch Hunters and Sisters of Sigmar may loot the crypts and gain D6x10 gc worth of loot - but the next time you play against Sisters of Sigmar or Witch Hunters, their entire warband will hate all your models.", "fr": "Toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar peut piller les cryptes et gagner un butin de D6x10 CO - mais lors de la prochaine partie contre les Chasseurs de Sorcières ou les Sœurs de Sigmar, toute leur bande haïra vos figurines." },
+        "nextGameNoteText": { "en": "Next game: Witch Hunters/Sisters of Sigmar hate you (crypts looted at the Graveyard).", "fr": "Prochaine partie : les Chasseurs de Sorcières/Sœurs de Sigmar vous haïssent (cryptes pillées au Cimetière)." } },
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Chasseurs de Sorcières/Sœurs de Sigmar : D6 Expérience répartis entre les Héros",
+        "restrictedToWarbandArchetypeNames": ["Witch Hunters", "The Sisters of Sigmar"], "grantsDistributedHeroExperienceFormula": "D6",
+        "branchText": { "en": "Witch Hunters and Sisters of Sigmar may instead seal the graves, gaining D6 Experience distributed amongst their Heroes.", "fr": "Les Chasseurs de Sorcières et Sœurs de Sigmar peuvent à la place sceller les tombes et gagner D6 Expérience répartis entre leurs Héros." } }
     ]
   },
   {

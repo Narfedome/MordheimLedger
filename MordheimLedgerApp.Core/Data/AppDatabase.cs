@@ -713,6 +713,8 @@ public class AppDatabase
             {
                 var branchTextKey = outcome.BranchText is { } branchText
                     ? await SeedTranslationAsync(branchText.En, branchText.Fr) : null;
+                var nextGameNoteTextKey = outcome.NextGameNoteText is { } nextGameNoteText
+                    ? await SeedTranslationAsync(nextGameNoteText.En, nextGameNoteText.Fr) : null;
                 await _db.InsertAsync(new ExplorationOutcomeEntity
                 {
                     ExplorationResultId = resultEntity.Id,
@@ -739,7 +741,8 @@ public class AppDatabase
                     GrantsLeaderExperience = outcome.GrantsLeaderExperience,
                     GrantsDistributedHeroExperienceFormula = outcome.GrantsDistributedHeroExperienceFormula,
                     GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName,
-                    GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman
+                    GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman,
+                    NextGameNoteTextKey = nextGameNoteTextKey
                 });
             }
         }

@@ -31,6 +31,7 @@ public static class EntityMapping
         Treasury = e.Treasury,
         WyrdstoneShards = e.WyrdstoneShards,
         PendingExplorationBonusDie = e.PendingExplorationBonusDie,
+        NextGameNote = e.NextGameNote,
         Notes = e.Notes
     };
 
@@ -43,6 +44,7 @@ public static class EntityMapping
         Treasury = m.Treasury,
         WyrdstoneShards = m.WyrdstoneShards,
         PendingExplorationBonusDie = m.PendingExplorationBonusDie,
+        NextGameNote = m.NextGameNote,
         Notes = m.Notes
     };
 
@@ -318,7 +320,9 @@ public static class EntityMapping
         GrantsLeaderExperience = e.GrantsLeaderExperience,
         GrantsDistributedHeroExperienceFormula = e.GrantsDistributedHeroExperienceFormula,
         GrantsFreeHenchmanArchetypeName = e.GrantsFreeHenchmanArchetypeName,
-        GrantsOptionalEquippedHenchman = e.GrantsOptionalEquippedHenchman
+        GrantsOptionalEquippedHenchman = e.GrantsOptionalEquippedHenchman,
+        NextGameNoteText = ResolveDescription(e.NextGameNoteTextKey, translations),
+        NextGameNoteTextKey = e.NextGameNoteTextKey
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -348,7 +352,8 @@ public static class EntityMapping
         GrantsLeaderExperience = m.GrantsLeaderExperience,
         GrantsDistributedHeroExperienceFormula = m.GrantsDistributedHeroExperienceFormula,
         GrantsFreeHenchmanArchetypeName = m.GrantsFreeHenchmanArchetypeName,
-        GrantsOptionalEquippedHenchman = m.GrantsOptionalEquippedHenchman
+        GrantsOptionalEquippedHenchman = m.GrantsOptionalEquippedHenchman,
+        NextGameNoteTextKey = m.NextGameNoteTextKey
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()

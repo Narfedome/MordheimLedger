@@ -449,6 +449,10 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.GrantsOptionalEquippedHenchman. False/absent for
     /// almost every outcome - so far only Prisoners' "other warbands" catch-all branch.</summary>
     public bool GrantsOptionalEquippedHenchman { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.NextGameNoteText. Null for almost every outcome -
+    /// so far only Graveyard's catch-all branch.</summary>
+    public LocalizedText? NextGameNoteText { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

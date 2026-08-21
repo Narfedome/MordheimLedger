@@ -119,6 +119,17 @@ public partial class WarbandDetailViewModel
             await _warbandService.SaveWarbandAsync(Warband);
         }
 
+        // Même idiome pour le pense-bête "prochaine partie" (Cimetière, catch-all : "Chasseurs de
+        // Sorcières/Sœurs de Sigmar vous haïssent" - voir Warband.NextGameNote/ExplorationOutcome.
+        // NextGameNoteText) - affiché en bannière sur la fiche de bande (WarbandDetailPage) depuis LA
+        // partie précédente, consommé qu'il ait servi ou non maintenant que cette nouvelle partie a lieu.
+        // Reposé plus bas si CETTE partie déclenche elle-même un nouveau pense-bête.
+        if (Warband.NextGameNote is not null)
+        {
+            Warband.NextGameNote = null;
+            await _warbandService.SaveWarbandAsync(Warband);
+        }
+
         // Même résolution nom-anglais-vers-Id que le chargement de la page, réutilisée ici pour
         // AddWarbandEquipmentAsync (seul l'Id compte, voir WarbandService) et pour la phrase
         // d'Historique (equipmentItemsByEnglishName donne directement l'item résolu dans la langue
@@ -305,6 +316,14 @@ public partial class WarbandDetailViewModel
                 }
                 sentences.Add(string.Format(Loc["HistoryEquippedHenchmanSentence"], recruitGroup.ArchetypeName, equipmentCost));
             }
+
+            // Rappel "prochaine partie" (Cimetière catch-all) - indépendant du Kind ci-dessus, même
+            // principe que SecondaryEquipmentItemName/GrantsOptionalEquippedHenchman.
+            if (outcome.NextGameNoteText is { } nextGameNote)
+            {
+                Warband.NextGameNote = nextGameNote;
+                await _warbandService.SaveWarbandAsync(Warband);
+            }
         }
 
         if (dialogViewModel.BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemName is { } bonusItemName)
@@ -350,7 +369,11 @@ public partial class WarbandDetailViewModel
                 changed = true;
             }
 
-            foreach (var advance in row.AdvanceRolls)
+            // AdvanceRolls (palier franchi par l'XP de bataille normale) + ExplorationAdvanceRolls
+            // (palier atteint uniquement grâce à l'XP accordée par la table d'Exploration - voir
+            // WarriorOutcomeRow.ExplorationMilestoneCount) : même application pour les deux, aucune
+            // distinction nécessaire une fois les jets faits.
+            foreach (var advance in row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
             {
                 if (string.IsNullOrWhiteSpace(advance.ResultText)) continue;
 

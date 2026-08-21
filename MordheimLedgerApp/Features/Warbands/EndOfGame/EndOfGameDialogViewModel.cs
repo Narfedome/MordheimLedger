@@ -113,6 +113,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
     [NotifyPropertyChangedFor(nameof(CurrentAdvanceWarrior))]
+    [NotifyPropertyChangedFor(nameof(CurrentAdvanceRolls))]
     [NotifyPropertyChangedFor(nameof(AdvanceProgressLabel))]
     [NotifyPropertyChangedFor(nameof(CanGoBack))]
     [NotifyPropertyChangedFor(nameof(IsLastStep))]
@@ -126,7 +127,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 
     private enum StepKind { Result, OutOfAction, Injury, Experience, Advance, ExplorationRoll, ExplorationResult, Recap }
 
-    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null);
+    /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
+    /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
+    /// bataille normale (WarriorOutcomeRow.MilestoneCount/AdvanceRolls) - place officielle de la
+    /// Progression dans la séquence du livre ; le second (true), juste après Exploration, pour des
+    /// paliers UNIQUEMENT atteints grâce à l'XP accordée par la table d'Exploration (Traînard/Prisonniers/
+    /// Cimetière - WarriorOutcomeRow.ExplorationMilestoneCount/ExplorationAdvanceRolls), qui ne peut être
+    /// détecté qu'une fois cette XP-là connue, donc après l'étape Exploration. Voir CurrentAdvanceRolls.</summary>
+    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null, bool IsExplorationAdvance = false);
 
     /// <summary>ExplorationResult ne s'ajoute que si un résultat a effectivement été déclenché par le
     /// jet précédent (au plus un, voir ExplorationChart.DetectMultiples) - même principe que les étapes
@@ -143,6 +151,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             steps.AddRange(WarriorRows.Where(r => r.HasMilestone).Select(r => new WizardStep(StepKind.Advance, r)));
             steps.Add(new(StepKind.ExplorationRoll));
             if (TriggeredExplorationResult is not null) steps.Add(new(StepKind.ExplorationResult));
+            // Deuxième passage Progression, placé APRÈS Exploration plutôt qu'inséré à la position
+            // "normale" (juste après Expérience, ci-dessus) : Steps est recalculée à chaud (voir la doc de
+            // classe) - un guerrier dont HasMilestone ne devient vrai qu'une fois l'XP d'Exploration
+            // assignée franchirait sinon un palier à une position DÉJÀ dépassée par le joueur, décalant
+            // silencieusement tous les StepIndex suivants (StepIndex est un simple entier, sans identité
+            // de step stable). Toujours ajouté après ExplorationResult, jamais avant : ce guerrier a donc
+            // déjà quitté cette position au moment où le palier apparaît, aucun décalage rétroactif possible.
+            steps.AddRange(WarriorRows.Where(r => r.HasExplorationMilestone).Select(r => new WizardStep(StepKind.Advance, r, IsExplorationAdvance: true)));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -187,6 +203,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// franchi un palier d'XP, même principe que CurrentInjuryWarrior (voir la doc de classe).</summary>
     public WarriorOutcomeRow? CurrentAdvanceWarrior => Current.Warrior;
 
+    /// <summary>La bonne collection de jets à afficher/valider pour l'étape Progression courante -
+    /// AdvanceRolls (XP de bataille) ou ExplorationAdvanceRolls (XP d'Exploration), selon
+    /// WizardStep.IsExplorationAdvance (voir sa doc). Tout le reste de l'étape (AutoRollAdvance,
+    /// PickAdvanceSkill...) reste inchangé, cette propriété est le seul point de bascule.</summary>
+    public ObservableCollection<AdvanceRollEntry>? CurrentAdvanceRolls =>
+        CurrentAdvanceWarrior is { } warrior ? (Current.IsExplorationAdvance ? warrior.ExplorationAdvanceRolls : warrior.AdvanceRolls) : null;
+
     public string AdvanceProgressLabel
     {
         get
@@ -194,7 +217,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             var warrior = CurrentAdvanceWarrior;
             if (warrior is null) return string.Empty;
 
-            var withMilestone = WarriorRows.Where(r => r.HasMilestone).ToList();
+            var withMilestone = (Current.IsExplorationAdvance
+                ? WarriorRows.Where(r => r.HasExplorationMilestone)
+                : WarriorRows.Where(r => r.HasMilestone)).ToList();
             var index = withMilestone.IndexOf(warrior);
             return index < 0 ? string.Empty : string.Format(Loc["EndOfGameAdvanceProgressLabel"], index + 1, withMilestone.Count);
         }
@@ -234,7 +259,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         {
             row.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName is nameof(WarriorOutcomeRow.IsOutOfAction) or nameof(WarriorOutcomeRow.ExperienceGained))
+                // DistributedExplorationExperience/LeaderExplorationExperience : Steps() gagne aussi son
+                // deuxième passage Progression (HasExplorationMilestone) dès que l'XP d'Exploration
+                // change, pas seulement IsOutOfAction/ExperienceGained.
+                if (e.PropertyName is nameof(WarriorOutcomeRow.IsOutOfAction) or nameof(WarriorOutcomeRow.ExperienceGained)
+                    or nameof(WarriorOutcomeRow.DistributedExplorationExperience) or nameof(WarriorOutcomeRow.LeaderExplorationExperience))
                 {
                     OnPropertyChanged(nameof(StepLabel));
                     OnPropertyChanged(nameof(IsLastStep));
@@ -268,7 +297,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         return Current.Kind switch
         {
             StepKind.Injury => ValidateInjuryStep(CurrentInjuryWarrior!),
-            StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceWarrior!),
+            StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceRolls ?? Enumerable.Empty<AdvanceRollEntry>()),
             StepKind.ExplorationRoll => ValidateExplorationRollStep(),
             StepKind.ExplorationResult => ValidateExplorationResultStep(),
             _ => true

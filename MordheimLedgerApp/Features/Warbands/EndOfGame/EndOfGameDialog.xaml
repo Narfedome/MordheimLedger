@@ -225,7 +225,10 @@
                  saute entièrement cette étape si personne n'a franchi de palier, voir Steps dans le
                  ViewModel). Un guerrier qui saute plusieurs paliers d'un coup a une carte par palier
                  (AdvanceRolls) empilée dans cette même étape - même résolution automatique que les
-                 Blessures Graves, purement descriptif. -->
+                 Blessures Graves, purement descriptif. Réapparaît une seconde fois après Exploration pour
+                 un palier atteint uniquement grâce à son XP (CurrentAdvanceRolls bascule alors sur
+                 ExplorationAdvanceRolls - voir WizardStep.IsExplorationAdvance), sans rien dupliquer côté
+                 XAML. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsAdvanceStep}">
                 <Grid ColumnDefinitions="*,Auto">
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
@@ -237,7 +240,7 @@
                             <Label Grid.Column="0" Text="{Binding CurrentAdvanceWarrior.Name}" FontAttributes="Bold"/>
                             <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceWarrior.AdvanceRolls}" Spacing="6">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="6">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="local:AdvanceRollEntry">
                                     <VerticalStackLayout Spacing="4">

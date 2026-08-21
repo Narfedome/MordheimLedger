@@ -1,9 +1,8 @@
 # Table d'Exploration — état d'implémentation
 
 Suivi de l'assistant Fin de Partie, étape Revenus/Exploration (voir le plan de séquencement).
-Mis à jour à chaque avancée — dernière mise à jour : **2026-08-21** (Prisonniers : recrutement
-conditionné à l'équipement de la branche "autres bandes" ; correction Race Kermesse du Chaos/Culte
-des Possédés → Humain du Chaos).
+Mis à jour à chaque avancée — dernière mise à jour : **2026-08-21** (Cimetière ; Progression reconnectée
+sur l'XP d'Exploration ; pense-bête "prochaine partie" `Warband.NextGameNote`).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -12,7 +11,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 | Groupe | Mécanisme | Statut |
 |---|---|---|
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
-| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **3/6 ✅** |
+| B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **4/6 ✅** |
 | C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
@@ -39,7 +38,7 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 | 4,2 | Sanctuaire | 🔧 | ❌ | Or (3D6) fait ; la bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement) rejoint le Groupe B, en attente de son UI de choix - voir Hors périmètre |
 | 4,3 | Maison de Ville | ✅ | ✅ | Branche unique |
 | 4,4 | Armurerie | ✅ | ✅ | Branche 1-2 : choix du joueur Bouclier ou Rondache (`AlternativeEquipmentItemName`) |
-| 4,5 | Cimetière | ⏳ | ❌ | Groupe B |
+| 4,5 | Cimetière | ✅ | — | Groupe B — miroir de Prisonniers : le catch-all (Or D6x10, toute bande) est ici la branche non restreinte, Chasseurs de Sorcières/Sœurs de Sigmar (seule branche `RestrictedToWarbandArchetypeNames`) prennent D6 Expérience répartis entre les Héros à la place (`GrantsDistributedHeroExperienceFormula` réutilisé tel quel - aucun code Core.Rules/wizard nouveau, l'infrastructure Groupe B existante couvre déjà cette forme). La conséquence "haïe par les Chasseurs de Sorcières/Sœurs de Sigmar à la prochaine partie" du catch-all est mécanisée en pense-bête (`ExplorationOutcome.NextGameNoteText` → `Warband.NextGameNote`, bannière sur la fiche de bande - voir Journal 2026-08-21) |
 | 4,6 | Catacombes | ⏳ | ❌ | Groupe C — déploiement spécial, `NextGameNotes` pas construit |
 | 5,1 | Maison du Prêteur | ✅ | ✅ | Branche unique |
 | 5,2 | Laboratoire de l'Alchimiste | ✅ | ✅ | Or (3D6) + carnet trouvé (`SecondaryEquipmentItemName`) - le Héros qui le porte débloque Érudition en plus de ses listes habituelles dès sa prochaine compétence gagnée (`EquipmentItem.GrantsSkillCategory`, voir `Core.Rules.SkillEligibility`) |
@@ -57,7 +56,7 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 ## Hors périmètre pour l'instant
 
 - **Groupe B** (Traînard/Taverne/Prisonniers/Cimetière/Trésor Caché/Bande Massacrée) : UI de sélection de branche par le joueur, plus les sous-mécaniques Recrutement gratuit (`Kind.Recruit`) et Expérience répartie (`Kind.Experience`) qu'elles impliquent (voir le plan de séquencement). **Sanctuaire** (4,2) rejoint cette liste pour sa bénédiction d'arme (Sœurs de Sigmar/Chasseurs de Sorcières uniquement, choix du joueur sur un objet déjà porté, pas une trouvaille) - même mécanique de choix conditionné à la bande que le reste du Groupe B, discuté puis explicitement reporté au 2026-08-18 plutôt que traité comme un cas isolé. Sa branche Or (3D6, toutes bandes) reste ✅.
-- **Groupe C** (Une Faveur Rendue/Catacombes/Entrée des Catacombes) : `Warband.NextGameNotes` (pense-bête sur la fiche de bande) + `Warband.HasCatacombReroll`/`PendingExplorationBonusDie` pour les effets mécanisables.
+- **Groupe C** (Une Faveur Rendue/Catacombes/Entrée des Catacombes) : `Warband.NextGameNote` (pense-bête sur la fiche de bande, voir Journal 2026-08-21 - construit et déjà branché pour Cimetière, réutilisable tel quel) + `Warband.HasCatacombReroll` (relance permanente, encore à construire) pour les effets mécanisables. Une Faveur Rendue exige en plus les Mercenaires à Louer (Hired Swords), pas encore implémentés.
 - **Vente de la pierre magique** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
 
 ## Journal
@@ -321,3 +320,69 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   deux bandes + la table de backfill (`_raceNameByWarbandEnglishName`, pour une base déjà migrée sur une
   autre machine) mis à jour en conséquence ; nouveau test `WarbandArchetype_ChaosWarbands_
   ResolveChaosHumanRace`.
+- **2026-08-21 (Cimetière)** — Avant de traiter Une Faveur Rendue (Groupe C), l'utilisateur a demandé de
+  faire "le reste" d'abord : Une Faveur Rendue exige les Mercenaires à Louer (Hired Swords), pas encore
+  implémentés et porteurs de leur propre mécanique de progression (mélange Héros/Homme de main) - un
+  chantier à part entière, alors que les entrées Groupe B restantes semblaient plus simples. Cimetière
+  confirme cette intuition : forme miroir de Prisonniers déjà bien rodée (`ResolveWarbandOutcome`), sauf
+  que le catch-all (Or D6x10, toute bande) est cette fois la branche SANS restriction et Chasseurs de
+  Sorcières/Sœurs de Sigmar la seule branche restreinte (D6 Expérience répartis entre les Héros,
+  `GrantsDistributedHeroExperienceFormula` réutilisé tel quel - déjà généralisé, aucune modification de
+  code requise, uniquement `ExplorationResults.json` + tests). La conséquence "haine à la prochaine
+  partie contre Chasseurs de Sorcières/Sœurs de Sigmar" du catch-all est restée en texte pur (`Note`/
+  `BranchText`) dans cette première passe - voir l'entrée suivante pour sa mécanisation en pense-bête,
+  demandée par l'utilisateur juste après.
+- **2026-08-21 (Progression reconnectée sur l'XP d'Exploration)** — Bug de fond repéré par l'utilisateur
+  en relisant les mécaniques d'XP des tables (Traînard/Prisonniers/Cimetière) : `WarriorOutcomeRow.
+  MilestoneCount` (qui pilote l'étape Progression) ne lisait QUE `ExperienceGained` (l'étape Expérience,
+  XP de bataille) - l'XP accordée directement en Exploration (`GrantsLeaderExperience`, chef fixe ;
+  `GrantsDistributedHeroExperienceFormula`, répartition libre) était ajoutée à `Warrior.Experience` à la
+  sauvegarde SANS jamais repasser par la détection de palier, donc sans jamais déclencher de jet de
+  Progression - un palier franchi par cet XP-là était silencieusement perdu, pour toujours (la partie
+  suivante repart du nouveau total déjà au-delà du palier). Confirmé par l'utilisateur : il faut
+  déclencher l'Advance si le palier est franchi, "on reprend la mécanique d'Advance déjà existante, on la
+  rebranche" - pas une nouvelle mécanique.
+  Contrainte de taille : Steps() est recalculée à chaud (voir la doc de classe d'EndOfGameDialogViewModel)
+  et la carte Progression normale est insérée à une position FIXE, juste après Expérience - donc AVANT
+  l'étape Exploration où cet XP-là devient connu. Réutiliser le même HasMilestone/MilestoneCount incluant
+  l'XP d'Exploration aurait fait apparaître une carte Progression à une position déjà dépassée par le
+  joueur au moment où le palier est franchi, décalant silencieusement tous les StepIndex suivants
+  (StepIndex est un entier brut, sans identité de step stable - `Next()` incrémente juste ce nombre).
+  Résolu par un DEUXIÈME passage de la même mécanique (mêmes `AdvanceRollEntry`/`HeroAdvanceTable`/
+  `HenchmanAdvanceTable`/commandes `AutoRollAdvance`/`PickAdvanceSkill`, rien dupliqué), placé après
+  l'étape Exploration plutôt qu'avant : `WarriorOutcomeRow.ExplorationMilestoneCount`/
+  `HasExplorationMilestone`/`ExplorationAdvanceRolls` comptent les paliers franchis UNIQUEMENT par
+  `ExplorationBonusExperience` (= `DistributedExplorationExperience` + le nouveau
+  `LeaderExplorationExperience`, pour `GrantsLeaderExperience`), à partir du point où la Progression
+  normale s'est déjà arrêtée (`Warrior.Experience + ExperienceGained`) plutôt que depuis `Warrior.
+  Experience` directement - évite tout recomptage/rejeu d'un palier déjà traité par le premier passage.
+  `WizardStep` gagne `IsExplorationAdvance` (bool) pour distinguer les deux passages du même
+  `StepKind.Advance` ; `EndOfGameDialogViewModel.CurrentAdvanceRolls` bascule entre `AdvanceRolls`/
+  `ExplorationAdvanceRolls` selon ce flag - seul point de bascule, le XAML (un seul bloc Progression) et
+  les commandes existantes n'ont pas besoin d'être dupliqués. `ValidateAdvanceStep`/`PickAdvanceSkill`
+  ajustés pour accepter/chercher dans les deux collections. Côté sauvegarde
+  (`WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync`) : `row.AdvanceRolls.Concat(row.
+  ExplorationAdvanceRolls)` appliqué en un seul passage, aucune distinction nécessaire une fois les jets
+  faits. Hors couverture de `MordheimLedgerApp.Tests` (logique ViewModel/tête MAUI, pas Core) - à
+  vérifier manuellement au prochain test en jeu d'un résultat Traînard/Prisonniers/Cimetière qui fait
+  franchir un palier.
+- **2026-08-21 (pense-bête "prochaine partie" - `Warband.NextGameNote`)** — Demandé par l'utilisateur
+  juste après Cimetière : comme prévu pour les Catacombes (Groupe C, "Hors périmètre" ci-dessus), la
+  conséquence "haine à la prochaine partie" de la branche catch-all a besoin d'un encart sur la fiche de
+  bande plutôt que de rester seulement lisible dans le texte du wizard, sans quoi le joueur n'a plus
+  aucun moyen de s'en souvenir une fois sorti du wizard. Nouveau champ `ExplorationOutcome.
+  NextGameNoteText`/`NextGameNoteTextKey` (même paire Text/TextKey que `BranchText`/`BranchTextKey`,
+  localisé EN/FR) posé sur Cimetière catch-all uniquement pour l'instant ; `Warband.NextGameNote`
+  (string?, même idiome que `PendingExplorationBonusDie` : posé à la résolution de la branche, consommé
+  sans condition à la Fin de Partie SUIVANTE - `WarbandDetailViewModel.EndOfGame.
+  ApplyExplorationOutcomeAsync`, juste à côté de la consommation de `PendingExplorationBonusDie`). Un
+  pense-bête plutôt qu'un effet appliqué : l'appli n'a aucune notion d'identité d'adversaire (jamais
+  demandé jusqu'ici), donc "la prochaine fois que vous jouez contre les Chasseurs de Sorcières/Sœurs de
+  Sigmar" ne peut pas être détecté automatiquement - le joueur lit la bannière et applique la règle
+  lui-même le moment venu. Bannière sur `WarbandDetailPage` (juste sous la ligne Trésorerie/Pierres
+  magiques/Rating, bordure `AppDanger`, masquée si `Warband.NextGameNote` est vide -
+  `WarbandDetailViewModel.HasNextGameNote`) plutôt qu'une simple entrée d'Historique, pour rester visible
+  tant qu'elle s'applique (l'Historique défile et se perd dans la liste). Infrastructure volontairement
+  générique (`Warband.NextGameNote`/`ExplorationOutcome.NextGameNoteText`, pas un champ dédié "haine
+  Sœurs/Chasseurs") pour être réutilisée telle quelle par Catacombes/Une Faveur Rendue plus tard, sans
+  nouveau champ ni nouvelle bannière à construire.

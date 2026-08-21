@@ -40,4 +40,5 @@ public class ExplorationOutcomeEntity
     public string? GrantsDistributedHeroExperienceFormula { get; set; }
     public string? GrantsFreeHenchmanArchetypeName { get; set; }
     public bool GrantsOptionalEquippedHenchman { get; set; }
+    public string? NextGameNoteTextKey { get; set; }
 }

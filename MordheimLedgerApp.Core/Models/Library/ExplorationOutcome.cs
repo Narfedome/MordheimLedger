@@ -186,4 +186,16 @@ public class ExplorationOutcome
     /// Kind.None-exclusive like GrantsDistributedHeroExperienceFormula/GrantsFreeHenchmanArchetypeName.
     /// False/default for every other branch.</summary>
     public bool GrantsOptionalEquippedHenchman { get; set; }
+
+    /// <summary>Localized reminder shown as a banner on the warband's detail page (Warband.NextGameNote)
+    /// from the moment this branch resolves until the NEXT End of Game is played - so far only
+    /// Graveyard's catch-all branch ("the next time you play against Sisters of Sigmar or Witch Hunters,
+    /// their entire warband will hate all your models"). A genuine "next game" consequence the app can't
+    /// otherwise track (no opponent-identity concept exists) - kept as a plain reminder rather than a
+    /// mechanized effect, same "no rules engine" boundary as everything else this simple. Null for every
+    /// other branch.</summary>
+    public string? NextGameNoteText { get; set; }
+
+    /// <summary>Translation slot backing NextGameNoteText - persistence-only, not for display.</summary>
+    public string? NextGameNoteTextKey { get; set; }
 }

@@ -27,5 +27,14 @@ public class Warband
     /// changed anything (same "spend it either way" idiom as any other found-but-unused resource).</summary>
     public bool PendingExplorationBonusDie { get; set; }
 
+    /// <summary>Free-text "next game" reminder set by an Exploration branch that can't be mechanized
+    /// because it depends on the OPPONENT's identity, which the app has no concept of (e.g. Graveyard's
+    /// catch-all: "the next time you play against Sisters of Sigmar or Witch Hunters, their entire
+    /// warband will hate all your models" - see Models.Library.ExplorationOutcome.NextGameNoteText).
+    /// Shown as a banner on WarbandDetailPage, cleared unconditionally the next time this warband's End
+    /// of Game wizard is saved, whether it actually applied that game or not - same "spend it either way"
+    /// idiom as PendingExplorationBonusDie. Null = no pending reminder.</summary>
+    public string? NextGameNote { get; set; }
+
     public string? Notes { get; set; }
 }

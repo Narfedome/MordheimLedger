@@ -821,7 +821,11 @@ public partial class EndOfGameDialogViewModel
         ArtefactRollError = null;
         DistributedExperienceTotal = string.Empty;
         DistributedExperienceError = null;
-        foreach (var hero in WarriorRows) hero.DistributedExplorationExperience = 0;
+        foreach (var hero in WarriorRows)
+        {
+            hero.DistributedExplorationExperience = 0;
+            hero.LeaderExplorationExperience = 0;
+        }
         SelectedEquippedHenchmanGroupOption = EquippedHenchmanGroupOptions[0];
         EquippedHenchmanError = null;
 
@@ -899,6 +903,15 @@ public partial class EndOfGameDialogViewModel
         else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone && outcome.GoldFormula is { } wyrdstoneFormula
             && !wyrdstoneFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
             ExplorationWyrdstoneAmount = wyrdstoneFormula;
+
+        // Traînard, branche Possédés : XP fixe au chef, sans jet ni choix - pousse la valeur sur sa ligne
+        // (WarriorOutcomeRow.LeaderExplorationExperience) pour que la Progression puisse en tenir compte
+        // si ça franchit un palier (voir ExplorationMilestoneCount), silencieusement ignoré si le chef
+        // n'est pas disponible cette partie (mort/malade/hors de combat), même idiome que
+        // BonusStatTestLeader/GrantsLeaderExperience côté sauvegarde (WarbandDetailViewModel.EndOfGame).
+        if (outcome.GrantsLeaderExperience is { } leaderXp
+            && WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader) is { } leaderRow)
+            leaderRow.LeaderExplorationExperience = leaderXp;
     }
 
     [RelayCommand]

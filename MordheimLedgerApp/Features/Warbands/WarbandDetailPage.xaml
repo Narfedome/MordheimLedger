@@ -186,20 +186,31 @@
              historique) entièrement masqué pendant Loading.IsLoading - seul le header (titre + retour)
              reste visible, pour ne pas bloquer la navigation pendant un chargement/rechargement. -->
         <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
-        <Label Grid.Row="0" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
-                    <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
-                    <Span Text=" · "/>
-                    <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
-                    <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>
-                    <Span Text=" · "/>
-                    <Span Text="{loc:Loc WarbandRatingPh}"/>
-                    <Span Text="{Binding Rating, StringFormat=' {0}'}"/>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
+        <VerticalStackLayout Grid.Row="0" Spacing="6" Margin="16,0,16,8">
+            <Label TextColor="{DynamicResource AppTextMuted}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
+                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
+                        <Span Text=" · "/>
+                        <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
+                        <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>
+                        <Span Text=" · "/>
+                        <Span Text="{loc:Loc WarbandRatingPh}"/>
+                        <Span Text="{Binding Rating, StringFormat=' {0}'}"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+            <!-- Pense-bête "prochaine partie" (voir Warband.NextGameNote) - ex. Cimetière : haine des
+                 Chasseurs de Sorcières/Sœurs de Sigmar après un pillage. S'efface tout seul à la Fin de
+                 Partie suivante (consommé côté ViewModel), rien à cliquer ici - même principe que le chip
+                 "Malade" d'un guerrier, mais au niveau de toute la bande. -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" Stroke="{DynamicResource AppDanger}"
+                    Padding="10,6" IsVisible="{Binding HasNextGameNote}">
+                <Label Text="{Binding Warband.NextGameNote}" FontSize="12" TextColor="{DynamicResource AppDanger}"/>
+            </Border>
+        </VerticalStackLayout>
 
         <!-- Roster / Historique : pas de précédent DmTools pour des "onglets" internes à une page de
              détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab.

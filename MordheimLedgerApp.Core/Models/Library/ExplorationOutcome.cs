@@ -210,4 +210,13 @@ public class ExplorationOutcome
     /// Ithilmar purchase rather than a bespoke bool flag - reuses the existing chip/abbreviation display
     /// as-is. False/default for every other branch.</summary>
     public bool GrantsWeaponBlessing { get; set; }
+
+    /// <summary>True only for Entrance to the Catacombs' single universal branch ("from now on, you may
+    /// re-roll one dice when you roll on the Exploration chart... a second and subsequent catacomb
+    /// entrance does not grant additional re-rolls") - sets Warband.HasCatacombReroll permanently, unlike
+    /// NextGameNoteText's one-game reminder. Per the user's explicit simplification (2026-08-21): the
+    /// wizard only shows an informational reminder in the Exploration roll step (same idiom as
+    /// PendingExplorationBonusDie's reminder) - the player re-rolls their own physical die and types the
+    /// new value themselves, no dedicated re-roll button/logic. False/default for every other branch.</summary>
+    public bool GrantsCatacombReroll { get; set; }
 }

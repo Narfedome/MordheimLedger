@@ -296,7 +296,10 @@
       "fr": "Vous trouvez une entrée vers les catacombes et les tunnels sous Mordheim. Lors de votre prochaine bataille, placez jusqu'à trois combattants (hors Ogres-Rats et Possédés) n'importe où sur le champ de bataille au niveau du sol, déployés à la fin de votre premier tour, à plus de 20 cm de toute figurine ennemie."
     },
     "rollsIndependently": false,
-    "outcomes": []
+    "outcomes": [
+      { "subRollMin": null, "subRollMax": null, "kind": "None",
+        "nextGameNoteText": { "en": "Next battle: position up to 3 fighters (not Rat Ogres or the Possessed) anywhere on the battlefield at ground level, set up at the end of your first turn, not within 8\" of any enemy model.", "fr": "Prochaine bataille : placez jusqu'à 3 combattants (hors Ogres-Rats et Possédés) n'importe où sur le champ de bataille au niveau du sol, déployés à la fin de votre premier tour, à plus de 20 cm de toute figurine ennemie." } }
+    ]
   },
   {
     "diceCount": 5,
@@ -379,7 +382,9 @@
       "fr": "Vous trouvez une entrée bien dissimulée vers les sombres catacombes qui s'étendent sur des kilomètres sous Mordheim. Désormais, vous pouvez relancer un dé à chaque jet sur la table d'Exploration. Notez-le sur la feuille de bande. Une deuxième entrée trouvée (ou plus) n'accorde pas de relance supplémentaire."
     },
     "rollsIndependently": false,
-    "outcomes": []
+    "outcomes": [
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "grantsCatacombReroll": true }
+    ]
   },
   {
     "diceCount": 6,

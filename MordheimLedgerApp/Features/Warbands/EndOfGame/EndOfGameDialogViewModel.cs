@@ -59,6 +59,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// once this Fin de Partie is actually saved (WarbandDetailViewModel.EndOfGame).</summary>
     private readonly bool _pendingExplorationBonusDie;
 
+    /// <summary>Captured once at dialog construction (see Warband.HasCatacombReroll) - permanent, unlike
+    /// _pendingExplorationBonusDie, so it's only ever read to show an informational reminder in the
+    /// Exploration roll step (ShowCatacombRerollReminder), never cleared/consumed.</summary>
+    private readonly bool _hasCatacombReroll;
+
     /// <summary>Snapshot of Warband.Treasury at dialog-open time (see EquippedHenchmanTreasuryAfter,
     /// Prisonniers' "autres bandes" branch) - the wizard never writes to the real Warband mid-dialog
     /// (only WarbandDetailViewModel.EndOfGame does, at Save), so this stays a plain frozen number for
@@ -229,13 +234,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _warbandArchetypeId = warbandArchetypeId;
         _warbandArchetypeName = warbandArchetypeName;
         _pendingExplorationBonusDie = pendingExplorationBonusDie;
+        _hasCatacombReroll = hasCatacombReroll;
         _currentTreasury = currentTreasury;
         _explorationResults = explorationResults;
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;

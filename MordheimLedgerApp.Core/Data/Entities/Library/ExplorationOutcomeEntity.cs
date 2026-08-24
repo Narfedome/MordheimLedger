@@ -42,4 +42,5 @@ public class ExplorationOutcomeEntity
     public bool GrantsOptionalEquippedHenchman { get; set; }
     public string? NextGameNoteTextKey { get; set; }
     public bool GrantsWeaponBlessing { get; set; }
+    public bool GrantsCatacombReroll { get; set; }
 }

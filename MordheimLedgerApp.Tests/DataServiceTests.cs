@@ -236,10 +236,25 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
             Assert.Equal(EquipmentCategory.MagicalArtefact, allEquipment.Single(i => i.Name == artefactName).Category);
         Assert.Equal(1, allEquipment.Single(i => i.Name == "All-seeing Eye of Numas").GrantsBonusExplorationDice);
 
-        // Catacombs (4 6): a purely tactical/battlefield effect (no gold/item/wyrdstone anywhere in the
-        // rulebook text) - genuinely nothing to mechanize, stays pure text.
+        // Catacombs (4 6, Group C): a single universal branch (no warband restriction), resolved via
+        // ResolveAutoOutcome - its "next battle" special deployment rule is mechanized as a pense-bête
+        // (NextGameNoteText -> Warband.NextGameNote, same mechanism as Graveyard's hate note) rather than
+        // staying pure text, since the app has no other way to remind the player once the wizard closes.
         var catacombs = results.Single(r => r.DiceCount == 4 && r.Value == 6);
-        Assert.Empty(catacombs.Outcomes);
+        Assert.False(catacombs.RollsIndependently);
+        var catacombsOutcome = Assert.Single(catacombs.Outcomes);
+        Assert.Equal(ExplorationOutcomeKind.None, catacombsOutcome.Kind);
+        Assert.Equal("Next battle: position up to 3 fighters (not Rat Ogres or the Possessed) anywhere on the battlefield at ground level, set up at the end of your first turn, not within 8\" of any enemy model.", catacombsOutcome.NextGameNoteText);
+
+        // Entrance to the Catacombs (5 6, Group C): unlike Catacombs (4 6) above, this is a PERMANENT
+        // grant (Warband.HasCatacombReroll) rather than a one-game reminder - GrantsCatacombReroll,
+        // never NextGameNoteText.
+        var catacombEntrance = results.Single(r => r.DiceCount == 5 && r.Value == 6);
+        Assert.False(catacombEntrance.RollsIndependently);
+        var catacombEntranceOutcome = Assert.Single(catacombEntrance.Outcomes);
+        Assert.Equal(ExplorationOutcomeKind.None, catacombEntranceOutcome.Kind);
+        Assert.True(catacombEntranceOutcome.GrantsCatacombReroll);
+        Assert.Null(catacombEntranceOutcome.NextGameNoteText);
 
         // Straggler (2 4): Groupe B "conditioned on warband identity" (2026-08-20: the wizard now
         // resolves the applicable branch automatically from the warband's archetype - see Core.Rules.

@@ -743,7 +743,8 @@ public class AppDatabase
                     GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName,
                     GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman,
                     NextGameNoteTextKey = nextGameNoteTextKey,
-                    GrantsWeaponBlessing = outcome.GrantsWeaponBlessing
+                    GrantsWeaponBlessing = outcome.GrantsWeaponBlessing,
+                    GrantsCatacombReroll = outcome.GrantsCatacombReroll
                 });
             }
         }

@@ -3,7 +3,7 @@
 Suivi de l'assistant Fin de Partie, étape Revenus/Exploration (voir le plan de séquencement).
 Mis à jour à chaque avancée — dernière mise à jour : **2026-08-21** (Cimetière ; Progression reconnectée
 sur l'XP d'Exploration ; pense-bête "prochaine partie" `Warband.NextGameNote` ; Sanctuaire/bénédiction
-d'arme).
+d'arme ; Catacombes ; Entrée des Catacombes).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -13,7 +13,7 @@ Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 E
 |---|---|---|
 | A — branche(s) fixe(s) | Or/Objet/Pierre magique résolu par un sous-jet D6 ou une branche unique | **18/18 ✅** |
 | B — conditionné par la bande | Une branche résolue automatiquement depuis l'archétype de la bande (pas un choix libre du joueur, confirmé le 2026-08-20), un test de caractéristique (gating, cible le chef, autopass par bande), ou des jets indépendants par objet selon l'entrée | **5/6 ✅** |
-| C — texte pur, aucun `Outcome` | Effet à appliquer à la prochaine bataille | **0/3 ⏳** (`Warband.NextGameNotes` pas construit) |
+| C — texte pur, pense-bête ou capacité permanente | Effet à appliquer à la prochaine bataille/partie, ou acquis pour toujours | **2/3 ✅** (`Warband.NextGameNote` couvre Catacombes, `Warband.HasCatacombReroll` couvre Entrée des Catacombes ; Une Faveur Rendue reste à faire) |
 | D — sous-table Artefacts Magiques | 6 objets nommés uniques, référencée par 2 entrées | **✅ 6/6 catalogués** (Villa d'un Noble mécanisée ; Trésor Caché reste Groupe B) |
 
 ## Détail (ordre des dés, pour tester avec de vrais dés)
@@ -40,13 +40,13 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 | 4,3 | Maison de Ville | ✅ | ✅ | Branche unique |
 | 4,4 | Armurerie | ✅ | ✅ | Branche 1-2 : choix du joueur Bouclier ou Rondache (`AlternativeEquipmentItemName`) |
 | 4,5 | Cimetière | ✅ | ✅ | Groupe B — miroir de Prisonniers : le catch-all (Or D6x10, toute bande) est ici la branche non restreinte, Chasseurs de Sorcières/Sœurs de Sigmar (seule branche `RestrictedToWarbandArchetypeNames`) prennent D6 Expérience répartis entre les Héros à la place (`GrantsDistributedHeroExperienceFormula` réutilisé tel quel - aucun code Core.Rules/wizard nouveau, l'infrastructure Groupe B existante couvre déjà cette forme). La conséquence "haïe par les Chasseurs de Sorcières/Sœurs de Sigmar à la prochaine partie" du catch-all est mécanisée en pense-bête (`ExplorationOutcome.NextGameNoteText` → `Warband.NextGameNote`, bannière sur la fiche de bande - voir Journal 2026-08-21) |
-| 4,6 | Catacombes | ⏳ | ❌ | Groupe C — déploiement spécial, `NextGameNotes` pas construit |
+| 4,6 | Catacombes | ✅ | ✅ | Groupe C — branche unique (pas conditionnée par la bande), résolue via `ResolveAutoOutcome` ; le déploiement spécial de la prochaine bataille est un pense-bête (`NextGameNoteText` → `Warband.NextGameNote`, bannière sur la fiche de bande, même mécanisme que Cimetière) - pur JSON, aucun code nouveau |
 | 5,1 | Maison du Prêteur | ✅ | ✅ | Branche unique |
 | 5,2 | Laboratoire de l'Alchimiste | ✅ | ✅ | Or (3D6) + carnet trouvé (`SecondaryEquipmentItemName`) - le Héros qui le porte débloque Érudition en plus de ses listes habituelles dès sa prochaine compétence gagnée (`EquipmentItem.GrantsSkillCategory`, voir `Core.Rules.SkillEligibility`) |
 | 5,3 | Bijoutier | ✅ | ✅ | 4 gemmes réelles (Pierres de Quartz/Améthyste/Collier/Rubis), vendables directement (`EquipmentItem.IsSellable`, pas un matériau - ce sont les objets eux-mêmes qui ont de la valeur) - valeur trouvée fixe au catalogue pour Améthyste/Collier, jetée en D6x5/D6x15 pour Quartz/Rubis (`ExplorationOutcome.FoundValueFormula` → `WarbandEquipment.FoundValueOverride`, affichée dans l'inventaire de bande et dans le popup détail au lieu du prix catalogue). Si gardée sur un Héros plutôt que vendue : +1 sur les jets d'objets rares (`EquipmentItem.GrantsRareItemSearchBonus`, `Core.Rules.RareItemSearchBonus` - la recherche d'objets rares elle-même n'est pas encore construite, ce n'est qu'une préparation de données) |
 | 5,4 | Maison du Marchand | ✅ | ✅ | Or (2D6x5) normalement, mais un double sur le 2D6 donne le Symbole de l'Ordre des Libres Marchands (`ExplorationResult.RequiresDoubleRoll` + `ExplorationOutcome.RequiresDoubleRoll`, 2 champs de dé dédiés - le total seul ne suffit pas à détecter un double). Un seul jet de 2D6 sert aux deux fins : si ce n'est pas un double, l'or (2D6x5) est calculé directement depuis ces 2 dés (`Core.Rules.DiceFormula.Apply`) plutôt que redemander un jet séparé - le livre ne prévoit qu'un seul lancer ici. Le Héros qui porte le symbole peut choisir Marchandage à sa prochaine Progression, même hors de ses listes habituelles (`EquipmentItem.GrantsSpecificSkillName`, `Core.Rules.SkillEligibility.EffectiveExtraSkillNames`, picker de compétence étendu) |
 | 5,5 | Bâtiment Éventré | ✅ | ✅ | Pierre magique (D3) toujours trouvée + test de Commandement ADDITIONNEL du chef de bande (`ExplorationResult.BonusStatTestField`, `Core.Rules.ExplorationOutcomeResolver.ResolveBonusStatTestOutcome` - s'ajoute à la pierre magique plutôt que la remplacer, contrairement à Puits) - en cas de réussite, un Chien de guerre rejoint la bande. Toujours le chef de bande, jamais un choix du joueur : nouveau `Warrior.IsLeader`/`WarriorArchetype.IsLeader` (flag explicite dans chaque JSON de bande, un seul par bande), pas de concept de "chef" avant cette passe. Jet en 2D6 (pas 1D6) : les tests de Commandement sont une exception explicite à la règle générale des tests de caractéristique (RulesReference `Regles.md`) - `Core.Rules.ExplorationChart.RollStatTest`, appliqué aussi rétroactivement au test de Puits (Endurance, resté en 1D6, correct) pour que le même mécanisme serve les deux |
-| 5,6 | Entrée des Catacombes | ⏳ | ❌ | Groupe C — relance permanente, `NextGameNotes`/`HasCatacombReroll` pas construits |
+| 5,6 | Entrée des Catacombes | ✅ | ✅ | Groupe C — capacité permanente (`Warband.HasCatacombReroll`, `ExplorationOutcome.GrantsCatacombReroll`), acquise une seule fois (idempotent, une 2e entrée ne fait rien de plus). Simplification demandée explicitement par l'utilisateur : l'app n'implémente pas la relance elle-même, juste un rappel informatif permanent à l'étape du jet d'Exploration (`ShowCatacombRerollReminder`, jamais consommé contrairement au rappel Traînard) - le joueur relance son dé physique et retape la valeur |
 | 6,1 | La Fosse | ✅ | ✅ | Envoi d'un Héros optionnel (`ExplorationResult.RequiresSentHero`, Picker sans stat comparée - "si vous le souhaitez", refuser d'envoyer quelqu'un est valide) - sous-jet 1 : le Héros envoyé est dévoré, `Warrior.Status` passe à `Dead` + phrase d'Historique dédiée (`ExplorationOutcome.CausesDeath`, même mécanisme que Sick du Puits - posé après `ApplyWarriorOutcomesAsync` pour éviter l'écrasement par sa resynchronisation de statut) ; sous-jet 2-6 : D6+1 pierres magiques, indépendant de qui a été envoyé |
 | 6,2 | Trésor Caché | ⏳ | ❌ | Groupe B — branche Artefact (sous-jet 5-6) désormais data-complète (`TriggersArtefactRoll`, Groupe D résolu), mais l'entrée entière reste non câblée dans le wizard (sélection de branche par le joueur, comme le reste du Groupe B) |
 | 6,3 | Forge Naine | ✅ | ✅ | Règle Gromril attachée sur les 3 branches concernées |
@@ -61,7 +61,9 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   l'archétype de la bande) : ici chaque objet/montant de la liste se jette INDÉPENDAMMENT contre son
   propre seuil ("4+", "5+"...), plusieurs peuvent se déclencher à la fois - aucune UI de ce genre
   n'existe encore dans le wizard, nécessite un mockup avant implémentation (voir le plan de séquencement).
-- **Groupe C** (Une Faveur Rendue/Catacombes/Entrée des Catacombes) : `Warband.NextGameNote` (pense-bête sur la fiche de bande, voir Journal 2026-08-21 - construit et déjà branché pour Cimetière, réutilisable tel quel) + `Warband.HasCatacombReroll` (relance permanente, encore à construire) pour les effets mécanisables. Une Faveur Rendue exige en plus les Mercenaires à Louer (Hired Swords), pas encore implémentés.
+- **Groupe C restant** : Une Faveur Rendue (3,6) exige les Mercenaires à Louer (Hired Swords), pas encore
+  implémentés (leur propre mécanique de progression, mélange Héros/Homme de main - chantier à part,
+  reporté explicitement le 2026-08-21).
 - **Vente de la pierre magique** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
 
 ## Journal
@@ -432,3 +434,26 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   ShowEquipmentDetail`, `WarriorEditDialogViewModel.ShowEquipmentDetail`) - `EquipmentPick` (choix en
   mémoire avant recrutement) n'a délibérément pas cette règle, une bénédiction ne peut par construction
   s'appliquer qu'à un guerrier déjà recruté.
+- **2026-08-21 (Catacombes)** — Enchaîné directement après Sanctuaire. Contrairement à Cimetière/
+  Sanctuaire (Groupe B, branche conditionnée par l'archétype de la bande), Catacombes (4,6) est une
+  branche UNIQUE et universelle (`rollsIndependently: false`, une seule Outcome) - son effet ("prochaine
+  bataille : jusqu'à 3 combattants déployés n'importe où au sol, hors Ogres-Rats/Possédés, à plus de 20
+  cm de l'ennemi") est un pense-bête pur, sans gain d'or/objet/pierre magique. Réutilise `Warband.
+  NextGameNote`/`ExplorationOutcome.NextGameNoteText` tels quels (construits pour Cimetière) - la seule
+  branche à ajouter était `ResolveAutoOutcome`, déjà générique (aucune modification requise), donc
+  encore une fois un changement 100% JSON + tests, aucun nouveau code C#. Un test existant (`Assert.
+  Empty(catacombs.Outcomes)`, qui documentait "genuinely nothing to mechanize, stays pure text" avant
+  cette passe) mis à jour en conséquence plutôt que dupliqué.
+- **2026-08-21 (Entrée des Catacombes)** — À ne pas confondre avec Catacombes (4,6) ci-dessus malgré le
+  nom proche : "vous pouvez désormais relancer un dé à chaque jet sur la table d'Exploration" est une
+  capacité PERMANENTE, pas un pense-bête d'une seule partie - `Warband.NextGameNote` (consommé à la
+  prochaine Fin de Partie) ne convient donc pas tel quel. Simplification explicite de l'utilisateur pour
+  ne pas avoir à construire un vrai bouton de relance : "tu peux faire juste un message d'information
+  lors de l'exploration chart" - nouveau `Warband.HasCatacombReroll` (bool permanent, jamais remis à
+  false, idempotent : une 2e entrée trouvée ne fait rien puisque le bool est déjà vrai) +
+  `ExplorationOutcome.GrantsCatacombReroll`, capturé une fois à l'ouverture du wizard
+  (`EndOfGameDialogViewModel._hasCatacombReroll`, même idiome que `_pendingExplorationBonusDie`) et
+  affiché comme simple rappel textuel à l'étape du jet d'Exploration (`ShowCatacombRerollReminder`) -
+  contrairement au rappel Traînard (consommé une fois montré), celui-ci reste affiché à VIE une fois
+  acquis, jamais consommé. Le joueur relance lui-même son dé physique et retape la nouvelle valeur dans
+  le champ existant - aucune UI de relance, aucun changement au nombre de dés affiché.

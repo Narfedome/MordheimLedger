@@ -41,6 +41,13 @@ public partial class EndOfGameDialogViewModel
     /// nombre de dés affichés) - affiché une fois à l'étape du jet d'Exploration.</summary>
     public bool ShowPendingExplorationBonusDieReminder => _pendingExplorationBonusDie;
 
+    /// <summary>Entrée des Catacombes (voir Warband.HasCatacombReroll) : contrairement au rappel
+    /// ci-dessus (consommé une fois montré), celui-ci reste affiché à CHAQUE Fin de Partie une fois
+    /// acquis, jamais consommé - purement informatif, le joueur relance lui-même le dé physique de son
+    /// choix et retape la nouvelle valeur, aucune logique de relance dans l'app (simplification demandée
+    /// explicitement par l'utilisateur, 2026-08-21).</summary>
+    public bool ShowCatacombRerollReminder => _hasCatacombReroll;
+
     public ObservableCollection<ExplorationDieEntry> ExplorationDice { get; } = new();
 
     [ObservableProperty]

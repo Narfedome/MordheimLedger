@@ -79,7 +79,7 @@ public partial class WarbandDetailViewModel
             a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
 
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId,
-            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
+            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
@@ -327,6 +327,16 @@ public partial class WarbandDetailViewModel
                 await _warbandService.SetWarriorEquipmentBlessingRuleAsync(blessedEquipment.Id, blessedRule.Id);
                 sentences.Add(string.Format(Loc["HistoryWeaponBlessingSentence"],
                     dialogViewModel.SelectedWeaponBlessingOption.Hero!.Name, blessedEquipment.Item.Name));
+            }
+
+            // Entrée des Catacombes - relance permanente (voir Warband.HasCatacombReroll), acquise une
+            // seule fois : une 2e entrée trouvée ne fait rien de plus (le bool est déjà vrai), aucune
+            // phrase d'Historique redondante dans ce cas.
+            if (outcome.GrantsCatacombReroll && !Warband.HasCatacombReroll)
+            {
+                Warband.HasCatacombReroll = true;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(Loc["HistoryCatacombRerollSentence"]);
             }
 
             // Rappel "prochaine partie" (Cimetière catch-all) - indépendant du Kind ci-dessus, même

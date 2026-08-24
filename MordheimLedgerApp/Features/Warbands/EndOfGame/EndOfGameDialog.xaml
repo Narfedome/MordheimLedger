@@ -308,6 +308,10 @@
                      dés affiché plus bas - voir ExplorationDiceCount pour pourquoi. -->
                 <Label Text="{loc:Loc EndOfGamePendingBonusDieReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
                        IsVisible="{Binding ShowPendingExplorationBonusDieReminder}"/>
+                <!-- Entrée des Catacombes : rappel permanent (jamais consommé, contrairement au rappel
+                     Traînard ci-dessus) - voir Warband.HasCatacombReroll. -->
+                <Label Text="{loc:Loc EndOfGameCatacombRerollReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       IsVisible="{Binding ShowCatacombRerollReminder}"/>
 
                 <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
                     <BindableLayout.ItemTemplate>

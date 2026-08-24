@@ -32,6 +32,7 @@ public static class EntityMapping
         WyrdstoneShards = e.WyrdstoneShards,
         PendingExplorationBonusDie = e.PendingExplorationBonusDie,
         NextGameNote = e.NextGameNote,
+        HasCatacombReroll = e.HasCatacombReroll,
         Notes = e.Notes
     };
 
@@ -45,6 +46,7 @@ public static class EntityMapping
         WyrdstoneShards = m.WyrdstoneShards,
         PendingExplorationBonusDie = m.PendingExplorationBonusDie,
         NextGameNote = m.NextGameNote,
+        HasCatacombReroll = m.HasCatacombReroll,
         Notes = m.Notes
     };
 
@@ -323,7 +325,8 @@ public static class EntityMapping
         GrantsOptionalEquippedHenchman = e.GrantsOptionalEquippedHenchman,
         NextGameNoteText = ResolveDescription(e.NextGameNoteTextKey, translations),
         NextGameNoteTextKey = e.NextGameNoteTextKey,
-        GrantsWeaponBlessing = e.GrantsWeaponBlessing
+        GrantsWeaponBlessing = e.GrantsWeaponBlessing,
+        GrantsCatacombReroll = e.GrantsCatacombReroll
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -355,7 +358,8 @@ public static class EntityMapping
         GrantsFreeHenchmanArchetypeName = m.GrantsFreeHenchmanArchetypeName,
         GrantsOptionalEquippedHenchman = m.GrantsOptionalEquippedHenchman,
         NextGameNoteTextKey = m.NextGameNoteTextKey,
-        GrantsWeaponBlessing = m.GrantsWeaponBlessing
+        GrantsWeaponBlessing = m.GrantsWeaponBlessing,
+        GrantsCatacombReroll = m.GrantsCatacombReroll
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()

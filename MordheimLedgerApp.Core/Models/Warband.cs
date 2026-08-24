@@ -36,5 +36,15 @@ public class Warband
     /// idiom as PendingExplorationBonusDie. Null = no pending reminder.</summary>
     public string? NextGameNote { get; set; }
 
+    /// <summary>Permanent, unlike NextGameNote's one-game reminder - set once and never cleared once a
+    /// warband finds Entrance to the Catacombs (see Models.Library.ExplorationOutcome.
+    /// GrantsCatacombReroll), granting "you may re-roll one dice when you roll on the Exploration chart"
+    /// from then on. A second/subsequent entrance found doesn't grant anything further - setting this
+    /// true again is naturally idempotent, no extra tracking needed. Per the user's explicit
+    /// simplification: the app only shows an informational reminder in the Exploration roll step, never
+    /// implements the re-roll itself - the player re-rolls their own physical die and types the new
+    /// value.</summary>
+    public bool HasCatacombReroll { get; set; }
+
     public string? Notes { get; set; }
 }

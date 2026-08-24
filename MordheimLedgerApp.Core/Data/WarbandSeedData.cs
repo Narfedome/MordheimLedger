@@ -457,6 +457,10 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.GrantsWeaponBlessing. False/absent for almost
     /// every outcome - so far only Shrine's Sisters of Sigmar/Witch Hunters branch.</summary>
     public bool GrantsWeaponBlessing { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsCatacombReroll. False/absent for almost
+    /// every outcome - so far only Entrance to the Catacombs' single branch.</summary>
+    public bool GrantsCatacombReroll { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

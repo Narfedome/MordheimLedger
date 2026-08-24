@@ -1,5 +1,6 @@
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Tests;
@@ -163,10 +164,27 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Null(wyrdstoneOutcome.SubRollMin);
         Assert.Contains(shatteredBuilding.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, EquipmentItemName: "Wardog", StatTestPass: true });
 
-        // Hidden Treasure (6 2): every Outcome checked independently against its own "N+" threshold.
+        // Hidden Treasure (6 2): every Outcome checked independently against its own "N+" threshold
+        // (2026-08-24: mechanized via ExplorationOutcomeResolver.IsIndependentThresholdResult - distinct
+        // from Group B's "one branch by warband identity" shape despite both being RollsIndependently).
         var hiddenTreasure = results.Single(r => r.DiceCount == 6 && r.Value == 2);
         Assert.True(hiddenTreasure.RollsIndependently);
         Assert.Equal(8, hiddenTreasure.Outcomes.Count);
+        Assert.True(ExplorationOutcomeResolver.IsIndependentThresholdResult(hiddenTreasure));
+        Assert.Contains(hiddenTreasure.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Gold, SubRollMin: null, GoldFormula: "5D6x5" });
+        Assert.Contains(hiddenTreasure.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Wyrdstone, SubRollMin: 4, GoldFormula: "D3" });
+        Assert.Contains(hiddenTreasure.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 5, TriggersArtefactRoll: true });
+
+        // Slaughtered Warband (6 4): same shape, no warband restriction anywhere either - but unlike
+        // Hidden Treasure, most Item rows have a REAL quantity formula (D3/D6, not just fixed "1"), and
+        // its Auto row is itself an Item (Daggers, D6) rather than Gold - both distinctions IndependentOutcomeEntry
+        // must handle generically (SubRollMin null = Auto regardless of Kind; ItemQuantityFormula
+        // containing 'D' = a real roll, same convention as the single-branch shape's ItemQuantityFormula).
+        var slaughteredWarband = results.Single(r => r.DiceCount == 6 && r.Value == 4);
+        Assert.True(ExplorationOutcomeResolver.IsIndependentThresholdResult(slaughteredWarband));
+        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: null, EquipmentItemName: "Dagger", ItemQuantityFormula: "D6" });
+        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 5, EquipmentItemName: "Heavy Armour", ItemQuantityFormula: "1" });
+        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 2, EquipmentItemName: "Shield", ItemQuantityFormula: "D3" });
 
         // Well (1 1): a Toughness test gates one bonus wyrdstone shard (pass) against sickness (fail) -
         // both branches Auto (no sub-roll), the wizard picks Pass/Fail itself by comparing the chosen

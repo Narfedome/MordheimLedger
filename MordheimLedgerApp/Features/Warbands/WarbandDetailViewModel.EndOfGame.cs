@@ -348,6 +348,38 @@ public partial class WarbandDetailViewModel
             }
         }
 
+        // Trésor Caché/Bande Massacrée - "roll for every item on the list separately" (voir
+        // EndOfGameDialogViewModel.IsIndependentThresholdResult) : plusieurs lignes peuvent avoir
+        // franchi leur propre seuil à la fois, contrairement au Kind unique ci-dessus (jamais résolu
+        // pour cette forme, les deux blocs sont mutuellement exclusifs en pratique).
+        if (dialogViewModel.IsIndependentThresholdResult)
+        {
+            foreach (var entry in dialogViewModel.IndependentOutcomeEntries.Where(e => e.ShowResult))
+            {
+                if (entry.IsGold && int.TryParse(entry.AmountRoll, out var gold) && gold != 0)
+                {
+                    Warband.Treasury += gold;
+                    await _warbandService.SaveWarbandAsync(Warband);
+                    sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
+                }
+                else if (entry.IsWyrdstone && int.TryParse(entry.AmountRoll, out var shards) && shards != 0)
+                {
+                    Warband.WyrdstoneShards += shards;
+                    await _warbandService.SaveWarbandAsync(Warband);
+                    sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], shards));
+                }
+                else if (entry.IsArtefact && entry.ResolvedArtefactItemName is { } artefactName)
+                {
+                    await AddOneItemToInventoryAsync(artefactName, 1, null);
+                }
+                else if (entry.IsItem && entry.Outcome.EquipmentItemName is { } itemName
+                    && int.TryParse(entry.ItemQuantity, out var quantity))
+                {
+                    await AddOneItemToInventoryAsync(itemName, quantity, entry.Outcome.MaterialRuleName);
+                }
+            }
+        }
+
         if (dialogViewModel.BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemName is { } bonusItemName)
             await AddOneItemToInventoryAsync(bonusItemName, 1, bonusOutcome.MaterialRuleName);
 

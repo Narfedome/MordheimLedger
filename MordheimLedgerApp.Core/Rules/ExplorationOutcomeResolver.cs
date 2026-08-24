@@ -106,4 +106,22 @@ public static class ExplorationOutcomeResolver
         var passed = ExplorationChart.PassesStatTest(field, roll, statValue);
         return result.Outcomes.FirstOrDefault(o => o.StatTestPass == passed);
     }
+
+    /// <summary>Hidden Treasure/Slaughtered Warband's shape ("roll for every item on the list
+    /// separately"): every Outcome is checked on its own D6 against its own SubRollMin threshold, several
+    /// can pass at once - contrast ResolveWarbandOutcome, the OTHER RollsIndependently shape (Straggler/
+    /// Prisoners/Graveyard/Shrine), which resolves to exactly ONE Outcome chosen by warband identity.
+    /// Distinguished from that shape by restriction: this one's Outcomes never carry
+    /// RestrictedToWarbandArchetypeNames at all - see ResolveWarbandOutcome's own guard, which already
+    /// requires at least one restricted Outcome and so never fires for this shape.</summary>
+    public static bool IsIndependentThresholdResult(ExplorationResult result) =>
+        result.RollsIndependently && result.Outcomes.Count > 0
+        && result.Outcomes.All(o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+
+    /// <summary>A single Outcome's independent threshold check within IsIndependentThresholdResult's
+    /// shape - "roll >= threshold" is arithmetic on an already-entered value, not a decision made for the
+    /// player. Only meaningful for an Outcome whose SubRollMin is set (the Auto branch, e.g. Hidden
+    /// Treasure's flat 5D6x5 gold, always applies without this check - callers branch on SubRollMin being
+    /// null separately).</summary>
+    public static bool MeetsIndependentThreshold(int roll, int threshold) => roll >= threshold;
 }

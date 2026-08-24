@@ -807,6 +807,30 @@
   <data name="EndOfGameCatacombRerollReminder" xml:space="preserve">
     <value>Grâce à l'entrée des Catacombes : vous pouvez relancer un dé de votre choix parmi vos jets d'Exploration.</value>
   </data>
+  <data name="EndOfGameIndependentThresholdLabel" xml:space="preserve">
+    <value>Seuil {0}+</value>
+  </data>
+  <data name="EndOfGameAutoGoldRowLabel" xml:space="preserve">
+    <value>Or trouvé</value>
+  </data>
+  <data name="EndOfGameThresholdGoldRowLabel" xml:space="preserve">
+    <value>Or supplémentaire</value>
+  </data>
+  <data name="EndOfGameThresholdGoldEarnedLabel" xml:space="preserve">
+    <value>Or supplémentaire gagné</value>
+  </data>
+  <data name="EndOfGameWyrdstoneEarnedLabel" xml:space="preserve">
+    <value>Pierres magiques gagnées</value>
+  </data>
+  <data name="EndOfGameWyrdstoneRowLabel" xml:space="preserve">
+    <value>Pierre(s) magique(s)</value>
+  </data>
+  <data name="EndOfGameArtefactRowLabel" xml:space="preserve">
+    <value>Artefact Magique</value>
+  </data>
+  <data name="EndOfGameIndependentOutcomeMissed" xml:space="preserve">
+    <value>Raté - rien cette fois.</value>
+  </data>
   <data name="EndOfGameExplorationGoldLabel" xml:space="preserve">
     <value>Or trouvé (CO)</value>
   </data>

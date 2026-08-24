@@ -480,6 +480,128 @@
                                    IsVisible="{Binding ExplorationDoubleRollError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
 
+                        <!-- Trésor Caché/Bande Massacrée : "roll for every item on the list separately" -
+                             une ligne par ExplorationOutcome, chacune avec son propre jet de seuil D6 (la
+                             branche Auto, ex. l'or de base, n'en a pas - voir IndependentOutcomeEntry.
+                             IsAuto). Calqué sur les blocs déjà existants plus bas (mêmes Entry+dé, même
+                             ChipView tapable, même table Artefact) plutôt qu'un nouveau langage visuel -
+                             mockup confirmé avec l'utilisateur avant implémentation (2026-08-24). -->
+                        <VerticalStackLayout IsVisible="{Binding IsIndependentThresholdResult}"
+                                              BindableLayout.ItemsSource="{Binding IndependentOutcomeEntries}" Spacing="16">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:IndependentOutcomeEntry">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding Label}" FontAttributes="Bold"/>
+
+                                        <!-- Seuil + jet, absents pour la branche Auto (voir IsAuto). -->
+                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsAuto, Converter={StaticResource InverseBoolConverter}}">
+                                            <Label Text="{Binding ThresholdLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding CheckRoll}" Keyboard="Numeric" WidthRequest="70"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding AutoRollCheckCommand}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding CheckRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding CheckRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{loc:Loc EndOfGameIndependentOutcomeMissed}" FontSize="12" FontAttributes="Italic"
+                                                   TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding Missed}"/>
+                                        </VerticalStackLayout>
+
+                                        <!-- Résultat : toujours pour la branche Auto, seulement une fois le
+                                             seuil passé sinon (voir ShowResult). -->
+                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowResult}">
+                                            <!-- Or/Pierre(s) magique(s) : même Entry+dé que le montant Or
+                                                 classique plus bas dans cette étape - la formule ("D3x10")
+                                                 en placeholder, même convention que les autres jets simples
+                                                 de ce wizard (StatTestRoll, ArtefactRoll...) plutôt qu'un
+                                                 label séparé (retour utilisateur 2026-08-24). Confirmation
+                                                 "gagné(es)" au-dessus (AmountEarnedLabel, vide pour la
+                                                 branche Auto) - une fois le seuil passé, rappelle ce qui
+                                                 vient d'être gagné avant de jeter combien. -->
+                                            <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowAmountRoll}">
+                                                <Label Text="{Binding AmountEarnedLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding IsAuto, Converter={StaticResource InverseBoolConverter}}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding AmountRoll}" Keyboard="Numeric" WidthRequest="70"
+                                                           Placeholder="{Binding Outcome.GoldFormula}">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding AutoRollAmountCommand}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding AmountRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding AmountRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            </VerticalStackLayout>
+
+                                            <!-- Objet : même ChipView tapable + quantité fixe ("x1", sans
+                                                 jet) ou éditable (D3/D6, Entry+dé) que le bloc Objet de la
+                                                 forme à branche unique plus bas dans cette étape. -->
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsItem}">
+                                                <components:ChipView Grid.Column="0" Item="{Binding ResolvedItem}"
+                                                                      IconGlyph="{Binding ResolvedItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding ShowResolvedItemDetailCommand}"/>
+                                                <Label Grid.Column="1" Text="{Binding ItemQuantity, StringFormat='x{0}'}"
+                                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding ShowItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                                <Entry Grid.Column="1" Text="{Binding ItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                                       VerticalOptions="Center" IsVisible="{Binding ShowItemQuantityRoll}"
+                                                       Placeholder="{Binding Outcome.ItemQuantityFormula}">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding AutoRollItemQuantityCommand}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                                              VerticalOptions="Center"
+                                                                              IsVisible="{Binding ShowItemQuantityRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding ItemQuantityError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding ItemQuantityError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                            <!-- Artefact Magique : même second jet + table dédiée que
+                                                 Villa d'un Noble (ArtefactRoll/ResolvedArtefactItem), y
+                                                 compris son libellé de table ("sur quelle table on
+                                                 relance" n'est pas déductible du contexte, voir le bloc
+                                                 original plus bas dans cette étape - manquait ici,
+                                                 corrigé sur retour utilisateur 2026-08-24). -->
+                                            <VerticalStackLayout Spacing="6" IsVisible="{Binding IsArtefact}">
+                                                <Label Text="{loc:Loc EndOfGameArtefactTableLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding ArtefactRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding AutoRollArtefactCommand}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding ArtefactRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding ArtefactRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                <components:ChipView IsVisible="{Binding ResolvedArtefactItem, Converter={StaticResource IsNotNullConverter}}"
+                                                                      Item="{Binding ResolvedArtefactItem}"
+                                                                      IconGlyph="{Binding ResolvedArtefactItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding ShowResolvedArtefactDetailCommand}"/>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
                         <!-- Branche résolue : montant d'or/pierres magiques éditable, ou objet trouvé
                              (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
                         <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">

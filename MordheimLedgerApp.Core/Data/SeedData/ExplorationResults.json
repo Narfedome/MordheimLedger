@@ -406,8 +406,8 @@
     "value": 2,
     "name": { "en": "Hidden Treasure", "fr": "Trésor Caché" },
     "description": {
-      "en": "In the depths of Mordheim, you come across a hidden chest bearing the coat-of-arms of one of the town's noble families. Roll for every item on the list separately: D3 Pieces of wyrdstone (4+), 5D6x5 gc (Auto), Holy Relic (5+), Suit of Heavy Armour (5+), D3 Gems worth 10 gc each (4+), Elven Cloak (5+), Holy Tome (5+), Magical Artefact (5+).",
-      "fr": "Dans les profondeurs de Mordheim, vous découvrez un coffre caché portant les armoiries d'une des familles nobles de la ville. Lancez séparément pour chaque objet de la liste : D3 pierres magiques (4+), 5D6x5 CO (Auto), Relique Sainte (5+), Armure lourde complète (5+), D3 Gemmes valant 10 CO chacune (4+), Cape Elfique (5+), Grimoire Sacré (5+), Artefact Magique (5+)."
+      "en": "In the depths of Mordheim, you come across a hidden chest bearing the coat-of-arms of one of the town's noble families. Roll for every item on the list separately.",
+      "fr": "Dans les profondeurs de Mordheim, vous découvrez un coffre caché portant les armoiries d'une des familles nobles de la ville. Lancez séparément pour chaque objet de la liste."
     },
     "rollsIndependently": true,
     "outcomes": [
@@ -444,8 +444,8 @@
     "value": 4,
     "name": { "en": "Slaughtered Warband", "fr": "Bande Massacrée" },
     "description": {
-      "en": "You find the remains of an entire warband, torn apart by some monstrous creature. After dealing with the dead as your warband sees fit, roll for every item separately: 3D6x5 gc (Auto), D3 Suits of Light Armour (4+), Suit of Heavy Armour (5+), D6 Daggers (Auto), Mordheim Map (4+), D3 Halberds (5+), D3 Swords (3+), D3 Shields (2+), D3 Bows (4+), D3 Helmets (2+).",
-      "fr": "Vous trouvez les restes d'une bande entière, déchiquetée par une créature monstrueuse. Après avoir traité les morts selon les usages de votre bande, lancez séparément pour chaque objet : 3D6x5 CO (Auto), D3 Armures légères complètes (4+), Armure lourde complète (5+), D6 Dagues (Auto), Carte de Mordheim (4+), D3 Hallebardes (5+), D3 Épées (3+), D3 Boucliers (2+), D3 Arcs (4+), D3 Casques (2+)."
+      "en": "You find the remains of an entire warband, torn apart by some monstrous creature. After dealing with the dead as your warband sees fit, roll for every item separately.",
+      "fr": "Vous trouvez les restes d'une bande entière, déchiquetée par une créature monstrueuse. Après avoir traité les morts selon les usages de votre bande, lancez séparément pour chaque objet."
     },
     "rollsIndependently": true,
     "outcomes": [

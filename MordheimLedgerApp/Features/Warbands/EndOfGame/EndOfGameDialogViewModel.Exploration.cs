@@ -78,6 +78,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(HasBonusStatTestOutcome))]
     [NotifyPropertyChangedFor(nameof(BonusStatTestItem))]
     [NotifyPropertyChangedFor(nameof(ShowSentHeroPicker))]
+    [NotifyPropertyChangedFor(nameof(IsIndependentThresholdResult))]
     // Steps() gagne/perd son étape ExplorationResult selon cette valeur (voir Steps) - le total affiché
     // par StepLabel et la visibilité du bouton "Suivant"/"Enregistrer" (IsLastStep) doivent donc suivre
     // en direct, pas seulement au prochain changement de StepIndex/WarriorRows (même classe de bug que
@@ -922,6 +923,10 @@ public partial class EndOfGameDialogViewModel
             // Sanctuaire) : la branche applicable se résout d'elle-même depuis l'archétype de la bande
             // jouée, aucune saisie du joueur ne la départage (voir ResolveWarbandOutcome).
             ApplyResolvedOutcome(warbandOutcome);
+
+        // Trésor Caché/Bande Massacrée : "roll for every item on the list separately" - sans effet (liste
+        // vide) pour toute autre forme, voir EndOfGameDialogViewModel.IndependentOutcomes.cs.
+        SyncIndependentOutcomeEntries();
     }
 
     partial void OnExplorationSubRollChanged(string value)
@@ -1024,6 +1029,10 @@ public partial class EndOfGameDialogViewModel
     /// rien de plus à valider.</summary>
     private bool ValidateExplorationResultStep()
     {
+        // Trésor Caché/Bande Massacrée - forme entièrement à part (plusieurs lignes indépendantes),
+        // aucune des validations de la branche unique ci-dessous ne s'applique.
+        if (IsIndependentThresholdResult) return ValidateIndependentOutcomesStep();
+
         if (ShowExplorationSubRoll && !CheckRoll(ResolvedExplorationOutcome is null, () => ExplorationSubRollError = Loc["EndOfGameRollRequired"]))
             return false;
 

@@ -813,6 +813,49 @@ public class RulesTests
         Assert.Null(ExplorationOutcomeResolver.ResolveBonusStatTestOutcome(Corpse(), roll: 1, statValue: 8));
     }
 
+    // Hidden Treasure (6,2): RollsIndependently like Straggler, but NO Outcome carries a warband
+    // restriction - every item on the list is checked on its own D6 against its own threshold instead.
+    private static ExplorationResult HiddenTreasure() => new()
+    {
+        DiceCount = 6, Value = 2, RollsIndependently = true,
+        Outcomes =
+        [
+            Outcome(ExplorationOutcomeKind.Wyrdstone, 4),
+            Outcome(ExplorationOutcomeKind.Gold),
+            Outcome(ExplorationOutcomeKind.Item, 5),
+            Outcome(ExplorationOutcomeKind.Gold, 4)
+        ]
+    };
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsIndependentThresholdResult_TrueForHiddenTreasure()
+    {
+        Assert.True(ExplorationOutcomeResolver.IsIndependentThresholdResult(HiddenTreasure()));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsIndependentThresholdResult_FalseForWarbandConditionedShape()
+    {
+        // Straggler is RollsIndependently too, but its Outcomes carry warband restrictions - the OTHER
+        // RollsIndependently shape (see ResolveWarbandOutcome), not this one.
+        Assert.False(ExplorationOutcomeResolver.IsIndependentThresholdResult(Straggler()));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsIndependentThresholdResult_FalseForSubRollShape()
+    {
+        Assert.False(ExplorationOutcomeResolver.IsIndependentThresholdResult(Corpse()));
+    }
+
+    [Theory]
+    [InlineData(4, 4, true)]
+    [InlineData(6, 4, true)]
+    [InlineData(3, 4, false)]
+    public void ExplorationOutcomeResolver_MeetsIndependentThreshold_ComparesRollToThreshold(int roll, int threshold, bool expected)
+    {
+        Assert.Equal(expected, ExplorationOutcomeResolver.MeetsIndependentThreshold(roll, threshold));
+    }
+
     // --- SkillEligibility -----------------------------------------------------------------------
 
     private static Warrior WarriorWith(List<SkillCategory> allowedCategories, params EquipmentItem[] carriedItems) =>

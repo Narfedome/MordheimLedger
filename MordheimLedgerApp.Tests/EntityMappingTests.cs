@@ -189,6 +189,20 @@ public class EntityMappingTests
         Assert.Equal(archetype.Leadership, recruited.Leadership);
         Assert.Equal(archetype.StartingExperience, recruited.Experience);
         Assert.Equal(WarriorStatus.Active, recruited.Status);
+
+        // Baseline snapshot for the stat-changed color code (StatRowView) - matches the live stats at
+        // recruitment, so nothing shows as changed until an Advance/Injury actually moves a stat.
+        Assert.Equal(archetype.Movement, recruited.StartingMovement);
+        Assert.Equal(archetype.WeaponSkill, recruited.StartingWeaponSkill);
+        Assert.Equal(archetype.BallisticSkill, recruited.StartingBallisticSkill);
+        Assert.Equal(archetype.Strength, recruited.StartingStrength);
+        Assert.Equal(archetype.Toughness, recruited.StartingToughness);
+        Assert.Equal(archetype.Wounds, recruited.StartingWounds);
+        Assert.Equal(archetype.Initiative, recruited.StartingInitiative);
+        Assert.Equal(archetype.Attacks, recruited.StartingAttacks);
+        Assert.Equal(archetype.Leadership, recruited.StartingLeadership);
+        Assert.False(recruited.WeaponSkillIncreased);
+        Assert.False(recruited.WeaponSkillDecreased);
     }
 
     [Fact]
@@ -347,6 +361,44 @@ public class EntityMappingTests
         Assert.Empty(promoted.IncreasedCharacteristics);
         Assert.Empty(promoted.AllowedSkillCategories);
         Assert.False(promoted.IsLeader);
+
+        // Baseline resets to what the group had actually earned by promotion (4 WeaponSkill here, not
+        // the original Henchman archetype's template) - the new Hero's own "since recruitment" starts
+        // now, so nothing shows as changed on the very first card render after promotion.
+        Assert.Equal(henchmanGroup.WeaponSkill, promoted.StartingWeaponSkill);
+        Assert.Equal(henchmanGroup.Strength, promoted.StartingStrength);
+        Assert.False(promoted.WeaponSkillIncreased);
+        Assert.False(promoted.StrengthIncreased);
+    }
+
+    [Fact]
+    public void Warrior_StatDeltaProperties_ReflectChangeSinceStartingSnapshot()
+    {
+        var warrior = new Warrior
+        {
+            Movement = 5,
+            StartingMovement = 4,
+            WeaponSkill = 3,
+            StartingWeaponSkill = 4,
+            Strength = 3,
+            StartingStrength = 3
+        };
+
+        Assert.True(warrior.MovementIncreased);
+        Assert.False(warrior.MovementDecreased);
+        Assert.False(warrior.WeaponSkillIncreased);
+        Assert.True(warrior.WeaponSkillDecreased);
+        Assert.False(warrior.StrengthIncreased);
+        Assert.False(warrior.StrengthDecreased);
+    }
+
+    [Fact]
+    public void Warrior_MovementDelta_IgnoredWhenMovementOverrideSet()
+    {
+        var warrior = new Warrior { Movement = 5, StartingMovement = 4, MovementOverride = "2D6" };
+
+        Assert.False(warrior.MovementIncreased);
+        Assert.False(warrior.MovementDecreased);
     }
 
     [Fact]

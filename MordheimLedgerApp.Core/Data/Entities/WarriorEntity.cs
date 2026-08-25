@@ -36,6 +36,17 @@ public class WarriorEntity
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
+    /// <summary>See Models.Warrior.StartingMovement/etc - snapshot at row creation, never updated after.</summary>
+    public int StartingMovement { get; set; }
+    public int StartingWeaponSkill { get; set; }
+    public int StartingBallisticSkill { get; set; }
+    public int StartingStrength { get; set; }
+    public int StartingToughness { get; set; }
+    public int StartingWounds { get; set; }
+    public int StartingInitiative { get; set; }
+    public int StartingAttacks { get; set; }
+    public int StartingLeadership { get; set; }
+
     /// <summary>Null = no animal assigned. The warrior's stats aren't merged with the animal's - it's
     /// tracked as its own separate profile, resolved from EquipmentItemEntity (Category == Animal) by
     /// WarbandService (see Models.Warrior.Animal).</summary>

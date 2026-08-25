@@ -41,6 +41,7 @@ public class AppDatabase
         await BackfillWarriorArchetypeRacialProfileAsync();
         await BackfillWarriorRacialMaxesAsync();
         await BackfillBranchedInjuriesAsync();
+        await BackfillWarriorStartingStatsAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
         // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
@@ -244,6 +245,37 @@ public class AppDatabase
             warrior.MaxInitiative = profile.Initiative;
             warrior.MaxAttacks = profile.Attacks;
             warrior.MaxLeadership = profile.Leadership;
+            await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for warriors recruited before Warrior.StartingMovement/etc
+    /// existed (2026-08-25) - the new columns default to 0 for pre-existing rows, which would make the
+    /// stat-changed color code (StatRowView's DataTriggers) show every single one of a warrior's
+    /// current stats as "increased" the moment this ships. All 9 fields being exactly 0 is used as the
+    /// "never set" marker (safe in practice: no real profile has Wounds/Attacks/Leadership all at 0 -
+    /// that would mean an unfieldable model) - baseline resets to whatever each warrior's CURRENT stats
+    /// happen to be right now (their true recruitment-time values aren't recoverable retroactively), so
+    /// no false delta shows up today and tracking is accurate from this point forward.</summary>
+    private async Task BackfillWarriorStartingStatsAsync()
+    {
+        var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
+            .Where(w => w.StartingMovement == 0 && w.StartingWeaponSkill == 0 && w.StartingBallisticSkill == 0 &&
+                        w.StartingStrength == 0 && w.StartingToughness == 0 && w.StartingWounds == 0 &&
+                        w.StartingInitiative == 0 && w.StartingAttacks == 0 && w.StartingLeadership == 0)
+            .ToList();
+
+        foreach (var warrior in staleWarriors)
+        {
+            warrior.StartingMovement = warrior.Movement;
+            warrior.StartingWeaponSkill = warrior.WeaponSkill;
+            warrior.StartingBallisticSkill = warrior.BallisticSkill;
+            warrior.StartingStrength = warrior.Strength;
+            warrior.StartingToughness = warrior.Toughness;
+            warrior.StartingWounds = warrior.Wounds;
+            warrior.StartingInitiative = warrior.Initiative;
+            warrior.StartingAttacks = warrior.Attacks;
+            warrior.StartingLeadership = warrior.Leadership;
             await _db.UpdateAsync(warrior);
         }
     }

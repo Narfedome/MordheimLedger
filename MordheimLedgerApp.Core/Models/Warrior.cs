@@ -56,6 +56,45 @@ public class Warrior
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
+    /// <summary>Snapshot of the stat line above at the moment THIS row started existing - recruitment
+    /// (EntityMapping.ToWarrior) or, for a Henchman promoted to Hero, the moment of promotion
+    /// (CloneAsPromotedHero, which resets the baseline to whatever the group had earned by then rather
+    /// than the Henchman archetype's original template). Never touched again afterwards - purely a
+    /// reference point for the IncreasedSinceStart/DecreasedSinceStart computed properties below, which
+    /// StatRowView's DataTriggers use to color a stat that has moved since (WarbandDetailPage) - same
+    /// snapshot-at-creation-time convention as MaxMovement/etc. below.</summary>
+    public int StartingMovement { get; set; }
+    public int StartingWeaponSkill { get; set; }
+    public int StartingBallisticSkill { get; set; }
+    public int StartingStrength { get; set; }
+    public int StartingToughness { get; set; }
+    public int StartingWounds { get; set; }
+    public int StartingInitiative { get; set; }
+    public int StartingAttacks { get; set; }
+    public int StartingLeadership { get; set; }
+
+    /// <summary>Movement excluded (MovementIncreased/MovementDecreased below instead) - MovementOverride
+    /// (e.g. Cave Squigs' "2D6") means the numeric Movement isn't even what's displayed
+    /// (MovementDisplay), so a plain int comparison would be meaningless whenever it's set.</summary>
+    public bool MovementIncreased => MovementOverride is null && Movement > StartingMovement;
+    public bool MovementDecreased => MovementOverride is null && Movement < StartingMovement;
+    public bool WeaponSkillIncreased => WeaponSkill > StartingWeaponSkill;
+    public bool WeaponSkillDecreased => WeaponSkill < StartingWeaponSkill;
+    public bool BallisticSkillIncreased => BallisticSkill > StartingBallisticSkill;
+    public bool BallisticSkillDecreased => BallisticSkill < StartingBallisticSkill;
+    public bool StrengthIncreased => Strength > StartingStrength;
+    public bool StrengthDecreased => Strength < StartingStrength;
+    public bool ToughnessIncreased => Toughness > StartingToughness;
+    public bool ToughnessDecreased => Toughness < StartingToughness;
+    public bool WoundsIncreased => Wounds > StartingWounds;
+    public bool WoundsDecreased => Wounds < StartingWounds;
+    public bool InitiativeIncreased => Initiative > StartingInitiative;
+    public bool InitiativeDecreased => Initiative < StartingInitiative;
+    public bool AttacksIncreased => Attacks > StartingAttacks;
+    public bool AttacksDecreased => Attacks < StartingAttacks;
+    public bool LeadershipIncreased => Leadership > StartingLeadership;
+    public bool LeadershipDecreased => Leadership < StartingLeadership;
+
     /// <summary>Which EquipmentList this warrior may buy starting equipment from - copied from the
     /// recruiting WarriorArchetype at recruitment (see WarriorArchetype.EquipmentListId), null = no
     /// equipment usable. Editing the archetype's list later doesn't retroactively change this.</summary>

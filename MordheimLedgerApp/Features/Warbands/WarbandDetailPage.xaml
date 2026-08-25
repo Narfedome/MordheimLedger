@@ -22,11 +22,11 @@
                  du Warrior lié (IsHero pilote directement ExperienceTrackView), pas du groupe qui
                  l'affiche. -->
             <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
-                <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
+                <Border Style="{StaticResource SectionCardBorderStyle}" Margin="6,6">
                     <VerticalStackLayout Spacing="2">
-                        <Grid ColumnDefinitions="*,Auto,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Start"  >
                             <HorizontalStackLayout Grid.Column="0" Spacing="6">
-                                <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                                <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
                                 <!-- Effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1) - vide donc
                                      invisible pour un Héros ou un groupe à 1 seul survivant. -->
                                 <Label Text="{Binding HeadCountDisplay}" TextColor="{DynamicResource AppTextMuted}"
@@ -53,7 +53,7 @@
                              abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
                              de cartes guerrier d'affilée. -->
-                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,0,0,8"
+                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,8,0,8"
                                                  AbbrFontSize="10" ValueFontSize="13"/>
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
@@ -220,11 +220,13 @@
 
             <!-- Pense-bête "prochaine partie" (voir Warband.NextGameNote) - ex. Cimetière : haine des
                  Chasseurs de Sorcières/Sœurs de Sigmar après un pillage. S'efface tout seul à la Fin de
-                 Partie suivante (consommé côté ViewModel), rien à cliquer ici - même principe que le chip
-                 "Malade" d'un guerrier, mais au niveau de toute la bande. -->
-            <Border Style="{StaticResource SectionCardBorderStyle}" Stroke="{DynamicResource AppDanger}"
+                 Partie suivante (consommé côté ViewModel), rien à cliquer ici. Couleur alignée sur les
+                 rappels de relance de l'étape Exploration du wizard (EndOfGamePendingBonusDieReminder/
+                 EndOfGameCatacombRerollReminder, AppAccent) plutôt que AppDanger - un pense-bête
+                 informatif, pas un état d'alerte (retour utilisateur 2026-08-25). -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" Stroke="{DynamicResource AppAccent}"
                     Padding="10,6" IsVisible="{Binding HasNextGameNote}">
-                <Label Text="{Binding Warband.NextGameNote}" FontSize="12" TextColor="{DynamicResource AppDanger}"/>
+                <Label Text="{Binding Warband.NextGameNote}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>
             </Border>
         </VerticalStackLayout>
 

@@ -170,7 +170,13 @@ public partial class WarriorOutcomeRow : ObservableObject
     partial void OnManualRollChanged(string value)
     {
         InjuryResultText = string.Empty;
-        if (int.TryParse(value, out var roll)) ResolveInjuryResult(roll);
+        if (int.TryParse(value, out var roll))
+            ResolveInjuryResult(roll);
+        else
+            // Jet effacé/invalide (ex. retiré après un résultat de Mort) - repasse Actif plutôt que de
+            // laisser le marquage Mort précédent affiché sans jet qui le justifie (bug corrigé
+            // 2026-08-25, voir ApplyInjuryRoll).
+            SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == WarriorStatus.Active).Key;
         if (!string.IsNullOrWhiteSpace(InjuryResultText)) RollError = null;
 
         // Si le jet principal ne donne plus "Rancune", le sous-jet/la cible précédemment saisis n'ont
@@ -201,13 +207,17 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// a déjà accès à LocalizationService via _loc, comme pour SelectedStatusLabel).</summary>
     private void ResolveInjuryResult(int roll)
     {
+        // Toujours synchronisé, même si le jet ne correspond à aucune entrée valide de la table
+        // (ex. "17") - IsDeath(roll) est alors simplement false, ce qui repasse correctement Actif au
+        // lieu de laisser un marquage Mort précédent affiché sans jet qui le justifie.
+        ApplyInjuryRoll(roll);
+
         bool found;
         string key;
         found = Warrior.IsHero ? SeriousInjuryTable.TryGetTextKey(roll, out key) : HenchmanInjuryTable.TryGetTextKey(roll, out key);
         if (!found) return;
 
         InjuryResultText = _loc[key];
-        ApplyInjuryRoll(roll);
     }
 
     /// <summary>Texte complet du résultat une fois consulté (via AutoRoll ou ShowInjuryResult) -
@@ -436,10 +446,10 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// changement d'OutOfActionCount.</summary>
     public ObservableCollection<InjurySubRollEntry> FigureInjuryRolls { get; } = new();
 
-    /// <summary>Plus de saisie manuelle : uniquement modifié par ApplyInjuryRoll (résultat "Mort",
-    /// jets 11-15) ou remis à l'état d'origine par OnIsOutOfActionChanged. Reste sur Warrior.Status
-    /// (donc "Actif") pour tout le reste, y compris les rétablissements et le résultat "Blessures
-    /// multiples" (16/21, ambigu tant que les sous-jets ne sont pas résolus).</summary>
+    /// <summary>Plus de saisie manuelle : uniquement modifié par ApplyInjuryRoll, qui synchronise dans
+    /// les deux sens (Mort pour un résultat de mort sans équivoque, Actif sinon - y compris quand le
+    /// jet est effacé/changé après coup, voir sa doc), ou remis à l'état d'origine par
+    /// OnIsOutOfActionChanged.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     [NotifyPropertyChangedFor(nameof(IsDead))]
@@ -524,15 +534,17 @@ public partial class WarriorOutcomeRow : ObservableObject
         selectedStatusLabel = _statusByLabel.First(kv => kv.Value == warrior.Status).Key;
     }
 
-    /// <summary>Appelé après un jet de Blessure Grave - passe le guerrier à Mort pour les résultats
-    /// de mort sans équivoque (Héros : 11-15 sur la table D66 ; Homme de main : 1-2 sur la table D6,
-    /// mécaniques totalement différentes). Le reste (rétablissements, blessures permanentes,
-    /// "Blessures multiples"...) ne touche pas le Statut.</summary>
+    /// <summary>Appelé après un jet de Blessure Grave - synchronise le Statut sur le résultat sans
+    /// équivoque de Mort (Héros : 11-15 sur la table D66 ; Homme de main : 1-2 sur la table D6,
+    /// mécaniques totalement différentes), DANS LES DEUX SENS : repasse à Actif si le jet est ensuite
+    /// changé/effacé vers un résultat qui n'est plus la Mort - bug corrigé le 2026-08-25 (le marquage
+    /// Mort restait affiché après avoir retiré/changé le jet, cette méthode ne faisait auparavant que
+    /// poser Mort, jamais l'inverse). Le reste (rétablissements, blessures permanentes, "Blessures
+    /// multiples"...) ne touche pas le Statut - ces résultats ne sont jamais IsDeath.</summary>
     public void ApplyInjuryRoll(int roll)
     {
         var isDeath = Warrior.IsHero ? SeriousInjuryTable.IsDeath(roll) : HenchmanInjuryTable.IsDeath(roll);
-        if (isDeath)
-            SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == WarriorStatus.Dead).Key;
+        SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == (isDeath ? WarriorStatus.Dead : WarriorStatus.Active)).Key;
     }
 
     /// <summary>(Re)peuple MultipleInjuryRolls avec exactement <paramref name="count"/> sous-jets (le

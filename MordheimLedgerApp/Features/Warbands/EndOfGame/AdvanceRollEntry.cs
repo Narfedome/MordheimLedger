@@ -92,6 +92,8 @@ public partial class AdvanceRollEntry : ObservableObject
 
     partial void OnManualRollChanged(string value)
     {
+        var previousOutcome = Outcome;
+
         ResultText = string.Empty;
         Outcome = null;
         PromotedWarriorPreview = null;
@@ -124,6 +126,23 @@ public partial class AdvanceRollEntry : ObservableObject
                     : HenchmanAdvanceTable.TryGetOutcome(roll, out var henchmanOutcome) ? henchmanOutcome : null;
             }
         }
+
+        // Un ré-appel de ce handler qui retombe sur un résultat Caractéristique structurellement
+        // IDENTIQUE au précédent (même Kind/ChoiceMode/Options, comparaison de valeur - AdvanceOutcome
+        // est un record) n'est jamais déclenché par une vraie nouvelle saisie du joueur (qui ferait
+        // changer le jet vers un AUTRE résultat) - seulement par un ré-affichage de la vue (ex. revenir
+        // sur cette étape du wizard) qui repasse accidentellement par la même valeur de jet. Ne doit
+        // SURTOUT PAS effacer le sous-jet/choix CC-ou-CT déjà fait par le joueur : bug réel trouvé le
+        // 2026-08-25 (retour utilisateur détaillé + capture d'écran + relecture de l'Historique) - la
+        // confirmation "CC +1"/"Cd +1" s'affichait bien pendant l'assistant, mais ResolvedField (donc
+        // ManualSubRoll/SelectedChoiceLabel, remis à zéro par RecomputeCharacteristicResolution)
+        // retombait silencieusement à null avant l'enregistrement : la Progression ne s'appliquait
+        // jamais, alors que la phrase d'Historique confirmait bien que ce jet était traité (texte
+        // descriptif générique, pas la confirmation résolue). Portée volontairement limitée à
+        // CharacteristicIncrease - Promotion/Compétence ne sont pas concernés par ce bug et gardent
+        // leur remise à zéro inconditionnelle ci-dessus.
+        if (Outcome is not null && Outcome == previousOutcome && Outcome.Kind == AdvanceKind.CharacteristicIncrease)
+            return;
 
         ManualSubRoll = string.Empty;
         SelectedSkills.Clear();
@@ -295,6 +314,16 @@ public partial class AdvanceRollEntry : ObservableObject
 
     partial void OnSelectedChoiceLabelChanged(string? value)
     {
+        // Un Picker MAUI peut repasser SelectedItem à null "en pratique" (voir la doc du champ
+        // ci-dessus, même quirk déjà repéré le 2026-08-24 pour un crash) sans action réelle du joueur -
+        // ignorer ce cas plutôt que d'effacer un ResolvedField déjà résolu (bug trouvé le 2026-08-25 :
+        // la confirmation "CC +1" s'affichait bien pendant l'assistant, mais la Progression ne
+        // s'appliquait jamais à l'enregistrement). Un vrai nouveau jet remet ResolvedField à null
+        // directement dans RecomputeCharacteristicResolution (pas seulement via ce callback) via
+        // SelectedChoiceLabel = string.Empty - une chaîne vide, jamais null - donc cette remise à zéro
+        // légitime n'est pas affectée par ce garde-fou.
+        if (value is null && ResolvedField is not null) return;
+
         ResolvedField = value is not null && _choiceFieldByLabel.TryGetValue(value, out var field) ? field : null;
         OnPropertyChanged(nameof(ResolvedField));
         OnPropertyChanged(nameof(ResolvedFieldLabel));

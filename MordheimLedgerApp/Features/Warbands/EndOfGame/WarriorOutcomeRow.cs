@@ -157,6 +157,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowMultipleInjuriesSection))]
     [NotifyPropertyChangedFor(nameof(ShowHatredSection))]
+    [NotifyPropertyChangedFor(nameof(ShowInjuryBranchSubRoll))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -176,6 +177,12 @@ public partial class WarriorOutcomeRow : ObservableObject
         // plus de sens - effacés plutôt que laissés affichés pour un résultat qui ne les déclenche plus.
         if (Warrior.IsHero && !ShowHatredSection && HatredSubRoll.Length > 0)
             HatredSubRoll = string.Empty;
+
+        // Même principe pour le sous-jet de branche (Blessure au bras/Jambe écrasée, 23/25) - un
+        // nouveau jet principal qui ne tombe plus sur l'un de ces deux résultats invalide le sous-jet
+        // déjà saisi.
+        if (Warrior.IsHero && !ShowInjuryBranchSubRoll && InjuryBranchSubRoll.Length > 0)
+            InjuryBranchSubRoll = string.Empty;
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -207,6 +214,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// c'est ce texte qui alimente la note du guerrier et la phrase d'Historique à la sauvegarde.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(ResolvedInjuryText))]
     private string injuryResultText = string.Empty;
 
     /// <summary>Un jet 2D6 par palier d'XP franchi cette partie (voir SyncAdvanceRolls) - un guerrier
@@ -370,6 +378,58 @@ public partial class WarriorOutcomeRow : ObservableObject
         HatredTargetDisplayName = string.Empty;
     }
 
+    /// <summary>True dès que le jet principal (ManualRoll) donne "Blessure au bras" (23) ou "Jambe
+    /// écrasée" (25, Héros uniquement) - les deux seuls résultats du Palier 1 dont l'effet mécanisé
+    /// dépend d'un sous-jet 1D6 (voir Core.Rules.SeriousInjuryEffectTable.RequiresBranchSubRoll). Le
+    /// texte des deux branches est déjà visible dans InjuryResultText (résolu dès le jet principal) -
+    /// ce sous-jet sert uniquement à déterminer laquelle s'applique réellement.</summary>
+    public bool ShowInjuryBranchSubRoll => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && SeriousInjuryEffectTable.RequiresBranchSubRoll(roll);
+
+    /// <summary>Le score du 1D6 tiré pour cette branche - saisi à la main ou rempli par
+    /// AutoRollInjuryBranch, même convention que ManualRoll/HatredSubRoll.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(InjuryBranchResultText))]
+    [NotifyPropertyChangedFor(nameof(ResolvedInjuryText))]
+    private string injuryBranchSubRoll = string.Empty;
+
+    partial void OnInjuryBranchSubRollChanged(string value)
+    {
+        if (HasValidInjuryBranchSubRoll) InjuryBranchRollError = null;
+    }
+
+    /// <summary>Texte propre à la branche réellement résolue (voir Core.Rules.SeriousInjuryTable.
+    /// TryGetBranchTextKey) - "Blessure au bras : amputé"/"... : légère" plutôt que le texte du livre qui
+    /// décrit les deux branches à la fois (déjà affiché au-dessus via InjuryResultText, comme contexte
+    /// avant le sous-jet). Vide tant que le sous-jet n'est pas encore saisi/valide.</summary>
+    public string InjuryBranchResultText =>
+        int.TryParse(ManualRoll, out var roll) && int.TryParse(InjuryBranchSubRoll, out var subRoll) &&
+        SeriousInjuryTable.TryGetBranchTextKey(roll, subRoll, out var key) ? _loc[key] : string.Empty;
+
+    /// <summary>Le texte à utiliser partout où "le résultat de Blessure de ce guerrier" est affiché/
+    /// enregistré (Récapitulatif, chip catalogue de repli, phrase d'Historique) - la branche résolue
+    /// (23/25) une fois connue, sinon le texte général déjà résolu par le jet principal.</summary>
+    public string ResolvedInjuryText => InjuryBranchResultText.Length > 0 ? InjuryBranchResultText : InjuryResultText;
+
+    /// <summary>Résolu depuis ManualRoll+InjuryBranchSubRoll (voir Core.Rules.SeriousInjuryEffectTable.
+    /// TryGetBranchSubRollOutcome) - null tant que le sous-jet n'est pas encore saisi/valide, ainsi que
+    /// pour la branche grave (1) qui reste hors Palier 1 (aucun effet mécanisé, cf. la doc de la
+    /// table). Consommé par WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync pour appliquer
+    /// l'effet réel.</summary>
+    public SeriousInjuryOutcome? InjuryBranchOutcome =>
+        int.TryParse(ManualRoll, out var roll) && int.TryParse(InjuryBranchSubRoll, out var subRoll) &&
+        SeriousInjuryEffectTable.TryGetBranchSubRollOutcome(roll, subRoll, out var outcome) ? outcome : null;
+
+    /// <summary>True dès que le sous-jet est un 1D6 valide (1-6), y compris la branche 1 (grave) qui ne
+    /// produit pas d'InjuryBranchOutcome (Palier 2, aucun effet mécanisé) - contrairement à
+    /// InjuryBranchOutcome, sert uniquement à valider que le joueur a bien saisi un jet avant de
+    /// continuer (ValidateInjuryStep).</summary>
+    public bool HasValidInjuryBranchSubRoll => int.TryParse(InjuryBranchSubRoll, out var subRoll) && subRoll is >= 1 and <= 6;
+
+    /// <summary>Même principe que RollError/HatredRollError, pour le sous-jet de branche.</summary>
+    [ObservableProperty]
+    private string? injuryBranchRollError;
+
     /// <summary>Un jet D6 par figurine hors de combat dans un groupe d'Hommes de main (OutOfActionCount)
     /// - sans objet pour un Héros, qui utilise ManualRoll/InjuryResultText ci-dessus à la place (une
     /// seule figurine, un seul jet). Peuplée/resynchronisée par SyncFigureInjuryRolls à chaque
@@ -424,7 +484,7 @@ public partial class WarriorOutcomeRow : ObservableObject
             var parts = new List<string>();
             if (ExperienceGained != 0) parts.Add($"+{ExperienceGained} PX");
             if (Status != Warrior.Status) parts.Add(SelectedStatusLabel);
-            if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(InjuryResultText);
+            if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(ResolvedInjuryText);
             foreach (var sub in MultipleInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(sub.InjuryResultText)) parts.Add(sub.InjuryResultText);
             foreach (var figure in FigureInjuryRolls)

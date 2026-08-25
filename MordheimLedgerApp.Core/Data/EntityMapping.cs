@@ -304,7 +304,8 @@ public static class EntityMapping
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
         Category = e.Category,
-        RollRange = e.RollRange
+        RollRange = e.RollRange,
+        BranchRange = e.BranchRange
     };
 
     public static InjuryEntity ToEntity(this Injury m) => new()
@@ -315,7 +316,8 @@ public static class EntityMapping
         Source = m.Source,
         ImagePath = m.ImagePath,
         Category = m.Category,
-        RollRange = m.RollRange
+        RollRange = m.RollRange,
+        BranchRange = m.BranchRange
     };
 
     public static ExplorationResult ToModel(this ExplorationResultEntity e, IReadOnlyDictionary<string, string> translations,
@@ -667,6 +669,7 @@ public static class EntityMapping
         Cost = e.Cost,
         Experience = e.Experience,
         Status = e.Status,
+        SickGamesRemaining = e.SickGamesRemaining,
         HeadCount = e.HeadCount,
         Movement = e.Movement,
         MovementOverride = e.MovementOverride,
@@ -715,6 +718,7 @@ public static class EntityMapping
         Cost = m.Cost,
         Experience = m.Experience,
         Status = m.Status,
+        SickGamesRemaining = m.SickGamesRemaining,
         HeadCount = m.HeadCount,
         Movement = m.Movement,
         MovementOverride = m.MovementOverride,
@@ -812,14 +816,16 @@ public static class EntityMapping
     {
         Id = e.Id,
         WarriorId = e.WarriorId,
-        Item = item
+        Item = item,
+        IsTemporary = e.IsTemporary
     };
 
     public static WarriorInjuryEntity ToEntity(this WarriorInjury m) => new()
     {
         Id = m.Id,
         WarriorId = m.WarriorId,
-        InjuryId = m.Item.Id
+        InjuryId = m.Item.Id,
+        IsTemporary = m.IsTemporary
     };
 
     /// <param name="resolvedName">The display name of whichever Target* is set, resolved by the caller

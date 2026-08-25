@@ -32,6 +32,9 @@ public partial class EndOfGameDialogViewModel
                 else
                     valid &= CheckRoll(!row.HasHatredTarget, () => row.HatredRollError = Loc["EndOfGameHatredTargetRequired"]);
             }
+
+            if (row.ShowInjuryBranchSubRoll)
+                valid &= CheckRoll(!row.HasValidInjuryBranchSubRoll, () => row.InjuryBranchRollError = Loc["EndOfGameRollRequired"]);
         }
         else
         {
@@ -83,6 +86,12 @@ public partial class EndOfGameDialogViewModel
     // préfère un jet physique, même convention que les autres jets de cette étape.
     [RelayCommand]
     private void AutoRollHatred(WarriorOutcomeRow row) => row.HatredSubRoll = HatredTargetTable.RollDice().ToString();
+
+    // Sous-jet 1D6 de branche (Blessure au bras/Jambe écrasée, 23/25) déterminant laquelle des deux
+    // s'applique (voir Core.Rules.SeriousInjuryEffectTable.RequiresBranchSubRoll) - même convention que
+    // AutoRollHatred, le champ InjuryBranchSubRoll reste modifiable ensuite pour un jet physique.
+    [RelayCommand]
+    private void AutoRollInjuryBranch(WarriorOutcomeRow row) => row.InjuryBranchSubRoll = SeriousInjuryEffectTable.RollSubDie().ToString();
 
     // Portée "toutes les bandes de ce type" (6) uniquement - la seule portée référençant un vrai
     // WarbandArchetype du catalogue (les 3 autres sont résolues à la frappe dans un simple champ texte,

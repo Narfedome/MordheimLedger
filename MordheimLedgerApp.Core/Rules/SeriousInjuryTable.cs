@@ -64,6 +64,25 @@ public static class SeriousInjuryTable
     /// warrior now hates, see HatredTargetTable.</summary>
     public static bool IsBitterEnmity(int roll) => roll == BitterEnmityRoll;
 
+    /// <summary>Arm Wound (23) and Smashed Leg (25) each cover TWO distinct permanent outcomes under one
+    /// D66 roll (see SeriousInjuryEffectTable.RequiresBranchSubRoll for the 1D6 that picks which) - the
+    /// plain TryGetTextKey above only resolves the combined book text describing both branches at once
+    /// ("sur 1 ... ; sur 2-6 ..."), used as the introductory text before the branch is known. Once the
+    /// branch sub-roll is in, this resolves the single resolved outcome's own clean text instead (also
+    /// the catalog Name/Description split - see Injuries.json's "23"/"25" entries, now two rows each,
+    /// distinguished by BranchRange).</summary>
+    public static bool TryGetBranchTextKey(int roll, int subRoll, out string key)
+    {
+        if (roll is 23 or 25 && subRoll is >= 1 and <= 6)
+        {
+            key = $"InjurySerious{roll}{(subRoll == 1 ? "Severe" : "Light")}";
+            return true;
+        }
+
+        key = string.Empty;
+        return false;
+    }
+
     /// <summary>Rolls two D6 (D66: first die = tens digit).</summary>
     public static int RollDice() => Random.Shared.Next(1, 7) * 10 + Random.Shared.Next(1, 7);
 }

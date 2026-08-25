@@ -19,6 +19,7 @@ public class WarriorEntity
     public int Cost { get; set; }
     public int Experience { get; set; }
     public WarriorStatus Status { get; set; } = WarriorStatus.Active;
+    public int SickGamesRemaining { get; set; }
 
     /// <summary>See Models.Warrior.HeadCount - always 1 for a Hero, living headcount of the Henchman
     /// group this row represents otherwise.</summary>

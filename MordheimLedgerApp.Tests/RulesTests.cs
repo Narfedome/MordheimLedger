@@ -182,6 +182,139 @@ public class RulesTests
         Assert.False(SeriousInjuryTable.IsBitterEnmity(roll));
     }
 
+    // --- SeriousInjuryEffectTable (Palier 1 mechanized subset) -----------------------------------
+
+    [Fact]
+    public void SeriousInjuryEffectTable_22_IsMovementPenalty()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(22, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+        Assert.Equal(CharacteristicField.Movement, outcome.Field);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_26_IsToughnessPenalty()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(26, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+        Assert.Equal(CharacteristicField.Toughness, outcome.Field);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_31_IsBallisticSkillPenalty()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(31, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+        Assert.Equal(CharacteristicField.BallisticSkill, outcome.Field);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_33_IsInitiativePenalty()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(33, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+        Assert.Equal(CharacteristicField.Initiative, outcome.Field);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_34_IsWeaponSkillPenalty()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(34, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+        Assert.Equal(CharacteristicField.WeaponSkill, outcome.Field);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_35_IsMissGamesRollD3()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(35, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.MissGamesRollD3, outcome.Kind);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_36_IsLoseAllEquipment()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(36, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.LoseAllEquipment, outcome.Kind);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_66_IsGainExperience()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(66, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.GainExperience, outcome.Kind);
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(23)]
+    [InlineData(24)]
+    [InlineData(25)]
+    [InlineData(32)]
+    [InlineData(41)]
+    [InlineData(56)]
+    [InlineData(61)]
+    [InlineData(65)]
+    public void SeriousInjuryEffectTable_UnmechanizedRolls_ReturnsFalse(int roll)
+    {
+        Assert.False(SeriousInjuryEffectTable.TryGetOutcome(roll, out _));
+    }
+
+    [Theory]
+    [InlineData(23)]
+    [InlineData(25)]
+    public void SeriousInjuryEffectTable_23And25_RequireBranchSubRoll(int roll)
+    {
+        Assert.True(SeriousInjuryEffectTable.RequiresBranchSubRoll(roll));
+    }
+
+    [Theory]
+    [InlineData(22)]
+    [InlineData(56)]
+    public void SeriousInjuryEffectTable_OtherRolls_DoNotRequireBranchSubRoll(int roll)
+    {
+        Assert.False(SeriousInjuryEffectTable.RequiresBranchSubRoll(roll));
+    }
+
+    [Theory]
+    [InlineData(23, 1)]
+    [InlineData(25, 1)]
+    public void SeriousInjuryEffectTable_SeverBranch_ReturnsFalse(int roll, int subRoll)
+    {
+        Assert.False(SeriousInjuryEffectTable.TryGetBranchSubRollOutcome(roll, subRoll, out _));
+    }
+
+    [Theory]
+    [InlineData(23, 2)]
+    [InlineData(23, 6)]
+    [InlineData(25, 2)]
+    [InlineData(25, 6)]
+    public void SeriousInjuryEffectTable_LightBranch_IsMissNextGame(int roll, int subRoll)
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetBranchSubRollOutcome(roll, subRoll, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.MissNextGame, outcome.Kind);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_RollSubDie_AlwaysInRange()
+    {
+        for (var i = 0; i < 200; i++)
+        {
+            var roll = SeriousInjuryEffectTable.RollSubDie();
+            Assert.InRange(roll, 1, 6);
+        }
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_RollD3_AlwaysInRange()
+    {
+        for (var i = 0; i < 200; i++)
+        {
+            var roll = SeriousInjuryEffectTable.RollD3();
+            Assert.InRange(roll, 1, 3);
+        }
+    }
+
     // --- HatredTargetTable (D6, Rancune sub-roll) ------------------------------------------------
 
     [Theory]

@@ -344,10 +344,10 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarriorSkillEntity>(warriorSkillId);
     }
 
-    public async Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury)
+    public async Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury, bool isTemporary = false)
     {
         await _db.Initialization;
-        var tracked = new WarriorInjury { WarriorId = warriorId, Item = injury };
+        var tracked = new WarriorInjury { WarriorId = warriorId, Item = injury, IsTemporary = isTemporary };
         var entity = tracked.ToEntity();
         await _db.Connection.InsertAsync(entity);
         tracked.Id = entity.Id;
@@ -358,6 +358,12 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorInjuryEntity>(warriorInjuryId);
+    }
+
+    public async Task RemoveTemporaryInjuriesAsync(int warriorId)
+    {
+        await _db.Initialization;
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ? AND IsTemporary = 1", warriorId);
     }
 
     public async Task<WarriorHatred> AddWarriorHatredAsync(int warriorId, int? targetWarbandArchetypeId, string? targetFreeText)

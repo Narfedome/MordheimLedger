@@ -36,6 +36,26 @@
     }
   },
   {
+    "name": { "en": "Arm Wound: Minor", "fr": "Blessure au bras : légère" },
+    "category": "Hero",
+    "rollRange": "23",
+    "branchRange": "2-6",
+    "description": {
+      "en": "Minor wound: misses the next battle.",
+      "fr": "Blessure légère : rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Arm Wound: Amputated", "fr": "Blessure au bras : amputé" },
+    "category": "Hero",
+    "rollRange": "23",
+    "branchRange": "1",
+    "description": {
+      "en": "Arm amputated: can only use one-handed weapons from now on (permanent).",
+      "fr": "Bras amputé : ne peut plus utiliser que des armes à une main (permanent)."
+    }
+  },
+  {
     "name": { "en": "Madness", "fr": "Folie" },
     "category": "Hero",
     "rollRange": "24",
@@ -51,6 +71,26 @@
     "description": {
       "en": "Crushed leg (1D6): on a 1, can no longer run but can still charge (permanent); on 2-6, misses the next battle.",
       "fr": "Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Smashed Leg: Minor", "fr": "Jambe écrasée : légère" },
+    "category": "Hero",
+    "rollRange": "25",
+    "branchRange": "2-6",
+    "description": {
+      "en": "Minor wound: misses the next battle.",
+      "fr": "Blessure légère : rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Smashed Leg: Severe", "fr": "Jambe écrasée : grave" },
+    "category": "Hero",
+    "rollRange": "25",
+    "branchRange": "1",
+    "description": {
+      "en": "Can no longer run but can still charge (permanent).",
+      "fr": "Ne peut plus courir mais peut charger (permanent)."
     }
   },
   {

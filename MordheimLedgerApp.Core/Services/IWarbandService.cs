@@ -81,8 +81,17 @@ public interface IWarbandService
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);
     Task RemoveWarriorSkillAsync(int warriorSkillId);
 
-    Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury);
+    /// <param name="isTemporary">See Models.WarriorInjury.IsTemporary - true only for the "misses next
+    /// game(s)" Palier 1 outcomes, cleaned up automatically by RemoveTemporaryInjuriesAsync once the
+    /// warrior recovers.</param>
+    Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury, bool isTemporary = false);
     Task RemoveWarriorInjuryAsync(int warriorInjuryId);
+
+    /// <summary>Deletes every WarriorInjury row on this warrior flagged IsTemporary - called once
+    /// Warrior.SickGamesRemaining reaches 0 (WarbandDetailViewModel.EndOfGame.
+    /// ApplySicknessLifecycleAsync), so the "légère"/temporary chip disappears the same moment the
+    /// warrior becomes Active again. A no-op if none are flagged.</summary>
+    Task RemoveTemporaryInjuriesAsync(int warriorId);
 
     /// <summary>"Rancune"/Bitter Enmity target (see Models.WarriorHatred) - exactly one of the two target
     /// parameters should be non-null/non-empty, matching the resolved HatredTargetKind.</summary>

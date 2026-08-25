@@ -913,7 +913,7 @@
     <value>Exploration : {0}.</value>
   </data>
   <data name="HistorySicknessSentence" xml:space="preserve">
-    <value>{0} est malade et manquera la prochaine partie.</value>
+    <value>{0} est indisponible et manquera la prochaine partie.</value>
   </data>
   <data name="HistoryPitDevouredSentence" xml:space="preserve">
     <value>{0} a été envoyé dans la Fosse et a été dévoré par ses gardiens.</value>
@@ -964,7 +964,7 @@
     <value>Mort</value>
   </data>
   <data name="WarriorStatusSick" xml:space="preserve">
-    <value>Malade</value>
+    <value>Indisponible</value>
   </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>
@@ -1113,6 +1113,9 @@
   <data name="EndOfGameHatredSubRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
+  <data name="EndOfGameInjuryBranchSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Nom du responsable</value>
   </data>
@@ -1224,11 +1227,23 @@
   <data name="InjurySerious23" xml:space="preserve">
     <value>Blessure au bras (1D6) : sur 1, bras amputé, ne peut plus utiliser que des armes à une main (permanent) ; sur 2-6, blessure légère, rate la prochaine bataille.</value>
   </data>
+  <data name="InjurySerious23Light" xml:space="preserve">
+    <value>Blessure légère : rate la prochaine bataille.</value>
+  </data>
+  <data name="InjurySerious23Severe" xml:space="preserve">
+    <value>Bras amputé : ne peut plus utiliser que des armes à une main (permanent).</value>
+  </data>
   <data name="InjurySerious24" xml:space="preserve">
     <value>Folie (1D6) : sur 1-3 devient Stupide de façon permanente ; sur 4-6 devient Frénétique de façon permanente.</value>
   </data>
   <data name="InjurySerious25" xml:space="preserve">
     <value>Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille.</value>
+  </data>
+  <data name="InjurySerious25Light" xml:space="preserve">
+    <value>Blessure légère : rate la prochaine bataille.</value>
+  </data>
+  <data name="InjurySerious25Severe" xml:space="preserve">
+    <value>Ne peut plus courir mais peut charger (permanent).</value>
   </data>
   <data name="InjurySerious26" xml:space="preserve">
     <value>Blessure au torse : Endurance -1 de façon permanente.</value>

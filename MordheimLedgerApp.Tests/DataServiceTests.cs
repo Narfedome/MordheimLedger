@@ -129,10 +129,18 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var injuries = await _library.GetInjuriesAsync("en");
 
         var heroInjuries = injuries.Where(i => i.Category == InjuryCategory.Hero).ToList();
-        Assert.Equal(20, heroInjuries.Count);
+        Assert.Equal(24, heroInjuries.Count);
         Assert.Contains(heroInjuries, i => i.Name == "Dead" && i.RollRange == "11-15");
         Assert.Contains(heroInjuries, i => i.Name == "Survives Against the Odds" && i.RollRange == "66");
         Assert.All(heroInjuries, i => Assert.False(string.IsNullOrWhiteSpace(i.RollRange)));
+
+        // Arm Wound (23)/Smashed Leg (25) each split into 2 branch-specific rows (light "2-6"/severe
+        // "1", see Injury.BranchRange) alongside the original combined-text row (rollRange only, no
+        // BranchRange - kept as a fallback for the untracked "Multiple Injuries" nested-branch case).
+        Assert.Contains(heroInjuries, i => i.Name == "Arm Wound: Minor" && i.RollRange == "23" && i.BranchRange == "2-6");
+        Assert.Contains(heroInjuries, i => i.Name == "Arm Wound: Amputated" && i.RollRange == "23" && i.BranchRange == "1");
+        Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Minor" && i.RollRange == "25" && i.BranchRange == "2-6");
+        Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Severe" && i.RollRange == "25" && i.BranchRange == "1");
 
         var henchmanInjuries = injuries.Where(i => i.Category == InjuryCategory.Henchman).ToList();
         Assert.Equal(2, henchmanInjuries.Count);

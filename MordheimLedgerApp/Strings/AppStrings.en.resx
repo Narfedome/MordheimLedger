@@ -913,7 +913,7 @@
     <value>Exploration: {0}.</value>
   </data>
   <data name="HistorySicknessSentence" xml:space="preserve">
-    <value>{0} is sick and will miss the next game.</value>
+    <value>{0} is unavailable and will miss the next game.</value>
   </data>
   <data name="HistoryPitDevouredSentence" xml:space="preserve">
     <value>{0} was sent into the Pit and devoured by its guardians.</value>
@@ -964,7 +964,7 @@
     <value>Dead</value>
   </data>
   <data name="WarriorStatusSick" xml:space="preserve">
-    <value>Sick</value>
+    <value>Unavailable</value>
   </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>
@@ -1113,6 +1113,9 @@
   <data name="EndOfGameHatredSubRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
+  <data name="EndOfGameInjuryBranchSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Name of the one responsible</value>
   </data>
@@ -1224,11 +1227,23 @@
   <data name="InjurySerious23" xml:space="preserve">
     <value>Arm wound (1D6): on a 1, arm amputated, can only use one-handed weapons from now on (permanent); on 2-6, minor wound, misses the next battle.</value>
   </data>
+  <data name="InjurySerious23Light" xml:space="preserve">
+    <value>Minor wound: misses the next battle.</value>
+  </data>
+  <data name="InjurySerious23Severe" xml:space="preserve">
+    <value>Arm amputated: can only use one-handed weapons from now on (permanent).</value>
+  </data>
   <data name="InjurySerious24" xml:space="preserve">
     <value>Madness (1D6): on 1-3 becomes permanently Stupid; on 4-6 becomes permanently Frenzied.</value>
   </data>
   <data name="InjurySerious25" xml:space="preserve">
     <value>Crushed leg (1D6): on a 1, can no longer run but can still charge (permanent); on 2-6, misses the next battle.</value>
+  </data>
+  <data name="InjurySerious25Light" xml:space="preserve">
+    <value>Minor wound: misses the next battle.</value>
+  </data>
+  <data name="InjurySerious25Severe" xml:space="preserve">
+    <value>Can no longer run but can still charge (permanent).</value>
   </data>
   <data name="InjurySerious26" xml:space="preserve">
     <value>Chest wound: Toughness permanently reduced by 1.</value>

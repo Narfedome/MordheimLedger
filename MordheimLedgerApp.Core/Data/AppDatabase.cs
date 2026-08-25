@@ -40,6 +40,7 @@ public class AppDatabase
         await BackfillWarbandArchetypeRaceAsync();
         await BackfillWarriorArchetypeRacialProfileAsync();
         await BackfillWarriorRacialMaxesAsync();
+        await BackfillBranchedInjuriesAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
         // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
@@ -796,6 +797,34 @@ public class AppDatabase
         }
     }
 
+    /// <summary>Runs on every launch, not just first (same idiom as BackfillWarbandArchetypeRaceAsync) -
+    /// SeedInjuriesAsync only runs on a genuinely empty database (see InitializeAsync), so an existing
+    /// player database never picks up rows added to Injuries.json after their first launch. Added
+    /// 2026-08-25 when Arm Wound (23)/Smashed Leg (25) each split from one merged catalog entry into two
+    /// branch-specific rows (light "2-6"/severe "1" - see Injury.BranchRange) : inserts whichever of
+    /// those new rows are still missing, identified by (Category, RollRange, BranchRange) rather than
+    /// Name/translation text - Injury has no player-facing editor that could rename that triple, unlike
+    /// Name which is just display text.</summary>
+    private async Task BackfillBranchedInjuriesAsync()
+    {
+        var existing = await _db.Table<InjuryEntity>().ToListAsync();
+        foreach (var inj in await LoadSeedArrayAsync<InjurySeedData>("Injuries.json"))
+        {
+            if (string.IsNullOrEmpty(inj.BranchRange)) continue;
+
+            var category = Enum.Parse<InjuryCategory>(inj.Category);
+            if (existing.Any(e => e.Category == category && e.RollRange == inj.RollRange && e.BranchRange == inj.BranchRange))
+                continue;
+
+            var injury = new Injury { Category = category, RollRange = inj.RollRange, BranchRange = inj.BranchRange, Source = ContentSource.Official };
+            injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);
+            injury.DescriptionKey = inj.Description is null ? null : await SeedTranslationAsync(inj.Description.En, inj.Description.Fr);
+            var entity = injury.ToEntity();
+            await _db.InsertAsync(entity);
+            existing.Add(entity);
+        }
+    }
+
     /// <summary>Plain insert, no dedup - the rulebook's Serious Injuries charts (Heroes' D66 + Henchmen's
     /// D6), common to every warband. Purely a browsable/editable reference catalog - see Injury's doc
     /// comment for why this is deliberately not wired into SeriousInjuryTable/HenchmanInjuryTable.</summary>
@@ -807,6 +836,7 @@ public class AppDatabase
             {
                 Category = Enum.Parse<InjuryCategory>(inj.Category),
                 RollRange = inj.RollRange,
+                BranchRange = inj.BranchRange,
                 Source = ContentSource.Official
             };
             injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);

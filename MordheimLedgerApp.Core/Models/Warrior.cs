@@ -21,6 +21,15 @@ public class Warrior
     public int Experience { get; set; }
     public WarriorStatus Status { get; set; } = WarriorStatus.Active;
 
+    /// <summary>Only meaningful while Status is Sick - how many MORE End of Game runs this warrior
+    /// stays Sick, decremented (not unconditionally cleared) each time - see
+    /// WarbandDetailViewModel.EndOfGame.ApplySicknessLifecycleAsync. 1 for every source that meant
+    /// "misses exactly the next game" (the Exploration chart's Puits failure, a light Arm Wound/
+    /// Smashed Leg), a D3 roll for Deep Wound (Core.Rules.SeriousInjuryEffectTable.
+    /// SeriousInjuryEffectKind.MissGamesRollD3) - the only source needing more than 1. Left at its
+    /// stale value once Status returns to Active; not read unless Status is Sick.</summary>
+    public int SickGamesRemaining { get; set; }
+
     /// <summary>Always 1 for a Hero (meaningless otherwise). For a Henchman group, how many living
     /// models remain in it - the whole point of the group being one row instead of N: casualties just
     /// decrement this (down to deletion at 0), while XP/equipment/skills stay shared across whoever's

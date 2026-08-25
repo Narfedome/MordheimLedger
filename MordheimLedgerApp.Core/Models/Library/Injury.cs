@@ -25,6 +25,14 @@ public class Injury
     /// Null for player-created entries that don't map to a specific roll.</summary>
     public string? RollRange { get; set; }
 
+    /// <summary>Same free-text convention as RollRange, one level down: for a D66 result that itself
+    /// branches on a further 1D6 (Arm Wound/Smashed Leg, roll "23"/"25" - see Core.Rules.
+    /// SeriousInjuryEffectTable.RequiresBranchSubRoll), each branch is its own catalog row sharing the
+    /// same RollRange but a distinct BranchRange ("1" vs "2-6") - so the chip/History text names the
+    /// actual outcome ("Blessure au bras : amputé") rather than the ambiguous shared roll name. Null for
+    /// every non-branching row (the overwhelming majority).</summary>
+    public string? BranchRange { get; set; }
+
     /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>
     public string? NameKey { get; set; }
     public string? DescriptionKey { get; set; }

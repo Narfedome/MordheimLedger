@@ -12,4 +12,6 @@ public class WarriorInjuryEntity
     public int WarriorId { get; set; }
 
     public int InjuryId { get; set; }
+
+    public bool IsTemporary { get; set; }
 }

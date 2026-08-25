@@ -380,6 +380,11 @@ public class InjurySeedData
     public string Category { get; set; } = string.Empty;
 
     public string? RollRange { get; set; }
+
+    /// <summary>See Models.Library.Injury.BranchRange - only set for the Arm Wound (23)/Smashed Leg (25)
+    /// rows, which are split into two entries (light "2-6" / severe "1") sharing the same RollRange.</summary>
+    public string? BranchRange { get; set; }
+
     public LocalizedText? Description { get; set; }
 }
 

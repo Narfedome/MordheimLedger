@@ -207,6 +207,33 @@
                                                       Command="{Binding ShowHatredArchetypeDetailCommand}"
                                                       RemoveCommand="{Binding RemoveHatredArchetypeCommand}"/>
                             </VerticalStackLayout>
+
+                            <!-- Résultat "Blessure au bras" (23) / "Jambe écrasée" (25) : le texte des
+                                 deux branches est déjà visible ci-dessus (InjuryResultText) - ce 1D6
+                                 détermine laquelle s'applique réellement (branche 2-6 = rate la
+                                 prochaine bataille, mécanisée ; branche 1 = grave, reste texte seul). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowInjuryBranchSubRoll}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.InjuryBranchSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameInjuryBranchSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollInjuryBranchCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.InjuryBranchRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <!-- Confirmation : le résultat réellement résolu par cette branche (ex.
+                                     "Bras amputé : ..."), pas le texte général des deux branches déjà
+                                     affiché plus haut - même langage que la confirmation de portée de
+                                     Rancune (HatredTargetDisplayName) plus haut dans cette étape. -->
+                                <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchResultText}" FontSize="12" FontAttributes="Bold"
+                                       IsVisible="{Binding CurrentInjuryWarrior.InjuryBranchResultText, Converter={StaticResource StringNotEmptyConverter}}"/>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
                         <!-- Groupe d'Hommes de main : un jet D6 indépendant par figurine hors de combat

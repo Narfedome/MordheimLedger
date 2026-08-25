@@ -41,4 +41,12 @@ public class Injury
 
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
+
+    /// <summary>Rules permanently granted to whoever carries this Injury (e.g. Stupidity/Frenzy from
+    /// Madness, 24) - same shared SpecialRule catalog/join-table idiom as EquipmentItem.SpecialRules,
+    /// resolved once and merged into the carrying Warrior's own SpecialRules chip list
+    /// (WarbandDetailViewModel.ToRow) rather than tracked as a separate mechanized effect - for this
+    /// kind of Serious Injury result, the chip/rule reminder IS the effect. Empty for the overwhelming
+    /// majority of rows (Palier 1's stat/status/equipment effects don't need this).</summary>
+    public List<SpecialRule> SpecialRules { get; set; } = new();
 }

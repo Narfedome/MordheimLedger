@@ -178,7 +178,8 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         var rows = await _db.Connection.Table<InjuryEntity>().ToListAsync();
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
-        return rows.Select(r => r.ToModel(translations)).ToList();
+        var specialRules = await LoadInjurySpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, specialRules)).ToList();
     }
 
     public async Task<List<ExplorationResult>> GetExplorationResultsAsync(string languageCode)
@@ -352,6 +353,17 @@ public class LibraryService : ILibraryService
         var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
         var links = await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync();
         return links.GroupBy(l => l.EquipmentItemId)
+            .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
+    /// <summary>Same pattern as LoadEquipmentSpecialRulesAsync - rules permanently granted by an Injury
+    /// (e.g. Stupidity/Frenzy from Madness, 24), merged into the carrying Warrior's own SpecialRules chip
+    /// list by WarbandDetailViewModel.ToRow.</summary>
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadInjurySpecialRulesAsync(string languageCode)
+    {
+        var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
+        var links = await _db.Connection.Table<InjurySpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.InjuryId)
             .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
     }
 

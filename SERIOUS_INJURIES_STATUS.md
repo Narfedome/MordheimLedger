@@ -14,7 +14,7 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 | Palier | Mécanisme | Statut |
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) | **10/10 ✅** |
-| 2 — règle spéciale permanente / note informative | Nouvelle table de jointure `WarriorSpecialRule` (Frénésie/Stupidité/Immunisé à la Peur/Provoque la Peur) + note "une main" sans blocage actif | **0/6 ⏳** |
+| 2 — règle spéciale permanente / note informative | Frénésie/Stupidité (Folie, 24) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme ; note "une main" (23 grave) sans blocage actif | **Folie ✅, 3 restants (Endurci, Horribles balafres, note "une main")** |
 | 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses, Vieille blessure ("avant chaque bataille"), suivi "second œil → retraite" | **0/4 ⏳** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
@@ -31,7 +31,8 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 22 | Blessure à la jambe | 1 | ✅ | ✅ | Mouvement -1 permanent |
 | 23 (sous-jet 2-6) | Blessure au bras : légère | 1 | ✅ | — | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée ("Blessure au bras : légère"), temporaire - supprimée automatiquement dès que le guerrier redevient Actif |
 | 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ⏳ | ❌ | Arme à une main seulement - reste texte seul (note informative prévue, pas de blocage actif) ; chip catalogue dédiée, permanente |
-| 24 | Folie | 2 | ⏳ | ❌ | 1D6 : 1-3 Stupide permanent, 4-6 Frénétique permanent - nécessite `WarriorSpecialRule` |
+| 24 (sous-jet 1-3) | Folie : Stupidité | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Stupidité" (trouvée/réutilisée depuis le catalogue commun) - apparaît comme une puce Règles spéciales tapable sur la fiche guerrier, exactement comme une règle d'objet |
+| 24 (sous-jet 4-6) | Folie : Frénésie | 2 | ✅ | — | Idem avec la `SpecialRule` "Frénésie" (déjà dans le catalogue commun, réutilisée telle quelle) |
 | 25 (sous-jet 2-6) | Jambe écrasée : légère | 1 | ✅ | — | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée, temporaire - supprimée dès le retour Actif |
 | 25 (sous-jet 1) | Jambe écrasée : grave | 3 | ⏳ | ❌ | "Ne peut plus courir" - pas de notion de course en combat, reste texte seul (aucun effet mécanisé) ; chip catalogue dédiée, permanente |
 | 26 | Blessure au torse | 1 | ✅ | — | Endurance -1 permanent |
@@ -58,10 +59,11 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 
 ## Hors périmètre pour l'instant
 
-- **Palier 2 (6 résultats)** : nécessite une nouvelle table de jointure `WarriorSpecialRule` (mirror
-  exact de `WarriorSkill`) pour octroyer une règle spéciale permanente (Frénésie/Stupidité/Immunisé à
-  la Peur/Provoque la Peur), + un simple flag informatif pour "arme à une main" (23, sous-jet 1) -
-  pas de blocage actif à l'équipement (décision explicite, cohérente avec "pas de moteur de règles").
+- **Palier 2, restants** : Endurci (62-63, Immunisé à la Peur) et Horribles balafres (64, Provoque la
+  Peur) au même mécanisme que Folie (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de nouvelle
+  table de jointure `WarriorSpecialRule` finalement nécessaire) ; "arme à une main" (23, sous-jet 1)
+  reste un simple flag informatif sans blocage actif à l'équipement (décision explicite, cohérente avec
+  "pas de moteur de règles").
 - **Palier 3 (4 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
   mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
   de l'Exploration ne convient pas, voir Journal) ; Vieille blessure (32) exige un jet "avant chaque
@@ -108,3 +110,27 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   **"Indisponible"/"Unavailable"** partout (`WarriorStatusSick`, `HistorySicknessSentence`) - terme
   couvrant aussi bien la maladie du Puits que ces blessures légères, `WarriorStatus.Sick` (l'identifiant
   C#) inchangé, seul le texte affiché change. Build clean, tests en cours de vérification.
+- **2026-08-25 (Folie - règle spéciale attachée à l'Injury, pas de nouvelle table `WarriorSpecialRule`)**
+  — Même embranchement que Blessure au bras/Jambe écrasée (sous-jet 1D6, 1-3 "Folie : Stupidité"/4-6
+  "Folie : Frénésie", 2 nouvelles entrées catalogue avec `BranchRange`) mais avec une idée plus simple
+  suggérée par l'utilisateur : "il me semble qu'on a les special rules pour ces trucs là, on peut
+  peut-être les rajouter aux injuries (comme les règles spéciales d'un item)" - plutôt que le
+  `WarriorSpecialRule` (mirror `WarriorSkill`) envisagé initialement pour tout le Palier 2, nouveau
+  `Injury.SpecialRules` (même idiome que `EquipmentItem.SpecialRules` : `InjurySpecialRuleEntity`,
+  `LibraryService.LoadInjurySpecialRulesAsync`, seed via `FindOrCreateSpecialRuleAsync` réutilisé tel
+  quel) - Stupidité/Frénésie existaient déjà comme `SpecialRule` (Frénésie dans le catalogue commun,
+  Stupidité en stub inline sur 4 bandes, texte repris à l'identique). `WarbandDetailViewModel.ToRow`
+  fusionne désormais `warrior.Injuries.SelectMany(i => i.Item.SpecialRules)` dans les mêmes règles
+  spéciales que bande/archétype/équipement : la règle apparaît comme une puce **tapable** (même
+  popup détail que n'importe quelle règle spéciale) sur la fiche guerrier dès que la Blessure Grave est
+  enregistrée - "rappel de règle" gratuit, aucun mécanisme de jointure par guerrier à construire.
+  **Bug annexe corrigé au passage** : `WarbandService.GetWarriorsAsync` résolvait chaque Injury portée
+  via un `FindAsync`+`ToModel` minimal par ligne (comme Equipment/Skill/Mutation avant leur correctif
+  antérieur) - laissait donc `SpecialRules` vide pour toute Injury déjà attachée à un guerrier existant.
+  Corrigé pour réutiliser `ILibraryService.GetInjuriesAsync` (déjà pleinement résolu), même motif que le
+  correctif Equipment/Skill/Mutation déjà en place. 299/299 tests passent, build clean (compilation
+  confirmée - copie finale bloquée par l'instance de l'appli/Visual Studio ouverts en parallèle).
+  **Reporté à une prochaine passe** (suggestion de l'utilisateur, pas encore traité) : rendre les chips
+  Haine de la fiche guerrier tapables (portée 6 seulement, celle qui référence un vrai
+  `WarbandArchetype` - actuellement `HatredChips` n'a aucune `Command`, contrairement à la même chip
+  dans le wizard qui l'est déjà).

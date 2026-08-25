@@ -386,6 +386,13 @@ public class InjurySeedData
     public string? BranchRange { get; set; }
 
     public LocalizedText? Description { get; set; }
+
+    /// <summary>Rules permanently granted to whoever carries this Injury (e.g. Stupidity/Frenzy from
+    /// Madness, 24) - find-or-created by English Name, same convention/shared cache as
+    /// EquipmentSeedData.SpecialRules. Resolved into a real WarriorRow SpecialRules chip via
+    /// Injury.SpecialRules once attached (see WarbandDetailViewModel.ToRow), not a separate mechanized
+    /// effect - the chip/rule reminder IS the effect for this kind of result.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 }
 
 /// <summary>One entry of the rulebook's Exploration chart (Data/SeedData/ExplorationResults.json,

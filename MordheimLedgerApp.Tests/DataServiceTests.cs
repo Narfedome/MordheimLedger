@@ -129,7 +129,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var injuries = await _library.GetInjuriesAsync("en");
 
         var heroInjuries = injuries.Where(i => i.Category == InjuryCategory.Hero).ToList();
-        Assert.Equal(24, heroInjuries.Count);
+        Assert.Equal(26, heroInjuries.Count);
         Assert.Contains(heroInjuries, i => i.Name == "Dead" && i.RollRange == "11-15");
         Assert.Contains(heroInjuries, i => i.Name == "Survives Against the Odds" && i.RollRange == "66");
         Assert.All(heroInjuries, i => Assert.False(string.IsNullOrWhiteSpace(i.RollRange)));
@@ -141,6 +141,15 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(heroInjuries, i => i.Name == "Arm Wound: Amputated" && i.RollRange == "23" && i.BranchRange == "1");
         Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Minor" && i.RollRange == "25" && i.BranchRange == "2-6");
         Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Severe" && i.RollRange == "25" && i.BranchRange == "1");
+
+        // Madness (24) splits the same way (Stupidity "1-3"/Frenzy "4-6") but, unlike Arm Wound/Smashed
+        // Leg, each branch also permanently grants a real SpecialRule (see Injury.SpecialRules) - the
+        // rule shows up as a real, tappable chip on the carrying Warrior's own SpecialRules list
+        // (WarbandDetailViewModel.ToRow), same idiom as an EquipmentItem's SpecialRules.
+        var stupidity = Assert.Single(heroInjuries, i => i.Name == "Madness: Stupidity" && i.RollRange == "24" && i.BranchRange == "1-3");
+        Assert.Contains(stupidity.SpecialRules, r => r.Name == "Stupidity");
+        var frenzy = Assert.Single(heroInjuries, i => i.Name == "Madness: Frenzy" && i.RollRange == "24" && i.BranchRange == "4-6");
+        Assert.Contains(frenzy.SpecialRules, r => r.Name == "Frenzy");
 
         var henchmanInjuries = injuries.Where(i => i.Category == InjuryCategory.Henchman).ToList();
         Assert.Equal(2, henchmanInjuries.Count);

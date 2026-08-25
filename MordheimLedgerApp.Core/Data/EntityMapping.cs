@@ -317,7 +317,8 @@ public static class EntityMapping
         ImagePath = m.ImagePath
     };
 
-    public static Injury ToModel(this InjuryEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    public static Injury ToModel(this InjuryEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByInjuryId = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -328,7 +329,8 @@ public static class EntityMapping
         ImagePath = e.ImagePath ?? string.Empty,
         Category = e.Category,
         RollRange = e.RollRange,
-        BranchRange = e.BranchRange
+        BranchRange = e.BranchRange,
+        SpecialRules = specialRulesByInjuryId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
 
     public static InjuryEntity ToEntity(this Injury m) => new()

@@ -328,6 +328,7 @@ public class AppDatabase
         await _db.CreateTableAsync<EquipmentItemEntity>();
         await _db.CreateTableAsync<SkillEntity>();
         await _db.CreateTableAsync<InjuryEntity>();
+        await _db.CreateTableAsync<InjurySpecialRuleEntity>();
         await _db.CreateTableAsync<WarriorEquipmentEntity>();
         await _db.CreateTableAsync<WarbandEquipmentEntity>();
         await _db.CreateTableAsync<WarriorSkillEntity>();
@@ -368,6 +369,7 @@ public class AppDatabase
         await _db.DropTableAsync<EquipmentItemEntity>();
         await _db.DropTableAsync<SkillEntity>();
         await _db.DropTableAsync<InjuryEntity>();
+        await _db.DropTableAsync<InjurySpecialRuleEntity>();
         await _db.DropTableAsync<WarriorEquipmentEntity>();
         await _db.DropTableAsync<WarriorSkillEntity>();
         await _db.DropTableAsync<WarriorInjuryEntity>();
@@ -833,10 +835,11 @@ public class AppDatabase
     /// SeedInjuriesAsync only runs on a genuinely empty database (see InitializeAsync), so an existing
     /// player database never picks up rows added to Injuries.json after their first launch. Added
     /// 2026-08-25 when Arm Wound (23)/Smashed Leg (25) each split from one merged catalog entry into two
-    /// branch-specific rows (light "2-6"/severe "1" - see Injury.BranchRange) : inserts whichever of
-    /// those new rows are still missing, identified by (Category, RollRange, BranchRange) rather than
-    /// Name/translation text - Injury has no player-facing editor that could rename that triple, unlike
-    /// Name which is just display text.</summary>
+    /// branch-specific rows (light "2-6"/severe "1" - see Injury.BranchRange), and extended the same day
+    /// for Madness (24)'s Stupidity "1-3"/Frenzy "4-6" split : inserts whichever of those new rows are
+    /// still missing (SpecialRules included, see Injury.SpecialRules), identified by (Category, RollRange,
+    /// BranchRange) rather than Name/translation text - Injury has no player-facing editor that could
+    /// rename that triple, unlike Name which is just display text.</summary>
     private async Task BackfillBranchedInjuriesAsync()
     {
         var existing = await _db.Table<InjuryEntity>().ToListAsync();
@@ -854,6 +857,12 @@ public class AppDatabase
             var entity = injury.ToEntity();
             await _db.InsertAsync(entity);
             existing.Add(entity);
+
+            foreach (var sr in inj.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = entity.Id, SpecialRuleId = ruleId });
+            }
         }
     }
 
@@ -873,7 +882,14 @@ public class AppDatabase
             };
             injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);
             injury.DescriptionKey = inj.Description is null ? null : await SeedTranslationAsync(inj.Description.En, inj.Description.Fr);
-            await _db.InsertAsync(injury.ToEntity());
+            var entity = injury.ToEntity();
+            await _db.InsertAsync(entity);
+
+            foreach (var sr in inj.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = entity.Id, SpecialRuleId = ruleId });
+            }
         }
     }
 

@@ -64,18 +64,24 @@ public static class SeriousInjuryTable
     /// warrior now hates, see HatredTargetTable.</summary>
     public static bool IsBitterEnmity(int roll) => roll == BitterEnmityRoll;
 
-    /// <summary>Arm Wound (23) and Smashed Leg (25) each cover TWO distinct permanent outcomes under one
-    /// D66 roll (see SeriousInjuryEffectTable.RequiresBranchSubRoll for the 1D6 that picks which) - the
-    /// plain TryGetTextKey above only resolves the combined book text describing both branches at once
-    /// ("sur 1 ... ; sur 2-6 ..."), used as the introductory text before the branch is known. Once the
-    /// branch sub-roll is in, this resolves the single resolved outcome's own clean text instead (also
-    /// the catalog Name/Description split - see Injuries.json's "23"/"25" entries, now two rows each,
-    /// distinguished by BranchRange).</summary>
+    /// <summary>Arm Wound (23), Smashed Leg (25) and Madness (24) each cover TWO distinct permanent
+    /// outcomes under one D66 roll (see SeriousInjuryEffectTable.RequiresBranchSubRoll for the 1D6 that
+    /// picks which) - the plain TryGetTextKey above only resolves the combined book text describing both
+    /// branches at once ("sur 1-3 ... ; sur 4-6 ..."), used as the introductory text before the branch is
+    /// known. Once the branch sub-roll is in, this resolves the single resolved outcome's own clean text
+    /// instead (also the catalog Name/Description split - see Injuries.json's "23"/"24"/"25" entries, now
+    /// two rows each, distinguished by BranchRange).</summary>
     public static bool TryGetBranchTextKey(int roll, int subRoll, out string key)
     {
         if (roll is 23 or 25 && subRoll is >= 1 and <= 6)
         {
             key = $"InjurySerious{roll}{(subRoll == 1 ? "Severe" : "Light")}";
+            return true;
+        }
+
+        if (roll == 24 && subRoll is >= 1 and <= 6)
+        {
+            key = subRoll <= 3 ? "InjurySerious24Stupidity" : "InjurySerious24Frenzy";
             return true;
         }
 

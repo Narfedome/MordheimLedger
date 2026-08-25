@@ -1236,6 +1236,12 @@
   <data name="InjurySerious24" xml:space="preserve">
     <value>Madness (1D6): on 1-3 becomes permanently Stupid; on 4-6 becomes permanently Frenzied.</value>
   </data>
+  <data name="InjurySerious24Stupidity" xml:space="preserve">
+    <value>Becomes permanently Stupid.</value>
+  </data>
+  <data name="InjurySerious24Frenzy" xml:space="preserve">
+    <value>Becomes permanently Frenzied.</value>
+  </data>
   <data name="InjurySerious25" xml:space="preserve">
     <value>Crushed leg (1D6): on a 1, can no longer run but can still charge (permanent); on 2-6, misses the next battle.</value>
   </data>

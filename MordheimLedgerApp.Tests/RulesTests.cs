@@ -263,9 +263,23 @@ public class RulesTests
     [Theory]
     [InlineData(23)]
     [InlineData(25)]
-    public void SeriousInjuryEffectTable_23And25_RequireBranchSubRoll(int roll)
+    [InlineData(24)]
+    public void SeriousInjuryEffectTable_23And25And24_RequireBranchSubRoll(int roll)
     {
         Assert.True(SeriousInjuryEffectTable.RequiresBranchSubRoll(roll));
+    }
+
+    [Theory]
+    [InlineData(24, 1)]
+    [InlineData(24, 3)]
+    [InlineData(24, 4)]
+    [InlineData(24, 6)]
+    public void SeriousInjuryEffectTable_24_NeverProducesBranchOutcome(int roll, int subRoll)
+    {
+        // Madness (24) still needs the branch sub-roll (RequiresBranchSubRoll above) to pick which
+        // catalog Injury/SpecialRule gets attached (see SeriousInjuryTable.TryGetBranchTextKey), but
+        // neither branch is a mechanized SeriousInjuryOutcome - the chip/rule reminder IS the effect.
+        Assert.False(SeriousInjuryEffectTable.TryGetBranchSubRollOutcome(roll, subRoll, out _));
     }
 
     [Theory]
@@ -313,6 +327,32 @@ public class RulesTests
             var roll = SeriousInjuryEffectTable.RollD3();
             Assert.InRange(roll, 1, 3);
         }
+    }
+
+    // --- SeriousInjuryTable.TryGetBranchTextKey (23/24/25 branch-specific text) --------------------
+
+    [Theory]
+    [InlineData(23, 1, "InjurySerious23Severe")]
+    [InlineData(23, 2, "InjurySerious23Light")]
+    [InlineData(23, 6, "InjurySerious23Light")]
+    [InlineData(25, 1, "InjurySerious25Severe")]
+    [InlineData(25, 6, "InjurySerious25Light")]
+    [InlineData(24, 1, "InjurySerious24Stupidity")]
+    [InlineData(24, 3, "InjurySerious24Stupidity")]
+    [InlineData(24, 4, "InjurySerious24Frenzy")]
+    [InlineData(24, 6, "InjurySerious24Frenzy")]
+    public void SeriousInjuryTable_TryGetBranchTextKey_ResolvesExpectedKey(int roll, int subRoll, string expectedKey)
+    {
+        Assert.True(SeriousInjuryTable.TryGetBranchTextKey(roll, subRoll, out var key));
+        Assert.Equal(expectedKey, key);
+    }
+
+    [Theory]
+    [InlineData(22, 1)]
+    [InlineData(56, 3)]
+    public void SeriousInjuryTable_TryGetBranchTextKey_OtherRolls_ReturnsFalse(int roll, int subRoll)
+    {
+        Assert.False(SeriousInjuryTable.TryGetBranchTextKey(roll, subRoll, out _));
     }
 
     // --- HatredTargetTable (D6, Rancune sub-roll) ------------------------------------------------

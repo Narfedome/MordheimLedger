@@ -65,6 +65,40 @@
     }
   },
   {
+    "name": { "en": "Madness: Stupidity", "fr": "Folie : Stupidité" },
+    "category": "Hero",
+    "rollRange": "24",
+    "branchRange": "1-3",
+    "description": {
+      "en": "Becomes permanently Stupid.",
+      "fr": "Devient Stupide de façon permanente."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Stupidity", "fr": "Stupidité" },
+        "description": {
+          "en": "This model is subject to the rules for Stupidity (see the Psychology rules).",
+          "fr": "Cette figurine est soumise aux règles de Stupidité (voir les règles de Psychologie)."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Madness: Frenzy", "fr": "Folie : Frénésie" },
+    "category": "Hero",
+    "rollRange": "24",
+    "branchRange": "4-6",
+    "description": {
+      "en": "Becomes permanently Frenzied.",
+      "fr": "Devient Frénétique de façon permanente."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Frenzy", "fr": "Frénésie" }
+      }
+    ]
+  },
+  {
     "name": { "en": "Smashed Leg", "fr": "Jambe écrasée" },
     "category": "Hero",
     "rollRange": "25",

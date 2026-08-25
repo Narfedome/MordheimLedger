@@ -94,6 +94,10 @@ public class WarbandService : IWarbandService
         var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
         var skillById = (await _library.GetSkillsAsync(languageCode)).ToDictionary(s => s.Id);
         var mutationById = (await _library.GetMutationsAsync(languageCode)).ToDictionary(m => m.Id);
+        // Idem pour Injury depuis que Madness (24)/etc peuvent porter des SpecialRules (Stupidité/
+        // Frénésie) - le FindAsync+ToModel minimal ci-dessous les aurait laissées vides, même trou que
+        // celui déjà corrigé pour Equipment/Skill/Mutation (voir le commentaire ci-dessus).
+        var injuryById = (await _library.GetInjuriesAsync(languageCode)).ToDictionary(i => i.Id);
 
         var warriors = new List<Warrior>();
         foreach (var row in warriorRows)
@@ -118,14 +122,8 @@ public class WarbandService : IWarbandService
             var injuryRows = await _db.Connection.Table<WarriorInjuryEntity>().Where(i => i.WarriorId == row.Id).ToListAsync();
             var injuries = new List<WarriorInjury>();
             foreach (var injuryRow in injuryRows)
-            {
-                var injuryEntity = await _db.Connection.FindAsync<InjuryEntity>(injuryRow.InjuryId);
-                if (injuryEntity is not null)
-                {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [injuryEntity.NameKey, injuryEntity.DescriptionKey], languageCode);
-                    injuries.Add(injuryRow.ToModel(injuryEntity.ToModel(translations)));
-                }
-            }
+                if (injuryById.TryGetValue(injuryRow.InjuryId, out var injury))
+                    injuries.Add(injuryRow.ToModel(injury));
 
             var spellRows = await _db.Connection.Table<WarriorSpellEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
             var spells = new List<WarriorSpell>();

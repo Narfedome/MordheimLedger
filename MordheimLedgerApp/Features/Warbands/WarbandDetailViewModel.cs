@@ -174,7 +174,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // ce correctif, seule la fusion bande+archétype était faite, les règles portées par
         // l'équipement n'apparaissaient jamais en chip sur la carte guerrier.
         var equipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
-        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).Concat(equipmentRules).DistinctBy(r => r.Id);
+        // Idem pour une Blessure Grave qui accorde une règle permanente (Folie 24 -> Stupidité/Frénésie,
+        // voir Injury.SpecialRules) - le rappel de règle ("comme les règles spéciales d'un objet",
+        // demande explicite de l'utilisateur 2026-08-25) vit ici plutôt que dans un nouveau mécanisme
+        // dédié : la puce Règles spéciales devient tapable/affiche le texte officiel gratuitement.
+        var injuryRules = warrior.Injuries.SelectMany(i => i.Item.SpecialRules);
+        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).Concat(equipmentRules).Concat(injuryRules).DistinctBy(r => r.Id);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
         var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;

@@ -64,10 +64,16 @@ public static class SeriousInjuryEffectTable
     /// <summary>Arm Wound (23) and Smashed Leg (25) both resolve their real-world effect via a further
     /// 1D6 rolled on top of the main D66 - the severe branch (1) needs a game concept this table
     /// doesn't cover yet (one-handed weapon only / can't run), the light branch (2-6) is a single
-    /// missed game either way.</summary>
-    public static bool RequiresBranchSubRoll(int roll) => roll is 23 or 25;
+    /// missed game either way. Madness (24) also branches on a further 1D6 (1-3 Stupidity, 4-6 Frenzy),
+    /// but neither branch produces a SeriousInjuryOutcome here - see TryGetBranchSubRollOutcome's doc -
+    /// the branch only picks which catalog Injury (and its attached SpecialRule) gets attached, no
+    /// separate mechanized effect on top.</summary>
+    public static bool RequiresBranchSubRoll(int roll) => roll is 23 or 25 or 24;
 
-    /// <param name="roll">The main D66 roll - must be 23 or 25, see RequiresBranchSubRoll.</param>
+    /// <param name="roll">The main D66 roll - one of RequiresBranchSubRoll's 3 values, but only 23/25
+    /// ever produce a SeriousInjuryOutcome here: Madness (24) always falls through to false regardless
+    /// of subRoll - see SeriousInjuryTable.TryGetBranchTextKey for how its branch is still resolved (a
+    /// catalog Injury attachment, not a mechanized effect).</param>
     /// <param name="subRoll">The further 1D6 roll.</param>
     public static bool TryGetBranchSubRollOutcome(int roll, int subRoll, out SeriousInjuryOutcome outcome)
     {

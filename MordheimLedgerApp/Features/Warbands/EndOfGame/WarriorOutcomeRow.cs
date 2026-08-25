@@ -388,11 +388,13 @@ public partial class WarriorOutcomeRow : ObservableObject
         HatredTargetDisplayName = string.Empty;
     }
 
-    /// <summary>True dès que le jet principal (ManualRoll) donne "Blessure au bras" (23) ou "Jambe
-    /// écrasée" (25, Héros uniquement) - les deux seuls résultats du Palier 1 dont l'effet mécanisé
+    /// <summary>True dès que le jet principal (ManualRoll) donne "Blessure au bras" (23), "Jambe
+    /// écrasée" (25) ou "Folie" (24, Héros uniquement) - les trois résultats dont la résolution finale
     /// dépend d'un sous-jet 1D6 (voir Core.Rules.SeriousInjuryEffectTable.RequiresBranchSubRoll). Le
     /// texte des deux branches est déjà visible dans InjuryResultText (résolu dès le jet principal) -
-    /// ce sous-jet sert uniquement à déterminer laquelle s'applique réellement.</summary>
+    /// ce sous-jet sert uniquement à déterminer laquelle s'applique réellement (un effet mécanisé pour
+    /// 23/25, un rappel de règle - SpecialRule attachée à l'Injury - pour 24, voir
+    /// Injury.SpecialRules).</summary>
     public bool ShowInjuryBranchSubRoll => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && SeriousInjuryEffectTable.RequiresBranchSubRoll(roll);
 
     /// <summary>Le score du 1D6 tiré pour cette branche - saisi à la main ou rempli par

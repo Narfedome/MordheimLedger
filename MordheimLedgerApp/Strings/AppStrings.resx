@@ -1236,6 +1236,12 @@
   <data name="InjurySerious24" xml:space="preserve">
     <value>Folie (1D6) : sur 1-3 devient Stupide de façon permanente ; sur 4-6 devient Frénétique de façon permanente.</value>
   </data>
+  <data name="InjurySerious24Stupidity" xml:space="preserve">
+    <value>Devient Stupide de façon permanente.</value>
+  </data>
+  <data name="InjurySerious24Frenzy" xml:space="preserve">
+    <value>Devient Frénétique de façon permanente.</value>
+  </data>
   <data name="InjurySerious25" xml:space="preserve">
     <value>Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille.</value>
   </data>

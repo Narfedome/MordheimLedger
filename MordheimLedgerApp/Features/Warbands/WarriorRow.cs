@@ -29,11 +29,18 @@ public partial class WarriorRow : ObservableObject
     /// manual additions via WarriorEditDialog - read-only display here.</summary>
     public ObservableCollection<WarriorInjury> Injuries { get; }
 
+    /// <summary>Mirrors Warrior.Hatreds, wrapped with the "Haine : {0}" prefix (see WarriorHatredChip) -
+    /// fed only by the End of Game "Rancune" Serious Injury result, no manual-add UI, read-only display
+    /// here.</summary>
+    public ObservableCollection<WarriorHatredChip> HatredChips { get; }
+
     /// <summary>Not stored on the Warrior itself - resolved by the ViewModel from the warrior's own
-    /// WarriorArchetype.SpecialRules plus the band's WarbandArchetype.SpecialRules (band-wide rules
-    /// apply to every warrior regardless of type). Purely a reference/read-only display, same as
-    /// RoleName - editing happens on the archetype in the Library, not per-Warrior.</summary>
-    public ObservableCollection<SpecialRule> SpecialRules { get; }
+    /// WarriorArchetype.SpecialRules, the band's WarbandArchetype.SpecialRules (band-wide rules apply to
+    /// every warrior regardless of type) and any currently-equipped item's SpecialRules, then exploded
+    /// into one chip per Hatred target where applicable - see WarbandDetailViewModel.ToRow/
+    /// SpecialRuleChip. Purely a reference/read-only display, same as RoleName - editing happens on the
+    /// archetype/equipment, not per-Warrior.</summary>
+    public ObservableCollection<SpecialRuleChip> SpecialRules { get; }
 
     /// <summary>Mirrors Warrior.Spells - read-only display, managed via WarriorEditDialog (conditional
     /// Sorts tab, only shown when the warrior's archetype is a spellcaster).</summary>
@@ -76,16 +83,18 @@ public partial class WarriorRow : ObservableObject
     /// a Hero (always HeadCount 1) or a lone Henchman, see Warrior.HeadCount.</summary>
     public string HeadCountDisplay => !Warrior.IsHero && Warrior.HeadCount > 1 ? $"× {Warrior.HeadCount}" : string.Empty;
 
-    public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRule>? specialRules = null, IEnumerable<MagicSchool>? magicSchools = null)
+    public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRuleChip>? specialRules = null, IEnumerable<MagicSchool>? magicSchools = null,
+        IEnumerable<WarriorHatredChip>? hatredChips = null)
     {
         Warrior = warrior;
         RoleName = roleName;
         Equipment = new ObservableCollection<WarriorEquipment>(warrior.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(warrior.Skills);
         Injuries = new ObservableCollection<WarriorInjury>(warrior.Injuries);
+        HatredChips = new ObservableCollection<WarriorHatredChip>(hatredChips ?? Enumerable.Empty<WarriorHatredChip>());
         Spells = new ObservableCollection<WarriorSpell>(warrior.Spells);
         Mutations = new ObservableCollection<WarriorMutation>(warrior.Mutations);
-        SpecialRules = new ObservableCollection<SpecialRule>(specialRules ?? Enumerable.Empty<SpecialRule>());
+        SpecialRules = new ObservableCollection<SpecialRuleChip>(specialRules ?? Enumerable.Empty<SpecialRuleChip>());
         MagicSchools = new ObservableCollection<MagicSchool>(magicSchools ?? Enumerable.Empty<MagicSchool>());
     }
 }

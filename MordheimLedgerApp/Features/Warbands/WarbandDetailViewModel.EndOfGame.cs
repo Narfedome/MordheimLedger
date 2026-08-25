@@ -502,6 +502,16 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
             }
 
+            // Rancune (56) : la cible choisie par le joueur (EndOfGameDialogViewModel.Injury) devient une
+            // WarriorHatred - voir Models.WarriorHatred pour pourquoi ce n'est pas une Injury de plus (2
+            // sortes de cible possibles, pas un simple texte catalogue).
+            if (row.HasHatredTarget)
+            {
+                await _warbandService.AddWarriorHatredAsync(warrior.Id, row.HatredTargetWarbandArchetypeId, row.HatredTargetFreeText);
+                var hatredLabel = string.Format(Loc["WarriorsHatredChipFormat"], row.HatredTargetDisplayName);
+                sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
+            }
+
             // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table, chacun
             // devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus.
             foreach (var sub in row.MultipleInjuryRolls)

@@ -54,4 +54,14 @@ public class SpecialRule
     /// SellWarbandItemAsync, which reuses Core.Rules.EquipmentPricing.CalculateCost (the same formula as
     /// a purchase) rather than a bespoke sell-price calculation.</summary>
     public bool IsResaleUpgrade { get; set; }
+
+    /// <summary>Empty = not a Hatred-granting rule (or a Hatred rule with no mechanized target yet -
+    /// e.g. a target warband not covered by any imported WarbandArchetype). Non-empty = this rule
+    /// grants Hatred against these specific WarbandArchetypes (never a Race - confirmed with the user,
+    /// Hatred always targets a warband type, not a broader faction). Fixed per rule, never chosen at
+    /// play - see WarriorHatred/HatredTargetTable for the separate per-Warrior "Rancune" injury result,
+    /// whose target IS chosen at play and isn't stored here. A rule with several targets (e.g. "Hammer
+    /// of Witches") renders as one chip per target on the warrior card rather than one combined chip -
+    /// see WarbandDetailViewModel.ToRow.</summary>
+    public List<int> HatredTargetWarbandArchetypeIds { get; set; } = new();
 }

@@ -58,9 +58,13 @@
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
                              ViewModel depuis WarriorArchetype.SpecialRules + WarbandArchetype.
-                             SpecialRules (règles bande-entière), pas stockées sur le Warrior. Pour
-                             changer les règles d'un type de guerrier, ça se passe dans la Bibliothèque
-                             (WarriorArchetypeEditDialog/WarbandArchetypeEditDialog), pas ici. -->
+                             SpecialRules (règles bande-entière) + les règles portées par l'équipement
+                             actuellement équipé, pas stockées sur le Warrior. Pour changer les règles
+                             d'un type de guerrier, ça se passe dans la Bibliothèque
+                             (WarriorArchetypeEditDialog/WarbandArchetypeEditDialog), pas ici. Une règle
+                             de Haine avec cible mécanisée (SpecialRule.HatredTargetWarbandArchetypeIds)
+                             s'explose en une chip par cible ("Haine : Skavens") au lieu d'une seule chip
+                             générique - voir WarbandDetailViewModel.BuildSpecialRuleChips/SpecialRuleChip. -->
                         <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
                                                   ItemsSource="{Binding SpecialRules}"
                                                   IconGlyph="{x:Static icons:SolidFont.Scroll}"
@@ -77,6 +81,18 @@
                                                   IconFontFamily="RpgAwesome"
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowInjuryDetailCommand}"/>
+
+                        <!-- Haine (Rancune, blessure grave 56) : lecture seule, pas de bouton "+"/"x" ni
+                             de tap-to-detail (pas de fiche catalogue à ouvrir, juste une cible résolue -
+                             voir Models.WarriorHatred/WarbandDetailViewModel.HatredChips). Distinct des
+                             chips "Haine : X" des Règles spéciales (celles-ci sont fixes, accordées par
+                             l'archétype/l'objet - voir SpecialRuleChip) : celle-ci vient d'un jet en
+                             partie, propre à ce guerrier. -->
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsHatredHeading}"
+                                                  ItemsSource="{Binding HatredChips}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaSkull}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"/>
 
                         <!-- École(s) de magie : celle(s) de LA BANDE (pas propre au guerrier - voir
                              WarriorRow.MagicSchools), résolue seulement pour les guerriers lanceurs de

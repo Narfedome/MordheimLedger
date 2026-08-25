@@ -84,6 +84,11 @@ public interface IWarbandService
     Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury);
     Task RemoveWarriorInjuryAsync(int warriorInjuryId);
 
+    /// <summary>"Rancune"/Bitter Enmity target (see Models.WarriorHatred) - exactly one of the two target
+    /// parameters should be non-null/non-empty, matching the resolved HatredTargetKind.</summary>
+    Task<WarriorHatred> AddWarriorHatredAsync(int warriorId, int? targetWarbandArchetypeId, string? targetFreeText);
+    Task RemoveWarriorHatredAsync(int warriorHatredId);
+
     Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell);
     Task RemoveWarriorSpellAsync(int warriorSpellId);
 

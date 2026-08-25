@@ -669,6 +669,12 @@
   <data name="WarriorsSpecialRulesHeading" xml:space="preserve">
     <value>Règles spéciales</value>
   </data>
+  <data name="WarriorsHatredChipFormat" xml:space="preserve">
+    <value>Haine : {0}</value>
+  </data>
+  <data name="WarriorsHatredHeading" xml:space="preserve">
+    <value>Haine</value>
+  </data>
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
   </data>
@@ -1097,6 +1103,27 @@
   </data>
   <data name="EndOfGameMultipleInjuryCountPh" xml:space="preserve">
     <value>1D6</value>
+  </data>
+  <data name="EndOfGameHatredHeading" xml:space="preserve">
+    <value>Qui hait-il désormais ?</value>
+  </data>
+  <data name="EndOfGameHatredScopeHint" xml:space="preserve">
+    <value>1-3 : l'individu responsable (ou le chef ennemi si c'était un Homme de main) — 4 : le chef de la bande responsable — 5 : la bande entière — 6 : toutes les bandes de ce type.</value>
+  </data>
+  <data name="EndOfGameHatredSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
+    <value>Nom du responsable</value>
+  </data>
+  <data name="EndOfGameHatredBandNamePh" xml:space="preserve">
+    <value>Nom de la bande</value>
+  </data>
+  <data name="EndOfGameHatredPickWarbandArchetype" xml:space="preserve">
+    <value>Quel type de bande ?</value>
+  </data>
+  <data name="EndOfGameHatredTargetRequired" xml:space="preserve">
+    <value>Renseignez la cible avant de continuer.</value>
   </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} a progressé : {1}</value>

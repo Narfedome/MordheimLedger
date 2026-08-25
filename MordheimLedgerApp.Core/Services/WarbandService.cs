@@ -149,9 +149,29 @@ public class WarbandService : IWarbandService
             if (row.AnimalId is { } animalId)
                 equipmentById.TryGetValue(animalId, out animal);
 
-            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal));
+            var hatredRows = await _db.Connection.Table<WarriorHatredEntity>().Where(h => h.WarriorId == row.Id).ToListAsync();
+            var hatreds = new List<WarriorHatred>();
+            foreach (var hatredRow in hatredRows)
+                hatreds.Add(hatredRow.ToModel(await ResolveHatredTargetNameAsync(hatredRow, languageCode)));
+
+            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal, hatreds));
         }
         return warriors;
+    }
+
+    /// <summary>Resolves WarriorHatredEntity's target into a display name - see Models.WarriorHatred.Name.
+    /// TargetWarbandArchetypeId needs a translation lookup (no Item to pass through like WarriorInjury),
+    /// TargetFreeText is already the display name.</summary>
+    private async Task<string> ResolveHatredTargetNameAsync(WarriorHatredEntity row, string languageCode)
+    {
+        if (row.TargetWarbandArchetypeId is { } archetypeId)
+        {
+            var archetype = await _db.Connection.FindAsync<WarbandArchetypeEntity>(archetypeId);
+            if (archetype is null) return string.Empty;
+            var translations = await TranslationResolver.ResolveAsync(_db, [archetype.NameKey], languageCode);
+            return translations[archetype.NameKey];
+        }
+        return row.TargetFreeText ?? string.Empty;
     }
 
     public async Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1)
@@ -186,6 +206,7 @@ public class WarbandService : IWarbandService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ?", warriorId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorHatredEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSpellEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorMutationEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
@@ -337,6 +358,27 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorInjuryEntity>(warriorInjuryId);
+    }
+
+    public async Task<WarriorHatred> AddWarriorHatredAsync(int warriorId, int? targetWarbandArchetypeId, string? targetFreeText)
+    {
+        await _db.Initialization;
+        var tracked = new WarriorHatred
+        {
+            WarriorId = warriorId,
+            TargetWarbandArchetypeId = targetWarbandArchetypeId,
+            TargetFreeText = targetFreeText
+        };
+        var entity = tracked.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        tracked.Id = entity.Id;
+        return tracked;
+    }
+
+    public async Task RemoveWarriorHatredAsync(int warriorHatredId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorHatredEntity>(warriorHatredId);
     }
 
     public async Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell)

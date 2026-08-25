@@ -167,6 +167,64 @@ public class RulesTests
         Assert.False(SeriousInjuryTable.IsMultipleInjuries(roll));
     }
 
+    [Fact]
+    public void SeriousInjuryTable_56_IsBitterEnmity()
+    {
+        Assert.True(SeriousInjuryTable.IsBitterEnmity(56));
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(55)]
+    [InlineData(66)]
+    public void SeriousInjuryTable_OtherResults_IsNotBitterEnmity(int roll)
+    {
+        Assert.False(SeriousInjuryTable.IsBitterEnmity(roll));
+    }
+
+    // --- HatredTargetTable (D6, Rancune sub-roll) ------------------------------------------------
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void HatredTargetTable_1To4_IsSpecificWarrior(int roll)
+    {
+        Assert.True(HatredTargetTable.TryGetOutcome(roll, out var kind));
+        Assert.Equal(HatredTargetKind.SpecificWarrior, kind);
+    }
+
+    [Fact]
+    public void HatredTargetTable_5_IsSpecificWarband()
+    {
+        Assert.True(HatredTargetTable.TryGetOutcome(5, out var kind));
+        Assert.Equal(HatredTargetKind.SpecificWarband, kind);
+    }
+
+    [Fact]
+    public void HatredTargetTable_6_IsWarbandArchetype()
+    {
+        Assert.True(HatredTargetTable.TryGetOutcome(6, out var kind));
+        Assert.Equal(HatredTargetKind.WarbandArchetype, kind);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(7)]
+    [InlineData(-1)]
+    public void HatredTargetTable_InvalidRoll_ReturnsFalse(int roll)
+    {
+        Assert.False(HatredTargetTable.TryGetOutcome(roll, out _));
+    }
+
+    [Fact]
+    public void HatredTargetTable_RollDice_AlwaysProducesAValidRoll()
+    {
+        for (var i = 0; i < 200; i++)
+            Assert.True(HatredTargetTable.TryGetOutcome(HatredTargetTable.RollDice(), out _));
+    }
+
     // --- HenchmanInjuryTable (D6) ---------------------------------------------------------------
 
     [Theory]

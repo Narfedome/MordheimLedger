@@ -37,6 +37,7 @@ public static class SeriousInjuryTable
 
     private static readonly int[] DeathRolls = [11, 12, 13, 14, 15];
     private static readonly int[] MultipleInjuriesRolls = [16, 21];
+    private const int BitterEnmityRoll = 56;
 
     public static bool TryGetTextKey(int roll, out string key)
     {
@@ -58,6 +59,10 @@ public static class SeriousInjuryTable
     /// <summary>True for the "Blessures multiples" result itself (16, 21) - triggers a 1D6 roll for
     /// the number of additional sub-rolls to make on this same table.</summary>
     public static bool IsMultipleInjuries(int roll) => Array.IndexOf(MultipleInjuriesRolls, roll) >= 0;
+
+    /// <summary>True for "Rancune"/Bitter Enmity (56) - triggers a further 1D6 to decide who the
+    /// warrior now hates, see HatredTargetTable.</summary>
+    public static bool IsBitterEnmity(int roll) => roll == BitterEnmityRoll;
 
     /// <summary>Rolls two D6 (D66: first die = tens digit).</summary>
     public static int RollDice() => Random.Shared.Next(1, 7) * 10 + Random.Shared.Next(1, 7);

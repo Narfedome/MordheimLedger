@@ -154,6 +154,59 @@
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
                             </VerticalStackLayout>
+
+                            <!-- Résultat "Rancune" (56) : 1D6 pour savoir quelle est la portée de la
+                                 Haine (Core.Rules.HatredTargetTable), PUIS un champ adapté à cette
+                                 portée. L'appli ne suit pas les bandes/guerriers adverses comme données
+                                 structurées (retour utilisateur explicite - rien à choisir dans un
+                                 picker de toute façon) : portées 1-4 (individu/chef) et 5 (cette bande)
+                                 sont un simple champ texte à la frappe, seule la portée 6 (toutes les
+                                 bandes de ce type) garde un picker structuré, car elle référence un vrai
+                                 WarbandArchetype du catalogue. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowHatredSection}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameHatredHeading}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{loc:Loc EndOfGameHatredScopeHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.HatredSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHatredSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollHatredCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+
+                                <Entry IsVisible="{Binding CurrentInjuryWarrior.ShowHatredFreeTextEntry}"
+                                       Text="{Binding CurrentInjuryWarrior.HatredTargetFreeTextInput}"
+                                       Placeholder="{Binding CurrentInjuryWarrior.HatredFreeTextPlaceholder}"/>
+
+                                <Button Text="{loc:Loc EndOfGameHatredPickWarbandArchetype}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                                        FontSize="12" Padding="8,4" HorizontalOptions="Start"
+                                        IsVisible="{Binding CurrentInjuryWarrior.ShowHatredArchetypePicker}"
+                                        Command="{Binding PickHatredWarbandArchetypeCommand}"
+                                        CommandParameter="{Binding CurrentInjuryWarrior}"/>
+
+                                <Label Text="{Binding CurrentInjuryWarrior.HatredRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.HatredRollError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                <!-- Portées 1-5 (texte libre) : simple confirmation, l'Entry ci-dessus
+                                     affiche déjà la saisie. -->
+                                <Label Text="{Binding CurrentInjuryWarrior.HatredTargetDisplayName}" FontSize="12"
+                                       IsVisible="{Binding CurrentInjuryWarrior.ShowHatredFreeTextEntry}"/>
+
+                                <!-- Portée 6 : chip tapable (détail de l'archétype) + retirable (relance
+                                     le picker), même langage que le reste de l'app plutôt qu'un label
+                                     brut. -->
+                                <components:ChipView IsVisible="{Binding CurrentInjuryWarrior.HatredTargetWarbandArchetype, Converter={StaticResource IsNotNullConverter}}"
+                                                      Item="{Binding CurrentInjuryWarrior.HatredTargetWarbandArchetype}"
+                                                      IconGlyph="{x:Static icons:SolidFont.Users}"
+                                                      Command="{Binding ShowHatredArchetypeDetailCommand}"
+                                                      RemoveCommand="{Binding RemoveHatredArchetypeCommand}"/>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
                         <!-- Groupe d'Hommes de main : un jet D6 indépendant par figurine hors de combat

@@ -247,7 +247,8 @@
           "description": {
             "en": "Years of bitter struggle against Chaos have left their mark - Cossacks are subject to Hatred against all forces of Chaos (i.e. any warband covered by the Ancient Enemies rule).",
             "fr": "Des années de conflit contre les forces du Chaos ont laissé leur empreinte dans l'âme des Cosaques. Ceux-ci sont sujets à la haine des forces du Chaos (c'est-à-dire les membres de toute bande à laquelle s'applique la règle Vieux Ennemis)."
-          }
+          },
+          "hatredTargetWarbandNames": ["CarnivalOfChaos", "CultOfThePossessed", "BeastmenRaiders"]
         }
       ],
       "equipmentListName": "Kislev Warrior Equipment List"

@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -22,6 +23,14 @@ public partial class EndOfGameDialogViewModel
                 valid &= CheckRoll(row.MultipleInjuryRolls.Count == 0, () => row.MultipleInjuryCountError = Loc["EndOfGameRollRequired"]);
                 foreach (var sub in row.MultipleInjuryRolls)
                     valid &= CheckRoll(string.IsNullOrWhiteSpace(sub.InjuryResultText), () => sub.RollError = Loc["EndOfGameRollRequired"]);
+            }
+
+            if (row.ShowHatredSection)
+            {
+                if (row.HatredScope is null)
+                    valid &= CheckRoll(true, () => row.HatredRollError = Loc["EndOfGameRollRequired"]);
+                else
+                    valid &= CheckRoll(!row.HasHatredTarget, () => row.HatredRollError = Loc["EndOfGameHatredTargetRequired"]);
             }
         }
         else
@@ -67,5 +76,41 @@ public partial class EndOfGameDialogViewModel
     {
         var roll = entry.IsHero ? SeriousInjuryTable.RollDice() : HenchmanInjuryTable.RollDice();
         entry.ManualRoll = roll.ToString();
+    }
+
+    // Sous-jet 1D6 de "Rancune" (56, Héros uniquement) déterminant la portée de la Haine (voir
+    // Core.Rules.HatredTargetTable) - le champ HatredSubRoll reste modifiable ensuite si le joueur
+    // préfère un jet physique, même convention que les autres jets de cette étape.
+    [RelayCommand]
+    private void AutoRollHatred(WarriorOutcomeRow row) => row.HatredSubRoll = HatredTargetTable.RollDice().ToString();
+
+    // Portée "toutes les bandes de ce type" (6) uniquement - la seule portée référençant un vrai
+    // WarbandArchetype du catalogue (les 3 autres sont résolues à la frappe dans un simple champ texte,
+    // voir WarriorOutcomeRow.OnHatredTargetFreeTextInputChanged - l'appli ne suit pas les bandes/
+    // guerriers adverses comme données structurées, retour utilisateur explicite). Nécessite un dialog
+    // (ActionSheet), impossible à déclencher depuis un simple setter de propriété - même patron que
+    // PickAdvanceSkill/PickAdvanceSpell (EndOfGameDialogViewModel.Advance.cs).
+    [RelayCommand]
+    private async Task PickHatredWarbandArchetype(WarriorOutcomeRow row)
+    {
+        var archetypes = await _libraryService.GetWarbandArchetypesAsync(Loc.Language);
+        var index = await ShowActionSheetIndexAsync(Loc["EndOfGameHatredPickWarbandArchetype"], archetypes.Select(a => a.Name).ToArray());
+        if (index < 0) return;
+
+        row.SetHatredTarget(archetypes[index]);
+    }
+
+    // Confirmation de la portée 6 en chip (ChipView), même langage tap-to-detail/croix-pour-retirer que
+    // le reste de l'app plutôt qu'un label brut.
+    [RelayCommand]
+    private Task ShowHatredArchetypeDetail(WarbandArchetype archetype) => _detailDialogs.ShowWarbandArchetypeDetailDialogAsync(archetype);
+
+    // ChipView ne transmet que l'item tapé (l'archétype lui-même, pas son WarriorOutcomeRow propriétaire)
+    // - même patron que RemoveAdvanceSkill/RemoveAdvanceSpell (EndOfGameDialogViewModel.Advance.cs).
+    [RelayCommand]
+    private void RemoveHatredArchetype(WarbandArchetype archetype)
+    {
+        foreach (var row in WarriorRows.Where(r => r.HatredTargetWarbandArchetype == archetype))
+            row.ClearHatredTargetWarbandArchetype();
     }
 }

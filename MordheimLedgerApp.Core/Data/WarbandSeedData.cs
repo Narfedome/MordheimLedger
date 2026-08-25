@@ -315,6 +315,13 @@ public class SpecialRuleSeedData
     /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.IsResaleUpgrade. False/absent
     /// for every material except "Ornate Weapon".</summary>
     public bool IsResaleUpgrade { get; set; }
+
+    /// <summary>Warband file stems (e.g. "OrcMob") this Hatred-granting rule targets - see
+    /// SpecialRule.HatredTargetWarbandArchetypeIds. Resolved the same deferred way as EquipmentSeedData/
+    /// SkillSeedData's RestrictedToWarbandNames (the target WarbandArchetype may not exist yet at seed
+    /// time), see AppDatabase's _pendingSharedRestrictions. Null/empty = not a Hatred rule, or one with
+    /// no mechanized target yet.</summary>
+    public List<string>? HatredTargetWarbandNames { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

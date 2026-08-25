@@ -441,7 +441,10 @@ public static class EntityMapping
         CostMultiplier = e.CostMultiplier,
         Abbreviation = e.Abbreviation,
         Rarity = e.Rarity,
-        IsResaleUpgrade = e.IsResaleUpgrade
+        IsResaleUpgrade = e.IsResaleUpgrade,
+        HatredTargetWarbandArchetypeIds = string.IsNullOrEmpty(e.HatredTargetWarbandArchetypeIds)
+            ? new List<int>()
+            : e.HatredTargetWarbandArchetypeIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList()
     };
 
     public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
@@ -454,7 +457,8 @@ public static class EntityMapping
         CostMultiplier = m.CostMultiplier,
         Abbreviation = m.Abbreviation,
         Rarity = m.Rarity,
-        IsResaleUpgrade = m.IsResaleUpgrade
+        IsResaleUpgrade = m.IsResaleUpgrade,
+        HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds)
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,
@@ -653,7 +657,7 @@ public static class EntityMapping
     /// not a join, see WarriorEntity.AnimalId.</param>
     public static Warrior ToModel(this WarriorEntity e, IEnumerable<WarriorEquipment>? equipment = null, IEnumerable<WarriorSkill>? skills = null,
         IEnumerable<WarriorInjury>? injuries = null, IEnumerable<WarriorSpell>? spells = null, IEnumerable<WarriorMutation>? mutations = null,
-        EquipmentItem? animal = null) => new()
+        EquipmentItem? animal = null, IEnumerable<WarriorHatred>? hatreds = null) => new()
     {
         Id = e.Id,
         WarbandId = e.WarbandId,
@@ -682,6 +686,7 @@ public static class EntityMapping
         Injuries = injuries?.ToList() ?? new List<WarriorInjury>(),
         Spells = spells?.ToList() ?? new List<WarriorSpell>(),
         Mutations = mutations?.ToList() ?? new List<WarriorMutation>(),
+        Hatreds = hatreds?.ToList() ?? new List<WarriorHatred>(),
         Animal = animal,
         IsLargeCreature = e.IsLargeCreature,
         GainsExperience = e.GainsExperience,
@@ -815,6 +820,25 @@ public static class EntityMapping
         Id = m.Id,
         WarriorId = m.WarriorId,
         InjuryId = m.Item.Id
+    };
+
+    /// <param name="resolvedName">The display name of whichever Target* is set, resolved by the caller
+    /// (WarbandService.GetWarriorsAsync) - see WarriorHatred.Name.</param>
+    public static WarriorHatred ToModel(this WarriorHatredEntity e, string resolvedName) => new()
+    {
+        Id = e.Id,
+        WarriorId = e.WarriorId,
+        TargetWarbandArchetypeId = e.TargetWarbandArchetypeId,
+        TargetFreeText = e.TargetFreeText,
+        Name = resolvedName
+    };
+
+    public static WarriorHatredEntity ToEntity(this WarriorHatred m) => new()
+    {
+        Id = m.Id,
+        WarriorId = m.WarriorId,
+        TargetWarbandArchetypeId = m.TargetWarbandArchetypeId,
+        TargetFreeText = m.TargetFreeText
     };
 
     /// <param name="item">The catalog spell this row references, loaded separately.</param>

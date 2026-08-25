@@ -73,6 +73,12 @@ public class Warrior
     /// same list — see WarbandDetailViewModel.EndOfGame's find-or-create-by-name lookup.</summary>
     public List<WarriorInjury> Injuries { get; set; } = new();
 
+    /// <summary>Loaded separately via the Warrior/WarriorHatred join table - not persisted on this
+    /// object. Fed only by the End of Game "Rancune" Serious Injury result (see
+    /// WarbandDetailViewModel.EndOfGame), no manual-add UI - unlike Injuries, there's no free-standing
+    /// catalog to pick from.</summary>
+    public List<WarriorHatred> Hatreds { get; set; } = new();
+
     /// <summary>Loaded separately via the Warrior/Spell join table — not persisted on this object. Which
     /// specific spells this warrior has learned from its band's granted magic school(s) (a caster
     /// doesn't know the whole table at once, see WarriorSpell) — empty for non-casters.</summary>

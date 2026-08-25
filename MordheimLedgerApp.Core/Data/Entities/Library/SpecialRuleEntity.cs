@@ -15,4 +15,11 @@ public class SpecialRuleEntity
     public string? Abbreviation { get; set; }
     public int? Rarity { get; set; }
     public bool IsResaleUpgrade { get; set; }
+
+    /// <summary>Comma-separated WarbandArchetype ids - see SpecialRule.HatredTargetWarbandArchetypeIds.
+    /// A plain delimited column rather than a join table: unlike EquipmentItem/Skill restrictions
+    /// (genuinely shared catalog rows restricted differently per consumer), a Hatred rule's target list
+    /// is intrinsic to what that specific named rule means, and each Hatred-granting rule already has a
+    /// distinct name per source (no two contexts share one catalog row with different targets).</summary>
+    public string? HatredTargetWarbandArchetypeIds { get; set; }
 }

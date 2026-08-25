@@ -317,7 +317,8 @@
           "description": {
             "en": "A Hero with the Hammer of Witches will hate all Possessed, Skaven, Beastmen, Chaos, Daemons, Dark Elf, Orc & Goblins and Sigmarite Sisters.",
             "fr": "Un Héros possédant le Marteau des Sorcières hait tous les Possédés, Skavens, Hommes-Bêtes, figurines du Chaos, Démons, Elfes Noirs, Orques & Gobelins et Sœurs de Sigmar."
-          }
+          },
+          "hatredTargetWarbandNames": ["CultOfThePossessed", "SkavenOfClanEshin", "BeastmenRaiders", "CarnivalOfChaos", "OrcMob", "SistersOfSigmar"]
         }
       ]
     },

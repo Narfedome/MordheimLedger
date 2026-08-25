@@ -49,7 +49,8 @@
       "description": {
         "en": "All Dwarfs are subject to Hatred against Orcs and Goblins.",
         "fr": "Tous les nains sont sujets à la Haine envers les orques et les gobelins."
-      }
+      },
+      "hatredTargetWarbandNames": ["OrcMob"]
     },
     {
       "name": {

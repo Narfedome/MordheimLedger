@@ -30,6 +30,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private List<SpecialRule> _bandWideSpecialRules = new();
     private List<MagicSchool> _bandMagicSchools = new();
 
+    /// <summary>All WarbandArchetype names (not just this warband's own), needed to resolve a Hatred
+    /// rule's target - which can point at any band type, not just the current one. See
+    /// BuildSpecialRuleChips.</summary>
+    private Dictionary<int, string> _warbandArchetypeNames = new();
+
     [ObservableProperty]
     private int warbandId;
 
@@ -129,6 +134,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
             _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
+            var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+            _warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
@@ -163,11 +170,39 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId);
         var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
-        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
+        // Un objet équipé (ex. Marteau des Sorcières) peut lui aussi accorder une règle spéciale - avant
+        // ce correctif, seule la fusion bande+archétype était faite, les règles portées par
+        // l'équipement n'apparaissaient jamais en chip sur la carte guerrier.
+        var equipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
+        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).Concat(equipmentRules).DistinctBy(r => r.Id);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
         var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
-        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), mergedRules, magicSchools);
+        var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) });
+        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
+    }
+
+    /// <summary>A rule with a mechanized Hatred target (SpecialRule.HatredTargetWarbandArchetypeIds)
+    /// explodes into one chip per target ("Haine : Skavens") instead of a single generic "Haine" chip -
+    /// every other rule maps 1:1 to its own catalog Name, unchanged.</summary>
+    private List<SpecialRuleChip> BuildSpecialRuleChips(IEnumerable<SpecialRule> rules)
+    {
+        var chips = new List<SpecialRuleChip>();
+        foreach (var rule in rules)
+        {
+            if (rule.HatredTargetWarbandArchetypeIds.Count == 0)
+            {
+                chips.Add(new SpecialRuleChip { Item = rule, Name = rule.Name });
+                continue;
+            }
+
+            foreach (var targetId in rule.HatredTargetWarbandArchetypeIds)
+            {
+                var targetName = _warbandArchetypeNames.GetValueOrDefault(targetId, "?");
+                chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], targetName) });
+            }
+        }
+        return chips;
     }
 
     [RelayCommand]
@@ -267,7 +302,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     // recrutement, via IDetailDialogService (voir ce service pour pourquoi il existe : cette
     // résolution de restrictions était dupliquée à la main dans ~28 endroits avant lui).
     [RelayCommand]
-    private Task ShowSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
+    private Task ShowSpecialRuleDetail(SpecialRuleChip chip) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(chip.Item);
 
     [RelayCommand]
     private Task ShowInjuryDetail(WarriorInjury injury) => _detailDialogs.ShowInjuryDetailDialogAsync(injury.Item);

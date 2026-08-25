@@ -299,6 +299,7 @@ public class AppDatabase
         await _db.CreateTableAsync<WarbandEquipmentEntity>();
         await _db.CreateTableAsync<WarriorSkillEntity>();
         await _db.CreateTableAsync<WarriorInjuryEntity>();
+        await _db.CreateTableAsync<WarriorHatredEntity>();
         await _db.CreateTableAsync<WarriorSpellEntity>();
         await _db.CreateTableAsync<HistoryEntryEntity>();
         await _db.CreateTableAsync<TranslationEntity>();
@@ -337,6 +338,7 @@ public class AppDatabase
         await _db.DropTableAsync<WarriorEquipmentEntity>();
         await _db.DropTableAsync<WarriorSkillEntity>();
         await _db.DropTableAsync<WarriorInjuryEntity>();
+        await _db.DropTableAsync<WarriorHatredEntity>();
         await _db.DropTableAsync<WarriorSpellEntity>();
         await _db.DropTableAsync<HistoryEntryEntity>();
         await _db.DropTableAsync<TranslationEntity>();
@@ -436,6 +438,18 @@ public class AppDatabase
         // first launch) and insert the matching join row.
         foreach (var pending in _pendingSharedRestrictions)
         {
+            // SpecialRule's Hatred target isn't a join table (see SpecialRuleEntity.
+            // HatredTargetWarbandArchetypeIds) - resolve every stem for this rule first, then write the
+            // whole CSV list back in one update, rather than one join row per stem like the other 3 kinds.
+            if (pending.Kind == SharedRestrictionKind.SpecialRule)
+            {
+                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByFileStem[stem]).ToList();
+                var ruleEntity = await _db.Table<SpecialRuleEntity>().Where(r => r.Id == pending.ItemId).FirstAsync();
+                ruleEntity.HatredTargetWarbandArchetypeIds = string.Join(',', targetIds);
+                await _db.UpdateAsync(ruleEntity);
+                continue;
+            }
+
             foreach (var stem in pending.WarbandFileStems)
             {
                 var warbandArchetypeId = _warbandArchetypeIdsByFileStem[stem];
@@ -922,6 +936,12 @@ public class AppDatabase
         var entity = rule.ToEntity();
         await _db.InsertAsync(entity);
 
+        // Target WarbandArchetypes may not be seeded yet (this rule can attach from a band-level array
+        // that seeds before the target band's own file) - resolved in the same deferred pass as
+        // Equipment/Skill/Mutation's RestrictedToWarbandNames, see SeedOfficialContentAsync.
+        if (seed.HatredTargetWarbandNames is { Count: > 0 } hatredTargets)
+            _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.SpecialRule, entity.Id, hatredTargets));
+
         _specialRuleIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
     }
@@ -1081,7 +1101,7 @@ public class AppDatabase
     /// name several bands via RestrictedToWarbandNames - see _pendingSharedRestrictions.</summary>
     private readonly Dictionary<string, int> _warbandArchetypeIdsByFileStem = new();
 
-    private enum SharedRestrictionKind { Equipment, Skill, Mutation }
+    private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule }
 
     private record struct PendingSharedRestriction(SharedRestrictionKind Kind, int ItemId, List<string> WarbandFileStems);
 

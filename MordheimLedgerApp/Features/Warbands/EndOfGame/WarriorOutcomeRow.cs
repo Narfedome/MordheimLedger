@@ -156,6 +156,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// physique, décision explicite du 2026-08-17.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowMultipleInjuriesSection))]
+    [NotifyPropertyChangedFor(nameof(ShowHatredSection))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -170,6 +171,11 @@ public partial class WarriorOutcomeRow : ObservableObject
         InjuryResultText = string.Empty;
         if (int.TryParse(value, out var roll)) ResolveInjuryResult(roll);
         if (!string.IsNullOrWhiteSpace(InjuryResultText)) RollError = null;
+
+        // Si le jet principal ne donne plus "Rancune", le sous-jet/la cible précédemment saisis n'ont
+        // plus de sens - effacés plutôt que laissés affichés pour un résultat qui ne les déclenche plus.
+        if (Warrior.IsHero && !ShowHatredSection && HatredSubRoll.Length > 0)
+            HatredSubRoll = string.Empty;
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -246,6 +252,124 @@ public partial class WarriorOutcomeRow : ObservableObject
     public ObservableCollection<InjurySubRollEntry> MultipleInjuryRolls { get; } = new();
     public bool HasMultipleInjuryRolls => MultipleInjuryRolls.Count > 0;
 
+    /// <summary>True dès que le jet principal (ManualRoll) donne "Rancune" (56, Héros uniquement) -
+    /// pilote l'affichage du bloc "qui hait-il" dans le XAML : le sous-jet 1D6 d'abord (portée), puis un
+    /// champ adapté à cette portée. L'appli ne suit pas les bandes/guerriers adverses comme données
+    /// structurées (retour utilisateur explicite : rien à choisir dans un picker de toute façon) - seule
+    /// la portée "toutes les bandes de ce type" (6) référence un vrai WarbandArchetype du catalogue ;
+    /// les 3 autres portées sont un simple nom tapé au clavier (voir HatredTargetFreeTextInput).</summary>
+    public bool ShowHatredSection => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && SeriousInjuryTable.IsBitterEnmity(roll);
+
+    /// <summary>Le score du 1D6 tiré pour savoir quelle est la portée de la Haine (voir Core.Rules.
+    /// HatredTargetTable) - saisi à la main ou rempli par AutoRollHatred, même convention que les autres
+    /// jets de cette étape.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(HatredScope))]
+    [NotifyPropertyChangedFor(nameof(ShowHatredFreeTextEntry))]
+    [NotifyPropertyChangedFor(nameof(ShowHatredArchetypePicker))]
+    [NotifyPropertyChangedFor(nameof(HatredFreeTextPlaceholder))]
+    private string hatredSubRoll = string.Empty;
+
+    /// <summary>Résolu depuis HatredSubRoll (voir Core.Rules.HatredTargetTable) - null tant que le
+    /// sous-jet n'est pas encore saisi/valide. Nommé "Scope" plutôt que "Kind" pour ne pas entrer en
+    /// collision avec le nom du type énuméré Core.Rules.HatredTargetKind lui-même (même précédent que
+    /// Warrior Warrior dans ce fichier, mais un enum ne peut pas être référencé par membre statique
+    /// (HatredTargetKind.SpecificWarrior) une fois son propre nom masqué par une propriété - contrairement
+    /// à une classe, l'accès qualifié via l'espace de noms n'aide pas ici).</summary>
+    public HatredTargetKind? HatredScope =>
+        int.TryParse(HatredSubRoll, out var roll) && HatredTargetTable.TryGetOutcome(roll, out var kind) ? kind : null;
+
+    /// <summary>Portées "individu" (1-4) et "cette bande" (5) : un simple champ texte, pas de picker -
+    /// l'app ne suit pas les guerriers/bandes adverses. Placeholder différent selon la portée (voir
+    /// HatredFreeTextPlaceholder), même mécanisme de saisie sinon.</summary>
+    public bool ShowHatredFreeTextEntry => HatredScope is HatredTargetKind.SpecificWarrior or HatredTargetKind.SpecificWarband;
+
+    public string HatredFreeTextPlaceholder => HatredScope == HatredTargetKind.SpecificWarband
+        ? _loc["EndOfGameHatredBandNamePh"]
+        : _loc["EndOfGameHatredIndividualNamePh"];
+
+    /// <summary>Saisie libre du nom (individu/chef en portée 1-4, bande en portée 5) - se résout tout
+    /// seul à la frappe (OnHatredTargetFreeTextInputChanged), même convention que le reste de ce wizard.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(HasHatredTarget))]
+    private string hatredTargetFreeTextInput = string.Empty;
+
+    partial void OnHatredTargetFreeTextInputChanged(string value)
+    {
+        HatredTargetDisplayName = value;
+        HatredTargetFreeText = string.IsNullOrWhiteSpace(value) ? null : value;
+        if (!string.IsNullOrWhiteSpace(value)) HatredRollError = null;
+    }
+
+    /// <summary>Portée "toutes les bandes de ce type" (6) : seule portée référençant un vrai catalogue
+    /// (WarbandArchetype), donc le seul cas gardant un picker structuré (PickHatredWarbandArchetype).</summary>
+    public bool ShowHatredArchetypePicker => HatredScope == HatredTargetKind.WarbandArchetype;
+
+    partial void OnHatredSubRollChanged(string value)
+    {
+        // Un nouveau sous-jet invalide la cible précédemment résolue - même principe que
+        // OnManualRollChanged pour les sous-jets Blessures multiples.
+        HatredTargetWarbandArchetype = null;
+        HatredTargetWarbandArchetypeId = null;
+        HatredTargetFreeText = null;
+        HatredTargetFreeTextInput = string.Empty;
+        HatredTargetDisplayName = string.Empty;
+        HatredRollError = null;
+    }
+
+    public int? HatredTargetWarbandArchetypeId { get; private set; }
+    public string? HatredTargetFreeText { get; private set; }
+
+    /// <summary>Nom résolu de la cible finale - vide tant qu'elle n'est pas résolue (à la frappe pour
+    /// une portée en texte libre, via PickHatredWarbandArchetypeCommand pour la portée 6). Pas de préfixe
+    /// "Haine :" ici (voir WarriorHatred.Name) - purement informatif pour ce wizard, le préfixe
+    /// s'applique à l'affichage en chip une fois la partie enregistrée (WarbandDetailViewModel.
+    /// BuildSpecialRuleChips's cousin, voir WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(HasHatredTarget))]
+    private string hatredTargetDisplayName = string.Empty;
+
+    public bool HasHatredTarget => HatredTargetDisplayName.Length > 0;
+
+    /// <summary>Même principe que RollError/MultipleInjuryCountError, pour le sous-jet de Rancune -
+    /// "jet requis" tant que HatredScope est null, "cible requise" si la portée 6 attend encore
+    /// PickHatredWarbandArchetype (voir ValidateInjuryStep).</summary>
+    [ObservableProperty]
+    private string? hatredRollError;
+
+    /// <summary>L'archétype de bande résolu (portée 6 uniquement) - conservé en plus de
+    /// HatredTargetWarbandArchetypeId/HatredTargetDisplayName pour que la chip de confirmation
+    /// (ChipView) puisse s'y lier directement, tap-to-detail et retrait compris, même langage que le
+    /// reste de l'app plutôt qu'un label brut ("comme toujours une chip", retour utilisateur explicite).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(HasHatredTarget))]
+    private WarbandArchetype? hatredTargetWarbandArchetype;
+
+    /// <summary>Appelée par EndOfGameDialogViewModel.Injury.PickHatredWarbandArchetype une fois le dialog
+    /// résolu (portée 6 uniquement - les autres se résolvent à la frappe, voir
+    /// OnHatredTargetFreeTextInputChanged).</summary>
+    public void SetHatredTarget(WarbandArchetype archetype)
+    {
+        HatredTargetWarbandArchetype = archetype;
+        HatredTargetWarbandArchetypeId = archetype.Id;
+        HatredTargetFreeText = null;
+        HatredTargetDisplayName = archetype.Name;
+        HatredRollError = null;
+    }
+
+    /// <summary>Croix de la chip (portée 6) - remet la portée à "non résolue" sans effacer le sous-jet,
+    /// pour que le joueur puisse re-choisir un autre type de bande sans tout refaire.</summary>
+    public void ClearHatredTargetWarbandArchetype()
+    {
+        HatredTargetWarbandArchetype = null;
+        HatredTargetWarbandArchetypeId = null;
+        HatredTargetDisplayName = string.Empty;
+    }
+
     /// <summary>Un jet D6 par figurine hors de combat dans un groupe d'Hommes de main (OutOfActionCount)
     /// - sans objet pour un Héros, qui utilise ManualRoll/InjuryResultText ci-dessus à la place (une
     /// seule figurine, un seul jet). Peuplée/resynchronisée par SyncFigureInjuryRolls à chaque
@@ -305,6 +429,7 @@ public partial class WarriorOutcomeRow : ObservableObject
                 if (!string.IsNullOrWhiteSpace(sub.InjuryResultText)) parts.Add(sub.InjuryResultText);
             foreach (var figure in FigureInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(figure.InjuryResultText)) parts.Add(figure.InjuryResultText);
+            if (HasHatredTarget) parts.Add(string.Format(_loc["WarriorsHatredChipFormat"], HatredTargetDisplayName));
             foreach (var advance in AdvanceRolls.Concat(ExplorationAdvanceRolls))
             {
                 if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);

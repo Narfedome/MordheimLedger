@@ -166,6 +166,14 @@ public class WarbandService : IWarbandService
         return warrior;
     }
 
+    public async Task InsertWarriorAsync(Warrior warrior)
+    {
+        await _db.Initialization;
+        var entity = warrior.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        warrior.Id = entity.Id;
+    }
+
     public async Task SaveWarriorAsync(Warrior warrior)
     {
         await _db.Initialization;

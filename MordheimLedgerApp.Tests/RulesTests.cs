@@ -243,6 +243,217 @@ public class RulesTests
         }
     }
 
+    // --- HeroAdvanceTable/HenchmanAdvanceTable.TryGetOutcome (structured, see AdvanceOutcome) --------
+    // Transcribed directly against the AdvanceHero{roll}/AdvanceHenchman{roll} flavor text already in
+    // AppStrings.resx (itself already verified against the rulebook) - the highest-value test in this
+    // whole feature, since a transcription error here would silently misapply every future Advance.
+
+    [Theory]
+    [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)] [InlineData(10)] [InlineData(11)] [InlineData(12)]
+    public void HeroAdvanceTable_TryGetOutcome_SkillRolls_ReturnSkillKind(int roll)
+    {
+        Assert.True(HeroAdvanceTable.TryGetOutcome(roll, out var outcome));
+        Assert.Equal(AdvanceKind.Skill, outcome.Kind);
+    }
+
+    [Fact]
+    public void HeroAdvanceTable_TryGetOutcome_Roll6_IsStrengthOrAttacksSubRoll()
+    {
+        Assert.True(HeroAdvanceTable.TryGetOutcome(6, out var outcome));
+        Assert.Equal(AdvanceKind.CharacteristicIncrease, outcome.Kind);
+        Assert.Equal(CharacteristicChoiceMode.SubRoll1D6, outcome.ChoiceMode);
+        Assert.Equal(CharacteristicField.Strength, outcome.OptionA);
+        Assert.Equal(CharacteristicField.Attacks, outcome.OptionB);
+    }
+
+    [Fact]
+    public void HeroAdvanceTable_TryGetOutcome_Roll7_IsWeaponSkillOrBallisticSkillChoice()
+    {
+        Assert.True(HeroAdvanceTable.TryGetOutcome(7, out var outcome));
+        Assert.Equal(AdvanceKind.CharacteristicIncrease, outcome.Kind);
+        Assert.Equal(CharacteristicChoiceMode.BinaryChoice, outcome.ChoiceMode);
+        Assert.Equal(CharacteristicField.WeaponSkill, outcome.OptionA);
+        Assert.Equal(CharacteristicField.BallisticSkill, outcome.OptionB);
+    }
+
+    [Fact]
+    public void HeroAdvanceTable_TryGetOutcome_Roll8_IsInitiativeOrLeadershipSubRoll()
+    {
+        Assert.True(HeroAdvanceTable.TryGetOutcome(8, out var outcome));
+        Assert.Equal(CharacteristicChoiceMode.SubRoll1D6, outcome.ChoiceMode);
+        Assert.Equal(CharacteristicField.Initiative, outcome.OptionA);
+        Assert.Equal(CharacteristicField.Leadership, outcome.OptionB);
+    }
+
+    [Fact]
+    public void HeroAdvanceTable_TryGetOutcome_Roll9_IsWoundsOrToughnessSubRoll()
+    {
+        Assert.True(HeroAdvanceTable.TryGetOutcome(9, out var outcome));
+        Assert.Equal(CharacteristicChoiceMode.SubRoll1D6, outcome.ChoiceMode);
+        Assert.Equal(CharacteristicField.Wounds, outcome.OptionA);
+        Assert.Equal(CharacteristicField.Toughness, outcome.OptionB);
+    }
+
+    [Theory]
+    [InlineData(1)] [InlineData(13)]
+    public void HeroAdvanceTable_TryGetOutcome_OutOfRange_ReturnsFalse(int roll)
+    {
+        Assert.False(HeroAdvanceTable.TryGetOutcome(roll, out _));
+    }
+
+    [Theory]
+    [InlineData(2, CharacteristicField.Initiative)]
+    [InlineData(3, CharacteristicField.Initiative)]
+    [InlineData(4, CharacteristicField.Initiative)]
+    [InlineData(5, CharacteristicField.Strength)]
+    [InlineData(8, CharacteristicField.Attacks)]
+    [InlineData(9, CharacteristicField.Leadership)]
+    public void HenchmanAdvanceTable_TryGetOutcome_FixedRolls_ReturnExpectedField(int roll, CharacteristicField expected)
+    {
+        Assert.True(HenchmanAdvanceTable.TryGetOutcome(roll, out var outcome));
+        Assert.Equal(AdvanceKind.CharacteristicIncrease, outcome.Kind);
+        Assert.Equal(CharacteristicChoiceMode.FixedSingle, outcome.ChoiceMode);
+        Assert.Equal(expected, outcome.FixedField);
+    }
+
+    [Theory]
+    [InlineData(6)]
+    [InlineData(7)]
+    public void HenchmanAdvanceTable_TryGetOutcome_ChoiceRolls_AreWeaponSkillOrBallisticSkill(int roll)
+    {
+        Assert.True(HenchmanAdvanceTable.TryGetOutcome(roll, out var outcome));
+        Assert.Equal(CharacteristicChoiceMode.BinaryChoice, outcome.ChoiceMode);
+        Assert.Equal(CharacteristicField.WeaponSkill, outcome.OptionA);
+        Assert.Equal(CharacteristicField.BallisticSkill, outcome.OptionB);
+    }
+
+    [Theory]
+    [InlineData(10)]
+    [InlineData(11)]
+    [InlineData(12)]
+    public void HenchmanAdvanceTable_TryGetOutcome_PromotionRolls_ReturnPromotionKind(int roll)
+    {
+        Assert.True(HenchmanAdvanceTable.IsPromotion(roll));
+        Assert.True(HenchmanAdvanceTable.TryGetOutcome(roll, out var outcome));
+        Assert.Equal(AdvanceKind.Promotion, outcome.Kind);
+    }
+
+    [Theory]
+    [InlineData(2)] [InlineData(6)] [InlineData(9)]
+    public void HenchmanAdvanceTable_IsPromotion_NonPromotionRolls_ReturnsFalse(int roll)
+    {
+        Assert.False(HenchmanAdvanceTable.IsPromotion(roll));
+    }
+
+    // --- CharacteristicIncreaseRules --------------------------------------------------------------
+
+    private static readonly CharacteristicValues DefaultValues = new(
+        Movement: 4, WeaponSkill: 3, BallisticSkill: 3, Strength: 3, Toughness: 3,
+        Wounds: 1, Initiative: 3, Attacks: 1, Leadership: 7);
+
+    private static readonly CharacteristicMaxes DefaultMaxes = new(
+        Movement: 4, WeaponSkill: 6, BallisticSkill: 6, Strength: 4, Toughness: 4,
+        Wounds: 3, Initiative: 6, Attacks: 4, Leadership: 9);
+
+    [Fact]
+    public void CharacteristicValues_Increment_AddsOneToTargetFieldOnly()
+    {
+        var incremented = DefaultValues.Increment(CharacteristicField.Strength);
+        Assert.Equal(DefaultValues.Strength + 1, incremented.Strength);
+        Assert.Equal(DefaultValues.Toughness, incremented.Toughness);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_IsAtMax_BelowMax_ReturnsFalse()
+    {
+        Assert.False(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.Strength, DefaultValues, DefaultMaxes));
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_IsAtMax_AtMax_ReturnsTrue()
+    {
+        var atMax = DefaultValues with { Strength = 4 };
+        Assert.True(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.Strength, atMax, DefaultMaxes));
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_IsAtMax_NullMax_NeverAtMax()
+    {
+        var freeTextMaxes = DefaultMaxes with { Movement = null };
+        Assert.False(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.Movement, DefaultValues with { Movement = 999 }, freeTextMaxes));
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_ResolveBinaryChoice_BothEligible_RequiresFreeChoice()
+    {
+        var result = CharacteristicIncreaseRules.ResolveBinaryChoice(
+            CharacteristicField.WeaponSkill, CharacteristicField.BallisticSkill, DefaultValues, DefaultMaxes);
+        Assert.True(result.RequiresFreeChoice);
+        Assert.Null(result.ForcedField);
+        Assert.Null(result.FallbackOptions);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_ResolveBinaryChoice_OneMaxed_ForcesTheOther()
+    {
+        var values = DefaultValues with { WeaponSkill = 6 };
+        var result = CharacteristicIncreaseRules.ResolveBinaryChoice(
+            CharacteristicField.WeaponSkill, CharacteristicField.BallisticSkill, values, DefaultMaxes);
+        Assert.Equal(CharacteristicField.BallisticSkill, result.ForcedField);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_ResolveBinaryChoice_BothMaxed_ReturnsFallbackOptions()
+    {
+        var values = DefaultValues with { WeaponSkill = 6, BallisticSkill = 6 };
+        var result = CharacteristicIncreaseRules.ResolveBinaryChoice(
+            CharacteristicField.WeaponSkill, CharacteristicField.BallisticSkill, values, DefaultMaxes);
+        Assert.NotNull(result.FallbackOptions);
+        Assert.DoesNotContain(CharacteristicField.WeaponSkill, result.FallbackOptions);
+        Assert.DoesNotContain(CharacteristicField.BallisticSkill, result.FallbackOptions);
+        Assert.Contains(CharacteristicField.Strength, result.FallbackOptions);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_ResolveBinaryChoice_HenchmanAlreadyIncreased_TreatedAsIneligible()
+    {
+        var alreadyIncreased = new[] { CharacteristicField.WeaponSkill };
+        var result = CharacteristicIncreaseRules.ResolveBinaryChoice(
+            CharacteristicField.WeaponSkill, CharacteristicField.BallisticSkill, DefaultValues, DefaultMaxes, alreadyIncreased);
+        Assert.Equal(CharacteristicField.BallisticSkill, result.ForcedField);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_IsEligibleForHenchmanIncrease_AlreadyIncreased_ReturnsFalse()
+    {
+        var alreadyIncreased = new[] { CharacteristicField.Strength };
+        Assert.False(CharacteristicIncreaseRules.IsEligibleForHenchmanIncrease(
+            CharacteristicField.Strength, alreadyIncreased, DefaultValues, DefaultMaxes));
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_IsEligibleForHenchmanIncrease_NotIncreasedNorMaxed_ReturnsTrue()
+    {
+        Assert.True(CharacteristicIncreaseRules.IsEligibleForHenchmanIncrease(
+            CharacteristicField.Strength, Array.Empty<CharacteristicField>(), DefaultValues, DefaultMaxes));
+    }
+
+    // --- PromotionRules -----------------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(0)] [InlineData(5)]
+    public void PromotionRules_BelowCap_CanPromote(int currentHeroCount)
+    {
+        Assert.True(PromotionRules.CanPromoteToHero(currentHeroCount));
+    }
+
+    [Theory]
+    [InlineData(6)] [InlineData(7)]
+    public void PromotionRules_AtOrAboveCap_CannotPromote(int currentHeroCount)
+    {
+        Assert.False(PromotionRules.CanPromoteToHero(currentHeroCount));
+    }
+
     // --- SpellRules -------------------------------------------------------------------------------
 
     [Fact]

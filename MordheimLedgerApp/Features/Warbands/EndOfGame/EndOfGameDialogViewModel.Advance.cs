@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Features.Warbands.CreateEdit;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -16,9 +17,12 @@ public partial class EndOfGameDialogViewModel
     /// devant valider que SES propres jets.</summary>
     private bool ValidateAdvanceStep(IEnumerable<AdvanceRollEntry> rolls)
     {
+        // AdvanceRollEntry.MissingRequirementMessage pointe précisément ce qui manque (jet principal,
+        // sous-jet, choix de caractéristique, compétence/sort, ou tel champ de la Promotion) plutôt
+        // qu'un message générique "Un jet est requis" même quand le jet était déjà fait - voir sa doc.
         var valid = true;
         foreach (var advance in rolls)
-            valid &= CheckRoll(string.IsNullOrWhiteSpace(advance.ResultText), () => advance.RollError = Loc["EndOfGameRollRequired"]);
+            valid &= CheckRoll(advance.MissingRequirementMessage is not null, () => advance.RollError = advance.MissingRequirementMessage);
         return valid;
     }
 
@@ -33,6 +37,12 @@ public partial class EndOfGameDialogViewModel
         var roll = entry.IsHero ? HeroAdvanceTable.RollDice() : HenchmanAdvanceTable.RollDice();
         entry.ManualRoll = roll.ToString();
     }
+
+    // Sous-jet 1D6 des résultats Héros 6/8/9 (voir CharacteristicChoiceMode.SubRoll1D6) - seule la
+    // table Héros en comporte, HeroAdvanceTable.RollSubDie() convient donc dans tous les cas où ce
+    // bouton est visible (AdvanceRollEntry.NeedsSubRoll).
+    [RelayCommand]
+    private void AutoRollSubRoll(AdvanceRollEntry entry) => entry.ManualSubRoll = HeroAdvanceTable.RollSubDie().ToString();
 
     // Résultat "Compétence" (voir HeroAdvanceTable.IsSkill) : le joueur choisit directement une
     // compétence existante de la Bibliothèque, comme le "+" Compétences de la carte guerrier -
@@ -55,10 +65,72 @@ public partial class EndOfGameDialogViewModel
             .ToList();
         var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
             SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds);
+        if (skills.Count == 0) return;
+
+        entry.SelectedSpell = null;
         foreach (var skill in skills)
             entry.SelectedSkills.Add(skill);
     }
 
+    // Alternative au choix de compétence ci-dessus, pour un Héros sorcier uniquement (voir
+    // AdvanceRollEntry.ShowSpellOption) : tirage 1D6 via SpellRollDialog sur les écoles de la bande,
+    // même mécanisme que WarriorEditDialogViewModel.AddSpell (branche non-_skipCosts) - un sorcier
+    // obtient toujours un sort au hasard, jamais un choix libre.
+    [RelayCommand]
+    private async Task PickAdvanceSpell(AdvanceRollEntry entry)
+    {
+        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry) || r.ExplorationAdvanceRolls.Contains(entry));
+        var knownSpellIds = row.Warrior.Spells.Select(s => s.Item.Id).ToList();
+        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
+        if (rolled is null) return;
+
+        entry.SelectedSkills.Clear();
+        entry.SelectedSpell = rolled;
+    }
+
     [RelayCommand]
     private Task ShowSkillDetail(Skill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill);
+
+    [RelayCommand]
+    private Task ShowSpellDetail(Spell spell) => _detailDialogs.ShowSpellDetailDialogAsync(spell);
+
+    // Croix du ChipView (voir XAML) : ChipView ne transmet que l'item tapé (ici la Skill elle-même, pas
+    // son AdvanceRollEntry propriétaire) - on retire donc cette Skill de TOUTES les collections
+    // SelectedSkills parcourues (y compris les jets imbriqués d'une Promotion), sans risque : chaque
+    // Skill choisie via PickAdvanceSkill est une instance propre au picker, jamais partagée entre deux
+    // entrées, donc Remove(skill) (égalité par référence, Skill n'a pas d'Equals custom) ne peut agir
+    // que sur la collection qui la détient réellement.
+    [RelayCommand]
+    private void RemoveAdvanceSkill(Skill skill)
+    {
+        foreach (var entry in AllAdvanceEntries())
+            entry.SelectedSkills.Remove(skill);
+    }
+
+    // Même idiome pour le sort choisi (SelectedSpell, une seule valeur au lieu d'une collection) - la
+    // demande initiale ne portait que sur les compétences, mais laisser le sort non-retirable aurait été
+    // une incohérence, pas un choix délibéré.
+    [RelayCommand]
+    private void RemoveAdvanceSpell(Spell spell)
+    {
+        foreach (var entry in AllAdvanceEntries().Where(e => e.SelectedSpell == spell))
+            entry.SelectedSpell = null;
+    }
+
+    /// <summary>Tous les AdvanceRollEntry de ce wizard, y compris les jets imbriqués d'une Promotion
+    /// (NestedHeroRoll/NestedHenchmanRoll) - seul point de parcours pour RemoveAdvanceSkill/
+    /// RemoveAdvanceSpell, qui n'ont que l'item tapé (pas l'entrée propriétaire) pour retrouver où
+    /// agir.</summary>
+    private IEnumerable<AdvanceRollEntry> AllAdvanceEntries()
+    {
+        foreach (var row in WarriorRows)
+        {
+            foreach (var entry in row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
+            {
+                yield return entry;
+                if (entry.NestedHeroRoll is { } heroRoll) yield return heroRoll;
+                if (entry.NestedHenchmanRoll is { } henchmanRoll) yield return henchmanRoll;
+            }
+        }
+    }
 }

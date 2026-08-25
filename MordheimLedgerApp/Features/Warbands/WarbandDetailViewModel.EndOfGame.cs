@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
 using MordheimLedgerApp.Services;
 
@@ -78,7 +79,7 @@ public partial class WarbandDetailViewModel
         var warriorArchetypesByEnglishName = englishWarriorArchetypes.ToDictionary(a => a.Name,
             a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId,
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
@@ -423,6 +424,32 @@ public partial class WarbandDetailViewModel
                 changed = true;
             }
 
+            // Applique un résultat Compétence/Sort/Caractéristique déjà résolu à target - factorisé en
+            // méthode locale (2026-08-24) car réutilisé pour 3 cibles distinctes : le guerrier lui-même
+            // (AdvanceRolls/ExplorationAdvanceRolls ci-dessous), le nouveau Héros d'une promotion
+            // (AdvanceRollEntry.NestedHeroRoll) et le reste du groupe source (NestedHenchmanRoll) - voir
+            // le bloc Promotion plus bas. N'appelle jamais SaveWarriorAsync elle-même : c'est à
+            // l'appelant de sauvegarder target une fois tous ses résultats appliqués (le guerrier
+            // principal via `changed`/le flux existant plus bas, le nouveau Héros/le reste du groupe
+            // explicitement dans le bloc Promotion).
+            async Task ApplyResolvedAdvanceAsync(Warrior target, AdvanceRollEntry advance)
+            {
+                var text = advance.SelectedSkills.Count > 0 ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
+                    : advance.HasSpellSelected ? string.Format(Loc["EndOfGameAdvanceSpellResultText"], advance.SelectedSpell!.Name)
+                    : advance.ResolvedField is not null ? $"{advance.ResolvedFieldLabel} +1"
+                    : advance.ResultText;
+                sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], target.Name, text));
+
+                foreach (var skill in advance.SelectedSkills)
+                    await _warbandService.AddWarriorSkillAsync(target.Id, skill);
+
+                if (advance.HasSpellSelected)
+                    await _warbandService.AddWarriorSpellAsync(target.Id, advance.SelectedSpell!);
+
+                if (advance.ResolvedField is { } field)
+                    ApplyCharacteristicIncrease(target, field);
+            }
+
             // AdvanceRolls (palier franchi par l'XP de bataille normale) + ExplorationAdvanceRolls
             // (palier atteint uniquement grâce à l'XP accordée par la table d'Exploration - voir
             // WarriorOutcomeRow.ExplorationMilestoneCount) : même application pour les deux, aucune
@@ -431,18 +458,33 @@ public partial class WarbandDetailViewModel
             {
                 if (string.IsNullOrWhiteSpace(advance.ResultText)) continue;
 
-                // Aucun résultat d'Advance (compétence ou stat) ne touche Injuries - ça prêterait à
-                // confusion avec une vraie blessure. La vraie compétence choisie est rattachée au
-                // guerrier ; les résultats de stat/choix (pas d'équivalent structuré dans le modèle,
-                // "no rules engine V1") ne vivent que dans l'Historique de la bande, à appliquer à la
-                // main via l'édition du guerrier.
-                var text = advance.SelectedSkills.Count > 0
-                    ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
-                    : advance.ResultText;
-                sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], warrior.Name, text));
+                // Mécanisé (2026-08-24) : un résultat "Compétence" attache une vraie Compétence OU (Héros
+                // sorcier) un vrai Sort ; un résultat "Caractéristique" applique un vrai +1 sur le
+                // Warrior, dans le respect du maximum racial et (Homme de main) de "jamais deux fois" -
+                // voir Core.Rules.CharacteristicIncreaseRules/AdvanceRollEntry.ResolvedField. Une
+                // promotion (10-12, "Ce gars est doué") crée un vrai nouveau Héros - voir
+                // EntityMapping.CloneAsPromotedHero - et applique son jet de Progression immédiat
+                // (NestedHeroRoll) plus, si le groupe comptait plus d'un membre, celui du reste du
+                // groupe (NestedHenchmanRoll).
+                if (advance.IsPromotionResult && advance.PromotedWarriorPreview is { } promoted && advance.NestedHeroRoll is { } heroRoll)
+                {
+                    await _warbandService.InsertWarriorAsync(promoted);
+                    sentences.Add(string.Format(Loc["HistoryPromotionSentence"], warrior.Name, promoted.Name));
 
-                foreach (var skill in advance.SelectedSkills)
-                    await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                    await ApplyResolvedAdvanceAsync(promoted, heroRoll);
+                    await _warbandService.SaveWarriorAsync(promoted);
+
+                    warrior.HeadCount -= 1;
+                    changed = true;
+
+                    if (advance.NestedHenchmanRoll is { } remainderRoll)
+                        await ApplyResolvedAdvanceAsync(warrior, remainderRoll);
+
+                    continue;
+                }
+
+                await ApplyResolvedAdvanceAsync(warrior, advance);
+                if (advance.ResolvedField is not null) changed = true;
             }
 
             if (row.Status != warrior.Status)
@@ -501,11 +543,40 @@ public partial class WarbandDetailViewModel
                 }
             }
 
+            // Couvre aussi le cas "dernier membre du groupe promu Héros" (voir le bloc Promotion
+            // ci-dessus, qui décrémente HeadCount lui aussi) - pas seulement les morts par figurine.
+            headCountWiped |= warrior.HeadCount <= 0;
+
             if (headCountWiped)
                 await _warbandService.DeleteWarriorAsync(warrior.Id);
             else if (changed)
                 await _warbandService.SaveWarriorAsync(warrior);
         }
+    }
+
+    /// <summary>Applique le +1 d'un résultat de Progression "Caractéristique" (voir AdvanceRollEntry.
+    /// ResolvedField, déjà validé éligible - maximum racial respecté, et pour un Homme de main jamais
+    /// deux fois la même caractéristique - au moment où le joueur l'a résolu dans le wizard) - switch
+    /// explicite sur les 9 champs plutôt que de la réflexion, même style que le reste d'EntityMapping/
+    /// ce fichier. Pour un Homme de main, la caractéristique rejoint aussi Warrior.
+    /// IncreasedCharacteristics (jamais pour un Héros, qui n'a pas cette restriction).</summary>
+    private static void ApplyCharacteristicIncrease(Warrior warrior, CharacteristicField field)
+    {
+        switch (field)
+        {
+            case CharacteristicField.Movement: warrior.Movement += 1; break;
+            case CharacteristicField.WeaponSkill: warrior.WeaponSkill += 1; break;
+            case CharacteristicField.BallisticSkill: warrior.BallisticSkill += 1; break;
+            case CharacteristicField.Strength: warrior.Strength += 1; break;
+            case CharacteristicField.Toughness: warrior.Toughness += 1; break;
+            case CharacteristicField.Wounds: warrior.Wounds += 1; break;
+            case CharacteristicField.Initiative: warrior.Initiative += 1; break;
+            case CharacteristicField.Attacks: warrior.Attacks += 1; break;
+            case CharacteristicField.Leadership: warrior.Leadership += 1; break;
+        }
+
+        if (!warrior.IsHero && !warrior.IncreasedCharacteristics.Contains(field))
+            warrior.IncreasedCharacteristics.Add(field);
     }
 
     /// <summary>Doit être appelée APRÈS ApplyWarriorOutcomesAsync (voir l'invariant documenté à

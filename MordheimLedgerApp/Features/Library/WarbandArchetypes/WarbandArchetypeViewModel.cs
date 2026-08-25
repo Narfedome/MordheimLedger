@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.RacialProfiles;
 using MordheimLedgerApp.Features.Library.Races;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
@@ -222,6 +223,12 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     /// WarbandArchetype comme MagicSchool classifie Spell.</summary>
     [RelayCommand]
     private static async Task ManageRaces() => await Shell.Current.GoToAsync(nameof(RaceListPage));
+
+    /// <summary>Ouvre le catalogue RacialProfile (maximums de caractéristiques par type de créature) -
+    /// même idiome que ManageRaces juste au-dessus, reflété ici pour la même raison (WarriorArchetype,
+    /// pas WarbandArchetype directement, mais aucun onglet Codex dédié pour l'instant).</summary>
+    [RelayCommand]
+    private static async Task ManageRacialProfiles() => await Shell.Current.GoToAsync(nameof(RacialProfileListPage));
 
     [RelayCommand]
     private async Task Delete()

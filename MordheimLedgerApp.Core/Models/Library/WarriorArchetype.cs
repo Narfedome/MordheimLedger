@@ -125,4 +125,11 @@ public class WarriorArchetype
     /// identifies "the warband leader" for rulebook rules that target them specifically (e.g. Shattered
     /// Building's Leadership test - Bâtiment Éventré).</summary>
     public bool IsLeader { get; set; }
+
+    /// <summary>Which creature body type's characteristic maximums govern this archetype's Advance
+    /// rolls (see Core.Rules.CharacteristicIncreaseRules) - see Models.Library.RacialProfile. Copied
+    /// onto Warrior at recruitment as a snapshot (see EntityMapping.ToWarrior/Warrior.MaxWeaponSkill
+    /// etc.), same convention as the rest of the stat line.</summary>
+    public int RacialProfileId { get; set; }
+    public RacialProfile? RacialProfile { get; set; }
 }

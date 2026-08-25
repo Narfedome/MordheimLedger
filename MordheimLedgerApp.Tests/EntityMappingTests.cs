@@ -1,6 +1,7 @@
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Tests;
 
@@ -234,6 +235,118 @@ public class EntityMappingTests
         Assert.Equal(warrior.Attacks, roundTripped.Attacks);
         Assert.Equal(warrior.Leadership, roundTripped.Leadership);
         Assert.Empty(roundTripped.Equipment);
+    }
+
+    [Fact]
+    public void RacialProfile_RoundTrips_ThroughEntity()
+    {
+        var profile = new RacialProfile
+        {
+            Id = 3,
+            Name = "Human",
+            Description = "Common human maximums.",
+            NameKey = "k1",
+            DescriptionKey = "k2",
+            Source = ContentSource.Official,
+            Movement = 4,
+            WeaponSkill = 6,
+            BallisticSkill = 6,
+            Strength = 4,
+            Toughness = 4,
+            Wounds = 3,
+            Initiative = 6,
+            Attacks = 4,
+            Leadership = 9
+        };
+
+        var translations = new Dictionary<string, string> { ["k1"] = profile.Name, ["k2"] = profile.Description };
+        var roundTripped = profile.ToEntity().ToModel(translations);
+
+        Assert.Equal(profile.Id, roundTripped.Id);
+        Assert.Equal(profile.Name, roundTripped.Name);
+        Assert.Equal(profile.Description, roundTripped.Description);
+        Assert.Equal(profile.Source, roundTripped.Source);
+        Assert.Equal(profile.Movement, roundTripped.Movement);
+        Assert.Null(roundTripped.MovementOverride);
+        Assert.Equal(profile.WeaponSkill, roundTripped.WeaponSkill);
+        Assert.Equal(profile.BallisticSkill, roundTripped.BallisticSkill);
+        Assert.Equal(profile.Strength, roundTripped.Strength);
+        Assert.Equal(profile.Toughness, roundTripped.Toughness);
+        Assert.Equal(profile.Wounds, roundTripped.Wounds);
+        Assert.Equal(profile.Initiative, roundTripped.Initiative);
+        Assert.Equal(profile.Attacks, roundTripped.Attacks);
+        Assert.Equal(profile.Leadership, roundTripped.Leadership);
+    }
+
+    [Fact]
+    public void RecruitingFromArchetype_CopiesRacialMaxSnapshotFromResolvedProfile()
+    {
+        var profile = new RacialProfile { Id = 1, Name = "Human", WeaponSkill = 6, BallisticSkill = 6, Strength = 4, Toughness = 4, Wounds = 3, Initiative = 6, Attacks = 4, Leadership = 9, Movement = 4 };
+        var archetype = new WarriorArchetype { Id = 1, Name = "Captain", RacialProfileId = 1, RacialProfile = profile };
+
+        var recruited = archetype.ToWarrior("Otto");
+
+        Assert.Equal(profile.Movement, recruited.MaxMovement);
+        Assert.Equal(profile.WeaponSkill, recruited.MaxWeaponSkill);
+        Assert.Equal(profile.BallisticSkill, recruited.MaxBallisticSkill);
+        Assert.Equal(profile.Strength, recruited.MaxStrength);
+        Assert.Equal(profile.Toughness, recruited.MaxToughness);
+        Assert.Equal(profile.Wounds, recruited.MaxWounds);
+        Assert.Equal(profile.Initiative, recruited.MaxInitiative);
+        Assert.Equal(profile.Attacks, recruited.MaxAttacks);
+        Assert.Equal(profile.Leadership, recruited.MaxLeadership);
+    }
+
+    [Fact]
+    public void RecruitingFromArchetype_UnresolvedRacialProfile_FallsBackToNullNeverBlocking()
+    {
+        var archetype = new WarriorArchetype { Id = 1, Name = "Captain", RacialProfileId = 5, RacialProfile = null };
+        var recruited = archetype.ToWarrior("Otto");
+        Assert.Null(recruited.MaxWeaponSkill);
+        Assert.Null(recruited.MaxMovement);
+    }
+
+    [Fact]
+    public void CloneAsPromotedHero_CopiesLiveStatsXpAndMaxes_NotArchetypeTemplate()
+    {
+        var henchmanGroup = new Warrior
+        {
+            Id = 42,
+            WarbandId = 7,
+            WarriorArchetypeId = 10,
+            Name = "Ghoul Pack",
+            IsHero = false,
+            Cost = 25,
+            Experience = 14,
+            HeadCount = 3,
+            WeaponSkill = 4,
+            BallisticSkill = 0,
+            Strength = 4,
+            Toughness = 4,
+            Wounds = 1,
+            Initiative = 4,
+            Attacks = 2,
+            Leadership = 6,
+            MaxWeaponSkill = 6,
+            MaxStrength = 5,
+            IncreasedCharacteristics = new List<CharacteristicField> { CharacteristicField.WeaponSkill }
+        };
+
+        var promoted = henchmanGroup.CloneAsPromotedHero("Grull");
+
+        Assert.Equal("Grull", promoted.Name);
+        Assert.True(promoted.IsHero);
+        Assert.Equal(1, promoted.HeadCount);
+        Assert.Equal(henchmanGroup.WarbandId, promoted.WarbandId);
+        Assert.Equal(henchmanGroup.WarriorArchetypeId, promoted.WarriorArchetypeId);
+        Assert.Equal(henchmanGroup.Experience, promoted.Experience);
+        Assert.Equal(henchmanGroup.WeaponSkill, promoted.WeaponSkill);
+        Assert.Equal(henchmanGroup.Strength, promoted.Strength);
+        Assert.Equal(henchmanGroup.MaxWeaponSkill, promoted.MaxWeaponSkill);
+        Assert.Equal(henchmanGroup.MaxStrength, promoted.MaxStrength);
+        Assert.Empty(promoted.IncreasedCharacteristics);
+        Assert.Empty(promoted.AllowedSkillCategories);
+        Assert.False(promoted.IsLeader);
     }
 
     [Fact]

@@ -72,6 +72,10 @@ public interface ILibraryService
     /// <summary>The Race catalog (Humain, Skaven, Orque...) - see Models.Library.Race.</summary>
     Task<List<Race>> GetRacesAsync(string languageCode);
 
+    /// <summary>The RacialProfile catalog (Humain, Nain, Skaven, Gobelin...) - characteristic maximums
+    /// per creature body type, see Models.Library.RacialProfile.</summary>
+    Task<List<RacialProfile>> GetRacialProfilesAsync(string languageCode);
+
     /// <summary>Inserts (Id == 0) or updates. Editing a row whose current Source is Official flips it
     /// to Modified. Name/Description are written as the translation value for languageCode - any other
     /// language's existing translation is left untouched. Also replaces the band's SpecialRule and
@@ -101,6 +105,7 @@ public interface ILibraryService
     Task SaveMutationAsync(Mutation mutation, string languageCode);
     Task SaveMagicSchoolAsync(MagicSchool school, string languageCode);
     Task SaveRaceAsync(Race race, string languageCode);
+    Task SaveRacialProfileAsync(RacialProfile racialProfile, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
     Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
@@ -113,4 +118,5 @@ public interface ILibraryService
     Task DeleteMutationAsync(int mutationId);
     Task DeleteMagicSchoolAsync(int magicSchoolId);
     Task DeleteRaceAsync(int raceId);
+    Task DeleteRacialProfileAsync(int racialProfileId);
 }

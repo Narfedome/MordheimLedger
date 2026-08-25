@@ -33,9 +33,10 @@
                                       IconFontFamily="RpgAwesome"
                                       Command="{Binding ShowMagicSchoolDetailCommand}"/>
 
-            <!-- Avant résolution : saisie du jet (physique ou dé) - la puce ci-dessous prend le relais
-                 une fois résolue (IsVisible inverse sur HasResolvedSpell). -->
-            <VerticalStackLayout Spacing="4" IsVisible="{Binding HasResolvedSpell, Converter={StaticResource InverseBoolConverter}}">
+            <!-- Saisie du jet (physique ou dé) - reste affichée même une fois résolue (voir le sous-jet
+                 d'AdvanceRollEntry, même demande : voir le jet ET ce qu'il a donné, pas juste la puce
+                 finale). -->
+            <VerticalStackLayout Spacing="4">
                 <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                     <Entry Grid.Column="0" Text="{Binding SpellRoll}" Keyboard="Numeric"
                            Placeholder="{loc:Loc WarbandsSpellRollPh}" WidthRequest="70"/>
@@ -47,11 +48,11 @@
                        IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
-            <!-- Après résolution : le sort obtenu, tapotable (récap complet à la demande, pas
-                 automatique) - le "x" de la puce (RemoveCommand=RerollCommand) revient à la saisie sans
-                 fermer le dialog. -->
-            <components:ChipItemView HeaderText="{loc:Loc WarriorsSpellsHeading}"
-                                      Item="{Binding ResolvedSpell}"
+            <!-- Le sort obtenu, tapotable (récap complet à la demande, pas automatique) - pas de
+                 libellé "Sorts connus" au-dessus (sur demande explicite, ce n'est pas la liste des
+                 sorts déjà connus du guerrier, juste le résultat de ce jet). Le "x" de la puce
+                 (RemoveCommand=RerollCommand) revient à la saisie sans fermer le dialog. -->
+            <components:ChipItemView Item="{Binding ResolvedSpell}"
                                       IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
                                       IconFontFamily="RpgAwesome"
                                       Command="{Binding ShowResolvedSpellDetailCommand}"
@@ -60,8 +61,6 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                 <Button Grid.Column="0" Text="{loc:Loc BtnCancel}" Style="{StaticResource DialogSecondaryButtonStyle}"
                         Command="{Binding CancelCommand}"/>
-                <Button Grid.Column="1" Text="{loc:Loc WarbandsSpellRollConfirm}" Command="{Binding RollCommand}"
-                        IsVisible="{Binding HasResolvedSpell, Converter={StaticResource InverseBoolConverter}}"/>
                 <Button Grid.Column="1" Text="{loc:Loc BtnSave}" Command="{Binding AcceptCommand}"
                         IsVisible="{Binding HasResolvedSpell}"/>
             </Grid>

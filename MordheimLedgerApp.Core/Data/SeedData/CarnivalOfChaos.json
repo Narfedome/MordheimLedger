@@ -64,6 +64,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Marauder of Chaos",
       "isSpellcaster": true,
       "description": {
         "en": "The Master is a power-crazed individual who leads his coven of daemonic entertainers throughout the backwaters of the Empire, tainting villages with disease - his cunning enchantments keep his troupe one step ahead of the Witch Hunters.",
@@ -110,6 +111,7 @@
       "initiative": 2,
       "attacks": 2,
       "leadership": 7,
+      "racialProfileName": "Marauder of Chaos",
       "description": {
         "en": "A specific type of mutant whose constitution has been bolstered by Nurgle's unnatural vitality - massive, statuesque creatures who play the strongman in the Carnival, wielding huge hammers and flails with reckless abandon.",
         "fr": "Les Colosses sont un type de mutant particulier dont la constitution a été renforcée par la vitalité surnaturelle du Seigneur de la Peste. Ils jouent le rôle d'hommes forts dans le cadre de la kermesse, accumulant les exploits pour susciter l'admiration des foules chétives. Au combat, ils s'arment de lourds marteaux et fléaux qu'ils font tourbillonner autour de leur tête avec une joie puérile."
@@ -151,6 +153,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Marauder of Chaos",
       "canBuyMutations": true,
       "description": {
         "en": "Those most blessed and favoured of Father Nurgle, occupying a position of great importance in the Carnival's hierarchy - so wracked with disease and mutation that it is unsafe for even the other mortal members to touch their bare skin.",
@@ -192,6 +195,7 @@
       "initiative": 4,
       "attacks": 2,
       "leadership": 10,
+      "racialProfileName": "Plague Bearer",
       "canUseEquipment": false,
       "description": {
         "en": "Daemons of Nurgle, identified by their cyclopean face and decayed body - revered by the mortal members of the warband as the Tallymen of Plagues, they take great pleasure in their showy roles as stage actors.",
@@ -292,6 +296,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 10,
+      "racialProfileName": "Nurgling",
       "canUseEquipment": false,
       "description": {
         "en": "Tiny daemons of Nurgle, seen by his followers as his beloved children - more a nuisance than a real threat individually, but able to overwhelm even the toughest warrior in numbers.",
@@ -386,6 +391,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Brethren",
       "description": {
         "en": "Devoted followers of Nurgle who have fully embraced the path of damnation - in the Carnival, the Brethren take on all the minor roles: stagehands, puppeteers, and the like.",
         "fr": "Les Frères sont les dévots du Seigneur de la Peste, et ils ont totalement adopté sa philosophie en s'engageant sur la voie de la damnation. Dans le cadre de la kermesse, les frères occupent les seconds rôles, ou font office de marionnettistes."

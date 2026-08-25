@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Features.Library.RacialProfiles.RacialProfileView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.RacialProfiles"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Name="root">
+
+    <!-- Liste à plat, même disposition que RaceView (pas de grille de tuiles) - le détail des 9
+         maximums s'obtient via Éditer, pas affiché en ligne ici. -->
+    <Grid Margin="5" RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <ActivityIndicator Grid.Row="0" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                           VerticalOptions="Center" HorizontalOptions="Center"
+                           WidthRequest="120" HeightRequest="120"/>
+
+        <CollectionView Grid.Row="0"
+                ItemsSource="{Binding RacialProfiles}"
+                SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="local:RacialProfileRow">
+                    <Grid ColumnDefinitions="4,*,Auto" Padding="{DynamicResource AppChapterRowPadding}" MinimumHeightRequest="48" ColumnSpacing="8">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                                CommandParameter="{Binding .}"/>
+                        </Grid.GestureRecognizers>
+                        <BoxView Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource ChapterDividerStyle}"/>
+                        <BoxView Grid.Column="0" Style="{StaticResource SelectionMarkerStyle}"/>
+                        <Label Grid.Column="1" Text="{Binding Item.Name}"
+                               FontSize="{OnIdiom Default=15, Desktop=13}"
+                               VerticalOptions="Center" Style="{StaticResource TruncatedLabelStyle}"/>
+                        <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                      Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                      Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
+                                                      CommandParameter="{Binding .}"/>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8">
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
+                                         Command="{Binding CreateCommand}"
+                                         Tooltip="{loc:Loc BtnAdd}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Pen}"
+                                         Command="{Binding EditCommand}"
+                                         Tooltip="{loc:Loc BtnRename}"
+                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Trash}"
+                                         Command="{Binding DeleteCommand}"
+                                         Tooltip="{loc:Loc BtnDelete}"
+                                         IsEnabled="{Binding SelectedRow, Converter={StaticResource IsNotNullConverter}}"/>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentView>

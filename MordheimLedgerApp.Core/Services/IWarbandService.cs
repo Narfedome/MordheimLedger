@@ -26,6 +26,12 @@ public interface IWarbandService
     /// <param name="headCount">Always 1 for a Hero. For a Henchman group, how many models it starts with
     /// - see Models.Warrior.HeadCount.</param>
     Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1);
+
+    /// <summary>Inserts an already fully-built Warrior as-is (no WarriorArchetype involved) - for the
+    /// Henchman-to-Hero promotion (Advance roll 10-12), whose new Hero is cloned from the live group's
+    /// own stats/XP (see EntityMapping.CloneAsPromotedHero) rather than seeded from a catalog template.</summary>
+    Task InsertWarriorAsync(Warrior warrior);
+
     Task SaveWarriorAsync(Warrior warrior);
     Task DeleteWarriorAsync(int warriorId);
 

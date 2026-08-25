@@ -189,12 +189,6 @@
   <data name="WarbandsSpellRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
-  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
-    <value>Confirm</value>
-  </data>
-  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
-    <value>Enter a roll between 1 and 6.</value>
-  </data>
   <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
     <value>No spell matches that roll on this warband's magic school table.</value>
   </data>
@@ -1014,8 +1008,74 @@
   <data name="EndOfGameAdvanceSkillResultText" xml:space="preserve">
     <value>Skill gained: {0}</value>
   </data>
+  <data name="EndOfGameAdvanceSpellResultText" xml:space="preserve">
+    <value>Spell gained: {0}</value>
+  </data>
   <data name="EndOfGameAdvanceRollPh" xml:space="preserve">
     <value>2D6</value>
+  </data>
+  <data name="EndOfGamePickSpell" xml:space="preserve">
+    <value>Roll a spell</value>
+  </data>
+  <data name="EndOfGameOr" xml:space="preserve">
+    <value>OR</value>
+  </data>
+  <data name="WarbandsSpellRollAlreadyKnownMessage" xml:space="preserve">
+    <value>This warrior already knows this spell - roll again.</value>
+  </data>
+  <data name="EndOfGameAdvanceSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameAdvanceChoicePh" xml:space="preserve">
+    <value>Characteristic</value>
+  </data>
+  <data name="EndOfGameSubRollRequired" xml:space="preserve">
+    <value>The 1D6 sub-roll is required</value>
+  </data>
+  <data name="EndOfGameAdvanceChoiceRequired" xml:space="preserve">
+    <value>Pick a characteristic</value>
+  </data>
+  <data name="EndOfGameAdvanceSkillRequired" xml:space="preserve">
+    <value>Pick a skill or a spell</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedRequired" xml:space="preserve">
+    <value>6 Heroes already reached - change this roll</value>
+  </data>
+  <data name="EndOfGamePromotionNameRequired" xml:space="preserve">
+    <value>The new Hero's name is required</value>
+  </data>
+  <data name="EndOfGamePromotionCategoriesRequired" xml:space="preserve">
+    <value>Pick the 2 skill tables</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollRequired" xml:space="preserve">
+    <value>New Hero: {0}</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderRollRequired" xml:space="preserve">
+    <value>Remaining group: {0}</value>
+  </data>
+  <data name="EndOfGamePromotionHeading" xml:space="preserve">
+    <value>Promotion!</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedBanner" xml:space="preserve">
+    <value>6 Heroes already reached - re-roll, no promotion possible this time.</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh1" xml:space="preserve">
+    <value>First skill table</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh2" xml:space="preserve">
+    <value>Second skill table</value>
+  </data>
+  <data name="EndOfGamePromotionNamePh" xml:space="preserve">
+    <value>New Hero's name</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollHeading" xml:space="preserve">
+    <value>New Hero's Advance</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderHeading" xml:space="preserve">
+    <value>Remaining group's Advance</value>
+  </data>
+  <data name="EndOfGamePromotionRerollHint" xml:space="preserve">
+    <value>A 10-12 here re-rolls: only one promotion per Advance roll.</value>
   </data>
   <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
     <value>Multiple Injuries</value>
@@ -1040,6 +1100,9 @@
   </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} advanced: {1}</value>
+  </data>
+  <data name="HistoryPromotionSentence" xml:space="preserve">
+    <value>{0}: a group member becomes a Hero ({1})!</value>
   </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
@@ -1235,6 +1298,24 @@
   </data>
   <data name="RaceNamePh" xml:space="preserve">
     <value>Race</value>
+  </data>
+  <data name="LibManageRacialProfiles" xml:space="preserve">
+    <value>Manage racial profiles</value>
+  </data>
+  <data name="RacialProfileCreateTitle" xml:space="preserve">
+    <value>New racial profile</value>
+  </data>
+  <data name="RacialProfileEditTitle" xml:space="preserve">
+    <value>Edit racial profile</value>
+  </data>
+  <data name="RacialProfileNamePh" xml:space="preserve">
+    <value>Racial profile</value>
+  </data>
+  <data name="RacialProfileMaxPh" xml:space="preserve">
+    <value>Characteristic maximums</value>
+  </data>
+  <data name="WarriorArchetypeRacialProfilePh" xml:space="preserve">
+    <value>Creature type (Advance)</value>
   </data>
   <data name="WarbandGradePh" xml:space="preserve">
     <value>Grade</value>

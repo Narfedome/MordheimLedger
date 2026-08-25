@@ -43,6 +43,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Marauder of Chaos",
       "isSpellcaster": true,
       "description": {
         "en": "Magisters lead the covens of the Possessed, granted magical powers by their patron gods - fanatical followers of the Dark Gods, utterly dedicated to bringing Chaos to the world.",
@@ -87,6 +88,7 @@
       "initiative": 4,
       "attacks": 2,
       "leadership": 7,
+      "racialProfileName": "Possessed",
       "canBuyMutations": true,
       "canUseEquipment": false,
       "description": {
@@ -131,6 +133,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Mutant",
       "canBuyMutations": true,
       "description": {
         "en": "Revered as the favoured ones of the Dark Gods, their physical disfigurements marking the vileness of their soul - they come in many shapes and sizes, each more bizarre than the next.",
@@ -160,6 +163,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Darksoul",
       "description": {
         "en": "Men driven insane by daemonic possession - the daemons have left their bodies, but their minds remain scarred, their insane strength making them dangerous fighters revered as holy men by the cult.",
         "fr": "Les Damnés sont des hommes que les possessions démoniaques, très fréquentes juste après la destruction de Mordheim, ont fini par rendre complètement fous. Leur force de déments contribue à faire des Damnés de redoutables combattants. Les autres membres des bandes de Possédés les regardent comme des saints."
@@ -196,6 +200,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Beastman",
       "description": {
         "en": "Mutated monstrosities infesting the forests of the Empire - massive horned creatures with an inhuman resistance to pain, readily allying with the Magisters of the Possessed.",
         "fr": "Les Hommes-Bêtes sont des monstres mutants qui infestent les forêts de l'Empire ; ils possèdent des cornes impressionnantes et sont très durs au mal. Ils se sont très vite alliés aux Magisters des bandes de Possédés."
@@ -220,6 +225,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Marauder of Chaos",
       "description": {
         "en": "Chaos adepts aspiring to damnation - their vile deeds have driven them to the brink of insanity.",
         "fr": "Les Initiés sont des adeptes du Chaos aspirant à la damnation. Leurs actes immondes les ont conduits jusqu'aux confins de la folie."

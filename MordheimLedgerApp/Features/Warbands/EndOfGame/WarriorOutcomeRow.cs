@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Services;
 
@@ -25,6 +26,15 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// false pour les types comme Zombie, voir sa doc). Exclut ce guerrier de l'étape Expérience
     /// (ShowsInExperienceStep) et donc, en cascade, de la Progression (HasMilestone).</summary>
     public bool GainsExperience { get; }
+
+    /// <summary>Copie de WarriorRow.MagicSchools (bande entière, déjà vide côté appelant pour tout
+    /// guerrier dont l'archétype n'est pas IsSpellcaster - voir WarriorRow) - consommée par
+    /// EndOfGameDialogViewModel.PickAdvanceSpell (tirage 1D6 sur ces écoles, même mécanisme que
+    /// WarriorEditDialogViewModel.AddSpell). IsSpellcaster (passé à chaque AdvanceRollEntry créé par ce
+    /// row, pour ShowSpellOption) en est directement dérivé.</summary>
+    public IReadOnlyList<MagicSchool> MagicSchools { get; }
+
+    public bool IsSpellcaster => MagicSchools.Count > 0;
 
     /// <summary>Un guerrier mort (étape Blessure) ou qui ne gagne jamais d'XP n'a rien à faire à
     /// l'étape Expérience - retiré de la liste plutôt que juste grisé/désactivé.</summary>
@@ -298,6 +308,8 @@ public partial class WarriorOutcomeRow : ObservableObject
             foreach (var advance in AdvanceRolls.Concat(ExplorationAdvanceRolls))
             {
                 if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
+                else if (advance.HasSpellSelected) parts.Add(advance.SelectedSpell!.Name);
+                else if (advance.ResolvedField is not null) parts.Add($"{advance.ResolvedFieldLabel} +1");
                 else if (!string.IsNullOrWhiteSpace(advance.ResultText)) parts.Add(advance.ResultText);
             }
 
@@ -307,11 +319,19 @@ public partial class WarriorOutcomeRow : ObservableObject
         }
     }
 
-    public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience)
+    /// <summary>Nombre de Héros de la bande à l'ouverture du wizard (voir EndOfGameDialogViewModel) -
+    /// transmis tel quel à chaque AdvanceRollEntry créé par ce row pour AdvanceRollEntry.CanPromote,
+    /// voir sa doc pour la limite acceptée (ne suit pas les promotions résolues plus tôt dans la même
+    /// Fin de Partie).</summary>
+    private readonly int _startingHeroCount;
+
+    public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience, IEnumerable<MagicSchool>? magicSchools = null, int startingHeroCount = 0)
     {
         Warrior = warrior;
         ArchetypeName = archetypeName;
         GainsExperience = gainsExperience;
+        _startingHeroCount = startingHeroCount;
+        MagicSchools = magicSchools?.ToList() ?? new List<MagicSchool>();
 
         foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
             _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;
@@ -377,7 +397,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     {
         while (AdvanceRolls.Count < MilestoneCount)
         {
-            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero);
+            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero, Warrior, AdvanceRolls, IsSpellcaster, _startingHeroCount);
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             AdvanceRolls.Add(entry);
         }
@@ -392,7 +412,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     {
         while (ExplorationAdvanceRolls.Count < ExplorationMilestoneCount)
         {
-            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero);
+            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _startingHeroCount);
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             ExplorationAdvanceRolls.Add(entry);
         }

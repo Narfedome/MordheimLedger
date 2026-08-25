@@ -38,6 +38,8 @@ public class AppDatabase
         // the method's own doc comment).
         await BackfillNeverGainsExperienceAsync();
         await BackfillWarbandArchetypeRaceAsync();
+        await BackfillWarriorArchetypeRacialProfileAsync();
+        await BackfillWarriorRacialMaxesAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
         // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
@@ -106,8 +108,8 @@ public class AppDatabase
     {
         ["Averlander Mercenaries"] = "Human",
         ["Beastmen Raiders"] = "Beastman",
-        ["Carnival of Chaos"] = "Chaos Human",
-        ["Cult of the Possessed"] = "Chaos Human",
+        ["Carnival of Chaos"] = "Marauder of Chaos",
+        ["Cult of the Possessed"] = "Marauder of Chaos",
         ["Dwarf Treasure Hunters"] = "Dwarf",
         ["Kislevites"] = "Human",
         ["Marienburg Mercenaries"] = "Human",
@@ -150,6 +152,98 @@ public class AppDatabase
 
             archetype.RaceId = raceId;
             await _db.UpdateAsync(archetype);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for WarriorArchetypes seeded before RacialProfileId existed -
+    /// same idiom as BackfillWarbandArchetypeRaceAsync just above (runs unconditionally every launch,
+    /// cheap no-op once every row has a real RacialProfileId). Ensures RacialProfiles.json is seeded
+    /// first (FindOrCreateRacialProfileAsync is DB-aware, safe even on a launch where
+    /// SeedOfficialContentAsync never ran), then re-reads all 15 warband JSON files (LoadWarbandSeedDataAsync)
+    /// to resolve each stale WarriorArchetype's profile by English Name against WarriorSeedData.
+    /// RacialProfileName - the per-band JSON field is the single source of truth (see its own doc), not
+    /// a separate hardcoded table, so a fix to one band's file is picked up here without touching this
+    /// method. Must run before BackfillWarriorRacialMaxesAsync, which depends on every WarriorArchetype
+    /// already having a real RacialProfileId (0 = genuinely none, see RacialProfileId's own doc).</summary>
+    /// <summary>The 15 warband seed file names - same list as SeedOfficialContentAsync's explicit
+    /// SeedWarbandFromJsonAsync calls, duplicated here (rather than having that method iterate this
+    /// array) so the ordered/commented call list there stays easy to scan on its own. Consumed by
+    /// BackfillWarriorArchetypeRacialProfileAsync, which needs to revisit every band file regardless of
+    /// seeding order.</summary>
+    private static readonly string[] _warbandFileNames =
+    [
+        "Undead.json", "DwarfTreasureHunters.json", "Averlanders.json", "Ostlanders.json",
+        "Reiklanders.json", "Middenheimers.json", "Marienburgers.json", "CarnivalOfChaos.json",
+        "CultOfThePossessed.json", "OrcMob.json", "BeastmenRaiders.json", "WitchHunters.json",
+        "SkavenOfClanEshin.json", "SistersOfSigmar.json", "Kislevites.json"
+    ];
+
+    private async Task BackfillWarriorArchetypeRacialProfileAsync()
+    {
+        var staleArchetypes = (await _db.Table<WarriorArchetypeEntity>().ToListAsync())
+            .Where(a => a.RacialProfileId == 0)
+            .ToList();
+        if (staleArchetypes.Count == 0) return;
+
+        foreach (var seed in await LoadSeedArrayAsync<RacialProfileSeedData>("RacialProfiles.json"))
+            await FindOrCreateRacialProfileAsync(seed);
+
+        var racialProfileNameByArchetypeEnglishName = new Dictionary<string, string>();
+        foreach (var fileName in _warbandFileNames)
+        {
+            var data = await LoadWarbandSeedDataAsync(fileName);
+            foreach (var w in data.Warriors)
+                if (w.RacialProfileName is { } profileName) racialProfileNameByArchetypeEnglishName[w.Name.En] = profileName;
+        }
+
+        var englishNamesByKey = (await _db.Table<TranslationEntity>().Where(t => t.LanguageCode == "en").ToListAsync())
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        foreach (var archetype in staleArchetypes)
+        {
+            if (!englishNamesByKey.TryGetValue(archetype.NameKey, out var englishName)) continue;
+            if (!racialProfileNameByArchetypeEnglishName.TryGetValue(englishName, out var profileName)) continue;
+            if (!_racialProfileIdsByEnglishName.TryGetValue(profileName, out var profileId)) continue;
+
+            archetype.RacialProfileId = profileId;
+            await _db.UpdateAsync(archetype);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for Warriors recruited before the racial-maximum snapshot
+    /// fields (MaxWeaponSkill etc.) existed - unlike the RaceId/RacialProfileId backfills above, this
+    /// doesn't need seed data or English-name lookups: every WarriorEntity already carries a real
+    /// WarriorArchetypeId - if that archetype's own RacialProfileId resolves to a real profile (0 =
+    /// genuinely none, see SeedWarbandFromJsonAsync/RacialProfiles.json's own doc - stays null forever,
+    /// nothing to backfill), copy its 9 maximums across. Filters on MaxWeaponSkill == null rather than
+    /// all 9 fields at once, same cheap-no-op-after-first-run idiom as the other backfills - re-scans
+    /// (harmlessly, a no-op via the profilesById lookup below) every launch for warriors whose archetype
+    /// has no profile, since null is otherwise indistinguishable from "not yet backfilled".</summary>
+    private async Task BackfillWarriorRacialMaxesAsync()
+    {
+        var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
+            .Where(w => w.MaxWeaponSkill == null)
+            .ToList();
+        if (staleWarriors.Count == 0) return;
+
+        var archetypesById = (await _db.Table<WarriorArchetypeEntity>().ToListAsync()).ToDictionary(a => a.Id);
+        var profilesById = (await _db.Table<RacialProfileEntity>().ToListAsync()).ToDictionary(p => p.Id);
+
+        foreach (var warrior in staleWarriors)
+        {
+            if (!archetypesById.TryGetValue(warrior.WarriorArchetypeId, out var archetype)) continue;
+            if (!profilesById.TryGetValue(archetype.RacialProfileId, out var profile)) continue;
+
+            warrior.MaxMovement = profile.MovementOverride is null ? profile.Movement : null;
+            warrior.MaxWeaponSkill = profile.WeaponSkill;
+            warrior.MaxBallisticSkill = profile.BallisticSkill;
+            warrior.MaxStrength = profile.Strength;
+            warrior.MaxToughness = profile.Toughness;
+            warrior.MaxWounds = profile.Wounds;
+            warrior.MaxInitiative = profile.Initiative;
+            warrior.MaxAttacks = profile.Attacks;
+            warrior.MaxLeadership = profile.Leadership;
+            await _db.UpdateAsync(warrior);
         }
     }
 
@@ -220,6 +314,7 @@ public class AppDatabase
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.CreateTableAsync<RaceEntity>();
+        await _db.CreateTableAsync<RacialProfileEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMutationEntity>();
         await _db.CreateTableAsync<EquipmentListEntity>();
         await _db.CreateTableAsync<EquipmentListItemEntity>();
@@ -257,6 +352,7 @@ public class AppDatabase
         await _db.DropTableAsync<MagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMutationEntity>();
+        await _db.DropTableAsync<RacialProfileEntity>();
         await _db.DropTableAsync<EquipmentListEntity>();
         await _db.DropTableAsync<EquipmentListItemEntity>();
         await _db.DropTableAsync<WarriorArchetypeEquipmentEntity>();
@@ -279,6 +375,7 @@ public class AppDatabase
         _mutationIdsByEnglishName.Clear();
         _magicSchoolIdsByEnglishName.Clear();
         _equipmentIdsByEnglishName.Clear();
+        _racialProfileIdsByEnglishName.Clear();
         _warbandArchetypeIdsByFileStem.Clear();
         _pendingSharedRestrictions.Clear();
         await CreateAllTablesAsync();
@@ -311,6 +408,7 @@ public class AppDatabase
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
         await SeedRacesAsync();
+        await SeedRacialProfilesAsync();
         // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
         // InitializeAsync plutôt que gardée derrière le garde-fou "catalogue vide" de cette méthode.
 
@@ -360,13 +458,22 @@ public class AppDatabase
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
     /// archetypes, band-specific equipment (with restriction rows where flagged) and spells - each
     /// translatable field gets a fresh key via SeedTranslationAsync, same as the Reiklander seed above.</summary>
-    private async Task SeedWarbandFromJsonAsync(string fileName)
+    /// <summary>Deserializes one warband seed file into its full WarbandSeedData - shared by
+    /// SeedWarbandFromJsonAsync (first-launch seeding) and BackfillWarriorArchetypeRacialProfileAsync
+    /// (which re-reads all 15 files to resolve WarriorSeedData.RacialProfileName by English archetype
+    /// name, since that's per-band JSON data rather than a shared lookup table).</summary>
+    private static async Task<WarbandSeedData> LoadWarbandSeedDataAsync(string fileName)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith(fileName, StringComparison.Ordinal));
         await using var stream = assembly.GetManifestResourceStream(resourceName)!;
-        var data = await JsonSerializer.DeserializeAsync<WarbandSeedData>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        return await JsonSerializer.DeserializeAsync<WarbandSeedData>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
             ?? throw new InvalidOperationException($"Empty or invalid seed file: {fileName}");
+    }
+
+    private async Task SeedWarbandFromJsonAsync(string fileName)
+    {
+        var data = await LoadWarbandSeedDataAsync(fileName);
 
         var warband = new WarbandArchetype
         {
@@ -509,7 +616,20 @@ public class AppDatabase
                 AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
                 IsLargeCreature = w.IsLargeCreature,
                 GainsExperience = w.GainsExperience,
-                IsLeader = w.IsLeader
+                IsLeader = w.IsLeader,
+                // 0 (jamais fail-fast, contrairement à WarbandArchetype.RaceId ci-dessus) si : (a)
+                // w.RacialProfileName est null (archétype qui ne gagne jamais d'Expérience - Zombie/
+                // Loup Funeste/Chien de guerre/Squig des Cavernes/Troll/Rats géants - l'étape
+                // Progression ne se déclenche jamais pour lui, voir WarriorOutcomeRow.
+                // ShowsInExperienceStep, donc ses maximums raciaux ne sont jamais consultés) ; ou (b) le
+                // nom référencé n'existe pas (encore) dans RacialProfiles.json. 0 se comporte comme
+                // "aucun maximum connu, ne bloque jamais" (voir Warrior.MaxWeaponSkill etc., nullable)
+                // plutôt que "plafonné à 0" - ajouter le profil manquant plus tard (Bibliothèque >
+                // Profils raciaux) suffit à l'activer, aucun changement de code requis.
+                RacialProfileId = w.RacialProfileName is { } racialProfileName
+                    && _racialProfileIdsByEnglishName.TryGetValue(racialProfileName, out var racialProfileId)
+                        ? racialProfileId
+                        : 0
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -892,6 +1012,58 @@ public class AppDatabase
         await _db.InsertAsync(entity);
 
         _raceIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
+    }
+
+    private async Task SeedRacialProfilesAsync()
+    {
+        foreach (var seed in await LoadSeedArrayAsync<RacialProfileSeedData>("RacialProfiles.json"))
+            await FindOrCreateRacialProfileAsync(seed);
+    }
+
+    /// <summary>English Name -> already-created RacialProfileEntity id, same rationale/DB-aware
+    /// find-or-create as _raceIdsByEnglishName above (a creature type like "Human" or "Skaven" is
+    /// shared by dozens of WarriorArchetypes across the 15 warband files).</summary>
+    private readonly Dictionary<string, int> _racialProfileIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateRacialProfileAsync(RacialProfileSeedData seed)
+    {
+        if (_racialProfileIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var existingKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en" && t.Value == seed.Name.En)
+            .Select(t => t.Key).ToHashSet();
+        if (existingKeys.Count > 0)
+        {
+            var existingProfile = (await _db.Table<RacialProfileEntity>().ToListAsync()).FirstOrDefault(r => existingKeys.Contains(r.NameKey));
+            if (existingProfile is not null)
+            {
+                _racialProfileIdsByEnglishName[seed.Name.En] = existingProfile.Id;
+                return existingProfile.Id;
+            }
+        }
+
+        var profile = new RacialProfile
+        {
+            Source = ContentSource.Official,
+            Movement = seed.Movement,
+            MovementOverride = seed.MovementOverride,
+            WeaponSkill = seed.WeaponSkill,
+            BallisticSkill = seed.BallisticSkill,
+            Strength = seed.Strength,
+            Toughness = seed.Toughness,
+            Wounds = seed.Wounds,
+            Initiative = seed.Initiative,
+            Attacks = seed.Attacks,
+            Leadership = seed.Leadership
+        };
+        profile.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        profile.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = profile.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _racialProfileIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 

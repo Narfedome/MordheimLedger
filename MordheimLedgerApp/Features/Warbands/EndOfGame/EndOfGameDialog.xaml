@@ -8,6 +8,7 @@
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:advance="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGameDialog"
                x:DataType="local:EndOfGameDialogViewModel"
@@ -240,53 +241,10 @@
                             <Label Grid.Column="0" Text="{Binding CurrentAdvanceWarrior.Name}" FontAttributes="Bold"/>
                             <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="6">
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="10">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="local:AdvanceRollEntry">
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
-                                            <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                                   Placeholder="{loc:Loc EndOfGameAdvanceRollPh}" WidthRequest="70">
-                                                <Entry.Behaviors>
-                                                    <components:DigitsOnlyBehavior/>
-                                                </Entry.Behaviors>
-                                            </Entry>
-                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
-                                                                          CommandParameter="{Binding .}"
-                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                        </Grid>
-                                        <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                                               IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
-                                        <Label Text="{Binding ResultText}" FontSize="12"/>
-                                        <!-- Résultat "Compétence" (Héros 2-5/10-12 uniquement, voir
-                                             HeroAdvanceTable.IsSkill) : choix direct dans la Bibliothèque,
-                                             rattachée au guerrier à l'enregistrement du wizard. -->
-                                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsSkillResult}">
-                                            <Button Text="{loc:Loc EndOfGamePickSkill}"
-                                                    Style="{StaticResource DialogSecondaryButtonStyle}"
-                                                    FontSize="12" Padding="8,4"
-                                                    IsVisible="{Binding HasSkillSelected, Converter={StaticResource InverseBoolConverter}}"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
-                                                    CommandParameter="{Binding .}"/>
-                                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SelectedSkills}"
-                                                        IsVisible="{Binding HasSkillSelected}">
-                                                <BindableLayout.ItemTemplate>
-                                                    <DataTemplate x:DataType="library:Skill">
-                                                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,0">
-                                                            <Border.GestureRecognizers>
-                                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
-                                                                                       CommandParameter="{Binding .}"/>
-                                                            </Border.GestureRecognizers>
-                                                            <Label Text="{Binding Name}" FontSize="12"
-                                                                   FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </BindableLayout.ItemTemplate>
-                                            </FlexLayout>
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
+                                    <advance:AdvanceRollEntryView Entry="{Binding .}"/>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>

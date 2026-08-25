@@ -763,7 +763,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             };
             if (slot is null || Archetype is null) return;
 
-            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService, _detailDialogs)));
+            var knownSpellIds = slot.Spells.Select(s => s.Id).ToList();
+            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService, _detailDialogs, knownSpellIds)));
             if (spell is null) return;
 
             slot.Spells.Add(spell);

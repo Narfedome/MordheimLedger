@@ -35,6 +35,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Human",
       "description": {
         "en": "A middle-aged veteran of the Imperial army, often a former sergeant or junior officer - a mercenary band's survival relies more on its leader's cunning and experience than his martial prowess.",
         "fr": "Un vétéran d'âge moyen de l'armée impériale, souvent un ancien sergent ou officier de second ordre - la survie d'une bande de mercenaires repose davantage sur la ruse et l'expérience de son chef que sur ses talents martiaux."
@@ -74,6 +75,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "A veteran soldier, easily recognized by his many scars and the cynicism that marks a lifelong campaigner - some Captains are merely merchants or nobles looking to turn a profit, and delegate all practical matters to a Sergeant.",
         "fr": "Un vétéran facilement reconnaissable à ses nombreuses cicatrices et au cynisme qui marque à jamais un soldat - certains Capitaines ne sont que des marchands ou des nobles à la recherche d'opportunités et délèguent tout l'aspect pratique à un Sergent."
@@ -103,6 +105,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "A trapper and ranger from the mountains around Black Fire Pass, expert at moving silently over rocky terrain and often employed as a scout.",
         "fr": "Un trappeur et rôdeur venu des montagnes entourant le Col du Feu Noir, expert pour se déplacer silencieusement en terrain rocailleux et souvent employé comme éclaireur."
@@ -143,6 +146,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Human",
       "description": {
         "en": "Even the armies of the Empire, full of seasoned men, always need youngsters to man the field kitchens or carry orders - some of these greenhorns, seeking romance and glory, prefer to join a mercenary band instead.",
         "fr": "Même les armées de l'Empire, remplies d'hommes mûrs, ont toujours besoin de jeunots pour aider aux fourneaux ou transmettre les ordres - certains de ces bleus, en quête d'aventures romanesques, préfèrent rejoindre une bande de mercenaires."
@@ -172,6 +176,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "The famous garrison stationed at Black Fire Pass, which repelled countless greenskin invasions - trained in the halberd and sword as well as the bow and crossbow, their yellow-and-black uniform is earned only after years of service in the pass.",
         "fr": "La célèbre garnison cantonnée au Col du Feu Noir, celle-là même qui repoussa tant d'invasions de peaux-vertes - entraînés au maniement de la hallebarde et de l'épée ainsi que de l'arc et de l'arbalète, leur uniforme jaune et noir se mérite après plusieurs années de service dans la passe."
@@ -196,6 +201,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Claiming to be a marksman takes more than picking up a bow - the best train for years to master their weapon of choice, and Imperial army recruiters are frequent visitors to archery contests looking to enlist an expert or two.",
         "fr": "Se prétendre tireur ne se résume pas à prendre un arc et tenter de toucher ses ennemis - les meilleurs s'entraînent des années durant pour maîtriser leur arme de prédilection, et les recruteurs de l'armée impériale fréquentent les compétitions d'archerie."
@@ -220,6 +226,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Halfling",
       "description": {
         "en": "Averland borders Mootland, home of the halflings - since Mootland's garrisons were devastated by the greenskin Warlord Gorbad in 1707, its guards have been encouraged to serve a few years defending Black Fire Pass as well.",
         "fr": "L'Averland est voisin du Mootland, la terre des halflings - depuis que le Mootland fut dévasté par le Seigneur de Guerre orque Gorbad en l'an 1707, ses gardes sont encouragés à servir quelques années dans les garnisons du Col du Feu Noir."

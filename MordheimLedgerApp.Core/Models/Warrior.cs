@@ -1,3 +1,5 @@
+using MordheimLedgerApp.Core.Rules;
+
 namespace MordheimLedgerApp.Core.Models;
 
 /// <summary>
@@ -99,4 +101,29 @@ public class Warrior
     /// Building's Leadership test - Bâtiment Éventré), rather than any Hero the player picks. False for
     /// every other warrior, including every other Hero.</summary>
     public bool IsLeader { get; set; }
+
+    /// <summary>Racial characteristic maximums, snapshotted from the recruiting WarriorArchetype's
+    /// RacialProfile at recruitment (see EntityMapping.ToWarrior) - same snapshot-at-recruit-time
+    /// convention as the rest of the stat line, not a live reference: editing the RacialProfile catalog
+    /// later doesn't retroactively change an already-recruited Warrior's own maximums. Consumed by
+    /// Core.Rules.CharacteristicIncreaseRules when resolving an Advance result. All 9 nullable: null
+    /// means no known ceiling - either this archetype's RacialProfile isn't resolved (RacialProfiles.json
+    /// deliberately only covers creature types with confirmed official numbers, or the archetype never
+    /// gains Experience at all) or, for MaxMovement specifically, a free-text override race (e.g. Cave
+    /// Squigs' "2D6"). Never blocks Progression by itself - see CharacteristicMaxes' doc.</summary>
+    public int? MaxMovement { get; set; }
+    public int? MaxWeaponSkill { get; set; }
+    public int? MaxBallisticSkill { get; set; }
+    public int? MaxStrength { get; set; }
+    public int? MaxToughness { get; set; }
+    public int? MaxWounds { get; set; }
+    public int? MaxInitiative { get; set; }
+    public int? MaxAttacks { get; set; }
+    public int? MaxLeadership { get; set; }
+
+    /// <summary>Henchman-only "never twice" tracking (rulebook: a Henchman group may only ever add +1 to
+    /// any single characteristic) - see Core.Rules.CharacteristicField/CharacteristicIncreaseRules.
+    /// IsEligibleForHenchmanIncrease. Meaningless for a Hero (always empty), who has no such
+    /// restriction.</summary>
+    public List<CharacteristicField> IncreasedCharacteristics { get; set; } = new();
 }

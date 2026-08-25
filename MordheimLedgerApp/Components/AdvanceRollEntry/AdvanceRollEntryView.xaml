@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.AdvanceRollEntry.AdvanceRollEntryView"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
+             xmlns:eog="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Name="root">
+
+    <!-- Le jet + résultat lui-même vit dans AdvanceRollEntryBaseView (voir sa doc pour le
+         StackOverflowException évité : jamais AdvanceRollEntryView à l'intérieur de lui-même). Ce
+         composant-ci n'ajoute que le bloc Promotion par-dessus, dont les 2 jets imbriqués
+         (NestedHeroRoll/NestedHenchmanRoll) réutilisent AdvanceRollEntryBaseView - jamais
+         AdvanceRollEntryView, aucune récursion possible. -->
+    <VerticalStackLayout BindingContext="{Binding Source={x:Reference root}, Path=Entry}"
+                          x:DataType="eog:AdvanceRollEntry" Spacing="8">
+        <local:AdvanceRollEntryBaseView Entry="{Binding .}"/>
+
+        <!-- Résultat "Promotion" (Homme de main, jet 10-12, voir AdvanceOutcome.Kind == Promotion) -
+             carte étendue en place : bannière de blocage si 6 Héros déjà atteints (CanPromote), sinon
+             nom + 2 listes de compétences puis le(s) jet(s) imbriqué(s), jamais une nouvelle WizardStep
+             - voir la doc de classe d'AdvanceRollEntry. -->
+        <VerticalStackLayout Spacing="8" IsVisible="{Binding IsPromotionResult}">
+            <Label Text="{loc:Loc EndOfGamePromotionHeading}" FontAttributes="Bold" FontSize="13"/>
+            <Label Text="{loc:Loc EndOfGamePromotionBlockedBanner}" FontSize="12" TextColor="{StaticResource AppDanger}"
+                   IsVisible="{Binding CanPromote, Converter={StaticResource InverseBoolConverter}}"/>
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding CanPromote}">
+                <Entry Text="{Binding PromotedWarriorName}" Placeholder="{loc:Loc EndOfGamePromotionNamePh}"/>
+                <Picker Title="{loc:Loc EndOfGamePromotionCategoryPh1}"
+                        ItemsSource="{Binding SkillCategoryOptions}"
+                        SelectedItem="{Binding SelectedPromotionCategoryLabel1}"/>
+                <Picker Title="{loc:Loc EndOfGamePromotionCategoryPh2}"
+                        ItemsSource="{Binding SkillCategoryOptions}"
+                        SelectedItem="{Binding SelectedPromotionCategoryLabel2}"/>
+                <VerticalStackLayout Spacing="4" IsVisible="{Binding NestedHeroRoll, Converter={StaticResource IsNotNullConverter}}">
+                    <Label Text="{loc:Loc EndOfGamePromotionHeroRollHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Border Style="{StaticResource SectionCardBorderStyle}">
+                        <local:AdvanceRollEntryBaseView Entry="{Binding NestedHeroRoll}"/>
+                    </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4" IsVisible="{Binding NestedHenchmanRoll, Converter={StaticResource IsNotNullConverter}}">
+                    <Label Text="{loc:Loc EndOfGamePromotionRemainderHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{loc:Loc EndOfGamePromotionRerollHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Border Style="{StaticResource SectionCardBorderStyle}">
+                        <local:AdvanceRollEntryBaseView Entry="{Binding NestedHenchmanRoll}"/>
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

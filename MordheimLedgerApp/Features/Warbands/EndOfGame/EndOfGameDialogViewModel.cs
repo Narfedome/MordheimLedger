@@ -5,6 +5,7 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
 
 using MordheimLedgerApp.Features.Warbands;
@@ -45,6 +46,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 {
     private readonly ISkillPickerService _skillPicker;
     private readonly IDetailDialogService _detailDialogs;
+    private readonly ILibraryService _libraryService;
     private readonly int _warbandArchetypeId;
 
     /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
@@ -234,10 +236,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
+        _libraryService = libraryService;
         _warbandArchetypeId = warbandArchetypeId;
         _warbandArchetypeName = warbandArchetypeName;
         _pendingExplorationBonusDie = pendingExplorationBonusDie;
@@ -254,8 +257,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ResultOptions.Add(Loc["EndOfGameResultDraw"]);
         selectedResult = ResultOptions[0];
 
+        // Snapshot pour AdvanceRollEntry.CanPromote (promotion Homme de main -> Héros, jet 10-12) - voir
+        // sa doc pour les limites acceptées (ne suit pas les promotions résolues plus tôt dans la même
+        // Fin de Partie ; se base sur activeWarriorRows - un Héros Malade cette partie, donc absent
+        // d'activeWarriorRows, n'est pas compté ici, sous-estimation mineure du plafond de 6 acceptée
+        // plutôt que de faire remonter le roster complet de la bande jusqu'à ce ViewModel).
+        var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
         WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
-            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience)));
+            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount)));
 
         // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
         // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/

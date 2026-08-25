@@ -299,10 +299,11 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         // ajoutées en mémoire pendant cette même session - garanti chargé même si l'utilisateur n'est
         // jamais passé par l'onglet Équipement.
         await EnsureEquipmentListsLoadedAsync();
+        var allRacialProfiles = await _libraryService.GetRacialProfilesAsync(LocalizationService.Instance.Language);
 
         var newItem = new WarriorArchetype();
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"],
-            _specialRulePicker, EquipmentLists.ToList(), _libraryService);
+            _specialRulePicker, EquipmentLists.ToList(), _libraryService, allRacialProfiles);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         Warriors.Add(newItem);
@@ -312,6 +313,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     private async Task EditWarrior(WarriorArchetype warrior)
     {
         await EnsureEquipmentListsLoadedAsync();
+        var allRacialProfiles = await _libraryService.GetRacialProfilesAsync(LocalizationService.Instance.Language);
 
         // Copie manuelle (comme WarriorArchetypeViewModel.Edit) : Annuler côté guerrier doit laisser le
         // chip affiché intact, pas de mutation en place tant que ce dialog imbriqué n'a pas confirmé.
@@ -346,11 +348,12 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             CanUseEquipment = warrior.CanUseEquipment,
             AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories),
             IsLargeCreature = warrior.IsLargeCreature,
-            GainsExperience = warrior.GainsExperience
+            GainsExperience = warrior.GainsExperience,
+            RacialProfileId = warrior.RacialProfileId
         };
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],
-            _specialRulePicker, EquipmentLists.ToList(), _libraryService);
+            _specialRulePicker, EquipmentLists.ToList(), _libraryService, allRacialProfiles);
         if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
 
         var index = Warriors.IndexOf(warrior);

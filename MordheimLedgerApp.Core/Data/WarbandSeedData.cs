@@ -147,6 +147,15 @@ public class WarriorSeedData
     /// <summary>True for the one archetype that represents this warband's leader (e.g. the Mercenary
     /// Captain) - exactly one per warband file. See WarriorArchetype.IsLeader.</summary>
     public bool IsLeader { get; set; }
+
+    /// <summary>English Name reference into Data/SeedData/RacialProfiles.json (e.g. "Human", "Vampire")
+    /// - which creature body type's characteristic maximums govern this archetype's Advance rolls, see
+    /// WarriorArchetype.RacialProfileId/RacialProfile. Null/omitted for an archetype whose
+    /// GainsExperience is false (Zombie, Dire Wolf...) - the Advance step never triggers for it, so it
+    /// never needs one. Declared per-band (here) rather than in a shared lookup table: each band file
+    /// already owns everything else specific to its own archetypes, and this keeps a wrong/missing
+    /// assignment a one-line fix in the file that actually needs it.</summary>
+    public string? RacialProfileName { get; set; }
 }
 
 public class EquipmentSeedData
@@ -260,6 +269,29 @@ public class RaceSeedData
 {
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
+}
+
+/// <summary>One creature body type's characteristic maximums (Data/SeedData/RacialProfiles.json,
+/// common - not declared per-band) - see Models.Library.RacialProfile. Find-or-created by English Name
+/// at seed time, same shape as RaceSeedData; resolved onto each WarriorArchetype via
+/// AppDatabase._racialProfileNameByWarriorArchetypeEnglishName (not a per-warrior JSON field - a
+/// creature type like "Human" or "Skaven" is shared by dozens of archetypes across the 15 warband
+/// files, so a single name-keyed lookup table is simpler to keep correct than repeating the same string
+/// on every WarriorSeedData entry).</summary>
+public class RacialProfileSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+    public int Movement { get; set; }
+    public string? MovementOverride { get; set; }
+    public int WeaponSkill { get; set; }
+    public int BallisticSkill { get; set; }
+    public int Strength { get; set; }
+    public int Toughness { get; set; }
+    public int Wounds { get; set; }
+    public int Initiative { get; set; }
+    public int Attacks { get; set; }
+    public int Leadership { get; set; }
 }
 
 /// <summary>One named, reusable SpecialRule entry (see WarbandSeedData.SpecialRules/WarriorSeedData.

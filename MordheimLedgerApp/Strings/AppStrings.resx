@@ -189,12 +189,6 @@
   <data name="WarbandsSpellRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
-  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
-    <value>Valider</value>
-  </data>
-  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
-    <value>Entrez un jet entre 1 et 6.</value>
-  </data>
   <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
     <value>Aucun sort ne correspond à ce jet dans la table de l'école de magie de cette bande.</value>
   </data>
@@ -1014,8 +1008,74 @@
   <data name="EndOfGameAdvanceSkillResultText" xml:space="preserve">
     <value>Compétence acquise : {0}</value>
   </data>
+  <data name="EndOfGameAdvanceSpellResultText" xml:space="preserve">
+    <value>Sort acquis : {0}</value>
+  </data>
   <data name="EndOfGameAdvanceRollPh" xml:space="preserve">
     <value>2D6</value>
+  </data>
+  <data name="EndOfGamePickSpell" xml:space="preserve">
+    <value>Tirer un sort</value>
+  </data>
+  <data name="EndOfGameOr" xml:space="preserve">
+    <value>OU</value>
+  </data>
+  <data name="WarbandsSpellRollAlreadyKnownMessage" xml:space="preserve">
+    <value>Ce guerrier connaît déjà ce sort - relancez.</value>
+  </data>
+  <data name="EndOfGameAdvanceSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameAdvanceChoicePh" xml:space="preserve">
+    <value>Caractéristique</value>
+  </data>
+  <data name="EndOfGameSubRollRequired" xml:space="preserve">
+    <value>Le sous-jet 1D6 est requis</value>
+  </data>
+  <data name="EndOfGameAdvanceChoiceRequired" xml:space="preserve">
+    <value>Choisissez une caractéristique</value>
+  </data>
+  <data name="EndOfGameAdvanceSkillRequired" xml:space="preserve">
+    <value>Choisissez une compétence ou un sort</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedRequired" xml:space="preserve">
+    <value>6 Héros déjà atteints - changez ce jet</value>
+  </data>
+  <data name="EndOfGamePromotionNameRequired" xml:space="preserve">
+    <value>Le nom du nouveau Héros est requis</value>
+  </data>
+  <data name="EndOfGamePromotionCategoriesRequired" xml:space="preserve">
+    <value>Choisissez les 2 listes de compétences</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollRequired" xml:space="preserve">
+    <value>Nouveau Héros : {0}</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderRollRequired" xml:space="preserve">
+    <value>Reste du groupe : {0}</value>
+  </data>
+  <data name="EndOfGamePromotionHeading" xml:space="preserve">
+    <value>Promotion !</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedBanner" xml:space="preserve">
+    <value>6 Héros déjà atteints - relancez, pas de promotion possible cette fois.</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh1" xml:space="preserve">
+    <value>Première liste de compétences</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh2" xml:space="preserve">
+    <value>Deuxième liste de compétences</value>
+  </data>
+  <data name="EndOfGamePromotionNamePh" xml:space="preserve">
+    <value>Nom du nouveau Héros</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollHeading" xml:space="preserve">
+    <value>Progression du nouveau Héros</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderHeading" xml:space="preserve">
+    <value>Progression du reste du groupe</value>
+  </data>
+  <data name="EndOfGamePromotionRerollHint" xml:space="preserve">
+    <value>Un 10-12 ici relance : une seule promotion par jet de Progression.</value>
   </data>
   <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
     <value>Blessures multiples</value>
@@ -1040,6 +1100,9 @@
   </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} a progressé : {1}</value>
+  </data>
+  <data name="HistoryPromotionSentence" xml:space="preserve">
+    <value>{0} : un membre du groupe devient Héros ({1}) !</value>
   </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Compétence : choisissez une compétence dans un tableau accessible à ce guerrier (ou un nouveau sort aléatoire si Sorcier).</value>
@@ -1235,6 +1298,24 @@
   </data>
   <data name="RaceNamePh" xml:space="preserve">
     <value>Race</value>
+  </data>
+  <data name="LibManageRacialProfiles" xml:space="preserve">
+    <value>Gérer les profils raciaux</value>
+  </data>
+  <data name="RacialProfileCreateTitle" xml:space="preserve">
+    <value>Nouveau profil racial</value>
+  </data>
+  <data name="RacialProfileEditTitle" xml:space="preserve">
+    <value>Modifier le profil racial</value>
+  </data>
+  <data name="RacialProfileNamePh" xml:space="preserve">
+    <value>Profil racial</value>
+  </data>
+  <data name="RacialProfileMaxPh" xml:space="preserve">
+    <value>Maximums de caractéristiques</value>
+  </data>
+  <data name="WarriorArchetypeRacialProfilePh" xml:space="preserve">
+    <value>Type de créature (Progression)</value>
   </data>
   <data name="WarbandGradePh" xml:space="preserve">
     <value>Grade</value>

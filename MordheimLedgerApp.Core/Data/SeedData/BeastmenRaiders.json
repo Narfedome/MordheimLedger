@@ -131,6 +131,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Beastman",
       "description": {
         "en": "Beastmen chieftains have gained their position through sheer brutality - he leads the Beastmen to Mordheim to gather Chaos Stones for his Herdstone.",
         "fr": "Chez les sauvages Hommes-Bêtes, c'est le Gor le plus puissant qui commande. Il conduit ses semblables dans les ruines de Mordheim en quête de pierres du Chaos qui orneront celle de la Harde."
@@ -169,6 +170,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Beastman",
       "description": {
         "en": "Beastmen Shamans are prophets of the Dark Gods, and the most respected of all Beastmen - may never wear armour.",
         "fr": "Les Chamans Hommes-Bêtes sont les prophètes des Dieux Sombres et ils sont très respectés. Il ne peut en aucun cas porter d'armure."
@@ -207,6 +209,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Bestigor",
       "description": {
         "en": "Bestigors are the largest type of Beastmen, the great horned warriors of the warband - massive creatures with an inhuman resistance to pain.",
         "fr": "Les Bestigors sont les plus grands et les plus puissants Hommes-Bêtes de la Harde. Ils arborent aussi les cornes les plus imposantes et semblent ignorer la douleur."
@@ -236,6 +239,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Centigor",
       "description": {
         "en": "A disturbing cross between a horse or oxen and a Beastman - the four legs grant great strength and speed while the humanoid torso can wield weapons, a redoutable combination.",
         "fr": "Un Centigor est le mélange contre-nature d'un quadrupède et d'un Homme-Bête. Ses quatre pattes lui permettent de se déplacer très vite et ses bras humanoïdes sont aptes à manier des armes. Il s'agit là d'une redoutable combinaison."
@@ -297,6 +301,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Beastman",
       "description": {
         "en": "Ungor are the most numerous of the Beastmen - small, spiteful creatures, but dangerous in large masses.",
         "fr": "Les Ungors sont les Hommes-Bêtes les plus courants. Ils sont plus frêles que les Gors mais leur cruauté les rend très dangereux s'ils sont en grand nombre."
@@ -333,6 +338,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Beastman",
       "description": {
         "en": "Gor are nearly as numerous as Ungor, but larger and more brutish.",
         "fr": "Les Gors sont moins nombreux que les Ungors, mais ils sont bien plus puissants et d'une violence extrême."
@@ -397,6 +403,7 @@
       "initiative": 4,
       "attacks": 3,
       "leadership": 8,
+      "racialProfileName": "Minotaur",
       "description": {
         "en": "A giant, bull-headed Beastman - so powerful and fearsome that any Beastmen Chieftain will try to recruit one into his warband.",
         "fr": "Le Minotaure est un Homme-Bête géant à tête de taureau. Il est si puissant et effrayant que tout Chef Homme-Bête essaiera d'en recruter un dans sa Harde."

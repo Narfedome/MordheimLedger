@@ -11,6 +11,7 @@ using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.MagicSchools;
+using MordheimLedgerApp.Features.Library.RacialProfiles;
 using MordheimLedgerApp.Features.Library.Races;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes;
@@ -170,6 +171,8 @@ namespace MordheimLedgerApp
             builder.Services.AddSingleton<IMagicSchoolPickerService, MagicSchoolPickerService>();
             builder.Services.AddTransient<RaceViewModel>();
             builder.Services.AddTransient<RaceListPage>();
+            builder.Services.AddTransient<RacialProfileViewModel>();
+            builder.Services.AddTransient<RacialProfileListPage>();
             builder.Services.AddTransient<LibraryViewModel>();
             builder.Services.AddTransient<LibraryPage>();
 

@@ -44,4 +44,7 @@ public class WarriorArchetypeEntity
     public bool IsLargeCreature { get; set; }
     public bool GainsExperience { get; set; } = true;
     public bool IsLeader { get; set; }
+
+    [Indexed]
+    public int RacialProfileId { get; set; }
 }

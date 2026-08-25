@@ -50,4 +50,20 @@ public class WarriorEntity
     public bool IsLargeCreature { get; set; }
     public bool GainsExperience { get; set; } = true;
     public bool IsLeader { get; set; }
+
+    /// <summary>See Models.Warrior's racial-maximum snapshot fields (copied from the recruiting
+    /// WarriorArchetype's RacialProfile at recruitment).</summary>
+    public int? MaxMovement { get; set; }
+    public int? MaxWeaponSkill { get; set; }
+    public int? MaxBallisticSkill { get; set; }
+    public int? MaxStrength { get; set; }
+    public int? MaxToughness { get; set; }
+    public int? MaxWounds { get; set; }
+    public int? MaxInitiative { get; set; }
+    public int? MaxAttacks { get; set; }
+    public int? MaxLeadership { get; set; }
+
+    /// <summary>Comma-separated CharacteristicField member names - see Models.Warrior.
+    /// IncreasedCharacteristics (same storage convention as AllowedSkillCategories).</summary>
+    public string? IncreasedCharacteristics { get; set; }
 }

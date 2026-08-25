@@ -318,7 +318,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             return;
         }
 
-        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(_magicSchools.ToList(), _libraryService, _detailDialogs)));
+        var knownSpellIds = Spells.Select(s => s.Item.Id).ToList();
+        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(_magicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
         if (rolled is null) return;
 
         var rolledLearned = await _warbandService.AddWarriorSpellAsync(Item.Id, rolled);

@@ -2,6 +2,7 @@ using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Core.Data;
 
@@ -87,7 +88,8 @@ public static class EntityMapping
     };
 
     public static WarriorArchetype ToModel(this WarriorArchetypeEntity e, IReadOnlyDictionary<string, string> translations,
-        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarriorArchetypeId = null) => new()
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByWarriorArchetypeId = null,
+        IReadOnlyDictionary<int, RacialProfile>? racialProfilesById = null) => new()
     {
         Id = e.Id,
         WarbandArchetypeId = e.WarbandArchetypeId,
@@ -120,7 +122,9 @@ public static class EntityMapping
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         IsLargeCreature = e.IsLargeCreature,
         GainsExperience = e.GainsExperience,
-        IsLeader = e.IsLeader
+        IsLeader = e.IsLeader,
+        RacialProfileId = e.RacialProfileId,
+        RacialProfile = racialProfilesById?.GetValueOrDefault(e.RacialProfileId)
     };
 
     private static List<SkillCategory> ParseSkillCategories(string? csv) =>
@@ -158,7 +162,8 @@ public static class EntityMapping
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
         IsLargeCreature = m.IsLargeCreature,
         GainsExperience = m.GainsExperience,
-        IsLeader = m.IsLeader
+        IsLeader = m.IsLeader,
+        RacialProfileId = m.RacialProfileId
     };
 
     /// <summary>Seeds a newly recruited Warrior's copyable fields from its archetype (name, cost, stat line, starting XP).</summary>
@@ -184,7 +189,69 @@ public static class EntityMapping
         AllowedSkillCategories = new List<Models.Library.SkillCategory>(archetype.AllowedSkillCategories),
         IsLargeCreature = archetype.IsLargeCreature,
         GainsExperience = archetype.GainsExperience,
-        IsLeader = archetype.IsLeader
+        IsLeader = archetype.IsLeader,
+        // Snapshot at recruitment, same convention as the rest of the stat line above - editing the
+        // RacialProfile catalog later doesn't retroactively change an already-recruited Warrior. Falls
+        // back to 0/null (never blocks an Advance) if the archetype's RacialProfile wasn't resolved by
+        // the caller (see LibraryService.GetWarriorArchetypesAsync) rather than throwing.
+        // Null (pas 0) quand RacialProfile n'est pas résolu - voir CharacteristicMaxes/Warrior.
+        // MaxWeaponSkill etc. : "aucun plafond connu", jamais "plafonné à 0".
+        MaxMovement = archetype.RacialProfile?.MovementOverride is null ? archetype.RacialProfile?.Movement : null,
+        MaxWeaponSkill = archetype.RacialProfile?.WeaponSkill,
+        MaxBallisticSkill = archetype.RacialProfile?.BallisticSkill,
+        MaxStrength = archetype.RacialProfile?.Strength,
+        MaxToughness = archetype.RacialProfile?.Toughness,
+        MaxWounds = archetype.RacialProfile?.Wounds,
+        MaxInitiative = archetype.RacialProfile?.Initiative,
+        MaxAttacks = archetype.RacialProfile?.Attacks,
+        MaxLeadership = archetype.RacialProfile?.Leadership
+    };
+
+    /// <summary>Henchman-to-Hero promotion (Advance roll 10-12, see HenchmanAdvanceTable.IsPromotion) -
+    /// clones the group's LIVE stats/XP onto a brand-new Warrior rather than reseeding from
+    /// WarriorArchetype.ToWarrior(), since the rulebook requires the promoted model to keep every
+    /// characteristic increase already earned by the group. WarriorArchetypeId stays pointed at the
+    /// Henchman archetype (e.g. "Ghoul") - IsHero is already a mutable per-row copy field (see
+    /// Models.Warrior), so flipping it true on this one new row is a legitimate, narrow exception to
+    /// "IsHero mirrors archetype." AllowedSkillCategories is NOT copied from the Henchman archetype -
+    /// the rulebook has the player pick two Hero skill tables available to the warband instead, left
+    /// empty here for the caller to set explicitly. Existing carried equipment/skills/injuries stay
+    /// with the source group's row (no join-table migration) - out of scope for this pass.</summary>
+    public static Warrior CloneAsPromotedHero(this Warrior henchmanGroup, string name) => new()
+    {
+        WarbandId = henchmanGroup.WarbandId,
+        WarriorArchetypeId = henchmanGroup.WarriorArchetypeId,
+        Name = name,
+        IsHero = true,
+        Cost = henchmanGroup.Cost,
+        Experience = henchmanGroup.Experience,
+        HeadCount = 1,
+        Movement = henchmanGroup.Movement,
+        MovementOverride = henchmanGroup.MovementOverride,
+        WeaponSkill = henchmanGroup.WeaponSkill,
+        BallisticSkill = henchmanGroup.BallisticSkill,
+        Strength = henchmanGroup.Strength,
+        Toughness = henchmanGroup.Toughness,
+        Wounds = henchmanGroup.Wounds,
+        Initiative = henchmanGroup.Initiative,
+        Attacks = henchmanGroup.Attacks,
+        Leadership = henchmanGroup.Leadership,
+        EquipmentListId = henchmanGroup.EquipmentListId,
+        CanUseEquipment = henchmanGroup.CanUseEquipment,
+        AllowedSkillCategories = new List<Models.Library.SkillCategory>(),
+        IsLargeCreature = henchmanGroup.IsLargeCreature,
+        GainsExperience = henchmanGroup.GainsExperience,
+        IsLeader = false,
+        MaxMovement = henchmanGroup.MaxMovement,
+        MaxWeaponSkill = henchmanGroup.MaxWeaponSkill,
+        MaxBallisticSkill = henchmanGroup.MaxBallisticSkill,
+        MaxStrength = henchmanGroup.MaxStrength,
+        MaxToughness = henchmanGroup.MaxToughness,
+        MaxWounds = henchmanGroup.MaxWounds,
+        MaxInitiative = henchmanGroup.MaxInitiative,
+        MaxAttacks = henchmanGroup.MaxAttacks,
+        MaxLeadership = henchmanGroup.MaxLeadership,
+        IncreasedCharacteristics = new List<CharacteristicField>()
     };
 
     public static Campaign ToModel(this CampaignEntity e) => new()
@@ -511,6 +578,44 @@ public static class EntityMapping
         Source = m.Source
     };
 
+    public static RacialProfile ToModel(this RacialProfileEntity e, IReadOnlyDictionary<string, string> translations) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        Movement = e.Movement,
+        MovementOverride = e.MovementOverride,
+        WeaponSkill = e.WeaponSkill,
+        BallisticSkill = e.BallisticSkill,
+        Strength = e.Strength,
+        Toughness = e.Toughness,
+        Wounds = e.Wounds,
+        Initiative = e.Initiative,
+        Attacks = e.Attacks,
+        Leadership = e.Leadership
+    };
+
+    public static RacialProfileEntity ToEntity(this RacialProfile m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source,
+        Movement = m.Movement,
+        MovementOverride = m.MovementOverride,
+        WeaponSkill = m.WeaponSkill,
+        BallisticSkill = m.BallisticSkill,
+        Strength = m.Strength,
+        Toughness = m.Toughness,
+        Wounds = m.Wounds,
+        Initiative = m.Initiative,
+        Attacks = m.Attacks,
+        Leadership = m.Leadership
+    };
+
     public static EquipmentItemEntity ToEntity(this EquipmentItem m) => new()
     {
         Id = m.Id,
@@ -580,7 +685,19 @@ public static class EntityMapping
         Animal = animal,
         IsLargeCreature = e.IsLargeCreature,
         GainsExperience = e.GainsExperience,
-        IsLeader = e.IsLeader
+        IsLeader = e.IsLeader,
+        MaxMovement = e.MaxMovement,
+        MaxWeaponSkill = e.MaxWeaponSkill,
+        MaxBallisticSkill = e.MaxBallisticSkill,
+        MaxStrength = e.MaxStrength,
+        MaxToughness = e.MaxToughness,
+        MaxWounds = e.MaxWounds,
+        MaxInitiative = e.MaxInitiative,
+        MaxAttacks = e.MaxAttacks,
+        MaxLeadership = e.MaxLeadership,
+        IncreasedCharacteristics = string.IsNullOrEmpty(e.IncreasedCharacteristics)
+            ? new List<CharacteristicField>()
+            : e.IncreasedCharacteristics.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<CharacteristicField>).ToList()
     };
 
     public static WarriorEntity ToEntity(this Warrior m) => new()
@@ -610,7 +727,17 @@ public static class EntityMapping
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories),
         IsLargeCreature = m.IsLargeCreature,
         GainsExperience = m.GainsExperience,
-        IsLeader = m.IsLeader
+        IsLeader = m.IsLeader,
+        MaxMovement = m.MaxMovement,
+        MaxWeaponSkill = m.MaxWeaponSkill,
+        MaxBallisticSkill = m.MaxBallisticSkill,
+        MaxStrength = m.MaxStrength,
+        MaxToughness = m.MaxToughness,
+        MaxWounds = m.MaxWounds,
+        MaxInitiative = m.MaxInitiative,
+        MaxAttacks = m.MaxAttacks,
+        MaxLeadership = m.MaxLeadership,
+        IncreasedCharacteristics = m.IncreasedCharacteristics.Count == 0 ? null : string.Join(',', m.IncreasedCharacteristics)
     };
 
     /// <param name="item">The catalog item this row references, loaded separately.</param>

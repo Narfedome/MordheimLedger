@@ -13,18 +13,18 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     protected override bool CancelResult => false;
 
     public List<UnavailableWarriorRow> UnavailableWarriors { get; }
-    public List<OldWoundRollEntry> OldWoundRolls { get; }
+    public List<OldWoundWarriorEntry> OldWoundEntries { get; }
     public string? NextGameNote { get; }
 
     public bool HasUnavailableWarriors => UnavailableWarriors.Count > 0;
-    public bool HasOldWoundRolls => OldWoundRolls.Count > 0;
+    public bool HasOldWoundRolls => OldWoundEntries.Count > 0;
     public bool HasNextGameNote => !string.IsNullOrWhiteSpace(NextGameNote);
     public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasNextGameNote;
 
-    public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundRollEntry> oldWoundRolls, string? nextGameNote)
+    public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries, string? nextGameNote)
     {
         UnavailableWarriors = unavailableWarriors;
-        OldWoundRolls = oldWoundRolls;
+        OldWoundEntries = oldWoundEntries;
         NextGameNote = nextGameNote;
     }
 

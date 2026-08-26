@@ -55,34 +55,47 @@
 
             <!-- Vieille blessure (32) : seul résultat de la table des Blessures Graves qui se rejoue à
                  chaque partie plutôt qu'une fois à la Fin de Partie (voir SERIOUS_INJURIES_STATUS.md) -
-                 même idiome de saisie que WarriorOutcomeRow.ManualRoll (jet manuel + bouton dé optionnel). -->
+                 même idiome de saisie que WarriorOutcomeRow.ManualRoll (jet manuel + bouton dé optionnel).
+                 Une seule carte par guerrier, même s'il porte plusieurs Vieilles blessures distinctes -
+                 chacune y est un jet indépendant à l'intérieur de la même carte (retour utilisateur
+                 2026-08-26 : "au lieu d'avoir 2 card, c'est d'avoir une card avec 2 roll à l'intérieur"). -->
             <VerticalStackLayout Spacing="10" IsVisible="{Binding HasOldWoundRolls}">
                 <Label Text="{loc:Loc StartGameOldWoundHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding OldWoundRolls}">
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding OldWoundEntries}">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="local:OldWoundRollEntry">
+                        <DataTemplate x:DataType="local:OldWoundWarriorEntry">
                             <Border Style="{StaticResource SectionCardBorderStyle}">
-                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
-                                        <Label Text="{Binding Warrior.Name}" FontAttributes="Bold"/>
-                                        <Label Text="{Binding Subtitle}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                        <Label Text="{loc:Loc StartGameOldWoundPass}" FontSize="12" FontAttributes="Bold"
-                                               TextColor="{DynamicResource AppSuccess}" IsVisible="{Binding ShowPass}"/>
-                                        <Label Text="{loc:Loc StartGameOldWoundFail}" FontSize="12" FontAttributes="Bold"
-                                               TextColor="{DynamicResource AppDanger}" IsVisible="{Binding ShowFail}"/>
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Warrior.Name}" FontAttributes="Bold"/>
+                                    <Label Text="{loc:Loc StartGameOldWoundSubtitle}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Rolls}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:OldWoundRollEntry">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                                        <Label Text="{Binding Label}" FontSize="11" IsVisible="{Binding HasLabel}"
+                                                               TextColor="{DynamicResource AppTextMuted}"/>
+                                                        <Label Text="{loc:Loc StartGameOldWoundPass}" FontSize="12" FontAttributes="Bold"
+                                                               TextColor="{DynamicResource AppSuccess}" IsVisible="{Binding ShowPass}"/>
+                                                        <Label Text="{loc:Loc StartGameOldWoundFail}" FontSize="12" FontAttributes="Bold"
+                                                               TextColor="{DynamicResource AppDanger}" IsVisible="{Binding ShowFail}"/>
+                                                    </VerticalStackLayout>
+                                                    <Entry Grid.Column="1" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60" VerticalOptions="Center">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                                  Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  VerticalOptions="Center"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
                                     </VerticalStackLayout>
-                                    <Entry Grid.Column="1" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60" VerticalOptions="Center">
-                                        <Entry.Behaviors>
-                                            <components:DigitsOnlyBehavior/>
-                                        </Entry.Behaviors>
-                                    </Entry>
-                                    <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
-                                                                  Style="{StaticResource GhostIconButtonStyle}"
-                                                                  VerticalOptions="Center"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollCommand}"
-                                                                  CommandParameter="{Binding .}"/>
-                                </Grid>
+                                </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>

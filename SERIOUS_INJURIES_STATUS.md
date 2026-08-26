@@ -297,3 +297,21 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   multiples pour le même guerrier, même résolution" était concerné. Aucun changement Core (fichier tête
   MAUI uniquement) - compilation confirmée (0 `error CS`), copie finale de l'exécutable bloquée par
   l'instance de l'appli ouverte en parallèle (limite connue).
+- **2026-08-26 (Lancer la partie - affichage groupé + conséquence réelle de l'échec)** — Deux retours
+  utilisateur sur "Lancer la partie". (1) Affichage : "au lieu d'avoir 2 card, c'est d'avoir une card
+  avec 2 roll à l'intérieur" - un guerrier à plusieurs Vieilles blessures affichait jusqu'ici une carte
+  par jet ; nouveau `OldWoundWarriorEntry` (une carte par guerrier, `List<OldWoundRollEntry>` à
+  l'intérieur) remplace le `List<OldWoundRollEntry>` plat de `StartGameDialogViewModel`.
+  `OldWoundRollEntry` perd son `Warrior`/`Subtitle` (redondants une fois regroupés par carte) au profit
+  d'un simple `Label` ("Jet 1"/"Jet 2", vide et masqué si une seule Vieille blessure). (2) Conséquence
+  du jet : "quand on clique sur commencer la partie, et que le personnage ne peut pas la jouer, il n'est
+  pas flagué pour la partie et est bien présent dans le End of Game" - avant ce correctif, un échec
+  n'était que journalisé dans l'Historique, sans toucher `Warrior.Status` : le guerrier restait Actif et
+  se retrouvait à tort dans `activeWarriorRows` si "Fin de partie" était ouvert avant sa prochaine
+  partie, alors qu'il n'avait pas participé à celle-ci. Corrigé : un guerrier avec au moins un jet raté
+  (`OldWoundWarriorEntry.HasFailure`, un seul suffit parmi ses jets) est marqué `WarriorStatus.Sick` +
+  `SickGamesRemaining += 1` à la confirmation - même mécanisme que le Puits de l'Exploration, donc
+  correctement exclu du prochain `EndOfGame()` et automatiquement rebasculé Actif par
+  `ApplySicknessLifecycleAsync` une fois cette partie (qu'il vient de manquer) enregistrée. Nouvelle clé
+  resx `StartGameOldWoundRollLabel` ("Jet"/"Roll"). Aucun changement Core - compilation confirmée (0
+  `error CS`), copie finale bloquée par l'instance de l'appli ouverte en parallèle (limite connue).

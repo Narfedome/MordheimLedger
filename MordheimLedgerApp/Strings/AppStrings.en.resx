@@ -993,6 +993,9 @@
   <data name="StartGameOldWoundSubtitle" xml:space="preserve">
     <value>Old battle wound: 1D6, fails on a 1</value>
   </data>
+  <data name="StartGameOldWoundRollLabel" xml:space="preserve">
+    <value>Roll</value>
+  </data>
   <data name="StartGameOldWoundPass" xml:space="preserve">
     <value>Can fight</value>
   </data>

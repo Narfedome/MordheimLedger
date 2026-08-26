@@ -76,7 +76,7 @@
                              Fin de partie et par les ajouts manuels. Même style de puce que
                              Équipement/Compétences. -->
                         <components:ChipListView HeaderText="{loc:Loc WarriorsInjuriesHeading}"
-                                                  ItemsSource="{Binding Injuries}"
+                                                  ItemsSource="{Binding InjuryChips}"
                                                   IconGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
                                                   IconFontFamily="RpgAwesome"
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"

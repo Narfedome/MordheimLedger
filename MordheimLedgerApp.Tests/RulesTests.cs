@@ -182,6 +182,25 @@ public class RulesTests
         Assert.False(SeriousInjuryTable.IsBitterEnmity(roll));
     }
 
+    [Theory]
+    [InlineData(36)]
+    [InlineData(56)]
+    [InlineData(61)]
+    public void SeriousInjuryTable_HidesRosterChip(int roll)
+    {
+        Assert.True(SeriousInjuryTable.HidesRosterChip(roll));
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(22)]
+    [InlineData(35)]
+    [InlineData(66)]
+    public void SeriousInjuryTable_OtherResults_DoNotHideRosterChip(int roll)
+    {
+        Assert.False(SeriousInjuryTable.HidesRosterChip(roll));
+    }
+
     // --- SeriousInjuryEffectTable (Palier 1 mechanized subset) -----------------------------------
 
     [Fact]

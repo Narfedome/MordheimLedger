@@ -242,7 +242,16 @@
     "description": {
       "en": "Hardened: becomes permanently immune to Fear.",
       "fr": "Endurci : devient immunisé à la Peur de façon permanente."
-    }
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Hardened", "fr": "Endurci" },
+        "description": {
+          "en": "This warrior has seen the worst the Old World has to offer and is no longer troubled by it - permanently immune to Fear. Distinct from Bugman's Ale's own \"Immune to Fear\" (that one lasts a single battle only) - this one never wears off.",
+          "fr": "Ce guerrier a vu le pire que le Vieux Monde ait à offrir et n'en est plus troublé - immunisé à la Peur de façon permanente. À ne pas confondre avec le \"Immunisé à la Peur\" de la Bière de Bugman (qui ne dure qu'une seule bataille) - celui-ci ne s'estompe jamais."
+        }
+      }
+    ]
   },
   {
     "name": { "en": "Horrible Scars", "fr": "Horribles balafres" },
@@ -251,7 +260,12 @@
     "description": {
       "en": "Horrible scars: now permanently causes Fear.",
       "fr": "Horribles balafres : provoque désormais la Peur, de façon permanente."
-    }
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Causes Fear", "fr": "Provoque la Peur" }
+      }
+    ]
   },
   {
     "name": { "en": "Sold to the Pits", "fr": "Vendu aux arènes" },

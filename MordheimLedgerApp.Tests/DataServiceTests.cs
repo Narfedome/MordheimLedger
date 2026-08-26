@@ -159,6 +159,15 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var frenzy = Assert.Single(heroInjuries, i => i.Name == "Madness: Frenzy" && i.RollRange == "24" && i.BranchRange == "4-6");
         Assert.Contains(frenzy.SpecialRules, r => r.Name == "Frenzy");
 
+        // Hardened (62-63)/Horrible Scars (64) : no sub-roll (single/ranged roll, no BranchRange), but
+        // same SpecialRule idiom as the branched results above - Hardened is a NEW rule distinct from
+        // Bugman's Ale's own "Immune to Fear" (that one is battle-only), Horrible Scars reuses the
+        // already-enriched common "Causes Fear" rule as-is.
+        var hardened = Assert.Single(heroInjuries, i => i.Name == "Hardened" && i.RollRange == "62-63");
+        Assert.Contains(hardened.SpecialRules, r => r.Name == "Hardened");
+        var horribleScars = Assert.Single(heroInjuries, i => i.Name == "Horrible Scars" && i.RollRange == "64");
+        Assert.Contains(horribleScars.SpecialRules, r => r.Name == "Causes Fear");
+
         var henchmanInjuries = injuries.Where(i => i.Category == InjuryCategory.Henchman).ToList();
         Assert.Equal(2, henchmanInjuries.Count);
         Assert.Contains(henchmanInjuries, i => i.Name == "Lost" && i.RollRange == "1-2");

@@ -14,7 +14,7 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 | Palier | Mécanisme | Statut |
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) ; Œil crevé (31) étendu (2026-08-26) au cas du second œil, seul résultat dont l'effet dépend de l'état déjà porté par le guerrier (`WarriorStatus.Retired`, nouveau) | **10/10 ✅** |
-| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé + Jambe écrasée grave ✅, 2 restants (Endurci, Horribles balafres)** |
+| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) + Endurci (62-63) + Provoque la Peur (Horribles balafres, 64) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal | **5/5 ✅** |
 | 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses | **0/2 ⏳** |
 | Récurrent (jet avant CHAQUE partie, pas seulement à la Fin de Partie où il est obtenu) | Vieille blessure (32) - mécanisé (2026-08-26) via le nouvel écran "Lancer la partie", voir Journal | **1/1 ✅** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
@@ -46,8 +46,8 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 41-55 | Récupération totale | — | ✅ | — | No-op, déjà correct |
 | 56 | Rancune | — | ✅ | — | Cible D6 + `WarriorHatred`, fait avant ce chantier |
 | 61 | Capturé | 3 | ⏳ | ❌ | Rançon/échange/vente comme esclave - branches multiples mutuellement exclusives |
-| 62-63 | Endurci | 2 | ⏳ | ❌ | Immunisé à la Peur permanent - `WarriorSpecialRule` |
-| 64 | Horribles balafres | 2 | ⏳ | ❌ | Provoque la Peur permanent - `WarriorSpecialRule` |
+| 62-63 | Endurci | 2 | ✅ | — | Chip catalogue portant une nouvelle `SpecialRule` "Endurci" (permanente, distincte du "Immunisé à la Peur" temporaire de la Bière de Bugman) |
+| 64 | Horribles balafres | 2 | ✅ | — | Chip catalogue portant la `SpecialRule` "Provoque la Peur" déjà enrichie dans le catalogue commun, réutilisée telle quelle |
 | 65 | Vendu aux arènes | 3 | ⏳ | ❌ | Combat un gladiateur (Francs-Tireurs) - branches victoire/défaite |
 | 66 | Survie miraculeuse | 1 | ✅ | — | +1 Expérience |
 
@@ -60,9 +60,6 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 
 ## Hors périmètre pour l'instant
 
-- **Palier 2, restants** : Endurci (62-63, Immunisé à la Peur) et Horribles balafres (64, Provoque la
-  Peur) au même mécanisme que Folie/Bras amputé (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de
-  nouvelle table de jointure `WarriorSpecialRule` finalement nécessaire).
 - **Palier 3 (2 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
   mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
   de l'Exploration ne convient pas, voir Journal).

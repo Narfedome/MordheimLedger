@@ -13,4 +13,5 @@ public class InjuryEntity
     public string? ImagePath { get; set; }
     public InjuryCategory Category { get; set; }
     public string? RollRange { get; set; }
+    public string? BranchRange { get; set; }
 }

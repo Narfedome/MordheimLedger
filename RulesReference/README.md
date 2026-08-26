@@ -23,6 +23,9 @@ seulement) — à compléter dans une passe suivante si besoin de plus de détai
   entrées (8 détaillées).
 - [ScenariosEtDivers.md](ScenariosEtDivers.md) — Scénarios (index des ~50 titres), Dramatis
   Personae (13 persos), Settings, Publications.
+- [ProfilsRaciaux.md](ProfilsRaciaux.md) — Table complète des 29 maximums de caractéristiques par
+  type de créature (fournie directement par l'utilisateur, pas paraphrasée comme le reste de ce
+  dossier), source de vérité pour `RacialProfiles.json` et la mécanisation de l'étape Progression.
 
 ## Écarts trouvés avec le code existant (à corriger séparément si pas déjà fait)
 

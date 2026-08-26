@@ -26,19 +26,77 @@ public interface IWarbandService
     /// <param name="headCount">Always 1 for a Hero. For a Henchman group, how many models it starts with
     /// - see Models.Warrior.HeadCount.</param>
     Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1);
+
+    /// <summary>Inserts an already fully-built Warrior as-is (no WarriorArchetype involved) - for the
+    /// Henchman-to-Hero promotion (Advance roll 10-12), whose new Hero is cloned from the live group's
+    /// own stats/XP (see EntityMapping.CloneAsPromotedHero) rather than seeded from a catalog template.</summary>
+    Task InsertWarriorAsync(Warrior warrior);
+
     Task SaveWarriorAsync(Warrior warrior);
     Task DeleteWarriorAsync(int warriorId);
 
     /// <param name="materialRule">Optional material (e.g. "Gromril") chosen for this specific carried
     /// weapon - see WarriorEquipment.MaterialRule.</param>
-    Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null);
+    /// <param name="foundValueOverride">Carries a stashed find's rolled resale value onto the warrior
+    /// (see WarriorEquipment.FoundValueOverride) - only meaningful when called via
+    /// EquipWarbandItemToWarriorAsync, null for a normal purchase.</param>
+    Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null);
     Task RemoveWarriorEquipmentAsync(int warriorEquipmentId);
+
+    /// <summary>Sets/clears BlessingRule on an ALREADY-carried weapon after the fact - so far only the
+    /// Shrine's blessing (Sisters of Sigmar/Witch Hunters, see ExplorationOutcome.GrantsWeaponBlessing),
+    /// which attaches the "Blessed Weapon" SpecialRule to a Hero's already-owned weapon rather than a
+    /// material chosen at purchase time (see AddWarriorEquipmentAsync). A SEPARATE slot from MaterialRule
+    /// (never touches it) - a weapon already Gromril/Ithilmar that also gets blessed keeps both.</summary>
+    Task SetWarriorEquipmentBlessingRuleAsync(int warriorEquipmentId, int? blessingSpecialRuleId);
+
+    /// <summary>Equipment held by the warband itself, not yet assigned to a warrior - see
+    /// Models.WarbandEquipment. Fed by the End of Game wizard's Exploration step (loot found this way
+    /// isn't tied to a specific warrior at the table either) and drained by EquipWarbandItemToWarriorAsync
+    /// once the player decides who carries it.</summary>
+    Task<List<WarbandEquipment>> GetWarbandEquipmentAsync(int warbandId, string languageCode);
+
+    /// <param name="foundValueOverride">Optional fixed resale value for this specific find, overriding
+    /// the usual Cost/MaterialRule.CostMultiplier computation - see WarbandEquipment.FoundValueOverride
+    /// (e.g. the Jewelsmith's Quartz Stones/Ruby, whose value is rolled once at find time rather than
+    /// fixed in the catalog).</param>
+    Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null);
+    Task RemoveWarbandEquipmentAsync(int warbandEquipmentId);
+
+    /// <summary>Moves an entire WarbandEquipment row (its full Quantity, never a partial split) onto a
+    /// warrior - deletes the stash row, creates the equivalent WarriorEquipment row.</summary>
+    Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId);
+
+    /// <summary>Sells an entire WarbandEquipment row (its full Quantity) back for FoundValueOverride, or
+    /// Core.Rules.EquipmentPricing.CalculateCost(Item.Cost, MaterialRule.CostMultiplier) * Quantity gc
+    /// when unset - same formula as a purchase, applied in reverse - credited to the warband's Treasury.
+    /// Only meaningful for a row whose MaterialRule has SpecialRule.IsResaleUpgrade set (e.g. "Ornate
+    /// Weapon" from Overturned Cart) or whose Item itself has EquipmentItem.IsSellable set (e.g. the
+    /// Jewelsmith's gems - see WarbandEquipment.IsSellable, which checks both) - throws if called on one
+    /// without, since the app never lets the player initiate this for an ordinary find or a normal
+    /// Gromril/Ithilmar purchase (no generic "sell any equipment" mechanic). Returns the gold amount
+    /// credited, for the caller's History sentence/UI feedback.</summary>
+    Task<int> SellWarbandItemAsync(int warbandEquipmentId);
 
     Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill);
     Task RemoveWarriorSkillAsync(int warriorSkillId);
 
-    Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury);
+    /// <param name="isTemporary">See Models.WarriorInjury.IsTemporary - true only for the "misses next
+    /// game(s)" Palier 1 outcomes, cleaned up automatically by RemoveTemporaryInjuriesAsync once the
+    /// warrior recovers.</param>
+    Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury, bool isTemporary = false);
     Task RemoveWarriorInjuryAsync(int warriorInjuryId);
+
+    /// <summary>Deletes every WarriorInjury row on this warrior flagged IsTemporary - called once
+    /// Warrior.SickGamesRemaining reaches 0 (WarbandDetailViewModel.EndOfGame.
+    /// ApplySicknessLifecycleAsync), so the "légère"/temporary chip disappears the same moment the
+    /// warrior becomes Active again. A no-op if none are flagged.</summary>
+    Task RemoveTemporaryInjuriesAsync(int warriorId);
+
+    /// <summary>"Rancune"/Bitter Enmity target (see Models.WarriorHatred) - exactly one of the two target
+    /// parameters should be non-null/non-empty, matching the resolved HatredTargetKind.</summary>
+    Task<WarriorHatred> AddWarriorHatredAsync(int warriorId, int? targetWarbandArchetypeId, string? targetFreeText);
+    Task RemoveWarriorHatredAsync(int warriorHatredId);
 
     Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell);
     Task RemoveWarriorSpellAsync(int warriorSpellId);

@@ -84,6 +84,16 @@
                  immédiatement au clic, Item n'ayant pas d'INotifyPropertyChanged. -->
                     <VerticalStackLayout Spacing="12" IsVisible="{Binding IsProfileTab}">
 
+                        <!-- Type de créature (voir Models.Library.RacialProfile) - gouverne les maximums de
+                             caractéristiques atteignables via la Progression (Core.Rules.
+                             CharacteristicIncreaseRules), catalogue éditable via l'icône "gérer" de l'onglet
+                             Bandes (WarbandArchetypeViewModel.ManageRacialProfiles). -->
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{loc:Loc WarriorArchetypeRacialProfilePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Picker ItemsSource="{Binding RacialProfileOptions}"
+                                    SelectedItem="{Binding SelectedRacialProfileLabel}"/>
+                        </VerticalStackLayout>
+
                         <!-- Profil - StatRowView en mode édition (IsEditable="True" bascule chaque Label en
                      Entry), même composant que WarriorArchetypeDetailDialog/WarbandDetailPage en lecture
                      seule. Mouvement bindé sur MovementInput (accepte "4" ou une surcharge "2D6" pour les

@@ -242,12 +242,24 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// spéciales affichée, pas seulement l'abréviation "(G)" du chip.</summary>
     [RelayCommand]
     private Task ShowEquipmentDetail(WarriorEquipment carried) =>
-        _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule);
+        _detailDialogs.ShowEquipmentDetailDialogAsync(carried.Item, carried.MaterialRule, carried.FoundValueOverride, carried.BlessingRule);
 
+    // SkillEligibility.EffectiveAllowedCategories plutôt que Item.AllowedSkillCategories brut : certains
+    // objets déjà portés élargissent les listes accessibles (ex. Carnet de l'Alchimiste -> Érudition,
+    // voir EquipmentItem.GrantsSkillCategory) - même besoin que PickAdvanceSkill du wizard Fin de
+    // Partie, ce guerrier peut tout aussi bien gagner une compétence ici, hors wizard.
     [RelayCommand]
     private async Task AddSkill()
     {
-        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId, Item.AllowedSkillCategories);
+        // Résolution "en" -> ids : EffectiveExtraSkillNames est en anglais (locale-agnostic côté Core),
+        // le picker lui-même travaille sur son propre catalogue localisé - même idiome que les
+        // résolutions XxxByEnglishName du wizard Fin de Partie.
+        var extraSkillNames = SkillEligibility.EffectiveExtraSkillNames(Item);
+        var extraSkillIds = extraSkillNames.Count == 0 ? null : (await _libraryService.GetSkillsAsync("en"))
+            .Where(s => extraSkillNames.Contains(s.Name)).Select(s => s.Id).ToList();
+
+        var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId,
+            SkillEligibility.EffectiveAllowedCategories(Item), extraSkillIds);
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);
@@ -306,7 +318,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             return;
         }
 
-        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(_magicSchools.ToList(), _libraryService, _detailDialogs)));
+        var knownSpellIds = Spells.Select(s => s.Item.Id).ToList();
+        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(_magicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
         if (rolled is null) return;
 
         var rolledLearned = await _warbandService.AddWarriorSpellAsync(Item.Id, rolled);

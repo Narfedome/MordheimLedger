@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MordheimLedgerApp.Components.AdvanceRollEntry.AdvanceRollEntryBaseView"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:eog="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Name="root">
+
+    <VerticalStackLayout BindingContext="{Binding Source={x:Reference root}, Path=Entry}"
+                          x:DataType="eog:AdvanceRollEntry" Spacing="4">
+        <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+            <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                   Placeholder="{loc:Loc EndOfGameAdvanceRollPh}" WidthRequest="70">
+                <Entry.Behaviors>
+                    <components:DigitsOnlyBehavior/>
+                </Entry.Behaviors>
+            </Entry>
+            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                          Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
+                                          CommandParameter="{Binding .}"
+                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+        </Grid>
+        <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+               IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+        <Label Text="{Binding ResultText}" FontSize="12"/>
+
+        <!-- Résultat "Compétence" (voir AdvanceOutcome.Kind == Skill) : choix direct dans la
+             Bibliothèque, ou (Héros sorcier, ShowSpellOption) tirage 1D6 d'un sort permanent à la place -
+             "OU" entre les 2 boutons, mutuellement exclusifs (choisir l'un efface l'autre, voir
+             EndOfGameDialogViewModel.PickAdvanceSkill/PickAdvanceSpell). La puce du résultat choisi
+             s'affiche SOUS les boutons (pas à côté) une fois l'un des deux tranché - voir
+             ShowSkillOrSpellButtons, qui masque alors les boutons entièrement. Rattaché au guerrier à
+             l'enregistrement du wizard, pas tout de suite. -->
+        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsSkillResult}">
+            <HorizontalStackLayout Spacing="8" IsVisible="{Binding ShowSkillOrSpellButtons}">
+                <Button Text="{loc:Loc EndOfGamePickSkill}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        FontSize="12" Padding="8,4"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
+                        CommandParameter="{Binding .}"/>
+                <Label Text="{loc:Loc EndOfGameOr}" VerticalOptions="Center" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                       IsVisible="{Binding ShowSpellOption}"/>
+                <Button Text="{loc:Loc EndOfGamePickSpell}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}"
+                        FontSize="12" Padding="8,4"
+                        IsVisible="{Binding ShowSpellOption}"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=PickAdvanceSpellCommand}"
+                        CommandParameter="{Binding .}"/>
+            </HorizontalStackLayout>
+            <!-- ChipView (pas ChipListView) : même motif que WarriorEditDialog (icône par catégorie de
+                 compétence, tap = popup détail) plutôt qu'un Border/Label maison. -->
+            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SelectedSkills}"
+                        IsVisible="{Binding HasSkillSelected}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="library:Skill">
+                        <components:ChipView Item="{Binding .}"
+                                              IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=RemoveAdvanceSkillCommand}"/>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <components:ChipView Item="{Binding SelectedSpell}"
+                                  IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                  IconFontFamily="RpgAwesome"
+                                  IsVisible="{Binding HasSpellSelected}"
+                                  Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=RemoveAdvanceSpellCommand}"/>
+        </VerticalStackLayout>
+
+        <!-- Résultat "Caractéristique" (voir AdvanceOutcome.Kind == CharacteristicIncrease) : sous-jet
+             1D6 (Héros 6/8/9, NeedsSubRoll), puis choix parmi ChoiceOptions si le résultat indiqué est
+             indisponible ou s'il s'agit d'un choix libre CC/CT (NeedsChoice) - même Picker pour les deux
+             cas, voir AdvanceRollEntry.RecomputeCharacteristicResolution. Confirmation "Stat +1" une
+             fois ResolvedField déterminé. -->
+        <VerticalStackLayout Spacing="4" IsVisible="{Binding IsCharacteristicResult}">
+            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding NeedsSubRoll}">
+                <Entry Grid.Column="0" Text="{Binding ManualSubRoll}" Keyboard="Numeric"
+                       Placeholder="{loc:Loc EndOfGameAdvanceSubRollPh}" WidthRequest="60">
+                    <Entry.Behaviors>
+                        <components:DigitsOnlyBehavior/>
+                    </Entry.Behaviors>
+                </Entry>
+                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=AutoRollSubRollCommand}"
+                                              CommandParameter="{Binding .}"
+                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+            </Grid>
+            <Picker Title="{loc:Loc EndOfGameAdvanceChoicePh}"
+                    ItemsSource="{Binding ChoiceOptions}"
+                    SelectedItem="{Binding SelectedChoiceLabel}"
+                    IsVisible="{Binding NeedsChoice}"/>
+            <Label FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"
+                   IsVisible="{Binding ResolvedField, Converter={StaticResource IsNotNullConverter}}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{Binding ResolvedFieldLabel}"/>
+                        <Span Text=" +1"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

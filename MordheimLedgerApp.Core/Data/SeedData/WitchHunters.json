@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Human",
   "imagePath": "witch_hunters.jpg",
   "name": {
     "en": "Witch Hunters",
@@ -30,6 +31,7 @@
       "cost": 60,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -40,6 +42,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Human",
       "description": {
         "en": "Driven by fanaticism, Witch Hunter Captains are obsessed with cleansing Mordheim and bringing the justice of Sigmar to all - carrying the edict of the Grand Theogonist himself, they have the divine right to judge and execute all who dare oppose them.",
         "fr": "Animé par le fanatisme, un capitaine répurgateur est obsédé par l'idée de purifier Mordheim et d'apporter la justice de Sigmar à tous. Transportant l'édit du Grand Théogoniste, il a une autorisation divine de juger et châtier les hérétiques et, en fait, tous ceux qui se dressent devant lui."
@@ -89,6 +92,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Members of the grim Order of Witch Hunters, dedicated to eradicating Chaos and all its minions - they usually prowl the Old World alone, but the situation in Mordheim requires them to band together.",
         "fr": "Les répurgateurs appartiennent au sinistre Ordre des Répurgateurs, voué à l'éradication du Chaos et de ses serviteurs. Ils parcourent habituellement le Vieux Monde seuls, exécutant les ennemis de Sigmar, mais la situation à Mordheim nécessite très souvent qu'ils se regroupent en bandes."
@@ -131,6 +135,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Human",
       "description": {
         "en": "Many powerful fighting men have come from the ranks of the faithful - the Priests of Sigmar are no exception, and the military wing of the cult is feared and respected throughout the Empire.",
         "fr": "Beaucoup de puissants guerriers ont rejoint les rangs des fidèles. Les prêtres de Sigmar ne font pas exception, et le bras armé du culte de Sigmar est craint et respecté dans tout l'Empire."
@@ -169,6 +174,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 10,
+      "racialProfileName": "Human",
       "description": {
         "en": "Fanatics and madmen obsessed with the end of the world, often men who lost their families to war or disaster - dangerous opponents in close combat, their bodies inured to pain by years of self-mutilation.",
         "fr": "Les flagellants sont des déments fanatiques obsédés par la fin du monde. Ce sont souvent des hommes qui ont perdu l'esprit en même temps que leurs familles à cause de la guerre ou de catastrophes naturelles. Ils sont des adversaires particulièrement redoutables au corps à corps, car la démence décuple leur force et leur corps est devenu insensible en raison des nombreuses auto-mutilations qu'ils s'infligent."
@@ -205,6 +211,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "When a man loses his family, home and all he cared for, religion is often the last refuge - these wandering, bitter fanatics exist only to destroy evil and the minions of Chaos, and many a band of Zealots is led by a Witch Hunter.",
         "fr": "Quand un homme perd sa famille, sa maison et ce qui donnait un sens à sa vie, la religion est souvent le dernier refuge. Ces hommes deviennent des vagabonds fanatiques, dangereux et amers, prêts à venger leurs pertes à n'importe quel prix. On les appelle séides. Les Répurgateurs trouvent beaucoup d'alliés dans leurs rangs et plus d'une bande de séides est dirigée par des Répurgateurs."
@@ -217,6 +224,7 @@
         "fr": "Chiens de guerre"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": 5,
       "startingExperience": 0,
@@ -309,7 +317,8 @@
           "description": {
             "en": "A Hero with the Hammer of Witches will hate all Possessed, Skaven, Beastmen, Chaos, Daemons, Dark Elf, Orc & Goblins and Sigmarite Sisters.",
             "fr": "Un Héros possédant le Marteau des Sorcières hait tous les Possédés, Skavens, Hommes-Bêtes, figurines du Chaos, Démons, Elfes Noirs, Orques & Gobelins et Sœurs de Sigmar."
-          }
+          },
+          "hatredTargetWarbandNames": ["CultOfThePossessed", "SkavenOfClanEshin", "BeastmenRaiders", "CarnivalOfChaos", "OrcMob", "SistersOfSigmar"]
         }
       ]
     },

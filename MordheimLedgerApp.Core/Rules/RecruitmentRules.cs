@@ -31,4 +31,11 @@ public static class RecruitmentRules
     /// remaining treasury is startingTreasury minus everything spent so far.</summary>
     public static int CalculateRemainingTreasury(int startingTreasury, int totalSpent, bool isExistingWarband,
         int treasuryOverride) => isExistingWarband ? treasuryOverride : startingTreasury - totalSpent;
+
+    /// <summary>Prisoners' "other warbands" catch-all branch (see Models.Library.ExplorationOutcome.
+    /// GrantsOptionalEquippedHenchman): the freed prisoner joins as a Henchman at no recruitment cost -
+    /// only the equipment needed to match the chosen group's current loadout must fit the treasury,
+    /// unlike CanRecruit above (which also gates on an archetype Cost and roster caps).</summary>
+    public static bool CanAffordEquippedHenchman(int availableTreasury, int equipmentCost) =>
+        availableTreasury >= equipmentCost;
 }

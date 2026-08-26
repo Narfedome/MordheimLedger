@@ -7,20 +7,12 @@
              x:Name="root">
 
     <VerticalStackLayout
-        Spacing="8"
         BindingContext="{x:Reference root}"
         IsVisible="{Binding ShowSection}">
 
         <!-- Header -->
         <Grid ColumnDefinitions="*,Auto">
 
-            <Label
-                Grid.Column="0"
-                Text="{Binding HeaderText}"
-                FontSize="{Binding HeaderFontSize}"
-                TextColor="{DynamicResource AppTextMuted}"
-                IsVisible="{Binding IsMandatory, Converter={StaticResource InverseBoolConverter}}"
-                VerticalOptions="Center" />
 
             <Label FontSize="{Binding HeaderFontSize}" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
                 <Label.FormattedText>

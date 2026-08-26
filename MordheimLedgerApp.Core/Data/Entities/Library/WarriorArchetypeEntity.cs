@@ -42,4 +42,9 @@ public class WarriorArchetypeEntity
     /// SkillCategory is a small fixed enum, not a foreign catalog to look up.</summary>
     public string? AllowedSkillCategories { get; set; }
     public bool IsLargeCreature { get; set; }
+    public bool GainsExperience { get; set; } = true;
+    public bool IsLeader { get; set; }
+
+    [Indexed]
+    public int RacialProfileId { get; set; }
 }

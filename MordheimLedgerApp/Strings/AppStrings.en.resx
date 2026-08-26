@@ -189,12 +189,6 @@
   <data name="WarbandsSpellRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
-  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
-    <value>Confirm</value>
-  </data>
-  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
-    <value>Enter a roll between 1 and 6.</value>
-  </data>
   <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
     <value>No spell matches that roll on this warband's magic school table.</value>
   </data>
@@ -306,6 +300,9 @@
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Treasury:</value>
   </data>
+  <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
+    <value>Wyrdstone:</value>
+  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Heroes</value>
   </data>
@@ -347,6 +344,21 @@
   </data>
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Dead</value>
+  </data>
+  <data name="WarriorsGroupRetired" xml:space="preserve">
+    <value>Retired</value>
+  </data>
+  <data name="InventoryHeading" xml:space="preserve">
+    <value>Inventory</value>
+  </data>
+  <data name="InventoryEquip" xml:space="preserve">
+    <value>Equip</value>
+  </data>
+  <data name="InventoryEquipTitle" xml:space="preserve">
+    <value>Carried by</value>
+  </data>
+  <data name="InventorySell" xml:space="preserve">
+    <value>Sell</value>
   </data>
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Experience</value>
@@ -582,6 +594,15 @@
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Miscellaneous Equipment</value>
   </data>
+  <data name="EquipmentCategoryConsumable" xml:space="preserve">
+    <value>Consumable</value>
+  </data>
+  <data name="EquipmentCategoryDrugsAndPoisons" xml:space="preserve">
+    <value>Drugs and Poisons</value>
+  </data>
+  <data name="EquipmentCategoryMagicalArtefact" xml:space="preserve">
+    <value>Magical Artefact</value>
+  </data>
   <data name="EquipmentCategoryAnimal" xml:space="preserve">
     <value>Animals</value>
   </data>
@@ -650,6 +671,12 @@
   </data>
   <data name="WarriorsSpecialRulesHeading" xml:space="preserve">
     <value>Special rules</value>
+  </data>
+  <data name="WarriorsHatredChipFormat" xml:space="preserve">
+    <value>Hatred: {0}</value>
+  </data>
+  <data name="WarriorsHatredHeading" xml:space="preserve">
+    <value>Hatred</value>
   </data>
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
@@ -771,11 +798,83 @@
   <data name="EndOfGameResultDraw" xml:space="preserve">
     <value>Draw</value>
   </data>
-  <data name="EndOfGameTreasuryPh" xml:space="preserve">
-    <value>Treasury found (gc)</value>
-  </data>
-  <data name="EndOfGameTreasuryHeading" xml:space="preserve">
+  <data name="EndOfGameExplorationHeading" xml:space="preserve">
     <value>Income</value>
+  </data>
+  <data name="EndOfGameExplorationDiceHint" xml:space="preserve">
+    <value>Roll one dice per surviving Hero who didn't go out of action, plus one if you won the battle (maximum 6 dice).</value>
+  </data>
+  <data name="EndOfGamePendingBonusDieReminder" xml:space="preserve">
+    <value>Thanks to your last exploration: roll one dice more than usual and discard any one dice before entering your rolls.</value>
+  </data>
+  <data name="EndOfGameCatacombRerollReminder" xml:space="preserve">
+    <value>Thanks to the Entrance to the Catacombs: you may re-roll one dice of your choice among your Exploration rolls.</value>
+  </data>
+  <data name="EndOfGameIndependentThresholdLabel" xml:space="preserve">
+    <value>Threshold {0}+</value>
+  </data>
+  <data name="EndOfGameAutoGoldRowLabel" xml:space="preserve">
+    <value>Gold found</value>
+  </data>
+  <data name="EndOfGameThresholdGoldRowLabel" xml:space="preserve">
+    <value>Additional gold</value>
+  </data>
+  <data name="EndOfGameThresholdGoldEarnedLabel" xml:space="preserve">
+    <value>Additional gold won</value>
+  </data>
+  <data name="EndOfGameWyrdstoneEarnedLabel" xml:space="preserve">
+    <value>Wyrdstone shards won</value>
+  </data>
+  <data name="EndOfGameWyrdstoneRowLabel" xml:space="preserve">
+    <value>Wyrdstone shard(s)</value>
+  </data>
+  <data name="EndOfGameArtefactRowLabel" xml:space="preserve">
+    <value>Magical Artefact</value>
+  </data>
+  <data name="EndOfGameIndependentOutcomeMissed" xml:space="preserve">
+    <value>Missed - nothing this time.</value>
+  </data>
+  <data name="EndOfGameExplorationGoldLabel" xml:space="preserve">
+    <value>Gold found (gc)</value>
+  </data>
+  <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
+    <value>Wyrdstone shards found</value>
+  </data>
+  <data name="EndOfGameExplorationFoundValueLabel" xml:space="preserve">
+    <value>Found value (gc)</value>
+  </data>
+  <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
+    <value>Choose a Hero</value>
+  </data>
+  <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
+    <value>Automatically passed for this warband.</value>
+  </data>
+  <data name="EndOfGameSentHeroPh" xml:space="preserve">
+    <value>Send a Hero (optional)</value>
+  </data>
+  <data name="EndOfGamePassByOption" xml:space="preserve">
+    <value>Move on</value>
+  </data>
+  <data name="EndOfGameDoNotRecruitOption" xml:space="preserve">
+    <value>Do not recruit</value>
+  </data>
+  <data name="EndOfGameWeaponBlessingPh" xml:space="preserve">
+    <value>Weapon to bless</value>
+  </data>
+  <data name="EndOfGameDoNotBlessOption" xml:space="preserve">
+    <value>Do not bless a weapon</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanGroupPh" xml:space="preserve">
+    <value>Group to reinforce</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanTreasuryAfterLabel" xml:space="preserve">
+    <value>Treasury after recruitment</value>
+  </data>
+  <data name="EndOfGameStatFieldToughness" xml:space="preserve">
+    <value>Toughness</value>
+  </data>
+  <data name="EndOfGameStatFieldLeadership" xml:space="preserve">
+    <value>Leadership</value>
   </data>
   <data name="EndOfGameXpPh" xml:space="preserve">
     <value>XP gained</value>
@@ -785,6 +884,15 @@
   </data>
   <data name="EndOfGameRoll" xml:space="preserve">
     <value>Roll</value>
+  </data>
+  <data name="EndOfGameArtefactTableLabel" xml:space="preserve">
+    <value>Magical Artefacts table (1-6)</value>
+  </data>
+  <data name="EndOfGameRollRequired" xml:space="preserve">
+    <value>Roll required before continuing.</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
+    <value>Insufficient treasury to equip this prisoner - choose another group or "Do not recruit".</value>
   </data>
   <data name="HistoryAddNote" xml:space="preserve">
     <value>Add a note</value>
@@ -798,14 +906,56 @@
   <data name="HistoryTreasurySentence" xml:space="preserve">
     <value>Treasury: +{0} gc.</value>
   </data>
+  <data name="HistoryExplorationItemSentence" xml:space="preserve">
+    <value>The warband found {0}x {1} (added to the inventory).</value>
+  </data>
+  <data name="HistoryExplorationWyrdstoneSentence" xml:space="preserve">
+    <value>The warband found {0} shard(s) of wyrdstone.</value>
+  </data>
+  <data name="HistoryExplorationNoteSentence" xml:space="preserve">
+    <value>Exploration: {0}.</value>
+  </data>
+  <data name="HistorySicknessSentence" xml:space="preserve">
+    <value>{0} is unavailable and will miss the next game.</value>
+  </data>
+  <data name="HistoryPitDevouredSentence" xml:space="preserve">
+    <value>{0} was sent into the Pit and devoured by its guardians.</value>
+  </data>
+  <data name="HistoryLeaderExperienceSentence" xml:space="preserve">
+    <value>{0} gains {1} Experience.</value>
+  </data>
+  <data name="HistoryFreeHenchmanSentence" xml:space="preserve">
+    <value>The warband welcomes {0}x {1} for free.</value>
+  </data>
+  <data name="HistoryDistributedExperienceSentence" xml:space="preserve">
+    <value>Experience distributed among the Heroes: {0}.</value>
+  </data>
+  <data name="HistoryEquippedHenchmanSentence" xml:space="preserve">
+    <value>A prisoner joins the {0} group as a new Henchman (equipment: {1} gc).</value>
+  </data>
+  <data name="HistoryWeaponBlessingSentence" xml:space="preserve">
+    <value>{0} blesses a weapon: {1}.</value>
+  </data>
+  <data name="HistoryCatacombRerollSentence" xml:space="preserve">
+    <value>The warband discovers an Entrance to the Catacombs: it may now re-roll one dice on every future Exploration roll.</value>
+  </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} gained {1} XP.</value>
   </data>
   <data name="HistoryDeathSentence" xml:space="preserve">
     <value>{0} died.</value>
   </data>
+  <data name="HistoryForcedRetirementSentence" xml:space="preserve">
+    <value>{0} loses their second eye and must retire from the warband.</value>
+  </data>
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} was taken out of action: {1}</value>
+  </data>
+  <data name="HistoryHenchmanDeathSentence" xml:space="preserve">
+    <value>{0} loses {1} model(s), {2} remaining.</value>
+  </data>
+  <data name="HistoryHenchmanWipedSentence" xml:space="preserve">
+    <value>{0} is wiped out.</value>
   </data>
   <data name="WarriorEditTitle" xml:space="preserve">
     <value>Edit Warrior</value>
@@ -819,11 +969,59 @@
   <data name="WarriorStatusDead" xml:space="preserve">
     <value>Dead</value>
   </data>
+  <data name="WarriorStatusSick" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
+  <data name="WarriorStatusSickCount" xml:space="preserve">
+    <value>Unavailable ({0})</value>
+  </data>
+  <data name="WarriorStatusRetired" xml:space="preserve">
+    <value>Retired</value>
+  </data>
+  <data name="StartGameButtonText" xml:space="preserve">
+    <value>Start the game</value>
+  </data>
+  <data name="StartGameTitle" xml:space="preserve">
+    <value>Before the game</value>
+  </data>
+  <data name="StartGameNothingToShow" xml:space="preserve">
+    <value>Nothing to report before this game.</value>
+  </data>
+  <data name="StartGameUnavailableHeading" xml:space="preserve">
+    <value>Unavailable warriors</value>
+  </data>
+  <data name="StartGameOldWoundHeading" xml:space="preserve">
+    <value>Pre-battle rolls</value>
+  </data>
+  <data name="StartGameOldWoundSubtitle" xml:space="preserve">
+    <value>Old battle wound: 1D6, fails on a 1</value>
+  </data>
+  <data name="StartGameOldWoundRollLabel" xml:space="preserve">
+    <value>Roll</value>
+  </data>
+  <data name="StartGameOldWoundPass" xml:space="preserve">
+    <value>Can fight</value>
+  </data>
+  <data name="StartGameOldWoundFail" xml:space="preserve">
+    <value>Can't fight</value>
+  </data>
+  <data name="StartGameNextGameNoteHeading" xml:space="preserve">
+    <value>Active effects for this game</value>
+  </data>
+  <data name="StartGameConfirm" xml:space="preserve">
+    <value>Begin the game</value>
+  </data>
+  <data name="HistoryOldWoundFailSentence" xml:space="preserve">
+    <value>{0} can't fight this battle (Old battle wound).</value>
+  </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>
   </data>
   <data name="EndOfGameHenchmanRollPh" xml:space="preserve">
     <value>D6</value>
+  </data>
+  <data name="EndOfGameDistributedExperienceRemainingLabel" xml:space="preserve">
+    <value>Remaining:</value>
   </data>
   <data name="HenchmanInjuryDead" xml:space="preserve">
     <value>Dead. The warrior is lost.</value>
@@ -836,15 +1034,6 @@
   </data>
   <data name="WarriorRoleHeroSingular" xml:space="preserve">
     <value>Hero</value>
-  </data>
-  <data name="EndOfGameShowResult" xml:space="preserve">
-    <value>Show result</value>
-  </data>
-  <data name="EndOfGameInvalidRoll" xml:space="preserve">
-    <value>Invalid roll (11 to 66, each digit between 1 and 6).</value>
-  </data>
-  <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
-    <value>Result ({0})</value>
   </data>
   <data name="EndOfGameInjuriesHeading" xml:space="preserve">
     <value>Serious Injuries</value>
@@ -873,14 +1062,131 @@
   <data name="EndOfGameAdvanceSkillResultText" xml:space="preserve">
     <value>Skill gained: {0}</value>
   </data>
+  <data name="EndOfGameAdvanceSpellResultText" xml:space="preserve">
+    <value>Spell gained: {0}</value>
+  </data>
   <data name="EndOfGameAdvanceRollPh" xml:space="preserve">
     <value>2D6</value>
   </data>
-  <data name="EndOfGameInvalidAdvanceRoll" xml:space="preserve">
-    <value>Invalid roll (2 to 12).</value>
+  <data name="EndOfGamePickSpell" xml:space="preserve">
+    <value>Roll a spell</value>
+  </data>
+  <data name="EndOfGameOr" xml:space="preserve">
+    <value>OR</value>
+  </data>
+  <data name="WarbandsSpellRollAlreadyKnownMessage" xml:space="preserve">
+    <value>This warrior already knows this spell - roll again.</value>
+  </data>
+  <data name="EndOfGameAdvanceSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameAdvanceChoicePh" xml:space="preserve">
+    <value>Characteristic</value>
+  </data>
+  <data name="EndOfGameSubRollRequired" xml:space="preserve">
+    <value>The 1D6 sub-roll is required</value>
+  </data>
+  <data name="EndOfGameAdvanceChoiceRequired" xml:space="preserve">
+    <value>Pick a characteristic</value>
+  </data>
+  <data name="EndOfGameAdvanceSkillRequired" xml:space="preserve">
+    <value>Pick a skill or a spell</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedRequired" xml:space="preserve">
+    <value>6 Heroes already reached - change this roll</value>
+  </data>
+  <data name="EndOfGamePromotionNameRequired" xml:space="preserve">
+    <value>The new Hero's name is required</value>
+  </data>
+  <data name="EndOfGamePromotionCategoriesRequired" xml:space="preserve">
+    <value>Pick the 2 skill tables</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollRequired" xml:space="preserve">
+    <value>New Hero: {0}</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderRollRequired" xml:space="preserve">
+    <value>Remaining group: {0}</value>
+  </data>
+  <data name="EndOfGamePromotionHeading" xml:space="preserve">
+    <value>Promotion!</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedBanner" xml:space="preserve">
+    <value>6 Heroes already reached - re-roll, no promotion possible this time.</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh1" xml:space="preserve">
+    <value>First skill table</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh2" xml:space="preserve">
+    <value>Second skill table</value>
+  </data>
+  <data name="EndOfGamePromotionNamePh" xml:space="preserve">
+    <value>New Hero's name</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollHeading" xml:space="preserve">
+    <value>New Hero's Advance</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderHeading" xml:space="preserve">
+    <value>Remaining group's Advance</value>
+  </data>
+  <data name="EndOfGamePromotionRerollHint" xml:space="preserve">
+    <value>A 10-12 here re-rolls: only one promotion per Advance roll.</value>
+  </data>
+  <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
+    <value>Multiple Injuries</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryLabel" xml:space="preserve">
+    <value>Roll {0}/{1}</value>
+  </data>
+  <data name="EndOfGameFigureLabel" xml:space="preserve">
+    <value>Model {0}/{1}</value>
+  </data>
+  <data name="EndOfGameOutOfActionHint" xml:space="preserve">
+    <value>Check the warriors who are out of action at the end of the game.</value>
+  </data>
+  <data name="EndOfGameInjuryProgressLabel" xml:space="preserve">
+    <value>Injured {0}/{1}</value>
+  </data>
+  <data name="EndOfGameAdvanceProgressLabel" xml:space="preserve">
+    <value>Advance {0}/{1}</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryCountPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameHatredHeading" xml:space="preserve">
+    <value>Who does he hate now?</value>
+  </data>
+  <data name="EndOfGameHatredScopeHint" xml:space="preserve">
+    <value>1-3: the individual responsible (or the enemy leader if it was a Henchman) — 4: the leader of the responsible warband — 5: the entire warband — 6: all warbands of that type.</value>
+  </data>
+  <data name="EndOfGameHatredSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameInjuryBranchSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameDeepWoundSubRollPh" xml:space="preserve">
+    <value>1D3</value>
+  </data>
+  <data name="EndOfGameDeepWoundResultFormat" xml:space="preserve">
+    <value>{0} game(s) missed</value>
+  </data>
+  <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
+    <value>Name of the one responsible</value>
+  </data>
+  <data name="EndOfGameHatredBandNamePh" xml:space="preserve">
+    <value>Warband name</value>
+  </data>
+  <data name="EndOfGameHatredPickWarbandArchetype" xml:space="preserve">
+    <value>Which type of warband?</value>
+  </data>
+  <data name="EndOfGameHatredTargetRequired" xml:space="preserve">
+    <value>Fill in the target before continuing.</value>
   </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} advanced: {1}</value>
+  </data>
+  <data name="HistoryPromotionSentence" xml:space="preserve">
+    <value>{0}: a group member becomes a Hero ({1})!</value>
   </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
@@ -975,11 +1281,29 @@
   <data name="InjurySerious23" xml:space="preserve">
     <value>Arm wound (1D6): on a 1, arm amputated, can only use one-handed weapons from now on (permanent); on 2-6, minor wound, misses the next battle.</value>
   </data>
+  <data name="InjurySerious23Light" xml:space="preserve">
+    <value>Minor wound: misses the next battle.</value>
+  </data>
+  <data name="InjurySerious23Severe" xml:space="preserve">
+    <value>Arm amputated: can only use one-handed weapons from now on (permanent).</value>
+  </data>
   <data name="InjurySerious24" xml:space="preserve">
     <value>Madness (1D6): on 1-3 becomes permanently Stupid; on 4-6 becomes permanently Frenzied.</value>
   </data>
+  <data name="InjurySerious24Stupidity" xml:space="preserve">
+    <value>Becomes permanently Stupid.</value>
+  </data>
+  <data name="InjurySerious24Frenzy" xml:space="preserve">
+    <value>Becomes permanently Frenzied.</value>
+  </data>
   <data name="InjurySerious25" xml:space="preserve">
     <value>Crushed leg (1D6): on a 1, can no longer run but can still charge (permanent); on 2-6, misses the next battle.</value>
+  </data>
+  <data name="InjurySerious25Light" xml:space="preserve">
+    <value>Minor wound: misses the next battle.</value>
+  </data>
+  <data name="InjurySerious25Severe" xml:space="preserve">
+    <value>Can no longer run but can still charge (permanent).</value>
   </data>
   <data name="InjurySerious26" xml:space="preserve">
     <value>Chest wound: Toughness permanently reduced by 1.</value>
@@ -1064,6 +1388,36 @@
   </data>
   <data name="LibManageMagicSchools" xml:space="preserve">
     <value>Manage magic schools</value>
+  </data>
+  <data name="LibManageRaces" xml:space="preserve">
+    <value>Manage races</value>
+  </data>
+  <data name="RaceCreateTitle" xml:space="preserve">
+    <value>New race</value>
+  </data>
+  <data name="RaceEditTitle" xml:space="preserve">
+    <value>Edit race</value>
+  </data>
+  <data name="RaceNamePh" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="LibManageRacialProfiles" xml:space="preserve">
+    <value>Manage racial profiles</value>
+  </data>
+  <data name="RacialProfileCreateTitle" xml:space="preserve">
+    <value>New racial profile</value>
+  </data>
+  <data name="RacialProfileEditTitle" xml:space="preserve">
+    <value>Edit racial profile</value>
+  </data>
+  <data name="RacialProfileNamePh" xml:space="preserve">
+    <value>Racial profile</value>
+  </data>
+  <data name="RacialProfileMaxPh" xml:space="preserve">
+    <value>Characteristic maximums</value>
+  </data>
+  <data name="WarriorArchetypeRacialProfilePh" xml:space="preserve">
+    <value>Creature type (Advance)</value>
   </data>
   <data name="WarbandGradePh" xml:space="preserve">
     <value>Grade</value>

@@ -8,6 +8,7 @@
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
                xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:advance="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGameDialog"
                x:DataType="local:EndOfGameDialogViewModel"
@@ -22,81 +23,332 @@
                    Style="{StaticResource DialogTitleLabelStyle}"/>
             <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
 
-            <!-- Étape 1 : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsStep0}">
+            <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsResultStep}">
                 <Picker Title="{loc:Loc EndOfGameResultPh}"
                         ItemsSource="{Binding ResultOptions}"
                         SelectedItem="{Binding SelectedResult}"/>
             </VerticalStackLayout>
 
-            <!-- Étape 2 : Blessures Graves (livre de règles, étape 1 de la séquence d'après-bataille) -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep1}">
-                <Label Text="{loc:Loc EndOfGameInjuriesHeading}" FontAttributes="Bold"/>
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+            <!-- Étape : Hors de combat - vue d'ensemble, aucun outil de jet ici (chaque guerrier/groupe
+                 concerné reçoit sa propre étape Blessure juste après, une carte par écran plutôt que
+                 toutes en même temps). Un Héros (toujours 1 figurine) se coche/décoche ; un groupe
+                 d'Hommes de main indique combien de figurines sont hors de combat via un stepper - le
+                 jet de Blessure Grave se fait par figurine, pas une fois pour tout le groupe. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsOutOfActionStep}">
+                <Label Text="{loc:Loc EndOfGameOutOfAction}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameOutOfActionHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="8">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:WarriorOutcomeRow">
                             <Border Style="{StaticResource SectionCardBorderStyle}">
-                                <VerticalStackLayout Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <!-- Héros et Hommes de main ont des tables de Blessures Graves
-                                             totalement différentes (D66 vs D6) - toujours afficher le
-                                             rôle pour lever l'ambiguïté. -->
-                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
-                                        <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de
-                                             mort (voir ApplyInjuryRoll), pas de saisie manuelle. -->
-                                        <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
-                                               IsVisible="{Binding IsDead}"
-                                               TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
-                                    </Grid>
-                                    <HorizontalStackLayout Spacing="10">
-                                        <CheckBox IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"/>
-                                        <Label Text="{loc:Loc EndOfGameOutOfAction}" VerticalOptions="Center"/>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </VerticalStackLayout>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"
+                                              IsVisible="{Binding IsHero}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
+                                                            IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementOutOfActionCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                        <Label Text="{Binding OutOfActionLabel}" WidthRequest="36" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementOutOfActionCommand}"
+                                                                      CommandParameter="{Binding .}"/>
                                     </HorizontalStackLayout>
-                                    <!-- Le joueur peut soit laisser l'appli tirer les dés (Dice = jet
-                                         aléatoire + popup de résultat immédiate), soit lancer ses propres
-                                         dés à la table et saisir le score lui-même (Entry + Eye = affiche
-                                         le résultat correspondant sans en tirer un nouveau). -->
-                                    <Grid IsVisible="{Binding ShowInjuryTools}" ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
-                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                               Placeholder="{Binding RollPlaceholder}" WidthRequest="70"/>
-                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollCommand}"
-                                                                      CommandParameter="{Binding .}"
-                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryResultCommand}"
-                                                                      CommandParameter="{Binding .}"
-                                                                      Tooltip="{loc:Loc EndOfGameShowResult}"/>
-                                    </Grid>
-                                </VerticalStackLayout>
+                                </Grid>
                             </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape 3 : Expérience (livre, étape 2 - saisie libre, pas de calcul assisté). Pas de
-                 Statut ici : entièrement auto-géré depuis l'étape Blessures Graves. Le jet de
-                 progression (palier franchi) est déplacé dans sa propre étape juste après, voir
-                 IsStep3 - un guerrier peut franchir plusieurs paliers d'un coup, ça ne tient plus sur
-                 une carte imbriquée ici. -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep2}">
+            <!-- Étape : Blessure - une carte par guerrier/groupe coché hors de combat, un seul à la
+                 fois (CurrentInjuryWarrior), pas une liste. Héros et groupe d'Hommes de main divergent
+                 ici : un Héros a un seul jet (+ ses éventuels sous-jets de Blessures multiples) ;
+                 un groupe a un jet D6 indépendant par figurine hors de combat (FigureInjuryRolls). -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsInjuryStep}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameInjuriesHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding InjuryProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <Label Grid.Column="0" Text="{Binding CurrentInjuryWarrior.Name}" FontAttributes="Bold"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                            <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de mort (voir
+                                 ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe
+                                 perd des figurines (HeadCount) plutôt que de passer Mort d'un coup. -->
+                            <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.IsDead}"
+                                   TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
+                        </Grid>
+
+                        <!-- Héros : un seul jet (+ Blessures multiples éventuelles). Le joueur peut soit
+                             laisser l'appli tirer les dés (Dice = jet aléatoire + popup de résultat
+                             immédiate), soit lancer ses propres dés à la table et saisir le score
+                             lui-même : dès que la saisie est un jet complet et valide, le résultat
+                             s'affiche tout seul sous le champ (pas de bouton à cliquer). -->
+                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero}" Spacing="8">
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
+                                       Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollCommand}"
+                                                              CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+                            <Label Text="{Binding CurrentInjuryWarrior.RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            <Label Text="{Binding CurrentInjuryWarrior.InjuryResultText}" FontSize="12"/>
+
+                            <!-- Résultat "Blessures multiples" (16/21) : 1D6 pour savoir combien de
+                                 sous-jets faire sur cette même table, puis un jet D66 par sous-jet. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowMultipleInjuriesSection}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameMultipleInjuriesHeading}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameMultipleInjuryCountPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollMultipleInjuryCountCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.MultipleInjuryCountError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.MultipleInjuryRolls}" Spacing="6">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                                  CommandParameter="{Binding .}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 35 (Blessure profonde). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowDeepWoundSubRoll}" Spacing="4">
+                                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding DeepWoundSubRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                    </Grid>
+                                                    <Label Text="{Binding DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                    <Label Text="{Binding DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                                                </VerticalStackLayout>
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Rancune" (56) : 1D6 pour savoir quelle est la portée de la
+                                 Haine (Core.Rules.HatredTargetTable), PUIS un champ adapté à cette
+                                 portée. L'appli ne suit pas les bandes/guerriers adverses comme données
+                                 structurées (retour utilisateur explicite - rien à choisir dans un
+                                 picker de toute façon) : portées 1-4 (individu/chef) et 5 (cette bande)
+                                 sont un simple champ texte à la frappe, seule la portée 6 (toutes les
+                                 bandes de ce type) garde un picker structuré, car elle référence un vrai
+                                 WarbandArchetype du catalogue. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowHatredSection}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameHatredHeading}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{loc:Loc EndOfGameHatredScopeHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.HatredSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHatredSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollHatredCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+
+                                <Entry IsVisible="{Binding CurrentInjuryWarrior.ShowHatredFreeTextEntry}"
+                                       Text="{Binding CurrentInjuryWarrior.HatredTargetFreeTextInput}"
+                                       Placeholder="{Binding CurrentInjuryWarrior.HatredFreeTextPlaceholder}"/>
+
+                                <Button Text="{loc:Loc EndOfGameHatredPickWarbandArchetype}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                                        FontSize="12" Padding="8,4" HorizontalOptions="Start"
+                                        IsVisible="{Binding CurrentInjuryWarrior.ShowHatredArchetypePicker}"
+                                        Command="{Binding PickHatredWarbandArchetypeCommand}"
+                                        CommandParameter="{Binding CurrentInjuryWarrior}"/>
+
+                                <Label Text="{Binding CurrentInjuryWarrior.HatredRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.HatredRollError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                <!-- Portées 1-5 (texte libre) : simple confirmation, l'Entry ci-dessus
+                                     affiche déjà la saisie. -->
+                                <Label Text="{Binding CurrentInjuryWarrior.HatredTargetDisplayName}" FontSize="12"
+                                       IsVisible="{Binding CurrentInjuryWarrior.ShowHatredFreeTextEntry}"/>
+
+                                <!-- Portée 6 : chip tapable (détail de l'archétype) + retirable (relance
+                                     le picker), même langage que le reste de l'app plutôt qu'un label
+                                     brut. -->
+                                <components:ChipView IsVisible="{Binding CurrentInjuryWarrior.HatredTargetWarbandArchetype, Converter={StaticResource IsNotNullConverter}}"
+                                                      Item="{Binding CurrentInjuryWarrior.HatredTargetWarbandArchetype}"
+                                                      IconGlyph="{x:Static icons:SolidFont.Users}"
+                                                      Command="{Binding ShowHatredArchetypeDetailCommand}"
+                                                      RemoveCommand="{Binding RemoveHatredArchetypeCommand}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Blessure au bras" (23) / "Jambe écrasée" (25) : le texte des
+                                 deux branches est déjà visible ci-dessus (InjuryResultText) - ce 1D6
+                                 détermine laquelle s'applique réellement (branche 2-6 = rate la
+                                 prochaine bataille, mécanisée ; branche 1 = grave, reste texte seul). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowInjuryBranchSubRoll}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.InjuryBranchSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameInjuryBranchSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollInjuryBranchCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.InjuryBranchRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <!-- Confirmation : le résultat réellement résolu par cette branche (ex.
+                                     "Bras amputé : ..."), pas le texte général des deux branches déjà
+                                     affiché plus haut - même langage que la confirmation de portée de
+                                     Rancune (HatredTargetDisplayName) plus haut dans cette étape. Reste
+                                     un simple texte pour 23/25 (aucune SpecialRule attachée à ces
+                                     branches) - une chip tapable la remplace dès qu'il y en a une (Folie
+                                     24 -> Stupidité/Frénésie, voir InjuryBranchSpecialRules), "il faut
+                                     mettre le chip plutôt que du texte" (retour utilisateur 2026-08-25). -->
+                                <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchResultText}" FontSize="12" FontAttributes="Bold"
+                                       IsVisible="{Binding CurrentInjuryWarrior.HasInjuryBranchSpecialRules, Converter={StaticResource InverseBoolConverter}}"/>
+                                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.InjuryBranchSpecialRules}"
+                                            IsVisible="{Binding CurrentInjuryWarrior.HasInjuryBranchSpecialRules}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="library:SpecialRule">
+                                            <components:ChipView Item="{Binding .}"
+                                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Blessure profonde" (35) : 1D3 déterminant le nombre de parties
+                                 manquées - jusqu'ici tiré silencieusement par l'appli sans que le joueur
+                                 ne le voie ni ne le saisisse (retour utilisateur 2026-08-26). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowDeepWoundSubRoll}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.DeepWoundSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollDeepWoundCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <Label Text="{Binding CurrentInjuryWarrior.DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Groupe d'Hommes de main : un jet D6 indépendant par figurine hors de combat
+                             (FigureInjuryRolls, déjà peuplé au nombre indiqué à l'étape précédente),
+                             même résolution automatique que côté Héros ci-dessus. -->
+                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero, Converter={StaticResource InverseBoolConverter}}" Spacing="10">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.FigureInjuryRolls}" Spacing="6">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                              CommandParameter="{Binding .}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Étape : Expérience (livre - saisie libre, pas de calcul assisté). Pas de Statut ici :
+                 entièrement auto-géré depuis l'étape Blessure. Le jet de progression (palier franchi)
+                 est déplacé dans sa propre étape juste après, voir IsAdvanceStep - un guerrier peut
+                 franchir plusieurs paliers d'un coup, ça ne tient plus sur une carte imbriquée ici. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExperienceStep}">
                 <Label Text="{loc:Loc EndOfGameExperienceHeading}" FontAttributes="Bold"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:WarriorOutcomeRow">
-                            <!-- Un guerrier mort (Blessures Graves, étape précédente) ne gagne plus
-                                 d'XP - retiré de cette étape plutôt que juste grisé. -->
+                            <!-- Un guerrier mort (étape Blessure) ou qui ne gagne jamais d'XP (règle
+                                 "Never Gains Experience", ex. Zombies) n'a rien à faire ici - retiré de
+                                 cette étape plutôt que juste grisé, voir ShowsInExperienceStep. -->
                             <Border Style="{StaticResource SectionCardBorderStyle}"
-                                    IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}">
+                                    IsVisible="{Binding ShowsInExperienceStep}">
                                 <VerticalStackLayout Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                                     </Grid>
-                                    <Entry Text="{Binding ExperienceGained}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameXpPh}"/>
+                                    <Entry Text="{Binding ExperienceGainedText}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameXpPh}">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
@@ -104,86 +356,693 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape 4 : Progression - seulement si au moins un guerrier a franchi un palier d'XP à
-                 l'étape précédente (HasAnyMilestone, voir ActiveSteps dans le ViewModel : le wizard
-                 saute carrément cette étape sinon, elle n'apparaît jamais dans la navigation Next/Back
-                 ni dans la numérotation StepLabel). Un guerrier qui saute plusieurs paliers d'un coup a
-                 une carte par palier (AdvanceRolls), chacune avec ses propres outils Tirer/Voir le
-                 résultat - même principe que les Blessures Graves, purement descriptif. -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep3}">
-                <Label Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+            <!-- Étape : Progression - une carte par guerrier ayant franchi un palier d'XP à l'étape
+                 précédente (CurrentAdvanceWarrior, même principe que CurrentInjuryWarrior - le wizard
+                 saute entièrement cette étape si personne n'a franchi de palier, voir Steps dans le
+                 ViewModel). Un guerrier qui saute plusieurs paliers d'un coup a une carte par palier
+                 (AdvanceRolls) empilée dans cette même étape - même résolution automatique que les
+                 Blessures Graves, purement descriptif. Réapparaît une seconde fois après Exploration pour
+                 un palier atteint uniquement grâce à son XP (CurrentAdvanceRolls bascule alors sur
+                 ExplorationAdvanceRolls - voir WizardStep.IsExplorationAdvance), sans rien dupliquer côté
+                 XAML. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsAdvanceStep}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding AdvanceProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{Binding CurrentAdvanceWarrior.Name}" FontAttributes="Bold"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="10">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:AdvanceRollEntry">
+                                    <advance:AdvanceRollEntryView Entry="{Binding .}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Étape : Exploration - jet (livre, chapitre "Revenus"). Nombre de dés calculé
+                 automatiquement (1D6 par Héros survivant + 1D6 si victoire, plafonné à 6 - voir
+                 Core.Rules.ExplorationChart), le joueur saisit ou tire chaque dé. La résolution du
+                 résultat éventuellement déclenché (au plus un, voir ExplorationChart.DetectMultiples)
+                 vit dans une étape séparée juste après (IsExplorationResultStep, n'apparaît que si un
+                 doublon/triple/etc a effectivement été trouvé) plutôt que sur ce même écran - même
+                 découpage "une étape par sujet" que Hors de combat/Blessure ailleurs dans ce wizard. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExplorationRollStep}">
+                <Label Text="{loc:Loc EndOfGameExplorationHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameExplorationDiceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <!-- Traînard, "autres bandes" : purement un rappel textuel, ne change pas le nombre de
+                     dés affiché plus bas - voir ExplorationDiceCount pour pourquoi. -->
+                <Label Text="{loc:Loc EndOfGamePendingBonusDieReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       IsVisible="{Binding ShowPendingExplorationBonusDieReminder}"/>
+                <!-- Entrée des Catacombes : rappel permanent (jamais consommé, contrairement au rappel
+                     Traînard ci-dessus) - voir Warband.HasCatacombReroll. -->
+                <Label Text="{loc:Loc EndOfGameCatacombRerollReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       IsVisible="{Binding ShowCatacombRerollReminder}"/>
+
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasMilestone}">
-                                <VerticalStackLayout Spacing="8">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
-                                        <Label Grid.Column="1" Text="{Binding RoleLabel}" TextColor="{DynamicResource AppTextMuted}"/>
-                                    </Grid>
-                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding AdvanceRolls}" Spacing="6">
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate x:DataType="local:AdvanceRollEntry">
-                                                <VerticalStackLayout Spacing="4">
-                                                    <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                                    <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="10">
-                                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                                               Placeholder="{loc:Loc EndOfGameAdvanceRollPh}" WidthRequest="70"/>
-                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
-                                                                                      CommandParameter="{Binding .}"
-                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Eye}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowAdvanceResultCommand}"
-                                                                                      CommandParameter="{Binding .}"
-                                                                                      Tooltip="{loc:Loc EndOfGameShowResult}"/>
-                                                    </Grid>
-                                                    <Label Text="{Binding ResultText}" FontSize="12"/>
-                                                    <!-- Résultat "Compétence" (Héros 2-5/10-12 uniquement, voir
-                                                         HeroAdvanceTable.IsSkill) : choix direct dans la Bibliothèque,
-                                                         rattachée au guerrier à l'enregistrement du wizard. -->
-                                                    <HorizontalStackLayout Spacing="8" IsVisible="{Binding IsSkillResult}">
-                                                        <Button Text="{loc:Loc EndOfGamePickSkill}"
-                                                                Style="{StaticResource DialogSecondaryButtonStyle}"
-                                                                FontSize="12" Padding="8,4"
-                                                                IsVisible="{Binding HasSkillSelected, Converter={StaticResource InverseBoolConverter}}"
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
-                                                                CommandParameter="{Binding .}"/>
-                                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SelectedSkills}"
-                                                                    IsVisible="{Binding HasSkillSelected}">
-                                                            <BindableLayout.ItemTemplate>
-                                                                <DataTemplate x:DataType="library:Skill">
-                                                                    <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,0">
-                                                                        <Border.GestureRecognizers>
-                                                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
-                                                                                                   CommandParameter="{Binding .}"/>
-                                                                        </Border.GestureRecognizers>
-                                                                        <Label Text="{Binding Name}" FontSize="12"
-                                                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
-                                                                    </Border>
-                                                                </DataTemplate>
-                                                            </BindableLayout.ItemTemplate>
-                                                        </FlexLayout>
-                                                    </HorizontalStackLayout>
-                                                </VerticalStackLayout>
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
-                                </VerticalStackLayout>
-                            </Border>
+                        <DataTemplate x:DataType="local:ExplorationDieEntry">
+                            <VerticalStackLayout Spacing="4" Margin="0,0,10,10">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6">
+                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollExplorationDieCommand}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                </FlexLayout>
             </VerticalStackLayout>
 
-            <!-- Étape 5 : Revenus (livre, étape 3 - trésor trouvé) -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep4}">
-                <Label Text="{loc:Loc EndOfGameTreasuryHeading}" FontAttributes="Bold"/>
-                <Entry Text="{Binding TreasuryFound}" Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameTreasuryPh}"/>
+            <!-- Étape : Exploration - résultat. N'apparaît dans le wizard que si le jet précédent a
+                 déclenché un résultat (voir EndOfGameDialogViewModel.Steps) - jamais plusieurs à la
+                 fois. Les objets trouvés vont dans l'inventaire de bande (pas de choix de guerrier ici,
+                 voir WarbandEquipment) - à équiper plus tard depuis la fiche de bande. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExplorationResultStep}">
+                <Label Text="{Binding TriggeredExplorationResult.Name}" FontAttributes="Bold"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <!-- Groupe B "conditionné par la bande" (ex. Traînard) : la description complète
+                             du livre énumère TOUTES les branches (Skavens/Possédés/Morts-Vivants/
+                             autres), alors qu'une seule s'applique à la bande jouée - affiche seulement
+                             le texte de cette branche plutôt que le paragraphe entier. Voir
+                             ExplorationResultDescriptionText. -->
+                        <Label Text="{Binding ExplorationResultDescriptionText}" FontSize="12"/>
+
+                        <!-- Héros envoyé (La Fosse) : optionnel ("si vous le souhaitez") - "Passer son
+                             chemin" apparaît comme une vraie option du Picker, sélectionnée par défaut,
+                             plutôt qu'un champ vide ambigu. Ne rien changer laisse simplement le sous-jet
+                             caché, aucune erreur bloquante. Voir ShowSentHeroPicker/SentHeroOptions. -->
+                        <Picker IsVisible="{Binding ShowSentHeroPicker}" Title="{loc:Loc EndOfGameSentHeroPh}"
+                                ItemsSource="{Binding SentHeroOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                SelectedItem="{Binding SelectedSentHeroOption}"/>
+
+                        <!-- Sous-jet D6 départageant les branches à choix exclusif (Groupe A, ex.
+                             Cadavre) - sans objet pour un résultat à une seule branche déjà résolue. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowExplorationSubRoll}" Spacing="6">
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Text="{Binding ExplorationSubRoll}" Keyboard="Numeric"
+                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationSubRollCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+                            <Label Text="{Binding ExplorationSubRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding ExplorationSubRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Test de caractéristique (Puits/Endurance, Taverne/Commandement) : comparer un
+                             jet à une stat - l'appli calcule elle-même Réussite/Échec (arithmétique sur
+                             des valeurs déjà connues, pas une décision aléatoire) et bascule vers la
+                             branche correspondante ci-dessous. Bâtiment Éventré/Commandement n'utilise
+                             PAS ce bloc : son test est additionnel (voir plus bas, ShowBonusStatTest),
+                             pas une branche exclusive comme celui-ci. Taverne cible toujours le chef
+                             (pas de Picker, voir ShowStatTestHeroPicker) et certaines bandes du livre
+                             réussissent automatiquement (voir StatTestAutoPasses). -->
+                        <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
+                            <Picker IsVisible="{Binding ShowStatTestHeroPicker}" Title="{loc:Loc EndOfGameStatTestHeroPh}"
+                                    ItemsSource="{Binding StatTestEligibleHeroes}" ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding StatTestHero}"/>
+                            <Label Text="{loc:Loc EndOfGameStatTestAutoPass}" FontSize="12" FontAttributes="Italic"
+                                   TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding StatTestAutoPasses}"/>
+                            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding ShowStatTestRoll}">
+                                <Entry Grid.Column="0" Text="{Binding StatTestRoll}" Keyboard="Numeric"
+                                       Placeholder="{Binding StatTestRollPlaceholder}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollStatTestCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <!-- Vide quand un Picker affiche déjà le nom choisi (Puits) -
+                                                 voir StatTestHeroDisplayPrefix. -->
+                                            <Span Text="{Binding StatTestHeroDisplayPrefix}"/>
+                                            <Span Text="{Binding StatTestFieldLabel}"/>
+                                            <Span Text=" "/>
+                                            <Span Text="{Binding StatTestStatValue}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Grid>
+                            <Label Text="{Binding StatTestError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding StatTestError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Test de Commandement ADDITIONNEL du chef (Bâtiment Éventré) : s'ajoute à une
+                             branche Auto déjà résolue (les pierres magiques) au lieu de la remplacer -
+                             voir ShowBonusStatTest. Toujours le chef de bande (Warrior.IsLeader), jamais
+                             un choix du joueur - pas de Picker, juste son nom affiché. Invisible si le
+                             chef n'est pas disponible cette partie (mort/malade) : personne ne peut
+                             commander à sa place. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowBonusStatTest}" Spacing="6">
+                            <VerticalStackLayout IsVisible="{Binding BonusStatTestLeader, Converter={StaticResource IsNotNullConverter}}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding BonusStatTestRoll}" Keyboard="Numeric"
+                                           Placeholder="{Binding BonusStatTestRollPlaceholder}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollBonusStatTestCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding BonusStatTestLeader.Warrior.Name}"/>
+                                                <Span Text=" - "/>
+                                                <Span Text="{Binding BonusStatTestFieldLabel}"/>
+                                                <Span Text=" "/>
+                                                <Span Text="{Binding BonusStatTestStatValue}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </Grid>
+                                <Label Text="{Binding BonusStatTestError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding BonusStatTestError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Double au 2D6 (Maison du Marchand) : 2 dés séparés, indispensables ici car
+                             le total seul (2D6x5) ne dit pas si c'était un double (ex. 6 peut venir de
+                             3+3 comme de 1+5) - voir ShowDoubleRollCheck. -->
+                        <VerticalStackLayout IsVisible="{Binding ShowDoubleRollCheck}" Spacing="6">
+                            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Text="{Binding ExplorationDoubleDie1}" Keyboard="Numeric" WidthRequest="50">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationDoubleDie1Command}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                <Entry Grid.Column="2" Text="{Binding ExplorationDoubleDie2}" Keyboard="Numeric" WidthRequest="50">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationDoubleDie2Command}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+                            <Label Text="{Binding ExplorationDoubleRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding ExplorationDoubleRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Trésor Caché/Bande Massacrée : "roll for every item on the list separately" -
+                             une ligne par ExplorationOutcome, chacune avec son propre jet de seuil D6 (la
+                             branche Auto, ex. l'or de base, n'en a pas - voir IndependentOutcomeEntry.
+                             IsAuto). Calqué sur les blocs déjà existants plus bas (mêmes Entry+dé, même
+                             ChipView tapable, même table Artefact) plutôt qu'un nouveau langage visuel -
+                             mockup confirmé avec l'utilisateur avant implémentation (2026-08-24). -->
+                        <VerticalStackLayout IsVisible="{Binding IsIndependentThresholdResult}"
+                                              BindableLayout.ItemsSource="{Binding IndependentOutcomeEntries}" Spacing="16">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:IndependentOutcomeEntry">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding Label}" FontAttributes="Bold"/>
+
+                                        <!-- Seuil + jet, absents pour la branche Auto (voir IsAuto). -->
+                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding IsAuto, Converter={StaticResource InverseBoolConverter}}">
+                                            <Label Text="{Binding ThresholdLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding CheckRoll}" Keyboard="Numeric" WidthRequest="70"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding AutoRollCheckCommand}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding CheckRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding CheckRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{loc:Loc EndOfGameIndependentOutcomeMissed}" FontSize="12" FontAttributes="Italic"
+                                                   TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding Missed}"/>
+                                        </VerticalStackLayout>
+
+                                        <!-- Résultat : toujours pour la branche Auto, seulement une fois le
+                                             seuil passé sinon (voir ShowResult). -->
+                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowResult}">
+                                            <!-- Or/Pierre(s) magique(s) : même Entry+dé que le montant Or
+                                                 classique plus bas dans cette étape - la formule ("D3x10")
+                                                 en placeholder, même convention que les autres jets simples
+                                                 de ce wizard (StatTestRoll, ArtefactRoll...) plutôt qu'un
+                                                 label séparé (retour utilisateur 2026-08-24). Confirmation
+                                                 "gagné(es)" au-dessus (AmountEarnedLabel, vide pour la
+                                                 branche Auto) - une fois le seuil passé, rappelle ce qui
+                                                 vient d'être gagné avant de jeter combien. -->
+                                            <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowAmountRoll}">
+                                                <Label Text="{Binding AmountEarnedLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding IsAuto, Converter={StaticResource InverseBoolConverter}}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding AmountRoll}" Keyboard="Numeric" WidthRequest="70"
+                                                           Placeholder="{Binding Outcome.GoldFormula}">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding AutoRollAmountCommand}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding AmountRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding AmountRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            </VerticalStackLayout>
+
+                                            <!-- Objet : même ChipView tapable + quantité fixe ("x1", sans
+                                                 jet) ou éditable (D3/D6, Entry+dé) que le bloc Objet de la
+                                                 forme à branche unique plus bas dans cette étape. -->
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsItem}">
+                                                <components:ChipView Grid.Column="0" Item="{Binding ResolvedItem}"
+                                                                      IconGlyph="{Binding ResolvedItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding ShowResolvedItemDetailCommand}"/>
+                                                <Label Grid.Column="1" Text="{Binding ItemQuantity, StringFormat='x{0}'}"
+                                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding ShowItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                                <Entry Grid.Column="1" Text="{Binding ItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                                       VerticalOptions="Center" IsVisible="{Binding ShowItemQuantityRoll}"
+                                                       Placeholder="{Binding Outcome.ItemQuantityFormula}">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding AutoRollItemQuantityCommand}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                                              VerticalOptions="Center"
+                                                                              IsVisible="{Binding ShowItemQuantityRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding ItemQuantityError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding ItemQuantityError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                            <!-- Artefact Magique : même second jet + table dédiée que
+                                                 Villa d'un Noble (ArtefactRoll/ResolvedArtefactItem), y
+                                                 compris son libellé de table ("sur quelle table on
+                                                 relance" n'est pas déductible du contexte, voir le bloc
+                                                 original plus bas dans cette étape - manquait ici,
+                                                 corrigé sur retour utilisateur 2026-08-24). -->
+                                            <VerticalStackLayout Spacing="6" IsVisible="{Binding IsArtefact}">
+                                                <Label Text="{loc:Loc EndOfGameArtefactTableLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding ArtefactRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding AutoRollArtefactCommand}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding ArtefactRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding ArtefactRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                <components:ChipView IsVisible="{Binding ResolvedArtefactItem, Converter={StaticResource IsNotNullConverter}}"
+                                                                      Item="{Binding ResolvedArtefactItem}"
+                                                                      IconGlyph="{Binding ResolvedArtefactItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding ShowResolvedArtefactDetailCommand}"/>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <!-- Branche résolue : montant d'or/pierres magiques éditable, ou objet trouvé
+                             (quantité éditable, va dans l'inventaire de bande à la sauvegarde). -->
+                        <VerticalStackLayout IsVisible="{Binding ResolvedExplorationOutcome, Converter={StaticResource IsNotNullConverter}}" Spacing="8">
+                            <!-- Résolue via le double au 2D6 (Maison du Marchand, voir ShowDoubleRollCheck) :
+                                 le montant est déjà calculé depuis les 2 dés tapés plus haut (voir
+                                 ShowExplorationGoldRoll/ResolveDoubleRoll) - lecture seule, pas de second
+                                 jet redondant pour le même 2D6x5. -->
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationGold}">
+                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationGoldLabel}" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding ExplorationGoldAmount}"
+                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding ShowExplorationGoldRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationGoldAmount}" Keyboard="Numeric" WidthRequest="70"
+                                       IsVisible="{Binding ShowExplorationGoldRoll}">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationGoldCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              IsVisible="{Binding ShowExplorationGoldRoll}"/>
+                            </Grid>
+
+                            <!-- Table des Artefacts Magiques (Villa d'un Noble) : la branche résolue ne
+                                 dit pas encore QUEL objet - un second D6 sur cette table fixe le
+                                 détermine (voir ShowArtefactRoll/Core.Rules.MagicalArtefactTable). Porte
+                                 son propre libellé, contrairement au sous-jet juste au-dessus - "sur
+                                 quelle table on relance" n'est pas déductible du contexte comme l'est le
+                                 premier jet (retour utilisateur 2026-08-20). -->
+                            <VerticalStackLayout IsVisible="{Binding ShowArtefactRoll}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameArtefactTableLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding ArtefactRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollArtefactCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding ArtefactRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding ArtefactRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Expérience répartie entre plusieurs Héros (Prisonniers, Possédés) -
+                                 contrairement à GrantsLeaderExperience (Traînard : +1 fixe au seul chef,
+                                 aucun choix), le joueur répartit lui-même un total jeté (D3, son propre
+                                 jet physique comme partout ailleurs) entre ses Héros via un steppeur +/-
+                                 chacun - forme confirmée par mockup avant implémentation (2026-08-20).
+                                 Bloqué tant que DistributedExperienceRemaining n'est pas exactement 0
+                                 (voir ValidateExplorationResultStep). -->
+                            <VerticalStackLayout IsVisible="{Binding HasDistributedHeroExperienceGrant}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding DistributedExperienceTotal}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollDistributedExperienceCommand}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    <Label Grid.Column="2" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding DistributedExperienceRemaining, Converter={StaticResource IsNotNullConverter}}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{loc:Loc EndOfGameDistributedExperienceRemainingLabel}"/>
+                                                <Span Text=" "/>
+                                                <Span Text="{Binding DistributedExperienceRemaining}"/>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </Grid>
+                                <Label Text="{Binding DistributedExperienceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding DistributedExperienceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DistributedExperienceEligibleHeroes}" Spacing="4"
+                                                      IsVisible="{Binding DistributedExperienceRemaining, Converter={StaticResource IsNotNullConverter}}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                                <Label Grid.Column="0" Text="{Binding Name}" VerticalOptions="Center"/>
+                                                <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementDistributedExperienceCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                    <Label Text="{Binding DistributedExplorationExperience}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementDistributedExperienceCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                </HorizontalStackLayout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Recrutement conditionné à l'équipement (Prisonniers, "autres bandes") -
+                                 "en utilisant les mêmes caractéristiques que le groupe existant" : le
+                                 joueur choisit lequel des groupes d'Hommes de main RÉELS de la bande
+                                 renforcer plutôt qu'un archétype fixe (contraste ResolvedFreeHenchman,
+                                 Traînard/Zombie) - "Ne pas recruter" par défaut (premier du Picker),
+                                 tableau de trésorerie masqué tant qu'il reste choisi (mock confirmé
+                                 2026-08-21). Le recrutement est gratuit, seul le coût de l'équipement
+                                 répliqué (déjà dans le libellé du Picker) doit tenir dans la trésorerie -
+                                 pas de bouton dédié, seul le "Suivant" du wizard bloque si le solde
+                                 passerait négatif (voir CanAffordEquippedHenchman). -->
+                            <VerticalStackLayout IsVisible="{Binding HasOptionalEquippedHenchmanGrant}" Spacing="6">
+                                <Picker Title="{loc:Loc EndOfGameEquippedHenchmanGroupPh}"
+                                        ItemsSource="{Binding EquippedHenchmanGroupOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                        SelectedItem="{Binding SelectedEquippedHenchmanGroupOption}"/>
+                                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowEquippedHenchmanTreasury}">
+                                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquippedHenchmanTreasuryAfterLabel}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{Binding EquippedHenchmanTreasuryAfter}" VerticalOptions="Center"/>
+                                </Grid>
+                                <Label Text="{Binding EquippedHenchmanError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding EquippedHenchmanError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Bénédiction d'arme (Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières) -
+                                 choix optionnel parmi les armes déjà portées par un Héros (jamais un
+                                 groupe d'Hommes de main ni la réserve de la bande - voir WeaponBlessingOptions),
+                                 aucune validation nécessaire ("Ne pas bénir d'arme" est une réponse
+                                 complète, même idiome que SentHeroOptions). -->
+                            <VerticalStackLayout IsVisible="{Binding HasWeaponBlessingGrant}" Spacing="6">
+                                <Picker Title="{loc:Loc EndOfGameWeaponBlessingPh}"
+                                        ItemsSource="{Binding WeaponBlessingOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                        SelectedItem="{Binding SelectedWeaponBlessingOption}"/>
+                                <!-- Aperçu du chip une fois béni ("Épée (G, B)") - voir BlessedWeaponPreview,
+                                     jamais persisté tel quel, juste pour que le joueur voie le résultat tout
+                                     de suite (retour utilisateur 2026-08-21). -->
+                                <components:ChipView Item="{Binding BlessedWeaponPreview}"
+                                                      IconGlyph="{Binding BlessedWeaponPreview.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      IsVisible="{Binding BlessedWeaponPreview, Converter={StaticResource IsNotNullConverter}}"
+                                                      Command="{Binding ShowBlessedWeaponDetailCommand}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Sauf indication contraire du livre (ex. Forge : "D3 Hallebardes"), un seul
+                                 exemplaire est trouvé - ni champ ni dé, juste "x1" en lecture seule (voir
+                                 ShowExplorationItemQuantityRoll) : ce n'est pas un jet, rien à faire
+                                 trancher au joueur. -->
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationItem}">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <!-- Choix du joueur entre 2 objets (ex. Armurerie 1-2 : Bouclier OU
+                                         Rondache, voir ExplorationOutcome.AlternativeEquipmentItemName) -
+                                         invisible pour toute autre branche Item. 2 RadioButton plutôt
+                                         qu'un Picker : les deux options tiennent affichées d'un coup,
+                                         pas de tap "pour ouvrir" en plus pour un choix binaire.
+                                         RadioButtonGroup.SelectedValue lié directement au nom ANGLAIS du
+                                         catalogue (Value de chaque RadioButton), pas un index - voir
+                                         EndOfGameDialogViewModel.SelectedExplorationItemName. Chaque
+                                         option affiche le vrai ChipView tapable (icône + popup détail) en
+                                         FRÈRE du RadioButton, jamais dans RadioButton.Content : un View
+                                         arbitraire en Content ne s'affichait pas côté Windows/WinUI
+                                         (repéré le 2026-08-18 - cercle vide, contenu flottant ailleurs à
+                                         l'écran) ; en frère plutôt qu'imbriqué, le tap du ChipView (popup
+                                         détail) et celui du RadioButton (sélection) ne se marchent pas
+                                         dessus, chacun sur sa propre cible. -->
+                                    <VerticalStackLayout Spacing="0" IsVisible="{Binding HasExplorationItemChoice}"
+                                                          RadioButtonGroup.GroupName="ExplorationItemChoice"
+                                                          RadioButtonGroup.SelectedValue="{Binding SelectedExplorationItemName, Mode=TwoWay}">
+                                        <HorizontalStackLayout Spacing="6">
+                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.EquipmentItemName}"/>
+                                            <components:ChipView Item="{Binding ExplorationItemChoicePrimaryItem}"
+                                                                  IconGlyph="{Binding ExplorationItemChoicePrimaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.AlternativeEquipmentItemName}"/>
+                                            <components:ChipView Item="{Binding ExplorationItemChoiceAlternativeItem}"
+                                                                  IconGlyph="{Binding ExplorationItemChoiceAlternativeItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    <!-- ChipView tapable (icône de catégorie + popup détail), même langage
+                                         d'interaction que toute autre référence Équipement dans l'app.
+                                         ResolvedExplorationSecondaryItem (ex. Charrette Renversée : Épée
+                                         + Dague, voir ExplorationOutcome.SecondaryEquipmentItemName) ne
+                                         s'affiche PAS ici - une section dédiée plus bas, hors de ce Grid
+                                         IsExplorationItem, la montre pour n'importe quel Kind (ex.
+                                         Laboratoire de l'Alchimiste : Or + Carnet), pas seulement Item -
+                                         éviter de l'afficher deux fois. Masqué pour une branche à choix :
+                                         les 2 RadioButton du bloc ci-dessus montrent déjà chaque option. -->
+                                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding HasExplorationItemChoice, Converter={StaticResource InverseBoolConverter}}">
+                                        <components:ChipView Item="{Binding ResolvedExplorationItem}"
+                                                              IconGlyph="{Binding ResolvedExplorationItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding ShowExplorationItemDetailCommand}"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                                <!-- VerticalOptions="Center" explicite sur les 3 : la colonne 0 grandit
+                                     désormais (2 RadioButton + chip) pour une branche à choix, la
+                                     colonne "jet" doit rester centrée sur la hauteur de la ligne plutôt
+                                     que collée en haut. -->
+                                <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
+                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding ShowExplorationItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding ShowExplorationItemQuantityRoll}">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationItemQuantityCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              VerticalOptions="Center"
+                                                              IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
+                            </Grid>
+
+                            <!-- Valeur de revente trouvée (ex. Bijoutier : Pierres de Quartz "D6x5 CG",
+                                 Rubis "D6x15 CG") - uniquement pour une branche Item dont la valeur
+                                 n'est pas le Cost fixe du catalogue (voir
+                                 ExplorationOutcome.FoundValueFormula/ShowExplorationItemFoundValueRoll).
+                                 Même idiome que l'Or : jamais rempli automatiquement, le joueur tape son
+                                 jet physique ou clique le dé. -->
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding ShowExplorationItemFoundValueRoll}">
+                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationFoundValueLabel}" VerticalOptions="Center"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationItemFoundValue}" Keyboard="Numeric" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationItemFoundValueCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+
+                            <!-- Même convention que l'Objet ci-dessus : une quantité fixe (ex. Puits :
+                                 toujours 1 pierre) s'affiche en lecture seule, sans jet (voir
+                                 ShowExplorationWyrdstoneRoll). -->
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding IsExplorationWyrdstone}">
+                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationWyrdstoneLabel}" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}"
+                                       VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding ShowExplorationWyrdstoneRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Grid.Column="1" Text="{Binding ExplorationWyrdstoneAmount}" Keyboard="Numeric" WidthRequest="70"
+                                       IsVisible="{Binding ShowExplorationWyrdstoneRoll}">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollExplorationWyrdstoneCommand}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"
+                                                              IsVisible="{Binding ShowExplorationWyrdstoneRoll}"/>
+                            </Grid>
+
+                            <!-- Un seul des trois Grid ci-dessus est jamais visible à la fois
+                                 (IsExplorationGold/Item/Wyrdstone mutuellement exclusifs) - une seule
+                                 Label d'erreur partagée suffit. -->
+                            <Label Text="{Binding ExplorationAmountError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding ExplorationAmountError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                            <!-- Branche sans effet trésorerie/inventaire (ex. Traînard/"autres bandes")
+                                 - purement informatif, consigné dans l'Historique à la sauvegarde plutôt
+                                 que silencieusement perdu. Masqué pour un résultat "conditionné par la
+                                 bande" (voir ExplorationResultDescriptionText plus haut) : ce même texte
+                                 y est déjà affiché, pas la peine de le répéter ici. -->
+                            <Label IsVisible="{Binding ShowExplorationNoteInBranchSection}" Text="{Binding ExplorationNoteText}"
+                                   FontSize="12" FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"/>
+
+                        </VerticalStackLayout>
+
+                        <!-- Second objet du même branch, indépendant du Kind (ex. Charrette Renversée,
+                             Kind Item : Épée + Dague ornées ; Laboratoire de l'Alchimiste, Kind Gold :
+                             Or + Carnet de l'Alchimiste) - voir ExplorationOutcome.
+                             SecondaryEquipmentItemName. Volontairement en dehors du Grid IsExplorationItem
+                             ci-dessus (qui ne s'affiche que pour Kind.Item) : ce second objet peut
+                             accompagner N'IMPORTE quel Kind, pas seulement Item. -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ResolvedExplorationSecondaryItem, Converter={StaticResource IsNotNullConverter}}">
+                            <components:ChipView Grid.Column="0" Item="{Binding ResolvedExplorationSecondaryItem}"
+                                                  IconGlyph="{Binding ResolvedExplorationSecondaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Objet bonus sur le même dé que l'or (ex. Boutique : "sur un 1, en plus, un
+                             Porte-bonheur") - voir BonusItemOutcome, déduit d'ExplorationGoldAmount sans
+                             second jet. Indépendant du bloc ResolvedExplorationOutcome ci-dessus
+                             (peut s'afficher en plus de l'or, jamais à la place). Toujours un seul
+                             exemplaire (même convention que ShowExplorationItemQuantityRoll), pas de
+                             champ ni de dé ici non plus. -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusItem}">
+                            <components:ChipView Grid.Column="0" Item="{Binding BonusItem}"
+                                                  IconGlyph="{Binding BonusItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Objet du test de Commandement additionnel du chef (ex. Bâtiment Éventré :
+                             Chien de guerre si réussi) - voir BonusStatTestOutcome, même convention
+                             qu'au-dessus (toujours 1 exemplaire, pas de champ/dé pour la quantité). -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasBonusStatTestOutcome}">
+                            <components:ChipView Grid.Column="0" Item="{Binding BonusStatTestItem}"
+                                                  IconGlyph="{Binding BonusStatTestItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Objet tiré sur la table des Artefacts Magiques (Villa d'un Noble) une fois le
+                             second D6 saisi - voir ResolvedArtefactItem. -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ResolvedArtefactItem, Converter={StaticResource IsNotNullConverter}}">
+                            <components:ChipView Grid.Column="0" Item="{Binding ResolvedArtefactItem}"
+                                                  IconGlyph="{Binding ResolvedArtefactItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowExplorationItemDetailCommand}"/>
+                            <Label Grid.Column="1" Text="x1" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+
+                        <!-- Homme de main gratuit (ex. Traînard/Prisonniers, Morts-Vivants : Zombie(s)
+                             rejoignent la bande) - voir ResolvedFreeHenchman. Quantité fixe (1, Traînard)
+                             en lecture seule, ou jet+dé si le livre en donne plusieurs (D3, Prisonniers -
+                             ExplorationOutcome.ItemQuantityFormula réutilisé tel quel, même champ que pour
+                             un Objet, voir ShowExplorationItemQuantityRoll). -->
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding ResolvedFreeHenchman, Converter={StaticResource IsNotNullConverter}}">
+                            <components:ChipView Grid.Column="0" Item="{Binding ResolvedFreeHenchman}"
+                                                  IconGlyph="{x:Static icons:SolidFont.UserGroup}"
+                                                  Command="{Binding ShowFreeHenchmanDetailCommand}"/>
+                            <Label Grid.Column="1" Text="{Binding ExplorationItemQuantity, StringFormat='x{0}'}"
+                                   VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"
+                                   IsVisible="{Binding ShowExplorationItemQuantityRoll, Converter={StaticResource InverseBoolConverter}}"/>
+                            <Entry Grid.Column="1" Text="{Binding ExplorationItemQuantity}" Keyboard="Numeric" WidthRequest="70"
+                                   VerticalOptions="Center" IsVisible="{Binding ShowExplorationItemQuantityRoll}">
+                                <Entry.Behaviors>
+                                    <components:DigitsOnlyBehavior/>
+                                </Entry.Behaviors>
+                            </Entry>
+                            <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding AutoRollExplorationItemQuantityCommand}"
+                                                          Tooltip="{loc:Loc EndOfGameRoll}" VerticalOptions="Center"
+                                                          IsVisible="{Binding ShowExplorationItemQuantityRoll}"/>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
-            <!-- Étape 6 : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsStep5}">
+            <!-- Étape : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsRecapStep}">
                 <Label Text="{loc:Loc EndOfGameRecapHeading}" FontAttributes="Bold"/>
                 <Label>
                     <Label.FormattedText>
@@ -194,12 +1053,12 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
-                <Label>
+                <Label IsVisible="{Binding HasExplorationResult}">
                     <Label.FormattedText>
                         <FormattedString>
-                            <Span Text="{loc:Loc EndOfGameTreasuryPh}"/>
+                            <Span Text="{loc:Loc EndOfGameExplorationHeading}"/>
                             <Span Text=" : "/>
-                            <Span Text="{Binding TreasuryFound}"/>
+                            <Span Text="{Binding TriggeredExplorationResult.Name}"/>
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>

@@ -13,13 +13,21 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 /// list". Regroupe le contexte (école(s) de magie de la bande, puce tapotable comme partout ailleurs
 /// dans l'appli - ShowMagicSchoolDetail) et la saisie du jet (comme AdvanceRollEntry côté Fin de partie :
 /// taper le résultat d'un dé physique, ou le bouton dé pour le remplir au hasard) dans un seul dialog.
-/// Deux étapes : Roll résout le jet en sort (ResolvedSpell, affiché en puce tapotable - récap complet à
-/// la demande, pas automatiquement) ; Accept ferme le dialog avec ce résultat. RemoveCommand de la puce
-/// (Reroll) permet de recommencer sans fermer le dialog si le joueur se ravise.</summary>
+/// Résolution automatique (2026-08-24, revu sur demande explicite - "pas la peine d'appuyer sur le
+/// bouton pour voir quel sort on récupère") : dès que SpellRoll est un 1D6 valide, OnSpellRollChanged
+/// résout directement ResolvedSpell, affiché en puce tapotable (récap complet à la demande, pas
+/// automatiquement) - plus de bouton "Valider" intermédiaire, même idiome que AdvanceRollEntry.
+/// ManualRoll qui se résout tout seul. Accept ferme le dialog avec ce résultat. RemoveCommand de la
+/// puce (Reroll) permet de recommencer sans fermer le dialog si le joueur se ravise.</summary>
 public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
 {
     private readonly ILibraryService _libraryService;
     private readonly IDetailDialogService _detailDialogs;
+
+    /// <summary>Sorts déjà connus de ce guerrier (Id) - un jet retombant dessus est refusé (voir
+    /// ResolveSpellAsync), demande explicite du 2026-08-24 : un lanceur de sorts ne doit jamais pouvoir
+    /// "gagner" deux fois le même sort. Vide pour une toute nouvelle recrue (rien connu encore).</summary>
+    private readonly IReadOnlyCollection<int> _knownSpellIds;
 
     protected override Spell? CancelResult => null;
 
@@ -37,15 +45,50 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
 
     public bool HasResolvedSpell => ResolvedSpell is not null;
 
-    public SpellRollDialogViewModel(List<MagicSchool> magicSchools, ILibraryService libraryService, IDetailDialogService detailDialogs)
+    public SpellRollDialogViewModel(List<MagicSchool> magicSchools, ILibraryService libraryService, IDetailDialogService detailDialogs,
+        IReadOnlyCollection<int> knownSpellIds)
     {
         MagicSchools = magicSchools;
         _libraryService = libraryService;
         _detailDialogs = detailDialogs;
+        _knownSpellIds = knownSpellIds;
     }
 
     [RelayCommand]
     private void AutoRoll() => SpellRoll = SpellRules.RollDice().ToString();
+
+    // Saisie physique (comme AutoRoll ci-dessus, qui déclenche ce même handler en modifiant SpellRoll) :
+    // résout dès qu'un 1D6 valide est présent, aucun bouton "Valider" à cliquer en plus. Un jet
+    // momentanément invalide en cours de frappe (vide, hors 1-6) est ignoré silencieusement plutôt que
+    // de montrer une erreur - RollError reste réservé au cas "cette école n'a rien sur cette valeur".
+    partial void OnSpellRollChanged(string value)
+    {
+        RollError = null;
+        if (!int.TryParse(value, out var roll) || roll < 1 || roll > 6) return;
+        _ = ResolveSpellAsync(roll);
+    }
+
+    private async Task ResolveSpellAsync(int roll)
+    {
+        var magicSchoolIds = MagicSchools.Select(s => s.Id).ToHashSet();
+        var available = (await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language))
+            .Where(s => magicSchoolIds.Contains(s.MagicSchoolId)).ToList();
+        var spell = available.FirstOrDefault(s => s.RollValue == roll);
+        if (spell is null)
+        {
+            RollError = Loc["WarbandsSpellRollEmptyMessage"];
+            return;
+        }
+
+        if (_knownSpellIds.Contains(spell.Id))
+        {
+            RollError = Loc["WarbandsSpellRollAlreadyKnownMessage"];
+            return;
+        }
+
+        RollError = null;
+        ResolvedSpell = spell;
+    }
 
     [RelayCommand]
     private async Task ShowMagicSchoolDetail(MagicSchool school)
@@ -69,29 +112,6 @@ public partial class SpellRollDialogViewModel : DialogViewModel<Spell?>
         ResolvedSpell = null;
         SpellRoll = string.Empty;
         RollError = null;
-    }
-
-    [RelayCommand]
-    private async Task Roll()
-    {
-        if (!int.TryParse(SpellRoll, out var roll) || roll < 1 || roll > 6)
-        {
-            RollError = Loc["WarbandsSpellRollInvalidMessage"];
-            return;
-        }
-
-        var magicSchoolIds = MagicSchools.Select(s => s.Id).ToHashSet();
-        var available = (await _libraryService.GetSpellsAsync(LocalizationService.Instance.Language))
-            .Where(s => magicSchoolIds.Contains(s.MagicSchoolId)).ToList();
-        var spell = available.FirstOrDefault(s => s.RollValue == roll);
-        if (spell is null)
-        {
-            RollError = Loc["WarbandsSpellRollEmptyMessage"];
-            return;
-        }
-
-        RollError = null;
-        ResolvedSpell = spell;
     }
 
     [RelayCommand]

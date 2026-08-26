@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "race": "Orc",
   "imagePath": "orc_mob.jpg",
   "name": {
     "en": "Orc Mob",
@@ -119,6 +120,7 @@
       "cost": 80,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -129,6 +131,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Orc",
       "description": {
         "en": "A massive, brutal individual who throws his lads into any fight he thinks he can profit from - the strongest, toughest and most violent of the mob, ready to prove it with his fists to any Boy who thinks otherwise.",
         "fr": "Le Chef Orque est un individu massif et brutal, qui entraîne ses gars dans la moindre bagarre pourvu qu'il pense en tirer profit. Il est le plus fort, le plus résistant et le plus violent de la bande, et si un des Boyz osait s'imaginer le contraire, il le lui démontrerait à coups de poing."
@@ -168,6 +171,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Orc",
       "description": {
         "en": "Shamans are outcasts of Orc society, gifted by the gods Gork and Mork with powers they can neither understand nor fully control - roaming Orc mobs are often the only place they are respected rather than shunned. May never wear armour.",
         "fr": "Les Chamanes sont des individus à part dans la société orque, bénis par les dieux Gork et Mork qui leur ont accordé des pouvoirs qu'ils ne peuvent ni comprendre ni totalement maîtriser - les bandes en maraude sont souvent les seules à leur offrir un certain statut plutôt que le rejet. Ne porte jamais d'armure."
@@ -205,6 +209,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Orc",
       "description": {
         "en": "Only the toughest survive and rise through the ranks of Orc society - Big 'Uns are such rising stars, carrying out the Boss's orders and, should he ever fall, deciding on his replacement (usually through personal combat).",
         "fr": "Seuls les plus agressifs peuvent survivre et prospérer au sein de la société orque. Les Kostos font partie de cette élite et font office de bras droit pour le Chef - si jamais ce dernier venait à faillir, c'est probablement un de ses Kostos qui le pousserait dehors pour prendre sa place (le différend étant généralement réglé en combat singulier)."
@@ -235,6 +240,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Orc",
       "description": {
         "en": "Savage and tough, Boyz fear nothing they can get their hands on, though they are even more ignorant and superstitious than most other creatures - they form the core of any Orc mob.",
         "fr": "Les Boyz sont sauvages et résistants. Ils ne craignent rien, peut-être parce qu'ils sont encore plus ignorants et superstitieux que n'importe quel autre être - ils constituent le gros des effectifs d'une bande Orque."
@@ -271,6 +277,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 5,
+      "racialProfileName": "Goblin",
       "description": {
         "en": "Used as cannon fodder (and occasionally as a food source!) by their larger Orc cousins - Goblins are less well equipped than Boyz, having to make do with whatever the Orcs do not want. A mob may never field more than twice as many Goblins as Orcs (Heroes included).",
         "fr": "Les Gobelins sont utilisés comme chair à canon (et parfois comme source de nourriture !) par leurs gros cousins Orques. Ils sont moins bien équipés que les Boyz et doivent se contenter de ce que ces derniers n'ont pas voulu. Une bande ne peut jamais compter plus de deux fois plus de Gobelins que d'Orques (Héros inclus)."
@@ -315,6 +322,7 @@
         "fr": "Squigs des cavernes"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": 5,
       "startingExperience": 0,
@@ -385,6 +393,7 @@
       },
       "isHero": false,
       "isLargeCreature": true,
+      "gainsExperience": false,
       "cost": 200,
       "maxCount": 1,
       "startingExperience": 0,

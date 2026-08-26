@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Skaven",
   "imagePath": "skaven_clan_eschin.jpg",
   "name": {
     "en": "Skaven of Clan Eshin",
@@ -92,6 +93,7 @@
       "cost": 60,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 6,
       "weaponSkill": 4,
@@ -102,6 +104,7 @@
       "initiative": 5,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Skaven",
       "description": {
         "en": "The Nightmaster of Clan Eshin has sent this Assassin to collect precious wyrdstone - success means wealth and status among the clan, failure is best not contemplated.",
         "fr": "Le Maître de la Nuit du clan Eshin a envoyé un de ses lieutenants à la recherche de la précieuse pierre magique. Le succès signifie gloire, descendance et aisance, tandis que la défaite signifie... Mieux vaut ne pas aborder ce sujet."
@@ -152,6 +155,7 @@
       "initiative": 5,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Skaven",
       "description": {
         "en": "The most powerful fighters of Clan Eshin - black-furred killers trained in every martial art of their clan, excelling at ambush and assassination in Mordheim's ruins.",
         "fr": "Les skavens noirs sont les plus puissants de tous les guerriers du clan Eshin, des tueurs chevronnés entraînés à tous les arts martiaux de leurs clans. À Mordheim ils excellent dans les embuscades et les assassinats."
@@ -183,6 +187,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Skaven",
       "description": {
         "en": "The sorcerers of Clan Eshin are black magicians who manufacture the enchanted weapons of the Assassins - their power is slight compared to the Warlocks of Clan Skryre or the mighty Grey Seers, but potent nonetheless.",
         "fr": "Les sorciers du clan Eshin sont des enchanteurs maléfiques qui fabriquent des armes magiques pour les assassins. Bien que leurs pouvoirs soient faibles en comparaison de ceux des technomages du clan Skryre ou des Prophètes Gris, leur sorcellerie est puissante."
@@ -221,6 +226,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 4,
+      "racialProfileName": "Skaven",
       "description": {
         "en": "Young apprentices of Clan Eshin, recently initiated into the secrets of the clan - they make up for their lack of knowledge with ambition and energy.",
         "fr": "Les coureurs nocturnes sont de jeunes apprentis du clan Eshin. Récemment initiés dans les secrets du clan, ils compensent leur manque de savoir par l'ambition et l'énergie dont ils font preuve."
@@ -250,6 +256,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 5,
+      "racialProfileName": "Skaven",
       "description": {
         "en": "The Clanrats of Clan Eshin - the strongest among them are initiated into the clan's secrets and begin training to become Assassins, the most feared of Skaven warriors.",
         "fr": "Les vermineux sont les guerriers du clan Eshin. Les plus forts d'entre eux sont initiés aux secrets du clan et sont entraînés pour devenir des assassins, ce sont les plus redoutés des guerriers des clans skavens. Tous rêvent de devenir un jour assassin."
@@ -262,6 +269,7 @@
         "fr": "Rats géants"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": null,
       "startingExperience": 0,
@@ -313,6 +321,7 @@
       "initiative": 4,
       "attacks": 3,
       "leadership": 4,
+      "racialProfileName": "Rat Ogre",
       "canUseEquipment": false,
       "description": {
         "en": "Horrible monsters much in demand as bodyguards to important Skaven.",

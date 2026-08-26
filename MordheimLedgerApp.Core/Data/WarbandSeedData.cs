@@ -25,6 +25,12 @@ public class WarbandSeedData
     /// MordheimLedgerApp.Core.Models.Library.WarbandGrade member names exactly (e.g. "Grade1a").</summary>
     public string Grade { get; set; } = nameof(Models.Library.WarbandGrade.Core);
 
+    /// <summary>English Name reference into Data/SeedData/Races.json (e.g. "Human", "Skaven") - resolved
+    /// once at seed time (see AppDatabase.FindOrCreateRaceAsync/SeedRacesAsync, seeded before any
+    /// warband file, same idiom as MagicSchools above). Every band declares exactly one - see
+    /// Models.Library.WarbandArchetype.RaceId.</summary>
+    public string Race { get; set; } = string.Empty;
+
     /// <summary>Rules SPECIFIC to this warband (e.g. "Ancient Enemies" for Kislevites) - genuinely
     /// common rules (Leader, Wizard, Causes Fear, ...) now live once in Data/SeedData/SpecialRules.json,
     /// seeded before any warband file, so they're never redeclared here anymore. Still find-or-created by
@@ -133,6 +139,23 @@ public class WarriorSeedData
     /// <summary>True for "large creature" archetypes (Rat Ogre, Ogre, Troll...) - see
     /// WarriorArchetype.IsLargeCreature.</summary>
     public bool IsLargeCreature { get; set; }
+
+    /// <summary>False for archetypes carrying the "Never Gains Experience" special rule (Zombie...) -
+    /// omitted/true for every ordinary archetype. See WarriorArchetype.GainsExperience.</summary>
+    public bool GainsExperience { get; set; } = true;
+
+    /// <summary>True for the one archetype that represents this warband's leader (e.g. the Mercenary
+    /// Captain) - exactly one per warband file. See WarriorArchetype.IsLeader.</summary>
+    public bool IsLeader { get; set; }
+
+    /// <summary>English Name reference into Data/SeedData/RacialProfiles.json (e.g. "Human", "Vampire")
+    /// - which creature body type's characteristic maximums govern this archetype's Advance rolls, see
+    /// WarriorArchetype.RacialProfileId/RacialProfile. Null/omitted for an archetype whose
+    /// GainsExperience is false (Zombie, Dire Wolf...) - the Advance step never triggers for it, so it
+    /// never needs one. Declared per-band (here) rather than in a shared lookup table: each band file
+    /// already owns everything else specific to its own archetypes, and this keeps a wrong/missing
+    /// assignment a one-line fix in the file that actually needs it.</summary>
+    public string? RacialProfileName { get; set; }
 }
 
 public class EquipmentSeedData
@@ -194,6 +217,22 @@ public class EquipmentSeedData
     public int? Initiative { get; set; }
     public int? Attacks { get; set; }
     public int? Leadership { get; set; }
+
+    /// <summary>Matches a MordheimLedgerApp.Core.Models.Library.SkillCategory member name - see
+    /// EquipmentItem.GrantsSkillCategory. Null for almost every item.</summary>
+    public string? GrantsSkillCategory { get; set; }
+
+    /// <summary>See EquipmentItem.GrantsSpecificSkillName. Null for almost every item.</summary>
+    public string? GrantsSpecificSkillName { get; set; }
+
+    /// <summary>See EquipmentItem.GrantsRareItemSearchBonus. Null for almost every item.</summary>
+    public int? GrantsRareItemSearchBonus { get; set; }
+
+    /// <summary>See EquipmentItem.IsSellable. False/absent for almost every item.</summary>
+    public bool IsSellable { get; set; }
+
+    /// <summary>See EquipmentItem.GrantsBonusExplorationDice. Null for almost every item.</summary>
+    public int? GrantsBonusExplorationDice { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -223,6 +262,38 @@ public class MagicSchoolSeedData
     public LocalizedText? Description { get; set; }
 }
 
+/// <summary>One race/species entry (Data/SeedData/Races.json, common - not declared per-band) - see
+/// Models.Library.Race. Find-or-created by English Name at seed time, same shape as
+/// MagicSchoolSeedData.</summary>
+public class RaceSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+}
+
+/// <summary>One creature body type's characteristic maximums (Data/SeedData/RacialProfiles.json,
+/// common - not declared per-band) - see Models.Library.RacialProfile. Find-or-created by English Name
+/// at seed time, same shape as RaceSeedData; resolved onto each WarriorArchetype via
+/// AppDatabase._racialProfileNameByWarriorArchetypeEnglishName (not a per-warrior JSON field - a
+/// creature type like "Human" or "Skaven" is shared by dozens of archetypes across the 15 warband
+/// files, so a single name-keyed lookup table is simpler to keep correct than repeating the same string
+/// on every WarriorSeedData entry).</summary>
+public class RacialProfileSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+    public int Movement { get; set; }
+    public string? MovementOverride { get; set; }
+    public int WeaponSkill { get; set; }
+    public int BallisticSkill { get; set; }
+    public int Strength { get; set; }
+    public int Toughness { get; set; }
+    public int Wounds { get; set; }
+    public int Initiative { get; set; }
+    public int Attacks { get; set; }
+    public int Leadership { get; set; }
+}
+
 /// <summary>One named, reusable SpecialRule entry (see WarbandSeedData.SpecialRules/WarriorSeedData.
 /// SpecialRules) - find-or-created by English Name at seed time so the same rule attached across
 /// multiple warbands/warrior types resolves to a single shared catalog row instead of duplicate text.</summary>
@@ -240,6 +311,17 @@ public class SpecialRuleSeedData
 
     /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.Rarity.</summary>
     public int? Rarity { get; set; }
+
+    /// <summary>Only meaningful alongside CostMultiplier - see SpecialRule.IsResaleUpgrade. False/absent
+    /// for every material except "Ornate Weapon".</summary>
+    public bool IsResaleUpgrade { get; set; }
+
+    /// <summary>Warband file stems (e.g. "OrcMob") this Hatred-granting rule targets - see
+    /// SpecialRule.HatredTargetWarbandArchetypeIds. Resolved the same deferred way as EquipmentSeedData/
+    /// SkillSeedData's RestrictedToWarbandNames (the target WarbandArchetype may not exist yet at seed
+    /// time), see AppDatabase's _pendingSharedRestrictions. Null/empty = not a Hatred rule, or one with
+    /// no mechanized target yet.</summary>
+    public List<string>? HatredTargetWarbandNames { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see
@@ -298,7 +380,138 @@ public class InjurySeedData
     public string Category { get; set; } = string.Empty;
 
     public string? RollRange { get; set; }
+
+    /// <summary>See Models.Library.Injury.BranchRange - only set for the Arm Wound (23)/Smashed Leg (25)
+    /// rows, which are split into two entries (light "2-6" / severe "1") sharing the same RollRange.</summary>
+    public string? BranchRange { get; set; }
+
     public LocalizedText? Description { get; set; }
+
+    /// <summary>Rules permanently granted to whoever carries this Injury (e.g. Stupidity/Frenzy from
+    /// Madness, 24) - find-or-created by English Name, same convention/shared cache as
+    /// EquipmentSeedData.SpecialRules. Resolved into a real WarriorRow SpecialRules chip via
+    /// Injury.SpecialRules once attached (see WarbandDetailViewModel.ToRow), not a separate mechanized
+    /// effect - the chip/rule reminder IS the effect for this kind of result.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+}
+
+/// <summary>One entry of the rulebook's Exploration chart (Data/SeedData/ExplorationResults.json,
+/// common - not declared per-band). See Models.Library.ExplorationResult.</summary>
+public class ExplorationResultSeedData
+{
+    public int DiceCount { get; set; }
+    public int Value { get; set; }
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText Description { get; set; } = new();
+
+    /// <summary>See Models.Library.ExplorationResult.ShortDescription. Null (almost every entry) = the
+    /// wizard shows Description as-is.</summary>
+    public LocalizedText? ShortDescription { get; set; }
+
+    public bool RollsIndependently { get; set; }
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationStatField member name (e.g.
+    /// "Toughness") - null (the vast majority) for entries with no stat test. See
+    /// Models.Library.ExplorationResult.StatTestField.</summary>
+    public string? StatTestField { get; set; }
+
+    /// <summary>See Models.Library.ExplorationResult.StatTestTargetsLeader. False/absent for almost every
+    /// entry - so far only Tavern (Taverne).</summary>
+    public bool StatTestTargetsLeader { get; set; }
+
+    /// <summary>See Models.Library.ExplorationResult.AutoPassStatTestWarbandArchetypeNames. Null/absent
+    /// for almost every entry - so far only Tavern (Taverne).</summary>
+    public List<string>? AutoPassStatTestWarbandArchetypeNames { get; set; }
+
+    /// <summary>See Models.Library.ExplorationResult.RequiresDoubleRoll. False/absent for almost every
+    /// entry - so far only Merchant's House (Maison du Marchand).</summary>
+    public bool RequiresDoubleRoll { get; set; }
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationStatField member name - see
+    /// Models.Library.ExplorationResult.BonusStatTestField. Null for almost every entry - so far only
+    /// Shattered Building (Bâtiment Éventré).</summary>
+    public string? BonusStatTestField { get; set; }
+
+    /// <summary>See Models.Library.ExplorationResult.RequiresSentHero. False/absent for almost every
+    /// entry - so far only the Pit (La Fosse).</summary>
+    public bool RequiresSentHero { get; set; }
+
+    public List<ExplorationOutcomeSeedData> Outcomes { get; set; } = new();
+}
+
+/// <summary>One mechanized branch of an ExplorationResultSeedData - see
+/// Models.Library.ExplorationOutcome for the field-by-field meaning.</summary>
+public class ExplorationOutcomeSeedData
+{
+    public int? SubRollMin { get; set; }
+    public int? SubRollMax { get; set; }
+
+    /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.ExplorationOutcomeKind member name.</summary>
+    public string Kind { get; set; } = "None";
+
+    public string? GoldFormula { get; set; }
+    public string? EquipmentItemName { get; set; }
+    public string? ItemQuantityFormula { get; set; }
+    public string? FoundValueFormula { get; set; }
+    public string? MaterialRuleName { get; set; }
+    public string? SecondaryEquipmentItemName { get; set; }
+    public string? AlternativeEquipmentItemName { get; set; }
+    public string? Note { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.BranchText. Null for almost every outcome - so far
+    /// only "conditioned by warband identity" branches (Straggler).</summary>
+    public LocalizedText? BranchText { get; set; }
+
+    public bool? StatTestPass { get; set; }
+    public bool CausesSickness { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.RequiresDoubleRoll. False/absent for almost every
+    /// outcome.</summary>
+    public bool RequiresDoubleRoll { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.CausesDeath. False/absent for almost every
+    /// outcome - so far only the Pit's (La Fosse) "devoured" branch.</summary>
+    public bool CausesDeath { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.TriggersArtefactRoll. False/absent for almost
+    /// every outcome - so far only Noble's Villa (Villa d'un Noble) and Hidden Treasure (Trésor Caché).</summary>
+    public bool TriggersArtefactRoll { get; set; }
+
+    /// <summary>English WarbandArchetype.Name(s) - see Models.Library.ExplorationOutcome.
+    /// RestrictedToWarbandArchetypeNames. Null/absent (almost every outcome) = no restriction.</summary>
+    public List<string>? RestrictedToWarbandArchetypeNames { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsNextExplorationBonusDie. False/absent for
+    /// almost every outcome - so far only Straggler's (Traînard) "any other warband" branch.</summary>
+    public bool GrantsNextExplorationBonusDie { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsLeaderExperience. Null/absent for almost
+    /// every outcome - so far only Straggler's (Traînard) Possessed branch.</summary>
+    public int? GrantsLeaderExperience { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsFreeHenchmanArchetypeName. Null/absent for
+    /// almost every outcome - so far only Straggler's (Traînard) Undead branch ("Zombie").</summary>
+    public string? GrantsFreeHenchmanArchetypeName { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsDistributedHeroExperienceFormula. Null for
+    /// almost every outcome - so far only Prisoners' Possessed branch ("D3").</summary>
+    public string? GrantsDistributedHeroExperienceFormula { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsOptionalEquippedHenchman. False/absent for
+    /// almost every outcome - so far only Prisoners' "other warbands" catch-all branch.</summary>
+    public bool GrantsOptionalEquippedHenchman { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.NextGameNoteText. Null for almost every outcome -
+    /// so far only Graveyard's catch-all branch.</summary>
+    public LocalizedText? NextGameNoteText { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsWeaponBlessing. False/absent for almost
+    /// every outcome - so far only Shrine's Sisters of Sigmar/Witch Hunters branch.</summary>
+    public bool GrantsWeaponBlessing { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsCatacombReroll. False/absent for almost
+    /// every outcome - so far only Entrance to the Catacombs' single branch.</summary>
+    public bool GrantsCatacombReroll { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

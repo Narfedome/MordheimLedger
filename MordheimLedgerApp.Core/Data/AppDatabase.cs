@@ -33,6 +33,291 @@ public class AppDatabase
         // nothing the player made is at risk of being duplicated).
         if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
             await SeedOfficialContentAsync();
+
+        // Runs on every launch, not just first: fixes existing data rather than seeding new data (see
+        // the method's own doc comment).
+        await BackfillNeverGainsExperienceAsync();
+        await BackfillWarbandArchetypeRaceAsync();
+        await BackfillWarriorArchetypeRacialProfileAsync();
+        await BackfillWarriorRacialMaxesAsync();
+        await BackfillBranchedInjuriesAsync();
+        await BackfillInjurySpecialRulesAsync();
+        await BackfillSpecialRuleDescriptionsAsync();
+        await BackfillWarriorStartingStatsAsync();
+
+        // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
+        // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
+        await ResyncExplorationResultsAsync();
+    }
+
+    /// <summary>One-time-per-row data fix for campaigns that started before WarriorArchetype/
+    /// Warrior.GainsExperience existed (2026-08-17): the new column's SQLite-added default is `true`
+    /// even for archetypes (Zombie, etc.) that already carry the "Never Gains Experience"/"Ne gagne
+    /// jamais d'Expérience" special rule - so the flag would silently disagree with the rule already
+    /// shown on the warrior's sheet until something corrects it. Unlike the "editing an archetype
+    /// doesn't retroactively change already-recruited warriors" rule elsewhere in this app (a
+    /// deliberate design choice about future edits), this is a missing-initial-value bug, not an edit -
+    /// so both the archetype template AND any already-recruited Warrior snapshot get corrected here,
+    /// once. Runs unconditionally (not gated by the "catalog empty" seed check, which only fires on a
+    /// brand new install) so it fixes any existing local database on next launch - cheap no-op every
+    /// run after the first since the WHERE-equivalent filters (GainsExperience still true) then match
+    /// nothing. A fresh install never hits this: Equipment/SpecialRules.json-derived seed data already
+    /// sets GainsExperience: false directly (see WarbandSeedData.WarriorSeedData), so nothing here is
+    /// ever stale for it.</summary>
+    private async Task BackfillNeverGainsExperienceAsync()
+    {
+        var ruleKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.Value is "Never Gains Experience" or "Ne gagne jamais d'Expérience")
+            .Select(t => t.Key)
+            .ToHashSet();
+        if (ruleKeys.Count == 0) return;
+
+        var ruleIds = (await _db.Table<SpecialRuleEntity>().ToListAsync())
+            .Where(r => ruleKeys.Contains(r.NameKey))
+            .Select(r => r.Id)
+            .ToHashSet();
+        if (ruleIds.Count == 0) return;
+
+        var archetypeIds = (await _db.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync())
+            .Where(j => ruleIds.Contains(j.SpecialRuleId))
+            .Select(j => j.WarriorArchetypeId)
+            .ToHashSet();
+        if (archetypeIds.Count == 0) return;
+
+        var staleArchetypes = (await _db.Table<WarriorArchetypeEntity>().ToListAsync())
+            .Where(a => archetypeIds.Contains(a.Id) && a.GainsExperience)
+            .ToList();
+        foreach (var archetype in staleArchetypes)
+        {
+            archetype.GainsExperience = false;
+            await _db.UpdateAsync(archetype);
+        }
+
+        var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
+            .Where(w => archetypeIds.Contains(w.WarriorArchetypeId) && w.GainsExperience)
+            .ToList();
+        foreach (var warrior in staleWarriors)
+        {
+            warrior.GainsExperience = false;
+            await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>English WarbandArchetype.Name -> English Race.Name, for the fixed 15 bands seeded
+    /// before WarbandArchetype.RaceId existed (2026-08-20) - hardcoded here rather than re-reading each
+    /// band's own JSON file's new "race" field, simpler for a one-time fix that only ever targets these
+    /// 15 already-known bands (a future 16th band goes through SeedWarbandFromJsonAsync normally, which
+    /// already resolves RaceId from its own JSON at insert time).</summary>
+    private static readonly Dictionary<string, string> _raceNameByWarbandEnglishName = new()
+    {
+        ["Averlander Mercenaries"] = "Human",
+        ["Beastmen Raiders"] = "Beastman",
+        ["Carnival of Chaos"] = "Marauder of Chaos",
+        ["Cult of the Possessed"] = "Marauder of Chaos",
+        ["Dwarf Treasure Hunters"] = "Dwarf",
+        ["Kislevites"] = "Human",
+        ["Marienburg Mercenaries"] = "Human",
+        ["Middenheim Mercenaries"] = "Human",
+        ["Orc Mob"] = "Orc",
+        ["Ostlander Mercenaries"] = "Human",
+        ["Reiklander Mercenaries"] = "Human",
+        ["The Sisters of Sigmar"] = "Human",
+        ["Skaven of Clan Eshin"] = "Skaven",
+        ["Undead"] = "Undead",
+        ["Witch Hunters"] = "Human"
+    };
+
+    /// <summary>One-time-per-row data fix for warbands seeded before WarbandArchetype.RaceId existed
+    /// (2026-08-20) - same idiom as BackfillNeverGainsExperienceAsync: runs unconditionally on every
+    /// launch (not gated by the "catalog empty" check, which only fires on a brand new install), cheap
+    /// no-op once every row has a real RaceId. A fresh install never hits this: SeedWarbandFromJsonAsync
+    /// already sets RaceId directly from each band's own JSON "race" field. Ensures Races.json is seeded
+    /// first (FindOrCreateRaceAsync is DB-aware, safe to call even though SeedOfficialContentAsync -
+    /// and therefore _raceIdsByEnglishName - never ran this launch), then maps each stale
+    /// WarbandArchetype to its race by English Name (_raceNameByWarbandEnglishName).</summary>
+    private async Task BackfillWarbandArchetypeRaceAsync()
+    {
+        var staleArchetypes = (await _db.Table<WarbandArchetypeEntity>().ToListAsync())
+            .Where(a => a.RaceId == 0)
+            .ToList();
+        if (staleArchetypes.Count == 0) return;
+
+        foreach (var seed in await LoadSeedArrayAsync<RaceSeedData>("Races.json"))
+            await FindOrCreateRaceAsync(seed);
+
+        var englishNamesByKey = (await _db.Table<TranslationEntity>().Where(t => t.LanguageCode == "en").ToListAsync())
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        foreach (var archetype in staleArchetypes)
+        {
+            if (!englishNamesByKey.TryGetValue(archetype.NameKey, out var englishName)) continue;
+            if (!_raceNameByWarbandEnglishName.TryGetValue(englishName, out var raceName)) continue;
+            if (!_raceIdsByEnglishName.TryGetValue(raceName, out var raceId)) continue;
+
+            archetype.RaceId = raceId;
+            await _db.UpdateAsync(archetype);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for WarriorArchetypes seeded before RacialProfileId existed -
+    /// same idiom as BackfillWarbandArchetypeRaceAsync just above (runs unconditionally every launch,
+    /// cheap no-op once every row has a real RacialProfileId). Ensures RacialProfiles.json is seeded
+    /// first (FindOrCreateRacialProfileAsync is DB-aware, safe even on a launch where
+    /// SeedOfficialContentAsync never ran), then re-reads all 15 warband JSON files (LoadWarbandSeedDataAsync)
+    /// to resolve each stale WarriorArchetype's profile by English Name against WarriorSeedData.
+    /// RacialProfileName - the per-band JSON field is the single source of truth (see its own doc), not
+    /// a separate hardcoded table, so a fix to one band's file is picked up here without touching this
+    /// method. Must run before BackfillWarriorRacialMaxesAsync, which depends on every WarriorArchetype
+    /// already having a real RacialProfileId (0 = genuinely none, see RacialProfileId's own doc).</summary>
+    /// <summary>The 15 warband seed file names - same list as SeedOfficialContentAsync's explicit
+    /// SeedWarbandFromJsonAsync calls, duplicated here (rather than having that method iterate this
+    /// array) so the ordered/commented call list there stays easy to scan on its own. Consumed by
+    /// BackfillWarriorArchetypeRacialProfileAsync, which needs to revisit every band file regardless of
+    /// seeding order.</summary>
+    private static readonly string[] _warbandFileNames =
+    [
+        "Undead.json", "DwarfTreasureHunters.json", "Averlanders.json", "Ostlanders.json",
+        "Reiklanders.json", "Middenheimers.json", "Marienburgers.json", "CarnivalOfChaos.json",
+        "CultOfThePossessed.json", "OrcMob.json", "BeastmenRaiders.json", "WitchHunters.json",
+        "SkavenOfClanEshin.json", "SistersOfSigmar.json", "Kislevites.json"
+    ];
+
+    private async Task BackfillWarriorArchetypeRacialProfileAsync()
+    {
+        var staleArchetypes = (await _db.Table<WarriorArchetypeEntity>().ToListAsync())
+            .Where(a => a.RacialProfileId == 0)
+            .ToList();
+        if (staleArchetypes.Count == 0) return;
+
+        foreach (var seed in await LoadSeedArrayAsync<RacialProfileSeedData>("RacialProfiles.json"))
+            await FindOrCreateRacialProfileAsync(seed);
+
+        var racialProfileNameByArchetypeEnglishName = new Dictionary<string, string>();
+        foreach (var fileName in _warbandFileNames)
+        {
+            var data = await LoadWarbandSeedDataAsync(fileName);
+            foreach (var w in data.Warriors)
+                if (w.RacialProfileName is { } profileName) racialProfileNameByArchetypeEnglishName[w.Name.En] = profileName;
+        }
+
+        var englishNamesByKey = (await _db.Table<TranslationEntity>().Where(t => t.LanguageCode == "en").ToListAsync())
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        foreach (var archetype in staleArchetypes)
+        {
+            if (!englishNamesByKey.TryGetValue(archetype.NameKey, out var englishName)) continue;
+            if (!racialProfileNameByArchetypeEnglishName.TryGetValue(englishName, out var profileName)) continue;
+            if (!_racialProfileIdsByEnglishName.TryGetValue(profileName, out var profileId)) continue;
+
+            archetype.RacialProfileId = profileId;
+            await _db.UpdateAsync(archetype);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for Warriors recruited before the racial-maximum snapshot
+    /// fields (MaxWeaponSkill etc.) existed - unlike the RaceId/RacialProfileId backfills above, this
+    /// doesn't need seed data or English-name lookups: every WarriorEntity already carries a real
+    /// WarriorArchetypeId - if that archetype's own RacialProfileId resolves to a real profile (0 =
+    /// genuinely none, see SeedWarbandFromJsonAsync/RacialProfiles.json's own doc - stays null forever,
+    /// nothing to backfill), copy its 9 maximums across. Filters on MaxWeaponSkill == null rather than
+    /// all 9 fields at once, same cheap-no-op-after-first-run idiom as the other backfills - re-scans
+    /// (harmlessly, a no-op via the profilesById lookup below) every launch for warriors whose archetype
+    /// has no profile, since null is otherwise indistinguishable from "not yet backfilled".</summary>
+    private async Task BackfillWarriorRacialMaxesAsync()
+    {
+        var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
+            .Where(w => w.MaxWeaponSkill == null)
+            .ToList();
+        if (staleWarriors.Count == 0) return;
+
+        var archetypesById = (await _db.Table<WarriorArchetypeEntity>().ToListAsync()).ToDictionary(a => a.Id);
+        var profilesById = (await _db.Table<RacialProfileEntity>().ToListAsync()).ToDictionary(p => p.Id);
+
+        foreach (var warrior in staleWarriors)
+        {
+            if (!archetypesById.TryGetValue(warrior.WarriorArchetypeId, out var archetype)) continue;
+            if (!profilesById.TryGetValue(archetype.RacialProfileId, out var profile)) continue;
+
+            warrior.MaxMovement = profile.MovementOverride is null ? profile.Movement : null;
+            warrior.MaxWeaponSkill = profile.WeaponSkill;
+            warrior.MaxBallisticSkill = profile.BallisticSkill;
+            warrior.MaxStrength = profile.Strength;
+            warrior.MaxToughness = profile.Toughness;
+            warrior.MaxWounds = profile.Wounds;
+            warrior.MaxInitiative = profile.Initiative;
+            warrior.MaxAttacks = profile.Attacks;
+            warrior.MaxLeadership = profile.Leadership;
+            await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for warriors recruited before Warrior.StartingMovement/etc
+    /// existed (2026-08-25) - the new columns default to 0 for pre-existing rows, which would make the
+    /// stat-changed color code (StatRowView's DataTriggers) show every single one of a warrior's
+    /// current stats as "increased" the moment this ships. All 9 fields being exactly 0 is used as the
+    /// "never set" marker (safe in practice: no real profile has Wounds/Attacks/Leadership all at 0 -
+    /// that would mean an unfieldable model) - baseline resets to whatever each warrior's CURRENT stats
+    /// happen to be right now (their true recruitment-time values aren't recoverable retroactively), so
+    /// no false delta shows up today and tracking is accurate from this point forward.</summary>
+    private async Task BackfillWarriorStartingStatsAsync()
+    {
+        var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
+            .Where(w => w.StartingMovement == 0 && w.StartingWeaponSkill == 0 && w.StartingBallisticSkill == 0 &&
+                        w.StartingStrength == 0 && w.StartingToughness == 0 && w.StartingWounds == 0 &&
+                        w.StartingInitiative == 0 && w.StartingAttacks == 0 && w.StartingLeadership == 0)
+            .ToList();
+
+        foreach (var warrior in staleWarriors)
+        {
+            warrior.StartingMovement = warrior.Movement;
+            warrior.StartingWeaponSkill = warrior.WeaponSkill;
+            warrior.StartingBallisticSkill = warrior.BallisticSkill;
+            warrior.StartingStrength = warrior.Strength;
+            warrior.StartingToughness = warrior.Toughness;
+            warrior.StartingWounds = warrior.Wounds;
+            warrior.StartingInitiative = warrior.Initiative;
+            warrior.StartingAttacks = warrior.Attacks;
+            warrior.StartingLeadership = warrior.Leadership;
+            await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>Wipes and re-seeds the Exploration chart from Data/SeedData/ExplorationResults.json on
+    /// EVERY launch, unconditionally - not gated behind InitializeAsync's "catalog empty" check like the
+    /// rest of SeedOfficialContentAsync. Two problems this solves at once:
+    /// (1) Found 2026-08-17: SeedExplorationResultsAsync got invoked a second time against a live dev
+    ///     database outside the normal single-pass seed, silently doubling every row (no dedup guard of
+    ///     its own, same "plain insert" precedent as Injury/EquipmentItem).
+    /// (2) Found 2026-08-18, the more fundamental issue: an ALREADY-SEEDED database never re-seeds
+    ///     anything (the empty-catalog gate only fires once, ever), so an edit to ExplorationResults.json
+    ///     - like adding Puits/StatTestField - silently never reached a machine that had already run the
+    ///     seed once before that edit existed. Every other Library catalog has a real CRUD editor and a
+    ///     "no rules engine" boundary that makes this a non-issue; Exploration is pure reference content
+    ///     with no editor and, critically, no other table holding a foreign key into
+    ///     ExplorationResultEntity/ExplorationOutcomeEntity (History entries are plain strings, not
+    ///     references) - nothing is lost by deleting and recreating it wholesale every launch. Cheap
+    ///     (30 rows) compared to re-running the ~22-pass full catalog+warband seed this replaces having
+    ///     to trigger manually.</summary>
+    private async Task ResyncExplorationResultsAsync()
+    {
+        var staleResults = await _db.Table<ExplorationResultEntity>().ToListAsync();
+        if (staleResults.Count > 0)
+        {
+            var staleOutcomes = await _db.Table<ExplorationOutcomeEntity>().ToListAsync();
+            foreach (var outcome in staleOutcomes)
+                await _db.DeleteAsync<ExplorationOutcomeEntity>(outcome.Id);
+
+            var staleKeys = staleResults.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }).ToHashSet();
+            var staleTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+                .Where(t => staleKeys.Contains(t.Key));
+            foreach (var translation in staleTranslations)
+                await _db.DeleteAsync<TranslationEntity>(translation.Id);
+
+            foreach (var result in staleResults)
+                await _db.DeleteAsync<ExplorationResultEntity>(result.Id);
+        }
+
+        await SeedExplorationResultsAsync();
     }
 
     private async Task CreateAllTablesAsync()
@@ -45,9 +330,12 @@ public class AppDatabase
         await _db.CreateTableAsync<EquipmentItemEntity>();
         await _db.CreateTableAsync<SkillEntity>();
         await _db.CreateTableAsync<InjuryEntity>();
+        await _db.CreateTableAsync<InjurySpecialRuleEntity>();
         await _db.CreateTableAsync<WarriorEquipmentEntity>();
+        await _db.CreateTableAsync<WarbandEquipmentEntity>();
         await _db.CreateTableAsync<WarriorSkillEntity>();
         await _db.CreateTableAsync<WarriorInjuryEntity>();
+        await _db.CreateTableAsync<WarriorHatredEntity>();
         await _db.CreateTableAsync<WarriorSpellEntity>();
         await _db.CreateTableAsync<HistoryEntryEntity>();
         await _db.CreateTableAsync<TranslationEntity>();
@@ -62,11 +350,15 @@ public class AppDatabase
         await _db.CreateTableAsync<WarriorMutationEntity>();
         await _db.CreateTableAsync<MagicSchoolEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMagicSchoolEntity>();
+        await _db.CreateTableAsync<RaceEntity>();
+        await _db.CreateTableAsync<RacialProfileEntity>();
         await _db.CreateTableAsync<WarbandArchetypeMutationEntity>();
         await _db.CreateTableAsync<EquipmentListEntity>();
         await _db.CreateTableAsync<EquipmentListItemEntity>();
         await _db.CreateTableAsync<WarriorArchetypeEquipmentEntity>();
         await _db.CreateTableAsync<EquipmentItemSpecialRuleEntity>();
+        await _db.CreateTableAsync<ExplorationResultEntity>();
+        await _db.CreateTableAsync<ExplorationOutcomeEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -79,9 +371,11 @@ public class AppDatabase
         await _db.DropTableAsync<EquipmentItemEntity>();
         await _db.DropTableAsync<SkillEntity>();
         await _db.DropTableAsync<InjuryEntity>();
+        await _db.DropTableAsync<InjurySpecialRuleEntity>();
         await _db.DropTableAsync<WarriorEquipmentEntity>();
         await _db.DropTableAsync<WarriorSkillEntity>();
         await _db.DropTableAsync<WarriorInjuryEntity>();
+        await _db.DropTableAsync<WarriorHatredEntity>();
         await _db.DropTableAsync<WarriorSpellEntity>();
         await _db.DropTableAsync<HistoryEntryEntity>();
         await _db.DropTableAsync<TranslationEntity>();
@@ -97,10 +391,14 @@ public class AppDatabase
         await _db.DropTableAsync<MagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMagicSchoolEntity>();
         await _db.DropTableAsync<WarbandArchetypeMutationEntity>();
+        await _db.DropTableAsync<RacialProfileEntity>();
         await _db.DropTableAsync<EquipmentListEntity>();
         await _db.DropTableAsync<EquipmentListItemEntity>();
         await _db.DropTableAsync<WarriorArchetypeEquipmentEntity>();
         await _db.DropTableAsync<EquipmentItemSpecialRuleEntity>();
+        await _db.DropTableAsync<ExplorationResultEntity>();
+        await _db.DropTableAsync<ExplorationOutcomeEntity>();
+        await _db.DropTableAsync<WarbandEquipmentEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -116,30 +414,42 @@ public class AppDatabase
         _mutationIdsByEnglishName.Clear();
         _magicSchoolIdsByEnglishName.Clear();
         _equipmentIdsByEnglishName.Clear();
+        _racialProfileIdsByEnglishName.Clear();
         _warbandArchetypeIdsByFileStem.Clear();
         _pendingSharedRestrictions.Clear();
         await CreateAllTablesAsync();
         await SeedOfficialContentAsync();
+
+        // Pas dans SeedOfficialContentAsync (voir ResyncExplorationResultsAsync, appelée à chaque
+        // lancement plutôt que gardée derrière son garde-fou "catalogue vide") - après un DropTableAsync
+        // complet ci-dessus, la table est garantie vide, un seed direct suffit ici (pas besoin du
+        // nettoyage préalable que fait ResyncExplorationResultsAsync sur une base déjà peuplée).
+        await SeedExplorationResultsAsync();
     }
 
     private async Task SeedOfficialContentAsync()
     {
-        // The 6 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
-        // Skills.json, Injuries.json, MagicSchools.json) must seed before any warband file below - warband
-        // JSON files only declare rules/equipment/mutations/schools that are genuinely THEIRS, and find-
-        // or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or a plain unrestricted insert
-        // (Equipment/Skill/Injury) relies on the canonical row already existing by the time a warband
-        // references it. Injuries.json isn't referenced by any warband file at all (no per-band injury
-        // tables in the rulebook), it just needs to seed once. Equipment.json's core rulebook mounts
-        // (Cheval/Destrier/Chien de guerre, EquipmentCategory.Animal) carry RestrictedToWarbandNames
-        // instead of a single-band flag - band-only mounts (e.g. Orc Mob's Sanglier de guerre) stay
-        // declared directly in their own warband file, same split as any other band-declared equipment.
+        // The 7 common catalogs (Data/SeedData/SpecialRules.json, Equipment.json, Mutations.json,
+        // Skills.json, Injuries.json, MagicSchools.json, ExplorationResults.json) must seed before any
+        // warband file below - warband JSON files only declare rules/equipment/mutations/schools that
+        // are genuinely THEIRS, and find-or-create-by-English-Name (SpecialRule/Mutation/MagicSchool) or
+        // a plain unrestricted insert (Equipment/Skill/Injury) relies on the canonical row already
+        // existing by the time a warband references it. Injuries.json/ExplorationResults.json aren't
+        // referenced by any warband file at all (no per-band injury/exploration tables in the rulebook),
+        // they just need to seed once. Equipment.json's core rulebook mounts (Cheval/Destrier/Chien de
+        // guerre, EquipmentCategory.Animal) carry RestrictedToWarbandNames instead of a single-band flag
+        // - band-only mounts (e.g. Orc Mob's Sanglier de guerre) stay declared directly in their own
+        // warband file, same split as any other band-declared equipment.
         await SeedSpecialRulesAsync();
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
+        await SeedRacesAsync();
+        await SeedRacialProfilesAsync();
+        // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
+        // InitializeAsync plutôt que gardée derrière le garde-fou "catalogue vide" de cette méthode.
 
         await SeedWarbandFromJsonAsync("Undead.json");
         await SeedWarbandFromJsonAsync("DwarfTreasureHunters.json");
@@ -165,6 +475,18 @@ public class AppDatabase
         // first launch) and insert the matching join row.
         foreach (var pending in _pendingSharedRestrictions)
         {
+            // SpecialRule's Hatred target isn't a join table (see SpecialRuleEntity.
+            // HatredTargetWarbandArchetypeIds) - resolve every stem for this rule first, then write the
+            // whole CSV list back in one update, rather than one join row per stem like the other 3 kinds.
+            if (pending.Kind == SharedRestrictionKind.SpecialRule)
+            {
+                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByFileStem[stem]).ToList();
+                var ruleEntity = await _db.Table<SpecialRuleEntity>().Where(r => r.Id == pending.ItemId).FirstAsync();
+                ruleEntity.HatredTargetWarbandArchetypeIds = string.Join(',', targetIds);
+                await _db.UpdateAsync(ruleEntity);
+                continue;
+            }
+
             foreach (var stem in pending.WarbandFileStems)
             {
                 var warbandArchetypeId = _warbandArchetypeIdsByFileStem[stem];
@@ -187,13 +509,22 @@ public class AppDatabase
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
     /// archetypes, band-specific equipment (with restriction rows where flagged) and spells - each
     /// translatable field gets a fresh key via SeedTranslationAsync, same as the Reiklander seed above.</summary>
-    private async Task SeedWarbandFromJsonAsync(string fileName)
+    /// <summary>Deserializes one warband seed file into its full WarbandSeedData - shared by
+    /// SeedWarbandFromJsonAsync (first-launch seeding) and BackfillWarriorArchetypeRacialProfileAsync
+    /// (which re-reads all 15 files to resolve WarriorSeedData.RacialProfileName by English archetype
+    /// name, since that's per-band JSON data rather than a shared lookup table).</summary>
+    private static async Task<WarbandSeedData> LoadWarbandSeedDataAsync(string fileName)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames().Single(n => n.EndsWith(fileName, StringComparison.Ordinal));
         await using var stream = assembly.GetManifestResourceStream(resourceName)!;
-        var data = await JsonSerializer.DeserializeAsync<WarbandSeedData>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        return await JsonSerializer.DeserializeAsync<WarbandSeedData>(stream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
             ?? throw new InvalidOperationException($"Empty or invalid seed file: {fileName}");
+    }
+
+    private async Task SeedWarbandFromJsonAsync(string fileName)
+    {
+        var data = await LoadWarbandSeedDataAsync(fileName);
 
         var warband = new WarbandArchetype
         {
@@ -202,7 +533,12 @@ public class AppDatabase
             StartingTreasury = data.StartingTreasury,
             MaxWarriors = data.MaxWarriors,
             MinWarriors = data.MinWarriors,
-            ImagePath = data.ImagePath ?? string.Empty
+            ImagePath = data.ImagePath ?? string.Empty,
+            // Indexeur direct (pas GetValueOrDefault) : une bande sans "race" reconnue dans Races.json
+            // (typo, ou Races.json pas encore seedé avant celle-ci) doit planter au premier lancement
+            // plutôt que silencieusement RaceId=0 - même précédent fail-fast que
+            // _warbandArchetypeIdsByFileStem plus bas.
+            RaceId = _raceIdsByEnglishName[data.Race]
         };
         warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
@@ -329,7 +665,22 @@ public class AppDatabase
                 EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
                 CanUseEquipment = w.CanUseEquipment,
                 AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
-                IsLargeCreature = w.IsLargeCreature
+                IsLargeCreature = w.IsLargeCreature,
+                GainsExperience = w.GainsExperience,
+                IsLeader = w.IsLeader,
+                // 0 (jamais fail-fast, contrairement à WarbandArchetype.RaceId ci-dessus) si : (a)
+                // w.RacialProfileName est null (archétype qui ne gagne jamais d'Expérience - Zombie/
+                // Loup Funeste/Chien de guerre/Squig des Cavernes/Troll/Rats géants - l'étape
+                // Progression ne se déclenche jamais pour lui, voir WarriorOutcomeRow.
+                // ShowsInExperienceStep, donc ses maximums raciaux ne sont jamais consultés) ; ou (b) le
+                // nom référencé n'existe pas (encore) dans RacialProfiles.json. 0 se comporte comme
+                // "aucun maximum connu, ne bloque jamais" (voir Warrior.MaxWeaponSkill etc., nullable)
+                // plutôt que "plafonné à 0" - ajouter le profil manquant plus tard (Bibliothèque >
+                // Profils raciaux) suffit à l'activer, aucun changement de code requis.
+                RacialProfileId = w.RacialProfileName is { } racialProfileName
+                    && _racialProfileIdsByEnglishName.TryGetValue(racialProfileName, out var racialProfileId)
+                        ? racialProfileId
+                        : 0
             };
             warrior.NameKey = await SeedTranslationAsync(w.Name.En, w.Name.Fr);
             warrior.DescriptionKey = w.Description is null ? null : await SeedTranslationAsync(w.Description.En, w.Description.Fr);
@@ -431,7 +782,12 @@ public class AppDatabase
                 Wounds = eq.Wounds,
                 Initiative = eq.Initiative,
                 Attacks = eq.Attacks,
-                Leadership = eq.Leadership
+                Leadership = eq.Leadership,
+                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
+                GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
+                GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
+                IsSellable = eq.IsSellable,
+                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -477,6 +833,115 @@ public class AppDatabase
         }
     }
 
+    /// <summary>Runs on every launch, not just first (same idiom as BackfillWarbandArchetypeRaceAsync) -
+    /// SeedInjuriesAsync only runs on a genuinely empty database (see InitializeAsync), so an existing
+    /// player database never picks up rows added to Injuries.json after their first launch. Added
+    /// 2026-08-25 when Arm Wound (23)/Smashed Leg (25) each split from one merged catalog entry into two
+    /// branch-specific rows (light "2-6"/severe "1" - see Injury.BranchRange), and extended the same day
+    /// for Madness (24)'s Stupidity "1-3"/Frenzy "4-6" split : inserts whichever of those new rows are
+    /// still missing (SpecialRules included, see Injury.SpecialRules), identified by (Category, RollRange,
+    /// BranchRange) rather than Name/translation text - Injury has no player-facing editor that could
+    /// rename that triple, unlike Name which is just display text.</summary>
+    private async Task BackfillBranchedInjuriesAsync()
+    {
+        var existing = await _db.Table<InjuryEntity>().ToListAsync();
+        foreach (var inj in await LoadSeedArrayAsync<InjurySeedData>("Injuries.json"))
+        {
+            if (string.IsNullOrEmpty(inj.BranchRange)) continue;
+
+            var category = Enum.Parse<InjuryCategory>(inj.Category);
+            if (existing.Any(e => e.Category == category && e.RollRange == inj.RollRange && e.BranchRange == inj.BranchRange))
+                continue;
+
+            var injury = new Injury { Category = category, RollRange = inj.RollRange, BranchRange = inj.BranchRange, Source = ContentSource.Official };
+            injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);
+            injury.DescriptionKey = inj.Description is null ? null : await SeedTranslationAsync(inj.Description.En, inj.Description.Fr);
+            var entity = injury.ToEntity();
+            await _db.InsertAsync(entity);
+            existing.Add(entity);
+
+            foreach (var sr in inj.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = entity.Id, SpecialRuleId = ruleId });
+            }
+        }
+    }
+
+    /// <summary>Runs on every launch, after BackfillBranchedInjuriesAsync - covers a DIFFERENT gap: an
+    /// Injury row that already existed (seeded or backfilled by an earlier launch) before Injuries.json
+    /// gave it any SpecialRules (e.g. "Blessure au bras : amputé" existed from the Arm Wound/Smashed Leg
+    /// split, 2026-08-25, but only gained its "One-Handed Weapons Only" rule in a later pass the same
+    /// day). BackfillBranchedInjuriesAsync only inserts brand-new rows (and attaches their rules at
+    /// insert time) - it never revisits a row that already exists, so this one specifically matches
+    /// existing rows by (Category, RollRange, BranchRange) and attaches whichever SpecialRules the seed
+    /// now lists, but ONLY if that row currently has zero attached (never re-adds/duplicates for a row
+    /// that already has some, even if the seed's own rule list changes again later - same
+    /// don't-retroactively-touch-an-already-resolved-row precedent as the rest of this file).</summary>
+    private async Task BackfillInjurySpecialRulesAsync()
+    {
+        var existingInjuries = await _db.Table<InjuryEntity>().ToListAsync();
+        var injuryIdsWithRules = (await _db.Table<InjurySpecialRuleEntity>().ToListAsync())
+            .Select(l => l.InjuryId).ToHashSet();
+
+        foreach (var inj in await LoadSeedArrayAsync<InjurySeedData>("Injuries.json"))
+        {
+            if (inj.SpecialRules.Count == 0) continue;
+
+            var category = Enum.Parse<InjuryCategory>(inj.Category);
+            var match = existingInjuries.FirstOrDefault(e => e.Category == category && e.RollRange == inj.RollRange && e.BranchRange == inj.BranchRange);
+            if (match is null || injuryIdsWithRules.Contains(match.Id)) continue;
+
+            foreach (var sr in inj.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = match.Id, SpecialRuleId = ruleId });
+            }
+        }
+    }
+
+    /// <summary>One-time text correction, runs on every launch - 3 SpecialRule catalog entries (Causes
+    /// Fear, Frenzy, Stupidity) were seeded with a thin stub/summary description rather than the full
+    /// official Psychology rule text ("pour ces règles là je peux t'envoyer les textes" - full text
+    /// supplied by the user 2026-08-25, purely textual/reference content, no new mechanic). Neither
+    /// SeedTranslationAsync nor FindOrCreateSpecialRuleAsync ever revisit an existing row (same gap as
+    /// the various other Backfill* methods for other catalogs) - editing SpecialRules.json/Injuries.json
+    /// alone never reaches an already-seeded database. Updates the translation VALUE in place (same
+    /// Key, not a new one) so every other consumer of that key stays correctly pointed at it, and only
+    /// for a row still at ContentSource.Official - an Official->Modified flip means the player edited
+    /// it, never silently overwritten (same rule as everywhere else in the Library). Cheap no-op every
+    /// run after the first, once the stored text already matches.</summary>
+    private async Task BackfillSpecialRuleDescriptionsAsync()
+    {
+        var corrections = new (string EnglishName, string En, string Fr)[]
+        {
+            ("Causes Fear",
+                "This model causes Fear. Enemies charged by it, or wishing to charge it, must first pass a Fear test (a Leadership test). Failing it when charged: the model must roll 6s to score hits that round. Failing it when trying to charge: the charge fails and the model stays stationary that turn. A model that itself causes Fear ignores these tests.",
+                "Cette figurine provoque la Peur. Les ennemis qu'elle charge, ou qui souhaitent la charger, doivent d'abord réussir un test de Peur (un test de Commandement). En cas d'échec en étant chargé : seuls les 6 touchent lors de ce round. En cas d'échec en voulant charger : la charge échoue et la figurine reste immobile ce tour. Une figurine qui provoque elle-même la Peur ignore ces tests."),
+            ("Frenzy",
+                "A frenzied warrior must always charge any enemy within charge range - the player has no choice. He fights with double Attacks in hand-to-hand combat (an extra Attack for a second weapon isn't doubled), and is immune to all other psychology while he remains within charge range. Being knocked down or stunned ends his frenzy for the rest of the battle, after which he fights normally.",
+                "Un guerrier frénétique doit toujours charger tout ennemi à portée de charge - le joueur n'a pas le choix. Il combat avec le double de ses Attaques au corps à corps (l'Attaque supplémentaire pour une arme dans chaque main n'est pas doublée), et est immunisé à toute autre règle de psychologie tant qu'il reste à portée de charge. Être mis à terre ou étourdi met fin à sa frénésie pour le reste de la bataille, après quoi il combat normalement."),
+            ("Stupidity",
+                "At the start of its turn, a Stupid model must pass a Leadership test or remain Stupid until its next turn: it cannot cast spells or fight in hand-to-hand combat (though enemies can still hit it normally). If not in hand-to-hand combat, roll a D6: on 1-3 it shambles forward at half speed (won't charge, stops at an obstacle or a drop, won't shoot); on 4-6 it stands inactive and does nothing.",
+                "Au début de son tour, une figurine Stupide doit réussir un test de Commandement, sinon elle reste Stupide jusqu'à son prochain tour : elle ne peut ni lancer de sorts ni combattre au corps à corps (mais les ennemis peuvent toujours la toucher normalement). Si elle n'est pas au corps à corps, lancez 1D6 : sur 1-3 elle avance en traînant les pieds à vitesse réduite (ne charge pas, s'arrête devant un obstacle ou une chute, ne tire pas) ; sur 4-6 elle reste immobile et ne fait rien.")
+        };
+
+        var englishByKey = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+        var rules = await _db.Table<SpecialRuleEntity>().ToListAsync();
+
+        foreach (var (englishName, en, fr) in corrections)
+        {
+            var rule = rules.FirstOrDefault(r => r.Source == ContentSource.Official
+                && r.NameKey is { } nk && englishByKey.TryGetValue(nk, out var name) && name == englishName);
+            if (rule?.DescriptionKey is not { } descKey) continue;
+
+            await TranslationResolver.SetAsync(this, descKey, "en", en);
+            await TranslationResolver.SetAsync(this, descKey, "fr", fr);
+        }
+    }
+
     /// <summary>Plain insert, no dedup - the rulebook's Serious Injuries charts (Heroes' D66 + Henchmen's
     /// D6), common to every warband. Purely a browsable/editable reference catalog - see Injury's doc
     /// comment for why this is deliberately not wired into SeriousInjuryTable/HenchmanInjuryTable.</summary>
@@ -488,11 +953,88 @@ public class AppDatabase
             {
                 Category = Enum.Parse<InjuryCategory>(inj.Category),
                 RollRange = inj.RollRange,
+                BranchRange = inj.BranchRange,
                 Source = ContentSource.Official
             };
             injury.NameKey = await SeedTranslationAsync(inj.Name.En, inj.Name.Fr);
             injury.DescriptionKey = inj.Description is null ? null : await SeedTranslationAsync(inj.Description.En, inj.Description.Fr);
-            await _db.InsertAsync(injury.ToEntity());
+            var entity = injury.ToEntity();
+            await _db.InsertAsync(entity);
+
+            foreach (var sr in inj.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = entity.Id, SpecialRuleId = ruleId });
+            }
+        }
+    }
+
+    /// <summary>Plain insert, no dedup - the rulebook's Exploration chart (doubles through
+    /// six-of-a-kind), common to every warband. EquipmentOutcome.EquipmentItemName is stored as-is (a
+    /// plain name, not an id): it's resolved by lookup against the Trading Post catalog by the End of
+    /// Game wizard at roll time, not at seed time - see Models.Library.ExplorationOutcome.</summary>
+    private async Task SeedExplorationResultsAsync()
+    {
+        foreach (var res in await LoadSeedArrayAsync<ExplorationResultSeedData>("ExplorationResults.json"))
+        {
+            var result = new ExplorationResult
+            {
+                DiceCount = res.DiceCount,
+                Value = res.Value,
+                RollsIndependently = res.RollsIndependently,
+                StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
+                StatTestTargetsLeader = res.StatTestTargetsLeader,
+                AutoPassStatTestWarbandArchetypeNames = res.AutoPassStatTestWarbandArchetypeNames ?? new(),
+                RequiresDoubleRoll = res.RequiresDoubleRoll,
+                BonusStatTestField = res.BonusStatTestField is { } bonusField ? Enum.Parse<ExplorationStatField>(bonusField) : null,
+                RequiresSentHero = res.RequiresSentHero,
+                Source = ContentSource.Official
+            };
+            result.NameKey = await SeedTranslationAsync(res.Name.En, res.Name.Fr);
+            result.DescriptionKey = await SeedTranslationAsync(res.Description.En, res.Description.Fr);
+            if (res.ShortDescription is { } shortDescription)
+                result.ShortDescriptionKey = await SeedTranslationAsync(shortDescription.En, shortDescription.Fr);
+            var resultEntity = result.ToEntity();
+            await _db.InsertAsync(resultEntity);
+
+            foreach (var outcome in res.Outcomes)
+            {
+                var branchTextKey = outcome.BranchText is { } branchText
+                    ? await SeedTranslationAsync(branchText.En, branchText.Fr) : null;
+                var nextGameNoteTextKey = outcome.NextGameNoteText is { } nextGameNoteText
+                    ? await SeedTranslationAsync(nextGameNoteText.En, nextGameNoteText.Fr) : null;
+                await _db.InsertAsync(new ExplorationOutcomeEntity
+                {
+                    ExplorationResultId = resultEntity.Id,
+                    SubRollMin = outcome.SubRollMin,
+                    SubRollMax = outcome.SubRollMax,
+                    Kind = Enum.Parse<ExplorationOutcomeKind>(outcome.Kind),
+                    GoldFormula = outcome.GoldFormula,
+                    EquipmentItemName = outcome.EquipmentItemName,
+                    ItemQuantityFormula = outcome.ItemQuantityFormula,
+                    FoundValueFormula = outcome.FoundValueFormula,
+                    MaterialRuleName = outcome.MaterialRuleName,
+                    SecondaryEquipmentItemName = outcome.SecondaryEquipmentItemName,
+                    AlternativeEquipmentItemName = outcome.AlternativeEquipmentItemName,
+                    Note = outcome.Note,
+                    BranchTextKey = branchTextKey,
+                    StatTestPass = outcome.StatTestPass,
+                    CausesSickness = outcome.CausesSickness,
+                    RequiresDoubleRoll = outcome.RequiresDoubleRoll,
+                    CausesDeath = outcome.CausesDeath,
+                    TriggersArtefactRoll = outcome.TriggersArtefactRoll,
+                    RestrictedToWarbandArchetypeNamesCsv = outcome.RestrictedToWarbandArchetypeNames is { Count: > 0 } names
+                        ? string.Join(",", names) : null,
+                    GrantsNextExplorationBonusDie = outcome.GrantsNextExplorationBonusDie,
+                    GrantsLeaderExperience = outcome.GrantsLeaderExperience,
+                    GrantsDistributedHeroExperienceFormula = outcome.GrantsDistributedHeroExperienceFormula,
+                    GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeName,
+                    GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman,
+                    NextGameNoteTextKey = nextGameNoteTextKey,
+                    GrantsWeaponBlessing = outcome.GrantsWeaponBlessing,
+                    GrantsCatacombReroll = outcome.GrantsCatacombReroll
+                });
+            }
         }
     }
 
@@ -542,11 +1084,17 @@ public class AppDatabase
         if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
-        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity };
+        var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity, IsResaleUpgrade = seed.IsResaleUpgrade };
         rule.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
         rule.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
         var entity = rule.ToEntity();
         await _db.InsertAsync(entity);
+
+        // Target WarbandArchetypes may not be seeded yet (this rule can attach from a band-level array
+        // that seeds before the target band's own file) - resolved in the same deferred pass as
+        // Equipment/Skill/Mutation's RestrictedToWarbandNames, see SeedOfficialContentAsync.
+        if (seed.HatredTargetWarbandNames is { Count: > 0 } hatredTargets)
+            _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.SpecialRule, entity.Id, hatredTargets));
 
         _specialRuleIdsByEnglishName[seed.Name.En] = entity.Id;
         return entity.Id;
@@ -599,6 +1147,100 @@ public class AppDatabase
         return entity.Id;
     }
 
+    private async Task SeedRacesAsync()
+    {
+        foreach (var seed in await LoadSeedArrayAsync<RaceSeedData>("Races.json"))
+            await FindOrCreateRaceAsync(seed);
+    }
+
+    /// <summary>English Name -> already-created RaceEntity id, same rationale as
+    /// _magicSchoolIdsByEnglishName - a race like "Human" is shared across most of the 15 warband files.
+    /// Unlike the other FindOrCreateXAsync helpers, also checks the DATABASE (not just this in-memory
+    /// dict) before creating: BackfillWarbandArchetypeRaceAsync calls this too, on a launch where
+    /// SeedOfficialContentAsync (and therefore this dict) never ran because the catalog wasn't empty -
+    /// without the DB check, an already-seeded machine would get a duplicate Race row every launch.</summary>
+    private readonly Dictionary<string, int> _raceIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateRaceAsync(RaceSeedData seed)
+    {
+        if (_raceIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var existingKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en" && t.Value == seed.Name.En)
+            .Select(t => t.Key).ToHashSet();
+        if (existingKeys.Count > 0)
+        {
+            var existingRace = (await _db.Table<RaceEntity>().ToListAsync()).FirstOrDefault(r => existingKeys.Contains(r.NameKey));
+            if (existingRace is not null)
+            {
+                _raceIdsByEnglishName[seed.Name.En] = existingRace.Id;
+                return existingRace.Id;
+            }
+        }
+
+        var race = new Race { Source = ContentSource.Official };
+        race.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        race.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = race.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _raceIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
+    }
+
+    private async Task SeedRacialProfilesAsync()
+    {
+        foreach (var seed in await LoadSeedArrayAsync<RacialProfileSeedData>("RacialProfiles.json"))
+            await FindOrCreateRacialProfileAsync(seed);
+    }
+
+    /// <summary>English Name -> already-created RacialProfileEntity id, same rationale/DB-aware
+    /// find-or-create as _raceIdsByEnglishName above (a creature type like "Human" or "Skaven" is
+    /// shared by dozens of WarriorArchetypes across the 15 warband files).</summary>
+    private readonly Dictionary<string, int> _racialProfileIdsByEnglishName = new();
+
+    private async Task<int> FindOrCreateRacialProfileAsync(RacialProfileSeedData seed)
+    {
+        if (_racialProfileIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+            return existingId;
+
+        var existingKeys = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en" && t.Value == seed.Name.En)
+            .Select(t => t.Key).ToHashSet();
+        if (existingKeys.Count > 0)
+        {
+            var existingProfile = (await _db.Table<RacialProfileEntity>().ToListAsync()).FirstOrDefault(r => existingKeys.Contains(r.NameKey));
+            if (existingProfile is not null)
+            {
+                _racialProfileIdsByEnglishName[seed.Name.En] = existingProfile.Id;
+                return existingProfile.Id;
+            }
+        }
+
+        var profile = new RacialProfile
+        {
+            Source = ContentSource.Official,
+            Movement = seed.Movement,
+            MovementOverride = seed.MovementOverride,
+            WeaponSkill = seed.WeaponSkill,
+            BallisticSkill = seed.BallisticSkill,
+            Strength = seed.Strength,
+            Toughness = seed.Toughness,
+            Wounds = seed.Wounds,
+            Initiative = seed.Initiative,
+            Attacks = seed.Attacks,
+            Leadership = seed.Leadership
+        };
+        profile.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
+        profile.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);
+        var entity = profile.ToEntity();
+        await _db.InsertAsync(entity);
+
+        _racialProfileIdsByEnglishName[seed.Name.En] = entity.Id;
+        return entity.Id;
+    }
+
     /// <summary>English Name -> already-created EquipmentItemEntity id - populated by both the common
     /// pool (SeedEquipmentAsync, plain insert, no dedup needed since Equipment.json is hand-authored
     /// duplicate-free) and by SeedWarbandFromJsonAsync's own find-or-create Equipment loop (needed for
@@ -613,7 +1255,7 @@ public class AppDatabase
     /// name several bands via RestrictedToWarbandNames - see _pendingSharedRestrictions.</summary>
     private readonly Dictionary<string, int> _warbandArchetypeIdsByFileStem = new();
 
-    private enum SharedRestrictionKind { Equipment, Skill, Mutation }
+    private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule }
 
     private record struct PendingSharedRestriction(SharedRestrictionKind Kind, int ItemId, List<string> WarbandFileStems);
 

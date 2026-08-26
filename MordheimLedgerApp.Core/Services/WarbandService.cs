@@ -3,6 +3,7 @@ using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Core.Services;
 
@@ -93,6 +94,10 @@ public class WarbandService : IWarbandService
         var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
         var skillById = (await _library.GetSkillsAsync(languageCode)).ToDictionary(s => s.Id);
         var mutationById = (await _library.GetMutationsAsync(languageCode)).ToDictionary(m => m.Id);
+        // Idem pour Injury depuis que Madness (24)/etc peuvent porter des SpecialRules (Stupidité/
+        // Frénésie) - le FindAsync+ToModel minimal ci-dessous les aurait laissées vides, même trou que
+        // celui déjà corrigé pour Equipment/Skill/Mutation (voir le commentaire ci-dessus).
+        var injuryById = (await _library.GetInjuriesAsync(languageCode)).ToDictionary(i => i.Id);
 
         var warriors = new List<Warrior>();
         foreach (var row in warriorRows)
@@ -103,18 +108,9 @@ public class WarbandService : IWarbandService
             {
                 if (!equipmentById.TryGetValue(carriedRow.EquipmentItemId, out var item)) continue;
 
-                SpecialRule? materialRule = null;
-                if (carriedRow.MaterialSpecialRuleId is { } materialRuleId)
-                {
-                    var materialEntity = await _db.Connection.FindAsync<SpecialRuleEntity>(materialRuleId);
-                    if (materialEntity is not null)
-                    {
-                        var materialTranslations = await TranslationResolver.ResolveAsync(_db, [materialEntity.NameKey, materialEntity.DescriptionKey], languageCode);
-                        materialRule = materialEntity.ToModel(materialTranslations);
-                    }
-                }
-
-                carried.Add(carriedRow.ToModel(item, materialRule));
+                var materialRule = await ResolveSpecialRuleAsync(carriedRow.MaterialSpecialRuleId, languageCode);
+                var blessingRule = await ResolveSpecialRuleAsync(carriedRow.BlessingSpecialRuleId, languageCode);
+                carried.Add(carriedRow.ToModel(item, materialRule, blessingRule));
             }
 
             var learnedRows = await _db.Connection.Table<WarriorSkillEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
@@ -126,14 +122,8 @@ public class WarbandService : IWarbandService
             var injuryRows = await _db.Connection.Table<WarriorInjuryEntity>().Where(i => i.WarriorId == row.Id).ToListAsync();
             var injuries = new List<WarriorInjury>();
             foreach (var injuryRow in injuryRows)
-            {
-                var injuryEntity = await _db.Connection.FindAsync<InjuryEntity>(injuryRow.InjuryId);
-                if (injuryEntity is not null)
-                {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [injuryEntity.NameKey, injuryEntity.DescriptionKey], languageCode);
-                    injuries.Add(injuryRow.ToModel(injuryEntity.ToModel(translations)));
-                }
-            }
+                if (injuryById.TryGetValue(injuryRow.InjuryId, out var injury))
+                    injuries.Add(injuryRow.ToModel(injury));
 
             var spellRows = await _db.Connection.Table<WarriorSpellEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
             var spells = new List<WarriorSpell>();
@@ -157,9 +147,29 @@ public class WarbandService : IWarbandService
             if (row.AnimalId is { } animalId)
                 equipmentById.TryGetValue(animalId, out animal);
 
-            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal));
+            var hatredRows = await _db.Connection.Table<WarriorHatredEntity>().Where(h => h.WarriorId == row.Id).ToListAsync();
+            var hatreds = new List<WarriorHatred>();
+            foreach (var hatredRow in hatredRows)
+                hatreds.Add(hatredRow.ToModel(await ResolveHatredTargetNameAsync(hatredRow, languageCode)));
+
+            warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal, hatreds));
         }
         return warriors;
+    }
+
+    /// <summary>Resolves WarriorHatredEntity's target into a display name - see Models.WarriorHatred.Name.
+    /// TargetWarbandArchetypeId needs a translation lookup (no Item to pass through like WarriorInjury),
+    /// TargetFreeText is already the display name.</summary>
+    private async Task<string> ResolveHatredTargetNameAsync(WarriorHatredEntity row, string languageCode)
+    {
+        if (row.TargetWarbandArchetypeId is { } archetypeId)
+        {
+            var archetype = await _db.Connection.FindAsync<WarbandArchetypeEntity>(archetypeId);
+            if (archetype is null) return string.Empty;
+            var translations = await TranslationResolver.ResolveAsync(_db, [archetype.NameKey], languageCode);
+            return translations[archetype.NameKey];
+        }
+        return row.TargetFreeText ?? string.Empty;
     }
 
     public async Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1)
@@ -174,6 +184,14 @@ public class WarbandService : IWarbandService
         return warrior;
     }
 
+    public async Task InsertWarriorAsync(Warrior warrior)
+    {
+        await _db.Initialization;
+        var entity = warrior.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        warrior.Id = entity.Id;
+    }
+
     public async Task SaveWarriorAsync(Warrior warrior)
     {
         await _db.Initialization;
@@ -186,15 +204,16 @@ public class WarbandService : IWarbandService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ?", warriorId);
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorHatredEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSpellEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorMutationEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
     }
 
-    public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null)
+    public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null)
     {
         await _db.Initialization;
-        var carried = new WarriorEquipment { WarriorId = warriorId, Item = item, Quantity = quantity, MaterialRule = materialRule };
+        var carried = new WarriorEquipment { WarriorId = warriorId, Item = item, Quantity = quantity, MaterialRule = materialRule, FoundValueOverride = foundValueOverride };
         var entity = carried.ToEntity();
         await _db.Connection.InsertAsync(entity);
         carried.Id = entity.Id;
@@ -205,6 +224,106 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+    }
+
+    public async Task SetWarriorEquipmentBlessingRuleAsync(int warriorEquipmentId, int? blessingSpecialRuleId)
+    {
+        await _db.Initialization;
+        var entity = await _db.Connection.FindAsync<WarriorEquipmentEntity>(warriorEquipmentId);
+        if (entity is null) return;
+        entity.BlessingSpecialRuleId = blessingSpecialRuleId;
+        await _db.Connection.UpdateAsync(entity);
+    }
+
+    /// <summary>Resolves a plain SpecialRule id to a localized model - shared by MaterialRule and
+    /// BlessingRule resolution (both are just "an optional SpecialRule attached to a carried/stashed
+    /// item"), despite the name predating BlessingRule.</summary>
+    private async Task<SpecialRule?> ResolveSpecialRuleAsync(int? specialRuleId, string languageCode)
+    {
+        if (specialRuleId is not { } id) return null;
+        var entity = await _db.Connection.FindAsync<SpecialRuleEntity>(id);
+        if (entity is null) return null;
+
+        var translations = await TranslationResolver.ResolveAsync(_db, [entity.NameKey, entity.DescriptionKey], languageCode);
+        return entity.ToModel(translations);
+    }
+
+    public async Task<List<WarbandEquipment>> GetWarbandEquipmentAsync(int warbandId, string languageCode)
+    {
+        await _db.Initialization;
+        var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
+        var rows = await _db.Connection.Table<WarbandEquipmentEntity>().Where(e => e.WarbandId == warbandId).ToListAsync();
+
+        var result = new List<WarbandEquipment>();
+        foreach (var row in rows)
+        {
+            if (!equipmentById.TryGetValue(row.EquipmentItemId, out var item)) continue;
+            var materialRule = await ResolveSpecialRuleAsync(row.MaterialSpecialRuleId, languageCode);
+            result.Add(row.ToModel(item, materialRule));
+        }
+        return result;
+    }
+
+    public async Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null)
+    {
+        await _db.Initialization;
+        var stashed = new WarbandEquipment { WarbandId = warbandId, Item = item, Quantity = quantity, MaterialRule = materialRule, FoundValueOverride = foundValueOverride };
+        var entity = stashed.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        stashed.Id = entity.Id;
+        return stashed;
+    }
+
+    public async Task RemoveWarbandEquipmentAsync(int warbandEquipmentId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+    }
+
+    public async Task<int> SellWarbandItemAsync(int warbandEquipmentId)
+    {
+        await _db.Initialization;
+        var stashRow = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId)
+            ?? throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} introuvable.");
+
+        // "en" suffit ici : seuls Cost/CostMultiplier comptent, même idiome que EquipWarbandItemToWarriorAsync.
+        var materialRule = await ResolveSpecialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
+        var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
+        // Vendable soit par le matériau (Ornate Weapon...), soit par l'objet lui-même (les gemmes du
+        // Bijoutier - voir Models.WarbandEquipment.IsSellable, même distinction).
+        if (materialRule?.IsResaleUpgrade != true && !item.IsSellable)
+            throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} n'est pas vendable.");
+
+        // FoundValueOverride (ex. gemmes du Bijoutier à valeur aléatoire, voir WarbandEquipment.
+        // FoundValueOverride) prime quand renseigné - la valeur a déjà été fixée au moment de la
+        // trouvaille. Sinon même formule que l'achat (Core.Rules.EquipmentPricing.CalculateCost) - "vaut
+        // le double du prix normal à la revente" est exactement CostMultiplier appliqué au Cost de base
+        // (×1, donc Cost tel quel, quand il n'y a pas de matériau) - pas un champ à part.
+        var gold = (stashRow.FoundValueOverride ?? EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: false)) * stashRow.Quantity;
+
+        var warband = await GetWarbandAsync(stashRow.WarbandId)
+            ?? throw new InvalidOperationException($"Warband {stashRow.WarbandId} introuvable.");
+        warband.Treasury += gold;
+        await SaveWarbandAsync(warband);
+
+        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+        return gold;
+    }
+
+    public async Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId)
+    {
+        await _db.Initialization;
+        var stashRow = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId)
+            ?? throw new InvalidOperationException($"WarbandEquipment {warbandEquipmentId} introuvable.");
+
+        // "en" suffit ici : seul l'Id compte pour AddWarriorEquipmentAsync (voir WarriorEquipment.ToEntity),
+        // même idiome que la résolution par nom anglais de l'étape Exploration du wizard.
+        var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
+        var materialRule = await ResolveSpecialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
+
+        var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule, stashRow.FoundValueOverride);
+        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+        return carried;
     }
 
     public async Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill)
@@ -223,10 +342,10 @@ public class WarbandService : IWarbandService
         await _db.Connection.DeleteAsync<WarriorSkillEntity>(warriorSkillId);
     }
 
-    public async Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury)
+    public async Task<WarriorInjury> AddWarriorInjuryAsync(int warriorId, Injury injury, bool isTemporary = false)
     {
         await _db.Initialization;
-        var tracked = new WarriorInjury { WarriorId = warriorId, Item = injury };
+        var tracked = new WarriorInjury { WarriorId = warriorId, Item = injury, IsTemporary = isTemporary };
         var entity = tracked.ToEntity();
         await _db.Connection.InsertAsync(entity);
         tracked.Id = entity.Id;
@@ -237,6 +356,33 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<WarriorInjuryEntity>(warriorInjuryId);
+    }
+
+    public async Task RemoveTemporaryInjuriesAsync(int warriorId)
+    {
+        await _db.Initialization;
+        await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ? AND IsTemporary = 1", warriorId);
+    }
+
+    public async Task<WarriorHatred> AddWarriorHatredAsync(int warriorId, int? targetWarbandArchetypeId, string? targetFreeText)
+    {
+        await _db.Initialization;
+        var tracked = new WarriorHatred
+        {
+            WarriorId = warriorId,
+            TargetWarbandArchetypeId = targetWarbandArchetypeId,
+            TargetFreeText = targetFreeText
+        };
+        var entity = tracked.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        tracked.Id = entity.Id;
+        return tracked;
+    }
+
+    public async Task RemoveWarriorHatredAsync(int warriorHatredId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<WarriorHatredEntity>(warriorHatredId);
     }
 
     public async Task<WarriorSpell> AddWarriorSpellAsync(int warriorId, Spell spell)

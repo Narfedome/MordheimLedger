@@ -114,6 +114,10 @@ namespace MordheimLedgerApp.Services
             var tokens = GetPaletteTokens(_palette, IsDark());
             tokens["AppSurfaceTranslucent"] = tokens["AppSurface"].WithAlpha(0.80f);
             tokens["AppDanger"] = Color.FromArgb("#8B3A3A");
+            // Fixe comme AppDanger (voir sa doc dans Colors.xaml) - une stat en hausse doit se lire
+            // "vert" quelle que soit la palette active, pas seulement dans AshAndWarpstone où AppAccent
+            // est déjà vert (ShadowAndGold, par exemple, a un accent doré/brun).
+            tokens["AppSuccess"] = Color.FromArgb("#3F9142");
             var res = Application.Current.Resources;
             foreach (var kv in tokens)
                 res[kv.Key] = kv.Value;

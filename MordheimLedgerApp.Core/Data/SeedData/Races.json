@@ -1,0 +1,58 @@
+[
+  {
+    "name": { "en": "Human", "fr": "Humain" },
+    "description": {
+      "en": "The most numerous race of the Old World - Mercenaries, Witch Hunters, Sisters of Sigmar and most other warbands recruit exclusively (or almost exclusively) from human stock.",
+      "fr": "La race la plus nombreuse du Vieux Monde - Mercenaires, Chasseurs de Sorcières, Sœurs de Sigmar et la plupart des autres bandes recrutent exclusivement (ou presque) des humains."
+    }
+  },
+  {
+    "name": { "en": "Chaos Human", "fr": "Humain du Chaos" },
+    "description": {
+      "en": "Humans given over to the Ruinous Powers - Carnival of Chaos and Cult of the Possessed warbands, still human in body (unlike the Beastmen or Skaven) but corrupted in mind and soul.",
+      "fr": "Humains livrés aux Puissances Ruineuses - bandes de la Kermesse du Chaos et du Culte des Possédés, encore humains de corps (contrairement aux Hommes-Bêtes ou aux Skavens) mais corrompus d'esprit et d'âme."
+    }
+  },
+  {
+    "name": { "en": "Skaven", "fr": "Skaven" },
+    "description": {
+      "en": "Man-rats born of Chaos-tainted mutation, dwelling in the tunnels beneath Mordheim.",
+      "fr": "Hommes-rats issus de mutations provoquées par le Chaos, vivant dans les tunnels sous Mordheim."
+    }
+  },
+  {
+    "name": { "en": "Orc", "fr": "Orque" },
+    "description": {
+      "en": "Green-skinned brutes drawn to Mordheim by the promise of plunder and a good fight.",
+      "fr": "Brutes à la peau verte attirées à Mordheim par la promesse de pillage et de bagarre."
+    }
+  },
+  {
+    "name": { "en": "Dwarf", "fr": "Nain" },
+    "description": {
+      "en": "Stout, grudge-bearing prospectors, in Mordheim to reclaim wyrdstone lost by their kin.",
+      "fr": "Prospecteurs trapus et rancuniers, venus à Mordheim récupérer la pierre magique perdue par les leurs."
+    }
+  },
+  {
+    "name": { "en": "Elf", "fr": "Elfe" },
+    "description": {
+      "en": "Tall, graceful and long-lived - no Elf warband has been catalogued yet, but the race exists in the setting.",
+      "fr": "Grands, gracieux et longévifs - aucune bande elfique n'est encore cataloguée, mais la race existe dans l'univers du jeu."
+    }
+  },
+  {
+    "name": { "en": "Undead", "fr": "Mort-Vivant" },
+    "description": {
+      "en": "Vampire-led legions of the walking dead - Zombies, Skeletons and worse, animated rather than born.",
+      "fr": "Légions de morts-vivants menées par un vampire - Zombies, Squelettes et pires, animés plutôt que nés."
+    }
+  },
+  {
+    "name": { "en": "Beastman", "fr": "Homme-Bête" },
+    "description": {
+      "en": "Chaos-spawned hybrids of man and beast, roaming Mordheim's ruins in savage warbands.",
+      "fr": "Hybrides d'homme et de bête engendrés par le Chaos, rôdant dans les ruines de Mordheim en bandes sauvages."
+    }
+  }
+]

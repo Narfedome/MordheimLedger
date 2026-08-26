@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Races.CreateEdit"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.Races.CreateEdit.RaceEditDialog"
+               x:DataType="local:RaceEditDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+        <Grid RowDefinitions="*,Auto" RowSpacing="16">
+        <dialogs:StableHeightScrollView Grid.Row="0">
+        <VerticalStackLayout Spacing="16">
+            <Label Text="{Binding Title}"
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
+
+            <VerticalStackLayout Spacing="4">
+                <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc RaceNamePh}"/>
+                            <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Entry Text="{Binding Item.Name}"/>
+                <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+            <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding SaveCommand}"/>
+        </Grid>
+        </Grid>
+    </Border>
+</dialogs:DialogContent>

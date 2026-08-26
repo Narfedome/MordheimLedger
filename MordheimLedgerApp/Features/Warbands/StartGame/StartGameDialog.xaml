@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.StartGame"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.StartGame.StartGameDialog"
+               x:DataType="local:StartGameDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <dialogs:StableHeightScrollView>
+        <VerticalStackLayout Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{loc:Loc StartGameTitle}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+
+            <Label Text="{loc:Loc StartGameNothingToShow}" TextColor="{DynamicResource AppTextMuted}"
+                   IsVisible="{Binding HasNothingToShow}"/>
+
+            <!-- Guerriers indisponibles : simple rappel, pas d'action possible ici (voir WarriorEditDialog
+                 pour changer un statut) - même esprit que les puces Sick de WarbandDetailPage. -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasUnavailableWarriors}">
+                <Label Text="{loc:Loc StartGameUnavailableHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" JustifyContent="Start" BindableLayout.ItemsSource="{Binding UnavailableWarriors}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:UnavailableWarriorRow">
+                            <Border Style="{StaticResource ChipBorderStyle}" Margin="0,0,6,6"
+                                    Padding="8,4" Stroke="{DynamicResource AppDanger}">
+                                <Label FontSize="12" TextColor="{DynamicResource AppDanger}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Row.Warrior.Name}" FontAttributes="Bold"/>
+                                            <Span Text=" &#183; "/>
+                                            <Span Text="{Binding Reason}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- Vieille blessure (32) : seul résultat de la table des Blessures Graves qui se rejoue à
+                 chaque partie plutôt qu'une fois à la Fin de Partie (voir SERIOUS_INJURIES_STATUS.md) -
+                 même idiome de saisie que WarriorOutcomeRow.ManualRoll (jet manuel + bouton dé optionnel).
+                 Une seule carte par guerrier, même s'il porte plusieurs Vieilles blessures distinctes -
+                 chacune y est un jet indépendant à l'intérieur de la même carte (retour utilisateur
+                 2026-08-26 : "au lieu d'avoir 2 card, c'est d'avoir une card avec 2 roll à l'intérieur"). -->
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding HasOldWoundRolls}">
+                <Label Text="{loc:Loc StartGameOldWoundHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding OldWoundEntries}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:OldWoundWarriorEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding Warrior.Name}" FontAttributes="Bold"/>
+                                    <Label Text="{loc:Loc StartGameOldWoundSubtitle}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Rolls}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:OldWoundRollEntry">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                                        <Label Text="{Binding Label}" FontSize="11" IsVisible="{Binding HasLabel}"
+                                                               TextColor="{DynamicResource AppTextMuted}"/>
+                                                        <Label Text="{loc:Loc StartGameOldWoundPass}" FontSize="12" FontAttributes="Bold"
+                                                               TextColor="{DynamicResource AppSuccess}" IsVisible="{Binding ShowPass}"/>
+                                                        <Label Text="{loc:Loc StartGameOldWoundFail}" FontSize="12" FontAttributes="Bold"
+                                                               TextColor="{DynamicResource AppDanger}" IsVisible="{Binding ShowFail}"/>
+                                                    </VerticalStackLayout>
+                                                    <Entry Grid.Column="1" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60" VerticalOptions="Center">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                                  Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  VerticalOptions="Center"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Effets actifs pour cette partie : Warband.NextGameNote, simple rappel textuel (voir sa
+                 doc) - pas encore d'accumulation possible si plusieurs effets étaient actifs à la fois
+                 (limite connue, confirmée avec l'utilisateur 2026-08-26 : laissé tel quel pour l'instant). -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasNextGameNote}">
+                <Label Text="{loc:Loc StartGameNextGameNoteHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <Label Text="{Binding NextGameNote}" FontSize="13"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <Button Text="{loc:Loc StartGameConfirm}" Command="{Binding ConfirmCommand}"/>
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+    </Border>
+</dialogs:DialogContent>

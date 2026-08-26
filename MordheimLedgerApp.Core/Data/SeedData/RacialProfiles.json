@@ -1,0 +1,147 @@
+[
+  {
+    "Name": { "En": "Human", "Fr": "Humain" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 4, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 6, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Halfling", "Fr": "Halfling" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 4, "WeaponSkill": 5, "BallisticSkill": 7, "Strength": 3, "Toughness": 3, "Wounds": 3, "Initiative": 9, "Attacks": 4, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Beastman", "Fr": "Homme-Bête" },
+    "Description": { "En": "Official racial maximums (rulebook appendix, \"Ungor\").", "Fr": "Maximums raciaux officiels (annexe du livre de règles, \"Ungor\")." },
+    "Movement": 6, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 7, "Attacks": 4, "Leadership": 7
+  },
+  {
+    "Name": { "En": "Bestigor", "Fr": "Bestigor" },
+    "Description": { "En": "Official racial maximums (rulebook appendix, \"Other Beastmen\").", "Fr": "Maximums raciaux officiels (annexe du livre de règles, \"Other Beastmen\")." },
+    "Movement": 5, "WeaponSkill": 7, "BallisticSkill": 6, "Strength": 4, "Toughness": 5, "Wounds": 4, "Initiative": 6, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Centigor", "Fr": "Centigor" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 9, "WeaponSkill": 7, "BallisticSkill": 6, "Strength": 4, "Toughness": 5, "Wounds": 4, "Initiative": 6, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Minotaur", "Fr": "Minotaure" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 6, "WeaponSkill": 6, "BallisticSkill": 5, "Strength": 5, "Toughness": 5, "Wounds": 5, "Initiative": 6, "Attacks": 5, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Possessed", "Fr": "Possédé" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 6, "WeaponSkill": 8, "BallisticSkill": 0, "Strength": 6, "Toughness": 6, "Wounds": 4, "Initiative": 7, "Attacks": 5, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Dwarf", "Fr": "Nain" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 3, "WeaponSkill": 7, "BallisticSkill": 6, "Strength": 4, "Toughness": 5, "Wounds": 3, "Initiative": 5, "Attacks": 4, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Orc", "Fr": "Orque" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 4, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 4, "Toughness": 5, "Wounds": 3, "Initiative": 5, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Goblin", "Fr": "Gobelin" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 4, "WeaponSkill": 5, "BallisticSkill": 6, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 6, "Attacks": 4, "Leadership": 7
+  },
+  {
+    "Name": { "En": "Ogre", "Fr": "Ogre" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 6, "WeaponSkill": 6, "BallisticSkill": 5, "Strength": 5, "Toughness": 5, "Wounds": 5, "Initiative": 6, "Attacks": 5, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Skaven", "Fr": "Skaven" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 6, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 7, "Attacks": 4, "Leadership": 7
+  },
+  {
+    "Name": { "En": "Vampire", "Fr": "Vampire" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 6, "WeaponSkill": 8, "BallisticSkill": 6, "Strength": 7, "Toughness": 6, "Wounds": 4, "Initiative": 9, "Attacks": 4, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Ghoul", "Fr": "Goule" },
+    "Description": { "En": "Official racial maximums (rulebook appendix).", "Fr": "Maximums raciaux officiels (annexe du livre de règles)." },
+    "Movement": 5, "WeaponSkill": 5, "BallisticSkill": 2, "Strength": 4, "Toughness": 5, "Wounds": 3, "Initiative": 5, "Attacks": 5, "Leadership": 7
+  },
+  {
+    "Name": { "En": "Marauder of Chaos", "Fr": "Maraudeur du Chaos" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - mutated-but-still-human-bodied cultist (Carnival Master/Brute/Magister/Initiate).", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - cultiste muté mais toujours de corps humain (Maître du Carnaval/Brute/Magister/Initié)." },
+    "Movement": 4, "WeaponSkill": 7, "BallisticSkill": 7, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 7, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Elf", "Fr": "Elfe" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 5, "WeaponSkill": 7, "BallisticSkill": 7, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 9, "Attacks": 4, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Skaven (Clan Pestilens)", "Fr": "Skaven (Clan Pestilens)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - distinct from the plain \"Skaven\" profile (Clan Eshin), no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - distinct du profil \"Skaven\" simple (Clan Eshin), aucune bande actuelle n'utilise ce profil." },
+    "Movement": 5, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 4, "Toughness": 5, "Wounds": 3, "Initiative": 7, "Attacks": 4, "Leadership": 7
+  },
+  {
+    "Name": { "En": "Saurus", "Fr": "Saurus" },
+    "Description": { "En": "Official racial maximums (rulebook appendix). Attacks is listed as \"4+1\" in the source (a Predator-style bonus not representable as a flat maximum) - seeded as 4, no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles). Attaques indiqué \"4+1\" dans la source (bonus type Prédateur non représentable comme un maximum simple) - seedé à 4, aucune bande actuelle n'utilise ce profil." },
+    "Movement": 4, "WeaponSkill": 6, "BallisticSkill": 0, "Strength": 5, "Toughness": 5, "Wounds": 3, "Initiative": 4, "Attacks": 4, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Skink", "Fr": "Skink" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 6, "WeaponSkill": 5, "BallisticSkill": 6, "Strength": 4, "Toughness": 3, "Wounds": 3, "Initiative": 7, "Attacks": 4, "Leadership": 8
+  },
+  {
+    "Name": { "En": "Black Orc", "Fr": "Orc Noir" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - distinct from the plain \"Orc\" profile, no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - distinct du profil \"Orc\" simple, aucune bande actuelle n'utilise ce profil." },
+    "Movement": 4, "WeaponSkill": 7, "BallisticSkill": 6, "Strength": 5, "Toughness": 6, "Wounds": 3, "Initiative": 5, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Werecreature (Norse)", "Fr": "Créature-Garou (Norse)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - Wulfen/Ulfwerenar, no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - Wulfen/Ulfwerenar, aucune bande actuelle n'utilise ce profil." },
+    "Movement": 8, "WeaponSkill": 6, "BallisticSkill": 0, "Strength": 6, "Toughness": 5, "Wounds": 4, "Initiative": 7, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Tomb Lord (Tomb Guardians)", "Fr": "Seigneur des Tombeaux (Gardiens des Tombeaux)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 4, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 5, "Toughness": 5, "Wounds": 5, "Initiative": 5, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Liche Priest & Acolyte (Tomb Guardians)", "Fr": "Prêtre-Liche et Acolyte (Gardiens des Tombeaux)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 4, "WeaponSkill": 6, "BallisticSkill": 6, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 6, "Attacks": 4, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Liche (Restless Dead)", "Fr": "Liche (Morts Errants)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 5, "WeaponSkill": 4, "BallisticSkill": 4, "Strength": 4, "Toughness": 4, "Wounds": 8, "Initiative": 6, "Attacks": 3, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Grave Guard (Restless Dead)", "Fr": "Garde des Tombeaux (Morts Errants)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 5, "WeaponSkill": 5, "BallisticSkill": 5, "Strength": 4, "Toughness": 4, "Wounds": 4, "Initiative": 5, "Attacks": 4, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Bull Centaur (Black Dwarfs)", "Fr": "Centaure-Taureau (Nains Noirs)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - distinct from the Sons of Hashut profile, no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - distinct du profil des Fils de Hashut, aucune bande actuelle n'utilise ce profil." },
+    "Movement": 8, "WeaponSkill": 7, "BallisticSkill": 6, "Strength": 5, "Toughness": 5, "Wounds": 4, "Initiative": 6, "Attacks": 5, "Leadership": 10
+  },
+  {
+    "Name": { "En": "Bull Centaur (The Sons of Hashut)", "Fr": "Centaure-Taureau (Les Fils de Hashut)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - distinct from the Black Dwarfs profile, no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - distinct du profil des Nains Noirs, aucune bande actuelle n'utilise ce profil." },
+    "Movement": 7, "WeaponSkill": 7, "BallisticSkill": 3, "Strength": 5, "Toughness": 5, "Wounds": 4, "Initiative": 4, "Attacks": 5, "Leadership": 9
+  },
+  {
+    "Name": { "En": "Hobgoblin (The Sons of Hashut)", "Fr": "Hobgobelin (Les Fils de Hashut)" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - no current warband uses this profile, seeded for future/custom warbands.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - aucune bande actuelle n'utilise ce profil, seedé pour de futures bandes/bandes personnalisées." },
+    "Movement": 4, "WeaponSkill": 5, "BallisticSkill": 5, "Strength": 4, "Toughness": 4, "Wounds": 3, "Initiative": 5, "Attacks": 3, "Leadership": 8
+  },
+  {
+    "Name": { "En": "Warrior of Chaos", "Fr": "Guerrier du Chaos" },
+    "Description": { "En": "Official racial maximums (rulebook appendix) - distinct from Marauder of Chaos, no current warband uses this profile.", "Fr": "Maximums raciaux officiels (annexe du livre de règles) - distinct du Maraudeur du Chaos, aucune bande actuelle n'utilise ce profil." },
+    "Movement": 4, "WeaponSkill": 8, "BallisticSkill": 8, "Strength": 5, "Toughness": 5, "Wounds": 3, "Initiative": 8, "Attacks": 5, "Leadership": 9
+  }
+]

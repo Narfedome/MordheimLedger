@@ -189,12 +189,6 @@
   <data name="WarbandsSpellRollPh" xml:space="preserve">
     <value>1D6</value>
   </data>
-  <data name="WarbandsSpellRollConfirm" xml:space="preserve">
-    <value>Valider</value>
-  </data>
-  <data name="WarbandsSpellRollInvalidMessage" xml:space="preserve">
-    <value>Entrez un jet entre 1 et 6.</value>
-  </data>
   <data name="WarbandsSpellRollEmptyMessage" xml:space="preserve">
     <value>Aucun sort ne correspond à ce jet dans la table de l'école de magie de cette bande.</value>
   </data>
@@ -306,6 +300,9 @@
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Trésorerie :</value>
   </data>
+  <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
+    <value>Pierres magiques :</value>
+  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Héros</value>
   </data>
@@ -347,6 +344,21 @@
   </data>
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Morts</value>
+  </data>
+  <data name="WarriorsGroupRetired" xml:space="preserve">
+    <value>Retraités</value>
+  </data>
+  <data name="InventoryHeading" xml:space="preserve">
+    <value>Inventaire</value>
+  </data>
+  <data name="InventoryEquip" xml:space="preserve">
+    <value>Équiper</value>
+  </data>
+  <data name="InventoryEquipTitle" xml:space="preserve">
+    <value>Faire porter par</value>
+  </data>
+  <data name="InventorySell" xml:space="preserve">
+    <value>Vendre</value>
   </data>
   <data name="WarriorsExperienceHeading" xml:space="preserve">
     <value>Expérience</value>
@@ -574,13 +586,22 @@
     <value>Arme à poudre noire</value>
   </data>
   <data name="EquipmentCategoryAmmunition" xml:space="preserve">
-    <value>Munitions</value>
+    <value>Projectiles et Munitions</value>
   </data>
   <data name="EquipmentCategoryArmour" xml:space="preserve">
     <value>Armure</value>
   </data>
   <data name="EquipmentCategoryMiscellaneousEquipment" xml:space="preserve">
     <value>Équipement divers</value>
+  </data>
+  <data name="EquipmentCategoryConsumable" xml:space="preserve">
+    <value>Consommable</value>
+  </data>
+  <data name="EquipmentCategoryDrugsAndPoisons" xml:space="preserve">
+    <value>Drogues et Poisons</value>
+  </data>
+  <data name="EquipmentCategoryMagicalArtefact" xml:space="preserve">
+    <value>Artefact Magique</value>
   </data>
   <data name="EquipmentCategoryAnimal" xml:space="preserve">
     <value>Animaux</value>
@@ -650,6 +671,12 @@
   </data>
   <data name="WarriorsSpecialRulesHeading" xml:space="preserve">
     <value>Règles spéciales</value>
+  </data>
+  <data name="WarriorsHatredChipFormat" xml:space="preserve">
+    <value>Haine : {0}</value>
+  </data>
+  <data name="WarriorsHatredHeading" xml:space="preserve">
+    <value>Haine</value>
   </data>
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
@@ -771,11 +798,83 @@
   <data name="EndOfGameResultDraw" xml:space="preserve">
     <value>Match nul</value>
   </data>
-  <data name="EndOfGameTreasuryPh" xml:space="preserve">
-    <value>Trésor trouvé (po)</value>
-  </data>
-  <data name="EndOfGameTreasuryHeading" xml:space="preserve">
+  <data name="EndOfGameExplorationHeading" xml:space="preserve">
     <value>Revenus</value>
+  </data>
+  <data name="EndOfGameExplorationDiceHint" xml:space="preserve">
+    <value>Lancez un dé par Héros survivant sans être hors de combat, plus un si vous avez gagné la bataille (maximum 6 dés).</value>
+  </data>
+  <data name="EndOfGamePendingBonusDieReminder" xml:space="preserve">
+    <value>Grâce à votre exploration précédente : lancez un dé de plus que d'habitude et écartez-en un à votre convenance avant de saisir vos jets.</value>
+  </data>
+  <data name="EndOfGameCatacombRerollReminder" xml:space="preserve">
+    <value>Grâce à l'entrée des Catacombes : vous pouvez relancer un dé de votre choix parmi vos jets d'Exploration.</value>
+  </data>
+  <data name="EndOfGameIndependentThresholdLabel" xml:space="preserve">
+    <value>Seuil {0}+</value>
+  </data>
+  <data name="EndOfGameAutoGoldRowLabel" xml:space="preserve">
+    <value>Or trouvé</value>
+  </data>
+  <data name="EndOfGameThresholdGoldRowLabel" xml:space="preserve">
+    <value>Or supplémentaire</value>
+  </data>
+  <data name="EndOfGameThresholdGoldEarnedLabel" xml:space="preserve">
+    <value>Or supplémentaire gagné</value>
+  </data>
+  <data name="EndOfGameWyrdstoneEarnedLabel" xml:space="preserve">
+    <value>Pierres magiques gagnées</value>
+  </data>
+  <data name="EndOfGameWyrdstoneRowLabel" xml:space="preserve">
+    <value>Pierre(s) magique(s)</value>
+  </data>
+  <data name="EndOfGameArtefactRowLabel" xml:space="preserve">
+    <value>Artefact Magique</value>
+  </data>
+  <data name="EndOfGameIndependentOutcomeMissed" xml:space="preserve">
+    <value>Raté - rien cette fois.</value>
+  </data>
+  <data name="EndOfGameExplorationGoldLabel" xml:space="preserve">
+    <value>Or trouvé (CO)</value>
+  </data>
+  <data name="EndOfGameExplorationWyrdstoneLabel" xml:space="preserve">
+    <value>Pierres magiques trouvées</value>
+  </data>
+  <data name="EndOfGameExplorationFoundValueLabel" xml:space="preserve">
+    <value>Valeur trouvée (CO)</value>
+  </data>
+  <data name="EndOfGameStatTestHeroPh" xml:space="preserve">
+    <value>Choisir un Héros</value>
+  </data>
+  <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
+    <value>Réussi automatiquement pour cette bande.</value>
+  </data>
+  <data name="EndOfGameSentHeroPh" xml:space="preserve">
+    <value>Envoyer un Héros (optionnel)</value>
+  </data>
+  <data name="EndOfGamePassByOption" xml:space="preserve">
+    <value>Passer son chemin</value>
+  </data>
+  <data name="EndOfGameDoNotRecruitOption" xml:space="preserve">
+    <value>Ne pas recruter</value>
+  </data>
+  <data name="EndOfGameWeaponBlessingPh" xml:space="preserve">
+    <value>Arme à bénir</value>
+  </data>
+  <data name="EndOfGameDoNotBlessOption" xml:space="preserve">
+    <value>Ne pas bénir d'arme</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanGroupPh" xml:space="preserve">
+    <value>Groupe à renforcer</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanTreasuryAfterLabel" xml:space="preserve">
+    <value>Trésorerie après recrutement</value>
+  </data>
+  <data name="EndOfGameStatFieldToughness" xml:space="preserve">
+    <value>Endurance</value>
+  </data>
+  <data name="EndOfGameStatFieldLeadership" xml:space="preserve">
+    <value>Commandement</value>
   </data>
   <data name="EndOfGameXpPh" xml:space="preserve">
     <value>PX gagnés</value>
@@ -785,6 +884,15 @@
   </data>
   <data name="EndOfGameRoll" xml:space="preserve">
     <value>Tirer</value>
+  </data>
+  <data name="EndOfGameArtefactTableLabel" xml:space="preserve">
+    <value>Table des Artefacts Magiques (1-6)</value>
+  </data>
+  <data name="EndOfGameRollRequired" xml:space="preserve">
+    <value>Jet requis avant de continuer.</value>
+  </data>
+  <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
+    <value>Trésorerie insuffisante pour équiper ce prisonnier - choisis un autre groupe ou "Ne pas recruter".</value>
   </data>
   <data name="HistoryAddNote" xml:space="preserve">
     <value>Ajouter une note</value>
@@ -796,7 +904,40 @@
     <value>Bataille : {0}.</value>
   </data>
   <data name="HistoryTreasurySentence" xml:space="preserve">
-    <value>Trésorerie : +{0} po.</value>
+    <value>Trésorerie : +{0} CO.</value>
+  </data>
+  <data name="HistoryExplorationItemSentence" xml:space="preserve">
+    <value>La bande a trouvé {0}x {1} (ajouté à l'inventaire).</value>
+  </data>
+  <data name="HistoryExplorationWyrdstoneSentence" xml:space="preserve">
+    <value>La bande a trouvé {0} pierre(s) magique(s).</value>
+  </data>
+  <data name="HistoryExplorationNoteSentence" xml:space="preserve">
+    <value>Exploration : {0}.</value>
+  </data>
+  <data name="HistorySicknessSentence" xml:space="preserve">
+    <value>{0} est indisponible et manquera la prochaine partie.</value>
+  </data>
+  <data name="HistoryPitDevouredSentence" xml:space="preserve">
+    <value>{0} a été envoyé dans la Fosse et a été dévoré par ses gardiens.</value>
+  </data>
+  <data name="HistoryLeaderExperienceSentence" xml:space="preserve">
+    <value>{0} gagne {1} Expérience.</value>
+  </data>
+  <data name="HistoryFreeHenchmanSentence" xml:space="preserve">
+    <value>La bande accueille {0}x {1} gratuitement.</value>
+  </data>
+  <data name="HistoryDistributedExperienceSentence" xml:space="preserve">
+    <value>Expérience répartie entre les Héros : {0}.</value>
+  </data>
+  <data name="HistoryEquippedHenchmanSentence" xml:space="preserve">
+    <value>Un prisonnier rejoint le groupe {0} comme nouvel Homme de main (équipement : {1} CO).</value>
+  </data>
+  <data name="HistoryWeaponBlessingSentence" xml:space="preserve">
+    <value>{0} bénit son arme : {1}.</value>
+  </data>
+  <data name="HistoryCatacombRerollSentence" xml:space="preserve">
+    <value>La bande découvre une entrée des Catacombes : elle pourra désormais relancer un dé à chaque jet d'Exploration.</value>
   </data>
   <data name="HistoryXpSentence" xml:space="preserve">
     <value>{0} a gagné {1} PX.</value>
@@ -804,8 +945,17 @@
   <data name="HistoryDeathSentence" xml:space="preserve">
     <value>{0} est mort.</value>
   </data>
+  <data name="HistoryForcedRetirementSentence" xml:space="preserve">
+    <value>{0} perd son second œil et doit prendre sa retraite.</value>
+  </data>
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} a été mis hors de combat : {1}</value>
+  </data>
+  <data name="HistoryHenchmanDeathSentence" xml:space="preserve">
+    <value>{0} perd {1} figurine(s), {2} restante(s).</value>
+  </data>
+  <data name="HistoryHenchmanWipedSentence" xml:space="preserve">
+    <value>{0} est anéanti.</value>
   </data>
   <data name="WarriorEditTitle" xml:space="preserve">
     <value>Modifier le guerrier</value>
@@ -819,11 +969,59 @@
   <data name="WarriorStatusDead" xml:space="preserve">
     <value>Mort</value>
   </data>
+  <data name="WarriorStatusSick" xml:space="preserve">
+    <value>Indisponible</value>
+  </data>
+  <data name="WarriorStatusSickCount" xml:space="preserve">
+    <value>Indisponible ({0})</value>
+  </data>
+  <data name="WarriorStatusRetired" xml:space="preserve">
+    <value>Retraité</value>
+  </data>
+  <data name="StartGameButtonText" xml:space="preserve">
+    <value>Lancer la partie</value>
+  </data>
+  <data name="StartGameTitle" xml:space="preserve">
+    <value>Avant la partie</value>
+  </data>
+  <data name="StartGameNothingToShow" xml:space="preserve">
+    <value>Rien à signaler avant cette partie.</value>
+  </data>
+  <data name="StartGameUnavailableHeading" xml:space="preserve">
+    <value>Guerriers indisponibles</value>
+  </data>
+  <data name="StartGameOldWoundHeading" xml:space="preserve">
+    <value>Jets avant bataille</value>
+  </data>
+  <data name="StartGameOldWoundSubtitle" xml:space="preserve">
+    <value>Vieille blessure : 1D6, échec sur 1</value>
+  </data>
+  <data name="StartGameOldWoundRollLabel" xml:space="preserve">
+    <value>Jet</value>
+  </data>
+  <data name="StartGameOldWoundPass" xml:space="preserve">
+    <value>Peut combattre</value>
+  </data>
+  <data name="StartGameOldWoundFail" xml:space="preserve">
+    <value>Ne peut pas combattre</value>
+  </data>
+  <data name="StartGameNextGameNoteHeading" xml:space="preserve">
+    <value>Effets actifs pour cette partie</value>
+  </data>
+  <data name="StartGameConfirm" xml:space="preserve">
+    <value>Commencer la partie</value>
+  </data>
+  <data name="HistoryOldWoundFailSentence" xml:space="preserve">
+    <value>{0} ne peut pas combattre cette partie (Vieille blessure).</value>
+  </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>
   </data>
   <data name="EndOfGameHenchmanRollPh" xml:space="preserve">
     <value>D6</value>
+  </data>
+  <data name="EndOfGameDistributedExperienceRemainingLabel" xml:space="preserve">
+    <value>Restant :</value>
   </data>
   <data name="HenchmanInjuryDead" xml:space="preserve">
     <value>Mort. Le guerrier est perdu.</value>
@@ -836,15 +1034,6 @@
   </data>
   <data name="WarriorRoleHeroSingular" xml:space="preserve">
     <value>Héros</value>
-  </data>
-  <data name="EndOfGameShowResult" xml:space="preserve">
-    <value>Voir le résultat</value>
-  </data>
-  <data name="EndOfGameInvalidRoll" xml:space="preserve">
-    <value>Jet invalide (11 à 66, chaque chiffre entre 1 et 6).</value>
-  </data>
-  <data name="EndOfGameInjuryResultTitle" xml:space="preserve">
-    <value>Résultat ({0})</value>
   </data>
   <data name="EndOfGameInjuriesHeading" xml:space="preserve">
     <value>Blessures Graves</value>
@@ -873,14 +1062,131 @@
   <data name="EndOfGameAdvanceSkillResultText" xml:space="preserve">
     <value>Compétence acquise : {0}</value>
   </data>
+  <data name="EndOfGameAdvanceSpellResultText" xml:space="preserve">
+    <value>Sort acquis : {0}</value>
+  </data>
   <data name="EndOfGameAdvanceRollPh" xml:space="preserve">
     <value>2D6</value>
   </data>
-  <data name="EndOfGameInvalidAdvanceRoll" xml:space="preserve">
-    <value>Jet invalide (2 à 12).</value>
+  <data name="EndOfGamePickSpell" xml:space="preserve">
+    <value>Tirer un sort</value>
+  </data>
+  <data name="EndOfGameOr" xml:space="preserve">
+    <value>OU</value>
+  </data>
+  <data name="WarbandsSpellRollAlreadyKnownMessage" xml:space="preserve">
+    <value>Ce guerrier connaît déjà ce sort - relancez.</value>
+  </data>
+  <data name="EndOfGameAdvanceSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameAdvanceChoicePh" xml:space="preserve">
+    <value>Caractéristique</value>
+  </data>
+  <data name="EndOfGameSubRollRequired" xml:space="preserve">
+    <value>Le sous-jet 1D6 est requis</value>
+  </data>
+  <data name="EndOfGameAdvanceChoiceRequired" xml:space="preserve">
+    <value>Choisissez une caractéristique</value>
+  </data>
+  <data name="EndOfGameAdvanceSkillRequired" xml:space="preserve">
+    <value>Choisissez une compétence ou un sort</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedRequired" xml:space="preserve">
+    <value>6 Héros déjà atteints - changez ce jet</value>
+  </data>
+  <data name="EndOfGamePromotionNameRequired" xml:space="preserve">
+    <value>Le nom du nouveau Héros est requis</value>
+  </data>
+  <data name="EndOfGamePromotionCategoriesRequired" xml:space="preserve">
+    <value>Choisissez les 2 listes de compétences</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollRequired" xml:space="preserve">
+    <value>Nouveau Héros : {0}</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderRollRequired" xml:space="preserve">
+    <value>Reste du groupe : {0}</value>
+  </data>
+  <data name="EndOfGamePromotionHeading" xml:space="preserve">
+    <value>Promotion !</value>
+  </data>
+  <data name="EndOfGamePromotionBlockedBanner" xml:space="preserve">
+    <value>6 Héros déjà atteints - relancez, pas de promotion possible cette fois.</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh1" xml:space="preserve">
+    <value>Première liste de compétences</value>
+  </data>
+  <data name="EndOfGamePromotionCategoryPh2" xml:space="preserve">
+    <value>Deuxième liste de compétences</value>
+  </data>
+  <data name="EndOfGamePromotionNamePh" xml:space="preserve">
+    <value>Nom du nouveau Héros</value>
+  </data>
+  <data name="EndOfGamePromotionHeroRollHeading" xml:space="preserve">
+    <value>Progression du nouveau Héros</value>
+  </data>
+  <data name="EndOfGamePromotionRemainderHeading" xml:space="preserve">
+    <value>Progression du reste du groupe</value>
+  </data>
+  <data name="EndOfGamePromotionRerollHint" xml:space="preserve">
+    <value>Un 10-12 ici relance : une seule promotion par jet de Progression.</value>
+  </data>
+  <data name="EndOfGameMultipleInjuriesHeading" xml:space="preserve">
+    <value>Blessures multiples</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryLabel" xml:space="preserve">
+    <value>Jet {0}/{1}</value>
+  </data>
+  <data name="EndOfGameFigureLabel" xml:space="preserve">
+    <value>Figurine {0}/{1}</value>
+  </data>
+  <data name="EndOfGameOutOfActionHint" xml:space="preserve">
+    <value>Cochez les guerriers hors de combat à la fin de la partie.</value>
+  </data>
+  <data name="EndOfGameInjuryProgressLabel" xml:space="preserve">
+    <value>Blessé {0}/{1}</value>
+  </data>
+  <data name="EndOfGameAdvanceProgressLabel" xml:space="preserve">
+    <value>Progression {0}/{1}</value>
+  </data>
+  <data name="EndOfGameMultipleInjuryCountPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameHatredHeading" xml:space="preserve">
+    <value>Qui hait-il désormais ?</value>
+  </data>
+  <data name="EndOfGameHatredScopeHint" xml:space="preserve">
+    <value>1-3 : l'individu responsable (ou le chef ennemi si c'était un Homme de main) — 4 : le chef de la bande responsable — 5 : la bande entière — 6 : toutes les bandes de ce type.</value>
+  </data>
+  <data name="EndOfGameHatredSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameInjuryBranchSubRollPh" xml:space="preserve">
+    <value>1D6</value>
+  </data>
+  <data name="EndOfGameDeepWoundSubRollPh" xml:space="preserve">
+    <value>1D3</value>
+  </data>
+  <data name="EndOfGameDeepWoundResultFormat" xml:space="preserve">
+    <value>{0} partie(s) manquée(s)</value>
+  </data>
+  <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
+    <value>Nom du responsable</value>
+  </data>
+  <data name="EndOfGameHatredBandNamePh" xml:space="preserve">
+    <value>Nom de la bande</value>
+  </data>
+  <data name="EndOfGameHatredPickWarbandArchetype" xml:space="preserve">
+    <value>Quel type de bande ?</value>
+  </data>
+  <data name="EndOfGameHatredTargetRequired" xml:space="preserve">
+    <value>Renseignez la cible avant de continuer.</value>
   </data>
   <data name="HistoryAdvanceSentence" xml:space="preserve">
     <value>{0} a progressé : {1}</value>
+  </data>
+  <data name="HistoryPromotionSentence" xml:space="preserve">
+    <value>{0} : un membre du groupe devient Héros ({1}) !</value>
   </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Compétence : choisissez une compétence dans un tableau accessible à ce guerrier (ou un nouveau sort aléatoire si Sorcier).</value>
@@ -975,11 +1281,29 @@
   <data name="InjurySerious23" xml:space="preserve">
     <value>Blessure au bras (1D6) : sur 1, bras amputé, ne peut plus utiliser que des armes à une main (permanent) ; sur 2-6, blessure légère, rate la prochaine bataille.</value>
   </data>
+  <data name="InjurySerious23Light" xml:space="preserve">
+    <value>Blessure légère : rate la prochaine bataille.</value>
+  </data>
+  <data name="InjurySerious23Severe" xml:space="preserve">
+    <value>Bras amputé : ne peut plus utiliser que des armes à une main (permanent).</value>
+  </data>
   <data name="InjurySerious24" xml:space="preserve">
     <value>Folie (1D6) : sur 1-3 devient Stupide de façon permanente ; sur 4-6 devient Frénétique de façon permanente.</value>
   </data>
+  <data name="InjurySerious24Stupidity" xml:space="preserve">
+    <value>Devient Stupide de façon permanente.</value>
+  </data>
+  <data name="InjurySerious24Frenzy" xml:space="preserve">
+    <value>Devient Frénétique de façon permanente.</value>
+  </data>
   <data name="InjurySerious25" xml:space="preserve">
     <value>Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille.</value>
+  </data>
+  <data name="InjurySerious25Light" xml:space="preserve">
+    <value>Blessure légère : rate la prochaine bataille.</value>
+  </data>
+  <data name="InjurySerious25Severe" xml:space="preserve">
+    <value>Ne peut plus courir mais peut charger (permanent).</value>
   </data>
   <data name="InjurySerious26" xml:space="preserve">
     <value>Blessure au torse : Endurance -1 de façon permanente.</value>
@@ -1064,6 +1388,36 @@
   </data>
   <data name="LibManageMagicSchools" xml:space="preserve">
     <value>Gérer les écoles de magie</value>
+  </data>
+  <data name="LibManageRaces" xml:space="preserve">
+    <value>Gérer les races</value>
+  </data>
+  <data name="RaceCreateTitle" xml:space="preserve">
+    <value>Nouvelle race</value>
+  </data>
+  <data name="RaceEditTitle" xml:space="preserve">
+    <value>Modifier la race</value>
+  </data>
+  <data name="RaceNamePh" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="LibManageRacialProfiles" xml:space="preserve">
+    <value>Gérer les profils raciaux</value>
+  </data>
+  <data name="RacialProfileCreateTitle" xml:space="preserve">
+    <value>Nouveau profil racial</value>
+  </data>
+  <data name="RacialProfileEditTitle" xml:space="preserve">
+    <value>Modifier le profil racial</value>
+  </data>
+  <data name="RacialProfileNamePh" xml:space="preserve">
+    <value>Profil racial</value>
+  </data>
+  <data name="RacialProfileMaxPh" xml:space="preserve">
+    <value>Maximums de caractéristiques</value>
+  </data>
+  <data name="WarriorArchetypeRacialProfilePh" xml:space="preserve">
+    <value>Type de créature (Progression)</value>
   </data>
   <data name="WarbandGradePh" xml:space="preserve">
     <value>Grade</value>

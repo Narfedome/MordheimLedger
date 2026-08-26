@@ -22,21 +22,29 @@
                  du Warrior lié (IsHero pilote directement ExperienceTrackView), pas du groupe qui
                  l'affiche. -->
             <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
-                <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
+                <Border Style="{StaticResource SectionCardBorderStyle}" Margin="6,6">
                     <VerticalStackLayout Spacing="2">
-                        <Grid ColumnDefinitions="*,Auto,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Start"  >
                             <HorizontalStackLayout Grid.Column="0" Spacing="6">
-                                <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                                <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
                                 <!-- Effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1) - vide donc
                                      invisible pour un Héros ou un groupe à 1 seul survivant. -->
                                 <Label Text="{Binding HeadCountDisplay}" TextColor="{DynamicResource AppTextMuted}"
                                        FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
+                                <!-- Pense-bête visuel seulement (voir WarriorRow.IsSick) - masqué tant
+                                     qu'il est Actif, s'efface tout seul à la fin de partie suivante,
+                                     rien à cliquer ici (contrairement à un ChipView catalogue). -->
+                                <Border Style="{StaticResource ChipBorderStyle}" IsVisible="{Binding IsSick}"
+                                        Padding="6,2" Stroke="{DynamicResource AppDanger}" VerticalOptions="Center">
+                                    <Label Text="{Binding SickChipText}" FontSize="11" FontAttributes="Bold"
+                                           TextColor="{DynamicResource AppDanger}"/>
+                                </Border>
                             </HorizontalStackLayout>
                             <Label Grid.Column="1" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
                             <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Pen}"
                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                          IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}"
+                                                          IsVisible="{Binding IsEditable}"
                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EditWarriorCommand}"
                                                           CommandParameter="{Binding .}"/>
                         </Grid>
@@ -45,14 +53,18 @@
                              abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
                              de cartes guerrier d'affilée. -->
-                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,0,0,8"
+                        <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,8,0,8"
                                                  AbbrFontSize="10" ValueFontSize="13"/>
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
                              ViewModel depuis WarriorArchetype.SpecialRules + WarbandArchetype.
-                             SpecialRules (règles bande-entière), pas stockées sur le Warrior. Pour
-                             changer les règles d'un type de guerrier, ça se passe dans la Bibliothèque
-                             (WarriorArchetypeEditDialog/WarbandArchetypeEditDialog), pas ici. -->
+                             SpecialRules (règles bande-entière) + les règles portées par l'équipement
+                             actuellement équipé, pas stockées sur le Warrior. Pour changer les règles
+                             d'un type de guerrier, ça se passe dans la Bibliothèque
+                             (WarriorArchetypeEditDialog/WarbandArchetypeEditDialog), pas ici. Une règle
+                             de Haine avec cible mécanisée (SpecialRule.HatredTargetWarbandArchetypeIds)
+                             s'explose en une chip par cible ("Haine : Skavens") au lieu d'une seule chip
+                             générique - voir WarbandDetailViewModel.BuildSpecialRuleChips/SpecialRuleChip. -->
                         <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
                                                   ItemsSource="{Binding SpecialRules}"
                                                   IconGlyph="{x:Static icons:SolidFont.Scroll}"
@@ -69,6 +81,18 @@
                                                   IconFontFamily="RpgAwesome"
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowInjuryDetailCommand}"/>
+
+                        <!-- Haine (Rancune, blessure grave 56) : lecture seule, pas de bouton "+"/"x" ni
+                             de tap-to-detail (pas de fiche catalogue à ouvrir, juste une cible résolue -
+                             voir Models.WarriorHatred/WarbandDetailViewModel.HatredChips). Distinct des
+                             chips "Haine : X" des Règles spéciales (celles-ci sont fixes, accordées par
+                             l'archétype/l'objet - voir SpecialRuleChip) : celle-ci vient d'un jet en
+                             partie, propre à ce guerrier. -->
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsHatredHeading}"
+                                                  ItemsSource="{Binding HatredChips}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaSkull}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"/>
 
                         <!-- École(s) de magie : celle(s) de LA BANDE (pas propre au guerrier - voir
                              WarriorRow.MagicSchools), résolue seulement pour les guerriers lanceurs de
@@ -157,29 +181,63 @@
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" x:Name="Header" ColumnDefinitions="*,Auto">
             <header:DetailPageHeaderView Grid.Column="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
-            <components:IconTextButton Grid.Column="1" Margin="0,0,16,0"
-                                        IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}"
-                                        Icon="{x:Static icons:SolidFont.FlagCheckered}"
-                                        Text="{loc:Loc EndOfGameTitle}"
-                                        TextColor="{DynamicResource AppAccent}"
-                                        Command="{Binding EndOfGameCommand}"/>
+            <HorizontalStackLayout Grid.Column="1" Spacing="16" Margin="0,0,16,0"
+                                    IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                <!-- Masqué entièrement si vide, comme l'était l'ancienne section dépliable du roster
+                     (voir Models.WarbandEquipment) - rien à réattribuer tant qu'aucun objet n'a été
+                     trouvé (ex. étape Exploration du wizard Fin de Partie). -->
+                <components:IconTextButton IsVisible="{Binding HasInventory}"
+                                            Icon="{x:Static icons:SolidFont.BoxOpen}"
+                                            Text="{loc:Loc InventoryHeading}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding ShowInventoryCommand}"/>
+                <!-- Un seul des deux boutons à la fois (voir Warband.GameInProgress/HasGameInProgress) -
+                     "Lancer la partie" remplace "Fin de partie" tant qu'aucune partie n'est en cours,
+                     demande explicite de l'utilisateur (2026-08-26) : "Start a game" -> "End of game". -->
+                <components:IconTextButton IsVisible="{Binding HasGameInProgress, Converter={StaticResource InverseBoolConverter}}"
+                                            Icon="{x:Static icons:SolidFont.Play}"
+                                            Text="{loc:Loc StartGameButtonText}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding StartGameCommand}"/>
+                <components:IconTextButton IsVisible="{Binding HasGameInProgress}"
+                                            Icon="{x:Static icons:SolidFont.FlagCheckered}"
+                                            Text="{loc:Loc EndOfGameTitle}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding EndOfGameCommand}"/>
+            </HorizontalStackLayout>
         </Grid>
 
         <!-- Contenu de la page (trésorerie/rating, onglets Roster/Historique, recruter, roster,
              historique) entièrement masqué pendant Loading.IsLoading - seul le header (titre + retour)
              reste visible, pour ne pas bloquer la navigation pendant un chargement/rechargement. -->
         <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
-        <Label Grid.Row="0" Margin="16,0,16,8" TextColor="{DynamicResource AppTextMuted}">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
-                    <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
-                    <Span Text=" · "/>
-                    <Span Text="{loc:Loc WarbandRatingPh}"/>
-                    <Span Text="{Binding Rating, StringFormat=' {0}'}"/>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
+        <VerticalStackLayout Grid.Row="0" Spacing="6" Margin="16,0,16,8">
+            <Label TextColor="{DynamicResource AppTextMuted}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
+                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
+                        <Span Text=" · "/>
+                        <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
+                        <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>
+                        <Span Text=" · "/>
+                        <Span Text="{loc:Loc WarbandRatingPh}"/>
+                        <Span Text="{Binding Rating, StringFormat=' {0}'}"/>
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+
+            <!-- Pense-bête "prochaine partie" (voir Warband.NextGameNote) - ex. Cimetière : haine des
+                 Chasseurs de Sorcières/Sœurs de Sigmar après un pillage. S'efface tout seul à la Fin de
+                 Partie suivante (consommé côté ViewModel), rien à cliquer ici. Couleur alignée sur les
+                 rappels de relance de l'étape Exploration du wizard (EndOfGamePendingBonusDieReminder/
+                 EndOfGameCatacombRerollReminder, AppAccent) plutôt que AppDanger - un pense-bête
+                 informatif, pas un état d'alerte (retour utilisateur 2026-08-25). -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" Stroke="{DynamicResource AppAccent}"
+                    Padding="10,6" IsVisible="{Binding HasNextGameNote}">
+                <Label Text="{Binding Warband.NextGameNote}" FontSize="12" TextColor="{DynamicResource AppAccent}"/>
+            </Border>
+        </VerticalStackLayout>
 
         <!-- Roster / Historique : pas de précédent DmTools pour des "onglets" internes à une page de
              détail - toggle minimal (deux boutons + IsVisible) plutôt qu'un vrai TabbedPage/Shell tab.
@@ -243,8 +301,8 @@
                                      BindableLayout.ItemsSource="{Binding Henchmen}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
-                <!-- Morts : lecture seule (les boutons Éditer/+/x sont masqués sur la carte via
-                     WarriorRow.IsDead), regroupe Héros et Hommes de main morts ensemble - conservés
+                <!-- Morts : lecture seule (le bouton Éditer est masqué sur la carte via
+                     WarriorRow.IsEditable), regroupe Héros et Hommes de main morts ensemble - conservés
                      dans le roster pour l'historique de la bande plutôt que retirés à la fin de partie. -->
                 <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
                     <Grid.GestureRecognizers>
@@ -264,6 +322,29 @@
                 </Grid>
                 <VerticalStackLayout IsVisible="{Binding DeadExpanded}"
                                      BindableLayout.ItemsSource="{Binding DeadWarriors}"
+                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
+
+                <!-- Retraités : même traitement lecture seule que Morts (WarriorRow.IsRetired), mais un
+                     guerrier retraité n'est jamais mort - actuellement uniquement via Œil crevé (31)
+                     perdu une seconde fois, voir Core.Rules.SeriousInjuryEffectKind.ForcedRetirement. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleRetiredCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc WarriorsGroupRetired}"/>
+                                <Span Text="{Binding RetiredWarriors.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding RetiredExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleRetiredCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding RetiredExpanded}"
+                                     BindableLayout.ItemsSource="{Binding RetiredWarriors}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
             </VerticalStackLayout>

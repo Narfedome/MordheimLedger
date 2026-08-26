@@ -55,63 +55,151 @@
         <!-- Mouvement -->
         <Label Grid.Row="0" Grid.Column="0" Text="{loc:Loc StatMovementAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=MovementText}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <!-- Item = Warrior uniquement (Animal/WarriorArchetype n'ont pas ces propriétés - binding
+                 silencieusement inerte pour eux, voir Models.Warrior.MovementIncreased/etc) : colore la
+                 valeur si elle a bougé depuis le recrutement (Warrior.StartingMovement etc.) - AppSuccess
+                 (vert fixe, pas AppAccent : reste vert quelle que soit la palette active, voir sa doc
+                 dans Colors.xaml) pour un gain, AppDanger (rouge fixe, déjà utilisé pour les chips
+                 Malade/Mort) pour une perte, ex. Blessure Grave. Demande explicite de l'utilisateur
+                 (2026-08-25, révisé le même jour pour des couleurs fixes/plus marquées).-->
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding MovementIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding MovementDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="0" Text="{Binding Source={x:Reference root}, Path=MovementText}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- CC -->
         <Label Grid.Row="0" Grid.Column="2" Text="{loc:Loc StatWeaponSkillAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="2" Text="{Binding WeaponSkill}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding WeaponSkillIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding WeaponSkillDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="2" Text="{Binding WeaponSkill}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- CT -->
         <Label Grid.Row="0" Grid.Column="4" Text="{loc:Loc StatBallisticSkillAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="4" Text="{Binding BallisticSkill}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding BallisticSkillIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding BallisticSkillDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="4" Text="{Binding BallisticSkill}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- F -->
         <Label Grid.Row="0" Grid.Column="6" Text="{loc:Loc StatStrengthAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="6" Text="{Binding Strength}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding StrengthIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding StrengthDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="6" Text="{Binding Strength}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- E -->
         <Label Grid.Row="0" Grid.Column="8" Text="{loc:Loc StatToughnessAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="8" Text="{Binding Toughness}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding ToughnessIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding ToughnessDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="8" Text="{Binding Toughness}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- PV -->
         <Label Grid.Row="0" Grid.Column="10" Text="{loc:Loc StatWoundsAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="10" Text="{Binding Wounds}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding WoundsIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding WoundsDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="10" Text="{Binding Wounds}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- I -->
         <Label Grid.Row="0" Grid.Column="12" Text="{loc:Loc StatInitiativeAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="12" Text="{Binding Initiative}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding InitiativeIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding InitiativeDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="12" Text="{Binding Initiative}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- A -->
         <Label Grid.Row="0" Grid.Column="14" Text="{loc:Loc StatAttacksAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="14" Text="{Binding Attacks}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding AttacksIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding AttacksDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="14" Text="{Binding Attacks}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 
         <!-- Cd -->
         <Label Grid.Row="0" Grid.Column="16" Text="{loc:Loc StatLeadershipAbbr}" FontSize="{Binding Source={x:Reference root}, Path=AbbrFontSize}" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
         <Label Grid.Row="2" Grid.Column="16" Text="{Binding Leadership}" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" FontAttributes="Bold" TextColor="{DynamicResource AppText}" HorizontalTextAlignment="Center"
-               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}"/>
+               IsVisible="{Binding Source={x:Reference root}, Path=IsEditable, Converter={StaticResource InverseBoolConverter}}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding LeadershipIncreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding LeadershipDecreased}" Value="True">
+                    <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
         <Entry Grid.Row="2" Grid.Column="16" Text="{Binding Leadership}" Keyboard="Numeric" FontSize="{Binding Source={x:Reference root}, Path=ValueFontSize}" HorizontalTextAlignment="Center"
                IsVisible="{Binding Source={x:Reference root}, Path=IsEditable}"/>
 

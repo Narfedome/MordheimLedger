@@ -1,3 +1,5 @@
+using MordheimLedgerApp.Core.Rules;
+
 namespace MordheimLedgerApp.Core.Models;
 
 /// <summary>
@@ -18,6 +20,15 @@ public class Warrior
     public int Cost { get; set; }
     public int Experience { get; set; }
     public WarriorStatus Status { get; set; } = WarriorStatus.Active;
+
+    /// <summary>Only meaningful while Status is Sick - how many MORE End of Game runs this warrior
+    /// stays Sick, decremented (not unconditionally cleared) each time - see
+    /// WarbandDetailViewModel.EndOfGame.ApplySicknessLifecycleAsync. 1 for every source that meant
+    /// "misses exactly the next game" (the Exploration chart's Puits failure, a light Arm Wound/
+    /// Smashed Leg), a D3 roll for Deep Wound (Core.Rules.SeriousInjuryEffectTable.
+    /// SeriousInjuryEffectKind.MissGamesRollD3) - the only source needing more than 1. Left at its
+    /// stale value once Status returns to Active; not read unless Status is Sick.</summary>
+    public int SickGamesRemaining { get; set; }
 
     /// <summary>Always 1 for a Hero (meaningless otherwise). For a Henchman group, how many living
     /// models remain in it - the whole point of the group being one row instead of N: casualties just
@@ -45,6 +56,45 @@ public class Warrior
     public int Attacks { get; set; }
     public int Leadership { get; set; }
 
+    /// <summary>Snapshot of the stat line above at the moment THIS row started existing - recruitment
+    /// (EntityMapping.ToWarrior) or, for a Henchman promoted to Hero, the moment of promotion
+    /// (CloneAsPromotedHero, which resets the baseline to whatever the group had earned by then rather
+    /// than the Henchman archetype's original template). Never touched again afterwards - purely a
+    /// reference point for the IncreasedSinceStart/DecreasedSinceStart computed properties below, which
+    /// StatRowView's DataTriggers use to color a stat that has moved since (WarbandDetailPage) - same
+    /// snapshot-at-creation-time convention as MaxMovement/etc. below.</summary>
+    public int StartingMovement { get; set; }
+    public int StartingWeaponSkill { get; set; }
+    public int StartingBallisticSkill { get; set; }
+    public int StartingStrength { get; set; }
+    public int StartingToughness { get; set; }
+    public int StartingWounds { get; set; }
+    public int StartingInitiative { get; set; }
+    public int StartingAttacks { get; set; }
+    public int StartingLeadership { get; set; }
+
+    /// <summary>Movement excluded (MovementIncreased/MovementDecreased below instead) - MovementOverride
+    /// (e.g. Cave Squigs' "2D6") means the numeric Movement isn't even what's displayed
+    /// (MovementDisplay), so a plain int comparison would be meaningless whenever it's set.</summary>
+    public bool MovementIncreased => MovementOverride is null && Movement > StartingMovement;
+    public bool MovementDecreased => MovementOverride is null && Movement < StartingMovement;
+    public bool WeaponSkillIncreased => WeaponSkill > StartingWeaponSkill;
+    public bool WeaponSkillDecreased => WeaponSkill < StartingWeaponSkill;
+    public bool BallisticSkillIncreased => BallisticSkill > StartingBallisticSkill;
+    public bool BallisticSkillDecreased => BallisticSkill < StartingBallisticSkill;
+    public bool StrengthIncreased => Strength > StartingStrength;
+    public bool StrengthDecreased => Strength < StartingStrength;
+    public bool ToughnessIncreased => Toughness > StartingToughness;
+    public bool ToughnessDecreased => Toughness < StartingToughness;
+    public bool WoundsIncreased => Wounds > StartingWounds;
+    public bool WoundsDecreased => Wounds < StartingWounds;
+    public bool InitiativeIncreased => Initiative > StartingInitiative;
+    public bool InitiativeDecreased => Initiative < StartingInitiative;
+    public bool AttacksIncreased => Attacks > StartingAttacks;
+    public bool AttacksDecreased => Attacks < StartingAttacks;
+    public bool LeadershipIncreased => Leadership > StartingLeadership;
+    public bool LeadershipDecreased => Leadership < StartingLeadership;
+
     /// <summary>Which EquipmentList this warrior may buy starting equipment from - copied from the
     /// recruiting WarriorArchetype at recruitment (see WarriorArchetype.EquipmentListId), null = no
     /// equipment usable. Editing the archetype's list later doesn't retroactively change this.</summary>
@@ -71,6 +121,12 @@ public class Warrior
     /// same list — see WarbandDetailViewModel.EndOfGame's find-or-create-by-name lookup.</summary>
     public List<WarriorInjury> Injuries { get; set; } = new();
 
+    /// <summary>Loaded separately via the Warrior/WarriorHatred join table - not persisted on this
+    /// object. Fed only by the End of Game "Rancune" Serious Injury result (see
+    /// WarbandDetailViewModel.EndOfGame), no manual-add UI - unlike Injuries, there's no free-standing
+    /// catalog to pick from.</summary>
+    public List<WarriorHatred> Hatreds { get; set; } = new();
+
     /// <summary>Loaded separately via the Warrior/Spell join table — not persisted on this object. Which
     /// specific spells this warrior has learned from its band's granted magic school(s) (a caster
     /// doesn't know the whole table at once, see WarriorSpell) — empty for non-casters.</summary>
@@ -87,4 +143,41 @@ public class Warrior
 
     /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.IsLargeCreature.</summary>
     public bool IsLargeCreature { get; set; }
+
+    /// <summary>Copied from the recruiting WarriorArchetype - see WarriorArchetype.GainsExperience. Used
+    /// by the End of Game wizard to exclude this warrior from the Experience/Advance steps entirely.</summary>
+    public bool GainsExperience { get; set; } = true;
+
+    /// <summary>True for the one warrior recruited from a warband's sole mandatory "no more, no less"
+    /// leader-type archetype (WarriorArchetype.MinCount.HasValue, e.g. the Captain/Vampire/Orc Boss -
+    /// every warband has exactly one) - copied at recruitment, same idiom as IsHero/GainsExperience.
+    /// Identifies "the warband leader" for rulebook rules that target them specifically (e.g. Shattered
+    /// Building's Leadership test - Bâtiment Éventré), rather than any Hero the player picks. False for
+    /// every other warrior, including every other Hero.</summary>
+    public bool IsLeader { get; set; }
+
+    /// <summary>Racial characteristic maximums, snapshotted from the recruiting WarriorArchetype's
+    /// RacialProfile at recruitment (see EntityMapping.ToWarrior) - same snapshot-at-recruit-time
+    /// convention as the rest of the stat line, not a live reference: editing the RacialProfile catalog
+    /// later doesn't retroactively change an already-recruited Warrior's own maximums. Consumed by
+    /// Core.Rules.CharacteristicIncreaseRules when resolving an Advance result. All 9 nullable: null
+    /// means no known ceiling - either this archetype's RacialProfile isn't resolved (RacialProfiles.json
+    /// deliberately only covers creature types with confirmed official numbers, or the archetype never
+    /// gains Experience at all) or, for MaxMovement specifically, a free-text override race (e.g. Cave
+    /// Squigs' "2D6"). Never blocks Progression by itself - see CharacteristicMaxes' doc.</summary>
+    public int? MaxMovement { get; set; }
+    public int? MaxWeaponSkill { get; set; }
+    public int? MaxBallisticSkill { get; set; }
+    public int? MaxStrength { get; set; }
+    public int? MaxToughness { get; set; }
+    public int? MaxWounds { get; set; }
+    public int? MaxInitiative { get; set; }
+    public int? MaxAttacks { get; set; }
+    public int? MaxLeadership { get; set; }
+
+    /// <summary>Henchman-only "never twice" tracking (rulebook: a Henchman group may only ever add +1 to
+    /// any single characteristic) - see Core.Rules.CharacteristicField/CharacteristicIncreaseRules.
+    /// IsEligibleForHenchmanIncrease. Meaningless for a Hero (always empty), who has no such
+    /// restriction.</summary>
+    public List<CharacteristicField> IncreasedCharacteristics { get; set; } = new();
 }

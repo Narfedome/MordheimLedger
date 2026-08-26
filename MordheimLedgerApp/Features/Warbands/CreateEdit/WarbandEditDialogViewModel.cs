@@ -366,7 +366,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 // Triés par Id pour un ordre stable (ordre de recrutement d'origine) - plusieurs groupes
                 // d'Hommes de main du même archétype si le joueur en avait déjà scindé un (voir
                 // SplitHenchmanGroupDraft), chacun devient son propre HenchmanGroupDraft ici.
-                foreach (var w in existingWarriors.Where(w => w.WarriorArchetypeId == archetype.Id && w.Status != WarriorStatus.Dead).OrderBy(w => w.Id))
+                foreach (var w in existingWarriors.Where(w => w.WarriorArchetypeId == archetype.Id && w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired).OrderBy(w => w.Id))
                 {
                     if (w.IsHero)
                         row.NameSlots.Add(new WarriorNameSlot(row, IsExistingWarband, existingWarrior: w));
@@ -763,7 +763,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             };
             if (slot is null || Archetype is null) return;
 
-            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService, _detailDialogs)));
+            var knownSpellIds = slot.Spells.Select(s => s.Id).ToList();
+            var spell = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(Archetype.MagicSchools, _libraryService, _detailDialogs, knownSpellIds)));
             if (spell is null) return;
 
             slot.Spells.Add(spell);

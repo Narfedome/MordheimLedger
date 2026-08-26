@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.RacialProfiles;
+using MordheimLedgerApp.Features.Library.Races;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Services;
 
@@ -177,8 +179,9 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         // Valeurs de départ raisonnables plutôt que 0/null - purement indicatives, l'utilisateur les
         // ajuste ou les efface (MaxWarriors reste nullable, 10 n'est qu'un point de départ arbitraire).
         var newItem = new WarbandArchetype { StartingTreasury = 500, MaxWarriors = 10 };
+        var allRaces = await _libraryService.GetRacesAsync(LocalizationService.Instance.Language);
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"],
-            _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker);
+            _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker, allRaces);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await LoadData();
@@ -203,15 +206,29 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             ImagePath = s.ImagePath,
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
-            MagicSchools = new List<MagicSchool>(s.MagicSchools)
+            MagicSchools = new List<MagicSchool>(s.MagicSchools),
+            RaceId = s.RaceId
         };
 
+        var allRaces = await _libraryService.GetRacesAsync(LocalizationService.Instance.Language);
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"],
-            _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker);
+            _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker, allRaces);
         if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
 
         await LoadData();
     }
+
+    /// <summary>Ouvre le catalogue Race en édition (Créer/Renommer/Supprimer) - même idiome que
+    /// SpellViewModel.ManageMagicSchools, reflété ici sur l'onglet Bandes puisque Race classifie
+    /// WarbandArchetype comme MagicSchool classifie Spell.</summary>
+    [RelayCommand]
+    private static async Task ManageRaces() => await Shell.Current.GoToAsync(nameof(RaceListPage));
+
+    /// <summary>Ouvre le catalogue RacialProfile (maximums de caractéristiques par type de créature) -
+    /// même idiome que ManageRaces juste au-dessus, reflété ici pour la même raison (WarriorArchetype,
+    /// pas WarbandArchetype directement, mais aucun onglet Codex dédié pour l'instant).</summary>
+    [RelayCommand]
+    private static async Task ManageRacialProfiles() => await Shell.Current.GoToAsync(nameof(RacialProfileListPage));
 
     [RelayCommand]
     private async Task Delete()

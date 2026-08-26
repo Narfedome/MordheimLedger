@@ -37,7 +37,13 @@ public interface IDetailDialogService
     /// that point) and this method preserves that choice rather than picking one.</summary>
     Task ShowWarriorArchetypeDetailDialogAsync(WarriorArchetype item, IReadOnlyList<NamedRef> warbandEquipmentLists);
 
-    Task ShowEquipmentDetailDialogAsync(EquipmentItem item, SpecialRule? materialRule = null);
+    /// <param name="foundValueOverride">Actual rolled resale value for one specific found
+    /// WarbandEquipment row (see Models.WarbandEquipment.FoundValueOverride) - replaces the catalog's
+    /// CostRandomMax-derived range in the popup when set (e.g. the Jewelsmith's Ruby, "45" instead of
+    /// "15 - 90"). Null for every ordinary catalog-browsing call site.</param>
+    /// <param name="blessingRule">The attached blessing rule (e.g. "Blessed Weapon"), loaded separately -
+    /// see WarriorEquipment.BlessingRule. Independent of materialRule - both can be set at once.</param>
+    Task ShowEquipmentDetailDialogAsync(EquipmentItem item, SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null);
     Task ShowSkillDetailDialogAsync(Skill item);
     Task ShowSpecialRuleDetailDialogAsync(SpecialRule item);
     Task ShowMutationDetailDialogAsync(Mutation item);
@@ -64,7 +70,7 @@ public class DetailDialogService : IDetailDialogService
     public Task ShowWarriorArchetypeDetailDialogAsync(WarriorArchetype item, IReadOnlyList<NamedRef> warbandEquipmentLists) =>
         ShowAsync(new WarriorArchetypeDetailDialog(new WarriorArchetypeDetailDialogViewModel(item, warbandEquipmentLists)));
 
-    public async Task ShowEquipmentDetailDialogAsync(EquipmentItem item, SpecialRule? materialRule = null)
+    public async Task ShowEquipmentDetailDialogAsync(EquipmentItem item, SpecialRule? materialRule = null, int? foundValueOverride = null, SpecialRule? blessingRule = null)
     {
         var language = LocalizationService.Instance.Language;
         var categoryLabel = LocalizationService.Instance[$"EquipmentCategory{item.Category}"];
@@ -80,7 +86,7 @@ public class DetailDialogService : IDetailDialogService
                 .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
 
         await ShowAsync(new EquipmentItemDetailDialog(
-            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, this, materialRule)));
+            new EquipmentItemDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, this, materialRule, foundValueOverride, blessingRule)));
     }
 
     public async Task ShowSkillDetailDialogAsync(Skill item)
@@ -119,5 +125,5 @@ public class DetailDialogService : IDetailDialogService
         ShowAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(item)));
 
     public Task ShowInjuryDetailDialogAsync(Injury item) =>
-        ShowAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(item)));
+        ShowAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(item, this)));
 }

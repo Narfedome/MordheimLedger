@@ -36,6 +36,35 @@
     }
   },
   {
+    "name": { "en": "Arm Wound: Minor", "fr": "Blessure au bras : légère" },
+    "category": "Hero",
+    "rollRange": "23",
+    "branchRange": "2-6",
+    "description": {
+      "en": "Minor wound: misses the next battle.",
+      "fr": "Blessure légère : rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Arm Wound: Amputated", "fr": "Blessure au bras : amputé" },
+    "category": "Hero",
+    "rollRange": "23",
+    "branchRange": "1",
+    "description": {
+      "en": "Arm amputated: can only use one-handed weapons from now on (permanent).",
+      "fr": "Bras amputé : ne peut plus utiliser que des armes à une main (permanent)."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Amputated arm", "fr": "Bras amputé" },
+        "description": {
+          "en": "This warrior's arm was amputated and replaced with nothing - he can no longer wield two-handed weapons. Purely a reminder: the app does not block equipping a two-handed weapon on this warrior.",
+          "fr": "Ce guerrier a eu le bras amputé et ne peut plus manier d'armes à deux mains. Purement un rappel : l'application ne bloque pas l'équipement d'une arme à deux mains sur ce guerrier."
+        }
+      }
+    ]
+  },
+  {
     "name": { "en": "Madness", "fr": "Folie" },
     "category": "Hero",
     "rollRange": "24",
@@ -45,6 +74,40 @@
     }
   },
   {
+    "name": { "en": "Madness: Stupidity", "fr": "Folie : Stupidité" },
+    "category": "Hero",
+    "rollRange": "24",
+    "branchRange": "1-3",
+    "description": {
+      "en": "Becomes permanently Stupid.",
+      "fr": "Devient Stupide de façon permanente."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Stupidity", "fr": "Stupidité" },
+        "description": {
+          "en": "At the start of its turn, a Stupid model must pass a Leadership test or remain Stupid until its next turn: it cannot cast spells or fight in hand-to-hand combat (though enemies can still hit it normally). If not in hand-to-hand combat, roll a D6: on 1-3 it shambles forward at half speed (won't charge, stops at an obstacle or a drop, won't shoot); on 4-6 it stands inactive and does nothing.",
+          "fr": "Au début de son tour, une figurine Stupide doit réussir un test de Commandement, sinon elle reste Stupide jusqu'à son prochain tour : elle ne peut ni lancer de sorts ni combattre au corps à corps (mais les ennemis peuvent toujours la toucher normalement). Si elle n'est pas au corps à corps, lancez 1D6 : sur 1-3 elle avance en traînant les pieds à vitesse réduite (ne charge pas, s'arrête devant un obstacle ou une chute, ne tire pas) ; sur 4-6 elle reste immobile et ne fait rien."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Madness: Frenzy", "fr": "Folie : Frénésie" },
+    "category": "Hero",
+    "rollRange": "24",
+    "branchRange": "4-6",
+    "description": {
+      "en": "Becomes permanently Frenzied.",
+      "fr": "Devient Frénétique de façon permanente."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Frenzy", "fr": "Frénésie" }
+      }
+    ]
+  },
+  {
     "name": { "en": "Smashed Leg", "fr": "Jambe écrasée" },
     "category": "Hero",
     "rollRange": "25",
@@ -52,6 +115,35 @@
       "en": "Crushed leg (1D6): on a 1, can no longer run but can still charge (permanent); on 2-6, misses the next battle.",
       "fr": "Jambe écrasée (1D6) : sur 1, ne peut plus courir mais peut charger (permanent) ; sur 2-6, rate la prochaine bataille."
     }
+  },
+  {
+    "name": { "en": "Smashed Leg: Minor", "fr": "Jambe écrasée : légère" },
+    "category": "Hero",
+    "rollRange": "25",
+    "branchRange": "2-6",
+    "description": {
+      "en": "Minor wound: misses the next battle.",
+      "fr": "Blessure légère : rate la prochaine bataille."
+    }
+  },
+  {
+    "name": { "en": "Smashed Leg: Severe", "fr": "Jambe écrasée : grave" },
+    "category": "Hero",
+    "rollRange": "25",
+    "branchRange": "1",
+    "description": {
+      "en": "Can no longer run but can still charge (permanent).",
+      "fr": "Ne peut plus courir mais peut charger (permanent)."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Cannot Run", "fr": "Ne peut plus courir" },
+        "description": {
+          "en": "This warrior's leg was crushed - he can no longer run (double move), though he may still charge normally. Purely a reminder: the app does not restrict this warrior's movement.",
+          "fr": "Ce guerrier a la jambe écrasée - il ne peut plus courir (mouvement doublé), mais peut toujours charger normalement. Purement un rappel : l'application ne restreint pas les déplacements de ce guerrier."
+        }
+      }
+    ]
   },
   {
     "name": { "en": "Chest Wound", "fr": "Blessure au torse" },

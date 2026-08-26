@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Human",
   "imagePath": "mercenaries_empire.jpg",
   "name": {
     "en": "Marienburg Mercenaries",
@@ -34,6 +35,7 @@
       "cost": 60,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -44,6 +46,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Human",
       "description": {
         "en": "A mercenary captain with solid experience, ready to fight for anyone so long as the price is right - the risks of Mordheim are real, but so are the potential riches.",
         "fr": "Un capitaine mercenaire jouit d'une solide expérience, il affrontera n'importe quoi ou n'importe qui, pour peu que le prix soit convenable. Mordheim offre à de tels hommes des opportunités de richesse incommensurables mais présente des risques bien réels."
@@ -83,6 +86,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "In every mercenary warband you will find a warrior bigger, stronger (and often uglier) than his comrades - champions answer the challenges levelled at the warband and pick their share of loot right after the captain.",
         "fr": "Dans toutes les bandes de mercenaires vous trouverez un guerrier plus gros, plus fort (souvent plus laid), que les autres. Ils sont appelés champions et relèvent généralement les défis lancés à la bande, touchant leur part de butin juste après le capitaine."
@@ -112,6 +116,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Human",
       "description": {
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
@@ -141,6 +146,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Most Marienburg warbands are recruited from the dockland thugs, ships' crews and stevedores of the City of Gold - grim, seasoned fighters who form the core of the warband.",
         "fr": "Le gros des bandes de Marienburg est recruté dans les bas-fonds de la Cité de l'Or - marins, dockers et autres - des baroudeurs renfrognés qui constituent le gros de la bande."
@@ -165,6 +171,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "The archers and hunters of the Old World are famed for their skill, said to hit a coin at 300 paces with a long bow.",
         "fr": "Les archers et les chasseurs du Vieux Monde sont réputés pour leur adresse et on dit qu'ils peuvent atteindre une pièce à 300 pieds avec un arc long."
@@ -189,6 +196,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Marienburg's chief skills lie in duelling and the use of poisons - swordsmen are professional duellists particularly well suited to the fighting that takes place in Mordheim.",
         "fr": "Marienburg excelle dans les duels et l'usage des poisons - les bretteurs sont des duellistes professionnels particulièrement adaptés aux types de combats qui se déroulent dans Mordheim."

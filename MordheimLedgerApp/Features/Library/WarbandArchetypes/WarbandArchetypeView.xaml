@@ -16,17 +16,27 @@
         </Grid.RowDefinitions>
 
         <!-- Filtre par Grade (Core/1a/1b/1c/2a, classification mordheimer.net) - même en-tête que
-             SpellView (bouton texte = filtre courant, ouvre l'ActionSheet). Pas d'icône "gérer" ici,
-             contrairement aux Sorts/Écoles de magie : le Grade est un champ direct de WarbandArchetype,
-             pas un sous-catalogue séparé. -->
-        <Grid Grid.Row="0" VerticalOptions="Center">
-            <Button Text="{Binding SelectedGradeFilter}"
+             SpellView (bouton texte = filtre courant, ouvre l'ActionSheet). Pas d'icône "gérer" pour le
+             Grade : c'est un champ direct de WarbandArchetype (enum), pas un sous-catalogue séparé -
+             contrairement à Race (2026-08-20), un vrai catalogue éditable comme les Écoles de Magie,
+             donc avec sa propre icône "gérer" (RaceListPage). -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,auto,auto" Margin="8,0,8,8" ColumnSpacing="4" VerticalOptions="Center">
+            <Button Grid.Column="0" Text="{Binding SelectedGradeFilter}"
                     Command="{Binding SelectGradeFilterCommand}"
                     BackgroundColor="Transparent"
                     TextColor="{DynamicResource AppAccent}"
                     FontSize="{OnIdiom Default=15, Desktop=13}"
                     HorizontalOptions="Start"
                     Padding="8,4"/>
+            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.PersonRays}"
+                                         Command="{Binding ManageRacesCommand}"
+                                         Tooltip="{loc:Loc LibManageRaces}"/>
+            <!-- Profils raciaux (maximums de caractéristiques par type de créature) - même idiome
+                 "gérer" que Race juste au-dessus, glyphe distinct (RaMonsterSkull) pour ne pas réutiliser
+                 PersonRays sur un second concept - voir CLAUDE.md § cohérence des icônes. -->
+            <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:RpgFont.RaMonsterSkull}"
+                                         Command="{Binding ManageRacialProfilesCommand}"
+                                         Tooltip="{loc:Loc LibManageRacialProfiles}"/>
         </Grid>
 
         <ActivityIndicator Grid.Row="1" IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"

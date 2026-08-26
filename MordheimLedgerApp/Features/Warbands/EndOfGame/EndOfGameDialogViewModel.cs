@@ -5,31 +5,100 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
+
+using MordheimLedgerApp.Features.Warbands;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>
-/// Wizard jusqu'à 6 étapes : Résultat, Blessures Graves, Expérience, Progression, Trésor,
-/// Récapitulatif - dans cet ordre pour suivre la "Séquence d'après-bataille" du livre de règles
-/// (Blessures Graves puis Expérience puis Revenus, à faire "devant témoin" juste après la partie ;
-/// le reste de la séquence - vente de pierre magique, disponibilité des vétérans, personnages
-/// spéciaux, achats... - n'est pas dans ce dialog, soit hors périmètre V1 soit déjà couvert ailleurs
-/// dans l'appli, ex. Recruter/Ajouter un objet sur la carte guerrier). Résultat n'est pas une étape
-/// du livre à proprement parler, gardé en premier comme contexte léger pour la phrase d'Historique.
-/// Progression n'est pas non plus une étape séparée du livre (le jet s'y fait "immédiatement" dès
-/// qu'un palier d'XP est franchi, cf. Campagne.md § Expérience) mais mérite son propre écran plutôt
-/// que d'être imbriquée dans Expérience : un guerrier peut franchir plusieurs paliers d'un coup, un
-/// jet 2D6 par palier (voir WarriorOutcomeRow.AdvanceRolls/ExperienceMilestones). Elle disparaît
-/// entièrement du wizard (ActiveSteps) si aucun guerrier n'a franchi de palier cette partie.
-/// Même pattern CurrentStep/IsStepN que WarriorArchetypeEditDialogViewModel. Le Statut n'est plus une
-/// saisie manuelle du tout - voir WarriorOutcomeRow.ApplyInjuryRoll.
+/// Wizard qui suit la "Séquence d'après-bataille" du livre de règles : Résultat, Hors de combat,
+/// une étape Blessure par guerrier coché hors de combat, Expérience, Progression, Exploration
+/// (chapitre "Revenus" - jet + résolution de la table d'Exploration, voir Core.Rules.ExplorationChart
+/// et Models.Library.ExplorationResult/ExplorationOutcome), Récapitulatif - dans cet ordre (Blessures
+/// Graves puis Expérience puis Revenus, à faire "devant témoin" juste après la partie ; le reste de la
+/// séquence - vente de pierre magique, disponibilité des vétérans, personnages spéciaux, achats...
+/// - n'est pas dans ce dialog, soit hors périmètre de cette passe (voir le plan de séquencement) soit
+/// déjà couvert ailleurs dans l'appli, ex. Recruter/Ajouter un objet sur la carte guerrier).
+/// Résultat n'est pas une étape du livre à proprement parler, gardé en premier comme contexte léger
+/// pour la phrase d'Historique.
+///
+/// Steps est reconstruite à chaque accès plutôt que mise en cache (mêmes bases que WarriorRows,
+/// jamais réaffectée) : le nombre d'étapes Blessure dépend de IsOutOfAction et le nombre d'étapes
+/// Progression de HasMilestone - une "carte pleine écran" par guerrier concerné dans les deux cas
+/// (décision explicite du 2026-08-17 pour ne pas surcharger un seul écran avec tous les guerriers
+/// concernés à la fois - Hors de combat/Expérience restent des vues d'ensemble, ce sont Blessure et
+/// Progression qui se découpent guerrier par guerrier). Décocher un Héros sur l'étape "Hors de combat"
+/// fait disparaître son étape Blessure ET efface tout ce qui y avait été saisi
+/// (WarriorOutcomeRow.OnOutOfActionCountChanged) - il n'y a plus de blessure à montrer. Le Statut n'est
+/// plus une saisie manuelle du tout - voir WarriorOutcomeRow.ApplyInjuryRoll.
+///
+/// Un groupe d'Hommes de main (HeadCount potentiellement &gt; 1) n'a pas une simple case à cocher mais
+/// un stepper "combien de figurines hors de combat" (IncrementOutOfAction/DecrementOutOfAction) - la
+/// règle du livre veut un jet de Blessure Grave par figurine concernée, pas un seul jet pour tout le
+/// groupe (confirmé par l'utilisateur, 2026-08-17). Son étape Blessure affiche alors autant de jets D6
+/// indépendants que de figurines indiquées (WarriorOutcomeRow.FigureInjuryRolls), chacun pouvant tuer sa
+/// figurine sans affecter les autres - WarbandDetailViewModel.EndOfGame décompte les morts pour
+/// décrémenter Warrior.HeadCount à l'enregistrement (jamais pendant le wizard lui-même).
 /// </summary>
 public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
 {
     private readonly ISkillPickerService _skillPicker;
     private readonly IDetailDialogService _detailDialogs;
+    private readonly ILibraryService _libraryService;
     private readonly int _warbandArchetypeId;
+
+    /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
+    /// Eshin") - needed alongside _warbandArchetypeId because a Groupe B "conditional on warband type"
+    /// Exploration branch (Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome) matches by name,
+    /// not Id (see ExplorationOutcome.RestrictedToWarbandArchetypeNames - a plain string reference, same
+    /// idiom as EquipmentItemName, since this is fixed rulebook content with no editor).</summary>
+    private readonly string _warbandArchetypeName;
+
+    /// <summary>Captured once at dialog construction (see Warband.PendingExplorationBonusDie) - read by
+    /// ExplorationDiceCount, never reassigned mid-wizard: the flag itself is only cleared on the Warband
+    /// once this Fin de Partie is actually saved (WarbandDetailViewModel.EndOfGame).</summary>
+    private readonly bool _pendingExplorationBonusDie;
+
+    /// <summary>Captured once at dialog construction (see Warband.HasCatacombReroll) - permanent, unlike
+    /// _pendingExplorationBonusDie, so it's only ever read to show an informational reminder in the
+    /// Exploration roll step (ShowCatacombRerollReminder), never cleared/consumed.</summary>
+    private readonly bool _hasCatacombReroll;
+
+    /// <summary>Snapshot of Warband.Treasury at dialog-open time (see EquippedHenchmanTreasuryAfter,
+    /// Prisonniers' "autres bandes" branch) - the wizard never writes to the real Warband mid-dialog
+    /// (only WarbandDetailViewModel.EndOfGame does, at Save), so this stays a plain frozen number for
+    /// the affordability preview rather than a live reference.</summary>
+    private readonly int _currentTreasury;
+
+    private readonly List<ExplorationResult> _explorationResults;
+
+    /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
+    /// wizard qui référence le catalogue Équipement par nom anglais brut plutôt que par Id
+    /// (ExplorationOutcome.EquipmentItemName, voir sa doc) - sans ça, "Axe" s'affichait tel quel même en
+    /// français. Construit une seule fois par l'appelant (WarbandDetailViewModel.EndOfGame) plutôt que
+    /// refait à chaque résolution de branche. L'item entier (pas juste son nom) permet d'afficher un
+    /// vrai ChipView tapable (icône de catégorie + popup détail via _detailDialogs) plutôt qu'un simple
+    /// Label - même langage d'interaction que le reste de l'app pour toute référence Équipement.</summary>
+    private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName;
+
+    /// <summary>Même idée que _equipmentItemsByEnglishName, pour ExplorationOutcome.MaterialRuleName (ex.
+    /// "Ornate Weapon") - permet au ChipView d'afficher "Épée (O)" comme n'importe quel objet en Gromril/
+    /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
+    private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
+
+    /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
+    /// ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - même besoin que
+    /// _equipmentItemsByEnglishName, mais limité aux archétypes de LA bande jouée (une branche
+    /// conditionnée à une bande ne référence jamais l'archétype d'une autre).</summary>
+    private readonly IReadOnlyDictionary<string, WarriorArchetype> _warriorArchetypesByEnglishName;
+
+    /// <summary>Nom anglais -> Id de compétence, pour résoudre EquipmentItem.GrantsSpecificSkillName
+    /// (voir Core.Rules.SkillEligibility.EffectiveExtraSkillNames) vers les ids que _skillPicker attend -
+    /// le picker travaille sur son propre catalogue localisé, ce dictionnaire ne sert qu'à traverser la
+    /// frontière anglais->id une fois, ici, plutôt qu'à chaque PickAdvanceSkill.</summary>
+    private readonly IReadOnlyDictionary<string, int> _skillIdsByEnglishName;
 
     protected override bool CancelResult => false;
 
@@ -40,352 +109,241 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private string selectedResult;
 
     [ObservableProperty]
-    private int treasuryFound;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsStep0))]
-    [NotifyPropertyChangedFor(nameof(IsStep1))]
-    [NotifyPropertyChangedFor(nameof(IsStep2))]
-    [NotifyPropertyChangedFor(nameof(IsStep3))]
-    [NotifyPropertyChangedFor(nameof(IsStep4))]
-    [NotifyPropertyChangedFor(nameof(IsStep5))]
+    [NotifyPropertyChangedFor(nameof(IsResultStep))]
+    [NotifyPropertyChangedFor(nameof(IsOutOfActionStep))]
+    [NotifyPropertyChangedFor(nameof(IsInjuryStep))]
+    [NotifyPropertyChangedFor(nameof(IsExperienceStep))]
+    [NotifyPropertyChangedFor(nameof(IsAdvanceStep))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationRollStep))]
+    [NotifyPropertyChangedFor(nameof(IsExplorationResultStep))]
+    [NotifyPropertyChangedFor(nameof(IsRecapStep))]
+    [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
+    [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
+    [NotifyPropertyChangedFor(nameof(CurrentAdvanceWarrior))]
+    [NotifyPropertyChangedFor(nameof(CurrentAdvanceRolls))]
+    [NotifyPropertyChangedFor(nameof(AdvanceProgressLabel))]
     [NotifyPropertyChangedFor(nameof(CanGoBack))]
     [NotifyPropertyChangedFor(nameof(IsLastStep))]
     [NotifyPropertyChangedFor(nameof(StepLabel))]
-    private int currentStep;
+    private int stepIndex;
 
-    public bool IsStep0 => CurrentStep == 0;
-    public bool IsStep1 => CurrentStep == 1;
-    public bool IsStep2 => CurrentStep == 2;
-    public bool IsStep3 => CurrentStep == 3;
-    public bool IsStep4 => CurrentStep == 4;
-    public bool IsStep5 => CurrentStep == 5;
+    partial void OnStepIndexChanged(int value)
+    {
+        if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
+    }
 
-    /// <summary>True si au moins un guerrier franchit un palier d'XP cette partie - évalué à chaque
-    /// Next/Back (pas mis en cache) puisque ça dépend des PX saisis à l'étape Expérience juste
-    /// avant. Pilote à la fois ActiveSteps (l'étape 3 "Progression" est incluse ou non) et l'affichage
-    /// conditionnel de son contenu dans le XAML (IsStep3 seul ne suffit pas : encore faut-il que
-    /// CurrentStep puisse valoir 3, ce que ActiveSteps empêche si ce flag est faux).</summary>
-    public bool HasAnyMilestone => WarriorRows.Any(r => r.HasMilestone);
+    private enum StepKind { Result, OutOfAction, Injury, Experience, Advance, ExplorationRoll, ExplorationResult, Recap }
 
-    /// <summary>Étape 3 (Progression) incluse seulement si HasAnyMilestone - les indices des autres
-    /// étapes restent fixes (0..5) pour que IsStepN reste simple, seule la séquence de navigation et
-    /// la numérotation affichée (StepLabel) sautent l'étape 3 quand elle est vide.</summary>
-    private List<int> ActiveSteps => HasAnyMilestone ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 4, 5];
+    /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
+    /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
+    /// bataille normale (WarriorOutcomeRow.MilestoneCount/AdvanceRolls) - place officielle de la
+    /// Progression dans la séquence du livre ; le second (true), juste après Exploration, pour des
+    /// paliers UNIQUEMENT atteints grâce à l'XP accordée par la table d'Exploration (Traînard/Prisonniers/
+    /// Cimetière - WarriorOutcomeRow.ExplorationMilestoneCount/ExplorationAdvanceRolls), qui ne peut être
+    /// détecté qu'une fois cette XP-là connue, donc après l'étape Exploration. Voir CurrentAdvanceRolls.</summary>
+    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null, bool IsExplorationAdvance = false);
 
-    public bool CanGoBack => ActiveSteps.IndexOf(CurrentStep) > 0;
-    public bool IsLastStep => CurrentStep == ActiveSteps[^1];
-    public string StepLabel => string.Format(Loc["LibStepLabel"], ActiveSteps.IndexOf(CurrentStep) + 1, ActiveSteps.Count);
+    /// <summary>ExplorationResult ne s'ajoute que si un résultat a effectivement été déclenché par le
+    /// jet précédent (au plus un, voir ExplorationChart.DetectMultiples) - même principe que les étapes
+    /// Blessure/Progression qui n'apparaissent que pour les guerriers concernés, plutôt qu'une seule
+    /// étape monolithique jet+résolution (retravaillé le 2026-08-17 suite à un retour explicite sur
+    /// l'UX).</summary>
+    private List<WizardStep> Steps
+    {
+        get
+        {
+            var steps = new List<WizardStep> { new(StepKind.Result), new(StepKind.OutOfAction) };
+            steps.AddRange(WarriorRows.Where(r => r.IsOutOfAction).Select(r => new WizardStep(StepKind.Injury, r)));
+            steps.Add(new(StepKind.Experience));
+            steps.AddRange(WarriorRows.Where(r => r.HasMilestone).Select(r => new WizardStep(StepKind.Advance, r)));
+            steps.Add(new(StepKind.ExplorationRoll));
+            if (TriggeredExplorationResult is not null) steps.Add(new(StepKind.ExplorationResult));
+            // Deuxième passage Progression, placé APRÈS Exploration plutôt qu'inséré à la position
+            // "normale" (juste après Expérience, ci-dessus) : Steps est recalculée à chaud (voir la doc de
+            // classe) - un guerrier dont HasMilestone ne devient vrai qu'une fois l'XP d'Exploration
+            // assignée franchirait sinon un palier à une position DÉJÀ dépassée par le joueur, décalant
+            // silencieusement tous les StepIndex suivants (StepIndex est un simple entier, sans identité
+            // de step stable). Toujours ajouté après ExplorationResult, jamais avant : ce guerrier a donc
+            // déjà quitté cette position au moment où le palier apparaît, aucun décalage rétroactif possible.
+            steps.AddRange(WarriorRows.Where(r => r.HasExplorationMilestone).Select(r => new WizardStep(StepKind.Advance, r, IsExplorationAdvance: true)));
+            steps.Add(new(StepKind.Recap));
+            return steps;
+        }
+    }
 
-    public EndOfGameDialogViewModel(IEnumerable<Warrior> activeWarriors, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, int warbandArchetypeId)
+    private WizardStep Current
+    {
+        get
+        {
+            var steps = Steps;
+            return steps[Math.Clamp(StepIndex, 0, steps.Count - 1)];
+        }
+    }
+
+    public bool IsResultStep => Current.Kind == StepKind.Result;
+    public bool IsOutOfActionStep => Current.Kind == StepKind.OutOfAction;
+    public bool IsInjuryStep => Current.Kind == StepKind.Injury;
+    public bool IsExperienceStep => Current.Kind == StepKind.Experience;
+    public bool IsAdvanceStep => Current.Kind == StepKind.Advance;
+    public bool IsExplorationRollStep => Current.Kind == StepKind.ExplorationRoll;
+    public bool IsExplorationResultStep => Current.Kind == StepKind.ExplorationResult;
+    public bool IsRecapStep => Current.Kind == StepKind.Recap;
+
+    /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
+    /// hors de combat, jamais une liste (voir la doc de classe).</summary>
+    public WarriorOutcomeRow? CurrentInjuryWarrior => Current.Warrior;
+
+    public string InjuryProgressLabel
+    {
+        get
+        {
+            var warrior = CurrentInjuryWarrior;
+            if (warrior is null) return string.Empty;
+
+            var outOfAction = WarriorRows.Where(r => r.IsOutOfAction).ToList();
+            var index = outOfAction.IndexOf(warrior);
+            return index < 0 ? string.Empty : string.Format(Loc["EndOfGameInjuryProgressLabel"], index + 1, outOfAction.Count);
+        }
+    }
+
+    /// <summary>Le seul guerrier affiché à l'étape Progression courante - une étape par guerrier ayant
+    /// franchi un palier d'XP, même principe que CurrentInjuryWarrior (voir la doc de classe).</summary>
+    public WarriorOutcomeRow? CurrentAdvanceWarrior => Current.Warrior;
+
+    /// <summary>La bonne collection de jets à afficher/valider pour l'étape Progression courante -
+    /// AdvanceRolls (XP de bataille) ou ExplorationAdvanceRolls (XP d'Exploration), selon
+    /// WizardStep.IsExplorationAdvance (voir sa doc). Tout le reste de l'étape (AutoRollAdvance,
+    /// PickAdvanceSkill...) reste inchangé, cette propriété est le seul point de bascule.</summary>
+    public ObservableCollection<AdvanceRollEntry>? CurrentAdvanceRolls =>
+        CurrentAdvanceWarrior is { } warrior ? (Current.IsExplorationAdvance ? warrior.ExplorationAdvanceRolls : warrior.AdvanceRolls) : null;
+
+    public string AdvanceProgressLabel
+    {
+        get
+        {
+            var warrior = CurrentAdvanceWarrior;
+            if (warrior is null) return string.Empty;
+
+            var withMilestone = (Current.IsExplorationAdvance
+                ? WarriorRows.Where(r => r.HasExplorationMilestone)
+                : WarriorRows.Where(r => r.HasMilestone)).ToList();
+            var index = withMilestone.IndexOf(warrior);
+            return index < 0 ? string.Empty : string.Format(Loc["EndOfGameAdvanceProgressLabel"], index + 1, withMilestone.Count);
+        }
+    }
+
+    public bool CanGoBack => StepIndex > 0;
+    public bool IsLastStep => StepIndex >= Steps.Count - 1;
+    public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
+
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
+        _libraryService = libraryService;
         _warbandArchetypeId = warbandArchetypeId;
+        _warbandArchetypeName = warbandArchetypeName;
+        _pendingExplorationBonusDie = pendingExplorationBonusDie;
+        _hasCatacombReroll = hasCatacombReroll;
+        _currentTreasury = currentTreasury;
+        _explorationResults = explorationResults;
+        _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
+        _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
+        _specialRulesByEnglishName = specialRulesByEnglishName;
+        _skillIdsByEnglishName = skillIdsByEnglishName;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
         ResultOptions.Add(Loc["EndOfGameResultDraw"]);
         selectedResult = ResultOptions[0];
 
-        WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriors.Select(w => new WarriorOutcomeRow(w)));
+        // Snapshot pour AdvanceRollEntry.CanPromote (promotion Homme de main -> Héros, jet 10-12) - voir
+        // sa doc pour les limites acceptées (ne suit pas les promotions résolues plus tôt dans la même
+        // Fin de Partie ; se base sur activeWarriorRows - un Héros Malade cette partie, donc absent
+        // d'activeWarriorRows, n'est pas compté ici, sous-estimation mineure du plafond de 6 acceptée
+        // plutôt que de faire remonter le roster complet de la bande jusqu'à ce ViewModel).
+        var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
+        WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
+            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog)));
+
+        // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
+        // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/
+        // IsLastStep tout de suite pour que le joueur voie le compte à jour pendant qu'il coche des
+        // guerriers ou saisit des PX, plutôt que d'attendre le prochain Next/Back.
+        foreach (var row in WarriorRows)
+        {
+            row.PropertyChanged += (_, e) =>
+            {
+                // DistributedExplorationExperience/LeaderExplorationExperience : Steps() gagne aussi son
+                // deuxième passage Progression (HasExplorationMilestone) dès que l'XP d'Exploration
+                // change, pas seulement IsOutOfAction/ExperienceGained.
+                if (e.PropertyName is nameof(WarriorOutcomeRow.IsOutOfAction) or nameof(WarriorOutcomeRow.ExperienceGained)
+                    or nameof(WarriorOutcomeRow.DistributedExplorationExperience) or nameof(WarriorOutcomeRow.LeaderExplorationExperience))
+                {
+                    OnPropertyChanged(nameof(StepLabel));
+                    OnPropertyChanged(nameof(IsLastStep));
+                }
+
+                // Répartition d'Expérience entre Héros (Prisonniers, Possédés) : DistributedExperienceRemaining
+                // s'appuie sur la somme des DistributedExplorationExperience de chaque Héros, un objet
+                // différent du ViewModel lui-même - remonte le changement manuellement, même principe que
+                // ExplorationDieEntry ailleurs dans ce fichier.
+                if (e.PropertyName == nameof(WarriorOutcomeRow.DistributedExplorationExperience))
+                    OnPropertyChanged(nameof(DistributedExperienceRemaining));
+            };
+        }
     }
 
     [RelayCommand]
     private void Next()
     {
-        var steps = ActiveSteps;
-        var index = steps.IndexOf(CurrentStep);
-        if (index < steps.Count - 1) CurrentStep = steps[index + 1];
+        if (!ValidateCurrentStep()) return;
+        if (StepIndex < Steps.Count - 1) StepIndex++;
+    }
+
+    /// <summary>Bloque le passage à l'étape suivante tant qu'un jet visible de l'étape courante est vide
+    /// ou invalide - seules les étapes Blessure et Progression ont des jets à valider (Résultat/Hors de
+    /// combat/Expérience/Trésor n'en ont pas). Pose RollError/MultipleInjuryCountError sur chaque jet
+    /// fautif (affiché sous le champ, voir XAML) plutôt qu'un message global - l'erreur s'efface
+    /// d'elle-même dès que le joueur corrige la saisie (voir WarriorOutcomeRow/InjurySubRollEntry/
+    /// AdvanceRollEntry.OnManualRollChanged), donc jamais recalculée ici pour les jets déjà valides.</summary>
+    private bool ValidateCurrentStep()
+    {
+        return Current.Kind switch
+        {
+            StepKind.Injury => ValidateInjuryStep(CurrentInjuryWarrior!),
+            StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceRolls ?? Enumerable.Empty<AdvanceRollEntry>()),
+            StepKind.ExplorationRoll => ValidateExplorationRollStep(),
+            StepKind.ExplorationResult => ValidateExplorationResultStep(),
+            _ => true
+        };
+    }
+
+    private static bool CheckRoll(bool isMissing, Action setError)
+    {
+        if (isMissing) setError();
+        return !isMissing;
     }
 
     [RelayCommand]
     private void Back()
     {
-        var steps = ActiveSteps;
-        var index = steps.IndexOf(CurrentStep);
-        if (index > 0) CurrentStep = steps[index - 1];
+        if (StepIndex > 0) StepIndex--;
     }
 
-    // Lance les dés à la place du joueur (D66 pour un Héros, D6 pour un Homme de main - deux tables
-    // totalement différentes, voir SeriousInjuryTable/HenchmanInjuryTable) et affiche tout de suite le
-    // résultat complet dans une popup - le champ ManualRoll reste modifiable ensuite si le joueur
-    // préfère un jet physique.
+    // Étape "Hors de combat" : un Héros (toujours HeadCount 1) se coche/décoche, mais un groupe
+    // d'Hommes de main compte plusieurs figurines - le jet de Blessure Grave se fait par figurine
+    // hors de combat, pas une fois pour tout le groupe (règle confirmée par l'utilisateur, 2026-08-17).
+    // Ces deux commandes pilotent le stepper +/- du groupe, borné à [0, HeadCount] ; le clic est la
+    // seule voie d'entrée (pas de saisie libre), donc pas de validation nécessaire ici.
     [RelayCommand]
-    private async Task AutoRoll(WarriorOutcomeRow row)
-    {
-        var roll = row.Warrior.IsHero ? SeriousInjuryTable.RollDice() : HenchmanInjuryTable.RollDice();
-        var text = ResolveInjuryText(row.Warrior.IsHero, roll)!;
-        row.ManualRoll = roll.ToString();
-        row.InjuryResultText = text;
-        row.ApplyInjuryRoll(roll);
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    // Pour un jet fait à la table (dés physiques) : le joueur saisit son score dans ManualRoll, ce
-    // bouton affiche juste le résultat correspondant sans en tirer un nouveau.
-    [RelayCommand]
-    private async Task ShowInjuryResult(WarriorOutcomeRow row)
-    {
-        if (!int.TryParse(row.ManualRoll, out var roll))
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
-            return;
-        }
-
-        var text = ResolveInjuryText(row.Warrior.IsHero, roll);
-        if (text is null)
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidRoll"]);
-            return;
-        }
-
-        row.InjuryResultText = text;
-        row.ApplyInjuryRoll(roll);
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    // Le jet/la classification (mort ou non) vivent dans Core.Rules, sans dépendance à la
-    // localisation - cette résolution de clé -> texte affiché reste ici côté tête MAUI.
-    private string? ResolveInjuryText(bool isHero, int roll)
-    {
-        bool found;
-        string key;
-        if (isHero) found = SeriousInjuryTable.TryGetTextKey(roll, out key);
-        else found = HenchmanInjuryTable.TryGetTextKey(roll, out key);
-        return found ? Loc[key] : null;
-    }
-
-    // Un guerrier peut franchir plusieurs paliers d'un coup - chaque AdvanceRollEntry (une par palier,
-    // voir WarriorOutcomeRow.SyncAdvanceRolls) est un jet 2D6 indépendant sur la table de progression,
-    // même pattern que AutoRoll/ShowInjuryResult mais purement descriptif : aucune stat n'est modifiée
-    // automatiquement (les sous-jets 1D6 des résultats 6/8/9 et le choix CC/CT du 7 restent à résoudre
-    // par le joueur, cf. HeroAdvanceTable/HenchmanAdvanceTable).
-    [RelayCommand]
-    private async Task AutoRollAdvance(AdvanceRollEntry entry)
-    {
-        var roll = entry.IsHero ? HeroAdvanceTable.RollDice() : HenchmanAdvanceTable.RollDice();
-        var text = ResolveAdvanceText(entry.IsHero, roll)!;
-        entry.ManualRoll = roll.ToString();
-        entry.ResultText = text;
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
+    private void IncrementOutOfAction(WarriorOutcomeRow row) =>
+        row.OutOfActionCount = Math.Min(row.Warrior.HeadCount, row.OutOfActionCount + 1);
 
     [RelayCommand]
-    private async Task ShowAdvanceResult(AdvanceRollEntry entry)
-    {
-        if (!int.TryParse(entry.ManualRoll, out var roll))
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
-            return;
-        }
-
-        var text = ResolveAdvanceText(entry.IsHero, roll);
-        if (text is null)
-        {
-            await ShowInfoAsync(Loc["EndOfGameRoll"], Loc["EndOfGameInvalidAdvanceRoll"]);
-            return;
-        }
-
-        entry.ResultText = text;
-        await ShowInfoAsync(string.Format(Loc["EndOfGameInjuryResultTitle"], roll), text);
-    }
-
-    private string? ResolveAdvanceText(bool isHero, int roll)
-    {
-        bool found;
-        string key;
-        if (isHero) found = HeroAdvanceTable.TryGetTextKey(roll, out key);
-        else found = HenchmanAdvanceTable.TryGetTextKey(roll, out key);
-        return found ? Loc[key] : null;
-    }
-
-    // Résultat "Compétence" (voir HeroAdvanceTable.IsSkill) : le joueur choisit directement une
-    // compétence existante de la Bibliothèque, comme le "+" Compétences de la carte guerrier -
-    // rattachée au guerrier par WarbandDetailViewModel.EndOfGame à l'enregistrement du wizard, pas
-    // tout de suite (même logique différée que les autres résultats de cette étape).
-    [RelayCommand]
-    private async Task PickAdvanceSkill(AdvanceRollEntry entry)
-    {
-        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry));
-        var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
-            row.Warrior.AllowedSkillCategories);
-        foreach (var skill in skills)
-            entry.SelectedSkills.Add(skill);
-    }
-
-    [RelayCommand]
-    private Task ShowSkillDetail(Skill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill);
+    private void DecrementOutOfAction(WarriorOutcomeRow row) =>
+        row.OutOfActionCount = Math.Max(0, row.OutOfActionCount - 1);
 
     [RelayCommand]
     private void Save() => Close(true);
-}
-
-/// <summary>One row per active Warrior in the End of Game dialog — collects the outcome, the caller
-/// (WarbandDetailViewModel) applies it via IWarbandService and builds the History sentence.</summary>
-public partial class WarriorOutcomeRow : ObservableObject
-{
-    private readonly Dictionary<string, WarriorStatus> _statusByLabel = new();
-    private readonly LocalizationService _loc = LocalizationService.Instance;
-
-    public Warrior Warrior { get; }
-    public string Name => Warrior.Name;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SummaryText))]
-    [NotifyPropertyChangedFor(nameof(MilestoneCount))]
-    [NotifyPropertyChangedFor(nameof(HasMilestone))]
-    private int experienceGained;
-
-    partial void OnExperienceGainedChanged(int value) => SyncAdvanceRolls();
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowInjuryTools))]
-    private bool isOutOfAction;
-
-    /// <summary>Le score D66 - saisi à la main (jet physique) ou rempli par AutoRoll.</summary>
-    [ObservableProperty]
-    private string manualRoll = string.Empty;
-
-    /// <summary>Texte complet du résultat une fois consulté (via AutoRoll ou ShowInjuryResult) -
-    /// c'est ce texte qui alimente la note du guerrier et la phrase d'Historique à la sauvegarde.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SummaryText))]
-    private string injuryResultText = string.Empty;
-
-    /// <summary>Un jet 2D6 par palier d'XP franchi cette partie (voir SyncAdvanceRolls) - un guerrier
-    /// qui saute plusieurs cases à bord épais d'un coup doit relancer autant de fois sur la table de
-    /// progression (Campagne.md § Expérience). Distincte du jet de Blessure Grave (ManualRoll) : les
-    /// deux peuvent coexister le même End of Game.</summary>
-    public ObservableCollection<AdvanceRollEntry> AdvanceRolls { get; } = new();
-
-    /// <summary>Plus de saisie manuelle : uniquement modifié par ApplyInjuryRoll (résultat "Mort",
-    /// jets 11-15). Reste sur Warrior.Status (donc "Actif") pour tout le reste, y compris les
-    /// rétablissements et le résultat "Blessures multiples" (16, ambigu - deux jets de plus requis).</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SummaryText))]
-    [NotifyPropertyChangedFor(nameof(IsDead))]
-    private string selectedStatusLabel = string.Empty;
-
-    public bool ShowInjuryTools => IsOutOfAction;
-    public WarriorStatus Status => _statusByLabel.GetValueOrDefault(SelectedStatusLabel, Warrior.Status);
-    public bool IsDead => Status == WarriorStatus.Dead;
-
-    /// <summary>Nombre de cases à bord épais franchies par les PX gagnés cette partie (voir
-    /// ExperienceMilestones) - peut dépasser 1 si le guerrier cumule assez de PX pour sauter
-    /// plusieurs paliers d'un coup, d'où AdvanceRolls plutôt qu'un jet unique.</summary>
-    public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience, Warrior.Experience + ExperienceGained);
-    public bool HasMilestone => MilestoneCount > 0;
-
-    /// <summary>Héros et Hommes de main utilisent deux tables de Blessures Graves totalement
-    /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce label et ce
-    /// placeholder gardent la distinction visible sur chaque carte du wizard.</summary>
-    public string RoleLabel => _loc[Warrior.IsHero ? "WarriorRoleHeroSingular" : "WarriorRoleHenchmanSingular"];
-    public string RollPlaceholder => _loc[Warrior.IsHero ? "EndOfGameRollPh" : "EndOfGameHenchmanRollPh"];
-
-    /// <summary>Ligne affichée à l'étape Récapitulatif - ne liste que ce qui a réellement changé.</summary>
-    public string SummaryText
-    {
-        get
-        {
-            var parts = new List<string>();
-            if (ExperienceGained != 0) parts.Add($"+{ExperienceGained} PX");
-            if (Status != Warrior.Status) parts.Add(SelectedStatusLabel);
-            if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(InjuryResultText);
-            foreach (var advance in AdvanceRolls)
-            {
-                if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
-                else if (!string.IsNullOrWhiteSpace(advance.ResultText)) parts.Add(advance.ResultText);
-            }
-
-            return parts.Count > 0
-                ? $"{Name} : {string.Join(", ", parts)}"
-                : string.Format(_loc["EndOfGameNoChange"], Name);
-        }
-    }
-
-    public WarriorOutcomeRow(Warrior warrior)
-    {
-        Warrior = warrior;
-
-        foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
-            _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;
-
-        selectedStatusLabel = _statusByLabel.First(kv => kv.Value == warrior.Status).Key;
-    }
-
-    /// <summary>Appelé après un jet de Blessure Grave - passe le guerrier à Mort pour les résultats
-    /// de mort sans équivoque (Héros : 11-15 sur la table D66 ; Homme de main : 1-2 sur la table D6,
-    /// mécaniques totalement différentes). Le reste (rétablissements, blessures permanentes,
-    /// "Blessures multiples"...) ne touche pas le Statut.</summary>
-    public void ApplyInjuryRoll(int roll)
-    {
-        var isDeath = Warrior.IsHero ? SeriousInjuryTable.IsDeath(roll) : HenchmanInjuryTable.IsDeath(roll);
-        if (!isDeath) return;
-
-        SelectedStatusLabel = _statusByLabel.First(kv => kv.Value == WarriorStatus.Dead).Key;
-    }
-
-    /// <summary>Ajuste AdvanceRolls pour qu'il compte exactement un AdvanceRollEntry par palier
-    /// franchi (MilestoneCount), en préservant les jets déjà faits quand le nombre ne diminue pas -
-    /// appelé à chaque frappe dans le champ PX de l'étape Expérience (OnExperienceGainedChanged).</summary>
-    private void SyncAdvanceRolls()
-    {
-        while (AdvanceRolls.Count < MilestoneCount)
-        {
-            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero);
-            entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
-            AdvanceRolls.Add(entry);
-        }
-        while (AdvanceRolls.Count > MilestoneCount)
-            AdvanceRolls.RemoveAt(AdvanceRolls.Count - 1);
-    }
-}
-
-/// <summary>One 2D6 progression roll for one milestone crossed by a WarriorOutcomeRow - see
-/// WarriorOutcomeRow.AdvanceRolls/SyncAdvanceRolls (a warrior can cross several milestones in the
-/// same End of Game, each needing its own independent roll).</summary>
-public partial class AdvanceRollEntry : ObservableObject
-{
-    private readonly LocalizationService _loc = LocalizationService.Instance;
-
-    public int Index { get; }
-    public bool IsHero { get; }
-    public string Label => string.Format(_loc["EndOfGameMilestoneLabel"], Index);
-
-    /// <summary>Le score 2D6 - saisi à la main (jet physique) ou rempli par AutoRollAdvance.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSkillResult))]
-    private string manualRoll = string.Empty;
-
-    /// <summary>Texte descriptif du résultat une fois consulté - purement informatif, voir
-    /// HeroAdvanceTable/HenchmanAdvanceTable.</summary>
-    [ObservableProperty]
-    private string resultText = string.Empty;
-
-    /// <summary>Seuls les résultats "Compétence" des Héros (voir HeroAdvanceTable.IsSkill) proposent
-    /// de choisir directement une compétence - les résultats de stat/choix (6/7/8/9) et la
-    /// promotion Homme de main (10-12, "Ce gars est doué") restent du texte descriptif.</summary>
-    public bool IsSkillResult => IsHero && int.TryParse(ManualRoll, out var roll) && HeroAdvanceTable.IsSkill(roll);
-
-    /// <summary>Compétence(s) choisie(s) pour ce jet - rattachée(s) au guerrier par
-    /// WarbandDetailViewModel.EndOfGame à l'enregistrement, voir PickAdvanceSkill.</summary>
-    public ObservableCollection<Skill> SelectedSkills { get; } = new();
-    public string SelectedSkillsText => string.Join(", ", SelectedSkills.Select(s => s.Name));
-
-    /// <summary>Pilote l'affichage exclusif bouton "Choisir une compétence" / nom(s) choisi(s) dans le
-    /// XAML - une fois une compétence sélectionnée, son nom remplace le bouton plutôt que de
-    /// s'afficher à côté.</summary>
-    public bool HasSkillSelected => SelectedSkills.Count > 0;
-
-    public AdvanceRollEntry(int index, bool isHero)
-    {
-        Index = index;
-        IsHero = isHero;
-        SelectedSkills.CollectionChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(SelectedSkillsText));
-            OnPropertyChanged(nameof(HasSkillSelected));
-        };
-    }
 }

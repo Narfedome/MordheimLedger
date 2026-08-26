@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "race": "Human",
   "imagePath": "kislevites_warriors.jpg",
   "name": {
     "en": "Kislevites",
@@ -44,6 +45,7 @@
       "cost": 60,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -54,6 +56,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Human",
       "description": {
         "en": "Druzhina are the minor nobles of Kislev, forming their own regiments in wartime - rich enough to afford their own horse and battlegear, often ancient artefacts handed down from father to son, they must always be ready to fight for the Tzar.",
         "fr": "Il s'agit des nobliaux de Kislev. En temps de guerre, ces derniers forment leurs propres régiments dans l'armée kislévite. Ils ont une apparence impressionnante, en grande partie grâce à leurs armes et armures antiques, qui sont souvent des artefacts passant de père en fils depuis des générations. Les capitaines sont assez riches pour s'offrir leur propre monture et équipement, aussi doivent-ils toujours se tenir prêts à combattre pour le Tzar."
@@ -103,6 +106,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "An ancient Cossack term meaning 'best warrior', given by a chieftain to his personal champion - or used by Gospodar warriors as a familiar term for an experienced veteran. Most Kislevite city garrisons hold at least one such grizzled officer.",
         "fr": "Esaul est un ancien mot cosaque signifiant 'meilleur guerrier', et était généralement appliqué au plus puissant combattant de la tribu. Le mot est aujourd'hui donné comme titre honorifique par un chef à son champion personnel, bien qu'il soit également encore utilisé par les guerriers Gospodar pour désigner un vétéran. Toute garnison de cité kislévite contient au moins un officier endurci que ses hommes appellent affectueusement Esaul."
@@ -132,6 +136,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Bears have featured in Kislevite myth since ancient times, and the powerful men who train them are widely renowned among their people - the best Bear Tamers are often recruited into Kislev's armies, where they enjoy special status.",
         "fr": "Depuis des temps immémoriaux, les ours ont une place prépondérante dans les légendes kislévites. Les colosses qui entraînent ces ours sont appelés dompteurs d'ours, et les meilleurs d'entre eux sont réputés parmi tous les kislévites. Un ours peut également être entraîné au combat, aussi les dompteurs sont souvent recrutés au sein des armées kislévites, où ils jouissent d'un statut privilégié."
@@ -173,6 +178,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
+      "racialProfileName": "Human",
       "description": {
         "en": "Strong, strapping lads from the countryside, often joining a band of daring adventurers to make their fortune.",
         "fr": "Ces jeunes paysans robustes se joignent souvent à des bandes d'aventuriers pour chercher fortune."
@@ -202,6 +208,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "The Gospodar tribe make up the bulk of Kislev's people and are generally considered its most civilised - Gospodar women hold the same rights as men, and the most powerful of the legendary Ice Mages of Kislev are all female.",
         "fr": "La tribu des Gospodar constitue la majorité du peuple de Kislev, et ses membres sont généralement considérés comme étant les gens les plus civilisés de ce pays inhospitalier. Celles-ci disposent d'ailleurs des mêmes droits que les mâles Gospodar : de fait, les plus puissants des légendaires mages des glaces kislévites sont tous des femmes !"
@@ -226,6 +233,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Nomadic tribesmen of northern Kislev, always the first to face Chaos invaders from the north - renowned horsemen whose favoured weapons are the sabre and spear.",
         "fr": "Les Cosaques sont des nomades vivant dans le nord de Kislev. Ils sont toujours les premiers à souffrir d'une invasion chaotique, c'est pourquoi ils vouent une haine farouche aux serviteurs des ténèbres. Les Cosaques sont réputés pour leurs talents de cavalier, leurs armes favorites étant le cimeterre et la lance."
@@ -239,7 +247,8 @@
           "description": {
             "en": "Years of bitter struggle against Chaos have left their mark - Cossacks are subject to Hatred against all forces of Chaos (i.e. any warband covered by the Ancient Enemies rule).",
             "fr": "Des années de conflit contre les forces du Chaos ont laissé leur empreinte dans l'âme des Cosaques. Ceux-ci sont sujets à la haine des forces du Chaos (c'est-à-dire les membres de toute bande à laquelle s'applique la règle Vieux Ennemis)."
-          }
+          },
+          "hatredTargetWarbandNames": ["CarnivalOfChaos", "CultOfThePossessed", "BeastmenRaiders"]
         }
       ],
       "equipmentListName": "Kislev Warrior Equipment List"
@@ -262,6 +271,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Firearms were introduced to Kislev by Prince Boydinov of Erengrad, whose legacy funded a regiment of handgunners - the only Kislevite warriors trained in the use of handguns, also skilled with the small halberd known as the bardiche.",
         "fr": "Les armes à feu furent introduites à Kislev par le Prince Boydinov d'Erengrad. À sa mort, le prince légua une bonne partie de sa fortune à la création et à l'entretien d'un régiment d'arquebusiers : celui-ci existe encore, et ses membres sont appelés les Streltsi. En plus de leur connaissance des armes à feu, les Streltsi utilisent aussi une petite hallebarde appelée bardiche."
@@ -286,6 +296,7 @@
         "fr": "Ours Apprivoisé"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 125,
       "maxCount": 1,
       "startingExperience": 0,

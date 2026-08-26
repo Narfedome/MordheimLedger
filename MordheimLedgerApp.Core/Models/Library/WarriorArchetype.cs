@@ -106,4 +106,30 @@ public class WarriorArchetype
     /// recruitment (see ToWarrior), same snapshot-at-recruit-time convention as the rest of the stat
     /// line.</summary>
     public bool IsLargeCreature { get; set; }
+
+    /// <summary>False for archetypes the rulebook explicitly excludes from Experience/Advance rolls
+    /// (Zombie, Dire Wolf... - see their "Never Gains Experience" special rule). True for every ordinary
+    /// archetype. Copied onto Warrior at recruitment (see EntityMapping.ToWarrior), same
+    /// snapshot-at-recruit-time convention as CanUseEquipment/IsLargeCreature above - a real flag rather
+    /// than matching the special rule's (editable, user-renameable) name, decided explicitly over the
+    /// initial string-matching approach once it started gating actual behavior (End of Game wizard)
+    /// rather than just suggesting a chip to attach in the archetype editor.</summary>
+    public bool GainsExperience { get; set; } = true;
+
+    /// <summary>True for the one archetype that represents a warband's leader (e.g. the Mercenary
+    /// Captain, the Vampire for Undead, the Orc Boss - every warband has exactly one). Explicit flag
+    /// rather than derived from MinCount/MaxCount == 1 (that pairing happens to coincide with the leader
+    /// today, but isn't itself a statement about leadership - a future "exactly one required" archetype
+    /// that isn't the leader would silently break that inference). Copied onto Warrior at recruitment
+    /// (see ToWarrior), same snapshot-at-recruit-time convention as IsLargeCreature/GainsExperience -
+    /// identifies "the warband leader" for rulebook rules that target them specifically (e.g. Shattered
+    /// Building's Leadership test - Bâtiment Éventré).</summary>
+    public bool IsLeader { get; set; }
+
+    /// <summary>Which creature body type's characteristic maximums govern this archetype's Advance
+    /// rolls (see Core.Rules.CharacteristicIncreaseRules) - see Models.Library.RacialProfile. Copied
+    /// onto Warrior at recruitment as a snapshot (see EntityMapping.ToWarrior/Warrior.MaxWeaponSkill
+    /// etc.), same convention as the rest of the stat line.</summary>
+    public int RacialProfileId { get; set; }
+    public RacialProfile? RacialProfile { get; set; }
 }

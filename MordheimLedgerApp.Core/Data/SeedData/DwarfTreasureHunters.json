@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "race": "Dwarf",
   "imagePath": "dwarf_treasure_hunters.jpg",
   "name": {
     "en": "Dwarf Treasure Hunters",
@@ -48,7 +49,8 @@
       "description": {
         "en": "All Dwarfs are subject to Hatred against Orcs and Goblins.",
         "fr": "Tous les nains sont sujets à la Haine envers les orques et les gobelins."
-      }
+      },
+      "hatredTargetWarbandNames": ["OrcMob"]
     },
     {
       "name": {
@@ -146,6 +148,7 @@
       "cost": 85,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 3,
       "weaponSkill": 5,
@@ -156,6 +159,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
+      "racialProfileName": "Dwarf",
       "description": {
         "en": "Dwarf nobles are Treasure Hunters who have recruited a band of like-minded kin and left their stronghold in search of riches.",
         "fr": "Les nobles nains sont des Chasseurs de Trésors qui ont recruté une bande de leurs congénères aux motivations similaires et ont quitté leur forteresse en quête de richesses."
@@ -194,6 +198,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
+      "racialProfileName": "Dwarf",
       "description": {
         "en": "Dwarf engineers are highly respected members of Dwarf society, masters of the war machines that made the Dwarf race famous.",
         "fr": "Les ingénieurs nains sont des membres très respectés de la société naine, qui construisent les formidables machines de guerre qui ont fait la réputation légendaire de leur race."
@@ -235,6 +240,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
+      "racialProfileName": "Dwarf",
       "description": {
         "en": "Troll Slayers belong to a grim cult dedicated to seeking a heroic death in battle.",
         "fr": "Les Tueurs de Trolls font partie d'un culte sinistre dédié à la recherche obsessionnelle d'une mort héroïque au combat."
@@ -286,6 +292,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
+      "racialProfileName": "Dwarf",
       "description": {
         "en": "Dwarf warriors in all their glory: tenacious, stubborn and unfailingly brave.",
         "fr": "Ce sont des guerriers nains dans toute leur splendeur : tenaces, têtus et d'une bravoure à toute épreuve."
@@ -310,6 +317,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
+      "racialProfileName": "Dwarf",
       "description": {
         "en": "Dwarf Thunderers are experts with missile weapons - many an Orc or Goblin has died to their crossbow bolts or handgun fire.",
         "fr": "Les tireurs nains sont des experts en armes de tir. Plus d'un orque ou gobelin est mort sous les carreaux de leurs arbalètes ou les balles de leurs arquebuses."
@@ -334,6 +342,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Dwarf",
       "description": {
         "en": "Young Dwarfs with barely a beard to their name, banded together under an experienced elder in hope of glory and riches.",
         "fr": "Ce sont de jeunes nains à la barbe naissante qui se sont regroupés sous les ordres d'un aîné plus expérimenté dans l'espoir qu'il les conduira vers la gloire et la richesse."

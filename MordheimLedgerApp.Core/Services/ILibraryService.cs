@@ -41,6 +41,11 @@ public interface ILibraryService
     Task<List<Skill>> GetSkillsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 
+    /// <summary>Every entry of the rulebook's Exploration chart (doubles through six-of-a-kind), each
+    /// with its Outcomes already loaded - see Models.Library.ExplorationResult. Reference data seeded
+    /// from the rulebook only, no editor screen yet.</summary>
+    Task<List<ExplorationResult>> GetExplorationResultsAsync(string languageCode);
+
     /// <summary>Every entry of every spell/prayer/ritual table (see Spell.MagicSchool) - purely
     /// reference data, no in-app casting/rolling ("no rules engine V1").</summary>
     Task<List<Spell>> GetSpellsAsync(string languageCode);
@@ -63,6 +68,13 @@ public interface ILibraryService
 
     /// <summary>The MagicSchool catalog (e.g. "Nécromancie") - see Models.Library.MagicSchool.</summary>
     Task<List<MagicSchool>> GetMagicSchoolsAsync(string languageCode);
+
+    /// <summary>The Race catalog (Humain, Skaven, Orque...) - see Models.Library.Race.</summary>
+    Task<List<Race>> GetRacesAsync(string languageCode);
+
+    /// <summary>The RacialProfile catalog (Humain, Nain, Skaven, Gobelin...) - characteristic maximums
+    /// per creature body type, see Models.Library.RacialProfile.</summary>
+    Task<List<RacialProfile>> GetRacialProfilesAsync(string languageCode);
 
     /// <summary>Inserts (Id == 0) or updates. Editing a row whose current Source is Official flips it
     /// to Modified. Name/Description are written as the translation value for languageCode - any other
@@ -92,6 +104,8 @@ public interface ILibraryService
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
     Task SaveMutationAsync(Mutation mutation, string languageCode);
     Task SaveMagicSchoolAsync(MagicSchool school, string languageCode);
+    Task SaveRaceAsync(Race race, string languageCode);
+    Task SaveRacialProfileAsync(RacialProfile racialProfile, string languageCode);
 
     Task DeleteWarbandArchetypeAsync(int warbandArchetypeId);
     Task DeleteWarriorArchetypeAsync(int warriorArchetypeId);
@@ -103,4 +117,6 @@ public interface ILibraryService
     Task DeleteSpecialRuleAsync(int specialRuleId);
     Task DeleteMutationAsync(int mutationId);
     Task DeleteMagicSchoolAsync(int magicSchoolId);
+    Task DeleteRaceAsync(int raceId);
+    Task DeleteRacialProfileAsync(int racialProfileId);
 }

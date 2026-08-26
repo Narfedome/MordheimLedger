@@ -13,6 +13,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly ILibraryService _libraryService;
     private readonly Dictionary<string, EquipmentList> _equipmentListByLabel = new();
+    private readonly Dictionary<string, RacialProfile> _racialProfileByLabel = new();
 
     /// <summary>Chargé à la demande (voir FindCatalogRuleAsync), une seule fois par instance de dialog -
     /// sert uniquement à retrouver une règle connue par son nom pour la pré-remplir automatiquement,
@@ -40,6 +41,15 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     [ObservableProperty]
     private string selectedEquipmentListLabel = string.Empty;
+
+    /// <summary>Quel type de créature (voir Models.Library.RacialProfile) gouverne les maximums de
+    /// caractéristiques de cet archétype - catalogue éditable (WarbandArchetypeViewModel.
+    /// ManageRacialProfiles) au même titre que Race, un simple Picker suffit (un archétype n'a jamais
+    /// qu'un seul profil racial).</summary>
+    public ObservableCollection<string> RacialProfileOptions { get; } = new();
+
+    [ObservableProperty]
+    private string selectedRacialProfileLabel = string.Empty;
 
     /// <summary>Champ texte unique pour le Mouvement - accepte un nombre ("4") ou une surcharge libre
     /// ("2D6" pour les Squigs des cavernes). Résolu vers Item.Movement/Item.MovementOverride au Save
@@ -100,7 +110,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     private bool neverGainsExperience;
 
     public WarriorArchetypeEditDialogViewModel(WarriorArchetype item, string title, ISpecialRulePickerService specialRulePicker,
-        IReadOnlyList<EquipmentList> allEquipmentLists, ILibraryService libraryService)
+        IReadOnlyList<EquipmentList> allEquipmentLists, ILibraryService libraryService, IReadOnlyList<RacialProfile> allRacialProfiles)
     {
         this.item = item;
         this.title = title;
@@ -113,7 +123,11 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         isLargeCreature = item.IsLargeCreature;
         canUseEquipment = item.CanUseEquipment;
         isChief = item.SpecialRules.Any(r => r.Name is "Leader" or "Chef");
-        neverGainsExperience = item.SpecialRules.Any(r => r.Name is "Never Gains Experience" or "Ne gagne jamais d'Expérience");
+        // Lu depuis le flag lui-même (GainsExperience), pas re-dérivé du nom de la règle attachée à
+        // chaque ouverture - c'est précisément pour ne plus dépendre d'un texte éditable que ce flag a
+        // été ajouté (voir sa doc). La migration des archétypes seedés avant son existence est gérée une
+        // fois pour toutes par AppDatabase.BackfillNeverGainsExperienceAsync, pas ici.
+        neverGainsExperience = !item.GainsExperience;
 
         var noneLabel = Loc["WarriorArchetypeEquipmentListNone"];
         EquipmentListOptions.Add(noneLabel);
@@ -124,10 +138,23 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         }
         var currentList = allEquipmentLists.FirstOrDefault(l => l.Id == item.EquipmentListId);
         selectedEquipmentListLabel = currentList?.Name ?? noneLabel;
+
+        foreach (var profile in allRacialProfiles)
+        {
+            _racialProfileByLabel[profile.Name] = profile;
+            RacialProfileOptions.Add(profile.Name);
+        }
+        selectedRacialProfileLabel = allRacialProfiles.FirstOrDefault(p => p.Id == item.RacialProfileId)?.Name ?? string.Empty;
     }
 
     partial void OnSelectedEquipmentListLabelChanged(string value) =>
         Item.EquipmentListId = _equipmentListByLabel.TryGetValue(value, out var list) ? list.Id : null;
+
+    partial void OnSelectedRacialProfileLabelChanged(string value)
+    {
+        if (_racialProfileByLabel.TryGetValue(value, out var profile))
+            Item.RacialProfileId = profile.Id;
+    }
 
     /// <summary>Basculer Héros/Homme de main réinitialise les cases propres au type qu'on quitte (et leur
     /// chip associée, via leurs propres OnXxxChanged - re-déclenchés en cascade par ces assignations)
@@ -176,6 +203,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     partial void OnNeverGainsExperienceChanged(bool value)
     {
+        Item.GainsExperience = !value;
         if (value) _ = AddSuggestedRuleAsync("Never Gains Experience", "Ne gagne jamais d'Expérience");
         else RemoveSuggestedRule("Never Gains Experience", "Ne gagne jamais d'Expérience");
     }

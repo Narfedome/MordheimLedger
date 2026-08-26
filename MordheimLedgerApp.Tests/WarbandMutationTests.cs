@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 
@@ -43,6 +44,33 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(archetype.Id, warband.WarbandArchetypeId);
     }
 
+    /// <summary>Race (2026-08-20): every warband archetype resolves to exactly one Race, seeded from
+    /// each band's own JSON "race" field (SeedWarbandFromJsonAsync) - Reiklander Mercenaries are Human,
+    /// same as most mercenary/Order bands.</summary>
+    [Fact]
+    public async Task WarbandArchetype_ResolvesRace()
+    {
+        var archetype = await GetReiklandersAsync();
+
+        Assert.NotEqual(0, archetype.RaceId);
+        Assert.NotNull(archetype.Race);
+        Assert.Equal("Human", archetype.Race!.Name);
+    }
+
+    /// <summary>Carnival of Chaos and Cult of the Possessed are human in body but corrupted by Chaos -
+    /// a distinct "Chaos Human" race, not plain "Human" (correction 2026-08-21: both were initially
+    /// seeded as plain Human, same mistake a careless read of the roster would make).</summary>
+    [Fact]
+    public async Task WarbandArchetype_ChaosWarbands_ResolveChaosHumanRace()
+    {
+        var archetypes = await _library.GetWarbandArchetypesAsync("en");
+        var kermesse = archetypes.Single(a => a.Name == "Carnival of Chaos");
+        var possessed = archetypes.Single(a => a.Name == "Cult of the Possessed");
+
+        Assert.Equal("Chaos Human", kermesse.Race!.Name);
+        Assert.Equal("Chaos Human", possessed.Race!.Name);
+    }
+
     [Fact]
     public async Task RecruitWarrior_PreFillsStatsFromArchetype_AndPersists()
     {
@@ -83,6 +111,32 @@ public class WarbandMutationTests : IDisposable
         Assert.NotEmpty(carried.Item.SpecialRules);
     }
 
+    /// <summary>Shrine's blessing (see ExplorationOutcome.GrantsWeaponBlessing) attaches "Blessed
+    /// Weapon" via WarriorEquipment.BlessingRule - a SEPARATE slot from MaterialRule (Gromril/Ithilmar/
+    /// Ornate), confirmed by the user 2026-08-21: a weapon already in Gromril that also gets blessed
+    /// keeps BOTH, shown as "(G, B)" rather than the blessing overwriting the material.</summary>
+    [Fact]
+    public async Task BlessedWeapon_CoexistsWithExistingMaterialRule()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
+        var recruited = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
+
+        var axe = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Name == "Axe");
+        var gromril = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Gromril Weapon");
+        var blessed = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Blessed Weapon");
+
+        var carried = await _warbands.AddWarriorEquipmentAsync(recruited.Id, axe, materialRule: gromril);
+        await _warbands.SetWarriorEquipmentBlessingRuleAsync(carried.Id, blessed.Id);
+
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var reloaded = Assert.Single(Assert.Single(roster).Equipment);
+        Assert.Equal("Gromril Weapon", reloaded.MaterialRule?.Name);
+        Assert.Equal("Blessed Weapon", reloaded.BlessingRule?.Name);
+        Assert.Equal("Axe (G, B)", reloaded.NameDisplay);
+    }
+
     [Fact]
     public async Task EditingOfficialArchetype_FlipsSourceToModified()
     {
@@ -108,5 +162,48 @@ public class WarbandMutationTests : IDisposable
 
         Assert.Null(await _warbands.GetWarbandAsync(warband.Id));
         Assert.Empty(await _warbands.GetWarriorsAsync(warband.Id, "en"));
+    }
+
+    [Fact]
+    public async Task ExplorationResults_DuplicatedByADoubleSeed_AreBackfilledOnNextLaunch()
+    {
+        // Reproduit le bug trouvé le 2026-08-17 sur une base de dev existante : une seconde exécution de
+        // SeedExplorationResultsAsync (hors du garde-fou normal "catalogue vide") insère un doublon pour
+        // "Corpse" (2,3) avec ses propres clés de traduction jamais enregistrées dans TranslationEntity -
+        // exactement le symptôme observé (nom/description affichant la clé brute au lieu du texte
+        // résolu, le wizard tombant sur cette copie cassée via FirstOrDefault). Depuis le 2026-08-18,
+        // ResyncExplorationResultsAsync (remplace l'ancien backfill ciblé sur ce seul symptôme) revide et
+        // reseede tout le catalogue à chaque lancement plutôt que de juste dédupliquer - ce doublon
+        // disparaît donc comme n'importe quel autre état périmé, plus seulement le cas des clés cassées.
+        await _db.Initialization;
+
+        var brokenDuplicate = new ExplorationResultEntity
+        {
+            DiceCount = 2, Value = 3,
+            NameKey = Guid.NewGuid().ToString("N"), DescriptionKey = Guid.NewGuid().ToString("N"),
+            Source = ContentSource.Official, RollsIndependently = false
+        };
+        await _db.Connection.InsertAsync(brokenDuplicate);
+        await _db.Connection.InsertAsync(new ExplorationOutcomeEntity
+        {
+            ExplorationResultId = brokenDuplicate.Id, SubRollMin = 1, SubRollMax = 6,
+            Kind = ExplorationOutcomeKind.Gold, GoldFormula = "D6"
+        });
+
+        // Rouvrir la même base de données (nouvelle instance AppDatabase sur le même fichier) rejoue
+        // InitializeAsync : le garde-fou de seed ne se redéclenche pas (catalogue déjà peuplé), mais le
+        // backfill tourne à chaque lancement, comme en conditions réelles au prochain démarrage de l'app.
+        // La connexion _db du test reste ouverte en parallèle (SQLite autorise plusieurs connexions sur
+        // le même fichier) - Dispose() la fermera normalement à la fin du test.
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var results = await reopenedLibrary.GetExplorationResultsAsync("en");
+        Assert.Equal(30, results.Count);
+        var corpse = results.Single(r => r.DiceCount == 2 && r.Value == 3);
+        Assert.Equal("Corpse", corpse.Name);
+
+        await reopenedDb.Connection.CloseAsync();
     }
 }

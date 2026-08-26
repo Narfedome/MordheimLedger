@@ -1,5 +1,6 @@
 {
   "grade": "Core",
+  "race": "Undead",
   "imagePath": "the_undead.jpg",
   "name": {
     "en": "Undead",
@@ -31,6 +32,7 @@
       "cost": 110,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 6,
       "weaponSkill": 4,
@@ -41,6 +43,7 @@
       "initiative": 5,
       "attacks": 2,
       "leadership": 8,
+      "racialProfileName": "Vampire",
       "description": {
         "en": "Vampires lead the Undead in their search for the magical stones that will give their master the power to conquer the Empire.",
         "fr": "Les vampires conduisent les morts-vivants dans leur quête de la pierre magique qui donnera à leur maître le pouvoir de conquérir l'Empire."
@@ -107,6 +110,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Necromancers are evil wizards, studying the corrupt art of Necromancy.",
         "fr": "Les nécromanciens sont des sorciers malfaisants, qui étudient les arcanes maudits de la nécromancie."
@@ -144,6 +148,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Dregs are the most miserable human survivors of the demise of Mordheim, deformed and rejected individuals often bound in fanatical loyalty to their Undead masters.",
         "fr": "Les parias sont les plus misérables survivants humains de la chute de Mordheim, des individus difformes et rejetés, souvent fanatiquement loyaux envers leurs maîtres morts-vivants."
@@ -160,6 +165,7 @@
         "fr": "Zombie"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 15,
       "maxCount": null,
       "startingExperience": 0,
@@ -248,6 +254,7 @@
       "initiative": 3,
       "attacks": 2,
       "leadership": 5,
+      "racialProfileName": "Ghoul",
       "canUseEquipment": false,
       "description": {
         "en": "Ghouls are the descendants of evil and insane men who ate the flesh of the dead to survive the famine.",
@@ -274,6 +281,7 @@
         "fr": "Loup Funeste"
       },
       "isHero": false,
+      "gainsExperience": false,
       "cost": 50,
       "maxCount": 5,
       "startingExperience": 0,

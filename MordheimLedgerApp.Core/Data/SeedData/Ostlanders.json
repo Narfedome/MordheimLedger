@@ -1,5 +1,6 @@
 {
   "grade": "Grade1a",
+  "race": "Human",
   "imagePath": "ostlanders_mercenaries.jpg",
   "name": {
     "en": "Ostlander Mercenaries",
@@ -42,6 +43,7 @@
       "cost": 60,
       "maxCount": 1,
       "minCount": 1,
+      "isLeader": true,
       "startingExperience": 20,
       "movement": 4,
       "weaponSkill": 4,
@@ -52,6 +54,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
+      "racialProfileName": "Human",
       "description": {
         "en": "In Ostland, the oldest (or most often, the most impressive) man of the village receives the title of Elder - only through his exhortations can an entire village be convinced to pack up and head to Mordheim to seek its fortune.",
         "fr": "En Ostland, l'homme le plus âgé (ou plus souvent le plus impressionnant) du village reçoit le titre de Doyen - ce n'est que par ses exhortations que tout un village peut être amené à faire ses valises et se rendre à Mordheim pour chercher fortune."
@@ -91,6 +94,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "All Priests of Taal are said to be born under the darkest phase of the moon - loners by nature, they wander the wild forests of the northern Empire, and none quite know why they've begun joining Ostlander bands digging through the ruins of Mordheim.",
         "fr": "On dit que tous les Prêtres de Taal sont nés pendant la phase la plus sombre de la lune - solitaires par nature, ils errent dans les forêts sauvages du nord de l'Empire, et nul ne sait pourquoi ils ont commencé à se joindre aux bandes d'Ostlanders qui fouillent les ruines de Mordheim."
@@ -145,6 +149,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Ostland villages are generally one large extended family - everyone is somebody's uncle, cousin or brother. Rather than bother with exact family ties, the village's most respected men (other than the Elder) are simply called Blood Brothers.",
         "fr": "Les villages d'Ostland sont généralement composés d'une famille élargie. Tout le monde est l'oncle, le cousin ou le frère d'un des membres du village. Au lieu de s'embêter avec les liens familiaux, les hommes les plus respectés du village (à l'exception du Doyen) sont simplement appelés Frères de sang."
@@ -174,6 +179,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Some men of Ostland prefer to live alone in the forests of the Old World rather than marry. Though these trappers don't share the tight family bonds of the average Ostlander, they're respected for their forest lore and unshakeable determination.",
         "fr": "Certains hommes de l'Ostland préfèrent vivre seuls dans les forêts du Vieux Monde plutôt que de se marier. Bien que ces trappeurs ne partagent pas les liens familiaux étroits de l'Ostlander moyen, ils sont respectés pour leur connaissance de la forêt et leur détermination sans faille."
@@ -198,6 +204,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
+      "racialProfileName": "Human",
       "description": {
         "en": "Most of an Ostlander band's warriors are brothers or cousins of the Elder - most are married men with children to feed. The ruins of Mordheim tempt with a greed few poor villagers can resist.",
         "fr": "La plupart des guerriers d'une bande d'Ostlanders sont des frères ou des cousins du Doyen. La plupart sont des hommes mariés avec des enfants à nourrir. Les ruines de Mordheim attisent une convoitise à laquelle peu de pauvres villageois peuvent résister."
@@ -222,6 +229,7 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 10,
+      "racialProfileName": "Human",
       "description": {
         "en": "Every Ostlander loves his beer, but in every village a few take that love to the extreme. Never sober and rarely aware, these fools cut a swathe through Mordheim's streets, hurling insults, committing petty vandalism and sowing chaos wherever they roam.",
         "fr": "Tous les Ostlanders aiment leur bière, mais dans chaque village il y a toujours quelques hommes qui poussent cet amour à l'extrême. Jamais sobres et rarement conscients, ces bouffons se frayent un chemin dans les rues de Mordheim en criant des insultes et en semant le désordre sur leur passage."
@@ -269,6 +277,7 @@
       "initiative": 3,
       "attacks": 2,
       "leadership": 7,
+      "racialProfileName": "Ogre",
       "description": {
         "en": "Ogres are more common in the pine-covered hills of Ostland than anywhere else in the Empire - the rugged mountain men value their muscle above all, and an Ogre's almost legendary strength and ability to shrug off terrible wounds make him a perfect shock trooper, if a costly one to keep fed.",
         "fr": "Il est possible de croiser un Ogre plus fréquemment dans les collines couvertes de pins de l'Ostland que n'importe où ailleurs dans l'Empire - ces créatures brutales sont très recherchées pour leurs muscles, et leur force quasi légendaire ainsi que leur capacité à supporter d'affreuses blessures en font des troupes de choc parfaites, bien que coûteuses à nourrir."

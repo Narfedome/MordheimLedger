@@ -13,6 +13,10 @@
     <Color x:Key="AppTextMuted">#948C7E</Color>
     <Color x:Key="AppBorder">#35303A</Color>
     <Color x:Key="AppDanger">#8B3A3A</Color>
+    <!-- Fixed (not palette-dependent), like AppDanger — a stat that's dropped since recruitment
+         (StatRowView) needs to read as "down" regardless of theme/palette, same reasoning as
+         AppDanger itself for the Malade/Mort chips it's shared with. -->
+    <Color x:Key="AppSuccess">#3F9142</Color>
     <!-- Fixed (not palette-dependent), like AppDanger — milestone boxes on an ExperienceTrackView
          (see WarbandDetailPage roster) need to read as "highlighted" regardless of theme. -->
     <Color x:Key="AppMilestone">#C9A227</Color>

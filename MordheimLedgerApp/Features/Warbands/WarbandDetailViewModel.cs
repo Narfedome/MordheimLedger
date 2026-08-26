@@ -8,6 +8,7 @@ using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
+using MordheimLedgerApp.Features.Warbands.Inventory;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
@@ -29,11 +30,27 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private List<SpecialRule> _bandWideSpecialRules = new();
     private List<MagicSchool> _bandMagicSchools = new();
 
+    /// <summary>All WarbandArchetype names (not just this warband's own), needed to resolve a Hatred
+    /// rule's target - which can point at any band type, not just the current one. See
+    /// BuildSpecialRuleChips.</summary>
+    private Dictionary<int, string> _warbandArchetypeNames = new();
+
     [ObservableProperty]
     private int warbandId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasNextGameNote))]
+    [NotifyPropertyChangedFor(nameof(HasGameInProgress))]
     private Warband? warband;
+
+    /// <summary>Warband.NextGameNote non-null (voir sa doc) - une bannière dédiée sur cette page plutôt
+    /// qu'une entrée d'Historique de plus, pour rester visible tant qu'elle s'applique (jusqu'à la Fin de
+    /// Partie suivante, qui la consomme - voir WarbandDetailViewModel.EndOfGame.ApplyExplorationOutcomeAsync).</summary>
+    public bool HasNextGameNote => !string.IsNullOrWhiteSpace(Warband?.NextGameNote);
+
+    /// <summary>Warband.GameInProgress (voir sa doc) - bascule quel des deux boutons "Lancer la partie"/
+    /// "Fin de partie" s'affiche sur cette page (jamais les deux).</summary>
+    public bool HasGameInProgress => Warband?.GameInProgress ?? false;
 
     /// <summary>Rulebook "calculate the warband rating" - sum over Heroes+Henchmen (active roster, dead
     /// warriors excluded) of (IsLargeCreature ? 20 : 5) + Experience. Recomputed after every LoadAsync -
@@ -52,6 +69,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private ObservableCollection<WarriorRow> deadWarriors = new();
 
     [ObservableProperty]
+    private ObservableCollection<WarriorRow> retiredWarriors = new();
+
+    [ObservableProperty]
     private bool heroesExpanded = true;
 
     [ObservableProperty]
@@ -59,6 +79,19 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool deadExpanded;
+
+    [ObservableProperty]
+    private bool retiredExpanded;
+
+    /// <summary>Objets trouvés mais pas encore assignés à un guerrier (voir Models.WarbandEquipment,
+    /// alimenté par l'étape Exploration du wizard Fin de Partie) - un bouton en en-tête de page
+    /// (visible seulement si HasInventory) ouvre WarbandInventoryDialog pour les réattribuer, plutôt
+    /// qu'une section dépliable dans le roster (retour utilisateur explicite, 2026-08-18).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasInventory))]
+    private ObservableCollection<WarbandEquipment> inventory = new();
+
+    public bool HasInventory => Inventory.Count > 0;
 
     [ObservableProperty]
     private ObservableCollection<HistoryEntry> historyEntries = new();
@@ -100,6 +133,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleDead() => DeadExpanded = !DeadExpanded;
 
+    [RelayCommand]
+    private void ToggleRetired() => RetiredExpanded = !RetiredExpanded;
+
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -112,28 +148,82 @@ public partial class WarbandDetailViewModel : BaseViewModel
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
             _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
+            var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+            _warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
-            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead));
-            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead));
+            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
+            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
+            RetiredWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsRetired));
             Rating = Heroes.Concat(Henchmen).Sum(r => (r.Warrior.IsLargeCreature ? 20 : 5) + r.Warrior.Experience);
+
+            var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);
+            Inventory = new ObservableCollection<WarbandEquipment>(inventory);
 
             var history = await _warbandService.GetHistoryEntriesAsync(id);
             HistoryEntries = new ObservableCollection<HistoryEntry>(history);
         });
     }
 
+    /// <summary>Ouvre l'inventaire de bande dans un dialog dédié (WarbandInventoryDialog) où chaque objet
+    /// peut être réattribué à un guerrier via un simple ActionSheet - toujours recharger le roster à la
+    /// fermeture, quel que soit le mode de fermeture (X ou auto-fermeture sur liste vide côté dialog),
+    /// même logique que OpenWarriorEditDialogAsync : le dialog persiste ses changements immédiatement,
+    /// pas de distinction Enregistrer/Annuler à respecter ici.</summary>
+    [RelayCommand]
+    private async Task ShowInventory()
+    {
+        var candidates = Heroes.Concat(Henchmen).ToList();
+        var dialogViewModel = new WarbandInventoryDialogViewModel(Inventory, candidates, _warbandService);
+        await ShowDialogAsync(new WarbandInventoryDialog(dialogViewModel));
+        await LoadAsync(WarbandId);
+    }
+
     private WarriorRow ToRow(Warrior warrior)
     {
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId);
         var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
-        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
+        // Un objet équipé (ex. Marteau des Sorcières) peut lui aussi accorder une règle spéciale - avant
+        // ce correctif, seule la fusion bande+archétype était faite, les règles portées par
+        // l'équipement n'apparaissaient jamais en chip sur la carte guerrier.
+        var equipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
+        // Une Blessure Grave qui accorde une règle permanente (Folie 24 -> Stupidité/Frénésie, Bras
+        // amputé -> Armes à une main uniquement, voir Injury.SpecialRules) n'est PAS fusionnée ici -
+        // contrairement à l'équipement, le rappel de règle vit uniquement derrière la puce Blessure
+        // elle-même (InjuryDetailDialog affiche la SpecialRule en puce imbriquée) : demande explicite de
+        // l'utilisateur 2026-08-26, pour éviter la puce en double (une fois via "Folie : Stupidité" dans
+        // Blessures, une fois via "Stupidité" dans Règles spéciales).
+        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).Concat(equipmentRules).DistinctBy(r => r.Id);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
         var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
-        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), mergedRules, magicSchools);
+        var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) });
+        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
+    }
+
+    /// <summary>A rule with a mechanized Hatred target (SpecialRule.HatredTargetWarbandArchetypeIds)
+    /// explodes into one chip per target ("Haine : Skavens") instead of a single generic "Haine" chip -
+    /// every other rule maps 1:1 to its own catalog Name, unchanged.</summary>
+    private List<SpecialRuleChip> BuildSpecialRuleChips(IEnumerable<SpecialRule> rules)
+    {
+        var chips = new List<SpecialRuleChip>();
+        foreach (var rule in rules)
+        {
+            if (rule.HatredTargetWarbandArchetypeIds.Count == 0)
+            {
+                chips.Add(new SpecialRuleChip { Item = rule, Name = rule.Name });
+                continue;
+            }
+
+            foreach (var targetId in rule.HatredTargetWarbandArchetypeIds)
+            {
+                var targetName = _warbandArchetypeNames.GetValueOrDefault(targetId, "?");
+                chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], targetName) });
+            }
+        }
+        return chips;
     }
 
     [RelayCommand]
@@ -233,7 +323,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     // recrutement, via IDetailDialogService (voir ce service pour pourquoi il existe : cette
     // résolution de restrictions était dupliquée à la main dans ~28 endroits avant lui).
     [RelayCommand]
-    private Task ShowSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
+    private Task ShowSpecialRuleDetail(SpecialRuleChip chip) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(chip.Item);
 
     [RelayCommand]
     private Task ShowInjuryDetail(WarriorInjury injury) => _detailDialogs.ShowInjuryDetailDialogAsync(injury.Item);
@@ -249,7 +339,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     [RelayCommand]
     private Task ShowEquipmentDetail(WarriorEquipment equipment) =>
-        _detailDialogs.ShowEquipmentDetailDialogAsync(equipment.Item, equipment.MaterialRule);
+        _detailDialogs.ShowEquipmentDetailDialogAsync(equipment.Item, equipment.MaterialRule, equipment.FoundValueOverride, equipment.BlessingRule);
 
     [RelayCommand]
     private Task ShowSkillDetail(WarriorSkill skill) => _detailDialogs.ShowSkillDetailDialogAsync(skill.Item);
@@ -263,108 +353,6 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var language = LocalizationService.Instance.Language;
         var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
         await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(school.Name, school.Description, spells)));
-    }
-
-    [RelayCommand]
-    private async Task EndOfGame()
-    {
-        if (Warband is null) return;
-
-        var activeWarriors = Heroes.Concat(Henchmen)
-            .Select(r => r.Warrior)
-            .Where(w => w.Status == WarriorStatus.Active)
-            .ToList();
-        if (activeWarriors.Count == 0)
-        {
-            await ShowInfoAsync(Loc["EndOfGameTitle"], Loc["EndOfGameNoWarriors"]);
-            return;
-        }
-
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriors, _skillPicker, _detailDialogs, Warband.WarbandArchetypeId);
-        if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
-
-        await Loading.RunAsync(async () =>
-        {
-            var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], dialogViewModel.SelectedResult) };
-
-            if (dialogViewModel.TreasuryFound != 0)
-            {
-                Warband.Treasury += dialogViewModel.TreasuryFound;
-                await _warbandService.SaveWarbandAsync(Warband);
-                sentences.Add(string.Format(Loc["HistoryTreasurySentence"], dialogViewModel.TreasuryFound));
-            }
-
-            List<Injury>? injuryCatalog = null;
-
-            // Find-or-create par nom (résolu dans la langue courante, comme le catalogue lui-même) dans
-            // le catalogue Injury - la table Blessures Graves a un texte fixe par jet, donc pas de
-            // risque de quasi-doublons.
-            var language = LocalizationService.Instance.Language;
-            async Task<Injury> GetOrCreateInjuryAsync(string name)
-            {
-                injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
-                var injury = injuryCatalog.FirstOrDefault(i => i.Name == name);
-                if (injury is null)
-                {
-                    injury = new Injury { Name = name, Source = ContentSource.Official };
-                    await _libraryService.SaveInjuryAsync(injury, language);
-                    injuryCatalog.Add(injury);
-                }
-                return injury;
-            }
-
-            foreach (var row in dialogViewModel.WarriorRows)
-            {
-                var warrior = row.Warrior;
-                var changed = false;
-
-                if (row.ExperienceGained != 0)
-                {
-                    warrior.Experience += row.ExperienceGained;
-                    sentences.Add(string.Format(Loc["HistoryXpSentence"], warrior.Name, row.ExperienceGained));
-                    changed = true;
-                }
-
-                foreach (var advance in row.AdvanceRolls)
-                {
-                    if (string.IsNullOrWhiteSpace(advance.ResultText)) continue;
-
-                    // Aucun résultat d'Advance (compétence ou stat) ne touche Injuries - ça prêterait à
-                    // confusion avec une vraie blessure. La vraie compétence choisie est rattachée au
-                    // guerrier ; les résultats de stat/choix (pas d'équivalent structuré dans le modèle,
-                    // "no rules engine V1") ne vivent que dans l'Historique de la bande, à appliquer à la
-                    // main via l'édition du guerrier.
-                    var text = advance.SelectedSkills.Count > 0
-                        ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
-                        : advance.ResultText;
-                    sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], warrior.Name, text));
-
-                    foreach (var skill in advance.SelectedSkills)
-                        await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
-                }
-
-                if (row.Status != warrior.Status)
-                {
-                    warrior.Status = row.Status;
-                    changed = true;
-                    if (warrior.Status == WarriorStatus.Dead)
-                        sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
-                }
-
-                if (!string.IsNullOrWhiteSpace(row.InjuryResultText))
-                {
-                    var injury = await GetOrCreateInjuryAsync(row.InjuryResultText);
-                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
-                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.InjuryResultText));
-                }
-
-                if (changed)
-                    await _warbandService.SaveWarriorAsync(warrior);
-            }
-
-            await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
-            await LoadAsync(Warband.Id);
-        });
     }
 
     [RelayCommand]

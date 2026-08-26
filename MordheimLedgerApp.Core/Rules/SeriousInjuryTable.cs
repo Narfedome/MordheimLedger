@@ -13,10 +13,15 @@ namespace MordheimLedgerApp.Core.Rules;
 /// the key via LocalizationService.
 ///
 /// Verified against the rulebook (p. 118-119) via RulesReference/Campagne.md. The "Blessures
-/// multiples" result (16, 21) means rolling 1D6 more sub-rolls on this same table (rerolling any
-/// Dead/Captured/further-Multiple) and stacking every effect - that loop is left to the player to
-/// execute manually (roll again, add another Injury via the picker) rather than automated, per the
-/// same "no rules engine" boundary.
+/// multiples" result (16, 21) means rolling 1D6 to determine how many more sub-rolls to make on this
+/// same table (not a fixed count) - the End of Game wizard has the player roll that 1D6 itself (see
+/// EndOfGameDialogViewModel.WarriorOutcomeRow.SetMultipleInjuryCount), then resolves that many
+/// sub-rolls (MultipleInjuryRolls), each becoming its own Injury on the warrior alongside the main
+/// "Blessures multiples" text. The rulebook says to re-roll any further Dead/Captured/Multiple
+/// Injuries sub-result, but the app deliberately does NOT enforce or auto-reroll that itself (explicit
+/// decision, 2026-08-17): whatever the player rolls or types in is accepted as-is, same as every other
+/// injury result. Still no stat mutation from the sub-rolls' own effects (leg wound, arm wound, etc.)
+/// - same "no rules engine" boundary as the main table.
 /// </summary>
 public static class SeriousInjuryTable
 {
@@ -31,6 +36,8 @@ public static class SeriousInjuryTable
     ];
 
     private static readonly int[] DeathRolls = [11, 12, 13, 14, 15];
+    private static readonly int[] MultipleInjuriesRolls = [16, 21];
+    private const int BitterEnmityRoll = 56;
 
     public static bool TryGetTextKey(int roll, out string key)
     {
@@ -48,6 +55,39 @@ public static class SeriousInjuryTable
     /// included even though it could lead to death indirectly - it means rolling twice more, which
     /// this single-roll check can't resolve on its own.</summary>
     public static bool IsDeath(int roll) => Array.IndexOf(DeathRolls, roll) >= 0;
+
+    /// <summary>True for the "Blessures multiples" result itself (16, 21) - triggers a 1D6 roll for
+    /// the number of additional sub-rolls to make on this same table.</summary>
+    public static bool IsMultipleInjuries(int roll) => Array.IndexOf(MultipleInjuriesRolls, roll) >= 0;
+
+    /// <summary>True for "Rancune"/Bitter Enmity (56) - triggers a further 1D6 to decide who the
+    /// warrior now hates, see HatredTargetTable.</summary>
+    public static bool IsBitterEnmity(int roll) => roll == BitterEnmityRoll;
+
+    /// <summary>Arm Wound (23), Smashed Leg (25) and Madness (24) each cover TWO distinct permanent
+    /// outcomes under one D66 roll (see SeriousInjuryEffectTable.RequiresBranchSubRoll for the 1D6 that
+    /// picks which) - the plain TryGetTextKey above only resolves the combined book text describing both
+    /// branches at once ("sur 1-3 ... ; sur 4-6 ..."), used as the introductory text before the branch is
+    /// known. Once the branch sub-roll is in, this resolves the single resolved outcome's own clean text
+    /// instead (also the catalog Name/Description split - see Injuries.json's "23"/"24"/"25" entries, now
+    /// two rows each, distinguished by BranchRange).</summary>
+    public static bool TryGetBranchTextKey(int roll, int subRoll, out string key)
+    {
+        if (roll is 23 or 25 && subRoll is >= 1 and <= 6)
+        {
+            key = $"InjurySerious{roll}{(subRoll == 1 ? "Severe" : "Light")}";
+            return true;
+        }
+
+        if (roll == 24 && subRoll is >= 1 and <= 6)
+        {
+            key = subRoll <= 3 ? "InjurySerious24Stupidity" : "InjurySerious24Frenzy";
+            return true;
+        }
+
+        key = string.Empty;
+        return false;
+    }
 
     /// <summary>Rolls two D6 (D66: first die = tens digit).</summary>
     public static int RollDice() => Random.Shared.Next(1, 7) * 10 + Random.Shared.Next(1, 7);

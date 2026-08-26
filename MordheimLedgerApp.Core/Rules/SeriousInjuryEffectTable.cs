@@ -37,6 +37,16 @@ public sealed record SeriousInjuryOutcome
 {
     public required SeriousInjuryEffectKind Kind { get; init; }
     public CharacteristicField? Field { get; init; }
+
+    /// <summary>The player-entered D3 roll for MissGamesRollD3 (Deep Wound, 35) - null here, since
+    /// TryGetOutcome is a pure function of the roll number alone and has no access to the wizard's own
+    /// sub-roll input. The caller (WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync) fills
+    /// this in via a `with` expression from WarriorOutcomeRow.DeepWoundSubRoll/InjurySubRollEntry.
+    /// DeepWoundSubRoll before calling ApplySeriousInjuryEffectAsync - same "app never rolls dice for
+    /// the player invisibly" principle as every other roll in the app (user feedback 2026-08-26: the D3
+    /// used to be rolled silently by SeriousInjuryEffectTable.RollD3() with no player visibility at
+    /// all).</summary>
+    public int? Value { get; init; }
 }
 
 /// <summary>Mechanized subset of the Heroes' Serious Injuries D66 chart (see SeriousInjuryTable, which

@@ -149,6 +149,26 @@
                                                 <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                        IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
                                                 <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 35 (Blessure profonde). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowDeepWoundSubRoll}" Spacing="4">
+                                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding DeepWoundSubRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                    </Grid>
+                                                    <Label Text="{Binding DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                    <Label Text="{Binding DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                                                </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
@@ -247,6 +267,27 @@
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </FlexLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Blessure profonde" (35) : 1D3 déterminant le nombre de parties
+                                 manquées - jusqu'ici tiré silencieusement par l'appli sans que le joueur
+                                 ne le voie ni ne le saisisse (retour utilisateur 2026-08-26). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowDeepWoundSubRoll}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.DeepWoundSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollDeepWoundCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <Label Text="{Binding CurrentInjuryWarrior.DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
 

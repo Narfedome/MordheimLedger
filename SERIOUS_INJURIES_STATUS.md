@@ -41,7 +41,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 32 | Vieille blessure | Récurrent | ✅ | — | Jet 1D6 avant CHAQUE partie future - nouvel écran "Lancer la partie" (`StartGameDialog`), échec journalisé dans l'Historique, pas de statut ni de blocage persisté (le joueur ne fielde simplement pas ce guerrier sur table cette fois) |
 | 33 | Traumatisme nerveux | 1 | ✅ | — | Initiative -1 permanent |
 | 34 | Blessure à la main | 1 | ✅ | — | Capacité de Combat -1 permanent |
-| 35 | Blessure profonde | 1 | ✅ | — | Malade, D3 parties (`Warrior.SickGamesRemaining`) - cumulatif si plusieurs occurrences dans la même résolution "Blessures multiples" (corrigé 2026-08-26) |
+| 35 | Blessure profonde | 1 | ✅ | — | Malade, D3 parties (`Warrior.SickGamesRemaining`) - cumulatif si plusieurs occurrences dans la même résolution "Blessures multiples" (corrigé 2026-08-26) ; le 1D3 est désormais un jet visible/saisi par le joueur dans le wizard (plus tiré à l'aveugle), et le nombre de parties restantes s'affiche sur la puce Indisponible |
 | 36 | Dépouillé | 1 | ✅ | — | Perd tout l'équipement porté, sans remboursement |
 | 41-55 | Récupération totale | — | ✅ | — | No-op, déjà correct |
 | 56 | Rancune | — | ✅ | — | Cible D6 + `WarriorHatred`, fait avant ce chantier |
@@ -315,3 +315,25 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   `ApplySicknessLifecycleAsync` une fois cette partie (qu'il vient de manquer) enregistrée. Nouvelle clé
   resx `StartGameOldWoundRollLabel` ("Jet"/"Roll"). Aucun changement Core - compilation confirmée (0
   `error CS`), copie finale bloquée par l'instance de l'appli ouverte en parallèle (limite connue).
+- **2026-08-26 (Blessure profonde : le 1D3 devient un jet visible + indicateur de parties restantes)** —
+  "Il nous faut le tirage du nombre de partie manquée (avec un indicateur du nombre d'indisponibilité)."
+  Deux lacunes réelles corrigées. (1) Le 1D3 de Blessure profonde (35) était tiré silencieusement par
+  `SeriousInjuryEffectTable.RollD3()` DANS `ApplySeriousInjuryEffectAsync`, à l'enregistrement - le
+  joueur ne le voyait ni ne le saisissait jamais, contrairement à tous les autres jets de l'appli (jet
+  manuel + bouton dé optionnel). Nouveau `SeriousInjuryOutcome.Value` (Core, `int?`, toujours null tel
+  que renvoyé par `TryGetOutcome` - une fonction pure du jet seul, sans accès à un sous-jet de wizard) :
+  rempli par l'appelant via `outcome with { Value = ... }` juste avant `ApplySeriousInjuryEffectAsync`,
+  depuis un nouveau sous-jet visible - `WarriorOutcomeRow.DeepWoundSubRoll`/`ShowDeepWoundSubRoll`/
+  `DeepWoundConfirmationText`/`DeepWoundRollError` (miroir exact d'`InjuryBranchSubRoll`, 1D3 au lieu de
+  1D6), plus la même chose sur `InjurySubRollEntry` pour un sous-jet "Blessures multiples" qui tombe
+  lui-même sur 35 - nouvelles commandes `AutoRollDeepWound`/`AutoRollSubDeepWound`. `MissGamesRollD3`
+  lit maintenant `outcome.Value` (repli défensif sur `RollD3()` si absent, ne devrait plus arriver -
+  `ValidateInjuryStep` exige ce sous-jet avant de continuer). (2) `Warrior.SickGamesRemaining` n'était
+  affiché NULLE PART dans l'UI malgré son existence depuis le Palier 1 - nouveau
+  `WarriorRow.SickChipText` ("Indisponible (2)", nouvelle clé resx `WarriorStatusSickCount`) remplace le
+  texte fixe "Indisponible" sur la puce du roster ET dans la liste "Guerriers indisponibles" de "Lancer
+  la partie" (réutilisé tel quel, une seule source de vérité pour ce texte). 309/309 tests passent
+  (aucun nouveau test Core - `SeriousInjuryOutcome.Value` est un champ additif, `TryGetOutcome` ne le
+  renseigne jamais lui-même donc la couverture existante reste valide telle quelle), build Core + tête
+  MAUI clean (compilation confirmée, copie finale bloquée par l'instance de l'appli ouverte en
+  parallèle - limite connue).

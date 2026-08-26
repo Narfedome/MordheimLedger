@@ -543,6 +543,14 @@ public partial class WarbandDetailViewModel
                         ? mainOutcome
                         : null;
 
+                // Blessure profonde (35) : le nombre de parties manquées est un 1D3 saisi par le joueur
+                // dans le wizard (row.DeepWoundSubRoll, voir WarriorOutcomeRow) plutôt que tiré à
+                // l'aveugle ici - même principe que row.InjuryBranchOutcome ci-dessus, juste pour la
+                // valeur plutôt que pour le choix de la branche. Repli sur un jet auto si jamais absent
+                // (ne devrait jamais arriver, ValidateInjuryStep l'exige avant de continuer).
+                if (outcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
+                    outcome = outcome with { Value = int.TryParse(row.DeepWoundSubRoll, out var d3) ? d3 : SeriousInjuryEffectTable.RollD3() };
+
                 // Puce temporaire (voir Models.WarriorInjury.IsTemporary) uniquement pour les effets qui
                 // se résorbent d'eux-mêmes une fois la Maladie levée - la branche grave permanente de
                 // 23/25 (aucun outcome ici) et tout le reste du Palier 1 restent des puces permanentes.
@@ -585,6 +593,12 @@ public partial class WarbandDetailViewModel
                 // décision de portée) : reste texte de référence pur pour ce cas précis, comme avant
                 // cette passe (GetOrCreateInjuryAsync retombe alors sur l'entrée catalogue générique).
                 var subOutcome = hasSubRoll && SeriousInjuryEffectTable.TryGetOutcome(subRoll, alreadyBlindedInOneEye, out var o) ? o : null;
+
+                // Même principe que pour le jet principal ci-dessus : le nombre de parties manquées est
+                // le 1D3 saisi par le joueur (sub.DeepWoundSubRoll), pas un jet invisible.
+                if (subOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
+                    subOutcome = subOutcome with { Value = int.TryParse(sub.DeepWoundSubRoll, out var subD3) ? subD3 : SeriousInjuryEffectTable.RollD3() };
+
                 var subIsTemporary = subOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
 
                 var subInjury = await GetOrCreateInjuryAsync(hasSubRoll ? subRoll : -1, warrior.IsHero, sub.InjuryResultText);
@@ -680,8 +694,12 @@ public partial class WarbandDetailViewModel
                 return true;
 
             case SeriousInjuryEffectKind.MissGamesRollD3:
+                // outcome.Value porte le 1D3 saisi par le joueur dans le wizard (voir
+                // WarriorOutcomeRow.DeepWoundSubRoll/InjurySubRollEntry.DeepWoundSubRoll, injecté par
+                // ApplyWarriorOutcomesAsync ci-dessus) - repli défensif sur un jet auto si jamais absent,
+                // ne devrait plus arriver depuis que ce sous-jet est visible/validé dans le wizard.
                 warrior.Status = WarriorStatus.Sick;
-                warrior.SickGamesRemaining += SeriousInjuryEffectTable.RollD3();
+                warrior.SickGamesRemaining += outcome.Value ?? SeriousInjuryEffectTable.RollD3();
                 return true;
 
             case SeriousInjuryEffectKind.ForcedRetirement:

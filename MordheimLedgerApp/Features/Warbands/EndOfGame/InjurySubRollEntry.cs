@@ -25,6 +25,7 @@ public partial class InjurySubRollEntry : ObservableObject
     public string Label => string.Format(_loc[_labelKey], Index, Total);
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
     private string manualRoll = string.Empty;
 
     /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
@@ -35,7 +36,11 @@ public partial class InjurySubRollEntry : ObservableObject
     partial void OnManualRollChanged(string value)
     {
         InjuryResultText = string.Empty;
-        if (!int.TryParse(value, out var roll)) return;
+        if (!int.TryParse(value, out var roll))
+        {
+            if (DeepWoundSubRoll.Length > 0) DeepWoundSubRoll = string.Empty;
+            return;
+        }
 
         bool found;
         string key;
@@ -45,10 +50,39 @@ public partial class InjurySubRollEntry : ObservableObject
             InjuryResultText = _loc[key];
             RollError = null;
         }
+
+        // Même principe que WarriorOutcomeRow.OnManualRollChanged pour le sous-jet de branche - un
+        // nouveau jet qui ne tombe plus sur 35 invalide le sous-jet de Blessure profonde déjà saisi.
+        if (!ShowDeepWoundSubRoll && DeepWoundSubRoll.Length > 0)
+            DeepWoundSubRoll = string.Empty;
     }
 
     [ObservableProperty]
     private string injuryResultText = string.Empty;
+
+    /// <summary>Même principe que WarriorOutcomeRow.ShowDeepWoundSubRoll, pour un sous-jet "Blessures
+    /// multiples" (16/21) qui tombe lui-même sur 35 - toujours faux pour un jet Homme de main (IsHero
+    /// false), qui utilise une table D6 totalement différente sans résultat 35.</summary>
+    public bool ShowDeepWoundSubRoll => IsHero && int.TryParse(ManualRoll, out var roll) && roll == 35;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DeepWoundConfirmationText))]
+    private string deepWoundSubRoll = string.Empty;
+
+    partial void OnDeepWoundSubRollChanged(string value)
+    {
+        if (HasValidDeepWoundSubRoll) DeepWoundRollError = null;
+    }
+
+    public bool HasValidDeepWoundSubRoll => int.TryParse(DeepWoundSubRoll, out var subRoll) && subRoll is >= 1 and <= 3;
+
+    public string DeepWoundConfirmationText =>
+        HasValidDeepWoundSubRoll && int.TryParse(DeepWoundSubRoll, out var subRoll)
+            ? string.Format(_loc["EndOfGameDeepWoundResultFormat"], subRoll)
+            : string.Empty;
+
+    [ObservableProperty]
+    private string? deepWoundRollError;
 
     /// <summary>True si le jet actuellement saisi est un résultat de mort (Héros 11-15, Homme de main
     /// 1-2) - utilisé par WarbandDetailViewModel.EndOfGame pour compter les figurines perdues dans un

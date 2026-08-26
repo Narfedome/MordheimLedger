@@ -22,7 +22,11 @@ public partial class EndOfGameDialogViewModel
             {
                 valid &= CheckRoll(row.MultipleInjuryRolls.Count == 0, () => row.MultipleInjuryCountError = Loc["EndOfGameRollRequired"]);
                 foreach (var sub in row.MultipleInjuryRolls)
+                {
                     valid &= CheckRoll(string.IsNullOrWhiteSpace(sub.InjuryResultText), () => sub.RollError = Loc["EndOfGameRollRequired"]);
+                    if (sub.ShowDeepWoundSubRoll)
+                        valid &= CheckRoll(!sub.HasValidDeepWoundSubRoll, () => sub.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
+                }
             }
 
             if (row.ShowHatredSection)
@@ -35,6 +39,9 @@ public partial class EndOfGameDialogViewModel
 
             if (row.ShowInjuryBranchSubRoll)
                 valid &= CheckRoll(!row.HasValidInjuryBranchSubRoll, () => row.InjuryBranchRollError = Loc["EndOfGameRollRequired"]);
+
+            if (row.ShowDeepWoundSubRoll)
+                valid &= CheckRoll(!row.HasValidDeepWoundSubRoll, () => row.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
         }
         else
         {
@@ -92,6 +99,17 @@ public partial class EndOfGameDialogViewModel
     // AutoRollHatred, le champ InjuryBranchSubRoll reste modifiable ensuite pour un jet physique.
     [RelayCommand]
     private void AutoRollInjuryBranch(WarriorOutcomeRow row) => row.InjuryBranchSubRoll = SeriousInjuryEffectTable.RollSubDie().ToString();
+
+    // Sous-jet 1D3 de Blessure profonde (35) déterminant le nombre de parties manquées (voir
+    // Core.Rules.SeriousInjuryEffectTable.RollD3) - jusqu'ici tiré silencieusement par l'appli sans que
+    // le joueur ne le voie, retour utilisateur 2026-08-26. Même convention que les autres jets de cette
+    // étape, modifiable ensuite pour un jet physique.
+    [RelayCommand]
+    private void AutoRollDeepWound(WarriorOutcomeRow row) => row.DeepWoundSubRoll = SeriousInjuryEffectTable.RollD3().ToString();
+
+    // Même sous-jet, pour un sous-jet "Blessures multiples" qui tombe lui-même sur 35.
+    [RelayCommand]
+    private void AutoRollSubDeepWound(InjurySubRollEntry entry) => entry.DeepWoundSubRoll = SeriousInjuryEffectTable.RollD3().ToString();
 
     // Portée "toutes les bandes de ce type" (6) uniquement - la seule portée référençant un vrai
     // WarbandArchetype du catalogue (les 3 autres sont résolues à la frappe dans un simple champ texte,

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -88,6 +89,12 @@ public partial class WarriorRow : ObservableObject
     /// au prochain Fin de Partie (voir WarbandDetailViewModel.EndOfGame), pas un statut permanent comme
     /// IsDead.</summary>
     public bool IsSick => Warrior.Status == WarriorStatus.Sick;
+
+    /// <summary>"Indisponible (2)" - l'indicateur du nombre de parties restantes demandé par
+    /// l'utilisateur (2026-08-26), jusqu'ici invisible partout (Warrior.SickGamesRemaining n'était
+    /// affiché nulle part). Recalculé à chaque affichage plutôt qu'observable : WarriorRow est
+    /// entièrement reconstruit à chaque LoadAsync, pas de notification de changement nécessaire ici.</summary>
+    public string SickChipText => string.Format(LocalizationService.Instance["WarriorStatusSickCount"], Warrior.SickGamesRemaining);
 
     /// <summary>"× 3" next to the name for a Henchman group with more than one living model - empty for
     /// a Hero (always HeadCount 1) or a lone Henchman, see Warrior.HeadCount.</summary>

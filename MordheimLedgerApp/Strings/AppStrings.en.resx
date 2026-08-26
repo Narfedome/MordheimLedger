@@ -972,6 +972,9 @@
   <data name="WarriorStatusSick" xml:space="preserve">
     <value>Unavailable</value>
   </data>
+  <data name="WarriorStatusSickCount" xml:space="preserve">
+    <value>Unavailable ({0})</value>
+  </data>
   <data name="WarriorStatusRetired" xml:space="preserve">
     <value>Retired</value>
   </data>
@@ -1160,6 +1163,12 @@
   </data>
   <data name="EndOfGameInjuryBranchSubRollPh" xml:space="preserve">
     <value>1D6</value>
+  </data>
+  <data name="EndOfGameDeepWoundSubRollPh" xml:space="preserve">
+    <value>1D3</value>
+  </data>
+  <data name="EndOfGameDeepWoundResultFormat" xml:space="preserve">
+    <value>{0} game(s) missed</value>
   </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Name of the one responsible</value>

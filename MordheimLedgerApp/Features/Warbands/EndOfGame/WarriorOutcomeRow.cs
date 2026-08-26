@@ -160,6 +160,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowInjuryBranchSubRoll))]
     [NotifyPropertyChangedFor(nameof(InjuryBranchSpecialRules))]
     [NotifyPropertyChangedFor(nameof(HasInjuryBranchSpecialRules))]
+    [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -191,6 +192,11 @@ public partial class WarriorOutcomeRow : ObservableObject
         // déjà saisi.
         if (Warrior.IsHero && !ShowInjuryBranchSubRoll && InjuryBranchSubRoll.Length > 0)
             InjuryBranchSubRoll = string.Empty;
+
+        // Même principe pour le sous-jet de Blessure profonde (35) - un nouveau jet principal qui ne
+        // tombe plus sur ce résultat invalide le sous-jet déjà saisi.
+        if (Warrior.IsHero && !ShowDeepWoundSubRoll && DeepWoundSubRoll.Length > 0)
+            DeepWoundSubRoll = string.Empty;
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -464,6 +470,45 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// <summary>Même principe que RollError/HatredRollError, pour le sous-jet de branche.</summary>
     [ObservableProperty]
     private string? injuryBranchRollError;
+
+    /// <summary>True dès que le jet principal (ManualRoll) donne "Blessure profonde" (35, Héros
+    /// uniquement) - seul résultat Palier 1 dont l'effet (nombre de parties manquées) dépend d'un
+    /// sous-jet 1D3 plutôt que d'être fixe. Auparavant tiré silencieusement par l'appli
+    /// (SeriousInjuryEffectTable.RollD3()) sans que le joueur ne le voie ni ne le saisisse - retour
+    /// utilisateur (2026-08-26) : "il nous faut le tirage du nombre de partie manquée (avec un
+    /// indicateur du nombre d'indisponibilité)". Même idiome de saisie manuelle + bouton dé optionnel
+    /// que ShowInjuryBranchSubRoll.</summary>
+    public bool ShowDeepWoundSubRoll => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && roll == 35;
+
+    /// <summary>Le score du 1D3 tiré (1 à 3) - saisi à la main ou rempli par AutoRollDeepWound, même
+    /// convention que InjuryBranchSubRoll.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(DeepWoundConfirmationText))]
+    private string deepWoundSubRoll = string.Empty;
+
+    partial void OnDeepWoundSubRollChanged(string value)
+    {
+        if (HasValidDeepWoundSubRoll) DeepWoundRollError = null;
+    }
+
+    /// <summary>True dès que le sous-jet est un 1D3 valide (1-3) - sert à la fois à valider avant de
+    /// continuer (ValidateInjuryStep) et à résoudre le nombre réel de parties manquées appliqué à la
+    /// sauvegarde (voir WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync).</summary>
+    public bool HasValidDeepWoundSubRoll => int.TryParse(DeepWoundSubRoll, out var subRoll) && subRoll is >= 1 and <= 3;
+
+    /// <summary>Confirmation affichée sous le sous-jet une fois valide, ex. "2 parties manquées" -
+    /// l'indicateur demandé par l'utilisateur, distinct du texte de référence statique
+    /// (InjuryResultText, qui ne mentionne que "1D3" en toutes lettres).</summary>
+    public string DeepWoundConfirmationText =>
+        HasValidDeepWoundSubRoll && int.TryParse(DeepWoundSubRoll, out var subRoll)
+            ? string.Format(_loc["EndOfGameDeepWoundResultFormat"], subRoll)
+            : string.Empty;
+
+    /// <summary>Même principe que RollError/InjuryBranchRollError, pour le sous-jet de Blessure
+    /// profonde.</summary>
+    [ObservableProperty]
+    private string? deepWoundRollError;
 
     /// <summary>Un jet D6 par figurine hors de combat dans un groupe d'Hommes de main (OutOfActionCount)
     /// - sans objet pour un Héros, qui utilise ManualRoll/InjuryResultText ci-dessus à la place (une

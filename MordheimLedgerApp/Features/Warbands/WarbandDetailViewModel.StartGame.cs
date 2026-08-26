@@ -21,7 +21,7 @@ public partial class WarbandDetailViewModel
 
         var unavailableWarriors = new List<UnavailableWarriorRow>();
         foreach (var row in Heroes.Concat(Henchmen).Where(r => r.Warrior.Status == WarriorStatus.Sick))
-            unavailableWarriors.Add(new UnavailableWarriorRow(row, Loc["WarriorStatusSick"]));
+            unavailableWarriors.Add(new UnavailableWarriorRow(row, row.SickChipText));
         foreach (var row in RetiredWarriors)
             unavailableWarriors.Add(new UnavailableWarriorRow(row, Loc["WarriorStatusRetired"]));
         foreach (var row in DeadWarriors)

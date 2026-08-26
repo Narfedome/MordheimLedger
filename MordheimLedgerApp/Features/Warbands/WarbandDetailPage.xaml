@@ -36,7 +36,7 @@
                                      rien à cliquer ici (contrairement à un ChipView catalogue). -->
                                 <Border Style="{StaticResource ChipBorderStyle}" IsVisible="{Binding IsSick}"
                                         Padding="6,2" Stroke="{DynamicResource AppDanger}" VerticalOptions="Center">
-                                    <Label Text="{loc:Loc WarriorStatusSick}" FontSize="11" FontAttributes="Bold"
+                                    <Label Text="{Binding SickChipText}" FontSize="11" FontAttributes="Bold"
                                            TextColor="{DynamicResource AppDanger}"/>
                                 </Border>
                             </HorizontalStackLayout>

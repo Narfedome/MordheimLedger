@@ -267,3 +267,17 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   vraie collision. Aucune nouvelle logique `Core.Rules` (pas de nouveau test `RulesTests.cs` - le
   matching par jet réutilise `InjuryCatalogLookup.RollRangeMatches` déjà couvert), 309/309 tests passent
   (compte inchangé), build Core + tête MAUI clean.
+- **2026-08-26 (correctif : un jet par Vieille blessure PORTÉE, pas par guerrier)** — Retour utilisateur
+  juste après la passe ci-dessus : "si on a plusieurs oldwound, on doit tirer le nombre de old wound...
+  2 old wound = 2 jets... ça augmente les chances de ne pas jouer" - un guerrier peut accumuler plusieurs
+  Vieilles blessures distinctes au fil des parties (2 résultats Serious Injury séparés tombés sur 32), et
+  chacune se teste indépendamment - la première implémentation ne générait qu'UNE `OldWoundRollEntry` par
+  guerrier concerné (`Where(...Injuries.Any(...))`), quel que soit le nombre réel de Vieilles blessures
+  portées. Corrigé en `SelectMany` sur le COMPTE d'instances (`Injuries.Count(...)`) plutôt que sur une
+  simple présence - un guerrier à 2 Vieilles blessures obtient maintenant 2 lignes de jet indépendantes.
+  `OldWoundRollEntry` gagne un `Subtitle` résolu par l'appelant (plutôt qu'un `{loc:Loc ...}` fixe en
+  XAML) pour pouvoir afficher "(1/2)"/"(2/2)" quand le guerrier en porte plusieurs, texte de base inchangé
+  sinon. Historique dédupliqué par guerrier (`.Select(r => r.Warrior).Distinct()`) avant de générer les
+  phrases d'échec : un guerrier qui rate 2 jets sur 2 ne doit apparaître qu'une fois dans l'Historique,
+  pas une phrase par jet raté. Aucun changement Core (seuls des fichiers tête MAUI touchés) - suite de
+  tests non concernée, non relancée ; build Core + tête MAUI clean.

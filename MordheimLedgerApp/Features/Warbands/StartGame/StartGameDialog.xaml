@@ -65,7 +65,7 @@
                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
                                         <Label Text="{Binding Warrior.Name}" FontAttributes="Bold"/>
-                                        <Label Text="{loc:Loc StartGameOldWoundSubtitle}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Text="{Binding Subtitle}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
                                         <Label Text="{loc:Loc StartGameOldWoundPass}" FontSize="12" FontAttributes="Bold"
                                                TextColor="{DynamicResource AppSuccess}" IsVisible="{Binding ShowPass}"/>
                                         <Label Text="{loc:Loc StartGameOldWoundFail}" FontSize="12" FontAttributes="Bold"

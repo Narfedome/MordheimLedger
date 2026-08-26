@@ -230,9 +230,23 @@
                                 <!-- Confirmation : le résultat réellement résolu par cette branche (ex.
                                      "Bras amputé : ..."), pas le texte général des deux branches déjà
                                      affiché plus haut - même langage que la confirmation de portée de
-                                     Rancune (HatredTargetDisplayName) plus haut dans cette étape. -->
+                                     Rancune (HatredTargetDisplayName) plus haut dans cette étape. Reste
+                                     un simple texte pour 23/25 (aucune SpecialRule attachée à ces
+                                     branches) - une chip tapable la remplace dès qu'il y en a une (Folie
+                                     24 -> Stupidité/Frénésie, voir InjuryBranchSpecialRules), "il faut
+                                     mettre le chip plutôt que du texte" (retour utilisateur 2026-08-25). -->
                                 <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchResultText}" FontSize="12" FontAttributes="Bold"
-                                       IsVisible="{Binding CurrentInjuryWarrior.InjuryBranchResultText, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                       IsVisible="{Binding CurrentInjuryWarrior.HasInjuryBranchSpecialRules, Converter={StaticResource InverseBoolConverter}}"/>
+                                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.InjuryBranchSpecialRules}"
+                                            IsVisible="{Binding CurrentInjuryWarrior.HasInjuryBranchSpecialRules}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="library:SpecialRule">
+                                            <components:ChipView Item="{Binding .}"
+                                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
 

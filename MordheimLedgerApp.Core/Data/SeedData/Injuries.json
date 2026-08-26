@@ -53,7 +53,16 @@
     "description": {
       "en": "Arm amputated: can only use one-handed weapons from now on (permanent).",
       "fr": "Bras amputé : ne peut plus utiliser que des armes à une main (permanent)."
-    }
+    },
+    "specialRules": [
+      {
+        "name": { "en": "One-Handed Weapons Only", "fr": "Armes à une main uniquement" },
+        "description": {
+          "en": "This warrior's arm was amputated and replaced with nothing - he can no longer wield two-handed weapons. Purely a reminder: the app does not block equipping a two-handed weapon on this warrior.",
+          "fr": "Ce guerrier a eu le bras amputé et ne peut plus manier d'armes à deux mains. Purement un rappel : l'application ne bloque pas l'équipement d'une arme à deux mains sur ce guerrier."
+        }
+      }
+    ]
   },
   {
     "name": { "en": "Madness", "fr": "Folie" },

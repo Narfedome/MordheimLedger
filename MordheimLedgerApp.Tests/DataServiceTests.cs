@@ -138,7 +138,10 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         // "1", see Injury.BranchRange) alongside the original combined-text row (rollRange only, no
         // BranchRange - kept as a fallback for the untracked "Multiple Injuries" nested-branch case).
         Assert.Contains(heroInjuries, i => i.Name == "Arm Wound: Minor" && i.RollRange == "23" && i.BranchRange == "2-6");
-        Assert.Contains(heroInjuries, i => i.Name == "Arm Wound: Amputated" && i.RollRange == "23" && i.BranchRange == "1");
+        // Amputated also carries a real SpecialRule (informational only - the app doesn't block
+        // equipping a two-handed weapon on this warrior, see the rule's own description).
+        var amputated = Assert.Single(heroInjuries, i => i.Name == "Arm Wound: Amputated" && i.RollRange == "23" && i.BranchRange == "1");
+        Assert.Contains(amputated.SpecialRules, r => r.Name == "One-Handed Weapons Only");
         Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Minor" && i.RollRange == "25" && i.BranchRange == "2-6");
         Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Severe" && i.RollRange == "25" && i.BranchRange == "1");
 

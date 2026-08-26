@@ -79,9 +79,16 @@ public partial class WarbandDetailViewModel
         var warriorArchetypesByEnglishName = englishWarriorArchetypes.ToDictionary(a => a.Name,
             a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
 
+        // Pour l'aperçu en direct des SpecialRules attachées à une branche de Blessure Grave (ex.
+        // Folie 24 -> Stupidité/Frénésie) - déjà pleinement résolu (SpecialRules incluses, voir
+        // LibraryService.GetInjuriesAsync) donc réutilisable tel quel par WarriorOutcomeRow, via
+        // InjuryCatalogLookup (même logique de correspondance par jet que GetOrCreateInjuryAsync plus
+        // bas, partagée pour ne pas dupliquer le parseur de RollRange).
+        var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
+
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -397,7 +404,8 @@ public partial class WarbandDetailViewModel
         List<Injury>? injuryCatalog = null;
 
         // Find-or-create par jet (roll) contre le catalogue Injury seedé depuis Injuries.json (RollRange
-        // par entrée, ex. "22", "16, 21", "11-15" - voir RollRangeMatches) plutôt que par égalité de
+        // par entrée, ex. "22", "16, 21", "11-15" - voir InjuryCatalogLookup, partagé avec
+        // WarriorOutcomeRow pour l'aperçu en direct dans le wizard) plutôt que par égalité de
         // texte : corrige un bug où la chip de blessure affichait la phrase descriptive complète
         // (row.InjuryResultText, résolue via la clé resx InjurySeriousXX, ex. "Blessure à la jambe :
         // Mouvement -1 de façon permanente.") au lieu du nom court du catalogue ("Blessure à la jambe") -
@@ -414,10 +422,7 @@ public partial class WarbandDetailViewModel
         {
             injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
             var category = isHero ? InjuryCategory.Hero : InjuryCategory.Henchman;
-            var candidates = injuryCatalog.Where(i => i.Category == category && RollRangeMatches(i.RollRange, roll)).ToList();
-            var injury = branchSubRoll is { } sub
-                ? candidates.FirstOrDefault(i => RollRangeMatches(i.BranchRange, sub))
-                : candidates.FirstOrDefault(i => string.IsNullOrWhiteSpace(i.BranchRange)) ?? candidates.FirstOrDefault();
+            var injury = InjuryCatalogLookup.Find(injuryCatalog, category, roll, branchSubRoll);
             if (injury is null)
             {
                 injury = new Injury { Name = fallbackText, Category = category, Source = ContentSource.Official };
@@ -612,32 +617,6 @@ public partial class WarbandDetailViewModel
             else if (changed)
                 await _warbandService.SaveWarriorAsync(warrior);
         }
-    }
-
-    /// <summary>Est-ce que <paramref name="roll"/> tombe dans <paramref name="rollRange"/>, le champ
-    /// d'affichage libre du catalogue Injury (Injuries.json - ex. "22", "16, 21", "11-15", "62-63") ?
-    /// Utilisé uniquement pour retrouver la bonne entrée du catalogue par jet (voir GetOrCreateInjuryAsync)
-    /// - RollRange lui-même reste un champ d'affichage libre non validé partout ailleurs (voir sa doc sur
-    /// Injury.cs), ce parseur est donc volontairement tolérant (jetons séparés par virgule, chacun un
-    /// nombre seul ou une plage "a-b").</summary>
-    private static bool RollRangeMatches(string? rollRange, int roll)
-    {
-        if (string.IsNullOrWhiteSpace(rollRange)) return false;
-
-        foreach (var token in rollRange.Split(',', StringSplitOptions.TrimEntries))
-        {
-            var bounds = token.Split('-', StringSplitOptions.TrimEntries);
-            if (bounds.Length == 2 && int.TryParse(bounds[0], out var lo) && int.TryParse(bounds[1], out var hi))
-            {
-                if (roll >= lo && roll <= hi) return true;
-            }
-            else if (int.TryParse(token, out var exact) && exact == roll)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /// <summary>Applique la mutation réelle d'un résultat de Blessure Grave Palier 1 (voir Core.Rules.

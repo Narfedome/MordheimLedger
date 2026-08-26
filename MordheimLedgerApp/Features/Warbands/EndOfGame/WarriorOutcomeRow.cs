@@ -158,6 +158,8 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowMultipleInjuriesSection))]
     [NotifyPropertyChangedFor(nameof(ShowHatredSection))]
     [NotifyPropertyChangedFor(nameof(ShowInjuryBranchSubRoll))]
+    [NotifyPropertyChangedFor(nameof(InjuryBranchSpecialRules))]
+    [NotifyPropertyChangedFor(nameof(HasInjuryBranchSpecialRules))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -403,6 +405,8 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     [NotifyPropertyChangedFor(nameof(InjuryBranchResultText))]
     [NotifyPropertyChangedFor(nameof(ResolvedInjuryText))]
+    [NotifyPropertyChangedFor(nameof(InjuryBranchSpecialRules))]
+    [NotifyPropertyChangedFor(nameof(HasInjuryBranchSpecialRules))]
     private string injuryBranchSubRoll = string.Empty;
 
     partial void OnInjuryBranchSubRollChanged(string value)
@@ -422,6 +426,25 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// enregistré (Récapitulatif, chip catalogue de repli, phrase d'Historique) - la branche résolue
     /// (23/25) une fois connue, sinon le texte général déjà résolu par le jet principal.</summary>
     public string ResolvedInjuryText => InjuryBranchResultText.Length > 0 ? InjuryBranchResultText : InjuryResultText;
+
+    /// <summary>Règle(s) spéciale(s) que la branche résolue accorde de façon permanente (Folie 24 ->
+    /// Stupidité/Frénésie, voir Injury.SpecialRules) - prévisualisée en direct dans le wizard via
+    /// InjuryCatalogLookup, la même résolution par jet que WarbandDetailViewModel.EndOfGame.
+    /// GetOrCreateInjuryAsync fera à l'enregistrement. Vide pour 23/25 (aucune SpecialRule attachée à
+    /// ces branches) et tant que le sous-jet n'est pas encore saisi/valide.</summary>
+    public IReadOnlyList<SpecialRule> InjuryBranchSpecialRules
+    {
+        get
+        {
+            if (!int.TryParse(ManualRoll, out var roll) || !int.TryParse(InjuryBranchSubRoll, out var subRoll))
+                return Array.Empty<SpecialRule>();
+
+            var category = Warrior.IsHero ? InjuryCategory.Hero : InjuryCategory.Henchman;
+            return (IReadOnlyList<SpecialRule>?)InjuryCatalogLookup.Find(_injuryCatalog, category, roll, subRoll)?.SpecialRules ?? Array.Empty<SpecialRule>();
+        }
+    }
+
+    public bool HasInjuryBranchSpecialRules => InjuryBranchSpecialRules.Count > 0;
 
     /// <summary>Résolu depuis ManualRoll+InjuryBranchSubRoll (voir Core.Rules.SeriousInjuryEffectTable.
     /// TryGetBranchSubRollOutcome) - null tant que le sous-jet n'est pas encore saisi/valide, ainsi que
@@ -522,12 +545,22 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// Fin de Partie).</summary>
     private readonly int _startingHeroCount;
 
-    public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience, IEnumerable<MagicSchool>? magicSchools = null, int startingHeroCount = 0)
+    /// <summary>Catalogue Injury complet (SpecialRules déjà résolues, voir LibraryService.
+    /// GetInjuriesAsync), chargé une seule fois à l'ouverture du wizard - permet à
+    /// InjuryBranchSpecialRules de prévisualiser la même résolution que GetOrCreateInjuryAsync fera à
+    /// l'enregistrement (WarbandDetailViewModel.EndOfGame), sans attendre la sauvegarde pour afficher
+    /// la chip de règle (demande explicite de l'utilisateur 2026-08-25 : "il faut mettre le chip plutôt
+    /// que du texte").</summary>
+    private readonly IReadOnlyList<Injury> _injuryCatalog;
+
+    public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience, IEnumerable<MagicSchool>? magicSchools = null,
+        int startingHeroCount = 0, IReadOnlyList<Injury>? injuryCatalog = null)
     {
         Warrior = warrior;
         ArchetypeName = archetypeName;
         GainsExperience = gainsExperience;
         _startingHeroCount = startingHeroCount;
+        _injuryCatalog = injuryCatalog ?? new List<Injury>();
         MagicSchools = magicSchools?.ToList() ?? new List<MagicSchool>();
 
         foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })

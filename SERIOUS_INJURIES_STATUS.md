@@ -14,7 +14,7 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 | Palier | Mécanisme | Statut |
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) | **10/10 ✅** |
-| 2 — règle spéciale permanente / note informative | Frénésie/Stupidité (Folie, 24) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme ; note "une main" (23 grave) sans blocage actif | **Folie ✅, 3 restants (Endurci, Horribles balafres, note "une main")** |
+| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Armes à une main uniquement (23 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé ✅, 2 restants (Endurci, Horribles balafres)** |
 | 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses, Vieille blessure ("avant chaque bataille"), suivi "second œil → retraite" | **0/4 ⏳** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
@@ -30,7 +30,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 16, 21 | Blessures multiples | — | ✅ | — | Relance 1D6 fois sur cette même table ; chaque sous-jet applique aussi son propre effet Palier 1 s'il y en a un |
 | 22 | Blessure à la jambe | 1 | ✅ | ✅ | Mouvement -1 permanent |
 | 23 (sous-jet 2-6) | Blessure au bras : légère | 1 | ✅ | — | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée ("Blessure au bras : légère"), temporaire - supprimée automatiquement dès que le guerrier redevient Actif |
-| 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ⏳ | ❌ | Arme à une main seulement - reste texte seul (note informative prévue, pas de blocage actif) ; chip catalogue dédiée, permanente |
+| 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Armes à une main uniquement" (nouvelle, purement informative - pas de blocage actif à l'équipement) - même traitement que Folie |
 | 24 (sous-jet 1-3) | Folie : Stupidité | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Stupidité" (trouvée/réutilisée depuis le catalogue commun) - apparaît comme une puce Règles spéciales tapable sur la fiche guerrier, exactement comme une règle d'objet |
 | 24 (sous-jet 4-6) | Folie : Frénésie | 2 | ✅ | — | Idem avec la `SpecialRule` "Frénésie" (déjà dans le catalogue commun, réutilisée telle quelle) |
 | 25 (sous-jet 2-6) | Jambe écrasée : légère | 1 | ✅ | — | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée, temporaire - supprimée dès le retour Actif |
@@ -60,10 +60,8 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 ## Hors périmètre pour l'instant
 
 - **Palier 2, restants** : Endurci (62-63, Immunisé à la Peur) et Horribles balafres (64, Provoque la
-  Peur) au même mécanisme que Folie (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de nouvelle
-  table de jointure `WarriorSpecialRule` finalement nécessaire) ; "arme à une main" (23, sous-jet 1)
-  reste un simple flag informatif sans blocage actif à l'équipement (décision explicite, cohérente avec
-  "pas de moteur de règles").
+  Peur) au même mécanisme que Folie/Bras amputé (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de
+  nouvelle table de jointure `WarriorSpecialRule` finalement nécessaire).
 - **Palier 3 (4 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
   mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
   de l'Exploration ne convient pas, voir Journal) ; Vieille blessure (32) exige un jet "avant chaque
@@ -134,3 +132,27 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   Haine de la fiche guerrier tapables (portée 6 seulement, celle qui référence un vrai
   `WarbandArchetype` - actuellement `HatredChips` n'a aucune `Command`, contrairement à la même chip
   dans le wizard qui l'est déjà).
+- **2026-08-25 (chip plutôt que texte DANS le wizard + Bras amputé rejoint le mécanisme)** — Deux
+  retours utilisateur sur la même session. (1) La confirmation de branche affichée dans l'assistant Fin
+  de Partie ("Devient Frénétique de façon permanente.") restait un simple `Label` en gras même quand la
+  branche accorde une vraie `SpecialRule` - "ici il faut mettre le chip plutôt que du texte" (capture
+  d'écran à l'appui). Nouveau `Core.Rules`-adjacent `InjuryCatalogLookup` (extrait de la logique de
+  correspondance par jet déjà dans `GetOrCreateInjuryAsync`, désormais partagée) permet à
+  `WarriorOutcomeRow.InjuryBranchSpecialRules` de prévisualiser EN DIRECT, avant même l'enregistrement,
+  quelle(s) `SpecialRule`(s) la branche résolue va attacher - le catalogue Injury (déjà résolu avec ses
+  SpecialRules) est chargé une fois à l'ouverture du wizard et transmis à chaque `WarriorOutcomeRow`.
+  `EndOfGameDialog.xaml` affiche désormais un `ChipView` tapable (nouvelle commande
+  `ShowInjuryBranchSpecialRuleDetail`, même popup que la fiche guerrier) à la place du texte dès qu'il y
+  a une règle à montrer - 23/25 (aucune `SpecialRule`) gardent le texte brut inchangé. (2) "On a la même
+  chose à faire pour la blessure au bras" - la branche grave de Blessure au bras (23, sous-jet 1,
+  "amputé") gagne une nouvelle `SpecialRule` **"Armes à une main uniquement"** (purement informative,
+  toujours pas de blocage actif à l'équipement - cohérent avec la doctrine "pas de moteur de règles").
+  **Nouveau backfill `BackfillInjurySpecialRulesAsync`** : contrairement à Folie (ligne catalogue
+  toute neuve, ses règles s'attachaient déjà à l'insertion via `BackfillBranchedInjuriesAsync`),
+  "Blessure au bras : amputé" EXISTAIT déjà en base (créée par le tout premier backfill de la session,
+  avant que Folie n'introduise `Injury.SpecialRules`) - `BackfillBranchedInjuriesAsync` ne revisite
+  jamais une ligne déjà là, donc la nouvelle règle ne se serait jamais attachée sur une base déjà
+  migrée sans ce backfill dédié (correspond par (Catégorie, RollRange, BranchRange), n'agit que si la
+  ligne trouvée a zéro `InjurySpecialRuleEntity` - jamais de doublon si la liste de règles du seed
+  change encore après coup). 299/299 tests passent, build clean (Core + tête MAUI, tests compilés et
+  exécutés avec succès).

@@ -41,6 +41,7 @@ public class AppDatabase
         await BackfillWarriorArchetypeRacialProfileAsync();
         await BackfillWarriorRacialMaxesAsync();
         await BackfillBranchedInjuriesAsync();
+        await BackfillInjurySpecialRulesAsync();
         await BackfillWarriorStartingStatsAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
@@ -862,6 +863,38 @@ public class AppDatabase
             {
                 var ruleId = await FindOrCreateSpecialRuleAsync(sr);
                 await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = entity.Id, SpecialRuleId = ruleId });
+            }
+        }
+    }
+
+    /// <summary>Runs on every launch, after BackfillBranchedInjuriesAsync - covers a DIFFERENT gap: an
+    /// Injury row that already existed (seeded or backfilled by an earlier launch) before Injuries.json
+    /// gave it any SpecialRules (e.g. "Blessure au bras : amputé" existed from the Arm Wound/Smashed Leg
+    /// split, 2026-08-25, but only gained its "One-Handed Weapons Only" rule in a later pass the same
+    /// day). BackfillBranchedInjuriesAsync only inserts brand-new rows (and attaches their rules at
+    /// insert time) - it never revisits a row that already exists, so this one specifically matches
+    /// existing rows by (Category, RollRange, BranchRange) and attaches whichever SpecialRules the seed
+    /// now lists, but ONLY if that row currently has zero attached (never re-adds/duplicates for a row
+    /// that already has some, even if the seed's own rule list changes again later - same
+    /// don't-retroactively-touch-an-already-resolved-row precedent as the rest of this file).</summary>
+    private async Task BackfillInjurySpecialRulesAsync()
+    {
+        var existingInjuries = await _db.Table<InjuryEntity>().ToListAsync();
+        var injuryIdsWithRules = (await _db.Table<InjurySpecialRuleEntity>().ToListAsync())
+            .Select(l => l.InjuryId).ToHashSet();
+
+        foreach (var inj in await LoadSeedArrayAsync<InjurySeedData>("Injuries.json"))
+        {
+            if (inj.SpecialRules.Count == 0) continue;
+
+            var category = Enum.Parse<InjuryCategory>(inj.Category);
+            var match = existingInjuries.FirstOrDefault(e => e.Category == category && e.RollRange == inj.RollRange && e.BranchRange == inj.BranchRange);
+            if (match is null || injuryIdsWithRules.Contains(match.Id)) continue;
+
+            foreach (var sr in inj.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = match.Id, SpecialRuleId = ruleId });
             }
         }
     }

@@ -122,4 +122,12 @@ public partial class EndOfGameDialogViewModel
         foreach (var row in WarriorRows.Where(r => r.HatredTargetWarbandArchetype == archetype))
             row.ClearHatredTargetWarbandArchetype();
     }
+
+    // Rappel de règle pour une branche qui accorde une SpecialRule permanente (Folie 24 -> Stupidité/
+    // Frénésie, voir WarriorOutcomeRow.InjuryBranchSpecialRules) - même popup que la puce Règles
+    // spéciales de la fiche guerrier (WarbandDetailViewModel.ShowSpecialRuleDetail), affichée dès le
+    // wizard plutôt que d'attendre l'enregistrement ("il faut mettre le chip plutôt que du texte",
+    // retour utilisateur 2026-08-25).
+    [RelayCommand]
+    private Task ShowInjuryBranchSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
 }

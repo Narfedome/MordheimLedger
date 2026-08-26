@@ -18,12 +18,10 @@ public enum WarriorStatus
     Sick = 2,
 
     /// <summary>Permanently out of the active roster but never fought their last battle - unlike Dead,
-    /// forced by a specific rule rather than a death roll. Two reachable cases: "Blinded in One Eye"
-    /// losing its second eye (see Core.Rules.SeriousInjuryEffectKind.ForcedRetirement), and "Captured"
-    /// (61) resolving to Sold to Slavers (see Core.Rules.CapturedOutcome.SoldToSlavers - gone for good,
-    /// but never explicitly killed, unlike Captured's other two "lost" branches which set Dead instead).
-    /// Treated identically to Dead everywhere the roster excludes inactive warriors
-    /// (WarbandDetailViewModel's Heroes/Henchmen/Rating, WarbandEditDialogViewModel's existing-warrior
-    /// slots) - kept in the roster for band history rather than deleted, same as Dead.</summary>
+    /// forced by a specific rule rather than a death roll (currently only "Blinded in One Eye" losing
+    /// its second eye, see Core.Rules.SeriousInjuryEffectKind.ForcedRetirement). Treated identically to
+    /// Dead everywhere the roster excludes inactive warriors (WarbandDetailViewModel's Heroes/Henchmen/
+    /// Rating, WarbandEditDialogViewModel's existing-warrior slots) - kept in the roster for band
+    /// history rather than deleted, same as Dead.</summary>
     Retired = 3
 }

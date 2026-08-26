@@ -407,6 +407,8 @@ public partial class WarbandDetailViewModel
 
     private async Task ApplyWarriorOutcomesAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
     {
+        if (Warband is null) return;
+
         List<Injury>? injuryCatalog = null;
 
         // Find-or-create par jet (roll) contre le catalogue Injury seedé depuis Injuries.json (RollRange
@@ -579,22 +581,27 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
             }
 
-            // Capturé (61) : pas un SeriousInjuryEffectKind (voir Core.Rules.CapturedOutcomeTable) - 5
-            // issues nommées choisies par le joueur (jamais un jet, une négociation/décision du capteur),
-            // toutes du point de vue du CAPTEUR (l'or/le Zombie/l'XP vont à la bande adverse, jamais la
-            // nôtre) - seul ce qui arrive à CE guerrier compte ici : revient avec son équipement
-            // (Rançon/Échange), ou perdu pour de bon (les 3 autres - équipement perdu comme Dépouillé,
-            // 36 ; Mort pour les deux issues qui tuent explicitement, Retraité pour la vente aux
-            // esclavagistes qui ne tue pas mais ne revient jamais).
-            if (row.ShowCapturedChoice && row.SelectedCapturedOutcome is { } capturedOutcome)
+            // Capturé (61) : portée revue à la baisse (2026-08-27, voir SERIOUS_INJURIES_STATUS.md) -
+            // le livre décrit 5 issues nommées mais toutes racontent une décision du CAPTEUR (une bande
+            // adverse que l'appli ne modélise pas comme donnée structurée - voir la note mémoire sur un
+            // futur système en réseau). Seule la rançon change réellement quelque chose de notre point
+            // de vue (coût négocié, déduit de notre trésorerie, le guerrier revient avec son
+            // équipement) - toute autre issue (échangé/vendu/tué/sacrifié) revient au même pour nous :
+            // perdu pour de bon, considéré mort, équipement perdu comme Dépouillé (36).
+            if (row.ShowCapturedChoice)
             {
-                sentences.Add(string.Format(Loc[$"HistoryCaptured{capturedOutcome}Sentence"], warrior.Name));
-                if (!CapturedOutcomeTable.ReturnsToWarband(capturedOutcome))
+                if (row.IsRansomed && int.TryParse(row.RansomAmount, out var ransomAmount))
                 {
-                    warrior.Status = CapturedOutcomeTable.CausesDeath(capturedOutcome) ? WarriorStatus.Dead : WarriorStatus.Retired;
+                    Warband.Treasury -= ransomAmount;
+                    sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, ransomAmount));
+                }
+                else
+                {
+                    warrior.Status = WarriorStatus.Dead;
                     foreach (var equipment in warrior.Equipment.ToList())
                         await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
                     warrior.Equipment.Clear();
+                    sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                 }
                 changed = true;
             }
@@ -635,15 +642,20 @@ public partial class WarbandDetailViewModel
 
                 // Capturé (61) : même principe que le jet principal ci-dessus, pour un sous-jet
                 // "Blessures multiples" qui tombe lui-même sur 61.
-                if (sub.ShowCapturedChoice && sub.SelectedCapturedOutcome is { } subCapturedOutcome)
+                if (sub.ShowCapturedChoice)
                 {
-                    sentences.Add(string.Format(Loc[$"HistoryCaptured{subCapturedOutcome}Sentence"], warrior.Name));
-                    if (!CapturedOutcomeTable.ReturnsToWarband(subCapturedOutcome))
+                    if (sub.IsRansomed && int.TryParse(sub.RansomAmount, out var subRansomAmount))
                     {
-                        warrior.Status = CapturedOutcomeTable.CausesDeath(subCapturedOutcome) ? WarriorStatus.Dead : WarriorStatus.Retired;
+                        Warband.Treasury -= subRansomAmount;
+                        sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, subRansomAmount));
+                    }
+                    else
+                    {
+                        warrior.Status = WarriorStatus.Dead;
                         foreach (var equipment in warrior.Equipment.ToList())
                             await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
                         warrior.Equipment.Clear();
+                        sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     changed = true;
                 }

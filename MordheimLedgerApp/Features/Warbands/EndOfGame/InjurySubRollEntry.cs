@@ -58,8 +58,8 @@ public partial class InjurySubRollEntry : ObservableObject
             DeepWoundSubRoll = string.Empty;
 
         // Même principe pour le choix de Capturé (61).
-        if (!ShowCapturedChoice && SelectedCapturedOutcomeLabel is not null)
-            SelectedCapturedOutcomeLabel = null;
+        if (!ShowCapturedChoice && IsRansomed)
+            IsRansomed = false;
     }
 
     [ObservableProperty]
@@ -93,20 +93,23 @@ public partial class InjurySubRollEntry : ObservableObject
     /// multiples" qui tombe lui-même sur 61.</summary>
     public bool ShowCapturedChoice => IsHero && int.TryParse(ManualRoll, out var roll) && roll == 61;
 
-    private readonly Dictionary<string, CapturedOutcome> _capturedOutcomeByLabel = new();
-
-    public List<string> CapturedOutcomeLabels { get; } = new();
-
     [ObservableProperty]
-    private string? selectedCapturedOutcomeLabel;
+    private bool isRansomed;
 
-    partial void OnSelectedCapturedOutcomeLabelChanged(string? value)
+    partial void OnIsRansomedChanged(bool value)
     {
-        if (value is not null) CapturedChoiceError = null;
+        if (!value) RansomAmount = string.Empty;
     }
 
-    public CapturedOutcome? SelectedCapturedOutcome =>
-        SelectedCapturedOutcomeLabel is { } label && _capturedOutcomeByLabel.TryGetValue(label, out var outcome) ? outcome : null;
+    [ObservableProperty]
+    private string ransomAmount = string.Empty;
+
+    public bool HasValidRansomAmount => int.TryParse(RansomAmount, out var amount) && amount >= 0;
+
+    partial void OnRansomAmountChanged(string value)
+    {
+        if (HasValidRansomAmount) CapturedChoiceError = null;
+    }
 
     [ObservableProperty]
     private string? capturedChoiceError;
@@ -123,13 +126,6 @@ public partial class InjurySubRollEntry : ObservableObject
         Total = total;
         IsHero = isHero;
         _labelKey = labelKey;
-
-        foreach (var outcome in Enum.GetValues<CapturedOutcome>())
-        {
-            var label = _loc[$"CapturedOutcome{outcome}"];
-            _capturedOutcomeByLabel[label] = outcome;
-            CapturedOutcomeLabels.Add(label);
-        }
     }
 
     /// <summary>Steps.SyncFigureInjuryRolls-style syncs (voir WarriorOutcomeRow.SyncFigureInjuryRolls)

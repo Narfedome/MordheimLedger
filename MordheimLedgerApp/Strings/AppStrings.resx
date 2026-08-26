@@ -1170,38 +1170,17 @@
   <data name="EndOfGameDeepWoundResultFormat" xml:space="preserve">
     <value>{0} partie(s) manquée(s)</value>
   </data>
-  <data name="EndOfGameCapturedChoicePh" xml:space="preserve">
-    <value>Issue du guerrier capturé</value>
+  <data name="EndOfGameCapturedRansomLabel" xml:space="preserve">
+    <value>Racheté contre rançon</value>
   </data>
-  <data name="CapturedOutcomeRansomed" xml:space="preserve">
-    <value>Rançon</value>
-  </data>
-  <data name="CapturedOutcomeExchanged" xml:space="preserve">
-    <value>Échange</value>
-  </data>
-  <data name="CapturedOutcomeSoldToSlavers" xml:space="preserve">
-    <value>Vendu aux esclavagistes</value>
-  </data>
-  <data name="CapturedOutcomeKilledByUndead" xml:space="preserve">
-    <value>Tué par les Morts-Vivants</value>
-  </data>
-  <data name="CapturedOutcomeSacrificedByPossessed" xml:space="preserve">
-    <value>Sacrifié par les Possédés</value>
+  <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
+    <value>Montant (CO)</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
-    <value>{0} a été capturé puis libéré contre rançon.</value>
+    <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>
   </data>
-  <data name="HistoryCapturedExchangedSentence" xml:space="preserve">
-    <value>{0} a été capturé puis échangé contre un prisonnier adverse.</value>
-  </data>
-  <data name="HistoryCapturedSoldToSlaversSentence" xml:space="preserve">
-    <value>{0} a été capturé et vendu aux esclavagistes.</value>
-  </data>
-  <data name="HistoryCapturedKilledByUndeadSentence" xml:space="preserve">
-    <value>{0} a été capturé et tué par les Morts-Vivants, qui en ont fait un Zombie.</value>
-  </data>
-  <data name="HistoryCapturedSacrificedByPossessedSentence" xml:space="preserve">
-    <value>{0} a été capturé et sacrifié par les Possédés.</value>
+  <data name="HistoryCapturedLostSentence" xml:space="preserve">
+    <value>{0} a été capturé et n'est jamais revenu, considéré comme mort.</value>
   </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Nom du responsable</value>

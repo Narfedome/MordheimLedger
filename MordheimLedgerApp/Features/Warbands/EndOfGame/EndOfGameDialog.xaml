@@ -173,9 +173,16 @@
                                                 <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
                                                      tombe lui-même sur 61 (Capturé). -->
                                                 <VerticalStackLayout IsVisible="{Binding ShowCapturedChoice}" Spacing="4">
-                                                    <Picker Title="{loc:Loc EndOfGameCapturedChoicePh}"
-                                                            ItemsSource="{Binding CapturedOutcomeLabels}"
-                                                            SelectedItem="{Binding SelectedCapturedOutcomeLabel}"/>
+                                                    <HorizontalStackLayout Spacing="8">
+                                                        <CheckBox IsChecked="{Binding IsRansomed}" VerticalOptions="Center"/>
+                                                        <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>
+                                                    </HorizontalStackLayout>
+                                                    <Entry IsVisible="{Binding IsRansomed}" Text="{Binding RansomAmount}"
+                                                           Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="120">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
                                                     <Label Text="{Binding CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                            IsVisible="{Binding CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
                                                 </VerticalStackLayout>
@@ -300,14 +307,23 @@
                                 <Label Text="{Binding CurrentInjuryWarrior.DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
                             </VerticalStackLayout>
 
-                            <!-- Résultat "Capturé" (61) : pas un jet, un choix parmi les 5 issues nommées
-                                 du livre - toutes du point de vue du capteur (voir Core.Rules.
-                                 CapturedOutcomeTable), toujours proposées sans condition (l'appli ne suit
-                                 pas la composition de la bande adverse). -->
+                            <!-- Résultat "Capturé" (61) : portée revue à la baisse (2026-08-27, voir
+                                 SERIOUS_INJURIES_STATUS.md) - le livre décrit 5 issues nommées mais
+                                 toutes racontent une décision du CAPTEUR (bande adverse non modélisée),
+                                 seule la rançon change réellement quelque chose de notre point de vue
+                                 (coût déduit de notre trésorerie, le guerrier revient). Décoché = perdu,
+                                 considéré mort - même traitement que toute autre issue non ransomée. -->
                             <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowCapturedChoice}" Spacing="6">
-                                <Picker Title="{loc:Loc EndOfGameCapturedChoicePh}"
-                                        ItemsSource="{Binding CurrentInjuryWarrior.CapturedOutcomeLabels}"
-                                        SelectedItem="{Binding CurrentInjuryWarrior.SelectedCapturedOutcomeLabel}"/>
+                                <HorizontalStackLayout Spacing="8">
+                                    <CheckBox IsChecked="{Binding CurrentInjuryWarrior.IsRansomed}" VerticalOptions="Center"/>
+                                    <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <Entry IsVisible="{Binding CurrentInjuryWarrior.IsRansomed}" Text="{Binding CurrentInjuryWarrior.RansomAmount}"
+                                       Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="120">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
                                 <Label Text="{Binding CurrentInjuryWarrior.CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                        IsVisible="{Binding CurrentInjuryWarrior.CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>

@@ -26,8 +26,8 @@ public partial class EndOfGameDialogViewModel
                     valid &= CheckRoll(string.IsNullOrWhiteSpace(sub.InjuryResultText), () => sub.RollError = Loc["EndOfGameRollRequired"]);
                     if (sub.ShowDeepWoundSubRoll)
                         valid &= CheckRoll(!sub.HasValidDeepWoundSubRoll, () => sub.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
-                    if (sub.ShowCapturedChoice)
-                        valid &= CheckRoll(sub.SelectedCapturedOutcome is null, () => sub.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+                    if (sub.ShowCapturedChoice && sub.IsRansomed)
+                        valid &= CheckRoll(!sub.HasValidRansomAmount, () => sub.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
                 }
             }
 
@@ -45,8 +45,8 @@ public partial class EndOfGameDialogViewModel
             if (row.ShowDeepWoundSubRoll)
                 valid &= CheckRoll(!row.HasValidDeepWoundSubRoll, () => row.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
 
-            if (row.ShowCapturedChoice)
-                valid &= CheckRoll(row.SelectedCapturedOutcome is null, () => row.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+            if (row.ShowCapturedChoice && row.IsRansomed)
+                valid &= CheckRoll(!row.HasValidRansomAmount, () => row.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
         }
         else
         {

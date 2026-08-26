@@ -45,7 +45,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 36 | Dépouillé | 1 | ✅ | — | Perd tout l'équipement porté, sans remboursement |
 | 41-55 | Récupération totale | — | ✅ | — | No-op, déjà correct |
 | 56 | Rancune | — | ✅ | — | Cible D6 + `WarriorHatred`, fait avant ce chantier |
-| 61 | Capturé | 3 | ✅ | — | Picker à 5 issues nommées (Rançon/Échange/Vendu aux esclavagistes/Tué par les Morts-Vivants/Sacrifié par les Possédés) - Rançon/Échange = retour à la bande avec équipement ; les 3 autres = équipement perdu + Mort (tué/sacrifié) ou Retraité (vendu, jamais confirmé mort) |
+| 61 | Capturé | 3 | ✅ | — | Portée revue à la baisse (2026-08-27) : case à cocher "Racheté contre rançon" + montant saisi (déduit de la trésorerie), guerrier revenu avec équipement si coché ; sinon considéré Mort, équipement perdu - les 4 autres issues du livre (Échange/Vendu/Tué/Sacrifié) ne sont plus distinguées, toutes racontent une décision de la bande adverse non modélisée |
 | 62-63 | Endurci | 2 | ✅ | — | Chip catalogue portant une nouvelle `SpecialRule` "Endurci" (permanente, distincte du "Immunisé à la Peur" temporaire de la Bière de Bugman) |
 | 64 | Horribles balafres | 2 | ✅ | — | Chip catalogue portant la `SpecialRule` "Provoque la Peur" déjà enrichie dans le catalogue commun, réutilisée telle quelle |
 | 65 | Vendu aux arènes | 3 | ⏳ | ❌ | Combat un gladiateur (Francs-Tireurs) - branches victoire/défaite |
@@ -360,3 +360,24 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   tests `RulesTests.cs` pour les 2 prédicats (5 cas). Aucun changement `DataServiceTests.cs` (pas de
   nouveau seed de catalogue - Capturé n'attache aucune `SpecialRule`, contrairement à Folie/Endurci).
   Build Core + tête MAUI clean (0 `error CS`), suite de tests en cours de vérification.
+- **2026-08-27 (Capturé - portée revue à la baisse : le capteur est une vraie bande adverse)** —
+  L'utilisateur, en relisant le résultat ci-dessus, a fait remarquer le vrai problème de fond : les 5
+  issues de Capturé racontent toutes une décision du CAPTEUR, c'est-à-dire une bande adverse - or
+  l'appli n'a aujourd'hui aucune notion de "l'autre bande" comme donnée structurée (elle vit sur un seul
+  appareil, pas de lobby/réseau entre deux joueurs). D'où l'idée, notée en mémoire pour plus tard sans
+  être lancée maintenant : un futur système de connexion entre appareils (lobby sur un réseau local)
+  pour que deux joueurs puissent réellement échanger ces données - "même si ça, c'est pour plus tard,
+  juste ne pas l'oublier". Dans l'immédiat, portée revue à la baisse : supprimé entièrement
+  `Core.Rules.CapturedOutcomeTable`/`CapturedOutcome` (5 valeurs, Picker) au profit d'un simple choix
+  binaire - une case à cocher "Racheté contre rançon" (`WarriorOutcomeRow.IsRansomed`/`RansomAmount`,
+  miroir sur `InjurySubRollEntry` pour le sous-jet imbriqué) : cochée, un montant en CO est saisi et
+  déduit de `Warband.Treasury` (négocié entre les deux joueurs à la table, aucune formule dans le
+  livre), le guerrier revient avec son équipement ; décochée (par défaut), le guerrier est
+  **considéré mort** (`WarriorStatus.Dead`, équipement perdu comme Dépouillé) - les 4 autres issues du
+  livre (Échange/Vendu aux esclavagistes/Tué par les Morts-Vivants/Sacrifié par les Possédés) ne sont
+  plus distinguées : toutes reviennent au même de notre point de vue (le guerrier ne revient jamais,
+  rien à gagner pour notre bande). `WarriorStatus.Retired` perd son 2e cas d'usage (Vendu aux
+  esclavagistes) - doc revenue à son unique cas d'origine (second Œil crevé). Tests `RulesTests.cs`
+  `CapturedOutcomeTable_*` supprimés (plus de table Core - la logique restante est trop simple pour
+  justifier une abstraction testée séparément). Build Core + tête MAUI clean (0 `error CS`), suite de
+  tests en cours de vérification.

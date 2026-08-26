@@ -201,34 +201,10 @@ public class RulesTests
         Assert.False(SeriousInjuryTable.HidesRosterChip(roll));
     }
 
-    // --- CapturedOutcomeTable (61 - 5 named outcomes, player choice rather than a roll) -----------
-
-    [Theory]
-    [InlineData(CapturedOutcome.Ransomed)]
-    [InlineData(CapturedOutcome.Exchanged)]
-    public void CapturedOutcomeTable_RansomedOrExchanged_ReturnsToWarband(CapturedOutcome outcome)
-    {
-        Assert.True(CapturedOutcomeTable.ReturnsToWarband(outcome));
-        Assert.False(CapturedOutcomeTable.CausesDeath(outcome));
-    }
-
-    [Fact]
-    public void CapturedOutcomeTable_SoldToSlavers_DoesNotReturnAndDoesNotCauseDeath()
-    {
-        // Gone for good, but not confirmed dead - see WarbandDetailViewModel.EndOfGame, maps to
-        // WarriorStatus.Retired rather than Dead.
-        Assert.False(CapturedOutcomeTable.ReturnsToWarband(CapturedOutcome.SoldToSlavers));
-        Assert.False(CapturedOutcomeTable.CausesDeath(CapturedOutcome.SoldToSlavers));
-    }
-
-    [Theory]
-    [InlineData(CapturedOutcome.KilledByUndead)]
-    [InlineData(CapturedOutcome.SacrificedByPossessed)]
-    public void CapturedOutcomeTable_KilledOrSacrificed_CausesDeath(CapturedOutcome outcome)
-    {
-        Assert.True(CapturedOutcomeTable.CausesDeath(outcome));
-        Assert.False(CapturedOutcomeTable.ReturnsToWarband(outcome));
-    }
+    // Capturé (61) : plus de table Core dédiée depuis la revue de portée du 2026-08-27 - la logique
+    // (racheté contre rançon avec un montant saisi/déduit de la trésorerie, ou perdu/considéré mort
+    // sinon) est trop simple pour justifier une abstraction Core.Rules, voir WarbandDetailViewModel.
+    // EndOfGame.ApplyWarriorOutcomesAsync.
 
     // --- SeriousInjuryEffectTable (Palier 1 mechanized subset) -----------------------------------
 

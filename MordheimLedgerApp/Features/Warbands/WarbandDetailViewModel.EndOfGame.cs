@@ -666,14 +666,22 @@ public partial class WarbandDetailViewModel
                 warrior.Experience += 1;
                 return true;
 
+            // Cumulatif (+=), pas un simple remplacement : "Blessures multiples" (16/21) peut produire
+            // PLUSIEURS sous-résultats qui accordent chacun du temps Malade pour le même guerrier (ex.
+            // deux Blessures profondes, ou Blessure au bras légère + Blessure profonde) - le texte du
+            // livre est explicite ("cumulez tous les effets obtenus"), un remplacement perdrait
+            // silencieusement les parties déjà accumulées par un sous-résultat précédent dans la même
+            // résolution. Repéré par analogie avec le correctif Vieille blessure (2026-08-26, un jet par
+            // instance portée plutôt qu'un seul par guerrier) - même famille de bug ("plusieurs
+            // occurrences du même effet doivent se cumuler, pas s'écraser").
             case SeriousInjuryEffectKind.MissNextGame:
                 warrior.Status = WarriorStatus.Sick;
-                warrior.SickGamesRemaining = 1;
+                warrior.SickGamesRemaining += 1;
                 return true;
 
             case SeriousInjuryEffectKind.MissGamesRollD3:
                 warrior.Status = WarriorStatus.Sick;
-                warrior.SickGamesRemaining = SeriousInjuryEffectTable.RollD3();
+                warrior.SickGamesRemaining += SeriousInjuryEffectTable.RollD3();
                 return true;
 
             case SeriousInjuryEffectKind.ForcedRetirement:

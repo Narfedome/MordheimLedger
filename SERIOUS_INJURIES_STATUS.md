@@ -41,7 +41,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 32 | Vieille blessure | Récurrent | ✅ | — | Jet 1D6 avant CHAQUE partie future - nouvel écran "Lancer la partie" (`StartGameDialog`), échec journalisé dans l'Historique, pas de statut ni de blocage persisté (le joueur ne fielde simplement pas ce guerrier sur table cette fois) |
 | 33 | Traumatisme nerveux | 1 | ✅ | — | Initiative -1 permanent |
 | 34 | Blessure à la main | 1 | ✅ | — | Capacité de Combat -1 permanent |
-| 35 | Blessure profonde | 1 | ✅ | — | Malade, D3 parties (`Warrior.SickGamesRemaining`) |
+| 35 | Blessure profonde | 1 | ✅ | — | Malade, D3 parties (`Warrior.SickGamesRemaining`) - cumulatif si plusieurs occurrences dans la même résolution "Blessures multiples" (corrigé 2026-08-26) |
 | 36 | Dépouillé | 1 | ✅ | — | Perd tout l'équipement porté, sans remboursement |
 | 41-55 | Récupération totale | — | ✅ | — | No-op, déjà correct |
 | 56 | Rancune | — | ✅ | — | Cible D6 + `WarriorHatred`, fait avant ce chantier |
@@ -281,3 +281,19 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   phrases d'échec : un guerrier qui rate 2 jets sur 2 ne doit apparaître qu'une fois dans l'Historique,
   pas une phrase par jet raté. Aucun changement Core (seuls des fichiers tête MAUI touchés) - suite de
   tests non concernée, non relancée ; build Core + tête MAUI clean.
+- **2026-08-26 (même bug pour Blessure profonde - correctif par analogie)** — L'utilisateur a repéré que
+  le correctif Vieille blessure ci-dessus s'applique aussi à Blessure profonde (35) : "ces changements
+  vont nous permettre de traiter plus efficacement la blessure profonde". Vérification faite,
+  `ApplySeriousInjuryEffectAsync` (`MissNextGame`/`MissGamesRollD3`) écrasait `Warrior.
+  SickGamesRemaining` (`=`) au lieu de le cumuler (`+=`) - inoffensif pour un jet isolé, mais "Blessures
+  multiples" (16/21) peut produire PLUSIEURS sous-résultats accordant chacun du temps Malade pour le
+  MÊME guerrier dans la MÊME résolution (deux Blessures profondes, ou Blessure au bras légère + Blessure
+  profonde) : le texte du livre est explicite ("cumulez tous les effets obtenus"), un remplacement
+  perdait silencieusement les parties déjà accumulées par un sous-résultat précédent. Même famille de
+  bug que Vieille blessure ("plusieurs occurrences du même effet doivent se cumuler, pas s'écraser") -
+  corrigé en changeant les deux affectations en `+=`. Un guerrier déjà Malade avant cette Fin de Partie
+  (`previouslySickWarriors`) ne peut pas être concerné : il est exclu d'`activeWarriorRows` et ne repasse
+  donc jamais par cette méthode dans la même session - seul le cas "plusieurs sous-résultats Blessures
+  multiples pour le même guerrier, même résolution" était concerné. Aucun changement Core (fichier tête
+  MAUI uniquement) - compilation confirmée (0 `error CS`), copie finale de l'exécutable bloquée par
+  l'instance de l'appli ouverte en parallèle (limite connue).

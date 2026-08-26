@@ -16,8 +16,8 @@
   {
     "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
     "description": {
-      "en": "This model causes Fear (see the Psychology rules).",
-      "fr": "Cette figurine provoque la Peur (voir les règles de Psychologie)."
+      "en": "This model causes Fear. Enemies charged by it, or wishing to charge it, must first pass a Fear test (a Leadership test). Failing it when charged: the model must roll 6s to score hits that round. Failing it when trying to charge: the charge fails and the model stays stationary that turn. A model that itself causes Fear ignores these tests.",
+      "fr": "Cette figurine provoque la Peur. Les ennemis qu'elle charge, ou qui souhaitent la charger, doivent d'abord réussir un test de Peur (un test de Commandement). En cas d'échec en étant chargé : seuls les 6 touchent lors de ce round. En cas d'échec en voulant charger : la charge échoue et la figurine reste immobile ce tour. Une figurine qui provoque elle-même la Peur ignore ces tests."
     }
   },
   {
@@ -110,8 +110,15 @@
   {
     "name": { "en": "Frenzy", "fr": "Frénésie" },
     "description": {
-      "en": "A frenzied warrior must always charge any enemy within charge range, fights with double Attacks in hand-to-hand combat (an extra Attack for a second weapon isn't doubled), and is immune to all other psychology while within charge range. Being knocked down or stunned ends his frenzy for the rest of the battle.",
-      "fr": "Un guerrier frénétique doit toujours charger tout ennemi à portée de charge, combat avec le double de ses Attaques au corps à corps (l'Attaque supplémentaire pour une arme dans chaque main n'est pas doublée), et est immunisé à toute autre règle de psychologie tant qu'il reste à portée de charge. Être mis à terre ou étourdi met fin à sa frénésie pour le reste de la bataille."
+      "en": "A frenzied warrior must always charge any enemy within charge range - the player has no choice. He fights with double Attacks in hand-to-hand combat (an extra Attack for a second weapon isn't doubled), and is immune to all other psychology while he remains within charge range. Being knocked down or stunned ends his frenzy for the rest of the battle, after which he fights normally.",
+      "fr": "Un guerrier frénétique doit toujours charger tout ennemi à portée de charge - le joueur n'a pas le choix. Il combat avec le double de ses Attaques au corps à corps (l'Attaque supplémentaire pour une arme dans chaque main n'est pas doublée), et est immunisé à toute autre règle de psychologie tant qu'il reste à portée de charge. Être mis à terre ou étourdi met fin à sa frénésie pour le reste de la bataille, après quoi il combat normalement."
+    }
+  },
+  {
+    "name": { "en": "Hatred", "fr": "Haine" },
+    "description": {
+      "en": "Warriors fighting an enemy they hate in hand-to-hand combat may re-roll any misses in the first turn of each hand-to-hand combat - this bonus applies only to that first turn, after which the warrior fights normally for the rest of the combat.",
+      "fr": "Un guerrier qui combat au corps à corps un ennemi qu'il hait peut relancer ses jets ratés lors du premier round de chaque combat - ce bonus ne s'applique qu'à ce premier round, le guerrier combat ensuite normalement pour le reste du combat."
     }
   }
 ]

@@ -2,7 +2,7 @@
 
 Suivi de l'assistant Fin de Partie, étape Blessure (voir CLAUDE.md § Règles dans Core, plan de
 séquencement "Mécaniser les Blessures Graves — Palier 1"). Mis à jour à chaque avancée — dernière
-mise à jour : **2026-08-25** (Palier 1 complet).
+mise à jour : **2026-08-26**.
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -29,11 +29,11 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 11-15 | Mort | — | ✅ | — | `WarriorStatus.Dead`, fait avant ce chantier |
 | 16, 21 | Blessures multiples | — | ✅ | — | Relance 1D6 fois sur cette même table ; chaque sous-jet applique aussi son propre effet Palier 1 s'il y en a un |
 | 22 | Blessure à la jambe | 1 | ✅ | ✅ | Mouvement -1 permanent |
-| 23 (sous-jet 2-6) | Blessure au bras : légère | 1 | ✅ | — | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée ("Blessure au bras : légère"), temporaire - supprimée automatiquement dès que le guerrier redevient Actif |
-| 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Armes à une main uniquement" (nouvelle, purement informative - pas de blocage actif à l'équipement) - même traitement que Folie |
-| 24 (sous-jet 1-3) | Folie : Stupidité | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Stupidité" (trouvée/réutilisée depuis le catalogue commun) - apparaît comme une puce Règles spéciales tapable sur la fiche guerrier, exactement comme une règle d'objet |
-| 24 (sous-jet 4-6) | Folie : Frénésie | 2 | ✅ | — | Idem avec la `SpecialRule` "Frénésie" (déjà dans le catalogue commun, réutilisée telle quelle) |
-| 25 (sous-jet 2-6) | Jambe écrasée : légère | 1 | ✅ | — | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée, temporaire - supprimée dès le retour Actif |
+| 23 (sous-jet 2-6) | Blessure au bras : légère | 1 | ✅ | ✅ | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée ("Blessure au bras : légère"), temporaire - supprimée automatiquement dès que le guerrier redevient Actif |
+| 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Armes à une main uniquement" (nouvelle, purement informative - pas de blocage actif à l'équipement) - même traitement que Folie, y compris la non-fusion dans les Règles spéciales (2026-08-26) |
+| 24 (sous-jet 1-3) | Folie : Stupidité | 2 | ✅ | ✅ | Chip catalogue dédiée portant une vraie `SpecialRule` "Stupidité" (trouvée/réutilisée depuis le catalogue commun) - PAS fusionnée dans les Règles spéciales du guerrier (revenu dessus le 2026-08-26), surfacée uniquement en puce imbriquée tapable à l'intérieur du dialog récap de la Blessure |
+| 24 (sous-jet 4-6) | Folie : Frénésie | 2 | ✅ | ✅ | Idem avec la `SpecialRule` "Frénésie" (déjà dans le catalogue commun, réutilisée telle quelle) |
+| 25 (sous-jet 2-6) | Jambe écrasée : légère | 1 | ✅ | ✅ | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée, temporaire - supprimée dès le retour Actif |
 | 25 (sous-jet 1) | Jambe écrasée : grave | 3 | ⏳ | ❌ | "Ne peut plus courir" - pas de notion de course en combat, reste texte seul (aucun effet mécanisé) ; chip catalogue dédiée, permanente |
 | 26 | Blessure au torse | 1 | ✅ | — | Endurance -1 permanent |
 | 31 | Œil crevé | 1 | ✅ | — | Tir -1 permanent (le suivi "second œil crevé → retrait obligatoire" reste Palier 3) |
@@ -156,3 +156,41 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   ligne trouvée a zéro `InjurySpecialRuleEntity` - jamais de doublon si la liste de règles du seed
   change encore après coup). 299/299 tests passent, build clean (Core + tête MAUI, tests compilés et
   exécutés avec succès).
+- **2026-08-26 (texte purement descriptif - Peur/Frénésie/Stupidité/Haine)** — L'utilisateur a fourni
+  le texte officiel complet des règles de Psychologie (Peur, Frénésie, Stupidité, Haine) en précisant
+  explicitement "c'est purement textuel" - aucune nouvelle mécanique demandée, seulement enrichir les
+  descriptions déjà affichées dans les popups de règle. `SpecialRules.json` : descriptions de
+  "Causes Fear"/"Frenzy" remplacées par le texte complet du livre ; nouvelle entrée "Hatred"/"Haine"
+  (catalogue seulement, pas encore branchée sur aucune UI - prépare le terrain si l'utilisateur demande
+  un jour de rendre les chips Haine tapables, cf. Journal 2026-08-25). `Injuries.json` : la
+  `SpecialRule` "Stupidity" nichée sous Folie:Stupidité reçoit le même texte complet. Ces 3 fichiers
+  seed ne suffisant pas seuls sur une base déjà peuplée (`SeedTranslationAsync`/
+  `FindOrCreateSpecialRuleAsync` ne revisitent jamais une ligne existante - même limite que les
+  backfills précédents), nouveau `BackfillSpecialRuleDescriptionsAsync` (enregistré juste après
+  `BackfillInjurySpecialRulesAsync`) met à jour en place la traduction de description des 3 règles déjà
+  seedées, uniquement si `ContentSource.Official` (jamais une ligne éditée par le joueur). Réutilise le
+  helper partagé `TranslationResolver.SetAsync` (déjà utilisé par `LibraryService.SetTranslationAsync`)
+  plutôt qu'un upsert dupliqué à la main. **Bug trouvé par les tests** (pas en relecture manuelle) :
+  la première version indexait les traductions anglaises par `.ToDictionary(t => t.Value, t => t.Key)`
+  pour retrouver la clé de traduction d'un nom de règle par son texte anglais - `Value` n'est pas
+  unique (plusieurs objets/règles sans rapport partagent un texte de description identique, ex. deux
+  armes utilisant la même description de masse) donc `ToDictionary` levait `ArgumentException` dès
+  l'`InitializeAsync` suivant, cassant 29 tests qui touchent la base. Corrigé en indexant par `Key`
+  (unique) et en comparant la valeur ensuite. 299/299 tests passent, build Core clean.
+- **2026-08-26 (retour en arrière : plus de fusion dans les Règles spéciales du guerrier)** — "On
+  ajoute pas la regle special stupidité/frenzy/amputed arm au guerrier directement. L'idée c'est
+  d'avoir la chip de blessure 'Folie : Stupidité'. Quand on clique dessus, on a la chip de la regle
+  Stupidité" - la fusion `warrior.Injuries.SelectMany(i => i.Item.SpecialRules)` dans
+  `WarbandDetailViewModel.ToRow` (ajoutée lors de la passe Folie, 2026-08-25) créait une chip en double :
+  une fois via la puce Blessure elle-même ("Folie : Stupidité" dans Blessures), une fois via la règle
+  fusionnée dans Règles spéciales ("Stupidité"). Retirée - `mergedRules` ne concatène plus que
+  `_bandWideSpecialRules`/`archetypeRules`/`equipmentRules` (équipement inchangé, seule la fusion Injury
+  est revenue en arrière). À la place, `InjuryDetailDialog`/`InjuryDetailDialogViewModel` gagnent le
+  même bloc `ChipListView` "Règles spéciales" qu'`EquipmentItemDetailDialog` (nouvelle commande
+  `ShowSpecialRuleDetail`, `IDetailDialogService` injecté dans le ViewModel - `DetailDialogService.
+  ShowInjuryDetailDialogAsync` passe désormais `this`) : la puce Blessure ("Folie : Stupidité") reste le
+  seul point d'entrée sur la fiche guerrier, et c'est en l'ouvrant qu'on trouve la puce imbriquée
+  "Stupidité" (tapable, même popup détail que partout ailleurs). Compilation confirmée (0 erreur C#) -
+  copie finale de l'exécutable bloquée par l'instance de l'appli ouverte en parallèle (PID 33316), même
+  limite connue que les fois précédentes ; aucun test xUnit concerné (le changement touche uniquement
+  des ViewModels de la tête MAUI, hors périmètre de `MordheimLedgerApp.Tests`).

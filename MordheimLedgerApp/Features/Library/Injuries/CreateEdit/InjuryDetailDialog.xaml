@@ -39,6 +39,11 @@
                 <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
             </VerticalStackLayout>
+
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding Item.SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
         </VerticalStackLayout>
         </dialogs:StableHeightScrollView>
     </Border>

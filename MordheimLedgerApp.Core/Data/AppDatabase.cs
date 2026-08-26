@@ -42,6 +42,7 @@ public class AppDatabase
         await BackfillWarriorRacialMaxesAsync();
         await BackfillBranchedInjuriesAsync();
         await BackfillInjurySpecialRulesAsync();
+        await BackfillSpecialRuleDescriptionsAsync();
         await BackfillWarriorStartingStatsAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
@@ -896,6 +897,48 @@ public class AppDatabase
                 var ruleId = await FindOrCreateSpecialRuleAsync(sr);
                 await _db.InsertAsync(new InjurySpecialRuleEntity { InjuryId = match.Id, SpecialRuleId = ruleId });
             }
+        }
+    }
+
+    /// <summary>One-time text correction, runs on every launch - 3 SpecialRule catalog entries (Causes
+    /// Fear, Frenzy, Stupidity) were seeded with a thin stub/summary description rather than the full
+    /// official Psychology rule text ("pour ces règles là je peux t'envoyer les textes" - full text
+    /// supplied by the user 2026-08-25, purely textual/reference content, no new mechanic). Neither
+    /// SeedTranslationAsync nor FindOrCreateSpecialRuleAsync ever revisit an existing row (same gap as
+    /// the various other Backfill* methods for other catalogs) - editing SpecialRules.json/Injuries.json
+    /// alone never reaches an already-seeded database. Updates the translation VALUE in place (same
+    /// Key, not a new one) so every other consumer of that key stays correctly pointed at it, and only
+    /// for a row still at ContentSource.Official - an Official->Modified flip means the player edited
+    /// it, never silently overwritten (same rule as everywhere else in the Library). Cheap no-op every
+    /// run after the first, once the stored text already matches.</summary>
+    private async Task BackfillSpecialRuleDescriptionsAsync()
+    {
+        var corrections = new (string EnglishName, string En, string Fr)[]
+        {
+            ("Causes Fear",
+                "This model causes Fear. Enemies charged by it, or wishing to charge it, must first pass a Fear test (a Leadership test). Failing it when charged: the model must roll 6s to score hits that round. Failing it when trying to charge: the charge fails and the model stays stationary that turn. A model that itself causes Fear ignores these tests.",
+                "Cette figurine provoque la Peur. Les ennemis qu'elle charge, ou qui souhaitent la charger, doivent d'abord réussir un test de Peur (un test de Commandement). En cas d'échec en étant chargé : seuls les 6 touchent lors de ce round. En cas d'échec en voulant charger : la charge échoue et la figurine reste immobile ce tour. Une figurine qui provoque elle-même la Peur ignore ces tests."),
+            ("Frenzy",
+                "A frenzied warrior must always charge any enemy within charge range - the player has no choice. He fights with double Attacks in hand-to-hand combat (an extra Attack for a second weapon isn't doubled), and is immune to all other psychology while he remains within charge range. Being knocked down or stunned ends his frenzy for the rest of the battle, after which he fights normally.",
+                "Un guerrier frénétique doit toujours charger tout ennemi à portée de charge - le joueur n'a pas le choix. Il combat avec le double de ses Attaques au corps à corps (l'Attaque supplémentaire pour une arme dans chaque main n'est pas doublée), et est immunisé à toute autre règle de psychologie tant qu'il reste à portée de charge. Être mis à terre ou étourdi met fin à sa frénésie pour le reste de la bataille, après quoi il combat normalement."),
+            ("Stupidity",
+                "At the start of its turn, a Stupid model must pass a Leadership test or remain Stupid until its next turn: it cannot cast spells or fight in hand-to-hand combat (though enemies can still hit it normally). If not in hand-to-hand combat, roll a D6: on 1-3 it shambles forward at half speed (won't charge, stops at an obstacle or a drop, won't shoot); on 4-6 it stands inactive and does nothing.",
+                "Au début de son tour, une figurine Stupide doit réussir un test de Commandement, sinon elle reste Stupide jusqu'à son prochain tour : elle ne peut ni lancer de sorts ni combattre au corps à corps (mais les ennemis peuvent toujours la toucher normalement). Si elle n'est pas au corps à corps, lancez 1D6 : sur 1-3 elle avance en traînant les pieds à vitesse réduite (ne charge pas, s'arrête devant un obstacle ou une chute, ne tire pas) ; sur 4-6 elle reste immobile et ne fait rien.")
+        };
+
+        var englishByKey = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+        var rules = await _db.Table<SpecialRuleEntity>().ToListAsync();
+
+        foreach (var (englishName, en, fr) in corrections)
+        {
+            var rule = rules.FirstOrDefault(r => r.Source == ContentSource.Official
+                && r.NameKey is { } nk && englishByKey.TryGetValue(nk, out var name) && name == englishName);
+            if (rule?.DescriptionKey is not { } descKey) continue;
+
+            await TranslationResolver.SetAsync(this, descKey, "en", en);
+            await TranslationResolver.SetAsync(this, descKey, "fr", fr);
         }
     }
 

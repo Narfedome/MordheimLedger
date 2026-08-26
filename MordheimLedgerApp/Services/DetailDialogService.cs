@@ -125,5 +125,5 @@ public class DetailDialogService : IDetailDialogService
         ShowAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(item)));
 
     public Task ShowInjuryDetailDialogAsync(Injury item) =>
-        ShowAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(item)));
+        ShowAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(item, this)));
 }

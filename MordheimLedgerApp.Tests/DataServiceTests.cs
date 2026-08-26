@@ -141,14 +141,19 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         // Amputated also carries a real SpecialRule (informational only - the app doesn't block
         // equipping a two-handed weapon on this warrior, see the rule's own description).
         var amputated = Assert.Single(heroInjuries, i => i.Name == "Arm Wound: Amputated" && i.RollRange == "23" && i.BranchRange == "1");
-        Assert.Contains(amputated.SpecialRules, r => r.Name == "One-Handed Weapons Only");
+        Assert.Contains(amputated.SpecialRules, r => r.Name == "Amputated arm");
         Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Minor" && i.RollRange == "25" && i.BranchRange == "2-6");
-        Assert.Contains(heroInjuries, i => i.Name == "Smashed Leg: Severe" && i.RollRange == "25" && i.BranchRange == "1");
+        // Severe crushed leg carries the same idiom (informational only - the app doesn't restrict this
+        // warrior's movement, see the rule's own description).
+        var smashedLegSevere = Assert.Single(heroInjuries, i => i.Name == "Smashed Leg: Severe" && i.RollRange == "25" && i.BranchRange == "1");
+        Assert.Contains(smashedLegSevere.SpecialRules, r => r.Name == "Cannot Run");
 
-        // Madness (24) splits the same way (Stupidity "1-3"/Frenzy "4-6") but, unlike Arm Wound/Smashed
-        // Leg, each branch also permanently grants a real SpecialRule (see Injury.SpecialRules) - the
-        // rule shows up as a real, tappable chip on the carrying Warrior's own SpecialRules list
-        // (WarbandDetailViewModel.ToRow), same idiom as an EquipmentItem's SpecialRules.
+        // Madness (24) splits the same way (Stupidity "1-3"/Frenzy "4-6") and, like Arm Wound/Smashed
+        // Leg's severe branch, each branch also permanently grants a real SpecialRule (see
+        // Injury.SpecialRules) - the rule shows up as a nested, tappable chip inside the Injury's own
+        // recap dialog (InjuryDetailDialog), NOT merged into the carrying Warrior's top-level
+        // SpecialRules list (WarbandDetailViewModel.ToRow deliberately excludes Injury.SpecialRules,
+        // see its own comment - avoids a duplicate chip).
         var stupidity = Assert.Single(heroInjuries, i => i.Name == "Madness: Stupidity" && i.RollRange == "24" && i.BranchRange == "1-3");
         Assert.Contains(stupidity.SpecialRules, r => r.Name == "Stupidity");
         var frenzy = Assert.Single(heroInjuries, i => i.Name == "Madness: Frenzy" && i.RollRange == "24" && i.BranchRange == "4-6");

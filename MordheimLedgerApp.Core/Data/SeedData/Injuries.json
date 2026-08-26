@@ -134,7 +134,16 @@
     "description": {
       "en": "Can no longer run but can still charge (permanent).",
       "fr": "Ne peut plus courir mais peut charger (permanent)."
-    }
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Cannot Run", "fr": "Ne peut plus courir" },
+        "description": {
+          "en": "This warrior's leg was crushed - he can no longer run (double move), though he may still charge normally. Purely a reminder: the app does not restrict this warrior's movement.",
+          "fr": "Ce guerrier a la jambe écrasée - il ne peut plus courir (mouvement doublé), mais peut toujours charger normalement. Purement un rappel : l'application ne restreint pas les déplacements de ce guerrier."
+        }
+      }
+    ]
   },
   {
     "name": { "en": "Chest Wound", "fr": "Blessure au torse" },

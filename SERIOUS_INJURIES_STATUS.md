@@ -14,7 +14,7 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 | Palier | Mécanisme | Statut |
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) | **10/10 ✅** |
-| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Armes à une main uniquement (23 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé ✅, 2 restants (Endurci, Horribles balafres)** |
+| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé + Jambe écrasée grave ✅, 2 restants (Endurci, Horribles balafres)** |
 | 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses, Vieille blessure ("avant chaque bataille"), suivi "second œil → retraite" | **0/4 ⏳** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
@@ -30,11 +30,11 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 16, 21 | Blessures multiples | — | ✅ | — | Relance 1D6 fois sur cette même table ; chaque sous-jet applique aussi son propre effet Palier 1 s'il y en a un |
 | 22 | Blessure à la jambe | 1 | ✅ | ✅ | Mouvement -1 permanent |
 | 23 (sous-jet 2-6) | Blessure au bras : légère | 1 | ✅ | ✅ | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée ("Blessure au bras : légère"), temporaire - supprimée automatiquement dès que le guerrier redevient Actif |
-| 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Armes à une main uniquement" (nouvelle, purement informative - pas de blocage actif à l'équipement) - même traitement que Folie, y compris la non-fusion dans les Règles spéciales (2026-08-26) |
+| 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Bras amputé" (nouvelle, purement informative - pas de blocage actif à l'équipement) - même traitement que Folie, y compris la non-fusion dans les Règles spéciales (2026-08-26) |
 | 24 (sous-jet 1-3) | Folie : Stupidité | 2 | ✅ | ✅ | Chip catalogue dédiée portant une vraie `SpecialRule` "Stupidité" (trouvée/réutilisée depuis le catalogue commun) - PAS fusionnée dans les Règles spéciales du guerrier (revenu dessus le 2026-08-26), surfacée uniquement en puce imbriquée tapable à l'intérieur du dialog récap de la Blessure |
 | 24 (sous-jet 4-6) | Folie : Frénésie | 2 | ✅ | ✅ | Idem avec la `SpecialRule` "Frénésie" (déjà dans le catalogue commun, réutilisée telle quelle) |
 | 25 (sous-jet 2-6) | Jambe écrasée : légère | 1 | ✅ | ✅ | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée, temporaire - supprimée dès le retour Actif |
-| 25 (sous-jet 1) | Jambe écrasée : grave | 3 | ⏳ | ❌ | "Ne peut plus courir" - pas de notion de course en combat, reste texte seul (aucun effet mécanisé) ; chip catalogue dédiée, permanente |
+| 25 (sous-jet 1) | Jambe écrasée : grave | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Ne peut plus courir" (nouvelle, purement informative - même traitement que Bras amputé/Folie) - PAS fusionnée dans les Règles spéciales du guerrier, surfacée en puce imbriquée tapable dans le dialog récap de la Blessure |
 | 26 | Blessure au torse | 1 | ✅ | — | Endurance -1 permanent |
 | 31 | Œil crevé | 1 | ✅ | — | Tir -1 permanent (le suivi "second œil crevé → retrait obligatoire" reste Palier 3) |
 | 32 | Vieille blessure | 3 | ⏳ | ❌ | Jet 1D6 avant CHAQUE partie future - aucun moment "avant bataille" dans l'appli aujourd'hui |
@@ -194,3 +194,21 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   copie finale de l'exécutable bloquée par l'instance de l'appli ouverte en parallèle (PID 33316), même
   limite connue que les fois précédentes ; aucun test xUnit concerné (le changement touche uniquement
   des ViewModels de la tête MAUI, hors périmètre de `MordheimLedgerApp.Tests`).
+- **2026-08-26 (Jambe écrasée grave rejoint le mécanisme - même principe que Bras amputé)** — "On passe
+  sur la jambe écrasé. On a le même principe que pour le bras blessé : soit une partie sautée soit une
+  blessure avec une règle spéciale." Le sous-jet 1D6 de 25 existait déjà (branché depuis la passe
+  22/23/25/26/..., 2026-08-25) - seule "Jambe écrasée : grave" (branche 1, "ne peut plus courir mais
+  peut charger") n'avait encore aucune `SpecialRule` attachée (listée Palier 3 jusqu'ici). Comme pour
+  Bras amputé (23, branche 1), nouvelle règle **"Ne peut plus courir"/"Cannot Run"** (purement
+  informative, aucun blocage actif des déplacements) ajoutée au `specialRules` de l'entrée existante dans
+  `Injuries.json` - **aucun nouveau code**, le mécanisme générique posé pour Bras amputé/Folie couvre
+  déjà ce cas tel quel : `BackfillInjurySpecialRulesAsync` (matche par Catégorie/RollRange/BranchRange,
+  n'attache que si zéro règle déjà présente) attache la règle sur une base déjà migrée, et
+  `InjuryDetailDialog` affiche automatiquement la nouvelle puce imbriquée tapable dès que
+  `Item.SpecialRules` contient quelque chose - conforme au "petit ajustement" du dessus (pas de fusion
+  dans les Règles spéciales du guerrier). **Bug de doc annexe corrigé au passage** : le nom de la
+  `SpecialRule` de Bras amputé avait été renommé "One-Handed Weapons Only" → "Amputated arm"/"Bras
+  amputé" à un moment non documenté de la session précédente (repéré en relisant `Injuries.json` pour ce
+  travail) - `DataServiceTests.cs` référençait encore l'ancien nom, jamais mis à jour ; corrigé, plus
+  Jambe écrasée : grave sort du Palier 3 pour rejoindre le Palier 2 (reste seulement Endurci/Horribles
+  balafres). 299/299 tests passent, build Core clean.

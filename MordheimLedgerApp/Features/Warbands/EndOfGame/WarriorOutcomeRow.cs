@@ -161,6 +161,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(InjuryBranchSpecialRules))]
     [NotifyPropertyChangedFor(nameof(HasInjuryBranchSpecialRules))]
     [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
+    [NotifyPropertyChangedFor(nameof(ShowCapturedChoice))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -197,6 +198,11 @@ public partial class WarriorOutcomeRow : ObservableObject
         // tombe plus sur ce résultat invalide le sous-jet déjà saisi.
         if (Warrior.IsHero && !ShowDeepWoundSubRoll && DeepWoundSubRoll.Length > 0)
             DeepWoundSubRoll = string.Empty;
+
+        // Même principe pour le choix de Capturé (61) - un nouveau jet principal qui ne tombe plus sur
+        // ce résultat invalide le choix déjà fait.
+        if (Warrior.IsHero && !ShowCapturedChoice && SelectedCapturedOutcomeLabel is not null)
+            SelectedCapturedOutcomeLabel = null;
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -510,6 +516,40 @@ public partial class WarriorOutcomeRow : ObservableObject
     [ObservableProperty]
     private string? deepWoundRollError;
 
+    /// <summary>Les 5 issues nommées de "Capturé" (voir Core.Rules.CapturedOutcome), résolues par un
+    /// libellé Picker plutôt qu'un jet - contrairement à Rancune (portée par un sous-jet D6), aucune des
+    /// 5 issues n'est déterminée par un dé : c'est un choix du joueur (négociation/décision du
+    /// capteur), pas une mécanique de hasard. Même idiome _statusByLabel que SelectedStatusLabel, mais
+    /// sans synchronisation depuis Warrior.Status (rien à synchroniser - toujours un choix neuf, jamais
+    /// pré-rempli).</summary>
+    private readonly Dictionary<string, CapturedOutcome> _capturedOutcomeByLabel = new();
+
+    public List<string> CapturedOutcomeLabels { get; } = new();
+
+    /// <summary>True dès que le jet principal (ManualRoll) donne "Capturé" (61, Héros uniquement).</summary>
+    public bool ShowCapturedChoice => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && roll == 61;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    [NotifyPropertyChangedFor(nameof(SelectedCapturedOutcome))]
+    private string? selectedCapturedOutcomeLabel;
+
+    partial void OnSelectedCapturedOutcomeLabelChanged(string? value)
+    {
+        if (value is not null) CapturedChoiceError = null;
+    }
+
+    /// <summary>Résolu depuis SelectedCapturedOutcomeLabel - null tant qu'aucune option n'est choisie.
+    /// Consommé par WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync pour appliquer le vrai
+    /// effet (retour à la bande avec équipement, ou perte définitive - voir Core.Rules.
+    /// CapturedOutcomeTable).</summary>
+    public CapturedOutcome? SelectedCapturedOutcome =>
+        SelectedCapturedOutcomeLabel is { } label && _capturedOutcomeByLabel.TryGetValue(label, out var outcome) ? outcome : null;
+
+    /// <summary>Même principe que RollError/InjuryBranchRollError, pour le choix de Capturé.</summary>
+    [ObservableProperty]
+    private string? capturedChoiceError;
+
     /// <summary>Un jet D6 par figurine hors de combat dans un groupe d'Hommes de main (OutOfActionCount)
     /// - sans objet pour un Héros, qui utilise ManualRoll/InjuryResultText ci-dessus à la place (une
     /// seule figurine, un seul jet). Peuplée/resynchronisée par SyncFigureInjuryRolls à chaque
@@ -612,6 +652,13 @@ public partial class WarriorOutcomeRow : ObservableObject
             _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;
 
         selectedStatusLabel = _statusByLabel.First(kv => kv.Value == warrior.Status).Key;
+
+        foreach (var outcome in Enum.GetValues<CapturedOutcome>())
+        {
+            var label = _loc[$"CapturedOutcome{outcome}"];
+            _capturedOutcomeByLabel[label] = outcome;
+            CapturedOutcomeLabels.Add(label);
+        }
     }
 
     /// <summary>Appelé après un jet de Blessure Grave - synchronise le Statut sur le résultat sans

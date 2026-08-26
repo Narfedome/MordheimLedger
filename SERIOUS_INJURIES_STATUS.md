@@ -2,7 +2,7 @@
 
 Suivi de l'assistant Fin de Partie, étape Blessure (voir CLAUDE.md § Règles dans Core, plan de
 séquencement "Mécaniser les Blessures Graves — Palier 1"). Mis à jour à chaque avancée — dernière
-mise à jour : **2026-08-26**.
+mise à jour : **2026-08-27**.
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -15,7 +15,7 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) ; Œil crevé (31) étendu (2026-08-26) au cas du second œil, seul résultat dont l'effet dépend de l'état déjà porté par le guerrier (`WarriorStatus.Retired`, nouveau) | **10/10 ✅** |
 | 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) + Endurci (62-63) + Provoque la Peur (Horribles balafres, 64) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal | **5/5 ✅** |
-| 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses | **0/2 ⏳** |
+| 3 — branches complexes / jet récurrent | Capturé (61) - mécanisé (2026-08-27), 5 issues nommées choisies par le joueur (pas un jet, voir `Core.Rules.CapturedOutcomeTable`) ; Vendu aux Fosses reste à faire | **1/2** |
 | Récurrent (jet avant CHAQUE partie, pas seulement à la Fin de Partie où il est obtenu) | Vieille blessure (32) - mécanisé (2026-08-26) via le nouvel écran "Lancer la partie", voir Journal | **1/1 ✅** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
@@ -45,7 +45,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 36 | Dépouillé | 1 | ✅ | — | Perd tout l'équipement porté, sans remboursement |
 | 41-55 | Récupération totale | — | ✅ | — | No-op, déjà correct |
 | 56 | Rancune | — | ✅ | — | Cible D6 + `WarriorHatred`, fait avant ce chantier |
-| 61 | Capturé | 3 | ⏳ | ❌ | Rançon/échange/vente comme esclave - branches multiples mutuellement exclusives |
+| 61 | Capturé | 3 | ✅ | — | Picker à 5 issues nommées (Rançon/Échange/Vendu aux esclavagistes/Tué par les Morts-Vivants/Sacrifié par les Possédés) - Rançon/Échange = retour à la bande avec équipement ; les 3 autres = équipement perdu + Mort (tué/sacrifié) ou Retraité (vendu, jamais confirmé mort) |
 | 62-63 | Endurci | 2 | ✅ | — | Chip catalogue portant une nouvelle `SpecialRule` "Endurci" (permanente, distincte du "Immunisé à la Peur" temporaire de la Bière de Bugman) |
 | 64 | Horribles balafres | 2 | ✅ | — | Chip catalogue portant la `SpecialRule` "Provoque la Peur" déjà enrichie dans le catalogue commun, réutilisée telle quelle |
 | 65 | Vendu aux arènes | 3 | ⏳ | ❌ | Combat un gladiateur (Francs-Tireurs) - branches victoire/défaite |
@@ -60,9 +60,9 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 
 ## Hors périmètre pour l'instant
 
-- **Palier 3 (2 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
-  mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
-  de l'Exploration ne convient pas, voir Journal).
+- **Palier 3, restant** : Vendu aux Fosses (65) - mini-combat contre un Franc-Tireur avec ses propres
+  branches victoire/défaite, patron encore à concevoir (aucun jet de combat mécanisé nulle part ailleurs
+  dans l'appli).
 
 ## Journal
 
@@ -334,3 +334,29 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   renseigne jamais lui-même donc la couverture existante reste valide telle quelle), build Core + tête
   MAUI clean (compilation confirmée, copie finale bloquée par l'instance de l'appli ouverte en
   parallèle - limite connue).
+- **2026-08-27 (Capturé - choix du joueur plutôt qu'un jet, nouvelle branche `feature/injuries-cleanup`)**
+  — L'utilisateur a fourni le texte officiel exact (61) : 5 issues nommées (Rançon, Échange, Vendu aux
+  esclavagistes, Tué par les Morts-Vivants avec Zombie gagné par le CAPTEUR, Sacrifié par les Possédés
+  avec +1 XP pour le chef du CAPTEUR) - toutes racontées du point de vue du capteur (l'or/le Zombie/l'XP
+  vont TOUJOURS à la bande adverse, jamais à la nôtre). Contrairement à Rancune (portée par un sous-jet
+  D6), aucune de ces 5 issues n'est déterminée par un dé - c'est une négociation/décision du capteur,
+  donc un simple **choix du joueur** (Picker, nouveau `EndOfGameCapturedChoicePh`) plutôt qu'un
+  mécanisme de jet. Nouveau `Core.Rules.CapturedOutcomeTable`/`CapturedOutcome` (5 valeurs) avec deux
+  prédicats purs : `ReturnsToWarband` (Rançon/Échange - le guerrier revient avec tout son équipement,
+  aucune mutation) et `CausesDeath` (Tué par les Morts-Vivants/Sacrifié par les Possédés ->
+  `WarriorStatus.Dead`) - la 5e issue (Vendu aux esclavagistes) ne renvoie ni l'un ni l'autre : perdu
+  pour de bon mais jamais confirmé mort, mappé sur `WarriorStatus.Retired` plutôt que `Dead` (2e usage
+  de ce statut après le second Œil crevé - doc mise à jour). Les 3 issues "perdues" perdent tout
+  l'équipement du guerrier (même mécanisme que Dépouillé, 36). Aucun jet de gold formule 1D6×5 CO
+  appliqué à NOTRE trésorerie : cet or va au capteur, pas à nous - vérifié dans le texte, aucune
+  mutation de `Warband.Treasury` pour ce résultat. Câblage wizard en miroir exact du reste : `WarriorOutcomeRow.
+  ShowCapturedChoice`/`SelectedCapturedOutcome` (+ mêmes propriétés sur `InjurySubRollEntry` pour un
+  sous-jet "Blessures multiples" tombant lui-même sur 61), validé par `ValidateInjuryStep`, appliqué
+  dans `ApplyWarriorOutcomesAsync` (jet principal et sous-jet) avec une phrase d'Historique dédiée par
+  issue (`HistoryCaptured{Outcome}Sentence`, cinq nouvelles clés resx). Capturé reste caché du chip
+  roster (déjà couvert par `SeriousInjuryTable.HidesRosterChip`, aucun changement nécessaire - un
+  guerrier revenu par Rançon/Échange n'a de toute façon aucune condition durable à rappeler, et un
+  guerrier Mort/Retraité ne montre plus aucune chip Blessure puisqu'il change de groupe roster). Nouveaux
+  tests `RulesTests.cs` pour les 2 prédicats (5 cas). Aucun changement `DataServiceTests.cs` (pas de
+  nouveau seed de catalogue - Capturé n'attache aucune `SpecialRule`, contrairement à Folie/Endurci).
+  Build Core + tête MAUI clean (0 `error CS`), suite de tests en cours de vérification.

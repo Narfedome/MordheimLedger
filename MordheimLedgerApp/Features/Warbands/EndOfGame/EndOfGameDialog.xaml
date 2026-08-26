@@ -169,6 +169,16 @@
                                                            IsVisible="{Binding DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
                                                     <Label Text="{Binding DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
                                                 </VerticalStackLayout>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 61 (Capturé). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowCapturedChoice}" Spacing="4">
+                                                    <Picker Title="{loc:Loc EndOfGameCapturedChoicePh}"
+                                                            ItemsSource="{Binding CapturedOutcomeLabels}"
+                                                            SelectedItem="{Binding SelectedCapturedOutcomeLabel}"/>
+                                                    <Label Text="{Binding CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
@@ -288,6 +298,18 @@
                                 <Label Text="{Binding CurrentInjuryWarrior.DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                        IsVisible="{Binding CurrentInjuryWarrior.DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
                                 <Label Text="{Binding CurrentInjuryWarrior.DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Capturé" (61) : pas un jet, un choix parmi les 5 issues nommées
+                                 du livre - toutes du point de vue du capteur (voir Core.Rules.
+                                 CapturedOutcomeTable), toujours proposées sans condition (l'appli ne suit
+                                 pas la composition de la bande adverse). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowCapturedChoice}" Spacing="6">
+                                <Picker Title="{loc:Loc EndOfGameCapturedChoicePh}"
+                                        ItemsSource="{Binding CurrentInjuryWarrior.CapturedOutcomeLabels}"
+                                        SelectedItem="{Binding CurrentInjuryWarrior.SelectedCapturedOutcomeLabel}"/>
+                                <Label Text="{Binding CurrentInjuryWarrior.CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
 

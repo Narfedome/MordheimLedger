@@ -1170,6 +1170,39 @@
   <data name="EndOfGameDeepWoundResultFormat" xml:space="preserve">
     <value>{0} game(s) missed</value>
   </data>
+  <data name="EndOfGameCapturedChoicePh" xml:space="preserve">
+    <value>Captured warrior's fate</value>
+  </data>
+  <data name="CapturedOutcomeRansomed" xml:space="preserve">
+    <value>Ransomed</value>
+  </data>
+  <data name="CapturedOutcomeExchanged" xml:space="preserve">
+    <value>Exchanged</value>
+  </data>
+  <data name="CapturedOutcomeSoldToSlavers" xml:space="preserve">
+    <value>Sold to slavers</value>
+  </data>
+  <data name="CapturedOutcomeKilledByUndead" xml:space="preserve">
+    <value>Killed by the Undead</value>
+  </data>
+  <data name="CapturedOutcomeSacrificedByPossessed" xml:space="preserve">
+    <value>Sacrificed by the Possessed</value>
+  </data>
+  <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
+    <value>{0} was captured and ransomed back.</value>
+  </data>
+  <data name="HistoryCapturedExchangedSentence" xml:space="preserve">
+    <value>{0} was captured and exchanged for an enemy prisoner.</value>
+  </data>
+  <data name="HistoryCapturedSoldToSlaversSentence" xml:space="preserve">
+    <value>{0} was captured and sold to slavers.</value>
+  </data>
+  <data name="HistoryCapturedKilledByUndeadSentence" xml:space="preserve">
+    <value>{0} was captured and killed by the Undead, who turned him into a Zombie.</value>
+  </data>
+  <data name="HistoryCapturedSacrificedByPossessedSentence" xml:space="preserve">
+    <value>{0} was captured and sacrificed by the Possessed.</value>
+  </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Name of the one responsible</value>
   </data>

@@ -201,6 +201,35 @@ public class RulesTests
         Assert.False(SeriousInjuryTable.HidesRosterChip(roll));
     }
 
+    // --- CapturedOutcomeTable (61 - 5 named outcomes, player choice rather than a roll) -----------
+
+    [Theory]
+    [InlineData(CapturedOutcome.Ransomed)]
+    [InlineData(CapturedOutcome.Exchanged)]
+    public void CapturedOutcomeTable_RansomedOrExchanged_ReturnsToWarband(CapturedOutcome outcome)
+    {
+        Assert.True(CapturedOutcomeTable.ReturnsToWarband(outcome));
+        Assert.False(CapturedOutcomeTable.CausesDeath(outcome));
+    }
+
+    [Fact]
+    public void CapturedOutcomeTable_SoldToSlavers_DoesNotReturnAndDoesNotCauseDeath()
+    {
+        // Gone for good, but not confirmed dead - see WarbandDetailViewModel.EndOfGame, maps to
+        // WarriorStatus.Retired rather than Dead.
+        Assert.False(CapturedOutcomeTable.ReturnsToWarband(CapturedOutcome.SoldToSlavers));
+        Assert.False(CapturedOutcomeTable.CausesDeath(CapturedOutcome.SoldToSlavers));
+    }
+
+    [Theory]
+    [InlineData(CapturedOutcome.KilledByUndead)]
+    [InlineData(CapturedOutcome.SacrificedByPossessed)]
+    public void CapturedOutcomeTable_KilledOrSacrificed_CausesDeath(CapturedOutcome outcome)
+    {
+        Assert.True(CapturedOutcomeTable.CausesDeath(outcome));
+        Assert.False(CapturedOutcomeTable.ReturnsToWarband(outcome));
+    }
+
     // --- SeriousInjuryEffectTable (Palier 1 mechanized subset) -----------------------------------
 
     [Fact]

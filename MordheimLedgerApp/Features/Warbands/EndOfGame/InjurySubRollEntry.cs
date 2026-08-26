@@ -26,6 +26,7 @@ public partial class InjurySubRollEntry : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
+    [NotifyPropertyChangedFor(nameof(ShowCapturedChoice))]
     private string manualRoll = string.Empty;
 
     /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
@@ -55,6 +56,10 @@ public partial class InjurySubRollEntry : ObservableObject
         // nouveau jet qui ne tombe plus sur 35 invalide le sous-jet de Blessure profonde déjà saisi.
         if (!ShowDeepWoundSubRoll && DeepWoundSubRoll.Length > 0)
             DeepWoundSubRoll = string.Empty;
+
+        // Même principe pour le choix de Capturé (61).
+        if (!ShowCapturedChoice && SelectedCapturedOutcomeLabel is not null)
+            SelectedCapturedOutcomeLabel = null;
     }
 
     [ObservableProperty]
@@ -84,6 +89,28 @@ public partial class InjurySubRollEntry : ObservableObject
     [ObservableProperty]
     private string? deepWoundRollError;
 
+    /// <summary>Même principe que WarriorOutcomeRow.ShowCapturedChoice, pour un sous-jet "Blessures
+    /// multiples" qui tombe lui-même sur 61.</summary>
+    public bool ShowCapturedChoice => IsHero && int.TryParse(ManualRoll, out var roll) && roll == 61;
+
+    private readonly Dictionary<string, CapturedOutcome> _capturedOutcomeByLabel = new();
+
+    public List<string> CapturedOutcomeLabels { get; } = new();
+
+    [ObservableProperty]
+    private string? selectedCapturedOutcomeLabel;
+
+    partial void OnSelectedCapturedOutcomeLabelChanged(string? value)
+    {
+        if (value is not null) CapturedChoiceError = null;
+    }
+
+    public CapturedOutcome? SelectedCapturedOutcome =>
+        SelectedCapturedOutcomeLabel is { } label && _capturedOutcomeByLabel.TryGetValue(label, out var outcome) ? outcome : null;
+
+    [ObservableProperty]
+    private string? capturedChoiceError;
+
     /// <summary>True si le jet actuellement saisi est un résultat de mort (Héros 11-15, Homme de main
     /// 1-2) - utilisé par WarbandDetailViewModel.EndOfGame pour compter les figurines perdues dans un
     /// groupe d'Hommes de main (voir WarriorOutcomeRow.FigureInjuryRolls). Sans objet pour les sous-jets
@@ -96,6 +123,13 @@ public partial class InjurySubRollEntry : ObservableObject
         Total = total;
         IsHero = isHero;
         _labelKey = labelKey;
+
+        foreach (var outcome in Enum.GetValues<CapturedOutcome>())
+        {
+            var label = _loc[$"CapturedOutcome{outcome}"];
+            _capturedOutcomeByLabel[label] = outcome;
+            CapturedOutcomeLabels.Add(label);
+        }
     }
 
     /// <summary>Steps.SyncFigureInjuryRolls-style syncs (voir WarriorOutcomeRow.SyncFigureInjuryRolls)

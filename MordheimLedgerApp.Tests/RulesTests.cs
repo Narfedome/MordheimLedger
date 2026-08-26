@@ -208,6 +208,49 @@ public class RulesTests
         Assert.Equal(CharacteristicField.BallisticSkill, outcome.Field);
     }
 
+    /// <summary>The 2-arg overload always behaves as if the warrior had never been blinded before -
+    /// existing callers (RulesTests above, the Henchman D6 chart which never reaches 31) keep getting
+    /// the ordinary -1 Ballistic Skill.</summary>
+    [Fact]
+    public void SeriousInjuryEffectTable_31_TwoArgOverload_NeverForcesRetirement()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(31, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_31_AlreadyBlinded_IsForcedRetirement()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(31, alreadyBlindedInOneEye: true, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.ForcedRetirement, outcome.Kind);
+        Assert.Null(outcome.Field);
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_31_NotYetBlinded_StillBallisticSkillPenalty()
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(31, alreadyBlindedInOneEye: false, out var outcome));
+        Assert.Equal(SeriousInjuryEffectKind.CharacteristicPenalty, outcome.Kind);
+        Assert.Equal(CharacteristicField.BallisticSkill, outcome.Field);
+    }
+
+    /// <summary>alreadyBlindedInOneEye only affects roll 31 - every other roll's outcome is unchanged
+    /// regardless of the flag.</summary>
+    [Theory]
+    [InlineData(22)]
+    [InlineData(26)]
+    [InlineData(33)]
+    [InlineData(34)]
+    [InlineData(35)]
+    [InlineData(36)]
+    [InlineData(66)]
+    public void SeriousInjuryEffectTable_AlreadyBlindedFlag_DoesNotAffectOtherRolls(int roll)
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(roll, out var withoutFlag));
+        Assert.True(SeriousInjuryEffectTable.TryGetOutcome(roll, alreadyBlindedInOneEye: true, out var withFlag));
+        Assert.Equal(withoutFlag, withFlag);
+    }
+
     [Fact]
     public void SeriousInjuryEffectTable_33_IsInitiativePenalty()
     {

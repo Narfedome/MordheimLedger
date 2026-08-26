@@ -345,6 +345,9 @@
   <data name="WarriorsGroupDead" xml:space="preserve">
     <value>Dead</value>
   </data>
+  <data name="WarriorsGroupRetired" xml:space="preserve">
+    <value>Retired</value>
+  </data>
   <data name="InventoryHeading" xml:space="preserve">
     <value>Inventory</value>
   </data>
@@ -941,6 +944,9 @@
   </data>
   <data name="HistoryDeathSentence" xml:space="preserve">
     <value>{0} died.</value>
+  </data>
+  <data name="HistoryForcedRetirementSentence" xml:space="preserve">
+    <value>{0} loses their second eye and must retire from the warband.</value>
   </data>
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} was taken out of action: {1}</value>

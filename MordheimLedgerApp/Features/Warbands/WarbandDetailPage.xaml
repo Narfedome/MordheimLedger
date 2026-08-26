@@ -44,7 +44,7 @@
                             <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Pen}"
                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                          IsVisible="{Binding IsDead, Converter={StaticResource InverseBoolConverter}}"
+                                                          IsVisible="{Binding IsEditable}"
                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EditWarriorCommand}"
                                                           CommandParameter="{Binding .}"/>
                         </Grid>
@@ -292,8 +292,8 @@
                                      BindableLayout.ItemsSource="{Binding Henchmen}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
-                <!-- Morts : lecture seule (les boutons Éditer/+/x sont masqués sur la carte via
-                     WarriorRow.IsDead), regroupe Héros et Hommes de main morts ensemble - conservés
+                <!-- Morts : lecture seule (le bouton Éditer est masqué sur la carte via
+                     WarriorRow.IsEditable), regroupe Héros et Hommes de main morts ensemble - conservés
                      dans le roster pour l'historique de la bande plutôt que retirés à la fin de partie. -->
                 <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
                     <Grid.GestureRecognizers>
@@ -313,6 +313,29 @@
                 </Grid>
                 <VerticalStackLayout IsVisible="{Binding DeadExpanded}"
                                      BindableLayout.ItemsSource="{Binding DeadWarriors}"
+                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
+
+                <!-- Retraités : même traitement lecture seule que Morts (WarriorRow.IsRetired), mais un
+                     guerrier retraité n'est jamais mort - actuellement uniquement via Œil crevé (31)
+                     perdu une seconde fois, voir Core.Rules.SeriousInjuryEffectKind.ForcedRetirement. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleRetiredCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc WarriorsGroupRetired}"/>
+                                <Span Text="{Binding RetiredWarriors.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding RetiredExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleRetiredCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding RetiredExpanded}"
+                                     BindableLayout.ItemsSource="{Binding RetiredWarriors}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
             </VerticalStackLayout>

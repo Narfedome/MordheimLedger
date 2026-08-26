@@ -64,6 +64,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private ObservableCollection<WarriorRow> deadWarriors = new();
 
     [ObservableProperty]
+    private ObservableCollection<WarriorRow> retiredWarriors = new();
+
+    [ObservableProperty]
     private bool heroesExpanded = true;
 
     [ObservableProperty]
@@ -71,6 +74,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     [ObservableProperty]
     private bool deadExpanded;
+
+    [ObservableProperty]
+    private bool retiredExpanded;
 
     /// <summary>Objets trouvés mais pas encore assignés à un guerrier (voir Models.WarbandEquipment,
     /// alimenté par l'étape Exploration du wizard Fin de Partie) - un bouton en en-tête de page
@@ -122,6 +128,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleDead() => DeadExpanded = !DeadExpanded;
 
+    [RelayCommand]
+    private void ToggleRetired() => RetiredExpanded = !RetiredExpanded;
+
     private async Task LoadAsync(int id)
     {
         await Loading.RunAsync(async () =>
@@ -139,9 +148,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
-            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead));
-            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead));
+            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
+            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
+            RetiredWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsRetired));
             Rating = Heroes.Concat(Henchmen).Sum(r => (r.Warrior.IsLargeCreature ? 20 : 5) + r.Warrior.Experience);
 
             var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);

@@ -13,9 +13,9 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 
 | Palier | Mécanisme | Statut |
 |---|---|---|
-| 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) | **10/10 ✅** |
+| 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) ; Œil crevé (31) étendu (2026-08-26) au cas du second œil, seul résultat dont l'effet dépend de l'état déjà porté par le guerrier (`WarriorStatus.Retired`, nouveau) | **10/10 ✅** |
 | 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé + Jambe écrasée grave ✅, 2 restants (Endurci, Horribles balafres)** |
-| 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses, Vieille blessure ("avant chaque bataille"), suivi "second œil → retraite" | **0/4 ⏳** |
+| 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses, Vieille blessure ("avant chaque bataille") | **0/3 ⏳** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
 
@@ -36,7 +36,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 25 (sous-jet 2-6) | Jambe écrasée : légère | 1 | ✅ | ✅ | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée, temporaire - supprimée dès le retour Actif |
 | 25 (sous-jet 1) | Jambe écrasée : grave | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Ne peut plus courir" (nouvelle, purement informative - même traitement que Bras amputé/Folie) - PAS fusionnée dans les Règles spéciales du guerrier, surfacée en puce imbriquée tapable dans le dialog récap de la Blessure |
 | 26 | Blessure au torse | 1 | ✅ | — | Endurance -1 permanent |
-| 31 | Œil crevé | 1 | ✅ | — | Tir -1 permanent (le suivi "second œil crevé → retrait obligatoire" reste Palier 3) |
+| 31 | Œil crevé | 1 | ✅ | — | Tir -1 permanent ; **second œil crevé mécanisé** (2026-08-26) : si le guerrier porte déjà cette Injury, un nouveau 31 déclenche `WarriorStatus.Retired` (nouveau statut, groupe "Retraités" dédié) au lieu d'un second -1 Tir |
 | 32 | Vieille blessure | 3 | ⏳ | ❌ | Jet 1D6 avant CHAQUE partie future - aucun moment "avant bataille" dans l'appli aujourd'hui |
 | 33 | Traumatisme nerveux | 1 | ✅ | — | Initiative -1 permanent |
 | 34 | Blessure à la main | 1 | ✅ | — | Capacité de Combat -1 permanent |
@@ -62,11 +62,10 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 - **Palier 2, restants** : Endurci (62-63, Immunisé à la Peur) et Horribles balafres (64, Provoque la
   Peur) au même mécanisme que Folie/Bras amputé (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de
   nouvelle table de jointure `WarriorSpecialRule` finalement nécessaire).
-- **Palier 3 (4 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
+- **Palier 3 (3 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
   mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
   de l'Exploration ne convient pas, voir Journal) ; Vieille blessure (32) exige un jet "avant chaque
-  bataille future" - aucun moment de ce type n'existe dans l'appli (seulement Fin de Partie) ; le
-  suivi "second œil crevé → retrait obligatoire" (31) n'est pas encore construit.
+  bataille future" - aucun moment de ce type n'existe dans l'appli (seulement Fin de Partie).
 
 ## Journal
 
@@ -212,3 +211,30 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   travail) - `DataServiceTests.cs` référençait encore l'ancien nom, jamais mis à jour ; corrigé, plus
   Jambe écrasée : grave sort du Palier 3 pour rejoindre le Palier 2 (reste seulement Endurci/Horribles
   balafres). 299/299 tests passent, build Core clean.
+- **2026-08-26 (second Œil crevé - premier résultat dont l'effet dépend de l'état déjà porté par le
+  guerrier)** — "Pour le 31 œil crevé, il faut qu'on gère mécaniquement le cas du double œil crevé."
+  Contrairement à tout ce qui précède dans ce fichier, l'effet de ce résultat dépend de ce que le
+  guerrier porte DÉJÀ (une Injury "Œil crevé" antérieure), pas seulement du jet - premier cas de ce genre
+  (voir `SeriousInjuryEffectTable`, jusqu'ici une fonction pure du jet seul). Nouveau
+  `SeriousInjuryEffectKind.ForcedRetirement` + surcharge `TryGetOutcome(int roll, bool
+  alreadyBlindedInOneEye, out outcome)` - l'ancienne surcharge à 2 arguments délègue à la nouvelle avec
+  `false`, donc tous les appelants existants (RulesTests.cs, la table Homme de main qui n'atteint jamais
+  31) restent inchangés. `WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync` calcule
+  `alreadyBlindedInOneEye` par guerrier (`warrior.Injuries.Any(...)` via `InjuryCatalogLookup.
+  RollRangeMatches`) et la met à jour après CHAQUE jet à 31 (jet principal ET chaque sous-jet
+  "Blessures multiples") - couvre même le cas rare d'un double 31 dans la même Fin de Partie.
+  **Nouveau `WarriorStatus.Retired`** (3) : mécaniquement identique à Mort partout où le roster exclut
+  les guerriers inactifs - nouveau groupe "Retraités" dans `WarbandDetailPage.xaml`/
+  `WarbandDetailViewModel.cs` (mirror exact du groupe Morts : `RetiredWarriors`/`RetiredExpanded`/
+  `ToggleRetiredCommand`), `WarriorRow.IsRetired` + nouveau `WarriorRow.IsEditable` (`!IsDead &&
+  !IsRetired`, remplace le binding direct sur `IsDead` du bouton Éditer de la carte guerrier) et exclusion
+  des créneaux de guerrier existant dans `WarbandEditDialogViewModel` (même filtre que
+  `Status != WarriorStatus.Dead`). Contrairement à Mort, jamais sélectionnable manuellement dans le
+  Picker de statut du wizard (`WarriorOutcomeRow._statusByLabel` ne liste toujours que Active/Dead) -
+  uniquement atteint via `ApplySeriousInjuryEffectAsync`'s nouveau cas `ForcedRetirement`, après le bloc
+  `row.Status != warrior.Status` (même position que MissNextGame/MissGamesRollD3, qui court-circuitent
+  déjà le Picker de la même façon). Nouvelle phrase d'Historique dédiée (`HistoryForcedRetirementSentence`)
+  plutôt que de réutiliser `HistoryDeathSentence` - le guerrier n'est pas mort. 10 nouveaux tests
+  `RulesTests.cs` (dont un vérifiant que le flag n'affecte aucun autre jet que 31). 309/309 tests passent,
+  build Core + tête MAUI clean (compilation confirmée, copie finale de l'exécutable réussie cette fois -
+  pas d'instance de l'appli verrouillant le DLL).

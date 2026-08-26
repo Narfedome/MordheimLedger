@@ -23,7 +23,12 @@ public enum SeriousInjuryEffectKind
     MissNextGame,
 
     /// <summary>Misses the next D3 games (Deep Wound, 35) - see Warrior.SickGamesRemaining.</summary>
-    MissGamesRollD3
+    MissGamesRollD3,
+
+    /// <summary>Forces the warrior into permanent retirement (WarriorStatus.Retired) - only reachable
+    /// via Blinded in One Eye (31) when the warrior already carries a prior instance of that same
+    /// Injury (losing the SECOND eye). See TryGetOutcome's alreadyBlindedInOneEye parameter.</summary>
+    ForcedRetirement
 }
 
 /// <summary>Structured counterpart to SeriousInjuryOutcome.Kind's target field - only meaningful for
@@ -44,12 +49,23 @@ public sealed record SeriousInjuryOutcome
 /// the user (2026-08-25).</summary>
 public static class SeriousInjuryEffectTable
 {
-    public static bool TryGetOutcome(int roll, out SeriousInjuryOutcome outcome)
+    /// <summary>Equivalent to TryGetOutcome(roll, alreadyBlindedInOneEye: false, out outcome) - every
+    /// call site that can't be blinded twice in the same breath (existing RulesTests.cs coverage, the
+    /// Henchman D6 chart which never reaches 31 anyway) keeps using this simpler overload.</summary>
+    public static bool TryGetOutcome(int roll, out SeriousInjuryOutcome outcome) =>
+        TryGetOutcome(roll, alreadyBlindedInOneEye: false, out outcome);
+
+    /// <param name="alreadyBlindedInOneEye">True if this warrior already carries a prior "Blinded in
+    /// One Eye" Injury (roll 31, see Warrior.Injuries) - only affects roll 31: per the rulebook's own
+    /// description of that result, losing the SECOND eye forces the warrior into permanent retirement
+    /// instead of the usual -1 Ballistic Skill (which already happened the first time).</param>
+    public static bool TryGetOutcome(int roll, bool alreadyBlindedInOneEye, out SeriousInjuryOutcome outcome)
     {
         outcome = roll switch
         {
             22 => new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.CharacteristicPenalty, Field = CharacteristicField.Movement },
             26 => new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.CharacteristicPenalty, Field = CharacteristicField.Toughness },
+            31 when alreadyBlindedInOneEye => new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.ForcedRetirement },
             31 => new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.CharacteristicPenalty, Field = CharacteristicField.BallisticSkill },
             33 => new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.CharacteristicPenalty, Field = CharacteristicField.Initiative },
             34 => new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.CharacteristicPenalty, Field = CharacteristicField.WeaponSkill },

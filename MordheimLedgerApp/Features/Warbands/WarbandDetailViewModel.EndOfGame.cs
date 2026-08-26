@@ -437,6 +437,13 @@ public partial class WarbandDetailViewModel
             var warrior = row.Warrior;
             var changed = false;
 
+            // Blinded in One Eye (31) : le second œil force la retraite plutôt qu'un nouveau -1 Tir -
+            // voir SeriousInjuryEffectTable.TryGetOutcome. Recalculé/mis à jour au fil des jets de CE
+            // guerrier ci-dessous (jet principal, puis chaque sous-jet "Blessures multiples") plutôt que
+            // recalculé une seule fois, pour couvrir le cas (rare) où les deux occurrences tombent dans
+            // la même Fin de Partie.
+            var alreadyBlindedInOneEye = warrior.Injuries.Any(i => InjuryCatalogLookup.RollRangeMatches(i.Item.RollRange, 31));
+
             if (row.ExperienceGained != 0)
             {
                 warrior.Experience += row.ExperienceGained;
@@ -526,7 +533,7 @@ public partial class WarbandDetailViewModel
                 // grave de 23/25...), qui reste texte de référence pur comme avant cette passe.
                 SeriousInjuryOutcome? outcome = row.ShowInjuryBranchSubRoll
                     ? row.InjuryBranchOutcome
-                    : hasMainRoll && SeriousInjuryEffectTable.TryGetOutcome(mainRoll, out var mainOutcome)
+                    : hasMainRoll && SeriousInjuryEffectTable.TryGetOutcome(mainRoll, alreadyBlindedInOneEye, out var mainOutcome)
                         ? mainOutcome
                         : null;
 
@@ -540,7 +547,12 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.ResolvedInjuryText));
 
                 if (outcome is not null)
+                {
                     changed |= await ApplySeriousInjuryEffectAsync(warrior, outcome);
+                    if (outcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
+                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
+                }
+                if (hasMainRoll && mainRoll == 31) alreadyBlindedInOneEye = true;
             }
 
             // Rancune (56) : la cible choisie par le joueur (EndOfGameDialogViewModel.Injury) devient une
@@ -566,7 +578,7 @@ public partial class WarbandDetailViewModel
                 // n'a pas de sous-jet dédié ici (pas de second niveau de jet imbriqué dans ce wizard,
                 // décision de portée) : reste texte de référence pur pour ce cas précis, comme avant
                 // cette passe (GetOrCreateInjuryAsync retombe alors sur l'entrée catalogue générique).
-                var subOutcome = hasSubRoll && SeriousInjuryEffectTable.TryGetOutcome(subRoll, out var o) ? o : null;
+                var subOutcome = hasSubRoll && SeriousInjuryEffectTable.TryGetOutcome(subRoll, alreadyBlindedInOneEye, out var o) ? o : null;
                 var subIsTemporary = subOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
 
                 var subInjury = await GetOrCreateInjuryAsync(hasSubRoll ? subRoll : -1, warrior.IsHero, sub.InjuryResultText);
@@ -574,7 +586,12 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, sub.InjuryResultText));
 
                 if (subOutcome is not null)
+                {
                     changed |= await ApplySeriousInjuryEffectAsync(warrior, subOutcome);
+                    if (subOutcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
+                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
+                }
+                if (hasSubRoll && subRoll == 31) alreadyBlindedInOneEye = true;
             }
 
             // Un jet D6 par figurine hors de combat dans ce groupe d'Hommes de main (règle confirmée
@@ -651,6 +668,10 @@ public partial class WarbandDetailViewModel
             case SeriousInjuryEffectKind.MissGamesRollD3:
                 warrior.Status = WarriorStatus.Sick;
                 warrior.SickGamesRemaining = SeriousInjuryEffectTable.RollD3();
+                return true;
+
+            case SeriousInjuryEffectKind.ForcedRetirement:
+                warrior.Status = WarriorStatus.Retired;
                 return true;
 
             default:

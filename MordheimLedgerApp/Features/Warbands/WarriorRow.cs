@@ -73,6 +73,16 @@ public partial class WarriorRow : ObservableObject
     /// buttons) - Dead is only ever reached via the End of Game wizard, see WarriorStatus.</summary>
     public bool IsDead => Warrior.Status == WarriorStatus.Dead;
 
+    /// <summary>Same read-only treatment as IsDead, but for the distinct "Retraités" group - permanent
+    /// like Dead, but the warrior never actually died (currently only reachable by losing a second eye,
+    /// see Core.Rules.SeriousInjuryEffectKind.ForcedRetirement). Only ever reached via the End of Game
+    /// wizard, same as Dead.</summary>
+    public bool IsRetired => Warrior.Status == WarriorStatus.Retired;
+
+    /// <summary>Drives the roster card's Edit (Pen) button - both permanent statuses freeze the card
+    /// the same way, see IsDead/IsRetired.</summary>
+    public bool IsEditable => !IsDead && !IsRetired;
+
     /// <summary>Manqué la partie précédente pour cause de maladie (ex. le Puits de la table
     /// d'Exploration, échec du test d'Endurance) - juste un pense-bête visuel, effacé automatiquement
     /// au prochain Fin de Partie (voir WarbandDetailViewModel.EndOfGame), pas un statut permanent comme

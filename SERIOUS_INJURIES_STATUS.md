@@ -15,7 +15,8 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) ; Œil crevé (31) étendu (2026-08-26) au cas du second œil, seul résultat dont l'effet dépend de l'état déjà porté par le guerrier (`WarriorStatus.Retired`, nouveau) | **10/10 ✅** |
 | 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé + Jambe écrasée grave ✅, 2 restants (Endurci, Horribles balafres)** |
-| 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses, Vieille blessure ("avant chaque bataille") | **0/3 ⏳** |
+| 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses | **0/2 ⏳** |
+| Récurrent (jet avant CHAQUE partie, pas seulement à la Fin de Partie où il est obtenu) | Vieille blessure (32) - mécanisé (2026-08-26) via le nouvel écran "Lancer la partie", voir Journal | **1/1 ✅** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
 
@@ -37,7 +38,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 25 (sous-jet 1) | Jambe écrasée : grave | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Ne peut plus courir" (nouvelle, purement informative - même traitement que Bras amputé/Folie) - PAS fusionnée dans les Règles spéciales du guerrier, surfacée en puce imbriquée tapable dans le dialog récap de la Blessure |
 | 26 | Blessure au torse | 1 | ✅ | — | Endurance -1 permanent |
 | 31 | Œil crevé | 1 | ✅ | — | Tir -1 permanent ; **second œil crevé mécanisé** (2026-08-26) : si le guerrier porte déjà cette Injury, un nouveau 31 déclenche `WarriorStatus.Retired` (nouveau statut, groupe "Retraités" dédié) au lieu d'un second -1 Tir |
-| 32 | Vieille blessure | 3 | ⏳ | ❌ | Jet 1D6 avant CHAQUE partie future - aucun moment "avant bataille" dans l'appli aujourd'hui |
+| 32 | Vieille blessure | Récurrent | ✅ | — | Jet 1D6 avant CHAQUE partie future - nouvel écran "Lancer la partie" (`StartGameDialog`), échec journalisé dans l'Historique, pas de statut ni de blocage persisté (le joueur ne fielde simplement pas ce guerrier sur table cette fois) |
 | 33 | Traumatisme nerveux | 1 | ✅ | — | Initiative -1 permanent |
 | 34 | Blessure à la main | 1 | ✅ | — | Capacité de Combat -1 permanent |
 | 35 | Blessure profonde | 1 | ✅ | — | Malade, D3 parties (`Warrior.SickGamesRemaining`) |
@@ -62,10 +63,9 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 - **Palier 2, restants** : Endurci (62-63, Immunisé à la Peur) et Horribles balafres (64, Provoque la
   Peur) au même mécanisme que Folie/Bras amputé (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de
   nouvelle table de jointure `WarriorSpecialRule` finalement nécessaire).
-- **Palier 3 (3 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
+- **Palier 3 (2 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
   mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
-  de l'Exploration ne convient pas, voir Journal) ; Vieille blessure (32) exige un jet "avant chaque
-  bataille future" - aucun moment de ce type n'existe dans l'appli (seulement Fin de Partie).
+  de l'Exploration ne convient pas, voir Journal).
 
 ## Journal
 
@@ -238,3 +238,32 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   `RulesTests.cs` (dont un vérifiant que le flag n'affecte aucun autre jet que 31). 309/309 tests passent,
   build Core + tête MAUI clean (compilation confirmée, copie finale de l'exécutable réussie cette fois -
   pas d'instance de l'appli verrouillant le DLL).
+- **2026-08-26 (Vieille blessure - nouvel écran "Lancer la partie")** — Dernier résultat mécanisable du
+  Palier 3 : contrairement à tout le reste de la table, son jet se rejoue "avant CHAQUE partie future",
+  pas une seule fois à la Fin de Partie où il est obtenu - aucun moment "avant bataille" n'existait dans
+  l'appli jusqu'ici (seulement Fin de Partie), d'où son classement Palier 3 initial. L'utilisateur a
+  suggéré de le résoudre via un bouton "Lancer la partie" qui remplacerait "Fin de partie" sur
+  `WarbandDetailPage` ("Start a game" -> "End of game", un seul bouton visible à la fois), doublé d'un
+  "wizard informatif" à un seul écran plutôt qu'un vrai wizard multi-étapes comme `EndOfGameDialog` -
+  confirmé via un mock (`mcp__visualize`) avant tout code. Nouveau `Warband.GameInProgress` (bool,
+  `WarbandEntity`/`EntityMapping` mirroré) bascule quel bouton s'affiche (`WarbandDetailViewModel.
+  HasGameInProgress`) - **aucun verrouillage réel** : rien n'empêche d'éditer le roster/l'inventaire
+  pendant qu'une partie est "en cours", décision explicite de l'utilisateur, ce flag ne fait que piloter
+  l'affichage du bouton. `EndOfGame` le repasse à `false` en fin de traitement. Nouveau
+  `Features/Warbands/StartGame/` (`StartGameDialog`/`StartGameDialogViewModel`, `OldWoundRollEntry`,
+  `UnavailableWarriorRow`) : 3 sections, toutes masquées si vides (`HasNothingToShow` si les 3 le sont) -
+  guerriers indisponibles (Malade/Retraité/Mort, simple rappel non-actionnable), jets de Vieille blessure
+  (1D6 par guerrier Actif portant l'Injury roll "32", même idiome de saisie manuelle + bouton dé optionnel
+  que `WarriorOutcomeRow.ManualRoll`/`EndOfGameDialogViewModel.Injury.AutoRoll`, échec sur 1), et
+  `Warband.NextGameNote` en simple rappel textuel. Seuls les échecs sont journalisés dans l'Historique
+  (nouveau `HistoryOldWoundFailSentence`) - un guerrier qui passe le test n'a rien de notable à
+  consigner. **Nouveau `WarriorStatusRetired`** (resx) : nécessaire pour afficher la raison d'un guerrier
+  Retraité dans la liste des indisponibles, jusqu'ici jamais affiché en toutes lettres nulle part (voir
+  Journal du 2026-08-26 sur `WarriorStatus.Retired`). **Discussion annexe, tranchée sans changement de
+  code** : l'utilisateur a demandé si plusieurs `NextGameNote` simultanés s'accumulent - non, c'est un
+  simple `string?` remplacé par écrasement (`Warband.NextGameNote = nextGameNote`), aucune accumulation ;
+  laissé tel quel pour l'instant (aucun second résultat Exploration ne pose encore de NextGameNote en
+  plus de Cimetière - "Une Faveur Rendue" reste à construire), à revisiter si un futur résultat cause une
+  vraie collision. Aucune nouvelle logique `Core.Rules` (pas de nouveau test `RulesTests.cs` - le
+  matching par jet réutilise `InjuryCatalogLookup.RollRangeMatches` déjà couvert), 309/309 tests passent
+  (compte inchangé), build Core + tête MAUI clean.

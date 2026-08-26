@@ -46,5 +46,12 @@ public class Warband
     /// value.</summary>
     public bool HasCatacombReroll { get; set; }
 
+    /// <summary>True between "Lancer la partie" and the following "Fin de partie" - drives which of the
+    /// two actions shows on WarbandDetailPage (mutually exclusive, never both). Purely a UI toggle: no
+    /// roster/inventory edit is actually blocked while true (explicit user decision, 2026-08-26 - no
+    /// locking mechanism, this flag only tracks which button to show and gates nothing else). Cleared by
+    /// EndOfGame, set by StartGame.</summary>
+    public bool GameInProgress { get; set; }
+
     public string? Notes { get; set; }
 }

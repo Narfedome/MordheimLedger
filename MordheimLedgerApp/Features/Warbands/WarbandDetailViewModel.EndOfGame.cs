@@ -102,6 +102,12 @@ public partial class WarbandDetailViewModel
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
             await ApplySicknessLifecycleAsync(dialogViewModel, previouslySickWarriors);
 
+            // La partie est terminée : redonne la main à "Lancer la partie" sur cette page (voir
+            // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée (Fin de Partie
+            // reste utilisable seule, aucune dépendance stricte à StartGame).
+            Warband.GameInProgress = false;
+            await _warbandService.SaveWarbandAsync(Warband);
+
             await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
             await LoadAsync(Warband.Id);
         });

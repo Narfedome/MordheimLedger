@@ -972,6 +972,42 @@
   <data name="WarriorStatusSick" xml:space="preserve">
     <value>Indisponible</value>
   </data>
+  <data name="WarriorStatusRetired" xml:space="preserve">
+    <value>Retraité</value>
+  </data>
+  <data name="StartGameButtonText" xml:space="preserve">
+    <value>Lancer la partie</value>
+  </data>
+  <data name="StartGameTitle" xml:space="preserve">
+    <value>Avant la partie</value>
+  </data>
+  <data name="StartGameNothingToShow" xml:space="preserve">
+    <value>Rien à signaler avant cette partie.</value>
+  </data>
+  <data name="StartGameUnavailableHeading" xml:space="preserve">
+    <value>Guerriers indisponibles</value>
+  </data>
+  <data name="StartGameOldWoundHeading" xml:space="preserve">
+    <value>Jets avant bataille</value>
+  </data>
+  <data name="StartGameOldWoundSubtitle" xml:space="preserve">
+    <value>Vieille blessure : 1D6, échec sur 1</value>
+  </data>
+  <data name="StartGameOldWoundPass" xml:space="preserve">
+    <value>Peut combattre</value>
+  </data>
+  <data name="StartGameOldWoundFail" xml:space="preserve">
+    <value>Ne peut pas combattre</value>
+  </data>
+  <data name="StartGameNextGameNoteHeading" xml:space="preserve">
+    <value>Effets actifs pour cette partie</value>
+  </data>
+  <data name="StartGameConfirm" xml:space="preserve">
+    <value>Commencer la partie</value>
+  </data>
+  <data name="HistoryOldWoundFailSentence" xml:space="preserve">
+    <value>{0} ne peut pas combattre cette partie (Vieille blessure).</value>
+  </data>
   <data name="EndOfGameRollPh" xml:space="preserve">
     <value>D66</value>
   </data>

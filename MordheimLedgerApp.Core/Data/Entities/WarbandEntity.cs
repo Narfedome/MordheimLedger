@@ -19,5 +19,6 @@ public class WarbandEntity
     public bool PendingExplorationBonusDie { get; set; }
     public string? NextGameNote { get; set; }
     public bool HasCatacombReroll { get; set; }
+    public bool GameInProgress { get; set; }
     public string? Notes { get; set; }
 }

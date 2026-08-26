@@ -191,7 +191,16 @@
                                             Text="{loc:Loc InventoryHeading}"
                                             TextColor="{DynamicResource AppAccent}"
                                             Command="{Binding ShowInventoryCommand}"/>
-                <components:IconTextButton Icon="{x:Static icons:SolidFont.FlagCheckered}"
+                <!-- Un seul des deux boutons à la fois (voir Warband.GameInProgress/HasGameInProgress) -
+                     "Lancer la partie" remplace "Fin de partie" tant qu'aucune partie n'est en cours,
+                     demande explicite de l'utilisateur (2026-08-26) : "Start a game" -> "End of game". -->
+                <components:IconTextButton IsVisible="{Binding HasGameInProgress, Converter={StaticResource InverseBoolConverter}}"
+                                            Icon="{x:Static icons:SolidFont.Play}"
+                                            Text="{loc:Loc StartGameButtonText}"
+                                            TextColor="{DynamicResource AppAccent}"
+                                            Command="{Binding StartGameCommand}"/>
+                <components:IconTextButton IsVisible="{Binding HasGameInProgress}"
+                                            Icon="{x:Static icons:SolidFont.FlagCheckered}"
                                             Text="{loc:Loc EndOfGameTitle}"
                                             TextColor="{DynamicResource AppAccent}"
                                             Command="{Binding EndOfGameCommand}"/>

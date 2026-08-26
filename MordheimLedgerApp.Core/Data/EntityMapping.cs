@@ -34,6 +34,7 @@ public static class EntityMapping
         PendingExplorationBonusDie = e.PendingExplorationBonusDie,
         NextGameNote = e.NextGameNote,
         HasCatacombReroll = e.HasCatacombReroll,
+        GameInProgress = e.GameInProgress,
         Notes = e.Notes
     };
 
@@ -48,6 +49,7 @@ public static class EntityMapping
         PendingExplorationBonusDie = m.PendingExplorationBonusDie,
         NextGameNote = m.NextGameNote,
         HasCatacombReroll = m.HasCatacombReroll,
+        GameInProgress = m.GameInProgress,
         Notes = m.Notes
     };
 

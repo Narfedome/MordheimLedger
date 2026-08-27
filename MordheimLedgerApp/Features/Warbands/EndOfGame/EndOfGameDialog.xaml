@@ -362,6 +362,61 @@
                 </Border>
             </VerticalStackLayout>
 
+            <!-- Étape : Prisonniers ennemis - une seule fois pour toute la bande (pas par guerrier),
+                 juste après les étapes Blessure. Ce que CETTE bande a capturé sur l'adversaire, sans
+                 rapport avec Capturé (61, l'inverse - un DE NOS guerriers capturé PAR l'adversaire, voir
+                 IsInjuryStep). Demandé par l'utilisateur (2026-08-27) en repensant Capturé : la bande
+                 adverse n'est pas modélisée, mais NOTRE propre type de bande l'est bien - Tué (Zombie)/
+                 Sacrifié (XP) n'apparaissent donc que pour les Morts-Vivants/le Culte des Possédés (voir
+                 IsUndeadWarband/IsPossessedWarband), Rançon/Vendu aux esclavagistes toujours proposés. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsCaptivesStep}">
+                <Label Text="{loc:Loc EndOfGameCaptivesHeading}" FontAttributes="Bold"/>
+                <HorizontalStackLayout Spacing="8">
+                    <CheckBox IsChecked="{Binding HasCapturedEnemies}" VerticalOptions="Center"/>
+                    <Label Text="{loc:Loc EndOfGameCapturedEnemiesToggle}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding HasCapturedEnemies}">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="{loc:Loc EndOfGameCapturedEnemyCountLabel}" VerticalOptions="Center"/>
+                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Command="{Binding DecrementCapturedEnemyCountCommand}"/>
+                        <Label Text="{Binding CapturedEnemyCount}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Command="{Binding IncrementCapturedEnemyCountCommand}"/>
+                    </HorizontalStackLayout>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding CapturedEnemies}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:CapturedEnemyEntry">
+                                <Border Style="{StaticResource SectionCardBorderStyle}">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding Index, StringFormat='{0}'}" FontAttributes="Bold"/>
+                                        <Picker Title="{loc:Loc EndOfGameCapturedEnemyFatePh}"
+                                                ItemsSource="{Binding FateLabels}"
+                                                SelectedItem="{Binding SelectedFateLabel}"/>
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding ShowGoldAmount}">
+                                            <Entry Grid.Column="0" Text="{Binding GoldAmount}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameCapturedEnemyGoldPh}" WidthRequest="90">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSoldToSlaversCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding FateError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding FateError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
             <!-- Étape : Expérience (livre - saisie libre, pas de calcul assisté). Pas de Statut ici :
                  entièrement auto-géré depuis l'étape Blessure. Le jet de progression (palier franchi)
                  est déplacé dans sa propre étape juste après, voir IsAdvanceStep - un guerrier peut
@@ -1100,6 +1155,7 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
+                <Label Text="{Binding SummaryCapturedEnemiesText}" IsVisible="{Binding HasCapturedEnemies}"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="4">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:WarriorOutcomeRow">

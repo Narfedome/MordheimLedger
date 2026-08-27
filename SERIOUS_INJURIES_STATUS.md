@@ -381,3 +381,22 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   `CapturedOutcomeTable_*` supprimés (plus de table Core - la logique restante est trop simple pour
   justifier une abstraction testée séparément). Build Core + tête MAUI clean (0 `error CS`), suite de
   tests en cours de vérification.
+- **2026-08-27 (Prisonniers ennemis - contrepartie de Capturé, notre propre bande capture l'adversaire)**
+  — Suite logique de la simplification ci-dessus, mockée puis confirmée par l'utilisateur ("tu peux
+  implémenter le mock ... pour le zombie, oui ça devient un vrai zombie") : Capturé (61) ne garde que
+  Rançon/Mort côté "un DE NOS guerriers capturé PAR l'adversaire" (bande adverse non modélisée), mais
+  l'INVERSE - notre bande capture des héros adverses - ne dépend que de NOTRE type de bande, une donnée
+  bien réelle (`WarbandArchetype`). Nouvelle étape de wizard `StepKind.Captives` (une seule fois pour
+  toute la bande, pas par guerrier, juste après les étapes Blessure) : case à cocher "des héros ennemis
+  ont été capturés", stepper pour le nombre, puis un `Picker` de destin par prisonnier
+  (`CapturedEnemyEntry`, nouveau fichier) - Rançon/Vendu aux esclavagistes toujours proposés (montant
+  saisi, gagné pour NOTRE trésorerie cette fois - Vendu a un bouton dé pour la formule du livre 1D6×5
+  CO) ; Tué (devient un vrai Zombie recruté dans la bande, fusionné dans un groupe de Zombies existant -
+  même mécanisme que `GrantsFreeHenchmanArchetypeName`) uniquement si la bande jouée est "Undead" ;
+  Sacrifié (+1 XP au chef, `Warrior.IsLeader`) uniquement pour "Cult of the Possessed" - match par nom
+  anglais d'archétype de bande (`EndOfGameDialogViewModel.IsUndeadWarband`/`IsPossessedWarband`), pas par
+  Race (le Culte des Possédés partage la race "Chaos Human" avec la Kermesse du Chaos, donc gater sur la
+  Race aurait mélangé les deux bandes). Nouvelle méthode `WarbandDetailViewModel.EndOfGame.
+  ApplyCapturedEnemiesAsync`, appelée une fois par Fin de Partie (pas par guerrier). Aucune nouvelle
+  logique Core.Rules (même décision que la simplification de Capturé - trop simple pour justifier une
+  abstraction). Build Core + tête MAUI clean (0 `error CS`), suite de tests en cours de vérification.

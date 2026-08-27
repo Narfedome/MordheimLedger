@@ -97,6 +97,7 @@ public partial class WarbandDetailViewModel
 
             await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentItemsByEnglishName, englishSpecialRules, sentences);
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
+            await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
@@ -700,6 +701,65 @@ public partial class WarbandDetailViewModel
                 await _warbandService.DeleteWarriorAsync(warrior.Id);
             else if (changed)
                 await _warbandService.SaveWarriorAsync(warrior);
+        }
+    }
+
+    /// <summary>Étape "Prisonniers ennemis" (EndOfGameDialogViewModel.IsCaptivesStep) - une seule fois
+    /// pour toute la bande, pas par guerrier (contrairement à ApplyWarriorOutcomesAsync ci-dessus).
+    /// Contrepartie de Capturé (61, un DE NOS guerriers capturé PAR l'adversaire, simplifié en rançon/
+    /// mort faute de vrai capteur modélisé, voir SERIOUS_INJURIES_STATUS.md) : ici NOUS sommes le
+    /// capteur, donc notre propre type de bande (EndOfGameDialogViewModel.IsUndeadWarband/
+    /// IsPossessedWarband) est une donnée bien réelle - les 4 issues du livre restent toutes
+    /// distinguées plutôt que simplifiées.</summary>
+    private async Task ApplyCapturedEnemiesAsync(EndOfGameDialogViewModel dialogViewModel,
+        IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, List<string> sentences)
+    {
+        if (Warband is null || !dialogViewModel.HasCapturedEnemies) return;
+
+        foreach (var entry in dialogViewModel.CapturedEnemies)
+        {
+            switch (entry.SelectedFate)
+            {
+                case CapturedEnemyFate.Ransomed when int.TryParse(entry.GoldAmount, out var ransom):
+                    Warband.Treasury += ransom;
+                    sentences.Add(string.Format(Loc["HistoryCapturedEnemyRansomedSentence"], ransom));
+                    break;
+
+                case CapturedEnemyFate.SoldToSlavers when int.TryParse(entry.GoldAmount, out var sold):
+                    Warband.Treasury += sold;
+                    sentences.Add(string.Format(Loc["HistoryCapturedEnemySoldSentence"], sold));
+                    break;
+
+                // Fusionne dans un groupe de Zombies déjà existant plutôt que de créer une ligne
+                // séparée - même principe que GrantsFreeHenchmanArchetypeName (Traînard/Prisonniers) plus
+                // haut dans ce fichier, un Zombie ne pouvant de toute façon porter aucun équipement.
+                case CapturedEnemyFate.KilledForZombie:
+                    if (warriorArchetypesByEnglishName.TryGetValue("Zombie", out var zombieArchetype))
+                    {
+                        var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == zombieArchetype.Id);
+                        if (existingGroup is not null)
+                        {
+                            existingGroup.Warrior.HeadCount += 1;
+                            await _warbandService.SaveWarriorAsync(existingGroup.Warrior);
+                        }
+                        else
+                        {
+                            await _warbandService.RecruitWarriorAsync(Warband.Id, zombieArchetype, zombieArchetype.Name, headCount: 1);
+                        }
+                    }
+                    sentences.Add(Loc["HistoryCapturedEnemyKilledSentence"]);
+                    break;
+
+                case CapturedEnemyFate.SacrificedForXp:
+                    var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                    if (leader is not null)
+                    {
+                        leader.Warrior.Experience += 1;
+                        await _warbandService.SaveWarriorAsync(leader.Warrior);
+                        sentences.Add(string.Format(Loc["HistoryCapturedEnemySacrificedSentence"], leader.Warrior.Name));
+                    }
+                    break;
+            }
         }
     }
 

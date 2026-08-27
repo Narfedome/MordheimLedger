@@ -1176,6 +1176,48 @@
   <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
     <value>Amount (gc)</value>
   </data>
+  <data name="EndOfGameCaptivesHeading" xml:space="preserve">
+    <value>Enemy prisoners</value>
+  </data>
+  <data name="EndOfGameCapturedEnemiesToggle" xml:space="preserve">
+    <value>Enemy heroes were captured this game</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyCountLabel" xml:space="preserve">
+    <value>Number of captured heroes</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyFatePh" xml:space="preserve">
+    <value>Prisoner's fate</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyGoldPh" xml:space="preserve">
+    <value>Amount (gc)</value>
+  </data>
+  <data name="EndOfGameCapturedEnemiesSummary" xml:space="preserve">
+    <value>{0} enemy prisoner(s) captured</value>
+  </data>
+  <data name="CapturedEnemyFateRansomed" xml:space="preserve">
+    <value>Ransomed</value>
+  </data>
+  <data name="CapturedEnemyFateSoldToSlavers" xml:space="preserve">
+    <value>Sold to slavers</value>
+  </data>
+  <data name="CapturedEnemyFateKilledForZombie" xml:space="preserve">
+    <value>Killed (becomes a Zombie)</value>
+  </data>
+  <data name="CapturedEnemyFateSacrificedForXp" xml:space="preserve">
+    <value>Sacrificed (+1 XP for the leader)</value>
+  </data>
+  <data name="HistoryCapturedEnemyRansomedSentence" xml:space="preserve">
+    <value>An enemy prisoner was ransomed back ({0} gc).</value>
+  </data>
+  <data name="HistoryCapturedEnemySoldSentence" xml:space="preserve">
+    <value>An enemy prisoner was sold to slavers ({0} gc).</value>
+  </data>
+  <data name="HistoryCapturedEnemyKilledSentence" xml:space="preserve">
+    <value>An enemy prisoner was killed and turned into a Zombie.</value>
+  </data>
+  <data name="HistoryCapturedEnemySacrificedSentence" xml:space="preserve">
+    <value>An enemy prisoner was sacrificed: {0} gains 1 XP.</value>
+  </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>
   </data>

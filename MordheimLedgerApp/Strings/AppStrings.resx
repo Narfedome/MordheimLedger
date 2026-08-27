@@ -1176,6 +1176,48 @@
   <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
     <value>Montant (CO)</value>
   </data>
+  <data name="EndOfGameCaptivesHeading" xml:space="preserve">
+    <value>Prisonniers ennemis</value>
+  </data>
+  <data name="EndOfGameCapturedEnemiesToggle" xml:space="preserve">
+    <value>Des héros ennemis ont été capturés cette partie</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyCountLabel" xml:space="preserve">
+    <value>Nombre de héros capturés</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyFatePh" xml:space="preserve">
+    <value>Sort du prisonnier</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyGoldPh" xml:space="preserve">
+    <value>Montant (CO)</value>
+  </data>
+  <data name="EndOfGameCapturedEnemiesSummary" xml:space="preserve">
+    <value>{0} prisonnier(s) ennemi(s) capturé(s)</value>
+  </data>
+  <data name="CapturedEnemyFateRansomed" xml:space="preserve">
+    <value>Rançon</value>
+  </data>
+  <data name="CapturedEnemyFateSoldToSlavers" xml:space="preserve">
+    <value>Vendu aux esclavagistes</value>
+  </data>
+  <data name="CapturedEnemyFateKilledForZombie" xml:space="preserve">
+    <value>Tué (devient un Zombie)</value>
+  </data>
+  <data name="CapturedEnemyFateSacrificedForXp" xml:space="preserve">
+    <value>Sacrifié (+1 XP au chef)</value>
+  </data>
+  <data name="HistoryCapturedEnemyRansomedSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été libéré contre rançon ({0} CO).</value>
+  </data>
+  <data name="HistoryCapturedEnemySoldSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été vendu aux esclavagistes ({0} CO).</value>
+  </data>
+  <data name="HistoryCapturedEnemyKilledSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été tué et transformé en Zombie.</value>
+  </data>
+  <data name="HistoryCapturedEnemySacrificedSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été sacrifié : {0} gagne 1 PX.</value>
+  </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>
   </data>

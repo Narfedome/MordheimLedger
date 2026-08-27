@@ -42,4 +42,7 @@ public partial class HiredSwordDetailDialogViewModel : ReadOnlyDialogViewModel
 
     [RelayCommand]
     private Task ShowWarbandDetail(WarbandArchetype warband) => ShowChipDetailAsync(warband.Name, warband.Description);
+
+    [RelayCommand]
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
 }

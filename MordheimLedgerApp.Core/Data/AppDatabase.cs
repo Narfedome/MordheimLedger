@@ -362,6 +362,7 @@ public class AppDatabase
         await _db.CreateTableAsync<HiredSwordEntity>();
         await _db.CreateTableAsync<HiredSwordEquipmentEntity>();
         await _db.CreateTableAsync<WarbandArchetypeHiredSwordEntity>();
+        await _db.CreateTableAsync<HiredSwordSpecialRuleEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -405,6 +406,7 @@ public class AppDatabase
         await _db.DropTableAsync<HiredSwordEntity>();
         await _db.DropTableAsync<HiredSwordEquipmentEntity>();
         await _db.DropTableAsync<WarbandArchetypeHiredSwordEntity>();
+        await _db.DropTableAsync<HiredSwordSpecialRuleEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -878,6 +880,12 @@ public class AppDatabase
                 if (!_equipmentIdsByEnglishName.TryGetValue(itemName, out var itemId))
                     throw new InvalidOperationException($"HiredSwords.json references unknown equipment '{itemName}'");
                 await _db.InsertAsync(new HiredSwordEquipmentEntity { HiredSwordId = entity.Id, EquipmentItemId = itemId });
+            }
+
+            foreach (var sr in hs.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new HiredSwordSpecialRuleEntity { HiredSwordId = entity.Id, SpecialRuleId = ruleId });
             }
 
             if (hs.RestrictedToWarbandNames is { Count: > 0 } hsWarbandNames)

@@ -401,6 +401,12 @@ public class HiredSwordSeedData
     /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - null/empty = hireable by
     /// every warband.</summary>
     public List<string>? RestrictedToWarbandNames { get; set; }
+
+    /// <summary>Named special rules unique to this Hired Sword (e.g. Troll Slayer's "Deathwish") - found-
+    /// or-created the same way as EquipmentSeedData.SpecialRules (inline, not a shared-catalog stub).
+    /// Only the clean single-effect rules go here - a Hired Sword's more elaborate systems (unique skill
+    /// lists, a companion profile, a market sub-table) stay free text in Description instead.</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 }
 
 /// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to

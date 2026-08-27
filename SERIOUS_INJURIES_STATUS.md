@@ -481,3 +481,63 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
      autorisées en simple texte (`PitFighterAllowedSkillCategoriesText`) plutôt qu'une ChipListView de
      compétences apprises, puisqu'il n'en a par définition aucune. Build Core + tête MAUI clean, suite
      complète relancée.
+- **2026-08-27 (roster complet des Francs-Tireurs Grade 1A, 12 nouvelles entrées + Règles Spéciales
+  propres)** — L'utilisateur a fourni le texte officiel complet des 13 Francs-Tireurs de Grade 1A
+  (Arabian Merchant, Beast Hunter, Dwarf Troll Slayer, Elf Ranger, Freelancer, Halfling Scout,
+  Highwayman, Imperial Assassin, Ogre Bodyguard, Pit Fighter déjà seedé, Roadwarden, Tilean Marksman,
+  Warlock) pour peupler le catalogue en une passe.
+  - **Nouveau : `HiredSword.SpecialRules`** (+ `HiredSwordSpecialRuleEntity`, jointure identique à
+    `WarriorArchetypeSpecialRuleEntity`) - jusque-là le modèle n'avait aucune règle spéciale, seul un
+    profil statique. Réservé aux règles propres à UN seul effet clair et non conditionnel (ex. Tueur de
+    Troll : Deathwish/Hard to Kill/Hard Head, nouvelles ; Ogre/Sorcier : réutilisent les entrées
+    partagées existantes "Causes Fear"/"Large Target"/"Wizard" par nom anglais, comme n'importe quel
+    autre find-or-create de ce catalogue) - même patron `SpecialRuleSeedData` inline que
+    `EquipmentSeedData.SpecialRules`. Éditeur/dialog récap étendus avec un `ChipListView` (picker non
+    filtré, `SpecialRuleFilterKind` n'a que Warband/Warrior, aucune valeur HiredSword - une règle propre
+    à un Franc-Tireur ne serait de toute façon jamais retrouvée par un filtre qui ne regarde que les
+    jointures Warband/Warrior).
+  - **Collision de nom repérée et résolue** : Highwayman et Roadwarden ont chacun une règle nommée
+    "Expert Rider" dans le texte officiel, mais avec un effet mécanique différent - le find-or-create
+    par nom anglais aurait fait hériter le second de la description du premier. Désambiguïsé en
+    "Expert Rider (Highwayman)"/"Expert Rider (Roadwarden)", même convention que les variantes d'arme
+    ("Heavy (Morning star)" vs "Heavy (Flail)"). Couvert par un test dédié
+    (`HiredSwords_SeedFullGrade1ARoster`) qui vérifie explicitement que les deux lignes restent
+    distinctes (Id et Description différents), pas fusionnées par erreur.
+  - **Systèmes trop complexes pour un chip** (aucune modélisation, texte de référence dans Description
+    uniquement, doctrine "pas de moteur de règles" déjà en place) : les 3 tables de marché du Marchand
+    d'Arabie (Marché Noir/Marchandises Étrangères/Recéleur) + son garde du corps compagnon (profil
+    séparé) ; les compétences uniques de plusieurs Francs-Tireurs (Tueur de Troll, Rôdeur Elfe, Assassin
+    Impérial) puisqu'aucune recrue réelle n'existe pour les "apprendre" via un Advance ; la monture
+    optionnelle du Chevalier Errant/Bandit de Grand Chemin/Gardien des Routes (Destrier/Cheval, profil
+    séparé) ; l'upkeep conditionnel (Tueur de Troll/Rôdeur Elfe payés plus cher par une bande Elfe -
+    aucune bande Elfe dans les 15 seedées, exception sans objet ; mentionné en Description quand même
+    pour Rôdeur Elfe puisque Chasseurs de Trésors Nains, notre "bande Naine", EST concernée).
+  - **5 nouveaux `EquipmentItem`** (`Equipment.json`) pour l'équipement de départ sans équivalent
+    existant : Cimeterre (compte comme Épée, réutilise sa règle "Parry (Sword)"), Hachette de Lancer
+    (compte comme Couteau de Lancer +1 Force), Rapière, Bâton (arme de Sorcier). Une "Brace of Pistols"
+    envisagée puis abandonnée : le catalogue traite déjà ce cas via une simple note de Description sur
+    l'objet "Pistol"/"Duelling Pistol" existant plutôt qu'une entrée séparée pour la paire (même
+    précédent que "Duelling Pistol" qui mentionne déjà "50 gc for a brace" dans son propre texte) -
+    suivi pour Bandit de Grand Chemin/Assassin Impérial.
+  - **Équipement à choix ou en plusieurs exemplaires** (Deux Haches du Tueur de Troll/Chasseur de Bêtes,
+    armes au choix de l'Ogre, monture optionnelle...) : un seul exemplaire listé dans
+    `StartingEquipmentIds` (le modèle n'a pas de quantité ni de "choix multiple"), le reste noté dans
+    Description - décision délibérée plutôt qu'ajouter une notion de quantité pour ce cas seul.
+  - Traductions FR : fournies par l'utilisateur pour le Gantelet à pointes (passe précédente) ; pour
+    cette passe (texte source uniquement en anglais), traductions FR faites par l'assistant - à
+    vérifier par l'utilisateur si un nom/une règle mérite d'être corrigé (ex. "Chevalier Errant" pour
+    "Freelancer", pas un terme officiel FR retrouvé).
+  - Build Core clean, tête MAUI compile sans erreur CS (seul l'exécutable local est resté verrouillé par
+    l'instance de l'utilisateur en cours d'exécution - pas un problème de code). Nouveau test
+    `HiredSwords_SeedFullGrade1ARoster` (`DataServiceTests.cs`), suite complète relancée.
+- **2026-08-27 (Magie Mineure - table de sorts du Sorcier)** — L'utilisateur a fourni la table complète
+  (6 sorts, D6) que le Sorcier génère aléatoirement à l'engagement. Ajoutée comme 8e `MagicSchool` dans
+  `MagicSchools.json` ("Lesser Magic"/"Magie Mineure", même format `MagicSchoolWithSpellsSeedData` que
+  les 7 écoles existantes) plutôt qu'en texte libre dans la fiche du Sorcier - contenu suffisamment
+  structuré (jet/difficulté/effet par sort) pour mériter d'être un vrai catalogue, browsable dans
+  l'onglet Sorts du Codex comme n'importe quelle autre école. Pas de lien structurel Sorcier ->
+  Magie Mineure : `HiredSword` n'a pas de champ `MagicSchools` (seul `WarbandArchetype` en a un),
+  cohérent avec la décision de ne pas construire de vrai flux de recrutement pour cette passe - noté
+  dans la Description du Sorcier à la place. Traductions FR par l'assistant (source fournie en anglais
+  uniquement). `DataServiceTests.CommonCatalogs_DedupCollisions_AndSeedSkills` mis à jour (42 -> 48
+  sorts total, +1 assertion pour "Lesser Magic"). Build Core + tête MAUI clean, suite complète relancée.

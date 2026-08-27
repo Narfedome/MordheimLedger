@@ -31,6 +31,7 @@ public partial class SkillCategoryOption : ObservableObject
 public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly IEquipmentPickerService _equipmentPicker;
+    private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IDetailDialogService _detailDialogs;
 
     protected override bool CancelResult => false;
@@ -63,13 +64,19 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
     /// même Include/Exclude editor que SkillEditDialogViewModel.WarbandRestriction.</summary>
     public WarbandRestrictionEditor WarbandRestriction { get; }
 
+    /// <summary>Règles spéciales propres à ce Franc-Tireur (ex. Tueur de Troll : Deathwish/Hard to Kill)
+    /// - édité en mémoire ici, recopié sur Item.SpecialRules à la sauvegarde, même principe que
+    /// WarriorArchetypeEditDialogViewModel.SpecialRules.</summary>
+    public ObservableCollection<SpecialRule> SpecialRules { get; }
+
     public HiredSwordEditDialogViewModel(HiredSword item, string title, IWarbandArchetypePickerService warbandPicker,
-        IEquipmentPickerService equipmentPicker, IDetailDialogService detailDialogs,
+        IEquipmentPickerService equipmentPicker, ISpecialRulePickerService specialRulePicker, IDetailDialogService detailDialogs,
         IReadOnlyList<WarbandArchetype> allWarbandArchetypes, IReadOnlyList<EquipmentItem> initialStartingEquipment)
     {
         this.item = item;
         this.title = title;
         _equipmentPicker = equipmentPicker;
+        _specialRulePicker = specialRulePicker;
         _detailDialogs = detailDialogs;
         movementInput = item.Movement.ToString();
 
@@ -79,6 +86,7 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
 
         StartingEquipment = new ObservableCollection<EquipmentItem>(initialStartingEquipment);
         WarbandRestriction = new WarbandRestrictionEditor(item.RestrictedToWarbandArchetypeIds, allWarbandArchetypes, warbandPicker);
+        SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
     }
 
     [RelayCommand]
@@ -101,6 +109,26 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveStartingEquipment(EquipmentItem equipmentItem) => StartingEquipment.Remove(equipmentItem);
 
+    // Catalogue non filtré (null) - même choix que les callers EquipmentItem, une règle propre à un
+    // Franc-Tireur (ex. "Deathwish") n'est attachée qu'à HiredSwordSpecialRuleEntity, jamais à
+    // WarriorArchetypeSpecialRuleEntity, donc SpecialRuleFilterKind.Warrior la masquerait à tort.
+    [RelayCommand]
+    private async Task AddSpecialRule()
+    {
+        var picked = await _specialRulePicker.PickSpecialRulesAsync();
+        foreach (var rule in picked)
+        {
+            if (SpecialRules.Any(r => r.Id == rule.Id)) continue;
+            SpecialRules.Add(rule);
+        }
+    }
+
+    [RelayCommand]
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
+
+    [RelayCommand]
+    private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
+
     private bool ValidateRequiredFields()
     {
         if (string.IsNullOrWhiteSpace(Item.Name))
@@ -121,6 +149,7 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
         Item.AllowedSkillCategories = SkillCategoryOptions.Where(o => o.IsChecked).Select(o => o.Category).ToList();
         Item.StartingEquipmentIds = StartingEquipment.Select(e => e.Id).ToList();
         Item.RestrictedToWarbandArchetypeIds = WarbandRestriction.SelectedIds;
+        Item.SpecialRules = SpecialRules.ToList();
         Close(true);
     }
 }

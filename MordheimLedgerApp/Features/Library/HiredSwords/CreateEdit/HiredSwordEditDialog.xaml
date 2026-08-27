@@ -87,6 +87,16 @@
                                       AddCommand="{Binding AddStartingEquipmentCommand}"
                                       RemoveCommand="{Binding RemoveStartingEquipmentCommand}"/>
 
+            <!-- Règles spéciales propres (ex. Tueur de Troll : Deathwish/Hard to Kill) - les systèmes
+                 plus élaborés (tables de marché, compétences uniques, monture/garde du corps compagnon)
+                 restent en texte libre dans la Description, pas de chip pour ceux-là. -->
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"
+                                      AddCommand="{Binding AddSpecialRuleCommand}"
+                                      RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+
             <!-- Peut être engagé par (bandes) : vide = commun à toutes les bandes. Contrôle unique
                  factorisant chips + bascule Inclure/Exclure - même composant que SkillEditDialogViewModel. -->
             <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>

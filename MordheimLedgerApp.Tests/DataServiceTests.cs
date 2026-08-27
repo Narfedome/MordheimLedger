@@ -67,7 +67,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(archetypes, a => a.Name == "Kislevites");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(42, spells.Count);
+        Assert.Equal(48, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
@@ -75,6 +75,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Waaagh! Magic"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Sigmar"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Magic of the Horned Rat"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Lesser Magic"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -165,6 +166,40 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
     {
         var hiredSwords = await _library.GetHiredSwordsAsync("fr");
         Assert.Single(hiredSwords, h => h.Name == "Gladiateur");
+    }
+
+    /// <summary>The full Grade 1A Hired Sword roster (13 entries) - locks in the count and a few of the
+    /// trickier cases: a rule reused from the shared catalog by exact English name (Ogre Bodyguard's
+    /// "Causes Fear"/"Large Target", Warlock's "Wizard") vs. a rule genuinely new to this pass (Troll
+    /// Slayer's "Deathwish"/"Hard to Kill"/"Hard Head"), and the "Expert Rider" name collision between
+    /// Highwayman/Roadwarden resolved by disambiguating suffix (two distinct SpecialRule rows, not one
+    /// shared by mistake).</summary>
+    [Fact]
+    public async Task HiredSwords_SeedFullGrade1ARoster()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("en");
+        Assert.Equal(13, hiredSwords.Count);
+
+        var ogre = Assert.Single(hiredSwords, h => h.Name == "Ogre Bodyguard");
+        Assert.Equal(new[] { "Causes Fear", "Large Target" }, ogre.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        var warlock = Assert.Single(hiredSwords, h => h.Name == "Warlock");
+        Assert.Single(warlock.SpecialRules, r => r.Name == "Wizard");
+
+        var trollSlayer = Assert.Single(hiredSwords, h => h.Name == "Dwarf Troll Slayer");
+        Assert.Equal(new[] { "Deathwish", "Hard Head", "Hard to Kill" }, trollSlayer.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        var highwayman = Assert.Single(hiredSwords, h => h.Name == "Highwayman");
+        var roadwarden = Assert.Single(hiredSwords, h => h.Name == "Roadwarden");
+        var highwaymanRider = Assert.Single(highwayman.SpecialRules, r => r.Name.StartsWith("Expert Rider"));
+        var roadwardenRider = Assert.Single(roadwarden.SpecialRules, r => r.Name.StartsWith("Expert Rider"));
+        Assert.NotEqual(highwaymanRider.Id, roadwardenRider.Id);
+        Assert.NotEqual(highwaymanRider.Description, roadwardenRider.Description);
+
+        // "Wizard" was already seeded by the common SpellCaster convention before HiredSwords.json runs -
+        // confirms the stub reuse actually found the existing row instead of creating a duplicate.
+        var allWizardRules = (await _library.GetSpecialRulesAsync("en")).Where(r => r.Name == "Wizard").ToList();
+        Assert.Single(allWizardRules);
     }
 
     /// <summary>Injuries.json seeds the rulebook's Serious Injuries charts once, common to every
@@ -462,16 +497,17 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
     }
 
     /// <summary>Every MagicSchool now carries a flavor-text Description (sourced from mordheimer.net's
-    /// school pages) in both languages - used to be null for all 7 schools until this was filled in.</summary>
+    /// school pages, plus the Warlock's Lesser Magic added 2026-08-27) in both languages - used to be
+    /// null for all 7 schools until this was filled in.</summary>
     [Fact]
     public async Task MagicSchools_AllHaveBilingualDescriptions()
     {
         var schoolsEn = await _library.GetMagicSchoolsAsync("en");
-        Assert.Equal(7, schoolsEn.Count);
+        Assert.Equal(8, schoolsEn.Count);
         Assert.All(schoolsEn, s => Assert.False(string.IsNullOrWhiteSpace(s.Description)));
 
         var schoolsFr = await _library.GetMagicSchoolsAsync("fr");
-        Assert.Equal(7, schoolsFr.Count);
+        Assert.Equal(8, schoolsFr.Count);
         Assert.All(schoolsFr, s => Assert.False(string.IsNullOrWhiteSpace(s.Description)));
     }
 

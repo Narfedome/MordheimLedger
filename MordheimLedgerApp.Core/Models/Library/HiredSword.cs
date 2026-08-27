@@ -61,4 +61,12 @@ public class HiredSword
     /// Fighter: every warband except Undead and Skaven) - same Include/Exclude semantics/UI as Skill/
     /// Mutation/EquipmentItem (see WarbandRestrictionEditor).</summary>
     public List<int> RestrictedToWarbandArchetypeIds { get; set; } = new();
+
+    /// <summary>Named special rules unique to this Hired Sword (e.g. Troll Slayer's "Deathwish"/"Hard to
+    /// Kill", Ogre Bodyguard's shared "Causes Fear"/"Large Target") - same find-or-create catalog and
+    /// join-table idiom as WarriorArchetype.SpecialRules, resolved/tappable as chips rather than plain
+    /// text. Only the clean, single-effect rules go here; a Hired Sword's more elaborate systems (unique
+    /// skill lists, a companion profile, a whole market sub-table) stay free text in Description - no
+    /// rules engine V1 for those.</summary>
+    public List<SpecialRule> SpecialRules { get; set; } = new();
 }

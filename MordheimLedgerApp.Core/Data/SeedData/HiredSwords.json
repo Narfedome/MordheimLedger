@@ -17,5 +17,357 @@
       "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
       "WitchHunters", "SistersOfSigmar", "Kislevites"
     ]
+  },
+  {
+    "name": { "en": "Arabian Merchant", "fr": "Marchand d'Arabie" },
+    "hireCost": 20,
+    "upkeep": 10,
+    "baseRating": 10,
+    "description": {
+      "en": "Source: Town Cryer 22. Not all hirelings are warriors - the merchants of Araby are advisers, treasure seekers and collectors of the arcane, with an uncanny knack for finding the best equipment at the best price through their black-market and foreign-trader contacts. Employer: any good-aligned warband (Mercenaries, Dwarfs, Witch Hunters, Tomb Raiders...).\n\nBeyond his Scimitar and Academic skills, a Merchant carries the Haggle skill and two elaborate systems not modelled here: Pawnbroker (+2D6 gc per item sold, up to full value, unless he was taken out of action) and Marketeer (after each battle, roll a D6 on one of three market tables - Black Market, Foreign Wares, Fencer - for special items at base price, Fencer items at half price but with a 1-in-6 chance of turning out a fake after first use). As he gains experience he may instead learn Stone Cutter (D6 on selling wyrdstone: 1-2 lose 2D6 gc, 3-5 gain 2D6 gc, 6 gain 3D6 gc) or Guardian, which grants him a free, unpaid Bodyguard (M4 WS4 BS2 S4 T3 W1 I3 A1 Ld8, Sword/Light Armour/Shield/Helmet) who intercepts any attack aimed at the Merchant but never acts independently.",
+      "fr": "Source : Town Cryer 22. Tous les mercenaires ne sont pas des guerriers - les marchands d'Arabie sont des conseillers, chercheurs de trésors et collectionneurs d'artefacts, capables de dénicher le meilleur équipement au meilleur prix grâce à leurs contacts dans les marchés noirs et le commerce étranger. Employeur : toute bande d'alignement bon (Mercenaires, Nains, Chasseurs de Sorcières, Chasseurs de Trésors...).\n\nOutre son Cimeterre et les compétences Érudition, un Marchand possède la compétence Marchandage et deux systèmes élaborés non modélisés ici : Prêteur sur gages (+2D6 CO par objet vendu, jusqu'à sa valeur totale, s'il n'a pas été mis hors de combat) et Négociant (après chaque bataille, jet de 1D6 sur l'une de trois tables - Marché Noir, Marchandises Étrangères, Recéleur - pour des objets spéciaux au prix de base, ceux du Recéleur à moitié prix mais avec 1 chance sur 6 de s'avérer un faux après le premier usage). En gagnant de l'expérience il peut aussi apprendre Tailleur de Pierre (1D6 à la vente de pierres magiques : 1-2 perd 2D6 CO, 3-5 gagne 2D6 CO, 6 gagne 3D6 CO) ou Garde du corps, qui lui octroie un garde du corps gratuit et non payé (M4 CC4 CT2 F4 E3 PV1 I3 A1 Cd8, Épée/Armure légère/Bouclier/Casque) qui intercepte toute attaque visant le Marchand mais n'agit jamais de lui-même."
+    },
+    "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 7,
+    "allowedSkillCategories": ["Academic"],
+    "startingEquipmentNames": ["Scimitar"],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Beast Hunter", "fr": "Chasseur de Bêtes" },
+    "hireCost": 35,
+    "upkeep": 15,
+    "baseRating": 18,
+    "description": {
+      "en": "Source: Town Cryer 28. Kith and kin slaughtered by Beastmen, the Beast Hunter is a dark wanderer bedecked in the skins of his foes, seeking unquenchable revenge. Employer: any warband except Skaven, Beastmen, Undead, Orcs & Goblins, Possessed and Carnival of Chaos.\n\nBeastmen Vengeance: fights for no upkeep cost in battles against Beastmen (not modelled - a house-ruled reminder for the player). Skull Rack: causes Fear in Beastmen specifically (not the app's generic Fear rule, kept as a note here). Predator: in a wilderness battle involving Beastmen, may deploy after both sides, anywhere hidden outside the enemy zone.",
+      "fr": "Source : Town Cryer 28. Famille et proches massacrés par les Hommes-Bêtes, le Chasseur de Bêtes est un vagabond sombre vêtu des peaux de ses ennemis, en quête d'une vengeance implacable. Employeur : toute bande sauf Skavens, Hommes-Bêtes, Morts-Vivants, Orques & Gobelins, Possédés et Kermesse du Chaos.\n\nVengeance contre les Bêtes : combat gratuitement (sans solde) contre les Hommes-Bêtes (non mécanisé - simple rappel pour le joueur). Rack de Crânes : provoque la Peur spécifiquement chez les Hommes-Bêtes (distinct de la règle générique Provoque la Peur de l'appli, gardé en note ici). Prédateur : lors d'une bataille en terrain sauvage impliquant des Hommes-Bêtes, peut être déployé après les deux camps, n'importe où hors de vue et hors de la zone de déploiement adverse."
+    },
+    "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 4,
+    "wounds": 1, "initiative": 4, "attacks": 2, "leadership": 7,
+    "allowedSkillCategories": ["Combat", "Strength"],
+    "startingEquipmentNames": ["Axe", "Throwing Axe", "Light Armour"],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Dwarf Troll Slayer", "fr": "Tueur de Troll Nain" },
+    "hireCost": 25,
+    "upkeep": 10,
+    "baseRating": 12,
+    "description": {
+      "en": "Source: Mordheim Rulebook. Having committed some unforgivable crime or dishonour, a Dwarf forsakes his home to seek an honourable death fighting the enemies of Dwarfkind - Mordheim offers plenty of opportunity. Employer: Mercenaries and Witch Hunters (a warband with Elves could hire one too, paying 20 gc upkeep instead of 10 - no Elf warband exists in this app, so that exception is moot for now).\n\nEquipped with Two Axes or a Double-Handed Axe (the hiring player's choice - only Axe is listed as fixed starting gear here). As he gains experience he may instead learn one of the Troll Slayer skills: Ferocious Charge (double Attacks on the turn he charges, at -1 to hit), Monster Slayer (always wounds on a D6 of 4+ regardless of Toughness, unless a lower score already applies) or Berserker (+1 to hit on the turn he charges).",
+      "fr": "Source : Livre des règles Mordheim. Ayant commis un crime impardonnable ou subi un déshonneur irréparable, un Nain abandonne son foyer pour chercher une mort honorable en combattant les ennemis de son peuple - Mordheim lui en offre l'occasion. Employeur : Mercenaires et Chasseurs de Sorcières (une bande comptant des Elfes pourrait aussi en engager un, contre 20 CO de solde au lieu de 10 - aucune bande Elfe n'existe dans l'appli, exception sans objet pour l'instant).\n\nÉquipé de Deux Haches ou d'une Hache à Deux Mains (au choix du joueur à l'engagement - seule la Hache est listée comme équipement fixe ici). En gagnant de l'expérience il peut aussi apprendre l'une des compétences de Tueur de Troll : Charge Féroce (double ses Attaques au tour où il charge, à -1 pour toucher), Tueur de Monstres (blesse toujours sur un 1D6 de 4+ quelle que soit l'Endurance adverse, sauf si un score inférieur suffit déjà) ou Berserker (+1 pour toucher au tour où il charge)."
+    },
+    "movement": 3, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
+    "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
+    "allowedSkillCategories": ["Combat", "Strength"],
+    "startingEquipmentNames": ["Axe"],
+    "restrictedToWarbandNames": [
+      "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers", "Marienburgers", "WitchHunters"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Deathwish", "fr": "Vœu de Mort" },
+        "description": {
+          "en": "Troll Slayers seek an honourable death in combat. They are completely immune to all psychology and will never need to test if they are fighting alone.",
+          "fr": "Les Tueurs de Troll cherchent une mort honorable au combat. Ils sont totalement immunisés à la psychologie et n'ont jamais besoin de passer de test s'ils combattent seuls."
+        }
+      },
+      {
+        "name": { "en": "Hard to Kill", "fr": "Dur à Tuer" },
+        "description": {
+          "en": "Troll Slayers are tough, resilient individuals who can only be taken out of action on a D6 roll of 6 instead of 5-6 when rolling on the Injury chart. Treat a roll of 5 as stunned.",
+          "fr": "Les Tueurs de Troll sont des individus coriaces qui ne sont mis hors de combat que sur un jet de 1D6 de 6, au lieu de 5-6, lors du jet sur la table des Blessures. Un résultat de 5 est traité comme Étourdi."
+        }
+      },
+      {
+        "name": { "en": "Hard Head", "fr": "Tête Dure" },
+        "description": {
+          "en": "Troll Slayers ignore the special rules for maces, clubs etc. They are not very easy individuals to knock out!",
+          "fr": "Les Tueurs de Troll ignorent les règles spéciales des masses, gourdins, etc. Ce ne sont pas des adversaires faciles à assommer !"
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Elf Ranger", "fr": "Rôdeur Elfe" },
+    "hireCost": 40,
+    "upkeep": 20,
+    "baseRating": 12,
+    "description": {
+      "en": "Source: Mordheim Rulebook. Elves sensibly avoid the ruins of Mordheim, but few can match their skill with a bow or their keen senses, and treasure hunters sometimes secure their services. Employer: Mercenaries and Witch Hunters (a warband with Dwarfs could hire one too, paying 40 gc upkeep instead of 20 - our Dwarf Treasure Hunters band is included below at that higher rate, noted here since the app cannot model a conditional upkeep).\n\nAs he gains experience he may instead learn an Elven skill: Fey (hostile spells fail against him on a D6 of 4+) or Luck (once per game, re-roll any one of his own dice rolls).",
+      "fr": "Source : Livre des règles Mordheim. Les Elfes évitent sagement les ruines de Mordheim, mais peu égalent leur talent à l'arc ou leurs sens aiguisés, et des chasseurs de trésors s'assurent parfois leurs services. Employeur : Mercenaires et Chasseurs de Sorcières (une bande comptant des Nains pourrait aussi en engager un, contre 40 CO de solde au lieu de 20 - nos Chasseurs de Trésors Nains sont inclus ci-dessous à ce tarif majoré, noté ici car l'appli ne peut pas modéliser une solde conditionnelle).\n\nEn gagnant de l'expérience il peut aussi apprendre une compétence elfique : Fée (les sorts hostiles échouent contre lui sur un 1D6 de 4+) ou Chance (une fois par partie, relance l'un de ses propres jets de dé)."
+    },
+    "movement": 5, "weaponSkill": 4, "ballisticSkill": 5, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 6, "attacks": 1, "leadership": 8,
+    "allowedSkillCategories": ["Shooting", "Speed"],
+    "startingEquipmentNames": ["Elf Bow", "Sword", "Elven Cloak"],
+    "restrictedToWarbandNames": [
+      "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers", "Marienburgers", "WitchHunters",
+      "DwarfTreasureHunters"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Seeker", "fr": "Limier" },
+        "description": {
+          "en": "When rolling on the Exploration chart, the Elf Ranger allows you to modify one dice roll by -1/+1.",
+          "fr": "Lors d'un jet sur la table d'Exploration, le Rôdeur Elfe permet de modifier un jet de dé de -1/+1."
+        }
+      },
+      {
+        "name": { "en": "Excellent Sight", "fr": "Vue Perçante" },
+        "description": {
+          "en": "Elves have eyesight unmatched by mere humans. The Elf Ranger spots Hidden enemies from two times as far away as other warriors (ie, twice his Initiative value in inches).",
+          "fr": "Les elfes ont une vue inégalée par de simples humains. Le Rôdeur Elfe repère les ennemis Cachés à une distance deux fois plus grande que les autres guerriers (soit le double de sa valeur d'Initiative en pouces)."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Freelancer", "fr": "Chevalier Errant" },
+    "hireCost": 50,
+    "upkeep": 20,
+    "baseRating": 21,
+    "description": {
+      "en": "Source: Mordheim Rulebook. Often a nobleman's disinherited younger son, the Freelancer (or 'robber knight') has taken to hiring out his considerable strength around the shanty towns surrounding Mordheim. Employer: Mercenaries and Witch Hunters.\n\nIf using the optional mounted-model rules, the Freelancer rides a Warhorse (M8 WS3 BS0 S3 T3 W1 I3 A1 Ld5) with the Ride Warhorse skill (Blazing Saddles article, not modelled here) - mounted he has a 3+ armour save, on foot 4+.",
+      "fr": "Source : Livre des règles Mordheim. Souvent fils cadet déshérité d'un noble, le Chevalier Errant (ou « chevalier brigand ») loue sa force considérable dans les bidonvilles entourant Mordheim. Employeur : Mercenaires et Chasseurs de Sorcières.\n\nAvec les règles optionnelles de monture, il chevauche un Destrier de guerre (M8 CC3 CT0 F3 E3 PV1 I3 A1 Cd5) avec la compétence Monte Destrier (article Selles Ardentes, non modélisée ici) - monté il a une sauvegarde de 3+, à pied 4+."
+    },
+    "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 4, "toughness": 3,
+    "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 7,
+    "allowedSkillCategories": ["Combat", "Strength"],
+    "startingEquipmentNames": ["Heavy Armour", "Shield", "Lance", "Sword"],
+    "restrictedToWarbandNames": [
+      "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers", "Marienburgers", "WitchHunters"
+    ]
+  },
+  {
+    "name": { "en": "Halfling Scout", "fr": "Éclaireur Halfling" },
+    "hireCost": 15,
+    "upkeep": 5,
+    "baseRating": 5,
+    "description": {
+      "en": "Source: Mordheim Rulebook. More concerned with their next meal than military pursuits, Halflings are nonetheless naturally good shots and steadfast in danger - the more adventurous ones make splendid scouts. Employer: any warband except Skaven, Undead and the Possessed.\n\nHis cooking pot counts as a Helmet.",
+      "fr": "Source : Livre des règles Mordheim. Davantage préoccupés par leur prochain repas que par les affaires militaires, les Halflings sont néanmoins naturellement bons tireurs et inébranlables face au danger - les plus aventureux font d'excellents éclaireurs. Employeur : toute bande sauf Skavens, Morts-Vivants et Possédés.\n\nSa marmite de cuisine compte comme un Casque."
+    },
+    "movement": 4, "weaponSkill": 2, "ballisticSkill": 4, "strength": 2, "toughness": 2,
+    "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+    "allowedSkillCategories": ["Speed", "Shooting"],
+    "startingEquipmentNames": ["Bow", "Dagger", "Helmet"],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "WitchHunters",
+      "SistersOfSigmar", "Kislevites"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Cook", "fr": "Cuisinier" },
+        "description": {
+          "en": "Halflings are renowned for their cooking skills. A warband with a Halfling Scout may increase its maximum size by +1, as warriors from all around are attracted by the smell of great food! Note that this does not increase the maximum number of Heroes you may have.",
+          "fr": "Les Halflings sont réputés pour leurs talents culinaires. Une bande comptant un Éclaireur Halfling peut augmenter sa taille maximale de +1, attirant des guerriers de partout par l'odeur d'une bonne cuisine ! Cela n'augmente pas le nombre maximum de Héros autorisés."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Highwayman", "fr": "Bandit de Grand Chemin" },
+    "hireCost": 35,
+    "upkeep": 20,
+    "baseRating": 20,
+    "description": {
+      "en": "Source: Town Cryer 26. A charming, foppish mask over a dark and dangerous man, the Highwayman preys on coaches and wagons from the woods and byways of the Empire. Employer: any warband except Sisters of Sigmar, Witch Hunters and any good-aligned Elves - a Highwayman will also never join a warband that already has a Roadwarden.\n\nHis cloak acts as a Buckler in close combat; his brace of pistols is represented here by a single Pistol entry.",
+      "fr": "Source : Town Cryer 26. Sous un masque charmant et affecté se cache un homme sombre et dangereux : le Bandit de Grand Chemin s'attaque aux diligences et chariots sur les chemins et bois de l'Empire. Employeur : toute bande sauf les Sœurs de Sigmar, les Chasseurs de Sorcières et les Elfes bons - un Bandit de Grand Chemin ne rejoindra jamais non plus une bande qui compte déjà un Gardien des Routes.\n\nSa cape fait office de Rondache au corps à corps ; sa paire de pistolets est représentée ici par une seule entrée Pistolet."
+    },
+    "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+    "allowedSkillCategories": ["Combat", "Shooting", "Speed"],
+    "startingEquipmentNames": ["Dagger", "Pistol", "Rapier", "Buckler"],
+    "restrictedToWarbandNames": [
+      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "SkavenOfClanEshin", "Kislevites"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Expert Pistolier", "fr": "Pistolier Expert" },
+        "description": {
+          "en": "A Highwayman's skill with a brace of pistols is unrivalled and as such he combines the effects of the skills Pistolier and Trick Shooter.",
+          "fr": "L'habileté d'un Bandit de Grand Chemin avec une paire de pistolets est inégalée : il combine les effets des compétences Pistolier et Tireur d'Élite."
+        }
+      },
+      {
+        "name": { "en": "Expert Rider (Highwayman)", "fr": "Cavalier Expert (Bandit de Grand Chemin)" },
+        "description": {
+          "en": "A Highwayman is a superb rider and as such while he is mounted he counts as being stationary for the purposes of shooting (no -1 modifier to hit) and he also benefits from the skill as he can reload quickly whilst on horseback.",
+          "fr": "Un Bandit de Grand Chemin est un cavalier hors pair : monté, il compte comme immobile pour le tir (aucun malus de -1 pour toucher) et peut recharger rapidement à cheval."
+        }
+      },
+      {
+        "name": { "en": "Unscrupulous", "fr": "Sans Scrupules" },
+        "description": {
+          "en": "A Highwayman, despite all his skill and bravado, is not to be trusted. At the end of each battle roll a D6, on a roll of a 1 the warband receives 1 less piece of Treasure than they would normally as the Highwayman has stolen it for himself (this Treasure is not spent on the Highwayman, it is lost!).",
+          "fr": "Malgré tout son talent et son aplomb, un Bandit de Grand Chemin reste peu fiable. À la fin de chaque bataille, lancez 1D6 : sur un 1, la bande reçoit un Trésor de moins que prévu, dérobé par le Bandit (ce Trésor n'est pas dépensé pour lui, il est simplement perdu !)."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Imperial Assassin", "fr": "Assassin Impérial" },
+    "hireCost": 40,
+    "upkeep": 20,
+    "baseRating": 22,
+    "description": {
+      "en": "Source: Mordheim Annual 2002. Politics is a dangerous game, and the Assassin specializes in removing 'obstacles' with discretion, joining a wandering warband between jobs to hone his skills. Employer: any warband except Witch Hunters, Sisters of Sigmar, Orcs & Goblins or Skaven.\n\nAny weapon bought for the Assassin is his to keep, never handed down to another warrior, though he will never use a blackpowder weapon (too conspicuous for his trade). As he gains experience he may instead learn an Assassin skill: Backstabber (may charge an unseen opponent within reach, +1 to hit and +1 on the Injury roll for the first round only) or Hide in Shadows (opponents need a passed Initiative test to charge or shoot at him while within 1\" of a wall or other linear obstacle).",
+      "fr": "Source : Mordheim Annual 2002. La politique est un jeu dangereux, et l'Assassin est spécialisé dans l'élimination discrète des « obstacles », rejoignant une bande errante entre deux contrats pour parfaire ses talents. Employeur : toute bande sauf Chasseurs de Sorcières, Sœurs de Sigmar, Orques & Gobelins ou Skavens.\n\nToute arme achetée pour l'Assassin lui reste acquise, jamais transmise à un autre guerrier, bien qu'il n'utilise jamais d'arme à poudre noire (trop bruyante pour son métier). En gagnant de l'expérience il peut aussi apprendre une compétence d'Assassin : Coup dans le dos (peut charger un adversaire non vu à portée de charge, +1 pour toucher et +1 au jet de Blessure au premier round seulement) ou Se fondre dans l'ombre (les adversaires doivent réussir un test d'Initiative pour le charger ou lui tirer dessus tant qu'il est à moins de 2,5cm d'un mur ou autre obstacle linéaire)."
+    },
+    "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 5, "attacks": 2, "leadership": 8,
+    "allowedSkillCategories": ["Combat", "Shooting", "Speed", "Strength"],
+    "startingEquipmentNames": ["Sword", "Dagger", "Throwing Knives", "Crossbow Pistol"],
+    "restrictedToWarbandNames": [
+      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "BeastmenRaiders", "Kislevites"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Poisoner", "fr": "Empoisonneur" },
+        "description": {
+          "en": "Assassins specialize in the use of poisons. The Assassin starts each game with his weapons poisoned with either Black Lotus or Dark Venom, decided by the controlling player before the game starts.",
+          "fr": "Les Assassins sont spécialisés dans l'usage des poisons. L'Assassin commence chaque partie avec ses armes empoisonnées au Lotus Noir ou au Venin Noir, au choix du joueur avant la partie."
+        }
+      },
+      {
+        "name": { "en": "Weapons Master", "fr": "Maître d'Armes" },
+        "description": {
+          "en": "The Assassin is a master of weapons and may use any weapon he finds. Unlike other members of your warband, any weapon you give an Assassin is his to keep. An Assassin will never use a blackpowder weapon as such devices are far too conspicuous for someone in his profession.",
+          "fr": "L'Assassin maîtrise toutes les armes et peut utiliser n'importe quelle arme trouvée. Contrairement aux autres membres de la bande, toute arme donnée à un Assassin lui reste acquise. Il n'utilisera jamais une arme à poudre noire, bien trop bruyante pour sa discrétion."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Ogre Bodyguard", "fr": "Garde du Corps Ogre" },
+    "hireCost": 80,
+    "upkeep": 30,
+    "baseRating": 25,
+    "description": {
+      "en": "Source: Mordheim Rulebook. Standing some ten feet tall and all of it bone and muscle, Ogres are much in demand as bodyguards and mercenaries despite their lack of brains - they happily accept any employer. Employer: any warband except Skaven.\n\nEquipped with either two Swords, Axes or Clubs (any mix), or a Double-Handed Weapon (the hiring player's choice - only a Club is listed as fixed starting gear here), plus Light Armour.",
+      "fr": "Source : Livre des règles Mordheim. Culminant à environ trois mètres, tout en os et en muscles, les Ogres sont très demandés comme gardes du corps et mercenaires malgré leur manque de jugeote - ils acceptent volontiers n'importe quel employeur. Employeur : toute bande sauf les Skavens.\n\nÉquipé soit de deux Épées, Haches ou Gourdins (au choix, mélange possible), soit d'une Arme à Deux Mains (au choix du joueur à l'engagement - seul un Gourdin est listé comme équipement fixe ici), plus une Armure légère."
+    },
+    "movement": 6, "weaponSkill": 3, "ballisticSkill": 2, "strength": 4, "toughness": 4,
+    "wounds": 3, "initiative": 3, "attacks": 2, "leadership": 7,
+    "allowedSkillCategories": ["Combat", "Strength"],
+    "startingEquipmentNames": ["Club", "Light Armour"],
+    "restrictedToWarbandNames": [
+      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "WitchHunters", "SistersOfSigmar", "Kislevites"
+    ],
+    "specialRules": [
+      { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" } },
+      { "name": { "en": "Large Target", "fr": "Grande Cible" } }
+    ]
+  },
+  {
+    "name": { "en": "Roadwarden", "fr": "Gardien des Routes" },
+    "hireCost": 40,
+    "upkeep": 20,
+    "baseRating": 22,
+    "description": {
+      "en": "Source: Town Cryer 26. Patrolling the highways of the Empire in all weathers, Roadwardens are dour, uncompromising men, deadly with the crossbow and merciless towards highwaymen and bandits. Employer: any good-aligned warband (Witch Hunters, Sisters of Sigmar, Dwarfs, Human Mercenaries...) - a Roadwarden will never join a warband that already has a Highwayman.\n\nCarries three Torches (only one is listed as fixed starting gear here).",
+      "fr": "Source : Town Cryer 26. Patrouillant les grandes routes de l'Empire par tous les temps, les Gardiens des Routes sont des hommes austères et intransigeants, redoutables à l'arbalète et sans pitié envers bandits et brigands. Employeur : toute bande d'alignement bon (Chasseurs de Sorcières, Sœurs de Sigmar, Nains, Mercenaires Humains...) - un Gardien des Routes ne rejoindra jamais une bande qui compte déjà un Bandit de Grand Chemin.\n\nPorte trois Torches (une seule est listée comme équipement fixe ici)."
+    },
+    "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 8,
+    "allowedSkillCategories": ["Combat", "Shooting", "Strength"],
+    "startingEquipmentNames": ["Crossbow", "Horseman's Hammer", "Dagger", "Heavy Armour", "Torch"],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Expert Rider (Roadwarden)", "fr": "Cavalier Expert (Gardien des Routes)" },
+        "description": {
+          "en": "A highly skilled horseman, a Roadwarden counts as having the Nimble skill whilst on horseback and suffers no modifiers for moving and shooting.",
+          "fr": "Cavalier hautement qualifié, le Gardien des Routes compte comme possédant la compétence Agile à cheval et ne subit aucun malus pour tir en mouvement."
+        }
+      },
+      {
+        "name": { "en": "Lethal Marksman", "fr": "Tireur Mortel" },
+        "description": {
+          "en": "A master with the crossbow, a Roadwarden combines the skills of Trick Shooter and Eagle Eyes.",
+          "fr": "Maître de l'arbalète, le Gardien des Routes combine les compétences Tireur d'Élite et Œil de Lynx."
+        }
+      },
+      {
+        "name": { "en": "Stern", "fr": "Impassible" },
+        "description": {
+          "en": "Working alone and in the dark for the majority of his profession the Roadwarden is made of strong stuff indeed. He may re-roll any failed Leadership test for fear, and is immune to the rules for being all alone.",
+          "fr": "Travaillant seul et dans l'obscurité le plus souvent, le Gardien des Routes est fait d'une trempe solide. Il peut relancer tout test de Commandement raté contre la Peur, et est immunisé aux règles de figurine Seule contre Tous."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Tilean Marksman", "fr": "Tireur Tiléen" },
+    "hireCost": 30,
+    "upkeep": 15,
+    "baseRating": 16,
+    "description": {
+      "en": "Source: Mordheim Annual 2002. When the constant wars among the city-states of Tilea die down, many of its mercenaries seek employment elsewhere - some have heard of the trouble brewing in Mordheim. Employer: any warband except Skaven, Orcs or Undead.",
+      "fr": "Source : Mordheim Annual 2002. Quand les guerres incessantes entre cités-États de Tilée s'apaisent, nombre de ses mercenaires cherchent à s'employer ailleurs - certains ont entendu parler des troubles qui couvent à Mordheim. Employeur : toute bande sauf Skavens, Orques ou Morts-Vivants."
+    },
+    "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
+    "allowedSkillCategories": ["Shooting"],
+    "startingEquipmentNames": ["Light Armour", "Sword", "Dagger", "Crossbow"],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "BeastmenRaiders", "WitchHunters",
+      "SistersOfSigmar", "Kislevites"
+    ],
+    "specialRules": [
+      {
+        "name": { "en": "Steady Hands", "fr": "Mains Sûres" },
+        "description": {
+          "en": "The Tilean Marksman's aim never wavers. He ignores 'to hit' modifiers for long range when shooting the crossbow.",
+          "fr": "La visée du Tireur Tiléen ne faiblit jamais. Il ignore les malus pour toucher liés à la longue portée en tirant à l'arbalète."
+        }
+      },
+      {
+        "name": { "en": "Dead Eye Shot", "fr": "Œil de Faucon" },
+        "description": {
+          "en": "The Marksman has the eyes of an eagle and can hit the smallest target. He ignores 'to hit' modifiers for cover when shooting his crossbow.",
+          "fr": "Le Tireur a des yeux d'aigle et peut toucher la plus petite cible. Il ignore les malus pour toucher liés à la couverture en tirant à l'arbalète."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Warlock", "fr": "Sorcier" },
+    "hireCost": 30,
+    "upkeep": 15,
+    "baseRating": 16,
+    "description": {
+      "en": "Source: Mordheim Rulebook. All magic is thought to originate from Chaos, so those blessed - or cursed - with the power of sorcery are hated and feared, yet a Warlock finds no shortage of employers willing to take the risk of persecution. Employer: any warband except Witch Hunters and Sisters of Sigmar.\n\nGenerates two spells at random from the Lesser Magic list when hired (see the Lesser Magic school in the Codex's Sorts tab for the full 6-spell table - not linked to this catalogue entry structurally, HiredSword has no MagicSchools field, only Warband does).",
+      "fr": "Source : Livre des règles Mordheim. Toute magie serait issue du Chaos, si bien que ceux bénis - ou maudits - du pouvoir de la sorcellerie sont craints et haïs ; un Sorcier ne manque pourtant pas d'employeurs prêts à courir le risque de la persécution. Employeur : toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar.\n\nGénère deux sorts au hasard sur la table de Magie Mineure à son engagement (voir l'école Magie Mineure dans l'onglet Sorts du Codex pour la table complète des 6 sorts - non liée structurellement à cette fiche, HiredSword n'a pas de champ MagicSchools, contrairement à WarbandArchetype)."
+    },
+    "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
+    "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
+    "allowedSkillCategories": ["Academic"],
+    "startingEquipmentNames": ["Staff"],
+    "restrictedToWarbandNames": [
+      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "SkavenOfClanEshin", "Kislevites"
+    ],
+    "specialRules": [
+      { "name": { "en": "Wizard", "fr": "Sorcier" } }
+    ]
   }
 ]

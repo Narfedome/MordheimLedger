@@ -180,7 +180,8 @@ public class LibraryService : ILibraryService
         var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
         var restrictions = await LoadHiredSwordRestrictionsAsync();
         var startingEquipment = await LoadHiredSwordEquipmentAsync();
-        return rows.Select(r => r.ToModel(translations, restrictions, startingEquipment)).ToList();
+        var specialRules = await LoadHiredSwordSpecialRulesAsync(languageCode);
+        return rows.Select(r => r.ToModel(translations, restrictions, startingEquipment, specialRules)).ToList();
     }
 
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)
@@ -353,6 +354,14 @@ public class LibraryService : ILibraryService
         return rows.GroupBy(r => r.HiredSwordId).ToDictionary(g => g.Key, g => g.Select(r => r.EquipmentItemId).ToList());
     }
 
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadHiredSwordSpecialRulesAsync(string languageCode)
+    {
+        var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
+        var links = await _db.Connection.Table<HiredSwordSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.HiredSwordId)
+            .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
     /// <summary>Seed-only axis (see Skill.RestrictedToWarriorArchetypeIds) - loaded/saved here so
     /// editing a seeded special skill through SkillEditDialog round-trips it instead of silently
     /// dropping it, even though the dialog has no UI to set it directly.</summary>
@@ -447,6 +456,13 @@ public class LibraryService : ILibraryService
         await _db.Connection.ExecuteAsync("DELETE FROM HiredSwordEquipmentEntity WHERE HiredSwordId = ?", hiredSwordId);
         foreach (var equipmentItemId in equipmentItemIds)
             await _db.Connection.InsertAsync(new HiredSwordEquipmentEntity { HiredSwordId = hiredSwordId, EquipmentItemId = equipmentItemId });
+    }
+
+    private async Task SaveHiredSwordSpecialRulesAsync(int hiredSwordId, List<SpecialRule> specialRules)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM HiredSwordSpecialRuleEntity WHERE HiredSwordId = ?", hiredSwordId);
+        foreach (var rule in specialRules)
+            await _db.Connection.InsertAsync(new HiredSwordSpecialRuleEntity { HiredSwordId = hiredSwordId, SpecialRuleId = rule.Id });
     }
 
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
@@ -578,6 +594,7 @@ public class LibraryService : ILibraryService
 
         await SaveHiredSwordRestrictionsAsync(hiredSword.Id, hiredSword.RestrictedToWarbandArchetypeIds);
         await SaveHiredSwordEquipmentAsync(hiredSword.Id, hiredSword.StartingEquipmentIds);
+        await SaveHiredSwordSpecialRulesAsync(hiredSword.Id, hiredSword.SpecialRules);
     }
 
     public async Task SaveInjuryAsync(Injury injury, string languageCode)

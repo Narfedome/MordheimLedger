@@ -20,6 +20,7 @@ public partial class HiredSwordViewModel : BaseViewModel
     private readonly IDetailDialogService _detailDialogs;
     private readonly IWarbandArchetypePickerService _warbandPicker;
     private readonly IEquipmentPickerService _equipmentPicker;
+    private readonly ISpecialRulePickerService _specialRulePicker;
     private List<WarbandArchetype> _warbandArchetypes = new();
     private List<EquipmentItem> _equipmentItems = new();
 
@@ -30,12 +31,14 @@ public partial class HiredSwordViewModel : BaseViewModel
     private HiredSwordRow? selectedRow;
 
     public HiredSwordViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs,
-        IWarbandArchetypePickerService warbandPicker, IEquipmentPickerService equipmentPicker)
+        IWarbandArchetypePickerService warbandPicker, IEquipmentPickerService equipmentPicker,
+        ISpecialRulePickerService specialRulePicker)
     {
         _libraryService = libraryService;
         _detailDialogs = detailDialogs;
         _warbandPicker = warbandPicker;
         _equipmentPicker = equipmentPicker;
+        _specialRulePicker = specialRulePicker;
 
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
             (r, m) => _ = ((HiredSwordViewModel)r).LoadData());
@@ -67,7 +70,7 @@ public partial class HiredSwordViewModel : BaseViewModel
     {
         var newItem = new HiredSword();
         var dialogViewModel = new HiredSwordEditDialogViewModel(newItem, Loc["HiredSwordCreateTitle"],
-            _warbandPicker, _equipmentPicker, _detailDialogs, _warbandArchetypes, Array.Empty<EquipmentItem>());
+            _warbandPicker, _equipmentPicker, _specialRulePicker, _detailDialogs, _warbandArchetypes, Array.Empty<EquipmentItem>());
         if (await ShowDialogAsync(new HiredSwordEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveHiredSwordAsync(newItem, LocalizationService.Instance.Language);
@@ -103,12 +106,13 @@ public partial class HiredSwordViewModel : BaseViewModel
             Leadership = s.Leadership,
             AllowedSkillCategories = new List<SkillCategory>(s.AllowedSkillCategories),
             StartingEquipmentIds = new List<int>(s.StartingEquipmentIds),
-            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds)
+            RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
+            SpecialRules = new List<SpecialRule>(s.SpecialRules)
         };
 
         var initialEquipment = _equipmentItems.Where(e => s.StartingEquipmentIds.Contains(e.Id)).ToList();
         var dialogViewModel = new HiredSwordEditDialogViewModel(copy, Loc["HiredSwordEditTitle"],
-            _warbandPicker, _equipmentPicker, _detailDialogs, _warbandArchetypes, initialEquipment);
+            _warbandPicker, _equipmentPicker, _specialRulePicker, _detailDialogs, _warbandArchetypes, initialEquipment);
         if (await ShowDialogAsync(new HiredSwordEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveHiredSwordAsync(copy, LocalizationService.Instance.Language);

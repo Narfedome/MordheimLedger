@@ -321,7 +321,8 @@ public static class EntityMapping
 
     public static HiredSword ToModel(this HiredSwordEntity e, IReadOnlyDictionary<string, string> translations,
         IReadOnlyDictionary<int, List<int>>? restrictions = null,
-        IReadOnlyDictionary<int, List<int>>? startingEquipmentByHiredSwordId = null) => new()
+        IReadOnlyDictionary<int, List<int>>? startingEquipmentByHiredSwordId = null,
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByHiredSwordId = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -344,7 +345,8 @@ public static class EntityMapping
         Leadership = e.Leadership,
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         StartingEquipmentIds = startingEquipmentByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        SpecialRules = specialRulesByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
     };
 
     public static HiredSwordEntity ToEntity(this HiredSword m) => new()

@@ -50,6 +50,52 @@
   },
   {
     "name": {
+      "en": "Scimitar",
+      "fr": "Cimeterre"
+    },
+    "category": "MeleeWeapon",
+    "cost": 10,
+    "description": {
+      "en": "A curved blade favoured by the sword-for-hire merchants of Araby - counts as a Sword in every respect.",
+      "fr": "Une lame courbe prisée par les marchands mercenaires d'Araby - compte comme une Épée à tous égards."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Sword)",
+          "fr": "Parade (Épée)"
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Rapier",
+      "fr": "Rapière"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A light, quick blade favoured by duellists and highwaymen over the heavier broadsword.",
+      "fr": "Une lame légère et rapide, préférée à la lourde épée large par les duellistes et les bandits de grand chemin."
+    },
+    "specialRules": []
+  },
+  {
+    "name": {
+      "en": "Staff",
+      "fr": "Bâton"
+    },
+    "category": "MeleeWeapon",
+    "cost": 5,
+    "description": {
+      "en": "The simple wooden staff carried by many a wizard and hedge-mage - as much a walking aid and badge of office as a weapon.",
+      "fr": "Le simple bâton de bois que portent bien des sorciers et rebouteux - autant une aide à la marche et un signe distinctif qu'une arme."
+    },
+    "specialRules": []
+  },
+  {
+    "name": {
       "en": "Hammer",
       "fr": "Marteau"
     },
@@ -735,6 +781,26 @@
         "description": {
           "en": "Models using throwing stars or knives do not suffer penalties for range or moving as these weapons are perfectly balanced for throwing. They cannot be used in close combat.",
           "fr": "Les guerriers utilisant des étoiles ou des couteaux de lancer ne subissent aucun malus lié à la distance ou au déplacement, ces armes étant parfaitement équilibrées pour le lancer. Elles ne peuvent pas être utilisées en combat rapproché."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Throwing Axe",
+      "fr": "Hachette de Lancer"
+    },
+    "category": "MissileWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A hand axe balanced for throwing, favoured by hunters of the wild. Counts as a Throwing Knife but with +1 Strength.",
+      "fr": "Une hachette équilibrée pour le lancer, prisée par les chasseurs des contrées sauvages. Compte comme un Couteau de Lancer mais avec +1 en Force."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Thrown Weapon",
+          "fr": "Arme de jet"
         }
       }
     ]

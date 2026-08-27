@@ -54,6 +54,11 @@
                 <Label Text="{Binding AllowedSkillCategoriesText}" TextColor="{DynamicResource AppText}"/>
             </VerticalStackLayout>
 
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding Item.SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
+
             <components:ChipListView HeaderText="{loc:Loc HiredSwordStartingEquipmentPh}"
                                       AlwaysShowSection="True"
                                       ItemsSource="{Binding StartingEquipment}"

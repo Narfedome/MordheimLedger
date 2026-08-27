@@ -120,6 +120,53 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Single(specialSkills, s => s.Name == "Da Cunnin' Plan" && s.RestrictedToWarriorArchetypeIds.Count == 1);
     }
 
+    /// <summary>HiredSwords.json seeds the "Pit Fighter" - never actually recruited into a Warband by
+    /// this code (see Models.Library.HiredSword), only a static catalogue entry used for the "Vendu aux
+    /// Fosses" mini-fight comparison. Locks in its profile, its 3 fixed starting-equipment items resolved
+    /// against the common Equipment.json catalogue, and its "every warband except Undead and Skaven"
+    /// restriction (13 of the 15 seeded warbands).</summary>
+    [Fact]
+    public async Task HiredSwords_SeedPitFighterFromRulebook()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("en");
+        var pitFighter = Assert.Single(hiredSwords, h => h.Name == "Pit Fighter");
+        Assert.Equal(ContentSource.Official, pitFighter.Source);
+        Assert.Equal(30, pitFighter.HireCost);
+        Assert.Equal(15, pitFighter.Upkeep);
+        Assert.Equal(22, pitFighter.BaseRating);
+        Assert.Equal(4, pitFighter.Movement);
+        Assert.Equal(4, pitFighter.WeaponSkill);
+        Assert.Equal(3, pitFighter.BallisticSkill);
+        Assert.Equal(4, pitFighter.Strength);
+        Assert.Equal(4, pitFighter.Toughness);
+        Assert.Equal(1, pitFighter.Wounds);
+        Assert.Equal(4, pitFighter.Initiative);
+        Assert.Equal(2, pitFighter.Attacks);
+        Assert.Equal(7, pitFighter.Leadership);
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Speed, SkillCategory.Strength], pitFighter.AllowedSkillCategories);
+
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+        var startingEquipmentNames = equipment.Where(e => pitFighter.StartingEquipmentIds.Contains(e.Id)).Select(e => e.Name).ToList();
+        Assert.Equal(3, startingEquipmentNames.Count);
+        Assert.Contains("Morning star", startingEquipmentNames);
+        Assert.Contains("Helmet", startingEquipmentNames);
+        Assert.Contains("Spiked gauntlet", startingEquipmentNames);
+
+        var warbands = await _library.GetWarbandArchetypesAsync("en");
+        Assert.Equal(13, pitFighter.RestrictedToWarbandArchetypeIds.Count);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Undead").Id, pitFighter.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Skaven of Clan Eshin").Id, pitFighter.RestrictedToWarbandArchetypeIds);
+    }
+
+    /// <summary>"Pit Fighter" is the rulebook's English name for the Hired Sword type ("Franc-Tireur" in
+    /// French is the CATEGORY name, not this specific archetype) - its own French name is "Gladiateur".</summary>
+    [Fact]
+    public async Task HiredSwords_SeedPitFighter_InFrenchToo()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("fr");
+        Assert.Single(hiredSwords, h => h.Name == "Gladiateur");
+    }
+
     /// <summary>Injuries.json seeds the rulebook's Serious Injuries charts once, common to every
     /// warband (no warband file references it) - Heroes' D66 chart (20 named rows covering the full
     /// 11-66 range) + Henchmen's much simpler D6 chart (2 rows).</summary>

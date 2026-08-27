@@ -319,6 +319,56 @@ public static class EntityMapping
         ImagePath = m.ImagePath
     };
 
+    public static HiredSword ToModel(this HiredSwordEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null,
+        IReadOnlyDictionary<int, List<int>>? startingEquipmentByHiredSwordId = null) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        HireCost = e.HireCost,
+        Upkeep = e.Upkeep,
+        BaseRating = e.BaseRating,
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty,
+        Movement = e.Movement,
+        WeaponSkill = e.WeaponSkill,
+        BallisticSkill = e.BallisticSkill,
+        Strength = e.Strength,
+        Toughness = e.Toughness,
+        Wounds = e.Wounds,
+        Initiative = e.Initiative,
+        Attacks = e.Attacks,
+        Leadership = e.Leadership,
+        AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
+        StartingEquipmentIds = startingEquipmentByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+    };
+
+    public static HiredSwordEntity ToEntity(this HiredSword m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        HireCost = m.HireCost,
+        Upkeep = m.Upkeep,
+        BaseRating = m.BaseRating,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source,
+        ImagePath = m.ImagePath,
+        Movement = m.Movement,
+        WeaponSkill = m.WeaponSkill,
+        BallisticSkill = m.BallisticSkill,
+        Strength = m.Strength,
+        Toughness = m.Toughness,
+        Wounds = m.Wounds,
+        Initiative = m.Initiative,
+        Attacks = m.Attacks,
+        Leadership = m.Leadership,
+        AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
+    };
+
     public static Injury ToModel(this InjuryEntity e, IReadOnlyDictionary<string, string> translations,
         IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByInjuryId = null) => new()
     {

@@ -162,6 +162,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasInjuryBranchSpecialRules))]
     [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
     [NotifyPropertyChangedFor(nameof(ShowCapturedChoice))]
+    [NotifyPropertyChangedFor(nameof(ShowSoldToThePits))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -203,6 +204,23 @@ public partial class WarriorOutcomeRow : ObservableObject
         // ce résultat invalide le choix déjà fait.
         if (Warrior.IsHero && !ShowCapturedChoice && IsRansomed)
             IsRansomed = false;
+
+        // Vendu aux Fosses (65) : le sous-jet de relance (défaite) est affiché dès l'entrée dans ce
+        // résultat, WonPitFight partant décoché par défaut - même principe d'auto-peuplement que
+        // PopulateMultipleInjuryRolls, mais sans jet intermédiaire ("combien de sous-jets") puisqu'il n'y
+        // en a toujours qu'un seul ici.
+        if (Warrior.IsHero && ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.Count == 0)
+            PopulateSoldToPitsRerollRoll();
+
+        // Même principe pour Vendu aux Fosses (65) - un nouveau jet principal qui ne tombe plus sur ce
+        // résultat invalide le choix victoire/défaite et le sous-jet de relance déjà saisis.
+        if (Warrior.IsHero && !ShowSoldToThePits && WonPitFight)
+            WonPitFight = false;
+        if (Warrior.IsHero && !ShowSoldToThePits && SoldToPitsRerollRoll.Count > 0)
+        {
+            SoldToPitsRerollRoll.Clear();
+            OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
+        }
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -554,6 +572,81 @@ public partial class WarriorOutcomeRow : ObservableObject
     [ObservableProperty]
     private string? capturedChoiceError;
 
+    /// <summary>True dès que le jet principal (ManualRoll) donne "Vendu aux Fosses" (65, Héros
+    /// uniquement) - combat de gladiateur contre un Gladiateur ("Pit Fighter", catalogue Franc-Tireur/
+    /// HiredSword - voir Models.Library.HiredSword). Ce Gladiateur est un adversaire éphémère affiché
+    /// pour comparaison de profil, jamais recruté dans notre bande (voir
+    /// HiredSwordEditDialogViewModel/HiredSwordViewModel - aucun flux d'engagement réel dans cette
+    /// passe). Comme pour Capturé, aucun moteur de combat : le joueur résout l'affrontement lui-même
+    /// (à la table ou en tête) et coche simplement victoire/défaite ci-dessous.</summary>
+    public bool ShowSoldToThePits => Warrior.IsHero && int.TryParse(ManualRoll, out var roll) && roll == 65;
+
+    /// <summary>Profil du Gladiateur ("Pit Fighter", catalogue Franc-Tireur/HiredSword) résolu une seule
+    /// fois à l'ouverture du wizard (voir WarbandDetailViewModel.EndOfGame.EndOfGame) et transmis à
+    /// chaque ligne - null si cette entrée du catalogue n'a jamais été seedée (ne devrait pas arriver en
+    /// pratique). Affiché en StatRowView à côté du profil de ce guerrier pour la comparaison de la
+    /// fiche officielle.</summary>
+    public HiredSword? PitFighterProfile { get; }
+
+    /// <summary>Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (voir
+    /// HiredSword.StartingEquipmentIds) - même résolution une seule fois à l'ouverture du wizard que
+    /// PitFighterProfile.</summary>
+    public IReadOnlyList<EquipmentItem> PitFighterEquipment { get; }
+
+    /// <summary>Compétences autorisées du Gladiateur en toutes lettres (ex. "Combat, Vitesse, Force") -
+    /// jamais de compétence réellement APPRISE à afficher (jamais recruté, voir PitFighterProfile), donc
+    /// un simple texte plutôt qu'une ChipListView de WarriorSkill comme pour ce guerrier.</summary>
+    public string PitFighterAllowedSkillCategoriesText => PitFighterProfile is null
+        ? string.Empty
+        : string.Join(", ", PitFighterProfile.AllowedSkillCategories.Select(c => _loc[$"SkillCategory{c}"]));
+
+    /// <summary>Pilote l'affichage de la section Équipement de la "fiche perso" comparative de Vendu aux
+    /// Fosses - même idiome que WarriorRow.HasEquipment côté roster.</summary>
+    public bool HasEquipment => Warrior.Equipment.Count > 0;
+
+    /// <summary>Idem pour Compétences - même idiome que WarriorRow.HasSkills.</summary>
+    public bool HasSkills => Warrior.Skills.Count > 0;
+
+    /// <summary>Idem côté carte du Gladiateur, pour son équipement de départ fixe (PitFighterEquipment).</summary>
+    public bool HasPitFighterEquipment => PitFighterEquipment.Count > 0;
+
+    /// <summary>Coché si le joueur gagne le combat de gladiateur (+50 CO, +2 PX, garde son équipement) -
+    /// décoché (par défaut) signifie défaite (un sous-jet supplémentaire, voir SoldToPitsRerollRoll).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    private bool wonPitFight;
+
+    partial void OnWonPitFightChanged(bool value)
+    {
+        if (value && SoldToPitsRerollRoll.Count > 0)
+        {
+            SoldToPitsRerollRoll.Clear();
+            OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
+        }
+        else if (!value && ShowSoldToThePits && SoldToPitsRerollRoll.Count == 0)
+        {
+            PopulateSoldToPitsRerollRoll();
+        }
+    }
+
+    /// <summary>Défaite du combat : un unique sous-jet D66 (relance sur la même table de Blessures
+    /// Graves) - réutilise InjurySubRollEntry tel quel (même patron que MultipleInjuryRolls) plutôt qu'un
+    /// nouveau type, il résout déjà un jet complet avec son propre IsDeath. Le livre dit de ne garder que
+    /// 11-35 ("reroll keeping only 11-35") - une consigne purement indicative (Label d'aide dans le XAML),
+    /// jamais validée : aucun jet n'est bloqué ailleurs dans l'appli, celui-ci ne fait pas exception.
+    /// Collection à un seul élément (plutôt qu'un champ nu) pour réutiliser le même DataTemplate/les mêmes
+    /// commandes AutoRoll que MultipleInjuryRolls/FigureInjuryRolls dans le XAML.</summary>
+    public ObservableCollection<InjurySubRollEntry> SoldToPitsRerollRoll { get; } = new();
+    public bool HasSoldToPitsRerollRoll => SoldToPitsRerollRoll.Count > 0;
+
+    private void PopulateSoldToPitsRerollRoll()
+    {
+        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel");
+        entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+        SoldToPitsRerollRoll.Add(entry);
+        OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
+    }
+
     /// <summary>Un jet D6 par figurine hors de combat dans un groupe d'Hommes de main (OutOfActionCount)
     /// - sans objet pour un Héros, qui utilise ManualRoll/InjuryResultText ci-dessus à la place (une
     /// seule figurine, un seul jet). Peuplée/resynchronisée par SyncFigureInjuryRolls à chaque
@@ -643,7 +736,8 @@ public partial class WarriorOutcomeRow : ObservableObject
     private readonly IReadOnlyList<Injury> _injuryCatalog;
 
     public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience, IEnumerable<MagicSchool>? magicSchools = null,
-        int startingHeroCount = 0, IReadOnlyList<Injury>? injuryCatalog = null)
+        int startingHeroCount = 0, IReadOnlyList<Injury>? injuryCatalog = null, HiredSword? pitFighterProfile = null,
+        IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         Warrior = warrior;
         ArchetypeName = archetypeName;
@@ -651,6 +745,8 @@ public partial class WarriorOutcomeRow : ObservableObject
         _startingHeroCount = startingHeroCount;
         _injuryCatalog = injuryCatalog ?? new List<Injury>();
         MagicSchools = magicSchools?.ToList() ?? new List<MagicSchool>();
+        PitFighterProfile = pitFighterProfile;
+        PitFighterEquipment = pitFighterEquipment ?? new List<EquipmentItem>();
 
         foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
             _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;

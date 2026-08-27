@@ -205,6 +205,31 @@
   },
   {
     "name": {
+      "en": "Spiked gauntlet",
+      "fr": "Gantelet à pointes"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "rarity": 7,
+    "description": {
+      "en": "Gladiators only. Heroes cannot learn to use it. Commonly used in the fighting pits, the spiked gauntlet counts as both a buckler and an additional weapon.",
+      "fr": "Gladiateurs uniquement. Les Héros ne peuvent pas apprendre à l'utiliser. Utilisé habituellement dans les arènes, le gantelet à pointes compte à la fois comme une rondache et une arme additionnelle."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Spiked Gauntlet)",
+          "fr": "Parade (Gantelet à pointes)"
+        },
+        "description": {
+          "en": "When the opponent rolls to hit, roll 1D6. If the score is greater than his best to-hit roll, your model has parried the blow and that attack is discarded. A model may not parry an attack made with double or more its own Strength - it is simply too powerful to be stopped. A model equipped with a spiked gauntlet may reroll a failed parry once per turn if it is combined with a sword.",
+          "fr": "Lorsque l'adversaire jette les dés pour toucher, lancez 1D6. Si le résultat est supérieur à son meilleur jet, votre figurine a paré le coup et l'attaque est annulée. Une figurine ne peut pas parer une attaque ayant le double ou plus de sa propre Force : elle est trop puissante pour être bloquée. Une figurine équipée d'un gantelet à pointes peut relancer une fois par tour toute parade ratée si elle est combinée à une épée."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
       "en": "Double-handed weapon",
       "fr": "Arme à deux mains"
     },

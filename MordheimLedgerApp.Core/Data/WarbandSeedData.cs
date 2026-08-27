@@ -370,6 +370,39 @@ public class SkillSeedData
     public List<string>? RestrictedToWarriorNames { get; set; }
 }
 
+/// <summary>One Hired Sword catalog entry (Data/SeedData/HiredSwords.json, always common - no per-band
+/// file declares its own, unlike Skill/Mutation). See Models.Library.HiredSword.</summary>
+public class HiredSwordSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public int HireCost { get; set; }
+    public int Upkeep { get; set; }
+    public int BaseRating { get; set; }
+    public LocalizedText? Description { get; set; }
+
+    public int Movement { get; set; }
+    public int WeaponSkill { get; set; }
+    public int BallisticSkill { get; set; }
+    public int Strength { get; set; }
+    public int Toughness { get; set; }
+    public int Wounds { get; set; }
+    public int Initiative { get; set; }
+    public int Attacks { get; set; }
+    public int Leadership { get; set; }
+
+    /// <summary>Matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names.</summary>
+    public List<string> AllowedSkillCategories { get; set; } = new();
+
+    /// <summary>English Name(s) of EquipmentSeedData entries already seeded from Equipment.json (this
+    /// runs after SeedEquipmentAsync) - resolved against _equipmentIdsByEnglishName, throws on an
+    /// unknown name (same fail-fast precedent as the other XxxIdsByEnglishName lookups).</summary>
+    public List<string> StartingEquipmentNames { get; set; } = new();
+
+    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - null/empty = hireable by
+    /// every warband.</summary>
+    public List<string>? RestrictedToWarbandNames { get; set; }
+}
+
 /// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to
 /// every warband - not declared per-band). See Injury.Category/RollRange.</summary>
 public class InjurySeedData

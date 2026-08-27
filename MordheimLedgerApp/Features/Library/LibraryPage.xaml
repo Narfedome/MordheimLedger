@@ -9,6 +9,7 @@
              xmlns:spells="clr-namespace:MordheimLedgerApp.Features.Library.Spells"
              xmlns:specialRules="clr-namespace:MordheimLedgerApp.Features.Library.SpecialRules"
              xmlns:mutations="clr-namespace:MordheimLedgerApp.Features.Library.Mutations"
+             xmlns:hiredSwords="clr-namespace:MordheimLedgerApp.Features.Library.HiredSwords"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Library.LibraryPage"
@@ -52,6 +53,8 @@
             IsVisible="{Binding IsSpecialRulesTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
         <mutations:MutationView Grid.Row="1" BindingContext="{Binding Mutations}"
             IsVisible="{Binding IsMutationsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
+        <hiredSwords:HiredSwordView Grid.Row="1" BindingContext="{Binding HiredSwords}"
+            IsVisible="{Binding IsHiredSwordsTab, Source={RelativeSource AncestorType={x:Type local:LibraryViewModel}}}"/>
     </Grid>
     </components:WatermarkedLayout>
 </ContentPage>

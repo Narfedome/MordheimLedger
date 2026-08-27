@@ -681,6 +681,36 @@
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
   </data>
+  <data name="LibTabHiredSwords" xml:space="preserve">
+    <value>Hired Swords</value>
+  </data>
+  <data name="HiredSwordNamePh" xml:space="preserve">
+    <value>Hired Sword name</value>
+  </data>
+  <data name="HiredSwordHireCostPh" xml:space="preserve">
+    <value>Hire cost (gc)</value>
+  </data>
+  <data name="HiredSwordUpkeepPh" xml:space="preserve">
+    <value>Upkeep (gc)</value>
+  </data>
+  <data name="HiredSwordBaseRatingPh" xml:space="preserve">
+    <value>Base Rating</value>
+  </data>
+  <data name="HiredSwordAllowedSkillCategoriesPh" xml:space="preserve">
+    <value>Allowed skill categories</value>
+  </data>
+  <data name="HiredSwordNoAllowedSkillCategories" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="HiredSwordStartingEquipmentPh" xml:space="preserve">
+    <value>Starting equipment</value>
+  </data>
+  <data name="HiredSwordCreateTitle" xml:space="preserve">
+    <value>New Hired Sword</value>
+  </data>
+  <data name="HiredSwordEditTitle" xml:space="preserve">
+    <value>Edit Hired Sword</value>
+  </data>
   <data name="MutationNamePh" xml:space="preserve">
     <value>Mutation name</value>
   </data>
@@ -1176,6 +1206,21 @@
   <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
     <value>Amount (gc)</value>
   </data>
+  <data name="EndOfGameSoldToPitsHeading" xml:space="preserve">
+    <value>Gladiator fight</value>
+  </data>
+  <data name="EndOfGameSoldToPitsWonLabel" xml:space="preserve">
+    <value>Won the fight (+50 gc, +2 XP, keeps their equipment)</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollHeading" xml:space="preserve">
+    <value>Loss: reroll on the same chart</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollHint" xml:space="preserve">
+    <value>The rulebook only keeps 11-35 for this reroll - free entry, not enforced.</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
+    <value>New roll</value>
+  </data>
   <data name="EndOfGameCaptivesHeading" xml:space="preserve">
     <value>Enemy prisoners</value>
   </data>
@@ -1223,6 +1268,12 @@
   </data>
   <data name="HistoryCapturedLostSentence" xml:space="preserve">
     <value>{0} was captured and never returned - considered dead.</value>
+  </data>
+  <data name="HistorySoldToPitsWonSentence" xml:space="preserve">
+    <value>{0} won their gladiator fight and returns with +50 gc and +2 XP.</value>
+  </data>
+  <data name="HistorySoldToPitsLostSentence" xml:space="preserve">
+    <value>{0} lost their gladiator fight but survives, returning with no armour or weapons.</value>
   </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Name of the one responsible</value>

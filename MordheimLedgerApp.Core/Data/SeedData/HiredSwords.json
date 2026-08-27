@@ -1,0 +1,21 @@
+[
+  {
+    "name": { "en": "Pit Fighter", "fr": "Gladiateur" },
+    "hireCost": 30,
+    "upkeep": 15,
+    "baseRating": 22,
+    "description": {
+      "en": "Pit Fighters are men who make their living in the illegal fighting pits of the Empire - places such as Black Boot Town or Blackfen. Some are free men, but most are slaves or prisoners. Although pit-fighting is illegal in many provinces it remains highly popular and wagers can be substantial, so the authorities usually turn a blind eye to these bloody contests.\n\nWhen not fighting in the pits, Pit Fighters hire out their services to the highest bidder and easily find employment among the warbands venturing into Mordheim. Pit Fighters are strong and dangerous, and their unique weapons give them an edge against almost anyone.",
+      "fr": "Les gladiateurs sont des hommes qui gagnent leur vie dans les arènes clandestines de l'Empire, notamment dans des lieux tels que le Bourg des Coupe-gorge ou Noirefosse. Certains sont des hommes libres, mais la plupart sont des esclaves ou des prisonniers. Bien que les combats de gladiateurs soient interdits dans nombre de provinces, ils restent très populaires et les paris rapportent beaucoup. Les autorités ferment donc les yeux sur ces tournois sanglants.\n\nLorsqu'ils ne sont pas dans les arènes, les gladiateurs vendent leurs services au plus offrant et trouvent facilement preneur parmi les bandes qui partent explorer Mordheim. Les gladiateurs sont puissants et redoutables, et leurs armes uniques leur donnent l'avantage contre quasiment n'importe qui."
+    },
+    "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 4, "toughness": 4,
+    "wounds": 1, "initiative": 4, "attacks": 2, "leadership": 7,
+    "allowedSkillCategories": ["Combat", "Speed", "Strength"],
+    "startingEquipmentNames": ["Morning star", "Helmet", "Spiked gauntlet"],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "WitchHunters", "SistersOfSigmar", "Kislevites"
+    ]
+  }
+]

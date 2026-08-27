@@ -359,6 +359,9 @@ public class AppDatabase
         await _db.CreateTableAsync<EquipmentItemSpecialRuleEntity>();
         await _db.CreateTableAsync<ExplorationResultEntity>();
         await _db.CreateTableAsync<ExplorationOutcomeEntity>();
+        await _db.CreateTableAsync<HiredSwordEntity>();
+        await _db.CreateTableAsync<HiredSwordEquipmentEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeHiredSwordEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -399,6 +402,9 @@ public class AppDatabase
         await _db.DropTableAsync<ExplorationResultEntity>();
         await _db.DropTableAsync<ExplorationOutcomeEntity>();
         await _db.DropTableAsync<WarbandEquipmentEntity>();
+        await _db.DropTableAsync<HiredSwordEntity>();
+        await _db.DropTableAsync<HiredSwordEquipmentEntity>();
+        await _db.DropTableAsync<WarbandArchetypeHiredSwordEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -444,6 +450,7 @@ public class AppDatabase
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
+        await SeedHiredSwordsAsync();
         await SeedInjuriesAsync();
         await SeedMagicSchoolsAsync();
         await SeedRacesAsync();
@@ -500,6 +507,9 @@ public class AppDatabase
                         break;
                     case SharedRestrictionKind.Mutation:
                         await _db.InsertAsync(new WarbandArchetypeMutationEntity { WarbandArchetypeId = warbandArchetypeId, MutationId = pending.ItemId });
+                        break;
+                    case SharedRestrictionKind.HiredSword:
+                        await _db.InsertAsync(new WarbandArchetypeHiredSwordEntity { WarbandArchetypeId = warbandArchetypeId, HiredSwordId = pending.ItemId });
                         break;
                 }
             }
@@ -830,6 +840,48 @@ public class AppDatabase
 
             if (sk.RestrictedToWarbandNames is { Count: > 0 } skWarbandNames)
                 _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Skill, skillEntity.Id, skWarbandNames));
+        }
+    }
+
+    /// <summary>Plain insert, no dedup - the only source of HiredSword data in the seed pipeline. Runs
+    /// after SeedEquipmentAsync (needs _equipmentIdsByEnglishName populated to resolve
+    /// StartingEquipmentNames) and before any SeedWarbandFromJsonAsync call (its RestrictedToWarbandNames
+    /// needs the same deferred-resolution pass as Equipment/Skill/Mutation, see SeedOfficialContentAsync).</summary>
+    private async Task SeedHiredSwordsAsync()
+    {
+        foreach (var hs in await LoadSeedArrayAsync<HiredSwordSeedData>("HiredSwords.json"))
+        {
+            var hiredSword = new HiredSword
+            {
+                HireCost = hs.HireCost,
+                Upkeep = hs.Upkeep,
+                BaseRating = hs.BaseRating,
+                Movement = hs.Movement,
+                WeaponSkill = hs.WeaponSkill,
+                BallisticSkill = hs.BallisticSkill,
+                Strength = hs.Strength,
+                Toughness = hs.Toughness,
+                Wounds = hs.Wounds,
+                Initiative = hs.Initiative,
+                Attacks = hs.Attacks,
+                Leadership = hs.Leadership,
+                AllowedSkillCategories = hs.AllowedSkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
+                Source = ContentSource.Official
+            };
+            hiredSword.NameKey = await SeedTranslationAsync(hs.Name.En, hs.Name.Fr);
+            hiredSword.DescriptionKey = hs.Description is null ? null : await SeedTranslationAsync(hs.Description.En, hs.Description.Fr);
+            var entity = hiredSword.ToEntity();
+            await _db.InsertAsync(entity);
+
+            foreach (var itemName in hs.StartingEquipmentNames)
+            {
+                if (!_equipmentIdsByEnglishName.TryGetValue(itemName, out var itemId))
+                    throw new InvalidOperationException($"HiredSwords.json references unknown equipment '{itemName}'");
+                await _db.InsertAsync(new HiredSwordEquipmentEntity { HiredSwordId = entity.Id, EquipmentItemId = itemId });
+            }
+
+            if (hs.RestrictedToWarbandNames is { Count: > 0 } hsWarbandNames)
+                _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.HiredSword, entity.Id, hsWarbandNames));
         }
     }
 
@@ -1255,7 +1307,7 @@ public class AppDatabase
     /// name several bands via RestrictedToWarbandNames - see _pendingSharedRestrictions.</summary>
     private readonly Dictionary<string, int> _warbandArchetypeIdsByFileStem = new();
 
-    private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule }
+    private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule, HiredSword }
 
     private record struct PendingSharedRestriction(SharedRestrictionKind Kind, int ItemId, List<string> WarbandFileStems);
 

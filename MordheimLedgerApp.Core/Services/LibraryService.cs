@@ -173,6 +173,16 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations, restrictions, warriorRestrictions)).ToList();
     }
 
+    public async Task<List<HiredSword>> GetHiredSwordsAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<HiredSwordEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var restrictions = await LoadHiredSwordRestrictionsAsync();
+        var startingEquipment = await LoadHiredSwordEquipmentAsync();
+        return rows.Select(r => r.ToModel(translations, restrictions, startingEquipment)).ToList();
+    }
+
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)
     {
         await _db.Initialization;
@@ -331,6 +341,18 @@ public class LibraryService : ILibraryService
         return rows.GroupBy(r => r.SkillId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
     }
 
+    private async Task<Dictionary<int, List<int>>> LoadHiredSwordRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarbandArchetypeHiredSwordEntity>().ToListAsync();
+        return rows.GroupBy(r => r.HiredSwordId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+    }
+
+    private async Task<Dictionary<int, List<int>>> LoadHiredSwordEquipmentAsync()
+    {
+        var rows = await _db.Connection.Table<HiredSwordEquipmentEntity>().ToListAsync();
+        return rows.GroupBy(r => r.HiredSwordId).ToDictionary(g => g.Key, g => g.Select(r => r.EquipmentItemId).ToList());
+    }
+
     /// <summary>Seed-only axis (see Skill.RestrictedToWarriorArchetypeIds) - loaded/saved here so
     /// editing a seeded special skill through SkillEditDialog round-trips it instead of silently
     /// dropping it, even though the dialog has no UI to set it directly.</summary>
@@ -411,6 +433,20 @@ public class LibraryService : ILibraryService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorArchetypeSkillEntity WHERE SkillId = ?", skillId);
         foreach (var warriorArchetypeId in warriorArchetypeIds)
             await _db.Connection.InsertAsync(new WarriorArchetypeSkillEntity { SkillId = skillId, WarriorArchetypeId = warriorArchetypeId });
+    }
+
+    private async Task SaveHiredSwordRestrictionsAsync(int hiredSwordId, List<int> warbandArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeHiredSwordEntity WHERE HiredSwordId = ?", hiredSwordId);
+        foreach (var warbandArchetypeId in warbandArchetypeIds)
+            await _db.Connection.InsertAsync(new WarbandArchetypeHiredSwordEntity { HiredSwordId = hiredSwordId, WarbandArchetypeId = warbandArchetypeId });
+    }
+
+    private async Task SaveHiredSwordEquipmentAsync(int hiredSwordId, List<int> equipmentItemIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM HiredSwordEquipmentEntity WHERE HiredSwordId = ?", hiredSwordId);
+        foreach (var equipmentItemId in equipmentItemIds)
+            await _db.Connection.InsertAsync(new HiredSwordEquipmentEntity { HiredSwordId = hiredSwordId, EquipmentItemId = equipmentItemId });
     }
 
     public async Task SaveWarbandArchetypeAsync(WarbandArchetype archetype, string languageCode)
@@ -520,6 +556,28 @@ public class LibraryService : ILibraryService
 
         await SaveSkillRestrictionsAsync(skill.Id, skill.RestrictedToWarbandArchetypeIds);
         await SaveSkillWarriorRestrictionsAsync(skill.Id, skill.RestrictedToWarriorArchetypeIds);
+    }
+
+    public async Task SaveHiredSwordAsync(HiredSword hiredSword, string languageCode)
+    {
+        await _db.Initialization;
+        await ApplyTranslationsAsync(hiredSword, languageCode);
+
+        if (hiredSword.Id == 0)
+        {
+            var entity = hiredSword.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            hiredSword.Id = entity.Id;
+        }
+        else
+        {
+            var existing = await _db.Connection.FindAsync<HiredSwordEntity>(hiredSword.Id);
+            if (existing?.Source == ContentSource.Official) hiredSword.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(hiredSword.ToEntity());
+        }
+
+        await SaveHiredSwordRestrictionsAsync(hiredSword.Id, hiredSword.RestrictedToWarbandArchetypeIds);
+        await SaveHiredSwordEquipmentAsync(hiredSword.Id, hiredSword.StartingEquipmentIds);
     }
 
     public async Task SaveInjuryAsync(Injury injury, string languageCode)
@@ -689,6 +747,14 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
+    private async Task ApplyTranslationsAsync(HiredSword m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
     private async Task ApplyTranslationsAsync(Injury m, string languageCode)
     {
         m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
@@ -773,6 +839,12 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<SkillEntity>(skillId);
+    }
+
+    public async Task DeleteHiredSwordAsync(int hiredSwordId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<HiredSwordEntity>(hiredSwordId);
     }
 
     public async Task DeleteInjuryAsync(int injuryId)

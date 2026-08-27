@@ -86,9 +86,28 @@ public partial class WarbandDetailViewModel
         // bas, partagée pour ne pas dupliquer le parseur de RollRange).
         var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
 
+        // Pour la comparaison de profil de "Vendu aux Fosses" (65) - le Gladiateur ("Pit Fighter",
+        // catalogue Franc-Tireur/HiredSword) est un adversaire éphémère (jamais recruté dans la bande,
+        // voir Models.Library.HiredSword), simple lookup par nom anglais comme les dictionnaires
+        // ci-dessus, pas de résolution par Id nécessaire ici (un seul profil consommé, pas une
+        // collection indexée par nom).
+        var englishHiredSwords = await _libraryService.GetHiredSwordsAsync("en");
+        var pitFighterEnglish = englishHiredSwords.FirstOrDefault(h => h.Name == "Pit Fighter");
+        var pitFighterProfile = pitFighterEnglish is null
+            ? null
+            : language == "en"
+                ? pitFighterEnglish
+                : (await _libraryService.GetHiredSwordsAsync(language)).FirstOrDefault(h => h.Id == pitFighterEnglish.Id) ?? pitFighterEnglish;
+
+        // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
+        // même carte comparative - même idiome que localizedEquipment ci-dessus.
+        var pitFighterEquipment = pitFighterProfile is null
+            ? new List<EquipmentItem>()
+            : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
+
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -605,6 +624,70 @@ public partial class WarbandDetailViewModel
                     sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                 }
                 changed = true;
+            }
+
+            // Vendu aux Fosses (65) : combat de gladiateur contre un Gladiateur ("Pit Fighter",
+            // catalogue Franc-Tireur/HiredSword) - adversaire éphémère, jamais recruté dans notre bande
+            // quelle que soit l'issue.
+            // Victoire : gain d'or/XP, équipement intact. Défaite : un unique sous-jet D66 sur la même
+            // table (row.SoldToPitsRerollRoll, réutilise le même traitement Palier 1 que les sous-jets
+            // "Blessures multiples" ci-dessous) puis, si le guerrier survit à cette relance, équipement
+            // perdu SANS CONDITION ("no armor or weapons", même traitement que Dépouillé/Capturé perdu).
+            if (row.ShowSoldToThePits)
+            {
+                if (row.WonPitFight)
+                {
+                    Warband.Treasury += 50;
+                    warrior.Experience += 2;
+                    sentences.Add(string.Format(Loc["HistorySoldToPitsWonSentence"], warrior.Name));
+                    changed = true;
+                }
+                else if (row.SoldToPitsRerollRoll.FirstOrDefault() is { } reroll && !string.IsNullOrWhiteSpace(reroll.InjuryResultText))
+                {
+                    var hasRerollRoll = int.TryParse(reroll.ManualRoll, out var rerollRoll);
+                    var rerollOutcome = hasRerollRoll && SeriousInjuryEffectTable.TryGetOutcome(rerollRoll, alreadyBlindedInOneEye, out var rerollO) ? rerollO : null;
+                    if (rerollOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
+                        rerollOutcome = rerollOutcome with { Value = int.TryParse(reroll.DeepWoundSubRoll, out var rerollD3) ? rerollD3 : SeriousInjuryEffectTable.RollD3() };
+
+                    var rerollInjury = await GetOrCreateInjuryAsync(hasRerollRoll ? rerollRoll : -1, warrior.IsHero, reroll.InjuryResultText);
+                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, rerollInjury,
+                        rerollOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3);
+                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, reroll.InjuryResultText));
+
+                    if (rerollOutcome is not null)
+                        changed |= await ApplySeriousInjuryEffectAsync(warrior, rerollOutcome);
+                    if (hasRerollRoll && rerollRoll == 31) alreadyBlindedInOneEye = true;
+
+                    if (reroll.IsDeath)
+                    {
+                        warrior.Status = WarriorStatus.Dead;
+                        sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                    }
+                    else if (reroll.ShowCapturedChoice && reroll.IsRansomed && int.TryParse(reroll.RansomAmount, out var rerollRansom))
+                    {
+                        // Sous-jet retombé sur Capturé (61), racheté - le guerrier revient avec son
+                        // équipement (pas de perte "sans armure ni armes" dans ce cas précis, même
+                        // exception que le traitement normal de Capturé).
+                        Warband.Treasury -= rerollRansom;
+                        sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, rerollRansom));
+                    }
+                    else if (reroll.ShowCapturedChoice)
+                    {
+                        warrior.Status = WarriorStatus.Dead;
+                        foreach (var equipment in warrior.Equipment.ToList())
+                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                        warrior.Equipment.Clear();
+                        sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
+                    }
+                    else
+                    {
+                        foreach (var equipment in warrior.Equipment.ToList())
+                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                        warrior.Equipment.Clear();
+                        sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
+                    }
+                    changed = true;
+                }
             }
 
             // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table, chacun

@@ -86,9 +86,28 @@ public partial class WarbandDetailViewModel
         // bas, partagée pour ne pas dupliquer le parseur de RollRange).
         var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
 
+        // Pour la comparaison de profil de "Vendu aux Fosses" (65) - le Gladiateur ("Pit Fighter",
+        // catalogue Franc-Tireur/HiredSword) est un adversaire éphémère (jamais recruté dans la bande,
+        // voir Models.Library.HiredSword), simple lookup par nom anglais comme les dictionnaires
+        // ci-dessus, pas de résolution par Id nécessaire ici (un seul profil consommé, pas une
+        // collection indexée par nom).
+        var englishHiredSwords = await _libraryService.GetHiredSwordsAsync("en");
+        var pitFighterEnglish = englishHiredSwords.FirstOrDefault(h => h.Name == "Pit Fighter");
+        var pitFighterProfile = pitFighterEnglish is null
+            ? null
+            : language == "en"
+                ? pitFighterEnglish
+                : (await _libraryService.GetHiredSwordsAsync(language)).FirstOrDefault(h => h.Id == pitFighterEnglish.Id) ?? pitFighterEnglish;
+
+        // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
+        // même carte comparative - même idiome que localizedEquipment ci-dessus.
+        var pitFighterEquipment = pitFighterProfile is null
+            ? new List<EquipmentItem>()
+            : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
+
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -97,6 +116,7 @@ public partial class WarbandDetailViewModel
 
             await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentItemsByEnglishName, englishSpecialRules, sentences);
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
+            await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
@@ -407,6 +427,8 @@ public partial class WarbandDetailViewModel
 
     private async Task ApplyWarriorOutcomesAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
     {
+        if (Warband is null) return;
+
         List<Injury>? injuryCatalog = null;
 
         // Find-or-create par jet (roll) contre le catalogue Injury seedé depuis Injuries.json (RollRange
@@ -579,6 +601,95 @@ public partial class WarbandDetailViewModel
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
             }
 
+            // Capturé (61) : portée revue à la baisse (2026-08-27, voir SERIOUS_INJURIES_STATUS.md) -
+            // le livre décrit 5 issues nommées mais toutes racontent une décision du CAPTEUR (une bande
+            // adverse que l'appli ne modélise pas comme donnée structurée - voir la note mémoire sur un
+            // futur système en réseau). Seule la rançon change réellement quelque chose de notre point
+            // de vue (coût négocié, déduit de notre trésorerie, le guerrier revient avec son
+            // équipement) - toute autre issue (échangé/vendu/tué/sacrifié) revient au même pour nous :
+            // perdu pour de bon, considéré mort, équipement perdu comme Dépouillé (36).
+            if (row.ShowCapturedChoice)
+            {
+                if (row.IsRansomed && int.TryParse(row.RansomAmount, out var ransomAmount))
+                {
+                    Warband.Treasury -= ransomAmount;
+                    sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, ransomAmount));
+                }
+                else
+                {
+                    warrior.Status = WarriorStatus.Dead;
+                    foreach (var equipment in warrior.Equipment.ToList())
+                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                    warrior.Equipment.Clear();
+                    sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
+                }
+                changed = true;
+            }
+
+            // Vendu aux Fosses (65) : combat de gladiateur contre un Gladiateur ("Pit Fighter",
+            // catalogue Franc-Tireur/HiredSword) - adversaire éphémère, jamais recruté dans notre bande
+            // quelle que soit l'issue.
+            // Victoire : gain d'or/XP, équipement intact. Défaite : un unique sous-jet D66 sur la même
+            // table (row.SoldToPitsRerollRoll, réutilise le même traitement Palier 1 que les sous-jets
+            // "Blessures multiples" ci-dessous) puis, si le guerrier survit à cette relance, équipement
+            // perdu SANS CONDITION ("no armor or weapons", même traitement que Dépouillé/Capturé perdu).
+            if (row.ShowSoldToThePits)
+            {
+                if (row.WonPitFight)
+                {
+                    Warband.Treasury += 50;
+                    warrior.Experience += 2;
+                    sentences.Add(string.Format(Loc["HistorySoldToPitsWonSentence"], warrior.Name));
+                    changed = true;
+                }
+                else if (row.SoldToPitsRerollRoll.FirstOrDefault() is { } reroll && !string.IsNullOrWhiteSpace(reroll.InjuryResultText))
+                {
+                    var hasRerollRoll = int.TryParse(reroll.ManualRoll, out var rerollRoll);
+                    var rerollOutcome = hasRerollRoll && SeriousInjuryEffectTable.TryGetOutcome(rerollRoll, alreadyBlindedInOneEye, out var rerollO) ? rerollO : null;
+                    if (rerollOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
+                        rerollOutcome = rerollOutcome with { Value = int.TryParse(reroll.DeepWoundSubRoll, out var rerollD3) ? rerollD3 : SeriousInjuryEffectTable.RollD3() };
+
+                    var rerollInjury = await GetOrCreateInjuryAsync(hasRerollRoll ? rerollRoll : -1, warrior.IsHero, reroll.InjuryResultText);
+                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, rerollInjury,
+                        rerollOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3);
+                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, reroll.InjuryResultText));
+
+                    if (rerollOutcome is not null)
+                        changed |= await ApplySeriousInjuryEffectAsync(warrior, rerollOutcome);
+                    if (hasRerollRoll && rerollRoll == 31) alreadyBlindedInOneEye = true;
+
+                    if (reroll.IsDeath)
+                    {
+                        warrior.Status = WarriorStatus.Dead;
+                        sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                    }
+                    else if (reroll.ShowCapturedChoice && reroll.IsRansomed && int.TryParse(reroll.RansomAmount, out var rerollRansom))
+                    {
+                        // Sous-jet retombé sur Capturé (61), racheté - le guerrier revient avec son
+                        // équipement (pas de perte "sans armure ni armes" dans ce cas précis, même
+                        // exception que le traitement normal de Capturé).
+                        Warband.Treasury -= rerollRansom;
+                        sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, rerollRansom));
+                    }
+                    else if (reroll.ShowCapturedChoice)
+                    {
+                        warrior.Status = WarriorStatus.Dead;
+                        foreach (var equipment in warrior.Equipment.ToList())
+                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                        warrior.Equipment.Clear();
+                        sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
+                    }
+                    else
+                    {
+                        foreach (var equipment in warrior.Equipment.ToList())
+                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                        warrior.Equipment.Clear();
+                        sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
+                    }
+                    changed = true;
+                }
+            }
+
             // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table, chacun
             // devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus.
             foreach (var sub in row.MultipleInjuryRolls)
@@ -612,6 +723,26 @@ public partial class WarbandDetailViewModel
                         sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
                 }
                 if (hasSubRoll && subRoll == 31) alreadyBlindedInOneEye = true;
+
+                // Capturé (61) : même principe que le jet principal ci-dessus, pour un sous-jet
+                // "Blessures multiples" qui tombe lui-même sur 61.
+                if (sub.ShowCapturedChoice)
+                {
+                    if (sub.IsRansomed && int.TryParse(sub.RansomAmount, out var subRansomAmount))
+                    {
+                        Warband.Treasury -= subRansomAmount;
+                        sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, subRansomAmount));
+                    }
+                    else
+                    {
+                        warrior.Status = WarriorStatus.Dead;
+                        foreach (var equipment in warrior.Equipment.ToList())
+                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                        warrior.Equipment.Clear();
+                        sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
+                    }
+                    changed = true;
+                }
             }
 
             // Un jet D6 par figurine hors de combat dans ce groupe d'Hommes de main (règle confirmée
@@ -653,6 +784,65 @@ public partial class WarbandDetailViewModel
                 await _warbandService.DeleteWarriorAsync(warrior.Id);
             else if (changed)
                 await _warbandService.SaveWarriorAsync(warrior);
+        }
+    }
+
+    /// <summary>Étape "Prisonniers ennemis" (EndOfGameDialogViewModel.IsCaptivesStep) - une seule fois
+    /// pour toute la bande, pas par guerrier (contrairement à ApplyWarriorOutcomesAsync ci-dessus).
+    /// Contrepartie de Capturé (61, un DE NOS guerriers capturé PAR l'adversaire, simplifié en rançon/
+    /// mort faute de vrai capteur modélisé, voir SERIOUS_INJURIES_STATUS.md) : ici NOUS sommes le
+    /// capteur, donc notre propre type de bande (EndOfGameDialogViewModel.IsUndeadWarband/
+    /// IsPossessedWarband) est une donnée bien réelle - les 4 issues du livre restent toutes
+    /// distinguées plutôt que simplifiées.</summary>
+    private async Task ApplyCapturedEnemiesAsync(EndOfGameDialogViewModel dialogViewModel,
+        IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, List<string> sentences)
+    {
+        if (Warband is null || !dialogViewModel.HasCapturedEnemies) return;
+
+        foreach (var entry in dialogViewModel.CapturedEnemies)
+        {
+            switch (entry.SelectedFate)
+            {
+                case CapturedEnemyFate.Ransomed when int.TryParse(entry.GoldAmount, out var ransom):
+                    Warband.Treasury += ransom;
+                    sentences.Add(string.Format(Loc["HistoryCapturedEnemyRansomedSentence"], ransom));
+                    break;
+
+                case CapturedEnemyFate.SoldToSlavers when int.TryParse(entry.GoldAmount, out var sold):
+                    Warband.Treasury += sold;
+                    sentences.Add(string.Format(Loc["HistoryCapturedEnemySoldSentence"], sold));
+                    break;
+
+                // Fusionne dans un groupe de Zombies déjà existant plutôt que de créer une ligne
+                // séparée - même principe que GrantsFreeHenchmanArchetypeName (Traînard/Prisonniers) plus
+                // haut dans ce fichier, un Zombie ne pouvant de toute façon porter aucun équipement.
+                case CapturedEnemyFate.KilledForZombie:
+                    if (warriorArchetypesByEnglishName.TryGetValue("Zombie", out var zombieArchetype))
+                    {
+                        var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == zombieArchetype.Id);
+                        if (existingGroup is not null)
+                        {
+                            existingGroup.Warrior.HeadCount += 1;
+                            await _warbandService.SaveWarriorAsync(existingGroup.Warrior);
+                        }
+                        else
+                        {
+                            await _warbandService.RecruitWarriorAsync(Warband.Id, zombieArchetype, zombieArchetype.Name, headCount: 1);
+                        }
+                    }
+                    sentences.Add(Loc["HistoryCapturedEnemyKilledSentence"]);
+                    break;
+
+                case CapturedEnemyFate.SacrificedForXp:
+                    var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                    if (leader is not null)
+                    {
+                        leader.Warrior.Experience += 1;
+                        await _warbandService.SaveWarriorAsync(leader.Warrior);
+                        sentences.Add(string.Format(Loc["HistoryCapturedEnemySacrificedSentence"], leader.Warrior.Name));
+                    }
+                    break;
+            }
         }
     }
 

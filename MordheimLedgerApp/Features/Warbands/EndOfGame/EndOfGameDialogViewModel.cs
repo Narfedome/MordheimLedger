@@ -112,6 +112,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsResultStep))]
     [NotifyPropertyChangedFor(nameof(IsOutOfActionStep))]
     [NotifyPropertyChangedFor(nameof(IsInjuryStep))]
+    [NotifyPropertyChangedFor(nameof(IsCaptivesStep))]
     [NotifyPropertyChangedFor(nameof(IsExperienceStep))]
     [NotifyPropertyChangedFor(nameof(IsAdvanceStep))]
     [NotifyPropertyChangedFor(nameof(IsExplorationRollStep))]
@@ -132,7 +133,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, Experience, Advance, ExplorationRoll, ExplorationResult, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -154,6 +155,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         {
             var steps = new List<WizardStep> { new(StepKind.Result), new(StepKind.OutOfAction) };
             steps.AddRange(WarriorRows.Where(r => r.IsOutOfAction).Select(r => new WizardStep(StepKind.Injury, r)));
+            // Prisonniers ennemis : une seule étape pour toute la bande (pas par guerrier, contrairement à
+            // Blessure/Progression) - ce que CETTE bande a capturé sur l'adversaire, sans rapport avec les
+            // guerriers propres mis hors de combat ci-dessus. Ajout demandé par l'utilisateur (2026-08-27),
+            // hors périmètre initial du wizard (voir la doc de classe).
+            steps.Add(new(StepKind.Captives));
             steps.Add(new(StepKind.Experience));
             steps.AddRange(WarriorRows.Where(r => r.HasMilestone).Select(r => new WizardStep(StepKind.Advance, r)));
             steps.Add(new(StepKind.ExplorationRoll));
@@ -183,6 +189,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsResultStep => Current.Kind == StepKind.Result;
     public bool IsOutOfActionStep => Current.Kind == StepKind.OutOfAction;
     public bool IsInjuryStep => Current.Kind == StepKind.Injury;
+    public bool IsCaptivesStep => Current.Kind == StepKind.Captives;
     public bool IsExperienceStep => Current.Kind == StepKind.Experience;
     public bool IsAdvanceStep => Current.Kind == StepKind.Advance;
     public bool IsExplorationRollStep => Current.Kind == StepKind.ExplorationRoll;
@@ -236,7 +243,50 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog)
+    /// <summary>Coché "Sacrifié" seulement pour le Culte des Possédés (bande précise, pas la race
+    /// "Humain du Chaos" qu'elle partage avec la Kermesse du Chaos) et "Tué (Zombie)" seulement pour les
+    /// Morts-Vivants - match par nom anglais de l'archétype de bande jouée (_warbandArchetypeName), même
+    /// idiome que ExplorationOutcome.RestrictedToWarbandArchetypeNames.</summary>
+    private bool IsUndeadWarband => _warbandArchetypeName == "Undead";
+    private bool IsPossessedWarband => _warbandArchetypeName == "Cult of the Possessed";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryCapturedEnemiesText))]
+    private bool hasCapturedEnemies;
+
+    partial void OnHasCapturedEnemiesChanged(bool value) => SyncCapturedEnemies();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryCapturedEnemiesText))]
+    private int capturedEnemyCount = 1;
+
+    partial void OnCapturedEnemyCountChanged(int value) => SyncCapturedEnemies();
+
+    public ObservableCollection<CapturedEnemyEntry> CapturedEnemies { get; } = new();
+
+    /// <summary>Ajoute/retire des entrées en bout de liste pour matcher CapturedEnemyCount, sans jamais
+    /// recréer celles déjà là - même principe que WarriorOutcomeRow.SyncFigureInjuryRolls (préserve la
+    /// saisie déjà faite sur les prisonniers 1..N si le joueur ajuste le compte après coup). Vide
+    /// entièrement si HasCapturedEnemies repasse à faux.</summary>
+    private void SyncCapturedEnemies()
+    {
+        if (!HasCapturedEnemies)
+        {
+            CapturedEnemies.Clear();
+            return;
+        }
+
+        while (CapturedEnemies.Count < CapturedEnemyCount)
+            CapturedEnemies.Add(new CapturedEnemyEntry(CapturedEnemies.Count + 1, IsUndeadWarband, IsPossessedWarband, Loc));
+        while (CapturedEnemies.Count > CapturedEnemyCount)
+            CapturedEnemies.RemoveAt(CapturedEnemies.Count - 1);
+    }
+
+    public string SummaryCapturedEnemiesText => HasCapturedEnemies
+        ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
+        : string.Empty;
+
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -264,7 +314,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         // plutôt que de faire remonter le roster complet de la bande jusqu'à ce ViewModel).
         var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
         WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
-            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog)));
+            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment)));
 
         // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
         // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/
@@ -312,6 +362,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         return Current.Kind switch
         {
             StepKind.Injury => ValidateInjuryStep(CurrentInjuryWarrior!),
+            StepKind.Captives => ValidateCaptivesStep(),
             StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceRolls ?? Enumerable.Empty<AdvanceRollEntry>()),
             StepKind.ExplorationRoll => ValidateExplorationRollStep(),
             StepKind.ExplorationResult => ValidateExplorationResultStep(),

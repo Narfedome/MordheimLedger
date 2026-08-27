@@ -681,6 +681,36 @@
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
   </data>
+  <data name="LibTabHiredSwords" xml:space="preserve">
+    <value>Francs-Tireurs</value>
+  </data>
+  <data name="HiredSwordNamePh" xml:space="preserve">
+    <value>Nom du franc-tireur</value>
+  </data>
+  <data name="HiredSwordHireCostPh" xml:space="preserve">
+    <value>Coût d'engagement (CO)</value>
+  </data>
+  <data name="HiredSwordUpkeepPh" xml:space="preserve">
+    <value>Entretien (CO)</value>
+  </data>
+  <data name="HiredSwordBaseRatingPh" xml:space="preserve">
+    <value>Valeur de bande</value>
+  </data>
+  <data name="HiredSwordAllowedSkillCategoriesPh" xml:space="preserve">
+    <value>Compétences autorisées</value>
+  </data>
+  <data name="HiredSwordNoAllowedSkillCategories" xml:space="preserve">
+    <value>Aucune</value>
+  </data>
+  <data name="HiredSwordStartingEquipmentPh" xml:space="preserve">
+    <value>Équipement de départ</value>
+  </data>
+  <data name="HiredSwordCreateTitle" xml:space="preserve">
+    <value>Nouveau franc-tireur</value>
+  </data>
+  <data name="HiredSwordEditTitle" xml:space="preserve">
+    <value>Modifier le franc-tireur</value>
+  </data>
   <data name="MutationNamePh" xml:space="preserve">
     <value>Nom de la mutation</value>
   </data>
@@ -1169,6 +1199,81 @@
   </data>
   <data name="EndOfGameDeepWoundResultFormat" xml:space="preserve">
     <value>{0} partie(s) manquée(s)</value>
+  </data>
+  <data name="EndOfGameCapturedRansomLabel" xml:space="preserve">
+    <value>Racheté contre rançon</value>
+  </data>
+  <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
+    <value>Montant (CO)</value>
+  </data>
+  <data name="EndOfGameSoldToPitsHeading" xml:space="preserve">
+    <value>Combat de gladiateur</value>
+  </data>
+  <data name="EndOfGameSoldToPitsWonLabel" xml:space="preserve">
+    <value>A gagné le combat (+50 CO, +2 PX, garde son équipement)</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollHeading" xml:space="preserve">
+    <value>Défaite : relance sur la même table</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollHint" xml:space="preserve">
+    <value>Le livre ne garde que 11-35 pour cette relance - saisie libre, non vérifiée.</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
+    <value>Nouveau jet</value>
+  </data>
+  <data name="EndOfGameCaptivesHeading" xml:space="preserve">
+    <value>Prisonniers ennemis</value>
+  </data>
+  <data name="EndOfGameCapturedEnemiesToggle" xml:space="preserve">
+    <value>Des héros ennemis ont été capturés cette partie</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyCountLabel" xml:space="preserve">
+    <value>Nombre de héros capturés</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyFatePh" xml:space="preserve">
+    <value>Sort du prisonnier</value>
+  </data>
+  <data name="EndOfGameCapturedEnemyGoldPh" xml:space="preserve">
+    <value>Montant (CO)</value>
+  </data>
+  <data name="EndOfGameCapturedEnemiesSummary" xml:space="preserve">
+    <value>{0} prisonnier(s) ennemi(s) capturé(s)</value>
+  </data>
+  <data name="CapturedEnemyFateRansomed" xml:space="preserve">
+    <value>Rançon</value>
+  </data>
+  <data name="CapturedEnemyFateSoldToSlavers" xml:space="preserve">
+    <value>Vendu aux esclavagistes</value>
+  </data>
+  <data name="CapturedEnemyFateKilledForZombie" xml:space="preserve">
+    <value>Tué (devient un Zombie)</value>
+  </data>
+  <data name="CapturedEnemyFateSacrificedForXp" xml:space="preserve">
+    <value>Sacrifié (+1 XP au chef)</value>
+  </data>
+  <data name="HistoryCapturedEnemyRansomedSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été libéré contre rançon ({0} CO).</value>
+  </data>
+  <data name="HistoryCapturedEnemySoldSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été vendu aux esclavagistes ({0} CO).</value>
+  </data>
+  <data name="HistoryCapturedEnemyKilledSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été tué et transformé en Zombie.</value>
+  </data>
+  <data name="HistoryCapturedEnemySacrificedSentence" xml:space="preserve">
+    <value>Un prisonnier ennemi a été sacrifié : {0} gagne 1 PX.</value>
+  </data>
+  <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
+    <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>
+  </data>
+  <data name="HistoryCapturedLostSentence" xml:space="preserve">
+    <value>{0} a été capturé et n'est jamais revenu, considéré comme mort.</value>
+  </data>
+  <data name="HistorySoldToPitsWonSentence" xml:space="preserve">
+    <value>{0} a gagné son combat de gladiateur et revient avec +50 CO et +2 PX.</value>
+  </data>
+  <data name="HistorySoldToPitsLostSentence" xml:space="preserve">
+    <value>{0} a perdu son combat de gladiateur mais survit, revenu sans armure ni armes.</value>
   </data>
   <data name="EndOfGameHatredIndividualNamePh" xml:space="preserve">
     <value>Nom du responsable</value>

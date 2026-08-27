@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.HiredSwords.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.HiredSwords.CreateEdit.HiredSwordEditDialog"
+               x:DataType="local:HiredSwordEditDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <Grid RowDefinitions="*,Auto" RowSpacing="16">
+        <dialogs:StableHeightScrollView Grid.Row="0">
+        <VerticalStackLayout Spacing="16">
+            <Label Text="{Binding Title}"
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
+            <VerticalStackLayout Spacing="4">
+                <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc HiredSwordNamePh}"/>
+                            <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Entry Text="{Binding Item.Name}"/>
+                <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Loc HiredSwordHireCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.HireCost}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{loc:Loc HiredSwordUpkeepPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Upkeep}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                    <Label Text="{loc:Loc HiredSwordBaseRatingPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.BaseRating}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="90"/>
+            </VerticalStackLayout>
+
+            <!-- Profil - même composant/mode édition que WarriorArchetypeEditDialog. Pas de surcharge de
+                 Mouvement (contrairement à WarriorArchetype/MovementOverride) : MovementInput reste un
+                 entier simple ici. -->
+            <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
+
+            <!-- Compétences autorisées lors d'une Progression - pas de contrôle réutilisable existant
+                 pour cette liste fixe de 6 entrées (voir WarriorArchetypeEditDialog.xaml, qui porte le
+                 même champ modèle sans UI d'édition), donc inline ici. -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc HiredSwordAllowedSkillCategoriesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding SkillCategoryOptions}" Spacing="2">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:SkillCategoryOption">
+                            <HorizontalStackLayout Spacing="10">
+                                <CheckBox IsChecked="{Binding IsChecked}" VerticalOptions="Center"/>
+                                <Label Text="{Binding Label}" VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Équipement de départ fixe (ex. Franc-Tireur : Morgenstern/Casque/Gantelet à pointes) -
+                 même patron ChipListView+picker qu'EquipmentListEditDialogViewModel.Items. -->
+            <components:ChipListView HeaderText="{loc:Loc HiredSwordStartingEquipmentPh}"
+                                      AlwaysShowSection="True"
+                                      ItemsSource="{Binding StartingEquipment}"
+                                      IconGlyph="{x:Static icons:SolidFont.Suitcase}"
+                                      Command="{Binding ShowStartingEquipmentDetailCommand}"
+                                      AddCommand="{Binding AddStartingEquipmentCommand}"
+                                      RemoveCommand="{Binding RemoveStartingEquipmentCommand}"/>
+
+            <!-- Règles spéciales propres (ex. Tueur de Troll : Deathwish/Hard to Kill) - les systèmes
+                 plus élaborés (tables de marché, compétences uniques, monture/garde du corps compagnon)
+                 restent en texte libre dans la Description, pas de chip pour ceux-là. -->
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"
+                                      AddCommand="{Binding AddSpecialRuleCommand}"
+                                      RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+
+            <!-- Peut être engagé par (bandes) : vide = commun à toutes les bandes. Contrôle unique
+                 factorisant chips + bascule Inclure/Exclure - même composant que SkillEditDialogViewModel. -->
+            <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
+
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding SaveCommand}"/>
+        </Grid>
+        </Grid>
+    </Border>
+</dialogs:DialogContent>

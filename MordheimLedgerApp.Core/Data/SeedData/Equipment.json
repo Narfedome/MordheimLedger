@@ -50,6 +50,52 @@
   },
   {
     "name": {
+      "en": "Scimitar",
+      "fr": "Cimeterre"
+    },
+    "category": "MeleeWeapon",
+    "cost": 10,
+    "description": {
+      "en": "A curved blade favoured by the sword-for-hire merchants of Araby - counts as a Sword in every respect.",
+      "fr": "Une lame courbe prisée par les marchands mercenaires d'Araby - compte comme une Épée à tous égards."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Sword)",
+          "fr": "Parade (Épée)"
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Rapier",
+      "fr": "Rapière"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A light, quick blade favoured by duellists and highwaymen over the heavier broadsword.",
+      "fr": "Une lame légère et rapide, préférée à la lourde épée large par les duellistes et les bandits de grand chemin."
+    },
+    "specialRules": []
+  },
+  {
+    "name": {
+      "en": "Staff",
+      "fr": "Bâton"
+    },
+    "category": "MeleeWeapon",
+    "cost": 5,
+    "description": {
+      "en": "The simple wooden staff carried by many a wizard and hedge-mage - as much a walking aid and badge of office as a weapon.",
+      "fr": "Le simple bâton de bois que portent bien des sorciers et rebouteux - autant une aide à la marche et un signe distinctif qu'une arme."
+    },
+    "specialRules": []
+  },
+  {
+    "name": {
       "en": "Hammer",
       "fr": "Marteau"
     },
@@ -199,6 +245,31 @@
         "description": {
           "en": "A model with a morning star may not use a second weapon or buckler in his other hand because it requires all his skill to wield it. He may carry a shield as normal though.",
           "fr": "Un guerrier armé d'un morgenstern ne peut utiliser d'arme supplémentaire ni de rondache dans son autre main, tant cette arme requiert toute son adresse. Il peut néanmoins porter un bouclier normalement."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Spiked gauntlet",
+      "fr": "Gantelet à pointes"
+    },
+    "category": "MeleeWeapon",
+    "cost": 15,
+    "rarity": 7,
+    "description": {
+      "en": "Gladiators only. Heroes cannot learn to use it. Commonly used in the fighting pits, the spiked gauntlet counts as both a buckler and an additional weapon.",
+      "fr": "Gladiateurs uniquement. Les Héros ne peuvent pas apprendre à l'utiliser. Utilisé habituellement dans les arènes, le gantelet à pointes compte à la fois comme une rondache et une arme additionnelle."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Parry (Spiked Gauntlet)",
+          "fr": "Parade (Gantelet à pointes)"
+        },
+        "description": {
+          "en": "When the opponent rolls to hit, roll 1D6. If the score is greater than his best to-hit roll, your model has parried the blow and that attack is discarded. A model may not parry an attack made with double or more its own Strength - it is simply too powerful to be stopped. A model equipped with a spiked gauntlet may reroll a failed parry once per turn if it is combined with a sword.",
+          "fr": "Lorsque l'adversaire jette les dés pour toucher, lancez 1D6. Si le résultat est supérieur à son meilleur jet, votre figurine a paré le coup et l'attaque est annulée. Une figurine ne peut pas parer une attaque ayant le double ou plus de sa propre Force : elle est trop puissante pour être bloquée. Une figurine équipée d'un gantelet à pointes peut relancer une fois par tour toute parade ratée si elle est combinée à une épée."
         }
       }
     ]
@@ -710,6 +781,26 @@
         "description": {
           "en": "Models using throwing stars or knives do not suffer penalties for range or moving as these weapons are perfectly balanced for throwing. They cannot be used in close combat.",
           "fr": "Les guerriers utilisant des étoiles ou des couteaux de lancer ne subissent aucun malus lié à la distance ou au déplacement, ces armes étant parfaitement équilibrées pour le lancer. Elles ne peuvent pas être utilisées en combat rapproché."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Throwing Axe",
+      "fr": "Hachette de Lancer"
+    },
+    "category": "MissileWeapon",
+    "cost": 15,
+    "description": {
+      "en": "A hand axe balanced for throwing, favoured by hunters of the wild. Counts as a Throwing Knife but with +1 Strength.",
+      "fr": "Une hachette équilibrée pour le lancer, prisée par les chasseurs des contrées sauvages. Compte comme un Couteau de Lancer mais avec +1 en Force."
+    },
+    "specialRules": [
+      {
+        "name": {
+          "en": "Thrown Weapon",
+          "fr": "Arme de jet"
         }
       }
     ]

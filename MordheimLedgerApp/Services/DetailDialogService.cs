@@ -3,6 +3,7 @@ using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
+using MordheimLedgerApp.Features.Library.HiredSwords.CreateEdit;
 using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
 using MordheimLedgerApp.Features.Library.Mutations.CreateEdit;
 using MordheimLedgerApp.Features.Library.Skills.CreateEdit;
@@ -47,6 +48,7 @@ public interface IDetailDialogService
     Task ShowSkillDetailDialogAsync(Skill item);
     Task ShowSpecialRuleDetailDialogAsync(SpecialRule item);
     Task ShowMutationDetailDialogAsync(Mutation item);
+    Task ShowHiredSwordDetailDialogAsync(HiredSword item);
     Task ShowSpellDetailDialogAsync(Spell item);
     Task ShowInjuryDetailDialogAsync(Injury item);
 }
@@ -119,6 +121,21 @@ public class DetailDialogService : IDetailDialogService
             : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         await ShowAsync(new MutationDetailDialog(new MutationDetailDialogViewModel(item, restrictedWarbands, allWarbands)));
+    }
+
+    public async Task ShowHiredSwordDetailDialogAsync(HiredSword item)
+    {
+        var language = LocalizationService.Instance.Language;
+        var allWarbands = await _libraryService.GetWarbandArchetypesAsync(language);
+        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var startingEquipment = item.StartingEquipmentIds.Count == 0
+            ? new List<EquipmentItem>()
+            : (await _libraryService.GetEquipmentItemsAsync(language)).Where(e => item.StartingEquipmentIds.Contains(e.Id)).ToList();
+
+        await ShowAsync(new HiredSwordDetailDialog(new HiredSwordDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands)));
     }
 
     public Task ShowSpellDetailDialogAsync(Spell item) =>

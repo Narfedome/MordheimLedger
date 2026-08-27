@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
@@ -26,6 +27,8 @@ public partial class EndOfGameDialogViewModel
                     valid &= CheckRoll(string.IsNullOrWhiteSpace(sub.InjuryResultText), () => sub.RollError = Loc["EndOfGameRollRequired"]);
                     if (sub.ShowDeepWoundSubRoll)
                         valid &= CheckRoll(!sub.HasValidDeepWoundSubRoll, () => sub.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
+                    if (sub.ShowCapturedChoice && sub.IsRansomed)
+                        valid &= CheckRoll(!sub.HasValidRansomAmount, () => sub.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
                 }
             }
 
@@ -42,6 +45,21 @@ public partial class EndOfGameDialogViewModel
 
             if (row.ShowDeepWoundSubRoll)
                 valid &= CheckRoll(!row.HasValidDeepWoundSubRoll, () => row.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
+
+            if (row.ShowCapturedChoice && row.IsRansomed)
+                valid &= CheckRoll(!row.HasValidRansomAmount, () => row.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+
+            if (row.ShowSoldToThePits && !row.WonPitFight)
+            {
+                foreach (var reroll in row.SoldToPitsRerollRoll)
+                {
+                    valid &= CheckRoll(string.IsNullOrWhiteSpace(reroll.InjuryResultText), () => reroll.RollError = Loc["EndOfGameRollRequired"]);
+                    if (reroll.ShowDeepWoundSubRoll)
+                        valid &= CheckRoll(!reroll.HasValidDeepWoundSubRoll, () => reroll.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
+                    if (reroll.ShowCapturedChoice && reroll.IsRansomed)
+                        valid &= CheckRoll(!reroll.HasValidRansomAmount, () => reroll.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+                }
+            }
         }
         else
         {
@@ -148,4 +166,20 @@ public partial class EndOfGameDialogViewModel
     // retour utilisateur 2026-08-25).
     [RelayCommand]
     private Task ShowInjuryBranchSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
+
+    // Vendu aux Fosses (65) : comparaison de profil "fiche perso" (même gabarit de carte que
+    // WarbandDetailPage) entre ce guerrier et le Gladiateur - ces deux commandes ouvrent le même détail
+    // catalogue que la fiche guerrier réelle (WarbandDetailViewModel.ShowEquipmentDetail/ShowSkillDetail)
+    // pour l'équipement/les compétences ACTUELS de ce guerrier.
+    [RelayCommand]
+    private Task ShowInjuryEquipmentDetail(WarriorEquipment item) =>
+        _detailDialogs.ShowEquipmentDetailDialogAsync(item.Item, item.MaterialRule, item.FoundValueOverride, item.BlessingRule);
+
+    [RelayCommand]
+    private Task ShowInjurySkillDetail(WarriorSkill item) => _detailDialogs.ShowSkillDetailDialogAsync(item.Item);
+
+    // Équipement de départ FIXE du Gladiateur (HiredSword.StartingEquipmentIds, jamais modifié en jeu) -
+    // un vrai EquipmentItem, pas un WarriorEquipment (ce Gladiateur n'est jamais recruté).
+    [RelayCommand]
+    private Task ShowPitFighterEquipmentDetail(EquipmentItem item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item);
 }

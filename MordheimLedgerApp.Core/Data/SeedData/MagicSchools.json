@@ -628,5 +628,74 @@
                                            }
                        }
                    ]
+    },
+    {
+        "name": { "en": "Lesser Magic", "fr": "Magie Mineure" },
+        "description": {
+            "en": "Those who have not been schooled in the ways of magic can cast only relatively simple spells. Lacking the tradition of sorcery and the grimoires of Necromancers and Chaos Mages, human Warlocks rely on their own natural aptitude and experimentation. Lesser Magic (or hedge magic) is not as awesome as the mighty spells of Necromancers and Chaos Mages, but it is still dangerous.",
+            "fr": "Ceux qui n'ont pas été formés aux voies de la magie ne peuvent lancer que des sorts relativement simples. Dépourvus de la tradition ésotérique et des grimoires des Nécromanciens et Mages du Chaos, les Sorciers humains s'en remettent à leur aptitude naturelle et à l'expérimentation. La Magie Mineure (ou magie rustique) est loin d'égaler la puissance des sorts de Nécromanciens et Mages du Chaos, mais reste dangereuse."
+        },
+        "spells": [
+            {
+                "magicSchoolName": "Lesser Magic",
+                "rollValue": 1,
+                "difficulty": 7,
+                "name": { "en": "Fires of U'Zhul", "fr": "Feux d'U'Zhul" },
+                "description": {
+                    "en": "The wizard summons a fiery ball of flames and hurls it upon his enemies. The fireball has a range of 18\" and causes one Strength 4 hit. It strikes the first model in its path. Armour saves are taken as normal (ie, with -1 modifier).",
+                    "fr": "Le sorcier invoque une boule de flammes et la projette sur ses ennemis. La boule de feu a une portée de 18ps et inflige une touche de Force 4. Elle frappe la première figurine sur son passage. Les sauvegardes d'armure se font normalement (soit avec un modificateur de -1)."
+                }
+            },
+            {
+                "magicSchoolName": "Lesser Magic",
+                "rollValue": 2,
+                "difficulty": 7,
+                "name": { "en": "Flight of Zimmeran", "fr": "Envol de Zimmeran" },
+                "description": {
+                    "en": "Calling upon the power of the winds of magic, the wizard walks on air. The wizard may immediately move anywhere within 12\", including into base contact with an enemy, in which case he counts as charging. If he engages a fleeing enemy in the close combat phase he will score 1 automatic hit and then his opponent will flee again (if he survives).",
+                    "fr": "Faisant appel au pouvoir des vents de la magie, le sorcier marche sur l'air. Il peut immédiatement se déplacer n'importe où à moins de 12ps, y compris au contact d'un ennemi, auquel cas il est considéré comme chargeant. S'il engage un ennemi en fuite lors de la phase de corps à corps, il inflige 1 touche automatique puis son adversaire fuit à nouveau (s'il survit)."
+                }
+            },
+            {
+                "magicSchoolName": "Lesser Magic",
+                "rollValue": 3,
+                "difficulty": 7,
+                "name": { "en": "Dread of Aramar", "fr": "Effroi d'Aramar" },
+                "description": {
+                    "en": "The wizard places a sense of mind-numbing fear into the minds of his opponents. A single model within 12\" of the wizard must pass a Leadership test or flee 2D6\" directly away from him. If he flees, he must test at the start of each of his own movement phases and will continue to flee until he passes a test. Note that this spell does not affect Undead or any model immune to fear.",
+                    "fr": "Le sorcier insuffle une terreur paralysante dans l'esprit de ses adversaires. Une figurine unique à moins de 12ps du sorcier doit réussir un test de Commandement ou fuir de 2D6ps directement loin de lui. Si elle fuit, elle doit retester au début de chacune de ses phases de mouvement et continue de fuir jusqu'à réussir un test. Ce sort n'affecte pas les Morts-Vivants ni toute figurine immunisée à la peur."
+                }
+            },
+            {
+                "magicSchoolName": "Lesser Magic",
+                "rollValue": 4,
+                "difficulty": 7,
+                "name": { "en": "Silver Arrows of Arha", "fr": "Flèches d'Argent d'Arha" },
+                "description": {
+                    "en": "Silvery arrows appear from thin air and circle around the wizard, shooting out to strike his foes. Unlike other spells, this cannot be cast whilst in hand-to-hand combat. The spell summons D6+2 arrows which the wizard can use to shoot against one enemy model. The arrows have a range of 24\". Use the wizard's own Ballistic Skill to determine whether he hits or not, but ignore movement, range and cover penalties. The arrows cause one S3 hit each.",
+                    "fr": "Des flèches argentées surgissent du néant et tournoient autour du sorcier avant de frapper ses ennemis. Contrairement aux autres sorts, celui-ci ne peut être lancé au corps à corps. Le sort invoque 1D6+2 flèches que le sorcier peut utiliser pour tirer sur une figurine ennemie. Les flèches ont une portée de 24ps. Utilisez la Capacité de Tir du sorcier pour déterminer si elles touchent, en ignorant les malus de mouvement, de portée et de couvert. Chaque flèche inflige une touche de Force 3."
+                }
+            },
+            {
+                "magicSchoolName": "Lesser Magic",
+                "rollValue": 5,
+                "difficulty": 6,
+                "name": { "en": "Luck of Shemtek", "fr": "Chance de Shemtek" },
+                "description": {
+                    "en": "The wizard summons the fickle power of magic to manipulate chance. The wizard may re-roll all his failed dice rolls, though the second results stand. The effect lasts until the beginning of his own next turn.",
+                    "fr": "Le sorcier invoque le pouvoir capricieux de la magie pour manipuler la chance. Il peut relancer tous ses jets de dé ratés, le second résultat étant définitif. L'effet dure jusqu'au début de son prochain tour."
+                }
+            },
+            {
+                "magicSchoolName": "Lesser Magic",
+                "rollValue": 6,
+                "difficulty": 8,
+                "name": { "en": "Sword of Rezhebel", "fr": "Épée de Rezhebel" },
+                "description": {
+                    "en": "A flaming sword appears in the hand of the wizard, promising red ruin to all who stand in his way. The sword gives the wizard +1 Attack, +2 Strength and +2 Weapon Skill. Take a Leadership test at the beginning of each of the wizard's own turns. If the test fails, the sword disappears.",
+                    "fr": "Une épée enflammée apparaît dans la main du sorcier, promettant la ruine sanglante à quiconque se dresse sur son chemin. L'épée confère au sorcier +1 Attaque, +2 Force et +2 Capacité de Combat. Un test de Commandement est requis au début de chacun de ses tours ; en cas d'échec, l'épée disparaît."
+                }
+            }
+        ]
     }
 ]

@@ -10,6 +10,7 @@ using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
+using MordheimLedgerApp.Features.Library.HiredSwords;
 using MordheimLedgerApp.Features.Library.MagicSchools;
 using MordheimLedgerApp.Features.Library.RacialProfiles;
 using MordheimLedgerApp.Features.Library.Races;
@@ -164,6 +165,7 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<MutationSelectorPage>();
             builder.Services.AddSingleton<IMutationPickerNavigationService, MutationPickerNavigationService>();
             builder.Services.AddSingleton<IMutationPickerService, MutationPickerService>();
+            builder.Services.AddTransient<HiredSwordViewModel>();
             builder.Services.AddTransient<MagicSchoolViewModel>();
             builder.Services.AddTransient<MagicSchoolSelectorPage>();
             builder.Services.AddTransient<MagicSchoolListPage>();

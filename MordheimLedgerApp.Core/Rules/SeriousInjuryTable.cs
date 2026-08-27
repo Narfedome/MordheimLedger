@@ -64,6 +64,16 @@ public static class SeriousInjuryTable
     /// warrior now hates, see HatredTargetTable.</summary>
     public static bool IsBitterEnmity(int roll) => roll == BitterEnmityRoll;
 
+    /// <summary>True for the 3 results whose WarriorInjury row carries no lasting condition worth a
+    /// permanent chip on the roster card - "Dépouillé" (36, equipment already gone, nothing left to
+    /// remind the player of), "Rancune" (56, already surfaced as its own "Haine : X" chip via
+    /// WarriorHatred - a second "Rancune" chip is redundant) and "Capturé" (61, not yet mechanized -
+    /// pure one-time event, no ongoing state). User feedback 2026-08-27: these shouldn't clutter the
+    /// Blessures chip list the way a real permanent condition (Bras amputé, Œil crevé) does. The
+    /// WarriorInjury row itself is still created/kept (History log, catalog integrity) - only the
+    /// roster chip is hidden, see WarbandDetailViewModel.ToRow.</summary>
+    public static bool HidesRosterChip(int roll) => roll is 36 or 56 or 61;
+
     /// <summary>Arm Wound (23), Smashed Leg (25) and Madness (24) each cover TWO distinct permanent
     /// outcomes under one D66 roll (see SeriousInjuryEffectTable.RequiresBranchSubRoll for the 1D6 that
     /// picks which) - the plain TryGetTextKey above only resolves the combined book text describing both

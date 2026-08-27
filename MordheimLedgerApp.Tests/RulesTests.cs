@@ -182,6 +182,30 @@ public class RulesTests
         Assert.False(SeriousInjuryTable.IsBitterEnmity(roll));
     }
 
+    [Theory]
+    [InlineData(36)]
+    [InlineData(56)]
+    [InlineData(61)]
+    public void SeriousInjuryTable_HidesRosterChip(int roll)
+    {
+        Assert.True(SeriousInjuryTable.HidesRosterChip(roll));
+    }
+
+    [Theory]
+    [InlineData(11)]
+    [InlineData(22)]
+    [InlineData(35)]
+    [InlineData(66)]
+    public void SeriousInjuryTable_OtherResults_DoNotHideRosterChip(int roll)
+    {
+        Assert.False(SeriousInjuryTable.HidesRosterChip(roll));
+    }
+
+    // Capturé (61) : plus de table Core dédiée depuis la revue de portée du 2026-08-27 - la logique
+    // (racheté contre rançon avec un montant saisi/déduit de la trésorerie, ou perdu/considéré mort
+    // sinon) est trop simple pour justifier une abstraction Core.Rules, voir WarbandDetailViewModel.
+    // EndOfGame.ApplyWarriorOutcomesAsync.
+
     // --- SeriousInjuryEffectTable (Palier 1 mechanized subset) -----------------------------------
 
     [Fact]

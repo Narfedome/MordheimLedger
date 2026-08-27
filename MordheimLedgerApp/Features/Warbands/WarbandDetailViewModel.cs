@@ -326,7 +326,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private Task ShowSpecialRuleDetail(SpecialRuleChip chip) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(chip.Item);
 
     [RelayCommand]
-    private Task ShowInjuryDetail(WarriorInjury injury) => _detailDialogs.ShowInjuryDetailDialogAsync(injury.Item);
+    private Task ShowInjuryDetail(InjuryChipGroup group) => _detailDialogs.ShowInjuryDetailDialogAsync(group.Representative.Item);
 
     [RelayCommand]
     private Task ShowSpellDetail(WarriorSpell spell) => _detailDialogs.ShowSpellDetailDialogAsync(spell.Item);

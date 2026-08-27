@@ -67,7 +67,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(archetypes, a => a.Name == "Kislevites");
 
         var spells = await _library.GetSpellsAsync("en");
-        Assert.Equal(42, spells.Count);
+        Assert.Equal(48, spells.Count);
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Necromancy"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Taal"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Nurgle Rituals"));
@@ -75,6 +75,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Waaagh! Magic"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Prayers of Sigmar"));
         Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Magic of the Horned Rat"));
+        Assert.Equal(6, spells.Count(s => s.MagicSchool?.Name == "Lesser Magic"));
 
         var necromancer = (await _library.GetWarriorArchetypesAsync(
             archetypes.Single(a => a.Name == "Undead").Id, "en")).Single(w => w.Name == "Necromancer");
@@ -120,6 +121,87 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Single(specialSkills, s => s.Name == "Da Cunnin' Plan" && s.RestrictedToWarriorArchetypeIds.Count == 1);
     }
 
+    /// <summary>HiredSwords.json seeds the "Pit Fighter" - never actually recruited into a Warband by
+    /// this code (see Models.Library.HiredSword), only a static catalogue entry used for the "Vendu aux
+    /// Fosses" mini-fight comparison. Locks in its profile, its 3 fixed starting-equipment items resolved
+    /// against the common Equipment.json catalogue, and its "every warband except Undead and Skaven"
+    /// restriction (13 of the 15 seeded warbands).</summary>
+    [Fact]
+    public async Task HiredSwords_SeedPitFighterFromRulebook()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("en");
+        var pitFighter = Assert.Single(hiredSwords, h => h.Name == "Pit Fighter");
+        Assert.Equal(ContentSource.Official, pitFighter.Source);
+        Assert.Equal(30, pitFighter.HireCost);
+        Assert.Equal(15, pitFighter.Upkeep);
+        Assert.Equal(22, pitFighter.BaseRating);
+        Assert.Equal(4, pitFighter.Movement);
+        Assert.Equal(4, pitFighter.WeaponSkill);
+        Assert.Equal(3, pitFighter.BallisticSkill);
+        Assert.Equal(4, pitFighter.Strength);
+        Assert.Equal(4, pitFighter.Toughness);
+        Assert.Equal(1, pitFighter.Wounds);
+        Assert.Equal(4, pitFighter.Initiative);
+        Assert.Equal(2, pitFighter.Attacks);
+        Assert.Equal(7, pitFighter.Leadership);
+        Assert.Equal([SkillCategory.Combat, SkillCategory.Speed, SkillCategory.Strength], pitFighter.AllowedSkillCategories);
+
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+        var startingEquipmentNames = equipment.Where(e => pitFighter.StartingEquipmentIds.Contains(e.Id)).Select(e => e.Name).ToList();
+        Assert.Equal(3, startingEquipmentNames.Count);
+        Assert.Contains("Morning star", startingEquipmentNames);
+        Assert.Contains("Helmet", startingEquipmentNames);
+        Assert.Contains("Spiked gauntlet", startingEquipmentNames);
+
+        var warbands = await _library.GetWarbandArchetypesAsync("en");
+        Assert.Equal(13, pitFighter.RestrictedToWarbandArchetypeIds.Count);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Undead").Id, pitFighter.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Skaven of Clan Eshin").Id, pitFighter.RestrictedToWarbandArchetypeIds);
+    }
+
+    /// <summary>"Pit Fighter" is the rulebook's English name for the Hired Sword type ("Franc-Tireur" in
+    /// French is the CATEGORY name, not this specific archetype) - its own French name is "Gladiateur".</summary>
+    [Fact]
+    public async Task HiredSwords_SeedPitFighter_InFrenchToo()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("fr");
+        Assert.Single(hiredSwords, h => h.Name == "Gladiateur");
+    }
+
+    /// <summary>The full Grade 1A Hired Sword roster (13 entries) - locks in the count and a few of the
+    /// trickier cases: a rule reused from the shared catalog by exact English name (Ogre Bodyguard's
+    /// "Causes Fear"/"Large Target", Warlock's "Wizard") vs. a rule genuinely new to this pass (Troll
+    /// Slayer's "Deathwish"/"Hard to Kill"/"Hard Head"), and the "Expert Rider" name collision between
+    /// Highwayman/Roadwarden resolved by disambiguating suffix (two distinct SpecialRule rows, not one
+    /// shared by mistake).</summary>
+    [Fact]
+    public async Task HiredSwords_SeedFullGrade1ARoster()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("en");
+        Assert.Equal(13, hiredSwords.Count);
+
+        var ogre = Assert.Single(hiredSwords, h => h.Name == "Ogre Bodyguard");
+        Assert.Equal(new[] { "Causes Fear", "Large Target" }, ogre.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        var warlock = Assert.Single(hiredSwords, h => h.Name == "Warlock");
+        Assert.Single(warlock.SpecialRules, r => r.Name == "Wizard");
+
+        var trollSlayer = Assert.Single(hiredSwords, h => h.Name == "Dwarf Troll Slayer");
+        Assert.Equal(new[] { "Deathwish", "Hard Head", "Hard to Kill" }, trollSlayer.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        var highwayman = Assert.Single(hiredSwords, h => h.Name == "Highwayman");
+        var roadwarden = Assert.Single(hiredSwords, h => h.Name == "Roadwarden");
+        var highwaymanRider = Assert.Single(highwayman.SpecialRules, r => r.Name.StartsWith("Expert Rider"));
+        var roadwardenRider = Assert.Single(roadwarden.SpecialRules, r => r.Name.StartsWith("Expert Rider"));
+        Assert.NotEqual(highwaymanRider.Id, roadwardenRider.Id);
+        Assert.NotEqual(highwaymanRider.Description, roadwardenRider.Description);
+
+        // "Wizard" was already seeded by the common SpellCaster convention before HiredSwords.json runs -
+        // confirms the stub reuse actually found the existing row instead of creating a duplicate.
+        var allWizardRules = (await _library.GetSpecialRulesAsync("en")).Where(r => r.Name == "Wizard").ToList();
+        Assert.Single(allWizardRules);
+    }
+
     /// <summary>Injuries.json seeds the rulebook's Serious Injuries charts once, common to every
     /// warband (no warband file references it) - Heroes' D66 chart (20 named rows covering the full
     /// 11-66 range) + Henchmen's much simpler D6 chart (2 rows).</summary>
@@ -158,6 +240,15 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Contains(stupidity.SpecialRules, r => r.Name == "Stupidity");
         var frenzy = Assert.Single(heroInjuries, i => i.Name == "Madness: Frenzy" && i.RollRange == "24" && i.BranchRange == "4-6");
         Assert.Contains(frenzy.SpecialRules, r => r.Name == "Frenzy");
+
+        // Hardened (62-63)/Horrible Scars (64) : no sub-roll (single/ranged roll, no BranchRange), but
+        // same SpecialRule idiom as the branched results above - Hardened is a NEW rule distinct from
+        // Bugman's Ale's own "Immune to Fear" (that one is battle-only), Horrible Scars reuses the
+        // already-enriched common "Causes Fear" rule as-is.
+        var hardened = Assert.Single(heroInjuries, i => i.Name == "Hardened" && i.RollRange == "62-63");
+        Assert.Contains(hardened.SpecialRules, r => r.Name == "Hardened");
+        var horribleScars = Assert.Single(heroInjuries, i => i.Name == "Horrible Scars" && i.RollRange == "64");
+        Assert.Contains(horribleScars.SpecialRules, r => r.Name == "Causes Fear");
 
         var henchmanInjuries = injuries.Where(i => i.Category == InjuryCategory.Henchman).ToList();
         Assert.Equal(2, henchmanInjuries.Count);
@@ -406,16 +497,17 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
     }
 
     /// <summary>Every MagicSchool now carries a flavor-text Description (sourced from mordheimer.net's
-    /// school pages) in both languages - used to be null for all 7 schools until this was filled in.</summary>
+    /// school pages, plus the Warlock's Lesser Magic added 2026-08-27) in both languages - used to be
+    /// null for all 7 schools until this was filled in.</summary>
     [Fact]
     public async Task MagicSchools_AllHaveBilingualDescriptions()
     {
         var schoolsEn = await _library.GetMagicSchoolsAsync("en");
-        Assert.Equal(7, schoolsEn.Count);
+        Assert.Equal(8, schoolsEn.Count);
         Assert.All(schoolsEn, s => Assert.False(string.IsNullOrWhiteSpace(s.Description)));
 
         var schoolsFr = await _library.GetMagicSchoolsAsync("fr");
-        Assert.Equal(7, schoolsFr.Count);
+        Assert.Equal(8, schoolsFr.Count);
         Assert.All(schoolsFr, s => Assert.False(string.IsNullOrWhiteSpace(s.Description)));
     }
 

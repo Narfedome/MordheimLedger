@@ -39,6 +39,11 @@ public interface ILibraryService
     /// EquipmentItem.RestrictedToWarbandArchetypeIds (the Rare/Trading-Post channel).</summary>
     Task<HashSet<int>> GetEquipmentListItemIdsAsync(int equipmentListId);
     Task<List<Skill>> GetSkillsAsync(string languageCode);
+
+    /// <summary>Hired Sword catalogue (e.g. "Pit Fighter") - never actually recruited into a Warband by
+    /// this code (see Models.Library.HiredSword), only used as a static profile lookup (e.g. the
+    /// "Vendu aux Fosses" mini-fight comparison).</summary>
+    Task<List<HiredSword>> GetHiredSwordsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 
     /// <summary>Every entry of the rulebook's Exploration chart (doubles through six-of-a-kind), each
@@ -99,6 +104,10 @@ public interface ILibraryService
     /// <summary>Also replaces the skill's warband-restriction rows (see
     /// Skill.RestrictedToWarbandArchetypeIds) with the current list.</summary>
     Task SaveSkillAsync(Skill skill, string languageCode);
+
+    /// <summary>Also replaces the Hired Sword's warband-restriction rows and its fixed starting-equipment
+    /// rows (see HiredSword.RestrictedToWarbandArchetypeIds/StartingEquipmentIds) with the current lists.</summary>
+    Task SaveHiredSwordAsync(HiredSword hiredSword, string languageCode);
     Task SaveInjuryAsync(Injury injury, string languageCode);
     Task SaveSpellAsync(Spell spell, string languageCode);
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
@@ -112,6 +121,7 @@ public interface ILibraryService
     Task DeleteEquipmentItemAsync(int equipmentItemId);
     Task DeleteEquipmentListAsync(int equipmentListId);
     Task DeleteSkillAsync(int skillId);
+    Task DeleteHiredSwordAsync(int hiredSwordId);
     Task DeleteInjuryAsync(int injuryId);
     Task DeleteSpellAsync(int spellId);
     Task DeleteSpecialRuleAsync(int specialRuleId);

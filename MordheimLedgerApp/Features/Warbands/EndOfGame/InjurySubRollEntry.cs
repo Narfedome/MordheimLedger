@@ -26,6 +26,7 @@ public partial class InjurySubRollEntry : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
+    [NotifyPropertyChangedFor(nameof(ShowCapturedChoice))]
     private string manualRoll = string.Empty;
 
     /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
@@ -55,6 +56,10 @@ public partial class InjurySubRollEntry : ObservableObject
         // nouveau jet qui ne tombe plus sur 35 invalide le sous-jet de Blessure profonde déjà saisi.
         if (!ShowDeepWoundSubRoll && DeepWoundSubRoll.Length > 0)
             DeepWoundSubRoll = string.Empty;
+
+        // Même principe pour le choix de Capturé (61).
+        if (!ShowCapturedChoice && IsRansomed)
+            IsRansomed = false;
     }
 
     [ObservableProperty]
@@ -83,6 +88,31 @@ public partial class InjurySubRollEntry : ObservableObject
 
     [ObservableProperty]
     private string? deepWoundRollError;
+
+    /// <summary>Même principe que WarriorOutcomeRow.ShowCapturedChoice, pour un sous-jet "Blessures
+    /// multiples" qui tombe lui-même sur 61.</summary>
+    public bool ShowCapturedChoice => IsHero && int.TryParse(ManualRoll, out var roll) && roll == 61;
+
+    [ObservableProperty]
+    private bool isRansomed;
+
+    partial void OnIsRansomedChanged(bool value)
+    {
+        if (!value) RansomAmount = string.Empty;
+    }
+
+    [ObservableProperty]
+    private string ransomAmount = string.Empty;
+
+    public bool HasValidRansomAmount => int.TryParse(RansomAmount, out var amount) && amount >= 0;
+
+    partial void OnRansomAmountChanged(string value)
+    {
+        if (HasValidRansomAmount) CapturedChoiceError = null;
+    }
+
+    [ObservableProperty]
+    private string? capturedChoiceError;
 
     /// <summary>True si le jet actuellement saisi est un résultat de mort (Héros 11-15, Homme de main
     /// 1-2) - utilisé par WarbandDetailViewModel.EndOfGame pour compter les figurines perdues dans un

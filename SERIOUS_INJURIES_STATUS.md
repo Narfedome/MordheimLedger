@@ -2,7 +2,7 @@
 
 Suivi de l'assistant Fin de Partie, étape Blessure (voir CLAUDE.md § Règles dans Core, plan de
 séquencement "Mécaniser les Blessures Graves — Palier 1"). Mis à jour à chaque avancée — dernière
-mise à jour : **2026-08-26**.
+mise à jour : **2026-08-27** (Vendu aux Fosses, voir Journal).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -14,8 +14,8 @@ coup - trop de résultats pour avancer autrement sans perdre le fil.
 | Palier | Mécanisme | Statut |
 |---|---|---|
 | 1 — effet direct sur stat/statut/équipement/XP déjà modélisé | Pénalité de caractéristique permanente, perte d'équipement, +1 XP, Indisponible (1 ou D3 parties) ; Œil crevé (31) étendu (2026-08-26) au cas du second œil, seul résultat dont l'effet dépend de l'état déjà porté par le guerrier (`WarriorStatus.Retired`, nouveau) | **10/10 ✅** |
-| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal ; Endurci/Horribles balafres au même mécanisme | **Folie + Bras amputé + Jambe écrasée grave ✅, 2 restants (Endurci, Horribles balafres)** |
-| 3 — branches complexes / jet récurrent | Capturé, Vendu aux Fosses | **0/2 ⏳** |
+| 2 — règle spéciale permanente attachée à l'Injury | Frénésie/Stupidité (Folie, 24) + Bras amputé (23 grave) + Ne peut plus courir (25 grave) + Endurci (62-63) + Provoque la Peur (Horribles balafres, 64) via `Injury.SpecialRules` - pas de nouvelle table `WarriorSpecialRule`, voir Journal | **5/5 ✅** |
+| 3 — branches complexes / jet récurrent | Capturé (61) - mécanisé (2026-08-27), 5 issues nommées choisies par le joueur (pas un jet, voir `Core.Rules.CapturedOutcomeTable`) ; Vendu aux Fosses (65) - mécanisé (2026-08-27), combat de gladiateur contre un Franc-Tireur (nouveau catalogue `HiredSword`), choix victoire/défaite par le joueur (pas de moteur de combat) | **2/2 ✅** |
 | Récurrent (jet avant CHAQUE partie, pas seulement à la Fin de Partie où il est obtenu) | Vieille blessure (32) - mécanisé (2026-08-26) via le nouvel écran "Lancer la partie", voir Journal | **1/1 ✅** |
 | Déjà mécanisé avant ce chantier | Mort (11-15), Blessures multiples (16/21), Rancune (56) | **✅** |
 | No-op (déjà correct) | Récupération totale (41-55, Héros), Récupération totale (3-6, Homme de main) | **2/2 ✅** |
@@ -45,10 +45,10 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 36 | Dépouillé | 1 | ✅ | — | Perd tout l'équipement porté, sans remboursement |
 | 41-55 | Récupération totale | — | ✅ | — | No-op, déjà correct |
 | 56 | Rancune | — | ✅ | — | Cible D6 + `WarriorHatred`, fait avant ce chantier |
-| 61 | Capturé | 3 | ⏳ | ❌ | Rançon/échange/vente comme esclave - branches multiples mutuellement exclusives |
-| 62-63 | Endurci | 2 | ⏳ | ❌ | Immunisé à la Peur permanent - `WarriorSpecialRule` |
-| 64 | Horribles balafres | 2 | ⏳ | ❌ | Provoque la Peur permanent - `WarriorSpecialRule` |
-| 65 | Vendu aux arènes | 3 | ⏳ | ❌ | Combat un gladiateur (Francs-Tireurs) - branches victoire/défaite |
+| 61 | Capturé | 3 | ✅ | — | Portée revue à la baisse (2026-08-27) : case à cocher "Racheté contre rançon" + montant saisi (déduit de la trésorerie), guerrier revenu avec équipement si coché ; sinon considéré Mort, équipement perdu - les 4 autres issues du livre (Échange/Vendu/Tué/Sacrifié) ne sont plus distinguées, toutes racontent une décision de la bande adverse non modélisée |
+| 62-63 | Endurci | 2 | ✅ | — | Chip catalogue portant une nouvelle `SpecialRule` "Endurci" (permanente, distincte du "Immunisé à la Peur" temporaire de la Bière de Bugman) |
+| 64 | Horribles balafres | 2 | ✅ | — | Chip catalogue portant la `SpecialRule` "Provoque la Peur" déjà enrichie dans le catalogue commun, réutilisée telle quelle |
+| 65 | Vendu aux arènes | 3 | ✅ | — | Combat de gladiateur contre un Franc-Tireur (nouveau catalogue Bibliothèque `HiredSword`, adversaire éphémère jamais recruté) : deux profils `StatRowView` côte à côte, case Victoire (+50 CO, +2 PX, équipement intact) sinon Défaite (un sous-jet D66 sur la même table, "ne garder que 11-35" indicatif non vérifié - survit = équipement perdu sans condition, mort = traité comme toute autre Mort) |
 | 66 | Survie miraculeuse | 1 | ✅ | — | +1 Expérience |
 
 ## Détail — Hommes de main (D6)
@@ -60,12 +60,12 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 
 ## Hors périmètre pour l'instant
 
-- **Palier 2, restants** : Endurci (62-63, Immunisé à la Peur) et Horribles balafres (64, Provoque la
-  Peur) au même mécanisme que Folie/Bras amputé (`Injury.SpecialRules`, voir Journal 2026-08-25 - pas de
-  nouvelle table de jointure `WarriorSpecialRule` finalement nécessaire).
-- **Palier 3 (2 résultats)** : Capturé (61) et Vendu aux Fosses (65) ont des branches multiples
-  mutuellement exclusives sans patron existant dans le wizard (le patron "Groupe D jets indépendants"
-  de l'Exploration ne convient pas, voir Journal).
+- Aucun résultat du Palier 3 restant à faire - les 36 résultats du D66 Héros sont désormais tous
+  mécanisés (Palier 1/2/3 + récurrent) ou correctement no-op.
+- Le catalogue `HiredSword` (Franc-Tireur) reste volontairement limité au profil statique + à cette
+  seule comparaison de Vendu aux Fosses - aucun vrai flux d'engagement (coût/entretien/Rating dans la
+  bande) n'existe encore, chantier séparé déjà noté pour "Une Faveur Rendue" (voir
+  `EXPLORATION_CHART_STATUS.md`).
 
 ## Journal
 
@@ -337,3 +337,207 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   renseigne jamais lui-même donc la couverture existante reste valide telle quelle), build Core + tête
   MAUI clean (compilation confirmée, copie finale bloquée par l'instance de l'appli ouverte en
   parallèle - limite connue).
+- **2026-08-27 (Capturé - choix du joueur plutôt qu'un jet, nouvelle branche `feature/injuries-cleanup`)**
+  — L'utilisateur a fourni le texte officiel exact (61) : 5 issues nommées (Rançon, Échange, Vendu aux
+  esclavagistes, Tué par les Morts-Vivants avec Zombie gagné par le CAPTEUR, Sacrifié par les Possédés
+  avec +1 XP pour le chef du CAPTEUR) - toutes racontées du point de vue du capteur (l'or/le Zombie/l'XP
+  vont TOUJOURS à la bande adverse, jamais à la nôtre). Contrairement à Rancune (portée par un sous-jet
+  D6), aucune de ces 5 issues n'est déterminée par un dé - c'est une négociation/décision du capteur,
+  donc un simple **choix du joueur** (Picker, nouveau `EndOfGameCapturedChoicePh`) plutôt qu'un
+  mécanisme de jet. Nouveau `Core.Rules.CapturedOutcomeTable`/`CapturedOutcome` (5 valeurs) avec deux
+  prédicats purs : `ReturnsToWarband` (Rançon/Échange - le guerrier revient avec tout son équipement,
+  aucune mutation) et `CausesDeath` (Tué par les Morts-Vivants/Sacrifié par les Possédés ->
+  `WarriorStatus.Dead`) - la 5e issue (Vendu aux esclavagistes) ne renvoie ni l'un ni l'autre : perdu
+  pour de bon mais jamais confirmé mort, mappé sur `WarriorStatus.Retired` plutôt que `Dead` (2e usage
+  de ce statut après le second Œil crevé - doc mise à jour). Les 3 issues "perdues" perdent tout
+  l'équipement du guerrier (même mécanisme que Dépouillé, 36). Aucun jet de gold formule 1D6×5 CO
+  appliqué à NOTRE trésorerie : cet or va au capteur, pas à nous - vérifié dans le texte, aucune
+  mutation de `Warband.Treasury` pour ce résultat. Câblage wizard en miroir exact du reste : `WarriorOutcomeRow.
+  ShowCapturedChoice`/`SelectedCapturedOutcome` (+ mêmes propriétés sur `InjurySubRollEntry` pour un
+  sous-jet "Blessures multiples" tombant lui-même sur 61), validé par `ValidateInjuryStep`, appliqué
+  dans `ApplyWarriorOutcomesAsync` (jet principal et sous-jet) avec une phrase d'Historique dédiée par
+  issue (`HistoryCaptured{Outcome}Sentence`, cinq nouvelles clés resx). Capturé reste caché du chip
+  roster (déjà couvert par `SeriousInjuryTable.HidesRosterChip`, aucun changement nécessaire - un
+  guerrier revenu par Rançon/Échange n'a de toute façon aucune condition durable à rappeler, et un
+  guerrier Mort/Retraité ne montre plus aucune chip Blessure puisqu'il change de groupe roster). Nouveaux
+  tests `RulesTests.cs` pour les 2 prédicats (5 cas). Aucun changement `DataServiceTests.cs` (pas de
+  nouveau seed de catalogue - Capturé n'attache aucune `SpecialRule`, contrairement à Folie/Endurci).
+  Build Core + tête MAUI clean (0 `error CS`), suite de tests en cours de vérification.
+- **2026-08-27 (Capturé - portée revue à la baisse : le capteur est une vraie bande adverse)** —
+  L'utilisateur, en relisant le résultat ci-dessus, a fait remarquer le vrai problème de fond : les 5
+  issues de Capturé racontent toutes une décision du CAPTEUR, c'est-à-dire une bande adverse - or
+  l'appli n'a aujourd'hui aucune notion de "l'autre bande" comme donnée structurée (elle vit sur un seul
+  appareil, pas de lobby/réseau entre deux joueurs). D'où l'idée, notée en mémoire pour plus tard sans
+  être lancée maintenant : un futur système de connexion entre appareils (lobby sur un réseau local)
+  pour que deux joueurs puissent réellement échanger ces données - "même si ça, c'est pour plus tard,
+  juste ne pas l'oublier". Dans l'immédiat, portée revue à la baisse : supprimé entièrement
+  `Core.Rules.CapturedOutcomeTable`/`CapturedOutcome` (5 valeurs, Picker) au profit d'un simple choix
+  binaire - une case à cocher "Racheté contre rançon" (`WarriorOutcomeRow.IsRansomed`/`RansomAmount`,
+  miroir sur `InjurySubRollEntry` pour le sous-jet imbriqué) : cochée, un montant en CO est saisi et
+  déduit de `Warband.Treasury` (négocié entre les deux joueurs à la table, aucune formule dans le
+  livre), le guerrier revient avec son équipement ; décochée (par défaut), le guerrier est
+  **considéré mort** (`WarriorStatus.Dead`, équipement perdu comme Dépouillé) - les 4 autres issues du
+  livre (Échange/Vendu aux esclavagistes/Tué par les Morts-Vivants/Sacrifié par les Possédés) ne sont
+  plus distinguées : toutes reviennent au même de notre point de vue (le guerrier ne revient jamais,
+  rien à gagner pour notre bande). `WarriorStatus.Retired` perd son 2e cas d'usage (Vendu aux
+  esclavagistes) - doc revenue à son unique cas d'origine (second Œil crevé). Tests `RulesTests.cs`
+  `CapturedOutcomeTable_*` supprimés (plus de table Core - la logique restante est trop simple pour
+  justifier une abstraction testée séparément). Build Core + tête MAUI clean (0 `error CS`), suite de
+  tests en cours de vérification.
+- **2026-08-27 (Prisonniers ennemis - contrepartie de Capturé, notre propre bande capture l'adversaire)**
+  — Suite logique de la simplification ci-dessus, mockée puis confirmée par l'utilisateur ("tu peux
+  implémenter le mock ... pour le zombie, oui ça devient un vrai zombie") : Capturé (61) ne garde que
+  Rançon/Mort côté "un DE NOS guerriers capturé PAR l'adversaire" (bande adverse non modélisée), mais
+  l'INVERSE - notre bande capture des héros adverses - ne dépend que de NOTRE type de bande, une donnée
+  bien réelle (`WarbandArchetype`). Nouvelle étape de wizard `StepKind.Captives` (une seule fois pour
+  toute la bande, pas par guerrier, juste après les étapes Blessure) : case à cocher "des héros ennemis
+  ont été capturés", stepper pour le nombre, puis un `Picker` de destin par prisonnier
+  (`CapturedEnemyEntry`, nouveau fichier) - Rançon/Vendu aux esclavagistes toujours proposés (montant
+  saisi, gagné pour NOTRE trésorerie cette fois - Vendu a un bouton dé pour la formule du livre 1D6×5
+  CO) ; Tué (devient un vrai Zombie recruté dans la bande, fusionné dans un groupe de Zombies existant -
+  même mécanisme que `GrantsFreeHenchmanArchetypeName`) uniquement si la bande jouée est "Undead" ;
+  Sacrifié (+1 XP au chef, `Warrior.IsLeader`) uniquement pour "Cult of the Possessed" - match par nom
+  anglais d'archétype de bande (`EndOfGameDialogViewModel.IsUndeadWarband`/`IsPossessedWarband`), pas par
+  Race (le Culte des Possédés partage la race "Chaos Human" avec la Kermesse du Chaos, donc gater sur la
+  Race aurait mélangé les deux bandes). Nouvelle méthode `WarbandDetailViewModel.EndOfGame.
+  ApplyCapturedEnemiesAsync`, appelée une fois par Fin de Partie (pas par guerrier). Aucune nouvelle
+  logique Core.Rules (même décision que la simplification de Capturé - trop simple pour justifier une
+  abstraction). Build Core + tête MAUI clean (0 `error CS`), suite de tests en cours de vérification.
+- **2026-08-27 (Vendu aux Fosses - dernier résultat du Palier 3, nouveau catalogue Bibliothèque
+  Franc-Tireur)** — Demande explicite de l'utilisateur avec le profil officiel complet du Franc-Tireur
+  (Pit Fighter) : deux profils `StatRowView` côte à côte (notre Héros vs. le Franc-Tireur) pour visualiser
+  le combat de gladiateur de 65, plus le CRUD Bibliothèque complet pour ce nouveau type de catalogue
+  ("bien sûr on aura besoin du crud et de la section librairie pour les francs tireur"). Passé par
+  `EnterPlanMode` vu l'ampleur (nouveau modèle Core + CRUD + onglet Codex + mécanique wizard) ; deux
+  décisions confirmées via `AskUserQuestion` avant d'implémenter : (1) l'équipement de départ du
+  Franc-Tireur référence de vrais `EquipmentItem` (Morgenstern/Casque déjà existants, Gantelet à pointes
+  nouveau) plutôt qu'un texte libre ; (2) cette passe se limite au catalogue + CRUD + l'affichage
+  comparatif - **pas de vrai flux d'engagement** (le Franc-Tireur de Vendu aux Fosses est un adversaire
+  éphémère qui ne rejoint jamais notre bande, c'est NOTRE guerrier qui revient s'il gagne - engagement
+  réel = chantier séparé, déjà noté bloquant pour "Une Faveur Rendue").
+  - **Core** : nouveau modèle `HiredSword` (profil complet M/CC/CT/F/E/PV/I/A/Cd, `HireCost`/`Upkeep`/
+    `BaseRating`, `AllowedSkillCategories`, `StartingEquipmentIds`, `RestrictedToWarbandArchetypeIds` -
+    même sémantique Include/Exclude que Skill/Mutation/EquipmentItem) + `HiredSwordEntity` +
+    2 tables de jointure (`HiredSwordEquipmentEntity` pour l'équipement de départ,
+    `WarbandArchetypeHiredSwordEntity` pour la restriction de bande, mêmes formes que les jointures
+    Skill/EquipmentItem existantes).
+  - **Seed** : nouveau `Data/SeedData/HiredSwords.json` (demande explicite de l'utilisateur) avec
+    l'entrée Franc-Tireur (30 CO d'engagement/15 CO d'entretien, +22 de Valeur de bande, profil M4/CC4/
+    CT3/F4/E4/PV1/I4/A2/Cd7, Combat/Vitesse/Force, Morgenstern/Casque/Gantelet à pointes) restreinte à
+    13 des 15 bandes seedées (toutes sauf Undead et Skavens - `WarbandRestrictionEditor` gère déjà
+    nativement l'affichage "Toutes sauf X, Y" pour ce cas, aucun nouveau mécanisme d'exclusion
+    nécessaire). Nouvelle entrée "Spiked gauntlet"/"Gantelet à pointes" dans `Equipment.json` (seul
+    objet des 3 qui n'existait pas déjà). `SeedHiredSwordsAsync` suit le patron `SeedSkillsAsync` +
+    résout `StartingEquipmentNames` contre `_equipmentIdsByEnglishName` (déjà peuplé, seedé après
+    Equipment.json) + nouveau `SharedRestrictionKind.HiredSword` pour la résolution différée de la
+    restriction de bande (même mécanisme que Equipment/Skill/Mutation).
+  - **CRUD Bibliothèque** : nouveau dossier `Features/Library/HiredSwords/` (patron le plus proche :
+    `Mutations/`, liste plate groupée Commun/bande - pas `Skills/`, qui groupe par `SkillCategory`, axe
+    inexistant ici ; pas de mode picker, aucun recrutement en jeu). `HiredSwordEditDialog` réutilise
+    `StatRowView` en édition (même usage que `WarriorArchetypeEditDialog`), un nouveau bloc de 6
+    cases à cocher "Compétences autorisées" (aucun éditeur existant pour ce champ, même sur
+    `WarriorArchetypeEditDialog` qui porte pourtant le même champ modèle) et `IEquipmentPickerService.
+    PickEquipmentAsync(warbandArchetypeId: 0)` pour choisir l'équipement de départ (même patron que
+    `EquipmentListEditDialogViewModel.Items`). Nouvel onglet Codex "Francs-Tireurs" (8e onglet,
+    `LibraryPage.xaml`/`LibraryViewModel.cs`).
+  - **Mécanique wizard (65)** : `WarriorOutcomeRow.ShowSoldToThePits` mirrore exactement
+    `ShowCapturedChoice` (jet == 65, Héros uniquement). `WonPitFight` (case à cocher) pilote deux
+    branches : victoire = +50 CO/+2 PX/équipement intact ; défaite = un unique sous-jet D66 sur la même
+    table de Blessures Graves, réutilisant `InjurySubRollEntry` tel quel (même patron que
+    `MultipleInjuryRolls`, y compris ses propres sous-cas imbriqués Blessure profonde/Capturé) plutôt
+    qu'un nouveau type - le livre dit de ne garder que 11-35 pour cette relance mais c'est resté une
+    consigne indicative (`Label` d'aide), jamais validée : aucun jet n'est bloqué ailleurs dans l'appli.
+    Le profil du Franc-Tireur est résolu une seule fois à l'ouverture du wizard (recherche par Nom
+    anglais exact "Pit Fighter", même idiome que la résolution "Zombie" existante) et transmis à chaque
+    `WarriorOutcomeRow` - jamais recruté, uniquement affiché pour comparaison. `ApplyWarriorOutcomesAsync`
+    applique la relance de défaite avec exactement le même traitement Palier 1 que les sous-jets
+    "Blessures multiples" (réutilise `GetOrCreateInjuryAsync`/`ApplySeriousInjuryEffectAsync`), puis
+    vide l'équipement du guerrier sans condition s'il survit (sauf s'il retombe sur Capturé-Rançon, seule
+    exception où l'équipement reste intact, cohérent avec le traitement normal de Capturé).
+  - Build Core + tête MAUI clean (0 `error CS`), nouveau test `HiredSwords_SeedPitFighterFromRulebook`
+    (`DataServiceTests.cs`) vérifiant le profil/l'équipement de départ/la restriction 13-bandes, suite
+    complète 317/317 verte.
+- **2026-08-27 (retouches demandées : nom FR du Gladiateur, onglet Codex non groupé, "fiche perso"
+  complète dans la comparaison)** — Trois corrections après relecture de l'utilisateur :
+  1. **Précision terminologique** : "Franc-Tireur" est le nom FR de la CATÉGORIE (Hired Sword),
+     "Gladiateur" est le nom FR propre au Pit Fighter (traduction officielle fournie par l'utilisateur,
+     avec le texte d'ambiance complet) - `HiredSwords.json` corrigé (`name.fr`), description
+     remplacée par le texte d'ambiance officiel (pas une redite des champs mécaniques déjà structurés),
+     nouveau test `HiredSwords_SeedPitFighter_InFrenchToo`. Quelques commentaires de code corrigés pour
+     ne plus laisser croire que "Franc-Tireur" désignait ce Gladiateur en particulier.
+  2. **Onglet Codex "Francs-Tireurs" dégroupé** (retiré par l'utilisateur) : `HiredSwordViewModel`/
+     `HiredSwordView.xaml` simplifiés en liste plate (`HiredSwordRows`), tout le mécanisme de
+     regroupement Commun/bande (`HiredSwordGroup`, filtre, `ShowGroupHeaders`...) supprimé - trop peu
+     d'entrées pour le justifier pour l'instant.
+  3. **Comparaison de Vendu aux Fosses enrichie** : les deux profils passent du simple `StatRowView`
+     nu au même gabarit de "fiche perso" que la carte guerrier de `WarbandDetailPage`
+     (`SectionCardBorderStyle`, nom+rôle, `StatRowView` resserré 10/13, chips Équipement/Compétences
+     tapables) - demande explicite de l'utilisateur avec le XAML exact de la fiche à reprendre comme
+     patron. Côté notre guerrier : équipement/compétences RÉELLEMENT portés (`Warrior.Equipment`/
+     `Skills`, nouvelles commandes `ShowInjuryEquipmentDetail`/`ShowInjurySkillDetail`). Côté
+     Gladiateur : équipement de départ FIXE résolu en vrais `EquipmentItem` (`WarriorOutcomeRow.
+     PitFighterEquipment`, nouvelle commande `ShowPitFighterEquipmentDetail`) plutôt qu'une liste de
+     `WarriorEquipment` (il n'est jamais recruté, pas d'instance portée à modéliser) ; compétences
+     autorisées en simple texte (`PitFighterAllowedSkillCategoriesText`) plutôt qu'une ChipListView de
+     compétences apprises, puisqu'il n'en a par définition aucune. Build Core + tête MAUI clean, suite
+     complète relancée.
+- **2026-08-27 (roster complet des Francs-Tireurs Grade 1A, 12 nouvelles entrées + Règles Spéciales
+  propres)** — L'utilisateur a fourni le texte officiel complet des 13 Francs-Tireurs de Grade 1A
+  (Arabian Merchant, Beast Hunter, Dwarf Troll Slayer, Elf Ranger, Freelancer, Halfling Scout,
+  Highwayman, Imperial Assassin, Ogre Bodyguard, Pit Fighter déjà seedé, Roadwarden, Tilean Marksman,
+  Warlock) pour peupler le catalogue en une passe.
+  - **Nouveau : `HiredSword.SpecialRules`** (+ `HiredSwordSpecialRuleEntity`, jointure identique à
+    `WarriorArchetypeSpecialRuleEntity`) - jusque-là le modèle n'avait aucune règle spéciale, seul un
+    profil statique. Réservé aux règles propres à UN seul effet clair et non conditionnel (ex. Tueur de
+    Troll : Deathwish/Hard to Kill/Hard Head, nouvelles ; Ogre/Sorcier : réutilisent les entrées
+    partagées existantes "Causes Fear"/"Large Target"/"Wizard" par nom anglais, comme n'importe quel
+    autre find-or-create de ce catalogue) - même patron `SpecialRuleSeedData` inline que
+    `EquipmentSeedData.SpecialRules`. Éditeur/dialog récap étendus avec un `ChipListView` (picker non
+    filtré, `SpecialRuleFilterKind` n'a que Warband/Warrior, aucune valeur HiredSword - une règle propre
+    à un Franc-Tireur ne serait de toute façon jamais retrouvée par un filtre qui ne regarde que les
+    jointures Warband/Warrior).
+  - **Collision de nom repérée et résolue** : Highwayman et Roadwarden ont chacun une règle nommée
+    "Expert Rider" dans le texte officiel, mais avec un effet mécanique différent - le find-or-create
+    par nom anglais aurait fait hériter le second de la description du premier. Désambiguïsé en
+    "Expert Rider (Highwayman)"/"Expert Rider (Roadwarden)", même convention que les variantes d'arme
+    ("Heavy (Morning star)" vs "Heavy (Flail)"). Couvert par un test dédié
+    (`HiredSwords_SeedFullGrade1ARoster`) qui vérifie explicitement que les deux lignes restent
+    distinctes (Id et Description différents), pas fusionnées par erreur.
+  - **Systèmes trop complexes pour un chip** (aucune modélisation, texte de référence dans Description
+    uniquement, doctrine "pas de moteur de règles" déjà en place) : les 3 tables de marché du Marchand
+    d'Arabie (Marché Noir/Marchandises Étrangères/Recéleur) + son garde du corps compagnon (profil
+    séparé) ; les compétences uniques de plusieurs Francs-Tireurs (Tueur de Troll, Rôdeur Elfe, Assassin
+    Impérial) puisqu'aucune recrue réelle n'existe pour les "apprendre" via un Advance ; la monture
+    optionnelle du Chevalier Errant/Bandit de Grand Chemin/Gardien des Routes (Destrier/Cheval, profil
+    séparé) ; l'upkeep conditionnel (Tueur de Troll/Rôdeur Elfe payés plus cher par une bande Elfe -
+    aucune bande Elfe dans les 15 seedées, exception sans objet ; mentionné en Description quand même
+    pour Rôdeur Elfe puisque Chasseurs de Trésors Nains, notre "bande Naine", EST concernée).
+  - **5 nouveaux `EquipmentItem`** (`Equipment.json`) pour l'équipement de départ sans équivalent
+    existant : Cimeterre (compte comme Épée, réutilise sa règle "Parry (Sword)"), Hachette de Lancer
+    (compte comme Couteau de Lancer +1 Force), Rapière, Bâton (arme de Sorcier). Une "Brace of Pistols"
+    envisagée puis abandonnée : le catalogue traite déjà ce cas via une simple note de Description sur
+    l'objet "Pistol"/"Duelling Pistol" existant plutôt qu'une entrée séparée pour la paire (même
+    précédent que "Duelling Pistol" qui mentionne déjà "50 gc for a brace" dans son propre texte) -
+    suivi pour Bandit de Grand Chemin/Assassin Impérial.
+  - **Équipement à choix ou en plusieurs exemplaires** (Deux Haches du Tueur de Troll/Chasseur de Bêtes,
+    armes au choix de l'Ogre, monture optionnelle...) : un seul exemplaire listé dans
+    `StartingEquipmentIds` (le modèle n'a pas de quantité ni de "choix multiple"), le reste noté dans
+    Description - décision délibérée plutôt qu'ajouter une notion de quantité pour ce cas seul.
+  - Traductions FR : fournies par l'utilisateur pour le Gantelet à pointes (passe précédente) ; pour
+    cette passe (texte source uniquement en anglais), traductions FR faites par l'assistant - à
+    vérifier par l'utilisateur si un nom/une règle mérite d'être corrigé (ex. "Chevalier Errant" pour
+    "Freelancer", pas un terme officiel FR retrouvé).
+  - Build Core clean, tête MAUI compile sans erreur CS (seul l'exécutable local est resté verrouillé par
+    l'instance de l'utilisateur en cours d'exécution - pas un problème de code). Nouveau test
+    `HiredSwords_SeedFullGrade1ARoster` (`DataServiceTests.cs`), suite complète relancée.
+- **2026-08-27 (Magie Mineure - table de sorts du Sorcier)** — L'utilisateur a fourni la table complète
+  (6 sorts, D6) que le Sorcier génère aléatoirement à l'engagement. Ajoutée comme 8e `MagicSchool` dans
+  `MagicSchools.json` ("Lesser Magic"/"Magie Mineure", même format `MagicSchoolWithSpellsSeedData` que
+  les 7 écoles existantes) plutôt qu'en texte libre dans la fiche du Sorcier - contenu suffisamment
+  structuré (jet/difficulté/effet par sort) pour mériter d'être un vrai catalogue, browsable dans
+  l'onglet Sorts du Codex comme n'importe quelle autre école. Pas de lien structurel Sorcier ->
+  Magie Mineure : `HiredSword` n'a pas de champ `MagicSchools` (seul `WarbandArchetype` en a un),
+  cohérent avec la décision de ne pas construire de vrai flux de recrutement pour cette passe - noté
+  dans la Description du Sorcier à la place. Traductions FR par l'assistant (source fournie en anglais
+  uniquement). `DataServiceTests.CommonCatalogs_DedupCollisions_AndSeedSkills` mis à jour (42 -> 48
+  sorts total, +1 assertion pour "Lesser Magic"). Build Core + tête MAUI clean, suite complète relancée.

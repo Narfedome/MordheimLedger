@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
@@ -60,6 +61,18 @@ public partial class WarriorRow : ObservableObject
     /// <summary>Mirrors Warrior.Animal (an EquipmentItem, Category == Animal) - read-only display,
     /// managed via WarriorEditDialog.</summary>
     public EquipmentItem? Animal => Warrior.Animal;
+
+    /// <summary>What the roster card's "Blessures" ChipListView actually binds to - Injuries grouped by
+    /// catalog Injury (two separate "Vieille blessure" results become one "Vieille blessure x2" chip,
+    /// see InjuryChipGroup) after filtering out results with no lasting condition worth a chip
+    /// (Dépouillé/Rancune/Capturé, see Core.Rules.SeriousInjuryTable.HidesRosterChip) - user feedback
+    /// 2026-08-27. Injuries itself stays raw/ungrouped (WarriorEditDialog's own Injuries tab still needs
+    /// to add/remove individual instances, not collapsed groups).</summary>
+    public List<InjuryChipGroup> InjuryChips => Injuries
+        .Where(i => !(int.TryParse(i.Item.RollRange, out var roll) && SeriousInjuryTable.HidesRosterChip(roll)))
+        .GroupBy(i => i.Item.Id)
+        .Select(g => new InjuryChipGroup { Representative = g.First(), Count = g.Count() })
+        .ToList();
 
     public bool HasEquipment => Equipment.Count > 0;
     public bool HasSkills => Skills.Count > 0;

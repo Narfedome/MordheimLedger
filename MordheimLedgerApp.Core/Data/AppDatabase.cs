@@ -94,7 +94,7 @@ public class AppDatabase
         }
 
         var staleWarriors = (await _db.Table<WarriorEntity>().ToListAsync())
-            .Where(w => archetypeIds.Contains(w.WarriorArchetypeId) && w.GainsExperience)
+            .Where(w => w.WarriorArchetypeId is { } waId && archetypeIds.Contains(waId) && w.GainsExperience)
             .ToList();
         foreach (var warrior in staleWarriors)
         {
@@ -235,7 +235,8 @@ public class AppDatabase
 
         foreach (var warrior in staleWarriors)
         {
-            if (!archetypesById.TryGetValue(warrior.WarriorArchetypeId, out var archetype)) continue;
+            if (warrior.WarriorArchetypeId is not { } warriorArchetypeId) continue;
+            if (!archetypesById.TryGetValue(warriorArchetypeId, out var archetype)) continue;
             if (!profilesById.TryGetValue(archetype.RacialProfileId, out var profile)) continue;
 
             warrior.MaxMovement = profile.MovementOverride is null ? profile.Movement : null;
@@ -452,9 +453,18 @@ public class AppDatabase
         await SeedEquipmentAsync();
         await SeedMutationsAsync();
         await SeedSkillsAsync();
-        await SeedHiredSwordsAsync();
         await SeedInjuriesAsync();
+        // Avant SeedHiredSwordsAsync : le Sorcier ("Warlock") référence "Lesser Magic" par un stub
+        // name-only (HiredSwordSeedData.MagicSchoolName, même idiome que les stubs SpecialRules/Mutations
+        // d'un fichier de bande) résolu via le même cache find-or-create que celui-ci alimente - le
+        // find-or-create renvoie l'id existant SANS jamais mettre à jour la Description si le nom a déjà
+        // été créé par un stub, donc l'ordre importe ici comme pour les 15 fichiers de bande (voir la
+        // note juste au-dessus) : school MagicSchools.json doit être LE créateur (avec sa vraie
+        // Description), pas le stub. Bug réel trouvé le 2026-08-27 (DataServiceTests.
+        // MagicSchools_AllHaveBilingualDescriptions) : Lesser Magic seedait sans description tant que
+        // HiredSwords seedait en premier.
         await SeedMagicSchoolsAsync();
+        await SeedHiredSwordsAsync();
         await SeedRacesAsync();
         await SeedRacialProfilesAsync();
         // Pas ici : voir ResyncExplorationResultsAsync, appelée inconditionnellement depuis
@@ -870,6 +880,8 @@ public class AppDatabase
                 AllowedSkillCategories = hs.AllowedSkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),
                 Source = ContentSource.Official
             };
+            if (hs.MagicSchoolName is { } magicSchoolName)
+                hiredSword.MagicSchoolId = await FindOrCreateMagicSchoolAsync(new MagicSchoolSeedData { Name = magicSchoolName });
             hiredSword.NameKey = await SeedTranslationAsync(hs.Name.En, hs.Name.Fr);
             hiredSword.DescriptionKey = hs.Description is null ? null : await SeedTranslationAsync(hs.Description.En, hs.Description.Fr);
             var entity = hiredSword.ToEntity();
@@ -1092,7 +1104,8 @@ public class AppDatabase
                     GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman,
                     NextGameNoteTextKey = nextGameNoteTextKey,
                     GrantsWeaponBlessing = outcome.GrantsWeaponBlessing,
-                    GrantsCatacombReroll = outcome.GrantsCatacombReroll
+                    GrantsCatacombReroll = outcome.GrantsCatacombReroll,
+                    GrantsFreeHiredSword = outcome.GrantsFreeHiredSword
                 });
             }
         }

@@ -27,4 +27,8 @@ public class HiredSwordEntity
 
     /// <summary>CSV of SkillCategory member names - same convention as WarriorArchetypeEntity.</summary>
     public string? AllowedSkillCategories { get; set; }
+
+    /// <summary>See Models.Library.HiredSword.MagicSchoolId. Null for almost every Hired Sword.</summary>
+    [Indexed]
+    public int? MagicSchoolId { get; set; }
 }

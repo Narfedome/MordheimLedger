@@ -354,13 +354,14 @@
     "upkeep": 15,
     "baseRating": 16,
     "description": {
-      "en": "Source: Mordheim Rulebook. All magic is thought to originate from Chaos, so those blessed - or cursed - with the power of sorcery are hated and feared, yet a Warlock finds no shortage of employers willing to take the risk of persecution. Employer: any warband except Witch Hunters and Sisters of Sigmar.\n\nGenerates two spells at random from the Lesser Magic list when hired (see the Lesser Magic school in the Codex's Sorts tab for the full 6-spell table - not linked to this catalogue entry structurally, HiredSword has no MagicSchools field, only Warband does).",
-      "fr": "Source : Livre des règles Mordheim. Toute magie serait issue du Chaos, si bien que ceux bénis - ou maudits - du pouvoir de la sorcellerie sont craints et haïs ; un Sorcier ne manque pourtant pas d'employeurs prêts à courir le risque de la persécution. Employeur : toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar.\n\nGénère deux sorts au hasard sur la table de Magie Mineure à son engagement (voir l'école Magie Mineure dans l'onglet Sorts du Codex pour la table complète des 6 sorts - non liée structurellement à cette fiche, HiredSword n'a pas de champ MagicSchools, contrairement à WarbandArchetype)."
+      "en": "Source: Mordheim Rulebook. All magic is thought to originate from Chaos, so those blessed - or cursed - with the power of sorcery are hated and feared, yet a Warlock finds no shortage of employers willing to take the risk of persecution. Employer: any warband except Witch Hunters and Sisters of Sigmar.\n\nGenerates two spells at random from the Lesser Magic list when hired (see the Lesser Magic school in the Codex's Sorts tab for the full 6-spell table).",
+      "fr": "Source : Livre des règles Mordheim. Toute magie serait issue du Chaos, si bien que ceux bénis - ou maudits - du pouvoir de la sorcellerie sont craints et haïs ; un Sorcier ne manque pourtant pas d'employeurs prêts à courir le risque de la persécution. Employeur : toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar.\n\nGénère deux sorts au hasard sur la table de Magie Mineure à son engagement (voir l'école Magie Mineure dans l'onglet Sorts du Codex pour la table complète des 6 sorts)."
     },
     "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
     "allowedSkillCategories": ["Academic"],
     "startingEquipmentNames": ["Staff"],
+    "magicSchoolName": { "en": "Lesser Magic", "fr": "Magie Mineure" },
     "restrictedToWarbandNames": [
       "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
       "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",

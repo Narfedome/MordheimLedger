@@ -262,6 +262,15 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var results = await _library.GetExplorationResultsAsync("en");
         Assert.Equal(30, results.Count);
 
+        // Returning a Favour (3,6): a free Hired Sword for the next battle - single Kind.None outcome,
+        // no sub-roll, GrantsFreeHiredSword drives the End of Game wizard's ChipListView picker.
+        var returningAFavour = results.Single(r => r.DiceCount == 3 && r.Value == 6);
+        Assert.Equal("Returning a Favour", returningAFavour.Name);
+        var favourOutcome = Assert.Single(returningAFavour.Outcomes);
+        Assert.Equal(ExplorationOutcomeKind.None, favourOutcome.Kind);
+        Assert.Null(favourOutcome.SubRollMin);
+        Assert.True(favourOutcome.GrantsFreeHiredSword);
+
         // Corpse (3 3): a single-roll D6 sub-table mixing a Gold branch and four Item branches.
         var corpse = results.Single(r => r.DiceCount == 2 && r.Value == 3);
         Assert.Equal("Corpse", corpse.Name);

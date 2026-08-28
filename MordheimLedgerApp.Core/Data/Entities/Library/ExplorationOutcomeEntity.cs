@@ -43,4 +43,5 @@ public class ExplorationOutcomeEntity
     public string? NextGameNoteTextKey { get; set; }
     public bool GrantsWeaponBlessing { get; set; }
     public bool GrantsCatacombReroll { get; set; }
+    public bool GrantsFreeHiredSword { get; set; }
 }

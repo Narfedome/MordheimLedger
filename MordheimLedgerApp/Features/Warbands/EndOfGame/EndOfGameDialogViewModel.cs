@@ -47,6 +47,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly ISkillPickerService _skillPicker;
     private readonly IDetailDialogService _detailDialogs;
     private readonly ILibraryService _libraryService;
+    private readonly IHiredSwordPickerService _hiredSwordPicker;
     private readonly int _warbandArchetypeId;
 
     /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
@@ -117,6 +118,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsAdvanceStep))]
     [NotifyPropertyChangedFor(nameof(IsExplorationRollStep))]
     [NotifyPropertyChangedFor(nameof(IsExplorationResultStep))]
+    [NotifyPropertyChangedFor(nameof(IsHiredSwordsStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
@@ -133,7 +135,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, HiredSwords, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -172,6 +174,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // de step stable). Toujours ajouté après ExplorationResult, jamais avant : ce guerrier a donc
             // déjà quitté cette position au moment où le palier apparaît, aucun décalage rétroactif possible.
             steps.AddRange(WarriorRows.Where(r => r.HasExplorationMilestone).Select(r => new WizardStep(StepKind.Advance, r, IsExplorationAdvance: true)));
+            // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
+            // voir EndOfGameDialogViewModel.HiredSwords.cs. Placée après l'or d'Exploration (le joueur
+            // décide en connaissant sa trésorerie finale, voir HiredSwordTreasuryAfter), entièrement
+            // absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance).
+            if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -194,6 +201,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsAdvanceStep => Current.Kind == StepKind.Advance;
     public bool IsExplorationRollStep => Current.Kind == StepKind.ExplorationRoll;
     public bool IsExplorationResultStep => Current.Kind == StepKind.ExplorationResult;
+    public bool IsHiredSwordsStep => Current.Kind == StepKind.HiredSwords;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
     /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
@@ -286,11 +294,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _libraryService = libraryService;
+        _hiredSwordPicker = hiredSwordPicker;
         _warbandArchetypeId = warbandArchetypeId;
         _warbandArchetypeName = warbandArchetypeName;
         _pendingExplorationBonusDie = pendingExplorationBonusDie;
@@ -301,6 +310,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
         _specialRulesByEnglishName = specialRulesByEnglishName;
         _skillIdsByEnglishName = skillIdsByEnglishName;
+        _hiredSwordCatalog = hiredSwordCatalog;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
@@ -315,6 +325,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
         WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
             new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment)));
+        BuildHiredSwordUpkeepEntries();
 
         // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
         // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/
@@ -366,6 +377,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceRolls ?? Enumerable.Empty<AdvanceRollEntry>()),
             StepKind.ExplorationRoll => ValidateExplorationRollStep(),
             StepKind.ExplorationResult => ValidateExplorationResultStep(),
+            StepKind.HiredSwords => ValidateHiredSwordsStep(),
             _ => true
         };
     }

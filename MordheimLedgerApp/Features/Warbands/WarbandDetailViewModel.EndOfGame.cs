@@ -92,12 +92,14 @@ public partial class WarbandDetailViewModel
         // ci-dessus, pas de résolution par Id nécessaire ici (un seul profil consommé, pas une
         // collection indexée par nom).
         var englishHiredSwords = await _libraryService.GetHiredSwordsAsync("en");
+        // Catalogue complet localisé - à la fois pour le Gladiateur éphémère ci-dessous (Vendu aux Fosses)
+        // ET, sans rapport avec lui, pour la nouvelle étape "Francs-Tireurs" (upkeep/recrutement réel dans
+        // NOTRE bande - voir EndOfGameDialogViewModel.HiredSwords.cs).
+        var localizedHiredSwords = language == "en" ? englishHiredSwords : await _libraryService.GetHiredSwordsAsync(language);
         var pitFighterEnglish = englishHiredSwords.FirstOrDefault(h => h.Name == "Pit Fighter");
         var pitFighterProfile = pitFighterEnglish is null
             ? null
-            : language == "en"
-                ? pitFighterEnglish
-                : (await _libraryService.GetHiredSwordsAsync(language)).FirstOrDefault(h => h.Id == pitFighterEnglish.Id) ?? pitFighterEnglish;
+            : localizedHiredSwords.FirstOrDefault(h => h.Id == pitFighterEnglish.Id) ?? pitFighterEnglish;
 
         // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
         // même carte comparative - même idiome que localizedEquipment ci-dessus.
@@ -105,9 +107,9 @@ public partial class WarbandDetailViewModel
             ? new List<EquipmentItem>()
             : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, Warband.WarbandArchetypeId,
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, pitFighterProfile, pitFighterEquipment);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -117,6 +119,7 @@ public partial class WarbandDetailViewModel
             await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentItemsByEnglishName, englishSpecialRules, sentences);
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
             await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
+            await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
@@ -379,6 +382,24 @@ public partial class WarbandDetailViewModel
             {
                 Warband.NextGameNote = nextGameNote;
                 await _warbandService.SaveWarbandAsync(Warband);
+            }
+
+            // Une Faveur Rendue (3,6) - Franc-Tireur gratuit pour la prochaine bataille (voir
+            // EndOfGameDialogViewModel.Exploration.cs) - indépendant du Kind ci-dessus, même principe que
+            // GrantsCatacombReroll/NextGameNoteText. Gratuit (HireCost jamais déduit) ; HiredSwordUpkeepPrepaid
+            // couvre déjà sa toute prochaine solde (voir ApplyHiredSwordUpkeepAsync).
+            if (outcome.GrantsFreeHiredSword && dialogViewModel.SelectedFreeHiredSword is { } freeHiredSword)
+            {
+                var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
+                var startingEquipment = localizedEquipment.Where(e => freeHiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
+                // Pas de nom saisi par le joueur - garde le nom du Franc-Tireur (ex. "Gladiateur"), même
+                // idiome que GrantsFreeHenchmanArchetypeName (Zombie).
+                var name = freeHiredSword.Name;
+
+                var recruited = await _warbandService.RecruitHiredSwordAsync(Warband.Id, freeHiredSword, name, startingEquipment);
+                recruited.HiredSwordUpkeepPrepaid = true;
+                await _warbandService.SaveWarriorAsync(recruited);
+                sentences.Add(string.Format(Loc["HistoryHiredSwordFreeGrantSentence"], name));
             }
         }
 
@@ -843,6 +864,58 @@ public partial class WarbandDetailViewModel
                     }
                     break;
             }
+        }
+    }
+
+    /// <summary>Étape "Francs-Tireurs" (EndOfGameDialogViewModel.IsHiredSwordsStep) - règle la solde de
+    /// chaque Franc-Tireur déjà engagé (payée/refusée/déjà prépayée par "Une Faveur Rendue") ET recrute
+    /// le nouveau éventuellement choisi à la même étape. Un Franc-Tireur déjà Mort/Retraité (décompté
+    /// plus haut par ApplyWarriorOutcomesAsync) n'a plus d'entrée d'upkeep ici (WarriorRows filtre déjà
+    /// les guerriers Actifs uniquement) - rien à facturer pour lui.</summary>
+    private async Task ApplyHiredSwordUpkeepAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var entry in dialogViewModel.HiredSwordUpkeepEntries)
+        {
+            var warrior = entry.Warrior;
+
+            if (entry.IsPrepaidFree)
+            {
+                // "Une Faveur Rendue" ne couvre que la toute prochaine solde - consommée ici, qu'elle
+                // qu'ait été la partie jouée entre-temps (voir Models.Warrior.HiredSwordUpkeepPrepaid).
+                warrior.HiredSwordUpkeepPrepaid = false;
+                await _warbandService.SaveWarriorAsync(warrior);
+                sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPrepaidSentence"], warrior.Name));
+                continue;
+            }
+
+            if (entry.WillPay == true)
+            {
+                Warband.Treasury -= entry.UpkeepCost;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPaidSentence"], warrior.Name, entry.UpkeepCost));
+            }
+            else
+            {
+                // Solde refusée/impayée - il quitte la bande pour de bon, perd toute son XP (livre des
+                // règles) - même s'il est réengagé plus tard, ce sera une toute nouvelle ligne (voir
+                // Models.Warrior.HiredSwordId).
+                await _warbandService.DeleteWarriorAsync(warrior.Id);
+                sentences.Add(string.Format(Loc["HistoryHiredSwordLeftSentence"], warrior.Name));
+            }
+        }
+
+        if (dialogViewModel.SelectedNewHiredSword is { } hiredSword)
+        {
+            var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
+            var startingEquipment = localizedEquipment.Where(e => hiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
+            var name = dialogViewModel.NewHiredSwordName.Trim();
+
+            await _warbandService.RecruitHiredSwordAsync(Warband.Id, hiredSword, name, startingEquipment);
+            Warband.Treasury -= hiredSword.HireCost;
+            await _warbandService.SaveWarbandAsync(Warband);
+            sentences.Add(string.Format(Loc["HistoryHiredSwordHiredSentence"], name, hiredSword.Name));
         }
     }
 

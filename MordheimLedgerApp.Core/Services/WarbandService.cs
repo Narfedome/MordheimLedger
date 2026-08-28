@@ -75,9 +75,9 @@ public class WarbandService : IWarbandService
     {
         await _db.Initialization;
         var warriors = await _db.Connection.Table<WarriorEntity>()
-            .Where(w => w.WarbandId == warbandId && w.Status == WarriorStatus.Active)
+            .Where(w => w.WarbandId == warbandId && w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired)
             .ToListAsync();
-        return warriors.Sum(w => ((w.IsLargeCreature ? 20 : 5) + w.Experience) * w.HeadCount);
+        return warriors.Sum(w => WarbandRatingRules.WarriorContribution(w.IsLargeCreature, w.Experience, w.HeadCount, w.HiredSwordBaseRating));
     }
 
     public async Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode)
@@ -181,6 +181,21 @@ public class WarbandService : IWarbandService
         var entity = warrior.ToEntity();
         await _db.Connection.InsertAsync(entity);
         warrior.Id = entity.Id;
+        return warrior;
+    }
+
+    public async Task<Warrior> RecruitHiredSwordAsync(int warbandId, HiredSword hiredSword, string name, IReadOnlyList<EquipmentItem> startingEquipment)
+    {
+        await _db.Initialization;
+        var warrior = hiredSword.ToWarrior(name);
+        warrior.WarbandId = warbandId;
+        var entity = warrior.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        warrior.Id = entity.Id;
+
+        foreach (var item in startingEquipment)
+            await AddWarriorEquipmentAsync(warrior.Id, item);
+
         return warrior;
     }
 

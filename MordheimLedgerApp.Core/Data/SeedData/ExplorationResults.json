@@ -194,7 +194,9 @@
       "fr": "En rentrant au campement, vous croisez une vieille connaissance venue rembourser une dette ou une faveur passée. Vous gagnez gratuitement les services d'un Mercenaire à Louer au choix (parmi ceux disponibles pour votre bande) pour la durée de la prochaine bataille."
     },
     "rollsIndependently": false,
-    "outcomes": []
+    "outcomes": [
+      { "kind": "None", "grantsFreeHiredSword": true }
+    ]
   },
   {
     "diceCount": 4,

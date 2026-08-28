@@ -40,9 +40,10 @@ public interface ILibraryService
     Task<HashSet<int>> GetEquipmentListItemIdsAsync(int equipmentListId);
     Task<List<Skill>> GetSkillsAsync(string languageCode);
 
-    /// <summary>Hired Sword catalogue (e.g. "Pit Fighter") - never actually recruited into a Warband by
-    /// this code (see Models.Library.HiredSword), only used as a static profile lookup (e.g. the
-    /// "Vendu aux Fosses" mini-fight comparison).</summary>
+    /// <summary>Hired Sword catalogue (e.g. "Pit Fighter") - see Models.Library.HiredSword. Used both as
+    /// a static profile lookup (the "Vendu aux Fosses" mini-fight comparison) and, unfiltered by
+    /// RestrictedToWarbandArchetypeIds, as the source list for actual recruitment (warband-creation
+    /// wizard/End of Game "Francs-Tireurs" - callers filter by eligibility themselves).</summary>
     Task<List<HiredSword>> GetHiredSwordsAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 

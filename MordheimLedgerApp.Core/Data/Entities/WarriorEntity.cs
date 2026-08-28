@@ -11,8 +11,24 @@ public class WarriorEntity
     [Indexed]
     public int WarbandId { get; set; }
 
+    /// <summary>Null when this row was recruited from a HiredSword instead (see HiredSwordId) - exactly
+    /// one of the two is ever set. See Models.Warrior's class doc for the invariant.</summary>
     [Indexed]
-    public int WarriorArchetypeId { get; set; }
+    public int? WarriorArchetypeId { get; set; }
+
+    /// <summary>Null for an ordinary Hero/Henchman (recruited from a WarriorArchetype instead, see
+    /// WarriorArchetypeId). Non-null identifies which HiredSword catalogue entry this row was recruited
+    /// from - see Models.Warrior.IsHiredSword.</summary>
+    [Indexed]
+    public int? HiredSwordId { get; set; }
+
+    /// <summary>Snapshot of HiredSword.BaseRating at recruitment (see Models.Warrior.
+    /// HiredSwordBaseRating) - null for an ordinary Hero/Henchman, whose Rating contribution is derived
+    /// from IsLargeCreature instead.</summary>
+    public int? HiredSwordBaseRating { get; set; }
+
+    /// <summary>See Models.Warrior.HiredSwordUpkeepPrepaid.</summary>
+    public bool HiredSwordUpkeepPrepaid { get; set; }
 
     public string Name { get; set; } = string.Empty;
     public bool IsHero { get; set; }

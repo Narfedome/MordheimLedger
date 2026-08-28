@@ -1,701 +1,722 @@
 ﻿[
-    {
-        "name":  {
-                     "en":  "Necromancy",
-                     "fr":  "Nécromancie"
-                 },
-        "description":  {
-                            "en":  "Necromancy is the magic of the dead. It grants Necromancers the power to raise the dead and command spirits, but also to destroy the vitality of the living.",
-                            "fr":  "La Nécromancie est la magie des morts. Elle confère aux nécromanciens le pouvoir de relever les morts et de commander les esprits, mais aussi de détruire la vitalité des vivants."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Necromancy",
-                           "rollValue":  1,
-                           "difficulty":  10,
-                           "name":  {
-                                        "en":  "Lifestealer",
-                                        "fr":  "Drain de Vie"
-                                    },
-                           "description":  {
-                                               "en":  "Choose a model within 6\". It suffers a wound (no save) and the Necromancer gains an extra wound for the battle, possibly above his maximum. Doesn\u0027t affect Possessed or Undead.",
-                                               "fr":  "Choisissez une figurine à moins de 6ps. Elle subit une blessure (sans sauvegarde) et le nécromancien gagne 1 PV supplémentaire pour la bataille, pouvant dépasser son maximum. N\u0027affecte pas les Possédés ni les Morts-Vivants."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Necromancy",
-                           "rollValue":  2,
-                           "difficulty":  5,
-                           "name":  {
-                                        "en":  "Re-Animation",
-                                        "fr":  "Réanimation"
-                                    },
-                           "description":  {
-                                               "en":  "One Zombie taken out of action in the last combat/shooting phase immediately returns to the battle within 6\" of the Necromancer, not in base contact with an enemy.",
-                                               "fr":  "Un zombie mis hors de combat lors de la dernière phase de corps à corps ou de tir retourne immédiatement au combat, placé à moins de 6ps du nécromancien, pas au contact d\u0027un ennemi."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Necromancy",
-                           "rollValue":  3,
-                           "difficulty":  6,
-                           "name":  {
-                                        "en":  "Death Vision",
-                                        "fr":  "Vision de Mort"
-                                    },
-                           "description":  {
-                                               "en":  "The Necromancer causes fear in his enemies for the duration of the battle.",
-                                               "fr":  "Le nécromancien cause la peur à ses ennemis pour la durée de la bataille."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Necromancy",
-                           "rollValue":  4,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Spell of Doom",
-                                        "fr":  "Fatalité"
-                                    },
-                           "description":  {
-                                               "en":  "Target an enemy within 12\" - it must roll equal to or under its Strength on 1D6 or the dead seize it; on a failure, roll on the Injury table.",
-                                               "fr":  "Désignez un ennemi à moins de 12ps - il doit obtenir un résultat inférieur ou égal à sa Force sur 1D6 ou les morts le saisissent ; en cas d\u0027échec, lancez sur le tableau des blessures."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Necromancy",
-                           "rollValue":  5,
-                           "difficulty":  6,
-                           "name":  {
-                                        "en":  "Call of Vanhel",
-                                        "fr":  "Appel de Vanhel"
-                                    },
-                           "description":  {
-                                               "en":  "A single Zombie or Dire Wolf within 6\" of the Necromancer may move again up to its full Movement; if this brings it into base contact with an enemy, it counts as charging.",
-                                               "fr":  "Un zombie ou loup funeste à moins de 6ps du nécromancien peut se déplacer à nouveau de son mouvement maximum ; si cela l\u0027amène au contact d\u0027un ennemi, il compte comme ayant chargé."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Necromancy",
-                           "rollValue":  6,
-                           "difficulty":  null,
-                           "name":  {
-                                        "en":  "Spell of Awakening",
-                                        "fr":  "Incantation de Réveil"
-                                    },
-                           "description":  {
-                                               "en":  "Automatic. If an enemy Hero is killed (11-15 on the Serious Injury chart), the Necromancer may raise him as a Zombie - keeps his profile/gear, counts as a solo Henchman group, can\u0027t run or gain experience.",
-                                               "fr":  "Automatique. Si un Héros ennemi est tué (11-15 sur le tableau des Blessures Graves), le nécromancien peut le réveiller en zombie - garde son profil/équipement, compte comme un groupe d\u0027Hommes de main à lui seul, ne peut plus courir ni gagner d\u0027expérience."
-                                           }
-                       }
-                   ]
+  {
+    "name": {
+      "en": "Necromancy",
+      "fr": "Nécromancie"
     },
-    {
-        "name":  {
-                     "en":  "Prayers of Taal",
-                     "fr":  "Prières de Taal"
-                 },
-        "description":  {
-                            "en":  "Taal is the God of Nature, the Lord of Beasts, revered by all who venture into the wild regions of the Empire - portrayed as a tall, broad-shouldered man wearing a stag skull as a helm and clothed in bison and bear skins. His followers include rangers, trappers and those who live in the wilds. Prayers of Taal work like Prayers of Sigmar, though the Priest of Taal may never wear Heavy Armour.",
-                            "fr":  "Taal est le Dieu de la Nature et exige le respect de tous ceux qui entrent dans les régions sauvages de l’Empire. Il est dépeint comme un grand homme aux larges épaules, avec de longs cheveux en bataille et une barbe épaisse. Il porte un crâne de cerf sur la tête et est vêtu de peaux de bison et d’ours. Il est souvent appelé le Seigneur des Bêtes. Ses fidèles sont des chasseurs, des trappeurs et traditionnellement tous ceux qui vivent dans la nature sauvage de l’Empire. Les Prières de Taal fonctionnent comme les Prières de Sigmar, bien qu’un prêtre Taal porte rarement une armure."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Prayers of Taal",
-                           "rollValue":  1,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Leap of the Stag",
-                                        "fr":  "Saut du Cerf"
-                                    },
-                           "description":  {
-                                               "en":  "Many Priests of Taal wear a stag\u0027s skull as a symbol of their devotion, and the Lord of the Forest\u0027s power can be called upon to mimic the speed and grace of this magnificent beast. The Priest may immediately move anywhere within 9\", including into base contact with an enemy, in which case the move counts as a charge with +1 Strength for the first turn. If it contacts a fleeing enemy, it automatically hits it with +1 Strength in the ensuing combat phase and the enemy must flee again (if it survives).",
-                                               "fr":  "Beaucoup de prêtres de Taal portent un crâne de cerf comme symbole de leur dévotion et le pouvoir du Seigneur de la Forêt peut être utilisé pour imiter la vitesse et la beauté de cette bête magnifique. Le Prêtre de Taal peut immédiatement se déplacer n\u0027importe où dans la limite de 9ps, y compris en contact socle à socle avec un ennemi, auquel cas ce mouvement est considéré comme une charge avec une Force +1 pour la durée du premier tour. S\u0027il entre en contact avec un ennemi en fuite, lors de la phase de corps à corps, il fera une touche automatique de Force+1 et son adversaire devra s\u0027enfuir à nouveau (s\u0027il survit)."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Taal",
-                           "rollValue":  2,
-                           "difficulty":  5,
-                           "name":  {
-                                        "en":  "Blessed Beer",
-                                        "fr":  "Bière Bénite"
-                                    },
-                           "description":  {
-                                               "en":  "Like his brother Ulric, Taal has a great appetite for the strong beers of the northern Empire - every Ostland village taps at least one barrel of beer in Taal\u0027s honour at the Summer solstice. Thanks to enough flasks of blessed beer, a Priest of Taal may heal himself or any model within 2\" - the warrior recovers to his maximum Wounds. In addition, every living enemy model (not Undead or Possessed) within 2\" of the Priest loses 1 Attack during the next close combat phase due to the powerful fumes.",
-                                               "fr":  "Comme son frère Ulric, Taal a un grand appétit pour les bières fortes du Nord de l\u0027Empire. Au cours de l\u0027équinoxe d\u0027été, chaque village d\u0027Ostland ouvre (au minimum !) un fût de bière en l\u0027honneur de Taal. Grâce à ses gourdes remplies de bière bénite qu\u0027il porte en nombre suffisant, un Prêtre de Taal peut se guérir ou guérir n\u0027importe quelle figurine située à 2ps de lui. Le guerrier récupère son maximum de Points de Vie. De plus, toutes les figurines ennemies vivantes (pas les Morts-Vivants, ni les Possédés donc) à moins de 2ps du Prêtre perdront 1 Attaque au cours de la prochaine phase de combat dû aux fortes émanations de bière."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Taal",
-                           "rollValue":  3,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Bear\u0027s Paw",
-                                        "fr":  "Patte d\u0027Ours"
-                                    },
-                           "description":  {
-                                               "en":  "Many armoured knights have been thrown to the ground by the surprising strength of Taal\u0027s followers - though traditionally called Bear\u0027s Paw, Ostlanders who have felt its power sometimes call it the Elk\u0027s Breath instead. The Priest blesses himself or a friendly model within 6\" - the target gains +2 Strength until the Priest\u0027s next turn.",
-                                               "fr":  "Beaucoup de chevaliers en armure ont été jetés à terre par la Force surprenante des fidèles de Taal. Bien qu\u0027il soit traditionnellement appelé « Patte d\u0027ours », ce sort est parfois appelé « Souffle de l\u0027élan » par les Ostlanders qui ont pu en ressentir la puissance. Le prêtre invoque la bénédiction de Taal sur lui ou sur une figurine amie dans un rayon de 6ps. La cible reçoit un bonus de +2 en Force jusqu\u0027au prochain tour du Prêtre."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Taal",
-                           "rollValue":  4,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Earthquake",
-                                        "fr":  "Tremblement de Terre"
-                                    },
-                           "description":  {
-                                               "en":  "Taal\u0027s domain covers both earth and sky, and his power can even reach the dark streets of Mordheim. When his name is invoked three times and an eagle\u0027s blood is spilled on the ground, the Lord of Nature makes the thunder roar and the earth shake. Must be cast on a building within 4\" - any enemy model in contact with the building suffers a Strength 3 hit. In addition, the building collapses and every model inside is treated as having fallen (e.g. a model falling 5\" must pass two Initiative tests - one per 2\" - or suffer 1D3 Strength 5 hits). Remove the building from play for the rest of the game.",
-                                               "fr":  "Le domaine de Taal comprend aussi bien la terre que le ciel et son pouvoir peut même atteindre les sombres rues de Mordheim. Lorsque son nom est invoqué par trois fois et que le sang d\u0027un aigle est versé au sol, le Seigneur de la Nature fait gronder le tonnerre et trembler la terre. Le sort doit être lancé sur un bâtiment à moins de 4ps. Toute figurine ennemie en contact avec le bâtiment subit une touche de Force 3. De plus, le bâtiment s\u0027effondrera et toutes les figurines qui s\u0027y trouvent seront considérées comme ayant subi une chute (par exemple, une figurine tombant de 5ps doit réussir deux tests d\u0027Initiative - un par tranche de 2ps - pour éviter de subir 1D3 touches de F5). Retirez le bâtiment du plateau pour le reste de la partie."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Taal",
-                           "rollValue":  5,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Entangle",
-                                        "fr":  "Entraves"
-                                    },
-                           "description":  {
-                                               "en":  "It\u0027s said that when Taal walked the earth, life sprang from his footsteps - part of his power can be called upon by his followers to help the forest regrow and return the land to its natural state. Vines and saplings burst from the ground, entangling anyone trying to cross it. Every friendly or enemy model (except Ostlander Jaegers) within 12\" of the Priest may only move at half Movement until the next Shooting phase.",
-                                               "fr":  "Il se dit que lorsque Taal marchait sur le sol, la vie surgissait de ses pas. Une partie de son pouvoir peut être invoqué par ses fidèles pour favoriser la repousse des forêts et aider la terre à revenir à son état naturel. Des plantes grimpantes et de petits arbres jaillissent de la terre, entravant tous ceux qui tentent de les traverser. Toutes les figurines amies ou ennemies (à l\u0027exception des Jaegers Ostlanders) à moins de 12ps du Prêtre ne peuvent se déplacer qu\u0027à la moitié de leur Mouvement jusqu\u0027à la prochaine phase de tir."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Taal",
-                           "rollValue":  6,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Squirrel Swarm",
-                                        "fr":  "Invocation d\u0027Écureuils"
-                                    },
-                           "description":  {
-                                               "en":  "Taal is master of every beast, great and small - those who anger him may be mauled by a mountain lion or drowned by an enraged beaver\u0027s flood. With this prayer, the Priest calls upon the Lord of Beasts\u0027 wrath, summoning dozens upon dozens of enraged squirrels. The furious rodents attack an enemy within 12\" of the Priest, swarming under the warrior\u0027s clothes and armour, scratching and biting. The target suffers 2D6 Strength 1 hits, no armour save allowed.",
-                                               "fr":  "Taal est le maître de toutes les bêtes, qu\u0027elles soient grandes ou petites. Ceux qui provoquent sa colère peuvent être mutilés par un lion des montagnes ou noyés par une crue provoquée par un castor en colère. Avec ce sort, le Prêtre appelle la colère du Seigneur des Bêtes, invoquant des dizaines et des dizaines d\u0027écureuils enragés. Les rongeurs furieux attaquent un ennemi à moins de 12ps du Prêtre, rampant sous les vêtements et l\u0027armure du guerrier, l\u0027écorchant et provoquant de nombreuses marques et morsures. La cible subit 2D6 touches de Force 1, sans sauvegarde possible."
-                                           }
-                       }
-                   ]
+    "description": {
+      "en": "Necromancy is the magic of the dead. It grants Necromancers the power to raise the dead and command spirits, but also to destroy the vitality of the living.",
+      "fr": "La Nécromancie est la magie des morts. Elle confère aux nécromanciens le pouvoir de relever les morts et de commander les esprits, mais aussi de détruire la vitalité des vivants."
     },
-    {
-        "name":  {
-                     "en":  "Nurgle Rituals",
-                     "fr":  "Rituels de Nurgle"
-                 },
-        "description":  {
-                            "en":  "The Carnival Master uses the rituals of Nurgle to pervert and corrupt nature, inflicting hideous diseases for which there are no known cures.",
-                            "fr":  "Le Maître du Carnaval utilise les rituels de Nurgle pour pervertir et corrompre la nature, infligeant d'horribles maladies pour lesquelles nul remède n'est connu."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Nurgle Rituals",
-                           "rollValue":  1,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Daemonic Vigour",
-                                        "fr":  "Vigueur Démoniaque"
-                                    },
-                           "description":  {
-                                               "en":  "The Master grants his daemonic servants supernatural toughness. Any Plague Bearer or Nurgling within 8\" of the Master has its daemonic armour save improved to 4+ until the start of its next turn.",
-                                               "fr":  "Le Maître accorde à ses serviteurs démoniaques une robustesse surnaturelle. Tout Portepeste ou Nurgling dans un rayon de 8ps du Maître voit sa sauvegarde démoniaque passer à 4+ jusqu\u0027au début de son prochain tour."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Nurgle Rituals",
-                           "rollValue":  2,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Buboes",
-                                        "fr":  "Bubons"
-                                    },
-                           "description":  {
-                                               "en":  "The Master bestows superb buboes upon his enemies. Range 8\", affects one enemy warrior - it must pass a Toughness test or lose 1 Wound, no armour save allowed.",
-                                               "fr":  "Le Maître dispense de superbes bubons à ses ennemis. Ce sort a une portée de 8ps et affecte un guerrier ennemi. Celui-ci doit réussir un test d\u0027Endurance ou perdre 1 Point de Vie. Aucune sauvegarde d\u0027armure n\u0027est autorisée."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Nurgle Rituals",
-                           "rollValue":  3,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Nurgling Miasma",
-                                        "fr":  "Miasmes Nurglesques"
-                                    },
-                           "description":  {
-                                               "en":  "The Master emits a foul-smelling fog that suffocates his enemies. Range 6\", affects every living creature, friend or foe - a warrior in range must pass a Toughness test or lose 1 Attack for the rest of the turn.",
-                                               "fr":  "Le Maître émet un brouillard malodorant qui fait suffoquer ses ennemis. Ce sort a une portée de 6ps et affecte toutes les créatures vivantes, amies ou ennemies. Tout guerrier à portée doit réussir un test d\u0027Endurance ou perdre 1 Attaque pour le reste du tour."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Nurgle Rituals",
-                           "rollValue":  4,
-                           "difficulty":  10,
-                           "name":  {
-                                        "en":  "Pestilence",
-                                        "fr":  "Pestilence"
-                                    },
-                           "description":  {
-                                               "en":  "The Master inflicts grave lesions upon the ungodly. Every enemy model within 12\" of the Master suffers a Strength 3 hit, no armour save allowed.",
-                                               "fr":  "Le Maître inflige de graves lésions aux mécréants. Toute figurine ennemie dans un rayon de 12ps du Maître subit une touche de Force 3, sans sauvegarde d\u0027armure."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Nurgle Rituals",
-                           "rollValue":  5,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Warty Skin",
-                                        "fr":  "Peau Verruqueuse"
-                                    },
-                           "description":  {
-                                               "en":  "The Master\u0027s skin takes on the aspect of his god\u0027s diseased hide. The Master gains a 2+ armour save, replacing his current one, lasting until the start of his next Shooting phase.",
-                                               "fr":  "La peau du Maître prend l\u0027aspect du cuir malade de son dieu. Le Maître gagne une sauvegarde d\u0027armure de 2+ qui remplace sa sauvegarde d\u0027armure actuelle. Ce rituel dure jusqu\u0027au début de sa prochaine phase de tir."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Nurgle Rituals",
-                           "rollValue":  6,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Nurgle\u0027s Rot",
-                                        "fr":  "Pourriture de Nurgle"
-                                    },
-                           "description":  {
-                                               "en":  "The Master grants Nurgle\u0027s blessing to his foes. Any enemy model in base contact with the Master must immediately pass a Toughness test or catch Nurgle\u0027s Rot (see the Nurgle\u0027s Rot mutation).",
-                                               "fr":  "Le Maître accorde la bénédiction de Nurgle à ses adversaires. Toute figurine ennemie en contact avec le Maître doit immédiatement réussir un test d\u0027Endurance ou attraper la Pourriture de Nurgle (voir la mutation Pourriture de Nurgle)."
-                                           }
-                       }
-                   ]
-    },
-    {
-        "name":  {
-                     "en":  "Chaos Rituals",
-                     "fr":  "Rituels du Chaos"
-                 },
-        "description":  {
-                            "en":  "Chaos rituals employ the raw power of the darkest magic, and are therefore supremely useful in bringing pain and suffering, as well as change and mutation.",
-                            "fr":  "Les Rituels du Chaos font appel à la puissance brute de la magie la plus sombre, redoutablement utile pour répandre douleur et souffrance, ainsi que changement et mutation."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Chaos Rituals",
-                           "rollValue":  1,
-                           "difficulty":  10,
-                           "name":  {
-                                        "en":  "Vision of Horror",
-                                        "fr":  "Vision d\u0027Horreur"
-                                    },
-                           "description":  {
-                                               "en":  "Unbearable visions of the Realms of Chaos crush the will of an enemy. Range 6\" - if the caster is in close combat, the target must be in base contact. The victim is immediately Stunned (Knocked Down if it cannot be Stunned).",
-                                               "fr":  "Le sorcier du Chaos provoque d\u0027insoutenables visions des Royaumes du Chaos et son ennemi se recroqueville d\u0027horreur. Ce sort a une portée de 6ps et doit être lancé sur l\u0027ennemi le plus proche (en contact socle à socle s\u0027il est au Corps à Corps). La victime est immédiatement sonnée (à terre si elle ne peut être sonnée)."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Chaos Rituals",
-                           "rollValue":  2,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Third Eye",
-                                        "fr":  "Œil Divin"
-                                    },
-                           "description":  {
-                                               "en":  "The Dark Gods grant a gift to their servant. Usable only once per battle. Choose any model within 6\", friend or foe, and roll 1D6: 1 = immediately Out of Action (no Serious Injury roll); 2-5 = +1 to one Characteristic for the battle (caster\u0027s choice); 6 = +1 to all Characteristics for the battle.",
-                                               "fr":  "Le sorcier du Chaos implore les dieux sombres d\u0027accorder un don à leur serviteur. Utilisable une seule fois par bataille. Choisissez n\u0027importe quelle figurine à moins de 6ps, amie ou ennemie, et lancez 1D6 : 1 = mise hors de combat immédiate (sans jet de Blessure Grave) ; 2-5 = +1 à une Caractéristique pour la bataille ; 6 = +1 à toutes les Caractéristiques pour la bataille."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Chaos Rituals",
-                           "rollValue":  3,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Black Blood",
-                                        "fr":  "Sang Noir"
-                                    },
-                           "description":  {
-                                               "en":  "The caster slashes his palm and his burning blood erupts forth. Range 8\", D3 Strength 5 hits on the first model in its path. After casting, the caster rolls on the Injury table for his own wound (an Out of Action result is treated as Stunned instead).",
-                                               "fr":  "Le sorcier du Chaos s\u0027entaille la paume de la main et son sang jaillit et brûle chair et armures. Cette attaque a une portée de 8ps et cause D3 touches de Force 5 à la première figurine sur sa trajectoire. Le sorcier doit ensuite lancer sur le tableau des Dégâts pour sa propre blessure (un résultat hors de combat est traité comme sonné)."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Chaos Rituals",
-                           "rollValue":  4,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Chaos Temptation",
-                                        "fr":  "Tentation du Chaos"
-                                    },
-                           "description":  {
-                                               "en":  "Awakens the chaotic side lurking in every living being. Range 12\", cast on the nearest enemy model. Compare 1D6+caster\u0027s Leadership to 1D6+target\u0027s Leadership; if the caster wins, they control the victim until it passes a Leadership test in its controller\u0027s Rally phase. The victim cannot suicide but may attack its own side; it will not fight the caster\u0027s warband. If already in combat with them, it disengages 1\" immediately.",
-                                               "fr":  "Le sorcier du Chaos réveille le côté chaotique qui se cache au tréfonds de l\u0027âme de tout être vivant. Le sort a une portée de 12ps et doit être jeté sur la figurine ennemie la plus proche. Comparez 1D6+Commandement du sorcier au 1D6+Commandement de la cible. Si le sorcier obtient le total le plus haut, il prend le contrôle de sa victime jusqu\u0027à ce qu\u0027elle réussisse un test de Commandement lors de la phase de Ralliement adverse. La figurine ne peut pas se suicider, mais peut attaquer les figurines de son propre camp et ne combattra pas la bande du sorcier."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Chaos Rituals",
-                           "rollValue":  5,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Dark Wings",
-                                        "fr":  "Ailes Ténébreuses"
-                                    },
-                           "description":  {
-                                               "en":  "Two dark daemons lift the caster wherever they will. The caster may immediately move up to 12\" anywhere, even into base contact with an enemy (counts as a charge). If it contacts a fleeing enemy, it inflicts one automatic hit in the ensuing close combat phase and the enemy must flee again if it survives.",
-                                               "fr":  "Le sorcier du Chaos est soulevé par deux démons ténébreux qui l\u0027emportent là où il le désire. Le sorcier peut immédiatement se déplacer n\u0027importe où à 12ps maximum, même au contact avec l\u0027ennemi, auquel cas il compte comme ayant chargé. S\u0027il engage un ennemi en fuite, il inflige une touche automatique pendant la phase de Corps à Corps puis son adversaire fuit à nouveau s\u0027il survit."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Chaos Rituals",
-                           "rollValue":  6,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Word of Pain",
-                                        "fr":  "Mot de Souffrance"
-                                    },
-                           "description":  {
-                                               "en":  "Speaking the name of his dark god, the caster inflicts terrible pain on all who hear it. Every model within 3\" of the caster, friend or foe, suffers a Strength 3 hit with no armour save.",
-                                               "fr":  "En prononçant le nom de son dieu ténébreux, le sorcier du Chaos inflige une douleur atroce à tous ceux qui l\u0027entendent. Toutes les figurines situées à moins de 3ps du sorcier, amies ou ennemies, subissent une touche de Force 3 sans sauvegarde d\u0027armure."
-                                           }
-                       }
-                   ]
-    },
-    {
-        "name":  {
-                     "en":  "Waaagh! Magic",
-                     "fr":  "Magie Waaagh !"
-                 },
-        "description":  {
-                            "en":  "Waaagh! spells are used by Orc Shamans. They are rituals of a sort, howling prayers to the boisterous Orc gods Gork and Mork.",
-                            "fr":  "Les sorts Waaagh! sont utilisés par les Chamanes Orques. Ce sont une forme de rituels, des prières hurlées aux dieux tapageurs des Orques, Gork et Mork."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Waaagh! Magic",
-                           "rollValue":  1,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Led\u0027z Go",
-                                        "fr":  "Z\u0027y Va !"
-                                    },
-                           "description":  {
-                                               "en":  "Any Orc or Goblin within 4\" of the Shaman automatically strikes first in hand-to-hand combat, regardless of other circumstances. Lasts until the Shaman is knocked down, stunned or taken out of action.",
-                                               "fr":  "Toute figurine Orque ou Gobelin à moins de 4ps du Chamane frappe automatiquement en premier au Corps à Corps, quelles que soient les circonstances. Dure jusqu\u0027à ce que le Chamane soit mis à terre, sonné ou hors de combat."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Waaagh! Magic",
-                           "rollValue":  2,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Oi! Gerroff!",
-                                        "fr":  "Bouge de Là !"
-                                    },
-                           "description":  {
-                                               "en":  "Range 8\". Moves an enemy model D6\" directly away from the Shaman. If it collides with another model or a building, both suffer a Strength 3 hit. May not target models in hand-to-hand combat.",
-                                               "fr":  "Portée 8ps. Déplace une figurine ennemie de 1D6ps dans la direction opposée au Chamane. Si la figurine heurte une autre figurine ou un bâtiment, les deux subissent une touche de Force 3. Ne peut pas cibler une figurine engagée au Corps à Corps."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Waaagh! Magic",
-                           "rollValue":  3,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Zzap!",
-                                        "fr":  "Zzzap !"
-                                    },
-                           "description":  {
-                                               "en":  "Range 12\". Causes D3 Strength 4 hits on the closest enemy model, no armour saves allowed.",
-                                               "fr":  "Portée 12ps. Inflige 1D3 touches de Force 4 à la figurine ennemie la plus proche, aucune sauvegarde d\u0027armure possible."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Waaagh! Magic",
-                           "rollValue":  4,
-                           "difficulty":  6,
-                           "name":  {
-                                        "en":  "Fooled Ya!",
-                                        "fr":  "Bouffon, Va !"
-                                    },
-                           "description":  {
-                                               "en":  "No enemy may charge the Shaman next turn. If the Shaman is engaged in hand-to-hand combat, he may immediately move 4\" away.",
-                                               "fr":  "Aucun ennemi ne peut charger le Chamane durant le prochain tour. Si le Chamane est engagé au Corps à Corps, il peut immédiatement être déplacé de 4ps."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Waaagh! Magic",
-                           "rollValue":  5,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Clubba",
-                                        "fr":  "Ramèn\u0027ta Fraise !"
-                                    },
-                           "description":  {
-                                               "en":  "An ectoplasmic club appears in the Shaman\u0027s hand, counting as a club with +2 Strength and granting +1 Attack. Lasts until the Shaman suffers a Wound.",
-                                               "fr":  "Une énorme massue fantomatique apparaît dans la main du Chamane, considérée comme un gourdin ordinaire mais donnant +2 en Force et +1 Attaque. Dure jusqu\u0027à ce que le Chamane subisse une Blessure."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Waaagh! Magic",
-                           "rollValue":  6,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Fire of Gork",
-                                        "fr":  "Feu de Gork"
-                                    },
-                           "description":  {
-                                               "en":  "Range 12\". Two bolts of green flame each cause D3 Strength 3 hits - both bolts may strike the closest enemy model, or be split between the two closest enemy models.",
-                                               "fr":  "Portée 12ps. Deux éclairs de flammes vertes infligent chacun 1D3 touches de Force 3 - les deux éclairs peuvent frapper la figurine ennemie la plus proche, ou être répartis entre les deux figurines ennemies les plus proches."
-                                           }
-                       }
-                   ]
-    },
-    {
-        "name":  {
-                     "en":  "Prayers of Sigmar",
-                     "fr":  "Prières de Sigmar"
-                 },
-        "description":  {
-                            "en":  "Those with great faith in the gods can call upon their divine power. The priests of Sigmar can pray for many miracles: healing of wounds, strengthening the resolve of their comrades or the banishment of Daemonic creatures and the Undead. A warrior may use the divine power of Sigmar while wearing armour - Prayers of Sigmar are not regarded as spells, so any special protection against spells does not affect them.",
-                            "fr":  "Ceux qui ont une grande foi dans les dieux peuvent faire appel à leur puissance divine. Les prêtres de Sigmar peuvent prier pour de nombreux miracles : guérison des blessures, renforcement de la détermination de leurs compagnons ou bannissement des créatures démoniaques et des Morts-Vivants. Un guerrier peut invoquer la puissance divine de Sigmar tout en portant une armure - les Prières de Sigmar ne sont pas considérées comme des sorts, une protection spéciale contre la magie ne les affecte donc pas."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Prayers of Sigmar",
-                           "rollValue":  1,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "The Hammer of Sigmar",
-                                        "fr":  "Le Marteau de Sigmar"
-                                    },
-                           "description":  {
-                                               "en":  "This weapon of the faithful glows with the righteous power of Sigmar. The wielder gains +2 Strength in close combat and all hits inflicted cause double damage (2 Wounds instead of 1). The Priest must test again each Shooting phase he wishes to keep using it.",
-                                               "fr":  "Cette arme du fidèle brille d\u0027une lumière dorée, empreinte de la puissance vertueuse de Sigmar. Le porteur gagne +2 en Force au Corps à Corps et tous les coups qu\u0027il inflige causent le double de dégâts (2 Blessures au lieu d\u0027une). Le Prêtre doit retenter le test à chaque phase de Tir pour continuer à l\u0027utiliser."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Sigmar",
-                           "rollValue":  2,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Hearts of Steel",
-                                        "fr":  "Cœurs d\u0027Acier"
-                                    },
-                           "description":  {
-                                               "en":  "Waves of glory surround the servant of Sigmar. Any allied warrior within 8\" becomes immune to Fear and All Alone tests, and the whole warband gains +1 to Rout tests. Lasts until the caster is knocked down, stunned or put out of action; the bonus does not stack if cast again.",
-                                               "fr":  "Des vagues de gloire entourent le serviteur de Sigmar. Tout guerrier allié à moins de 8ps devient immunisé à la Peur et au test Seul contre Tous, et toute la bande gagne +1 à ses tests de Déroute. Dure jusqu\u0027à ce que le lanceur soit mis à terre, sonné ou hors de combat ; le bonus ne se cumule pas si le sort est relancé."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Sigmar",
-                           "rollValue":  3,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Soulfire",
-                                        "fr":  "Feu de l\u0027Âme"
-                                    },
-                           "description":  {
-                                               "en":  "The wrath of Sigmar comes to earth in purifying flames. All enemy models within 4\" suffer a Strength 3 hit, no armour saves allowed - Undead and Possessed models suffer a Strength 5 hit instead.",
-                                               "fr":  "La colère de Sigmar s\u0027abat sur terre en flammes purificatrices. Toute figurine ennemie à moins de 4ps subit une touche de Force 3, sans sauvegarde d\u0027armure possible - les figurines Mortes-Vivantes et Possédées subissent une touche de Force 5 à la place."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Sigmar",
-                           "rollValue":  4,
-                           "difficulty":  6,
-                           "name":  {
-                                        "en":  "Shield of Faith",
-                                        "fr":  "Bouclier de la Foi"
-                                    },
-                           "description":  {
-                                               "en":  "A shield of pure white light appears before the Priest, granting immunity to all spells as long as his faith holds. Roll at the start of each Recovery phase: on a 1 or 2 the shield disappears.",
-                                               "fr":  "Un bouclier de pure lumière blanche apparaît devant le Prêtre, le rendant immunisé à tous les sorts tant que sa foi reste forte. Lancez le dé au début de chaque phase de Récupération : sur un 1 ou 2, le bouclier disparaît."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Sigmar",
-                           "rollValue":  5,
-                           "difficulty":  5,
-                           "name":  {
-                                        "en":  "Healing Hand",
-                                        "fr":  "Main Guérisseuse"
-                                    },
-                           "description":  {
-                                               "en":  "Laying hands upon a wounded comrade, the Priest calls upon Sigmar to heal his wounds. Any one model within 2\" (including himself) is restored to full Wounds; any other stunned or knocked-down friendly model within 2\" immediately stands up and fights on normally.",
-                                               "fr":  "En posant les mains sur un compagnon blessé, le Prêtre invoque Sigmar pour guérir ses blessures. Une figurine à moins de 2ps (lui-même inclus) recouvre la totalité de ses Points de Vie ; toute autre figurine amie sonnée ou à terre à moins de 2ps se relève aussitôt et combat normalement."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Prayers of Sigmar",
-                           "rollValue":  6,
-                           "difficulty":  9,
-                           "name":  {
-                                        "en":  "Armour of Righteousness",
-                                        "fr":  "Armure de la Vertu"
-                                    },
-                           "description":  {
-                                               "en":  "Impenetrable armour covers the Priest, a fiery twin-tailed comet burning above his head. He gains a 2+ armour save (replacing his normal save) and causes Fear, becoming immune to it himself, until the start of his next Shooting phase.",
-                                               "fr":  "Une armure impénétrable recouvre le Prêtre, tandis qu\u0027une comète bifide enflammée brille au-dessus de sa tête. Il obtient une sauvegarde d\u0027armure de 2+ (qui remplace sa sauvegarde normale) et provoque la Peur tout en y étant lui-même immunisé, jusqu\u0027au début de sa prochaine phase de Tir."
-                                           }
-                       }
-                   ]
-    },
-    {
-        "name":  {
-                     "en":  "Magic of the Horned Rat",
-                     "fr":  "Magie du Rat Cornu"
-                 },
-        "description":  {
-                            "en":  "This brand of sorcery is used by the Skaven. It is a sinister form of magic which calls upon the Skaven deity, a loathsome daemonic god known as the Horned Rat.",
-                            "fr":  "Cette forme de sorcellerie est utilisée par les Skavens. Il s'agit d'une magie sinistre qui fait appel à la divinité skaven, un abject dieu démoniaque connu sous le nom de Rat Cornu."
-                        },
-        "spells":  [
-                       {
-                           "magicSchoolName":  "Magic of the Horned Rat",
-                           "rollValue":  1,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Warpfire",
-                                        "fr":  "Feu de Malepierre"
-                                    },
-                           "description":  {
-                                               "en":  "A green flame leaps from the Sorcerer\u0027s paw. Range 8\", hits the first model in its path with D3 Strength 4 hits, and one Strength 3 hit on each model within 2\" of the target.",
-                                               "fr":  "Une flamme verte jaillit de la patte tendue du Sorcier. Portée 8ps, inflige 1D3 touches de Force 4 à la première figurine sur sa trajectoire, ainsi qu\u0027une touche de Force 3 à chaque figurine à moins de 2ps de la cible."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Magic of the Horned Rat",
-                           "rollValue":  2,
-                           "difficulty":  null,
-                           "name":  {
-                                        "en":  "Children of the Horned Rat",
-                                        "fr":  "Enfants du Rat Cornu"
-                                    },
-                           "description":  {
-                                               "en":  "Automatic difficulty. Must be cast before the game, once only: summons D3 Giant Rats placed within 6\" of the Sorcerer. They disappear after the battle and do not count towards the warband\u0027s maximum size.",
-                                               "fr":  "Difficulté automatique. Doit être lancé avant la partie, une seule fois : invoque 1D3 Rats géants placés à moins de 6ps du Sorcier. Ils disparaissent après la bataille et ne comptent pas dans l\u0027effectif maximum de la bande."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Magic of the Horned Rat",
-                           "rollValue":  3,
-                           "difficulty":  7,
-                           "name":  {
-                                        "en":  "Gnawdoom",
-                                        "fr":  "Fléau Rongeur"
-                                    },
-                           "description":  {
-                                               "en":  "The target is attacked by rats and soon covered head to foot in small, bleeding wounds - causes 2D6 Strength 1 hits on a single model within 8\" of the caster.",
-                                               "fr":  "La cible est attaquée par des rats et se retrouve bientôt couverte de la tête aux pieds de petites blessures saignantes - inflige 2D6 touches de Force 1 à une figurine à moins de 8ps du lanceur."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Magic of the Horned Rat",
-                           "rollValue":  4,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Black Fury",
-                                        "fr":  "Fureur Noire"
-                                    },
-                           "description":  {
-                                               "en":  "With a chittering incantation the Sorcerer becomes a monstrous rat-like creature. He may immediately charge any enemy model within 12\" (ignoring terrain and interposing models) and gains +2 Attacks and +1 Strength for that turn\u0027s close combat phase only.",
-                                               "fr":  "D\u0027une incantation chuintante, le Sorcier se transforme en une créature monstrueuse à l\u0027apparence de rat. Il peut immédiatement charger toute figurine ennemie à moins de 12ps (en ignorant le terrain et les figurines interposées) et gagne +2 Attaques et +1 Force pour la seule phase de Corps à Corps de ce tour."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Magic of the Horned Rat",
-                           "rollValue":  5,
-                           "difficulty":  8,
-                           "name":  {
-                                        "en":  "Eye of the Warp",
-                                        "fr":  "Œil du Warp"
-                                    },
-                           "description":  {
-                                               "en":  "All standing models in base contact with the Sorcerer must take a Leadership test; on failure, each suffers a Strength 3 hit and runs 2D6\" directly away, exactly as if it had lost a Seul contre Tous test.",
-                                               "fr":  "Toute figurine debout au contact du Sorcier doit immédiatement effectuer un test de Commandement ; en cas d\u0027échec, elle subit une touche de Force 3 et fuit de 2D6ps directement à l\u0027opposé du Sorcier, exactement comme si elle avait perdu un test Seul contre Tous."
-                                           }
-                       },
-                       {
-                           "magicSchoolName":  "Magic of the Horned Rat",
-                           "rollValue":  6,
-                           "difficulty":  6,
-                           "name":  {
-                                        "en":  "Sorcerer\u0027s Curse",
-                                        "fr":  "Malédiction du Sorcier"
-                                    },
-                           "description":  {
-                                               "en":  "Range 12\", affects a single model within range: the target must re-roll any successful armour save and to-hit roll during the Skaven close combat phase, and during its own next Shooting and close combat phases.",
-                                               "fr":  "Portée 12ps, affecte une seule figurine dans cette portée : la cible doit relancer toute sauvegarde d\u0027armure et tout jet pour toucher réussis durant la phase de Corps à Corps skaven, ainsi que durant ses propres prochaines phases de Tir et de Corps à Corps."
-                                           }
-                       }
-                   ]
-    },
-    {
-        "name": { "en": "Lesser Magic", "fr": "Magie Mineure" },
-        "description": {
-            "en": "Those who have not been schooled in the ways of magic can cast only relatively simple spells. Lacking the tradition of sorcery and the grimoires of Necromancers and Chaos Mages, human Warlocks rely on their own natural aptitude and experimentation. Lesser Magic (or hedge magic) is not as awesome as the mighty spells of Necromancers and Chaos Mages, but it is still dangerous.",
-            "fr": "Ceux qui n'ont pas été formés aux voies de la magie ne peuvent lancer que des sorts relativement simples. Dépourvus de la tradition ésotérique et des grimoires des Nécromanciens et Mages du Chaos, les Sorciers humains s'en remettent à leur aptitude naturelle et à l'expérimentation. La Magie Mineure (ou magie rustique) est loin d'égaler la puissance des sorts de Nécromanciens et Mages du Chaos, mais reste dangereuse."
+    "spells": [
+      {
+        "magicSchoolName": "Necromancy",
+        "rollValue": 1,
+        "difficulty": 10,
+        "name": {
+          "en": "Lifestealer",
+          "fr": "Drain de Vie"
         },
-        "spells": [
-            {
-                "magicSchoolName": "Lesser Magic",
-                "rollValue": 1,
-                "difficulty": 7,
-                "name": { "en": "Fires of U'Zhul", "fr": "Feux d'U'Zhul" },
-                "description": {
-                    "en": "The wizard summons a fiery ball of flames and hurls it upon his enemies. The fireball has a range of 18\" and causes one Strength 4 hit. It strikes the first model in its path. Armour saves are taken as normal (ie, with -1 modifier).",
-                    "fr": "Le sorcier invoque une boule de flammes et la projette sur ses ennemis. La boule de feu a une portée de 18ps et inflige une touche de Force 4. Elle frappe la première figurine sur son passage. Les sauvegardes d'armure se font normalement (soit avec un modificateur de -1)."
-                }
-            },
-            {
-                "magicSchoolName": "Lesser Magic",
-                "rollValue": 2,
-                "difficulty": 7,
-                "name": { "en": "Flight of Zimmeran", "fr": "Envol de Zimmeran" },
-                "description": {
-                    "en": "Calling upon the power of the winds of magic, the wizard walks on air. The wizard may immediately move anywhere within 12\", including into base contact with an enemy, in which case he counts as charging. If he engages a fleeing enemy in the close combat phase he will score 1 automatic hit and then his opponent will flee again (if he survives).",
-                    "fr": "Faisant appel au pouvoir des vents de la magie, le sorcier marche sur l'air. Il peut immédiatement se déplacer n'importe où à moins de 12ps, y compris au contact d'un ennemi, auquel cas il est considéré comme chargeant. S'il engage un ennemi en fuite lors de la phase de corps à corps, il inflige 1 touche automatique puis son adversaire fuit à nouveau (s'il survit)."
-                }
-            },
-            {
-                "magicSchoolName": "Lesser Magic",
-                "rollValue": 3,
-                "difficulty": 7,
-                "name": { "en": "Dread of Aramar", "fr": "Effroi d'Aramar" },
-                "description": {
-                    "en": "The wizard places a sense of mind-numbing fear into the minds of his opponents. A single model within 12\" of the wizard must pass a Leadership test or flee 2D6\" directly away from him. If he flees, he must test at the start of each of his own movement phases and will continue to flee until he passes a test. Note that this spell does not affect Undead or any model immune to fear.",
-                    "fr": "Le sorcier insuffle une terreur paralysante dans l'esprit de ses adversaires. Une figurine unique à moins de 12ps du sorcier doit réussir un test de Commandement ou fuir de 2D6ps directement loin de lui. Si elle fuit, elle doit retester au début de chacune de ses phases de mouvement et continue de fuir jusqu'à réussir un test. Ce sort n'affecte pas les Morts-Vivants ni toute figurine immunisée à la peur."
-                }
-            },
-            {
-                "magicSchoolName": "Lesser Magic",
-                "rollValue": 4,
-                "difficulty": 7,
-                "name": { "en": "Silver Arrows of Arha", "fr": "Flèches d'Argent d'Arha" },
-                "description": {
-                    "en": "Silvery arrows appear from thin air and circle around the wizard, shooting out to strike his foes. Unlike other spells, this cannot be cast whilst in hand-to-hand combat. The spell summons D6+2 arrows which the wizard can use to shoot against one enemy model. The arrows have a range of 24\". Use the wizard's own Ballistic Skill to determine whether he hits or not, but ignore movement, range and cover penalties. The arrows cause one S3 hit each.",
-                    "fr": "Des flèches argentées surgissent du néant et tournoient autour du sorcier avant de frapper ses ennemis. Contrairement aux autres sorts, celui-ci ne peut être lancé au corps à corps. Le sort invoque 1D6+2 flèches que le sorcier peut utiliser pour tirer sur une figurine ennemie. Les flèches ont une portée de 24ps. Utilisez la Capacité de Tir du sorcier pour déterminer si elles touchent, en ignorant les malus de mouvement, de portée et de couvert. Chaque flèche inflige une touche de Force 3."
-                }
-            },
-            {
-                "magicSchoolName": "Lesser Magic",
-                "rollValue": 5,
-                "difficulty": 6,
-                "name": { "en": "Luck of Shemtek", "fr": "Chance de Shemtek" },
-                "description": {
-                    "en": "The wizard summons the fickle power of magic to manipulate chance. The wizard may re-roll all his failed dice rolls, though the second results stand. The effect lasts until the beginning of his own next turn.",
-                    "fr": "Le sorcier invoque le pouvoir capricieux de la magie pour manipuler la chance. Il peut relancer tous ses jets de dé ratés, le second résultat étant définitif. L'effet dure jusqu'au début de son prochain tour."
-                }
-            },
-            {
-                "magicSchoolName": "Lesser Magic",
-                "rollValue": 6,
-                "difficulty": 8,
-                "name": { "en": "Sword of Rezhebel", "fr": "Épée de Rezhebel" },
-                "description": {
-                    "en": "A flaming sword appears in the hand of the wizard, promising red ruin to all who stand in his way. The sword gives the wizard +1 Attack, +2 Strength and +2 Weapon Skill. Take a Leadership test at the beginning of each of the wizard's own turns. If the test fails, the sword disappears.",
-                    "fr": "Une épée enflammée apparaît dans la main du sorcier, promettant la ruine sanglante à quiconque se dresse sur son chemin. L'épée confère au sorcier +1 Attaque, +2 Force et +2 Capacité de Combat. Un test de Commandement est requis au début de chacun de ses tours ; en cas d'échec, l'épée disparaît."
-                }
-            }
-        ]
-    }
+        "description": {
+          "en": "Choose a model within 6\". It suffers a wound (no save) and the Necromancer gains an extra wound for the battle, possibly above his maximum. Doesn\u0027t affect Possessed or Undead.",
+          "fr": "Choisissez une figurine à moins de 6ps. Elle subit une blessure (sans sauvegarde) et le nécromancien gagne 1 PV supplémentaire pour la bataille, pouvant dépasser son maximum. N\u0027affecte pas les Possédés ni les Morts-Vivants."
+        }
+      },
+      {
+        "magicSchoolName": "Necromancy",
+        "rollValue": 2,
+        "difficulty": 5,
+        "name": {
+          "en": "Re-Animation",
+          "fr": "Réanimation"
+        },
+        "description": {
+          "en": "One Zombie taken out of action in the last combat/shooting phase immediately returns to the battle within 6\" of the Necromancer, not in base contact with an enemy.",
+          "fr": "Un zombie mis hors de combat lors de la dernière phase de corps à corps ou de tir retourne immédiatement au combat, placé à moins de 6ps du nécromancien, pas au contact d\u0027un ennemi."
+        }
+      },
+      {
+        "magicSchoolName": "Necromancy",
+        "rollValue": 3,
+        "difficulty": 6,
+        "name": {
+          "en": "Death Vision",
+          "fr": "Vision de Mort"
+        },
+        "description": {
+          "en": "The Necromancer causes fear in his enemies for the duration of the battle.",
+          "fr": "Le nécromancien cause la peur à ses ennemis pour la durée de la bataille."
+        }
+      },
+      {
+        "magicSchoolName": "Necromancy",
+        "rollValue": 4,
+        "difficulty": 9,
+        "name": {
+          "en": "Spell of Doom",
+          "fr": "Fatalité"
+        },
+        "description": {
+          "en": "Target an enemy within 12\" - it must roll equal to or under its Strength on 1D6 or the dead seize it; on a failure, roll on the Injury table.",
+          "fr": "Désignez un ennemi à moins de 12ps - il doit obtenir un résultat inférieur ou égal à sa Force sur 1D6 ou les morts le saisissent ; en cas d\u0027échec, lancez sur le tableau des blessures."
+        }
+      },
+      {
+        "magicSchoolName": "Necromancy",
+        "rollValue": 5,
+        "difficulty": 6,
+        "name": {
+          "en": "Call of Vanhel",
+          "fr": "Appel de Vanhel"
+        },
+        "description": {
+          "en": "A single Zombie or Dire Wolf within 6\" of the Necromancer may move again up to its full Movement; if this brings it into base contact with an enemy, it counts as charging.",
+          "fr": "Un zombie ou loup funeste à moins de 6ps du nécromancien peut se déplacer à nouveau de son mouvement maximum ; si cela l\u0027amène au contact d\u0027un ennemi, il compte comme ayant chargé."
+        }
+      },
+      {
+        "magicSchoolName": "Necromancy",
+        "rollValue": 6,
+        "difficulty": null,
+        "name": {
+          "en": "Spell of Awakening",
+          "fr": "Incantation de Réveil"
+        },
+        "description": {
+          "en": "Automatic. If an enemy Hero is killed (11-15 on the Serious Injury chart), the Necromancer may raise him as a Zombie - keeps his profile/gear, counts as a solo Henchman group, can\u0027t run or gain experience.",
+          "fr": "Automatique. Si un Héros ennemi est tué (11-15 sur le tableau des Blessures Graves), le nécromancien peut le réveiller en zombie - garde son profil/équipement, compte comme un groupe d\u0027Hommes de main à lui seul, ne peut plus courir ni gagner d\u0027expérience."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Prayers of Taal",
+      "fr": "Prières de Taal"
+    },
+    "description": {
+      "en": "Taal is the God of Nature, the Lord of Beasts, revered by all who venture into the wild regions of the Empire - portrayed as a tall, broad-shouldered man wearing a stag skull as a helm and clothed in bison and bear skins. His followers include rangers, trappers and those who live in the wilds. Prayers of Taal work like Prayers of Sigmar, though the Priest of Taal may never wear Heavy Armour.",
+      "fr": "Taal est le Dieu de la Nature et exige le respect de tous ceux qui entrent dans les régions sauvages de l’Empire. Il est dépeint comme un grand homme aux larges épaules, avec de longs cheveux en bataille et une barbe épaisse. Il porte un crâne de cerf sur la tête et est vêtu de peaux de bison et d’ours. Il est souvent appelé le Seigneur des Bêtes. Ses fidèles sont des chasseurs, des trappeurs et traditionnellement tous ceux qui vivent dans la nature sauvage de l’Empire. Les Prières de Taal fonctionnent comme les Prières de Sigmar, bien qu’un prêtre Taal porte rarement une armure."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Prayers of Taal",
+        "rollValue": 1,
+        "difficulty": 7,
+        "name": {
+          "en": "Leap of the Stag",
+          "fr": "Saut du Cerf"
+        },
+        "description": {
+          "en": "Many Priests of Taal wear a stag\u0027s skull as a symbol of their devotion, and the Lord of the Forest\u0027s power can be called upon to mimic the speed and grace of this magnificent beast. The Priest may immediately move anywhere within 9\", including into base contact with an enemy, in which case the move counts as a charge with +1 Strength for the first turn. If it contacts a fleeing enemy, it automatically hits it with +1 Strength in the ensuing combat phase and the enemy must flee again (if it survives).",
+          "fr": "Beaucoup de prêtres de Taal portent un crâne de cerf comme symbole de leur dévotion et le pouvoir du Seigneur de la Forêt peut être utilisé pour imiter la vitesse et la beauté de cette bête magnifique. Le Prêtre de Taal peut immédiatement se déplacer n\u0027importe où dans la limite de 9ps, y compris en contact socle à socle avec un ennemi, auquel cas ce mouvement est considéré comme une charge avec une Force +1 pour la durée du premier tour. S\u0027il entre en contact avec un ennemi en fuite, lors de la phase de corps à corps, il fera une touche automatique de Force+1 et son adversaire devra s\u0027enfuir à nouveau (s\u0027il survit)."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Taal",
+        "rollValue": 2,
+        "difficulty": 5,
+        "name": {
+          "en": "Blessed Beer",
+          "fr": "Bière Bénite"
+        },
+        "description": {
+          "en": "Like his brother Ulric, Taal has a great appetite for the strong beers of the northern Empire - every Ostland village taps at least one barrel of beer in Taal\u0027s honour at the Summer solstice. Thanks to enough flasks of blessed beer, a Priest of Taal may heal himself or any model within 2\" - the warrior recovers to his maximum Wounds. In addition, every living enemy model (not Undead or Possessed) within 2\" of the Priest loses 1 Attack during the next close combat phase due to the powerful fumes.",
+          "fr": "Comme son frère Ulric, Taal a un grand appétit pour les bières fortes du Nord de l\u0027Empire. Au cours de l\u0027équinoxe d\u0027été, chaque village d\u0027Ostland ouvre (au minimum !) un fût de bière en l\u0027honneur de Taal. Grâce à ses gourdes remplies de bière bénite qu\u0027il porte en nombre suffisant, un Prêtre de Taal peut se guérir ou guérir n\u0027importe quelle figurine située à 2ps de lui. Le guerrier récupère son maximum de Points de Vie. De plus, toutes les figurines ennemies vivantes (pas les Morts-Vivants, ni les Possédés donc) à moins de 2ps du Prêtre perdront 1 Attaque au cours de la prochaine phase de combat dû aux fortes émanations de bière."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Taal",
+        "rollValue": 3,
+        "difficulty": 7,
+        "name": {
+          "en": "Bear\u0027s Paw",
+          "fr": "Patte d\u0027Ours"
+        },
+        "description": {
+          "en": "Many armoured knights have been thrown to the ground by the surprising strength of Taal\u0027s followers - though traditionally called Bear\u0027s Paw, Ostlanders who have felt its power sometimes call it the Elk\u0027s Breath instead. The Priest blesses himself or a friendly model within 6\" - the target gains +2 Strength until the Priest\u0027s next turn.",
+          "fr": "Beaucoup de chevaliers en armure ont été jetés à terre par la Force surprenante des fidèles de Taal. Bien qu\u0027il soit traditionnellement appelé « Patte d\u0027ours », ce sort est parfois appelé « Souffle de l\u0027élan » par les Ostlanders qui ont pu en ressentir la puissance. Le prêtre invoque la bénédiction de Taal sur lui ou sur une figurine amie dans un rayon de 6ps. La cible reçoit un bonus de +2 en Force jusqu\u0027au prochain tour du Prêtre."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Taal",
+        "rollValue": 4,
+        "difficulty": 9,
+        "name": {
+          "en": "Earthquake",
+          "fr": "Tremblement de Terre"
+        },
+        "description": {
+          "en": "Taal\u0027s domain covers both earth and sky, and his power can even reach the dark streets of Mordheim. When his name is invoked three times and an eagle\u0027s blood is spilled on the ground, the Lord of Nature makes the thunder roar and the earth shake. Must be cast on a building within 4\" - any enemy model in contact with the building suffers a Strength 3 hit. In addition, the building collapses and every model inside is treated as having fallen (e.g. a model falling 5\" must pass two Initiative tests - one per 2\" - or suffer 1D3 Strength 5 hits). Remove the building from play for the rest of the game.",
+          "fr": "Le domaine de Taal comprend aussi bien la terre que le ciel et son pouvoir peut même atteindre les sombres rues de Mordheim. Lorsque son nom est invoqué par trois fois et que le sang d\u0027un aigle est versé au sol, le Seigneur de la Nature fait gronder le tonnerre et trembler la terre. Le sort doit être lancé sur un bâtiment à moins de 4ps. Toute figurine ennemie en contact avec le bâtiment subit une touche de Force 3. De plus, le bâtiment s\u0027effondrera et toutes les figurines qui s\u0027y trouvent seront considérées comme ayant subi une chute (par exemple, une figurine tombant de 5ps doit réussir deux tests d\u0027Initiative - un par tranche de 2ps - pour éviter de subir 1D3 touches de F5). Retirez le bâtiment du plateau pour le reste de la partie."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Taal",
+        "rollValue": 5,
+        "difficulty": 8,
+        "name": {
+          "en": "Entangle",
+          "fr": "Entraves"
+        },
+        "description": {
+          "en": "It\u0027s said that when Taal walked the earth, life sprang from his footsteps - part of his power can be called upon by his followers to help the forest regrow and return the land to its natural state. Vines and saplings burst from the ground, entangling anyone trying to cross it. Every friendly or enemy model (except Ostlander Jaegers) within 12\" of the Priest may only move at half Movement until the next Shooting phase.",
+          "fr": "Il se dit que lorsque Taal marchait sur le sol, la vie surgissait de ses pas. Une partie de son pouvoir peut être invoqué par ses fidèles pour favoriser la repousse des forêts et aider la terre à revenir à son état naturel. Des plantes grimpantes et de petits arbres jaillissent de la terre, entravant tous ceux qui tentent de les traverser. Toutes les figurines amies ou ennemies (à l\u0027exception des Jaegers Ostlanders) à moins de 12ps du Prêtre ne peuvent se déplacer qu\u0027à la moitié de leur Mouvement jusqu\u0027à la prochaine phase de tir."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Taal",
+        "rollValue": 6,
+        "difficulty": 7,
+        "name": {
+          "en": "Squirrel Swarm",
+          "fr": "Invocation d\u0027Écureuils"
+        },
+        "description": {
+          "en": "Taal is master of every beast, great and small - those who anger him may be mauled by a mountain lion or drowned by an enraged beaver\u0027s flood. With this prayer, the Priest calls upon the Lord of Beasts\u0027 wrath, summoning dozens upon dozens of enraged squirrels. The furious rodents attack an enemy within 12\" of the Priest, swarming under the warrior\u0027s clothes and armour, scratching and biting. The target suffers 2D6 Strength 1 hits, no armour save allowed.",
+          "fr": "Taal est le maître de toutes les bêtes, qu\u0027elles soient grandes ou petites. Ceux qui provoquent sa colère peuvent être mutilés par un lion des montagnes ou noyés par une crue provoquée par un castor en colère. Avec ce sort, le Prêtre appelle la colère du Seigneur des Bêtes, invoquant des dizaines et des dizaines d\u0027écureuils enragés. Les rongeurs furieux attaquent un ennemi à moins de 12ps du Prêtre, rampant sous les vêtements et l\u0027armure du guerrier, l\u0027écorchant et provoquant de nombreuses marques et morsures. La cible subit 2D6 touches de Force 1, sans sauvegarde possible."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Nurgle Rituals",
+      "fr": "Rituels de Nurgle"
+    },
+    "description": {
+      "en": "The Carnival Master uses the rituals of Nurgle to pervert and corrupt nature, inflicting hideous diseases for which there are no known cures.",
+      "fr": "Le Maître du Carnaval utilise les rituels de Nurgle pour pervertir et corrompre la nature, infligeant d'horribles maladies pour lesquelles nul remède n'est connu."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Nurgle Rituals",
+        "rollValue": 1,
+        "difficulty": 8,
+        "name": {
+          "en": "Daemonic Vigour",
+          "fr": "Vigueur Démoniaque"
+        },
+        "description": {
+          "en": "The Master grants his daemonic servants supernatural toughness. Any Plague Bearer or Nurgling within 8\" of the Master has its daemonic armour save improved to 4+ until the start of its next turn.",
+          "fr": "Le Maître accorde à ses serviteurs démoniaques une robustesse surnaturelle. Tout Portepeste ou Nurgling dans un rayon de 8ps du Maître voit sa sauvegarde démoniaque passer à 4+ jusqu\u0027au début de son prochain tour."
+        }
+      },
+      {
+        "magicSchoolName": "Nurgle Rituals",
+        "rollValue": 2,
+        "difficulty": 7,
+        "name": {
+          "en": "Buboes",
+          "fr": "Bubons"
+        },
+        "description": {
+          "en": "The Master bestows superb buboes upon his enemies. Range 8\", affects one enemy warrior - it must pass a Toughness test or lose 1 Wound, no armour save allowed.",
+          "fr": "Le Maître dispense de superbes bubons à ses ennemis. Ce sort a une portée de 8ps et affecte un guerrier ennemi. Celui-ci doit réussir un test d\u0027Endurance ou perdre 1 Point de Vie. Aucune sauvegarde d\u0027armure n\u0027est autorisée."
+        }
+      },
+      {
+        "magicSchoolName": "Nurgle Rituals",
+        "rollValue": 3,
+        "difficulty": 8,
+        "name": {
+          "en": "Nurgling Miasma",
+          "fr": "Miasmes Nurglesques"
+        },
+        "description": {
+          "en": "The Master emits a foul-smelling fog that suffocates his enemies. Range 6\", affects every living creature, friend or foe - a warrior in range must pass a Toughness test or lose 1 Attack for the rest of the turn.",
+          "fr": "Le Maître émet un brouillard malodorant qui fait suffoquer ses ennemis. Ce sort a une portée de 6ps et affecte toutes les créatures vivantes, amies ou ennemies. Tout guerrier à portée doit réussir un test d\u0027Endurance ou perdre 1 Attaque pour le reste du tour."
+        }
+      },
+      {
+        "magicSchoolName": "Nurgle Rituals",
+        "rollValue": 4,
+        "difficulty": 10,
+        "name": {
+          "en": "Pestilence",
+          "fr": "Pestilence"
+        },
+        "description": {
+          "en": "The Master inflicts grave lesions upon the ungodly. Every enemy model within 12\" of the Master suffers a Strength 3 hit, no armour save allowed.",
+          "fr": "Le Maître inflige de graves lésions aux mécréants. Toute figurine ennemie dans un rayon de 12ps du Maître subit une touche de Force 3, sans sauvegarde d\u0027armure."
+        }
+      },
+      {
+        "magicSchoolName": "Nurgle Rituals",
+        "rollValue": 5,
+        "difficulty": 8,
+        "name": {
+          "en": "Warty Skin",
+          "fr": "Peau Verruqueuse"
+        },
+        "description": {
+          "en": "The Master\u0027s skin takes on the aspect of his god\u0027s diseased hide. The Master gains a 2+ armour save, replacing his current one, lasting until the start of his next Shooting phase.",
+          "fr": "La peau du Maître prend l\u0027aspect du cuir malade de son dieu. Le Maître gagne une sauvegarde d\u0027armure de 2+ qui remplace sa sauvegarde d\u0027armure actuelle. Ce rituel dure jusqu\u0027au début de sa prochaine phase de tir."
+        }
+      },
+      {
+        "magicSchoolName": "Nurgle Rituals",
+        "rollValue": 6,
+        "difficulty": 9,
+        "name": {
+          "en": "Nurgle\u0027s Rot",
+          "fr": "Pourriture de Nurgle"
+        },
+        "description": {
+          "en": "The Master grants Nurgle\u0027s blessing to his foes. Any enemy model in base contact with the Master must immediately pass a Toughness test or catch Nurgle\u0027s Rot (see the Nurgle\u0027s Rot mutation).",
+          "fr": "Le Maître accorde la bénédiction de Nurgle à ses adversaires. Toute figurine ennemie en contact avec le Maître doit immédiatement réussir un test d\u0027Endurance ou attraper la Pourriture de Nurgle (voir la mutation Pourriture de Nurgle)."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Chaos Rituals",
+      "fr": "Rituels du Chaos"
+    },
+    "description": {
+      "en": "Chaos rituals employ the raw power of the darkest magic, and are therefore supremely useful in bringing pain and suffering, as well as change and mutation.",
+      "fr": "Les Rituels du Chaos font appel à la puissance brute de la magie la plus sombre, redoutablement utile pour répandre douleur et souffrance, ainsi que changement et mutation."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Chaos Rituals",
+        "rollValue": 1,
+        "difficulty": 10,
+        "name": {
+          "en": "Vision of Horror",
+          "fr": "Vision d\u0027Horreur"
+        },
+        "description": {
+          "en": "Unbearable visions of the Realms of Chaos crush the will of an enemy. Range 6\" - if the caster is in close combat, the target must be in base contact. The victim is immediately Stunned (Knocked Down if it cannot be Stunned).",
+          "fr": "Le sorcier du Chaos provoque d\u0027insoutenables visions des Royaumes du Chaos et son ennemi se recroqueville d\u0027horreur. Ce sort a une portée de 6ps et doit être lancé sur l\u0027ennemi le plus proche (en contact socle à socle s\u0027il est au Corps à Corps). La victime est immédiatement sonnée (à terre si elle ne peut être sonnée)."
+        }
+      },
+      {
+        "magicSchoolName": "Chaos Rituals",
+        "rollValue": 2,
+        "difficulty": 7,
+        "name": {
+          "en": "Third Eye",
+          "fr": "Œil Divin"
+        },
+        "description": {
+          "en": "The Dark Gods grant a gift to their servant. Usable only once per battle. Choose any model within 6\", friend or foe, and roll 1D6: 1 = immediately Out of Action (no Serious Injury roll); 2-5 = +1 to one Characteristic for the battle (caster\u0027s choice); 6 = +1 to all Characteristics for the battle.",
+          "fr": "Le sorcier du Chaos implore les dieux sombres d\u0027accorder un don à leur serviteur. Utilisable une seule fois par bataille. Choisissez n\u0027importe quelle figurine à moins de 6ps, amie ou ennemie, et lancez 1D6 : 1 = mise hors de combat immédiate (sans jet de Blessure Grave) ; 2-5 = +1 à une Caractéristique pour la bataille ; 6 = +1 à toutes les Caractéristiques pour la bataille."
+        }
+      },
+      {
+        "magicSchoolName": "Chaos Rituals",
+        "rollValue": 3,
+        "difficulty": 8,
+        "name": {
+          "en": "Black Blood",
+          "fr": "Sang Noir"
+        },
+        "description": {
+          "en": "The caster slashes his palm and his burning blood erupts forth. Range 8\", D3 Strength 5 hits on the first model in its path. After casting, the caster rolls on the Injury table for his own wound (an Out of Action result is treated as Stunned instead).",
+          "fr": "Le sorcier du Chaos s\u0027entaille la paume de la main et son sang jaillit et brûle chair et armures. Cette attaque a une portée de 8ps et cause D3 touches de Force 5 à la première figurine sur sa trajectoire. Le sorcier doit ensuite lancer sur le tableau des Dégâts pour sa propre blessure (un résultat hors de combat est traité comme sonné)."
+        }
+      },
+      {
+        "magicSchoolName": "Chaos Rituals",
+        "rollValue": 4,
+        "difficulty": 9,
+        "name": {
+          "en": "Chaos Temptation",
+          "fr": "Tentation du Chaos"
+        },
+        "description": {
+          "en": "Awakens the chaotic side lurking in every living being. Range 12\", cast on the nearest enemy model. Compare 1D6+caster\u0027s Leadership to 1D6+target\u0027s Leadership; if the caster wins, they control the victim until it passes a Leadership test in its controller\u0027s Rally phase. The victim cannot suicide but may attack its own side; it will not fight the caster\u0027s warband. If already in combat with them, it disengages 1\" immediately.",
+          "fr": "Le sorcier du Chaos réveille le côté chaotique qui se cache au tréfonds de l\u0027âme de tout être vivant. Le sort a une portée de 12ps et doit être jeté sur la figurine ennemie la plus proche. Comparez 1D6+Commandement du sorcier au 1D6+Commandement de la cible. Si le sorcier obtient le total le plus haut, il prend le contrôle de sa victime jusqu\u0027à ce qu\u0027elle réussisse un test de Commandement lors de la phase de Ralliement adverse. La figurine ne peut pas se suicider, mais peut attaquer les figurines de son propre camp et ne combattra pas la bande du sorcier."
+        }
+      },
+      {
+        "magicSchoolName": "Chaos Rituals",
+        "rollValue": 5,
+        "difficulty": 7,
+        "name": {
+          "en": "Dark Wings",
+          "fr": "Ailes Ténébreuses"
+        },
+        "description": {
+          "en": "Two dark daemons lift the caster wherever they will. The caster may immediately move up to 12\" anywhere, even into base contact with an enemy (counts as a charge). If it contacts a fleeing enemy, it inflicts one automatic hit in the ensuing close combat phase and the enemy must flee again if it survives.",
+          "fr": "Le sorcier du Chaos est soulevé par deux démons ténébreux qui l\u0027emportent là où il le désire. Le sorcier peut immédiatement se déplacer n\u0027importe où à 12ps maximum, même au contact avec l\u0027ennemi, auquel cas il compte comme ayant chargé. S\u0027il engage un ennemi en fuite, il inflige une touche automatique pendant la phase de Corps à Corps puis son adversaire fuit à nouveau s\u0027il survit."
+        }
+      },
+      {
+        "magicSchoolName": "Chaos Rituals",
+        "rollValue": 6,
+        "difficulty": 7,
+        "name": {
+          "en": "Word of Pain",
+          "fr": "Mot de Souffrance"
+        },
+        "description": {
+          "en": "Speaking the name of his dark god, the caster inflicts terrible pain on all who hear it. Every model within 3\" of the caster, friend or foe, suffers a Strength 3 hit with no armour save.",
+          "fr": "En prononçant le nom de son dieu ténébreux, le sorcier du Chaos inflige une douleur atroce à tous ceux qui l\u0027entendent. Toutes les figurines situées à moins de 3ps du sorcier, amies ou ennemies, subissent une touche de Force 3 sans sauvegarde d\u0027armure."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Waaagh! Magic",
+      "fr": "Magie Waaagh !"
+    },
+    "description": {
+      "en": "Waaagh! spells are used by Orc Shamans. They are rituals of a sort, howling prayers to the boisterous Orc gods Gork and Mork.",
+      "fr": "Les sorts Waaagh! sont utilisés par les Chamanes Orques. Ce sont une forme de rituels, des prières hurlées aux dieux tapageurs des Orques, Gork et Mork."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Waaagh! Magic",
+        "rollValue": 1,
+        "difficulty": 9,
+        "name": {
+          "en": "Led\u0027z Go",
+          "fr": "Z\u0027y Va !"
+        },
+        "description": {
+          "en": "Any Orc or Goblin within 4\" of the Shaman automatically strikes first in hand-to-hand combat, regardless of other circumstances. Lasts until the Shaman is knocked down, stunned or taken out of action.",
+          "fr": "Toute figurine Orque ou Gobelin à moins de 4ps du Chamane frappe automatiquement en premier au Corps à Corps, quelles que soient les circonstances. Dure jusqu\u0027à ce que le Chamane soit mis à terre, sonné ou hors de combat."
+        }
+      },
+      {
+        "magicSchoolName": "Waaagh! Magic",
+        "rollValue": 2,
+        "difficulty": 7,
+        "name": {
+          "en": "Oi! Gerroff!",
+          "fr": "Bouge de Là !"
+        },
+        "description": {
+          "en": "Range 8\". Moves an enemy model D6\" directly away from the Shaman. If it collides with another model or a building, both suffer a Strength 3 hit. May not target models in hand-to-hand combat.",
+          "fr": "Portée 8ps. Déplace une figurine ennemie de 1D6ps dans la direction opposée au Chamane. Si la figurine heurte une autre figurine ou un bâtiment, les deux subissent une touche de Force 3. Ne peut pas cibler une figurine engagée au Corps à Corps."
+        }
+      },
+      {
+        "magicSchoolName": "Waaagh! Magic",
+        "rollValue": 3,
+        "difficulty": 9,
+        "name": {
+          "en": "Zzap!",
+          "fr": "Zzzap !"
+        },
+        "description": {
+          "en": "Range 12\". Causes D3 Strength 4 hits on the closest enemy model, no armour saves allowed.",
+          "fr": "Portée 12ps. Inflige 1D3 touches de Force 4 à la figurine ennemie la plus proche, aucune sauvegarde d\u0027armure possible."
+        }
+      },
+      {
+        "magicSchoolName": "Waaagh! Magic",
+        "rollValue": 4,
+        "difficulty": 6,
+        "name": {
+          "en": "Fooled Ya!",
+          "fr": "Bouffon, Va !"
+        },
+        "description": {
+          "en": "No enemy may charge the Shaman next turn. If the Shaman is engaged in hand-to-hand combat, he may immediately move 4\" away.",
+          "fr": "Aucun ennemi ne peut charger le Chamane durant le prochain tour. Si le Chamane est engagé au Corps à Corps, il peut immédiatement être déplacé de 4ps."
+        }
+      },
+      {
+        "magicSchoolName": "Waaagh! Magic",
+        "rollValue": 5,
+        "difficulty": 7,
+        "name": {
+          "en": "Clubba",
+          "fr": "Ramèn\u0027ta Fraise !"
+        },
+        "description": {
+          "en": "An ectoplasmic club appears in the Shaman\u0027s hand, counting as a club with +2 Strength and granting +1 Attack. Lasts until the Shaman suffers a Wound.",
+          "fr": "Une énorme massue fantomatique apparaît dans la main du Chamane, considérée comme un gourdin ordinaire mais donnant +2 en Force et +1 Attaque. Dure jusqu\u0027à ce que le Chamane subisse une Blessure."
+        }
+      },
+      {
+        "magicSchoolName": "Waaagh! Magic",
+        "rollValue": 6,
+        "difficulty": 8,
+        "name": {
+          "en": "Fire of Gork",
+          "fr": "Feu de Gork"
+        },
+        "description": {
+          "en": "Range 12\". Two bolts of green flame each cause D3 Strength 3 hits - both bolts may strike the closest enemy model, or be split between the two closest enemy models.",
+          "fr": "Portée 12ps. Deux éclairs de flammes vertes infligent chacun 1D3 touches de Force 3 - les deux éclairs peuvent frapper la figurine ennemie la plus proche, ou être répartis entre les deux figurines ennemies les plus proches."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Prayers of Sigmar",
+      "fr": "Prières de Sigmar"
+    },
+    "description": {
+      "en": "Those with great faith in the gods can call upon their divine power. The priests of Sigmar can pray for many miracles: healing of wounds, strengthening the resolve of their comrades or the banishment of Daemonic creatures and the Undead. A warrior may use the divine power of Sigmar while wearing armour - Prayers of Sigmar are not regarded as spells, so any special protection against spells does not affect them.",
+      "fr": "Ceux qui ont une grande foi dans les dieux peuvent faire appel à leur puissance divine. Les prêtres de Sigmar peuvent prier pour de nombreux miracles : guérison des blessures, renforcement de la détermination de leurs compagnons ou bannissement des créatures démoniaques et des Morts-Vivants. Un guerrier peut invoquer la puissance divine de Sigmar tout en portant une armure - les Prières de Sigmar ne sont pas considérées comme des sorts, une protection spéciale contre la magie ne les affecte donc pas."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Prayers of Sigmar",
+        "rollValue": 1,
+        "difficulty": 7,
+        "name": {
+          "en": "The Hammer of Sigmar",
+          "fr": "Le Marteau de Sigmar"
+        },
+        "description": {
+          "en": "This weapon of the faithful glows with the righteous power of Sigmar. The wielder gains +2 Strength in close combat and all hits inflicted cause double damage (2 Wounds instead of 1). The Priest must test again each Shooting phase he wishes to keep using it.",
+          "fr": "Cette arme du fidèle brille d\u0027une lumière dorée, empreinte de la puissance vertueuse de Sigmar. Le porteur gagne +2 en Force au Corps à Corps et tous les coups qu\u0027il inflige causent le double de dégâts (2 Blessures au lieu d\u0027une). Le Prêtre doit retenter le test à chaque phase de Tir pour continuer à l\u0027utiliser."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Sigmar",
+        "rollValue": 2,
+        "difficulty": 8,
+        "name": {
+          "en": "Hearts of Steel",
+          "fr": "Cœurs d\u0027Acier"
+        },
+        "description": {
+          "en": "Waves of glory surround the servant of Sigmar. Any allied warrior within 8\" becomes immune to Fear and All Alone tests, and the whole warband gains +1 to Rout tests. Lasts until the caster is knocked down, stunned or put out of action; the bonus does not stack if cast again.",
+          "fr": "Des vagues de gloire entourent le serviteur de Sigmar. Tout guerrier allié à moins de 8ps devient immunisé à la Peur et au test Seul contre Tous, et toute la bande gagne +1 à ses tests de Déroute. Dure jusqu\u0027à ce que le lanceur soit mis à terre, sonné ou hors de combat ; le bonus ne se cumule pas si le sort est relancé."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Sigmar",
+        "rollValue": 3,
+        "difficulty": 9,
+        "name": {
+          "en": "Soulfire",
+          "fr": "Feu de l\u0027Âme"
+        },
+        "description": {
+          "en": "The wrath of Sigmar comes to earth in purifying flames. All enemy models within 4\" suffer a Strength 3 hit, no armour saves allowed - Undead and Possessed models suffer a Strength 5 hit instead.",
+          "fr": "La colère de Sigmar s\u0027abat sur terre en flammes purificatrices. Toute figurine ennemie à moins de 4ps subit une touche de Force 3, sans sauvegarde d\u0027armure possible - les figurines Mortes-Vivantes et Possédées subissent une touche de Force 5 à la place."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Sigmar",
+        "rollValue": 4,
+        "difficulty": 6,
+        "name": {
+          "en": "Shield of Faith",
+          "fr": "Bouclier de la Foi"
+        },
+        "description": {
+          "en": "A shield of pure white light appears before the Priest, granting immunity to all spells as long as his faith holds. Roll at the start of each Recovery phase: on a 1 or 2 the shield disappears.",
+          "fr": "Un bouclier de pure lumière blanche apparaît devant le Prêtre, le rendant immunisé à tous les sorts tant que sa foi reste forte. Lancez le dé au début de chaque phase de Récupération : sur un 1 ou 2, le bouclier disparaît."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Sigmar",
+        "rollValue": 5,
+        "difficulty": 5,
+        "name": {
+          "en": "Healing Hand",
+          "fr": "Main Guérisseuse"
+        },
+        "description": {
+          "en": "Laying hands upon a wounded comrade, the Priest calls upon Sigmar to heal his wounds. Any one model within 2\" (including himself) is restored to full Wounds; any other stunned or knocked-down friendly model within 2\" immediately stands up and fights on normally.",
+          "fr": "En posant les mains sur un compagnon blessé, le Prêtre invoque Sigmar pour guérir ses blessures. Une figurine à moins de 2ps (lui-même inclus) recouvre la totalité de ses Points de Vie ; toute autre figurine amie sonnée ou à terre à moins de 2ps se relève aussitôt et combat normalement."
+        }
+      },
+      {
+        "magicSchoolName": "Prayers of Sigmar",
+        "rollValue": 6,
+        "difficulty": 9,
+        "name": {
+          "en": "Armour of Righteousness",
+          "fr": "Armure de la Vertu"
+        },
+        "description": {
+          "en": "Impenetrable armour covers the Priest, a fiery twin-tailed comet burning above his head. He gains a 2+ armour save (replacing his normal save) and causes Fear, becoming immune to it himself, until the start of his next Shooting phase.",
+          "fr": "Une armure impénétrable recouvre le Prêtre, tandis qu\u0027une comète bifide enflammée brille au-dessus de sa tête. Il obtient une sauvegarde d\u0027armure de 2+ (qui remplace sa sauvegarde normale) et provoque la Peur tout en y étant lui-même immunisé, jusqu\u0027au début de sa prochaine phase de Tir."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Magic of the Horned Rat",
+      "fr": "Magie du Rat Cornu"
+    },
+    "description": {
+      "en": "This brand of sorcery is used by the Skaven. It is a sinister form of magic which calls upon the Skaven deity, a loathsome daemonic god known as the Horned Rat.",
+      "fr": "Cette forme de sorcellerie est utilisée par les Skavens. Il s'agit d'une magie sinistre qui fait appel à la divinité skaven, un abject dieu démoniaque connu sous le nom de Rat Cornu."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Magic of the Horned Rat",
+        "rollValue": 1,
+        "difficulty": 8,
+        "name": {
+          "en": "Warpfire",
+          "fr": "Feu de Malepierre"
+        },
+        "description": {
+          "en": "A green flame leaps from the Sorcerer\u0027s paw. Range 8\", hits the first model in its path with D3 Strength 4 hits, and one Strength 3 hit on each model within 2\" of the target.",
+          "fr": "Une flamme verte jaillit de la patte tendue du Sorcier. Portée 8ps, inflige 1D3 touches de Force 4 à la première figurine sur sa trajectoire, ainsi qu\u0027une touche de Force 3 à chaque figurine à moins de 2ps de la cible."
+        }
+      },
+      {
+        "magicSchoolName": "Magic of the Horned Rat",
+        "rollValue": 2,
+        "difficulty": null,
+        "name": {
+          "en": "Children of the Horned Rat",
+          "fr": "Enfants du Rat Cornu"
+        },
+        "description": {
+          "en": "Automatic difficulty. Must be cast before the game, once only: summons D3 Giant Rats placed within 6\" of the Sorcerer. They disappear after the battle and do not count towards the warband\u0027s maximum size.",
+          "fr": "Difficulté automatique. Doit être lancé avant la partie, une seule fois : invoque 1D3 Rats géants placés à moins de 6ps du Sorcier. Ils disparaissent après la bataille et ne comptent pas dans l\u0027effectif maximum de la bande."
+        }
+      },
+      {
+        "magicSchoolName": "Magic of the Horned Rat",
+        "rollValue": 3,
+        "difficulty": 7,
+        "name": {
+          "en": "Gnawdoom",
+          "fr": "Fléau Rongeur"
+        },
+        "description": {
+          "en": "The target is attacked by rats and soon covered head to foot in small, bleeding wounds - causes 2D6 Strength 1 hits on a single model within 8\" of the caster.",
+          "fr": "La cible est attaquée par des rats et se retrouve bientôt couverte de la tête aux pieds de petites blessures saignantes - inflige 2D6 touches de Force 1 à une figurine à moins de 8ps du lanceur."
+        }
+      },
+      {
+        "magicSchoolName": "Magic of the Horned Rat",
+        "rollValue": 4,
+        "difficulty": 8,
+        "name": {
+          "en": "Black Fury",
+          "fr": "Fureur Noire"
+        },
+        "description": {
+          "en": "With a chittering incantation the Sorcerer becomes a monstrous rat-like creature. He may immediately charge any enemy model within 12\" (ignoring terrain and interposing models) and gains +2 Attacks and +1 Strength for that turn\u0027s close combat phase only.",
+          "fr": "D\u0027une incantation chuintante, le Sorcier se transforme en une créature monstrueuse à l\u0027apparence de rat. Il peut immédiatement charger toute figurine ennemie à moins de 12ps (en ignorant le terrain et les figurines interposées) et gagne +2 Attaques et +1 Force pour la seule phase de Corps à Corps de ce tour."
+        }
+      },
+      {
+        "magicSchoolName": "Magic of the Horned Rat",
+        "rollValue": 5,
+        "difficulty": 8,
+        "name": {
+          "en": "Eye of the Warp",
+          "fr": "Œil du Warp"
+        },
+        "description": {
+          "en": "All standing models in base contact with the Sorcerer must take a Leadership test; on failure, each suffers a Strength 3 hit and runs 2D6\" directly away, exactly as if it had lost a Seul contre Tous test.",
+          "fr": "Toute figurine debout au contact du Sorcier doit immédiatement effectuer un test de Commandement ; en cas d\u0027échec, elle subit une touche de Force 3 et fuit de 2D6ps directement à l\u0027opposé du Sorcier, exactement comme si elle avait perdu un test Seul contre Tous."
+        }
+      },
+      {
+        "magicSchoolName": "Magic of the Horned Rat",
+        "rollValue": 6,
+        "difficulty": 6,
+        "name": {
+          "en": "Sorcerer\u0027s Curse",
+          "fr": "Malédiction du Sorcier"
+        },
+        "description": {
+          "en": "Range 12\", affects a single model within range: the target must re-roll any successful armour save and to-hit roll during the Skaven close combat phase, and during its own next Shooting and close combat phases.",
+          "fr": "Portée 12ps, affecte une seule figurine dans cette portée : la cible doit relancer toute sauvegarde d\u0027armure et tout jet pour toucher réussis durant la phase de Corps à Corps skaven, ainsi que durant ses propres prochaines phases de Tir et de Corps à Corps."
+        }
+      }
+    ]
+  },
+  {
+    "name": {
+      "en": "Lesser Magic",
+      "fr": "Magie Mineure"
+    },
+    "description": {
+      "en": "Those who have not been schooled in the ways of magic can cast only relatively simple spells. Lacking the tradition of sorcery and the grimoires of Necromancers and Chaos Mages, human Warlocks rely on their own natural aptitude and experimentation. Lesser Magic (or hedge magic) is not as awesome as the mighty spells of Necromancers and Chaos Mages, but it is still dangerous.",
+      "fr": "Ceux qui n'ont pas été formés aux voies de la magie ne peuvent lancer que des sorts relativement simples. Dépourvus de la tradition ésotérique et des grimoires des Nécromanciens et Mages du Chaos, les Sorciers humains s'en remettent à leur aptitude naturelle et à l'expérimentation. La Magie Mineure (ou magie rustique) est loin d'égaler la puissance des sorts de Nécromanciens et Mages du Chaos, mais reste dangereuse."
+    },
+    "spells": [
+      {
+        "magicSchoolName": "Lesser Magic",
+        "rollValue": 1,
+        "difficulty": 7,
+        "name": {
+          "en": "Fires of U'Zhul",
+          "fr": "Feux d'U'Zhul"
+        },
+        "description": {
+          "en": "The wizard summons a fiery ball of flames and hurls it upon his enemies. The fireball has a range of 18\" and causes one Strength 4 hit. It strikes the first model in its path. Armour saves are taken as normal (ie, with -1 modifier).",
+          "fr": "Le sorcier invoque une boule de flammes et la projette sur ses ennemis. La boule de feu a une portée de 18ps et inflige une touche de Force 4. Elle frappe la première figurine sur son passage. Les sauvegardes d'armure se font normalement (soit avec un modificateur de -1)."
+        }
+      },
+      {
+        "magicSchoolName": "Lesser Magic",
+        "rollValue": 2,
+        "difficulty": 7,
+        "name": {
+          "en": "Flight of Zimmeran",
+          "fr": "Envol de Zimmeran"
+        },
+        "description": {
+          "en": "Calling upon the power of the winds of magic, the wizard walks on air. The wizard may immediately move anywhere within 12\", including into base contact with an enemy, in which case he counts as charging. If he engages a fleeing enemy in the close combat phase he will score 1 automatic hit and then his opponent will flee again (if he survives).",
+          "fr": "Faisant appel au pouvoir des vents de la magie, le sorcier marche sur l'air. Il peut immédiatement se déplacer n'importe où à moins de 12ps, y compris au contact d'un ennemi, auquel cas il est considéré comme chargeant. S'il engage un ennemi en fuite lors de la phase de corps à corps, il inflige 1 touche automatique puis son adversaire fuit à nouveau (s'il survit)."
+        }
+      },
+      {
+        "magicSchoolName": "Lesser Magic",
+        "rollValue": 3,
+        "difficulty": 7,
+        "name": {
+          "en": "Dread of Aramar",
+          "fr": "Effroi d'Aramar"
+        },
+        "description": {
+          "en": "The wizard places a sense of mind-numbing fear into the minds of his opponents. A single model within 12\" of the wizard must pass a Leadership test or flee 2D6\" directly away from him. If he flees, he must test at the start of each of his own movement phases and will continue to flee until he passes a test. Note that this spell does not affect Undead or any model immune to fear.",
+          "fr": "Le sorcier insuffle une terreur paralysante dans l'esprit de ses adversaires. Une figurine unique à moins de 12ps du sorcier doit réussir un test de Commandement ou fuir de 2D6ps directement loin de lui. Si elle fuit, elle doit retester au début de chacune de ses phases de mouvement et continue de fuir jusqu'à réussir un test. Ce sort n'affecte pas les Morts-Vivants ni toute figurine immunisée à la peur."
+        }
+      },
+      {
+        "magicSchoolName": "Lesser Magic",
+        "rollValue": 4,
+        "difficulty": 7,
+        "name": {
+          "en": "Silver Arrows of Arha",
+          "fr": "Flèches d'Argent d'Arha"
+        },
+        "description": {
+          "en": "Silvery arrows appear from thin air and circle around the wizard, shooting out to strike his foes. Unlike other spells, this cannot be cast whilst in hand-to-hand combat. The spell summons D6+2 arrows which the wizard can use to shoot against one enemy model. The arrows have a range of 24\". Use the wizard's own Ballistic Skill to determine whether he hits or not, but ignore movement, range and cover penalties. The arrows cause one S3 hit each.",
+          "fr": "Des flèches argentées surgissent du néant et tournoient autour du sorcier avant de frapper ses ennemis. Contrairement aux autres sorts, celui-ci ne peut être lancé au corps à corps. Le sort invoque 1D6+2 flèches que le sorcier peut utiliser pour tirer sur une figurine ennemie. Les flèches ont une portée de 24ps. Utilisez la Capacité de Tir du sorcier pour déterminer si elles touchent, en ignorant les malus de mouvement, de portée et de couvert. Chaque flèche inflige une touche de Force 3."
+        }
+      },
+      {
+        "magicSchoolName": "Lesser Magic",
+        "rollValue": 5,
+        "difficulty": 6,
+        "name": {
+          "en": "Luck of Shemtek",
+          "fr": "Chance de Shemtek"
+        },
+        "description": {
+          "en": "The wizard summons the fickle power of magic to manipulate chance. The wizard may re-roll all his failed dice rolls, though the second results stand. The effect lasts until the beginning of his own next turn.",
+          "fr": "Le sorcier invoque le pouvoir capricieux de la magie pour manipuler la chance. Il peut relancer tous ses jets de dé ratés, le second résultat étant définitif. L'effet dure jusqu'au début de son prochain tour."
+        }
+      },
+      {
+        "magicSchoolName": "Lesser Magic",
+        "rollValue": 6,
+        "difficulty": 8,
+        "name": {
+          "en": "Sword of Rezhebel",
+          "fr": "Épée de Rezhebel"
+        },
+        "description": {
+          "en": "A flaming sword appears in the hand of the wizard, promising red ruin to all who stand in his way. The sword gives the wizard +1 Attack, +2 Strength and +2 Weapon Skill. Take a Leadership test at the beginning of each of the wizard's own turns. If the test fails, the sword disappears.",
+          "fr": "Une épée enflammée apparaît dans la main du sorcier, promettant la ruine sanglante à quiconque se dresse sur son chemin. L'épée confère au sorcier +1 Attaque, +2 Force et +2 Capacité de Combat. Un test de Commandement est requis au début de chacun de ses tours ; en cas d'échec, l'épée disparaît."
+        }
+      }
+    ]
+  }
 ]

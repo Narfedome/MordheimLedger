@@ -2,10 +2,12 @@ namespace MordheimLedgerApp.Core.Models.Library;
 
 /// <summary>
 /// A Hired Sword archetype (e.g. "Pit Fighter") - a mercenary profile from the rulebook, catalogued the
-/// same way as Skill/Mutation/EquipmentItem. This pass only needs the catalogue itself and its profile
-/// for the "Vendu aux Fosses" (Serious Injury 65) mini-fight comparison - a Hired Sword is NEVER actually
-/// recruited into a Warband by this code (that stays a separate future workstream, see
-/// SERIOUS_INJURIES_STATUS.md), so there is deliberately no HeadCount/upkeep-tracking/Rating wiring here.
+/// same way as Skill/Mutation/EquipmentItem. Originally only used for the "Vendu aux Fosses" (Serious
+/// Injury 65) mini-fight comparison; now also actually recruitable into a Warband (warband-creation
+/// wizard's "Francs-Tireurs" tab, plus the End of Game wizard) - see Models.Warrior.HiredSwordId/
+/// IsHiredSword/HiredSwordBaseRating/HiredSwordUpkeepPrepaid and WarbandService.RecruitHiredSwordAsync.
+/// No HeadCount here (always recruited as HeadCount 1, never a group) - upkeep tracking/Rating live on
+/// the recruited Warrior, not on this catalogue entry.
 /// </summary>
 public class HiredSword
 {
@@ -69,4 +71,13 @@ public class HiredSword
     /// skill lists, a companion profile, a whole market sub-table) stay free text in Description - no
     /// rules engine V1 for those.</summary>
     public List<SpecialRule> SpecialRules { get; set; } = new();
+
+    /// <summary>Null = not a spellcaster (almost every Hired Sword). Set only for a Hired Sword that
+    /// generates/casts its own spells independently of the hiring warband's own MagicSchools (e.g. the
+    /// Warlock, who "generates two spells at random from the Lesser Magic list when hired" regardless of
+    /// which warband hires him) - contrast WarriorArchetype.IsSpellcaster, which instead draws from
+    /// WHATEVER magic school(s) the parent WarbandArchetype grants. A single nullable FK (not a list like
+    /// WarbandArchetype.MagicSchools) since no Hired Sword in the book draws from more than one school.</summary>
+    public int? MagicSchoolId { get; set; }
+    public MagicSchool? MagicSchool { get; set; }
 }

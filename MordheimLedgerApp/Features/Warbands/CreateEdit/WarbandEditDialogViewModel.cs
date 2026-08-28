@@ -27,7 +27,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
     /// Warrior/WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
-        private const int StepCount = 4;
+        /// <summary>Général/Guerriers/Équipement/Mercenaires/Noms - toujours 5, y compris à la toute
+        /// première création (retour utilisateur : contrairement à une décision antérieure, un Franc-
+        /// Tireur EST recrutable dès la création d'une bande neuve, pas seulement en Mode Libre/bande
+        /// déjà existante).</summary>
+        private const int StepCount = 5;
 
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
@@ -38,6 +42,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private readonly ISpellPickerService _spellPicker;
         private readonly IInjuryPickerService _injuryPicker;
         private readonly IMutationPickerService _mutationPicker;
+        private readonly IHiredSwordPickerService _hiredSwordPicker;
         private bool _recruitableLoaded;
 
         /// <summary>Guerriers déjà en base retirés cette session (decrement confirmé sous leur effectif
@@ -80,6 +85,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
         [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
         [NotifyPropertyChangedFor(nameof(IsNamesTab))]
+        [NotifyPropertyChangedFor(nameof(IsMercenariesTab))]
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -87,7 +93,20 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public bool IsGeneralTab => SelectedTab == 0;
         public bool IsWarriorsTab => SelectedTab == 1;
         public bool IsEquipmentTab => SelectedTab == 2;
-        public bool IsNamesTab => SelectedTab == 3;
+
+        /// <summary>Juste après Équipement, avant Noms - engagement des Francs-Tireurs, séparé de
+        /// Guerriers puisqu'un Franc-Tireur n'est ni un Héros ni un Homme de main du catalogue
+        /// WarriorArchetype (aucun équipement/compétence à choisir, gear fixe - voir HiredSwordRecruitRow)
+        /// et ne compte jamais dans MaxWarriors/MaxCount (RecruitmentRules.CanRecruitHiredSword).
+        /// Disponible dès la toute première création de bande (retour utilisateur explicite - contrairement
+        /// à une décision antérieure, pas réservé au Mode Libre/bande déjà existante). Placé AVANT Noms
+        /// (contrairement à une passe précédente qui l'avait mis en dernier) : le joueur doit avoir choisi
+        /// ses Francs-Tireurs avant d'arriver à l'étape qui les nomme (voir la 3e section de Noms,
+        /// IsNamesTab).</summary>
+        public bool IsMercenariesTab => SelectedTab == 3;
+
+        private const int NamesTabIndex = 4;
+        public bool IsNamesTab => SelectedTab == NamesTabIndex;
 
         /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
         public bool CanGoBack => SelectedTab > 0;
@@ -103,6 +122,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Sous-ensemble de RecruitRows effectivement recruté (Count > 0) - c'est la seule chose
         /// pertinente à afficher à l'étape Équipement, pas la liste complète des types disponibles.</summary>
         public IEnumerable<WarriorRecruitRow> RecruitedRows => RecruitRows.Where(r => r.Count > 0);
+
+        /// <summary>Une ligne par HiredSword éligible à cet Archetype (RestrictedToWarbandArchetypeIds vide
+        /// ou le contenant) - onglet Mercenaires. Peuplée par EnsureRecruitableArchetypesLoadedAsync, en
+        /// parallèle de RecruitRows. Contrairement à RecruitRows, jamais réinitialisée par
+        /// AddArchetype/RemoveArchetype (Franc-Tireur n'a pas de sens tant qu'aucun Archetype n'est choisi -
+        /// _recruitableLoaded couvre déjà ce cas, voir EnsureRecruitableArchetypesLoadedAsync).</summary>
+        [ObservableProperty]
+        private ObservableCollection<HiredSwordRecruitRow> hiredSwordRows = new();
 
         /// <summary>Effectif total vérifié contre Archetype.MaxWarriors - Count contient déjà le roster
         /// existant (pré-rempli par EnsureRecruitableArchetypesLoadedAsync quand Item.Id != 0), pas
@@ -139,9 +166,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// Limite acceptée : si un groupe déjà existant grossit (nouvelle tête ajoutée à un groupe déjà
         /// équipé), un nouvel achat d'équipement pour "tout le groupe" est facturé au Count actuel
         /// (l'effectif après ajout), pas seulement pour la tête ajoutée - pas de rescaling plus fin tenté.</summary>
+        /// <summary>Inclut la prime d'engagement (HireCost) de chaque nouveau Franc-Tireur coché cette
+        /// session (ExistingWarrior null - un déjà recruté est déjà payé) - son équipement de départ est
+        /// fixe et déjà compris dans HireCost, pas de terme séparé comme pour un Héros/groupe.</summary>
         private int TotalSpent => RecruitRows.Sum(r => (r.Count - r.ExistingCount) * r.Cost)
             + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost) * g.Count)
-            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost));
+            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost))
+            + HiredSwordRows.Where(r => r.IsRecruited && r.ExistingWarrior is null).Sum(r => r.Cost);
 
         /// <summary>Ce qui doit revenir à la trésorerie suite à des actions sur le roster déjà existant -
         /// suppression complète confirmée (Cost du guerrier + son équipement d'origine, voir
@@ -157,7 +188,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 .Sum(t => t.Row.Cost * (t.Group.BaselineHeadCount - t.Group.Count))
             + RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
                 .Where(s => s.ExistingWarrior != null)
-                .Sum(s => RefundableEquipmentCost(s.BaselineEquipment, b => s.Equipment.All(p => p.ExistingId != b.Id)));
+                .Sum(s => RefundableEquipmentCost(s.BaselineEquipment, b => s.Equipment.All(p => p.ExistingId != b.Id)))
+            // Franc-Tireur déjà engagé décoché cette session - remboursement intégral de sa prime, pas de
+            // confirmation (voir HiredSwordRecruitRow, point d'entrée secondaire, plus simple que
+            // DecrementWarrior/_pendingFullDeletions à dessein).
+            + HiredSwordRows.Where(r => !r.IsRecruited && r.ExistingWarrior != null).Sum(r => r.Cost);
 
         /// <summary>Combien de la baseline fournie (l'équipement d'ORIGINE d'un guerrier, avant toute
         /// modification cette session) rembourser réellement - la dague gratuite (livre des règles : "in
@@ -259,7 +294,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker,
             IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker,
             ISkillPickerService skillPicker, ISpellPickerService spellPicker, IInjuryPickerService injuryPicker,
-            IMutationPickerService mutationPicker)
+            IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker)
         {
             this.item = item;
             this.title = title;
@@ -272,6 +307,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             _spellPicker = spellPicker;
             _injuryPicker = injuryPicker;
             _mutationPicker = mutationPicker;
+            _hiredSwordPicker = hiredSwordPicker;
             IsWizardMode = item.Id == 0;
         }
 
@@ -295,9 +331,16 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [RelayCommand]
         private async Task ShowNamesTab()
         {
-            SelectedTab = 3;
+            SelectedTab = NamesTabIndex;
             await EnsureRecruitableArchetypesLoadedAsync();
             PopulateSuggestedNames();
+        }
+
+        [RelayCommand]
+        private async Task ShowMercenariesTab()
+        {
+            SelectedTab = 3;
+            await EnsureRecruitableArchetypesLoadedAsync();
         }
 
         [RelayCommand]
@@ -311,9 +354,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (IsExistingWarband) TreasuryOverride = picked.StartingTreasury;
 
             // Change d'archetype en cours de création : les recrues déjà choisies venaient du catalogue
-            // de l'ancien archetype, plus valides pour le nouveau.
+            // de l'ancien archetype, plus valides pour le nouveau (idem éligibilité Franc-Tireur).
             _recruitableLoaded = false;
             RecruitRows.Clear();
+            HiredSwordRows.Clear();
         }
 
         [RelayCommand]
@@ -322,6 +366,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             Archetype = null;
             _recruitableLoaded = false;
             RecruitRows.Clear();
+            HiredSwordRows.Clear();
         }
 
         [RelayCommand]
@@ -350,10 +395,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (_recruitableLoaded || Archetype is null) return;
             var language = LocalizationService.Instance.Language;
             List<WarriorArchetype> loaded = new();
+            List<HiredSword> loadedHiredSwords = new();
             List<Warrior> existingWarriors = new();
             await Loading.RunAsync(async () =>
             {
                 loaded = await Task.Run(() => _libraryService.GetWarriorArchetypesAsync(Archetype.Id, language));
+                loadedHiredSwords = await Task.Run(() => _libraryService.GetHiredSwordsAsync(language));
                 if (Item.Id != 0)
                     existingWarriors = await Task.Run(() => _warbandService.GetWarriorsAsync(Item.Id, language));
             });
@@ -377,6 +424,15 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 rows.Add(row);
             }
             RecruitRows = rows;
+
+            var hiredSwordRowsList = new ObservableCollection<HiredSwordRecruitRow>();
+            foreach (var hiredSword in loadedHiredSwords.Where(h => h.RestrictedToWarbandArchetypeIds.Count == 0 || h.RestrictedToWarbandArchetypeIds.Contains(Archetype.Id)))
+            {
+                var existing = existingWarriors.FirstOrDefault(w => w.HiredSwordId == hiredSword.Id && w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired);
+                hiredSwordRowsList.Add(new HiredSwordRecruitRow(hiredSword, existing));
+            }
+            HiredSwordRows = hiredSwordRowsList;
+
             _recruitableLoaded = true;
             UpdateRecruitability();
         }
@@ -468,6 +524,54 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             UpdateRecruitability();
         }
 
+        /// <summary>Sous-ensemble de HiredSwordRows effectivement recruté - alimente le ChipListView de
+        /// l'étape Mercenaires ET la 3e section de l'étape Noms (voir WarbandEditDialog.xaml). Recalculée
+        /// à chaque tap Add/Remove (voir UpdateRecruitability), même idiome que RecruitedRows.</summary>
+        public IEnumerable<HiredSwordRecruitRow> RecruitedHiredSwordRows => HiredSwordRows.Where(r => r.IsRecruited);
+
+        public bool HasRecruitedHiredSwords => RecruitedHiredSwordRows.Any();
+
+        /// <summary>Ouvre IHiredSwordPickerService (ChipListView.AddCommand) - catalogue déjà filtré par
+        /// éligibilité à CETTE bande et par "pas déjà recruté" (ExcludedHiredSwordIds), donc "un seul de
+        /// chaque type" (livre des règles) n'a même pas besoin d'être revérifié ici. Seule la trésorerie
+        /// reste à checker (sauf en Mode Libre, comme IncrementWarrior) - s'arrête au premier
+        /// inabordable plutôt que de tout annuler, même idiome qu'AddEquipment.</summary>
+        [RelayCommand]
+        private async Task AddHiredSword()
+        {
+            if (Archetype is null) return;
+
+            var excludedIds = HiredSwordRows.Where(r => r.IsRecruited).Select(r => r.HiredSword.Id).ToList();
+            var picked = await _hiredSwordPicker.PickHiredSwordsAsync(Archetype.Id, excludedIds);
+            foreach (var hiredSword in picked)
+            {
+                var row = HiredSwordRows.FirstOrDefault(r => r.HiredSword.Id == hiredSword.Id);
+                if (row is null || row.IsRecruited) continue;
+
+                if (!IsExistingWarband && !RecruitmentRules.CanRecruitHiredSword(alreadyHasThisType: false, RemainingTreasury, row.Cost))
+                {
+                    await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
+                    break;
+                }
+                row.IsRecruited = true;
+            }
+
+            UpdateRecruitability();
+        }
+
+        /// <summary>Décocher un Franc-Tireur déjà en base (ChipListView.RemoveCommand) ne fait rien
+        /// d'autre que marquer la ligne - le remboursement (TotalRefunds) et la suppression réelle
+        /// (DeleteWarriorAsync) n'ont lieu qu'au Save(), sans confirmation (voir HiredSwordRecruitRow).</summary>
+        [RelayCommand]
+        private void RemoveHiredSword(HiredSwordRecruitRow row)
+        {
+            row.IsRecruited = false;
+            UpdateRecruitability();
+        }
+
+        [RelayCommand]
+        private Task ShowHiredSwordDetail(HiredSwordRecruitRow row) => _detailDialogs.ShowHiredSwordDetailDialogAsync(row.HiredSword);
+
         /// <summary>Détache un second HenchmanGroupDraft du groupe tapé - le seul moyen d'obtenir des Hommes de
         /// main du même type équipés différemment (livre des règles : "if your Henchman group has four
         /// warriors, and you want to buy them swords, you must buy four swords" - deux équipements
@@ -518,6 +622,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             OnPropertyChanged(nameof(RosterCountDisplay));
             OnPropertyChanged(nameof(RemainingTreasuryDisplay));
             OnPropertyChanged(nameof(RecruitedRows));
+            OnPropertyChanged(nameof(RecruitedHiredSwordRows));
+            OnPropertyChanged(nameof(HasRecruitedHiredSwords));
 
             if (Archetype is null) return;
             var total = TotalWarriorCount;
@@ -846,6 +952,20 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 }
             }
 
+            // Francs-Tireurs recrutés à l'étape Mercenaires (voir IsMercenariesTab/RecruitedHiredSwordRows)
+            // - même exigence qu'un Héros, une identité propre. Vit ici plutôt que dans un
+            // ValidateMercenariesStep séparé : le champ Nom lui-même est édité sur CETTE étape (3e
+            // section, voir WarbandEditDialog.xaml), pas sur Mercenaires (qui n'est plus qu'une sélection
+            // via ChipListView, aucun champ à valider là-bas).
+            foreach (var row in HiredSwordRows.Where(r => r.IsRecruited))
+            {
+                if (string.IsNullOrWhiteSpace(row.Name))
+                {
+                    NamesError = string.Format(Loc["WarbandsWarriorNameRequired"], row.HiredSword.Name);
+                    return false;
+                }
+            }
+
             NamesError = null;
             return true;
         }
@@ -879,7 +999,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (SelectedTab >= StepCount - 1) return;
             SelectedTab++;
 
-            if (IsWarriorsTab || IsEquipmentTab) await EnsureRecruitableArchetypesLoadedAsync();
+            if (IsWarriorsTab || IsEquipmentTab || IsMercenariesTab) await EnsureRecruitableArchetypesLoadedAsync();
             if (IsNamesTab) PopulateSuggestedNames();
         }
 
@@ -946,7 +1066,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             PopulateSuggestedNames();
             if (!ValidateNamesStep())
             {
-                SelectedTab = 3;
+                SelectedTab = NamesTabIndex;
                 return;
             }
 
@@ -1029,6 +1149,37 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
                 foreach (var warrior in _pendingFullDeletions)
                     await _warbandService.DeleteWarriorAsync(warrior.Id);
+
+                // Francs-Tireurs : équipement de départ résolu une seule fois (fixe, voir HiredSword.
+                // StartingEquipmentIds) - seulement si au moins une NOUVELLE recrue en a besoin.
+                var hiredSwordEquipmentCatalog = HiredSwordRows.Any(r => r.IsRecruited && r.ExistingWarrior is null)
+                    ? await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language)
+                    : new List<EquipmentItem>();
+
+                foreach (var row in HiredSwordRows)
+                {
+                    if (row.IsRecruited)
+                    {
+                        if (row.ExistingWarrior is { } existing)
+                        {
+                            var trimmedName = row.Name.Trim();
+                            if (existing.Name != trimmedName)
+                            {
+                                existing.Name = trimmedName;
+                                await _warbandService.SaveWarriorAsync(existing);
+                            }
+                        }
+                        else
+                        {
+                            var startingEquipment = hiredSwordEquipmentCatalog.Where(e => row.HiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
+                            await _warbandService.RecruitHiredSwordAsync(warbandId, row.HiredSword, row.Name.Trim(), startingEquipment);
+                        }
+                    }
+                    else if (row.ExistingWarrior is { } departed)
+                    {
+                        await _warbandService.DeleteWarriorAsync(departed.Id);
+                    }
+                }
             });
 
             Close(true);

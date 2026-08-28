@@ -32,7 +32,9 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
+    private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly IDetailDialogService _detailDialogs;
+    private readonly ILibraryService _libraryService;
 
     protected override bool CancelResult => false;
 
@@ -69,15 +71,24 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
     /// WarriorArchetypeEditDialogViewModel.SpecialRules.</summary>
     public ObservableCollection<SpecialRule> SpecialRules { get; }
 
+    /// <summary>0 ou 1 élément (jamais plus - voir HiredSword.MagicSchoolId, un simple FK) - un
+    /// ChipListView normal (liste) plutôt qu'un Picker dédié, pour rester cohérent avec Équipement de
+    /// départ/Règles spéciales ci-dessus. AddMagicSchool remplace l'entrée existante au lieu d'empiler
+    /// (voir sa doc).</summary>
+    public ObservableCollection<MagicSchool> MagicSchools { get; }
+
     public HiredSwordEditDialogViewModel(HiredSword item, string title, IWarbandArchetypePickerService warbandPicker,
-        IEquipmentPickerService equipmentPicker, ISpecialRulePickerService specialRulePicker, IDetailDialogService detailDialogs,
-        IReadOnlyList<WarbandArchetype> allWarbandArchetypes, IReadOnlyList<EquipmentItem> initialStartingEquipment)
+        IEquipmentPickerService equipmentPicker, ISpecialRulePickerService specialRulePicker, IMagicSchoolPickerService magicSchoolPicker,
+        IDetailDialogService detailDialogs, ILibraryService libraryService, IReadOnlyList<WarbandArchetype> allWarbandArchetypes,
+        IReadOnlyList<EquipmentItem> initialStartingEquipment)
     {
         this.item = item;
         this.title = title;
         _equipmentPicker = equipmentPicker;
         _specialRulePicker = specialRulePicker;
+        _magicSchoolPicker = magicSchoolPicker;
         _detailDialogs = detailDialogs;
+        _libraryService = libraryService;
         movementInput = item.Movement.ToString();
 
         SkillCategoryOptions = new ObservableCollection<SkillCategoryOption>(
@@ -87,6 +98,7 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
         StartingEquipment = new ObservableCollection<EquipmentItem>(initialStartingEquipment);
         WarbandRestriction = new WarbandRestrictionEditor(item.RestrictedToWarbandArchetypeIds, allWarbandArchetypes, warbandPicker);
         SpecialRules = new ObservableCollection<SpecialRule>(item.SpecialRules);
+        MagicSchools = new ObservableCollection<MagicSchool>(item.MagicSchool is { } school ? new[] { school } : Array.Empty<MagicSchool>());
     }
 
     [RelayCommand]
@@ -124,10 +136,37 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
-    private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
+    private Task ShowSpecialRuleDetail(SpecialRule rule) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(rule);
 
     [RelayCommand]
     private void RemoveSpecialRule(SpecialRule rule) => SpecialRules.Remove(rule);
+
+    /// <summary>Remplace l'entrée existante plutôt que d'empiler (un seul FK, voir MagicSchools) - même
+    /// picker multi-sélection que partout ailleurs (IMagicSchoolPickerService), seul le premier résultat
+    /// est retenu.</summary>
+    [RelayCommand]
+    private async Task AddMagicSchool()
+    {
+        var picked = await _magicSchoolPicker.PickMagicSchoolsAsync();
+        if (picked.FirstOrDefault() is not { } school) return;
+
+        MagicSchools.Clear();
+        MagicSchools.Add(school);
+    }
+
+    /// <summary>Recap complet (Nom+Description+table de sorts) plutôt que le popup Nom+Description seul -
+    /// même appel que WarbandArchetypeEditDialogViewModel.ShowMagicSchoolDetail (le surcharge 3 args de
+    /// ShowChipDetailAsync, réservée aux chips École de magie).</summary>
+    [RelayCommand]
+    private async Task ShowMagicSchoolDetail(MagicSchool school)
+    {
+        var language = LocalizationService.Instance.Language;
+        var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
+        await ShowChipDetailAsync(school.Name, school.Description, spells);
+    }
+
+    [RelayCommand]
+    private void RemoveMagicSchool(MagicSchool school) => MagicSchools.Remove(school);
 
     private bool ValidateRequiredFields()
     {
@@ -150,6 +189,8 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
         Item.StartingEquipmentIds = StartingEquipment.Select(e => e.Id).ToList();
         Item.RestrictedToWarbandArchetypeIds = WarbandRestriction.SelectedIds;
         Item.SpecialRules = SpecialRules.ToList();
+        Item.MagicSchool = MagicSchools.FirstOrDefault();
+        Item.MagicSchoolId = Item.MagicSchool?.Id;
         Close(true);
     }
 }

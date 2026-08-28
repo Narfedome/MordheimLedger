@@ -9,12 +9,44 @@ namespace MordheimLedgerApp.Core.Models;
 /// and for MaxCount tracking) — the stat fields below are its own copy, seeded from that archetype at
 /// recruitment, then advancing via Experience (individually for a Hero, collectively for the whole
 /// Henchman group this row represents).
+///
+/// Exactly one of WarriorArchetypeId/HiredSwordId is ever set: a row recruited from the ordinary
+/// Hero/Henchman roster carries WarriorArchetypeId (HiredSwordId null); a row recruited from the
+/// separate Hired Sword catalogue (see Library.HiredSword) carries HiredSwordId instead
+/// (WarriorArchetypeId null) - see IsHiredSword and EntityMapping.ToWarrior(this HiredSword, ...).
 /// </summary>
 public class Warrior
 {
     public int Id { get; set; }
     public int WarbandId { get; set; }
-    public int WarriorArchetypeId { get; set; }
+    public int? WarriorArchetypeId { get; set; }
+
+    /// <summary>Non-null only for a warrior recruited from the Hired Sword catalogue (see
+    /// Library.HiredSword) rather than an ordinary WarriorArchetype - see the class doc's invariant.</summary>
+    public int? HiredSwordId { get; set; }
+
+    /// <summary>True for a Hired Sword-recruited row. IsHero stays false for these (Henchman D6 Injury
+    /// table, Henchman XP-milestone spacing, Henchman-slot roster placement - all correct per the
+    /// rulebook), but Advances still roll on the Hero table ("roll on the Heroes Advancement table as
+    /// opposed to Henchmen") - every call site that picks HeroAdvanceTable/HenchmanAdvanceTable checks
+    /// `IsHero || IsHiredSword` instead of IsHero alone (see WarriorOutcomeRow.SyncAdvanceRolls/
+    /// SyncExplorationAdvanceRolls, EndOfGameDialogViewModel.Advance.cs) - the one place these two
+    /// concerns needed decoupling.</summary>
+    public bool IsHiredSword => HiredSwordId.HasValue;
+
+    /// <summary>Snapshot of HiredSword.BaseRating at recruitment (see EntityMapping.ToWarrior(this
+    /// HiredSword, ...)) - null for an ordinary Hero/Henchman, whose Rating contribution is derived from
+    /// IsLargeCreature instead (see Core.Rules.WarbandRatingRules.WarriorContribution). Never a live
+    /// re-lookup against the catalogue - same "snapshot at recruit time, never retroactive" convention
+    /// as every other stat on this class.</summary>
+    public int? HiredSwordBaseRating { get; set; }
+
+    /// <summary>True right after "Returning a Favour" (Exploration 3,6) grants this Hired Sword for free
+    /// - his very next upkeep charge (End of Game's "Francs-Tireurs" step) is skipped and this flag is
+    /// cleared, then he behaves exactly like a normally-recruited Hired Sword from then on. False for
+    /// every other warrior.</summary>
+    public bool HiredSwordUpkeepPrepaid { get; set; }
+
     public string Name { get; set; } = string.Empty;
     public bool IsHero { get; set; }
     public int Cost { get; set; }

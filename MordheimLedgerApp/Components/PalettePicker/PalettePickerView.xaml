@@ -18,7 +18,7 @@
                     <BoxView Grid.Column="1" Color="#E8DBB8"/>
                 </Grid>
                 <BoxView Grid.Row="0" HeightRequest="5" VerticalOptions="End" Color="#C9A66B"/>
-                <Label Grid.Row="1" Text="{loc:Loc OnboardingPalette}" FontSize="{OnIdiom Default=10, Desktop=9}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                <Label Grid.Row="1" Text="{loc:Loc PaletteShadowAndGold}" FontSize="{OnIdiom Default=10, Desktop=9}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
             </Grid>
         </Border>
         <!-- A: Cendre & Wyrdstone -->
@@ -32,7 +32,7 @@
                     <BoxView Grid.Column="1" Color="#EDE7D9"/>
                 </Grid>
                 <BoxView Grid.Row="0" HeightRequest="5" VerticalOptions="End" Color="#7FA34F"/>
-                <Label Grid.Row="1" Text="{loc:Loc OnboardingPalette}" FontSize="{OnIdiom Default=10, Desktop=9}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                <Label Grid.Row="1" Text="{loc:Loc PaletteAshAndWarpstone}" FontSize="{OnIdiom Default=10, Desktop=9}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
             </Grid>
         </Border>
 

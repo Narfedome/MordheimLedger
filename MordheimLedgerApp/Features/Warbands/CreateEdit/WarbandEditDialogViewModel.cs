@@ -27,11 +27,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
     /// Warrior/WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
-        /// <summary>4 (Général/Guerriers/Équipement/Noms) sauf en Mode Libre (IsExistingWarband) qui ajoute
-        /// l'onglet Mercenaires (5) - retour utilisateur explicite : engager un Franc-Tireur au tout
-        /// premier recrutement (jamais joué) n'a pas de sens narratif, seule une bande "déjà existante"
-        /// (importée avec son historique) peut déjà en avoir engagé un.</summary>
-        private int StepCount => IsExistingWarband ? 5 : 4;
+        /// <summary>Général/Guerriers/Équipement/Mercenaires/Noms - toujours 5, y compris à la toute
+        /// première création (retour utilisateur : contrairement à une décision antérieure, un Franc-
+        /// Tireur EST recrutable dès la création d'une bande neuve, pas seulement en Mode Libre/bande
+        /// déjà existante).</summary>
+        private const int StepCount = 5;
 
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
@@ -94,19 +94,18 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public bool IsWarriorsTab => SelectedTab == 1;
         public bool IsEquipmentTab => SelectedTab == 2;
 
-        /// <summary>Juste après Équipement, avant Noms (voir StepCount/NamesTabIndex) - engagement des
-        /// Francs-Tireurs, séparé de Guerriers puisqu'un Franc-Tireur n'est ni un Héros ni un Homme de
-        /// main du catalogue WarriorArchetype (aucun équipement/compétence à choisir, gear fixe - voir
-        /// HiredSwordRecruitRow) et ne compte jamais dans MaxWarriors/MaxCount (RecruitmentRules.
-        /// CanRecruitHiredSword). N'existe qu'en Mode Libre (IsExistingWarband) - voir StepCount. Placé
-        /// AVANT Noms (contrairement à une passe précédente qui l'avait mis en dernier) : le joueur doit
-        /// avoir choisi ses Francs-Tireurs avant d'arriver à l'étape qui les nomme (voir la 3e section de
-        /// Noms, IsNamesTab).</summary>
-        public bool IsMercenariesTab => IsExistingWarband && SelectedTab == 3;
+        /// <summary>Juste après Équipement, avant Noms - engagement des Francs-Tireurs, séparé de
+        /// Guerriers puisqu'un Franc-Tireur n'est ni un Héros ni un Homme de main du catalogue
+        /// WarriorArchetype (aucun équipement/compétence à choisir, gear fixe - voir HiredSwordRecruitRow)
+        /// et ne compte jamais dans MaxWarriors/MaxCount (RecruitmentRules.CanRecruitHiredSword).
+        /// Disponible dès la toute première création de bande (retour utilisateur explicite - contrairement
+        /// à une décision antérieure, pas réservé au Mode Libre/bande déjà existante). Placé AVANT Noms
+        /// (contrairement à une passe précédente qui l'avait mis en dernier) : le joueur doit avoir choisi
+        /// ses Francs-Tireurs avant d'arriver à l'étape qui les nomme (voir la 3e section de Noms,
+        /// IsNamesTab).</summary>
+        public bool IsMercenariesTab => SelectedTab == 3;
 
-        /// <summary>Index réel de l'onglet Noms - décalé d'un cran si Mercenaires existe (Mode Libre),
-        /// puisque celui-ci s'intercale juste avant (voir IsMercenariesTab).</summary>
-        private int NamesTabIndex => IsExistingWarband ? 4 : 3;
+        private const int NamesTabIndex = 4;
         public bool IsNamesTab => SelectedTab == NamesTabIndex;
 
         /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
@@ -248,10 +247,6 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// aussi ce mode.</summary>
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RemainingTreasuryDisplay))]
-        [NotifyPropertyChangedFor(nameof(IsMercenariesTab))]
-        [NotifyPropertyChangedFor(nameof(IsNamesTab))]
-        [NotifyPropertyChangedFor(nameof(IsLastStep))]
-        [NotifyPropertyChangedFor(nameof(StepLabel))]
         private bool isExistingWarband;
 
         /// <summary>Trésorerie saisie librement par l'utilisateur en mode Libre - remplace
@@ -264,22 +259,6 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         partial void OnIsExistingWarbandChanged(bool value)
         {
             if (value) TreasuryOverride = RosterStartingTreasury;
-
-            // L'onglet Mercenaires n'existe qu'en Mode Libre (voir StepCount) - décocher pendant qu'on y
-            // est déjà (retour en arrière depuis l'étape Équipement) le ferait disparaître sous les pieds
-            // du joueur ; le ramener sur Noms (dernier onglet restant) plutôt que de le laisser sur un
-            // SelectedTab qui ne correspond plus à rien. Réinitialise aussi tout toggle Franc-Tireur fait
-            // cette session (à sa valeur de construction, ExistingWarrior != null - jamais une
-            // suppression : un Franc-Tireur déjà en base garde son IsRecruited=true, invisible dans
-            // TotalSpent/TotalRefunds qui ne réagissent qu'à un CHANGEMENT par rapport à cet état
-            // d'origine) - sans ça, un engagement encore non sauvegardé resterait compté dans la
-            // trésorerie affichée alors que l'onglet qui l'a produit vient de disparaître.
-            if (!value)
-            {
-                if (SelectedTab >= StepCount) SelectedTab = StepCount - 1;
-                foreach (var row in HiredSwordRows)
-                    row.IsRecruited = row.ExistingWarrior is not null;
-            }
 
             // Propage rétroactivement aux slots déjà créés (le joueur a coché/décoché après être
             // retourné en arrière depuis l'étape Équipement) - sans ça, RecruitSlot.IsExistingWarband

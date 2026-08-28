@@ -1332,6 +1332,9 @@
   <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
     <value>{0} le {1} rejoint la bande.</value>
   </data>
+  <data name="HistoryHiredSwordFreeGrantSentence" xml:space="preserve">
+    <value>{0} rejoint la bande gratuitement pour la prochaine bataille (Une Faveur Rendue).</value>
+  </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Compétence : choisissez une compétence dans un tableau accessible à ce guerrier (ou un nouveau sort aléatoire si Sorcier).</value>
   </data>

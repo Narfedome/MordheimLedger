@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
@@ -31,6 +32,15 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly bool _skipCosts;
 
     protected override bool CancelResult => false;
+
+    /// <summary>Masque le bouton "x" de retrait d'un objet d'équipement pour un Franc-Tireur (livre des
+    /// règles, section Hired Swords : "A player cannot buy extra weapons or equipment for a Hired Sword,
+    /// and he cannot sell the Hired Sword's weapons or equipment") - CanUseEquipment est déjà ce qui
+    /// masque le bouton "+" (AddEquipmentCommand, IsVisible direct sur le bouton dans WarriorEditDialog.
+    /// xaml) ; ChipView.RemoveCommand n'a pas d'équivalent IsVisible, donc même bascule ici en renvoyant
+    /// null - ChipView masque son "x" quand RemoveCommand est null (voir ChipView.xaml). Guerrier normal :
+    /// comportement inchangé (RemoveEquipmentCommand direct).</summary>
+    public ICommand? RemoveEquipmentCommandOrNull => Item.CanUseEquipment ? RemoveEquipmentCommand : null;
 
     [ObservableProperty]
     private Warrior item;

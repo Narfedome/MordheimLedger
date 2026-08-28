@@ -1060,18 +1060,11 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(FreeHiredSwordChipItems))]
     private HiredSword? selectedFreeHiredSword;
 
-    partial void OnSelectedFreeHiredSwordChanged(HiredSword? value)
-    {
-        FreeHiredSwordError = null;
-        if (value is null) FreeHiredSwordName = string.Empty;
-    }
+    partial void OnSelectedFreeHiredSwordChanged(HiredSword? value) => FreeHiredSwordError = null;
 
     /// <summary>0 ou 1 élément - le ChipListView de l'étape (voir EndOfGameDialog.xaml), même idiome que
     /// HiredSwordEditDialogViewModel.MagicSchools pour un FK unique affiché comme une liste.</summary>
     public List<HiredSword> FreeHiredSwordChipItems => SelectedFreeHiredSword is { } h ? new List<HiredSword> { h } : new List<HiredSword>();
-
-    [ObservableProperty]
-    private string freeHiredSwordName = string.Empty;
 
     [ObservableProperty]
     private string? freeHiredSwordError;
@@ -1156,11 +1149,12 @@ public partial class EndOfGameDialogViewModel
 
         // Franc-Tireur gratuit (Une Faveur Rendue) : un type doit être choisi (aucune option "Ne pas
         // recruter" - contrairement aux autres pickers ci-dessus, le livre n'offre pas de refuser ce
-        // cadeau) avec un nom renseigné - sauf si aucun type n'est éligible à cette bande (liste vide,
-        // voir HasEligibleFreeHiredSwords), auquel cas rien à choisir/valider.
+        // cadeau) - sauf si aucun type n'est éligible à cette bande (liste vide, voir
+        // HasEligibleFreeHiredSwords), auquel cas rien à choisir/valider. Pas de nom à saisir - le
+        // guerrier recruté garde le nom du Franc-Tireur (ex. "Gladiateur"), même idiome que
+        // ResolvedFreeHenchman (Zombie).
         if (HasFreeHiredSwordGrant && HasEligibleFreeHiredSwords
-            && !CheckRoll(SelectedFreeHiredSword is null || string.IsNullOrWhiteSpace(FreeHiredSwordName),
-                () => FreeHiredSwordError = Loc["EndOfGameRollRequired"]))
+            && !CheckRoll(SelectedFreeHiredSword is null, () => FreeHiredSwordError = Loc["EndOfGameRollRequired"]))
             return false;
 
         var amountMissing = ResolvedExplorationOutcome?.Kind switch

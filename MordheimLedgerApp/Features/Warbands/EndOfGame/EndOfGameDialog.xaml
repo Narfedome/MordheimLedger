@@ -1081,8 +1081,6 @@
                                                           Command="{Binding ShowFreeHiredSwordDetailCommand}"
                                                           AddCommand="{Binding AddFreeHiredSwordCommand}"
                                                           RemoveCommand="{Binding RemoveFreeHiredSwordCommand}"/>
-                                <Entry Text="{Binding FreeHiredSwordName}" Placeholder="{loc:Loc EndOfGameHiredSwordNamePh}"
-                                       IsVisible="{Binding SelectedFreeHiredSword, Converter={StaticResource IsNotNullConverter}}"/>
                                 <Label Text="{Binding FreeHiredSwordError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                        IsVisible="{Binding FreeHiredSwordError, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>

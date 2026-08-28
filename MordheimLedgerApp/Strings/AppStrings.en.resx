@@ -1332,6 +1332,9 @@
   <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
     <value>{0} the {1} joins the warband.</value>
   </data>
+  <data name="HistoryHiredSwordFreeGrantSentence" xml:space="preserve">
+    <value>{0} joins the warband free of charge for the next battle (Returning a Favour).</value>
+  </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>
   </data>
@@ -1645,7 +1648,7 @@
     <value>Select a section</value>
   </data>
   <data name="PaletteAshAndWarpstone" xml:space="preserve">
-    <value>Ash &amp;  Warpstone</value>
+    <value>Ash &amp;  Wyrdstone</value>
   </data>
   <data name="PaletteShadowAndGold" xml:space="preserve">
     <value>Shadow &amp; Gold</value>

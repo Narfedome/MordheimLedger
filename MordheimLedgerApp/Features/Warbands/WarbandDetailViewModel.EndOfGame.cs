@@ -392,12 +392,14 @@ public partial class WarbandDetailViewModel
             {
                 var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
                 var startingEquipment = localizedEquipment.Where(e => freeHiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
-                var name = dialogViewModel.FreeHiredSwordName.Trim();
+                // Pas de nom saisi par le joueur - garde le nom du Franc-Tireur (ex. "Gladiateur"), même
+                // idiome que GrantsFreeHenchmanArchetypeName (Zombie).
+                var name = freeHiredSword.Name;
 
                 var recruited = await _warbandService.RecruitHiredSwordAsync(Warband.Id, freeHiredSword, name, startingEquipment);
                 recruited.HiredSwordUpkeepPrepaid = true;
                 await _warbandService.SaveWarriorAsync(recruited);
-                sentences.Add(string.Format(Loc["HistoryHiredSwordHiredSentence"], name, freeHiredSword.Name));
+                sentences.Add(string.Format(Loc["HistoryHiredSwordFreeGrantSentence"], name));
             }
         }
 

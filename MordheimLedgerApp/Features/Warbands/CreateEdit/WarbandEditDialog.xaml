@@ -45,13 +45,11 @@
                                                  IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
                             <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
                                                  IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
-                            <!-- Francs-Tireurs : uniquement en Mode Libre (voir WarbandEditDialogViewModel.
-                                 StepCount) - engager un Franc-Tireur au tout premier recrutement (jamais
-                                 joué) n'a pas de sens narratif. Avant Noms : le joueur doit avoir choisi
-                                 ses Francs-Tireurs avant d'arriver à l'étape qui les nomme. -->
+                            <!-- Francs-Tireurs : disponible dès la toute première création de bande, pas
+                                 seulement en Mode Libre. Avant Noms : le joueur doit avoir choisi ses
+                                 Francs-Tireurs avant d'arriver à l'étape qui les nomme. -->
                             <components:TabToggleButton Text="{loc:Loc LibTabHiredSwords}" Command="{Binding ShowMercenariesTabCommand}"
-                                                 IsActive="{Binding IsMercenariesTab}" FontSize="12"
-                                                 IsVisible="{Binding IsExistingWarband}"/>
+                                                 IsActive="{Binding IsMercenariesTab}" FontSize="12"/>
                             <components:TabToggleButton Text="{loc:Loc WarbandCreateTabNames}" Command="{Binding ShowNamesTabCommand}"
                                                  IsActive="{Binding IsNamesTab}" FontSize="12"/>
                         </HorizontalStackLayout>

@@ -177,6 +177,9 @@
   <data name="WarbandsFreeModeLabel" xml:space="preserve">
     <value>Mode libre (aucun coût appliqué)</value>
   </data>
+  <data name="WarbandsDismissHiredSwordAction" xml:space="preserve">
+    <value>Renvoyer</value>
+  </data>
   <data name="WarbandsExistingWarbandTitle" xml:space="preserve">
     <value>Mode libre</value>
   </data>
@@ -704,6 +707,12 @@
   </data>
   <data name="HiredSwordStartingEquipmentPh" xml:space="preserve">
     <value>Équipement de départ</value>
+  </data>
+  <data name="HiredSwordMagicSchoolPh" xml:space="preserve">
+    <value>École de magie</value>
+  </data>
+  <data name="HiredSwordNoMagicSchool" xml:space="preserve">
+    <value>Aucune (pas un lanceur de sorts)</value>
   </data>
   <data name="HiredSwordCreateTitle" xml:space="preserve">
     <value>Nouveau franc-tireur</value>
@@ -1239,6 +1248,24 @@
   <data name="EndOfGameCapturedEnemiesSummary" xml:space="preserve">
     <value>{0} prisonnier(s) ennemi(s) capturé(s)</value>
   </data>
+  <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
+    <value>Francs-Tireurs</value>
+  </data>
+  <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
+    <value>Payer</value>
+  </data>
+  <data name="EndOfGameHiredSwordPrepaidLabel" xml:space="preserve">
+    <value>Solde déjà réglée (Une Faveur Rendue)</value>
+  </data>
+  <data name="EndOfGameHiredSwordRecruitHeading" xml:space="preserve">
+    <value>Recruter un nouveau Franc-Tireur (optionnel)</value>
+  </data>
+  <data name="EndOfGameHiredSwordRecruitPh" xml:space="preserve">
+    <value>Choisir un Franc-Tireur</value>
+  </data>
+  <data name="EndOfGameHiredSwordNamePh" xml:space="preserve">
+    <value>Nom</value>
+  </data>
   <data name="CapturedEnemyFateRansomed" xml:space="preserve">
     <value>Rançon</value>
   </data>
@@ -1292,6 +1319,18 @@
   </data>
   <data name="HistoryPromotionSentence" xml:space="preserve">
     <value>{0} : un membre du groupe devient Héros ({1}) !</value>
+  </data>
+  <data name="HistoryHiredSwordUpkeepPaidSentence" xml:space="preserve">
+    <value>Solde payée à {0} ({1} CO).</value>
+  </data>
+  <data name="HistoryHiredSwordUpkeepPrepaidSentence" xml:space="preserve">
+    <value>Solde de {0} déjà réglée (Une Faveur Rendue).</value>
+  </data>
+  <data name="HistoryHiredSwordLeftSentence" xml:space="preserve">
+    <value>{0} quitte la bande, sa solde n'a pas été payée.</value>
+  </data>
+  <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
+    <value>{0} le {1} rejoint la bande.</value>
   </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Compétence : choisissez une compétence dans un tableau accessible à ce guerrier (ou un nouveau sort aléatoire si Sorcier).</value>

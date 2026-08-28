@@ -220,6 +220,50 @@ public static class EntityMapping
         MaxLeadership = archetype.RacialProfile?.Leadership
     };
 
+    /// <summary>Recruits a Hired Sword (see Models.Library.HiredSword) as a Warrior row - mirrors
+    /// WarriorArchetype.ToWarrior above, but IsHero stays false (a Hired Sword is "written into the
+    /// roster in a Henchman group slot", Henchman D6 Injury table + Henchman XP-milestone spacing) while
+    /// HiredSwordId makes IsHiredSword true, which independently routes Advances to the Hero table
+    /// instead (see Warrior.IsHiredSword's doc - the one place these two concerns need decoupling).
+    /// CanUseEquipment false enforces "cannot buy extra weapons/equipment for them" - his fixed starting
+    /// gear is inserted separately by the caller (WarbandService.RecruitHiredSwordAsync) via the normal
+    /// AddWarriorEquipmentAsync. No RacialProfile concept exists for a HiredSword, so every Max* stays
+    /// null - an accepted gap, a Hired Sword's Advances never hit a racial ceiling.</summary>
+    public static Warrior ToWarrior(this HiredSword hiredSword, string name) => new()
+    {
+        HiredSwordId = hiredSword.Id,
+        HiredSwordBaseRating = hiredSword.BaseRating,
+        Name = name,
+        IsHero = false,
+        Cost = hiredSword.HireCost,
+        Experience = 0,
+        HeadCount = 1,
+        Movement = hiredSword.Movement,
+        WeaponSkill = hiredSword.WeaponSkill,
+        BallisticSkill = hiredSword.BallisticSkill,
+        Strength = hiredSword.Strength,
+        Toughness = hiredSword.Toughness,
+        Wounds = hiredSword.Wounds,
+        Initiative = hiredSword.Initiative,
+        Attacks = hiredSword.Attacks,
+        Leadership = hiredSword.Leadership,
+        StartingMovement = hiredSword.Movement,
+        StartingWeaponSkill = hiredSword.WeaponSkill,
+        StartingBallisticSkill = hiredSword.BallisticSkill,
+        StartingStrength = hiredSword.Strength,
+        StartingToughness = hiredSword.Toughness,
+        StartingWounds = hiredSword.Wounds,
+        StartingInitiative = hiredSword.Initiative,
+        StartingAttacks = hiredSword.Attacks,
+        StartingLeadership = hiredSword.Leadership,
+        EquipmentListId = null,
+        CanUseEquipment = false,
+        AllowedSkillCategories = new List<Models.Library.SkillCategory>(hiredSword.AllowedSkillCategories),
+        IsLargeCreature = false,
+        GainsExperience = true,
+        IsLeader = false
+    };
+
     /// <summary>Henchman-to-Hero promotion (Advance roll 10-12, see HenchmanAdvanceTable.IsPromotion) -
     /// clones the group's LIVE stats/XP onto a brand-new Warrior rather than reseeding from
     /// WarriorArchetype.ToWarrior(), since the rulebook requires the promoted model to keep every
@@ -322,7 +366,8 @@ public static class EntityMapping
     public static HiredSword ToModel(this HiredSwordEntity e, IReadOnlyDictionary<string, string> translations,
         IReadOnlyDictionary<int, List<int>>? restrictions = null,
         IReadOnlyDictionary<int, List<int>>? startingEquipmentByHiredSwordId = null,
-        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByHiredSwordId = null) => new()
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByHiredSwordId = null,
+        IReadOnlyDictionary<int, MagicSchool>? magicSchoolsById = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -346,7 +391,9 @@ public static class EntityMapping
         AllowedSkillCategories = ParseSkillCategories(e.AllowedSkillCategories),
         StartingEquipmentIds = startingEquipmentByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<int>(),
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        SpecialRules = specialRulesByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>()
+        SpecialRules = specialRulesByHiredSwordId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
+        MagicSchoolId = e.MagicSchoolId,
+        MagicSchool = e.MagicSchoolId is { } magicSchoolId ? magicSchoolsById?.GetValueOrDefault(magicSchoolId) : null
     };
 
     public static HiredSwordEntity ToEntity(this HiredSword m) => new()
@@ -368,6 +415,7 @@ public static class EntityMapping
         Initiative = m.Initiative,
         Attacks = m.Attacks,
         Leadership = m.Leadership,
+        MagicSchoolId = m.MagicSchoolId,
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
     };
 
@@ -474,7 +522,8 @@ public static class EntityMapping
         NextGameNoteText = ResolveDescription(e.NextGameNoteTextKey, translations),
         NextGameNoteTextKey = e.NextGameNoteTextKey,
         GrantsWeaponBlessing = e.GrantsWeaponBlessing,
-        GrantsCatacombReroll = e.GrantsCatacombReroll
+        GrantsCatacombReroll = e.GrantsCatacombReroll,
+        GrantsFreeHiredSword = e.GrantsFreeHiredSword
     };
 
     public static ExplorationOutcomeEntity ToEntity(this ExplorationOutcome m) => new()
@@ -507,7 +556,8 @@ public static class EntityMapping
         GrantsOptionalEquippedHenchman = m.GrantsOptionalEquippedHenchman,
         NextGameNoteTextKey = m.NextGameNoteTextKey,
         GrantsWeaponBlessing = m.GrantsWeaponBlessing,
-        GrantsCatacombReroll = m.GrantsCatacombReroll
+        GrantsCatacombReroll = m.GrantsCatacombReroll,
+        GrantsFreeHiredSword = m.GrantsFreeHiredSword
     };
 
     public static SpecialRule ToModel(this SpecialRuleEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -743,6 +793,9 @@ public static class EntityMapping
         Id = e.Id,
         WarbandId = e.WarbandId,
         WarriorArchetypeId = e.WarriorArchetypeId,
+        HiredSwordId = e.HiredSwordId,
+        HiredSwordBaseRating = e.HiredSwordBaseRating,
+        HiredSwordUpkeepPrepaid = e.HiredSwordUpkeepPrepaid,
         Name = e.Name,
         IsHero = e.IsHero,
         Cost = e.Cost,
@@ -801,6 +854,9 @@ public static class EntityMapping
         Id = m.Id,
         WarbandId = m.WarbandId,
         WarriorArchetypeId = m.WarriorArchetypeId,
+        HiredSwordId = m.HiredSwordId,
+        HiredSwordBaseRating = m.HiredSwordBaseRating,
+        HiredSwordUpkeepPrepaid = m.HiredSwordUpkeepPrepaid,
         Name = m.Name,
         IsHero = m.IsHero,
         Cost = m.Cost,

@@ -181,7 +181,11 @@ public class LibraryService : ILibraryService
         var restrictions = await LoadHiredSwordRestrictionsAsync();
         var startingEquipment = await LoadHiredSwordEquipmentAsync();
         var specialRules = await LoadHiredSwordSpecialRulesAsync(languageCode);
-        return rows.Select(r => r.ToModel(translations, restrictions, startingEquipment, specialRules)).ToList();
+        // Une poignée de Francs-Tireurs sont lanceurs de sorts en propre (ex. le Sorcier/"Warlock",
+        // Magie Mineure) - voir Models.Library.HiredSword.MagicSchoolId, un simple FK, pas de table de
+        // jointure comme les 3 chargements ci-dessus.
+        var magicSchoolsById = (await GetMagicSchoolsAsync(languageCode)).ToDictionary(s => s.Id);
+        return rows.Select(r => r.ToModel(translations, restrictions, startingEquipment, specialRules, magicSchoolsById)).ToList();
     }
 
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)

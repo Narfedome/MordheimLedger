@@ -17,15 +17,25 @@ public interface IWarbandService
 
     Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode);
 
-    /// <summary>Rulebook "calculate the warband rating" - sum over active (non-Dead) warriors of
-    /// (IsLargeCreature ? 20 : 5) + Experience. Lightweight (WarriorEntity columns only, no
-    /// equipment/skills/spells joins) so it's cheap to call once per row in a warband list.</summary>
+    /// <summary>Rulebook "calculate the warband rating" - sum over every non-Dead/non-Retired warrior
+    /// (Sick included) of Core.Rules.WarbandRatingRules.WarriorContribution (single source of truth,
+    /// shared with WarbandDetailViewModel's own copy of this sum). Lightweight (WarriorEntity columns
+    /// only, no equipment/skills/spells joins) so it's cheap to call once per row in a warband list.</summary>
     Task<int> GetWarbandRatingAsync(int warbandId);
 
     /// <summary>Copies archetype.Cost/stats onto a new Warrior via WarriorArchetype.ToWarrior().</summary>
     /// <param name="headCount">Always 1 for a Hero. For a Henchman group, how many models it starts with
     /// - see Models.Warrior.HeadCount.</param>
     Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1);
+
+    /// <summary>Recruits a Hired Sword (see Models.Library.HiredSword) via HiredSword.ToWarrior() -
+    /// mirrors RecruitWarriorAsync above, always HeadCount 1 (only one of each type per warband, never a
+    /// group). Also inserts his fixed starting gear as real WarriorEquipment rows (startingEquipment,
+    /// already resolved by the caller from HiredSword.StartingEquipmentIds) - CanUseEquipment is false on
+    /// the resulting Warrior so no more can ever be added/removed from the roster UI afterwards. Does NOT
+    /// touch Warband.Treasury - the caller deducts HireCost (or skips it entirely for "Returning a
+    /// Favour"'s free grant) using the same inline idiom as every other cost in this codebase.</summary>
+    Task<Warrior> RecruitHiredSwordAsync(int warbandId, HiredSword hiredSword, string name, IReadOnlyList<EquipmentItem> startingEquipment);
 
     /// <summary>Inserts an already fully-built Warrior as-is (no WarriorArchetype involved) - for the
     /// Henchman-to-Hero promotion (Advance roll 10-12), whose new Hero is cloned from the live group's

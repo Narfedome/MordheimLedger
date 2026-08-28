@@ -814,7 +814,11 @@ public partial class WarriorOutcomeRow : ObservableObject
     {
         while (AdvanceRolls.Count < MilestoneCount)
         {
-            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero, Warrior, AdvanceRolls, IsSpellcaster, _startingHeroCount);
+            // IsHero || IsHiredSword : un Franc-Tireur reste IsHero=false (bonne table de Blessure D6,
+            // bon espacement de paliers Homme de main) mais progresse sur la table Héros ("roll on the
+            // Heroes Advancement table as opposed to Henchmen") - le seul endroit où ces deux notions se
+            // découplent, voir Warrior.IsHiredSword.
+            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, AdvanceRolls, IsSpellcaster, _startingHeroCount);
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             AdvanceRolls.Add(entry);
         }
@@ -829,7 +833,7 @@ public partial class WarriorOutcomeRow : ObservableObject
     {
         while (ExplorationAdvanceRolls.Count < ExplorationMilestoneCount)
         {
-            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _startingHeroCount);
+            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _startingHeroCount);
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             ExplorationAdvanceRolls.Add(entry);
         }

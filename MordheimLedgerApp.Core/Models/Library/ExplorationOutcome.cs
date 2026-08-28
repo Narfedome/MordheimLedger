@@ -219,4 +219,15 @@ public class ExplorationOutcome
     /// PendingExplorationBonusDie's reminder) - the player re-rolls their own physical die and types the
     /// new value themselves, no dedicated re-roll button/logic. False/default for every other branch.</summary>
     public bool GrantsCatacombReroll { get; set; }
+
+    /// <summary>True only for "Returning a Favour" ((3,6) - "you gain the services of any one Hired
+    /// Sword... for the duration of the next battle, free of charge") - same "independent of Kind" idiom
+    /// as GrantsOptionalEquippedHenchman/GrantsWeaponBlessing. Unlike GrantsFreeHenchmanArchetypeName (a
+    /// FIXED archetype from the book), the player picks which Hired Sword type to engage at resolution
+    /// time (EndOfGameDialogViewModel.Exploration.cs), since that's a real choice offered by the book
+    /// ("choose from those available to your warband"), not a fixed name - resolved via
+    /// WarbandService.RecruitHiredSwordAsync (free, HireCost not deducted) with Warrior.
+    /// HiredSwordUpkeepPrepaid set so the very next End of Game's upkeep step shows it already covered.
+    /// False/default for every other branch.</summary>
+    public bool GrantsFreeHiredSword { get; set; }
 }

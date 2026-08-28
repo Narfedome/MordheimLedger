@@ -38,4 +38,12 @@ public static class RecruitmentRules
     /// unlike CanRecruit above (which also gates on an archetype Cost and roster caps).</summary>
     public static bool CanAffordEquippedHenchman(int availableTreasury, int equipmentCost) =>
         availableTreasury >= equipmentCost;
+
+    /// <summary>Hired Sword recruitment guard (rulebook: "you can only have one of each type of Hired
+    /// Sword in your warband") - deliberately does NOT check MaxWarriors/MaxCount like CanRecruit above:
+    /// Hired Swords never count toward those caps. alreadyHasThisType should be computed by the caller as
+    /// "an active (not Dead/Retired) Warrior already recruited from this exact HiredSword" - a departed
+    /// one can always be re-hired as a brand-new row (see Warrior.HiredSwordId doc).</summary>
+    public static bool CanRecruitHiredSword(bool alreadyHasThisType, int remainingTreasury, int hireCost) =>
+        !alreadyHasThisType && remainingTreasury >= hireCost;
 }

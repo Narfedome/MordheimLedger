@@ -59,6 +59,12 @@
                                       IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                       Command="{Binding ShowSpecialRuleDetailCommand}"/>
 
+            <components:ChipListView HeaderText="{loc:Loc HiredSwordMagicSchoolPh}"
+                                      ItemsSource="{Binding MagicSchools}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowMagicSchoolDetailCommand}"/>
+
             <components:ChipListView HeaderText="{loc:Loc HiredSwordStartingEquipmentPh}"
                                       AlwaysShowSection="True"
                                       ItemsSource="{Binding StartingEquipment}"

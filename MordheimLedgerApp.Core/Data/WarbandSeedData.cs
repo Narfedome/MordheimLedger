@@ -407,6 +407,13 @@ public class HiredSwordSeedData
     /// Only the clean single-effect rules go here - a Hired Sword's more elaborate systems (unique skill
     /// lists, a companion profile, a market sub-table) stay free text in Description instead.</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
+    /// <summary>See Models.Library.HiredSword.MagicSchoolId. Null for almost every Hired Sword - so far
+    /// only the Warlock ("Lesser Magic"). Name-only stub (no Description) - same idiom as a per-band
+    /// file's SpecialRules/Mutations stubs (see CLAUDE.md's "données communes centralisées" note):
+    /// resolved via the same FindOrCreateMagicSchoolAsync cache SeedMagicSchoolsAsync already populates
+    /// from MagicSchools.json, whichever of the two seeds first.</summary>
+    public LocalizedText? MagicSchoolName { get; set; }
 }
 
 /// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to
@@ -551,6 +558,10 @@ public class ExplorationOutcomeSeedData
     /// <summary>See Models.Library.ExplorationOutcome.GrantsCatacombReroll. False/absent for almost
     /// every outcome - so far only Entrance to the Catacombs' single branch.</summary>
     public bool GrantsCatacombReroll { get; set; }
+
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsFreeHiredSword. False/absent for almost
+    /// every outcome - so far only Returning a Favour's ((3,6)) single branch.</summary>
+    public bool GrantsFreeHiredSword { get; set; }
 }
 
 /// <summary>One magic school plus its full spell table (Data/SeedData/MagicSchools.json only) - the

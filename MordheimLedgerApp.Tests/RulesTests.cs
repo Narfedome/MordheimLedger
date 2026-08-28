@@ -859,6 +859,56 @@ public class RulesTests
         Assert.False(RecruitmentRules.CanAffordEquippedHenchman(availableTreasury: 31, equipmentCost: 32));
     }
 
+    // Hired Sword recruitment (rulebook: "only one of each type") - deliberately no MaxWarriors/MaxCount
+    // check, unlike CanRecruit above.
+    [Fact]
+    public void RecruitmentRules_CanRecruitHiredSword_TrueWhenNotAlreadyEngagedAndAffordable()
+    {
+        Assert.True(RecruitmentRules.CanRecruitHiredSword(alreadyHasThisType: false, remainingTreasury: 30, hireCost: 30));
+    }
+
+    [Fact]
+    public void RecruitmentRules_CanRecruitHiredSword_FalseWhenAlreadyEngaged()
+    {
+        Assert.False(RecruitmentRules.CanRecruitHiredSword(alreadyHasThisType: true, remainingTreasury: 1000, hireCost: 30));
+    }
+
+    [Fact]
+    public void RecruitmentRules_CanRecruitHiredSword_FalseWhenTreasuryTooLow()
+    {
+        Assert.False(RecruitmentRules.CanRecruitHiredSword(alreadyHasThisType: false, remainingTreasury: 29, hireCost: 30));
+    }
+
+    // --- WarbandRatingRules -----------------------------------------------------------------------
+    //
+    // Single source of truth replacing two previously-disagreeing inline formulas (WarbandDetailViewModel
+    // vs WarbandService.GetWarbandRatingAsync) - unified behaviour: multiplies by HeadCount, and
+    // substitutes HiredSwordBaseRating + Experience for a Hired Sword instead of (IsLargeCreature ? 20 : 5) + Experience.
+
+    [Fact]
+    public void WarbandRatingRules_WarriorContribution_OrdinaryHero()
+    {
+        Assert.Equal(5 + 8, WarbandRatingRules.WarriorContribution(isLargeCreature: false, experience: 8, headCount: 1, hiredSwordBaseRating: null));
+    }
+
+    [Fact]
+    public void WarbandRatingRules_WarriorContribution_LargeCreatureUsesTwentyBase()
+    {
+        Assert.Equal(20 + 3, WarbandRatingRules.WarriorContribution(isLargeCreature: true, experience: 3, headCount: 1, hiredSwordBaseRating: null));
+    }
+
+    [Fact]
+    public void WarbandRatingRules_WarriorContribution_MultipliesByHeadCount()
+    {
+        Assert.Equal((5 + 2) * 4, WarbandRatingRules.WarriorContribution(isLargeCreature: false, experience: 2, headCount: 4, hiredSwordBaseRating: null));
+    }
+
+    [Fact]
+    public void WarbandRatingRules_WarriorContribution_HiredSwordUsesBaseRatingInsteadOfFlatFive()
+    {
+        Assert.Equal(22 + 6, WarbandRatingRules.WarriorContribution(isLargeCreature: false, experience: 6, headCount: 1, hiredSwordBaseRating: 22));
+    }
+
     // --- EquipmentPricing -----------------------------------------------------------------------
 
     [Fact]

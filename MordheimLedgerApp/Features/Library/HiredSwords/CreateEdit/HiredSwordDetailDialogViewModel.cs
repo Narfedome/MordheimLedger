@@ -19,6 +19,11 @@ public partial class HiredSwordDetailDialogViewModel : ReadOnlyDialogViewModel
         ? Loc["HiredSwordNoAllowedSkillCategories"]
         : string.Join(", ", Item.AllowedSkillCategories.Select(c => Loc[$"SkillCategory{c}"]));
 
+    /// <summary>0 ou 1 élément (voir HiredSword.MagicSchoolId) - ChipListView masque toute la section
+    /// (header inclus) si vide, aucun élément à montrer pour un Franc-Tireur qui n'est pas lanceur de
+    /// sorts (l'immense majorité).</summary>
+    public List<MagicSchool> MagicSchools => Item.MagicSchool is { } school ? new List<MagicSchool> { school } : new List<MagicSchool>();
+
     /// <summary>Already resolved by the caller (DetailDialogService.ShowHiredSwordDetailDialogAsync).</summary>
     public List<EquipmentItem> StartingEquipment { get; }
 
@@ -45,4 +50,7 @@ public partial class HiredSwordDetailDialogViewModel : ReadOnlyDialogViewModel
 
     [RelayCommand]
     private Task ShowSpecialRuleDetail(SpecialRule rule) => ShowChipDetailAsync(rule.Name, rule.Description);
+
+    [RelayCommand]
+    private Task ShowMagicSchoolDetail(MagicSchool school) => ShowChipDetailAsync(school.Name, school.Description);
 }

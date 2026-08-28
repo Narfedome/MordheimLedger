@@ -77,15 +77,32 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Équipement de départ fixe (ex. Franc-Tireur : Morgenstern/Casque/Gantelet à pointes) -
-                 même patron ChipListView+picker qu'EquipmentListEditDialogViewModel.Items. -->
-            <components:ChipListView HeaderText="{loc:Loc HiredSwordStartingEquipmentPh}"
-                                      AlwaysShowSection="True"
-                                      ItemsSource="{Binding StartingEquipment}"
-                                      IconGlyph="{x:Static icons:SolidFont.Suitcase}"
-                                      Command="{Binding ShowStartingEquipmentDetailCommand}"
-                                      AddCommand="{Binding AddStartingEquipmentCommand}"
-                                      RemoveCommand="{Binding RemoveStartingEquipmentCommand}"/>
+            <!-- Équipement de départ fixe (ex. Franc-Tireur : Morgenstern/Casque/Gantelet à pointes) - un
+                 vrai loadout de personnage (peut mélanger arme/armure/divers), pas un simple catalogue à
+                 plat comme EquipmentListEditDialogViewModel.Items : ChipView (pas ChipListView) avec
+                 l'icône par catégorie (EquipmentCategoryIconConverter), même motif que l'Équipement de
+                 WarriorEditDialog/la carte guerrier (WarbandDetailPage.xaml) plutôt qu'une seule icône
+                 fixe pour toute la liste. -->
+            <VerticalStackLayout Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddStartingEquipmentCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:EquipmentItem">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:HiredSwordEditDialogViewModel}}, Path=ShowStartingEquipmentDetailCommand}"
+                                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:HiredSwordEditDialogViewModel}}, Path=RemoveStartingEquipmentCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
 
             <!-- Règles spéciales propres (ex. Tueur de Troll : Deathwish/Hard to Kill) - les systèmes
                  plus élaborés (tables de marché, compétences uniques, monture/garde du corps compagnon)
@@ -96,6 +113,18 @@
                                       Command="{Binding ShowSpecialRuleDetailCommand}"
                                       AddCommand="{Binding AddSpecialRuleCommand}"
                                       RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+
+            <!-- École de magie propre (ex. Sorcier/Magie Mineure) - 0 ou 1 élément seulement (voir
+                 HiredSword.MagicSchoolId), AddMagicSchool remplace plutôt qu'empile. Vide pour presque
+                 tous les Francs-Tireurs, EmptyHintText l'explicite plutôt que de masquer la section. -->
+            <components:ChipListView HeaderText="{loc:Loc HiredSwordMagicSchoolPh}"
+                                      ItemsSource="{Binding MagicSchools}"
+                                      EmptyHintText="{loc:Loc HiredSwordNoMagicSchool}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowMagicSchoolDetailCommand}"
+                                      AddCommand="{Binding AddMagicSchoolCommand}"
+                                      RemoveCommand="{Binding RemoveMagicSchoolCommand}"/>
 
             <!-- Peut être engagé par (bandes) : vide = commun à toutes les bandes. Contrôle unique
                  factorisant chips + bascule Inclure/Exclure - même composant que SkillEditDialogViewModel. -->

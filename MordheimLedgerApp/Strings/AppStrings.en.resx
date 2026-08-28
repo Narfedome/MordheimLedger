@@ -177,6 +177,9 @@
   <data name="WarbandsFreeModeLabel" xml:space="preserve">
     <value>Free mode (no costs applied)</value>
   </data>
+  <data name="WarbandsDismissHiredSwordAction" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
   <data name="WarbandsExistingWarbandTitle" xml:space="preserve">
     <value>Free mode</value>
   </data>
@@ -704,6 +707,12 @@
   </data>
   <data name="HiredSwordStartingEquipmentPh" xml:space="preserve">
     <value>Starting equipment</value>
+  </data>
+  <data name="HiredSwordMagicSchoolPh" xml:space="preserve">
+    <value>Magic school</value>
+  </data>
+  <data name="HiredSwordNoMagicSchool" xml:space="preserve">
+    <value>None (not a spellcaster)</value>
   </data>
   <data name="HiredSwordCreateTitle" xml:space="preserve">
     <value>New Hired Sword</value>
@@ -1239,6 +1248,24 @@
   <data name="EndOfGameCapturedEnemiesSummary" xml:space="preserve">
     <value>{0} enemy prisoner(s) captured</value>
   </data>
+  <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
+    <value>Hired Swords</value>
+  </data>
+  <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
+    <value>Pay</value>
+  </data>
+  <data name="EndOfGameHiredSwordPrepaidLabel" xml:space="preserve">
+    <value>Upkeep already covered (Returning a Favour)</value>
+  </data>
+  <data name="EndOfGameHiredSwordRecruitHeading" xml:space="preserve">
+    <value>Hire a new Hired Sword (optional)</value>
+  </data>
+  <data name="EndOfGameHiredSwordRecruitPh" xml:space="preserve">
+    <value>Choose a Hired Sword</value>
+  </data>
+  <data name="EndOfGameHiredSwordNamePh" xml:space="preserve">
+    <value>Name</value>
+  </data>
   <data name="CapturedEnemyFateRansomed" xml:space="preserve">
     <value>Ransomed</value>
   </data>
@@ -1292,6 +1319,18 @@
   </data>
   <data name="HistoryPromotionSentence" xml:space="preserve">
     <value>{0}: a group member becomes a Hero ({1})!</value>
+  </data>
+  <data name="HistoryHiredSwordUpkeepPaidSentence" xml:space="preserve">
+    <value>Upkeep paid to {0} ({1} GC).</value>
+  </data>
+  <data name="HistoryHiredSwordUpkeepPrepaidSentence" xml:space="preserve">
+    <value>{0}'s upkeep already covered (Returning a Favour).</value>
+  </data>
+  <data name="HistoryHiredSwordLeftSentence" xml:space="preserve">
+    <value>{0} leaves the warband, his upkeep went unpaid.</value>
+  </data>
+  <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
+    <value>{0} the {1} joins the warband.</value>
   </data>
   <data name="AdvanceHero2" xml:space="preserve">
     <value>Skill: pick a skill from a table available to this warrior (or a new random spell if Wizard).</value>

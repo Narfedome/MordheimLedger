@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -24,9 +25,10 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private readonly IInjuryPickerService _injuryPicker;
     private readonly ISpellPickerService _spellPicker;
     private readonly IMutationPickerService _mutationPicker;
+    private readonly IHiredSwordPickerService _hiredSwordPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
-    private Dictionary<int, string> _archetypeNames = new();
+    private List<HiredSword> _recruitableHiredSwords = new();
     private List<SpecialRule> _bandWideSpecialRules = new();
     private List<MagicSchool> _bandMagicSchools = new();
 
@@ -101,7 +103,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, IMutationPickerService mutationPicker)
+        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
@@ -111,6 +113,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         _injuryPicker = injuryPicker;
         _spellPicker = spellPicker;
         _mutationPicker = mutationPicker;
+        _hiredSwordPicker = hiredSwordPicker;
 
         // Le roster affiche des noms d'Équipement/Compétences/Blessures résolus dans la langue courante
         // - sans ça, ils resteraient périmés si la langue change pendant que cette page est déjà
@@ -144,7 +147,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
             if (Warband is null) return;
 
             _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
-            _archetypeNames = _recruitableArchetypes.ToDictionary(a => a.Id, a => a.Name);
+            // Pour la résolution du RoleName d'un guerrier recruté d'un Franc-Tireur (voir ToRow) - le
+            // catalogue complet, pas filtré par restriction de bande (un Franc-Tireur déjà recruté doit
+            // toujours afficher son nom, même si son entrée catalogue a depuis été restreinte à d'autres
+            // bandes).
+            _recruitableHiredSwords = await _libraryService.GetHiredSwordsAsync(LocalizationService.Instance.Language);
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
             _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
@@ -157,7 +164,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
             RetiredWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsRetired));
-            Rating = Heroes.Concat(Henchmen).Sum(r => (r.Warrior.IsLargeCreature ? 20 : 5) + r.Warrior.Experience);
+            Rating = Heroes.Concat(Henchmen).Sum(r => WarbandRatingRules.WarriorContribution(
+                r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating));
 
             var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);
             Inventory = new ObservableCollection<WarbandEquipment>(inventory);
@@ -183,6 +191,22 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     private WarriorRow ToRow(Warrior warrior)
     {
+        // Un guerrier recruté d'un Franc-Tireur (voir Warrior.IsHiredSword) n'a pas de WarriorArchetype
+        // à résoudre - RoleName vient du catalogue HiredSword à la place, ses propres SpecialRules
+        // jouant le rôle que jouerait archetypeRules ci-dessous. École de magie : PROPRE au Franc-Tireur
+        // (HiredSword.MagicSchoolId, ex. le Sorcier/Magie Mineure) plutôt que celle de la bande qui
+        // l'engage - contrairement à un WarriorArchetype normal (IsSpellcaster + écoles DE LA BANDE).
+        if (warrior.HiredSwordId is { } hiredSwordId)
+        {
+            var hiredSword = _recruitableHiredSwords.FirstOrDefault(h => h.Id == hiredSwordId);
+            var hiredSwordEquipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
+            var hiredSwordMergedRules = _bandWideSpecialRules.Concat(hiredSword?.SpecialRules ?? new List<SpecialRule>())
+                .Concat(hiredSwordEquipmentRules).DistinctBy(r => r.Id);
+            var hiredSwordHatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) });
+            var hiredSwordMagicSchools = hiredSword?.MagicSchool is { } school ? new List<MagicSchool> { school } : null;
+            return new WarriorRow(warrior, hiredSword?.Name ?? "?", BuildSpecialRuleChips(hiredSwordMergedRules), hiredSwordMagicSchools, hiredSwordHatredChips);
+        }
+
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId);
         var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
         // Un objet équipé (ex. Marteau des Sorcières) peut lui aussi accorder une règle spéciale - avant
@@ -200,7 +224,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
         var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
         var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) });
-        return new WarriorRow(warrior, _archetypeNames.GetValueOrDefault(warrior.WarriorArchetypeId, "?"), BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
+        return new WarriorRow(warrior, archetype?.Name ?? "?", BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
     }
 
     /// <summary>A rule with a mechanized Hatred target (SpecialRule.HatredTargetWarbandArchetypeIds)
@@ -241,16 +265,28 @@ public partial class WarbandDetailViewModel : BaseViewModel
         if (Warband is null) return;
 
         var w = row.Warrior;
+        // Copie exhaustive de TOUS les champs de Warrior - SaveWarriorAsync fait un UPDATE complet
+        // (warrior.ToEntity()), donc un champ oublié ici est silencieusement remis à sa valeur par
+        // défaut au premier Enregistrer (bug trouvé en ajoutant les 3 champs Franc-Tireur ci-dessous :
+        // IsLargeCreature/GainsExperience/IsLeader/AllowedSkillCategories/CanUseEquipment/tous les Max*/
+        // tous les Starting*/IncreasedCharacteristics/SickGamesRemaining/Hatreds manquaient déjà tous,
+        // silencieusement effacés à chaque édition - CanUseEquipment=false est précisément ce qui masque
+        // le bouton "+" équipement d'un Franc-Tireur, donc ce trou touchait directement la nouvelle
+        // fonctionnalité, pas seulement un bug préexistant sans rapport).
         var copy = new Warrior
         {
             Id = w.Id,
             WarbandId = w.WarbandId,
             WarriorArchetypeId = w.WarriorArchetypeId,
+            HiredSwordId = w.HiredSwordId,
+            HiredSwordBaseRating = w.HiredSwordBaseRating,
+            HiredSwordUpkeepPrepaid = w.HiredSwordUpkeepPrepaid,
             Name = w.Name,
             IsHero = w.IsHero,
             Cost = w.Cost,
             Experience = w.Experience,
             Status = w.Status,
+            SickGamesRemaining = w.SickGamesRemaining,
             HeadCount = w.HeadCount,
             Movement = w.Movement,
             MovementOverride = w.MovementOverride,
@@ -262,34 +298,66 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Initiative = w.Initiative,
             Attacks = w.Attacks,
             Leadership = w.Leadership,
+            StartingMovement = w.StartingMovement,
+            StartingWeaponSkill = w.StartingWeaponSkill,
+            StartingBallisticSkill = w.StartingBallisticSkill,
+            StartingStrength = w.StartingStrength,
+            StartingToughness = w.StartingToughness,
+            StartingWounds = w.StartingWounds,
+            StartingInitiative = w.StartingInitiative,
+            StartingAttacks = w.StartingAttacks,
+            StartingLeadership = w.StartingLeadership,
             EquipmentListId = w.EquipmentListId,
+            CanUseEquipment = w.CanUseEquipment,
+            AllowedSkillCategories = w.AllowedSkillCategories,
             Equipment = w.Equipment,
             Skills = w.Skills,
             Injuries = w.Injuries,
+            Hatreds = w.Hatreds,
             Spells = w.Spells,
             Mutations = w.Mutations,
-            Animal = w.Animal
+            Animal = w.Animal,
+            IsLargeCreature = w.IsLargeCreature,
+            GainsExperience = w.GainsExperience,
+            IsLeader = w.IsLeader,
+            MaxMovement = w.MaxMovement,
+            MaxWeaponSkill = w.MaxWeaponSkill,
+            MaxBallisticSkill = w.MaxBallisticSkill,
+            MaxStrength = w.MaxStrength,
+            MaxToughness = w.MaxToughness,
+            MaxWounds = w.MaxWounds,
+            MaxInitiative = w.MaxInitiative,
+            MaxAttacks = w.MaxAttacks,
+            MaxLeadership = w.MaxLeadership,
+            IncreasedCharacteristics = w.IncreasedCharacteristics
         };
 
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == w.WarriorArchetypeId);
-        await OpenWarriorEditDialogAsync(copy, archetype, row.Equipment);
+        var hiredSword = _recruitableHiredSwords.FirstOrDefault(h => h.Id == w.HiredSwordId);
+        await OpenWarriorEditDialogAsync(copy, archetype, hiredSword, row.Equipment);
     }
 
     /// <summary>Ouvre WarriorEditDialog sur warrior (déjà en base - un guerrier fraîchement recruté ou
     /// une copie défensive d'un guerrier existant, voir RecruitWarriorAsync/EditWarrior) et applique le
     /// résultat - factorisé ici, les deux appelants ne différaient que par la provenance du Warrior et
-    /// l'équipement à rembourser en cas de suppression.</summary>
-    private async Task OpenWarriorEditDialogAsync(Warrior warrior, WarriorArchetype? archetype, IEnumerable<WarriorEquipment> equipmentForRefund)
+    /// l'équipement à rembourser en cas de suppression. hiredSword non-null seulement pour un guerrier
+    /// recruté d'un Franc-Tireur (archetype reste alors null, voir Warrior.IsHiredSword) - son école de
+    /// magie propre (HiredSword.MagicSchool, ex. le Sorcier) prime sur celle de la bande.</summary>
+    private async Task OpenWarriorEditDialogAsync(Warrior warrior, WarriorArchetype? archetype, HiredSword? hiredSword, IEnumerable<WarriorEquipment> equipmentForRefund)
     {
         if (Warband is null) return;
 
-        var isSpellcaster = archetype?.IsSpellcaster ?? false;
+        var isSpellcaster = archetype?.IsSpellcaster == true || hiredSword?.MagicSchool is not null;
         var isMutant = archetype?.CanBuyMutations ?? false;
-        var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
+        var archetypeRules = archetype?.SpecialRules ?? hiredSword?.SpecialRules ?? new List<SpecialRule>();
         var specialRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id).ToList();
+        // École(s) proposée(s) au picker de sort : celles DE LA BANDE pour un guerrier normal, mais la
+        // seule école PROPRE au Franc-Tireur pour lui (voir HiredSword.MagicSchoolId) - jamais les deux
+        // mélangées, un Franc-Tireur n'a pas accès aux écoles de la bande qui l'engage.
+        var magicSchools = hiredSword?.MagicSchool is { } hiredSwordSchool ? new List<MagicSchool> { hiredSwordSchool } : _bandMagicSchools;
 
         var dialogViewModel = new WarriorEditDialogViewModel(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
-            _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, _bandMagicSchools,
+            _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, magicSchools,
             _mutationPicker, isMutant, specialRules);
         var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
 

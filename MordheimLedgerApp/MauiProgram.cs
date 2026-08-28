@@ -166,6 +166,9 @@ namespace MordheimLedgerApp
             builder.Services.AddSingleton<IMutationPickerNavigationService, MutationPickerNavigationService>();
             builder.Services.AddSingleton<IMutationPickerService, MutationPickerService>();
             builder.Services.AddTransient<HiredSwordViewModel>();
+            builder.Services.AddTransient<HiredSwordSelectorPage>();
+            builder.Services.AddSingleton<IHiredSwordPickerNavigationService, HiredSwordPickerNavigationService>();
+            builder.Services.AddSingleton<IHiredSwordPickerService, HiredSwordPickerService>();
             builder.Services.AddTransient<MagicSchoolViewModel>();
             builder.Services.AddTransient<MagicSchoolSelectorPage>();
             builder.Services.AddTransient<MagicSchoolListPage>();

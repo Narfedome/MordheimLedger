@@ -90,6 +90,51 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal("Otto", persisted.Name);
     }
 
+    /// <summary>Hired Sword recruitment (see Models.Library.HiredSword/WarbandService.
+    /// RecruitHiredSwordAsync) - mirrors RecruitWarrior_PreFillsStatsFromArchetype_AndPersists above,
+    /// but via HiredSword.ToWarrior() (no WarriorArchetype involved) and with real starting-equipment
+    /// rows inserted in the same call, since a Hired Sword's gear is fixed rather than picked.</summary>
+    [Fact]
+    public async Task RecruitHiredSword_PreFillsProfileAddsStartingEquipment_AndPersists()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var pitFighter = (await _library.GetHiredSwordsAsync("en")).Single(h => h.Name == "Pit Fighter");
+        var startingEquipment = (await _library.GetEquipmentItemsAsync("en"))
+            .Where(e => pitFighter.StartingEquipmentIds.Contains(e.Id)).ToList();
+
+        var recruited = await _warbands.RecruitHiredSwordAsync(warband.Id, pitFighter, "Grimjaw", startingEquipment);
+
+        Assert.NotEqual(0, recruited.Id);
+        Assert.True(recruited.IsHiredSword);
+        Assert.Equal(pitFighter.Id, recruited.HiredSwordId);
+        Assert.Equal(pitFighter.BaseRating, recruited.HiredSwordBaseRating);
+        Assert.False(recruited.IsHero);
+        Assert.False(recruited.CanUseEquipment);
+
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var persisted = Assert.Single(roster);
+        Assert.Equal("Grimjaw", persisted.Name);
+        Assert.Equal(startingEquipment.Count, persisted.Equipment.Count);
+    }
+
+    /// <summary>The Warlock is the one Hired Sword that's a spellcaster in its own right (Lesser Magic,
+    /// not the hiring warband's own schools) - see Models.Library.HiredSword.MagicSchoolId, seeded via
+    /// HiredSwords.json's magicSchoolName stub resolved against the same MagicSchools.json entry every
+    /// other Lesser Magic spellcaster shares.</summary>
+    [Fact]
+    public async Task Warlock_ResolvesOwnMagicSchool()
+    {
+        var hiredSwords = await _library.GetHiredSwordsAsync("en");
+        var warlock = hiredSwords.Single(h => h.Name == "Warlock");
+
+        Assert.NotNull(warlock.MagicSchool);
+        Assert.Equal("Lesser Magic", warlock.MagicSchool!.Name);
+
+        var pitFighter = hiredSwords.Single(h => h.Name == "Pit Fighter");
+        Assert.Null(pitFighter.MagicSchool);
+    }
+
     /// <summary>Regression test for a real bug: GetWarriorsAsync used to resolve each carried
     /// EquipmentItem via a minimal FindAsync+ToModel(translations) call, leaving SpecialRules (and
     /// restrictions) empty for every already-recruited warrior's equipment - invisible until the

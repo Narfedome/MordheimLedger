@@ -45,6 +45,13 @@
                                                  IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
                             <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
                                                  IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                            <!-- Francs-Tireurs : uniquement en Mode Libre (voir WarbandEditDialogViewModel.
+                                 StepCount) - engager un Franc-Tireur au tout premier recrutement (jamais
+                                 joué) n'a pas de sens narratif. Avant Noms : le joueur doit avoir choisi
+                                 ses Francs-Tireurs avant d'arriver à l'étape qui les nomme. -->
+                            <components:TabToggleButton Text="{loc:Loc LibTabHiredSwords}" Command="{Binding ShowMercenariesTabCommand}"
+                                                 IsActive="{Binding IsMercenariesTab}" FontSize="12"
+                                                 IsVisible="{Binding IsExistingWarband}"/>
                             <components:TabToggleButton Text="{loc:Loc WarbandCreateTabNames}" Command="{Binding ShowNamesTabCommand}"
                                                  IsActive="{Binding IsNamesTab}" FontSize="12"/>
                         </HorizontalStackLayout>
@@ -229,6 +236,29 @@
                         </VerticalStackLayout>
                     </VerticalStackLayout>
 
+                    <!-- Francs-Tireurs : ne comptent jamais dans l'effectif/le plafond de la bande (voir
+                         RecruitmentRules.CanRecruitHiredSword) - pas d'équipement/compétence à choisir
+                         (gear fixe, voir HiredSword.StartingEquipmentIds), juste une sélection via
+                         ChipListView+picker (IHiredSwordPickerService, même composant/idiome que toute
+                         autre liste éditable de l'app) - "un seul de chaque type" déjà garanti par le
+                         picker (ExcludedHiredSwordIds). Le nom personnel se saisit sur l'étape Noms juste
+                         après (3e section, voir IsNamesTab) - même séparation "quoi" (ici) / "comment ça
+                         s'appelle" (Noms) que Guerriers/Noms. Retirer un chip ici (même un Franc-Tireur
+                         déjà en base, bande rouverte pour édition) ne demande pas de confirmation - voir
+                         HiredSwordRecruitRow, secondaire par rapport au roster normal. -->
+                    <VerticalStackLayout Spacing="16" IsVisible="{Binding IsMercenariesTab}">
+                        <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                        <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+
+                        <components:ChipListView HeaderText="{loc:Loc LibTabHiredSwords}"
+                                                  ItemsSource="{Binding RecruitedHiredSwordRows}"
+                                                  IconGlyph="{x:Static icons:SolidFont.UserGroup}"
+                                                  Command="{Binding ShowHiredSwordDetailCommand}"
+                                                  AddCommand="{Binding AddHiredSwordCommand}"
+                                                  RemoveCommand="{Binding RemoveHiredSwordCommand}"/>
+                    </VerticalStackLayout>
+
                     <!-- Noms : une fois l'équipement connu, pour nommer en connaissance de cause plutôt
                          qu'à l'aveugle à l'étape Guerriers. Pré-rempli par PopulateSuggestedNames (voir
                          WarbandEditDialogViewModel), toujours éditable ici. -->
@@ -284,9 +314,25 @@
                             </VerticalStackLayout>
                         </VerticalStackLayout>
 
+                        <!-- 3e section : Francs-Tireurs recrutés à l'étape Mercenaires (voir
+                             IsMercenariesTab) - même principe Entry+EquipmentSummary que Héros/Hommes de
+                             main ci-dessus, absente si aucun n'a été recruté (RecruitedHiredSwordRows
+                             vide, y compris hors Mode Libre où l'onglet Mercenaires n'existe même pas). -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasRecruitedHiredSwords}">
+                            <Label Text="{loc:Loc LibTabHiredSwords}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHiredSwordRows}" Spacing="8">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:HiredSwordRecruitRow">
+                                        <Entry Text="{Binding Name}" FontSize="13"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
                         <Label Text="{Binding NamesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding NamesError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>
+
                 </VerticalStackLayout>
             </dialogs:StableHeightScrollView>
 

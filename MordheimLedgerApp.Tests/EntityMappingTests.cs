@@ -251,6 +251,81 @@ public class EntityMappingTests
         Assert.Empty(roundTripped.Equipment);
     }
 
+    // Hired Sword recruitment - exactly one of WarriorArchetypeId/HiredSwordId is ever set (see
+    // Models.Warrior's class doc). IsHero stays false (Henchman-style D6 injuries/XP milestones) even
+    // though Progression uses the Heroes table (IsHero || IsHiredSword at the two AdvanceRollEntry
+    // construction sites in WarriorOutcomeRow.cs, not tested here - pure UI wiring).
+    [Fact]
+    public void RecruitingFromHiredSword_PreFillsProfileAndMarksNotHero()
+    {
+        var hiredSword = new HiredSword
+        {
+            Id = 5,
+            Name = "Pit Fighter",
+            HireCost = 30,
+            Upkeep = 25,
+            BaseRating = 22,
+            Movement = 4,
+            WeaponSkill = 4,
+            BallisticSkill = 3,
+            Strength = 4,
+            Toughness = 4,
+            Wounds = 1,
+            Initiative = 5,
+            Attacks = 2,
+            Leadership = 7
+        };
+
+        var recruited = hiredSword.ToWarrior("Grimjaw");
+
+        Assert.Null(recruited.WarriorArchetypeId);
+        Assert.Equal(hiredSword.Id, recruited.HiredSwordId);
+        Assert.True(recruited.IsHiredSword);
+        Assert.Equal(hiredSword.BaseRating, recruited.HiredSwordBaseRating);
+        Assert.False(recruited.HiredSwordUpkeepPrepaid);
+        Assert.Equal("Grimjaw", recruited.Name);
+        Assert.False(recruited.IsHero);
+        Assert.Equal(1, recruited.HeadCount);
+        Assert.False(recruited.CanUseEquipment);
+        Assert.True(recruited.GainsExperience);
+        Assert.Equal(hiredSword.Movement, recruited.Movement);
+        Assert.Equal(hiredSword.WeaponSkill, recruited.WeaponSkill);
+        Assert.Equal(hiredSword.BallisticSkill, recruited.BallisticSkill);
+        Assert.Equal(hiredSword.Strength, recruited.Strength);
+        Assert.Equal(hiredSword.Toughness, recruited.Toughness);
+        Assert.Equal(hiredSword.Wounds, recruited.Wounds);
+        Assert.Equal(hiredSword.Initiative, recruited.Initiative);
+        Assert.Equal(hiredSword.Attacks, recruited.Attacks);
+        Assert.Equal(hiredSword.Leadership, recruited.Leadership);
+    }
+
+    [Fact]
+    public void HiredSwordWarrior_RoundTrips_ThroughEntity()
+    {
+        var warrior = new Warrior
+        {
+            Id = 2,
+            WarbandId = 7,
+            WarriorArchetypeId = null,
+            HiredSwordId = 5,
+            HiredSwordBaseRating = 22,
+            HiredSwordUpkeepPrepaid = true,
+            Name = "Grimjaw",
+            IsHero = false,
+            Cost = 30,
+            Experience = 4,
+            Status = WarriorStatus.Active
+        };
+
+        var roundTripped = warrior.ToEntity().ToModel();
+
+        Assert.Null(roundTripped.WarriorArchetypeId);
+        Assert.Equal(warrior.HiredSwordId, roundTripped.HiredSwordId);
+        Assert.True(roundTripped.IsHiredSword);
+        Assert.Equal(warrior.HiredSwordBaseRating, roundTripped.HiredSwordBaseRating);
+        Assert.True(roundTripped.HiredSwordUpkeepPrepaid);
+    }
+
     [Fact]
     public void RacialProfile_RoundTrips_ThroughEntity()
     {

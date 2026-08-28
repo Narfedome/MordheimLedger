@@ -167,6 +167,7 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(DistributedExperienceRemaining))]
     [NotifyPropertyChangedFor(nameof(HasOptionalEquippedHenchmanGrant))]
     [NotifyPropertyChangedFor(nameof(HasWeaponBlessingGrant))]
+    [NotifyPropertyChangedFor(nameof(HasFreeHiredSwordGrant))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemQuantityRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationItemFoundValueRoll))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationWyrdstoneRoll))]
@@ -887,6 +888,11 @@ public partial class EndOfGameDialogViewModel
         SelectedEquippedHenchmanGroupOption = EquippedHenchmanGroupOptions[0];
         EquippedHenchmanError = null;
         SelectedWeaponBlessingOption = WeaponBlessingOptions[0];
+        // Franc-Tireur gratuit (Une Faveur Rendue) : même reset que les autres grants ci-dessus - sans
+        // ça, un choix fait sur un jet précédent resterait affiché/validé pour un nouveau jet qui ne
+        // déclenche même plus cette branche.
+        SelectedFreeHiredSword = null;
+        FreeHiredSwordError = null;
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -1027,6 +1033,73 @@ public partial class EndOfGameDialogViewModel
     /// ApplyResolvedOutcome), donc à valider comme n'importe quel autre jet de ce wizard. Une branche
     /// Kind.None (rien à saisir) ou l'absence de branche (ex. Catacombes, aucune Outcome du tout) n'ont
     /// rien de plus à valider.</summary>
+    // --- Franc-Tireur gratuit (Une Faveur Rendue, (3,6)) ----------------------------------------
+    //
+    // "vous gagnez gratuitement les services d'un Mercenaire à Louer au choix (parmi ceux disponibles
+    // pour votre bande) pour la durée de la prochaine bataille" - même catalogue éligible que l'étape
+    // "Francs-Tireurs" plus loin dans le wizard (AvailableHiredSwordsToRecruit, voir
+    // EndOfGameDialogViewModel.HiredSwords.cs : déjà filtré par restriction de bande ET par "pas déjà
+    // activement engagé"), réutilisé tel quel plutôt que dupliqué - contrairement à ce recrutement
+    // optionnel PAYANT là-bas, celui-ci est GRATUIT (HireCost jamais déduit, voir
+    // WarbandDetailViewModel.EndOfGame.ApplyExplorationOutcomeAsync) et pose Warrior.
+    // HiredSwordUpkeepPrepaid pour que la toute PROCHAINE solde soit déjà couverte ("libre de charge
+    // pour la prochaine bataille"). Limite acceptée : si le même type est ALSO choisi à l'étape
+    // "Francs-Tireurs" plus loin dans ce même wizard (les deux lisent la même liste live, qui ne se met
+    // à jour qu'au Save), rien ne l'empêche ici - combo très rare (il faudrait tirer cette Exploration
+    // ET vouloir recruter le même type payant la même partie), hors périmètre de cette passe.
+
+    public bool HasFreeHiredSwordGrant => ResolvedExplorationOutcome?.GrantsFreeHiredSword == true;
+
+    /// <summary>Faux si cette bande n'a aucun Franc-Tireur éligible (catalogue entièrement restreint à
+    /// d'autres bandes) - ValidateExplorationResultStep n'exige alors aucun choix (impossible), même si
+    /// le ChipListView/son "+" restent affichés (un picker vide reste un point d'entrée valide pour en
+    /// créer un nouveau directement depuis là, voir HiredSwordViewModel.Create).</summary>
+    public bool HasEligibleFreeHiredSwords => EligibleHiredSwordsForBand.Count > 0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FreeHiredSwordChipItems))]
+    private HiredSword? selectedFreeHiredSword;
+
+    partial void OnSelectedFreeHiredSwordChanged(HiredSword? value)
+    {
+        FreeHiredSwordError = null;
+        if (value is null) FreeHiredSwordName = string.Empty;
+    }
+
+    /// <summary>0 ou 1 élément - le ChipListView de l'étape (voir EndOfGameDialog.xaml), même idiome que
+    /// HiredSwordEditDialogViewModel.MagicSchools pour un FK unique affiché comme une liste.</summary>
+    public List<HiredSword> FreeHiredSwordChipItems => SelectedFreeHiredSword is { } h ? new List<HiredSword> { h } : new List<HiredSword>();
+
+    [ObservableProperty]
+    private string freeHiredSwordName = string.Empty;
+
+    [ObservableProperty]
+    private string? freeHiredSwordError;
+
+    /// <summary>AddCommand du ChipListView - ouvre le même picker/selector que l'étape "Francs-Tireurs"
+    /// (IHiredSwordPickerService.PickHiredSwordAsync, sélection UNIQUE - livre des règles : un seul
+    /// Franc-Tireur gratuit par Faveur), filtré à cette bande et excluant les types déjà activement
+    /// engagés ET celui déjà choisi (payant) à l'étape "Francs-Tireurs" plus loin dans ce même wizard
+    /// (SelectedNewHiredSword).</summary>
+    [RelayCommand]
+    private async Task AddFreeHiredSword()
+    {
+        var excludedIds = WarriorRows.Where(r => r.Warrior.IsHiredSword)
+            .Select(r => r.Warrior.HiredSwordId!.Value).ToList();
+        if (SelectedNewHiredSword is { } alreadyChosenElsewhere) excludedIds.Add(alreadyChosenElsewhere.Id);
+
+        var hiredSword = await _hiredSwordPicker.PickHiredSwordAsync(_warbandArchetypeId, excludedIds);
+        if (hiredSword is null) return;
+
+        SelectedFreeHiredSword = hiredSword;
+    }
+
+    [RelayCommand]
+    private Task ShowFreeHiredSwordDetail(HiredSword hiredSword) => _detailDialogs.ShowHiredSwordDetailDialogAsync(hiredSword);
+
+    [RelayCommand]
+    private void RemoveFreeHiredSword(HiredSword hiredSword) => SelectedFreeHiredSword = null;
+
     private bool ValidateExplorationResultStep()
     {
         // Trésor Caché/Bande Massacrée - forme entièrement à part (plusieurs lignes indépendantes),
@@ -1079,6 +1152,15 @@ public partial class EndOfGameDialogViewModel
         // progression (voir CanAffordEquippedHenchman).
         if (HasOptionalEquippedHenchmanGrant && SelectedEquippedHenchmanGroupOption?.Group is not null
             && !CheckRoll(!CanAffordEquippedHenchman, () => EquippedHenchmanError = Loc["EndOfGameEquippedHenchmanUnaffordable"]))
+            return false;
+
+        // Franc-Tireur gratuit (Une Faveur Rendue) : un type doit être choisi (aucune option "Ne pas
+        // recruter" - contrairement aux autres pickers ci-dessus, le livre n'offre pas de refuser ce
+        // cadeau) avec un nom renseigné - sauf si aucun type n'est éligible à cette bande (liste vide,
+        // voir HasEligibleFreeHiredSwords), auquel cas rien à choisir/valider.
+        if (HasFreeHiredSwordGrant && HasEligibleFreeHiredSwords
+            && !CheckRoll(SelectedFreeHiredSword is null || string.IsNullOrWhiteSpace(FreeHiredSwordName),
+                () => FreeHiredSwordError = Loc["EndOfGameRollRequired"]))
             return false;
 
         var amountMissing = ResolvedExplorationOutcome?.Kind switch

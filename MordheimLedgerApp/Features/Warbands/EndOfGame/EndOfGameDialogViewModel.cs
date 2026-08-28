@@ -73,6 +73,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// the affordability preview rather than a live reference.</summary>
     private readonly int _currentTreasury;
 
+    /// <summary>Snapshot of Warband.WyrdstoneShards at dialog-open time (see _currentTreasury for the
+    /// same reasoning) - drives whether the Wyrdstone Sale step even appears (Steps) and bounds
+    /// ShardsToSell. Never live-updated mid-wizard: only WarbandDetailViewModel.EndOfGame writes to the
+    /// real Warband, at Save.</summary>
+    private readonly int _currentWyrdstoneShards;
+
     private readonly List<ExplorationResult> _explorationResults;
 
     /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
@@ -118,6 +124,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsAdvanceStep))]
     [NotifyPropertyChangedFor(nameof(IsExplorationRollStep))]
     [NotifyPropertyChangedFor(nameof(IsExplorationResultStep))]
+    [NotifyPropertyChangedFor(nameof(IsWyrdstoneSaleStep))]
+    [NotifyPropertyChangedFor(nameof(IsAvailableVeteransStep))]
     [NotifyPropertyChangedFor(nameof(IsHiredSwordsStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
@@ -135,7 +143,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, HiredSwords, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, HiredSwords, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -174,6 +182,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // de step stable). Toujours ajouté après ExplorationResult, jamais avant : ce guerrier a donc
             // déjà quitté cette position au moment où le palier apparaît, aucun décalage rétroactif possible.
             steps.AddRange(WarriorRows.Where(r => r.HasExplorationMilestone).Select(r => new WizardStep(StepKind.Advance, r, IsExplorationAdvance: true)));
+            // Vente de pierre magique (séquence livre, étape 4) : rien à vendre si le stock est vide, en
+            // comptant l'ancien stock ET ce que CETTE partie vient de trouver (voir MaxShardsToSell) -
+            // même principe que HiredSwords ci-dessous (étape entièrement absente plutôt que montrée
+            // vide). Disponibilité des Vétérans (étape 5) : toujours présente, un jet a lieu à CHAQUE Fin
+            // de Partie que la bande ait ou non l'intention d'embaucher (voir Warband.
+            // AvailableVeteranExperience) - même statut "toujours là" qu'Expérience/Prisonniers.
+            if (MaxShardsToSell > 0) steps.Add(new(StepKind.WyrdstoneSale));
+            steps.Add(new(StepKind.AvailableVeterans));
             // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
             // voir EndOfGameDialogViewModel.HiredSwords.cs. Placée après l'or d'Exploration (le joueur
             // décide en connaissant sa trésorerie finale, voir HiredSwordTreasuryAfter), entièrement
@@ -201,6 +217,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsAdvanceStep => Current.Kind == StepKind.Advance;
     public bool IsExplorationRollStep => Current.Kind == StepKind.ExplorationRoll;
     public bool IsExplorationResultStep => Current.Kind == StepKind.ExplorationResult;
+    public bool IsWyrdstoneSaleStep => Current.Kind == StepKind.WyrdstoneSale;
+    public bool IsAvailableVeteransStep => Current.Kind == StepKind.AvailableVeterans;
     public bool IsHiredSwordsStep => Current.Kind == StepKind.HiredSwords;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
@@ -294,7 +312,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -305,6 +323,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _pendingExplorationBonusDie = pendingExplorationBonusDie;
         _hasCatacombReroll = hasCatacombReroll;
         _currentTreasury = currentTreasury;
+        _currentWyrdstoneShards = currentWyrdstoneShards;
         _explorationResults = explorationResults;
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
         _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
@@ -377,6 +396,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceRolls ?? Enumerable.Empty<AdvanceRollEntry>()),
             StepKind.ExplorationRoll => ValidateExplorationRollStep(),
             StepKind.ExplorationResult => ValidateExplorationResultStep(),
+            StepKind.AvailableVeterans => ValidateAvailableVeteransStep(),
             StepKind.HiredSwords => ValidateHiredSwordsStep(),
             _ => true
         };

@@ -20,5 +20,6 @@ public class WarbandEntity
     public string? NextGameNote { get; set; }
     public bool HasCatacombReroll { get; set; }
     public bool GameInProgress { get; set; }
+    public int AvailableVeteranExperience { get; set; }
     public string? Notes { get; set; }
 }

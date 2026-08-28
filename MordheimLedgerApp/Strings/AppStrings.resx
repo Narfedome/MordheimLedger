@@ -306,6 +306,9 @@
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Pierres magiques :</value>
   </data>
+  <data name="WarbandsAvailableVeteransLabel" xml:space="preserve">
+    <value>Vétérans disponibles :</value>
+  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Héros</value>
   </data>
@@ -1259,6 +1262,39 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Francs-Tireurs</value>
   </data>
+  <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
+    <value>Total des dés : {0} → Pierre magique trouvée : {1} éclat(s)</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleHeading" xml:space="preserve">
+    <value>Vente de pierre magique</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleIntro" xml:space="preserve">
+    <value>Pas obligatoire de tout vendre maintenant - le reste du stock attend en réserve.</value>
+  </data>
+  <data name="EndOfGameWyrdstoneFoundThisGameFormat" xml:space="preserve">
+    <value>Grâce à votre exploration, vous avez trouvé {0} éclat(s) de pierre magique.</value>
+  </data>
+  <data name="EndOfGameWyrdstoneExistingStockFormat" xml:space="preserve">
+    <value>Stock déjà en réserve : {0} éclat(s).</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleTableTitle" xml:space="preserve">
+    <value>Barème (éclats vendus × effectif de la bande)</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleTableShardsHeader" xml:space="preserve">
+    <value>Éclats</value>
+  </data>
+  <data name="EndOfGameWyrdstoneShardsToSellLabel" xml:space="preserve">
+    <value>Éclats à vendre</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleValueFormat" xml:space="preserve">
+    <value>Vendre {0} éclat(s) pour {1} CO</value>
+  </data>
+  <data name="EndOfGameAvailableVeteransHeading" xml:space="preserve">
+    <value>Disponibilité des Vétérans</value>
+  </data>
+  <data name="EndOfGameAvailableVeteransIntro" xml:space="preserve">
+    <value>Jet de 2D6 : représente l'expérience totale de vétérans disponibles à l'embauche pour renforcer un groupe d'Hommes de main existant. Aucun engagement pour l'instant.</value>
+  </data>
   <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
     <value>Payer</value>
   </data>
@@ -1297,6 +1333,15 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryCapturedEnemySacrificedSentence" xml:space="preserve">
     <value>Un prisonnier ennemi a été sacrifié : {0} gagne 1 PX.</value>
+  </data>
+  <data name="HistoryBaselineWyrdstoneSentence" xml:space="preserve">
+    <value>La bande a trouvé {0} éclat(s) de pierre magique en explorant.</value>
+  </data>
+  <data name="HistoryWyrdstoneSaleSentence" xml:space="preserve">
+    <value>La bande vend {0} éclat(s) de pierre magique pour {1} CO.</value>
+  </data>
+  <data name="HistoryAvailableVeteransSentence" xml:space="preserve">
+    <value>{0} PX de vétérans disponibles à l'embauche avant la prochaine bataille.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>

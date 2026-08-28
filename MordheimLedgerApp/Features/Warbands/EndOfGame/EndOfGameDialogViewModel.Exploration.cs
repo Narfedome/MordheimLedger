@@ -50,6 +50,23 @@ public partial class EndOfGameDialogViewModel
 
     public ObservableCollection<ExplorationDieEntry> ExplorationDice { get; } = new();
 
+    /// <summary>"Add the results together and consult the chart..." (Core.Rules.WyrdstoneShardsTable) -
+    /// a SECOND, universal effect of this same roll, entirely additive to whatever specific chart entry
+    /// TriggeredExplorationResult may also resolve (doubles/triples only) - applies even when no doubles
+    /// are rolled at all. 0 while any die is still empty (mirrors ResolveExplorationResult's own guard),
+    /// notified via ResolveExplorationResult (the same single choke point already called on every die
+    /// change).</summary>
+    public int BaselineWyrdstoneShardsFound => ExplorationDice.Any(d => d.Value is null)
+        ? 0
+        : WyrdstoneShardsTable.GetShards(ExplorationDice.Sum(d => d.Value!.Value));
+
+    /// <summary>Formatted display text, detailing the dice total behind BaselineWyrdstoneShardsFound
+    /// (retour utilisateur 2026-08-28 : "détailler le résultat" plutôt qu'un nombre nu) - computed here
+    /// rather than nesting {loc:Loc} inside a StringFormat attribute (not valid XAML, see
+    /// WyrdstoneSaleValueDisplay). 0 while any die is still empty, same guard as BaselineWyrdstoneShardsFound.</summary>
+    public string BaselineWyrdstoneShardsFoundDisplay => string.Format(Loc["EndOfGameBaselineWyrdstoneFormat"],
+        ExplorationDice.Any(d => d.Value is null) ? 0 : ExplorationDice.Sum(d => d.Value!.Value), BaselineWyrdstoneShardsFound);
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasExplorationResult))]
     [NotifyPropertyChangedFor(nameof(ShowExplorationSubRoll))]
@@ -833,7 +850,11 @@ public partial class EndOfGameDialogViewModel
     partial void OnExplorationGoldAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
     partial void OnExplorationItemQuantityChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
     partial void OnExplorationItemFoundValueChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
-    partial void OnExplorationWyrdstoneAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
+    partial void OnExplorationWyrdstoneAmountChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null;
+        NotifyWyrdstoneFoundThisGameChanged();
+    }
 
     private void SyncExplorationDice()
     {
@@ -856,6 +877,9 @@ public partial class EndOfGameDialogViewModel
     /// plutôt que de laisser une résolution obsolète affichée.</summary>
     private void ResolveExplorationResult()
     {
+        OnPropertyChanged(nameof(BaselineWyrdstoneShardsFound));
+        OnPropertyChanged(nameof(BaselineWyrdstoneShardsFoundDisplay));
+        NotifyWyrdstoneFoundThisGameChanged();
         TriggeredExplorationResult = null;
         ExplorationSubRoll = string.Empty;
         ExplorationSubRollError = null;

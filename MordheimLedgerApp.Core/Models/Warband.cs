@@ -53,5 +53,15 @@ public class Warband
     /// EndOfGame, set by StartGame.</summary>
     public bool GameInProgress { get; set; }
 
+    /// <summary>"Check available veterans" (post-battle sequence step 5, after Selling Wyrdstone) - a
+    /// fresh 2D6 roll each End of Game represents an Experience "pool" available to spend hiring
+    /// battle-hardened Henchmen into EXISTING Henchman groups (never new standalone Heroes), without
+    /// committing to actually hire anyone right away. Overwritten by each new roll rather than
+    /// accumulating across multiple End of Games (RAW doesn't say what happens to an unspent pool once a
+    /// new one is rolled - simplest interpretation, matches PendingExplorationBonusDie's "spend it either
+    /// way" idiom). Step 8 ("Engager de nouvelles recrues", the actual spending UI) doesn't exist yet -
+    /// shown as a standing stat on WarbandDetailPage in the meantime so it isn't invisible/forgotten.</summary>
+    public int AvailableVeteranExperience { get; set; }
+
     public string? Notes { get; set; }
 }

@@ -306,6 +306,9 @@
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Wyrdstone:</value>
   </data>
+  <data name="WarbandsAvailableVeteransLabel" xml:space="preserve">
+    <value>Available veterans:</value>
+  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Heroes</value>
   </data>
@@ -1259,6 +1262,39 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Hired Swords</value>
   </data>
+  <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
+    <value>Dice total: {0} → Wyrdstone found: {1} shard(s)</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleHeading" xml:space="preserve">
+    <value>Selling Wyrdstone</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleIntro" xml:space="preserve">
+    <value>You don't have to sell it all now - the rest of the stock stays in reserve.</value>
+  </data>
+  <data name="EndOfGameWyrdstoneFoundThisGameFormat" xml:space="preserve">
+    <value>Thanks to your exploration, you found {0} wyrdstone shard(s).</value>
+  </data>
+  <data name="EndOfGameWyrdstoneExistingStockFormat" xml:space="preserve">
+    <value>Already in reserve: {0} shard(s).</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleTableTitle" xml:space="preserve">
+    <value>Price table (shards sold × warband size)</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleTableShardsHeader" xml:space="preserve">
+    <value>Shards</value>
+  </data>
+  <data name="EndOfGameWyrdstoneShardsToSellLabel" xml:space="preserve">
+    <value>Shards to sell</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleValueFormat" xml:space="preserve">
+    <value>Sell {0} shard(s) for {1} gc</value>
+  </data>
+  <data name="EndOfGameAvailableVeteransHeading" xml:space="preserve">
+    <value>Check Available Veterans</value>
+  </data>
+  <data name="EndOfGameAvailableVeteransIntro" xml:space="preserve">
+    <value>Roll 2D6: represents the total Experience worth of veterans available for hire into an existing Henchman group. No commitment yet.</value>
+  </data>
   <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
     <value>Pay</value>
   </data>
@@ -1297,6 +1333,15 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryCapturedEnemySacrificedSentence" xml:space="preserve">
     <value>An enemy prisoner was sacrificed: {0} gains 1 XP.</value>
+  </data>
+  <data name="HistoryBaselineWyrdstoneSentence" xml:space="preserve">
+    <value>The warband found {0} wyrdstone shard(s) while exploring.</value>
+  </data>
+  <data name="HistoryWyrdstoneSaleSentence" xml:space="preserve">
+    <value>The warband sells {0} wyrdstone shard(s) for {1} gc.</value>
+  </data>
+  <data name="HistoryAvailableVeteransSentence" xml:space="preserve">
+    <value>{0} XP worth of veterans available for hire before the next battle.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

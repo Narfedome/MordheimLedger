@@ -108,7 +108,7 @@ public partial class WarbandDetailViewModel
             : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
 
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, Warband.WarbandArchetypeId,
-            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
+            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
@@ -119,6 +119,8 @@ public partial class WarbandDetailViewModel
             await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentItemsByEnglishName, englishSpecialRules, sentences);
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
             await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
+            await ApplyWyrdstoneSaleAsync(dialogViewModel, sentences);
+            await ApplyAvailableVeteransAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -165,6 +167,18 @@ public partial class WarbandDetailViewModel
         {
             Warband.NextGameNote = null;
             await _warbandService.SaveWarbandAsync(Warband);
+        }
+
+        // "Add the results together and consult the chart..." (Core.Rules.WyrdstoneShardsTable) - un
+        // SECOND effet du même jet, entièrement additif à l'éventuel résultat de doublons/triplets
+        // ci-dessous (TriggeredExplorationResult) : s'applique TOUJOURS, même sans aucun résultat
+        // spécial déclenché. dialogViewModel.BaselineWyrdstoneShardsFound vaut 0 si aucun Héros n'a
+        // survécu (aucun dé lancé), donc rien à faire dans ce cas.
+        if (dialogViewModel.BaselineWyrdstoneShardsFound > 0)
+        {
+            Warband.WyrdstoneShards += dialogViewModel.BaselineWyrdstoneShardsFound;
+            await _warbandService.SaveWarbandAsync(Warband);
+            sentences.Add(string.Format(Loc["HistoryBaselineWyrdstoneSentence"], dialogViewModel.BaselineWyrdstoneShardsFound));
         }
 
         // Même résolution nom-anglais-vers-Id que le chargement de la page, réutilisée ici pour
@@ -865,6 +879,33 @@ public partial class WarbandDetailViewModel
                     break;
             }
         }
+    }
+
+    /// <summary>Étape "Vente de pierre magique" (livre, étape 4 - EndOfGameDialogViewModel.
+    /// IsWyrdstoneSaleStep) : absente du wizard si le stock était vide à l'ouverture (voir Steps), donc
+    /// ShardsToSell reste à 0 par défaut dans ce cas - rien à faire, pas besoin de re-vérifier ici.</summary>
+    private async Task ApplyWyrdstoneSaleAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null || dialogViewModel.ShardsToSell <= 0) return;
+
+        var gold = dialogViewModel.WyrdstoneSaleValue;
+        Warband.WyrdstoneShards -= dialogViewModel.ShardsToSell;
+        Warband.Treasury += gold;
+        await _warbandService.SaveWarbandAsync(Warband);
+        sentences.Add(string.Format(Loc["HistoryWyrdstoneSaleSentence"], dialogViewModel.ShardsToSell, gold));
+    }
+
+    /// <summary>Étape "Disponibilité des Vétérans" (livre, étape 5 - EndOfGameDialogViewModel.
+    /// IsAvailableVeteransStep) : toujours présente dans le wizard, donc VeteranExperienceRoll est
+    /// toujours renseigné ici (bloqué par ValidateAvailableVeteransStep sinon) - écrase la valeur
+    /// précédente plutôt que de l'additionner, voir Warband.AvailableVeteranExperience.</summary>
+    private async Task ApplyAvailableVeteransAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null || !int.TryParse(dialogViewModel.VeteranExperienceRoll, out var pool)) return;
+
+        Warband.AvailableVeteranExperience = pool;
+        await _warbandService.SaveWarbandAsync(Warband);
+        sentences.Add(string.Format(Loc["HistoryAvailableVeteransSentence"], pool));
     }
 
     /// <summary>Étape "Francs-Tireurs" (EndOfGameDialogViewModel.IsHiredSwordsStep) - règle la solde de

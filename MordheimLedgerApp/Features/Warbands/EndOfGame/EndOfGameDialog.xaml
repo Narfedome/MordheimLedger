@@ -679,6 +679,11 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
+
+                <!-- "Add the results together..." (Core.Rules.WyrdstoneShardsTable) - effet SÉPARÉ et
+                     ADDITIF du jet, indépendant du résultat éventuel des doublons/triplets ci-dessous
+                     (IsExplorationResultStep) - toujours appliqué, même sans aucun résultat spécial. -->
+                <Label Text="{Binding BaselineWyrdstoneShardsFoundDisplay}" FontAttributes="Bold"/>
             </VerticalStackLayout>
 
             <!-- Étape : Exploration - résultat. N'apparaît dans le wizard que si le jet précédent a
@@ -1308,6 +1313,127 @@
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
+            </VerticalStackLayout>
+
+            <!-- Étape : Vente de pierre magique (livre, étape 4) - stepper +/- borné au stock actuel
+                 (MaxShardsToSell), aperçu du gain en direct (WyrdstoneSaleValue, Core.Rules.
+                 WyrdstoneSaleTable). Entièrement absente si le stock est vide (voir Steps). Vendre 0 est
+                 valide (jamais obligatoire de tout vendre - le stock non vendu reste en réserve). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsWyrdstoneSaleStep}">
+                <Label Text="{loc:Loc EndOfGameWyrdstoneSaleHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameWyrdstoneSaleIntro}" TextColor="{DynamicResource AppTextMuted}"/>
+                <!-- D'où sort MaxShardsToSell (retour utilisateur 2026-08-28) : ce que CETTE partie vient
+                     de trouver (barème universel + éventuel bonus Puits/Bâtiment Éventré/La Fosse, voir
+                     FoundThisGameWyrdstoneShards) et ce qui était déjà en réserve, plutôt qu'un total nu
+                     sans origine. -->
+                <Label Text="{Binding FoundThisGameWyrdstoneDisplay}" IsVisible="{Binding HasFoundThisGameWyrdstone}"/>
+                <Label Text="{Binding ExistingWyrdstoneStockDisplay}" TextColor="{DynamicResource AppTextMuted}"
+                       IsVisible="{Binding HasExistingWyrdstoneStock}"/>
+                <HorizontalStackLayout Spacing="8">
+                    <Label Text="{loc:Loc EndOfGameWyrdstoneShardsToSellLabel}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Command="{Binding DecrementShardsToSellCommand}"/>
+                    <Label Text="{Binding ShardsToSell}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Command="{Binding IncrementShardsToSellCommand}"/>
+                    <Label Text="{Binding MaxShardsToSell, StringFormat='/ {0}'}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                </HorizontalStackLayout>
+                <Label Text="{Binding WyrdstoneSaleValueDisplay}" FontAttributes="Bold"/>
+
+                <!-- Barème complet en repère (retour utilisateur 2026-08-28) - en-tête statique + lignes
+                     data-bound (WyrdstoneSaleTableRows, Core.Rules.WyrdstoneSaleTable est la seule source
+                     de vérité, aucun chiffre dupliqué en dur ici) partageant les mêmes ColumnDefinitions
+                     pour que les colonnes s'alignent. Ligne du nombre d'éclats choisi (ShardsToSell) mise
+                     en évidence via IsHighlighted. -->
+                <Label Text="{loc:Loc EndOfGameWyrdstoneSaleTableTitle}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" Margin="0,8,0,0"/>
+                <Grid ColumnDefinitions="50,*,*,*,*,*,*" ColumnSpacing="4">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameWyrdstoneSaleTableShardsHeader}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="1" Text="1-3" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="2" Text="4-6" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="3" Text="7-9" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="4" Text="10-12" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="5" Text="13-15" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                    <Label Grid.Column="6" Text="16+" FontSize="11" TextColor="{DynamicResource AppTextMuted}" HorizontalTextAlignment="Center"/>
+                </Grid>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WyrdstoneSaleTableRows}" Spacing="3">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WyrdstoneSaleTableRow">
+                            <Grid ColumnDefinitions="50,*,*,*,*,*,*" ColumnSpacing="4">
+                                <Label Grid.Column="0" Text="{Binding ShardsLabel}" FontSize="12" HorizontalTextAlignment="Center"/>
+                                <Label Grid.Column="1" Text="{Binding Bucket1}" FontSize="12" HorizontalTextAlignment="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HighlightedBucketNumber}" Value="1">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="2" Text="{Binding Bucket2}" FontSize="12" HorizontalTextAlignment="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HighlightedBucketNumber}" Value="2">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="3" Text="{Binding Bucket3}" FontSize="12" HorizontalTextAlignment="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HighlightedBucketNumber}" Value="3">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="4" Text="{Binding Bucket4}" FontSize="12" HorizontalTextAlignment="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HighlightedBucketNumber}" Value="4">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="5" Text="{Binding Bucket5}" FontSize="12" HorizontalTextAlignment="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HighlightedBucketNumber}" Value="5">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                                <Label Grid.Column="6" Text="{Binding Bucket6}" FontSize="12" HorizontalTextAlignment="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HighlightedBucketNumber}" Value="6">
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                                <Setter Property="TextColor" Value="{DynamicResource AppSuccess}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape : Disponibilité des Vétérans (livre, étape 5) - simple jet 2D6 saisi/tapé, jamais
+                 dépensé dans ce wizard (étape 8 "Engager de nouvelles recrues", pas encore construite) -
+                 juste enregistré sur Warband.AvailableVeteranExperience, affiché en attendant sur
+                 WarbandDetailPage. Toujours présente (aucune condition, voir Steps). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsAvailableVeteransStep}">
+                <Label Text="{loc:Loc EndOfGameAvailableVeteransHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameAvailableVeteransIntro}" TextColor="{DynamicResource AppTextMuted}"/>
+                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                    <Entry Grid.Column="0" Text="{Binding VeteranExperienceRoll}" Keyboard="Numeric"
+                           Placeholder="{loc:Loc EndOfGameXpPh}" WidthRequest="90">
+                        <Entry.Behaviors>
+                            <components:DigitsOnlyBehavior/>
+                        </Entry.Behaviors>
+                    </Entry>
+                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Command="{Binding AutoRollVeteranExperienceCommand}"
+                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                </Grid>
+                <Label Text="{Binding VeteranExperienceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding VeteranExperienceRollError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
             <!-- Étape : Francs-Tireurs - solde des Francs-Tireurs déjà engagés (Picker Payer/Renvoyer,

@@ -35,6 +35,7 @@ public static class EntityMapping
         NextGameNote = e.NextGameNote,
         HasCatacombReroll = e.HasCatacombReroll,
         GameInProgress = e.GameInProgress,
+        AvailableVeteranExperience = e.AvailableVeteranExperience,
         Notes = e.Notes
     };
 
@@ -50,6 +51,7 @@ public static class EntityMapping
         NextGameNote = m.NextGameNote,
         HasCatacombReroll = m.HasCatacombReroll,
         GameInProgress = m.GameInProgress,
+        AvailableVeteranExperience = m.AvailableVeteranExperience,
         Notes = m.Notes
     };
 

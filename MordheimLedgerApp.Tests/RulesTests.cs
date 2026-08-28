@@ -1534,4 +1534,71 @@ public class RulesTests
         Assert.Null(MagicalArtefactTable.RollForItemName(0));
         Assert.Null(MagicalArtefactTable.RollForItemName(7));
     }
+
+    // --- WyrdstoneSaleTable ---------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(1, 1, 45)]
+    [InlineData(1, 16, 25)]
+    [InlineData(4, 5, 80)]
+    [InlineData(8, 1, 155)]
+    [InlineData(8, 16, 100)]
+    public void WyrdstoneSaleTable_GetNetGold_MatchesRulebookTable(int shardsSold, int warriorCount, int expectedGold)
+    {
+        Assert.Equal(expectedGold, WyrdstoneSaleTable.GetNetGold(shardsSold, warriorCount));
+    }
+
+    [Fact]
+    public void WyrdstoneSaleTable_GetNetGold_ClampsAboveEightShards()
+    {
+        Assert.Equal(WyrdstoneSaleTable.GetNetGold(8, 7), WyrdstoneSaleTable.GetNetGold(20, 7));
+    }
+
+    [Fact]
+    public void WyrdstoneSaleTable_GetNetGold_ZeroOrNegativeShards_ReturnsZero()
+    {
+        Assert.Equal(0, WyrdstoneSaleTable.GetNetGold(0, 5));
+        Assert.Equal(0, WyrdstoneSaleTable.GetNetGold(-1, 5));
+    }
+
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(3, 1)]
+    [InlineData(4, 2)]
+    [InlineData(6, 2)]
+    [InlineData(7, 3)]
+    [InlineData(9, 3)]
+    [InlineData(10, 4)]
+    [InlineData(12, 4)]
+    [InlineData(13, 5)]
+    [InlineData(15, 5)]
+    [InlineData(16, 6)]
+    [InlineData(30, 6)]
+    public void WyrdstoneSaleTable_GetWarriorCountBucketIndex_MatchesColumns(int warriorCount, int expectedBucket)
+    {
+        Assert.Equal(expectedBucket, WyrdstoneSaleTable.GetWarriorCountBucketIndex(warriorCount));
+    }
+
+    // --- WyrdstoneShardsTable ---------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(0, 0)]
+    [InlineData(1, 1)]
+    [InlineData(5, 1)]
+    [InlineData(6, 2)]
+    [InlineData(11, 2)]
+    [InlineData(12, 3)]
+    [InlineData(17, 3)]
+    [InlineData(18, 4)]
+    [InlineData(24, 4)]
+    [InlineData(25, 5)]
+    [InlineData(30, 5)]
+    [InlineData(31, 6)]
+    [InlineData(35, 6)]
+    [InlineData(36, 7)]
+    [InlineData(100, 7)]
+    public void WyrdstoneShardsTable_GetShards_MatchesRulebookTable(int diceTotal, int expectedShards)
+    {
+        Assert.Equal(expectedShards, WyrdstoneShardsTable.GetShards(diceTotal));
+    }
 }

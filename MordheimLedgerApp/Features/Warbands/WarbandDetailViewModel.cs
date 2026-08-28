@@ -43,12 +43,19 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasNextGameNote))]
     [NotifyPropertyChangedFor(nameof(HasGameInProgress))]
+    [NotifyPropertyChangedFor(nameof(HasAvailableVeteranExperience))]
     private Warband? warband;
 
     /// <summary>Warband.NextGameNote non-null (voir sa doc) - une bannière dédiée sur cette page plutôt
     /// qu'une entrée d'Historique de plus, pour rester visible tant qu'elle s'applique (jusqu'à la Fin de
     /// Partie suivante, qui la consomme - voir WarbandDetailViewModel.EndOfGame.ApplyExplorationOutcomeAsync).</summary>
     public bool HasNextGameNote => !string.IsNullOrWhiteSpace(Warband?.NextGameNote);
+
+    /// <summary>Warband.AvailableVeteranExperience > 0 (voir sa doc) - masque le rappel avant toute
+    /// première Fin de Partie (jamais joué le jet). Contrairement à HasNextGameNote, ce n'est pas un
+    /// pense-bête à durée limitée : reste affiché jusqu'à ce qu'une future étape de dépense (livre étape
+    /// 8, pas encore construite) le consomme.</summary>
+    public bool HasAvailableVeteranExperience => Warband?.AvailableVeteranExperience > 0;
 
     /// <summary>Warband.GameInProgress (voir sa doc) - bascule quel des deux boutons "Lancer la partie"/
     /// "Fin de partie" s'affiche sur cette page (jamais les deux).</summary>

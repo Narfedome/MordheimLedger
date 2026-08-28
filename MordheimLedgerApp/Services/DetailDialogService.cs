@@ -135,7 +135,11 @@ public class DetailDialogService : IDetailDialogService
             ? new List<EquipmentItem>()
             : (await _libraryService.GetEquipmentItemsAsync(language)).Where(e => item.StartingEquipmentIds.Contains(e.Id)).ToList();
 
-        await ShowAsync(new HiredSwordDetailDialog(new HiredSwordDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands)));
+        var magicSchoolSpells = item.MagicSchool is null
+            ? new List<Spell>()
+            : (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == item.MagicSchool.Id).ToList();
+
+        await ShowAsync(new HiredSwordDetailDialog(new HiredSwordDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands, magicSchoolSpells, this)));
     }
 
     public Task ShowSpellDetailDialogAsync(Spell item) =>

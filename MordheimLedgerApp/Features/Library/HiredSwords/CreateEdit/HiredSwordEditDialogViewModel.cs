@@ -34,6 +34,7 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
     private readonly IDetailDialogService _detailDialogs;
+    private readonly ILibraryService _libraryService;
 
     protected override bool CancelResult => false;
 
@@ -78,7 +79,8 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
 
     public HiredSwordEditDialogViewModel(HiredSword item, string title, IWarbandArchetypePickerService warbandPicker,
         IEquipmentPickerService equipmentPicker, ISpecialRulePickerService specialRulePicker, IMagicSchoolPickerService magicSchoolPicker,
-        IDetailDialogService detailDialogs, IReadOnlyList<WarbandArchetype> allWarbandArchetypes, IReadOnlyList<EquipmentItem> initialStartingEquipment)
+        IDetailDialogService detailDialogs, ILibraryService libraryService, IReadOnlyList<WarbandArchetype> allWarbandArchetypes,
+        IReadOnlyList<EquipmentItem> initialStartingEquipment)
     {
         this.item = item;
         this.title = title;
@@ -86,6 +88,7 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
         _specialRulePicker = specialRulePicker;
         _magicSchoolPicker = magicSchoolPicker;
         _detailDialogs = detailDialogs;
+        _libraryService = libraryService;
         movementInput = item.Movement.ToString();
 
         SkillCategoryOptions = new ObservableCollection<SkillCategoryOption>(
@@ -151,8 +154,16 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
         MagicSchools.Add(school);
     }
 
+    /// <summary>Recap complet (Nom+Description+table de sorts) plutôt que le popup Nom+Description seul -
+    /// même appel que WarbandArchetypeEditDialogViewModel.ShowMagicSchoolDetail (le surcharge 3 args de
+    /// ShowChipDetailAsync, réservée aux chips École de magie).</summary>
     [RelayCommand]
-    private Task ShowMagicSchoolDetail(MagicSchool school) => ShowChipDetailAsync(school.Name, school.Description);
+    private async Task ShowMagicSchoolDetail(MagicSchool school)
+    {
+        var language = LocalizationService.Instance.Language;
+        var spells = (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == school.Id).ToList();
+        await ShowChipDetailAsync(school.Name, school.Description, spells);
+    }
 
     [RelayCommand]
     private void RemoveMagicSchool(MagicSchool school) => MagicSchools.Remove(school);

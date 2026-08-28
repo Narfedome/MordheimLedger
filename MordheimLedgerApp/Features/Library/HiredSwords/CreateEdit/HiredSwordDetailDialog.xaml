@@ -65,11 +65,21 @@
                                       IconFontFamily="RpgAwesome"
                                       Command="{Binding ShowMagicSchoolDetailCommand}"/>
 
-            <components:ChipListView HeaderText="{loc:Loc HiredSwordStartingEquipmentPh}"
-                                      AlwaysShowSection="True"
-                                      ItemsSource="{Binding StartingEquipment}"
-                                      IconGlyph="{x:Static icons:SolidFont.Suitcase}"
-                                      Command="{Binding ShowStartingEquipmentDetailCommand}"/>
+            <!-- ChipView (pas ChipListView) : l'icône varie par item (EquipmentCategoryIconConverter),
+                 même motif que HiredSwordEditDialog/l'Équipement de WarriorEditDialog/la carte guerrier. -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:EquipmentItem">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:HiredSwordDetailDialogViewModel}}, Path=ShowStartingEquipmentDetailCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
 
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                       AlwaysShowSection="True"

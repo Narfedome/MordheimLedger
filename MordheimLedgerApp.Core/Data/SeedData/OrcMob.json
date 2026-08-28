@@ -569,7 +569,7 @@
         "en": "Mad Cap Mushrooms",
         "fr": "Champignons bonnets de fou"
       },
-      "category": "MiscellaneousEquipment",
+      "category": "DrugsAndPoisons",
       "cost": 30,
       "costRandomMax": 18,
       "description": {

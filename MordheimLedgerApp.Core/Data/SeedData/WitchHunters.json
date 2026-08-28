@@ -62,7 +62,8 @@
           "description": {
             "en": "This model hates all models who can cast spells.",
             "fr": "Cette figurine hait tous les jeteurs de sorts."
-          }
+          },
+          "hatredTargetsSpellcasters": true
         }
       ],
       "equipmentListName": "Witch Hunter Equipment List",
@@ -106,7 +107,8 @@
           "description": {
             "en": "This model hates all models who can cast spells.",
             "fr": "Cette figurine hait tous les jeteurs de sorts."
-          }
+          },
+          "hatredTargetsSpellcasters": true
         }
       ],
       "equipmentListName": "Witch Hunter Equipment List",

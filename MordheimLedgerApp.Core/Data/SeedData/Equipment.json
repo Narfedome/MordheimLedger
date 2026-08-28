@@ -1967,8 +1967,8 @@
     "specialRules": [
       {
         "name": {
-          "en": "Poison Immunity",
-          "fr": "Immunité aux Poisons"
+          "en": "Poison Immunity (Tears of Shallaya)",
+          "fr": "Immunité aux Poisons (Larmes de Shallaya)"
         },
         "description": {
           "en": "A model who drinks a vial of the Tears of Shallaya at the beginning of a battle will be completely immune to all poisons for the duration of combat. Undead and Possessed warriors may not use the Tears of Shallaya. There is enough liquid in a vial to last for the duration of one battle.",

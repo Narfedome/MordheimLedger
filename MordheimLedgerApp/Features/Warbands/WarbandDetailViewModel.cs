@@ -202,7 +202,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
             var hiredSwordEquipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
             var hiredSwordMergedRules = _bandWideSpecialRules.Concat(hiredSword?.SpecialRules ?? new List<SpecialRule>())
                 .Concat(hiredSwordEquipmentRules).DistinctBy(r => r.Id);
-            var hiredSwordHatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) });
+            var hiredSwordHatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
+                .Concat(BuildRuleHatredChips(hiredSwordMergedRules));
             var hiredSwordMagicSchools = hiredSword?.MagicSchool is { } school ? new List<MagicSchool> { school } : null;
             return new WarriorRow(warrior, hiredSword?.Name ?? "?", BuildSpecialRuleChips(hiredSwordMergedRules), hiredSwordMagicSchools, hiredSwordHatredChips);
         }
@@ -223,19 +224,22 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
         var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
-        var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) });
+        var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
+            .Concat(BuildRuleHatredChips(mergedRules));
         return new WarriorRow(warrior, archetype?.Name ?? "?", BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
     }
 
-    /// <summary>A rule with a mechanized Hatred target (SpecialRule.HatredTargetWarbandArchetypeIds)
-    /// explodes into one chip per target ("Haine : Skavens") instead of a single generic "Haine" chip -
-    /// every other rule maps 1:1 to its own catalog Name, unchanged.</summary>
+    /// <summary>A rule with a mechanized Hatred target explodes into one chip per target ("Haine :
+    /// Skavens") instead of a single generic "Haine" chip - either a WarbandArchetype target
+    /// (SpecialRule.HatredTargetWarbandArchetypeIds, one chip per band) or the spellcaster-trait target
+    /// (SpecialRule.HatredTargetsSpellcasters, e.g. "Au Bûcher !" - one chip, not band-scoped). A rule
+    /// with neither maps 1:1 to its own catalog Name, unchanged.</summary>
     private List<SpecialRuleChip> BuildSpecialRuleChips(IEnumerable<SpecialRule> rules)
     {
         var chips = new List<SpecialRuleChip>();
         foreach (var rule in rules)
         {
-            if (rule.HatredTargetWarbandArchetypeIds.Count == 0)
+            if (rule.HatredTargetWarbandArchetypeIds.Count == 0 && !rule.HatredTargetsSpellcasters)
             {
                 chips.Add(new SpecialRuleChip { Item = rule, Name = rule.Name });
                 continue;
@@ -246,6 +250,26 @@ public partial class WarbandDetailViewModel : BaseViewModel
                 var targetName = _warbandArchetypeNames.GetValueOrDefault(targetId, "?");
                 chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], targetName) });
             }
+            if (rule.HatredTargetsSpellcasters)
+                chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], Loc["HatredTargetSpellcasters"]) });
+        }
+        return chips;
+    }
+
+    /// <summary>Same explosion as BuildSpecialRuleChips (one chip per mechanized Hatred target, band or
+    /// spellcaster-trait), mirrored into the roster card's "Haine" section - user request 2026-08-28:
+    /// hatred granted by a special rule (e.g. "Haine des Orques et des Gobelins", "Au Bûcher !") should
+    /// show up alongside Rancune-granted hatred, not just in Règles spéciales. Item stays null - see
+    /// WarriorHatredChip.</summary>
+    private List<WarriorHatredChip> BuildRuleHatredChips(IEnumerable<SpecialRule> rules)
+    {
+        var chips = new List<WarriorHatredChip>();
+        foreach (var rule in rules)
+        {
+            foreach (var targetId in rule.HatredTargetWarbandArchetypeIds)
+                chips.Add(new WarriorHatredChip { Name = string.Format(Loc["WarriorsHatredChipFormat"], _warbandArchetypeNames.GetValueOrDefault(targetId, "?")) });
+            if (rule.HatredTargetsSpellcasters)
+                chips.Add(new WarriorHatredChip { Name = string.Format(Loc["WarriorsHatredChipFormat"], Loc["HatredTargetSpellcasters"]) });
         }
         return chips;
     }
@@ -392,6 +416,15 @@ public partial class WarbandDetailViewModel : BaseViewModel
     // résolution de restrictions était dupliquée à la main dans ~28 endroits avant lui).
     [RelayCommand]
     private Task ShowSpecialRuleDetail(SpecialRuleChip chip) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(chip.Item);
+
+    /// <summary>Haine section : contrairement à ShowSpecialRuleDetail (qui ouvre la vraie fiche catalogue
+    /// de la règle source), ce recap est volontairement générique - la règle de Haine elle-même
+    /// (relance des jets Pour Toucher au 1er round) est toujours la même quel que soit ce qui l'accorde
+    /// (Rancune ou une règle spéciale de bande), donc pas de Item à résoudre ici (voir
+    /// WarriorHatredChip). chip.Name ("Haine : X") sert de titre, la cible reste donc visible.</summary>
+    [RelayCommand]
+    private Task ShowHatredDetail(WarriorHatredChip chip) =>
+        ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(chip.Name, Loc["HatredRuleDescription"])));
 
     [RelayCommand]
     private Task ShowInjuryDetail(InjuryChipGroup group) => _detailDialogs.ShowInjuryDetailDialogAsync(group.Representative.Item);

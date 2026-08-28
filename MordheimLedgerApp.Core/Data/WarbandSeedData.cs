@@ -322,6 +322,10 @@ public class SpecialRuleSeedData
     /// time), see AppDatabase's _pendingSharedRestrictions. Null/empty = not a Hatred rule, or one with
     /// no mechanized target yet.</summary>
     public List<string>? HatredTargetWarbandNames { get; set; }
+
+    /// <summary>See SpecialRule.HatredTargetsSpellcasters. False/absent for every rule but "Burn the
+    /// Witch!".</summary>
+    public bool HatredTargetsSpellcasters { get; set; }
 }
 
 /// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see

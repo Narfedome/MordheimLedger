@@ -72,10 +72,10 @@
     ],
     "specialRules": [
       {
-        "name": { "en": "Deathwish", "fr": "Vœu de Mort" },
+        "name": { "en": "Death Wish", "fr": "Vœu de Mort" },
         "description": {
-          "en": "Troll Slayers seek an honourable death in combat. They are completely immune to all psychology and will never need to test if they are fighting alone.",
-          "fr": "Les Tueurs de Troll cherchent une mort honorable au combat. Ils sont totalement immunisés à la psychologie et n'ont jamais besoin de passer de test s'ils combattent seuls."
+          "en": "This model seeks an honourable death in combat - it is immune to psychology and never takes an Alone Against All test.",
+          "fr": "Cette figurine cherche une mort honorable au combat - elle est immunisée à la psychologie et ne fait jamais de test lorsqu'elle se bat seule."
         }
       },
       {
@@ -86,10 +86,10 @@
         }
       },
       {
-        "name": { "en": "Hard Head", "fr": "Tête Dure" },
+        "name": { "en": "Hard Headed", "fr": "Tête Dure" },
         "description": {
-          "en": "Troll Slayers ignore the special rules for maces, clubs etc. They are not very easy individuals to knock out!",
-          "fr": "Les Tueurs de Troll ignorent les règles spéciales des masses, gourdins, etc. Ce ne sont pas des adversaires faciles à assommer !"
+          "en": "Dwarfs ignore the special rules of maces, hammers etc. - they're not easily knocked out!",
+          "fr": "Les nains ignorent les règles spéciales des masses, marteaux, etc. - ils ne sont pas faciles à assommer !"
         }
       }
     ]

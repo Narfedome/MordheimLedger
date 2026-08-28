@@ -681,6 +681,14 @@
   <data name="WarriorsHatredHeading" xml:space="preserve">
     <value>Haine</value>
   </data>
+  <data name="HatredTargetSpellcasters" xml:space="preserve">
+    <value>Jeteurs de sorts</value>
+  </data>
+  <data name="HatredRuleDescription" xml:space="preserve">
+    <value>La Haine est un sentiment puissant, et en cette époque de conflits et de guerre, les rivalités haineuses sont monnaie courante.
+
+Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer ses jets Pour Toucher ratés lors du premier round de chaque combat au corps à corps. Ce bonus ne s'applique qu'au premier round de chaque combat et représente le guerrier déversant sa haine contenue sur son adversaire. Après ce premier round, il perd de son élan et combat normalement pour le reste du combat.</value>
+  </data>
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
   </data>

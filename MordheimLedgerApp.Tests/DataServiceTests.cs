@@ -186,8 +186,12 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var warlock = Assert.Single(hiredSwords, h => h.Name == "Warlock");
         Assert.Single(warlock.SpecialRules, r => r.Name == "Wizard");
 
+        // "Death Wish"/"Hard Headed" - aligned to DwarfTreasureHunters.json's own wording (2026-08-28
+        // dedup pass) so find-or-create merges this Hired Sword's rows with the warband archetype's
+        // instead of creating near-duplicate SpecialRule catalog entries with flavor-text-only
+        // differences (was "Deathwish"/"Hard Head" here, a naming mismatch, not two real rules).
         var trollSlayer = Assert.Single(hiredSwords, h => h.Name == "Dwarf Troll Slayer");
-        Assert.Equal(new[] { "Deathwish", "Hard Head", "Hard to Kill" }, trollSlayer.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+        Assert.Equal(new[] { "Death Wish", "Hard Headed", "Hard to Kill" }, trollSlayer.SpecialRules.Select(r => r.Name).OrderBy(n => n));
 
         var highwayman = Assert.Single(hiredSwords, h => h.Name == "Highwayman");
         var roadwarden = Assert.Single(hiredSwords, h => h.Name == "Roadwarden");
@@ -563,14 +567,16 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
     /// <summary>"Blessed Weapon" (Shrine's Sisters of Sigmar/Witch Hunters branch, see
     /// ExplorationOutcome.GrantsWeaponBlessing) reuses the same MaterialRule mechanism as Gromril/
     /// Ithilmar/Ornate Weapon (abbreviation shown in the carried-weapon chip) rather than a bespoke bool
-    /// flag - no CostMultiplier (the blessing doesn't change the weapon's price) and not a resale
-    /// upgrade, unlike Ornate Weapon.</summary>
+    /// flag - CostMultiplier of 1 (no gold multiplier per the book, confirmed with the user 2026-08-28 -
+    /// was null before, which kept it out of both the Codex's "Objets" classification and the
+    /// material-choice checkbox list entirely, unlike Gromril/Ithilmar/Ornate) and not a resale upgrade,
+    /// unlike Ornate Weapon.</summary>
     [Fact]
     public async Task SpecialRules_BlessedWeapon_IsAbbreviatedMaterialRuleNotResaleUpgrade()
     {
         var blessed = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Blessed Weapon");
         Assert.Equal("B", blessed.Abbreviation);
-        Assert.Null(blessed.CostMultiplier);
+        Assert.Equal(1, blessed.CostMultiplier);
         Assert.False(blessed.IsResaleUpgrade);
     }
 

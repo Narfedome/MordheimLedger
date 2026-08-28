@@ -251,8 +251,13 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         var warbandIds = (await _db.Connection.Table<WarbandArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var warriorIds = (await _db.Connection.Table<WarriorArchetypeSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
+        // Un Franc-Tireur (HiredSword) est un type de guerrier recrutable comme un autre, juste sans
+        // WarriorArchetype - une règle qui n'est attachée qu'à lui (ex. "Tête Dure"/"Vœu de Mort" du
+        // Tueur de Troll Nain) doit tomber dans le même groupe "Guerriers" plutôt que "Non classée" -
+        // trou repéré 2026-08-28 (ce join n'existait pas encore quand les Francs-Tireurs ont été ajoutés).
+        var hiredSwordIds = (await _db.Connection.Table<HiredSwordSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
         var itemIds = (await _db.Connection.Table<EquipmentItemSpecialRuleEntity>().ToListAsync()).Select(l => l.SpecialRuleId);
-        return (new HashSet<int>(warbandIds), new HashSet<int>(warriorIds), new HashSet<int>(itemIds));
+        return (new HashSet<int>(warbandIds), new HashSet<int>(warriorIds.Concat(hiredSwordIds)), new HashSet<int>(itemIds));
     }
 
     public async Task<List<Mutation>> GetMutationsAsync(string languageCode)

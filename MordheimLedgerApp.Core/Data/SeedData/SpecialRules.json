@@ -98,6 +98,7 @@
       "en": "Blessed by the patrons of the Sisters of Sigmar or the Witch Hunters at a ruined shrine - this weapon always wounds Undead or Possessed models on a to-wound roll of 2+.",
       "fr": "Bénie par les mécènes des Sœurs de Sigmar ou des Chasseurs de Sorcières dans un sanctuaire en ruine - cette arme blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+."
     },
+    "costMultiplier": 1,
     "abbreviation": "B"
   },
   {

@@ -575,7 +575,8 @@ public static class EntityMapping
         IsResaleUpgrade = e.IsResaleUpgrade,
         HatredTargetWarbandArchetypeIds = string.IsNullOrEmpty(e.HatredTargetWarbandArchetypeIds)
             ? new List<int>()
-            : e.HatredTargetWarbandArchetypeIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList()
+            : e.HatredTargetWarbandArchetypeIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList(),
+        HatredTargetsSpellcasters = e.HatredTargetsSpellcasters
     };
 
     public static SpecialRuleEntity ToEntity(this SpecialRule m) => new()
@@ -589,7 +590,8 @@ public static class EntityMapping
         Abbreviation = m.Abbreviation,
         Rarity = m.Rarity,
         IsResaleUpgrade = m.IsResaleUpgrade,
-        HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds)
+        HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds),
+        HatredTargetsSpellcasters = m.HatredTargetsSpellcasters
     };
 
     public static EquipmentItem ToModel(this EquipmentItemEntity e, IReadOnlyDictionary<string, string> translations,

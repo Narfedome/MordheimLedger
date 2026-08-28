@@ -22,4 +22,7 @@ public class SpecialRuleEntity
     /// is intrinsic to what that specific named rule means, and each Hatred-granting rule already has a
     /// distinct name per source (no two contexts share one catalog row with different targets).</summary>
     public string? HatredTargetWarbandArchetypeIds { get; set; }
+
+    /// <summary>See SpecialRule.HatredTargetsSpellcasters.</summary>
+    public bool HatredTargetsSpellcasters { get; set; }
 }

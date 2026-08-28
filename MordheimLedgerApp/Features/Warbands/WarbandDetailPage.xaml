@@ -82,17 +82,22 @@
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowInjuryDetailCommand}"/>
 
-                        <!-- Haine (Rancune, blessure grave 56) : lecture seule, pas de bouton "+"/"x" ni
-                             de tap-to-detail (pas de fiche catalogue à ouvrir, juste une cible résolue -
-                             voir Models.WarriorHatred/WarbandDetailViewModel.HatredChips). Distinct des
-                             chips "Haine : X" des Règles spéciales (celles-ci sont fixes, accordées par
-                             l'archétype/l'objet - voir SpecialRuleChip) : celle-ci vient d'un jet en
-                             partie, propre à ce guerrier. -->
+                        <!-- Haine : lecture seule, pas de bouton "+"/"x" - unifie les deux sources de
+                             Haine du guerrier (2026-08-28) derrière le même format de chip "Haine : X" :
+                             un jet de Rancune (Blessure Grave 56, Item réel sur la chip) et toute règle
+                             spéciale à cible de Haine mécanisée (SpecialRule.
+                             HatredTargetWarbandArchetypeIds, Item null - voir WarbandDetailViewModel.
+                             BuildRuleHatredChips) apparaissent ici côte à côte. Ces dernières restent
+                             AUSSI dans les Règles spéciales ci-dessus (pas retirées, juste dupliquées ici) -
+                             leur tap y ouvre toujours la vraie fiche de la règle source ; ici, le tap
+                             ouvre un recap générique de la règle de Haine elle-même (toujours la même,
+                             quelle que soit la source - voir ShowHatredDetail). -->
                         <components:ChipListView HeaderText="{loc:Loc WarriorsHatredHeading}"
                                                   ItemsSource="{Binding HatredChips}"
                                                   IconGlyph="{x:Static icons:RpgFont.RaSkull}"
                                                   IconFontFamily="RpgAwesome"
-                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"/>
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowHatredDetailCommand}"/>
 
                         <!-- École(s) de magie : celle(s) de LA BANDE (pas propre au guerrier - voir
                              WarriorRow.MagicSchools), résolue seulement pour les guerriers lanceurs de

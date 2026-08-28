@@ -31,9 +31,10 @@ public partial class WarriorRow : ObservableObject
     /// manual additions via WarriorEditDialog - read-only display here.</summary>
     public ObservableCollection<WarriorInjury> Injuries { get; }
 
-    /// <summary>Mirrors Warrior.Hatreds, wrapped with the "Haine : {0}" prefix (see WarriorHatredChip) -
-    /// fed only by the End of Game "Rancune" Serious Injury result, no manual-add UI, read-only display
-    /// here.</summary>
+    /// <summary>Two merged sources (see WarriorHatredChip, WarbandDetailViewModel.BuildRuleHatredChips) -
+    /// Warrior.Hatreds (End of Game "Rancune" Serious Injury result) and any special-rule-granted Hatred
+    /// target (SpecialRule.HatredTargetWarbandArchetypeIds), both wrapped with the "Haine : {0}" prefix.
+    /// No manual-add UI either way, read-only display here.</summary>
     public ObservableCollection<WarriorHatredChip> HatredChips { get; }
 
     /// <summary>Not stored on the Warrior itself - resolved by the ViewModel from the warrior's own

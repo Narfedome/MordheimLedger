@@ -681,6 +681,14 @@
   <data name="WarriorsHatredHeading" xml:space="preserve">
     <value>Hatred</value>
   </data>
+  <data name="HatredTargetSpellcasters" xml:space="preserve">
+    <value>Spellcasters</value>
+  </data>
+  <data name="HatredRuleDescription" xml:space="preserve">
+    <value>Hatred is a very powerful emotion, and during this era of strife and war, bitter rivalry is commonplace.
+
+Warriors who fight enemies they hate in hand-to-hand combat may re-roll any misses when they attack in the first turn of each hand-to-hand combat. This bonus applies only in the first turn of each combat and represents the warrior venting his pent-up hatred on his foe. After the initial round of hand-to-hand combat he loses some impetus and subsequently fights as normal for the rest of the combat.</value>
+  </data>
   <data name="LibTabMutations" xml:space="preserve">
     <value>Mutations</value>
   </data>

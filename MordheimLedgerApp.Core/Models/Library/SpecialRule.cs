@@ -64,4 +64,13 @@ public class SpecialRule
     /// of Witches") renders as one chip per target on the warrior card rather than one combined chip -
     /// see WarbandDetailViewModel.ToRow.</summary>
     public List<int> HatredTargetWarbandArchetypeIds { get; set; } = new();
+
+    /// <summary>A distinct, narrower kind of mechanized Hatred target than HatredTargetWarbandArchetypeIds
+    /// above - that field targets a whole warband TYPE ("Skavens"), this one targets a MODEL TRAIT that
+    /// cuts across every band ("Burn the Witch!"/"Au Bûcher !": Witch Hunters hate every spellcaster,
+    /// whatever band that spellcaster belongs to - not expressible as a list of WarbandArchetype ids).
+    /// False for every rule but this one so far - added 2026-08-28 rather than generalizing into a full
+    /// "target kind" concept, since only one rule needs it. Renders as its own "Haine : {0}" chip, same
+    /// as a WarbandArchetype target - see WarbandDetailViewModel.BuildSpecialRuleChips/BuildRuleHatredChips.</summary>
+    public bool HatredTargetsSpellcasters { get; set; }
 }

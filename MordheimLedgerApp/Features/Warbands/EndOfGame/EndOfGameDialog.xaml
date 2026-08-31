@@ -1436,19 +1436,26 @@
                        IsVisible="{Binding VeteranExperienceRollError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
-            <!-- Étape : Objets rares (livre, étape 6a) - une carte par Héros vivant non Hors de combat
-                 (RareItemSearchEntries construite une fois pour tous les Héros dans le constructeur -
-                 IsVisible masque ceux Hors de combat plutôt que les retirer, voir HasEligibleHeroesForRareItems).
-                 Chaque recherche est optionnelle : "Chercher un objet" ouvre le Trading Post complet en
-                 SingleSelectMode (un seul objet à la fois - "you may only make one roll for each Hero").
-                 Une arme de corps à corps COMMUNE choisie peut en plus être forgée en Gromril/Ithilmar
-                 (RadioButton + ChipView tapable par matériau, même motif que le choix Bouclier/Rondache de
-                 l'Armurerie ci-dessus - RareItemSearchEntry.IsMaterialEligible/EffectiveRarity), auquel cas
-                 c'est la Rareté DU MATÉRIAU qui est recherchée, pas celle (absente) de l'arme. Jet de 2D6 +
-                 bonus éventuel (Core.Rules.RareItemSearchBonus, ex. gemmes du Bijoutier) comparé à cette
-                 Rareté. Cette étape détermine SEULEMENT IsSuccess - l'achat proprement dit se décide sur
-                 l'étape séparée suivante (IsRareItemPurchaseStep, voir plus bas - jamais automatique, retour
-                 utilisateur 2026-08-28). Entièrement absente si aucun Héros n'est éligible (voir Steps). -->
+            <!-- Étape : Objets rares / Personnages spéciaux (livre, étape 6a+7 fusionnées côté recherche -
+                 une carte par Héros vivant non Hors de combat (RareItemSearchEntries construite une fois
+                 pour tous les Héros dans le constructeur - IsVisible masque ceux Hors de combat plutôt que
+                 les retirer, voir HasEligibleHeroesForRareItems). Switch Objet/Personnage en tête de carte
+                 (RareItemSearchEntry.IsSearchingForCharacter/SetSearchModeCommand) - "Heroes who are
+                 looking for a special character cannot look for rare items", jamais les deux à la fois ;
+                 basculer réinitialise systématiquement les deux côtés (voir
+                 OnIsSearchingForCharacterChanged, retour utilisateur 2026-08-28). Côté Objet : "Chercher un
+                 objet" ouvre le Trading Post complet en SingleSelectMode (un seul objet à la fois - "you
+                 may only make one roll for each Hero"). Une arme de corps à corps COMMUNE OU RARE choisie
+                 peut en plus être forgée en Gromril/Ithilmar (pilules tapables, voir IsMaterialEligible/
+                 EffectiveRarity), auquel cas c'est la Rareté DU MATÉRIAU (ou la plus haute des deux) qui est
+                 recherchée. Côté Personnage : nom en saisie libre pour l'instant (pas de catalogue Dramatis
+                 Personae encore - le sélecteur remplacera ce champ une fois la liste envoyée), jet de 1D6
+                 comparé à l'Initiative DU HÉROS CHERCHEUR (pas une Rareté - réussi si le jet est SOUS
+                 l'Initiative, voir IsCharacterFound). Cette étape détermine SEULEMENT IsSuccess/
+                 IsCharacterFound - l'achat/recrutement se décide sur l'étape séparée suivante
+                 (IsRareItemPurchaseStep - pour l'instant scopée aux objets, le recrutement de personnage
+                 n'est pas encore câblé, frais d'embauche/entretien pas encore tranchés). Entièrement
+                 absente si aucun Héros n'est éligible (voir Steps). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRareItemsStep}">
                 <Label Text="{loc:Loc EndOfGameRareItemsHeading}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameRareItemsIntro}" TextColor="{DynamicResource AppTextMuted}"/>
@@ -1460,6 +1467,64 @@
                                 <VerticalStackLayout Spacing="8">
                                     <Label Text="{Binding HeroName}" FontAttributes="Bold"/>
 
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="0" Margin="0,0,0,4">
+                                        <Border Grid.Column="0" Style="{StaticResource ChipBorderStyle}" Padding="0,6" HorizontalOptions="Fill">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SetSearchModeCommand}" CommandParameter="{x:Boolean False}"/>
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSearchingForCharacter}" Value="False">
+                                                    <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{loc:Loc EndOfGameRareItemModeObjectLabel}" FontSize="12" HorizontalTextAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Column="1" Style="{StaticResource ChipBorderStyle}" Padding="0,6" HorizontalOptions="Fill">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SetSearchModeCommand}" CommandParameter="{x:Boolean True}"/>
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSearchingForCharacter}" Value="True">
+                                                    <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{loc:Loc EndOfGameRareItemModeCharacterLabel}" FontSize="12" HorizontalTextAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Côté Personnage spécial -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter}">
+                                        <Entry Text="{Binding CharacterName}" Placeholder="{loc:Loc EndOfGameRareItemCharacterNamePh}"/>
+                                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasCharacterName}">
+                                            <Label Text="{Binding CharacterInitiativeDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding CharacterRoll}" Keyboard="Numeric"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding AutoRollCharacterCommand}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding CharacterRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding CharacterRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{Binding CharacterResultDisplay}" FontAttributes="Bold" IsVisible="{Binding HasCharacterResult}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsCharacterFound}" Value="True">
+                                                        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsCharacterFound}" Value="False">
+                                                        <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!-- Côté Objet rare -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter, Converter={StaticResource InverseBoolConverter}}">
                                     <components:IconTextButton IsVisible="{Binding HasSelectedItem, Converter={StaticResource InverseBoolConverter}}"
                                                                 Icon="{x:Static icons:SolidFont.MagnifyingGlass}"
                                                                 Text="{loc:Loc EndOfGameRareItemSearchButton}"
@@ -1560,6 +1625,7 @@
                                                 </Label.Triggers>
                                             </Label>
                                         </VerticalStackLayout>
+                                    </VerticalStackLayout>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </Border>

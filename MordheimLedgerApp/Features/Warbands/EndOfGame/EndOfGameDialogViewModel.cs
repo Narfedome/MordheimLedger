@@ -392,6 +392,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
                     OnPropertyChanged(nameof(IsRareItemPurchaseBlocked));
                 }
+                // Basculer Objet/Personnage (ou trouver un personnage) ne fait pas encore apparaître/
+                // disparaître d'étape (le recrutement de personnage n'est pas câblé sur RareItemPurchase,
+                // voir EndOfGameDialogViewModel.RareItems.cs) - seul StepLabel a besoin d'être notifié pour
+                // l'instant, IsSearchingForCharacter n'affecte rien d'autre hors de la carte elle-même.
+                if (e.PropertyName is nameof(RareItemSearchEntry.IsSearchingForCharacter))
+                {
+                    OnPropertyChanged(nameof(StepLabel));
+                }
             };
         }
 

@@ -52,8 +52,11 @@ public partial class EndOfGameDialogViewModel
     /// un groupe d'Hommes de main qui perd SEULEMENT une partie de ses figurines cette bataille (IsDead
     /// reste faux tant qu'il en reste au moins une) compte encore son HeadCount D'AVANT ces pertes - la
     /// colonne exacte du barème n'est pas assez sensible à 1-2 guerriers près pour que ça vaille la peine
-    /// de recalculer un HeadCount survivant précis ici.</summary>
-    public int CurrentWarriorCount => WarriorRows.Where(r => !r.IsDead).Sum(r => r.HeadCount);
+    /// de recalculer un HeadCount survivant précis ici. Francs-Tireurs exclus (texte du livre, "Recruiting
+    /// Hired Swords" : "Hired Swords do not count towards the maximum number of warriors... and don't
+    /// affect your income from selling wyrdstone" - repéré 2026-08-28 en lisant le texte de l'étape 7,
+    /// corrigé ici avant de l'oublier).</summary>
+    public int CurrentWarriorCount => WarriorRows.Where(r => !r.IsDead && !r.Warrior.IsHiredSword).Sum(r => r.HeadCount);
 
     public int WyrdstoneSaleValue => WyrdstoneSaleTable.GetNetGold(ShardsToSell, CurrentWarriorCount);
 

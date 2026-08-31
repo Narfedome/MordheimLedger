@@ -94,12 +94,18 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Only a Hero with something actually searchable needs a roll - HasRarity is false for a
     /// common non-weapon item (nothing to roll against) or a common melee weapon with no material chosen
-    /// yet, in both cases simply not a real search attempt (optional, per the book).</summary>
+    /// yet, in both cases simply not a real search attempt (optional, per the book). Same idea on the
+    /// Personnage side: a name typed but no roll yet blocks Next, an empty name (nobody sought) doesn't.</summary>
     private bool ValidateRareItemsStep()
     {
         var valid = true;
-        foreach (var entry in RareItemSearchEntries.Where(e => !e.Hero.IsOutOfAction && e.HasRarity))
-            valid &= CheckRoll(entry.TotalRoll is null, () => entry.RollError = Loc["EndOfGameRollRequired"]);
+        foreach (var entry in RareItemSearchEntries.Where(e => !e.Hero.IsOutOfAction))
+        {
+            if (entry.IsSearchingForCharacter && entry.HasCharacterName)
+                valid &= CheckRoll(entry.CharacterTotalRoll is null, () => entry.CharacterRollError = Loc["EndOfGameRollRequired"]);
+            else if (!entry.IsSearchingForCharacter && entry.HasRarity)
+                valid &= CheckRoll(entry.TotalRoll is null, () => entry.RollError = Loc["EndOfGameRollRequired"]);
+        }
         return valid;
     }
 

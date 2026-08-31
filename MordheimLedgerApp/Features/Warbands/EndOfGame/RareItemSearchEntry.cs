@@ -22,6 +22,32 @@ public partial class RareItemSearchEntry : ObservableObject
     public WarriorOutcomeRow Hero { get; }
     public string HeroName => Hero.Name;
 
+    /// <summary>False = searching for a rare item (the original mode, everything below IsSearchingForCharacter
+    /// unchanged). True = searching for a special character instead - "Heroes who are looking for a
+    /// special character cannot look for rare items", so this is a genuine either/or switch per Hero, not
+    /// two independent searches (user request 2026-08-28: "un switch Hero/Objet... si on change de puce
+    /// hero/objet, on reset la sélection" - toggling always clears BOTH sides' state, see
+    /// OnIsSearchingForCharacterChanged). CharacterName is a free-text placeholder for now (no Dramatis
+    /// Personae catalog yet - the user will send the real list later, at which point this becomes a real
+    /// picker like SelectedItem, same "ship the mechanic first" precedent as WarriorHatred.TargetFreeText).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCharacterName))]
+    private bool isSearchingForCharacter;
+
+    partial void OnIsSearchingForCharacterChanged(bool value)
+    {
+        SelectedItem = null; // cascade via OnSelectedItemChanged: Material/Roll/WantsToBuy/PriceRoll
+        CharacterName = string.Empty;
+        CharacterRoll = string.Empty;
+        CharacterRollError = null;
+    }
+
+    /// <summary>Backs the two-segment switch in XAML (Objet/Personnage) - takes the target mode directly
+    /// (x:Boolean CommandParameter on each half) rather than toggling, since each half of the switch always
+    /// sets a specific side regardless of current state.</summary>
+    [RelayCommand]
+    private void SetSearchMode(bool searchingForCharacter) => IsSearchingForCharacter = searchingForCharacter;
+
     /// <summary>Null = not currently searching for anything - a Hero isn't required to make an attempt.
     /// Picking a new item clears any previously chosen SelectedMaterial/roll/purchase state (see
     /// OnSelectedItemChanged) - nothing about the last item carries over to a different one.</summary>
@@ -205,6 +231,55 @@ public partial class RareItemSearchEntry : ObservableObject
     /// "Acheter" checked, and the price is fully known (fixed, or a variable supplement already rolled).
     /// Consumed by WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync.</summary>
     public bool IsPurchased => IsSuccess && WantsToBuy && EffectiveCost.HasValue;
+
+    // --- Recherche de Personnage Spécial (livre, "Looking for special characters" p.146) - alternative
+    // à la recherche d'objet rare ci-dessus, voir IsSearchingForCharacter -----------------------------
+
+    /// <summary>Free-typed placeholder for the special character sought - see IsSearchingForCharacter's
+    /// doc for why this isn't a real picker yet.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCharacterName))]
+    private string characterName = string.Empty;
+
+    public bool HasCharacterName => !string.IsNullOrWhiteSpace(CharacterName);
+
+    /// <summary>Free-typed 1D6 roll, same "string Entry" idiom as every other roll in this wizard - no
+    /// Core.Rules.RareItemSearchBonus here, the book only ever compares this roll to Initiative, nothing
+    /// else modifies it.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CharacterTotalRoll))]
+    [NotifyPropertyChangedFor(nameof(HasCharacterResult))]
+    [NotifyPropertyChangedFor(nameof(IsCharacterFound))]
+    [NotifyPropertyChangedFor(nameof(CharacterResultDisplay))]
+    private string characterRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? characterRollError;
+
+    partial void OnCharacterRollChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) CharacterRollError = null; }
+
+    public int CharacterInitiative => Hero.Warrior.Initiative;
+
+    /// <summary>Computed here rather than a nested {loc:Loc} inside a StringFormat attribute (not valid
+    /// XAML, see CostDisplay above).</summary>
+    public string CharacterInitiativeDisplay => string.Format(_loc["EndOfGameRareItemCharacterInitiativeFormat"], CharacterInitiative);
+
+    public int? CharacterTotalRoll => int.TryParse(CharacterRoll, out var r) ? r : null;
+
+    public bool HasCharacterResult => HasCharacterName && CharacterTotalRoll is not null;
+
+    /// <summary>"If any of the searchers rolls under his Initiative he has located the special character" -
+    /// strictly UNDER, unlike the Rare Item search's "equal or greater" against Rarity above.</summary>
+    public bool IsCharacterFound => HasCharacterResult && CharacterTotalRoll < CharacterInitiative;
+
+    /// <summary>Same generic "Trouvé !"/"Introuvable" wording as ResultDisplay (Rare Item search) - the
+    /// phrasing doesn't name what was being searched for either way, so it reads correctly for both.</summary>
+    public string CharacterResultDisplay => !HasCharacterResult
+        ? string.Empty
+        : string.Format(_loc[IsCharacterFound ? "EndOfGameRareItemSuccessFormat" : "EndOfGameRareItemFailureFormat"], CharacterTotalRoll);
+
+    [RelayCommand]
+    private void AutoRollCharacter() => CharacterRoll = Random.Shared.Next(1, 7).ToString();
 
     public RareItemSearchEntry(WarriorOutcomeRow hero, LocalizationService loc)
     {

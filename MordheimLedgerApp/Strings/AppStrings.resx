@@ -1097,6 +1097,24 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="StartGameOldWoundFail" xml:space="preserve">
     <value>Ne peut pas combattre</value>
   </data>
+  <data name="StartGameAidHeading" xml:space="preserve">
+    <value>Aide conditionnelle</value>
+  </data>
+  <data name="StartGameAidEnemyRatingPh" xml:space="preserve">
+    <value>Valeur de la bande adverse</value>
+  </data>
+  <data name="StartGameAidWontCome" xml:space="preserve">
+    <value>N'acceptera pas d'aider cette fois (écart trop faible)</value>
+  </data>
+  <data name="StartGameAidRequiredRollFormat" xml:space="preserve">
+    <value>Jet requis : {0}+</value>
+  </data>
+  <data name="StartGameAidSuccess" xml:space="preserve">
+    <value>Accepte d'aider</value>
+  </data>
+  <data name="StartGameAidFailure" xml:space="preserve">
+    <value>N'aide pas cette fois</value>
+  </data>
   <data name="StartGameNextGameNoteHeading" xml:space="preserve">
     <value>Effets actifs pour cette partie</value>
   </data>
@@ -1319,6 +1337,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameCharacterSearchButton" xml:space="preserve">
     <value>Chercher un personnage</value>
   </data>
+  <data name="EndOfGameCharacterRecruitLabel" xml:space="preserve">
+    <value>Recruter</value>
+  </data>
   <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
     <value>Rare {0}</value>
   </data>
@@ -1438,6 +1459,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryRareItemFoundSentence" xml:space="preserve">
     <value>{0} déniche un objet rare : {1}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>

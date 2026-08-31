@@ -30,9 +30,9 @@ public partial class WarbandDetailViewModel
         // la prochaine fin de partie, pas celle-ci (revenu sur ce point le 2026-08-18 : l'ancienne
         // version effaçait le statut avant même de construire activeWarriorRows, donc le guerrier
         // participait normalement à la fin de partie censée représenter la partie qu'il ratait).
-        var previouslySickWarriors = Heroes.Concat(Henchmen).Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
+        var previouslySickWarriors = AllActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
 
-        var activeWarriorRows = Heroes.Concat(Henchmen)
+        var activeWarriorRows = AllActiveWarriorRows
             .Where(r => r.Warrior.Status == WarriorStatus.Active)
             .ToList();
         if (activeWarriorRows.Count == 0)
@@ -121,7 +121,7 @@ public partial class WarbandDetailViewModel
             await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
             await ApplyWyrdstoneSaleAsync(dialogViewModel, sentences);
             ApplyAvailableVeterans(dialogViewModel, sentences);
-            await ApplyRareItemSearchAsync(dialogViewModel, sentences);
+            await ApplyRareItemSearchAsync(dialogViewModel, localizedEquipment, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -276,7 +276,7 @@ public partial class WarbandDetailViewModel
                 // Traînard, branche Possédés - même idiome que BonusStatTestLeader (Bâtiment Éventré) :
                 // pas d'erreur bloquante si le chef n'est pas disponible cette partie (mort/malade/hors
                 // de combat), le bonus est simplement indisponible.
-                var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                var leader = AllActiveWarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
                 if (leader is not null)
                 {
                     leader.Warrior.Experience += leaderXp;
@@ -870,7 +870,7 @@ public partial class WarbandDetailViewModel
                     break;
 
                 case CapturedEnemyFate.SacrificedForXp:
-                    var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                    var leader = AllActiveWarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
                     if (leader is not null)
                     {
                         leader.Warrior.Experience += 1;
@@ -923,7 +923,12 @@ public partial class WarbandDetailViewModel
     /// emporte la SpecialRule avec elle (MaterialRule, même mécanisme que "Épée Ornée" - Charrette
     /// Renversée). Une recherche sans objet choisi, ratée, ou décochée ne fait rien pour ce Héros -
     /// aucune pénalité au livre dans aucun de ces cas.</summary>
-    private async Task ApplyRareItemSearchAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    /// <summary>Étape Achat/Recrutement (EndOfGameDialogViewModel.IsRareItemPurchaseStep) - traite les
+    /// deux modes (RareItemSearchEntry.IsSearchingForCharacter) : objets achetés (IsPurchased, inchangé)
+    /// ET personnages recrutés (IsRecruited, 2026-08-31). Un personnage recruté ne touche jamais
+    /// Warband.Treasury (pas de frais d'engagement pour l'instant, voir Models.Warrior.DramatisPersonaId's
+    /// own doc) - juste inséré comme un Warrior normal, avec son équipement/ses compétences fixes.</summary>
+    private async Task ApplyRareItemSearchAsync(EndOfGameDialogViewModel dialogViewModel, List<EquipmentItem> localizedEquipment, List<string> sentences)
     {
         if (Warband is null) return;
 
@@ -935,6 +940,24 @@ public partial class WarbandDetailViewModel
             await _warbandService.AddWarbandEquipmentAsync(Warband.Id, item, materialRule: entry.SelectedMaterial);
             var displayName = entry.SelectedMaterial is { } material ? $"{item.Name} ({material.Abbreviation})" : item.Name;
             sentences.Add(string.Format(Loc["HistoryRareItemFoundSentence"], entry.HeroName, displayName));
+        }
+
+        foreach (var entry in dialogViewModel.RareItemSearchEntries.Where(e => e.IsRecruited))
+        {
+            var persona = entry.SelectedCharacter!;
+            // "id => catalog.First(...)" plutôt que "catalog.Where(id contains)" - ce dernier itère le
+            // CATALOGUE (jamais deux fois le même EquipmentItem), donc perdrait silencieusement un doublon
+            // (ex. Bertha : StartingEquipmentIds contient deux fois l'id du Marteau de Guerre Sigmarite,
+            // voir DramatisPersonae.json - retour utilisateur 2026-09-01, "j'ai pas réussi à le gérer").
+            // RecruitDramatisPersonaAsync regroupe ensuite ces doublons en une seule WarriorEquipment row
+            // à Quantity=2 plutôt que deux rows identiques.
+            var startingEquipment = persona.StartingEquipmentIds
+                .Select(itemId => localizedEquipment.FirstOrDefault(e => e.Id == itemId))
+                .Where(item => item is not null)
+                .Select(item => item!)
+                .ToList();
+            await _warbandService.RecruitDramatisPersonaAsync(Warband.Id, persona, persona.Name, startingEquipment, persona.Skills);
+            sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
         }
     }
 

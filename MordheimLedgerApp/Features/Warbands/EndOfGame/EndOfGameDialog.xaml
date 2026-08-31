@@ -1652,17 +1652,20 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape : Achat des objets rares trouvés (livre, étape 6b - séparée de la recherche, retour
-                 utilisateur 2026-08-28 : jamais un achat automatique sur un jet réussi). Une carte par
-                 recherche RÉUSSIE (RareItemsWithResults) - une recherche ratée n'apparaît pas ici. Case
-                 "Acheter" décochable (WantsToBuy, coché par défaut) ; si l'objet a un prix variable
-                 (HasVariablePrice, ex. "10 CO + 1D6"), un jet de supplément doit être fait avant de
-                 connaître le prix réel ("attention au prix variable !"). Trésorerie restante recalculée en
-                 direct (RareItemPurchaseRemainingTreasury) ; le bouton Suivant du wizard reste actif mais
-                 ValidateRareItemPurchaseStep bloque le passage si le total coché dépasserait la trésorerie
-                 (IsRareItemPurchaseBlocked, bandeau dédié ci-dessous) plutôt que de sauter silencieusement
-                 l'achat impayable comme une première passe de cette étape le faisait. Entièrement absente
-                 si aucune recherche n'a abouti (voir Steps). -->
+            <!-- Étape : Achat des objets rares / Recrutement des personnages trouvés (livre, étapes 6b+7 -
+                 séparées de la recherche, retour utilisateur 2026-08-28 : jamais un achat/recrutement
+                 automatique sur un jet réussi). Une carte par recherche RÉUSSIE de l'un ou l'autre mode
+                 (RareItemsWithResults, voir RareItemSearchEntry.IsFound) - une recherche ratée n'apparaît
+                 pas ici. Côté Objet : case "Acheter" décochable (WantsToBuy, coché par défaut) ; si
+                 l'objet a un prix variable (HasVariablePrice, ex. "10 CO + 1D6"), un jet de supplément
+                 doit être fait avant de connaître le prix réel ("attention au prix variable !").
+                 Trésorerie restante recalculée en direct (RareItemPurchaseRemainingTreasury) ; le bouton
+                 Suivant du wizard reste actif mais ValidateRareItemPurchaseStep bloque le passage si le
+                 total coché dépasserait la trésorerie (IsRareItemPurchaseBlocked, bandeau dédié
+                 ci-dessous). Côté Personnage : case "Recruter" décochable (WantsToRecruit, coché par
+                 défaut), pas de coût pour l'instant (frais d'engagement toujours en attente, voir
+                 Models.Warrior.DramatisPersonaId) donc n'affecte jamais la trésorerie/le bandeau bloquant.
+                 Entièrement absente si aucune recherche n'a abouti (voir Steps). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRareItemPurchaseStep}">
                 <Label Text="{loc:Loc EndOfGameRareItemPurchaseHeading}" FontAttributes="Bold"/>
                 <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
@@ -1674,28 +1677,42 @@
                             <Border Style="{StaticResource SectionCardBorderStyle}">
                                 <VerticalStackLayout Spacing="8">
                                     <Label Text="{Binding HeroName}" FontAttributes="Bold"/>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                                        <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
-                                                              IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+
+                                    <!-- Côté Personnage trouvé -->
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsSearchingForCharacter}">
+                                        <components:ChipView Grid.Column="0" Item="{Binding SelectedCharacter}"
+                                                              IconGlyph="{x:Static icons:RpgFont.RaDuel}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareItemDetailCommand}"/>
-                                        <Label Grid.Column="1" Text="{Binding CostDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                                        <CheckBox Grid.Column="2" IsChecked="{Binding WantsToBuy}" VerticalOptions="Center"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowCharacterDetailCommand}"/>
+                                        <Label Grid.Column="1" Text="{loc:Loc EndOfGameCharacterRecruitLabel}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <CheckBox Grid.Column="2" IsChecked="{Binding WantsToRecruit}" VerticalOptions="Center"/>
                                     </Grid>
-                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding HasVariablePrice}">
-                                        <Entry Grid.Column="0" Text="{Binding PriceRoll}" Keyboard="Numeric"
-                                               Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
-                                            <Entry.Behaviors>
-                                                <components:DigitsOnlyBehavior/>
-                                            </Entry.Behaviors>
-                                        </Entry>
-                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollRarePriceCommand}"
-                                                                      CommandParameter="{Binding .}"
-                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                    </Grid>
-                                    <Label Text="{Binding PriceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                                           IsVisible="{Binding PriceRollError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                    <!-- Côté Objet trouvé -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter, Converter={StaticResource InverseBoolConverter}}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
+                                                                  IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareItemDetailCommand}"/>
+                                            <Label Grid.Column="1" Text="{Binding CostDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <CheckBox Grid.Column="2" IsChecked="{Binding WantsToBuy}" VerticalOptions="Center"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding HasVariablePrice}">
+                                            <Entry Grid.Column="0" Text="{Binding PriceRoll}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollRarePriceCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding PriceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding PriceRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>

@@ -44,6 +44,7 @@ public class AppDatabase
         await BackfillInjurySpecialRulesAsync();
         await BackfillSpecialRuleDescriptionsAsync();
         await BackfillWarriorStartingStatsAsync();
+        await BackfillDramatisPersonaStartingEquipmentAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
         // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
@@ -280,6 +281,57 @@ public class AppDatabase
             warrior.StartingAttacks = warrior.Attacks;
             warrior.StartingLeadership = warrior.Leadership;
             await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>One-time-per-row data fix for an already-seeded database whose DramatisPersonae.json was
+    /// edited AFTER SeedDramatisPersonaeAsync already ran once (2026-09-01: Bertha's startingEquipmentNames
+    /// gained a second "Sigmarite Warhammer" entry to represent her carrying two - the empty-catalog seed
+    /// gate only fires on a brand new install, so a machine that had already seeded her once never picked
+    /// this up, same root cause as ResyncExplorationResultsAsync's problem (2) but for a catalog that -
+    /// unlike Exploration - DOES have a real Library editor (Official -> Modified). A full unconditional
+    /// wipe-and-reseed like Exploration's would risk clobbering a player's own edit, so this only touches
+    /// ContentSource.Official personas, matched to their JSON entry by English name (same idiom as
+    /// BackfillNeverGainsExperienceAsync's rule-text match), and only when the seeded equipment ROW COUNT
+    /// doesn't match the JSON's current startingEquipmentNames count - re-syncing just that persona's
+    /// DramatisPersonaEquipmentEntity rows (delete + reinsert) to the JSON's list, duplicates included.
+    /// No-op on every subsequent launch once counts agree, and for anyone who has since edited a persona
+    /// into Modified/Custom.</summary>
+    private async Task BackfillDramatisPersonaStartingEquipmentAsync()
+    {
+        var personae = (await _db.Table<DramatisPersonaEntity>().ToListAsync())
+            .Where(p => p.Source == ContentSource.Official)
+            .ToList();
+        if (personae.Count == 0) return;
+
+        var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        var equipmentIdByEnglishName = (await _db.Table<EquipmentItemEntity>().ToListAsync())
+            .Where(e => englishTranslations.ContainsKey(e.NameKey))
+            .ToDictionary(e => englishTranslations[e.NameKey], e => e.Id);
+
+        var jsonByEnglishName = (await LoadSeedArrayAsync<DramatisPersonaSeedData>("DramatisPersonae.json"))
+            .ToDictionary(dp => dp.Name.En);
+
+        foreach (var entity in personae)
+        {
+            if (!englishTranslations.TryGetValue(entity.NameKey, out var englishName)) continue;
+            if (!jsonByEnglishName.TryGetValue(englishName, out var dp)) continue;
+
+            var existingRows = await _db.Table<DramatisPersonaEquipmentEntity>().Where(r => r.DramatisPersonaId == entity.Id).ToListAsync();
+            if (existingRows.Count == dp.StartingEquipmentNames.Count) continue;
+
+            foreach (var row in existingRows)
+                await _db.DeleteAsync(row);
+            foreach (var itemName in dp.StartingEquipmentNames)
+            {
+                // Fail-soft (unlike the first-launch seed path, which throws on a typo): a backfill
+                // running on every subsequent launch shouldn't be able to block startup over bad data.
+                if (equipmentIdByEnglishName.TryGetValue(itemName, out var itemId))
+                    await _db.InsertAsync(new DramatisPersonaEquipmentEntity { DramatisPersonaId = entity.Id, EquipmentItemId = itemId });
+            }
         }
     }
 
@@ -525,6 +577,17 @@ public class AppDatabase
                 continue;
             }
 
+            // Skill's Hatred target mirrors SpecialRule's above - same CSV-write shape, same reason
+            // (not a join table, see SkillEntity.HatredTargetWarbandArchetypeIds).
+            if (pending.Kind == SharedRestrictionKind.SkillHatredTarget)
+            {
+                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByFileStem[stem]).ToList();
+                var skillEntityForHatred = await _db.Table<SkillEntity>().Where(s => s.Id == pending.ItemId).FirstAsync();
+                skillEntityForHatred.HatredTargetWarbandArchetypeIds = string.Join(',', targetIds);
+                await _db.UpdateAsync(skillEntityForHatred);
+                continue;
+            }
+
             foreach (var stem in pending.WarbandFileStems)
             {
                 var warbandArchetypeId = _warbandArchetypeIdsByFileStem[stem];
@@ -764,6 +827,9 @@ public class AppDatabase
                 foreach (var name in names)
                     await _db.InsertAsync(new WarriorArchetypeSkillEntity { WarriorArchetypeId = warriorIdsByEnglishName[name], SkillId = skillEntity.Id });
             }
+
+            if (sk.HatredTargetWarbandNames is { Count: > 0 } hatredTargetNames)
+                _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.SkillHatredTarget, skillEntity.Id, hatredTargetNames));
         }
 
         foreach (var sp in data.Spells)
@@ -874,6 +940,9 @@ public class AppDatabase
 
             if (sk.RestrictedToWarbandNames is { Count: > 0 } skWarbandNames)
                 _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Skill, skillEntity.Id, skWarbandNames));
+
+            if (sk.HatredTargetWarbandNames is { Count: > 0 } skHatredTargetNames)
+                _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.SkillHatredTarget, skillEntity.Id, skHatredTargetNames));
         }
     }
 
@@ -1421,7 +1490,7 @@ public class AppDatabase
     /// name several bands via RestrictedToWarbandNames - see _pendingSharedRestrictions.</summary>
     private readonly Dictionary<string, int> _warbandArchetypeIdsByFileStem = new();
 
-    private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule, HiredSword }
+    private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule, HiredSword, SkillHatredTarget }
 
     private record struct PendingSharedRestriction(SharedRestrictionKind Kind, int ItemId, List<string> WarbandFileStems);
 

@@ -18,8 +18,9 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <!-- Carte guerrier partagée entre les sections Heroes/Henchmen : le contenu ne dépend que
-                 du Warrior lié (IsHero pilote directement ExperienceTrackView), pas du groupe qui
+            <!-- Carte guerrier partagée entre les 4 groupes du roster (Heroes/Henchmen/HiredSwords/
+                 DramatisPersonae, voir WarbandDetailViewModel) : le contenu ne dépend que du Warrior lié
+                 (IsHero pilote ExperienceTrackView, GainsExperience sa visibilité), pas du groupe qui
                  l'affiche. -->
             <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
                 <Border Style="{StaticResource SectionCardBorderStyle}" Margin="6,6">
@@ -169,13 +170,20 @@
                             </FlexLayout>
                         </VerticalStackLayout>
 
-                        <Label Text="{loc:Loc WarriorsExperienceHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
-                        <!-- Pas de HorizontalOptions="Center" ici : ExperienceTrackView a besoin de sa
-                             largeur réellement disponible (voir CalculateRowSize) pour choisir combien
-                             de cases tiennent par ligne - un Center le ferait se réduire à son propre
-                             contenu, rendant ce calcul circulaire. Le centrage visuel se fait déjà à
-                             l'intérieur du composant (TrackLayout). -->
-                        <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}"/>
+                        <!-- Masqué entièrement pour un guerrier qui ne gagne jamais d'Expérience
+                             (Warrior.GainsExperience, ex. Zombie/Loup de Guerre - "Never Gains
+                             Experience") - retour utilisateur 2026-09-01 : la piste n'a aucun sens pour
+                             eux, à la différence d'un groupe d'Hommes de main tout juste recruté (encore
+                             à 0 PX mais capable d'en gagner), qui garde la piste normalement. -->
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding Warrior.GainsExperience}">
+                            <Label Text="{loc:Loc WarriorsExperienceHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <!-- Pas de HorizontalOptions="Center" ici : ExperienceTrackView a besoin de sa
+                                 largeur réellement disponible (voir CalculateRowSize) pour choisir combien
+                                 de cases tiennent par ligne - un Center le ferait se réduire à son propre
+                                 contenu, rendant ce calcul circulaire. Le centrage visuel se fait déjà à
+                                 l'intérieur du composant (TrackLayout). -->
+                            <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}"/>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
             </DataTemplate>
@@ -306,10 +314,60 @@
                                      BindableLayout.ItemsSource="{Binding Henchmen}"
                                      BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
 
+                <!-- Francs-Tireurs : bloc à part depuis le 2026-09-01 (retour utilisateur) - avant, un
+                     Franc-Tireur recruté (Warrior.IsHiredSword) tombait dans Hommes de main (IsHero=false
+                     pour lui aussi), juste distingué par son RoleName. Masqué entièrement si la bande n'en
+                     a recruté aucun (HasHiredSwords) - contrairement à Héros/Hommes de main, que toute
+                     bande a toujours. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasHiredSwords}">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleHiredSwordsCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc LibTabHiredSwords}"/>
+                                <Span Text="{Binding HiredSwords.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding HiredSwordsExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleHiredSwordsCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding HiredSwordsExpanded}"
+                                     BindableLayout.ItemsSource="{Binding HiredSwords}"
+                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
+
+                <!-- Dramatis Personae : même traitement/même raison que Francs-Tireurs ci-dessus (bloc
+                     ajouté le même jour) - un personnage recruté (Warrior.IsDramatisPersona) tombait de
+                     la même façon dans Hommes de main avant. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasDramatisPersonae}">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleDramatisPersonaeCommand}"/>
+                    </Grid.GestureRecognizers>
+                    <Label Grid.Column="0" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc LibTabDramatisPersonae}"/>
+                                <Span Text="{Binding DramatisPersonae.Count, StringFormat=' · {0}'}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{Binding DramatisPersonaeExpanded, Converter={StaticResource BoolToChevronConverter}}"
+                                                  Command="{Binding ToggleDramatisPersonaeCommand}"/>
+                </Grid>
+                <VerticalStackLayout IsVisible="{Binding DramatisPersonaeExpanded}"
+                                     BindableLayout.ItemsSource="{Binding DramatisPersonae}"
+                                     BindableLayout.ItemTemplate="{StaticResource WarriorCardTemplate}"/>
+
                 <!-- Morts : lecture seule (le bouton Éditer est masqué sur la carte via
                      WarriorRow.IsEditable), regroupe Héros et Hommes de main morts ensemble - conservés
-                     dans le roster pour l'historique de la bande plutôt que retirés à la fin de partie. -->
-                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                     dans le roster pour l'historique de la bande plutôt que retirés à la fin de partie.
+                     Masqué entièrement si vide (HasDeadWarriors, retour utilisateur 2026-09-01) - même
+                     raison que Francs-Tireurs/Dramatis Personae ci-dessus. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasDeadWarriors}">
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ToggleDeadCommand}"/>
                     </Grid.GestureRecognizers>
@@ -331,8 +389,9 @@
 
                 <!-- Retraités : même traitement lecture seule que Morts (WarriorRow.IsRetired), mais un
                      guerrier retraité n'est jamais mort - actuellement uniquement via Œil crevé (31)
-                     perdu une seconde fois, voir Core.Rules.SeriousInjuryEffectKind.ForcedRetirement. -->
-                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                     perdu une seconde fois, voir Core.Rules.SeriousInjuryEffectKind.ForcedRetirement.
+                     Masqué entièrement si vide (HasRetiredWarriors), même raison que Morts ci-dessus. -->
+                <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto" IsVisible="{Binding HasRetiredWarriors}">
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ToggleRetiredCommand}"/>
                     </Grid.GestureRecognizers>

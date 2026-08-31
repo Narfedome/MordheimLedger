@@ -156,6 +156,73 @@ public class WarbandMutationTests : IDisposable
         Assert.NotEmpty(carried.Item.SpecialRules);
     }
 
+    /// <summary>Bertha's own catalogue entry lists "Sigmarite Warhammer" twice in
+    /// DramatisPersonae.json.startingEquipmentNames (she carries two) - locks in the 2026-09-01 fix
+    /// (user report: "j'ai pas réussi à le gérer") for two distinct bugs found together: (1) the
+    /// EquipmentItemId resolution used to go through EquipmentItem.Where(id-list.Contains(...)), which
+    /// silently collapsed the duplicate since it iterates the catalog, never the id list twice; (2) even
+    /// with the id preserved twice, RecruitDramatisPersonaAsync used to insert one WarriorEquipment row
+    /// per occurrence instead of a single row with Quantity=2. Both fixed together: a single row,
+    /// Quantity=2, "Sigmarite Warhammer x2" (see WarriorEquipment.NameDisplay's own quantity suffix, also
+    /// new this pass).</summary>
+    [Fact]
+    public async Task RecruitingBertha_ConsolidatesDuplicateStartingEquipmentIntoOneQuantityTwoRow()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+
+        var bertha = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
+        var allEquipment = await _library.GetEquipmentItemsAsync("en");
+        // Même résolution que l'appelant réel (WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync) -
+        // par id, pas par Where(catalog).Contains(ids), pour préserver les doublons.
+        var startingEquipment = bertha.StartingEquipmentIds.Select(id => allEquipment.First(e => e.Id == id)).ToList();
+        Assert.Equal(2, startingEquipment.Count(e => e.Name == "Sigmarite Warhammer"));
+
+        var recruited = await _warbands.RecruitDramatisPersonaAsync(warband.Id, bertha, "Bertha", startingEquipment, bertha.Skills);
+
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var warrior = Assert.Single(roster, w => w.Id == recruited.Id);
+        var warhammer = Assert.Single(warrior.Equipment, e => e.Item.Name == "Sigmarite Warhammer");
+        Assert.Equal(2, warhammer.Quantity);
+        Assert.Equal("Sigmarite Warhammer x2", warhammer.NameDisplay);
+        Assert.Equal(4, warrior.Equipment.Count); // Warhammer(x2)/Gromril Armour/Blessed Water/Holy Relic - 4 distinct rows, not 5.
+    }
+
+    /// <summary>The fix above only helps a fresh install: an already-seeded database (Bertha seeded with
+    /// a single Sigmarite Warhammer row, before her JSON entry gained the duplicate on 2026-09-01) never
+    /// re-runs SeedDramatisPersonaeAsync (empty-catalog gate only fires once) - same class of bug as
+    /// ExplorationResults_DuplicatedByADoubleSeed_AreBackfilledOnNextLaunch above, fixed the same way via
+    /// a dedicated Backfill* method (BackfillDramatisPersonaStartingEquipmentAsync) that runs
+    /// unconditionally on every launch and re-syncs a mismatched Official persona's equipment row count
+    /// from the JSON.</summary>
+    [Fact]
+    public async Task DramatisPersonaEquipment_StaleFromBeforeADuplicateWasAdded_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var bertha = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
+        var allEquipment = await _library.GetEquipmentItemsAsync("en");
+        var warhammerId = allEquipment.Single(e => e.Name == "Sigmarite Warhammer").Id;
+
+        // Simule une base seedée AVANT l'ajout du doublon dans DramatisPersonae.json : ne garder qu'UNE
+        // seule ligne DramatisPersonaEquipmentEntity pour le Marteau de Sigmarite (au lieu de 2).
+        var warhammerRows = await _db.Connection.Table<DramatisPersonaEquipmentEntity>()
+            .Where(r => r.DramatisPersonaId == bertha.Id && r.EquipmentItemId == warhammerId).ToListAsync();
+        Assert.Equal(2, warhammerRows.Count);
+        await _db.Connection.DeleteAsync(warhammerRows[0]);
+
+        // Rouvrir la même base (nouvelle instance AppDatabase sur le même fichier) rejoue InitializeAsync -
+        // le garde-fou de seed ne se redéclenche pas, mais le backfill tourne à chaque lancement.
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedBertha = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
+        Assert.Equal(2, reopenedBertha.StartingEquipmentIds.Count(id => id == warhammerId));
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
     /// <summary>Shrine's blessing (see ExplorationOutcome.GrantsWeaponBlessing) attaches "Blessed
     /// Weapon" via WarriorEquipment.BlessingRule - a SEPARATE slot from MaterialRule (Gromril/Ithilmar/
     /// Ornate), confirmed by the user 2026-08-21: a weapon already in Gromril that also gets blessed

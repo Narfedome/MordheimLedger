@@ -376,6 +376,13 @@ public class SkillSeedData
     /// may pick this skill (e.g. "Da Cunnin' Plan" -&gt; ["Orc Boss"]) - null/empty = every warrior of the
     /// restricted warband(s) can pick it. Only meaningful alongside RestrictedToThisWarband.</summary>
     public List<string>? RestrictedToWarriorNames { get; set; }
+
+    /// <summary>Warband file stems this skill grants Hatred against (e.g. Sisters of Sigmar's "Righteous
+    /// Fury" -&gt; Skaven of Clan Eshin/Undead/Cult of the Possessed/Beastmen Raiders) - see
+    /// Skill.HatredTargetWarbandArchetypeIds, same deferred-resolution mechanism as
+    /// SpecialRuleSeedData.HatredTargetWarbandNames (added 2026-09-01, so a target band doesn't need to
+    /// have seeded yet).</summary>
+    public List<string>? HatredTargetWarbandNames { get; set; }
 }
 
 /// <summary>One Hired Sword catalog entry (Data/SeedData/HiredSwords.json, always common - no per-band

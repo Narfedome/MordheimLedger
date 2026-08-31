@@ -102,6 +102,52 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
+            <!-- Aide conditionnelle (ex. Bertha, DramatisPersona.RequiresRatingDisadvantage) - une carte
+                 par personnage recruté concerné (DramatisPersonaAidEntry). Saisie de la Valeur de la
+                 bande adverse (jamais suivie par l'appli, voir sa doc) -> écart calculé -> jet requis
+                 (Core.Rules.RatingGapAidTable) -> jet manuel + résultat. Purement informatif, comme le
+                 reste de ce dialog : ne bloque rien, ne change aucun statut. -->
+            <VerticalStackLayout Spacing="10" IsVisible="{Binding HasAidEntries}">
+                <Label Text="{loc:Loc StartGameAidHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding AidEntries}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:DramatisPersonaAidEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="{Binding PersonaName}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding WarriorName}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Entry Text="{Binding EnemyRating}" Keyboard="Numeric" Placeholder="{loc:Loc StartGameAidEnemyRatingPh}">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <Label Text="{loc:Loc StartGameAidWontCome}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding WontCome}"/>
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" IsVisible="{Binding RequiredRoll, Converter={StaticResource IsNotNullConverter}}">
+                                        <Label Grid.Column="0" Text="{Binding RequiredRollDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                        <Entry Grid.Column="1" Text="{Binding Roll}" Keyboard="Numeric"
+                                               Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60" VerticalOptions="Center">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                      Style="{StaticResource GhostIconButtonStyle}"
+                                                                      VerticalOptions="Center"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollAidCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                    </Grid>
+                                    <Label Text="{loc:Loc StartGameAidSuccess}" FontSize="12" FontAttributes="Bold"
+                                           TextColor="{DynamicResource AppSuccess}" IsVisible="{Binding IsSuccess}"/>
+                                    <Label Text="{loc:Loc StartGameAidFailure}" FontSize="12" FontAttributes="Bold"
+                                           TextColor="{DynamicResource AppDanger}" IsVisible="{Binding IsFailure}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
             <!-- Effets actifs pour cette partie : Warband.NextGameNote, simple rappel textuel (voir sa
                  doc) - pas encore d'accumulation possible si plusieurs effets étaient actifs à la fois
                  (limite connue, confirmée avec l'utilisateur 2026-08-26 : laissé tel quel pour l'instant). -->

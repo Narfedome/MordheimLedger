@@ -34,15 +34,19 @@ public class WarriorEquipment
     public int? FoundValueOverride { get; set; }
 
     /// <summary>"Sword (G)" for a plain material, "Sword (G, B)" if also blessed (both abbreviations,
-    /// MaterialRule first) - plain "Sword" if neither is set. Same idiom as EquipmentPick.Name (the
-    /// in-memory equivalent before this row exists in the database).</summary>
+    /// MaterialRule first) - plain "Sword" if neither is set, then " x2" appended when Quantity > 1 (e.g.
+    /// "Sigmarite Warhammer x2", "Bullets x6") - previously silent (Quantity only fed cost math, never
+    /// shown on the card, a pre-existing gap for every warrior, not just a Dramatis Persona carrying two
+    /// of the same item - fixed 2026-09-01, user request). Same idiom as EquipmentPick.Name (the
+    /// in-memory equivalent before this row exists in the database) for the material/blessing part.</summary>
     public string NameDisplay
     {
         get
         {
             var abbrs = new[] { MaterialRule?.Abbreviation, BlessingRule?.Abbreviation }
                 .Where(a => !string.IsNullOrEmpty(a)).ToList();
-            return abbrs.Count > 0 ? $"{Item.Name} ({string.Join(", ", abbrs)})" : Item.Name;
+            var name = abbrs.Count > 0 ? $"{Item.Name} ({string.Join(", ", abbrs)})" : Item.Name;
+            return Quantity > 1 ? $"{name} x{Quantity}" : name;
         }
     }
 

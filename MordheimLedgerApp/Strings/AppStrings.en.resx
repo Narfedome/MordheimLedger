@@ -1097,6 +1097,24 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="StartGameOldWoundFail" xml:space="preserve">
     <value>Can't fight</value>
   </data>
+  <data name="StartGameAidHeading" xml:space="preserve">
+    <value>Conditional aid</value>
+  </data>
+  <data name="StartGameAidEnemyRatingPh" xml:space="preserve">
+    <value>Enemy warband Rating</value>
+  </data>
+  <data name="StartGameAidWontCome" xml:space="preserve">
+    <value>Won't agree to help this time (gap too small)</value>
+  </data>
+  <data name="StartGameAidRequiredRollFormat" xml:space="preserve">
+    <value>Roll required: {0}+</value>
+  </data>
+  <data name="StartGameAidSuccess" xml:space="preserve">
+    <value>Agrees to help</value>
+  </data>
+  <data name="StartGameAidFailure" xml:space="preserve">
+    <value>Doesn't help this time</value>
+  </data>
   <data name="StartGameNextGameNoteHeading" xml:space="preserve">
     <value>Active effects for this game</value>
   </data>
@@ -1319,6 +1337,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameCharacterSearchButton" xml:space="preserve">
     <value>Search for a character</value>
   </data>
+  <data name="EndOfGameCharacterRecruitLabel" xml:space="preserve">
+    <value>Recruit</value>
+  </data>
   <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
     <value>Rare {0}</value>
   </data>
@@ -1438,6 +1459,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryRareItemFoundSentence" xml:space="preserve">
     <value>{0} finds a rare item: {1}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
+    <value>{0} tracks down {1}, who joins the warband.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

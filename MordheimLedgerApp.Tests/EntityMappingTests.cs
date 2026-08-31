@@ -326,6 +326,82 @@ public class EntityMappingTests
         Assert.True(roundTripped.HiredSwordUpkeepPrepaid);
     }
 
+    // Dramatis Persona recruitment - a genuinely different shape from HiredSword above, corrected
+    // 2026-09-01 against the rulebook's own "Experience, Injuries and Equipment" section for special
+    // characters: IsHero TRUE (they "suffer serious injuries, just like Heroes" - gets the full Hero D66
+    // Serious Injury flow for free via the plain Warrior.IsHero checks in WarriorOutcomeRow.cs, no
+    // IsDramatisPersona wiring needed there) and GainsExperience FALSE ("do not earn Experience points").
+    [Fact]
+    public void RecruitingFromDramatisPersona_PreFillsProfileAndMarksHero()
+    {
+        var persona = new DramatisPersona
+        {
+            Id = 9,
+            Name = "Aenur, the Sword of Twilight",
+            HireCost = 150,
+            RatingBonus = 100,
+            Movement = 5,
+            WeaponSkill = 8,
+            BallisticSkill = 4,
+            Strength = 4,
+            Toughness = 3,
+            Wounds = 2,
+            Initiative = 7,
+            Attacks = 3,
+            Leadership = 8
+        };
+
+        var recruited = persona.ToWarrior("Aenur");
+
+        Assert.Null(recruited.WarriorArchetypeId);
+        Assert.Null(recruited.HiredSwordId);
+        Assert.Equal(persona.Id, recruited.DramatisPersonaId);
+        Assert.True(recruited.IsDramatisPersona);
+        Assert.Equal(persona.RatingBonus, recruited.DramatisPersonaRatingBonus);
+        Assert.Equal("Aenur", recruited.Name);
+        Assert.True(recruited.IsHero);
+        Assert.Equal(1, recruited.HeadCount);
+        Assert.False(recruited.CanUseEquipment);
+        Assert.False(recruited.GainsExperience);
+        Assert.Equal(persona.Movement, recruited.Movement);
+        Assert.Equal(persona.WeaponSkill, recruited.WeaponSkill);
+        Assert.Equal(persona.BallisticSkill, recruited.BallisticSkill);
+        Assert.Equal(persona.Strength, recruited.Strength);
+        Assert.Equal(persona.Toughness, recruited.Toughness);
+        Assert.Equal(persona.Wounds, recruited.Wounds);
+        Assert.Equal(persona.Initiative, recruited.Initiative);
+        Assert.Equal(persona.Attacks, recruited.Attacks);
+        Assert.Equal(persona.Leadership, recruited.Leadership);
+    }
+
+    [Fact]
+    public void DramatisPersonaWarrior_RoundTrips_ThroughEntity()
+    {
+        var warrior = new Warrior
+        {
+            Id = 3,
+            WarbandId = 7,
+            WarriorArchetypeId = null,
+            DramatisPersonaId = 9,
+            DramatisPersonaRatingBonus = 100,
+            Name = "Aenur",
+            IsHero = true,
+            GainsExperience = false,
+            Cost = 150,
+            Experience = 0,
+            Status = WarriorStatus.Active
+        };
+
+        var roundTripped = warrior.ToEntity().ToModel();
+
+        Assert.Null(roundTripped.WarriorArchetypeId);
+        Assert.Equal(warrior.DramatisPersonaId, roundTripped.DramatisPersonaId);
+        Assert.True(roundTripped.IsDramatisPersona);
+        Assert.Equal(warrior.DramatisPersonaRatingBonus, roundTripped.DramatisPersonaRatingBonus);
+        Assert.True(roundTripped.IsHero);
+        Assert.False(roundTripped.GainsExperience);
+    }
+
     [Fact]
     public void RacialProfile_RoundTrips_ThroughEntity()
     {

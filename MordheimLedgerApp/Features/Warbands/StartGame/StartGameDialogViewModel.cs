@@ -14,17 +14,21 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
 
     public List<UnavailableWarriorRow> UnavailableWarriors { get; }
     public List<OldWoundWarriorEntry> OldWoundEntries { get; }
+    public List<DramatisPersonaAidEntry> AidEntries { get; }
     public string? NextGameNote { get; }
 
     public bool HasUnavailableWarriors => UnavailableWarriors.Count > 0;
     public bool HasOldWoundRolls => OldWoundEntries.Count > 0;
+    public bool HasAidEntries => AidEntries.Count > 0;
     public bool HasNextGameNote => !string.IsNullOrWhiteSpace(NextGameNote);
-    public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasNextGameNote;
+    public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasAidEntries && !HasNextGameNote;
 
-    public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries, string? nextGameNote)
+    public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries,
+        List<DramatisPersonaAidEntry> aidEntries, string? nextGameNote)
     {
         UnavailableWarriors = unavailableWarriors;
         OldWoundEntries = oldWoundEntries;
+        AidEntries = aidEntries;
         NextGameNote = nextGameNote;
     }
 
@@ -35,4 +39,7 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     // tiré par l'appli, modifiable ensuite si le joueur préfère lancer son propre dé physique.
     [RelayCommand]
     private void AutoRoll(OldWoundRollEntry entry) => entry.ManualRoll = Random.Shared.Next(1, 7).ToString();
+
+    [RelayCommand]
+    private void AutoRollAid(DramatisPersonaAidEntry entry) => entry.Roll = Random.Shared.Next(1, 7).ToString();
 }

@@ -258,6 +258,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Single(bertha.RestrictedToWarbandArchetypeIds, warbands.Single(w => w.Name == "The Sisters of Sigmar").Id);
         Assert.Equal("Prayers of Sigmar", bertha.MagicSchool?.Name);
         Assert.True(bertha.RequiresRatingDisadvantage);
+        Assert.True(bertha.IsWanderer); // "A request for Bertha... must be made for each battle" - same one-battle-only shape.
 
         var nicodemus = Assert.Single(personae, p => p.Name.StartsWith("Nicodemus"));
         Assert.Equal(DramatisPersonaHireFeeKind.Wyrdstone, nicodemus.FeeKind);

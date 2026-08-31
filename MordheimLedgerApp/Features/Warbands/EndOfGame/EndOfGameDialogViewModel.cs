@@ -370,21 +370,22 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             WarriorRows.Where(r => r.Warrior.IsHero).Select(r => new RareItemSearchEntry(r, Loc)));
 
         // L'étape Achat séparée (RareItemPurchase) et son total en direct (RareItemPurchaseRemainingTreasury)
-        // dépendent de IsSuccess/WantsToBuy/PriceRoll de chaque entrée - notifie StepLabel/IsLastStep
-        // (l'étape peut apparaître/disparaître) et le total à chaque changement, même idiome que la
-        // subscription WarriorRows ci-dessus.
+        // dépendent de IsSuccess/IsCharacterFound/WantsToBuy/PriceRoll de chaque entrée - notifie
+        // StepLabel/IsLastStep (l'étape peut apparaître/disparaître) et le total à chaque changement,
+        // même idiome que la subscription WarriorRows ci-dessus.
         foreach (var entry in RareItemSearchEntries)
         {
             entry.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName is nameof(RareItemSearchEntry.IsSuccess))
+                if (e.PropertyName is nameof(RareItemSearchEntry.IsSuccess) or nameof(RareItemSearchEntry.IsCharacterFound))
                 {
                     OnPropertyChanged(nameof(StepLabel));
                     OnPropertyChanged(nameof(IsLastStep));
                     // Bug trouvé par test utilisateur : RareItemsWithResults n'est jamais notifiée sans
                     // cette ligne, donc le BindableLayout de l'étape Achat (bound dessus) ne se rafraîchit
                     // jamais après le chargement initial - la carte de l'étape reste vide même quand une
-                    // recherche vient de réussir.
+                    // recherche vient de réussir. Même bug possible côté Personnage depuis que
+                    // RareItemsWithResults couvre IsCharacterFound aussi (voir RareItemSearchEntry.IsFound).
                     OnPropertyChanged(nameof(RareItemsWithResults));
                 }
                 if (e.PropertyName is nameof(RareItemSearchEntry.WantsToBuy) or nameof(RareItemSearchEntry.PriceRoll) or nameof(RareItemSearchEntry.IsSuccess))
@@ -394,10 +395,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
                     OnPropertyChanged(nameof(IsRareItemPurchaseBlocked));
                 }
-                // Basculer Objet/Personnage (ou trouver un personnage) ne fait pas encore apparaître/
-                // disparaître d'étape (le recrutement de personnage n'est pas câblé sur RareItemPurchase,
-                // voir EndOfGameDialogViewModel.RareItems.cs) - seul StepLabel a besoin d'être notifié pour
-                // l'instant, IsSearchingForCharacter n'affecte rien d'autre hors de la carte elle-même.
+                // Basculer Objet/Personnage change quels résultats existent (voir IsFound) - StepLabel
+                // seul suffit ici, RareItemsWithResults est déjà notifiée par la branche IsSuccess/
+                // IsCharacterFound ci-dessus dès que le nouveau mode produit un résultat.
                 if (e.PropertyName is nameof(RareItemSearchEntry.IsSearchingForCharacter))
                 {
                     OnPropertyChanged(nameof(StepLabel));

@@ -47,6 +47,27 @@ public class Warrior
     /// every other warrior.</summary>
     public bool HiredSwordUpkeepPrepaid { get; set; }
 
+    /// <summary>Non-null only for a warrior recruited from the Dramatis Personae catalogue (see
+    /// Library.DramatisPersona) - a third parallel to HiredSwordId, but NOT the same shape: unlike a
+    /// Hired Sword, EntityMapping.ToWarrior(this DramatisPersona, ...) sets IsHero TRUE and
+    /// GainsExperience FALSE, straight from the rulebook's own "Experience, Injuries and Equipment"
+    /// section for special characters ("do not earn Experience points... suffer serious injuries, just
+    /// like Heroes"). That gets the full Hero-shaped post-battle Serious Injury flow (D66 table,
+    /// Captured/Sold to the Pits...) for free via the plain Warrior.IsHero checks already spread through
+    /// WarriorOutcomeRow, without needing to also recognize IsDramatisPersona at each one. Roster
+    /// grouping still keeps them in their own block, not Heroes (see WarbandDetailViewModel.LoadAsync).
+    /// Still deliberately NOT wiring every OTHER HiredSword integration point (Wyrdstone-sale headcount
+    /// exclusion, a dedicated upkeep step, Wanderer one-battle lifecycle...) - those stay manual/
+    /// player-tracked until a real need surfaces, same incremental precedent as HiredSword's own
+    /// history.</summary>
+    public int? DramatisPersonaId { get; set; }
+
+    public bool IsDramatisPersona => DramatisPersonaId.HasValue;
+
+    /// <summary>Snapshot of DramatisPersona.RatingBonus at recruitment - same "never a live re-lookup"
+    /// convention as HiredSwordBaseRating.</summary>
+    public int? DramatisPersonaRatingBonus { get; set; }
+
     public string Name { get; set; } = string.Empty;
     public bool IsHero { get; set; }
     public int Cost { get; set; }

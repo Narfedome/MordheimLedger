@@ -4,18 +4,23 @@ using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>Post-battle sequence step 6, "Rare items" (p.145), split into TWO wizard steps (user request
-/// 2026-08-28 - never an implicit auto-buy on a successful roll): (1) IsRareItemsStep - one optional 2D6
-/// search attempt per living Hero not taken Out of Action this battle, each against a Rare item of the
-/// player's choosing (RareItemSearchEntry.SelectedItem), or a common melee weapon forged in Gromril/
-/// Ithilmar (SelectedMaterial) - purely determines IsSuccess, buys nothing. (2) IsRareItemPurchaseStep -
-/// a separate card per successful find, "Acheter" checkbox (WantsToBuy) + a price-supplement roll for a
-/// variable-cost item (PriceRoll/HasVariablePrice - "attention au prix variable !", missed in the first
-/// pass of this feature), blocking Next if the checked total would exceed the warband's treasury. Only
-/// entries actually bought (RareItemSearchEntry.IsPurchased) are committed at Save - see
-/// WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync. Henchmen never search ("Whenever a HERO
-/// wants to buy...") - entries are built once per Hero in the main constructor, this file only
-/// orchestrates both steps.</summary>
+/// <summary>Post-battle sequence step 6, "Rare items" (p.145) - and, since 2026-08-31, step 7 "Looking
+/// for special characters" (p.146) sharing the same two-step shape - split into TWO wizard steps (user
+/// request 2026-08-28 - never an implicit auto-buy on a successful roll): (1) IsRareItemsStep - one
+/// optional search attempt per living Hero not taken Out of Action this battle, EITHER against a Rare
+/// item of the player's choosing (RareItemSearchEntry.SelectedItem, 2D6 vs Rarity - purely determines
+/// IsSuccess, buys nothing) OR a Dramatis Persona (SelectedCharacter, 1D6 vs Initiative - determines
+/// IsCharacterFound, recruits nothing), per RareItemSearchEntry.IsSearchingForCharacter. (2)
+/// IsRareItemPurchaseStep - a separate card per successful find of EITHER kind (RareItemSearchEntry.
+/// IsFound): "Acheter" (WantsToBuy) + a price-supplement roll for a variable-cost item (PriceRoll/
+/// HasVariablePrice - "attention au prix variable !", missed in the first pass of this feature) for an
+/// item, or "Recruter" (WantsToRecruit, no fee applied yet - see Models.Warrior.DramatisPersonaId's own
+/// doc) for a character - blocking Next if the checked ITEM total would exceed the warband's treasury
+/// (recruiting a character is currently free, doesn't affect this). Only entries actually bought/
+/// recruited (IsPurchased/IsRecruited) are committed at Save - see WarbandDetailViewModel.EndOfGame.
+/// ApplyRareItemSearchAsync. Henchmen never search ("Whenever a HERO wants to buy..."/"Heroes looking
+/// for...") - entries are built once per Hero in the main constructor, this file only orchestrates both
+/// steps.</summary>
 public partial class EndOfGameDialogViewModel
 {
     public ObservableCollection<RareItemSearchEntry> RareItemSearchEntries { get; }
@@ -135,9 +140,10 @@ public partial class EndOfGameDialogViewModel
 
     // --- Étape Achat (séparée, voir IsRareItemPurchaseStep) --------------------------------------
 
-    /// <summary>Only the successful finds get a card on the Purchase step - a failed search has nothing
-    /// to buy.</summary>
-    public List<RareItemSearchEntry> RareItemsWithResults => RareItemSearchEntries.Where(e => e.IsSuccess).ToList();
+    /// <summary>Only the successful finds get a card on this step - a failed search has nothing to
+    /// buy/recruit. Covers BOTH modes (RareItemSearchEntry.IsFound: IsSuccess for Objet, IsCharacterFound
+    /// for Personnage) since the step now shows a "Recruter ?" card alongside "Acheter ?" cards.</summary>
+    public List<RareItemSearchEntry> RareItemsWithResults => RareItemSearchEntries.Where(e => e.IsFound).ToList();
 
     [RelayCommand]
     private void AutoRollRarePrice(RareItemSearchEntry entry) => entry.PriceRoll = Random.Shared.Next(1, 7).ToString();

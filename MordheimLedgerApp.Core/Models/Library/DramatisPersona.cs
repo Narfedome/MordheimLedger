@@ -80,11 +80,14 @@ public class DramatisPersona
     /// Dramatis Persona's Rating scales with Experience in the source text gathered so far.</summary>
     public int RatingBonus { get; set; }
 
-    /// <summary>True for a character the book explicitly calls a "Wanderer" (Aenur, Ulli &amp; Marquand) -
-    /// stays with the warband for one battle only, and can't be sought again until the warband has
-    /// fought at least one battle without them. False doesn't necessarily mean "permanent hire" (Bertha's
-    /// own per-battle-request nature isn't literally the "Wanderer" rule the book uses for these two, so
-    /// it's left false and explained in Description instead).</summary>
+    /// <summary>True for a character who never stays with the warband beyond one battle - either because
+    /// the book explicitly calls them a "Wanderer" (Aenur, Ulli &amp; Marquand - can't be sought again
+    /// until the warband has fought at least one battle without them), or because their own mechanic
+    /// requires a fresh request every time (Bertha - "A request for Bertha to aid the warband must be
+    /// made for each battle you wish her to help" - corrected 2026-08-31, user caught that this is the
+    /// same one-battle-only shape even though the book never uses the word "Wanderer" for her). Purely
+    /// descriptive for now, same "no rules engine V1" stance as the rest of this type - not enforced
+    /// anywhere (no automatic removal from the roster after a battle).</summary>
     public bool IsWanderer { get; set; }
 
     /// <summary>True for a character who only agrees to personally join the battle when the hiring

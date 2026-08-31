@@ -11,12 +11,16 @@ public static class WarbandRatingRules
     /// <summary>Rating contribution of one Warrior row. hiredSwordBaseRating non-null (a Hired Sword,
     /// see Models.Warrior.HiredSwordBaseRating) replaces the usual "20 for a Large Creature, else 5"
     /// per-model base with the catalogue's own BaseRating (e.g. Pit Fighter: 22) - isLargeCreature is
-    /// ignored in that case, a Hired Sword is never also a Large Creature. headCount multiplies the
-    /// whole per-model contribution (always 1 for a Hero or a Hired Sword, the living model count for a
-    /// Henchman group).</summary>
-    public static int WarriorContribution(bool isLargeCreature, int experience, int headCount, int? hiredSwordBaseRating)
+    /// ignored in that case, a Hired Sword is never also a Large Creature. dramatisPersonaRatingBonus
+    /// non-null (see Models.Warrior.DramatisPersonaRatingBonus) works the same way for a recruited
+    /// Dramatis Persona (e.g. Aenur: +100) - mutually exclusive with hiredSwordBaseRating in practice
+    /// (Warrior.DramatisPersonaId/HiredSwordId are never both set), checked first only because a
+    /// Dramatis Persona's bonus is a flat warband-Rating add-on, never itself scaled by Experience like
+    /// a Hired Sword's BaseRating is. headCount multiplies the whole per-model contribution (always 1
+    /// for a Hero, a Hired Sword, or a Dramatis Persona, the living model count for a Henchman group).</summary>
+    public static int WarriorContribution(bool isLargeCreature, int experience, int headCount, int? hiredSwordBaseRating, int? dramatisPersonaRatingBonus = null)
     {
-        var perModel = hiredSwordBaseRating is { } baseRating ? baseRating + experience : (isLargeCreature ? 20 : 5) + experience;
+        var perModel = dramatisPersonaRatingBonus ?? (hiredSwordBaseRating is { } baseRating ? baseRating + experience : (isLargeCreature ? 20 : 5) + experience);
         return perModel * headCount;
     }
 }

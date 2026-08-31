@@ -77,7 +77,7 @@ public class WarbandService : IWarbandService
         var warriors = await _db.Connection.Table<WarriorEntity>()
             .Where(w => w.WarbandId == warbandId && w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired)
             .ToListAsync();
-        return warriors.Sum(w => WarbandRatingRules.WarriorContribution(w.IsLargeCreature, w.Experience, w.HeadCount, w.HiredSwordBaseRating));
+        return warriors.Sum(w => WarbandRatingRules.WarriorContribution(w.IsLargeCreature, w.Experience, w.HeadCount, w.HiredSwordBaseRating, w.DramatisPersonaRatingBonus));
     }
 
     public async Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode)
@@ -195,6 +195,29 @@ public class WarbandService : IWarbandService
 
         foreach (var item in startingEquipment)
             await AddWarriorEquipmentAsync(warrior.Id, item);
+
+        return warrior;
+    }
+
+    public async Task<Warrior> RecruitDramatisPersonaAsync(int warbandId, DramatisPersona dramatisPersona, string name, IReadOnlyList<EquipmentItem> startingEquipment, IReadOnlyList<Skill> startingSkills)
+    {
+        await _db.Initialization;
+        var warrior = dramatisPersona.ToWarrior(name);
+        warrior.WarbandId = warbandId;
+        var entity = warrior.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        warrior.Id = entity.Id;
+
+        // Groupé par objet (ex. Bertha : deux Marteaux de Guerre Sigmarites, voir
+        // DramatisPersonae.json.startingEquipmentNames) - une seule WarriorEquipment row par objet distinct,
+        // Quantity = nombre d'occurrences, plutôt qu'une row par occurrence. La liste appelante (résolue
+        // depuis DramatisPersona.StartingEquipmentIds, qui garde les doublons) contiendrait sinon le même
+        // Id plusieurs fois - insérer une row par occurrence créerait autant de puces identiques sur la
+        // carte au lieu d'une seule "x2" (WarriorEquipment.NameDisplay, retour utilisateur 2026-09-01).
+        foreach (var group in startingEquipment.GroupBy(item => item.Id))
+            await AddWarriorEquipmentAsync(warrior.Id, group.First(), quantity: group.Count());
+        foreach (var skill in startingSkills)
+            await AddWarriorSkillAsync(warrior.Id, skill);
 
         return warrior;
     }

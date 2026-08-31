@@ -38,9 +38,9 @@
     "wounds": 2, "initiative": 4, "attacks": 3, "leadership": 10,
     "feeKind": "None",
     "ratingBonus": 105,
-    "isWanderer": false,
+    "isWanderer": true,
     "requiresRatingDisadvantage": true,
-    "startingEquipmentNames": ["Sigmarite Warhammer", "Gromril Armour", "Blessed Water", "Holy Relic"],
+    "startingEquipmentNames": [ "Sigmarite Warhammer", "Sigmarite Warhammer", "Gromril Armour", "Blessed Water", "Holy Relic" ],
     "skillNames": ["Mighty Blow", "Unstoppable Charge", "Righteous Fury"],
     "specialRules": [
       {

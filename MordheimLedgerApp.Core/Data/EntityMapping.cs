@@ -264,6 +264,59 @@ public static class EntityMapping
         IsLeader = false
     };
 
+    /// <summary>Recruits a Dramatis Persona (see Models.Library.DramatisPersona) as a Warrior row -
+    /// UNLIKE ToWarrior(this HiredSword, ...) above, IsHero is TRUE here (corrected 2026-09-01 against
+    /// the rulebook's own "Experience, Injuries and Equipment" section for special characters: "Special
+    /// characters do not earn Experience points, although they suffer serious injuries, just like
+    /// Heroes, if they are taken out of action" - the D66 Hero Serious Injury table, Captured/Sold to the
+    /// Pits sub-flows etc. in WarriorOutcomeRow are ALL gated on the plain Warrior.IsHero flag, not a
+    /// combined IsHero||IsHiredSword check like Advance-routing is - setting IsHero=true here gets that
+    /// entire Hero-shaped post-battle flow for free, matching the rulebook, instead of rerouting ~15
+    /// individual checks throughout that file to also recognize IsDramatisPersona). GainsExperience is
+    /// FALSE (same rulebook line: "do not earn Experience points") - this alone already keeps them out of
+    /// the Experience/Advance step entirely (see WarriorOutcomeRow.HasMilestone), so IsHero=true never
+    /// reintroduces XP/Advances for them. Roster grouping still keeps them out of the Heroes block (see
+    /// WarbandDetailViewModel.LoadAsync's Heroes filter, which excludes IsDramatisPersona explicitly) -
+    /// IsHero here only drives END-OF-GAME mechanics, not which visual roster group they land in.
+    /// CanUseEquipment false: "Only they may use this equipment; it can't be given to other warriors...
+    /// you cannot buy extra weapons or equipment for a special character" (same rulebook section) - their
+    /// fixed gear (DramatisPersona.StartingEquipmentIds) is inserted separately by the caller
+    /// (WarbandService.RecruitDramatisPersonaAsync), same as HiredSword.</summary>
+    public static Warrior ToWarrior(this DramatisPersona persona, string name) => new()
+    {
+        DramatisPersonaId = persona.Id,
+        DramatisPersonaRatingBonus = persona.RatingBonus,
+        Name = name,
+        IsHero = true,
+        Cost = persona.HireCost ?? 0,
+        Experience = 0,
+        HeadCount = 1,
+        Movement = persona.Movement,
+        WeaponSkill = persona.WeaponSkill,
+        BallisticSkill = persona.BallisticSkill,
+        Strength = persona.Strength,
+        Toughness = persona.Toughness,
+        Wounds = persona.Wounds,
+        Initiative = persona.Initiative,
+        Attacks = persona.Attacks,
+        Leadership = persona.Leadership,
+        StartingMovement = persona.Movement,
+        StartingWeaponSkill = persona.WeaponSkill,
+        StartingBallisticSkill = persona.BallisticSkill,
+        StartingStrength = persona.Strength,
+        StartingToughness = persona.Toughness,
+        StartingWounds = persona.Wounds,
+        StartingInitiative = persona.Initiative,
+        StartingAttacks = persona.Attacks,
+        StartingLeadership = persona.Leadership,
+        EquipmentListId = null,
+        CanUseEquipment = false,
+        AllowedSkillCategories = new List<Models.Library.SkillCategory>(),
+        IsLargeCreature = false,
+        GainsExperience = false,
+        IsLeader = false
+    };
+
     /// <summary>Henchman-to-Hero promotion (Advance roll 10-12, see HenchmanAdvanceTable.IsPromotion) -
     /// clones the group's LIVE stats/XP onto a brand-new Warrior rather than reseeding from
     /// WarriorArchetype.ToWarrior(), since the rulebook requires the promoted model to keep every
@@ -350,7 +403,10 @@ public static class EntityMapping
         Source = e.Source,
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
-        RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
+        RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        HatredTargetWarbandArchetypeIds = string.IsNullOrEmpty(e.HatredTargetWarbandArchetypeIds)
+            ? new List<int>()
+            : e.HatredTargetWarbandArchetypeIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList()
     };
 
     public static SkillEntity ToEntity(this Skill m) => new()
@@ -360,7 +416,8 @@ public static class EntityMapping
         Category = m.Category,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
-        ImagePath = m.ImagePath
+        ImagePath = m.ImagePath,
+        HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds)
     };
 
     public static HiredSword ToModel(this HiredSwordEntity e, IReadOnlyDictionary<string, string> translations,
@@ -862,6 +919,8 @@ public static class EntityMapping
         HiredSwordId = e.HiredSwordId,
         HiredSwordBaseRating = e.HiredSwordBaseRating,
         HiredSwordUpkeepPrepaid = e.HiredSwordUpkeepPrepaid,
+        DramatisPersonaId = e.DramatisPersonaId,
+        DramatisPersonaRatingBonus = e.DramatisPersonaRatingBonus,
         Name = e.Name,
         IsHero = e.IsHero,
         Cost = e.Cost,
@@ -923,6 +982,8 @@ public static class EntityMapping
         HiredSwordId = m.HiredSwordId,
         HiredSwordBaseRating = m.HiredSwordBaseRating,
         HiredSwordUpkeepPrepaid = m.HiredSwordUpkeepPrepaid,
+        DramatisPersonaId = m.DramatisPersonaId,
+        DramatisPersonaRatingBonus = m.DramatisPersonaRatingBonus,
         Name = m.Name,
         IsHero = m.IsHero,
         Cost = m.Cost,

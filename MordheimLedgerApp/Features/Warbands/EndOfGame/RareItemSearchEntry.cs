@@ -290,6 +290,24 @@ public partial class RareItemSearchEntry : ObservableObject
     [RelayCommand]
     private void AutoRollCharacter() => CharacterRoll = Random.Shared.Next(1, 7).ToString();
 
+    /// <summary>Whether the player wants this found character actually recruited - defaults true, same
+    /// "found usually means wanting it, but never automatic" spirit as WantsToBuy. No hire fee applied
+    /// yet regardless (see Models.Warrior.DramatisPersonaId's own doc - deliberately deferred), so unlike
+    /// WantsToBuy this never blocks the wizard on affordability.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsRecruited))]
+    private bool wantsToRecruit = true;
+
+    /// <summary>Consumed by WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync - a found character
+    /// actually joins the roster only if the player left "Recruter" checked.</summary>
+    public bool IsRecruited => IsCharacterFound && WantsToRecruit;
+
+    /// <summary>Unified "this entry has a positive result" regardless of mode - IsSuccess (Objet) or
+    /// IsCharacterFound (Personnage) depending on IsSearchingForCharacter. Feeds the shared Purchase step
+    /// list (EndOfGameDialogViewModel.RareItems.cs.RareItemsWithResults), which now shows a card per
+    /// successful search of EITHER kind.</summary>
+    public bool IsFound => IsSearchingForCharacter ? IsCharacterFound : IsSuccess;
+
     public RareItemSearchEntry(WarriorOutcomeRow hero, LocalizationService loc)
     {
         Hero = hero;

@@ -26,6 +26,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private readonly ISpellPickerService _spellPicker;
     private readonly IMutationPickerService _mutationPicker;
     private readonly IHiredSwordPickerService _hiredSwordPicker;
+    private readonly IDramatisPersonaPickerService _dramatisPersonaPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private List<HiredSword> _recruitableHiredSwords = new();
@@ -103,7 +104,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker)
+        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker,
+        IDramatisPersonaPickerService dramatisPersonaPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
@@ -114,6 +116,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         _spellPicker = spellPicker;
         _mutationPicker = mutationPicker;
         _hiredSwordPicker = hiredSwordPicker;
+        _dramatisPersonaPicker = dramatisPersonaPicker;
 
         // Le roster affiche des noms d'Équipement/Compétences/Blessures résolus dans la langue courante
         // - sans ça, ils resteraient périmés si la langue change pendant que cette page est déjà

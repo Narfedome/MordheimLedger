@@ -91,7 +91,15 @@ public class DramatisPersona
     /// warband is genuinely outmatched (e.g. Bertha - "will only come to the aid of a warband if their
     /// enemy has a higher warband rating") - see Core.Rules.RatingGapAidTable, extracted from her own
     /// mechanic so a future Dramatis Persona sharing this exact shape reuses the same table instead of
-    /// re-describing it in prose. False for every other character.</summary>
+    /// re-describing it in prose. False for every other character.
+    ///
+    /// Data-only, NOT wired into the End of Game wizard's "Personnage spécial" search (RareItemSearchEntry/
+    /// EndOfGameDialogViewModel.RareItems.cs) - realized 2026-08-31, in conversation with the user, that it
+    /// can't be: the Rating gap needs the NEXT battle's opponent, which isn't known yet at the end of the
+    /// CURRENT one. This check belongs to a future "Start of Game" flow (matching an opponent, comparing
+    /// Ratings) that doesn't exist in the app yet - not a gap in the End of Game wizard to fill later, a
+    /// different feature entirely. Leave this flag/RatingGapAidTable as-is (ready, unused) until that flow
+    /// exists rather than forcing it into the wizard.</summary>
     public bool RequiresRatingDisadvantage { get; set; }
 
     /// <summary>Empty = hireable by every warband. Non-empty = these WarbandArchetype ids only (e.g.

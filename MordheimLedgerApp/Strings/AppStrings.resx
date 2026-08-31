@@ -1316,6 +1316,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
     <value>Chercher un objet rare</value>
   </data>
+  <data name="EndOfGameCharacterSearchButton" xml:space="preserve">
+    <value>Chercher un personnage</value>
+  </data>
   <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
     <value>Rare {0}</value>
   </data>

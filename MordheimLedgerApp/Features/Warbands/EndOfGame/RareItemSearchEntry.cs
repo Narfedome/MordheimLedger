@@ -27,19 +27,14 @@ public partial class RareItemSearchEntry : ObservableObject
     /// special character cannot look for rare items", so this is a genuine either/or switch per Hero, not
     /// two independent searches (user request 2026-08-28: "un switch Hero/Objet... si on change de puce
     /// hero/objet, on reset la sélection" - toggling always clears BOTH sides' state, see
-    /// OnIsSearchingForCharacterChanged). CharacterName is a free-text placeholder for now (no Dramatis
-    /// Personae catalog yet - the user will send the real list later, at which point this becomes a real
-    /// picker like SelectedItem, same "ship the mechanic first" precedent as WarriorHatred.TargetFreeText).</summary>
+    /// OnIsSearchingForCharacterChanged).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasCharacterName))]
     private bool isSearchingForCharacter;
 
     partial void OnIsSearchingForCharacterChanged(bool value)
     {
         SelectedItem = null; // cascade via OnSelectedItemChanged: Material/Roll/WantsToBuy/PriceRoll
-        CharacterName = string.Empty;
-        CharacterRoll = string.Empty;
-        CharacterRollError = null;
+        SelectedCharacter = null; // cascade via OnSelectedCharacterChanged: Roll/RollError
     }
 
     /// <summary>Backs the two-segment switch in XAML (Objet/Personnage) - takes the target mode directly
@@ -235,13 +230,23 @@ public partial class RareItemSearchEntry : ObservableObject
     // --- Recherche de Personnage Spécial (livre, "Looking for special characters" p.146) - alternative
     // à la recherche d'objet rare ci-dessus, voir IsSearchingForCharacter -----------------------------
 
-    /// <summary>Free-typed placeholder for the special character sought - see IsSearchingForCharacter's
-    /// doc for why this isn't a real picker yet.</summary>
+    /// <summary>Null = aucun personnage choisi - une recherche est facultative, comme pour SelectedItem.
+    /// Choisi via DramatisPersonaPickerService (voir EndOfGameDialogViewModel.RareItems.cs), narrowé aux
+    /// personnages éligibles à la bande du Héros qui cherche (RestrictedToWarbandArchetypeIds).</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasCharacterName))]
-    private string characterName = string.Empty;
+    [NotifyPropertyChangedFor(nameof(HasSelectedCharacter))]
+    [NotifyPropertyChangedFor(nameof(HasCharacterResult))]
+    [NotifyPropertyChangedFor(nameof(IsCharacterFound))]
+    [NotifyPropertyChangedFor(nameof(CharacterResultDisplay))]
+    private DramatisPersona? selectedCharacter;
 
-    public bool HasCharacterName => !string.IsNullOrWhiteSpace(CharacterName);
+    partial void OnSelectedCharacterChanged(DramatisPersona? value)
+    {
+        CharacterRoll = string.Empty;
+        CharacterRollError = null;
+    }
+
+    public bool HasSelectedCharacter => SelectedCharacter is not null;
 
     /// <summary>Free-typed 1D6 roll, same "string Entry" idiom as every other roll in this wizard - no
     /// Core.Rules.RareItemSearchBonus here, the book only ever compares this roll to Initiative, nothing
@@ -266,10 +271,14 @@ public partial class RareItemSearchEntry : ObservableObject
 
     public int? CharacterTotalRoll => int.TryParse(CharacterRoll, out var r) ? r : null;
 
-    public bool HasCharacterResult => HasCharacterName && CharacterTotalRoll is not null;
+    public bool HasCharacterResult => HasSelectedCharacter && CharacterTotalRoll is not null;
 
     /// <summary>"If any of the searchers rolls under his Initiative he has located the special character" -
-    /// strictly UNDER, unlike the Rare Item search's "equal or greater" against Rarity above.</summary>
+    /// strictly UNDER, unlike the Rare Item search's "equal or greater" against Rarity above. Ne tient PAS
+    /// compte d'un éventuel DramatisPersona.RequiresRatingDisadvantage (ex. Bertha) et ne le fera jamais
+    /// ICI : ce jet compare l'écart de Valeur avec le PROCHAIN adversaire, qui n'est pas encore connu à la
+    /// fin de la partie courante (voir DramatisPersona.RequiresRatingDisadvantage) - un futur flux "Début
+    /// de partie" en sera responsable, pas ce wizard de Fin de Partie.</summary>
     public bool IsCharacterFound => HasCharacterResult && CharacterTotalRoll < CharacterInitiative;
 
     /// <summary>Same generic "Trouvé !"/"Introuvable" wording as ResultDisplay (Rare Item search) - the

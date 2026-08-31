@@ -92,16 +92,40 @@ public partial class EndOfGameDialogViewModel
     [RelayCommand]
     private void AutoRollRareItem(RareItemSearchEntry entry) => entry.Roll = (Random.Shared.Next(1, 7) + Random.Shared.Next(1, 7)).ToString();
 
+    /// <summary>Narrowed to this warband via _warbandArchetypeId (same idiom as SelectRareItem/
+    /// AllowedWarbandArchetypeId elsewhere) - a Dramatis Persona with a non-empty
+    /// RestrictedToWarbandArchetypeIds only shows up in the picker when this warband is in that list
+    /// (e.g. Veskit only for Skaven of Clan Eshin, Bertha only for Sisters of Sigmar). Picking again
+    /// replaces any previous choice and clears the roll state (see RareItemSearchEntry.
+    /// OnSelectedCharacterChanged). Single-select only (IDramatisPersonaPickerService.
+    /// PickDramatisPersonaAsync) - "you may only make one roll for each Hero", same rule as the Objet
+    /// side.</summary>
+    [RelayCommand]
+    private async Task SelectCharacter(RareItemSearchEntry entry)
+    {
+        var picked = await _dramatisPersonaPicker.PickDramatisPersonaAsync(_warbandArchetypeId);
+        if (picked is null) return;
+
+        entry.SelectedCharacter = picked;
+    }
+
+    [RelayCommand]
+    private Task ShowCharacterDetail(DramatisPersona character) => _detailDialogs.ShowDramatisPersonaDetailDialogAsync(character);
+
+    [RelayCommand]
+    private void ClearCharacter(RareItemSearchEntry entry) => entry.SelectedCharacter = null;
+
     /// <summary>Only a Hero with something actually searchable needs a roll - HasRarity is false for a
     /// common non-weapon item (nothing to roll against) or a common melee weapon with no material chosen
     /// yet, in both cases simply not a real search attempt (optional, per the book). Same idea on the
-    /// Personnage side: a name typed but no roll yet blocks Next, an empty name (nobody sought) doesn't.</summary>
+    /// Personnage side: a character picked but no roll yet blocks Next, nobody picked (nobody sought)
+    /// doesn't.</summary>
     private bool ValidateRareItemsStep()
     {
         var valid = true;
         foreach (var entry in RareItemSearchEntries.Where(e => !e.Hero.IsOutOfAction))
         {
-            if (entry.IsSearchingForCharacter && entry.HasCharacterName)
+            if (entry.IsSearchingForCharacter && entry.HasSelectedCharacter)
                 valid &= CheckRoll(entry.CharacterTotalRoll is null, () => entry.CharacterRollError = Loc["EndOfGameRollRequired"]);
             else if (!entry.IsSearchingForCharacter && entry.HasRarity)
                 valid &= CheckRoll(entry.TotalRoll is null, () => entry.RollError = Loc["EndOfGameRollRequired"]);

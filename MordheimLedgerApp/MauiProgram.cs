@@ -170,8 +170,10 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<HiredSwordSelectorPage>();
             builder.Services.AddSingleton<IHiredSwordPickerNavigationService, HiredSwordPickerNavigationService>();
             builder.Services.AddSingleton<IHiredSwordPickerService, HiredSwordPickerService>();
-            // Catalogue seul pour l'instant (pas de sélecteur/picker - voir Models.Library.DramatisPersona).
             builder.Services.AddTransient<DramatisPersonaViewModel>();
+            builder.Services.AddTransient<DramatisPersonaSelectorPage>();
+            builder.Services.AddSingleton<IDramatisPersonaPickerNavigationService, DramatisPersonaPickerNavigationService>();
+            builder.Services.AddSingleton<IDramatisPersonaPickerService, DramatisPersonaPickerService>();
             builder.Services.AddTransient<MagicSchoolViewModel>();
             builder.Services.AddTransient<MagicSchoolSelectorPage>();
             builder.Services.AddTransient<MagicSchoolListPage>();

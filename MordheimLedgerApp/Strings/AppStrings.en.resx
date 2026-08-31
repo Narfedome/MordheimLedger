@@ -1316,6 +1316,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
     <value>Search for a rare item</value>
   </data>
+  <data name="EndOfGameCharacterSearchButton" xml:space="preserve">
+    <value>Search for a character</value>
+  </data>
   <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
     <value>Rare {0}</value>
   </data>

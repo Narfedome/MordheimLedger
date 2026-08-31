@@ -49,6 +49,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly ILibraryService _libraryService;
     private readonly IHiredSwordPickerService _hiredSwordPicker;
     private readonly IEquipmentPickerService _equipmentPicker;
+    private readonly IDramatisPersonaPickerService _dramatisPersonaPicker;
     private readonly int _warbandArchetypeId;
 
     /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
@@ -325,13 +326,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
         _libraryService = libraryService;
         _hiredSwordPicker = hiredSwordPicker;
         _equipmentPicker = equipmentPicker;
+        _dramatisPersonaPicker = dramatisPersonaPicker;
         _warbandArchetypeId = warbandArchetypeId;
         _warbandArchetypeName = warbandArchetypeName;
         _pendingExplorationBonusDie = pendingExplorationBonusDie;

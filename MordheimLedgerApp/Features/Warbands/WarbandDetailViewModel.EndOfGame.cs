@@ -107,7 +107,7 @@ public partial class WarbandDetailViewModel
             ? new List<EquipmentItem>()
             : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, Warband.WarbandArchetypeId,
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;

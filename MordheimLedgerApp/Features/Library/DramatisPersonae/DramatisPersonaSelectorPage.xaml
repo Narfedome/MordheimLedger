@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.DramatisPersonae"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:picker="clr-namespace:MordheimLedgerApp.Components.PickerSelectorLayout"
+             x:Class="MordheimLedgerApp.Features.Library.DramatisPersonae.DramatisPersonaSelectorPage"
+             Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
+
+    <!-- Poussée nue (pas de NavigationPage, voir DramatisPersonaPickerService) - même raison/composant
+         que HiredSwordSelectorPage. Sélection unique uniquement pour l'instant (voir
+         IDramatisPersonaPickerService), pas de bascule SelectionMode. -->
+    <picker:PickerSelectorLayout Title="{loc:Loc LibTabDramatisPersonae}" BackCommand="{Binding CancelCommand}">
+        <local:DramatisPersonaView IsCrud="False"/>
+    </picker:PickerSelectorLayout>
+</ContentPage>

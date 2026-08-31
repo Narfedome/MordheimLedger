@@ -10,9 +10,12 @@ using MordheimLedgerApp.Services;
 namespace MordheimLedgerApp.Features.Library.DramatisPersonae;
 
 /// <summary>Catalog of Dramatis Personae/special characters (e.g. "Aenur, the Sword of Twilight") -
-/// CRUD only, no picker mode (unlike HiredSwordViewModel): catalog-only pass, not yet a recruitment
-/// source - see Models.Library.DramatisPersona's own doc. Flat list, no grouping, same "too few entries
-/// to warrant it" call as HiredSwordView.</summary>
+/// CRUD AND picker mode (added when the End of Game wizard's "Personnage spécial" search step started
+/// referencing the real catalog instead of free-text - see EndOfGameDialogViewModel.RareItems.cs) - same
+/// IsSelectorMode/SelectedRows/ConfirmSelection bascule as HiredSwordViewModel. Flat list, no grouping,
+/// same "too few entries to warrant it" call as HiredSwordView. Single-select only for now (see
+/// IDramatisPersonaPickerService) - SelectedRows still exists for symmetry with HiredSwordViewModel's
+/// Multiple mode, but nothing currently opens this picker with SelectionMode.Multiple.</summary>
 public partial class DramatisPersonaViewModel : BaseViewModel
 {
     private readonly ILibraryService _libraryService;
@@ -22,6 +25,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
     private readonly ISkillPickerService _skillPicker;
     private readonly ISpecialRulePickerService _specialRulePicker;
     private readonly IMagicSchoolPickerService _magicSchoolPicker;
+    private readonly IDramatisPersonaPickerNavigationService _pickerNavigation;
     private List<WarbandArchetype> _warbandArchetypes = new();
     private List<EquipmentItem> _equipmentItems = new();
 
@@ -31,9 +35,29 @@ public partial class DramatisPersonaViewModel : BaseViewModel
     [ObservableProperty]
     private DramatisPersonaRow? selectedRow;
 
+    /// <summary>Set by DramatisPersonaSelectorPage right after construction - même bascule que
+    /// HiredSwordViewModel.IsSelectorMode.</summary>
+    public bool IsSelectorMode { get; set; }
+
+    /// <summary>Multi-sélection en mode picker uniquement - alimentée par Select, vidée par LoadData.
+    /// Non utilisée pour l'instant (voir la doc de classe) mais gardée pour cohérence avec
+    /// HiredSwordViewModel si un futur appelant a besoin du mode Multiple.</summary>
+    public ObservableCollection<DramatisPersonaRow> SelectedRows { get; } = new();
+
+    public bool HasSelectedRows => SelectedRows.Count > 0 || SelectedRow != null;
+
+    /// <summary>Set by DramatisPersonaSelectorPage. Toujours Single pour l'instant.</summary>
+    public SelectionMode SelectionMode { get; set; }
+
+    /// <summary>Set by DramatisPersonaPickerService - narrowe aux Dramatis Personae éligibles à CETTE
+    /// bande (RestrictedToWarbandArchetypeIds vide ou la contenant). Null en usage Codex normal (CRUD),
+    /// où tout le catalogue doit rester visible.</summary>
+    public int? AllowedWarbandArchetypeId { get; set; }
+
     public DramatisPersonaViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs,
         IWarbandArchetypePickerService warbandPicker, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
-        ISpecialRulePickerService specialRulePicker, IMagicSchoolPickerService magicSchoolPicker)
+        ISpecialRulePickerService specialRulePicker, IMagicSchoolPickerService magicSchoolPicker,
+        IDramatisPersonaPickerNavigationService pickerNavigation)
     {
         _libraryService = libraryService;
         _detailDialogs = detailDialogs;
@@ -42,6 +66,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         _skillPicker = skillPicker;
         _specialRulePicker = specialRulePicker;
         _magicSchoolPicker = magicSchoolPicker;
+        _pickerNavigation = pickerNavigation;
 
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this,
             (r, m) => _ = ((DramatisPersonaViewModel)r).LoadData());
@@ -55,8 +80,14 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         _equipmentItems = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
 
-        DramatisPersonaRows = new ObservableCollection<DramatisPersonaRow>(items.Select(i => new DramatisPersonaRow(i)));
+        IEnumerable<DramatisPersona> filtered = items;
+        if (AllowedWarbandArchetypeId is { } warbandId)
+            filtered = filtered.Where(p => p.RestrictedToWarbandArchetypeIds.Count == 0 || p.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+
+        DramatisPersonaRows = new ObservableCollection<DramatisPersonaRow>(filtered.Select(i => new DramatisPersonaRow(i)));
         SelectedRow = null;
+        SelectedRows.Clear();
+        OnPropertyChanged(nameof(HasSelectedRows));
     }
 
     partial void OnSelectedRowChanged(DramatisPersonaRow? oldValue, DramatisPersonaRow? newValue)
@@ -66,7 +97,20 @@ public partial class DramatisPersonaViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Select(DramatisPersonaRow row) => SelectedRow = row;
+    private void Select(DramatisPersonaRow row)
+    {
+        if (!IsSelectorMode || SelectionMode == SelectionMode.Single)
+        {
+            SelectedRow = row;
+            OnPropertyChanged(nameof(HasSelectedRows));
+            return;
+        }
+
+        row.IsSelected = !row.IsSelected;
+        if (row.IsSelected) SelectedRows.Add(row);
+        else SelectedRows.Remove(row);
+        OnPropertyChanged(nameof(HasSelectedRows));
+    }
 
     [RelayCommand]
     private async Task Create()
@@ -79,6 +123,14 @@ public partial class DramatisPersonaViewModel : BaseViewModel
 
         await _libraryService.SaveDramatisPersonaAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
+
+        // Sélecteur : le "+" doit se comporter comme si on avait tapé la nouvelle tuile - coché et
+        // ajouté à SelectedRows/SelectedRow, sans fermer le picker.
+        if (IsSelectorMode)
+        {
+            var row = DramatisPersonaRows.FirstOrDefault(r => r.Item.Id == newItem.Id);
+            if (row != null) Select(row);
+        }
     }
 
     [RelayCommand]
@@ -143,4 +195,20 @@ public partial class DramatisPersonaViewModel : BaseViewModel
     /// WarbandArchetypeViewModel.ShowDetails.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
     private Task ShowDetails(DramatisPersonaRow row) => _detailDialogs.ShowDramatisPersonaDetailDialogAsync(row.Item);
+
+    [RelayCommand]
+    private async Task ConfirmSelection()
+    {
+        if (SelectionMode == SelectionMode.Single && SelectedRow != null)
+        {
+            await _pickerNavigation.ClosePickerAsync(new[] { SelectedRow.Item });
+            return;
+        }
+
+        var items = SelectedRows.Select(r => r.Item).ToList();
+        await _pickerNavigation.ClosePickerAsync(items);
+    }
+
+    [RelayCommand]
+    private async Task Cancel() => await _pickerNavigation.ClosePickerAsync(Array.Empty<DramatisPersona>());
 }

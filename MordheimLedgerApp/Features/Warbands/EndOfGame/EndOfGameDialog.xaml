@@ -1492,10 +1492,28 @@
                                         </Border>
                                     </Grid>
 
-                                    <!-- Côté Personnage spécial -->
+                                    <!-- Côté Personnage spécial - même motif "Chercher..." + ChipView tapable
+                                         que le côté Objet (SelectCharacterCommand ouvre le picker Dramatis
+                                         Personae, narrowé à cette bande - voir EndOfGameDialogViewModel.
+                                         RareItems.cs.SelectCharacter). -->
                                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter}">
-                                        <Entry Text="{Binding CharacterName}" Placeholder="{loc:Loc EndOfGameRareItemCharacterNamePh}"/>
-                                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasCharacterName}">
+                                        <components:IconTextButton IsVisible="{Binding HasSelectedCharacter, Converter={StaticResource InverseBoolConverter}}"
+                                                                    Icon="{x:Static icons:SolidFont.MagnifyingGlass}"
+                                                                    Text="{loc:Loc EndOfGameCharacterSearchButton}"
+                                                                    TextColor="{DynamicResource AppAccent}"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=SelectCharacterCommand}"
+                                                                    CommandParameter="{Binding .}"/>
+
+                                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedCharacter}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                                <components:ChipView Grid.Column="0" Item="{Binding SelectedCharacter}"
+                                                                      IconGlyph="{x:Static icons:RpgFont.RaDuel}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowCharacterDetailCommand}"/>
+                                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Xmark}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ClearCharacterCommand}"
+                                                                              CommandParameter="{Binding .}"/>
+                                            </Grid>
                                             <Label Text="{Binding CharacterInitiativeDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                             <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                                                 <Entry Grid.Column="0" Text="{Binding CharacterRoll}" Keyboard="Numeric"

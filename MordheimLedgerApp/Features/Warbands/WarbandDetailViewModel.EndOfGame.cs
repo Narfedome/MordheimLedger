@@ -911,24 +911,26 @@ public partial class WarbandDetailViewModel
         sentences.Add(string.Format(Loc["HistoryAvailableVeteransSentence"], pool));
     }
 
-    /// <summary>Étape "Objets rares" (livre, étape 6 - EndOfGameDialogViewModel.IsRareItemsStep) : chaque
-    /// recherche réussie (RareItemSearchEntry.IsSuccess) achète l'objet directement dans l'inventaire de
-    /// bande NON assigné (IWarbandService.AddWarbandEquipmentAsync, même flux qu'un objet trouvé en
-    /// Exploration - à équiper plus tard via WarbandInventoryDialog), payé tout de suite (Warband.Treasury
-    /// -= coût). Une arme commune forgée en Gromril/Ithilmar (SelectedMaterial non-null) coûte le prix de
-    /// base × le multiplicateur du matériau (Core.Rules.EquipmentPricing.CalculateCost, même formule
-    /// qu'un achat normal en Gromril/Ithilmar) et emporte la SpecialRule avec elle (MaterialRule, même
-    /// mécanisme que "Épée Ornée" - Charrette Renversée). Une recherche sans objet choisi ou ratée
-    /// (IsSuccess faux) ne fait rien pour ce Héros - aucune pénalité au livre en cas d'échec.</summary>
+    /// <summary>Étapes "Objets rares" + "Achat" (livre, étape 6, scindée en 2 - EndOfGameDialogViewModel.
+    /// IsRareItemsStep/IsRareItemPurchaseStep, retour utilisateur 2026-08-28 : jamais d'achat automatique
+    /// sur un jet réussi, une case "Acheter" décidée par le joueur sur une étape séparée) : chaque
+    /// recherche réellement ACHETÉE (RareItemSearchEntry.IsPurchased - jet réussi ET case cochée ET prix
+    /// définitivement connu, le step Achat bloquant Next si le total coché dépasserait la trésorerie) va
+    /// dans l'inventaire de bande NON assigné (IWarbandService.AddWarbandEquipmentAsync, même flux qu'un
+    /// objet trouvé en Exploration - à équiper plus tard via WarbandInventoryDialog), payé (Warband.
+    /// Treasury -= EffectiveCost, prix de base ajusté Gromril/Ithilmar si un matériau est attaché PLUS le
+    /// supplément de prix variable éventuel - voir RareItemSearchEntry.EffectiveCost/HasVariablePrice) et
+    /// emporte la SpecialRule avec elle (MaterialRule, même mécanisme que "Épée Ornée" - Charrette
+    /// Renversée). Une recherche sans objet choisi, ratée, ou décochée ne fait rien pour ce Héros -
+    /// aucune pénalité au livre dans aucun de ces cas.</summary>
     private async Task ApplyRareItemSearchAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
         if (Warband is null) return;
 
-        foreach (var entry in dialogViewModel.RareItemSearchEntries.Where(e => e.HasSelectedItem && e.IsSuccess))
+        foreach (var entry in dialogViewModel.RareItemSearchEntries.Where(e => e.IsPurchased))
         {
             var item = entry.SelectedItem!;
-            var cost = EquipmentPricing.CalculateCost(item.Cost, entry.SelectedMaterial?.CostMultiplier, isFree: false);
-            Warband.Treasury -= cost;
+            Warband.Treasury -= entry.EffectiveCost!.Value;
             await _warbandService.SaveWarbandAsync(Warband);
             await _warbandService.AddWarbandEquipmentAsync(Warband.Id, item, materialRule: entry.SelectedMaterial);
             var displayName = entry.SelectedMaterial is { } material ? $"{item.Name} ({material.Abbreviation})" : item.Name;

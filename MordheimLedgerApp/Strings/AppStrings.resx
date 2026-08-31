@@ -1265,6 +1265,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRareItemsIntro" xml:space="preserve">
     <value>Un jet de 2D6 au maximum par Héros vivant - facultatif, jamais obligatoire.</value>
   </data>
+  <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
+    <value>Trésorerie restante : {0} CO</value>
+  </data>
   <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
     <value>Chercher un objet rare</value>
   </data>
@@ -1279,6 +1282,18 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRareItemFailureFormat" xml:space="preserve">
     <value>Introuvable cette fois (jet total {0})</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseHeading" xml:space="preserve">
+    <value>Achat des objets trouvés</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
+    <value>Trésorerie insuffisante - décochez un objet ou ajustez les jets avant de continuer.</value>
+  </data>
+  <data name="EndOfGameRareItemFixedCostFormat" xml:space="preserve">
+    <value>{0} CO</value>
+  </data>
+  <data name="EndOfGameRareItemRollPricePrompt" xml:space="preserve">
+    <value>Effectuer le jet de valeur</value>
   </data>
   <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
     <value>Total des dés : {0} → Pierre magique trouvée : {1} éclat(s)</value>

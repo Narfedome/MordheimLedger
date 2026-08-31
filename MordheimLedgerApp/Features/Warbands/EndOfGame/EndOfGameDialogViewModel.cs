@@ -128,6 +128,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsWyrdstoneSaleStep))]
     [NotifyPropertyChangedFor(nameof(IsAvailableVeteransStep))]
     [NotifyPropertyChangedFor(nameof(IsRareItemsStep))]
+    [NotifyPropertyChangedFor(nameof(IsRareItemPurchaseStep))]
     [NotifyPropertyChangedFor(nameof(IsHiredSwordsStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
@@ -145,7 +146,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, HiredSwords, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -194,8 +195,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             steps.Add(new(StepKind.AvailableVeterans));
             // Objets rares (étape 6) : absente sans Héros éligible (survivant, pas Hors de combat cette
             // partie - "Warriors taken out of action during the last battle may not look for rare
-            // items"), même principe que WyrdstoneSale ci-dessus.
+            // items"), même principe que WyrdstoneSale ci-dessus. Achat : étape SÉPARÉE (retour
+            // utilisateur 2026-08-28 - jamais un achat automatique sur un jet réussi), absente si aucune
+            // recherche n'a abouti (voir Steps() recalculée à chaud - un jet raté à l'étape précédente ne
+            // laisse rien à acheter, cette carte disparaît d'elle-même).
             if (HasEligibleHeroesForRareItems) steps.Add(new(StepKind.RareItems));
+            if (RareItemSearchEntries.Any(e => e.IsSuccess)) steps.Add(new(StepKind.RareItemPurchase));
             // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
             // voir EndOfGameDialogViewModel.HiredSwords.cs. Placée après l'or d'Exploration (le joueur
             // décide en connaissant sa trésorerie finale, voir HiredSwordTreasuryAfter), entièrement
@@ -226,6 +231,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsWyrdstoneSaleStep => Current.Kind == StepKind.WyrdstoneSale;
     public bool IsAvailableVeteransStep => Current.Kind == StepKind.AvailableVeterans;
     public bool IsRareItemsStep => Current.Kind == StepKind.RareItems;
+    public bool IsRareItemPurchaseStep => Current.Kind == StepKind.RareItemPurchase;
     public bool IsHiredSwordsStep => Current.Kind == StepKind.HiredSwords;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
@@ -361,6 +367,34 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         RareItemSearchEntries = new ObservableCollection<RareItemSearchEntry>(
             WarriorRows.Where(r => r.Warrior.IsHero).Select(r => new RareItemSearchEntry(r, Loc)));
 
+        // L'étape Achat séparée (RareItemPurchase) et son total en direct (RareItemPurchaseRemainingTreasury)
+        // dépendent de IsSuccess/WantsToBuy/PriceRoll de chaque entrée - notifie StepLabel/IsLastStep
+        // (l'étape peut apparaître/disparaître) et le total à chaque changement, même idiome que la
+        // subscription WarriorRows ci-dessus.
+        foreach (var entry in RareItemSearchEntries)
+        {
+            entry.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName is nameof(RareItemSearchEntry.IsSuccess))
+                {
+                    OnPropertyChanged(nameof(StepLabel));
+                    OnPropertyChanged(nameof(IsLastStep));
+                    // Bug trouvé par test utilisateur : RareItemsWithResults n'est jamais notifiée sans
+                    // cette ligne, donc le BindableLayout de l'étape Achat (bound dessus) ne se rafraîchit
+                    // jamais après le chargement initial - la carte de l'étape reste vide même quand une
+                    // recherche vient de réussir.
+                    OnPropertyChanged(nameof(RareItemsWithResults));
+                }
+                if (e.PropertyName is nameof(RareItemSearchEntry.WantsToBuy) or nameof(RareItemSearchEntry.PriceRoll) or nameof(RareItemSearchEntry.IsSuccess))
+                {
+                    OnPropertyChanged(nameof(RareItemPurchaseTotalCost));
+                    OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasury));
+                    OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
+                    OnPropertyChanged(nameof(IsRareItemPurchaseBlocked));
+                }
+            };
+        }
+
         // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
         // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/
         // IsLastStep tout de suite pour que le joueur voie le compte à jour pendant qu'il coche des
@@ -413,6 +447,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             StepKind.ExplorationResult => ValidateExplorationResultStep(),
             StepKind.AvailableVeterans => ValidateAvailableVeteransStep(),
             StepKind.RareItems => ValidateRareItemsStep(),
+            StepKind.RareItemPurchase => ValidateRareItemPurchaseStep(),
             StepKind.HiredSwords => ValidateHiredSwordsStep(),
             _ => true
         };

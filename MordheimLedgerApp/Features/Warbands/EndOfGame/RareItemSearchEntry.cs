@@ -9,8 +9,12 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// <summary>One Hero's rare item search attempt (post-battle sequence step 6, "Rare items" - p.145):
 /// "Whenever a Hero wants to buy a rare item, roll 2D6 and compare the result to the [Rarity] number
 /// stated... You may also only make one roll for each Hero looking for rare items." Nominating an item
-/// is optional (a Hero may simply not search) - see EndOfGameDialogViewModel.RareItems.cs for the step
-/// this backs, one entry per living Hero not taken Out of Action this battle.</summary>
+/// is optional (a Hero may simply not search) - see EndOfGameDialogViewModel.RareItems.cs for the
+/// availability-roll step this backs (one entry per living Hero not taken Out of Action this battle) and
+/// the separate Purchase step (WantsToBuy/PriceRoll below) that follows it - a distinct step rather than
+/// an implicit auto-buy on success, per user request 2026-08-28: "1re étape : jet de dispo. Si roll
+/// réussi, 2e étape (nouveau step) Achat : case à cocher, jet de valeur pour les prix variables, bloquer
+/// le step si trésorerie négative."</summary>
 public partial class RareItemSearchEntry : ObservableObject
 {
     private readonly LocalizationService _loc;
@@ -19,8 +23,8 @@ public partial class RareItemSearchEntry : ObservableObject
     public string HeroName => Hero.Name;
 
     /// <summary>Null = not currently searching for anything - a Hero isn't required to make an attempt.
-    /// Picking a new item clears any previously chosen SelectedMaterial (see OnSelectedItemChanged) - a
-    /// material choice made for the last item never carries over to a different one.</summary>
+    /// Picking a new item clears any previously chosen SelectedMaterial/roll/purchase state (see
+    /// OnSelectedItemChanged) - nothing about the last item carries over to a different one.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedItem))]
     [NotifyPropertyChangedFor(nameof(IsMaterialEligible))]
@@ -29,6 +33,10 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasRarity))]
     [NotifyPropertyChangedFor(nameof(HasResult))]
     [NotifyPropertyChangedFor(nameof(IsSuccess))]
+    [NotifyPropertyChangedFor(nameof(HasVariablePrice))]
+    [NotifyPropertyChangedFor(nameof(CostDisplay))]
+    [NotifyPropertyChangedFor(nameof(EffectiveCost))]
+    [NotifyPropertyChangedFor(nameof(IsPurchased))]
     [NotifyPropertyChangedFor(nameof(ResultDisplay))]
     private EquipmentItem? selectedItem;
 
@@ -37,6 +45,9 @@ public partial class RareItemSearchEntry : ObservableObject
         SelectedMaterial = null;
         Roll = string.Empty;
         RollError = null;
+        WantsToBuy = true;
+        PriceRoll = string.Empty;
+        PriceRollError = null;
     }
 
     /// <summary>Only meaningful when IsMaterialEligible - a common melee weapon (Rarity null) forged in
@@ -50,6 +61,9 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasRarity))]
     [NotifyPropertyChangedFor(nameof(HasResult))]
     [NotifyPropertyChangedFor(nameof(IsSuccess))]
+    [NotifyPropertyChangedFor(nameof(CostDisplay))]
+    [NotifyPropertyChangedFor(nameof(EffectiveCost))]
+    [NotifyPropertyChangedFor(nameof(IsPurchased))]
     [NotifyPropertyChangedFor(nameof(ResultDisplay))]
     private SpecialRule? selectedMaterial;
 
@@ -69,6 +83,7 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(TotalRoll))]
     [NotifyPropertyChangedFor(nameof(HasResult))]
     [NotifyPropertyChangedFor(nameof(IsSuccess))]
+    [NotifyPropertyChangedFor(nameof(IsPurchased))]
     [NotifyPropertyChangedFor(nameof(ResultDisplay))]
     private string roll = string.Empty;
 
@@ -116,14 +131,80 @@ public partial class RareItemSearchEntry : ObservableObject
 
     public bool HasResult => EffectiveRarity is not null && TotalRoll is not null;
 
-    /// <summary>"If the roll is equal or greater, the item is available." False (not null) once HasResult
-    /// is true and the roll falls short - IsVisible bindings in XAML key off HasResult, not this, to tell
-    /// "no result yet" apart from "found nothing".</summary>
+    /// <summary>"If the roll is equal or greater, the item is available." Purely about the DICE - whether
+    /// the Hero actually WALKS AWAY with the item is a separate question, decided on the following
+    /// Purchase step (WantsToBuy) rather than automatically here. False (not null) once HasResult is true
+    /// and the roll falls short - IsVisible bindings in XAML key off HasResult, not this, to tell "no
+    /// result yet" apart from "found nothing".</summary>
     public bool IsSuccess => HasResult && TotalRoll >= EffectiveRarity;
 
     public string ResultDisplay => !HasResult
         ? string.Empty
         : string.Format(_loc[IsSuccess ? "EndOfGameRareItemSuccessFormat" : "EndOfGameRareItemFailureFormat"], TotalRoll);
+
+    // --- Étape Achat (livre, suite de la même étape 6 - séparée en carte à part, voir
+    // EndOfGameDialogViewModel.IsRareItemPurchaseStep) -------------------------------------------
+
+    /// <summary>Null = fixed price (EquipmentItem.Cost alone). Non-null = a random supplement must be
+    /// rolled on top before the real price is known (e.g. "10 gc + 1D6") - user request 2026-08-28,
+    /// "attention au prix variable !", a gap the first pass of this step missed entirely.</summary>
+    public bool HasVariablePrice => SelectedItem?.CostRandomMax is not null;
+
+    /// <summary>The fixed part of the price, already Gromril/Ithilmar-adjusted if a material is attached
+    /// (Core.Rules.EquipmentPricing.CalculateCost, same formula as a normal purchase) - the random
+    /// supplement (PriceRoll) is always additive on top of this, never itself multiplied by the material.</summary>
+    public int? BaseCost => SelectedItem is null ? null : EquipmentPricing.CalculateCost(SelectedItem.Cost, SelectedMaterial?.CostMultiplier, isFree: false);
+
+    /// <summary>Fixed price: the real number straight away ("18 gc"). Variable price, not yet rolled: a
+    /// prompt to roll it rather than a vague "18 gc + up to 18 gc" range (user request 2026-08-28: "on
+    /// roll mais on ne sait pas exactement combien ça coûte" - the range was more confusing than helpful).
+    /// Variable price, rolled: the real resolved total ("140 gc"), same as a fixed price from that point
+    /// on - EffectiveCost, not BaseCost, once it's known.</summary>
+    public string CostDisplay => !HasVariablePrice
+        ? (BaseCost is { } fixedCost ? string.Format(_loc["EndOfGameRareItemFixedCostFormat"], fixedCost) : string.Empty)
+        : EffectiveCost is { } resolvedCost
+            ? string.Format(_loc["EndOfGameRareItemFixedCostFormat"], resolvedCost)
+            : _loc["EndOfGameRareItemRollPricePrompt"];
+
+    /// <summary>Free-typed roll for the random price supplement - only relevant/shown when
+    /// HasVariablePrice is true. Blank (not 0) while unrolled, same "string Entry" idiom as every other
+    /// roll in this wizard.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PriceSupplement))]
+    [NotifyPropertyChangedFor(nameof(EffectiveCost))]
+    [NotifyPropertyChangedFor(nameof(CostDisplay))]
+    [NotifyPropertyChangedFor(nameof(IsPurchased))]
+    private string priceRoll = string.Empty;
+
+    [ObservableProperty]
+    private string? priceRollError;
+
+    partial void OnPriceRollChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) PriceRollError = null; }
+
+    /// <summary>0 for a fixed-price item (nothing to roll) - null for a variable-price item whose
+    /// supplement hasn't been rolled yet, distinguishing "no extra cost" from "price not yet known".</summary>
+    public int? PriceSupplement => !HasVariablePrice ? 0 : (int.TryParse(PriceRoll, out var r) ? r : null);
+
+    /// <summary>The real total gc cost - null while the price isn't fully known yet (variable-price item,
+    /// supplement not rolled). Never computed until BOTH BaseCost and PriceSupplement resolve, so a
+    /// premature "affordable" read never happens on a half-rolled price.</summary>
+    public int? EffectiveCost => BaseCost is { } b && PriceSupplement is { } s ? b + s : null;
+
+    /// <summary>Whether the player wants this find bought at all - defaults true (finding it usually means
+    /// wanting it), but purchase is never automatic/implicit: the player can still decline (e.g. to keep
+    /// gold for something else), and the whole Purchase step blocks progression if the CHECKED total
+    /// would exceed the warband's treasury (see EndOfGameDialogViewModel.RareItemPurchaseRemainingTreasury) -
+    /// there's deliberately no per-entry "can't afford" auto-skip here, unlike an earlier pass of this
+    /// step. Only meaningful when IsSuccess.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPurchased))]
+    private bool wantsToBuy = true;
+
+    /// <summary>The item is bought - treasury debited, added to the band's (unassigned) stash with its
+    /// material attached - only if all three hold: the availability roll succeeded, the player left
+    /// "Acheter" checked, and the price is fully known (fixed, or a variable supplement already rolled).
+    /// Consumed by WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync.</summary>
+    public bool IsPurchased => IsSuccess && WantsToBuy && EffectiveCost.HasValue;
 
     public RareItemSearchEntry(WarriorOutcomeRow hero, LocalizationService loc)
     {

@@ -1265,6 +1265,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemsIntro" xml:space="preserve">
     <value>At most one 2D6 roll per living Hero - optional, never required.</value>
   </data>
+  <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
+    <value>Remaining treasury: {0} gc</value>
+  </data>
   <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
     <value>Search for a rare item</value>
   </data>
@@ -1279,6 +1282,18 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameRareItemFailureFormat" xml:space="preserve">
     <value>Not found this time (total roll {0})</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseHeading" xml:space="preserve">
+    <value>Buying what you found</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
+    <value>Not enough gold - uncheck an item or adjust the rolls before continuing.</value>
+  </data>
+  <data name="EndOfGameRareItemFixedCostFormat" xml:space="preserve">
+    <value>{0} gc</value>
+  </data>
+  <data name="EndOfGameRareItemRollPricePrompt" xml:space="preserve">
+    <value>Roll for the price</value>
   </data>
   <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
     <value>Dice total: {0} → Wyrdstone found: {1} shard(s)</value>

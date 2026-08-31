@@ -1436,7 +1436,7 @@
                        IsVisible="{Binding VeteranExperienceRollError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
-            <!-- Étape : Objets rares (livre, étape 6) - une carte par Héros vivant non Hors de combat
+            <!-- Étape : Objets rares (livre, étape 6a) - une carte par Héros vivant non Hors de combat
                  (RareItemSearchEntries construite une fois pour tous les Héros dans le constructeur -
                  IsVisible masque ceux Hors de combat plutôt que les retirer, voir HasEligibleHeroesForRareItems).
                  Chaque recherche est optionnelle : "Chercher un objet" ouvre le Trading Post complet en
@@ -1446,7 +1446,9 @@
                  l'Armurerie ci-dessus - RareItemSearchEntry.IsMaterialEligible/EffectiveRarity), auquel cas
                  c'est la Rareté DU MATÉRIAU qui est recherchée, pas celle (absente) de l'arme. Jet de 2D6 +
                  bonus éventuel (Core.Rules.RareItemSearchBonus, ex. gemmes du Bijoutier) comparé à cette
-                 Rareté. Entièrement absente si aucun Héros n'est éligible (voir Steps). -->
+                 Rareté. Cette étape détermine SEULEMENT IsSuccess - l'achat proprement dit se décide sur
+                 l'étape séparée suivante (IsRareItemPurchaseStep, voir plus bas - jamais automatique, retour
+                 utilisateur 2026-08-28). Entièrement absente si aucun Héros n'est éligible (voir Steps). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRareItemsStep}">
                 <Label Text="{loc:Loc EndOfGameRareItemsHeading}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameRareItemsIntro}" TextColor="{DynamicResource AppTextMuted}"/>
@@ -1559,6 +1561,57 @@
                                             </Label>
                                         </VerticalStackLayout>
                                     </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape : Achat des objets rares trouvés (livre, étape 6b - séparée de la recherche, retour
+                 utilisateur 2026-08-28 : jamais un achat automatique sur un jet réussi). Une carte par
+                 recherche RÉUSSIE (RareItemsWithResults) - une recherche ratée n'apparaît pas ici. Case
+                 "Acheter" décochable (WantsToBuy, coché par défaut) ; si l'objet a un prix variable
+                 (HasVariablePrice, ex. "10 CO + 1D6"), un jet de supplément doit être fait avant de
+                 connaître le prix réel ("attention au prix variable !"). Trésorerie restante recalculée en
+                 direct (RareItemPurchaseRemainingTreasury) ; le bouton Suivant du wizard reste actif mais
+                 ValidateRareItemPurchaseStep bloque le passage si le total coché dépasserait la trésorerie
+                 (IsRareItemPurchaseBlocked, bandeau dédié ci-dessous) plutôt que de sauter silencieusement
+                 l'achat impayable comme une première passe de cette étape le faisait. Entièrement absente
+                 si aucune recherche n'a abouti (voir Steps). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRareItemPurchaseStep}">
+                <Label Text="{loc:Loc EndOfGameRareItemPurchaseHeading}" FontAttributes="Bold"/>
+                <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameRareItemPurchaseBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsRareItemPurchaseBlocked}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RareItemsWithResults}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:RareItemSearchEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding HeroName}" FontAttributes="Bold"/>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                        <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
+                                                              IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareItemDetailCommand}"/>
+                                        <Label Grid.Column="1" Text="{Binding CostDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <CheckBox Grid.Column="2" IsChecked="{Binding WantsToBuy}" VerticalOptions="Center"/>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding HasVariablePrice}">
+                                        <Entry Grid.Column="0" Text="{Binding PriceRoll}" Keyboard="Numeric"
+                                               Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollRarePriceCommand}"
+                                                                      CommandParameter="{Binding .}"
+                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    </Grid>
+                                    <Label Text="{Binding PriceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                           IsVisible="{Binding PriceRollError, Converter={StaticResource IsNotNullConverter}}"/>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>

@@ -728,6 +728,51 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="HiredSwordEditTitle" xml:space="preserve">
     <value>Edit Hired Sword</value>
   </data>
+  <data name="LibTabDramatisPersonae" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="DramatisPersonaNamePh" xml:space="preserve">
+    <value>Character name</value>
+  </data>
+  <data name="DramatisPersonaFeeKindPh" xml:space="preserve">
+    <value>Fee type</value>
+  </data>
+  <data name="DramatisPersonaFeeKindGold" xml:space="preserve">
+    <value>Gold (hire fee + upkeep)</value>
+  </data>
+  <data name="DramatisPersonaFeeKindNone" xml:space="preserve">
+    <value>Free (conditional)</value>
+  </data>
+  <data name="DramatisPersonaFeeKindWyrdstone" xml:space="preserve">
+    <value>Wyrdstone</value>
+  </data>
+  <data name="DramatisPersonaFeeKindPair" xml:space="preserve">
+    <value>Shared fee (pair)</value>
+  </data>
+  <data name="DramatisPersonaFeeNone" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="DramatisPersonaFeeWyrdstone" xml:space="preserve">
+    <value>Wyrdstone</value>
+  </data>
+  <data name="DramatisPersonaFeePairFormat" xml:space="preserve">
+    <value>{0} gc (pair)</value>
+  </data>
+  <data name="DramatisPersonaRatingBonusPh" xml:space="preserve">
+    <value>Warband Rating</value>
+  </data>
+  <data name="DramatisPersonaIsWandererPh" xml:space="preserve">
+    <value>Wanderer (one battle only)</value>
+  </data>
+  <data name="DramatisPersonaRequiresRatingDisadvantagePh" xml:space="preserve">
+    <value>Only aids if the enemy warband has a higher Rating (Rating-gap table)</value>
+  </data>
+  <data name="DramatisPersonaCreateTitle" xml:space="preserve">
+    <value>New Dramatis Persona</value>
+  </data>
+  <data name="DramatisPersonaEditTitle" xml:space="preserve">
+    <value>Edit Dramatis Persona</value>
+  </data>
   <data name="MutationNamePh" xml:space="preserve">
     <value>Mutation name</value>
   </data>
@@ -1294,6 +1339,18 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameRareItemRollPricePrompt" xml:space="preserve">
     <value>Roll for the price</value>
+  </data>
+  <data name="EndOfGameRareItemModeObjectLabel" xml:space="preserve">
+    <value>Rare item</value>
+  </data>
+  <data name="EndOfGameRareItemModeCharacterLabel" xml:space="preserve">
+    <value>Special character</value>
+  </data>
+  <data name="EndOfGameRareItemCharacterNamePh" xml:space="preserve">
+    <value>Name of the character sought</value>
+  </data>
+  <data name="EndOfGameRareItemCharacterInitiativeFormat" xml:space="preserve">
+    <value>Initiative {0}</value>
   </data>
   <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
     <value>Dice total: {0} → Wyrdstone found: {1} shard(s)</value>

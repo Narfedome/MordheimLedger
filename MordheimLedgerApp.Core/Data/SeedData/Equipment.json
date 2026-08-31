@@ -2460,5 +2460,82 @@
         }
       }
     ]
+  },
+  {
+    "name": { "en": "Ienh-Khain", "fr": "Ienh-Khain" },
+    "category": "MeleeWeapon",
+    "cost": 0,
+    "isUniqueArtefact": true,
+    "description": {
+      "en": "The Hand of Khaine - an incredibly long single-edged sword carried by the Elf swordsman Aenur (see Dramatis Personae). Never for sale, never found on the Exploration chart - it belongs to Aenur alone.",
+      "fr": "La Main de Khaine - une épée à un tranchant, d'une longueur incroyable, portée par l'escrimeur elfe Aenur (voir Dramatis Personae). Jamais à vendre, jamais trouvée sur la table d'Exploration - elle n'appartient qu'à Aenur."
+    },
+    "specialRules": [
+      { "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } },
+      {
+        "name": { "en": "Ienh-Khain's Edge", "fr": "Tranchant d'Ienh-Khain" },
+        "description": {
+          "en": "This sword adds +1 to its wielder's Strength, and causes a critical hit on a roll of 5-6 (instead of the usual unmodified 6) when rolling to wound.",
+          "fr": "Cette épée ajoute +1 à la Force de son porteur, et inflige un coup critique sur un jet de 5-6 (au lieu du 6 non modifié habituel) lors du jet pour blesser."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Wizard's Staff (Nicodemus)", "fr": "Bâton de Sorcier (Nicodemus)" },
+    "category": "MeleeWeapon",
+    "cost": 0,
+    "isUniqueArtefact": true,
+    "description": {
+      "en": "The enormous staff carried by the cursed pilgrim Nicodemus (see Dramatis Personae). Never for sale, never found on the Exploration chart - it belongs to Nicodemus alone.",
+      "fr": "L'énorme bâton porté par le pèlerin maudit Nicodemus (voir Dramatis Personae). Jamais à vendre, jamais trouvé sur la table d'Exploration - il n'appartient qu'à Nicodemus."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Two-Handed Grip", "fr": "Prise à Deux Mains" },
+        "description": {
+          "en": "Used two-handed, the staff counts as a Club and also lets its wielder parry as if armed with a buckler. Used one-handed (as a Club) it frees the other hand to cast the Sword of Rezhebel spell - that spell-sword cannot itself be used to parry, being a spell and not a real weapon.",
+          "fr": "Utilisé à deux mains, le bâton compte comme un Gourdin et permet aussi à son porteur de parer comme s'il portait une rondache. Utilisé à une main (comme un Gourdin), il libère l'autre main pour lancer le sort Épée de Rezhebel - cette épée-sort ne peut elle-même pas parer, étant un sort et non une véritable arme."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "Eshin Fighting Claws (Veskit)", "fr": "Griffes de Combat d'Eshin (Veskit)" },
+    "category": "MeleeWeapon",
+    "cost": 0,
+    "isUniqueArtefact": true,
+    "description": {
+      "en": "Veskit's own sorcerously-modified Fighting Claws (see Dramatis Personae) - each incorporates a built-in Warplock Pistol, distinct from the plain Fighting Claws any Clan Eshin warrior may buy. Never for sale, never found on the Exploration chart - they belong to Veskit alone.",
+      "fr": "Les Griffes de Combat de Veskit, modifiées par sorcellerie (voir Dramatis Personae) - chacune intègre un Pistolet Verminique, à la différence des simples Griffes de Combat que tout guerrier du Clan Eshin peut acheter. Jamais à vendre, jamais trouvées sur la table d'Exploration - elles n'appartiennent qu'à Veskit."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Integrated Warplock Pistol", "fr": "Pistolet Verminique Intégré" },
+        "description": {
+          "en": "Each claw incorporates a built-in Warplock Pistol, letting the wielder shoot every turn regardless of movement. In close combat the wielder fights at Strength 5 with a -3 armour save modifier, and may still parry twice (once per claw).",
+          "fr": "Chaque griffe intègre un Pistolet Verminique, permettant à son porteur de tirer à chaque tour quel que soit son déplacement. Au corps à corps, le porteur combat à Force 5 avec un modificateur de sauvegarde d'armure de -3, et peut toujours parer deux fois (une fois par griffe)."
+        }
+      }
+    ]
+  },
+  {
+    "name": { "en": "The Noctu", "fr": "Le Noctu" },
+    "category": "MiscellaneousEquipment",
+    "cost": 0,
+    "isUniqueArtefact": true,
+    "description": {
+      "en": "A black jewel stolen by Marianna Chevaux from the Lahmian Vampire Serutat's crypt (see Dramatis Personae). Never for sale, never found on the Exploration chart - it belongs to Marianna alone.",
+      "fr": "Un joyau noir dérobé par Marianna Chevaux dans la crypte de la Vampire Lahmienne Serutat (voir Dramatis Personae). Jamais à vendre, jamais trouvé sur la table d'Exploration - il n'appartient qu'à Marianna."
+    },
+    "specialRules": [
+      {
+        "name": { "en": "Veil of Shadow", "fr": "Voile d'Ombre" },
+        "description": {
+          "en": "The gemstone's cloaking properties reduce all shooting to-hit rolls against its bearer by -1.",
+          "fr": "Les propriétés de camouflage de la pierre réduisent de -1 tous les jets pour toucher au tir dirigés contre son porteur."
+        }
+      }
+    ]
   }
 ]

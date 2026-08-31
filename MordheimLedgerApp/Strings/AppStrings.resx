@@ -728,6 +728,51 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="HiredSwordEditTitle" xml:space="preserve">
     <value>Modifier le franc-tireur</value>
   </data>
+  <data name="LibTabDramatisPersonae" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="DramatisPersonaNamePh" xml:space="preserve">
+    <value>Nom du personnage</value>
+  </data>
+  <data name="DramatisPersonaFeeKindPh" xml:space="preserve">
+    <value>Type de frais</value>
+  </data>
+  <data name="DramatisPersonaFeeKindGold" xml:space="preserve">
+    <value>Or (engagement + entretien)</value>
+  </data>
+  <data name="DramatisPersonaFeeKindNone" xml:space="preserve">
+    <value>Gratuit (conditionnel)</value>
+  </data>
+  <data name="DramatisPersonaFeeKindWyrdstone" xml:space="preserve">
+    <value>Pierre magique</value>
+  </data>
+  <data name="DramatisPersonaFeeKindPair" xml:space="preserve">
+    <value>Frais partagés (paire)</value>
+  </data>
+  <data name="DramatisPersonaFeeNone" xml:space="preserve">
+    <value>Gratuit</value>
+  </data>
+  <data name="DramatisPersonaFeeWyrdstone" xml:space="preserve">
+    <value>Pierre magique</value>
+  </data>
+  <data name="DramatisPersonaFeePairFormat" xml:space="preserve">
+    <value>{0} CO (paire)</value>
+  </data>
+  <data name="DramatisPersonaRatingBonusPh" xml:space="preserve">
+    <value>Valeur de bande</value>
+  </data>
+  <data name="DramatisPersonaIsWandererPh" xml:space="preserve">
+    <value>Vagabond (une seule bataille)</value>
+  </data>
+  <data name="DramatisPersonaRequiresRatingDisadvantagePh" xml:space="preserve">
+    <value>N'aide que si la bande adverse a une Valeur supérieure (barème écart de Valeur)</value>
+  </data>
+  <data name="DramatisPersonaCreateTitle" xml:space="preserve">
+    <value>Nouveau Dramatis Persona</value>
+  </data>
+  <data name="DramatisPersonaEditTitle" xml:space="preserve">
+    <value>Modifier le Dramatis Persona</value>
+  </data>
   <data name="MutationNamePh" xml:space="preserve">
     <value>Nom de la mutation</value>
   </data>
@@ -1294,6 +1339,18 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRareItemRollPricePrompt" xml:space="preserve">
     <value>Effectuer le jet de valeur</value>
+  </data>
+  <data name="EndOfGameRareItemModeObjectLabel" xml:space="preserve">
+    <value>Objet rare</value>
+  </data>
+  <data name="EndOfGameRareItemModeCharacterLabel" xml:space="preserve">
+    <value>Personnage spécial</value>
+  </data>
+  <data name="EndOfGameRareItemCharacterNamePh" xml:space="preserve">
+    <value>Nom du personnage recherché</value>
+  </data>
+  <data name="EndOfGameRareItemCharacterInitiativeFormat" xml:space="preserve">
+    <value>Initiative {0}</value>
   </data>
   <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
     <value>Total des dés : {0} → Pierre magique trouvée : {1} éclat(s)</value>

@@ -1601,4 +1601,22 @@ public class RulesTests
     {
         Assert.Equal(expectedShards, WyrdstoneShardsTable.GetShards(diceTotal));
     }
+
+    // --- RatingGapAidTable ---------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(0, null)]
+    [InlineData(49, null)]
+    [InlineData(50, 6)]
+    [InlineData(99, 6)]
+    [InlineData(100, 5)]
+    [InlineData(149, 5)]
+    [InlineData(150, 4)]
+    [InlineData(199, 4)]
+    [InlineData(200, 3)]
+    [InlineData(500, 3)]
+    public void RatingGapAidTable_GetRequiredRoll_MatchesBerthasTable(int ratingDifference, int? expectedRoll)
+    {
+        Assert.Equal(expectedRoll, RatingGapAidTable.GetRequiredRoll(ratingDifference));
+    }
 }

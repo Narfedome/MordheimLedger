@@ -364,6 +364,11 @@ public class AppDatabase
         await _db.CreateTableAsync<HiredSwordEquipmentEntity>();
         await _db.CreateTableAsync<WarbandArchetypeHiredSwordEntity>();
         await _db.CreateTableAsync<HiredSwordSpecialRuleEntity>();
+        await _db.CreateTableAsync<DramatisPersonaEntity>();
+        await _db.CreateTableAsync<DramatisPersonaSpecialRuleEntity>();
+        await _db.CreateTableAsync<WarbandArchetypeDramatisPersonaEntity>();
+        await _db.CreateTableAsync<DramatisPersonaEquipmentEntity>();
+        await _db.CreateTableAsync<DramatisPersonaSkillEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -408,6 +413,11 @@ public class AppDatabase
         await _db.DropTableAsync<HiredSwordEquipmentEntity>();
         await _db.DropTableAsync<WarbandArchetypeHiredSwordEntity>();
         await _db.DropTableAsync<HiredSwordSpecialRuleEntity>();
+        await _db.DropTableAsync<DramatisPersonaEntity>();
+        await _db.DropTableAsync<DramatisPersonaSpecialRuleEntity>();
+        await _db.DropTableAsync<WarbandArchetypeDramatisPersonaEntity>();
+        await _db.DropTableAsync<DramatisPersonaEquipmentEntity>();
+        await _db.DropTableAsync<DramatisPersonaSkillEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -423,6 +433,7 @@ public class AppDatabase
         _mutationIdsByEnglishName.Clear();
         _magicSchoolIdsByEnglishName.Clear();
         _equipmentIdsByEnglishName.Clear();
+        _skillIdsByEnglishName.Clear();
         _racialProfileIdsByEnglishName.Clear();
         _warbandArchetypeIdsByFileStem.Clear();
         _pendingSharedRestrictions.Clear();
@@ -485,6 +496,14 @@ public class AppDatabase
         await SeedWarbandFromJsonAsync("SkavenOfClanEshin.json");
         await SeedWarbandFromJsonAsync("SistersOfSigmar.json");
         await SeedWarbandFromJsonAsync("Kislevites.json");
+
+        // Après les 15 bandes (pas avant, contrairement à HiredSwords) : certains personnages référencent
+        // par nom une Compétence propre à une bande (ex. Bertha/"Righteous Fury", propre aux Sœurs de
+        // Sigmar - RestrictedToThisWarband dans SistersOfSigmar.json) via _skillIdsByEnglishName, qui
+        // n'existe donc qu'une fois cette bande seedée. Conséquence positive : plus besoin de la passe de
+        // résolution différée pour RestrictedToWarbandNames (voir SeedDramatisPersonaeAsync) - chaque
+        // WarbandArchetypeId existe déjà, résolu directement via _warbandArchetypeIdsByFileStem.
+        await SeedDramatisPersonaeAsync();
 
         // Deferred resolution: common-catalog entries (Equipment/Skill/Mutation) that named several
         // bands via RestrictedToWarbandNames couldn't resolve a WarbandArchetypeId at seed time, since
@@ -735,6 +754,7 @@ public class AppDatabase
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
             var skillEntity = skill.ToEntity();
             await _db.InsertAsync(skillEntity);
+            _skillIdsByEnglishName[sk.Name.En] = skillEntity.Id;
 
             if (sk.RestrictedToThisWarband)
                 await _db.InsertAsync(new WarbandArchetypeSkillEntity { WarbandArchetypeId = warbandEntity.Id, SkillId = skillEntity.Id });
@@ -809,7 +829,8 @@ public class AppDatabase
                 GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
                 GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
                 IsSellable = eq.IsSellable,
-                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice
+                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
+                IsUniqueArtefact = eq.IsUniqueArtefact
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -849,6 +870,7 @@ public class AppDatabase
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
             var skillEntity = skill.ToEntity();
             await _db.InsertAsync(skillEntity);
+            _skillIdsByEnglishName[sk.Name.En] = skillEntity.Id;
 
             if (sk.RestrictedToWarbandNames is { Count: > 0 } skWarbandNames)
                 _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Skill, skillEntity.Id, skWarbandNames));
@@ -902,6 +924,72 @@ public class AppDatabase
 
             if (hs.RestrictedToWarbandNames is { Count: > 0 } hsWarbandNames)
                 _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.HiredSword, entity.Id, hsWarbandNames));
+        }
+    }
+
+    /// <summary>Plain insert, no dedup - the only source of DramatisPersona data in the seed pipeline.
+    /// Runs AFTER all 15 SeedWarbandFromJsonAsync calls (unlike SeedHiredSwordsAsync, which runs before
+    /// them) - some characters reference a band-exclusive Skill by name (e.g. Bertha/"Righteous Fury",
+    /// RestrictedToThisWarband in SistersOfSigmar.json), which only exists in _skillIdsByEnglishName once
+    /// that band has seeded. Side benefit: every WarbandArchetypeId already exists by this point, so
+    /// RestrictedToWarbandNames resolves directly via _warbandArchetypeIdsByFileStem - no deferred-
+    /// resolution pass needed here, unlike Equipment/Skill/Mutation/HiredSword (see
+    /// SeedOfficialContentAsync).</summary>
+    private async Task SeedDramatisPersonaeAsync()
+    {
+        foreach (var dp in await LoadSeedArrayAsync<DramatisPersonaSeedData>("DramatisPersonae.json"))
+        {
+            var persona = new DramatisPersona
+            {
+                Movement = dp.Movement,
+                WeaponSkill = dp.WeaponSkill,
+                BallisticSkill = dp.BallisticSkill,
+                Strength = dp.Strength,
+                Toughness = dp.Toughness,
+                Wounds = dp.Wounds,
+                Initiative = dp.Initiative,
+                Attacks = dp.Attacks,
+                Leadership = dp.Leadership,
+                FeeKind = Enum.Parse<DramatisPersonaHireFeeKind>(dp.FeeKind),
+                HireCost = dp.HireCost,
+                Upkeep = dp.Upkeep,
+                RatingBonus = dp.RatingBonus,
+                IsWanderer = dp.IsWanderer,
+                RequiresRatingDisadvantage = dp.RequiresRatingDisadvantage,
+                Source = ContentSource.Official
+            };
+            if (dp.MagicSchoolName is { } magicSchoolName)
+                persona.MagicSchoolId = await FindOrCreateMagicSchoolAsync(new MagicSchoolSeedData { Name = magicSchoolName });
+            persona.NameKey = await SeedTranslationAsync(dp.Name.En, dp.Name.Fr);
+            persona.DescriptionKey = dp.Description is null ? null : await SeedTranslationAsync(dp.Description.En, dp.Description.Fr);
+            var entity = persona.ToEntity();
+            await _db.InsertAsync(entity);
+
+            foreach (var sr in dp.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new DramatisPersonaSpecialRuleEntity { DramatisPersonaId = entity.Id, SpecialRuleId = ruleId });
+            }
+
+            foreach (var itemName in dp.StartingEquipmentNames)
+            {
+                if (!_equipmentIdsByEnglishName.TryGetValue(itemName, out var itemId))
+                    throw new InvalidOperationException($"DramatisPersonae.json references unknown equipment '{itemName}'");
+                await _db.InsertAsync(new DramatisPersonaEquipmentEntity { DramatisPersonaId = entity.Id, EquipmentItemId = itemId });
+            }
+
+            foreach (var skillName in dp.SkillNames)
+            {
+                if (!_skillIdsByEnglishName.TryGetValue(skillName, out var skillId))
+                    throw new InvalidOperationException($"DramatisPersonae.json references unknown skill '{skillName}'");
+                await _db.InsertAsync(new DramatisPersonaSkillEntity { DramatisPersonaId = entity.Id, SkillId = skillId });
+            }
+
+            if (dp.RestrictedToWarbandNames is { Count: > 0 } dpWarbandNames)
+            {
+                foreach (var stem in dpWarbandNames)
+                    await _db.InsertAsync(new WarbandArchetypeDramatisPersonaEntity { DramatisPersonaId = entity.Id, WarbandArchetypeId = _warbandArchetypeIdsByFileStem[stem] });
+            }
         }
     }
 
@@ -1321,6 +1409,11 @@ public class AppDatabase
     /// Warrior-Priest for Witch Hunters, Heroines for Sisters of Sigmar - one catalog row, two sets of
     /// restriction rows). Also consumed when resolving EquipmentListSeedData.ItemNames.</summary>
     private readonly Dictionary<string, int> _equipmentIdsByEnglishName = new();
+
+    /// <summary>English Name -> SkillEntity id, populated by SeedSkillsAsync - same purpose as
+    /// _equipmentIdsByEnglishName, needed to resolve DramatisPersonaSeedData.SkillNames (a Dramatis
+    /// Persona's fixed known-skills list, not a WarriorArchetype pick-from-category Advance table).</summary>
+    private readonly Dictionary<string, int> _skillIdsByEnglishName = new();
 
     /// <summary>Warband JSON file stem (e.g. "Reiklanders", from SeedWarbandFromJsonAsync's fileName
     /// without extension) -> WarbandArchetypeEntity id, populated as each of the 15 warband files seeds.

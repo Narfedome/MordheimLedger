@@ -236,5 +236,12 @@
       "en": "The warrior can scale even the highest wall or fence with ease, climbing up or down a height equal to twice his normal Movement without needing an Initiative test.",
       "fr": "Ce guerrier peut escalader avec aisance même les murs ou clôtures les plus hauts. Il peut grimper ou descendre une hauteur égale à deux fois son Mouvement normal, sans avoir besoin de réussir de test d'Initiative pour cela."
     }
+  },
+  {
+    "name": { "en": "Knife Fighter", "fr": "Combattant au Couteau" }, "category": "Combat",
+    "description": {
+      "en": "The warrior is a master of fighting with knives and daggers. When armed with two or more knives/daggers in close combat, he gains +1 Attack. TO VERIFY against the rulebook - added 2026-08-31 alongside the Dramatis Personae catalog (Johann the Knife/Marquand Volker), not sourced from a directly-checked rulebook excerpt.",
+      "fr": "Ce guerrier est passé maître dans l'art du combat au couteau et à la dague. Lorsqu'il est armé d'au moins deux couteaux/dagues en corps à corps, il gagne +1 Attaque. À VÉRIFIER contre le livre de règles - ajoutée le 2026-08-31 avec le catalogue des Dramatis Personae (Johann le Couteau/Marquand Volker), pas issue d'un extrait du livre directement consulté."
+    }
   }
 ]

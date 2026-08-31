@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit.DramatisPersonaDetailDialog"
+               x:DataType="local:DramatisPersonaDetailDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <dialogs:StableHeightScrollView>
+        <VerticalStackLayout Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc DramatisPersonaFeeKindPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding FeeKindDisplay}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="4" IsVisible="{Binding HasHireCost}">
+                    <Label Text="{loc:Loc HiredSwordHireCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.HireCost}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding HasUpkeep}">
+                    <Label Text="{loc:Loc HiredSwordUpkeepPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.Upkeep}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                    <Label Text="{loc:Loc DramatisPersonaRatingBonusPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding Item.RatingBonus}" TextColor="{DynamicResource AppText}"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <HorizontalStackLayout Spacing="6" IsVisible="{Binding Item.IsWanderer}">
+                <Label Text="{x:Static icons:SolidFont.PersonWalkingArrowRight}" FontFamily="FontSolid" FontSize="12"
+                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                <Label Text="{loc:Loc DramatisPersonaIsWandererPh}" VerticalOptions="Center" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            </HorizontalStackLayout>
+
+            <!-- Voir Core.Rules.RatingGapAidTable - le barème précis reste en texte libre dans
+                 Description (comme le reste des mécaniques élaborées propres à un personnage), ce
+                 drapeau signale juste que ce personnage utilise LE barème générique plutôt qu'un
+                 mécanisme entièrement sur-mesure. -->
+            <HorizontalStackLayout Spacing="6" IsVisible="{Binding Item.RequiresRatingDisadvantage}">
+                <Label Text="{x:Static icons:SolidFont.ScaleUnbalanced}" FontFamily="FontSolid" FontSize="12"
+                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                <Label Text="{loc:Loc DramatisPersonaRequiresRatingDisadvantagePh}" VerticalOptions="Center" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+
+            <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementDisplay}"/>
+
+            <!-- ChipView (pas ChipListView) : l'icône varie par catégorie (SkillCategoryIconConverter),
+                 même motif que la carte guerrier. -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc TabSkills}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Skills}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:Skill">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaDetailDialogViewModel}}, Path=ShowSkillDetailCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- ChipView (pas ChipListView) : l'icône varie par catégorie d'équipement, même motif que
+                 HiredSwordDetailDialog. -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:EquipmentItem">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaDetailDialogViewModel}}, Path=ShowStartingEquipmentDetailCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding Item.SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
+
+            <components:ChipListView HeaderText="{loc:Loc HiredSwordMagicSchoolPh}"
+                                      ItemsSource="{Binding MagicSchools}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowMagicSchoolDetailCommand}"/>
+
+            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                      AlwaysShowSection="True"
+                                      ItemsSource="{Binding RestrictedWarbands}"
+                                      IconGlyph="{x:Static icons:SolidFont.Users}"
+                                      Command="{Binding ShowWarbandDetailCommand}"/>
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+    </Border>
+</dialogs:DialogContent>

@@ -233,6 +233,10 @@ public class EquipmentSeedData
 
     /// <summary>See EquipmentItem.GrantsBonusExplorationDice. Null for almost every item.</summary>
     public int? GrantsBonusExplorationDice { get; set; }
+
+    /// <summary>See EquipmentItem.IsUniqueArtefact. False/absent for almost every item - true only for a
+    /// one-of-a-kind item permanently tied to a single owner (e.g. a Dramatis Persona's unique gear).</summary>
+    public bool IsUniqueArtefact { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -417,6 +421,63 @@ public class HiredSwordSeedData
     /// file's SpecialRules/Mutations stubs (see CLAUDE.md's "données communes centralisées" note):
     /// resolved via the same FindOrCreateMagicSchoolAsync cache SeedMagicSchoolsAsync already populates
     /// from MagicSchools.json, whichever of the two seeds first.</summary>
+    public LocalizedText? MagicSchoolName { get; set; }
+}
+
+/// <summary>One named "Dramatis Persona"/special character (Data/SeedData/DramatisPersonae.json, a
+/// single shared catalog seeded like HiredSwords.json - not declared per-band) - see
+/// Models.Library.DramatisPersona for why this is a separate, deliberately smaller shape than
+/// HiredSwordSeedData (no AllowedSkillCategories/StartingEquipmentNames: these characters don't advance
+/// or shop, their gear/skills stay part of Description).</summary>
+public class DramatisPersonaSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+
+    public int Movement { get; set; }
+    public int WeaponSkill { get; set; }
+    public int BallisticSkill { get; set; }
+    public int Strength { get; set; }
+    public int Toughness { get; set; }
+    public int Wounds { get; set; }
+    public int Initiative { get; set; }
+    public int Attacks { get; set; }
+    public int Leadership { get; set; }
+
+    /// <summary>Matches MordheimLedgerApp.Core.Models.Library.DramatisPersonaHireFeeKind member names
+    /// ("Gold"/"None"/"Wyrdstone"/"Pair") - see that enum's doc.</summary>
+    public string FeeKind { get; set; } = nameof(MordheimLedgerApp.Core.Models.Library.DramatisPersonaHireFeeKind.Gold);
+
+    public int? HireCost { get; set; }
+    public int? Upkeep { get; set; }
+    public int RatingBonus { get; set; }
+    public bool IsWanderer { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.RequiresRatingDisadvantage - false for almost every
+    /// character.</summary>
+    public bool RequiresRatingDisadvantage { get; set; }
+
+    /// <summary>Same mechanism as HiredSwordSeedData.RestrictedToWarbandNames - null/empty = hireable by
+    /// every warband.</summary>
+    public List<string>? RestrictedToWarbandNames { get; set; }
+
+    /// <summary>Every clean, single-effect rule (reused or genuinely unique to this character) - found-
+    /// or-created the same way as HiredSwordSeedData.SpecialRules. Only real branching/multi-step systems
+    /// stay free text in Description instead (see DramatisPersona's own doc).</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
+    /// <summary>English Name(s) of EquipmentSeedData entries - same resolution as
+    /// HiredSwordSeedData.StartingEquipmentNames (runs after SeedEquipmentAsync, resolved against
+    /// _equipmentIdsByEnglishName, throws on an unknown name).</summary>
+    public List<string> StartingEquipmentNames { get; set; } = new();
+
+    /// <summary>English Name(s) of SkillSeedData entries this character already knows (e.g. Aenur:
+    /// "Strike to Injure") - resolved against _skillIdsByEnglishName (runs after SeedSkillsAsync, throws
+    /// on an unknown name, same fail-fast precedent as StartingEquipmentNames).</summary>
+    public List<string> SkillNames { get; set; } = new();
+
+    /// <summary>See Models.Library.DramatisPersona.MagicSchoolId - same name-only stub idiom as
+    /// HiredSwordSeedData.MagicSchoolName.</summary>
     public LocalizedText? MagicSchoolName { get; set; }
 }
 

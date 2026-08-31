@@ -419,6 +419,68 @@ public static class EntityMapping
         AllowedSkillCategories = m.AllowedSkillCategories.Count == 0 ? null : string.Join(',', m.AllowedSkillCategories)
     };
 
+    public static DramatisPersona ToModel(this DramatisPersonaEntity e, IReadOnlyDictionary<string, string> translations,
+        IReadOnlyDictionary<int, List<int>>? restrictions = null,
+        IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByDramatisPersonaId = null,
+        IReadOnlyDictionary<int, List<int>>? startingEquipmentByDramatisPersonaId = null,
+        IReadOnlyDictionary<int, List<Skill>>? skillsByDramatisPersonaId = null,
+        IReadOnlyDictionary<int, MagicSchool>? magicSchoolsById = null) => new()
+    {
+        Id = e.Id,
+        Name = ResolveName(e.NameKey, translations),
+        Description = ResolveDescription(e.DescriptionKey, translations),
+        NameKey = e.NameKey,
+        DescriptionKey = e.DescriptionKey,
+        Source = e.Source,
+        ImagePath = e.ImagePath ?? string.Empty,
+        Movement = e.Movement,
+        WeaponSkill = e.WeaponSkill,
+        BallisticSkill = e.BallisticSkill,
+        Strength = e.Strength,
+        Toughness = e.Toughness,
+        Wounds = e.Wounds,
+        Initiative = e.Initiative,
+        Attacks = e.Attacks,
+        Leadership = e.Leadership,
+        FeeKind = e.FeeKind,
+        HireCost = e.HireCost,
+        Upkeep = e.Upkeep,
+        RatingBonus = e.RatingBonus,
+        IsWanderer = e.IsWanderer,
+        RequiresRatingDisadvantage = e.RequiresRatingDisadvantage,
+        RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        SpecialRules = specialRulesByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<SpecialRule>(),
+        StartingEquipmentIds = startingEquipmentByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<int>(),
+        Skills = skillsByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<Skill>(),
+        MagicSchoolId = e.MagicSchoolId,
+        MagicSchool = e.MagicSchoolId is { } magicSchoolId ? magicSchoolsById?.GetValueOrDefault(magicSchoolId) : null
+    };
+
+    public static DramatisPersonaEntity ToEntity(this DramatisPersona m) => new()
+    {
+        Id = m.Id,
+        NameKey = m.NameKey ?? string.Empty,
+        DescriptionKey = m.DescriptionKey,
+        Source = m.Source,
+        ImagePath = m.ImagePath,
+        Movement = m.Movement,
+        WeaponSkill = m.WeaponSkill,
+        BallisticSkill = m.BallisticSkill,
+        Strength = m.Strength,
+        Toughness = m.Toughness,
+        Wounds = m.Wounds,
+        Initiative = m.Initiative,
+        Attacks = m.Attacks,
+        Leadership = m.Leadership,
+        FeeKind = m.FeeKind,
+        HireCost = m.HireCost,
+        Upkeep = m.Upkeep,
+        RatingBonus = m.RatingBonus,
+        IsWanderer = m.IsWanderer,
+        RequiresRatingDisadvantage = m.RequiresRatingDisadvantage,
+        MagicSchoolId = m.MagicSchoolId
+    };
+
     public static Injury ToModel(this InjuryEntity e, IReadOnlyDictionary<string, string> translations,
         IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByInjuryId = null) => new()
     {
@@ -627,7 +689,8 @@ public static class EntityMapping
         GrantsSpecificSkillName = e.GrantsSpecificSkillName,
         GrantsRareItemSearchBonus = e.GrantsRareItemSearchBonus,
         IsSellable = e.IsSellable,
-        GrantsBonusExplorationDice = e.GrantsBonusExplorationDice
+        GrantsBonusExplorationDice = e.GrantsBonusExplorationDice,
+        IsUniqueArtefact = e.IsUniqueArtefact
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -778,7 +841,8 @@ public static class EntityMapping
         GrantsSpecificSkillName = m.GrantsSpecificSkillName,
         GrantsRareItemSearchBonus = m.GrantsRareItemSearchBonus,
         IsSellable = m.IsSellable,
-        GrantsBonusExplorationDice = m.GrantsBonusExplorationDice
+        GrantsBonusExplorationDice = m.GrantsBonusExplorationDice,
+        IsUniqueArtefact = m.IsUniqueArtefact
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>

@@ -104,6 +104,18 @@ public class EquipmentItem
     /// everything else - see Models.WarbandEquipment.IsSellable, which checks both.</summary>
     public bool IsSellable { get; set; }
 
+    /// <summary>True for a one-of-a-kind item permanently tied to a single owner (e.g. Aenur's sword
+    /// Ienh-Khain, a Dramatis Persona's unique starting gear - see DramatisPersona.StartingEquipmentIds)
+    /// - never purchasable at the Trading Post or addable to a starting EquipmentList regardless of
+    /// Category, unlike EquipmentCategory.MagicalArtefact which is reserved specifically for the
+    /// rulebook's 6 canonical Magical Artefacts (Core.Rules.MagicalArtefactTable) and shouldn't be
+    /// repurposed for this. Same exclusion point as MagicalArtefact (see
+    /// EquipmentItemViewModel.ApplyFilter's AllowedWarbandArchetypeId branch) - Codex/CRUD browsing and
+    /// any detail/recap dialog still show it normally, only purchase/recruitment pickers hide it.
+    /// Seed-only for now (no EquipmentItemEditDialog UI), same precedent as GrantsSkillCategory/
+    /// RestrictedToWarriorArchetypeIds.</summary>
+    public bool IsUniqueArtefact { get; set; }
+
     /// <summary>Null for almost every item. Non-null marks an item that grants this many EXTRA dice to
     /// the warband's post-battle Exploration roll while carried by a warrior (e.g. the All-seeing Eye
     /// of Numas - Œil Omniscient de Numas: "roll two dice instead of one for the bearer"). Computed live

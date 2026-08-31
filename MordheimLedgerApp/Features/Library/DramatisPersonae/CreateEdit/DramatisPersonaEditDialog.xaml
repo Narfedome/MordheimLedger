@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit.DramatisPersonaEditDialog"
+               x:DataType="local:DramatisPersonaEditDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <Grid RowDefinitions="*,Auto" RowSpacing="16">
+        <dialogs:StableHeightScrollView Grid.Row="0">
+        <VerticalStackLayout Spacing="16">
+            <Label Text="{Binding Title}"
+                   Style="{StaticResource DialogTitleLabelStyle}"/>
+            <VerticalStackLayout Spacing="4">
+                <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc DramatisPersonaNamePh}"/>
+                            <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Entry Text="{Binding Item.Name}"/>
+                <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc DramatisPersonaFeeKindPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Picker ItemsSource="{Binding FeeKindOptions}"
+                        SelectedItem="{Binding SelectedFeeKindLabel}"/>
+            </VerticalStackLayout>
+
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                    <Label Text="{loc:Loc HiredSwordHireCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.HireCost}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                    <Label Text="{loc:Loc HiredSwordUpkeepPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Upkeep}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="2" Spacing="4">
+                    <Label Text="{loc:Loc DramatisPersonaRatingBonusPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.RatingBonus}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+            </Grid>
+
+            <HorizontalStackLayout Spacing="10">
+                <CheckBox IsChecked="{Binding Item.IsWanderer}" VerticalOptions="Center"/>
+                <Label Text="{loc:Loc DramatisPersonaIsWandererPh}" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <!-- Barème écart de Valeur -> jet requis (Core.Rules.RatingGapAidTable) - générique, extrait
+                 du mécanisme propre de Bertha pour être réutilisable par un futur Dramatis Persona du même
+                 genre, plutôt que recodé en texte libre à chaque fois. -->
+            <HorizontalStackLayout Spacing="10">
+                <CheckBox IsChecked="{Binding Item.RequiresRatingDisadvantage}" VerticalOptions="Center"/>
+                <Label Text="{loc:Loc DramatisPersonaRequiresRatingDisadvantagePh}" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Editor Text="{Binding Item.Description}" HeightRequest="160"/>
+            </VerticalStackLayout>
+
+            <!-- Profil - même composant/mode édition que HiredSwordEditDialog. -->
+            <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
+
+            <!-- Compétences déjà connues (ex. Aenur : Frapper pour Blesser, Escrimeur Expert...) - liste
+                 fixe (pas de choix de catégorie à la Progression) - ChipView (pas ChipListView) car
+                 l'icône varie par catégorie (SkillCategoryIconConverter), même motif que la carte
+                 guerrier (WarbandDetailPage.xaml). -->
+            <VerticalStackLayout Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc TabSkills}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddSkillCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:Skill">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaEditDialogViewModel}}, Path=RemoveSkillCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- Équipement de départ fixe (ex. Aenur : Armure d'Ithilmar, Cape Elfique, Ienh-Khain) - même
+                 motif ChipView/EquipmentCategoryIconConverter que HiredSwordEditDialog. -->
+            <VerticalStackLayout Spacing="4">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Plus}"
+                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                  Command="{Binding AddStartingEquipmentCommand}"/>
+                </Grid>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:EquipmentItem">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaEditDialogViewModel}}, Path=ShowStartingEquipmentDetailCommand}"
+                                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaEditDialogViewModel}}, Path=RemoveStartingEquipmentCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- Chaque règle propre (réutilisée ou unique à ce personnage, mais un effet simple/nommable
+                 - ex. "Invincible Swordsman") - les systèmes à embranchements/étapes multiples restent en
+                 texte libre dans Description, pas de chip pour ceux-là. -->
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"
+                                      AddCommand="{Binding AddSpecialRuleCommand}"
+                                      RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+
+            <!-- École de magie propre (ex. Nicodemus/Magie Mineure) - 0 ou 1 élément seulement, même
+                 principe que HiredSwordEditDialog. -->
+            <components:ChipListView HeaderText="{loc:Loc HiredSwordMagicSchoolPh}"
+                                      ItemsSource="{Binding MagicSchools}"
+                                      EmptyHintText="{loc:Loc HiredSwordNoMagicSchool}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowMagicSchoolDetailCommand}"
+                                      AddCommand="{Binding AddMagicSchoolCommand}"
+                                      RemoveCommand="{Binding RemoveMagicSchoolCommand}"/>
+
+            <!-- Peut être engagé par (bandes) : vide = commun à toutes les bandes. -->
+            <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
+
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="10">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding CancelCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding SaveCommand}"/>
+        </Grid>
+        </Grid>
+    </Border>
+</dialogs:DialogContent>

@@ -2,6 +2,7 @@ using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Features.Library.HiredSwords.CreateEdit;
 using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
@@ -49,6 +50,7 @@ public interface IDetailDialogService
     Task ShowSpecialRuleDetailDialogAsync(SpecialRule item);
     Task ShowMutationDetailDialogAsync(Mutation item);
     Task ShowHiredSwordDetailDialogAsync(HiredSword item);
+    Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item);
     Task ShowSpellDetailDialogAsync(Spell item);
     Task ShowInjuryDetailDialogAsync(Injury item);
 }
@@ -140,6 +142,25 @@ public class DetailDialogService : IDetailDialogService
             : (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == item.MagicSchool.Id).ToList();
 
         await ShowAsync(new HiredSwordDetailDialog(new HiredSwordDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands, magicSchoolSpells, this)));
+    }
+
+    public async Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item)
+    {
+        var language = LocalizationService.Instance.Language;
+        var allWarbands = await _libraryService.GetWarbandArchetypesAsync(language);
+        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var startingEquipment = item.StartingEquipmentIds.Count == 0
+            ? new List<EquipmentItem>()
+            : (await _libraryService.GetEquipmentItemsAsync(language)).Where(e => item.StartingEquipmentIds.Contains(e.Id)).ToList();
+
+        var magicSchoolSpells = item.MagicSchool is null
+            ? new List<Spell>()
+            : (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == item.MagicSchool.Id).ToList();
+
+        await ShowAsync(new DramatisPersonaDetailDialog(new DramatisPersonaDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands, magicSchoolSpells, this)));
     }
 
     public Task ShowSpellDetailDialogAsync(Spell item) =>

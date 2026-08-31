@@ -206,6 +206,97 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Single(allWizardRules);
     }
 
+    /// <summary>DramatisPersonae.json (Grade 1A, catalog-only pass - see Models.Library.DramatisPersona)
+    /// - locks in the count, the varied hire-fee shapes (Gold/None/Wyrdstone/Pair), a Wanderer flag, a
+    /// single-warband restriction (Veskit: Skaven only), a reused common SpecialRule (Marianna's "Causes
+    /// Fear"/"Immune to Poison"/"Immune to Psychology"), and a shared MagicSchool stub resolving to the
+    /// same catalog row Nicodemus/Bertha both reference ("Lesser Magic"/"Prayers of Sigmar").</summary>
+    [Fact]
+    public async Task DramatisPersonae_SeedFullGrade1ARoster()
+    {
+        var personae = await _library.GetDramatisPersonaeAsync("en");
+        Assert.Equal(8, personae.Count);
+
+        var aenur = Assert.Single(personae, p => p.Name.StartsWith("Aenur"));
+        Assert.Equal(ContentSource.Official, aenur.Source);
+        Assert.Equal(DramatisPersonaHireFeeKind.Gold, aenur.FeeKind);
+        Assert.Equal(150, aenur.HireCost);
+        Assert.Null(aenur.Upkeep);
+        Assert.Equal(100, aenur.RatingBonus);
+        Assert.True(aenur.IsWanderer);
+        Assert.Single(aenur.SpecialRules, r => r.Name == "Invincible Swordsman");
+        Assert.Equal(7, aenur.Skills.Count);
+        Assert.Contains(aenur.Skills, s => s.Name == "Expert Swordsman");
+
+        var equipment = await _library.GetEquipmentItemsAsync("en");
+        var aenurEquipmentNames = equipment.Where(e => aenur.StartingEquipmentIds.Contains(e.Id)).Select(e => e.Name).ToList();
+        Assert.Equal(new[] { "Elven Cloak", "Ienh-Khain", "Ithilmar Armour" }, aenurEquipmentNames.OrderBy(n => n));
+
+        // Ienh-Khain/Wizard's Staff (Nicodemus)/Eshin Fighting Claws (Veskit)/The Noctu - unique to one
+        // Dramatis Persona each, never purchasable at the Trading Post regardless of Category (see
+        // EquipmentItem.IsUniqueArtefact, distinct from EquipmentCategory.MagicalArtefact which is
+        // reserved for the rulebook's own 6 canonical Magical Artefacts).
+        var ienhKhain = equipment.Single(e => e.Name == "Ienh-Khain");
+        Assert.True(ienhKhain.IsUniqueArtefact);
+        Assert.Equal(0, ienhKhain.Cost);
+        Assert.Contains(ienhKhain.SpecialRules, r => r.Name == "Parry (Sword)");
+
+        // "Parry (Sword)" is the same shared SpecialRule every other Sword/Scimitar already carries
+        // (find-or-create by name) - confirms Ienh-Khain's stub found the existing row.
+        var allParrySwordRules = (await _library.GetSpecialRulesAsync("en")).Where(r => r.Name == "Parry (Sword)").ToList();
+        Assert.Single(allParrySwordRules);
+
+        var warbands = await _library.GetWarbandArchetypesAsync("en");
+        Assert.Equal(12, aenur.RestrictedToWarbandArchetypeIds.Count);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Undead").Id, aenur.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Skaven of Clan Eshin").Id, aenur.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Cult of the Possessed").Id, aenur.RestrictedToWarbandArchetypeIds);
+
+        var bertha = Assert.Single(personae, p => p.Name.StartsWith("Bertha"));
+        Assert.Equal(DramatisPersonaHireFeeKind.None, bertha.FeeKind);
+        Assert.Null(bertha.HireCost);
+        Assert.Single(bertha.RestrictedToWarbandArchetypeIds, warbands.Single(w => w.Name == "The Sisters of Sigmar").Id);
+        Assert.Equal("Prayers of Sigmar", bertha.MagicSchool?.Name);
+        Assert.True(bertha.RequiresRatingDisadvantage);
+
+        var nicodemus = Assert.Single(personae, p => p.Name.StartsWith("Nicodemus"));
+        Assert.Equal(DramatisPersonaHireFeeKind.Wyrdstone, nicodemus.FeeKind);
+        Assert.Null(nicodemus.HireCost);
+        Assert.Equal("Lesser Magic", nicodemus.MagicSchool?.Name);
+
+        var marianna = Assert.Single(personae, p => p.Name.StartsWith("Countess Marianna"));
+        Assert.Equal(new[] { "Causes Fear", "Immune to Poison", "Immune to Psychology", "No Pain (Marianna)" },
+            marianna.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        var marquand = Assert.Single(personae, p => p.Name == "Marquand Volker");
+        var ulli = Assert.Single(personae, p => p.Name == "Ulli Leitpold");
+        Assert.Equal(DramatisPersonaHireFeeKind.Pair, marquand.FeeKind);
+        Assert.Equal(DramatisPersonaHireFeeKind.Pair, ulli.FeeKind);
+        Assert.True(marquand.IsWanderer);
+        Assert.True(ulli.IsWanderer);
+        Assert.Equal(30, marquand.RatingBonus);
+        Assert.Equal(30, ulli.RatingBonus);
+        Assert.Equal(60, marquand.RatingBonus + ulli.RatingBonus); // book's combined "+60" for the pair.
+
+        var veskit = Assert.Single(personae, p => p.Name.StartsWith("Veskit"));
+        Assert.Single(veskit.RestrictedToWarbandArchetypeIds, warbands.Single(w => w.Name == "Skaven of Clan Eshin").Id);
+        Assert.Equal(new[] { "Immune to Psychology", "No Pain (Veskit)", "Unblinking Eye" },
+            veskit.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+        Assert.Single(veskit.StartingEquipmentIds);
+
+        // Bertha references "Righteous Fury", a band-exclusive Skill declared in SistersOfSigmar.json
+        // (RestrictedToThisWarband) rather than the common Skills.json pool - only resolvable because
+        // DramatisPersonae.json now seeds AFTER all 15 warband files (see AppDatabase.
+        // SeedDramatisPersonaeAsync's updated ordering, 2026-08-31).
+        Assert.Contains(bertha.Skills, s => s.Name == "Righteous Fury");
+
+        // "Immune to Psychology" already existed in the common catalog (SpecialRules.json) before
+        // DramatisPersonae.json seeds - confirms Marianna/Veskit's stub reuse found the existing row
+        // instead of creating a near-duplicate.
+        var allImmuneToPsychologyRules = (await _library.GetSpecialRulesAsync("en")).Where(r => r.Name == "Immune to Psychology").ToList();
+        Assert.Single(allImmuneToPsychologyRules);
+    }
+
     /// <summary>Injuries.json seeds the rulebook's Serious Injuries charts once, common to every
     /// warband (no warband file references it) - Heroes' D66 chart (20 named rows covering the full
     /// 11-66 range) + Henchmen's much simpler D6 chart (2 rows).</summary>

@@ -182,8 +182,12 @@ public partial class EquipmentItemViewModel : BaseViewModel
             // achetables ni ajoutables à une liste d'équipement de départ (demande explicite de
             // l'utilisateur, 2026-08-20). Ne s'applique qu'ici (contexte "achat"/liste, jamais au Codex/
             // CRUD ci-dessus où AllowedWarbandArchetypeId reste null) - la consultation en lecture seule
-            // du Codex les affiche normalement.
-            filtered = filtered.Where(i => i.Category != EquipmentCategory.MagicalArtefact);
+            // du Codex les affiche normalement. Même exclusion pour IsUniqueArtefact (ex. l'épée d'Aenur,
+            // Ienh-Khain) - un objet unique propre à un seul Dramatis Persona, jamais achetable non plus,
+            // mais qui n'appartient à aucune des 6 Artefacts Magiques canoniques de la table d'Exploration
+            // (voir EquipmentCategory.MagicalArtefact, réservé à celle-ci - décision utilisateur 2026-08-31
+            // de ne pas réutiliser cette catégorie pour ce cas).
+            filtered = filtered.Where(i => i.Category != EquipmentCategory.MagicalArtefact && !i.IsUniqueArtefact);
 
             bool WarriorOk(EquipmentItem i) => i.RestrictedToWarriorArchetypeIds.Count == 0
                 || (AllowedWarriorArchetypeId is { } wa && i.RestrictedToWarriorArchetypeIds.Contains(wa));

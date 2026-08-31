@@ -232,21 +232,6 @@
                 </Label.FormattedText>
             </Label>
 
-            <!-- Disponibilité des Vétérans (livre, étape 5) : jet de 2D6 fait à chaque Fin de Partie
-                 (voir Warband.AvailableVeteranExperience), pas encore dépensable dans l'appli (étape 8
-                 "Engager de nouvelles recrues" pas encore construite) - simple rappel visible tant que
-                 l'étape de dépense n'existe pas, masqué à 0 (jamais joué de Fin de Partie, ou pool par
-                 défaut). -->
-            <Label TextColor="{DynamicResource AppTextMuted}" FontSize="12"
-                   IsVisible="{Binding HasAvailableVeteranExperience}">
-                <Label.FormattedText>
-                    <FormattedString>
-                        <Span Text="{loc:Loc WarbandsAvailableVeteransLabel}"/>
-                        <Span Text="{Binding Warband.AvailableVeteranExperience, StringFormat=' {0} PX'}"/>
-                    </FormattedString>
-                </Label.FormattedText>
-            </Label>
-
             <!-- Pense-bête "prochaine partie" (voir Warband.NextGameNote) - ex. Cimetière : haine des
                  Chasseurs de Sorcières/Sœurs de Sigmar après un pillage. S'efface tout seul à la Fin de
                  Partie suivante (consommé côté ViewModel), rien à cliquer ici. Couleur alignée sur les

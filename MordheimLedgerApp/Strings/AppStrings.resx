@@ -306,9 +306,6 @@
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Pierres magiques :</value>
   </data>
-  <data name="WarbandsAvailableVeteransLabel" xml:space="preserve">
-    <value>Vétérans disponibles :</value>
-  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Héros</value>
   </data>
@@ -1262,6 +1259,27 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Francs-Tireurs</value>
   </data>
+  <data name="EndOfGameRareItemsHeading" xml:space="preserve">
+    <value>Objets rares</value>
+  </data>
+  <data name="EndOfGameRareItemsIntro" xml:space="preserve">
+    <value>Un jet de 2D6 au maximum par Héros vivant - facultatif, jamais obligatoire.</value>
+  </data>
+  <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
+    <value>Chercher un objet rare</value>
+  </data>
+  <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
+    <value>Rare {0}</value>
+  </data>
+  <data name="EndOfGameRareItemBonusFormat" xml:space="preserve">
+    <value>Bonus au jet : +{0}</value>
+  </data>
+  <data name="EndOfGameRareItemSuccessFormat" xml:space="preserve">
+    <value>Trouvé ! (jet total {0})</value>
+  </data>
+  <data name="EndOfGameRareItemFailureFormat" xml:space="preserve">
+    <value>Introuvable cette fois (jet total {0})</value>
+  </data>
   <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
     <value>Total des dés : {0} → Pierre magique trouvée : {1} éclat(s)</value>
   </data>
@@ -1293,7 +1311,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Disponibilité des Vétérans</value>
   </data>
   <data name="EndOfGameAvailableVeteransIntro" xml:space="preserve">
-    <value>Jet de 2D6 : représente l'expérience totale de vétérans disponibles à l'embauche pour renforcer un groupe d'Hommes de main existant. Aucun engagement pour l'instant.</value>
+    <value>Jet de 2D6 : expérience totale de vétérans disponibles pour renforcer un groupe d'Hommes de main existant, valable pour cette séquence uniquement - non cumulable d'une Fin de Partie à l'autre.</value>
   </data>
   <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
     <value>Payer</value>
@@ -1341,7 +1359,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>La bande vend {0} éclat(s) de pierre magique pour {1} CO.</value>
   </data>
   <data name="HistoryAvailableVeteransSentence" xml:space="preserve">
-    <value>{0} PX de vétérans disponibles à l'embauche avant la prochaine bataille.</value>
+    <value>Vétérans disponibles ce jour pour renforcer les groupes d'Hommes de main : {0} PX (non cumulables).</value>
+  </data>
+  <data name="HistoryRareItemFoundSentence" xml:space="preserve">
+    <value>{0} déniche un objet rare : {1}.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>

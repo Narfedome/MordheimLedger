@@ -481,9 +481,13 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   elle-même (`ApplyExplorationOutcomeAsync` puis `ApplyWyrdstoneSaleAsync`, dans cet ordre) était déjà
   correcte, seul le plafond affiché/appliqué côté wizard était trop restrictif. (3) **Disponibilité
   des Vétérans** (étape 5 du livre, choisie par l'utilisateur pour démarrer le chantier "étapes 5-10") :
-  nouveau `Warband.AvailableVeteranExperience` (int, écrasé à chaque nouveau jet plutôt qu'accumulé - RAW
-  ne précise pas le sort d'un pool non dépensé) alimenté par un simple jet 2D6 saisi/tapé, toujours
-  présente dans le wizard. Pas encore dépensable (l'étape 8 "Engager de nouvelles recrues", qui consomme
-  ce pool pour renforcer un groupe d'Hommes de main existant, n'existe pas encore) - affiché en attendant
-  comme un rappel permanent sur `WarbandDetailPage` (`HasAvailableVeteranExperience`), pour ne pas rester
-  invisible entre-temps.
+  simple jet 2D6 saisi/tapé, toujours présente dans le wizard, juste tracé en Historique. **Corrigé dans
+  la foulée** (retour utilisateur, texte du livre "Nouvelles recrues et groupes d'Hommes de main
+  existants" p.144 à l'appui) : une première passe persistait le résultat (`Warband.
+  AvailableVeteranExperience`, affiché en rappel permanent sur `WarbandDetailPage`) en anticipation de
+  l'étape 8 pas encore construite - or le livre est explicite, ce pool ne sert QUE durant la séquence où
+  il est jeté ("les points excédentaires sont perdus"), rien ne se cumule d'une Fin de Partie à l'autre.
+  Persistance entièrement retirée (`Warband.AvailableVeteranExperience` supprimé du modèle/entité/mapping,
+  bannière `WarbandDetailPage` retirée) - le jet reste dans le wizard (utile le jour où l'étape 8 existera
+  et pourra le consommer DANS LA MÊME séquence) mais ne laisse plus aucune trace persistante au-delà de
+  l'entrée d'Historique.

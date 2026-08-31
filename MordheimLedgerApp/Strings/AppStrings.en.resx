@@ -306,9 +306,6 @@
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Wyrdstone:</value>
   </data>
-  <data name="WarbandsAvailableVeteransLabel" xml:space="preserve">
-    <value>Available veterans:</value>
-  </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Heroes</value>
   </data>
@@ -1262,6 +1259,27 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Hired Swords</value>
   </data>
+  <data name="EndOfGameRareItemsHeading" xml:space="preserve">
+    <value>Rare items</value>
+  </data>
+  <data name="EndOfGameRareItemsIntro" xml:space="preserve">
+    <value>At most one 2D6 roll per living Hero - optional, never required.</value>
+  </data>
+  <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
+    <value>Search for a rare item</value>
+  </data>
+  <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
+    <value>Rare {0}</value>
+  </data>
+  <data name="EndOfGameRareItemBonusFormat" xml:space="preserve">
+    <value>Roll bonus: +{0}</value>
+  </data>
+  <data name="EndOfGameRareItemSuccessFormat" xml:space="preserve">
+    <value>Found it! (total roll {0})</value>
+  </data>
+  <data name="EndOfGameRareItemFailureFormat" xml:space="preserve">
+    <value>Not found this time (total roll {0})</value>
+  </data>
   <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
     <value>Dice total: {0} → Wyrdstone found: {1} shard(s)</value>
   </data>
@@ -1293,7 +1311,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Check Available Veterans</value>
   </data>
   <data name="EndOfGameAvailableVeteransIntro" xml:space="preserve">
-    <value>Roll 2D6: represents the total Experience worth of veterans available for hire into an existing Henchman group. No commitment yet.</value>
+    <value>Roll 2D6: total Experience worth of veterans available to reinforce an existing Henchman group, good for this sequence only - doesn't carry over to the next End of Game.</value>
   </data>
   <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
     <value>Pay</value>
@@ -1341,7 +1359,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>The warband sells {0} wyrdstone shard(s) for {1} gc.</value>
   </data>
   <data name="HistoryAvailableVeteransSentence" xml:space="preserve">
-    <value>{0} XP worth of veterans available for hire before the next battle.</value>
+    <value>Veterans available today to reinforce Henchman groups: {0} XP (doesn't carry over).</value>
+  </data>
+  <data name="HistoryRareItemFoundSentence" xml:space="preserve">
+    <value>{0} finds a rare item: {1}.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

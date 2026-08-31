@@ -107,7 +107,7 @@ public partial class WarbandDetailViewModel
             ? new List<EquipmentItem>()
             : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, Warband.WarbandArchetypeId,
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
@@ -120,7 +120,8 @@ public partial class WarbandDetailViewModel
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
             await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
             await ApplyWyrdstoneSaleAsync(dialogViewModel, sentences);
-            await ApplyAvailableVeteransAsync(dialogViewModel, sentences);
+            ApplyAvailableVeterans(dialogViewModel, sentences);
+            await ApplyRareItemSearchAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -897,15 +898,42 @@ public partial class WarbandDetailViewModel
 
     /// <summary>Étape "Disponibilité des Vétérans" (livre, étape 5 - EndOfGameDialogViewModel.
     /// IsAvailableVeteransStep) : toujours présente dans le wizard, donc VeteranExperienceRoll est
-    /// toujours renseigné ici (bloqué par ValidateAvailableVeteransStep sinon) - écrase la valeur
-    /// précédente plutôt que de l'additionner, voir Warband.AvailableVeteranExperience.</summary>
-    private async Task ApplyAvailableVeteransAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    /// toujours renseigné ici (bloqué par ValidateAvailableVeteransStep sinon). Contrairement à un
+    /// premier essai de ce chantier, ce pool n'est PAS persisté sur Warband - retour utilisateur
+    /// 2026-08-28, texte du livre à l'appui ("Nouvelles recrues et groupes d'Hommes de main existants",
+    /// p.144) : ce jet ne sert qu'à recruter DURANT CETTE séquence (étape 8, pas encore construite), les
+    /// points excédentaires sont perdus, rien ne se cumule d'une Fin de Partie à l'autre. Juste une
+    /// entrée d'Historique pour trace du jet, aucun état durable.</summary>
+    private void ApplyAvailableVeterans(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
-        if (Warband is null || !int.TryParse(dialogViewModel.VeteranExperienceRoll, out var pool)) return;
+        if (!int.TryParse(dialogViewModel.VeteranExperienceRoll, out var pool)) return;
 
-        Warband.AvailableVeteranExperience = pool;
-        await _warbandService.SaveWarbandAsync(Warband);
         sentences.Add(string.Format(Loc["HistoryAvailableVeteransSentence"], pool));
+    }
+
+    /// <summary>Étape "Objets rares" (livre, étape 6 - EndOfGameDialogViewModel.IsRareItemsStep) : chaque
+    /// recherche réussie (RareItemSearchEntry.IsSuccess) achète l'objet directement dans l'inventaire de
+    /// bande NON assigné (IWarbandService.AddWarbandEquipmentAsync, même flux qu'un objet trouvé en
+    /// Exploration - à équiper plus tard via WarbandInventoryDialog), payé tout de suite (Warband.Treasury
+    /// -= coût). Une arme commune forgée en Gromril/Ithilmar (SelectedMaterial non-null) coûte le prix de
+    /// base × le multiplicateur du matériau (Core.Rules.EquipmentPricing.CalculateCost, même formule
+    /// qu'un achat normal en Gromril/Ithilmar) et emporte la SpecialRule avec elle (MaterialRule, même
+    /// mécanisme que "Épée Ornée" - Charrette Renversée). Une recherche sans objet choisi ou ratée
+    /// (IsSuccess faux) ne fait rien pour ce Héros - aucune pénalité au livre en cas d'échec.</summary>
+    private async Task ApplyRareItemSearchAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var entry in dialogViewModel.RareItemSearchEntries.Where(e => e.HasSelectedItem && e.IsSuccess))
+        {
+            var item = entry.SelectedItem!;
+            var cost = EquipmentPricing.CalculateCost(item.Cost, entry.SelectedMaterial?.CostMultiplier, isFree: false);
+            Warband.Treasury -= cost;
+            await _warbandService.SaveWarbandAsync(Warband);
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, item, materialRule: entry.SelectedMaterial);
+            var displayName = entry.SelectedMaterial is { } material ? $"{item.Name} ({material.Abbreviation})" : item.Name;
+            sentences.Add(string.Format(Loc["HistoryRareItemFoundSentence"], entry.HeroName, displayName));
+        }
     }
 
     /// <summary>Étape "Francs-Tireurs" (EndOfGameDialogViewModel.IsHiredSwordsStep) - règle la solde de

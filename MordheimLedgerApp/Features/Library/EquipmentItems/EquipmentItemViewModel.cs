@@ -98,6 +98,23 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     public bool IsCategoryLocked => LockedCategory.HasValue;
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) for the End of Game "Objets rares" step -
+    /// excludes common (Rarity null) MissileWeapon/BlackPowderWeapon/Armour items, which have no search
+    /// path at all in that context (no Rarity to roll against, and Gromril/Ithilmar only apply to melee
+    /// weapons - see RareItemSearchEntry.IsMaterialEligible): showing them would just be dead-end
+    /// clutter. Every other category (MeleeWeapon - common ones ARE searchable via a material - Misc/
+    /// Consumable/etc.) and any genuinely Rare item regardless of category stay visible - user request
+    /// 2026-08-28, explicit that the restriction is "juste pour les armes/armure", not the whole
+    /// catalog. False everywhere else.</summary>
+    public bool RareSearchMode { get; set; }
+
+    /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants at most one item
+    /// picked at a time (e.g. the End of Game "Objets rares" step - a Hero nominates ONE item to attempt
+    /// their single roll against, "You may also only make one roll for each Hero"). Tapping a new tile
+    /// replaces any previous selection instead of adding to it - see Select. False everywhere else
+    /// (Library CRUD tab, every normal multi-item purchase picker).</summary>
+    public bool SingleSelectMode { get; set; }
+
     public bool ShowBudget => AvailableGold.HasValue;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
@@ -152,6 +169,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
         IEnumerable<EquipmentItem> filtered = _allItems;
         if (SelectedCategory is { } category)
             filtered = filtered.Where(i => i.Category == category);
+        if (RareSearchMode)
+        {
+            var weaponOrArmourWithNoSearchPath = new[]
+                { EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
+            filtered = filtered.Where(i => i.Rarity.HasValue || i.Category == EquipmentCategory.MeleeWeapon
+                || !weaponOrArmourWithNoSearchPath.Contains(i.Category));
+        }
         if (AllowedWarbandArchetypeId is { } warbandId)
         {
             // Les Artefacts Magiques ne se trouvent que via la table dédiée de l'Exploration - jamais
@@ -164,15 +188,42 @@ public partial class EquipmentItemViewModel : BaseViewModel
             bool WarriorOk(EquipmentItem i) => i.RestrictedToWarriorArchetypeIds.Count == 0
                 || (AllowedWarriorArchetypeId is { } wa && i.RestrictedToWarriorArchetypeIds.Contains(wa));
 
-            filtered = AllowedEquipmentListItemIds is { } listIds
-                // Recruit picker: the assigned list is the sole source of truth for what this warrior
-                // can buy - Rare items reachable by this warrior are list members too, just narrowed to
-                // specific archetypes via RestrictedToWarriorArchetypeIds where the list is shared.
-                ? filtered.Where(i => listIds.Contains(i.Id) && WarriorOk(i))
+            bool BroadBandScoped(EquipmentItem i) =>
+                i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId);
+
+            if (AllowedEquipmentListItemIds is { } listIds)
+            {
+                if (RareSearchMode)
+                {
+                    // Objets rares (union des listes de la bande, voir EndOfGameDialogViewModel.
+                    // RareItems.cs) : seules les armes/armures sont vraiment rattachées à une liste
+                    // d'équipement - le reste du catalogue (Divers/Consommable/Drogues/Munitions/
+                    // Montures) vient du Trading Post général, jamais listé nulle part, donc pas à
+                    // restreindre par liste (retour utilisateur 2026-08-28) - repasse sur le large
+                    // "commun + objets de la bande" habituel, qui exclut déjà correctement un objet
+                    // restreint à une AUTRE bande (ex. Marteau des Sorcières pour des Skavens) via
+                    // RestrictedToWarbandArchetypeIds, sans rapport avec les listes.
+                    var listScopedCategories = new[]
+                        { EquipmentCategory.MeleeWeapon, EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
+                    filtered = filtered.Where(i => listScopedCategories.Contains(i.Category)
+                        ? listIds.Contains(i.Id) && WarriorOk(i)
+                        : BroadBandScoped(i));
+                }
+                else
+                {
+                    // Recruit picker: the assigned list is the sole source of truth for what this warrior
+                    // can buy - Rare items reachable by this warrior are list members too, just narrowed to
+                    // specific archetypes via RestrictedToWarriorArchetypeIds where the list is shared.
+                    filtered = filtered.Where(i => listIds.Contains(i.Id) && WarriorOk(i));
+                }
+            }
+            else
+            {
                 // Broad warband-scoped browse (EquipmentList editor's own "add item" picker, or a
                 // warrior with no assigned list) - common pool + this band's own items, unchanged from
                 // before EquipmentList existed.
-                : filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+                filtered = filtered.Where(BroadBandScoped);
+            }
         }
 
         var groups = new ObservableCollection<EquipmentItemGroup>();
@@ -206,7 +257,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     /// <summary>Tap sur la tuile elle-même (pas sur le stepper +/-) : bascule 0/1 exemplaire, comme avant
     /// l'ajout du stepper de quantité - IncrementQuantity/DecrementQuantity gèrent le reste une fois
-    /// sélectionnée.</summary>
+    /// sélectionnée. En SingleSelectMode, sélectionner une nouvelle tuile désélectionne d'abord toute
+    /// autre tuile déjà choisie (jamais un panier) - voir SingleSelectMode.</summary>
     [RelayCommand]
     private void Select(EquipmentItemRow row)
     {
@@ -224,6 +276,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
         }
         else
         {
+            if (SingleSelectMode)
+            {
+                foreach (var other in SelectedRows.ToList())
+                {
+                    other.Quantity = 0;
+                    other.IsSelected = false;
+                }
+                SelectedRows.Clear();
+            }
+
             row.Quantity = 1;
             row.IsSelected = true;
             SelectedRows.Add(row);

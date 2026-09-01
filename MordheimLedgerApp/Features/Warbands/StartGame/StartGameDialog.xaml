@@ -109,14 +109,24 @@
                  reste de ce dialog : ne bloque rien, ne change aucun statut. -->
             <VerticalStackLayout Spacing="10" IsVisible="{Binding HasAidEntries}">
                 <Label Text="{loc:Loc StartGameAidHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc StartGameAidExplanation}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding AidRuleTierRows}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="system:String">
+                            <Label Text="{Binding .}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
                 <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding AidEntries}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:DramatisPersonaAidEntry">
                             <Border Style="{StaticResource SectionCardBorderStyle}">
                                 <VerticalStackLayout Spacing="6">
                                     <Label Text="{Binding PersonaName}" FontAttributes="Bold"/>
-                                    <Label Text="{Binding WarriorName}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                    <Entry Text="{Binding EnemyRating}" Keyboard="Numeric" Placeholder="{loc:Loc StartGameAidEnemyRatingPh}">
+                                    <Label Text="{Binding WarriorName}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding HasCustomWarriorName}"/>
+                                    <Label Text="{loc:Loc StartGameAidEnemyRatingPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <Entry Text="{Binding EnemyRating}" Keyboard="Numeric">
                                         <Entry.Behaviors>
                                             <components:DigitsOnlyBehavior/>
                                         </Entry.Behaviors>
@@ -141,6 +151,8 @@
                                            TextColor="{DynamicResource AppSuccess}" IsVisible="{Binding IsSuccess}"/>
                                     <Label Text="{loc:Loc StartGameAidFailure}" FontSize="12" FontAttributes="Bold"
                                            TextColor="{DynamicResource AppDanger}" IsVisible="{Binding IsFailure}"/>
+                                    <Label Text="{loc:Loc StartGameAidWillLeaveWarband}" FontSize="11"
+                                           TextColor="{DynamicResource AppDanger}" IsVisible="{Binding WontFight}"/>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>

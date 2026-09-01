@@ -1115,6 +1115,21 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="StartGameAidFailure" xml:space="preserve">
     <value>N'aide pas cette fois</value>
   </data>
+  <data name="StartGameAidExplanation" xml:space="preserve">
+    <value>Ce personnage n'accepte de rejoindre personnellement le combat que si la bande adverse a une Valeur supérieure à la vôtre. Saisissez la Valeur de la bande adverse ci-dessous pour connaître le jet à réussir :</value>
+  </data>
+  <data name="StartGameAidWillLeaveWarband" xml:space="preserve">
+    <value>Sera retiré(e) de la bande en confirmant - il faudra le/la rechercher à nouveau.</value>
+  </data>
+  <data name="StartGameAidTierWontComeFormat" xml:space="preserve">
+    <value>Moins de {0} points d'écart : ne vient pas</value>
+  </data>
+  <data name="StartGameAidTierRangeFormat" xml:space="preserve">
+    <value>{0} à {1} points d'écart : jet de {2}+</value>
+  </data>
+  <data name="StartGameAidTierOpenFormat" xml:space="preserve">
+    <value>{0} points d'écart ou plus : jet de {1}+</value>
+  </data>
   <data name="StartGameNextGameNoteHeading" xml:space="preserve">
     <value>Effets actifs pour cette partie</value>
   </data>
@@ -1462,6 +1477,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
     <value>{0} retrouve {1}, qui rejoint la bande.</value>
+  </data>
+  <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
+    <value>{0} quitte la bande (Vagabond) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>

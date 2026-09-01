@@ -122,6 +122,7 @@ public partial class WarbandDetailViewModel
             await ApplyWyrdstoneSaleAsync(dialogViewModel, sentences);
             ApplyAvailableVeterans(dialogViewModel, sentences);
             await ApplyRareItemSearchAsync(dialogViewModel, localizedEquipment, sentences);
+            await ApplyWandererDeparturesAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -958,6 +959,40 @@ public partial class WarbandDetailViewModel
                 .ToList();
             await _warbandService.RecruitDramatisPersonaAsync(Warband.Id, persona, persona.Name, startingEquipment, persona.Skills);
             sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
+        }
+    }
+
+    /// <summary>"Vagabond" departure (voir DramatisPersona.IsWanderer) - retour utilisateur 2026-09-01 :
+    /// Bertha "sort complètement de la bande" après CHAQUE bataille (qu'elle ait pu se battre ou non - le
+    /// jet d'Aide conditionnelle du Lancement de Partie, voir RatingGapAidTable, décide seulement si elle
+    /// a participé à CETTE bataille, pas si elle repart ensuite : elle repart de toute façon), et ne peut
+    /// être réintégrée que par une nouvelle recherche de Personnage spécial. Généralisé aux 3 personnages
+    /// Vagabonds (Aenur, Ulli &amp; Marquand aussi - IsWanderer documente déjà "never stays with the
+    /// warband beyond one battle" pour eux également), pas seulement Bertha - confirmé via
+    /// AskUserQuestion. Retrait COMPLET (WarbandService.DeleteWarriorAsync, équipement/compétences avec)
+    /// plutôt qu'un statut "Parti(e)" dédié - décision utilisateur (même question) : une future recherche
+    /// recrée une fiche neuve, aucun historique de blessure conservé, mais évite d'avoir deux fiches du
+    /// même personnage en même temps.
+    ///
+    /// Scope volontairement dialogViewModel.WarriorRows (le roster Actif figé à L'OUVERTURE de ce wizard)
+    /// plutôt que le roster courant : un Personnage spécial fraîchement recruté PENDANT cette même Fin de
+    /// Partie (juste au-dessus, ApplyRareItemSearchAsync) n'apparaît jamais dans WarriorRows - il reste
+    /// donc pour au moins la prochaine bataille, comme voulu ("A request for Bertha to aid the warband
+    /// must be made for EACH battle" implique qu'une fois recrutée elle participe à celle-ci, puis repart
+    /// à LA FIN de celle-ci, pas immédiatement). Mort/Retraité exclus : déjà des états terminaux gérés
+    /// ailleurs, rien à faire de plus pour eux ici.</summary>
+    private async Task ApplyWandererDeparturesAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        foreach (var row in dialogViewModel.WarriorRows)
+        {
+            var warrior = row.Warrior;
+            if (!warrior.IsDramatisPersona || warrior.Status is WarriorStatus.Dead or WarriorStatus.Retired) continue;
+
+            var persona = _recruitableDramatisPersonae.FirstOrDefault(p => p.Id == warrior.DramatisPersonaId);
+            if (persona is not { IsWanderer: true }) continue;
+
+            await _warbandService.DeleteWarriorAsync(warrior.Id);
+            sentences.Add(string.Format(Loc["HistoryDramatisPersonaDepartedSentence"], warrior.Name));
         }
     }
 

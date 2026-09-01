@@ -71,7 +71,7 @@
                 <Label Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="library:EquipmentItem">
+                        <DataTemplate x:DataType="components:EquipmentQuantityChip">
                             <components:ChipView Item="{Binding .}"
                                                   IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                   IconFontFamily="RpgAwesome"

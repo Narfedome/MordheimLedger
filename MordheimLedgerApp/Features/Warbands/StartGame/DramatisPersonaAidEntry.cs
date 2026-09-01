@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Services;
 
@@ -8,13 +9,30 @@ namespace MordheimLedgerApp.Features.Warbands.StartGame;
 /// catalogue entry has RequiresRatingDisadvantage (e.g. Bertha) - "A request... must be made for each
 /// battle", checked HERE (at game launch) rather than the End of Game wizard, because the NEXT
 /// opponent's Rating is only knowable once a game is about to start (see DramatisPersona.
-/// RequiresRatingDisadvantage's own doc for why the End of Game wizard can't do this). Purely
-/// informational - same "nothing is actually blocked" philosophy as the rest of StartGameDialog: if she
-/// doesn't come, the player simply doesn't field her this battle, no roster/status change either way.</summary>
+/// RequiresRatingDisadvantage's own doc for why the End of Game wizard can't do this).
+///
+/// NOT purely informational (revised 2026-09-01, user request): once the outcome is known (WontCome, or
+/// a failed Roll), confirming "Commencer la partie" removes this Warrior from the roster right away -
+/// same "leaves the warband entirely, only a fresh search brings her back" behaviour as the Vagabond
+/// departure already applied at End of Game (see WarbandDetailViewModel.EndOfGame.
+/// ApplyWandererDeparturesAsync), just triggered earlier because a failed aid check already answers the
+/// question ("she isn't with the band for this battle at all") without waiting for the battle to be
+/// played out. A successful check leaves her alone here - she still leaves normally at the END of this
+/// same game via the existing Vagabond-departure step, since RequiresRatingDisadvantage always implies
+/// IsWanderer in practice (Bertha is both).</summary>
 public partial class DramatisPersonaAidEntry : ObservableObject
 {
+    public Warrior Warrior { get; }
     public string WarriorName { get; }
     public string PersonaName { get; }
+
+    /// <summary>False in the common case (Warrior.Name is recopied from persona.Name as-is at recruitment,
+    /// see WarbandService.RecruitDramatisPersonaAsync) - showing WarriorName under PersonaName then would
+    /// just repeat the same text twice (bug reported 2026-09-01: "Bertha Bestraufrung..." shown as both
+    /// the card title and the line right under it). Only true if the player renamed the recruited warrior
+    /// afterwards (EditWarrior), in which case both names are worth showing.</summary>
+    public bool HasCustomWarriorName => WarriorName != PersonaName;
+
     private readonly int _ownRating;
 
     /// <summary>Free-typed - the opponent's warband Rating isn't tracked anywhere in this app (no
@@ -29,6 +47,7 @@ public partial class DramatisPersonaAidEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasResult))]
     [NotifyPropertyChangedFor(nameof(IsSuccess))]
     [NotifyPropertyChangedFor(nameof(IsFailure))]
+    [NotifyPropertyChangedFor(nameof(WontFight))]
     private string enemyRating = string.Empty;
 
     public int? RatingDifference => int.TryParse(EnemyRating, out var enemy) ? enemy - _ownRating : null;
@@ -54,6 +73,7 @@ public partial class DramatisPersonaAidEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasResult))]
     [NotifyPropertyChangedFor(nameof(IsSuccess))]
     [NotifyPropertyChangedFor(nameof(IsFailure))]
+    [NotifyPropertyChangedFor(nameof(WontFight))]
     private string roll = string.Empty;
 
     public int? RollValue => int.TryParse(Roll, out var r) ? r : null;
@@ -64,9 +84,16 @@ public partial class DramatisPersonaAidEntry : ObservableObject
 
     public bool IsFailure => HasResult && !IsSuccess;
 
-    public DramatisPersonaAidEntry(string warriorName, string personaName, int ownRating)
+    /// <summary>True once the outcome definitively says "not with the band this battle" - either the gap
+    /// was too small to need her (WontCome) or the willingness roll failed (IsFailure). False while
+    /// nothing has been entered yet (HasRatingDifference/HasResult both false) - never removes anyone on
+    /// incomplete data.</summary>
+    public bool WontFight => WontCome || IsFailure;
+
+    public DramatisPersonaAidEntry(Warrior warrior, string personaName, int ownRating)
     {
-        WarriorName = warriorName;
+        Warrior = warrior;
+        WarriorName = warrior.Name;
         PersonaName = personaName;
         _ownRating = ownRating;
     }

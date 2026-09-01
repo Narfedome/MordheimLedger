@@ -24,8 +24,10 @@ public partial class HiredSwordDetailDialogViewModel : ReadOnlyDialogViewModel
     /// sorts (l'immense majorité).</summary>
     public List<MagicSchool> MagicSchools => Item.MagicSchool is { } school ? new List<MagicSchool> { school } : new List<MagicSchool>();
 
-    /// <summary>Already resolved by the caller (DetailDialogService.ShowHiredSwordDetailDialogAsync).</summary>
-    public List<EquipmentItem> StartingEquipment { get; }
+    /// <summary>Already resolved by the caller (DetailDialogService.ShowHiredSwordDetailDialogAsync) - one
+    /// chip per distinct id, a duplicate id folds into a single "x2" chip (see EquipmentQuantityChip),
+    /// same treatment as DramatisPersonaDetailDialogViewModel.StartingEquipment.</summary>
+    public List<EquipmentQuantityChip> StartingEquipment { get; }
 
     /// <summary>Collapsed to its complement against allWarbandArchetypes when it covers more than half
     /// the catalog - see WarbandRestrictionDisplay.</summary>
@@ -40,7 +42,7 @@ public partial class HiredSwordDetailDialogViewModel : ReadOnlyDialogViewModel
     private readonly List<Spell> _magicSchoolSpells;
     private readonly IDetailDialogService _detailDialogs;
 
-    public HiredSwordDetailDialogViewModel(HiredSword item, List<EquipmentItem> startingEquipment,
+    public HiredSwordDetailDialogViewModel(HiredSword item, List<EquipmentQuantityChip> startingEquipment,
         List<WarbandArchetype> restrictedWarbands, List<WarbandArchetype> allWarbandArchetypes, List<Spell> magicSchoolSpells,
         IDetailDialogService detailDialogs)
     {
@@ -59,7 +61,7 @@ public partial class HiredSwordDetailDialogViewModel : ReadOnlyDialogViewModel
     /// aux chips "restriction" (bandes/écoles) qui restent sur le popup générique, un objet d'équipement a
     /// des attributs propres qu'un simple Nom+Description ne montre pas.</summary>
     [RelayCommand]
-    private Task ShowStartingEquipmentDetail(EquipmentItem equipmentItem) => _detailDialogs.ShowEquipmentDetailDialogAsync(equipmentItem);
+    private Task ShowStartingEquipmentDetail(EquipmentQuantityChip chip) => _detailDialogs.ShowEquipmentDetailDialogAsync(chip.Item);
 
     [RelayCommand]
     private Task ShowWarbandDetail(WarbandArchetype warband) => ShowChipDetailAsync(warband.Name, warband.Description);

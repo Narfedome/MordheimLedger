@@ -1115,6 +1115,21 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="StartGameAidFailure" xml:space="preserve">
     <value>Doesn't help this time</value>
   </data>
+  <data name="StartGameAidExplanation" xml:space="preserve">
+    <value>This character only agrees to personally join the fight if the enemy warband's Rating is higher than yours. Enter the enemy warband's Rating below to find out what roll is needed:</value>
+  </data>
+  <data name="StartGameAidWillLeaveWarband" xml:space="preserve">
+    <value>Will leave the warband once confirmed - a new search will be needed to bring them back.</value>
+  </data>
+  <data name="StartGameAidTierWontComeFormat" xml:space="preserve">
+    <value>Under {0} points of difference: won't come</value>
+  </data>
+  <data name="StartGameAidTierRangeFormat" xml:space="preserve">
+    <value>{0} to {1} points of difference: roll {2}+</value>
+  </data>
+  <data name="StartGameAidTierOpenFormat" xml:space="preserve">
+    <value>{0} points of difference or more: roll {1}+</value>
+  </data>
   <data name="StartGameNextGameNoteHeading" xml:space="preserve">
     <value>Active effects for this game</value>
   </data>
@@ -1462,6 +1477,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
     <value>{0} tracks down {1}, who joins the warband.</value>
+  </data>
+  <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
+    <value>{0} leaves the warband (Wanderer) - a new search will be needed before the next battle.</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

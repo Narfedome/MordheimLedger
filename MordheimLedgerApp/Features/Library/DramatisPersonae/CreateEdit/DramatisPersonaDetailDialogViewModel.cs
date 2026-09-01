@@ -26,8 +26,10 @@ public partial class DramatisPersonaDetailDialogViewModel : ReadOnlyDialogViewMo
     public List<MagicSchool> MagicSchools => Item.MagicSchool is { } school ? new List<MagicSchool> { school } : new List<MagicSchool>();
 
     /// <summary>Déjà résolu par l'appelant (DetailDialogService.ShowDramatisPersonaDetailDialogAsync),
-    /// même principe que HiredSwordDetailDialogViewModel.StartingEquipment.</summary>
-    public List<EquipmentItem> StartingEquipment { get; }
+    /// même principe que HiredSwordDetailDialogViewModel.StartingEquipment - un chip par id distinct,
+    /// un doublon (ex. les 2 Marteaux de Sigmarite de Bertha) se replie en un seul chip "x2" plutôt que
+    /// deux chips identiques (voir EquipmentQuantityChip).</summary>
+    public List<EquipmentQuantityChip> StartingEquipment { get; }
 
     /// <summary>Collapsed to its complement against allWarbandArchetypes when it covers more than half
     /// the catalog - see WarbandRestrictionDisplay.</summary>
@@ -40,7 +42,7 @@ public partial class DramatisPersonaDetailDialogViewModel : ReadOnlyDialogViewMo
     private readonly List<Spell> _magicSchoolSpells;
     private readonly IDetailDialogService _detailDialogs;
 
-    public DramatisPersonaDetailDialogViewModel(DramatisPersona item, List<EquipmentItem> startingEquipment,
+    public DramatisPersonaDetailDialogViewModel(DramatisPersona item, List<EquipmentQuantityChip> startingEquipment,
         List<WarbandArchetype> restrictedWarbands, List<WarbandArchetype> allWarbandArchetypes, List<Spell> magicSchoolSpells,
         IDetailDialogService detailDialogs)
     {
@@ -54,7 +56,7 @@ public partial class DramatisPersonaDetailDialogViewModel : ReadOnlyDialogViewMo
     }
 
     [RelayCommand]
-    private Task ShowStartingEquipmentDetail(EquipmentItem equipmentItem) => _detailDialogs.ShowEquipmentDetailDialogAsync(equipmentItem);
+    private Task ShowStartingEquipmentDetail(EquipmentQuantityChip chip) => _detailDialogs.ShowEquipmentDetailDialogAsync(chip.Item);
 
     [RelayCommand]
     private Task ShowWarbandDetail(WarbandArchetype warband) => ShowChipDetailAsync(warband.Name, warband.Description);

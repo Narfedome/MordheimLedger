@@ -12,15 +12,33 @@ namespace MordheimLedgerApp.Core.Rules;
 /// this table only tells the player what they needed to score.</summary>
 public static class RatingGapAidTable
 {
-    /// <summary>Null = won't come at all (the hiring warband isn't behind enough to need the help).
-    /// Otherwise the D6 score required, easier as the gap widens - source: Bertha's own table, p.146ish
-    /// (Tome of Heroes).</summary>
-    public static int? GetRequiredRoll(int ratingDifference) => ratingDifference switch
+    /// <summary>One breakpoint of the table: a Rating gap of at least MinDifference requires rolling
+    /// RequiredRoll+ on a D6. Data, not prose - StartGameDialog renders this list directly (one row per
+    /// Tier, plus a "won't come" row below the first Tier's MinDifference) instead of a hand-written resx
+    /// sentence, so the on-screen explanation can never drift out of sync with GetRequiredRoll below (both
+    /// read the same source of truth). Source: Bertha's own table, p.146ish (Tome of Heroes).</summary>
+    public readonly record struct Tier(int MinDifference, int RequiredRoll);
+
+    /// <summary>Ascending by MinDifference - a gap below Tiers[0].MinDifference means "won't come" (see
+    /// GetRequiredRoll returning null).</summary>
+    public static readonly IReadOnlyList<Tier> Tiers = new[]
     {
-        < 50 => null,
-        < 100 => 6,
-        < 150 => 5,
-        < 200 => 4,
-        _ => 3
+        new Tier(50, 6),
+        new Tier(100, 5),
+        new Tier(150, 4),
+        new Tier(200, 3)
     };
+
+    /// <summary>Null = won't come at all (the hiring warband isn't behind enough to need the help).
+    /// Otherwise the D6 score required, easier as the gap widens.</summary>
+    public static int? GetRequiredRoll(int ratingDifference)
+    {
+        Tier? matched = null;
+        foreach (var tier in Tiers)
+        {
+            if (ratingDifference >= tier.MinDifference)
+                matched = tier;
+        }
+        return matched?.RequiredRoll;
+    }
 }

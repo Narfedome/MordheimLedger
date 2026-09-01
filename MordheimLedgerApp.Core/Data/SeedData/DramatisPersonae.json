@@ -64,8 +64,8 @@
   {
     "name": { "en": "Countess Marianna Chevaux, Vampire Assassin", "fr": "Comtesse Marianna Chevaux, Assassin Vampire" },
     "description": {
-      "en": "Once an assassin-thief, Marianna was tainted with Vampirism by the ancient Lahmian Serutat while stealing the gem known as the Noctu from her crypt. A half-vampire now hiding in Mordheim, she hunts the city's Undead for information on Serutat's whereabouts while hiring out her assassin's skills. Her blades are coated in essence of garlic, which acts as Black Lotus against Vampires.\n\nHire Fee: 150 gc to hire, 75 gc upkeep (varies - see below).\n\nFighting Undead: all Vampires hate Marianna (a personal enmity, not a band-wide Hatred).\n\n'You can never escape your past...': on the game's last turn while Marianna still stands, or as soon as a warband routs, roll a D6 - 1-3: she leaves the warband's service after the game; 4-5: she stays for another game if the warband can afford her upkeep; 6: a group of Serutat's minions ambushes her (D3+1 Zombies, D3+1 Ghouls, or a Vampire + 2 Ghouls per a further D6) for D3 extra turns - if the warband helps her survive she fights the next battle for free, otherwise she leaves.",
-      "fr": "Ancienne voleuse-assassin, Marianna a été touchée par la malédiction vampirique de l'antique Lahmienne Serutat en dérobant le joyau appelé le Noctu dans sa crypte. Devenue mi-vampire, elle se cache désormais à Mordheim où elle traque les Morts-Vivants de la cité pour retrouver la trace de Serutat, tout en louant ses talents d'assassin. Ses lames sont enduites d'essence d'ail, qui agit comme le Lotus Noir contre les Vampires.\n\nFrais d'engagement : 150 CO à l'engagement, 75 CO de solde (variable - voir ci-dessous).\n\nCombat contre les Morts-Vivants : tous les Vampires haïssent Marianna (une inimitié personnelle, pas une Haine de bande).\n\n'On n'échappe jamais à son passé...' : au dernier tour de la partie tant que Marianna tient encore debout, ou dès qu'une bande est mise en déroute, jet de 1D6 - 1-3 : elle quitte le service de la bande après la partie ; 4-5 : elle reste pour une bataille de plus si la bande peut payer sa solde ; 6 : un groupe de sbires de Serutat lui tombe dessus (1D3+1 Zombies, 1D3+1 Goules, ou un Vampire + 2 Goules selon un second 1D6) pour 1D3 tours supplémentaires - si la bande l'aide à survivre, elle combat gratuitement la bataille suivante, sinon elle part."
+      "en": "Once an assassin-thief, Marianna was tainted with Vampirism by the ancient Lahmian Serutat while stealing the gem known as the Noctu from her crypt. A half-vampire now hiding in Mordheim, she hunts the city's Undead for information on Serutat's whereabouts while hiring out her assassin's skills. Her blades are coated in essence of garlic, which acts as Black Lotus against Vampires.",
+      "fr": "Ancienne voleuse-assassin, Marianna a été touchée par la malédiction vampirique de l'antique Lahmienne Serutat en dérobant le joyau appelé le Noctu dans sa crypte. Devenue mi-vampire, elle se cache désormais à Mordheim où elle traque les Morts-Vivants de la cité pour retrouver la trace de Serutat, tout en louant ses talents d'assassin. Ses lames sont enduites d'essence d'ail, qui agit comme le Lotus Noir contre les Vampires."
     },
     "movement": 6, "weaponSkill": 6, "ballisticSkill": 6, "strength": 4, "toughness": 4,
     "wounds": 2, "initiative": 9, "attacks": 3, "leadership": 9,
@@ -85,6 +85,23 @@
         "description": {
           "en": "This warrior treats a stunned result as knocked down instead. Combined with Jump Up, she can never actually be knocked down either - only losing her last Wound takes her out of action.",
           "fr": "Cette guerrière traite un résultat Étourdi comme Mis à terre à la place. Combiné à Se Relever d'un Bond, elle ne peut de toute façon jamais être mise à terre - seule la perte de sa dernière Blessure la met hors de combat."
+        }
+      },
+      {
+        "name": {
+          "en": "Fighting Undead",
+          "fr": "Combattre les morts-vivants"
+        },
+        "description": {
+          "en": "All Vampires hate Marianna (a personal enmity, not a band-wide Hatred).",
+          "fr": "Tous les Vampires haïssent Marianna (une inimitié personnelle, pas une Haine de bande)."
+        }
+      },
+      {
+        "name": { "en": "You Can Never Escape Your Past...", "fr": "On n'échappe jamais à son passé..." },
+        "description": {
+          "en": "On the game's last turn while Marianna still stands, or as soon as a warband routs, roll a D6 - 1-3: she leaves the warband's service after the game; 4-5: she stays for another game if the warband can afford her upkeep; 6: a group of Serutat's minions ambushes her (D3+1 Zombies, D3+1 Ghouls, or a Vampire + 2 Ghouls per a further D6) for D3 extra turns - if the warband helps her survive she fights the next battle for free, otherwise she leaves.",
+          "fr": "Au dernier tour de la partie tant que Marianna tient encore debout, ou dès qu'une bande est mise en déroute, jet de 1D6 - 1-3 : elle quitte le service de la bande après la partie ; 4-5 : elle reste pour une bataille de plus si la bande peut payer sa solde ; 6 : un groupe de sbires de Serutat lui tombe dessus (1D3+1 Zombies, 1D3+1 Goules, ou un Vampire + 2 Goules selon un second 1D6) pour 1D3 tours supplémentaires - si la bande l'aide à survivre, elle combat gratuitement la bataille suivante, sinon elle part."
         }
       }
     ],

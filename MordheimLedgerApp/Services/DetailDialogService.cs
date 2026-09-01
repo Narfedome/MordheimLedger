@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
@@ -134,8 +135,8 @@ public class DetailDialogService : IDetailDialogService
             : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         var startingEquipment = item.StartingEquipmentIds.Count == 0
-            ? new List<EquipmentItem>()
-            : (await _libraryService.GetEquipmentItemsAsync(language)).Where(e => item.StartingEquipmentIds.Contains(e.Id)).ToList();
+            ? new List<EquipmentQuantityChip>()
+            : EquipmentQuantityChip.GroupFrom(item.StartingEquipmentIds, await _libraryService.GetEquipmentItemsAsync(language));
 
         var magicSchoolSpells = item.MagicSchool is null
             ? new List<Spell>()
@@ -153,8 +154,8 @@ public class DetailDialogService : IDetailDialogService
             : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         var startingEquipment = item.StartingEquipmentIds.Count == 0
-            ? new List<EquipmentItem>()
-            : (await _libraryService.GetEquipmentItemsAsync(language)).Where(e => item.StartingEquipmentIds.Contains(e.Id)).ToList();
+            ? new List<EquipmentQuantityChip>()
+            : EquipmentQuantityChip.GroupFrom(item.StartingEquipmentIds, await _libraryService.GetEquipmentItemsAsync(language));
 
         var magicSchoolSpells = item.MagicSchool is null
             ? new List<Spell>()

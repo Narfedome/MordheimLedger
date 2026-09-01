@@ -266,7 +266,11 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal("Lesser Magic", nicodemus.MagicSchool?.Name);
 
         var marianna = Assert.Single(personae, p => p.Name.StartsWith("Countess Marianna"));
-        Assert.Equal(new[] { "Causes Fear", "Immune to Poison", "Immune to Psychology", "No Pain (Marianna)" },
+        // "Hated by Vampires"/"You Can Never Escape Your Past..." extracted from free-text Description
+        // into their own SpecialRule rows (2026-09-01, user request) - same catalog-visibility precedent
+        // as Bertha's "High Matriarch"/"Sigmar's Handmaiden", even though the mechanic they describe
+        // stays unmechanized prose (no rules engine V1).
+        Assert.Equal(new[] { "Causes Fear", "Hated by Vampires", "Immune to Poison", "Immune to Psychology", "No Pain (Marianna)", "You Can Never Escape Your Past..." },
             marianna.SpecialRules.Select(r => r.Name).OrderBy(n => n));
 
         var marquand = Assert.Single(personae, p => p.Name == "Marquand Volker");

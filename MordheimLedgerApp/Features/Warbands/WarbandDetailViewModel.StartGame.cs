@@ -56,7 +56,7 @@ public partial class WarbandDetailViewModel
         var aidEntries = AllActiveWarriorRows
             .Where(r => r.Warrior.Status == WarriorStatus.Active)
             .Where(r => r.Warrior.DramatisPersonaId is { } id && dramatisPersonaeById.TryGetValue(id, out var persona) && persona.RequiresRatingDisadvantage)
-            .Select(r => new DramatisPersonaAidEntry(r.Warrior.Name, dramatisPersonaeById[r.Warrior.DramatisPersonaId!.Value].Name, Rating))
+            .Select(r => new DramatisPersonaAidEntry(r.Warrior, dramatisPersonaeById[r.Warrior.DramatisPersonaId!.Value].Name, Rating))
             .ToList();
 
         var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote);
@@ -80,6 +80,17 @@ public partial class WarbandDetailViewModel
                 await _warbandService.SaveWarriorAsync(entry.Warrior);
                 sentences.Add(string.Format(Loc["HistoryOldWoundFailSentence"], entry.Warrior.Name));
             }
+            // Aide conditionnelle ratée (ex. Bertha : écart trop faible ou jet manqué) - voir
+            // DramatisPersonaAidEntry.WontFight. Retrait immédiat plutôt que d'attendre la Fin de Partie
+            // (ApplyWandererDeparturesAsync la retirerait de toute façon puisqu'elle est Vagabonde, mais
+            // seulement une fois cette bataille "traitée" - la retirer ICI reflète honnêtement qu'elle
+            // n'a jamais rejoint la bande pour cette partie, retour utilisateur 2026-09-01).
+            foreach (var entry in dialogViewModel.AidEntries.Where(e => e.WontFight))
+            {
+                await _warbandService.DeleteWarriorAsync(entry.Warrior.Id);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaDepartedSentence"], entry.Warrior.Name));
+            }
+
             if (sentences.Count > 0)
                 await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
 

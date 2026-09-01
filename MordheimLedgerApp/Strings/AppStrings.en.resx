@@ -1355,6 +1355,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Remaining treasury: {0} gc</value>
   </data>
+  <data name="EndOfGameCharacterWyrdstoneCostValue" xml:space="preserve">
+    <value>1 wyrdstone shard</value>
+  </data>
+  <data name="EndOfGameWyrdstoneShardsRemainingFormat" xml:space="preserve">
+    <value>Remaining wyrdstone shards: {0}</value>
+  </data>
   <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
     <value>Search for a rare item</value>
   </data>
@@ -1390,6 +1396,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
     <value>Not enough gold - uncheck an item or adjust the rolls before continuing.</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseWyrdstoneBlockedMessage" xml:space="preserve">
+    <value>Not enough wyrdstone shards to pay Nicodemus - sell fewer at the previous step or uncheck his recruitment.</value>
   </data>
   <data name="EndOfGameRareItemFixedCostFormat" xml:space="preserve">
     <value>{0} gc</value>
@@ -1501,6 +1510,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
     <value>{0} tracks down {1}, who joins the warband in exchange for {2}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedWyrdstoneSentence" xml:space="preserve">
+    <value>{0} tracks down {1}, who joins the warband in exchange for a wyrdstone shard.</value>
+  </data>
+  <data name="HistoryDramatisPersonaWyrdstoneUpkeepPaidSentence" xml:space="preserve">
+    <value>{0} receives their wyrdstone shard.</value>
   </data>
   <data name="HistoryDramatisPersonaUpkeepRefusedSentence" xml:space="preserve">
     <value>{0} leaves the warband, their upkeep unpaid - a new search will be needed to get them back.</value>

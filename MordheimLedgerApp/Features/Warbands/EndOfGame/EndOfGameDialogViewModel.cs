@@ -422,6 +422,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasury));
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
                     OnPropertyChanged(nameof(IsRareItemPurchaseBlocked));
+                    // Nicodemus (FeeKind.Wyrdstone) - même bug potentiel que le bloc trésorerie ci-dessus,
+                    // pour le stock de pierres magiques (2026-09-01, "on a qu'a brancher la wyrstone à son
+                    // paiement").
+                    OnPropertyChanged(nameof(HasWyrdstoneCostEntries));
+                    OnPropertyChanged(nameof(RareItemPurchaseTotalWyrdstoneCost));
+                    OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShards));
+                    OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShardsDisplay));
+                    OnPropertyChanged(nameof(IsRareItemPurchaseWyrdstoneBlocked));
                 }
                 // Basculer Objet/Personnage change quels résultats existent (voir IsFound) - StepLabel
                 // seul suffit ici, RareItemsWithResults est déjà notifiée par la branche IsSuccess/

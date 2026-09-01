@@ -3,7 +3,7 @@
 Suivi de ce qui reste à gérer sur le catalogue Dramatis Personae (`Core/Models/Library/
 DramatisPersona.cs`, `Data/SeedData/DramatisPersonae.json`, 8 personnages) au-delà du catalogue et
 du recrutement de base. Mis à jour à chaque avancée — dernière mise à jour : **2026-09-01** (frais
-d'engagement en or + paiement alternatif de Johann).
+d'engagement en or/pierre magique + paiement alternatif de Johann).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire ·
 📝 Volontairement laissé en texte libre (voir CLAUDE.md § Règles de collaboration : pas de moteur de
@@ -21,7 +21,7 @@ règles/calculateur de combat en V1)
 | Aide conditionnelle de Bertha (jet de Rating au Lancement de Partie) | ✅ | 2026-09-01, `RatingGapAidTable` + `StartGameDialog` - un échec (écart trop faible ou jet raté) la retire IMMÉDIATEMENT du roster à la confirmation, pas seulement à la Fin de Partie suivante |
 | Équipement de départ dupliqué (2 Marteaux de Sigmarite) | ✅ | 2026-09-01, `Quantity` + backfill base existante (catalogue) + chip "x2" dans les dialogs récap Codex |
 | Cycle de vie Vagabond (retrait auto après une bataille) | ✅ | 2026-09-01, `ApplyWandererDeparturesAsync` (Fin de Partie) - retrait complet, généralisé aux 3 Vagabonds (Aenur/Bertha/Ulli & Marquand) |
-| Frais d'engagement en or (HireCost à l'engagement + Upkeep récurrent) | ✅ | 2026-09-01, `FeeKind.Gold` uniquement (Johann/Veskit/Marianna) - voir Transverse pour la portée exacte |
+| Frais d'engagement (HireCost à l'engagement + Upkeep récurrent) | ✅ | 2026-09-01, `FeeKind.Gold` (Johann/Veskit/Marianna) ET `FeeKind.Wyrdstone` (Nicodemus) - voir Transverse pour la portée exacte |
 | Paiement alternatif de Johann (Ombre Cramoisie au lieu d'or) | ✅ | 2026-09-01, `DramatisPersona.AlternativePaymentItemId` + picker Codex + retrait réel de l'inventaire de bande, généralisable à tout futur personnage Gold via le même champ |
 | Exclusion du décompte de tête pour la vente de pierre magique | ⏳ | Voir note dans `Warrior.cs` (même limite que Franc-Tireur) |
 | Mécaniques propres à un seul personnage (Marianna, Nicodemus, Johann, Ulli & Marquand) | ⏳ / 📝 | Détail ci-dessous, personnage par personnage |
@@ -29,19 +29,23 @@ règles/calculateur de combat en V1)
 
 ## Transverse (tous personnages)
 
-- **Frais d'engagement en or : câblé, mais scopé à `FeeKind.Gold` uniquement (2026-09-01).** À
-  l'engagement (recherche "Personnage spécial" de Fin de Partie), `HireCost` est déduit de la
-  trésorerie (bloque le step si ça dépasserait le budget, même bandeau que l'achat d'objets rares -
-  `RareItemSearchEntry.EffectiveHireCostForTreasury`/`RareItemPurchaseTotalCost`). Nouvelle étape
-  "Dramatis Personae" en Fin de Partie (`EndOfGameDialogViewModel.DramatisPersonae.cs`, entièrement
-  absente si aucun personnage concerné) règle ensuite la solde récurrente à chaque partie suivante -
-  Payer/Renvoyer comme les Francs-Tireurs, impayée = retrait complet du roster (`ApplyDramatisPersonaUpkeepAsync`).
-  Concrètement : Johann (70 CO + 30 solde) et Veskit (80 CO + 35 solde) sont couverts ; Marianna
+- **Frais d'engagement : câblé pour `FeeKind.Gold` ET `FeeKind.Wyrdstone` (2026-09-01).** À
+  l'engagement (recherche "Personnage spécial" de Fin de Partie), le coût est déduit - `HireCost` sur
+  la trésorerie pour un personnage Gold, 1 éclat de pierre magique pour Nicodemus (Wyrdstone, jamais
+  d'option en or pour lui) - bloque le step si ça dépasserait le budget/stock disponible, même bandeau
+  que l'achat d'objets rares côté or (`RareItemSearchEntry.EffectiveHireCostForTreasury`/
+  `RareItemPurchaseTotalCost`) et un bandeau parallèle côté pierre magique
+  (`EffectiveWyrdstoneCostForShards`/`RareItemPurchaseTotalWyrdstoneCost`, calculé après le choix fait
+  à l'étape Vente de pierres magiques du même wizard). Nouvelle étape "Dramatis Personae" en Fin de
+  Partie (`EndOfGameDialogViewModel.DramatisPersonae.cs`, entièrement absente si aucun personnage
+  concerné) règle ensuite la solde récurrente à chaque partie suivante - Payer/Renvoyer comme les
+  Francs-Tireurs (1 pierre magique pour Nicodemus, montant en or pour les autres), impayée = retrait
+  complet du roster (`ApplyDramatisPersonaUpkeepAsync`). Concrètement : Johann (70 CO + 30 solde),
+  Veskit (80 CO + 35 solde) et Nicodemus (1 pierre à l'engagement + 1/bataille) sont couverts ; Marianna
   (150 CO + 75 solde variable) aussi pour le HireCost/Upkeep fixe, mais sa propre mécanique
   "On n'échappe jamais à son passé..." (qui fait varier l'upkeep réel) reste hors périmètre (texte
   libre, voir sa ligne plus bas). **Toujours hors périmètre, décision explicite** : Bertha (`None`,
-  rien à payer de toute façon), Nicodemus (`Wyrdstone` - paiement par bataille en pierre magique,
-  mécanique bien plus élaborée), Ulli & Marquand (`Pair` - engagement à deux, enchère "Une Poignée
+  rien à payer de toute façon), Ulli & Marquand (`Pair` - engagement à deux, enchère "Une Poignée
   d'Or").
 - **Paiement alternatif : généralisé, pas seulement Johann.** `DramatisPersona.AlternativePaymentItemId`
   (nouveau champ, éditable via un picker Codex - `EquipmentQuantityChip`-style 0/1 élément comme
@@ -78,8 +82,8 @@ règles/calculateur de combat en V1)
 | **Aenur, l'Épée du Crépuscule** | 12 bandes humaines/Ordre | Départ Vagabond ✅. ⏳ Délai de re-recherche (1 bataille sans lui) non tracké, voir Transverse. |
 | **Bertha Bestraufrung** | Sœurs de Sigmar | Aide conditionnelle ✅. Départ Vagabond ✅ (pas de délai de re-recherche pour elle, conforme au livre). Recrutement "gratuit en or" (`FeeKind.None`) déjà correct puisqu'aucun paiement n'est prélevé de toute façon. |
 | **Comtesse Marianna Chevaux** | 12 bandes | Frais en or (HireCost/Upkeep) ✅. 📝 **"On n'échappe jamais à son passé..."** : jet 1D6 au dernier tour de partie / à la déroute (reste-part / reste-si-solde-payée / embuscade Zombies+Goules+Vampire pour D3 tours) — entièrement absent du wizard, aucun écran ne couvre "pendant" une partie sur table ; c'est aussi ce qui fait varier son upkeep réel dans le livre, non reflété par l'Upkeep fixe (75) utilisé pour la solde récurrente. 📝 Haine personnelle des Vampires envers elle (déjà une `SpecialRule` dédiée, "Hated by Vampires") — non modélisable via `HatredTargetWarbandArchetypeIds` (ciblage par bande, pas par Vampires-en-tant-qu'individus). |
-| **Johann le Couteau** | 12 bandes | Frais en or + paiement alternatif (Ombre Cramoisie) ✅. 📝 Dague comptée comme 2 Épées en CaC — effet de combat, hors moteur de règles V1. |
-| **Nicodemus, le Pèlerin Maudit** | 11 bandes | ⏳ **Paiement en éclat de pierre magique à chaque bataille (y compris la première), sinon il part définitivement.** `FeeKind.Wyrdstone` existe côté modèle mais rien ne consomme réellement un éclat ni ne retire Nicodemus du roster si la bande ne peut/veut pas payer — mécanique à part entière (délibérément hors périmètre de la passe Gold du 2026-09-01), plus impactant qu'une simple solde puisque c'est une contrainte par-bataille. |
+| **Johann le Couteau** | 12 bandes | Frais en or + paiement alternatif (Ombre Cramoisie) ✅. Dagues comptant comme Épées (Parade uniquement, pas le bonus de sauvegarde) ✅ - `Dagger (Johann)`, objet unique dans Equipment.json portant la règle partagée `Parry (Sword)`, même principe que Ienh-Khain (Aenur). |
+| **Nicodemus, le Pèlerin Maudit** | 11 bandes | Paiement en éclat de pierre magique (à l'engagement + solde après chaque bataille) ✅ - mêmes étapes Achat/Recrutement et Dramatis Personae que Johann/Veskit/Marianna, juste une devise différente (aucune option en or pour lui, "il n'a aucun intérêt pour l'or"). Bâton de Sorcier (deux mains = Gourdin + Parade comme rondache ; une main = libère l'autre pour l'Épée de Rezhebel) déjà modélisé (`Wizard's Staff (Nicodemus)`, Equipment.json). |
 | **Marquand Volker & Ulli Leitpold** | 12 bandes (paire) | Départ Vagabond ✅ (chacun individuellement - voir "recrutement en paire non imposé" ci-dessous, le départ n'est pas non plus synchronisé entre les deux). ⏳ Délai de re-recherche non tracké, voir Transverse. ⏳ Frais en or non prélevés (`FeeKind.Pair`, délibérément hors périmètre de la passe Gold du 2026-09-01). ⏳ **Recrutement en paire non imposé** : les deux fiches catalogue sont indépendantes, rien n'empêche d'en recruter un seul dans l'UI actuelle (le livre les impose comme un bloc). ⏳ **"Une Poignée d'Or" / "Où est l'Argent ?"** (enchère secrète adverse en début de partie pour retourner la paire, saisie ou combat en duel si la bande ne peut pas payer) — aucun écran de Lancement de Partie ne couvre ce mécanisme. 📝 "Inséparables" (rester à 4" l'un de l'autre, traîner le partenaire hors du champ) — positionnement sur table, hors périmètre de l'app de toute façon. |
 | **Veskit, Bourreau Suprême** | Skavens (Clan Eshin) | Frais en or (HireCost/Upkeep) ✅. Rien d'autre en attente — pas Vagabond. |
 
@@ -100,6 +104,30 @@ règles/calculateur de combat en V1)
   IMMÉDIATEMENT à la confirmation du Lancement de Partie plutôt que d'attendre la Fin de Partie suivante
   (`DramatisPersonaAidEntry.WontFight`) - reflète que le personnage n'a jamais rejoint la bande pour
   cette bataille précise, avec un avertissement visible sur la carte avant confirmation.
+- **2026-09-01 (suite, dagues de Johann)** : "compte comme deux Épées" d'abord modélisé comme une règle
+  spéciale directement sur le Dramatis Persona ("Toujours Deux Épées") - revenu dessus après retour
+  utilisateur sur deux points : (1) la nuance du livre est plus précise ("censé avoir Parade et pas la
+  sauvegarde" - les vraies Épées combinées donnent aussi un bonus de sauvegarde d'armure que les dagues
+  de Johann n'ont PAS) ; (2) même principe que l'arme d'Aenur (Ienh-Khain) - un vrai objet catalogue
+  unique, pas une règle de personnage. Remplacé par `Dagger (Johann)` (`Equipment.json`, `IsUniqueArtefact`,
+  coût 0) portant la règle partagée `Parry (Sword)` déjà utilisée par Ienh-Khain/d'autres armes, avec sa
+  propre description qui précise "pour la règle Parade uniquement, pas le bonus de sauvegarde". Ses 2
+  "Dagger" génériques (`startingEquipmentNames`) remplacés par 2 `Dagger (Johann)` - consolidés en une
+  seule ligne "x2" comme les 2 Marteaux de Sigmarite de Bertha. Nouveau backfill général
+  `BackfillNewEquipmentItemsAsync` au passage : `Equipment.json` n'avait jusqu'ici aucun mécanisme pour
+  qu'un objet VRAIMENT NOUVEAU (jamais vu avant) atteigne une base déjà seedée - seul un objet déjà
+  existant pouvait être corrigé (Bertha/Johann plus haut). S'applique à toute future entrée neuve, pas
+  seulement Dagger (Johann).
+- **2026-09-01 (suite, "on a qu'a brancher la wyrstone à son paiement")** : Nicodemus rejoint Johann/
+  Veskit/Marianna dans les étapes Achat/Recrutement et Dramatis Personae du wizard Fin de Partie, payé
+  en pierre magique (1 éclat, jamais d'or) plutôt qu'en or - `RareItemSearchEntry.HasWyrdstoneCost`/
+  `EffectiveWyrdstoneCostForShards`, bandeau "pierres magiques restantes" parallèle à celui de la
+  trésorerie (calculé après le choix de vente de l'étape Vente de pierres magiques, qui précède celle-ci
+  dans le wizard). `DramatisPersonaUpkeepEntry` généralisé aux deux devises (`IsWyrdstoneFee`). Confirmé
+  au passage : le Bâton de Sorcier de Nicodemus (deux mains = Gourdin + Parade comme rondache ; une main
+  = libère l'autre pour l'Épée de Rezhebel, qui ne peut elle-même pas parer) était déjà modélisé
+  correctement dans le catalogue (`Wizard's Staff (Nicodemus)`, Equipment.json) lors d'une session
+  antérieure - rien à refaire.
 - **2026-09-01 (suite, bug de test utilisateur)** : l'étape "Achat/Recrutement" du wizard Fin de Partie
   était entièrement sautée dès qu'un Héros n'avait trouvé qu'un Personnage spécial (pas d'Objet rare) -
   `Steps` ne l'incluait que via `RareItemSearchEntries.Any(e => e.IsSuccess)`, qui ne couvre que le mode

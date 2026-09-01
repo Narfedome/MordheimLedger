@@ -1,23 +1,36 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>A Gold-fee Dramatis Persona already actively in the roster (Johann/Veskit/Marianna - NOT
-/// Bertha/None, Nicodemus/Wyrdstone, Ulli &amp; Marquand/Pair, all three still out of scope, see
-/// DRAMATIS_PERSONAE_STATUS.md), at the "Dramatis Personae" step of the End of Game wizard - see
-/// EndOfGameDialogViewModel.DramatisPersonae.cs.BuildDramatisPersonaUpkeepEntries. Same Payer/Renvoyer
-/// choice idiom as HiredSwordUpkeepEntry (a Picker with two options, not a raw bool?) - simpler than that
-/// class though: no IsPrepaidFree equivalent exists for a Dramatis Persona (nothing like "Une Faveur
-/// Rendue" grants one of these for free), so HasChoice is always true here.</summary>
+/// <summary>A recurring-fee Dramatis Persona already actively in the roster, at the "Dramatis Personae"
+/// step of the End of Game wizard - see EndOfGameDialogViewModel.DramatisPersonae.cs.
+/// BuildDramatisPersonaUpkeepEntries. Covers two currencies: Gold (Johann/Veskit/Marianna) and Wyrdstone
+/// (Nicodemus, 2026-09-01 - "he has no interest in gold... must be paid a wyrdstone shard... after every
+/// battle he fights") - NOT Bertha/None nor Ulli &amp; Marquand/Pair, both still out of scope, see
+/// DRAMATIS_PERSONAE_STATUS.md. Same Payer/Renvoyer choice idiom as HiredSwordUpkeepEntry (a Picker with
+/// two options, not a raw bool?) - simpler than that class though: no IsPrepaidFree equivalent exists for
+/// a Dramatis Persona (nothing like "Une Faveur Rendue" grants one of these for free), so HasChoice is
+/// always true here.</summary>
 public partial class DramatisPersonaUpkeepEntry : ObservableObject
 {
     public Warrior Warrior { get; }
     public DramatisPersona Persona { get; }
 
     public string DisplayName => Warrior.Name;
-    public int UpkeepCost => Persona.Upkeep!.Value;
+
+    public bool IsWyrdstoneFee => Persona.FeeKind == DramatisPersonaHireFeeKind.Wyrdstone;
+
+    /// <summary>1 for Nicodemus (always exactly one shard, never varies), otherwise the persona's real
+    /// gold Upkeep.</summary>
+    public int UpkeepCost => IsWyrdstoneFee ? 1 : Persona.Upkeep!.Value;
+
+    /// <summary>"1 pierre magique" for Nicodemus (reuses RareItemSearchEntry's own currency label, same
+    /// resx key) - the raw gold number otherwise, unchanged from before (HiredSwordUpkeepEntry shows its
+    /// own UpkeepCost the same bare way, no "CO" suffix either).</summary>
+    public string UpkeepCostDisplay => IsWyrdstoneFee ? LocalizationService.Instance["EndOfGameCharacterWyrdstoneCostValue"] : UpkeepCost.ToString();
 
     public List<string> ChoiceLabels { get; }
     private readonly string _payLabel;

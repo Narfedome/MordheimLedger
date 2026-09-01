@@ -252,6 +252,10 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(AlternativePaymentItemLabel))]
     [NotifyPropertyChangedFor(nameof(IsPayingWithAlternativeItem))]
     [NotifyPropertyChangedFor(nameof(EffectiveHireCostForTreasury))]
+    [NotifyPropertyChangedFor(nameof(HasWyrdstoneCost))]
+    [NotifyPropertyChangedFor(nameof(EffectiveWyrdstoneCostForShards))]
+    [NotifyPropertyChangedFor(nameof(HasEngagementCost))]
+    [NotifyPropertyChangedFor(nameof(EngagementCostDisplay))]
     private DramatisPersona? selectedCharacter;
 
     partial void OnSelectedCharacterChanged(DramatisPersona? value)
@@ -344,6 +348,21 @@ public partial class RareItemSearchEntry : ObservableObject
             ? _loc["EndOfGameCharacterHireCostFree"]
             : string.Format(_loc["EndOfGameRareItemFixedCostFormat"], SelectedCharacter!.HireCost!.Value);
 
+    /// <summary>Nicodemus only (FeeKind.Wyrdstone) - "he has no interest in gold... must be paid a
+    /// wyrdstone shard when he joins the warband". Always exactly 1 shard, never stored as a number on
+    /// DramatisPersona (unlike HireCost) since the book never varies it.</summary>
+    public bool HasWyrdstoneCost => SelectedCharacter?.FeeKind == DramatisPersonaHireFeeKind.Wyrdstone;
+
+    public int EffectiveWyrdstoneCostForShards => HasWyrdstoneCost ? 1 : 0;
+
+    /// <summary>Unified "there's an engagement cost to show" regardless of currency - drives ONE shared
+    /// XAML block (Grid + "Frais d'engagement" label) instead of a near-duplicate block per currency,
+    /// mutually exclusive by construction (HasHireCost requires FeeKind.Gold, HasWyrdstoneCost requires
+    /// FeeKind.Wyrdstone).</summary>
+    public bool HasEngagementCost => HasHireCost || HasWyrdstoneCost;
+
+    public string EngagementCostDisplay => HasWyrdstoneCost ? _loc["EndOfGameCharacterWyrdstoneCostValue"] : HireCostDisplay;
+
     /// <summary>True only when this character actually HAS an alternative payment item (DramatisPersona.
     /// AlternativePaymentItemId, e.g. Johann/Crimson Shade) AND the warband's inventory currently owns at
     /// least one unit of it - no point offering a choice the band can't actually make.</summary>
@@ -364,6 +383,7 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsPayingWithAlternativeItem))]
     [NotifyPropertyChangedFor(nameof(EffectiveHireCostForTreasury))]
     [NotifyPropertyChangedFor(nameof(HireCostDisplay))]
+    [NotifyPropertyChangedFor(nameof(EngagementCostDisplay))]
     private bool wantsToPayWithAlternativeItem;
 
     public bool IsPayingWithAlternativeItem => HasAlternativePaymentOption && WantsToPayWithAlternativeItem;

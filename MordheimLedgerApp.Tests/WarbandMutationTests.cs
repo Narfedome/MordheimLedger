@@ -252,6 +252,65 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
+    /// <summary>Same class of bug again, one layer up: Equipment.json has no dedup-at-runtime mechanism
+    /// at all (unlike DramatisPersona/Skill/Mutation), so a genuinely NEW entry added to it after a
+    /// database already seeded once (2026-09-01: "Dagger (Johann)") would otherwise never reach a machine
+    /// that had already seeded before that entry existed - fixed via BackfillNewEquipmentItemsAsync,
+    /// which only INSERTS items missing by English name (mirrors SeedEquipmentAsync's own per-item logic),
+    /// never touches an existing row.</summary>
+    [Fact]
+    public async Task NewEquipmentItem_AddedAfterADatabaseWasAlreadySeeded_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var johannDagger = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Dagger (Johann)");
+
+        // Simule une base seedée AVANT l'ajout de "Dagger (Johann)" à Equipment.json : supprime la ligne
+        // (+ sa règle Parade attachée) comme si elle n'avait jamais existé.
+        await _db.Connection.ExecuteAsync("DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ?", johannDagger.Id);
+        await _db.Connection.DeleteAsync<EquipmentItemEntity>(johannDagger.Id);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedDagger = Assert.Single(await reopenedLibrary.GetEquipmentItemsAsync("en"), e => e.Name == "Dagger (Johann)");
+        Assert.True(reopenedDagger.IsUniqueArtefact);
+        Assert.Equal(0, reopenedDagger.Cost);
+        Assert.Contains(reopenedDagger.SpecialRules, r => r.Name == "Parry (Sword)");
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Second case the same backfill covers: an ALREADY-existing equipment item whose
+    /// specialRules changed (2026-09-01: "Wizard's Staff (Nicodemus)" gained "Concussion"/
+    /// "Parry (Buckler)" alongside its own "Two-Handed Grip") - detected by a rule-COUNT mismatch and
+    /// re-synced (delete + reinsert), same idiom as the DramatisPersona equipment-count backfill.</summary>
+    [Fact]
+    public async Task EquipmentItemSpecialRules_StaleFromBeforeTheyWereAdded_AreBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var staff = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Wizard's Staff (Nicodemus)");
+        Assert.Equal(3, staff.SpecialRules.Count);
+
+        // Simule une base seedée AVANT l'ajout de Concussion/Parry (Buckler) : ne garder que "Two-Handed
+        // Grip" (sa règle d'origine).
+        var twoHandedGripRule = staff.SpecialRules.Single(r => r.Name == "Two-Handed Grip");
+        await _db.Connection.ExecuteAsync(
+            "DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ? AND SpecialRuleId != ?", staff.Id, twoHandedGripRule.Id);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedStaff = (await reopenedLibrary.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Wizard's Staff (Nicodemus)");
+        Assert.Equal(new[] { "Concussion", "Parry (Buckler)", "Two-Handed Grip" },
+            reopenedStaff.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
     /// <summary>Shrine's blessing (see ExplorationOutcome.GrantsWeaponBlessing) attaches "Blessed
     /// Weapon" via WarriorEquipment.BlessingRule - a SEPARATE slot from MaterialRule (Gromril/Ithilmar/
     /// Ornate), confirmed by the user 2026-08-21: a weapon already in Gromril that also gets blessed

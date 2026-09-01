@@ -44,6 +44,11 @@ public class AppDatabase
         await BackfillInjurySpecialRulesAsync();
         await BackfillSpecialRuleDescriptionsAsync();
         await BackfillWarriorStartingStatsAsync();
+        // Doit rester AVANT BackfillDramatisPersonaStartingEquipmentAsync : cette dernière résout les
+        // noms d'objets d'un Dramatis Persona (ex. Johann/"Dagger (Johann)") contre le catalogue déjà en
+        // base - un objet Equipment.json tout neuf doit donc déjà exister avant que cette résolution ne
+        // tourne, sinon elle échoue silencieusement (fail-soft, voir sa doc).
+        await BackfillNewEquipmentItemsAsync();
         await BackfillDramatisPersonaStartingEquipmentAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
@@ -281,6 +286,91 @@ public class AppDatabase
             warrior.StartingAttacks = warrior.Attacks;
             warrior.StartingLeadership = warrior.Leadership;
             await _db.UpdateAsync(warrior);
+        }
+    }
+
+    /// <summary>Equipment.json has no dedup-at-runtime mechanism (see the file's own note in CLAUDE.md) -
+    /// fine for the normal case (SeedEquipmentAsync only ever runs once, on a genuinely empty catalog),
+    /// but any edit to the file made after a machine already seeded once would otherwise silently never
+    /// reach that machine - two independent cases per entry, matched by English name against what's
+    /// already in TranslationEntity: (1) a brand-new entry (2026-09-01: "Dagger (Johann)", a new unique
+    /// artefact for Johann's "counts as a Sword for Parry" mechanic) gets INSERTED (mirrors
+    /// SeedEquipmentAsync's own per-item logic exactly); (2) an ALREADY-existing entry whose specialRules
+    /// changed (2026-09-01: "Wizard's Staff (Nicodemus)" gained "Concussion"/"Parry (Buckler)" alongside
+    /// its own "Two-Handed Grip") gets its EquipmentItemSpecialRuleEntity rows re-synced by COUNT mismatch
+    /// (delete + reinsert, same idiom as BackfillDramatisPersonaStartingEquipmentAsync's equipment-count
+    /// check) - every other field on an existing row is left untouched, so nothing a player edited into
+    /// Modified/Custom is at risk either way. Known limitation: unlike SeedOfficialContentAsync,
+    /// RestrictedToWarbandNames isn't resolvable here (no deferred-resolution queue on this path) - not
+    /// needed by any entry added so far, would need extending if a future backfilled item requires it.</summary>
+    private async Task BackfillNewEquipmentItemsAsync()
+    {
+        var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+        var existingEquipmentIdByName = (await _db.Table<EquipmentItemEntity>().ToListAsync())
+            .Where(e => englishTranslations.ContainsKey(e.NameKey))
+            .ToDictionary(e => englishTranslations[e.NameKey], e => e.Id);
+
+        foreach (var eq in await LoadSeedArrayAsync<EquipmentSeedData>("Equipment.json"))
+        {
+            if (existingEquipmentIdByName.TryGetValue(eq.Name.En, out var existingId))
+            {
+                // L'objet existe déjà - même limite/logique que BackfillDramatisPersonaStartingEquipmentAsync
+                // pour StartingEquipmentIds : un item déjà seedé dont les specialRules ont changé depuis
+                // (2026-09-01 : "Wizard's Staff (Nicodemus)" a gagné Concussion/Parry (Buckler) en plus de
+                // sa propre "Two-Handed Grip") ne les récupère jamais tout seul - comparé par COMPTE, pas
+                // par contenu (assez pour ce cas, comme pour l'équipement de départ d'un Dramatis Persona).
+                var existingRuleCount = await _db.Table<EquipmentItemSpecialRuleEntity>().Where(r => r.EquipmentItemId == existingId).CountAsync();
+                if (existingRuleCount != eq.SpecialRules.Count)
+                {
+                    var staleRuleRows = await _db.Table<EquipmentItemSpecialRuleEntity>().Where(r => r.EquipmentItemId == existingId).ToListAsync();
+                    foreach (var row in staleRuleRows)
+                        await _db.DeleteAsync(row);
+                    foreach (var sr in eq.SpecialRules)
+                    {
+                        var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                        await _db.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = existingId, SpecialRuleId = ruleId });
+                    }
+                }
+                continue;
+            }
+
+            var item = new EquipmentItem
+            {
+                Category = Enum.Parse<EquipmentCategory>(eq.Category),
+                Cost = eq.Cost,
+                Rarity = eq.Rarity,
+                CostRandomMax = eq.CostRandomMax,
+                Source = ContentSource.Official,
+                IsFreeDagger = eq.IsFreeDagger,
+                Movement = eq.Movement,
+                WeaponSkill = eq.WeaponSkill,
+                BallisticSkill = eq.BallisticSkill,
+                Strength = eq.Strength,
+                Toughness = eq.Toughness,
+                Wounds = eq.Wounds,
+                Initiative = eq.Initiative,
+                Attacks = eq.Attacks,
+                Leadership = eq.Leadership,
+                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
+                GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
+                GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
+                IsSellable = eq.IsSellable,
+                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
+                IsUniqueArtefact = eq.IsUniqueArtefact
+            };
+            item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
+            item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
+            var itemEntity = item.ToEntity();
+            await _db.InsertAsync(itemEntity);
+            _equipmentIdsByEnglishName[eq.Name.En] = itemEntity.Id;
+
+            foreach (var sr in eq.SpecialRules)
+            {
+                var ruleId = await FindOrCreateSpecialRuleAsync(sr);
+                await _db.InsertAsync(new EquipmentItemSpecialRuleEntity { EquipmentItemId = itemEntity.Id, SpecialRuleId = ruleId });
+            }
         }
     }
 

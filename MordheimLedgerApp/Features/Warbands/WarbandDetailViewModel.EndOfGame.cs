@@ -971,7 +971,16 @@ public partial class WarbandDetailViewModel
                 .Select(item => item!)
                 .ToList();
 
-            if (!entry.HasHireCost)
+            if (entry.HasWyrdstoneCost)
+            {
+                // Nicodemus - "he has no interest in gold... must be paid a wyrdstone shard when he
+                // joins the warband" (2026-09-01, "on a qu'a brancher la wyrstone à son paiement"). Pas
+                // de repli sur l'or : il n'a aucune option de paiement en or, contrairement à Johann.
+                Warband.WyrdstoneShards -= entry.EffectiveWyrdstoneCostForShards;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWyrdstoneSentence"], entry.HeroName, persona.Name));
+            }
+            else if (!entry.HasHireCost)
             {
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
             }
@@ -1031,12 +1040,14 @@ public partial class WarbandDetailViewModel
     }
 
     /// <summary>Étape "Dramatis Personae" (EndOfGameDialogViewModel.IsDramatisPersonaeStep) - règle la
-    /// solde de chaque Dramatis Persona à frais en or déjà engagé (Johann/Veskit/Marianna). Même
-    /// Payer/Renvoyer que ApplyHiredSwordUpkeepAsync ci-dessous, mais sans équivalent d'IsPrepaidFree
-    /// (rien comme "Une Faveur Rendue" n'existe pour un Dramatis Persona) et sans recrutement combiné (un
-    /// Dramatis Persona se recrute via ApplyRareItemSearchAsync, pas ici). Solde refusée/impayée = il
-    /// quitte la bande pour de bon - même traitement que le refus d'un Franc-Tireur (retrait complet,
-    /// équipement/compétences avec) : une future recherche recréera une fiche neuve.</summary>
+    /// solde de chaque Dramatis Persona à frais récurrents déjà engagé : en or (Johann/Veskit/Marianna)
+    /// OU en pierre magique (Nicodemus, DramatisPersonaUpkeepEntry.IsWyrdstoneFee - 2026-09-01, "on a
+    /// qu'a brancher la wyrstone à son paiement"). Même Payer/Renvoyer que ApplyHiredSwordUpkeepAsync
+    /// ci-dessous, mais sans équivalent d'IsPrepaidFree (rien comme "Une Faveur Rendue" n'existe pour un
+    /// Dramatis Persona) et sans recrutement combiné (un Dramatis Persona se recrute via
+    /// ApplyRareItemSearchAsync, pas ici). Solde refusée/impayée = il quitte la bande pour de bon - même
+    /// traitement que le refus d'un Franc-Tireur (retrait complet, équipement/compétences avec) : une
+    /// future recherche recréera une fiche neuve.</summary>
     private async Task ApplyDramatisPersonaUpkeepAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
         if (Warband is null) return;
@@ -1045,7 +1056,13 @@ public partial class WarbandDetailViewModel
         {
             var warrior = entry.Warrior;
 
-            if (entry.WillPay == true)
+            if (entry.WillPay == true && entry.IsWyrdstoneFee)
+            {
+                Warband.WyrdstoneShards -= entry.UpkeepCost;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaWyrdstoneUpkeepPaidSentence"], warrior.Name));
+            }
+            else if (entry.WillPay == true)
             {
                 Warband.Treasury -= entry.UpkeepCost;
                 await _warbandService.SaveWarbandAsync(Warband);

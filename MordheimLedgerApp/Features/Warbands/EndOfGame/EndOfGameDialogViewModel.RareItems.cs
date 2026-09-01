@@ -178,17 +178,52 @@ public partial class EndOfGameDialogViewModel
     /// unchecking something.</summary>
     public bool IsRareItemPurchaseBlocked => RareItemPurchaseRemainingTreasury < 0;
 
+    // --- Pierres magiques (Nicodemus, FeeKind.Wyrdstone - 2026-09-01, "on a qu'a brancher la wyrstone à
+    // son paiement") : même principe que la trésorerie ci-dessus, mais pour le stock de pierres magiques
+    // plutôt que l'or - Nicodemus n'a "aucun intérêt pour l'or", il n'existe aucune option de paiement en
+    // or pour lui (contrairement à Johann/Veskit/Marianna). ---------------------------------------------
+
+    /// <summary>True only when at least one entry this step involves a Wyrdstone-fee character - pilote
+    /// la visibilité du bandeau "pierres magiques restantes" (pas affiché pour une Fin de Partie sans
+    /// Nicodemus, même principe que HasHiredSwordUpkeep).</summary>
+    public bool HasWyrdstoneCostEntries => RareItemsWithResults.Any(e => e.HasWyrdstoneCost);
+
+    /// <summary>Stock déjà connu à ce stade du wizard : l'ancien stock MOINS ce que le joueur a choisi de
+    /// vendre à l'étape Vente de pierres magiques (ShardsToSell/MaxShardsToSell, voir PostBattle.cs) -
+    /// cette étape se déroule AVANT celle-ci dans l'ordre du wizard (Steps), son choix est donc déjà
+    /// définitif. Même limite que RareItemBaselineTreasury/HiredSwordTreasuryAfter : ne tient pas compte
+    /// d'une dépense concurrente dans une AUTRE étape (ex. Francs-Tireurs, qui ne consomme de toute façon
+    /// jamais de pierres magiques) - pas un problème ici puisque cette étape est la seule à en dépenser.</summary>
+    private int RareItemBaselineWyrdstoneShards => MaxShardsToSell - ShardsToSell;
+
+    /// <summary>Sum of EffectiveWyrdstoneCostForShards for every recruited Wyrdstone-fee character (en
+    /// pratique, au plus un seul Héros peut réellement recruter Nicodemus dans une même Fin de Partie -
+    /// un seul exemplaire existe dans le catalogue).</summary>
+    public int RareItemPurchaseTotalWyrdstoneCost => RareItemsWithResults.Where(e => e.IsRecruited).Sum(e => e.EffectiveWyrdstoneCostForShards);
+
+    public int RareItemPurchaseRemainingWyrdstoneShards => RareItemBaselineWyrdstoneShards - RareItemPurchaseTotalWyrdstoneCost;
+
+    /// <summary>Formatted display text - computed here rather than nesting {loc:Loc} inside a
+    /// StringFormat attribute (not valid XAML, see RareItemPurchaseRemainingTreasuryDisplay).</summary>
+    public string RareItemPurchaseRemainingWyrdstoneShardsDisplay => string.Format(Loc["EndOfGameWyrdstoneShardsRemainingFormat"], RareItemPurchaseRemainingWyrdstoneShards);
+
+    /// <summary>Same "block Next entirely" spirit as IsRareItemPurchaseBlocked, for the shard stock
+    /// instead of gold - "if the warband has no shard to give... he leaves and never returns", so
+    /// recruiting Nicodemus without enough shards left simply can't be confirmed.</summary>
+    public bool IsRareItemPurchaseWyrdstoneBlocked => RareItemPurchaseRemainingWyrdstoneShards < 0;
+
     /// <summary>Blocks Next until every checked variable-price find has its supplement rolled (a price
     /// can't be judged affordable while still unknown), then blocks again if the checked total exceeds
-    /// the treasury (IsRareItemPurchaseBlocked).</summary>
+    /// the treasury (IsRareItemPurchaseBlocked) or the Wyrdstone shard stock (IsRareItemPurchaseWyrdstoneBlocked).</summary>
     private bool ValidateRareItemPurchaseStep()
     {
         var valid = true;
         foreach (var entry in RareItemsWithResults.Where(e => e.WantsToBuy && e.HasVariablePrice))
             valid &= CheckRoll(entry.PriceSupplement is null, () => entry.PriceRollError = Loc["EndOfGameRollRequired"]);
 
-        // Pas un champ précis à mettre en défaut (voir IsRareItemPurchaseBlocked) - un bandeau dédié en
-        // XAML l'affiche directement, pas besoin de passer par CheckRoll/un message par entrée.
-        return valid && !IsRareItemPurchaseBlocked;
+        // Pas un champ précis à mettre en défaut (voir IsRareItemPurchaseBlocked/IsRareItemPurchaseWyrdstoneBlocked) -
+        // un bandeau dédié en XAML les affiche directement, pas besoin de passer par CheckRoll/un message
+        // par entrée.
+        return valid && !IsRareItemPurchaseBlocked && !IsRareItemPurchaseWyrdstoneBlocked;
     }
 }

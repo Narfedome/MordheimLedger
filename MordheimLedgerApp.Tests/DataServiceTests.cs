@@ -265,6 +265,16 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Null(nicodemus.HireCost);
         Assert.Equal("Lesser Magic", nicodemus.MagicSchool?.Name);
 
+        // Wizard's Staff (Nicodemus) - "les regle special des massue/rondache/2 mains" (2026-09-01, user
+        // request): reuses the SAME shared rules Club ("Concussion") and Buckler ("Parry (Buckler)")
+        // actually carry, rather than only describing the combo in the custom "Two-Handed Grip" rule's
+        // free text - find-or-create confirms these are the real shared rows, not near-duplicates.
+        var nicodemusStaff = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Wizard's Staff (Nicodemus)");
+        Assert.Equal(new[] { "Concussion", "Parry (Buckler)", "Two-Handed Grip" },
+            nicodemusStaff.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+        var allConcussionRules = (await _library.GetSpecialRulesAsync("en")).Where(r => r.Name == "Concussion").ToList();
+        Assert.Single(allConcussionRules);
+
         // Johann's alternative payment item (2026-09-01, "on va construire un vrai truc") - the same
         // real Equipment.json catalog row (DrugsAndPoisons, common pool) Trading Post already sells,
         // resolved through DramatisPersona.AlternativePaymentItemId/AlternativePaymentItem exactly like
@@ -275,6 +285,21 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal(30, johann.Upkeep);
         Assert.Equal("Crimson Shade", johann.AlternativePaymentItem?.Name);
         Assert.Equal((await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Crimson Shade").Id, johann.AlternativePaymentItemId);
+        Assert.Equal(new[] { "Knife Fighter Extraordinaire" }, johann.SpecialRules.Select(r => r.Name));
+
+        // "Daggers count as two Swords" (2026-09-01, user request) modelled the same way as Aenur's
+        // Ienh-Khain - a real unique EquipmentItem ("Dagger (Johann)", IsUniqueArtefact) carrying the
+        // shared "Parry (Sword)" rule, not a fake persona-level rule or a made-up "Dagger (Sword)" catalog
+        // entry. User correction mid-session: only Parry, NOT the usual Armour Save bonus two real Swords
+        // grant together - the item's own description spells that out rather than a second SpecialRule.
+        // Two units (he wields two daggers, per startingEquipmentNames) - same duplicate-id consolidation
+        // as Bertha's 2 Sigmarite Warhammers.
+        var allEquipment = await _library.GetEquipmentItemsAsync("en");
+        Assert.Equal(2, johann.StartingEquipmentIds.Count(id => allEquipment.First(e => e.Id == id).Name == "Dagger (Johann)"));
+        var johannDagger = allEquipment.Single(e => e.Name == "Dagger (Johann)");
+        Assert.True(johannDagger.IsUniqueArtefact);
+        Assert.Equal(0, johannDagger.Cost);
+        Assert.Contains(johannDagger.SpecialRules, r => r.Name == "Parry (Sword)");
 
         var marianna = Assert.Single(personae, p => p.Name.StartsWith("Countess Marianna"));
         // "Fighting Undead"/"You Can Never Escape Your Past..." extracted from free-text Description

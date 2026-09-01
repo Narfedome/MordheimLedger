@@ -1663,18 +1663,25 @@
                  Suivant du wizard reste actif mais ValidateRareItemPurchaseStep bloque le passage si le
                  total coché dépasserait la trésorerie (IsRareItemPurchaseBlocked, bandeau dédié
                  ci-dessous). Côté Personnage : case "Recruter" décochable (WantsToRecruit, coché par
-                 défaut) ; un personnage à frais en or (RareItemSearchEntry.HasHireCost, ex. Johann/
-                 Veskit/Marianna - PAS Bertha/None, Nicodemus/Wyrdstone, Ulli & Marquand/Pair, voir sa
-                 propre doc) affiche son coût et compte dans le même bandeau bloquant que les objets
-                 (2026-09-01, user request) ; s'il a en plus un objet de paiement alternatif ET que la
-                 bande en possède un exemplaire (HasAlternativePaymentOption, ex. Johann/Ombre Cramoisie),
-                 une case permet de payer avec l'objet à la place de l'or. Entièrement absente si aucune
-                 recherche n'a abouti (voir Steps). -->
+                 défaut) ; un personnage à frais - en or (RareItemSearchEntry.HasHireCost, ex. Johann/
+                 Veskit/Marianna) OU en pierre magique (HasWyrdstoneCost, Nicodemus uniquement - "il n'a
+                 aucun intérêt pour l'or", pas d'option or pour lui) - affiche son coût
+                 (HasEngagementCost/EngagementCostDisplay, unifié entre les deux devises) et compte dans le
+                 bandeau bloquant correspondant (trésorerie ou stock de pierres magiques, 2026-09-01, user
+                 request). Bertha (None)/Ulli &amp; Marquand (Pair) restent hors périmètre, voir leur
+                 propre doc. Un personnage à frais en or a en plus, s'il a un objet de paiement alternatif
+                 ET que la bande en possède un exemplaire (HasAlternativePaymentOption, ex. Johann/Ombre
+                 Cramoisie), une case pour payer avec l'objet à la place de l'or. Entièrement absente si
+                 aucune recherche n'a abouti (voir Steps). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRareItemPurchaseStep}">
                 <Label Text="{loc:Loc EndOfGameRareItemPurchaseHeading}" FontAttributes="Bold"/>
                 <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameRareItemPurchaseBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
                        IsVisible="{Binding IsRareItemPurchaseBlocked}"/>
+                <Label Text="{Binding RareItemPurchaseRemainingWyrdstoneShardsDisplay}" FontAttributes="Bold"
+                       IsVisible="{Binding HasWyrdstoneCostEntries}"/>
+                <Label Text="{loc:Loc EndOfGameRareItemPurchaseWyrdstoneBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsRareItemPurchaseWyrdstoneBlocked}"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding RareItemsWithResults}" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:RareItemSearchEntry">
@@ -1692,12 +1699,12 @@
                                         <CheckBox Grid.Column="2" IsChecked="{Binding WantsToRecruit}" VerticalOptions="Center"/>
                                     </Grid>
 
-                                    <!-- Frais d'engagement (Gold uniquement, voir HasHireCost) - visible seulement si le joueur
-                                         a laissé "Recruter" coché. -->
+                                    <!-- Frais d'engagement (or OU pierre magique, voir HasEngagementCost) - visible
+                                         seulement si le joueur a laissé "Recruter" coché. -->
                                     <VerticalStackLayout Spacing="6" IsVisible="{Binding IsRecruited}">
-                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasHireCost}">
+                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasEngagementCost}">
                                             <Label Grid.Column="0" Text="{loc:Loc EndOfGameCharacterHireCostPh}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
-                                            <Label Grid.Column="1" Text="{Binding HireCostDisplay}" VerticalOptions="Center"/>
+                                            <Label Grid.Column="1" Text="{Binding EngagementCostDisplay}" VerticalOptions="Center"/>
                                         </Grid>
                                         <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasAlternativePaymentOption}">
                                             <CheckBox IsChecked="{Binding WantsToPayWithAlternativeItem}" VerticalOptions="Center"/>
@@ -1793,10 +1800,12 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape : Dramatis Personae (solde des personnages à frais en or déjà engagés - Johann/
-                 Veskit/Marianna, voir EndOfGameDialogViewModel.DramatisPersonae.cs). Même carte/Picker
-                 Payer-Renvoyer que Francs-Tireurs ci-dessus, sans le bloc recrutement (déjà couvert par la
-                 recherche "Personnage spécial"). -->
+            <!-- Étape : Dramatis Personae (solde des personnages à frais récurrents déjà engagés - en or
+                 pour Johann/Veskit/Marianna, en pierre magique pour Nicodemus, voir
+                 EndOfGameDialogViewModel.DramatisPersonae.cs). Même carte/Picker Payer-Renvoyer que
+                 Francs-Tireurs ci-dessus, sans le bloc recrutement (déjà couvert par la recherche
+                 "Personnage spécial"). UpkeepCostDisplay (pas UpkeepCost brut) pour que la devise soit
+                 lisible ("1 pierre magique" plutôt qu'un "1" ambigu). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsDramatisPersonaeStep}">
                 <Label Text="{loc:Loc EndOfGameDramatisPersonaeHeading}" FontAttributes="Bold"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding DramatisPersonaUpkeepEntries}" Spacing="8">
@@ -1806,7 +1815,7 @@
                                 <VerticalStackLayout Spacing="6">
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Grid.Column="0" Text="{Binding DisplayName}" FontAttributes="Bold"/>
-                                        <Label Grid.Column="1" Text="{Binding UpkeepCost}" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Grid.Column="1" Text="{Binding UpkeepCostDisplay}" TextColor="{DynamicResource AppTextMuted}"/>
                                     </Grid>
                                     <VerticalStackLayout Spacing="4">
                                         <Picker ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>

@@ -1355,6 +1355,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Trésorerie restante : {0} CO</value>
   </data>
+  <data name="EndOfGameCharacterWyrdstoneCostValue" xml:space="preserve">
+    <value>1 pierre magique</value>
+  </data>
+  <data name="EndOfGameWyrdstoneShardsRemainingFormat" xml:space="preserve">
+    <value>Pierres magiques restantes : {0}</value>
+  </data>
   <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
     <value>Chercher un objet rare</value>
   </data>
@@ -1390,6 +1396,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
     <value>Trésorerie insuffisante - décochez un objet ou ajustez les jets avant de continuer.</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseWyrdstoneBlockedMessage" xml:space="preserve">
+    <value>Pas assez de pierres magiques pour payer Nicodemus - vendez-en moins à l'étape précédente ou décochez son recrutement.</value>
   </data>
   <data name="EndOfGameRareItemFixedCostFormat" xml:space="preserve">
     <value>{0} CO</value>
@@ -1501,6 +1510,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
     <value>{0} retrouve {1}, qui rejoint la bande contre {2}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedWyrdstoneSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande contre un éclat de pierre magique.</value>
+  </data>
+  <data name="HistoryDramatisPersonaWyrdstoneUpkeepPaidSentence" xml:space="preserve">
+    <value>{0} reçoit son éclat de pierre magique.</value>
   </data>
   <data name="HistoryDramatisPersonaUpkeepRefusedSentence" xml:space="preserve">
     <value>{0} quitte la bande, sa solde n'ayant pas été payée - une nouvelle recherche sera nécessaire pour la récupérer.</value>

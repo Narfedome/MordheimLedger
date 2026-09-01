@@ -722,6 +722,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="HiredSwordNoMagicSchool" xml:space="preserve">
     <value>None (not a spellcaster)</value>
   </data>
+  <data name="DramatisPersonaAlternativePaymentItemPh" xml:space="preserve">
+    <value>Alternative payment item</value>
+  </data>
+  <data name="DramatisPersonaNoAlternativePaymentItem" xml:space="preserve">
+    <value>None (gold only)</value>
+  </data>
   <data name="HiredSwordCreateTitle" xml:space="preserve">
     <value>New Hired Sword</value>
   </data>
@@ -1337,6 +1343,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Hired Swords</value>
   </data>
+  <data name="EndOfGameDramatisPersonaeHeading" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
   <data name="EndOfGameRareItemsHeading" xml:space="preserve">
     <value>Rare items</value>
   </data>
@@ -1354,6 +1363,15 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameCharacterRecruitLabel" xml:space="preserve">
     <value>Recruit</value>
+  </data>
+  <data name="EndOfGameCharacterHireCostPh" xml:space="preserve">
+    <value>Hire fee</value>
+  </data>
+  <data name="EndOfGameCharacterHireCostFree" xml:space="preserve">
+    <value>Free</value>
+  </data>
+  <data name="EndOfGameCharacterAlternativePaymentFormat" xml:space="preserve">
+    <value>Pay with {0} instead</value>
   </data>
   <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
     <value>Rare {0}</value>
@@ -1477,6 +1495,15 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
     <value>{0} tracks down {1}, who joins the warband.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedGoldSentence" xml:space="preserve">
+    <value>{0} tracks down {1}, who joins the warband for {2} gc.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
+    <value>{0} tracks down {1}, who joins the warband in exchange for {2}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaUpkeepRefusedSentence" xml:space="preserve">
+    <value>{0} leaves the warband, their upkeep unpaid - a new search will be needed to get them back.</value>
   </data>
   <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
     <value>{0} leaves the warband (Wanderer) - a new search will be needed before the next battle.</value>

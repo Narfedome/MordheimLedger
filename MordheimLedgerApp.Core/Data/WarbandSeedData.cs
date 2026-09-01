@@ -486,6 +486,12 @@ public class DramatisPersonaSeedData
     /// <summary>See Models.Library.DramatisPersona.MagicSchoolId - same name-only stub idiom as
     /// HiredSwordSeedData.MagicSchoolName.</summary>
     public LocalizedText? MagicSchoolName { get; set; }
+
+    /// <summary>English Name of an EquipmentSeedData/Equipment.json entry - see Models.Library.
+    /// DramatisPersona.AlternativePaymentItemId. Same resolution as StartingEquipmentNames (runs after
+    /// SeedEquipmentAsync, resolved against _equipmentIdsByEnglishName, throws on an unknown name). Null
+    /// for almost every character - only meaningful when FeeKind is Gold.</summary>
+    public string? AlternativePaymentItemName { get; set; }
 }
 
 /// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to

@@ -52,6 +52,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly IDramatisPersonaPickerService _dramatisPersonaPicker;
     private readonly int _warbandArchetypeId;
 
+    /// <summary>EquipmentItem ids the warband's unassigned inventory currently owns at least one of -
+    /// passed straight through to each RareItemSearchEntry (see its own doc) to decide whether an
+    /// alternative-payment option (e.g. Johann/Crimson Shade) can even be offered.</summary>
+    private readonly IReadOnlyCollection<int> _ownedEquipmentItemIds;
+
     /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
     /// Eshin") - needed alongside _warbandArchetypeId because a Groupe B "conditional on warband type"
     /// Exploration branch (Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome) matches by name,
@@ -131,6 +136,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsRareItemsStep))]
     [NotifyPropertyChangedFor(nameof(IsRareItemPurchaseStep))]
     [NotifyPropertyChangedFor(nameof(IsHiredSwordsStep))]
+    [NotifyPropertyChangedFor(nameof(IsDramatisPersonaeStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
@@ -147,7 +153,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -199,14 +205,26 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // items"), même principe que WyrdstoneSale ci-dessus. Achat : étape SÉPARÉE (retour
             // utilisateur 2026-08-28 - jamais un achat automatique sur un jet réussi), absente si aucune
             // recherche n'a abouti (voir Steps() recalculée à chaud - un jet raté à l'étape précédente ne
-            // laisse rien à acheter, cette carte disparaît d'elle-même).
+            // laisse rien à acheter, cette carte disparaît d'elle-même). IsFound (pas IsSuccess) - bug
+            // trouvé 2026-09-01 (retour utilisateur, en testant le paiement de Johann) : IsSuccess ne
+            // couvre que le mode Objet, donc l'étape entière était sautée dès qu'un Héros n'avait trouvé
+            // qu'un Personnage spécial (IsCharacterFound) et aucun objet - RareItemsWithResults (le
+            // contenu affiché À L'INTÉRIEUR de cette étape) utilisait déjà IsFound correctement, seule la
+            // condition d'INCLUSION de l'étape elle-même avait été oubliée lors de l'ajout du mode
+            // Personnage (2026-08-31).
             if (HasEligibleHeroesForRareItems) steps.Add(new(StepKind.RareItems));
-            if (RareItemSearchEntries.Any(e => e.IsSuccess)) steps.Add(new(StepKind.RareItemPurchase));
+            if (RareItemSearchEntries.Any(e => e.IsFound)) steps.Add(new(StepKind.RareItemPurchase));
             // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
             // voir EndOfGameDialogViewModel.HiredSwords.cs. Placée après l'or d'Exploration (le joueur
             // décide en connaissant sa trésorerie finale, voir HiredSwordTreasuryAfter), entièrement
             // absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance).
             if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
+            // Dramatis Personae : solde des personnages à frais en or déjà engagés (Johann/Veskit/
+            // Marianna) - voir EndOfGameDialogViewModel.DramatisPersonae.cs. Aucun recrutement combiné
+            // ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis Persona passe déjà par la
+            // recherche "Personnage spécial", RareItems/RareItemPurchase ci-dessus) - entièrement absente
+            // si aucun personnage à frais en or n'est concerné.
+            if (HasDramatisPersonaeUpkeep) steps.Add(new(StepKind.DramatisPersonae));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -234,6 +252,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsRareItemsStep => Current.Kind == StepKind.RareItems;
     public bool IsRareItemPurchaseStep => Current.Kind == StepKind.RareItemPurchase;
     public bool IsHiredSwordsStep => Current.Kind == StepKind.HiredSwords;
+    public bool IsDramatisPersonaeStep => Current.Kind == StepKind.DramatisPersonae;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
     /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
@@ -326,7 +345,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyCollection<int> ownedEquipmentItemIds, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -346,6 +365,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _specialRulesByEnglishName = specialRulesByEnglishName;
         _skillIdsByEnglishName = skillIdsByEnglishName;
         _hiredSwordCatalog = hiredSwordCatalog;
+        _dramatisPersonaCatalog = dramatisPersonaCatalog;
+        _ownedEquipmentItemIds = ownedEquipmentItemIds;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
@@ -361,13 +382,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
             new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment)));
         BuildHiredSwordUpkeepEntries();
+        BuildDramatisPersonaUpkeepEntries();
 
         // Une entrée par Héros (jamais un Homme de main - "Whenever a Hero wants to buy a rare item") -
         // construites une fois ici comme WarriorRows, celles des Héros mis Hors de combat restent dans la
         // collection mais masquées côté XAML (IsOutOfAction, voir HasEligibleHeroesForRareItems) plutôt
         // que retirées, même principe que ShowsInExperienceStep pour l'étape Expérience.
         RareItemSearchEntries = new ObservableCollection<RareItemSearchEntry>(
-            WarriorRows.Where(r => r.Warrior.IsHero).Select(r => new RareItemSearchEntry(r, Loc)));
+            WarriorRows.Where(r => r.Warrior.IsHero).Select(r => new RareItemSearchEntry(r, Loc, _ownedEquipmentItemIds)));
 
         // L'étape Achat séparée (RareItemPurchase) et son total en direct (RareItemPurchaseRemainingTreasury)
         // dépendent de IsSuccess/IsCharacterFound/WantsToBuy/PriceRoll de chaque entrée - notifie
@@ -388,7 +410,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                     // RareItemsWithResults couvre IsCharacterFound aussi (voir RareItemSearchEntry.IsFound).
                     OnPropertyChanged(nameof(RareItemsWithResults));
                 }
-                if (e.PropertyName is nameof(RareItemSearchEntry.WantsToBuy) or nameof(RareItemSearchEntry.PriceRoll) or nameof(RareItemSearchEntry.IsSuccess))
+                // WantsToRecruit/IsCharacterFound/WantsToPayWithAlternativeItem ajoutés 2026-09-01 - un
+                // personnage à frais en or (RareItemSearchEntry.HasHireCost) participe maintenant à ce
+                // même total (EffectiveHireCostForTreasury), même bug potentiel que RareItemsWithResults
+                // ci-dessus s'il manquait ici : la trésorerie restante affichée resterait périmée dès que
+                // le joueur coche/décoche "Recruter" ou bascule le paiement alternatif.
+                if (e.PropertyName is nameof(RareItemSearchEntry.WantsToBuy) or nameof(RareItemSearchEntry.PriceRoll) or nameof(RareItemSearchEntry.IsSuccess)
+                    or nameof(RareItemSearchEntry.WantsToRecruit) or nameof(RareItemSearchEntry.IsCharacterFound) or nameof(RareItemSearchEntry.WantsToPayWithAlternativeItem))
                 {
                     OnPropertyChanged(nameof(RareItemPurchaseTotalCost));
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasury));
@@ -459,6 +487,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             StepKind.RareItems => ValidateRareItemsStep(),
             StepKind.RareItemPurchase => ValidateRareItemPurchaseStep(),
             StepKind.HiredSwords => ValidateHiredSwordsStep(),
+            StepKind.DramatisPersonae => ValidateDramatisPersonaeStep(),
             _ => true
         };
     }

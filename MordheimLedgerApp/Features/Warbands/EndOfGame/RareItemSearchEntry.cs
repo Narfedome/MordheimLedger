@@ -19,6 +19,14 @@ public partial class RareItemSearchEntry : ObservableObject
 {
     private readonly LocalizationService _loc;
 
+    /// <summary>Snapshot of EquipmentItem ids the warband's UNASSIGNED inventory currently holds at least
+    /// one of (see WarbandDetailViewModel.EndOfGame - the same Inventory collection the roster page
+    /// already shows), used only to decide whether HasAlternativePaymentOption can offer itself at all
+    /// (e.g. Johann/Crimson Shade - no point showing "pay with X" if the band owns none). Frozen at
+    /// wizard-open time like every other snapshot in this class (Bonus, EffectiveRarity...) - equipment
+    /// can't actually change mid-wizard.</summary>
+    private readonly IReadOnlyCollection<int> _ownedEquipmentItemIds;
+
     public WarriorOutcomeRow Hero { get; }
     public string HeroName => Hero.Name;
 
@@ -238,12 +246,19 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(HasCharacterResult))]
     [NotifyPropertyChangedFor(nameof(IsCharacterFound))]
     [NotifyPropertyChangedFor(nameof(CharacterResultDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasHireCost))]
+    [NotifyPropertyChangedFor(nameof(HireCostDisplay))]
+    [NotifyPropertyChangedFor(nameof(HasAlternativePaymentOption))]
+    [NotifyPropertyChangedFor(nameof(AlternativePaymentItemLabel))]
+    [NotifyPropertyChangedFor(nameof(IsPayingWithAlternativeItem))]
+    [NotifyPropertyChangedFor(nameof(EffectiveHireCostForTreasury))]
     private DramatisPersona? selectedCharacter;
 
     partial void OnSelectedCharacterChanged(DramatisPersona? value)
     {
         CharacterRoll = string.Empty;
         CharacterRollError = null;
+        WantsToPayWithAlternativeItem = false;
     }
 
     public bool HasSelectedCharacter => SelectedCharacter is not null;
@@ -308,9 +323,62 @@ public partial class RareItemSearchEntry : ObservableObject
     /// successful search of EITHER kind.</summary>
     public bool IsFound => IsSearchingForCharacter ? IsCharacterFound : IsSuccess;
 
-    public RareItemSearchEntry(WarriorOutcomeRow hero, LocalizationService loc)
+    // --- Frais d'engagement (2026-09-01, user request - "on va construire un vrai truc") -------------
+    // Seul FeeKind.Gold est câblé ici : None (Bertha) ne prélève rien de toute façon, Wyrdstone
+    // (Nicodemus) et Pair (Ulli & Marquand) ont des mécaniques bien plus élaborées (paiement récurrent en
+    // pierre magique, engagement à deux) volontairement laissées hors périmètre de cette passe - voir
+    // DRAMATIS_PERSONAE_STATUS.md.
+
+    /// <summary>Only meaningful for a Gold-fee character (Johann/Veskit/Marianna) - None/Wyrdstone/Pair
+    /// never show a gold cost here (see the class comment above).</summary>
+    public bool HasHireCost => SelectedCharacter is { FeeKind: DramatisPersonaHireFeeKind.Gold, HireCost: not null };
+
+    /// <summary>"Gratuit" once IsPayingWithAlternativeItem is checked - reflects EffectiveHireCostForTreasury
+    /// (what's ACTUALLY charged, 0 in that case), not the raw catalog HireCost, which stayed shown as "70"
+    /// even after choosing the alternative item until this fix (2026-09-01, user report: "si on coche
+    /// l'ombre cramoisie, le recrutement doit être gratuit... on voit toujours noté 70" - the treasury
+    /// total was already correctly adjusted, only this label lagged behind).</summary>
+    public string HireCostDisplay => !HasHireCost
+        ? string.Empty
+        : IsPayingWithAlternativeItem
+            ? _loc["EndOfGameCharacterHireCostFree"]
+            : string.Format(_loc["EndOfGameRareItemFixedCostFormat"], SelectedCharacter!.HireCost!.Value);
+
+    /// <summary>True only when this character actually HAS an alternative payment item (DramatisPersona.
+    /// AlternativePaymentItemId, e.g. Johann/Crimson Shade) AND the warband's inventory currently owns at
+    /// least one unit of it - no point offering a choice the band can't actually make.</summary>
+    public bool HasAlternativePaymentOption => HasHireCost
+        && SelectedCharacter!.AlternativePaymentItemId is { } itemId
+        && _ownedEquipmentItemIds.Contains(itemId);
+
+    /// <summary>Computed here rather than a nested {loc:Loc} inside a StringFormat attribute (not valid
+    /// XAML, same idiom as CostDisplay/CharacterInitiativeDisplay above).</summary>
+    public string AlternativePaymentItemLabel => HasAlternativePaymentOption
+        ? string.Format(_loc["EndOfGameCharacterAlternativePaymentFormat"], SelectedCharacter!.AlternativePaymentItem!.Name)
+        : string.Empty;
+
+    /// <summary>Player's choice when HasAlternativePaymentOption is true - defaults false (pay gold).
+    /// Meaningless (ignored at Apply time) when HasAlternativePaymentOption is false, even if somehow left
+    /// true from a previous SelectedCharacter (reset in OnSelectedCharacterChanged regardless).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPayingWithAlternativeItem))]
+    [NotifyPropertyChangedFor(nameof(EffectiveHireCostForTreasury))]
+    [NotifyPropertyChangedFor(nameof(HireCostDisplay))]
+    private bool wantsToPayWithAlternativeItem;
+
+    public bool IsPayingWithAlternativeItem => HasAlternativePaymentOption && WantsToPayWithAlternativeItem;
+
+    /// <summary>What actually gets deducted from the treasury for this entry - 0 whenever gold isn't the
+    /// payment method (no hire cost at all, or paying with the alternative item instead). Feeds
+    /// EndOfGameDialogViewModel.RareItems.cs's RareItemPurchaseTotalCost, the same running total/
+    /// affordability block already used for rare item purchases - a character's gold fee competes for the
+    /// same treasury, same "bloquer le step si trésorerie négative" rule.</summary>
+    public int EffectiveHireCostForTreasury => HasHireCost && !IsPayingWithAlternativeItem ? SelectedCharacter!.HireCost!.Value : 0;
+
+    public RareItemSearchEntry(WarriorOutcomeRow hero, LocalizationService loc, IReadOnlyCollection<int> ownedEquipmentItemIds)
     {
         Hero = hero;
         _loc = loc;
+        _ownedEquipmentItemIds = ownedEquipmentItemIds;
     }
 }

@@ -1663,9 +1663,13 @@
                  Suivant du wizard reste actif mais ValidateRareItemPurchaseStep bloque le passage si le
                  total coché dépasserait la trésorerie (IsRareItemPurchaseBlocked, bandeau dédié
                  ci-dessous). Côté Personnage : case "Recruter" décochable (WantsToRecruit, coché par
-                 défaut), pas de coût pour l'instant (frais d'engagement toujours en attente, voir
-                 Models.Warrior.DramatisPersonaId) donc n'affecte jamais la trésorerie/le bandeau bloquant.
-                 Entièrement absente si aucune recherche n'a abouti (voir Steps). -->
+                 défaut) ; un personnage à frais en or (RareItemSearchEntry.HasHireCost, ex. Johann/
+                 Veskit/Marianna - PAS Bertha/None, Nicodemus/Wyrdstone, Ulli & Marquand/Pair, voir sa
+                 propre doc) affiche son coût et compte dans le même bandeau bloquant que les objets
+                 (2026-09-01, user request) ; s'il a en plus un objet de paiement alternatif ET que la
+                 bande en possède un exemplaire (HasAlternativePaymentOption, ex. Johann/Ombre Cramoisie),
+                 une case permet de payer avec l'objet à la place de l'or. Entièrement absente si aucune
+                 recherche n'a abouti (voir Steps). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRareItemPurchaseStep}">
                 <Label Text="{loc:Loc EndOfGameRareItemPurchaseHeading}" FontAttributes="Bold"/>
                 <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
@@ -1687,6 +1691,19 @@
                                         <Label Grid.Column="1" Text="{loc:Loc EndOfGameCharacterRecruitLabel}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                                         <CheckBox Grid.Column="2" IsChecked="{Binding WantsToRecruit}" VerticalOptions="Center"/>
                                     </Grid>
+
+                                    <!-- Frais d'engagement (Gold uniquement, voir HasHireCost) - visible seulement si le joueur
+                                         a laissé "Recruter" coché. -->
+                                    <VerticalStackLayout Spacing="6" IsVisible="{Binding IsRecruited}">
+                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasHireCost}">
+                                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameCharacterHireCostPh}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Label Grid.Column="1" Text="{Binding HireCostDisplay}" VerticalOptions="Center"/>
+                                        </Grid>
+                                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasAlternativePaymentOption}">
+                                            <CheckBox IsChecked="{Binding WantsToPayWithAlternativeItem}" VerticalOptions="Center"/>
+                                            <Label Text="{Binding AlternativePaymentItemLabel}" VerticalOptions="Center" FontSize="12"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
 
                                     <!-- Côté Objet trouvé -->
                                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter, Converter={StaticResource InverseBoolConverter}}">
@@ -1773,6 +1790,33 @@
                         <Label Text="{Binding NewHiredSwordAffordError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                IsVisible="{Binding NewHiredSwordAffordError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Étape : Dramatis Personae (solde des personnages à frais en or déjà engagés - Johann/
+                 Veskit/Marianna, voir EndOfGameDialogViewModel.DramatisPersonae.cs). Même carte/Picker
+                 Payer-Renvoyer que Francs-Tireurs ci-dessus, sans le bloc recrutement (déjà couvert par la
+                 recherche "Personnage spécial"). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsDramatisPersonaeStep}">
+                <Label Text="{loc:Loc EndOfGameDramatisPersonaeHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DramatisPersonaUpkeepEntries}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:DramatisPersonaUpkeepEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding DisplayName}" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1" Text="{Binding UpkeepCost}" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </Grid>
+                                    <VerticalStackLayout Spacing="4">
+                                        <Picker ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
+                                        <Label Text="{Binding ChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding ChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
             </VerticalStackLayout>
 

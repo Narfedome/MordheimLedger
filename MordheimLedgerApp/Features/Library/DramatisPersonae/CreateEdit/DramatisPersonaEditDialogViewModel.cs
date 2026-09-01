@@ -64,6 +64,10 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
     /// HiredSwordEditDialogViewModel.MagicSchools.</summary>
     public ObservableCollection<MagicSchool> MagicSchools { get; }
 
+    /// <summary>0 ou 1 élément (voir DramatisPersona.AlternativePaymentItemId, ex. Johann/Ombre
+    /// Cramoisie) - même principe 0/1-élément que MagicSchools ci-dessus.</summary>
+    public ObservableCollection<EquipmentItem> AlternativePaymentItems { get; }
+
     public DramatisPersonaEditDialogViewModel(DramatisPersona item, string title, IWarbandArchetypePickerService warbandPicker,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, IDetailDialogService detailDialogs, ILibraryService libraryService,
@@ -92,6 +96,7 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
         StartingEquipment = new ObservableCollection<EquipmentItem>(initialStartingEquipment);
         Skills = new ObservableCollection<Skill>(item.Skills);
         MagicSchools = new ObservableCollection<MagicSchool>(item.MagicSchool is { } school ? new[] { school } : Array.Empty<MagicSchool>());
+        AlternativePaymentItems = new ObservableCollection<EquipmentItem>(item.AlternativePaymentItem is { } altItem ? new[] { altItem } : Array.Empty<EquipmentItem>());
     }
 
     partial void OnSelectedFeeKindLabelChanged(string value)
@@ -179,6 +184,25 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private void RemoveMagicSchool(MagicSchool school) => MagicSchools.Remove(school);
 
+    /// <summary>Remplace l'entrée existante plutôt que d'empiler (un seul FK) - même principe 0/1-élément
+    /// qu'AddMagicSchool ci-dessus. warbandArchetypeId: 0 - même raison qu'AddStartingEquipment (aucune
+    /// bande réelle n'est concernée, un Dramatis Persona n'est jamais recruté PAR une bande spécifique).</summary>
+    [RelayCommand]
+    private async Task AddAlternativePaymentItem()
+    {
+        var picked = await _equipmentPicker.PickEquipmentAsync(warbandArchetypeId: 0, singleSelect: true);
+        if (picked.Count == 0) return;
+
+        AlternativePaymentItems.Clear();
+        AlternativePaymentItems.Add(picked[0]);
+    }
+
+    [RelayCommand]
+    private Task ShowAlternativePaymentItemDetail(EquipmentItem equipmentItem) => _detailDialogs.ShowEquipmentDetailDialogAsync(equipmentItem);
+
+    [RelayCommand]
+    private void RemoveAlternativePaymentItem(EquipmentItem equipmentItem) => AlternativePaymentItems.Remove(equipmentItem);
+
     private bool ValidateRequiredFields()
     {
         if (string.IsNullOrWhiteSpace(Item.Name))
@@ -202,6 +226,8 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
         Item.Skills = Skills.ToList();
         Item.MagicSchool = MagicSchools.FirstOrDefault();
         Item.MagicSchoolId = Item.MagicSchool?.Id;
+        Item.AlternativePaymentItem = AlternativePaymentItems.FirstOrDefault();
+        Item.AlternativePaymentItemId = Item.AlternativePaymentItem?.Id;
         Close(true);
     }
 }

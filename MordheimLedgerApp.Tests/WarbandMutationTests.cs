@@ -223,6 +223,35 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
+    /// <summary>Same class of bug as the equipment-count backfill above, for the OTHER field
+    /// BackfillDramatisPersonaStartingEquipmentAsync now also fixes: an already-seeded database has
+    /// Johann's AlternativePaymentItemId still null (seeded before this field/JSON entry existed) - the
+    /// backfill overwrites the plain FK column directly (no join table involved, simpler than the
+    /// equipment-count fix) once it disagrees with DramatisPersonae.json's current
+    /// alternativePaymentItemName.</summary>
+    [Fact]
+    public async Task DramatisPersonaAlternativePaymentItem_StaleFromBeforeItExisted_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var johann = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Johann"));
+        Assert.NotNull(johann.AlternativePaymentItemId);
+
+        // Simule une base seedée AVANT l'ajout du champ - efface la valeur déjà résolue.
+        var entity = await _db.Connection.FindAsync<DramatisPersonaEntity>(johann.Id);
+        entity.AlternativePaymentItemId = null;
+        await _db.Connection.UpdateAsync(entity);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedJohann = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Johann"));
+        Assert.Equal("Crimson Shade", reopenedJohann.AlternativePaymentItem?.Name);
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
     /// <summary>Shrine's blessing (see ExplorationOutcome.GrantsWeaponBlessing) attaches "Blessed
     /// Weapon" via WarriorEquipment.BlessingRule - a SEPARATE slot from MaterialRule (Gromril/Ithilmar/
     /// Ornate), confirmed by the user 2026-08-21: a weapon already in Gromril that also gets blessed

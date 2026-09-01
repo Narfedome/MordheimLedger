@@ -56,6 +56,19 @@
                 </VerticalStackLayout>
             </Grid>
 
+            <!-- Objet de paiement alternatif (ex. Johann : une dose d'Ombre Cramoisie au lieu d'or) -
+                 0 ou 1 élément, même principe que la section École de magie plus bas. Seulement pertinent
+                 quand FeeKind est Gold, mais pas masqué conditionnellement (même choix que HireCost/Upkeep
+                 ci-dessus, toujours visibles quel que soit FeeKind). -->
+            <components:ChipListView HeaderText="{loc:Loc DramatisPersonaAlternativePaymentItemPh}"
+                                      ItemsSource="{Binding AlternativePaymentItems}"
+                                      EmptyHintText="{loc:Loc DramatisPersonaNoAlternativePaymentItem}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaPotion}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowAlternativePaymentItemDetailCommand}"
+                                      AddCommand="{Binding AddAlternativePaymentItemCommand}"
+                                      RemoveCommand="{Binding RemoveAlternativePaymentItemCommand}"/>
+
             <HorizontalStackLayout Spacing="10">
                 <CheckBox IsChecked="{Binding Item.IsWanderer}" VerticalOptions="Center"/>
                 <Label Text="{loc:Loc DramatisPersonaIsWandererPh}" VerticalOptions="Center"/>

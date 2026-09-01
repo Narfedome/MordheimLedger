@@ -198,7 +198,11 @@ public class LibraryService : ILibraryService
         var startingEquipment = await LoadDramatisPersonaEquipmentAsync();
         var skills = await LoadDramatisPersonaSkillsAsync(languageCode);
         var magicSchoolsById = (await GetMagicSchoolsAsync(languageCode)).ToDictionary(s => s.Id);
-        return rows.Select(r => r.ToModel(translations, restrictions, specialRules, startingEquipment, skills, magicSchoolsById)).OrderBy(r => r.Name).ToList();
+        // Résout AlternativePaymentItemId (ex. Johann/Ombre Cramoisie) - même dictionnaire complet que
+        // partout ailleurs où un DramatisPersona référence un objet du catalogue (voir StartingEquipmentIds
+        // plus haut dans cette méthode).
+        var equipmentById = (await GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
+        return rows.Select(r => r.ToModel(translations, restrictions, specialRules, startingEquipment, skills, magicSchoolsById, equipmentById)).OrderBy(r => r.Name).ToList();
     }
 
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)

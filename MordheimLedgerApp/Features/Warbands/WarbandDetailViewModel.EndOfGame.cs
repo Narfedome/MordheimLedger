@@ -107,9 +107,16 @@ public partial class WarbandDetailViewModel
             ? new List<EquipmentItem>()
             : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
 
+        // Étape "Dramatis Personae" (upkeep, voir EndOfGameDialogViewModel.DramatisPersonae.cs) + choix
+        // "payer avec l'objet alternatif" de l'étape Achat (RareItemSearchEntry.HasAlternativePaymentOption) -
+        // même catalogue localisé que localizedHiredSwords ci-dessus, même raison (résout FeeKind/Upkeep/
+        // AlternativePaymentItemId d'un personnage déjà recruté, jamais stockés sur Warrior lui-même).
+        var dramatisPersonaCatalog = await _libraryService.GetDramatisPersonaeAsync(language);
+        var ownedEquipmentItemIds = Inventory.Select(w => w.Item.Id).ToHashSet();
+
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, ownedEquipmentItemIds, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -123,6 +130,7 @@ public partial class WarbandDetailViewModel
             ApplyAvailableVeterans(dialogViewModel, sentences);
             await ApplyRareItemSearchAsync(dialogViewModel, localizedEquipment, sentences);
             await ApplyWandererDeparturesAsync(dialogViewModel, sentences);
+            await ApplyDramatisPersonaUpkeepAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -926,9 +934,14 @@ public partial class WarbandDetailViewModel
     /// aucune pénalité au livre dans aucun de ces cas.</summary>
     /// <summary>Étape Achat/Recrutement (EndOfGameDialogViewModel.IsRareItemPurchaseStep) - traite les
     /// deux modes (RareItemSearchEntry.IsSearchingForCharacter) : objets achetés (IsPurchased, inchangé)
-    /// ET personnages recrutés (IsRecruited, 2026-08-31). Un personnage recruté ne touche jamais
-    /// Warband.Treasury (pas de frais d'engagement pour l'instant, voir Models.Warrior.DramatisPersonaId's
-    /// own doc) - juste inséré comme un Warrior normal, avec son équipement/ses compétences fixes.</summary>
+    /// ET personnages recrutés (IsRecruited). Un personnage à frais en or (RareItemSearchEntry.
+    /// HasHireCost - Johann/Veskit/Marianna, PAS Bertha/None ni Nicodemus/Wyrdstone ni Ulli & Marquand/
+    /// Pair) prélève désormais réellement son HireCost sur la trésorerie (2026-09-01, user request),
+    /// SAUF s'il a un objet de paiement alternatif ET que le joueur a coché cette option
+    /// (IsPayingWithAlternativeItem, ex. Johann/Ombre Cramoisie) - dans ce cas un exemplaire de l'objet
+    /// est retiré de l'inventaire de bande à la place (retrait total de la pile, voir DramatisPersona.
+    /// AlternativePaymentItemId's own doc - pas de mécanisme de pile partielle dans cette app). Un
+    /// personnage sans frais (Bertha) reste inséré gratuitement comme avant.</summary>
     private async Task ApplyRareItemSearchAsync(EndOfGameDialogViewModel dialogViewModel, List<EquipmentItem> localizedEquipment, List<string> sentences)
     {
         if (Warband is null) return;
@@ -957,8 +970,29 @@ public partial class WarbandDetailViewModel
                 .Where(item => item is not null)
                 .Select(item => item!)
                 .ToList();
+
+            if (!entry.HasHireCost)
+            {
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
+            }
+            else if (entry.IsPayingWithAlternativeItem
+                && Inventory.FirstOrDefault(w => w.Item.Id == persona.AlternativePaymentItemId) is { } paymentStash)
+            {
+                await _warbandService.RemoveWarbandEquipmentAsync(paymentStash.Id);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWithItemSentence"], entry.HeroName, persona.Name, paymentStash.Item.Name));
+            }
+            else
+            {
+                // Repli sur l'or si "payer avec l'objet" était coché mais que l'objet a entre-temps
+                // disparu de l'inventaire (deux Héros cherchant/recrutant le même personnage la même Fin
+                // de Partie, cas limite non bloqué par l'UI) - même comportement que si la case n'avait
+                // jamais été cochée.
+                Warband.Treasury -= persona.HireCost!.Value;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedGoldSentence"], entry.HeroName, persona.Name, persona.HireCost!.Value));
+            }
+
             await _warbandService.RecruitDramatisPersonaAsync(Warband.Id, persona, persona.Name, startingEquipment, persona.Skills);
-            sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
         }
     }
 
@@ -993,6 +1027,35 @@ public partial class WarbandDetailViewModel
 
             await _warbandService.DeleteWarriorAsync(warrior.Id);
             sentences.Add(string.Format(Loc["HistoryDramatisPersonaDepartedSentence"], warrior.Name));
+        }
+    }
+
+    /// <summary>Étape "Dramatis Personae" (EndOfGameDialogViewModel.IsDramatisPersonaeStep) - règle la
+    /// solde de chaque Dramatis Persona à frais en or déjà engagé (Johann/Veskit/Marianna). Même
+    /// Payer/Renvoyer que ApplyHiredSwordUpkeepAsync ci-dessous, mais sans équivalent d'IsPrepaidFree
+    /// (rien comme "Une Faveur Rendue" n'existe pour un Dramatis Persona) et sans recrutement combiné (un
+    /// Dramatis Persona se recrute via ApplyRareItemSearchAsync, pas ici). Solde refusée/impayée = il
+    /// quitte la bande pour de bon - même traitement que le refus d'un Franc-Tireur (retrait complet,
+    /// équipement/compétences avec) : une future recherche recréera une fiche neuve.</summary>
+    private async Task ApplyDramatisPersonaUpkeepAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var entry in dialogViewModel.DramatisPersonaUpkeepEntries)
+        {
+            var warrior = entry.Warrior;
+
+            if (entry.WillPay == true)
+            {
+                Warband.Treasury -= entry.UpkeepCost;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPaidSentence"], warrior.Name, entry.UpkeepCost));
+            }
+            else
+            {
+                await _warbandService.DeleteWarriorAsync(warrior.Id);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaUpkeepRefusedSentence"], warrior.Name));
+            }
         }
     }
 

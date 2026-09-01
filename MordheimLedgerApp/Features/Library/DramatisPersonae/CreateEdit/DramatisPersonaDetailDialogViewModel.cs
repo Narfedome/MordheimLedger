@@ -25,6 +25,10 @@ public partial class DramatisPersonaDetailDialogViewModel : ReadOnlyDialogViewMo
     /// section (header inclus) si vide.</summary>
     public List<MagicSchool> MagicSchools => Item.MagicSchool is { } school ? new List<MagicSchool> { school } : new List<MagicSchool>();
 
+    /// <summary>0 ou 1 élément (voir DramatisPersona.AlternativePaymentItemId) - même principe que
+    /// MagicSchools ci-dessus.</summary>
+    public List<EquipmentItem> AlternativePaymentItems => Item.AlternativePaymentItem is { } altItem ? new List<EquipmentItem> { altItem } : new List<EquipmentItem>();
+
     /// <summary>Déjà résolu par l'appelant (DetailDialogService.ShowDramatisPersonaDetailDialogAsync),
     /// même principe que HiredSwordDetailDialogViewModel.StartingEquipment - un chip par id distinct,
     /// un doublon (ex. les 2 Marteaux de Sigmarite de Bertha) se replie en un seul chip "x2" plutôt que
@@ -69,4 +73,7 @@ public partial class DramatisPersonaDetailDialogViewModel : ReadOnlyDialogViewMo
 
     [RelayCommand]
     private Task ShowMagicSchoolDetail(MagicSchool school) => ShowChipDetailAsync(school.Name, school.Description, _magicSchoolSpells);
+
+    [RelayCommand]
+    private Task ShowAlternativePaymentItemDetail(EquipmentItem equipmentItem) => _detailDialogs.ShowEquipmentDetailDialogAsync(equipmentItem);
 }

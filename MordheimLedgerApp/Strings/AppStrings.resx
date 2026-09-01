@@ -722,6 +722,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="HiredSwordNoMagicSchool" xml:space="preserve">
     <value>Aucune (pas un lanceur de sorts)</value>
   </data>
+  <data name="DramatisPersonaAlternativePaymentItemPh" xml:space="preserve">
+    <value>Objet de paiement alternatif</value>
+  </data>
+  <data name="DramatisPersonaNoAlternativePaymentItem" xml:space="preserve">
+    <value>Aucun (or uniquement)</value>
+  </data>
   <data name="HiredSwordCreateTitle" xml:space="preserve">
     <value>Nouveau franc-tireur</value>
   </data>
@@ -1337,6 +1343,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Francs-Tireurs</value>
   </data>
+  <data name="EndOfGameDramatisPersonaeHeading" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
   <data name="EndOfGameRareItemsHeading" xml:space="preserve">
     <value>Objets rares</value>
   </data>
@@ -1354,6 +1363,15 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameCharacterRecruitLabel" xml:space="preserve">
     <value>Recruter</value>
+  </data>
+  <data name="EndOfGameCharacterHireCostPh" xml:space="preserve">
+    <value>Frais d'engagement</value>
+  </data>
+  <data name="EndOfGameCharacterHireCostFree" xml:space="preserve">
+    <value>Gratuit</value>
+  </data>
+  <data name="EndOfGameCharacterAlternativePaymentFormat" xml:space="preserve">
+    <value>Payer avec {0} à la place</value>
   </data>
   <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
     <value>Rare {0}</value>
@@ -1477,6 +1495,15 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
     <value>{0} retrouve {1}, qui rejoint la bande.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedGoldSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande contre {2} CO.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande contre {2}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaUpkeepRefusedSentence" xml:space="preserve">
+    <value>{0} quitte la bande, sa solde n'ayant pas été payée - une nouvelle recherche sera nécessaire pour la récupérer.</value>
   </data>
   <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
     <value>{0} quitte la bande (Vagabond) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>

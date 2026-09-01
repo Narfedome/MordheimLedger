@@ -76,6 +76,19 @@ public class DramatisPersona
     /// the book - that nuance stays in Description rather than forcing a number here).</summary>
     public int? Upkeep { get; set; }
 
+    /// <summary>Only meaningful when FeeKind is Gold - an EquipmentItem the warband can hand over INSTEAD
+    /// of the gold HireCost (e.g. Johann the Knife: "may also be hired for one portion of Crimson Shade
+    /// instead of gold, since he's addicted to it"). Null = no alternative, gold is the only option (the
+    /// vast majority of Gold-fee characters). Real mechanic (2026-09-01, user request), not just
+    /// descriptive text: WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync actually removes one
+    /// unit of this item from the warband's inventory when the player chooses this option instead of
+    /// deducting HireCost - see RareItemSearchEntry.IsPayingWithAlternativeItem. Whole-stack removal if
+    /// the band happens to own more than one unit (WarbandService.RemoveWarbandEquipmentAsync deletes the
+    /// row outright) - same simplification already used everywhere else a WarbandEquipment row is
+    /// consumed (Sell/assign-to-warrior), this app has no partial-stack-quantity mechanism anywhere.</summary>
+    public int? AlternativePaymentItemId { get; set; }
+    public EquipmentItem? AlternativePaymentItem { get; set; }
+
     /// <summary>Flat Warband Rating contribution (e.g. Aenur: +100) - unlike HiredSword.BaseRating, no
     /// Dramatis Persona's Rating scales with Experience in the source text gathered so far.</summary>
     public int RatingBonus { get; set; }

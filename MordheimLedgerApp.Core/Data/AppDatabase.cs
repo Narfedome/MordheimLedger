@@ -292,11 +292,12 @@ public class AppDatabase
     /// unlike Exploration - DOES have a real Library editor (Official -> Modified). A full unconditional
     /// wipe-and-reseed like Exploration's would risk clobbering a player's own edit, so this only touches
     /// ContentSource.Official personas, matched to their JSON entry by English name (same idiom as
-    /// BackfillNeverGainsExperienceAsync's rule-text match), and only when the seeded equipment ROW COUNT
-    /// doesn't match the JSON's current startingEquipmentNames count - re-syncing just that persona's
-    /// DramatisPersonaEquipmentEntity rows (delete + reinsert) to the JSON's list, duplicates included.
-    /// No-op on every subsequent launch once counts agree, and for anyone who has since edited a persona
-    /// into Modified/Custom.</summary>
+    /// BackfillNeverGainsExperienceAsync's rule-text match). Two independent checks per persona, both
+    /// re-run every launch (cheap no-op once in sync): (1) equipment ROW COUNT mismatch re-syncs
+    /// DramatisPersonaEquipmentEntity rows (delete + reinsert) to the JSON's startingEquipmentNames list,
+    /// duplicates included; (2) AlternativePaymentItemId mismatch (2026-09-01, Johann/Ombre Cramoisie)
+    /// just overwrites the FK directly - simpler than (1) since it's a plain column, not a join table. Both
+    /// no-op once in sync, and for anyone who has since edited a persona into Modified/Custom.</summary>
     private async Task BackfillDramatisPersonaStartingEquipmentAsync()
     {
         var personae = (await _db.Table<DramatisPersonaEntity>().ToListAsync())
@@ -321,16 +322,29 @@ public class AppDatabase
             if (!jsonByEnglishName.TryGetValue(englishName, out var dp)) continue;
 
             var existingRows = await _db.Table<DramatisPersonaEquipmentEntity>().Where(r => r.DramatisPersonaId == entity.Id).ToListAsync();
-            if (existingRows.Count == dp.StartingEquipmentNames.Count) continue;
-
-            foreach (var row in existingRows)
-                await _db.DeleteAsync(row);
-            foreach (var itemName in dp.StartingEquipmentNames)
+            if (existingRows.Count != dp.StartingEquipmentNames.Count)
             {
-                // Fail-soft (unlike the first-launch seed path, which throws on a typo): a backfill
-                // running on every subsequent launch shouldn't be able to block startup over bad data.
-                if (equipmentIdByEnglishName.TryGetValue(itemName, out var itemId))
-                    await _db.InsertAsync(new DramatisPersonaEquipmentEntity { DramatisPersonaId = entity.Id, EquipmentItemId = itemId });
+                foreach (var row in existingRows)
+                    await _db.DeleteAsync(row);
+                foreach (var itemName in dp.StartingEquipmentNames)
+                {
+                    // Fail-soft (unlike the first-launch seed path, which throws on a typo): a backfill
+                    // running on every subsequent launch shouldn't be able to block startup over bad data.
+                    if (equipmentIdByEnglishName.TryGetValue(itemName, out var itemId))
+                        await _db.InsertAsync(new DramatisPersonaEquipmentEntity { DramatisPersonaId = entity.Id, EquipmentItemId = itemId });
+                }
+            }
+
+            // Même logique pour AlternativePaymentItemId (2026-09-01, Johann/Ombre Cramoisie) - un champ
+            // simple (FK direct, pas une table de jointure), donc comparé et réécrit directement plutôt que
+            // delete+reinsert. Indépendant du bloc équipement ci-dessus (pas de "continue" partagé) : les
+            // deux backfills doivent chacun s'exécuter même si l'autre est déjà à jour.
+            var wantedAlternativePaymentItemId = dp.AlternativePaymentItemName is { } altName && equipmentIdByEnglishName.TryGetValue(altName, out var altId)
+                ? altId : (int?)null;
+            if (entity.AlternativePaymentItemId != wantedAlternativePaymentItemId)
+            {
+                entity.AlternativePaymentItemId = wantedAlternativePaymentItemId;
+                await _db.UpdateAsync(entity);
             }
         }
     }
@@ -1029,6 +1043,12 @@ public class AppDatabase
             };
             if (dp.MagicSchoolName is { } magicSchoolName)
                 persona.MagicSchoolId = await FindOrCreateMagicSchoolAsync(new MagicSchoolSeedData { Name = magicSchoolName });
+            if (dp.AlternativePaymentItemName is { } alternativePaymentItemName)
+            {
+                if (!_equipmentIdsByEnglishName.TryGetValue(alternativePaymentItemName, out var alternativePaymentItemId))
+                    throw new InvalidOperationException($"DramatisPersonae.json references unknown equipment '{alternativePaymentItemName}'");
+                persona.AlternativePaymentItemId = alternativePaymentItemId;
+            }
             persona.NameKey = await SeedTranslationAsync(dp.Name.En, dp.Name.Fr);
             persona.DescriptionKey = dp.Description is null ? null : await SeedTranslationAsync(dp.Description.En, dp.Description.Fr);
             var entity = persona.ToEntity();

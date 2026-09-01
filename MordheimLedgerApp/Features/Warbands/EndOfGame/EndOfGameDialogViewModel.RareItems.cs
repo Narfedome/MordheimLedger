@@ -157,10 +157,14 @@ public partial class EndOfGameDialogViewModel
         + (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
         + WyrdstoneSaleValue;
 
-    /// <summary>Sum of EffectiveCost for every entry still checked "Acheter" - a variable-price item not
-    /// yet rolled (EffectiveCost null) simply doesn't count yet, so the running total understates until
-    /// every price is known (ValidateRareItemPurchaseStep blocks Next until then anyway).</summary>
-    public int RareItemPurchaseTotalCost => RareItemsWithResults.Where(e => e.WantsToBuy).Sum(e => e.EffectiveCost ?? 0);
+    /// <summary>Sum of EffectiveCost for every entry still checked "Acheter", PLUS EffectiveHireCostForTreasury
+    /// for every recruited Gold-fee character still paying in gold (2026-09-01, user request - a
+    /// character's hire fee competes for the same treasury as a rare item purchase, same affordability
+    /// block). A variable-price item not yet rolled (EffectiveCost null) simply doesn't count yet, so the
+    /// running total understates until every price is known (ValidateRareItemPurchaseStep blocks Next
+    /// until then anyway).</summary>
+    public int RareItemPurchaseTotalCost => RareItemsWithResults.Where(e => e.WantsToBuy).Sum(e => e.EffectiveCost ?? 0)
+        + RareItemsWithResults.Where(e => e.IsRecruited).Sum(e => e.EffectiveHireCostForTreasury);
 
     public int RareItemPurchaseRemainingTreasury => RareItemBaselineTreasury - RareItemPurchaseTotalCost;
 

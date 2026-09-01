@@ -481,7 +481,8 @@ public static class EntityMapping
         IReadOnlyDictionary<int, List<SpecialRule>>? specialRulesByDramatisPersonaId = null,
         IReadOnlyDictionary<int, List<int>>? startingEquipmentByDramatisPersonaId = null,
         IReadOnlyDictionary<int, List<Skill>>? skillsByDramatisPersonaId = null,
-        IReadOnlyDictionary<int, MagicSchool>? magicSchoolsById = null) => new()
+        IReadOnlyDictionary<int, MagicSchool>? magicSchoolsById = null,
+        IReadOnlyDictionary<int, EquipmentItem>? equipmentById = null) => new()
     {
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
@@ -510,7 +511,9 @@ public static class EntityMapping
         StartingEquipmentIds = startingEquipmentByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<int>(),
         Skills = skillsByDramatisPersonaId?.GetValueOrDefault(e.Id) ?? new List<Skill>(),
         MagicSchoolId = e.MagicSchoolId,
-        MagicSchool = e.MagicSchoolId is { } magicSchoolId ? magicSchoolsById?.GetValueOrDefault(magicSchoolId) : null
+        MagicSchool = e.MagicSchoolId is { } magicSchoolId ? magicSchoolsById?.GetValueOrDefault(magicSchoolId) : null,
+        AlternativePaymentItemId = e.AlternativePaymentItemId,
+        AlternativePaymentItem = e.AlternativePaymentItemId is { } altItemId ? equipmentById?.GetValueOrDefault(altItemId) : null
     };
 
     public static DramatisPersonaEntity ToEntity(this DramatisPersona m) => new()
@@ -535,7 +538,8 @@ public static class EntityMapping
         RatingBonus = m.RatingBonus,
         IsWanderer = m.IsWanderer,
         RequiresRatingDisadvantage = m.RequiresRatingDisadvantage,
-        MagicSchoolId = m.MagicSchoolId
+        MagicSchoolId = m.MagicSchoolId,
+        AlternativePaymentItemId = m.AlternativePaymentItemId
     };
 
     public static Injury ToModel(this InjuryEntity e, IReadOnlyDictionary<string, string> translations,

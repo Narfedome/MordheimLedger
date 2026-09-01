@@ -113,6 +113,12 @@
                                       IconFontFamily="RpgAwesome"
                                       Command="{Binding ShowMagicSchoolDetailCommand}"/>
 
+            <components:ChipListView HeaderText="{loc:Loc DramatisPersonaAlternativePaymentItemPh}"
+                                      ItemsSource="{Binding AlternativePaymentItems}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaPotion}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowAlternativePaymentItemDetailCommand}"/>
+
             <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
                                       AlwaysShowSection="True"
                                       ItemsSource="{Binding RestrictedWarbands}"

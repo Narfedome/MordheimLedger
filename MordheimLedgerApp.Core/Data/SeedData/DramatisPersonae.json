@@ -114,8 +114,8 @@
   {
     "name": { "en": "Johann the Knife", "fr": "Johann le Couteau" },
     "description": {
-      "en": "The most famous of Mordheim's cutthroats and assassins for hire, Johann carries countless lethal daggers (always counted as two Swords in close combat) and a purse heavy with the gold of the many wealthy but unskilful opponents he has despatched. His blades are coated with Black Lotus. He is addicted to Crimson Shade.\n\nHire Fee: 70 gc to hire, +30 gc upkeep - may also be hired for one portion of Crimson Shade instead of gold, since he's addicted to it.",
-      "fr": "Le plus célèbre des coupe-jarrets et assassins à louer de Mordheim, Johann porte d'innombrables dagues mortelles (toujours comptées comme deux Épées en corps à corps) et une bourse alourdie par l'or des nombreux adversaires riches mais peu doués qu'il a expédiés. Ses lames sont enduites de Lotus Noir. Il est dépendant à l'Ombre Écarlate.\n\nFrais d'engagement : 70 CO à l'engagement, +30 CO de solde - peut aussi être engagé contre une dose d'Ombre Écarlate au lieu d'or, vu sa dépendance."
+      "en": "The most famous of Mordheim's cutthroats and assassins for hire, Johann carries countless lethal daggers (always counted as two Swords in close combat) and a purse heavy with the gold of the many wealthy but unskilful opponents he has despatched. His blades are coated with Black Lotus. He is addicted to Crimson Shade.",
+      "fr": "Le plus célèbre des coupe-jarrets et assassins à louer de Mordheim, Johann porte d'innombrables dagues mortelles (toujours comptées comme deux Épées en corps à corps) et une bourse alourdie par l'or des nombreux adversaires riches mais peu doués qu'il a expédiés. Ses lames sont enduites de Lotus Noir. Il est dépendant à l'Ombre Cramoisie."
     },
     "movement": 4, "weaponSkill": 3, "ballisticSkill": 6, "strength": 4, "toughness": 3,
     "wounds": 2, "initiative": 6, "attacks": 1, "leadership": 7,
@@ -124,6 +124,7 @@
     "upkeep": 30,
     "ratingBonus": 60,
     "isWanderer": false,
+    "alternativePaymentItemName": "Crimson Shade",
     "startingEquipmentNames": ["Throwing Knives", "Dagger"],
     "skillNames": ["Dodge", "Scale Sheer Surfaces", "Quick Shot", "Eagle Eyes", "Knife Fighter"],
     "specialRules": [

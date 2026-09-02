@@ -1,60 +1,61 @@
 # Mordheim Ledger
 
-Application mobile et bureau pour tenir **le grand livre** d'une campagne
-[Mordheim](https://en.wikipedia.org/wiki/Mordheim) : historique de tes bandes, roster des
-guerriers, trésorerie, blessures, avancement, et catalogue de règles maison.
+*Lire en [français](README.fr.md).*
 
-Outil de fan, non commercial, sans lien avec Games Workshop (voir [Licence](#licence)).
+A mobile and desktop app for keeping **the ledger** of a
+[Mordheim](https://en.wikipedia.org/wiki/Mordheim) campaign: the history of your warbands,
+warrior rosters, treasury, injuries, advancement, and a catalogue of house rules.
 
-> Contexte produit et suivi d'avancement détaillé : [ROADMAP.md](ROADMAP.md).
-> Notes techniques et conventions de code : [CLAUDE.md](CLAUDE.md).
+A non-commercial fan tool, unaffiliated with Games Workshop (see [License](#license)).
 
-## Statut
+> Product context and detailed progress log: [ROADMAP.md](ROADMAP.md) (French).
+> Technical notes and code conventions: [CLAUDE.md](CLAUDE.md) (French).
 
-En développement actif — **V1** (mono-appareil, sans compte, stockage 100 % local).
-Fonctionnel de bout en bout : création de bande, recrutement, roster détaillé, assistant
-de fin de partie (blessures graves, exploration, butin, XP/avancement). Le partage entre
-joueurs (export/import, QR code) est prévu pour la V2.
+## Status
+
+Under active development — **V1** (single device, no account, fully local storage).
+Working end to end: warband creation, recruitment, detailed roster, end-of-game wizard
+(serious injuries, exploration, loot, XP / advancement). Sharing between players
+(export/import, QR code) is planned for V2.
 
 ## Stack
 
-- **.NET 10** / **.NET MAUI** — cibles Android, iOS, Mac Catalyst et Windows
+- **.NET 10** / **.NET MAUI** — targets Android, iOS, Mac Catalyst and Windows
 - **MVVM** via [CommunityToolkit.Mvvm](https://learn.microsoft.com/dotnet/communitytoolkit/mvvm/)
-- **SQLite** local via [`sqlite-net-pcl`](https://github.com/praeclarum/sqlite-net)
-- Tests : **xUnit**
-- Localisation **fr / en** (`Strings/AppStrings*.resx`)
+- Local **SQLite** via [`sqlite-net-pcl`](https://github.com/praeclarum/sqlite-net)
+- Tests: **xUnit**
+- **fr / en** localization (`Strings/AppStrings*.resx`)
 
-## Structure de la solution
+## Solution layout
 
-| Projet | Rôle |
+| Project | Role |
 | --- | --- |
-| `MordheimLedgerApp.Core` | Cœur sans dépendance MAUI : `Models/` (modèles purs), `Data/` (entités SQLite + `AppDatabase` + mapping + `SeedData/*.json`), `Services/` (CRUD `ILibraryService` / `IWarbandService`), `Rules/` (décisions de règles pures et testables) |
-| `MordheimLedgerApp` | Tête MAUI : `Features/<Domaine>/` (Page + ViewModel), `Components/`, `Services/` (localisation / thème / chargement), `Resources/Styles/` (design tokens) |
-| `MordheimLedgerApp.Tests` | Mapping entité ↔ modèle, tests d'intégration des services sur une base SQLite temporaire, tests de règles pures (`Core.Rules`, sans base) |
-| `Tools/DbSeedGenerator` | Génération de la base de seed embarquée (`Resources/Raw/seed.db3`) |
+| `MordheimLedgerApp.Core` | MAUI-free core: `Models/` (pure models), `Data/` (SQLite entities + `AppDatabase` + mapping + `SeedData/*.json`), `Services/` (`ILibraryService` / `IWarbandService` CRUD), `Rules/` (pure, testable rule decisions) |
+| `MordheimLedgerApp` | MAUI head: `Features/<Domain>/` (Page + ViewModel), `Components/`, `Services/` (localization / theme / loading), `Resources/Styles/` (design tokens) |
+| `MordheimLedgerApp.Tests` | Entity ↔ model mapping, service integration tests against a throwaway SQLite database, pure-rules tests (`Core.Rules`, no database) |
+| `Tools/DbSeedGenerator` | Builds the embedded seed database (`Resources/Raw/seed.db3`) |
 
-### Deux mondes de données
+### Two data worlds
 
-- **Library** (`Models/Library/`) : le contenu **éditable** — types de bandes, types de
-  guerriers, objets de la Place du Marché, compétences, sorts, mutations, blessures…
-  Chaque ligne porte un `ContentSource` (`Official` / `Modified` / `Custom`). Éditer une
-  entrée officielle la bascule en `Modified`.
-- **Campagne** (`Models/`) : les **instances jouées** — `Campaign`, `Warband`, `Warrior`,
-  `WarriorEquipment`. Recruter un guerrier copie les stats de l'archétype à cet instant ;
-  le guerrier évolue ensuite indépendamment.
+- **Library** (`Models/Library/`): the **editable** content — warband types, warrior types,
+  Trading Post items, skills, spells, mutations, injuries… Every row carries a
+  `ContentSource` (`Official` / `Modified` / `Custom`). Editing an official entry flips it
+  to `Modified`.
+- **Campaign** (`Models/`): the **played** instances — `Campaign`, `Warband`, `Warrior`,
+  `WarriorEquipment`. Recruiting a warrior copies the archetype's stats at that moment; the
+  warrior then evolves independently.
 
-### Contenu officiel embarqué
+### Bundled official content
 
-15 bandes seedées depuis le livre de règles via le pipeline JSON `Data/SeedData/`
-(Reiklander / Middenheim / Marienburg, Averlanders, Ostlanders, Morts-Vivants, Chasseurs
-de Trésors Nains, Kermesse du Chaos, Culte des Possédés, Pillards Hommes-Bêtes, Horde
-Orque, Répurgateurs, Skavens du Clan Eshin, Sœurs de Sigmar, Kislévites), plus les
-Épées à Louer et les Personnages Dramatis, et les catalogues communs (règles spéciales,
-équipement, compétences, mutations, écoles de magie).
+15 warbands seeded from the rulebook through the `Data/SeedData/` JSON pipeline (Reikland /
+Middenheim / Marienburg, Averlanders, Ostlanders, Undead, Dwarf Treasure Hunters, Carnival
+of Chaos, Cult of the Possessed, Beastmen Raiders, Orc Mob, Witch Hunters, Skaven of Clan
+Eshin, Sisters of Sigmar, Kislevites), plus Hired Swords and Dramatis Personae, and the
+shared catalogues (special rules, equipment, skills, mutations, magic schools).
 
 ## Build & tests
 
-Sur Windows (seule cible testable en local) :
+On Windows (the only target that builds locally here):
 
 ```bash
 dotnet build MordheimLedgerApp/MordheimLedgerApp.csproj -f net10.0-windows10.0.19041.0
@@ -64,19 +65,18 @@ dotnet build MordheimLedgerApp/MordheimLedgerApp.csproj -f net10.0-windows10.0.1
 dotnet test MordheimLedgerApp.Tests
 ```
 
-## Contribution
+## Contributing
 
-Développement par branche de fonctionnalité (`feature/<nom>`), pas directement sur
-`master`. Voir [CLAUDE.md](CLAUDE.md) pour les conventions (terminologie anglaise
-officielle du jeu, règles nouvelles à placer dans `Core/Rules/`, messages de commit
-courts…).
+Feature-branch workflow (`feature/<name>`), never straight onto `master`. See
+[CLAUDE.md](CLAUDE.md) for the conventions (official English game terminology, new rules go
+in `Core/Rules/`, short commit messages…).
 
-## Licence
+## License
 
-Propriétaire — tous droits réservés, © 2026 Cyril Bezard-Falgas. Le dépôt est public
-pour référence uniquement ; sa visibilité ne vaut pas licence d'utilisation. Voir
+Proprietary — all rights reserved, © 2026 Cyril Bezard-Falgas. The repository is public for
+reference only; its visibility does not grant a license to use its contents. See
 [LICENSE](LICENSE).
 
-Mordheim, Warhammer et les noms, termes et images associés sont des marques et/ou
-œuvres protégées de Games Workshop Limited. Projet de fan non officiel, non commercial,
-sans affiliation ni approbation de Games Workshop.
+Mordheim, Warhammer and all associated names, terms and imagery are trademarks and/or
+copyrights of Games Workshop Limited. This is an unofficial, non-commercial fan project,
+not affiliated with or endorsed by Games Workshop.

@@ -54,7 +54,7 @@
                                 FontFamily="RpgAwesome"
                                 WidthRequest="20" HeightRequest="20"
                                 HorizontalOptions="Center" />
-                                <Label Text="{Binding Item.Name}"
+                                <Label Text="{Binding DisplayName}"
                                    Style="{StaticResource CodexTileNameLabelStyle}"
                                    HorizontalOptions="Center"
                                    HorizontalTextAlignment="Center"

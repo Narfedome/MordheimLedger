@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
@@ -252,6 +253,105 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
+    /// <summary>Same backfill, same class of bug, for the pairing fields added 2026-09-01 ("on va bien
+    /// s'amuser pour finaliser le duo") - an already-seeded database has Ulli/Marquand's
+    /// PairedWithDramatisPersonaId/IsHiddenFromSearchPicker still at their defaults (null/false).</summary>
+    [Fact]
+    public async Task DramatisPersonaPairing_StaleFromBeforeItExisted_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var marquand = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        var ulli = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Ulli Leitpold");
+
+        // Simule une base seedée AVANT l'ajout des champs - efface les valeurs déjà résolues.
+        var marquandEntity = await _db.Connection.FindAsync<DramatisPersonaEntity>(marquand.Id);
+        marquandEntity.PairedWithDramatisPersonaId = null;
+        await _db.Connection.UpdateAsync(marquandEntity);
+        var ulliEntity = await _db.Connection.FindAsync<DramatisPersonaEntity>(ulli.Id);
+        ulliEntity.PairedWithDramatisPersonaId = null;
+        ulliEntity.IsHiddenFromSearchPicker = false;
+        await _db.Connection.UpdateAsync(ulliEntity);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedPersonae = await reopenedLibrary.GetDramatisPersonaeAsync("en");
+        var reopenedMarquand = reopenedPersonae.Single(p => p.Name == "Marquand Volker");
+        var reopenedUlli = reopenedPersonae.Single(p => p.Name == "Ulli Leitpold");
+        Assert.Equal("Ulli Leitpold", reopenedMarquand.PairedWithDramatisPersona?.Name);
+        Assert.Equal("Marquand Volker", reopenedUlli.PairedWithDramatisPersona?.Name);
+        Assert.True(reopenedUlli.IsHiddenFromSearchPicker);
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same class of bug again: "A Fistful of Crowns"/"Une Poignée d'Or" (2026-09-01) was split
+    /// out of Marquand/Ulli's free-text Description into a real SpecialRule AFTER the pair had already
+    /// seeded once - a database seeded before that split never picks it up without a dedicated backfill
+    /// (BackfillDramatisPersonaSpecialRulesAsync). Additive-only: removing just this one link (simulating
+    /// the stale state) and reopening must add it back WITHOUT touching "Inseparable", which was already
+    /// there and must survive untouched.</summary>
+    [Fact]
+    public async Task DramatisPersonaSpecialRule_AddedAfterADatabaseWasAlreadySeeded_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var marquand = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        Assert.Equal(2, marquand.SpecialRules.Count);
+
+        // Simule une base seedée AVANT l'ajout de la règle - retire uniquement son lien de jointure,
+        // laisse "Inseparable" intact.
+        var staleLinks = await _db.Connection.Table<DramatisPersonaSpecialRuleEntity>()
+            .Where(l => l.DramatisPersonaId == marquand.Id).ToListAsync();
+        var fistfulLink = staleLinks.Single(l => l.SpecialRuleId == marquand.SpecialRules.Single(r => r.Name == "A Fistful of Crowns").Id);
+        await _db.Connection.DeleteAsync(fistfulLink);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedMarquand = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        Assert.Equal(new[] { "A Fistful of Crowns", "Inseparable" }, reopenedMarquand.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same class of bug again: Marquand/Ulli's Description text (2026-09-01, replaced their
+    /// short trimmed bio with each half's real individual biography) and Marquand's new PairDescription
+    /// (the shared "duo" lore, previously nonexistent) both need to reach an already-seeded database -
+    /// BackfillDramatisPersonaDescriptionsAsync compares against the CURRENT English text (not a simple
+    /// missing-row check like the other Backfill* methods), so this simulates BOTH a stale existing
+    /// Description (old text still in the DB) and a genuinely missing PairDescriptionKey (null, as any
+    /// database seeded before this field existed would have).</summary>
+    [Fact]
+    public async Task DramatisPersonaDescriptions_StaleOrMissing_AreBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var marquand = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        var marquandEntity = await _db.Connection.FindAsync<DramatisPersonaEntity>(marquand.Id);
+        var staleDescKey = marquandEntity.DescriptionKey!;
+        var staleTranslation = await _db.Connection.Table<TranslationEntity>()
+            .Where(t => t.Key == staleDescKey && t.LanguageCode == "en").FirstAsync();
+        staleTranslation.Value = "stale placeholder bio";
+        await _db.Connection.UpdateAsync(staleTranslation);
+        marquandEntity.PairDescriptionKey = null;
+        await _db.Connection.UpdateAsync(marquandEntity);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedMarquand = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        Assert.Contains("mercenary and assassin", reopenedMarquand.Description);
+        Assert.NotNull(reopenedMarquand.PairDescription);
+        Assert.Contains("Marquand Volker and Ulli Leitpold", reopenedMarquand.PairDescription);
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
     /// <summary>Same class of bug again, one layer up: Equipment.json has no dedup-at-runtime mechanism
     /// at all (unlike DramatisPersona/Skill/Mutation), so a genuinely NEW entry added to it after a
     /// database already seeded once (2026-09-01: "Dagger (Johann)") would otherwise never reach a machine
@@ -405,5 +505,30 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal("Corpse", corpse.Name);
 
         await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Délai de re-recherche (2026-09-01, "on va bien s'amuser pour finaliser le duo") - voir
+    /// DramatisPersona.RequiresCooldownBeforeResearch. Couvre les 3 opérations CRUD de
+    /// WarbandService directement (pas le picker/le wizard, testés côté tête MAUI, hors périmètre de ce
+    /// projet de tests) : Add pose un cooldown, Get le retrouve, Clear efface tout pour la bande - jamais
+    /// pour une AUTRE bande (Aenur pourrait être en cooldown pour la Bande A tout en restant recherchable
+    /// par la Bande B).</summary>
+    [Fact]
+    public async Task DramatisPersonaCooldown_AddGetClear_ScopedPerWarband()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warbandA = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var warbandB = await _warbands.CreateWarbandAsync("The Iron Fists", warbandArchetype);
+
+        var aenur = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Aenur"));
+        Assert.True(aenur.RequiresCooldownBeforeResearch);
+
+        await _warbands.AddDramatisPersonaCooldownAsync(warbandA.Id, aenur.Id);
+
+        Assert.Equal(new[] { aenur.Id }, await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandA.Id));
+        Assert.Empty(await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandB.Id));
+
+        await _warbands.ClearAllDramatisPersonaCooldownsAsync(warbandA.Id);
+        Assert.Empty(await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandA.Id));
     }
 }

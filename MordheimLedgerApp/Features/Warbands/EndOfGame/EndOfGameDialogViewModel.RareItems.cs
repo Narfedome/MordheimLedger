@@ -100,22 +100,30 @@ public partial class EndOfGameDialogViewModel
     /// <summary>Narrowed to this warband via _warbandArchetypeId (same idiom as SelectRareItem/
     /// AllowedWarbandArchetypeId elsewhere) - a Dramatis Persona with a non-empty
     /// RestrictedToWarbandArchetypeIds only shows up in the picker when this warband is in that list
-    /// (e.g. Veskit only for Skaven of Clan Eshin, Bertha only for Sisters of Sigmar). Picking again
-    /// replaces any previous choice and clears the roll state (see RareItemSearchEntry.
-    /// OnSelectedCharacterChanged). Single-select only (IDramatisPersonaPickerService.
+    /// (e.g. Veskit only for Skaven of Clan Eshin, Bertha only for Sisters of Sigmar). Also excludes
+    /// anyone currently on cooldown for this warband (_cooldownDramatisPersonaIds, 2026-09-01 - Aenur/
+    /// Ulli &amp; Marquand's "can't be sought again until the warband has fought at least one battle
+    /// without them"). Picking again replaces any previous choice and clears the roll state (see
+    /// RareItemSearchEntry.OnSelectedCharacterChanged). Single-select only (IDramatisPersonaPickerService.
     /// PickDramatisPersonaAsync) - "you may only make one roll for each Hero", same rule as the Objet
     /// side.</summary>
     [RelayCommand]
     private async Task SelectCharacter(RareItemSearchEntry entry)
     {
-        var picked = await _dramatisPersonaPicker.PickDramatisPersonaAsync(_warbandArchetypeId);
+        var picked = await _dramatisPersonaPicker.PickDramatisPersonaAsync(_warbandArchetypeId, _cooldownDramatisPersonaIds);
         if (picked is null) return;
 
         entry.SelectedCharacter = picked;
     }
 
+    /// <summary>Résumé de paire si le personnage recherché/trouvé en fait partie (2026-09-01, même
+    /// logique que DramatisPersonaViewModel.ShowDetails en mode picker) - ce contexte (recherche/achat
+    /// "Personnage spécial") est du recrutement, pas de la consultation Codex.</summary>
     [RelayCommand]
-    private Task ShowCharacterDetail(DramatisPersona character) => _detailDialogs.ShowDramatisPersonaDetailDialogAsync(character);
+    private Task ShowCharacterDetail(DramatisPersona character) =>
+        character.PairedWithDramatisPersona is not null
+            ? _detailDialogs.ShowDramatisPersonaPairDetailDialogAsync(character)
+            : _detailDialogs.ShowDramatisPersonaDetailDialogAsync(character);
 
     [RelayCommand]
     private void ClearCharacter(RareItemSearchEntry entry) => entry.SelectedCharacter = null;

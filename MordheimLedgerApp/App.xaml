@@ -13,6 +13,7 @@
             <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
             <converters:EquipmentCategoryIconConverter x:Key="EquipmentCategoryIconConverter" />
             <converters:SkillCategoryIconConverter x:Key="SkillCategoryIconConverter" />
+            <converters:FirstNonEmptyMultiConverter x:Key="FirstNonEmptyMultiConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Sizes.xaml" />

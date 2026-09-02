@@ -1507,6 +1507,7 @@
                                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedCharacter}">
                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
                                                 <components:ChipView Grid.Column="0" Item="{Binding SelectedCharacter}"
+                                                                      NameOverride="{Binding SelectedCharacterDisplayName}"
                                                                       IconGlyph="{x:Static icons:RpgFont.RaDuel}"
                                                                       IconFontFamily="RpgAwesome"
                                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowCharacterDetailCommand}"/>
@@ -1692,6 +1693,7 @@
                                     <!-- Côté Personnage trouvé -->
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsSearchingForCharacter}">
                                         <components:ChipView Grid.Column="0" Item="{Binding SelectedCharacter}"
+                                                              NameOverride="{Binding SelectedCharacterDisplayName}"
                                                               IconGlyph="{x:Static icons:RpgFont.RaDuel}"
                                                               IconFontFamily="RpgAwesome"
                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowCharacterDetailCommand}"/>
@@ -1827,6 +1829,117 @@
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
+
+                <!-- Une Poignée d'Or (2026-09-01) : visible seulement pour une bande qui n'a PAS déjà
+                     Ulli & Marquand (ShowPairCorruptionOption) - la bande qui les possède déjà n'a rien
+                     ici, elle bascule "Rendre hostile" directement sur la carte du guerrier concerné
+                     (WarbandDetailPage). Case indépendante des entrées d'upkeep ci-dessus, sans lien avec
+                     aucune autre bande locale (voir EndOfGameDialogViewModel.DramatisPersonae.cs). -->
+                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding ShowPairCorruptionOption}">
+                    <VerticalStackLayout Spacing="6">
+                        <HorizontalStackLayout Spacing="8">
+                            <CheckBox IsChecked="{Binding WantsToRecordPairCorruption}" VerticalOptions="Center"/>
+                            <Label Text="{Binding PairCorruptionLabel}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <VerticalStackLayout Spacing="4" IsVisible="{Binding WantsToRecordPairCorruption}">
+                            <Entry Text="{Binding PairCorruptionAmount}" Keyboard="Numeric"
+                                   Placeholder="{loc:Loc EndOfGamePairCorruptionAmountPh}" WidthRequest="120">
+                                <Entry.Behaviors>
+                                    <components:DigitsOnlyBehavior/>
+                                </Entry.Behaviors>
+                            </Entry>
+                            <Label Text="{Binding PairCorruptionError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding PairCorruptionError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Où est l'Argent ? (2026-09-01) : repli si le montant ci-dessus dépasserait le
+                             solde prévisionnel de la bande (IsPairCorruptionUnaffordable). "Duel avec le
+                             meneur" reprend le même principe que Vendu aux Fosses (65) côté Blessure -
+                             CheckBox victoire/défaite + sous-jet D66 (InjurySubRollEntry, même
+                             DataTemplate/commandes AutoRoll). -->
+                        <VerticalStackLayout Spacing="8" IsVisible="{Binding IsPairCorruptionUnaffordable}">
+                            <Label Text="{loc:Loc EndOfGameWheresMoneyHeading}" FontSize="12" FontAttributes="Bold"
+                                   TextColor="{StaticResource AppDanger}"/>
+                            <Label Text="{loc:Loc EndOfGameWheresMoneyHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Picker ItemsSource="{Binding WheresMoneyChoiceLabels}" SelectedItem="{Binding SelectedWheresMoneyChoice}"/>
+                            <Label Text="{Binding WheresMoneyChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding WheresMoneyChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                            <Label Text="{loc:Loc EndOfGameWheresMoneyEquipmentHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                   IsVisible="{Binding WantsEquipmentSeizure}"/>
+
+                            <VerticalStackLayout Spacing="6" IsVisible="{Binding WantsDuel}">
+                                <HorizontalStackLayout Spacing="8">
+                                    <CheckBox IsChecked="{Binding WonDuel}" VerticalOptions="Center"/>
+                                    <Label Text="{loc:Loc EndOfGamePairDuelWonLabel}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+
+                                <VerticalStackLayout IsVisible="{Binding HasPairDuelRoll}" Spacing="6">
+                                    <Label Text="{loc:Loc EndOfGamePairDuelRerollHeading}" FontSize="12"
+                                           FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding PairDuelRoll}" Spacing="6">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                                <VerticalStackLayout Spacing="4">
+                                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                                      Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                    </Grid>
+                                                    <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+                                                    <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                                    <VerticalStackLayout IsVisible="{Binding ShowDeepWoundSubRoll}" Spacing="4">
+                                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                            <Entry Grid.Column="0" Text="{Binding DeepWoundSubRoll}" Keyboard="Numeric"
+                                                                   Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                                                <Entry.Behaviors>
+                                                                    <components:DigitsOnlyBehavior/>
+                                                                </Entry.Behaviors>
+                                                            </Entry>
+                                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                                                                                          Style="{StaticResource GhostIconButtonStyle}"
+                                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                                          CommandParameter="{Binding .}"
+                                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                        </Grid>
+                                                        <Label Text="{Binding DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                               IsVisible="{Binding DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                        <Label Text="{Binding DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                                                    </VerticalStackLayout>
+
+                                                    <VerticalStackLayout IsVisible="{Binding ShowCapturedChoice}" Spacing="4">
+                                                        <HorizontalStackLayout Spacing="8">
+                                                            <CheckBox IsChecked="{Binding IsRansomed}" VerticalOptions="Center"/>
+                                                            <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>
+                                                        </HorizontalStackLayout>
+                                                        <Entry IsVisible="{Binding IsRansomed}" Text="{Binding RansomAmount}"
+                                                               Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="120">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <Label Text="{Binding CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                               IsVisible="{Binding CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                    </VerticalStackLayout>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
             <!-- Étape : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->

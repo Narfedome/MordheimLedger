@@ -18,6 +18,20 @@ public partial class ChipView : ContentView
         set => SetValue(ItemProperty, value);
     }
 
+    public static readonly BindableProperty NameOverrideProperty =
+        BindableProperty.Create(nameof(NameOverride), typeof(string), typeof(ChipView));
+
+    /// <summary>Non renseigné (défaut, null/vide) : le Label affiche Item.Name comme toujours. Renseigné :
+    /// prend le dessus (voir FirstNonEmptyMultiConverter) - 2026-09-01, Une Poignée d'Or : Marquand Volker
+    /// seul porte le chip d'Ulli & Marquand dans les écrans de recrutement (le picker/la carte "Personnage
+    /// spécial"), donc affiché "Marquand Volker &amp; Ulli Leitpold" via cette override plutôt que son
+    /// Item.Name brut - jamais de mutation de l'objet catalogue lui-même.</summary>
+    public string? NameOverride
+    {
+        get => (string?)GetValue(NameOverrideProperty);
+        set => SetValue(NameOverrideProperty, value);
+    }
+
     public static readonly BindableProperty IconGlyphProperty =
         BindableProperty.Create(nameof(IconGlyph), typeof(string), typeof(ChipView), string.Empty);
 

@@ -256,6 +256,7 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(EffectiveWyrdstoneCostForShards))]
     [NotifyPropertyChangedFor(nameof(HasEngagementCost))]
     [NotifyPropertyChangedFor(nameof(EngagementCostDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedCharacterDisplayName))]
     private DramatisPersona? selectedCharacter;
 
     partial void OnSelectedCharacterChanged(DramatisPersona? value)
@@ -266,6 +267,15 @@ public partial class RareItemSearchEntry : ObservableObject
     }
 
     public bool HasSelectedCharacter => SelectedCharacter is not null;
+
+    /// <summary>ChipView.NameOverride for the chosen character's chip (2026-09-01, Une Poignée d'Or) -
+    /// null unless SelectedCharacter is one half of a pair, in which case Marquand alone (the only half
+    /// ever actually chosen here, see HasHireCost's own doc) must read "Marquand Volker &amp; Ulli Leitpold"
+    /// rather than his bare Item.Name, same reasoning/precedent as DramatisPersonaRow.DisplayName in the
+    /// picker tile itself.</summary>
+    public string? SelectedCharacterDisplayName => SelectedCharacter?.PairedWithDramatisPersona is { } partner
+        ? $"{SelectedCharacter.Name} & {partner.Name}"
+        : null;
 
     /// <summary>Free-typed 1D6 roll, same "string Entry" idiom as every other roll in this wizard - no
     /// Core.Rules.RareItemSearchBonus here, the book only ever compares this roll to Initiative, nothing
@@ -328,14 +338,16 @@ public partial class RareItemSearchEntry : ObservableObject
     public bool IsFound => IsSearchingForCharacter ? IsCharacterFound : IsSuccess;
 
     // --- Frais d'engagement (2026-09-01, user request - "on va construire un vrai truc") -------------
-    // Seul FeeKind.Gold est câblé ici : None (Bertha) ne prélève rien de toute façon, Wyrdstone
-    // (Nicodemus) et Pair (Ulli & Marquand) ont des mécaniques bien plus élaborées (paiement récurrent en
-    // pierre magique, engagement à deux) volontairement laissées hors périmètre de cette passe - voir
-    // DRAMATIS_PERSONAE_STATUS.md.
-
-    /// <summary>Only meaningful for a Gold-fee character (Johann/Veskit/Marianna) - None/Wyrdstone/Pair
-    /// never show a gold cost here (see the class comment above).</summary>
-    public bool HasHireCost => SelectedCharacter is { FeeKind: DramatisPersonaHireFeeKind.Gold, HireCost: not null };
+    // Gold (Johann/Veskit/Marianna) ET Pair (Ulli & Marquand, 2026-09-01 - "30 Couronnes d'Or pour les
+    // deux") partagent le même mécanisme (déduction directe de HireCost sur la trésorerie) : Pair n'est
+    // qu'un FeeKind différent pour la MÊME devise, contrairement à Wyrdstone qui en est une vraie autre -
+    // pas besoin d'un chemin séparé. Recruter le personnage "caché" du duo (Ulli, jamais son propre choix
+    // dans le picker - voir DramatisPersona.IsHiddenFromSearchPicker) ne double jamais ce coût : seul
+    // Marquand est un vrai RareItemSearchEntry.SelectedCharacter possible, Ulli est recrutée EN PLUS de
+    // lui sans frais propre (voir WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync). None
+    // (Bertha) ne prélève rien de toute façon, Wyrdstone (Nicodemus) reste séparé (vraie autre devise, son
+    // propre bandeau "pierres magiques restantes" - voir EndOfGameDialogViewModel.RareItems.cs).
+    public bool HasHireCost => SelectedCharacter is { HireCost: not null } and { FeeKind: DramatisPersonaHireFeeKind.Gold or DramatisPersonaHireFeeKind.Pair };
 
     /// <summary>"Gratuit" once IsPayingWithAlternativeItem is checked - reflects EffectiveHireCostForTreasury
     /// (what's ACTUALLY charged, 0 in that case), not the raw catalog HireCost, which stayed shown as "70"

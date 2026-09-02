@@ -192,7 +192,7 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         var rows = await _db.Connection.Table<DramatisPersonaEntity>().ToListAsync();
-        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey }), languageCode);
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey, r.PairDescriptionKey }), languageCode);
         var restrictions = await LoadDramatisPersonaRestrictionsAsync();
         var specialRules = await LoadDramatisPersonaSpecialRulesAsync(languageCode);
         var startingEquipment = await LoadDramatisPersonaEquipmentAsync();
@@ -202,7 +202,19 @@ public class LibraryService : ILibraryService
         // partout ailleurs où un DramatisPersona référence un objet du catalogue (voir StartingEquipmentIds
         // plus haut dans cette méthode).
         var equipmentById = (await GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
-        return rows.Select(r => r.ToModel(translations, restrictions, specialRules, startingEquipment, skills, magicSchoolsById, equipmentById)).OrderBy(r => r.Name).ToList();
+        var models = rows.Select(r => r.ToModel(translations, restrictions, specialRules, startingEquipment, skills, magicSchoolsById, equipmentById)).ToList();
+
+        // Résout PairedWithDramatisPersonaId (Ulli/Marquand, 2026-09-01) - navigation self-référente,
+        // donc résolue APRÈS que tous les modèles existent (pas de dictionnaire passé à ToModel comme les
+        // autres résolutions ci-dessus, plus simple ainsi pour une auto-référence).
+        var modelsById = models.ToDictionary(m => m.Id);
+        foreach (var model in models)
+        {
+            if (model.PairedWithDramatisPersonaId is { } pairedId)
+                model.PairedWithDramatisPersona = modelsById.GetValueOrDefault(pairedId);
+        }
+
+        return models.OrderBy(r => r.Name).ToList();
     }
 
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)

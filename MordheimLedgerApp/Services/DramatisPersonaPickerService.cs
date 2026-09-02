@@ -11,7 +11,10 @@ public interface IDramatisPersonaPickerService
     /// PickHiredSwordAsync.</summary>
     /// <param name="warbandArchetypeId">Narrowe aux Dramatis Personae éligibles à cette bande (voir
     /// DramatisPersona.RestrictedToWarbandArchetypeIds) - null (usage Codex) montre tout le catalogue.</param>
-    Task<DramatisPersona?> PickDramatisPersonaAsync(int? warbandArchetypeId = null);
+    /// <param name="excludedDramatisPersonaIds">Masque ces ids (2026-09-01, délai de re-recherche - voir
+    /// DramatisPersona.RequiresCooldownBeforeResearch) - null/vide (usage Codex ou aucun cooldown actif)
+    /// ne masque rien.</param>
+    Task<DramatisPersona?> PickDramatisPersonaAsync(int? warbandArchetypeId = null, IReadOnlyCollection<int>? excludedDramatisPersonaIds = null);
 }
 
 public class DramatisPersonaPickerService : IDramatisPersonaPickerService
@@ -20,7 +23,7 @@ public class DramatisPersonaPickerService : IDramatisPersonaPickerService
 
     public DramatisPersonaPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<DramatisPersona?> PickDramatisPersonaAsync(int? warbandArchetypeId = null)
+    public async Task<DramatisPersona?> PickDramatisPersonaAsync(int? warbandArchetypeId = null, IReadOnlyCollection<int>? excludedDramatisPersonaIds = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<DramatisPersona>>();
 
@@ -32,6 +35,7 @@ public class DramatisPersonaPickerService : IDramatisPersonaPickerService
         // HiredSwordPickerService.PickAsync.
         var viewModel = _provider.GetRequiredService<DramatisPersonaViewModel>();
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        viewModel.ExcludedDramatisPersonaIds = excludedDramatisPersonaIds;
         var page = new DramatisPersonaSelectorPage(viewModel);
 
         // Filet de sécurité : si la modale est fermée sans passer par ClosePickerAsync (geste/bouton

@@ -441,6 +441,11 @@ public class DramatisPersonaSeedData
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 
+    /// <summary>See Models.Library.DramatisPersona.PairDescription - the shared "duo" lore text, only set
+    /// on Marquand's entry. Null for every other persona (Ulli included - hers is null, only Marquand
+    /// carries it, see IsHiddenFromSearchPicker for why he's the "primary" of the pair).</summary>
+    public LocalizedText? PairDescription { get; set; }
+
     public int Movement { get; set; }
     public int WeaponSkill { get; set; }
     public int BallisticSkill { get; set; }
@@ -463,6 +468,19 @@ public class DramatisPersonaSeedData
     /// <summary>See Models.Library.DramatisPersona.RequiresRatingDisadvantage - false for almost every
     /// character.</summary>
     public bool RequiresRatingDisadvantage { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.RequiresCooldownBeforeResearch - true for Aenur and
+    /// Ulli &amp; Marquand only.</summary>
+    public bool RequiresCooldownBeforeResearch { get; set; }
+
+    /// <summary>English Name of another DramatisPersonaSeedData entry in the SAME file - see
+    /// Models.Library.DramatisPersona.PairedWithDramatisPersonaId. Resolved AFTER the whole file is seeded
+    /// (deferred, see AppDatabase.SeedDramatisPersonaeAsync's pendingPairings) since the referenced entry
+    /// may appear later in the array. Null for every persona except Ulli/Marquand.</summary>
+    public string? PairedWithPersonaName { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.IsHiddenFromSearchPicker - true for Ulli only.</summary>
+    public bool HiddenFromSearchPicker { get; set; }
 
     /// <summary>Same mechanism as HiredSwordSeedData.RestrictedToWarbandNames - null/empty = hireable by
     /// every warband.</summary>

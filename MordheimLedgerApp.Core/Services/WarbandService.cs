@@ -222,6 +222,39 @@ public class WarbandService : IWarbandService
         return warrior;
     }
 
+    /// <summary>DramatisPersona ids currently "on cooldown" for this warband - see Models.Library.
+    /// DramatisPersona.RequiresCooldownBeforeResearch's own doc. Consumed by the "Personnage spécial"
+    /// search picker (excludes these) and by WarbandDetailViewModel.EndOfGame (clears/sets rows at Apply
+    /// time).</summary>
+    public async Task<List<int>> GetDramatisPersonaCooldownIdsAsync(int warbandId)
+    {
+        await _db.Initialization;
+        return (await _db.Connection.Table<WarbandDramatisPersonaCooldownEntity>().Where(r => r.WarbandId == warbandId).ToListAsync())
+            .Select(r => r.DramatisPersonaId)
+            .ToList();
+    }
+
+    /// <summary>Marks a persona as on cooldown for this warband - called when a RequiresCooldownBeforeResearch
+    /// persona departs (ApplyWandererDeparturesAsync). No dedup guard: a persona can only depart once per
+    /// warband at a time (they're either on the roster or not), so a duplicate row can't happen in
+    /// practice.</summary>
+    public async Task AddDramatisPersonaCooldownAsync(int warbandId, int dramatisPersonaId)
+    {
+        await _db.Initialization;
+        await _db.Connection.InsertAsync(new WarbandDramatisPersonaCooldownEntity { WarbandId = warbandId, DramatisPersonaId = dramatisPersonaId });
+    }
+
+    /// <summary>Clears every cooldown row for this warband - called at the START of ApplyRareItemSearchAsync's
+    /// processing (before any NEW departure this same End of Game could add a fresh one): reaching this End
+    /// of Game at all already means "the warband fought a battle" since the persona was excluded from being
+    /// re-sought this session (picker-side filter), so whatever was on cooldown going into this wizard has
+    /// now satisfied "at least one battle without them".</summary>
+    public async Task ClearAllDramatisPersonaCooldownsAsync(int warbandId)
+    {
+        await _db.Initialization;
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandDramatisPersonaCooldownEntity WHERE WarbandId = ?", warbandId);
+    }
+
     public async Task InsertWarriorAsync(Warrior warrior)
     {
         await _db.Initialization;

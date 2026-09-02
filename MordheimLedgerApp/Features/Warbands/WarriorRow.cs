@@ -114,8 +114,36 @@ public partial class WarriorRow : ObservableObject
     /// a Hero (always HeadCount 1) or a lone Henchman, see Warrior.HeadCount.</summary>
     public string HeadCountDisplay => !Warrior.IsHero && Warrior.HeadCount > 1 ? $"× {Warrior.HeadCount}" : string.Empty;
 
+    /// <summary>Only set for a Dramatis Persona row (see WarbandDetailViewModel.ToRow) - the catalog
+    /// profile, needed here for CanToggleHostile/PairHireFee below. Null for every other warrior.</summary>
+    private DramatisPersona? Persona { get; }
+
+    /// <summary>True only for Ulli &amp; Marquand (FeeKind.Pair) - drives the roster card's "Rendre
+    /// hostile" toggle for the "A Fistful of Crowns" bribe rule (2026-09-01, see Warrior.
+    /// IsHostileThisBattle). False for every other warrior, including every other Dramatis Persona.</summary>
+    public bool CanToggleHostile => Persona?.FeeKind == DramatisPersonaHireFeeKind.Pair;
+
+    /// <summary>The pair's shared hire fee (30), shown next to the toggle so the table can compare it
+    /// live against an enemy's bribe offer during "A Fistful of Crowns" - null (hidden) unless
+    /// CanToggleHostile.</summary>
+    public int? PairHireFee => CanToggleHostile ? Persona!.HireCost : null;
+
+    /// <summary>"Frais : 30 CO" next to the toggle - empty (invisible) unless CanToggleHostile.</summary>
+    public string PairHireFeeDisplay => PairHireFee is { } fee ? string.Format(LocalizationService.Instance["WarriorsPairHireFeeFormat"], fee) : string.Empty;
+
+    /// <summary>Mirrors Warrior.IsHostileThisBattle - an ObservableProperty (rather than a plain
+    /// passthrough) so WarbandDetailViewModel.ToggleHostile can flip it and have the roster card's toggle
+    /// button repaint immediately, without a full LoadAsync/ToRow rebuild.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HostileToggleLabel))]
+    private bool isHostileThisBattle;
+
+    /// <summary>"Rendre hostile" / "Hostile" - the toggle chip's own label, flips with IsHostileThisBattle
+    /// so the XAML can bind Text directly instead of a StringFormat-in-DataTrigger dance.</summary>
+    public string HostileToggleLabel => LocalizationService.Instance[IsHostileThisBattle ? "WarriorsHostileActiveLabel" : "WarriorsHostileToggleLabel"];
+
     public WarriorRow(Warrior warrior, string roleName, IEnumerable<SpecialRuleChip>? specialRules = null, IEnumerable<MagicSchool>? magicSchools = null,
-        IEnumerable<WarriorHatredChip>? hatredChips = null)
+        IEnumerable<WarriorHatredChip>? hatredChips = null, DramatisPersona? persona = null)
     {
         Warrior = warrior;
         RoleName = roleName;
@@ -127,5 +155,7 @@ public partial class WarriorRow : ObservableObject
         Mutations = new ObservableCollection<WarriorMutation>(warrior.Mutations);
         SpecialRules = new ObservableCollection<SpecialRuleChip>(specialRules ?? Enumerable.Empty<SpecialRuleChip>());
         MagicSchools = new ObservableCollection<MagicSchool>(magicSchools ?? Enumerable.Empty<MagicSchool>());
+        Persona = persona;
+        isHostileThisBattle = warrior.IsHostileThisBattle;
     }
 }

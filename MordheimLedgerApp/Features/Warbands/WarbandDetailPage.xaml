@@ -50,6 +50,37 @@
                                                           CommandParameter="{Binding .}"/>
                         </Grid>
 
+                        <!-- Une Poignée d'Or (2026-09-01) : Ulli & Marquand uniquement
+                             (WarriorRow.CanToggleHostile, invisible pour tout autre guerrier) - bascule
+                             manuelle, l'app ne peut pas détecter une corruption en cours de partie
+                             elle-même (voir la SpecialRule "Une Poignée d'Or"). Les 30 CO de frais sont
+                             affichés à côté pour le comparatif à table avec l'offre adverse. Résolu à la
+                             Fin de Partie (étape Dramatis Personae) - voir WarbandDetailViewModel.EndOfGame. -->
+                        <HorizontalStackLayout Spacing="6" IsVisible="{Binding CanToggleHostile}">
+                            <HorizontalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ToggleHostileCommand}"
+                                                       CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout.GestureRecognizers>
+                            <Border Style="{StaticResource ChipBorderStyle}" Padding="6,2" Stroke="{DynamicResource AppDanger}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsHostileThisBattle}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="{DynamicResource AppDanger}"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <Label Text="{Binding HostileToggleLabel}" FontSize="11" FontAttributes="Bold">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsHostileThisBattle}" Value="True">
+                                            <Setter Property="TextColor" Value="White"/>
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsHostileThisBattle}" Value="False">
+                                            <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </Border>
+                            <Label Text="{Binding PairHireFeeDisplay}" TextColor="{DynamicResource AppTextMuted}" FontSize="11" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+
                         <!-- StatRowView partagé avec AnimalDetailDialog/WarriorArchetypeDetailDialog -
                              abréviations françaises officielles (StatXAbbr), resserré à 10/13 (au lieu
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup

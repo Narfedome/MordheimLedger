@@ -34,6 +34,21 @@ public class AppDatabase
         if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
             await SeedOfficialContentAsync();
 
+        // Bug trouvé le 2026-09-01 en ajoutant BackfillDramatisPersonaSpecialRulesAsync : plusieurs
+        // Backfill* méthodes ci-dessous appellent FindOrCreateSpecialRuleAsync (BackfillNewEquipmentItemsAsync,
+        // BackfillInjurySpecialRulesAsync), qui ne consulte QUE le cache _specialRuleIdsByEnglishName - or ce
+        // cache n'est peuplé que pendant un SeedOfficialContentAsync frais (voir sa doc), donc reste VIDE à
+        // chaque lancement ordinaire (catalogue déjà seedé, le bloc juste au-dessus est sauté). Résultat :
+        // un Backfill* qui a besoin d'une règle DÉJÀ existante en base (ex. "Parry (Sword)", partagée par
+        // Ienh-Khain/Dague du Corsaire/Dague de Johann) ne la retrouve jamais via le cache et en recrée un
+        // doublon à chaque lancement où ce Backfill* a quelque chose à faire - resté silencieux jusqu'ici
+        // (personne ne construisait de dictionnaire strict par nom sur TOUTES les SpecialRuleEntity), mais
+        // a fait planter BackfillDramatisPersonaSpecialRulesAsync (ToDictionary refuse une clé en double)
+        // dès qu'un test recréait "Dagger (Johann)" via BackfillNewEquipmentItemsAsync sur une base ayant
+        // déjà "Parry (Sword)". Pré-chauffe le cache depuis la base AVANT tout Backfill* - no-op sur une
+        // base fraîche (catalogue vide, rien à charger).
+        await WarmSpecialRuleCacheAsync();
+
         // Runs on every launch, not just first: fixes existing data rather than seeding new data (see
         // the method's own doc comment).
         await BackfillNeverGainsExperienceAsync();
@@ -50,6 +65,8 @@ public class AppDatabase
         // tourne, sinon elle échoue silencieusement (fail-soft, voir sa doc).
         await BackfillNewEquipmentItemsAsync();
         await BackfillDramatisPersonaStartingEquipmentAsync();
+        await BackfillDramatisPersonaSpecialRulesAsync();
+        await BackfillDramatisPersonaDescriptionsAsync();
 
         // Contrairement au reste de cette méthode : inconditionnel, pas gardé derrière le check
         // "catalogue vide" (voir la doc de ResyncExplorationResultsAsync).
@@ -382,12 +399,14 @@ public class AppDatabase
     /// unlike Exploration - DOES have a real Library editor (Official -> Modified). A full unconditional
     /// wipe-and-reseed like Exploration's would risk clobbering a player's own edit, so this only touches
     /// ContentSource.Official personas, matched to their JSON entry by English name (same idiom as
-    /// BackfillNeverGainsExperienceAsync's rule-text match). Two independent checks per persona, both
+    /// BackfillNeverGainsExperienceAsync's rule-text match). Several independent checks per persona, all
     /// re-run every launch (cheap no-op once in sync): (1) equipment ROW COUNT mismatch re-syncs
     /// DramatisPersonaEquipmentEntity rows (delete + reinsert) to the JSON's startingEquipmentNames list,
-    /// duplicates included; (2) AlternativePaymentItemId mismatch (2026-09-01, Johann/Ombre Cramoisie)
-    /// just overwrites the FK directly - simpler than (1) since it's a plain column, not a join table. Both
-    /// no-op once in sync, and for anyone who has since edited a persona into Modified/Custom.</summary>
+    /// duplicates included; (2) AlternativePaymentItemId (2026-09-01, Johann/Ombre Cramoisie),
+    /// (3) RequiresCooldownBeforeResearch, (4) PairedWithDramatisPersonaId and (5) IsHiddenFromSearchPicker
+    /// (all 2026-09-01, Ulli &amp; Marquand) just overwrite their column directly - simpler than (1) since
+    /// they're plain columns, not a join table. All no-op once in sync, and for anyone who has since
+    /// edited a persona into Modified/Custom.</summary>
     private async Task BackfillDramatisPersonaStartingEquipmentAsync()
     {
         var personae = (await _db.Table<DramatisPersonaEntity>().ToListAsync())
@@ -405,6 +424,13 @@ public class AppDatabase
 
         var jsonByEnglishName = (await LoadSeedArrayAsync<DramatisPersonaSeedData>("DramatisPersonae.json"))
             .ToDictionary(dp => dp.Name.En);
+
+        // Pour PairedWithPersonaName (Ulli/Marquand, 2026-09-01) - toutes les personas existent déjà ici
+        // (contrairement à SeedDramatisPersonaeAsync's résolution différée, nécessaire seulement pendant
+        // l'insertion initiale), donc une simple résolution directe suffit.
+        var personaIdByEnglishName = personae
+            .Where(p => englishTranslations.ContainsKey(p.NameKey))
+            .ToDictionary(p => englishTranslations[p.NameKey], p => p.Id);
 
         foreach (var entity in personae)
         {
@@ -431,10 +457,143 @@ public class AppDatabase
             // deux backfills doivent chacun s'exécuter même si l'autre est déjà à jour.
             var wantedAlternativePaymentItemId = dp.AlternativePaymentItemName is { } altName && equipmentIdByEnglishName.TryGetValue(altName, out var altId)
                 ? altId : (int?)null;
-            if (entity.AlternativePaymentItemId != wantedAlternativePaymentItemId)
+            // Même logique pour RequiresCooldownBeforeResearch/PairedWithDramatisPersonaId/
+            // IsHiddenFromSearchPicker (2026-09-01, Aenur/Ulli & Marquand) - de simples colonnes,
+            // comparées et réécrites directement comme AlternativePaymentItemId ci-dessus.
+            var wantedPairedWithId = dp.PairedWithPersonaName is { } pairedName && personaIdByEnglishName.TryGetValue(pairedName, out var pairedId)
+                ? pairedId : (int?)null;
+            var needsUpdate = entity.AlternativePaymentItemId != wantedAlternativePaymentItemId
+                || entity.RequiresCooldownBeforeResearch != dp.RequiresCooldownBeforeResearch
+                || entity.PairedWithDramatisPersonaId != wantedPairedWithId
+                || entity.IsHiddenFromSearchPicker != dp.HiddenFromSearchPicker;
+            if (needsUpdate)
             {
                 entity.AlternativePaymentItemId = wantedAlternativePaymentItemId;
+                entity.RequiresCooldownBeforeResearch = dp.RequiresCooldownBeforeResearch;
+                entity.PairedWithDramatisPersonaId = wantedPairedWithId;
+                entity.IsHiddenFromSearchPicker = dp.HiddenFromSearchPicker;
                 await _db.UpdateAsync(entity);
+            }
+        }
+    }
+
+    /// <summary>Runs on every launch - keeps an Official persona's Description/PairDescription text
+    /// (translations) in sync with DramatisPersonae.json's current wording, same "Official content always
+    /// mirrors the JSON, only a player edit (ContentSource.Modified) permanently diverges" precedent as
+    /// every other Backfill* here. Added 2026-09-01 (user-supplied source text): Marquand/Ulli's own
+    /// Description was a short trimmed bio + a mechanical hire-fee note; replaced with each persona's real
+    /// individual biography, and the mechanical note moved into a NEW PairDescription (Marquand only - the
+    /// shared "duo" lore, e.g. "Never in the history of the Empire...", distinct from either half's own
+    /// personal bio) shown by DramatisPersonaPairDetailDialog instead of the plain profile dialog. Compares
+    /// by current English text (cheap, no version/hash column) - a no-op once in sync, creates
+    /// PairDescriptionKey on first run (null beforehand, only Marquand's JSON entry has PairDescription).</summary>
+    private async Task BackfillDramatisPersonaDescriptionsAsync()
+    {
+        var personae = (await _db.Table<DramatisPersonaEntity>().ToListAsync())
+            .Where(p => p.Source == ContentSource.Official)
+            .ToList();
+        if (personae.Count == 0) return;
+
+        var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        var jsonByEnglishName = (await LoadSeedArrayAsync<DramatisPersonaSeedData>("DramatisPersonae.json"))
+            .ToDictionary(dp => dp.Name.En);
+
+        foreach (var entity in personae)
+        {
+            if (!englishTranslations.TryGetValue(entity.NameKey, out var englishName)) continue;
+            if (!jsonByEnglishName.TryGetValue(englishName, out var dp)) continue;
+
+            if (dp.Description is { } desc && englishTranslations.GetValueOrDefault(entity.DescriptionKey ?? string.Empty) != desc.En)
+            {
+                entity.DescriptionKey = await TranslationResolver.SetAsync(this, entity.DescriptionKey, "en", desc.En);
+                if (!string.IsNullOrEmpty(desc.Fr))
+                    await TranslationResolver.SetAsync(this, entity.DescriptionKey, "fr", desc.Fr);
+                await _db.UpdateAsync(entity);
+            }
+
+            if (dp.PairDescription is { } pairDesc && englishTranslations.GetValueOrDefault(entity.PairDescriptionKey ?? string.Empty) != pairDesc.En)
+            {
+                entity.PairDescriptionKey = await TranslationResolver.SetAsync(this, entity.PairDescriptionKey, "en", pairDesc.En);
+                if (!string.IsNullOrEmpty(pairDesc.Fr))
+                    await TranslationResolver.SetAsync(this, entity.PairDescriptionKey, "fr", pairDesc.Fr);
+                await _db.UpdateAsync(entity);
+            }
+        }
+    }
+
+    /// <summary>Runs on every launch, after BackfillDramatisPersonaStartingEquipmentAsync - adds any
+    /// SpecialRule a persona's JSON entry now lists but the DB link doesn't have yet (e.g. "A Fistful of
+    /// Crowns"/"Une Poignée d'Or", split out of Marquand/Ulli's free-text Description into a real
+    /// SpecialRule on 2026-09-01 so it shows as its own tappable chip on the roster card - see
+    /// WarbandDetailViewModel.ToRow - instead of being buried in a wall of biography prose). Additive
+    /// only, matched by (DramatisPersonaId, SpecialRuleId) pair - never touches a rule the persona already
+    /// has (e.g. "Inseparable"), so a player who hand-edited a persona's rules in the Codex isn't silently
+    /// overwritten. Deliberately does NOT reuse FindOrCreateSpecialRuleAsync's transient
+    /// _specialRuleIdsByEnglishName cache directly - that cache is only populated during a fresh
+    /// SeedOfficialContentAsync pass and stays empty on every ordinary launch, so blindly calling it here
+    /// would insert a duplicate SpecialRuleEntity for any rule name that happens to already exist in the
+    /// DB. Instead resolves an existing row by English name straight against the DB first (same shape as
+    /// the equipment-name lookup already built in BackfillDramatisPersonaStartingEquipmentAsync), only
+    /// inserting - and caching locally for the rest of this one pass - when genuinely no row exists yet.</summary>
+    private async Task BackfillDramatisPersonaSpecialRulesAsync()
+    {
+        var personae = (await _db.Table<DramatisPersonaEntity>().ToListAsync())
+            .Where(p => p.Source == ContentSource.Official)
+            .ToList();
+        if (personae.Count == 0) return;
+
+        var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+
+        var jsonByEnglishName = (await LoadSeedArrayAsync<DramatisPersonaSeedData>("DramatisPersonae.json"))
+            .ToDictionary(dp => dp.Name.En);
+
+        // Boucle plutôt qu'un ToDictionary strict (2026-09-01, bug trouvé) : une base déjà installée
+        // avant le correctif de WarmSpecialRuleCacheAsync peut porter un VRAI doublon de nom (ex. "Parry
+        // (Sword)" créé deux fois par un ancien passage de BackfillNewEquipmentItemsAsync) - premier
+        // rencontré gagne plutôt que planter au chargement.
+        var specialRuleIdByEnglishName = new Dictionary<string, int>();
+        foreach (var rule in await _db.Table<SpecialRuleEntity>().ToListAsync())
+        {
+            if (englishTranslations.TryGetValue(rule.NameKey, out var ruleName) && !specialRuleIdByEnglishName.ContainsKey(ruleName))
+                specialRuleIdByEnglishName[ruleName] = rule.Id;
+        }
+
+        var existingLinks = (await _db.Table<DramatisPersonaSpecialRuleEntity>().ToListAsync())
+            .Select(l => (l.DramatisPersonaId, l.SpecialRuleId)).ToHashSet();
+
+        foreach (var entity in personae)
+        {
+            if (!englishTranslations.TryGetValue(entity.NameKey, out var englishName)) continue;
+            if (!jsonByEnglishName.TryGetValue(englishName, out var dp)) continue;
+
+            foreach (var sr in dp.SpecialRules)
+            {
+                if (!specialRuleIdByEnglishName.TryGetValue(sr.Name.En, out var ruleId))
+                {
+                    var rule = new SpecialRule
+                    {
+                        Source = ContentSource.Official,
+                        CostMultiplier = sr.CostMultiplier,
+                        Abbreviation = sr.Abbreviation,
+                        Rarity = sr.Rarity,
+                        IsResaleUpgrade = sr.IsResaleUpgrade,
+                        HatredTargetsSpellcasters = sr.HatredTargetsSpellcasters
+                    };
+                    rule.NameKey = await SeedTranslationAsync(sr.Name.En, sr.Name.Fr);
+                    rule.DescriptionKey = sr.Description is null ? null : await SeedTranslationAsync(sr.Description.En, sr.Description.Fr);
+                    var newRuleEntity = rule.ToEntity();
+                    await _db.InsertAsync(newRuleEntity);
+                    ruleId = newRuleEntity.Id;
+                    specialRuleIdByEnglishName[sr.Name.En] = ruleId;
+                }
+
+                if (existingLinks.Add((entity.Id, ruleId)))
+                    await _db.InsertAsync(new DramatisPersonaSpecialRuleEntity { DramatisPersonaId = entity.Id, SpecialRuleId = ruleId });
             }
         }
     }
@@ -525,6 +684,7 @@ public class AppDatabase
         await _db.CreateTableAsync<WarbandArchetypeDramatisPersonaEntity>();
         await _db.CreateTableAsync<DramatisPersonaEquipmentEntity>();
         await _db.CreateTableAsync<DramatisPersonaSkillEntity>();
+        await _db.CreateTableAsync<WarbandDramatisPersonaCooldownEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -574,6 +734,7 @@ public class AppDatabase
         await _db.DropTableAsync<WarbandArchetypeDramatisPersonaEntity>();
         await _db.DropTableAsync<DramatisPersonaEquipmentEntity>();
         await _db.DropTableAsync<DramatisPersonaSkillEntity>();
+        await _db.DropTableAsync<WarbandDramatisPersonaCooldownEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -1110,6 +1271,15 @@ public class AppDatabase
     /// SeedOfficialContentAsync).</summary>
     private async Task SeedDramatisPersonaeAsync()
     {
+        // Résolution différée du pairage Ulli/Marquand (2026-09-01, "vous devez les recruter tous les
+        // deux") - Marquand référence Ulli par nom AVANT qu'elle n'existe (elle vient après lui dans le
+        // fichier), même problème que RestrictedToWarbandNames ailleurs dans cette classe. Peuplé pendant
+        // la boucle, résolu juste après (les deux entrées existent alors forcément, aucun besoin de la
+        // file d'attente _pendingSharedRestrictions partagée avec les catalogues communs - celle-ci ne
+        // sert qu'à Equipment/Skill/Mutation, résolue APRÈS les 15 bandes, bien plus tard que ce point).
+        var personaIdsByEnglishName = new Dictionary<string, int>();
+        var pendingPairings = new List<(int EntityId, string PairedWithName)>();
+
         foreach (var dp in await LoadSeedArrayAsync<DramatisPersonaSeedData>("DramatisPersonae.json"))
         {
             var persona = new DramatisPersona
@@ -1129,6 +1299,8 @@ public class AppDatabase
                 RatingBonus = dp.RatingBonus,
                 IsWanderer = dp.IsWanderer,
                 RequiresRatingDisadvantage = dp.RequiresRatingDisadvantage,
+                RequiresCooldownBeforeResearch = dp.RequiresCooldownBeforeResearch,
+                IsHiddenFromSearchPicker = dp.HiddenFromSearchPicker,
                 Source = ContentSource.Official
             };
             if (dp.MagicSchoolName is { } magicSchoolName)
@@ -1141,8 +1313,12 @@ public class AppDatabase
             }
             persona.NameKey = await SeedTranslationAsync(dp.Name.En, dp.Name.Fr);
             persona.DescriptionKey = dp.Description is null ? null : await SeedTranslationAsync(dp.Description.En, dp.Description.Fr);
+            persona.PairDescriptionKey = dp.PairDescription is null ? null : await SeedTranslationAsync(dp.PairDescription.En, dp.PairDescription.Fr);
             var entity = persona.ToEntity();
             await _db.InsertAsync(entity);
+            personaIdsByEnglishName[dp.Name.En] = entity.Id;
+            if (dp.PairedWithPersonaName is { } pairedWithName)
+                pendingPairings.Add((entity.Id, pairedWithName));
 
             foreach (var sr in dp.SpecialRules)
             {
@@ -1169,6 +1345,15 @@ public class AppDatabase
                 foreach (var stem in dpWarbandNames)
                     await _db.InsertAsync(new WarbandArchetypeDramatisPersonaEntity { DramatisPersonaId = entity.Id, WarbandArchetypeId = _warbandArchetypeIdsByFileStem[stem] });
             }
+        }
+
+        foreach (var (entityId, pairedWithName) in pendingPairings)
+        {
+            if (!personaIdsByEnglishName.TryGetValue(pairedWithName, out var pairedWithId))
+                throw new InvalidOperationException($"DramatisPersonae.json references unknown persona '{pairedWithName}' for pairedWithPersonaName");
+            var entity = await _db.Table<DramatisPersonaEntity>().Where(e => e.Id == entityId).FirstAsync();
+            entity.PairedWithDramatisPersonaId = pairedWithId;
+            await _db.UpdateAsync(entity);
         }
     }
 
@@ -1418,6 +1603,25 @@ public class AppDatabase
     /// resolve to the SAME catalog row instead of 4 duplicates - keep the English Name verbatim-identical
     /// across files for a rule meant to be shared.</summary>
     private readonly Dictionary<string, int> _specialRuleIdsByEnglishName = new();
+
+    /// <summary>Called once at the top of InitializeAsync (2026-09-01, bug fix) - populates
+    /// _specialRuleIdsByEnglishName from whatever SpecialRuleEntity rows already exist in the DB, so any
+    /// Backfill* method calling FindOrCreateSpecialRuleAsync later in the same launch reuses an
+    /// already-seeded rule instead of blindly inserting a duplicate (the cache is otherwise only ever
+    /// populated live during a fresh SeedOfficialContentAsync pass - see the class doc). No-op on a fresh
+    /// empty database (nothing to load yet, SeedOfficialContentAsync will populate the cache itself as it
+    /// goes).</summary>
+    private async Task WarmSpecialRuleCacheAsync()
+    {
+        var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
+            .Where(t => t.LanguageCode == "en")
+            .ToDictionary(t => t.Key, t => t.Value);
+        foreach (var rule in await _db.Table<SpecialRuleEntity>().ToListAsync())
+        {
+            if (englishTranslations.TryGetValue(rule.NameKey, out var name) && !_specialRuleIdsByEnglishName.ContainsKey(name))
+                _specialRuleIdsByEnglishName[name] = rule.Id;
+        }
+    }
 
     private async Task<int> FindOrCreateSpecialRuleAsync(SpecialRuleSeedData seed)
     {

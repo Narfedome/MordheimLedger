@@ -46,9 +46,17 @@ public class DramatisPersona
     /// modeled fields.</summary>
     public string? Description { get; set; }
 
+    /// <summary>Only meaningful for Ulli &amp; Marquand (2026-09-01) - the shared "duo" lore text (how the
+    /// pair met, their joint reputation), distinct from Description above (each half's OWN personal
+    /// biography). Set on Marquand only (the "primary" half - see IsHiddenFromSearchPicker), shown by
+    /// DramatisPersonaPairDetailDialog rather than the plain single-profile dialog, which still shows
+    /// Description (this persona's own bio) regardless of pairing. Null for every non-paired character.</summary>
+    public string? PairDescription { get; set; }
+
     /// <summary>Translation slot backing Name/Description - persistence-only, not for display.</summary>
     public string? NameKey { get; set; }
     public string? DescriptionKey { get; set; }
+    public string? PairDescriptionKey { get; set; }
 
     public ContentSource Source { get; set; }
 
@@ -98,10 +106,34 @@ public class DramatisPersona
     /// until the warband has fought at least one battle without them), or because their own mechanic
     /// requires a fresh request every time (Bertha - "A request for Bertha to aid the warband must be
     /// made for each battle you wish her to help" - corrected 2026-08-31, user caught that this is the
-    /// same one-battle-only shape even though the book never uses the word "Wanderer" for her). Purely
-    /// descriptive for now, same "no rules engine V1" stance as the rest of this type - not enforced
-    /// anywhere (no automatic removal from the roster after a battle).</summary>
+    /// same one-battle-only shape even though the book never uses the word "Wanderer" for her). Enforced
+    /// since 2026-09-01 (WarbandDetailViewModel.EndOfGame.ApplyWandererDeparturesAsync) - a recruited
+    /// warrior with this flag is automatically removed from the roster at every End of Game.</summary>
     public bool IsWanderer { get; set; }
+
+    /// <summary>True for Aenur and Ulli &amp; Marquand (NOT Bertha, despite her also being IsWanderer) -
+    /// "can't be sought again until the warband has fought at least one battle without them". Enforced
+    /// (2026-09-01) via WarbandDramatisPersonaCooldownEntity: a row exists for (WarbandId, DramatisPersonaId)
+    /// from the moment this persona departs (ApplyWandererDeparturesAsync) until the NEXT End of Game
+    /// finishes (that battle satisfies "one battle without them") - the "Personnage spécial" search picker
+    /// excludes any persona currently on cooldown for the searching warband. Bertha has no such delay (can
+    /// be re-sought the very next battle), so this stays false for her even though IsWanderer is true.</summary>
+    public bool RequiresCooldownBeforeResearch { get; set; }
+
+    /// <summary>Only meaningful for Ulli &amp; Marquand (2026-09-01) - "Ulli et Marquand ne se séparent
+    /// jamais et vous devez les recruter tous les deux pour une bataille". Marquand points to Ulli (and
+    /// vice versa, for symmetry) - recruiting the primary of the pair (see IsHiddenFromSearchPicker)
+    /// automatically recruits this one too, for the SAME shared HireCost (never charged twice - see
+    /// WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync). Null for every other Dramatis Persona.</summary>
+    public int? PairedWithDramatisPersonaId { get; set; }
+    public DramatisPersona? PairedWithDramatisPersona { get; set; }
+
+    /// <summary>True for Ulli only (2026-09-01) - the "Personnage spécial" search picker never shows her
+    /// as her own selectable option (user decision, AskUserQuestion: "un seul choix « Ulli &amp; Marquand »
+    /// dans le picker") - Marquand alone represents the pair there, both are recruited together via
+    /// PairedWithDramatisPersonaId. She still shows up normally in the Codex (browsing/editing), only
+    /// hidden from the recruitment picker itself.</summary>
+    public bool IsHiddenFromSearchPicker { get; set; }
 
     /// <summary>True for a character who only agrees to personally join the battle when the hiring
     /// warband is genuinely outmatched (e.g. Bertha - "will only come to the aid of a warband if their

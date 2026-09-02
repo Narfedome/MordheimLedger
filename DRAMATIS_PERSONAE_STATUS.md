@@ -2,8 +2,8 @@
 
 Suivi de ce qui reste à gérer sur le catalogue Dramatis Personae (`Core/Models/Library/
 DramatisPersona.cs`, `Data/SeedData/DramatisPersonae.json`, 8 personnages) au-delà du catalogue et
-du recrutement de base. Mis à jour à chaque avancée — dernière mise à jour : **2026-09-01** (frais
-d'engagement en or/pierre magique + paiement alternatif de Johann).
+du recrutement de base. Mis à jour à chaque avancée — dernière mise à jour : **2026-09-01** ("Une
+Poignée d'Or" + "Où est l'Argent ?" - Ulli & Marquand désormais complets).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire ·
 📝 Volontairement laissé en texte libre (voir CLAUDE.md § Règles de collaboration : pas de moteur de
@@ -57,16 +57,29 @@ règles/calculateur de combat en V1)
   pile partielle nulle part ailleurs dans l'app, même simplification que Vendre/Assigner un objet).
   Johann est le seul personnage à l'utiliser aujourd'hui (Ombre Cramoisie), le champ est prêt pour un
   futur cas similaire sans travail supplémentaire.
-- **Vagabond : départ automatisé (2026-09-01), délai de re-recherche toujours manuel.** `IsWanderer=true`
-  (Aenur, Bertha, Ulli & Marquand) déclenche désormais un retrait COMPLET du roster à chaque Fin de
-  Partie (`ApplyWandererDeparturesAsync` - décision utilisateur via `AskUserQuestion` : suppression pure,
-  pas de statut "Parti(e)" dédié, une future recherche recrée une fiche neuve sans historique conservé).
-  Scope volontairement le roster figé à l'OUVERTURE du wizard : un personnage retrouvé PENDANT cette même
-  Fin de Partie (étape Recherche) n'est jamais concerné, il reste au moins jusqu'à la bataille suivante.
-  Ce qui reste manuel : la nuance "délai avant de pouvoir re-rechercher" (Aenur/Ulli & Marquand - "can't
-  be sought again until the warband has fought at least one battle without them" - contre aucun délai
-  pour Bertha, qui peut être re-cherchée dès la bataille suivante) n'est pas trackée ; rien n'empêche
-  aujourd'hui de la re-rechercher trop tôt pour Aenur/Ulli & Marquand.
+- **Vagabond : départ automatisé (2026-09-01).** `IsWanderer=true` (Aenur, Bertha, Ulli & Marquand)
+  déclenche un retrait COMPLET du roster à chaque Fin de Partie (`ApplyWandererDeparturesAsync` -
+  décision utilisateur via `AskUserQuestion` : suppression pure, pas de statut "Parti(e)" dédié, une
+  future recherche recrée une fiche neuve sans historique conservé). Scope volontairement le roster figé
+  à l'OUVERTURE du wizard : un personnage retrouvé PENDANT cette même Fin de Partie (étape Recherche)
+  n'est jamais concerné, il reste au moins jusqu'à la bataille suivante.
+- **Délai de re-recherche (2026-09-01) : câblé pour Aenur et Ulli & Marquand, pas Bertha.**
+  `DramatisPersona.RequiresCooldownBeforeResearch` ("can't be sought again until the warband has fought
+  at least one battle without them") - une ligne `WarbandDramatisPersonaCooldownEntity` (WarbandId,
+  DramatisPersonaId) est posée dès que ce type de personnage quitte la bande
+  (`ApplyWandererDeparturesAsync`), et exclut le personnage du picker "Personnage spécial"
+  (`IDramatisPersonaPickerService.PickDramatisPersonaAsync`, nouveau paramètre `excludedDramatisPersonaIds`)
+  tant qu'elle existe. Effacée en bloc pour toute la bande (`ClearAllDramatisPersonaCooldownsAsync`) au
+  DÉBUT de chaque Fin de Partie suivante, AVANT `ApplyWandererDeparturesAsync` (qui peut reposer un
+  cooldown pour un NOUVEAU départ de cette même Fin de Partie) : atteindre cette Fin de Partie veut dire
+  qu'une bataille a été jouée sans ce personnage (il était exclu du picker), donc la condition "au moins
+  une bataille sans lui" est satisfaite. Bertha n'a pas ce flag - "A request for Bertha... must be made
+  for each battle" ne mentionne aucun délai, elle reste re-cherchable dès la bataille suivante.
+  **Bug trouvé en passant** : `DramatisPersonaViewModel.Edit()` (copie défensive avant ouverture du
+  dialog d'édition Codex) omettait déjà `AlternativePaymentItemId`/`AlternativePaymentItem` depuis le
+  travail sur Johann - éditer Johann via le Codex effaçait silencieusement son objet de paiement
+  alternatif au premier Enregistrer. Corrigé au passage (même classe de bug que la copie de `Warrior`
+  documentée dans `EditWarrior`).
 - **Décompte de tête à la vente de pierre magique.** Même limite connue que pour les Francs-Tireurs
   (voir `Warrior.cs`) : un Dramatis Persona compte probablement dans le calcul actuel alors que le
   livre exclut ce type de guerrier du partage. Pas vérifié/corrigé.
@@ -79,16 +92,53 @@ règles/calculateur de combat en V1)
 
 | Personnage | Bande(s) | Mécanique propre restant à gérer |
 |---|---|---|
-| **Aenur, l'Épée du Crépuscule** | 12 bandes humaines/Ordre | Départ Vagabond ✅. ⏳ Délai de re-recherche (1 bataille sans lui) non tracké, voir Transverse. |
+| **Aenur, l'Épée du Crépuscule** | 12 bandes humaines/Ordre | Départ Vagabond ✅. Délai de re-recherche (1 bataille sans lui) ✅. |
 | **Bertha Bestraufrung** | Sœurs de Sigmar | Aide conditionnelle ✅. Départ Vagabond ✅ (pas de délai de re-recherche pour elle, conforme au livre). Recrutement "gratuit en or" (`FeeKind.None`) déjà correct puisqu'aucun paiement n'est prélevé de toute façon. |
 | **Comtesse Marianna Chevaux** | 12 bandes | Frais en or (HireCost/Upkeep) ✅. 📝 **"On n'échappe jamais à son passé..."** : jet 1D6 au dernier tour de partie / à la déroute (reste-part / reste-si-solde-payée / embuscade Zombies+Goules+Vampire pour D3 tours) — entièrement absent du wizard, aucun écran ne couvre "pendant" une partie sur table ; c'est aussi ce qui fait varier son upkeep réel dans le livre, non reflété par l'Upkeep fixe (75) utilisé pour la solde récurrente. 📝 Haine personnelle des Vampires envers elle (déjà une `SpecialRule` dédiée, "Hated by Vampires") — non modélisable via `HatredTargetWarbandArchetypeIds` (ciblage par bande, pas par Vampires-en-tant-qu'individus). |
 | **Johann le Couteau** | 12 bandes | Frais en or + paiement alternatif (Ombre Cramoisie) ✅. Dagues comptant comme Épées (Parade uniquement, pas le bonus de sauvegarde) ✅ - `Dagger (Johann)`, objet unique dans Equipment.json portant la règle partagée `Parry (Sword)`, même principe que Ienh-Khain (Aenur). |
 | **Nicodemus, le Pèlerin Maudit** | 11 bandes | Paiement en éclat de pierre magique (à l'engagement + solde après chaque bataille) ✅ - mêmes étapes Achat/Recrutement et Dramatis Personae que Johann/Veskit/Marianna, juste une devise différente (aucune option en or pour lui, "il n'a aucun intérêt pour l'or"). Bâton de Sorcier (deux mains = Gourdin + Parade comme rondache ; une main = libère l'autre pour l'Épée de Rezhebel) déjà modélisé (`Wizard's Staff (Nicodemus)`, Equipment.json). |
-| **Marquand Volker & Ulli Leitpold** | 12 bandes (paire) | Départ Vagabond ✅ (chacun individuellement - voir "recrutement en paire non imposé" ci-dessous, le départ n'est pas non plus synchronisé entre les deux). ⏳ Délai de re-recherche non tracké, voir Transverse. ⏳ Frais en or non prélevés (`FeeKind.Pair`, délibérément hors périmètre de la passe Gold du 2026-09-01). ⏳ **Recrutement en paire non imposé** : les deux fiches catalogue sont indépendantes, rien n'empêche d'en recruter un seul dans l'UI actuelle (le livre les impose comme un bloc). ⏳ **"Une Poignée d'Or" / "Où est l'Argent ?"** (enchère secrète adverse en début de partie pour retourner la paire, saisie ou combat en duel si la bande ne peut pas payer) — aucun écran de Lancement de Partie ne couvre ce mécanisme. 📝 "Inséparables" (rester à 4" l'un de l'autre, traîner le partenaire hors du champ) — positionnement sur table, hors périmètre de l'app de toute façon. |
+| **Marquand Volker & Ulli Leitpold** | 13 bandes (paire, toutes sauf Sœurs de Sigmar/Répurgateurs) | Départ Vagabond ✅ (chacun individuellement - le départ n'est pas synchronisé entre les deux au niveau du code, mais ils ont toujours été recrutés/quittent ensemble en pratique puisqu'ils arrivent toujours ensemble). Délai de re-recherche ✅ (chacun a son propre cooldown, non partagé - sans conséquence tant qu'ils partent toujours ensemble). **Recrutement en paire imposé + frais partagé (30 CO) ✅ (2026-09-01)** : le picker "Personnage spécial" n'affiche que Marquand (`DramatisPersona.IsHiddenFromSearchPicker` masque Ulli), le recruter recrute automatiquement Ulli aussi (`PairedWithDramatisPersonaId`) pour un seul HireCost de 30 CO (jamais 60) - voir `WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync`. **"Une Poignée d'Or" (A Fistful of Crowns) ✅ (2026-09-01)** : extraite du texte libre en une vraie `SpecialRule` (chip tapotable sur la carte, comme "On n'échappe jamais à son passé..." de Marianna) - texte générique, pas de montant en dur (les 30 CO du comparatif viennent du catalogue, affichés en direct à côté du bouton). Résolu en deux blocs, l'issue n'étant connue qu'après la bataille jouée sur table (pas un mécanisme de Lancement de Partie) : (1) côté bande propriétaire, bouton "Rendre hostile" sur la carte du guerrier (`WarriorRow.CanToggleHostile`/`WarbandDetailViewModel.ToggleHostile`) exclut sa contribution de la Valeur pour cette bataille (`Warrior.IsHostileThisBattle`) sans le supprimer du roster - à la Fin de Partie, `ApplyWandererDeparturesAsync` produit une phrase d'historique différenciée puis le retire comme tout Vagabond (aucun paiement de son côté, "seul le camp qui gagne le contrôle paie"). (2) côté n'importe quelle autre bande (même sur un autre appareil, aucun lien de données entre bandes) : case "Corruption de Marquand Volker & Ulli Leitpold" à la Fin de Partie (`EndOfGameDialogViewModel.ShowPairCorruptionOption`, visible seulement si cette bande ne possède pas déjà la paire) + montant, déduit de SA propre trésorerie. **"Où est l'Argent ?" ✅ (2026-09-01)** : repli si le montant de corruption saisi dépasse le solde prévisionnel de la bande à cette étape (`EndOfGameDialogViewModel.IsPairCorruptionUnaffordable`, même principe que `RareItemPurchaseRemainingTreasury`). Deux choix : "Céder du matériel" (pas de sélecteur de valeur automatique, juste un rappel textuel invitant à retirer du matériel équivalent depuis l'Inventaire - décision explicite, aucun mécanisme de vente partielle ailleurs dans l'app) ; "Duel avec le meneur" (même principe que Vendu aux Fosses/D66-65 côté Blessures, retour utilisateur explicite - `WonDuel`/`PairDuelRoll` réutilisent `InjurySubRollEntry` tel quel : victoire = rien de plus, défaite = un sous-jet D66 sur la table des Blessures Graves Héros appliqué au meneur de bande, résolu par la même mécanique que la relance de Vendu aux Fosses mais sans sa perte d'équipement inconditionnelle, absente du texte de cette règle-ci). 📝 "Inséparables" (rester à 4" l'un de l'autre, traîner le partenaire hors du champ) — positionnement sur table, hors périmètre de l'app de toute façon. |
 | **Veskit, Bourreau Suprême** | Skavens (Clan Eshin) | Frais en or (HireCost/Upkeep) ✅. Rien d'autre en attente — pas Vagabond. |
 
 ## Historique
 
+- **2026-09-01 (suite, "Une Poignée d'Or", mécanique par mécanique)** : la corruption elle-même
+  ("A Fistful of Crowns" - enchère secrète adverse à un tour quelconque de la partie, l'app ne peut
+  simuler ni le tour par tour ni le secret) est traitée après-coup plutôt qu'au Lancement de Partie,
+  puisque son issue n'est connue qu'une fois la bataille jouée sur table. Extraite en vraie `SpecialRule`
+  (chip tapotable, texte générique sans montant en dur). Côté propriétaire : bouton "Rendre hostile" sur
+  la carte du guerrier (`Warrior.IsHostileThisBattle`, `WarriorRow.CanToggleHostile` limité à
+  `FeeKind.Pair`) exclut sa Valeur pour cette bataille sans le retirer du roster ; `ApplyWandererDeparturesAsync`
+  produit une phrase d'historique différenciée puis le retire comme tout Vagabond, sans paiement de son
+  côté ("seul le camp qui gagne le contrôle paie"). Côté n'importe quelle autre bande (même sur un autre
+  appareil - retour utilisateur explicite, donc aucun lien de données entre bandes) : case "Corruption de
+  Marquand Volker & Ulli Leitpold" en Fin de Partie (`EndOfGameDialogViewModel.ShowPairCorruptionOption`,
+  visible seulement si cette bande ne possède pas déjà la paire) + montant, déduit de SA trésorerie. "Où
+  est l'Argent ?" (repli si le camp contrôlant ne peut pas payer) volontairement laissé de côté - règle
+  suivante de la série, pas encore donnée par l'utilisateur. Bug trouvé en passant :
+  `WarbandDetailViewModel.EditWarrior`'s copie défensive omettait déjà `DramatisPersonaId`/
+  `DramatisPersonaRatingBonus` (pas seulement le nouveau `IsHostileThisBattle`) - éditer un guerrier
+  Dramatis Persona via le bouton Éditer du roster effaçait silencieusement son lien catalogue au premier
+  Enregistrer, corrigé au passage (même classe de bug que `DramatisPersonaViewModel.Edit()` déjà
+  documentée plus haut, cette fois côté roster plutôt que Codex).
+
+- **2026-09-01 (suite, "on va bien s'amuser pour finaliser le duo", partie 2)** : recrutement en paire
+  imposé pour Ulli & Marquand ("vous devez les recruter tous les deux pour une bataille"), confirmé via
+  `AskUserQuestion` (un seul choix "Ulli & Marquand" dans le picker plutôt que deux cartes synchronisées).
+  Nouveaux champs `PairedWithDramatisPersonaId` (navigation self-référente, résolue après coup dans
+  `LibraryService.GetDramatisPersonaeAsync`, même principe qu'`AlternativePaymentItem`) et
+  `IsHiddenFromSearchPicker` (Ulli seule, masquée du picker de recrutement mais pas du Codex normal).
+  `HasHireCost` généralisé de Gold à Gold-ou-Pair (même devise, même mécanisme de déduction - contrairement
+  à Wyrdstone qui reste séparé) : recruter Marquand recrute automatiquement Ulli pour le même HireCost de
+  30 CO, jamais doublé. Au passage, confirmé par le texte du livre que la restriction de bande existante
+  (13/15 bandes, exclut Sœurs de Sigmar + Répurgateurs) et le RatingBonus (30+30=60) étaient déjà corrects.
+  Reste pour le duo : l'enchère "Une Poignée d'Or"/"Où est l'Argent ?" (prochain chantier).
+- **2026-09-01 (suite, "on va bien s'amuser pour finaliser le duo")** : délai de re-recherche câblé
+  (Aenur/Ulli & Marquand, pas Bertha) - nouvelle table `WarbandDramatisPersonaCooldownEntity`, exclusion
+  côté picker "Personnage spécial", pose/nettoyage à la Fin de Partie. Bug trouvé et corrigé en passant
+  dans `DramatisPersonaViewModel.Edit()` (copie défensive oubliant `AlternativePaymentItemId`). Reste
+  ouvert pour le duo : recrutement en paire non imposé, enchère "Une Poignée d'Or"/"Où est l'Argent ?" -
+  prochain chantier annoncé par l'utilisateur.
 - **2026-09-01** : création de ce fichier. Session ayant branché la recherche/recrutement du wizard
   Fin de Partie sur le vrai catalogue, ajouté le bloc de roster dédié (+ Francs-Tireurs, qui n'en avait
   pas non plus), corrigé `IsHero`/`GainsExperience` d'après le texte du livre, découplé la section

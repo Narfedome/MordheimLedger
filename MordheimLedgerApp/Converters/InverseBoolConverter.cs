@@ -54,4 +54,17 @@ namespace MordheimLedgerApp.Converters
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
             => throw new NotImplementedException();
     }
+
+    /// <summary>First non-null/non-empty string among the bound values, in order - used by ChipView's
+    /// Label (2026-09-01, Une Poignée d'Or) to prefer an explicit NameOverride when set, falling back to
+    /// Item's own Name otherwise (e.g. Marquand alone -&gt; "Marquand Volker &amp; Ulli Leitpold" wherever the
+    /// caller supplies that override, unchanged "Marquand Volker" everywhere else - see ChipView.xaml).</summary>
+    public class FirstNonEmptyMultiConverter : IMultiValueConverter
+    {
+        public object? Convert(object?[] values, Type targetType, object? parameter, CultureInfo culture) =>
+            values.Select(v => v as string).FirstOrDefault(s => !string.IsNullOrEmpty(s)) ?? string.Empty;
+
+        public object[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
 }

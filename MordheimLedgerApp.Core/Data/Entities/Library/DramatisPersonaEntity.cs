@@ -9,6 +9,10 @@ public class DramatisPersonaEntity
     public int Id { get; set; }
     public string NameKey { get; set; } = string.Empty;
     public string? DescriptionKey { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.PairDescriptionKey. Null for every persona except
+    /// Marquand.</summary>
+    public string? PairDescriptionKey { get; set; }
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
 
@@ -30,6 +34,17 @@ public class DramatisPersonaEntity
 
     /// <summary>See Models.Library.DramatisPersona.RequiresRatingDisadvantage.</summary>
     public bool RequiresRatingDisadvantage { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.RequiresCooldownBeforeResearch.</summary>
+    public bool RequiresCooldownBeforeResearch { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.PairedWithDramatisPersonaId. Null for every persona
+    /// except Ulli/Marquand.</summary>
+    [Indexed]
+    public int? PairedWithDramatisPersonaId { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.IsHiddenFromSearchPicker.</summary>
+    public bool IsHiddenFromSearchPicker { get; set; }
 
     /// <summary>See Models.Library.DramatisPersona.MagicSchoolId. Null for most Dramatis Personae.</summary>
     [Indexed]

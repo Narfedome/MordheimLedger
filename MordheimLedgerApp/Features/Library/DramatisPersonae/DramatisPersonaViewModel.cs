@@ -54,6 +54,12 @@ public partial class DramatisPersonaViewModel : BaseViewModel
     /// où tout le catalogue doit rester visible.</summary>
     public int? AllowedWarbandArchetypeId { get; set; }
 
+    /// <summary>Set by DramatisPersonaPickerService (2026-09-01, délai de re-recherche - voir
+    /// DramatisPersona.RequiresCooldownBeforeResearch) - masque tout personnage actuellement en
+    /// cooldown pour la bande qui cherche (ex. Aenur parti la Fin de Partie précédente). Null/vide en
+    /// usage Codex normal, où tout le catalogue doit rester visible.</summary>
+    public IReadOnlyCollection<int>? ExcludedDramatisPersonaIds { get; set; }
+
     public DramatisPersonaViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs,
         IWarbandArchetypePickerService warbandPicker, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
         ISpecialRulePickerService specialRulePicker, IMagicSchoolPickerService magicSchoolPicker,
@@ -83,8 +89,22 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         IEnumerable<DramatisPersona> filtered = items;
         if (AllowedWarbandArchetypeId is { } warbandId)
             filtered = filtered.Where(p => p.RestrictedToWarbandArchetypeIds.Count == 0 || p.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+        if (ExcludedDramatisPersonaIds is { Count: > 0 } excludedIds)
+            filtered = filtered.Where(p => !excludedIds.Contains(p.Id));
+        // Ulli (2026-09-01, "un seul choix « Ulli & Marquand » dans le picker") - jamais son propre choix
+        // dans le picker de recrutement (IsSelectorMode), Marquand seul représente la paire (voir
+        // DramatisPersona.IsHiddenFromSearchPicker's own doc). Reste visible dans le Codex normal
+        // (IsSelectorMode false) pour la consultation/l'édition.
+        if (IsSelectorMode)
+            filtered = filtered.Where(p => !p.IsHiddenFromSearchPicker);
 
-        DramatisPersonaRows = new ObservableCollection<DramatisPersonaRow>(filtered.Select(i => new DramatisPersonaRow(i)));
+        // Nom de tuile combiné pour la paire, "Marquand Volker & Ulli Leitpold" plutôt que "Marquand
+        // Volker" seul (2026-09-01, user request) - UNIQUEMENT dans le picker de recrutement : Ulli n'y a
+        // pas sa propre tuile (filtrée juste au-dessus), donc celle de Marquand doit se lire comme
+        // représentant les deux. Dans le Codex normal (IsSelectorMode false), les deux gardent leur
+        // propre tuile/nom séparé - voir DramatisPersonaRow.DisplayName's own doc.
+        DramatisPersonaRows = new ObservableCollection<DramatisPersonaRow>(filtered.Select(i => new DramatisPersonaRow(i,
+            IsSelectorMode && i.PairedWithDramatisPersona is { } partner ? $"{i.Name} & {partner.Name}" : null)));
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
@@ -144,8 +164,10 @@ public partial class DramatisPersonaViewModel : BaseViewModel
             Id = s.Id,
             Name = s.Name,
             Description = s.Description,
+            PairDescription = s.PairDescription,
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
+            PairDescriptionKey = s.PairDescriptionKey,
             Source = s.Source,
             ImagePath = s.ImagePath,
             Movement = s.Movement,
@@ -163,12 +185,27 @@ public partial class DramatisPersonaViewModel : BaseViewModel
             RatingBonus = s.RatingBonus,
             IsWanderer = s.IsWanderer,
             RequiresRatingDisadvantage = s.RequiresRatingDisadvantage,
+            RequiresCooldownBeforeResearch = s.RequiresCooldownBeforeResearch,
+            // Bug trouvé en passant (2026-09-01, même classe que AlternativePaymentItemId juste en
+            // dessous) : ces trois champs manquaient déjà depuis l'ajout du pairage Ulli & Marquand -
+            // éditer Marquand ou Ulli via le Codex effaçait silencieusement son lien de paire au premier
+            // Enregistrer.
+            PairedWithDramatisPersonaId = s.PairedWithDramatisPersonaId,
+            PairedWithDramatisPersona = s.PairedWithDramatisPersona,
+            IsHiddenFromSearchPicker = s.IsHiddenFromSearchPicker,
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
             SpecialRules = new List<SpecialRule>(s.SpecialRules),
             StartingEquipmentIds = new List<int>(s.StartingEquipmentIds),
             Skills = new List<Skill>(s.Skills),
             MagicSchoolId = s.MagicSchoolId,
-            MagicSchool = s.MagicSchool
+            MagicSchool = s.MagicSchool,
+            // Bug trouvé en passant (2026-09-01) : manquaient déjà tous les deux depuis l'ajout du
+            // paiement alternatif de Johann - la copie défensive les omettait, donc éditer Johann via le
+            // Codex effaçait silencieusement son AlternativePaymentItemId au premier Enregistrer (même
+            // classe de bug que la copie de Warrior dans WarbandDetailViewModel.EditWarrior, déjà
+            // documentée là-bas).
+            AlternativePaymentItemId = s.AlternativePaymentItemId,
+            AlternativePaymentItem = s.AlternativePaymentItem
         };
 
         var initialEquipment = _equipmentItems.Where(e => s.StartingEquipmentIds.Contains(e.Id)).ToList();
@@ -192,9 +229,16 @@ public partial class DramatisPersonaViewModel : BaseViewModel
     }
 
     /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
-    /// WarbandArchetypeViewModel.ShowDetails.</summary>
+    /// WarbandArchetypeViewModel.ShowDetails. Résumé de paire seulement en mode picker (IsSelectorMode -
+    /// 2026-09-01, user request : le Codex normal doit montrer directement la fiche du personnage tapé,
+    /// le picker de recrutement montre le résumé "Description + règles communes + 2 profils" à la place,
+    /// puisque c'est là que la paire n'a qu'une seule tuile combinée - voir DramatisPersonaRow.
+    /// DisplayName).</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private Task ShowDetails(DramatisPersonaRow row) => _detailDialogs.ShowDramatisPersonaDetailDialogAsync(row.Item);
+    private Task ShowDetails(DramatisPersonaRow row) =>
+        IsSelectorMode && row.Item.PairedWithDramatisPersona is not null
+            ? _detailDialogs.ShowDramatisPersonaPairDetailDialogAsync(row.Item)
+            : _detailDialogs.ShowDramatisPersonaDetailDialogAsync(row.Item);
 
     [RelayCommand]
     private async Task ConfirmSelection()

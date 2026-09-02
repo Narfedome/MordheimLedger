@@ -224,7 +224,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
             DramatisPersonae = new ObservableCollection<WarriorRow>(alive.Where(r => r.Warrior.IsDramatisPersona));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
             RetiredWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsRetired));
-            Rating = alive.Sum(r => WarbandRatingRules.WarriorContribution(
+            // Exclut du calcul tout guerrier basculé "hostile" via "Une Poignée d'Or" (2026-09-01, Ulli &
+            // Marquand corrompus par l'adversaire pour cette bataille - voir Warrior.IsHostileThisBattle) :
+            // il reste dans le roster (pas supprimé), juste sans contribution à la Valeur tant que le
+            // flag est actif.
+            Rating = alive.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
                 r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
 
             var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);
@@ -284,7 +288,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
                 .Concat(BuildRuleHatredChips(HatredSourceRules(warrior, personaMergedRules)))
                 .Concat(BuildSkillHatredChips(warrior.Skills.Select(s => s.Item)));
             var personaMagicSchools = persona?.MagicSchool is { } personaSchool ? new List<MagicSchool> { personaSchool } : null;
-            return new WarriorRow(warrior, string.Empty, BuildSpecialRuleChips(personaMergedRules), personaMagicSchools, personaHatredChips);
+            return new WarriorRow(warrior, string.Empty, BuildSpecialRuleChips(personaMergedRules), personaMagicSchools, personaHatredChips, persona);
         }
 
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId);
@@ -391,6 +395,24 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ShowHistoryTab() => ShowHistory = true;
 
+    /// <summary>"Rendre hostile" - Une Poignée d'Or (2026-09-01, Ulli &amp; Marquand uniquement, see
+    /// WarriorRow.CanToggleHostile). Purely a manual player-facing bookkeeping toggle: the app can't
+    /// detect a mid-battle secret bribe itself (see the SpecialRule's own description), so the player
+    /// flips this once an enemy successfully corrupts the pair. Persists immediately (same
+    /// no-Enregistrer-button convention as ShowInventory) and recomputes Rating right away, excluding
+    /// their contribution while the flag is set (see LoadAsync).</summary>
+    [RelayCommand]
+    private async Task ToggleHostile(WarriorRow row)
+    {
+        if (Warband is null) return;
+
+        row.IsHostileThisBattle = !row.IsHostileThisBattle;
+        row.Warrior.IsHostileThisBattle = row.IsHostileThisBattle;
+        await _warbandService.SaveWarriorAsync(row.Warrior);
+        Rating = AllActiveWarriorRows.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
+            r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
+    }
+
     [RelayCommand]
     private async Task EditWarrior(WarriorRow row)
     {
@@ -404,7 +426,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // tous les Starting*/IncreasedCharacteristics/SickGamesRemaining/Hatreds manquaient déjà tous,
         // silencieusement effacés à chaque édition - CanUseEquipment=false est précisément ce qui masque
         // le bouton "+" équipement d'un Franc-Tireur, donc ce trou touchait directement la nouvelle
-        // fonctionnalité, pas seulement un bug préexistant sans rapport).
+        // fonctionnalité, pas seulement un bug préexistant sans rapport). Même classe de bug trouvée en
+        // passant le 2026-09-01 en câblant IsHostileThisBattle (Une Poignée d'Or) :
+        // DramatisPersonaId/DramatisPersonaRatingBonus manquaient déjà tous les deux - éditer un guerrier
+        // recruté depuis le catalogue Dramatis Personae via ce bouton Éditer effaçait silencieusement son
+        // lien vers son personnage catalogue au premier Enregistrer. Corrigé au passage.
         var copy = new Warrior
         {
             Id = w.Id,
@@ -413,6 +439,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
             HiredSwordId = w.HiredSwordId,
             HiredSwordBaseRating = w.HiredSwordBaseRating,
             HiredSwordUpkeepPrepaid = w.HiredSwordUpkeepPrepaid,
+            DramatisPersonaId = w.DramatisPersonaId,
+            DramatisPersonaRatingBonus = w.DramatisPersonaRatingBonus,
+            IsHostileThisBattle = w.IsHostileThisBattle,
             Name = w.Name,
             IsHero = w.IsHero,
             Cost = w.Cost,

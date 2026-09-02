@@ -57,6 +57,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// alternative-payment option (e.g. Johann/Crimson Shade) can even be offered.</summary>
     private readonly IReadOnlyCollection<int> _ownedEquipmentItemIds;
 
+    /// <summary>DramatisPersona ids currently on cooldown for this warband (2026-09-01, délai de
+    /// re-recherche - voir DramatisPersona.RequiresCooldownBeforeResearch) - passed to
+    /// IDramatisPersonaPickerService.PickDramatisPersonaAsync so the "Personnage spécial" search picker
+    /// never even shows them as an option.</summary>
+    private readonly IReadOnlyCollection<int> _cooldownDramatisPersonaIds;
+
     /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
     /// Eshin") - needed alongside _warbandArchetypeId because a Groupe B "conditional on warband type"
     /// Exploration branch (Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome) matches by name,
@@ -219,12 +225,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // décide en connaissant sa trésorerie finale, voir HiredSwordTreasuryAfter), entièrement
             // absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance).
             if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
-            // Dramatis Personae : solde des personnages à frais en or déjà engagés (Johann/Veskit/
-            // Marianna) - voir EndOfGameDialogViewModel.DramatisPersonae.cs. Aucun recrutement combiné
-            // ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis Persona passe déjà par la
-            // recherche "Personnage spécial", RareItems/RareItemPurchase ci-dessus) - entièrement absente
-            // si aucun personnage à frais en or n'est concerné.
-            if (HasDramatisPersonaeUpkeep) steps.Add(new(StepKind.DramatisPersonae));
+            // Dramatis Personae : solde des personnages à frais en or/pierre magique déjà engagés
+            // (Johann/Veskit/Marianna/Nicodemus) OU la case "Une Poignée d'Or" pour une bande qui n'a
+            // pas déjà Ulli & Marquand - voir EndOfGameDialogViewModel.DramatisPersonae.cs. Aucun
+            // recrutement combiné ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis
+            // Persona passe déjà par la recherche "Personnage spécial", RareItems/RareItemPurchase
+            // ci-dessus) - entièrement absente si ni l'un ni l'autre n'est concerné.
+            if (HasDramatisPersonaeUpkeep || ShowPairCorruptionOption) steps.Add(new(StepKind.DramatisPersonae));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -345,7 +352,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyCollection<int> ownedEquipmentItemIds, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyCollection<int> ownedEquipmentItemIds, IReadOnlyCollection<int> cooldownDramatisPersonaIds, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -367,6 +374,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _hiredSwordCatalog = hiredSwordCatalog;
         _dramatisPersonaCatalog = dramatisPersonaCatalog;
         _ownedEquipmentItemIds = ownedEquipmentItemIds;
+        _cooldownDramatisPersonaIds = cooldownDramatisPersonaIds;
 
         ResultOptions.Add(Loc["EndOfGameResultVictory"]);
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
@@ -383,6 +391,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment)));
         BuildHiredSwordUpkeepEntries();
         BuildDramatisPersonaUpkeepEntries();
+        BuildPairCorruptionOption();
 
         // Une entrée par Héros (jamais un Homme de main - "Whenever a Hero wants to buy a rare item") -
         // construites une fois ici comme WarriorRows, celles des Héros mis Hors de combat restent dans la

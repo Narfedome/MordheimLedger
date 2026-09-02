@@ -678,6 +678,15 @@
   <data name="WarriorsHatredChipFormat" xml:space="preserve">
     <value>Hatred: {0}</value>
   </data>
+  <data name="WarriorsPairHireFeeFormat" xml:space="preserve">
+    <value>Fee: {0} gc</value>
+  </data>
+  <data name="WarriorsHostileToggleLabel" xml:space="preserve">
+    <value>Mark hostile</value>
+  </data>
+  <data name="WarriorsHostileActiveLabel" xml:space="preserve">
+    <value>Hostile</value>
+  </data>
   <data name="WarriorsHatredHeading" xml:space="preserve">
     <value>Hatred</value>
   </data>
@@ -769,6 +778,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="DramatisPersonaIsWandererPh" xml:space="preserve">
     <value>Wanderer (one battle only)</value>
+  </data>
+  <data name="DramatisPersonaPairProfilesPh" xml:space="preserve">
+    <value>Profiles</value>
   </data>
   <data name="DramatisPersonaRequiresRatingDisadvantagePh" xml:space="preserve">
     <value>Only aids if the enemy warband has a higher Rating (Rating-gap table)</value>
@@ -988,6 +1000,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Roll required before continuing.</value>
+  </data>
+  <data name="EndOfGameAmountRequired" xml:space="preserve">
+    <value>Amount required before continuing.</value>
+  </data>
+  <data name="EndOfGamePairCorruptionOptionFormat" xml:space="preserve">
+    <value>Corruption of {0} (A Fistful of Crowns)</value>
   </data>
   <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
     <value>Insufficient treasury to equip this prisoner - choose another group or "Do not recruit".</value>
@@ -1307,6 +1325,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
     <value>Amount (gc)</value>
   </data>
+  <data name="EndOfGamePairCorruptionAmountPh" xml:space="preserve">
+    <value>Amount paid (gc)</value>
+  </data>
   <data name="EndOfGameSoldToPitsHeading" xml:space="preserve">
     <value>Gladiator fight</value>
   </data>
@@ -1321,6 +1342,30 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>New roll</value>
+  </data>
+  <data name="EndOfGameWheresMoneyEquipmentChoice" xml:space="preserve">
+    <value>Hand over equipment</value>
+  </data>
+  <data name="EndOfGameWheresMoneyDuelChoice" xml:space="preserve">
+    <value>Duel with the leader</value>
+  </data>
+  <data name="EndOfGamePairDuelRollLabel" xml:space="preserve">
+    <value>Duel roll</value>
+  </data>
+  <data name="EndOfGameWheresMoneyHeading" xml:space="preserve">
+    <value>Where's the Money?</value>
+  </data>
+  <data name="EndOfGameWheresMoneyHint" xml:space="preserve">
+    <value>The warband can't pay the bribe - equipment seized or an immediate duel with the leader.</value>
+  </data>
+  <data name="EndOfGameWheresMoneyEquipmentHint" xml:space="preserve">
+    <value>Once this End of Game is saved, manually remove equipment of equal value from the Inventory.</value>
+  </data>
+  <data name="EndOfGamePairDuelWonLabel" xml:space="preserve">
+    <value>The leader won the duel</value>
+  </data>
+  <data name="EndOfGamePairDuelRerollHeading" xml:space="preserve">
+    <value>Defeat: roll on the Serious Injury table</value>
   </data>
   <data name="EndOfGameCaptivesHeading" xml:space="preserve">
     <value>Enemy prisoners</value>
@@ -1508,6 +1553,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="HistoryDramatisPersonaRecruitedGoldSentence" xml:space="preserve">
     <value>{0} tracks down {1}, who joins the warband for {2} gc.</value>
   </data>
+  <data name="HistoryDramatisPersonaPairRecruitedGoldSentence" xml:space="preserve">
+    <value>{0} tracks down {1} and {2}, who join the warband for {3} gc.</value>
+  </data>
   <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
     <value>{0} tracks down {1}, who joins the warband in exchange for {2}.</value>
   </data>
@@ -1522,6 +1570,15 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
     <value>{0} leaves the warband (Wanderer) - a new search will be needed before the next battle.</value>
+  </data>
+  <data name="HistoryDramatisPersonaCorruptedSentence" xml:space="preserve">
+    <value>{0} fought for the enemy this battle (bribed via A Fistful of Crowns) - a new search will be needed before the next battle.</value>
+  </data>
+  <data name="HistoryPairCorruptionPaidSentence" xml:space="preserve">
+    <value>The warband bribed Ulli &amp; Marquand for {0} gc (A Fistful of Crowns).</value>
+  </data>
+  <data name="HistoryPairDuelWonSentence" xml:space="preserve">
+    <value>{0} fought Ulli &amp; Marquand in a duel and survived (Where's the Money?).</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

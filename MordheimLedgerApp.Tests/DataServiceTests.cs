@@ -224,6 +224,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Null(aenur.Upkeep);
         Assert.Equal(100, aenur.RatingBonus);
         Assert.True(aenur.IsWanderer);
+        Assert.True(aenur.RequiresCooldownBeforeResearch); // "can't be sought again until the warband has fought at least one battle without them"
         Assert.Single(aenur.SpecialRules, r => r.Name == "Invincible Swordsman");
         Assert.Equal(7, aenur.Skills.Count);
         Assert.Contains(aenur.Skills, s => s.Name == "Expert Swordsman");
@@ -259,6 +260,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal("Prayers of Sigmar", bertha.MagicSchool?.Name);
         Assert.True(bertha.RequiresRatingDisadvantage);
         Assert.True(bertha.IsWanderer); // "A request for Bertha... must be made for each battle" - same one-battle-only shape.
+        Assert.False(bertha.RequiresCooldownBeforeResearch); // no such delay for her, unlike Aenur/Ulli & Marquand - can be re-sought the very next battle.
 
         var nicodemus = Assert.Single(personae, p => p.Name.StartsWith("Nicodemus"));
         Assert.Equal(DramatisPersonaHireFeeKind.Wyrdstone, nicodemus.FeeKind);
@@ -316,9 +318,47 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal(DramatisPersonaHireFeeKind.Pair, ulli.FeeKind);
         Assert.True(marquand.IsWanderer);
         Assert.True(ulli.IsWanderer);
+        Assert.True(marquand.RequiresCooldownBeforeResearch);
+        Assert.True(ulli.RequiresCooldownBeforeResearch);
         Assert.Equal(30, marquand.RatingBonus);
         Assert.Equal(30, ulli.RatingBonus);
         Assert.Equal(60, marquand.RatingBonus + ulli.RatingBonus); // book's combined "+60" for the pair.
+
+        // "vous devez les recruter tous les deux pour une bataille" (2026-09-01) - Marquand alone
+        // represents the pair in the recruitment picker (Ulli is IsHiddenFromSearchPicker), both point at
+        // each other via PairedWithDramatisPersonaId/PairedWithDramatisPersona (self-referencing
+        // navigation, resolved by LibraryService.GetDramatisPersonaeAsync after every model exists).
+        Assert.False(marquand.IsHiddenFromSearchPicker);
+        Assert.True(ulli.IsHiddenFromSearchPicker);
+        Assert.Equal(ulli.Id, marquand.PairedWithDramatisPersonaId);
+        Assert.Equal(marquand.Id, ulli.PairedWithDramatisPersonaId);
+        Assert.Equal("Ulli Leitpold", marquand.PairedWithDramatisPersona?.Name);
+        Assert.Equal("Marquand Volker", ulli.PairedWithDramatisPersona?.Name);
+        // "30 Couronnes d'Or pour les deux" - un seul HireCost partagé (jamais 60), déjà correct côté
+        // catalogue (les deux valent 30 chacun, mais seul celui de Marquand est réellement prélevé - voir
+        // WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync, hors périmètre des tests Core).
+        Assert.Equal(30, marquand.HireCost);
+        // "Toutes les bandes peuvent recruter Ulli et Marquand, à l'exception des Sœurs de Sigmar et des
+        // Répurgateurs" - déjà correct dans le catalogue (13 bandes sur 15, exclut seulement ces deux).
+        Assert.Equal(13, marquand.RestrictedToWarbandArchetypeIds.Count);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "The Sisters of Sigmar").Id, marquand.RestrictedToWarbandArchetypeIds);
+        Assert.DoesNotContain(warbands.Single(w => w.Name == "Witch Hunters").Id, marquand.RestrictedToWarbandArchetypeIds);
+
+        // "A Fistful of Crowns" extracted from Marquand/Ulli's free-text Description into its own
+        // SpecialRule (2026-09-01, same precedent as Marianna's above) - shows as a tappable chip on the
+        // roster card instead of being buried in a wall of biography prose. Both entries carry their own
+        // copy, same as "Inseparable".
+        Assert.Equal(new[] { "A Fistful of Crowns", "Inseparable" }, marquand.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+        Assert.Equal(new[] { "A Fistful of Crowns", "Inseparable" }, ulli.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        // Description individuelle vs récit partagé (2026-09-01, user-supplied source text) : chacun a sa
+        // propre biographie personnelle (Description), distincte du récit du duo (PairDescription,
+        // uniquement sur Marquand - voir DramatisPersonaPairDetailDialogViewModel).
+        Assert.Contains("mercenary and assassin", marquand.Description);
+        Assert.Contains("massive warhammer", ulli.Description);
+        Assert.NotNull(marquand.PairDescription);
+        Assert.Contains("Marquand Volker and Ulli Leitpold", marquand.PairDescription);
+        Assert.Null(ulli.PairDescription);
 
         var veskit = Assert.Single(personae, p => p.Name.StartsWith("Veskit"));
         Assert.Single(veskit.RestrictedToWarbandArchetypeIds, warbands.Single(w => w.Name == "Skaven of Clan Eshin").Id);

@@ -17,7 +17,14 @@
             <Label Grid.Column="0" Text="{Binding IconGlyph, Source={x:Reference root}}"
                    FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
                    FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-            <Label Grid.Column="1" Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
+            <Label Grid.Column="1" FontSize="11" VerticalOptions="Center">
+                <Label.Text>
+                    <MultiBinding Converter="{StaticResource FirstNonEmptyMultiConverter}">
+                        <Binding Path="NameOverride" Source="{x:Reference root}"/>
+                        <Binding Path="Name"/>
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
             <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                           Icon="{x:Static icons:SolidFont.Xmark}"
                                           IconSize="10" Padding="0,0,-8,0"

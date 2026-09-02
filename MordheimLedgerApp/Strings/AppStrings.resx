@@ -678,6 +678,15 @@
   <data name="WarriorsHatredChipFormat" xml:space="preserve">
     <value>Haine : {0}</value>
   </data>
+  <data name="WarriorsPairHireFeeFormat" xml:space="preserve">
+    <value>Frais : {0} CO</value>
+  </data>
+  <data name="WarriorsHostileToggleLabel" xml:space="preserve">
+    <value>Rendre hostile</value>
+  </data>
+  <data name="WarriorsHostileActiveLabel" xml:space="preserve">
+    <value>Hostile</value>
+  </data>
   <data name="WarriorsHatredHeading" xml:space="preserve">
     <value>Haine</value>
   </data>
@@ -769,6 +778,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="DramatisPersonaIsWandererPh" xml:space="preserve">
     <value>Vagabond (une seule bataille)</value>
+  </data>
+  <data name="DramatisPersonaPairProfilesPh" xml:space="preserve">
+    <value>Profils</value>
   </data>
   <data name="DramatisPersonaRequiresRatingDisadvantagePh" xml:space="preserve">
     <value>N'aide que si la bande adverse a une Valeur supérieure (barème écart de Valeur)</value>
@@ -988,6 +1000,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Jet requis avant de continuer.</value>
+  </data>
+  <data name="EndOfGameAmountRequired" xml:space="preserve">
+    <value>Montant requis avant de continuer.</value>
+  </data>
+  <data name="EndOfGamePairCorruptionOptionFormat" xml:space="preserve">
+    <value>Corruption de {0} (Une Poignée d'Or)</value>
   </data>
   <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
     <value>Trésorerie insuffisante pour équiper ce prisonnier - choisis un autre groupe ou "Ne pas recruter".</value>
@@ -1307,6 +1325,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
     <value>Montant (CO)</value>
   </data>
+  <data name="EndOfGamePairCorruptionAmountPh" xml:space="preserve">
+    <value>Montant payé (CO)</value>
+  </data>
   <data name="EndOfGameSoldToPitsHeading" xml:space="preserve">
     <value>Combat de gladiateur</value>
   </data>
@@ -1321,6 +1342,30 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>Nouveau jet</value>
+  </data>
+  <data name="EndOfGameWheresMoneyEquipmentChoice" xml:space="preserve">
+    <value>Céder du matériel</value>
+  </data>
+  <data name="EndOfGameWheresMoneyDuelChoice" xml:space="preserve">
+    <value>Duel avec le meneur</value>
+  </data>
+  <data name="EndOfGamePairDuelRollLabel" xml:space="preserve">
+    <value>Jet du duel</value>
+  </data>
+  <data name="EndOfGameWheresMoneyHeading" xml:space="preserve">
+    <value>Où est l'Argent ?</value>
+  </data>
+  <data name="EndOfGameWheresMoneyHint" xml:space="preserve">
+    <value>La bande ne peut pas payer la corruption - matériel cédé ou duel immédiat avec le meneur.</value>
+  </data>
+  <data name="EndOfGameWheresMoneyEquipmentHint" xml:space="preserve">
+    <value>Une fois cette Fin de Partie enregistrée, retirez manuellement du matériel de valeur équivalente depuis l'Inventaire.</value>
+  </data>
+  <data name="EndOfGamePairDuelWonLabel" xml:space="preserve">
+    <value>Le meneur a gagné le duel</value>
+  </data>
+  <data name="EndOfGamePairDuelRerollHeading" xml:space="preserve">
+    <value>Défaite : jet sur la table des Blessures Graves</value>
   </data>
   <data name="EndOfGameCaptivesHeading" xml:space="preserve">
     <value>Prisonniers ennemis</value>
@@ -1508,6 +1553,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="HistoryDramatisPersonaRecruitedGoldSentence" xml:space="preserve">
     <value>{0} retrouve {1}, qui rejoint la bande contre {2} CO.</value>
   </data>
+  <data name="HistoryDramatisPersonaPairRecruitedGoldSentence" xml:space="preserve">
+    <value>{0} retrouve {1} et {2}, qui rejoignent la bande contre {3} CO.</value>
+  </data>
   <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
     <value>{0} retrouve {1}, qui rejoint la bande contre {2}.</value>
   </data>
@@ -1522,6 +1570,15 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
     <value>{0} quitte la bande (Vagabond) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>
+  </data>
+  <data name="HistoryDramatisPersonaCorruptedSentence" xml:space="preserve">
+    <value>{0} a combattu pour l'adversaire cette bataille (corrompu·e via Une Poignée d'Or) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>
+  </data>
+  <data name="HistoryPairCorruptionPaidSentence" xml:space="preserve">
+    <value>La bande a corrompu Ulli &amp; Marquand pour {0} CO (Une Poignée d'Or).</value>
+  </data>
+  <data name="HistoryPairDuelWonSentence" xml:space="preserve">
+    <value>{0} a affronté Ulli &amp; Marquand en duel et a survécu (Où est l'Argent ?).</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>

@@ -44,6 +44,11 @@ public interface IWarbandService
     /// deferred, see Models.Warrior.DramatisPersonaId's own doc.</summary>
     Task<Warrior> RecruitDramatisPersonaAsync(int warbandId, DramatisPersona dramatisPersona, string name, IReadOnlyList<EquipmentItem> startingEquipment, IReadOnlyList<Skill> startingSkills);
 
+    /// <summary>See Models.Library.DramatisPersona.RequiresCooldownBeforeResearch's own doc.</summary>
+    Task<List<int>> GetDramatisPersonaCooldownIdsAsync(int warbandId);
+    Task AddDramatisPersonaCooldownAsync(int warbandId, int dramatisPersonaId);
+    Task ClearAllDramatisPersonaCooldownsAsync(int warbandId);
+
     /// <summary>Inserts an already fully-built Warrior as-is (no WarriorArchetype involved) - for the
     /// Henchman-to-Hero promotion (Advance roll 10-12), whose new Hero is cloned from the live group's
     /// own stats/XP (see EntityMapping.CloneAsPromotedHero) rather than seeded from a catalog template.</summary>

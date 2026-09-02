@@ -10,6 +10,14 @@ public partial class DramatisPersonaRow : ObservableObject
 {
     public DramatisPersona Item { get; }
 
+    /// <summary>What the tile's name label actually binds to - Item.Name by default, but overridden by
+    /// DramatisPersonaViewModel.LoadData to the combined "Marquand Volker &amp; Ulli Leitpold" in the
+    /// "Personnage spécial" recruitment picker specifically (2026-09-01, user request: the picker's single
+    /// combined tile - Ulli hidden there, see DramatisPersona.IsHiddenFromSearchPicker - must read as the
+    /// pair, unlike the normal Codex grid where both keep their own separate tile/name). Item.Name stays
+    /// untouched either way - this is purely a tile display concern.</summary>
+    public string DisplayName { get; }
+
     [ObservableProperty]
     private bool isSelected;
 
@@ -33,5 +41,9 @@ public partial class DramatisPersonaRow : ObservableObject
         }
     }
 
-    public DramatisPersonaRow(DramatisPersona item) => Item = item;
+    public DramatisPersonaRow(DramatisPersona item, string? displayName = null)
+    {
+        Item = item;
+        DisplayName = displayName ?? item.Name;
+    }
 }

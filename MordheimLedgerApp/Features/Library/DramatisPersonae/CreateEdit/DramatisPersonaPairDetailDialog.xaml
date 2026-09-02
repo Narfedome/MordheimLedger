@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit.DramatisPersonaPairDetailDialog"
+               x:DataType="local:DramatisPersonaPairDetailDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <dialogs:StableHeightScrollView>
+        <VerticalStackLayout Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding Item.PairDescription}" TextColor="{DynamicResource AppText}"/>
+            </VerticalStackLayout>
+
+            <!-- Profils : un chip par moitié de la paire (Item puis son partenaire) - tap ouvre le vrai
+                 profil complet (DramatisPersonaDetailDialog) de ce personnage précis, jamais celui-ci à
+                 nouveau (voir la doc de classe du ViewModel). -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="{loc:Loc DramatisPersonaPairProfilesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Profiles}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="library:DramatisPersona">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{x:Static icons:SolidFont.UserTie}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:DramatisPersonaPairDetailDialogViewModel}}, Path=ShowProfileDetailCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <!-- Règles communes aux deux moitiés (les deux fiches portent des copies identiques par
+                 convention, voir DramatisPersonae.json) - Item.SpecialRules suffit, pas besoin de fusionner
+                 avec celles du partenaire. -->
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding Item.SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+    </Border>
+</dialogs:DialogContent>

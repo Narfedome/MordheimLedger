@@ -20,7 +20,10 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// recruited (IsPurchased/IsRecruited) are committed at Save - see WarbandDetailViewModel.EndOfGame.
 /// ApplyRareItemSearchAsync. Henchmen never search ("Whenever a HERO wants to buy..."/"Heroes looking
 /// for...") - entries are built once per Hero in the main constructor, this file only orchestrates both
-/// steps.</summary>
+/// steps. Dramatis Personae never search either (2026-09-03, user feedback) even though Warrior.IsHero
+/// is true for them (same Serious Injury/XP flow as a real Hero) - excluded explicitly at the
+/// RareItemSearchEntries construction site and in HasEligibleHeroesForRareItems below, same limitation
+/// already fixed for SurvivingHeroCount (EndOfGameDialogViewModel.Exploration.cs).</summary>
 public partial class EndOfGameDialogViewModel
 {
     public ObservableCollection<RareItemSearchEntry> RareItemSearchEntries { get; }
@@ -28,8 +31,12 @@ public partial class EndOfGameDialogViewModel
     /// <summary>Drives whether the search step exists at all (Steps) - "Warriors taken out of action
     /// during the last battle may not look for rare items", so a Hero currently marked Hors de combat
     /// doesn't count even though their RareItemSearchEntries row still technically exists (hidden, not
-    /// removed - see the constructor).</summary>
-    public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && !r.IsOutOfAction);
+    /// removed - see the constructor). Dramatis Personae excluded too (2026-09-03, user feedback - "les
+    /// dramatis personae ne peuvent pas trouver des objets rares/personnages spéciaux, c'est que les
+    /// héros") - same exclusion as RareItemSearchEntries itself (main constructor); kept as a separate
+    /// check on WarriorRows rather than derived from RareItemSearchEntries so both conditions stay
+    /// obviously in sync.</summary>
+    public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona);
 
     /// <summary>Gromril/Ithilmar - the only two materials with a Rarity (see SpecialRule.Rarity), which
     /// is exactly what makes a common melee weapon forged from them searchable here (see
@@ -156,11 +163,12 @@ public partial class EndOfGameDialogViewModel
     [RelayCommand]
     private void AutoRollRarePrice(RareItemSearchEntry entry) => entry.PriceRoll = Random.Shared.Next(1, 7).ToString();
 
-    /// <summary>Same "gold already known this sequence" spirit as HiredSwordTreasuryAfter (Exploration
-    /// gold), plus the Wyrdstone Sale step's proceeds (WyrdstoneSaleValue), since that step happens right
-    /// before this one in the wizard order and its gold is just as real by the time the player decides
-    /// what to buy. Purely a live preview - nothing is written to the real Warband until
-    /// WarbandDetailViewModel.EndOfGame saves.</summary>
+    /// <summary>Base commune de trésorerie pour TOUT le wizard (pas seulement cette étape, malgré son nom
+    /// - voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining, seul appelant en dehors de ce fichier
+    /// depuis le 2026-09-03) : la trésorerie de la bande avant cette Fin de Partie, plus ce que CETTE
+    /// partie a rapporté (or d'Exploration + Vente de pierres magiques, WyrdstoneSaleValue - cette étape
+    /// précède celle-ci dans l'ordre du wizard, son gain est donc déjà connu). Purely a live preview -
+    /// nothing is written to the real Warband until WarbandDetailViewModel.EndOfGame saves.</summary>
     private int RareItemBaselineTreasury => _currentTreasury
         + (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
         + WyrdstoneSaleValue;
@@ -174,7 +182,12 @@ public partial class EndOfGameDialogViewModel
     public int RareItemPurchaseTotalCost => RareItemsWithResults.Where(e => e.WantsToBuy).Sum(e => e.EffectiveCost ?? 0)
         + RareItemsWithResults.Where(e => e.IsRecruited).Sum(e => e.EffectiveHireCostForTreasury);
 
-    public int RareItemPurchaseRemainingTreasury => RareItemBaselineTreasury - RareItemPurchaseTotalCost;
+    /// <summary>Alias de EndOfGameTreasuryRemaining (2026-09-03, retour utilisateur - "on n'utilise pas le
+    /// même solde de trésorerie à la corruption et à l'achat d'objet rare... un seul solde qu'on ajuste au
+    /// fur et à mesure des étapes") : cette étape n'a plus SA PROPRE version isolée du solde restant,
+    /// juste un nom conservé pour l'affichage/la compatibilité de cette page (RareItemPurchaseRemainingTreasuryDisplay/
+    /// IsRareItemPurchaseBlocked en aval).</summary>
+    public int RareItemPurchaseRemainingTreasury => EndOfGameTreasuryRemaining;
 
     /// <summary>Formatted display text - computed here rather than nesting {loc:Loc} inside a
     /// StringFormat attribute (not valid XAML, see WyrdstoneSaleValueDisplay).</summary>

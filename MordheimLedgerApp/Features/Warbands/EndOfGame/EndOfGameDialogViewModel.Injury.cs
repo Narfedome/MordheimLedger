@@ -48,18 +48,6 @@ public partial class EndOfGameDialogViewModel
 
             if (row.ShowCapturedChoice && row.IsRansomed)
                 valid &= CheckRoll(!row.HasValidRansomAmount, () => row.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
-
-            if (row.ShowSoldToThePits && !row.WonPitFight)
-            {
-                foreach (var reroll in row.SoldToPitsRerollRoll)
-                {
-                    valid &= CheckRoll(string.IsNullOrWhiteSpace(reroll.InjuryResultText), () => reroll.RollError = Loc["EndOfGameRollRequired"]);
-                    if (reroll.ShowDeepWoundSubRoll)
-                        valid &= CheckRoll(!reroll.HasValidDeepWoundSubRoll, () => reroll.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
-                    if (reroll.ShowCapturedChoice && reroll.IsRansomed)
-                        valid &= CheckRoll(!reroll.HasValidRansomAmount, () => reroll.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
-                }
-            }
         }
         else
         {
@@ -67,6 +55,26 @@ public partial class EndOfGameDialogViewModel
                 valid &= CheckRoll(string.IsNullOrWhiteSpace(figure.InjuryResultText), () => figure.RollError = Loc["EndOfGameRollRequired"]);
         }
 
+        return valid;
+    }
+
+    /// <summary>Étape "Vendu aux Fosses", extraite de la carte Blessure le 2026-09-04 (retour utilisateur -
+    /// voir IsPitFightStep) - déplacée telle quelle depuis ValidateInjuryStep, aucun changement de
+    /// comportement. Rien à valider en cas de victoire (WonPitFight) ; en cas de défaite, le sous-jet de
+    /// relance (SoldToPitsRerollRoll) doit être complet.</summary>
+    private bool ValidatePitFightStep(WarriorOutcomeRow row)
+    {
+        if (row.WonPitFight) return true;
+
+        var valid = true;
+        foreach (var reroll in row.SoldToPitsRerollRoll)
+        {
+            valid &= CheckRoll(string.IsNullOrWhiteSpace(reroll.InjuryResultText), () => reroll.RollError = Loc["EndOfGameRollRequired"]);
+            if (reroll.ShowDeepWoundSubRoll)
+                valid &= CheckRoll(!reroll.HasValidDeepWoundSubRoll, () => reroll.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
+            if (reroll.ShowCapturedChoice && reroll.IsRansomed)
+                valid &= CheckRoll(!reroll.HasValidRansomAmount, () => reroll.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+        }
         return valid;
     }
 
@@ -182,4 +190,16 @@ public partial class EndOfGameDialogViewModel
     // un vrai EquipmentItem, pas un WarriorEquipment (ce Gladiateur n'est jamais recruté).
     [RelayCommand]
     private Task ShowPitFighterEquipmentDetail(EquipmentItem item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item);
+
+    /// <summary>Règles spéciales de combat du "vrai" guerrier côté "Ce guerrier"/"Le meneur" (WarriorOutcomeRow.
+    /// SpecialRules, déjà fusionné - voir sa doc) - 2026-09-04, retour utilisateur ("il faut rajouter dans
+    /// les 2 cas les règles spéciales du combat"). Partagé entre Vendu aux Fosses (Injury) et Duel avec le
+    /// meneur (PairDuel) : même type de chip des deux côtés, pas de raison de dupliquer la commande.</summary>
+    [RelayCommand]
+    private Task ShowWarriorSpecialRuleDetail(SpecialRuleChip item) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(item.Item);
+
+    /// <summary>Règles spéciales du Gladiateur (HiredSword.SpecialRules, déjà résolues côté catalogue) -
+    /// même contexte que ShowWarriorSpecialRuleDetail ci-dessus, côté adversaire de Vendu aux Fosses.</summary>
+    [RelayCommand]
+    private Task ShowPitFighterSpecialRuleDetail(SpecialRule item) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(item);
 }

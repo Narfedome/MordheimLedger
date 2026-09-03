@@ -350,13 +350,14 @@ public partial class EndOfGameDialogViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEquippedHenchmanTreasury))]
-    [NotifyPropertyChangedFor(nameof(EquippedHenchmanTreasuryAfter))]
-    [NotifyPropertyChangedFor(nameof(CanAffordEquippedHenchman))]
     private EquippedHenchmanGroupOption? selectedEquippedHenchmanGroupOption;
 
     partial void OnSelectedEquippedHenchmanGroupOptionChanged(EquippedHenchmanGroupOption? value)
     {
         if (value?.Group is not null) EquippedHenchmanError = null;
+        // Son coût d'équipement dispute désormais la même trésorerie que le reste du wizard (2026-09-03,
+        // voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
+        NotifyTreasuryChanged();
     }
 
     [ObservableProperty]
@@ -366,18 +367,20 @@ public partial class EndOfGameDialogViewModel
     /// d'afficher un calcul de trésorerie pour une option qui n'en change rien.</summary>
     public bool ShowEquippedHenchmanTreasury => SelectedEquippedHenchmanGroupOption?.Group is not null;
 
-    /// <summary>Trésorerie actuelle (au moment d'ouvrir ce wizard, voir _currentTreasury) + l'or de CETTE
-    /// branche (le même 2D6 que ExplorationGoldAmount, l'escorte hors de la ville) - le coût de
-    /// l'équipement du groupe choisi. Peut afficher un total négatif (voir CanAffordEquippedHenchman) :
-    /// c'est justement le signal qui bloque la progression.</summary>
-    public int EquippedHenchmanTreasuryAfter => _currentTreasury
-        + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
-        - (SelectedEquippedHenchmanGroupOption?.EquipmentCost ?? 0);
+    /// <summary>Alias de EndOfGameTreasuryRemaining (2026-09-03, retour utilisateur - "un seul solde de
+    /// trésorerie qu'on ajuste au fur et à mesure des étapes") : le coût de l'équipement du groupe choisi
+    /// est déjà retranché de ce solde unique, cette propriété ne fait plus que l'exposer sous son ancien
+    /// nom pour l'affichage existant (EndOfGameEquippedHenchmanTreasuryAfterLabel). Peut afficher un total
+    /// négatif (voir CanAffordEquippedHenchman) : c'est justement le signal qui bloque la progression.</summary>
+    public int EquippedHenchmanTreasuryAfter => EndOfGameTreasuryRemaining;
 
-    public bool CanAffordEquippedHenchman => SelectedEquippedHenchmanGroupOption?.Group is null
-        || RecruitmentRules.CanAffordEquippedHenchman(
-            _currentTreasury + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0),
-            SelectedEquippedHenchmanGroupOption.EquipmentCost);
+    /// <summary>Le coût de SelectedEquippedHenchmanGroupOption est déjà retranché de
+    /// EndOfGameTreasuryRemaining (2026-09-03, voir sa doc) - remplace l'ancien appel direct à
+    /// Core.Rules.RecruitmentRules.CanAffordEquippedHenchman (toujours testée/utilisée telle quelle
+    /// ailleurs, voir RulesTests.cs - seul CE point d'appel change), qui ne tenait compte que de la
+    /// trésorerie de base + l'or d'Exploration, jamais des Objets rares/Francs-Tireurs/Corruption-
+    /// Rétention décidés ailleurs dans ce même wizard.</summary>
+    public bool CanAffordEquippedHenchman => SelectedEquippedHenchmanGroupOption?.Group is null || EndOfGameTreasuryRemaining >= 0;
 
     // --- Bénédiction d'arme (Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières) ---------------
     //

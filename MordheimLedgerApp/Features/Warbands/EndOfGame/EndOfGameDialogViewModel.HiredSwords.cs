@@ -11,7 +11,8 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// "phase de campagne entre deux parties" du livre. Entièrement absente du wizard si
 /// HasAnyHiredSwordRelevance est faux (aucun déjà engagé, aucun éligible à recruter). Placée juste
 /// avant Récapitulatif (après l'or d'Exploration, voir EndOfGameDialogViewModel.Steps) pour que le
-/// joueur décide en connaissant sa trésorerie finale - voir HiredSwordTreasuryAfter.</summary>
+/// joueur décide en connaissant sa trésorerie finale - voir EndOfGameDialogViewModel.
+/// EndOfGameTreasuryRemaining/CanAffordNewHiredSword.</summary>
 public partial class EndOfGameDialogViewModel
 {
     /// <summary>Catalogue complet (non filtré par restriction de bande NI par "déjà engagé" - voir
@@ -49,13 +50,15 @@ public partial class EndOfGameDialogViewModel
     public bool HasHiredSwordsToRecruit => AvailableHiredSwordsToRecruit.Count > 0;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CanAffordNewHiredSword))]
     private HiredSword? selectedNewHiredSword;
 
     partial void OnSelectedNewHiredSwordChanged(HiredSword? value)
     {
         NewHiredSwordAffordError = null;
         if (value is null) NewHiredSwordName = string.Empty;
+        // Son coût d'engagement dispute désormais la même trésorerie que le reste du wizard (2026-09-03,
+        // voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
+        NotifyTreasuryChanged();
     }
 
     [ObservableProperty]
@@ -72,15 +75,13 @@ public partial class EndOfGameDialogViewModel
     [ObservableProperty]
     private string? newHiredSwordAffordError;
 
-    /// <summary>Trésorerie estimée disponible pour engager un nouveau Franc-Tireur à cette étape - la
-    /// trésorerie au moment d'ouvrir ce wizard (_currentTreasury) + l'or de l'étape Exploration si CETTE
-    /// partie en a rapporté (même idiome qu'EquippedHenchmanTreasuryAfter). Simplification acceptée :
-    /// n'intègre pas un éventuel coût d'Homme de main équipé choisi à la même étape Exploration (combo
-    /// rare, hors périmètre de cette passe).</summary>
-    public int HiredSwordTreasuryAfter => _currentTreasury
-        + (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0);
-
-    public bool CanAffordNewHiredSword => SelectedNewHiredSword is null || HiredSwordTreasuryAfter >= SelectedNewHiredSword.HireCost;
+    /// <summary>Le coût d'engagement de SelectedNewHiredSword est déjà retranché de
+    /// EndOfGameTreasuryRemaining (2026-09-03, voir sa doc) - "peut-on se le permettre" revient donc
+    /// simplement à vérifier que ce solde net, TOUTES dépenses de ce wizard confondues, ne passe pas dans
+    /// le rouge. Remplace l'ancien HiredSwordTreasuryAfter, une version isolée qui ne tenait compte que de
+    /// la trésorerie de base + l'or d'Exploration (ni des Objets rares, ni de la Corruption/Rétention, ni
+    /// de l'Homme de main équipé - exactement le genre d'écart signalé par l'utilisateur le 2026-09-03).</summary>
+    public bool CanAffordNewHiredSword => SelectedNewHiredSword is null || EndOfGameTreasuryRemaining >= 0;
 
     /// <summary>Peuplée une seule fois à la construction du dialog (voir EndOfGameDialogViewModel ctor) -
     /// ce sont de vrais guerriers déjà recrutés, pas un compte arbitraire piloté par un steppeur.</summary>

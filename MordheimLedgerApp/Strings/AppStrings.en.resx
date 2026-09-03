@@ -1349,9 +1349,6 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>New roll</value>
   </data>
-  <data name="EndOfGamePairDuelRollLabel" xml:space="preserve">
-    <value>Duel roll</value>
-  </data>
   <data name="EndOfGameWheresMoneyHeading" xml:space="preserve">
     <value>Where's the Money?</value>
   </data>
@@ -1370,14 +1367,14 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGamePairDuelWonLabel" xml:space="preserve">
     <value>The leader won the duel</value>
   </data>
-  <data name="EndOfGamePairDuelRerollHeading" xml:space="preserve">
-    <value>Defeat: roll on the Serious Injury table</value>
+  <data name="EndOfGamePairDuelLostNote" xml:space="preserve">
+    <value>Defeat: the leader is killed.</value>
   </data>
   <data name="EndOfGamePairDuelHeading" xml:space="preserve">
     <value>Duel with the leader</value>
   </data>
   <data name="EndOfGameCaptivesHeading" xml:space="preserve">
-    <value>Prisoners &amp; Bribery</value>
+    <value>Enemy prisoners</value>
   </data>
   <data name="EndOfGameCapturedEnemiesToggle" xml:space="preserve">
     <value>Enemy heroes were captured this game</value>
@@ -1399,6 +1396,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameDramatisPersonaeHeading" xml:space="preserve">
     <value>Dramatis Personae</value>
+  </data>
+  <data name="EndOfGamePairEngagementHeading" xml:space="preserve">
+    <value>A Fistful of Crowns</value>
   </data>
   <data name="EndOfGameRareItemsHeading" xml:space="preserve">
     <value>Rare items</value>
@@ -1594,6 +1594,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryPairDuelWonSentence" xml:space="preserve">
     <value>{0} fought Ulli &amp; Marquand in a duel and survived (Where's the Money?).</value>
+  </data>
+  <data name="HistoryPairDuelLostSentence" xml:space="preserve">
+    <value>{0} fought Ulli &amp; Marquand in a duel and died (Where's the Money?).</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

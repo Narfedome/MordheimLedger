@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -112,6 +113,18 @@ public partial class WarbandDetailViewModel
         // même catalogue localisé que localizedHiredSwords ci-dessus, même raison (résout FeeKind/Upkeep/
         // AlternativePaymentItemId d'un personnage déjà recruté, jamais stockés sur Warrior lui-même).
         var dramatisPersonaCatalog = await _libraryService.GetDramatisPersonaeAsync(language);
+        // Équipement de départ de chaque Dramatis Persona (Marquand & Ulli notamment, "Duel avec le
+        // meneur" - retour utilisateur 2026-09-03 : "les armes ne sont pas affichées... dans le combat
+        // contre la paire") - résolu ici en amont, même idiome que pitFighterEquipment ci-dessus :
+        // DramatisPersona.StartingEquipmentIds reste une simple liste d'ids catalogue (voir sa doc), le
+        // modèle n'a jamais porté sa propre résolution en vrais EquipmentItem. Même helper que
+        // DetailDialogService.ShowDramatisPersonaDetailDialogAsync (EquipmentQuantityChip.GroupFrom, gère
+        // les doublons - ex. Bertha "x2 Marteaux de Sigmarite" - contrairement au simple Where+Contains
+        // utilisé pour le Gladiateur), résolu pour TOUT le catalogue plutôt que seulement la paire :
+        // aussi peu coûteux, et réutilisable si un futur écran de ce wizard a besoin d'un autre Dramatis
+        // Persona.
+        var dramatisPersonaStartingEquipmentById = dramatisPersonaCatalog.ToDictionary(p => p.Id,
+            p => p.StartingEquipmentIds.Count == 0 ? new List<EquipmentQuantityChip>() : EquipmentQuantityChip.GroupFrom(p.StartingEquipmentIds, localizedEquipment));
         var ownedEquipmentItemIds = Inventory.Select(w => w.Item.Id).ToHashSet();
         // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - voir DramatisPersona.
         // RequiresCooldownBeforeResearch) - exclut du picker "Personnage spécial" tout personnage encore
@@ -120,7 +133,7 @@ public partial class WarbandDetailViewModel
 
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, ownedEquipmentItemIds, cooldownDramatisPersonaIds, Inventory.ToList(), pitFighterProfile, pitFighterEquipment);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, dramatisPersonaStartingEquipmentById, ownedEquipmentItemIds, cooldownDramatisPersonaIds, Inventory.ToList(), pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -1091,10 +1104,10 @@ public partial class WarbandDetailViewModel
     /// ApplyRareItemSearchAsync, pas ici). Solde refusée/impayée = il quitte la bande pour de bon - même
     /// traitement que le refus d'un Franc-Tireur (retrait complet, équipement/compétences avec) : une
     /// future recherche recréera une fiche neuve. Traite aussi, en fin de méthode, l'éventuel paiement
-    /// "Une Poignée d'Or" d'une bande qui n'a pas la paire (voir EndOfGameDialogViewModel.
-    /// WantsToRecordPairCorruption - saisi à l'étape Prisonniers du wizard depuis le 2026-09-01, voir
-    /// EndOfGameDialogViewModel.Captives.cs, mais appliqué ici avec le reste de la comptabilité Dramatis
-    /// Personae, sujet indépendant de l'étape qui l'affiche).</summary>
+    /// "Une Poignée d'Or" (Corruption ou Rétention de Marquand &amp; Ulli - voir EndOfGameDialogViewModel.
+    /// WantsToRecordPairCorruption/PairRetentionAmount, saisis sur l'étape "Une Poignée d'Or" dédiée
+    /// depuis le 2026-09-04, voir EndOfGameDialogViewModel.PairEngagement.cs), appliqué ici avec le reste
+    /// de la comptabilité Dramatis Personae, sujet indépendant de l'étape qui l'affiche.</summary>
     private async Task ApplyDramatisPersonaUpkeepAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
         if (Warband is null) return;
@@ -1129,7 +1142,18 @@ public partial class WarbandDetailViewModel
         // paire ici (aucune ligne Warrior créée) - purement le paiement, cohérent avec "sur un autre
         // appareil pas celle présente en local" (retour utilisateur) : cette bande n'a pas forcément
         // accès aux fiches Marquand/Ulli elles-mêmes.
-        if (dialogViewModel.WantsToRecordPairCorruption && int.TryParse(dialogViewModel.PairCorruptionAmount, out var corruptionAmount))
+        //
+        // !IsPairCorruptionUnaffordable (2026-09-04, retour utilisateur - vrai bug trouvé en creusant un
+        // signalement sur les valeurs du magot) : payer en or ne se fait QUE si la bande peut réellement
+        // payer - "instead" dans "if the controlling warband can't pay a successful bribe... the pair
+        // INSTEAD seizes an equal value of equipment" est une lecture stricte confirmée par l'utilisateur
+        // (aucun or ne sort du tout dans le cas impayable, Céder du matériel/Duel couvre l'INTÉGRALITÉ du
+        // montant) - sans ce garde-fou, la trésorerie était débitée du montant COMPLET ICI, EN PLUS de la
+        // saisie d'équipement/du duel appliqués séparément (ApplyPairEquipmentSeizureIfNeededAsync/
+        // ApplyPairDuelIfNeededAsync juste en dessous) : double paiement (or perdu ET objets/meneur
+        // perdus pour la même dette).
+        if (dialogViewModel.WantsToRecordPairCorruption && !dialogViewModel.IsPairCorruptionUnaffordable
+            && int.TryParse(dialogViewModel.PairCorruptionAmount, out var corruptionAmount))
         {
             Warband.Treasury -= corruptionAmount;
             await _warbandService.SaveWarbandAsync(Warband);
@@ -1141,8 +1165,11 @@ public partial class WarbandDetailViewModel
         // GARDER après une tentative adverse ("seul le camp qui obtient OU GARDE le contrôle paie", voir
         // la SpecialRule "A Fistful of Crowns"). 0/vide (pas de tentative) ne fait rien - PairRetentionAmount
         // reste alors vide, int.TryParse échoue, ce bloc est un no-op. Appliqué en tout dernier (après la
-        // boucle Payer/Renvoyer ci-dessus) - "à la fin de tous les décomptes", retour utilisateur.
-        if (int.TryParse(dialogViewModel.PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
+        // boucle Payer/Renvoyer ci-dessus) - "à la fin de tous les décomptes", retour utilisateur. Même
+        // garde-fou !IsPairRetentionUnaffordable que la Corruption ci-dessus (2026-09-04) - double
+        // paiement sinon.
+        if (!dialogViewModel.IsPairRetentionUnaffordable
+            && int.TryParse(dialogViewModel.PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
         {
             Warband.Treasury -= retentionAmount;
             await _warbandService.SaveWarbandAsync(Warband);
@@ -1173,15 +1200,13 @@ public partial class WarbandDetailViewModel
     /// <summary>"Où est l'Argent ?" (2026-09-01) - repli si le montant à payer dépasserait le solde
     /// prévisionnel de la bande, dans l'un ou l'autre des deux cas mutuellement exclusifs (une bande ne
     /// possède jamais Ulli &amp; Marquand ET tente de les débaucher à la fois) : IsPairCorruptionUnaffordable
-    /// (Captives.cs, ne les possède pas) ou IsPairRetentionUnaffordable (DramatisPersonae.cs, les possède
-    /// déjà). Voir ApplyPairEquipmentSeizureIfNeededAsync juste au-dessus pour l'autre choix possible
-    /// ("Céder du matériel"). Même principe que Vendu aux Fosses (WonPitFight/SoldToPitsRerollRoll, voir
-    /// ApplyWarriorOutcomesAsync) mais appliqué au meneur de CETTE bande (Warrior.IsLeader) plutôt qu'à un
-    /// guerrier hors de combat, et SANS la perte d'équipement inconditionnelle propre au Gladiateur (pas
-    /// dans le texte de cette règle-ci) : victoire = rien de plus, défaite = un sous-jet D66 sur la table
-    /// des Blessures Graves Héros, résolu par la même mécanique (GetOrCreateInjury/AddWarriorInjuryAsync/
-    /// ApplySeriousInjuryEffectAsync) mais avec sa propre petite fonction locale plutôt que celle - déjà
-    /// locale à ApplyWarriorOutcomesAsync, donc hors de portée d'ici - qu'utilise Vendu aux Fosses.</summary>
+    /// (ne les possède pas) ou IsPairRetentionUnaffordable (les possède déjà) - toutes deux dans
+    /// EndOfGameDialogViewModel.PairEngagement.cs. Voir ApplyPairEquipmentSeizureIfNeededAsync juste
+    /// au-dessus pour l'autre choix possible
+    /// ("Céder du matériel"). Victoire = rien de plus ; défaite = mort automatique du meneur (2026-09-03,
+    /// retour utilisateur - "en cas de défaite, le chef de bande est forcément mort"), pas de jet sur la
+    /// table des Blessures Graves contrairement à une première version qui s'inspirait par erreur de
+    /// Vendu aux Fosses (WonPitFight/SoldToPitsRerollRoll) - absent du texte de cette règle-ci.</summary>
     private async Task ApplyPairDuelIfNeededAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
         var isUnaffordable = dialogViewModel.IsPairCorruptionUnaffordable || dialogViewModel.IsPairRetentionUnaffordable;
@@ -1197,56 +1222,9 @@ public partial class WarbandDetailViewModel
             return;
         }
 
-        if (dialogViewModel.PairDuelRoll.FirstOrDefault() is not { } roll || string.IsNullOrWhiteSpace(roll.InjuryResultText)) return;
-
-        var language = LocalizationService.Instance.Language;
-        var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
-        async Task<Injury> GetOrCreateDuelInjuryAsync(int roll, string fallbackText)
-        {
-            var injury = InjuryCatalogLookup.Find(injuryCatalog, InjuryCategory.Hero, roll, null);
-            if (injury is null)
-            {
-                injury = new Injury { Name = fallbackText, Category = InjuryCategory.Hero, Source = ContentSource.Official };
-                await _libraryService.SaveInjuryAsync(injury, language);
-                injuryCatalog.Add(injury);
-            }
-            return injury;
-        }
-
-        var hasRoll = int.TryParse(roll.ManualRoll, out var rollNumber);
-        var outcome = hasRoll && SeriousInjuryEffectTable.TryGetOutcome(rollNumber, false, out var resolvedOutcome) ? resolvedOutcome : null;
-        if (outcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
-            outcome = outcome with { Value = int.TryParse(roll.DeepWoundSubRoll, out var d3) ? d3 : SeriousInjuryEffectTable.RollD3() };
-
-        var injury = await GetOrCreateDuelInjuryAsync(hasRoll ? rollNumber : -1, roll.InjuryResultText);
-        await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury,
-            outcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3);
-        sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, roll.InjuryResultText));
-
-        if (outcome is not null)
-            await ApplySeriousInjuryEffectAsync(warrior, outcome);
-
-        if (roll.IsDeath)
-        {
-            warrior.Status = WarriorStatus.Dead;
-            sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
-        }
-        else if (roll.ShowCapturedChoice && roll.IsRansomed && int.TryParse(roll.RansomAmount, out var ransomAmount))
-        {
-            Warband.Treasury -= ransomAmount;
-            sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, ransomAmount));
-        }
-        else if (roll.ShowCapturedChoice)
-        {
-            warrior.Status = WarriorStatus.Dead;
-            foreach (var equipment in warrior.Equipment.ToList())
-                await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-            warrior.Equipment.Clear();
-            sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
-        }
-
+        warrior.Status = WarriorStatus.Dead;
+        sentences.Add(string.Format(Loc["HistoryPairDuelLostSentence"], warrior.Name));
         await _warbandService.SaveWarriorAsync(warrior);
-        await _warbandService.SaveWarbandAsync(Warband);
     }
 
     /// <summary>Étape "Francs-Tireurs" (EndOfGameDialogViewModel.IsHiredSwordsStep) - règle la solde de

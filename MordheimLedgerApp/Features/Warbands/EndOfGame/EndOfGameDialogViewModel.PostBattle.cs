@@ -20,6 +20,15 @@ public partial class EndOfGameDialogViewModel
     [NotifyPropertyChangedFor(nameof(WyrdstoneSaleTableRows))]
     private int shardsToSell;
 
+    /// <summary>La vente de pierre magique dispute la même trésorerie que le reste du wizard (2026-09-03,
+    /// voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc) - un
+    /// changement manuel du joueur (Incrémenter/Décrémenter) doit donc se répercuter partout ailleurs
+    /// (Achat d'Objets rares, Corruption/Rétention...). Reste un choix ENTIÈREMENT manuel - "The warband
+    /// SHOULD sell any Wyrdstone necessary..." est une recommandation du livre, pas une obligation
+    /// (retour utilisateur 2026-09-03) : une première version vendait automatiquement le nécessaire,
+    /// retirée le même jour.</summary>
+    partial void OnShardsToSellChanged(int value) => NotifyTreasuryChanged();
+
     /// <summary>Stock déjà en réserve (_currentWyrdstoneShards, figé à l'ouverture du wizard) PLUS ce que
     /// CETTE Fin de Partie vient de trouver, toutes sources confondues (FoundThisGameWyrdstoneShards) -
     /// le livre ne distingue pas "ancien" et "nouveau" stock, la pierre magique tout juste trouvée doit

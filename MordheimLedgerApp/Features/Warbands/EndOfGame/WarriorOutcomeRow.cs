@@ -593,13 +593,6 @@ public partial class WarriorOutcomeRow : ObservableObject
     /// PitFighterProfile.</summary>
     public IReadOnlyList<EquipmentItem> PitFighterEquipment { get; }
 
-    /// <summary>Compétences autorisées du Gladiateur en toutes lettres (ex. "Combat, Vitesse, Force") -
-    /// jamais de compétence réellement APPRISE à afficher (jamais recruté, voir PitFighterProfile), donc
-    /// un simple texte plutôt qu'une ChipListView de WarriorSkill comme pour ce guerrier.</summary>
-    public string PitFighterAllowedSkillCategoriesText => PitFighterProfile is null
-        ? string.Empty
-        : string.Join(", ", PitFighterProfile.AllowedSkillCategories.Select(c => _loc[$"SkillCategory{c}"]));
-
     /// <summary>Pilote l'affichage de la section Équipement de la "fiche perso" comparative de Vendu aux
     /// Fosses - même idiome que WarriorRow.HasEquipment côté roster.</summary>
     public bool HasEquipment => Warrior.Equipment.Count > 0;
@@ -609,6 +602,17 @@ public partial class WarriorOutcomeRow : ObservableObject
 
     /// <summary>Idem côté carte du Gladiateur, pour son équipement de départ fixe (PitFighterEquipment).</summary>
     public bool HasPitFighterEquipment => PitFighterEquipment.Count > 0;
+
+    /// <summary>Règles spéciales de CE guerrier (WarriorArchetype + bande + objet équipé, déjà fusionnées
+    /// - voir WarriorRow.SpecialRules côté roster). Transmis tel quel par l'appelant (WarbandDetailViewModel.
+    /// EndOfGame, activeWarriorRows.Select(...)) plutôt que recalculé ici : ce row n'a pas accès au
+    /// catalogue Bibliothèque nécessaire à la fusion. 2026-09-04, retour utilisateur ("il faut rajouter
+    /// dans les 2 cas les règles spéciales du combat") pour Vendu aux Fosses/Duel - jusque-là discarded au
+    /// passage de WarriorRow à WarriorOutcomeRow. Pas de HasSpecialRules : bindé directement en
+    /// ItemsSource de ChipListView, qui gère seule sa visibilité (ShowSection/HasItems internes) -
+    /// contrairement à HasEquipment/HasSkills ci-dessus, nécessaires pour le FlexLayout manuel
+    /// (icône par catégorie d'item, pas une seule icône fixe - voir CLAUDE.md § Icônes).</summary>
+    public IReadOnlyList<SpecialRuleChip> SpecialRules { get; }
 
     /// <summary>Coché si le joueur gagne le combat de gladiateur (+50 CO, +2 PX, garde son équipement) -
     /// décoché (par défaut) signifie défaite (un sous-jet supplémentaire, voir SoldToPitsRerollRoll).</summary>
@@ -737,7 +741,7 @@ public partial class WarriorOutcomeRow : ObservableObject
 
     public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience, IEnumerable<MagicSchool>? magicSchools = null,
         int startingHeroCount = 0, IReadOnlyList<Injury>? injuryCatalog = null, HiredSword? pitFighterProfile = null,
-        IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+        IReadOnlyList<EquipmentItem>? pitFighterEquipment = null, IEnumerable<SpecialRuleChip>? specialRules = null)
     {
         Warrior = warrior;
         ArchetypeName = archetypeName;
@@ -747,6 +751,7 @@ public partial class WarriorOutcomeRow : ObservableObject
         MagicSchools = magicSchools?.ToList() ?? new List<MagicSchool>();
         PitFighterProfile = pitFighterProfile;
         PitFighterEquipment = pitFighterEquipment ?? new List<EquipmentItem>();
+        SpecialRules = specialRules?.ToList() ?? new List<SpecialRuleChip>();
 
         foreach (var status in new[] { WarriorStatus.Active, WarriorStatus.Dead })
             _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;

@@ -9,7 +9,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>One row per active Warrior in the End of Game dialog — collects the outcome, the caller
 /// (WarbandDetailViewModel) applies it via IWarbandService and builds the History sentence.</summary>
-public partial class WarriorOutcomeRow : ObservableObject
+public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 {
     private readonly Dictionary<string, WarriorStatus> _statusByLabel = new();
     private readonly LocalizationService _loc = LocalizationService.Instance;
@@ -163,6 +163,11 @@ public partial class WarriorOutcomeRow : ObservableObject
     [NotifyPropertyChangedFor(nameof(ShowDeepWoundSubRoll))]
     [NotifyPropertyChangedFor(nameof(ShowCapturedChoice))]
     [NotifyPropertyChangedFor(nameof(ShowSoldToThePits))]
+    [NotifyPropertyChangedFor(nameof(SeriousInjuryBonusExperience))]
+    [NotifyPropertyChangedFor(nameof(MilestoneCount))]
+    [NotifyPropertyChangedFor(nameof(HasMilestone))]
+    [NotifyPropertyChangedFor(nameof(ExplorationMilestoneCount))]
+    [NotifyPropertyChangedFor(nameof(HasExplorationMilestone))]
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
@@ -221,6 +226,16 @@ public partial class WarriorOutcomeRow : ObservableObject
             SoldToPitsRerollRoll.Clear();
             OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
         }
+
+        // Survie Miraculeuse contre Toute Attente (66) accorde +1 XP (voir SeriousInjuryBonusExperience/
+        // Core.Rules.SeriousInjuryEffectTable.GainExperience) - ce bonus peut à lui seul faire franchir un
+        // palier de Progression, donc resynchronise AdvanceRolls/ExplorationAdvanceRolls ici plutôt que
+        // d'attendre OnExperienceGainedTextChanged (2026-09-04, retour utilisateur - "si avec ce px on
+        // atteint un advance... on a pas de sélection de skill"). Inconditionnel (avant le early-return
+        // ci-dessous) : doit tourner même si ce jet n'est plus "Blessures multiples", y compris pour
+        // effacer un palier qui ne serait plus atteint si le joueur change son jet après coup.
+        SyncAdvanceRolls();
+        SyncExplorationAdvanceRolls();
 
         // Si le jet principal est refait vers un résultat qui n'est plus "Blessures multiples", les
         // sous-jets précédemment saisis n'ont plus de sens - on les efface plutôt que de les laisser
@@ -645,7 +660,7 @@ public partial class WarriorOutcomeRow : ObservableObject
 
     private void PopulateSoldToPitsRerollRoll()
     {
-        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel");
+        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel", injuryCatalog: _injuryCatalog);
         entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
         SoldToPitsRerollRoll.Add(entry);
         OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
@@ -670,24 +685,49 @@ public partial class WarriorOutcomeRow : ObservableObject
     public WarriorStatus Status => _statusByLabel.GetValueOrDefault(SelectedStatusLabel, Warrior.Status);
     public bool IsDead => Status == WarriorStatus.Dead;
 
+    /// <summary>XP accordée par un résultat "Survie Miraculeuse contre Toute Attente" (66, Héros
+    /// uniquement - voir Core.Rules.SeriousInjuryEffectTable.GainExperience) - jusqu'ici appliquée
+    /// directement à Warrior.Experience à l'enregistrement (WarbandDetailViewModel.EndOfGame.
+    /// ApplySeriousInjuryEffectAsync) sans jamais être reflétée ici, donc invisible pour MilestoneCount/
+    /// AdvanceRolls : un guerrier franchissant un palier grâce à ce seul bonus n'obtenait jamais son jet
+    /// de Progression (retour utilisateur 2026-09-04 - "si avec ce px on atteint un advance... on a pas
+    /// de sélection de skill"). Compte le jet principal ET chaque sous-jet "Blessures multiples" tombant
+    /// sur 66 - peut cumuler plusieurs +1 si plusieurs sous-jets tombent sur ce résultat, même principe
+    /// cumulatif que le reste de la table (voir ApplySeriousInjuryEffectAsync.GainExperience).</summary>
+    public int SeriousInjuryBonusExperience
+    {
+        get
+        {
+            var count = 0;
+            if (int.TryParse(ManualRoll, out var roll) && roll == 66) count++;
+            foreach (var sub in MultipleInjuryRolls)
+                if (int.TryParse(sub.ManualRoll, out var subRoll) && subRoll == 66) count++;
+            return count;
+        }
+    }
+
     /// <summary>Nombre de cases à bord épais franchies par les PX gagnés cette partie (voir
     /// ExperienceMilestones) - peut dépasser 1 si le guerrier cumule assez de PX pour sauter
-    /// plusieurs paliers d'un coup, d'où AdvanceRolls plutôt qu'un jet unique.</summary>
-    public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience, Warrior.Experience + ExperienceGained);
+    /// plusieurs paliers d'un coup, d'où AdvanceRolls plutôt qu'un jet unique. Inclut
+    /// SeriousInjuryBonusExperience depuis le 2026-09-04 (voir sa doc) en plus d'ExperienceGained.</summary>
+    public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience,
+        Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience);
     public bool HasMilestone => GainsExperience && MilestoneCount > 0;
 
     /// <summary>Paliers franchis UNIQUEMENT par l'XP accordée en Exploration (ExplorationBonusExperience),
     /// comptés à partir du point où l'étape Progression normale s'est déjà arrêtée (Warrior.Experience +
-    /// ExperienceGained) plutôt que depuis Warrior.Experience directement - évite de recompter/refaire
-    /// jeter un palier déjà traité par MilestoneCount ci-dessus. Nécessaire parce que l'Exploration
-    /// (chapitre "Revenus") a lieu APRÈS la Progression dans la séquence officielle du livre (voir la doc
-    /// de classe d'EndOfGameDialogViewModel) : un palier uniquement atteint grâce à cet XP-là ne peut être
-    /// détecté qu'une fois l'Exploration résolue, jamais pendant la Progression elle-même. Réutilise
-    /// exactement la même mécanique (ExperienceMilestones, AdvanceRollEntry, HeroAdvanceTable/
-    /// HenchmanAdvanceTable) via une deuxième carte Progression insérée après l'étape Exploration - voir
-    /// EndOfGameDialogViewModel.Steps/WizardStep.IsExplorationAdvance.</summary>
+    /// ExperienceGained + SeriousInjuryBonusExperience) plutôt que depuis Warrior.Experience directement -
+    /// évite de recompter/refaire jeter un palier déjà traité par MilestoneCount ci-dessus. Nécessaire
+    /// parce que l'Exploration (chapitre "Revenus") a lieu APRÈS la Progression dans la séquence
+    /// officielle du livre (voir la doc de classe d'EndOfGameDialogViewModel) : un palier uniquement
+    /// atteint grâce à cet XP-là ne peut être détecté qu'une fois l'Exploration résolue, jamais pendant la
+    /// Progression elle-même. Réutilise exactement la même mécanique (ExperienceMilestones,
+    /// AdvanceRollEntry, HeroAdvanceTable/HenchmanAdvanceTable) via une deuxième carte Progression
+    /// insérée après l'étape Exploration - voir EndOfGameDialogViewModel.Steps/
+    /// WizardStep.IsExplorationAdvance.</summary>
     public int ExplorationMilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero,
-        Warrior.Experience + ExperienceGained, Warrior.Experience + ExperienceGained + ExplorationBonusExperience);
+        Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience,
+        Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience + ExplorationBonusExperience);
 
     public bool HasExplorationMilestone => GainsExperience && ExplorationMilestoneCount > 0;
 
@@ -782,12 +822,23 @@ public partial class WarriorOutcomeRow : ObservableObject
         MultipleInjuryRolls.Clear();
         for (var i = 1; i <= count; i++)
         {
-            var entry = new InjurySubRollEntry(i, count, isHero: true, labelKey: "EndOfGameMultipleInjuryLabel");
-            entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+            var entry = new InjurySubRollEntry(i, count, isHero: true, labelKey: "EndOfGameMultipleInjuryLabel", injuryCatalog: _injuryCatalog);
+            entry.PropertyChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(SummaryText));
+                // 2026-09-04 : un sous-jet peut lui-même tomber sur 66 (Survie Miraculeuse, voir
+                // SeriousInjuryBonusExperience) - resynchronise AdvanceRolls/ExplorationAdvanceRolls ici
+                // aussi, pas seulement sur le jet principal (WarriorOutcomeRow.OnManualRollChanged).
+                OnPropertyChanged(nameof(SeriousInjuryBonusExperience));
+                SyncAdvanceRolls();
+                SyncExplorationAdvanceRolls();
+            };
             MultipleInjuryRolls.Add(entry);
         }
 
         OnPropertyChanged(nameof(HasMultipleInjuryRolls));
+        SyncAdvanceRolls();
+        SyncExplorationAdvanceRolls();
     }
 
     /// <summary>Ajuste FigureInjuryRolls pour qu'il compte exactement un jet D6 par figurine hors de

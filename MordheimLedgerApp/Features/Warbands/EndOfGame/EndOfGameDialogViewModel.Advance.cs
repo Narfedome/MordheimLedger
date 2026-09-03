@@ -63,8 +63,11 @@ public partial class EndOfGameDialogViewModel
             .Select(name => _skillIdsByEnglishName.GetValueOrDefault(name))
             .Where(id => id != 0)
             .ToList();
+        // singleSelect: true (2026-09-04, retour utilisateur - "dans la section des advance, il faut
+        // passer en sélection unique") : un jet de Progression n'accorde jamais plus d'une compétence,
+        // contrairement au picker générique de la Bibliothèque.
         var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
-            SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds);
+            SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds, singleSelect: true);
         if (skills.Count == 0) return;
 
         entry.SelectedSpell = null;

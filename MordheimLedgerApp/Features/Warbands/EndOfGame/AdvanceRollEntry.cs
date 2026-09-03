@@ -258,6 +258,11 @@ public partial class AdvanceRollEntry : ObservableObject
     {
         if (NestedHeroRoll is not null) return;
         if (!CanPromote) return;
+        // Le Picker (AdvanceRollEntryView.xaml, SelectedItem TwoWay) repasse SelectedItem à null quand sa
+        // sélection est effacée/réinitialisée (ex. ItemsSource retouché) - Dictionary.TryGetValue lève
+        // ArgumentNullException sur une clé null plutôt que de simplement renvoyer false, d'où ce garde-fou
+        // explicite (bug trouvé en jeu, 2026-09-04 : "Value cannot be null (Parameter 'key')").
+        if (SelectedPromotionCategoryLabel1 is null || SelectedPromotionCategoryLabel2 is null) return;
         if (!_skillCategoryByLabel.TryGetValue(SelectedPromotionCategoryLabel1, out var category1)) return;
         if (!_skillCategoryByLabel.TryGetValue(SelectedPromotionCategoryLabel2, out var category2)) return;
         if (category1 == category2) return;

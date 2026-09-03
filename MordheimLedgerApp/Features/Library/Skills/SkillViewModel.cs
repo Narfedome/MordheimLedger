@@ -53,6 +53,16 @@ public partial class SkillViewModel : BaseViewModel
 
     public bool HasSelectedRows => SelectedRows.Count > 0;
 
+    /// <summary>Restreint le picker à au plus UNE compétence à la fois (2026-09-04, retour utilisateur -
+    /// "dans la section des advance, il faut passer en sélection unique") : un jet de Progression
+    /// n'accorde jamais plus d'une compétence, contrairement au picker générique de la Bibliothèque
+    /// (ajout de plusieurs compétences d'un coup à un guerrier - WarbandEditDialogViewModel/
+    /// WarriorEditDialogViewModel/DramatisPersonaEditDialogViewModel, qui laissent ce flag à false). Set
+    /// par SkillPickerService avant construction (même idiome qu'AllowedCategories). Ne change pas
+    /// l'interaction "tap + bouton Confirmer" - juste : taper une nouvelle compétence désélectionne
+    /// automatiquement la précédente plutôt que de les cumuler.</summary>
+    public bool SingleSelectMode { get; set; }
+
     /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by SkillPickerService
     /// before construction) = only skills whose RestrictedToWarbandArchetypeIds is empty (common) or
     /// contains this id are shown - see WarriorEditDialogViewModel.AddSkill/EndOfGameDialogViewModel.</summary>
@@ -155,6 +165,16 @@ public partial class SkillViewModel : BaseViewModel
         {
             SelectedRow = row;
             return;
+        }
+
+        // SingleSelectMode : taper une compétence PAS encore sélectionnée vide d'abord la sélection en
+        // cours (au plus une ligne) - taper la compétence déjà sélectionnée reste une simple bascule
+        // (désélection), même comportement que le multi-select pour ce cas précis.
+        if (SingleSelectMode && !row.IsSelected)
+        {
+            foreach (var selected in SelectedRows.ToList())
+                selected.IsSelected = false;
+            SelectedRows.Clear();
         }
 
         row.IsSelected = !row.IsSelected;

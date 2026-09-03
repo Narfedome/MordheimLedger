@@ -1340,6 +1340,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameSoldToPitsWonLabel" xml:space="preserve">
     <value>A gagné le combat (+50 CO, +2 PX, garde son équipement)</value>
   </data>
+  <data name="EndOfGameSoldToPitsInlineHint" xml:space="preserve">
+    <value>Ce sous-jet a lui-même déclenché un combat de gladiateur - voir l'étape dédiée.</value>
+  </data>
   <data name="EndOfGameSoldToPitsRerollHeading" xml:space="preserve">
     <value>Défaite : relance sur la même table</value>
   </data>

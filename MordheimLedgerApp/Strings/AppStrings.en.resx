@@ -1340,6 +1340,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameSoldToPitsWonLabel" xml:space="preserve">
     <value>Won the fight (+50 gc, +2 XP, keeps their equipment)</value>
   </data>
+  <data name="EndOfGameSoldToPitsInlineHint" xml:space="preserve">
+    <value>This sub-roll itself triggered a gladiator fight - see the dedicated step.</value>
+  </data>
   <data name="EndOfGameSoldToPitsRerollHeading" xml:space="preserve">
     <value>Loss: reroll on the same chart</value>
   </data>

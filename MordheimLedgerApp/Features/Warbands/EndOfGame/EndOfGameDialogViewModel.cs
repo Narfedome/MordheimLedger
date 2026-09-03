@@ -156,6 +156,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsPairDuelStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
+    [NotifyPropertyChangedFor(nameof(CurrentPitFightOutcome))]
+    [NotifyPropertyChangedFor(nameof(CurrentPitFightSubRoll))]
+    [NotifyPropertyChangedFor(nameof(IsPitFightMainOccurrence))]
     [NotifyPropertyChangedFor(nameof(InjuryProgressLabel))]
     [NotifyPropertyChangedFor(nameof(CurrentAdvanceWarrior))]
     [NotifyPropertyChangedFor(nameof(CurrentAdvanceRolls))]
@@ -179,7 +182,12 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// paliers UNIQUEMENT atteints grâce à l'XP accordée par la table d'Exploration (Traînard/Prisonniers/
     /// Cimetière - WarriorOutcomeRow.ExplorationMilestoneCount/ExplorationAdvanceRolls), qui ne peut être
     /// détecté qu'une fois cette XP-là connue, donc après l'étape Exploration. Voir CurrentAdvanceRolls.</summary>
-    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null, bool IsExplorationAdvance = false);
+    /// <summary>SubRoll (2026-09-04, retour utilisateur - "à chaque blessure on refait un D66 avec le
+    /// sous-jet adéquat") distingue, pour un StepKind.PitFight, l'occurrence résolue : null = le jet
+    /// principal de Warrior (comportement d'origine) ; non-null = une "Blessures multiples" sous-jet
+    /// précis de Warrior.MultipleInjuryRolls (un guerrier peut donc enchaîner plusieurs étapes Vendu aux
+    /// Fosses dans la même Fin de Partie, une par occurrence de 65). Voir CurrentPitFightOutcome.</summary>
+    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null, bool IsExplorationAdvance = false, InjurySubRollEntry? SubRoll = null);
 
     // --- Trésorerie : UNE seule source de vérité pour tout le wizard (2026-09-03, retour utilisateur -
     // "on n'utilise pas le même solde de trésorerie à la corruption et à l'achat d'objet rare... on doit
@@ -253,10 +261,17 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // Blessure du guerrier concerné plutôt qu'un bloc embarqué dans la même carte - même position
             // "juste après" que PairDuel après PairEngagement. D'où une boucle plutôt qu'un simple
             // Select : il faut pouvoir insérer une deuxième étape conditionnelle entre deux guerriers.
+            // Une étape PAR OCCURRENCE (retour utilisateur, même message) : le jet principal ET chaque
+            // sous-jet "Blessures multiples" qui tombe lui-même sur 65 déclenchent chacun leur propre
+            // combat de gladiateur (SubRoll distingue l'occurrence, voir WizardStep/CurrentPitFightOutcome)
+            // - un guerrier peut donc enchaîner plusieurs étapes Vendu aux Fosses dans la même Fin de
+            // Partie.
             foreach (var r in WarriorRows.Where(w => w.IsOutOfAction))
             {
                 steps.Add(new WizardStep(StepKind.Injury, r));
                 if (r.ShowSoldToThePits) steps.Add(new WizardStep(StepKind.PitFight, r));
+                foreach (var sub in r.MultipleInjuryRolls)
+                    if (sub.ShowSoldToThePits) steps.Add(new WizardStep(StepKind.PitFight, r, SubRoll: sub));
             }
             // Prisonniers ennemis : une seule étape pour toute la bande (pas par guerrier, contrairement à
             // Blessure/Progression) - ce que CETTE bande a capturé sur l'adversaire, sans rapport avec les
@@ -363,6 +378,26 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
     /// hors de combat, jamais une liste (voir la doc de classe).</summary>
     public WarriorOutcomeRow? CurrentInjuryWarrior => Current.Warrior;
+
+    /// <summary>Occurrence de Vendu aux Fosses résolue par l'étape courante (2026-09-04, retour
+    /// utilisateur) : le jet principal de CurrentInjuryWarrior si Current.SubRoll est null, sinon ce
+    /// sous-jet précis - les deux exposent la même forme (IPitFightOutcome : WonPitFight/
+    /// SoldToPitsRerollRoll/HasSoldToPitsRerollRoll), ce qui permet au XAML de la carte "checkbox
+    /// victoire + relance" de rester identique quelle que soit l'occurrence, sans dupliquer ce bloc.
+    /// PitFighterProfile/PitFighterEquipment/les cartes de comparaison restent bindées sur
+    /// CurrentInjuryWarrior directement (le Gladiateur et le profil du guerrier sont les mêmes quelle
+    /// que soit l'occurrence, inutile de les dupliquer par sous-jet).</summary>
+    public IPitFightOutcome? CurrentPitFightOutcome => Current.SubRoll is { } sub ? sub : CurrentInjuryWarrior;
+
+    /// <summary>Le sous-jet "Blessures multiples" résolu par cette étape, typé InjurySubRollEntry plutôt
+    /// qu'IPitFightOutcome (contrairement à CurrentPitFightOutcome) uniquement pour exposer Label côté
+    /// XAML ("Blessure X/Y", sous-titre de l'étape) - null pour le jet principal.</summary>
+    public InjurySubRollEntry? CurrentPitFightSubRoll => Current.SubRoll;
+
+    /// <summary>Pilote l'affichage du sous-titre "Blessure X/Y" (CurrentPitFightSubRoll.Label) quand cette
+    /// étape résout un sous-jet plutôt que le jet principal - utile dès qu'un guerrier enchaîne plusieurs
+    /// combats de gladiateur dans la même Fin de Partie.</summary>
+    public bool IsPitFightMainOccurrence => Current.SubRoll is null;
 
     public string InjuryProgressLabel
     {
@@ -637,7 +672,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         return Current.Kind switch
         {
             StepKind.Injury => ValidateInjuryStep(CurrentInjuryWarrior!),
-            StepKind.PitFight => ValidatePitFightStep(CurrentInjuryWarrior!),
+            StepKind.PitFight => ValidatePitFightStep(),
             StepKind.Captives => ValidateCaptivesStep(),
             StepKind.Advance => ValidateAdvanceStep(CurrentAdvanceRolls ?? Enumerable.Empty<AdvanceRollEntry>()),
             StepKind.ExplorationRoll => ValidateExplorationRollStep(),

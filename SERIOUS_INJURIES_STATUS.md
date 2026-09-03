@@ -2,7 +2,7 @@
 
 Suivi de l'assistant Fin de Partie, étape Blessure (voir CLAUDE.md § Règles dans Core, plan de
 séquencement "Mécaniser les Blessures Graves — Palier 1"). Mis à jour à chaque avancée — dernière
-mise à jour : **2026-08-27** (Vendu aux Fosses, voir Journal).
+mise à jour : **2026-09-04** (parité complète des sous-jets "Blessures multiples", voir Journal).
 
 Légende : ✅ Fait (jouable de bout en bout, y compris la sauvegarde) · 🔧 En cours · ⏳ À faire
 
@@ -28,7 +28,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | Dés | Résultat | Palier | Statut | Testé | Note |
 |---|---|---|---|---|---|
 | 11-15 | Mort | — | ✅ | — | `WarriorStatus.Dead`, fait avant ce chantier |
-| 16, 21 | Blessures multiples | — | ✅ | — | Relance 1D6 fois sur cette même table ; chaque sous-jet applique aussi son propre effet Palier 1 s'il y en a un |
+| 16, 21 | Blessures multiples | — | ✅ | — | Relance 1D6 fois sur cette même table ; chaque sous-jet est désormais un jet D66 COMPLET (2026-09-04) - Palier 1, branche 23/25/24 (avec chip de règle spéciale), Rancune (56, cible complète), Vendu aux Fosses (65, sa propre étape de combat), Mort et Capturé - un sous-jet retombant lui-même sur Blessures multiples reste seul exception (texte de référence, pas de ré-explosion, confirmé explicitement par l'utilisateur) |
 | 22 | Blessure à la jambe | 1 | ✅ | ✅ | Mouvement -1 permanent |
 | 23 (sous-jet 2-6) | Blessure au bras : légère | 1 | ✅ | ✅ | Statut Indisponible, 1 partie ratée ; chip catalogue dédiée ("Blessure au bras : légère"), temporaire - supprimée automatiquement dès que le guerrier redevient Actif |
 | 23 (sous-jet 1) | Blessure au bras : amputé | 2 | ✅ | — | Chip catalogue dédiée portant une vraie `SpecialRule` "Bras amputé" (nouvelle, purement informative - pas de blocage actif à l'équipement) - même traitement que Folie, y compris la non-fusion dans les Règles spéciales (2026-08-26) |
@@ -49,7 +49,7 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
 | 62-63 | Endurci | 2 | ✅ | — | Chip catalogue portant une nouvelle `SpecialRule` "Endurci" (permanente, distincte du "Immunisé à la Peur" temporaire de la Bière de Bugman) |
 | 64 | Horribles balafres | 2 | ✅ | — | Chip catalogue portant la `SpecialRule` "Provoque la Peur" déjà enrichie dans le catalogue commun, réutilisée telle quelle |
 | 65 | Vendu aux arènes | 3 | ✅ | — | Combat de gladiateur contre un Franc-Tireur (nouveau catalogue Bibliothèque `HiredSword`, adversaire éphémère jamais recruté) : deux profils `StatRowView` côte à côte, case Victoire (+50 CO, +2 PX, équipement intact) sinon Défaite (un sous-jet D66 sur la même table, "ne garder que 11-35" indicatif non vérifié - survit = équipement perdu sans condition, mort = traité comme toute autre Mort) |
-| 66 | Survie miraculeuse | 1 | ✅ | — | +1 Expérience |
+| 66 | Survie miraculeuse | 1 | ✅ | — | +1 Expérience - désormais reflété dans MilestoneCount/AdvanceRolls du wizard (2026-09-04, voir Journal), pas seulement appliqué à Warrior.Experience à l'enregistrement |
 
 ## Détail — Hommes de main (D6)
 
@@ -541,3 +541,71 @@ Colonne Testé : ✅ = vérifié en jeu par l'utilisateur, — = codé mais pas 
   dans la Description du Sorcier à la place. Traductions FR par l'assistant (source fournie en anglais
   uniquement). `DataServiceTests.CommonCatalogs_DedupCollisions_AndSeedSkills` mis à jour (42 -> 48
   sorts total, +1 assertion pour "Lesser Magic"). Build Core + tête MAUI clean, suite complète relancée.
+- **2026-09-04 (parité complète des sous-jets "Blessures multiples")** — Retour utilisateur explicite :
+  *"les rolls des blessures doivent être les mêmes qu'une blessure classique... on peut tirer 2 fois
+  Folie qui nous fait roll la folie une fois chacun et se retrouver avec frénésie et stupide"*. Jusque-là
+  (voir la note "à l'exception de la branche 23/25... pas de second niveau de jet imbriqué dans ce
+  wizard, décision de portée" qui vivait dans `WarbandDetailViewModel.EndOfGame.cs`), un sous-jet
+  "Blessures multiples" (16/21) ne réutilisait que Blessure profonde (35)/Capturé (61) - Rancune (56), la
+  branche 23/25/24 et Vendu aux Fosses (65) restaient du texte de référence pur, et un sous-jet tombant
+  sur la Mort (11-15) n'était même pas appliqué du tout (statut du guerrier inchangé - un vrai manque, pas
+  seulement Rancune/Branche/Arène). `InjurySubRollEntry` (`Features/Warbands/EndOfGame/InjurySubRollEntry.cs`)
+  gagne donc tout ce qu'un jet principal (`WarriorOutcomeRow`) sait faire pour un Héros - même
+  implémentation dupliquée (pas de type partagé), même idiome déjà établi dans ce fichier pour Blessure
+  profonde/Capturé. Seule exception, confirmée explicitement : un sous-jet retombant lui-même sur
+  Blessures multiples (16/21) N'explose PAS en sous-sous-jets ("pour une 2ème blessure multiple, on ne
+  peut pas en envoyer une autre si on est déjà en blessure multiple") - reste texte de référence, cette
+  entrée n'a jamais porté de mécanisme d'explosion donc rien à ajouter pour respecter cette règle.
+  - **Vendu aux Fosses (65) en sous-jet : sa propre étape, une par occurrence.** Un guerrier peut donc
+    enchaîner plusieurs combats de gladiateur dans la même Fin de Partie (le jet principal ET chaque
+    sous-jet tombant sur 65), confirmé explicitement par l'utilisateur ("une étape de combat par
+    occurrence"). `WizardStep` (`EndOfGameDialogViewModel.cs`) gagne un champ `SubRoll` (`InjurySubRollEntry?`,
+    null = jet principal) ; `Steps` boucle désormais sur `WarriorRows.Where(w => w.IsOutOfAction)` (au lieu
+    d'un simple `Select`) pour pouvoir insérer une étape `PitFight` par occurrence entre deux guerriers.
+    Nouvelle interface `IPitFightOutcome` (`WonPitFight`/`SoldToPitsRerollRoll`/`HasSoldToPitsRerollRoll`),
+    implémentée par `WarriorOutcomeRow` ET `InjurySubRollEntry` - `CurrentPitFightOutcome`
+    (`EndOfGameDialogViewModel.cs`) pointe vers la bonne selon `Current.SubRoll`, ce qui permet à la carte
+    "checkbox victoire + relance" du XAML de rester identique quelle que soit l'occurrence (bindée sur
+    `CurrentPitFightOutcome.X` plutôt que sur `CurrentInjuryWarrior.X` en dur) - seuls le profil du
+    guerrier et celui du Gladiateur restent bindés sur `CurrentInjuryWarrior` directement (partagés par
+    toutes les occurrences). `IsPitFightMainOccurrence`/`CurrentPitFightSubRoll.Label` affichent un
+    sous-titre "Blessure X/Y" dès que l'étape résout un sous-jet plutôt que le jet principal.
+  - **Apply-time** (`WarbandDetailViewModel.EndOfGame.cs`) : deux nouvelles fonctions locales partagées,
+    `ApplyInjuryRollCoreAsync` (résout + applique catalogue Injury/Palier 1/branche/Rancune pour UN jet
+    D66, appelée pour chaque sous-jet ET pour la relance d'un combat de gladiateur perdu) et
+    `ApplyPitFightEntryAsync` (Victoire/Défaite d'UNE occurrence de Vendu aux Fosses, réutilisable pour un
+    sous-jet comme pour le jet principal... non, uniquement pour un sous-jet, le bloc du jet principal
+    reste inchangé par cette passe pour ne pas toucher du code déjà testé). Le bloc du jet PRINCIPAL
+    (injury/Palier 1/Rancune/Capturé/Vendu aux Fosses, plus haut dans la méthode) reste intégralement
+    inchangé - seule la boucle `foreach (var sub in row.MultipleInjuryRolls)` a été réécrite pour utiliser
+    ces deux fonctions, réduisant le risque de régression sur un chemin déjà éprouvé.
+  - **Scope volontairement NON couvert** (documenté dans `InjurySubRollEntry`, pas un oubli) : la relance
+    d'un combat de gladiateur perdu (`SoldToPitsRerollRoll`) n'affiche PAS sa propre section
+    Rancune/Branche/nouveau-combat dans son DataTemplate XAML, même si le type le permettrait
+    techniquement (mêmes propriétés que toute autre instance) - rejouer un combat de gladiateur qui en
+    amène un autre est un cas si marginal (il faudrait retomber sur 65 une deuxième fois d'affilée) qu'aucune
+    UI dédiée n'a été construite ; la donnée resterait simplement non saisie si ça arrivait, sans planter.
+    À généraliser si ce cas devient un jour un vrai besoin.
+  - Build Core + tête MAUI clean (aucune erreur CS dès la première passe malgré l'ampleur du changement).
+    Suite complète (386 tests) relancée - aucun test ne couvre directement ce wizard (`MordheimLedgerApp.Tests`
+    ne référence que Core), donc ce passage reste à vérifier manuellement en jeu par l'utilisateur.
+- **2026-09-04 (suite, retour utilisateur - "le pull d'exp n'est pas comptabilisé dans les blessures...
+  si avec ce px on atteint un advance... on a pas de sélection de skill") : Survie Miraculeuse contre
+  Toute Attente (66, +1 XP) enfin visible côté Progression.** Bug distinct de la parité des sous-jets
+  ci-dessus, trouvé juste après : `SeriousInjuryEffectTable.GainExperience` (66) appliquait bien
+  `warrior.Experience += 1` à l'enregistrement (`ApplySeriousInjuryEffectAsync`), mais ce bonus n'était
+  JAMAIS reflété dans `WarriorOutcomeRow.MilestoneCount`/`AdvanceRolls` - un guerrier franchissant un
+  palier de Progression GRÂCE À CE SEUL bonus n'obtenait donc jamais son jet de compétence/statistique
+  dans le wizard, alors que `warrior.Experience` finissait quand même par être correct en base (les deux
+  ajouts, `ExperienceGained` et ce +1, s'additionnent au même champ indépendamment de l'ordre d'exécution -
+  seule l'ÉTAPE Progression du wizard ne le proposait jamais). Nouveau `WarriorOutcomeRow.
+  SeriousInjuryBonusExperience` : compte +1 par occurrence de 66, jet principal ET chaque sous-jet
+  "Blessures multiples" (cumulatif, même principe que le reste de la table) - injecté dans `MilestoneCount`
+  (`Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience`) et dans le point de départ
+  d'`ExplorationMilestoneCount` (pour rester cohérent avec où la Progression normale s'est réellement
+  arrêtée). `OnManualRollChanged` (jet principal ET chaque `InjurySubRollEntry` de `MultipleInjuryRolls`,
+  via la souscription `PropertyChanged` déjà existante) appelle désormais `SyncAdvanceRolls()`/
+  `SyncExplorationAdvanceRolls()` - jusque-là seul `OnExperienceGainedTextChanged` (étape Expérience)
+  déclenchait cette resynchronisation, jamais un changement sur l'étape Blessure (pourtant TOUJOURS
+  antérieure à l'étape Progression dans la séquence du wizard, donc sans souci de timing pour ce cas
+  précis). Build + suite complète relancés, non encore vérifié en jeu.

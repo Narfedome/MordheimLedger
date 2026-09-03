@@ -514,9 +514,10 @@ public partial class WarbandDetailViewModel
         //
         // branchSubRoll : pour Blessure au bras/Jambe écrasée (23/25), le catalogue a 2 entrées par roll
         // (légère "2-6"/grave "1", voir Injury.BranchRange) - non-null sélectionne la bonne, null retombe
-        // sur l'entrée générique (BranchRange vide) si elle existe, sinon une entrée arbitraire (cas
-        // hors-périmètre : un sous-jet "Blessures multiples" tombant sur 23/25 n'a pas de sous-jet de
-        // branche imbriqué dans ce wizard).
+        // sur l'entrée générique (BranchRange vide) si elle existe, sinon une entrée arbitraire. Un
+        // sous-jet "Blessures multiples" tombant sur 23/25 a bien son propre sous-jet de branche depuis
+        // le 2026-09-04 (retour utilisateur - voir ApplyInjuryRollCoreAsync plus bas), donc branchSubRoll
+        // n'est plus réservé au seul jet principal.
         async Task<Injury> GetOrCreateInjuryAsync(int roll, bool isHero, string fallbackText, int? branchSubRoll = null)
         {
             injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
@@ -542,6 +543,102 @@ public partial class WarbandDetailViewModel
             // recalculé une seule fois, pour couvrir le cas (rare) où les deux occurrences tombent dans
             // la même Fin de Partie.
             var alreadyBlindedInOneEye = warrior.Injuries.Any(i => InjuryCatalogLookup.RollRangeMatches(i.Item.RollRange, 31));
+
+            // 2026-09-04, retour utilisateur ("les rolls des blessures doivent être les mêmes qu'une
+            // blessure classique... on peut tirer 2 fois Folie qui nous fait roll la folie une fois
+            // chacun") : résout + applique UN jet D66 complet (catalogue Injury + effet Palier 1 +
+            // branche 23/25/24 + Rancune 56) - partagé par chaque sous-jet "Blessures multiples" de CE
+            // guerrier (foreach (var sub in row.MultipleInjuryRolls) plus bas) et par la relance d'un
+            // combat de gladiateur perdu (voir ApplyPitFightEntryAsync juste après), pour que les deux se
+            // comportent EXACTEMENT comme le jet principal ci-dessus plutôt que la version tronquée
+            // (Palier 1 seul, sans branche/Rancune) qui existait avant cette passe. Ne décide PAS de
+            // Mort/Capturé/Vendu aux Fosses : chaque appelant garde sa propre branche pour ça, la
+            // conséquence (HeadCount/Status/reroll) diffère légèrement selon le contexte (voir plus bas).
+            async Task<bool> ApplyInjuryRollCoreAsync(InjurySubRollEntry entry)
+            {
+                if (string.IsNullOrWhiteSpace(entry.InjuryResultText)) return false;
+
+                var entryChanged = false;
+                var hasRoll = int.TryParse(entry.ManualRoll, out var roll);
+                int? entryBranchSubRoll = entry.ShowInjuryBranchSubRoll && int.TryParse(entry.InjuryBranchSubRoll, out var branchRoll) ? branchRoll : null;
+
+                var entryOutcome = entry.ShowInjuryBranchSubRoll
+                    ? entry.InjuryBranchOutcome
+                    : hasRoll && SeriousInjuryEffectTable.TryGetOutcome(roll, alreadyBlindedInOneEye, out var o) ? o : null;
+                if (entryOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
+                    entryOutcome = entryOutcome with { Value = int.TryParse(entry.DeepWoundSubRoll, out var d3) ? d3 : SeriousInjuryEffectTable.RollD3() };
+
+                var entryIsTemporary = entryOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
+                var entryInjury = await GetOrCreateInjuryAsync(hasRoll ? roll : -1, warrior.IsHero, entry.ResolvedInjuryText, entryBranchSubRoll);
+                await _warbandService.AddWarriorInjuryAsync(warrior.Id, entryInjury, entryIsTemporary);
+                sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, entry.ResolvedInjuryText));
+
+                if (entryOutcome is not null)
+                {
+                    entryChanged |= await ApplySeriousInjuryEffectAsync(warrior, entryOutcome);
+                    if (entryOutcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
+                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
+                }
+                if (hasRoll && roll == 31) alreadyBlindedInOneEye = true;
+
+                if (entry.HasHatredTarget)
+                {
+                    await _warbandService.AddWarriorHatredAsync(warrior.Id, entry.HatredTargetWarbandArchetypeId, entry.HatredTargetFreeText);
+                    var hatredLabel = string.Format(Loc["WarriorsHatredChipFormat"], entry.HatredTargetDisplayName);
+                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
+                }
+
+                return entryChanged;
+            }
+
+            // Vendu aux Fosses (65) pour UNE occurrence - un sous-jet "Blessures multiples" qui tombe sur
+            // 65 (jamais le jet principal, qui garde son propre bloc plus bas, inchangé par cette passe).
+            // Même issue Victoire/Défaite que le jet principal (voir ce bloc pour la doc détaillée) :
+            // victoire = or/XP, équipement intact ; défaite = relance (entry.SoldToPitsRerollRoll),
+            // équipement perdu sans condition si le guerrier survit à cette relance.
+            async Task<bool> ApplyPitFightEntryAsync(InjurySubRollEntry entry)
+            {
+                if (entry.WonPitFight)
+                {
+                    Warband.Treasury += 50;
+                    warrior.Experience += 2;
+                    sentences.Add(string.Format(Loc["HistorySoldToPitsWonSentence"], warrior.Name));
+                    return true;
+                }
+
+                if (entry.SoldToPitsRerollRoll.FirstOrDefault() is not { } reroll || string.IsNullOrWhiteSpace(reroll.InjuryResultText))
+                    return false;
+
+                await ApplyInjuryRollCoreAsync(reroll);
+
+                if (reroll.IsDeath)
+                {
+                    warrior.Status = WarriorStatus.Dead;
+                    sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                }
+                else if (reroll.ShowCapturedChoice && reroll.IsRansomed && int.TryParse(reroll.RansomAmount, out var rerollRansom))
+                {
+                    Warband.Treasury -= rerollRansom;
+                    sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, rerollRansom));
+                }
+                else if (reroll.ShowCapturedChoice)
+                {
+                    warrior.Status = WarriorStatus.Dead;
+                    foreach (var equipment in warrior.Equipment.ToList())
+                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                    warrior.Equipment.Clear();
+                    sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
+                }
+                else
+                {
+                    foreach (var equipment in warrior.Equipment.ToList())
+                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                    warrior.Equipment.Clear();
+                    sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
+                }
+
+                return true;
+            }
 
             if (row.ExperienceGained != 0)
             {
@@ -762,42 +859,34 @@ public partial class WarbandDetailViewModel
             }
 
             // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table, chacun
-            // devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus.
+            // devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus - même
+            // résolution complète que le jet principal (branche 23/25/24, Rancune 56, Vendu aux Fosses
+            // 65 avec sa propre relance, Mort) depuis le 2026-09-04 (retour utilisateur - "les rolls des
+            // blessures doivent être les mêmes qu'une blessure classique"), voir ApplyInjuryRollCoreAsync/
+            // ApplyPitFightEntryAsync plus haut. Un sous-jet tombant lui-même sur "Blessures multiples"
+            // (16/21) n'explose PAS en sous-sous-jets (confirmé explicitement par l'utilisateur - "pour
+            // une 2ème blessure multiple, on ne peut pas en envoyer une autre si on est déjà en blessure
+            // multiple") : il reste simplement le texte de référence créé par ApplyInjuryRollCoreAsync,
+            // sans branche supplémentaire (cette entrée n'a jamais porté de mécanisme d'explosion).
             foreach (var sub in row.MultipleInjuryRolls)
             {
                 if (string.IsNullOrWhiteSpace(sub.InjuryResultText)) continue;
 
-                var hasSubRoll = int.TryParse(sub.ManualRoll, out var subRoll);
+                changed |= await ApplyInjuryRollCoreAsync(sub);
 
-                // Même table Palier 1 que le jet principal ci-dessus (un sous-jet "Blessures multiples"
-                // est un jet D66 complet sur cette même table) - à l'exception de la branche 23/25, qui
-                // n'a pas de sous-jet dédié ici (pas de second niveau de jet imbriqué dans ce wizard,
-                // décision de portée) : reste texte de référence pur pour ce cas précis, comme avant
-                // cette passe (GetOrCreateInjuryAsync retombe alors sur l'entrée catalogue générique).
-                var subOutcome = hasSubRoll && SeriousInjuryEffectTable.TryGetOutcome(subRoll, alreadyBlindedInOneEye, out var o) ? o : null;
-
-                // Même principe que pour le jet principal ci-dessus : le nombre de parties manquées est
-                // le 1D3 saisi par le joueur (sub.DeepWoundSubRoll), pas un jet invisible.
-                if (subOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
-                    subOutcome = subOutcome with { Value = int.TryParse(sub.DeepWoundSubRoll, out var subD3) ? subD3 : SeriousInjuryEffectTable.RollD3() };
-
-                var subIsTemporary = subOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
-
-                var subInjury = await GetOrCreateInjuryAsync(hasSubRoll ? subRoll : -1, warrior.IsHero, sub.InjuryResultText);
-                await _warbandService.AddWarriorInjuryAsync(warrior.Id, subInjury, subIsTemporary);
-                sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, sub.InjuryResultText));
-
-                if (subOutcome is not null)
+                // Mort (11-15) : jusqu'à cette passe, un sous-jet tombant sur la Mort n'était PAS
+                // appliqué du tout (seul Capturé l'était) - un vrai manque, pas seulement Rancune/
+                // Branche/Vendu aux Fosses. Le jet principal n'a pas besoin de ce bloc : sa propre Mort
+                // passe par row.Status (déjà appliqué plus haut, avant ce sous-jet).
+                if (sub.IsDeath)
                 {
-                    changed |= await ApplySeriousInjuryEffectAsync(warrior, subOutcome);
-                    if (subOutcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
-                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
+                    warrior.Status = WarriorStatus.Dead;
+                    sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                    changed = true;
                 }
-                if (hasSubRoll && subRoll == 31) alreadyBlindedInOneEye = true;
-
                 // Capturé (61) : même principe que le jet principal ci-dessus, pour un sous-jet
                 // "Blessures multiples" qui tombe lui-même sur 61.
-                if (sub.ShowCapturedChoice)
+                else if (sub.ShowCapturedChoice)
                 {
                     if (sub.IsRansomed && int.TryParse(sub.RansomAmount, out var subRansomAmount))
                     {
@@ -813,6 +902,13 @@ public partial class WarbandDetailViewModel
                         sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     changed = true;
+                }
+                // Vendu aux Fosses (65) : même principe, pour un sous-jet qui tombe lui-même sur 65 - sa
+                // propre étape de combat de gladiateur (EndOfGameDialogViewModel.Steps, une étape par
+                // occurrence, 2026-09-04 retour utilisateur).
+                else if (sub.ShowSoldToThePits)
+                {
+                    changed |= await ApplyPitFightEntryAsync(sub);
                 }
             }
 

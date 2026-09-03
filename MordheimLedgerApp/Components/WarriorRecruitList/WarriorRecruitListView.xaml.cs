@@ -7,7 +7,7 @@ namespace MordheimLedgerApp.Components;
 /// (WarbandEditDialogViewModel, étape Guerriers) : une ligne par WarriorRecruitRow avec son chip
 /// (tap = détail) et un compteur 0/MaxCount avec stepper +/- - remplace l'ancien flux ActionSheet
 /// "choisir un type puis nommer" par une liste directement manipulable. Le nom de chaque recrue Héros/
-/// groupe d'Hommes de main se saisit à part, à l'étape Noms (voir WarbandEditDialog's IsNamesTab), pas
+/// groupe d'Hommes de main se saisit à part, à l'étape Noms (voir WarbandEditDialog's IsWarriorNamesTab), pas
 /// ici. La validation (MaxCount/trésorerie/effectif bande) reste côté appelant : Increment/
 /// DecrementCommand ne font qu'exposer l'intention, voir WarbandEditDialogViewModel.IncrementWarrior.</summary>
 public partial class WarriorRecruitListView : ContentView

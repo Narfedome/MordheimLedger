@@ -108,6 +108,13 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
     private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
 
+    /// <summary>Snapshot de l'inventaire de bande (voir WarbandDetailViewModel.Inventory) au moment
+    /// d'ouvrir ce wizard - 2026-09-01, "Céder du matériel" (Où est l'Argent) : sélection automatique
+    /// d'objets dont la somme couvre le manque, voir EndOfGameDialogViewModel.Captives.cs's
+    /// SeizedEquipmentItems. Jamais modifié depuis ce wizard (aucun achat/vente d'objet de bande ici) -
+    /// une simple liste figée suffit, pas besoin de la revalider en direct.</summary>
+    private readonly List<WarbandEquipment> _warbandInventory;
+
     /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
     /// ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - même besoin que
     /// _equipmentItemsByEnglishName, mais limité aux archétypes de LA bande jouée (une branche
@@ -159,7 +166,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairDuel, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -226,12 +233,21 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance).
             if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
             // Dramatis Personae : solde des personnages à frais en or/pierre magique déjà engagés
-            // (Johann/Veskit/Marianna/Nicodemus) OU la case "Une Poignée d'Or" pour une bande qui n'a
-            // pas déjà Ulli & Marquand - voir EndOfGameDialogViewModel.DramatisPersonae.cs. Aucun
-            // recrutement combiné ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis
-            // Persona passe déjà par la recherche "Personnage spécial", RareItems/RareItemPurchase
-            // ci-dessus) - entièrement absente si ni l'un ni l'autre n'est concerné.
-            if (HasDramatisPersonaeUpkeep || ShowPairCorruptionOption) steps.Add(new(StepKind.DramatisPersonae));
+            // (Johann/Veskit/Marianna/Nicodemus) OU "C'est l'heure de payer !" (ShowPairRetentionOption -
+            // bande qui possède DÉJÀ Ulli & Marquand, ce qu'elle a payé pour les garder) - voir
+            // EndOfGameDialogViewModel.DramatisPersonae.cs. Le cas symétrique, "Corruption de Marquand
+            // Volker & Ulli Leitpold" pour une bande qui ne les possède PAS, vit dans l'étape Prisonniers
+            // (StepKind.Captives, toujours présente) - voir EndOfGameDialogViewModel.Captives.cs. Aucun
+            // recrutement combiné ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis Persona
+            // passe déjà par la recherche "Personnage spécial", RareItems/RareItemPurchase ci-dessus) -
+            // entièrement absente si rien de tout ça n'est concerné.
+            if (HasDramatisPersonaeUpkeep || ShowPairRetentionOption) steps.Add(new(StepKind.DramatisPersonae));
+            // Duel avec le meneur (2026-09-01, retour utilisateur - "quitte à le mettre dans un step
+            // supplémentaire pour éviter une page trop longue") : sa propre étape, uniquement si le stash
+            // de bande ne suffit pas à couvrir la corruption/rétention (WantsDuel, déterminé
+            // automatiquement depuis le 2026-09-02, plus de choix manuel - voir Captives.cs) - affiche les
+            // profils du meneur et de la paire avant la case victoire/défaite, voir IsPairDuelStep.
+            if (WantsDuel) steps.Add(new(StepKind.PairDuel));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -260,6 +276,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsRareItemPurchaseStep => Current.Kind == StepKind.RareItemPurchase;
     public bool IsHiredSwordsStep => Current.Kind == StepKind.HiredSwords;
     public bool IsDramatisPersonaeStep => Current.Kind == StepKind.DramatisPersonae;
+    public bool IsPairDuelStep => Current.Kind == StepKind.PairDuel;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
     /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
@@ -352,7 +369,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyCollection<int> ownedEquipmentItemIds, IReadOnlyCollection<int> cooldownDramatisPersonaIds, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyCollection<int> ownedEquipmentItemIds, IReadOnlyCollection<int> cooldownDramatisPersonaIds, List<WarbandEquipment> warbandInventory, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -370,6 +387,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
         _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
         _specialRulesByEnglishName = specialRulesByEnglishName;
+        _warbandInventory = warbandInventory;
         _skillIdsByEnglishName = skillIdsByEnglishName;
         _hiredSwordCatalog = hiredSwordCatalog;
         _dramatisPersonaCatalog = dramatisPersonaCatalog;
@@ -392,6 +410,22 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         BuildHiredSwordUpkeepEntries();
         BuildDramatisPersonaUpkeepEntries();
         BuildPairCorruptionOption();
+        BuildPairRetentionOption();
+
+        // Payer/Renvoyer un Johann/Veskit/Marianna/Nicodemus change DramatisPersonaeBaselineTreasury
+        // (Captives.cs) - même bug potentiel que RareItemSearchEntries ci-dessous s'il manquait ici : le
+        // bloc "Où est l'Argent ?" resterait périmé si le joueur coche "Payer" sur une autre solde APRÈS
+        // avoir déjà saisi son montant de corruption/rétention (2026-09-02, retour utilisateur).
+        foreach (var entry in DramatisPersonaUpkeepEntries)
+        {
+            entry.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName != nameof(DramatisPersonaUpkeepEntry.SelectedChoiceLabel)) return;
+                OnPropertyChanged(nameof(IsPairCorruptionUnaffordable));
+                OnPropertyChanged(nameof(IsPairRetentionUnaffordable));
+                OnPropertyChanged(nameof(DramatisPersonaeBaselineTreasuryDisplay));
+            };
+        }
 
         // Une entrée par Héros (jamais un Homme de main - "Whenever a Hero wants to buy a rare item") -
         // construites une fois ici comme WarriorRows, celles des Héros mis Hors de combat restent dans la
@@ -439,6 +473,23 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShards));
                     OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShardsDisplay));
                     OnPropertyChanged(nameof(IsRareItemPurchaseWyrdstoneBlocked));
+                    // Bug trouvé par test utilisateur (2026-09-02) : IsPairCorruptionUnaffordable/
+                    // IsPairRetentionUnaffordable (Captives.cs/DramatisPersonae.cs) dépendent de
+                    // DramatisPersonaeBaselineTreasury, lui-même dérivé de RareItemPurchaseRemainingTreasury
+                    // - jamais notifiées ici jusqu'à ce correctif, donc le bloc "Où est l'Argent ?" restait
+                    // caché (ou affiché à tort) après un achat/recrutement d'Objet rare qui changeait la
+                    // trésorerie APRÈS que le joueur ait déjà saisi son montant de corruption/rétention (le
+                    // getter recalculait juste - le problème est côté "quand redemander à la Vue de
+                    // relire IsVisible", pas côté valeur elle-même).
+                    OnPropertyChanged(nameof(IsPairCorruptionUnaffordable));
+                    OnPropertyChanged(nameof(IsPairRetentionUnaffordable));
+                    OnPropertyChanged(nameof(DramatisPersonaeBaselineTreasuryDisplay));
+                    // Retour utilisateur (2026-09-02) : "si on a engager la paire, on ne doit pas voir la
+                    // case de corruption" - l'étape Prisonniers (case Corruption) précède l'étape Achat/
+                    // Recrutement dans l'ordre du wizard (Steps), donc cocher "Recruter" sur un Marquand/
+                    // Ulli trouvé ici doit rétroactivement cacher cette case si le joueur revient en
+                    // arrière (voir ShowPairCorruptionOption, désormais calculée plutôt que figée).
+                    OnPropertyChanged(nameof(ShowPairCorruptionOption));
                 }
                 // Basculer Objet/Personnage change quels résultats existent (voir IsFound) - StepLabel
                 // seul suffit ici, RareItemsWithResults est déjà notifiée par la branche IsSuccess/
@@ -505,6 +556,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             StepKind.RareItemPurchase => ValidateRareItemPurchaseStep(),
             StepKind.HiredSwords => ValidateHiredSwordsStep(),
             StepKind.DramatisPersonae => ValidateDramatisPersonaeStep(),
+            StepKind.PairDuel => ValidatePairDuelStep(),
             _ => true
         };
     }

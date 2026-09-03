@@ -400,15 +400,30 @@ public partial class WarbandDetailViewModel : BaseViewModel
     /// detect a mid-battle secret bribe itself (see the SpecialRule's own description), so the player
     /// flips this once an enemy successfully corrupts the pair. Persists immediately (same
     /// no-Enregistrer-button convention as ShowInventory) and recomputes Rating right away, excluding
-    /// their contribution while the flag is set (see LoadAsync).</summary>
+    /// their contribution while the flag is set (see LoadAsync). Bascule TOUJOURS les deux moitiés de la
+    /// paire ensemble (2026-09-01, retour utilisateur) - Ulli et Marquand sont corrompus ou non comme un
+    /// seul bloc dans le livre, jamais l'un sans l'autre ; tapoter la carte de l'un des deux suffit,
+    /// l'autre suit automatiquement au même état (pas un toggle indépendant du sien).</summary>
     [RelayCommand]
     private async Task ToggleHostile(WarriorRow row)
     {
         if (Warband is null) return;
 
-        row.IsHostileThisBattle = !row.IsHostileThisBattle;
-        row.Warrior.IsHostileThisBattle = row.IsHostileThisBattle;
+        var newValue = !row.IsHostileThisBattle;
+        row.IsHostileThisBattle = newValue;
+        row.Warrior.IsHostileThisBattle = newValue;
         await _warbandService.SaveWarriorAsync(row.Warrior);
+
+        var persona = _recruitableDramatisPersonae.FirstOrDefault(p => p.Id == row.Warrior.DramatisPersonaId);
+        if (persona?.PairedWithDramatisPersonaId is { } partnerId
+            && DramatisPersonae.FirstOrDefault(r => r.Warrior.DramatisPersonaId == partnerId) is { } partnerRow
+            && partnerRow.IsHostileThisBattle != newValue)
+        {
+            partnerRow.IsHostileThisBattle = newValue;
+            partnerRow.Warrior.IsHostileThisBattle = newValue;
+            await _warbandService.SaveWarriorAsync(partnerRow.Warrior);
+        }
+
         Rating = AllActiveWarriorRows.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
             r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
     }

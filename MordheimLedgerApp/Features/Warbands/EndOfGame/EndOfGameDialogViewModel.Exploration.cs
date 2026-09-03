@@ -23,7 +23,13 @@ public partial class EndOfGameDialogViewModel
     // par l'utilisateur le 2026-08-17). Le nombre de dés ne peut varier qu'entre Result/HorsDeCombat
     // (déjà résolus quand on atteint cette étape) et le moment où on l'atteint, donc SyncExplorationDice
     // n'a besoin d'être appelée qu'en y entrant (OnStepIndexChanged) plutôt qu'à chaque frappe.
-    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction);
+    //
+    // Dramatis Personae exclus (2026-09-01, retour utilisateur) : IsHero vaut TRUE pour eux (voir
+    // Warrior.DramatisPersonaId's own doc - même flux Blessures Graves qu'un Héros normal), mais ce
+    // sont des figurines à part, pas des Héros au sens de cette règle du livre - même limite déjà
+    // connue/documentée pour le décompte de tête à la vente de pierre magique (voir
+    // DRAMATIS_PERSONAE_STATUS.md), corrigée ici pour l'Exploration.
+    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona);
     public bool WonLastGame => ResultOptions.Count > 0 && SelectedResult == ResultOptions[0];
 
     /// <summary>Dés bonus depuis l'équipement porté par les guerriers encore debout (ex. l'Œil

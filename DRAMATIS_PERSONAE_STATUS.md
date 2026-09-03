@@ -97,11 +97,89 @@ règles/calculateur de combat en V1)
 | **Comtesse Marianna Chevaux** | 12 bandes | Frais en or (HireCost/Upkeep) ✅. 📝 **"On n'échappe jamais à son passé..."** : jet 1D6 au dernier tour de partie / à la déroute (reste-part / reste-si-solde-payée / embuscade Zombies+Goules+Vampire pour D3 tours) — entièrement absent du wizard, aucun écran ne couvre "pendant" une partie sur table ; c'est aussi ce qui fait varier son upkeep réel dans le livre, non reflété par l'Upkeep fixe (75) utilisé pour la solde récurrente. 📝 Haine personnelle des Vampires envers elle (déjà une `SpecialRule` dédiée, "Hated by Vampires") — non modélisable via `HatredTargetWarbandArchetypeIds` (ciblage par bande, pas par Vampires-en-tant-qu'individus). |
 | **Johann le Couteau** | 12 bandes | Frais en or + paiement alternatif (Ombre Cramoisie) ✅. Dagues comptant comme Épées (Parade uniquement, pas le bonus de sauvegarde) ✅ - `Dagger (Johann)`, objet unique dans Equipment.json portant la règle partagée `Parry (Sword)`, même principe que Ienh-Khain (Aenur). |
 | **Nicodemus, le Pèlerin Maudit** | 11 bandes | Paiement en éclat de pierre magique (à l'engagement + solde après chaque bataille) ✅ - mêmes étapes Achat/Recrutement et Dramatis Personae que Johann/Veskit/Marianna, juste une devise différente (aucune option en or pour lui, "il n'a aucun intérêt pour l'or"). Bâton de Sorcier (deux mains = Gourdin + Parade comme rondache ; une main = libère l'autre pour l'Épée de Rezhebel) déjà modélisé (`Wizard's Staff (Nicodemus)`, Equipment.json). |
-| **Marquand Volker & Ulli Leitpold** | 13 bandes (paire, toutes sauf Sœurs de Sigmar/Répurgateurs) | Départ Vagabond ✅ (chacun individuellement - le départ n'est pas synchronisé entre les deux au niveau du code, mais ils ont toujours été recrutés/quittent ensemble en pratique puisqu'ils arrivent toujours ensemble). Délai de re-recherche ✅ (chacun a son propre cooldown, non partagé - sans conséquence tant qu'ils partent toujours ensemble). **Recrutement en paire imposé + frais partagé (30 CO) ✅ (2026-09-01)** : le picker "Personnage spécial" n'affiche que Marquand (`DramatisPersona.IsHiddenFromSearchPicker` masque Ulli), le recruter recrute automatiquement Ulli aussi (`PairedWithDramatisPersonaId`) pour un seul HireCost de 30 CO (jamais 60) - voir `WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync`. **"Une Poignée d'Or" (A Fistful of Crowns) ✅ (2026-09-01)** : extraite du texte libre en une vraie `SpecialRule` (chip tapotable sur la carte, comme "On n'échappe jamais à son passé..." de Marianna) - texte générique, pas de montant en dur (les 30 CO du comparatif viennent du catalogue, affichés en direct à côté du bouton). Résolu en deux blocs, l'issue n'étant connue qu'après la bataille jouée sur table (pas un mécanisme de Lancement de Partie) : (1) côté bande propriétaire, bouton "Rendre hostile" sur la carte du guerrier (`WarriorRow.CanToggleHostile`/`WarbandDetailViewModel.ToggleHostile`) exclut sa contribution de la Valeur pour cette bataille (`Warrior.IsHostileThisBattle`) sans le supprimer du roster - à la Fin de Partie, `ApplyWandererDeparturesAsync` produit une phrase d'historique différenciée puis le retire comme tout Vagabond (aucun paiement de son côté, "seul le camp qui gagne le contrôle paie"). (2) côté n'importe quelle autre bande (même sur un autre appareil, aucun lien de données entre bandes) : case "Corruption de Marquand Volker & Ulli Leitpold" à la Fin de Partie (`EndOfGameDialogViewModel.ShowPairCorruptionOption`, visible seulement si cette bande ne possède pas déjà la paire) + montant, déduit de SA propre trésorerie. **"Où est l'Argent ?" ✅ (2026-09-01)** : repli si le montant de corruption saisi dépasse le solde prévisionnel de la bande à cette étape (`EndOfGameDialogViewModel.IsPairCorruptionUnaffordable`, même principe que `RareItemPurchaseRemainingTreasury`). Deux choix : "Céder du matériel" (pas de sélecteur de valeur automatique, juste un rappel textuel invitant à retirer du matériel équivalent depuis l'Inventaire - décision explicite, aucun mécanisme de vente partielle ailleurs dans l'app) ; "Duel avec le meneur" (même principe que Vendu aux Fosses/D66-65 côté Blessures, retour utilisateur explicite - `WonDuel`/`PairDuelRoll` réutilisent `InjurySubRollEntry` tel quel : victoire = rien de plus, défaite = un sous-jet D66 sur la table des Blessures Graves Héros appliqué au meneur de bande, résolu par la même mécanique que la relance de Vendu aux Fosses mais sans sa perte d'équipement inconditionnelle, absente du texte de cette règle-ci). 📝 "Inséparables" (rester à 4" l'un de l'autre, traîner le partenaire hors du champ) — positionnement sur table, hors périmètre de l'app de toute façon. |
+| **Marquand Volker & Ulli Leitpold** | 13 bandes (paire, toutes sauf Sœurs de Sigmar/Répurgateurs) | Départ Vagabond ✅ (chacun individuellement - le départ n'est pas synchronisé entre les deux au niveau du code, mais ils ont toujours été recrutés/quittent ensemble en pratique puisqu'ils arrivent toujours ensemble). Délai de re-recherche ✅ (chacun a son propre cooldown, non partagé - sans conséquence tant qu'ils partent toujours ensemble). **Recrutement en paire imposé + frais partagé (30 CO) ✅ (2026-09-01)** : le picker "Personnage spécial" n'affiche que Marquand (`DramatisPersona.IsHiddenFromSearchPicker` masque Ulli), le recruter recrute automatiquement Ulli aussi (`PairedWithDramatisPersonaId`) pour un seul HireCost de 30 CO (jamais 60) - voir `WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync`. **"Une Poignée d'Or" (A Fistful of Crowns) ✅ (2026-09-01)** : extraite du texte libre en une vraie `SpecialRule` (chip tapotable sur la carte, comme "On n'échappe jamais à son passé..." de Marianna) - texte générique, pas de montant en dur (les 30 CO du comparatif viennent du catalogue, affichés en direct à côté du bouton). Résolu en trois blocs, l'issue n'étant connue qu'après la bataille jouée sur table (pas un mécanisme de Lancement de Partie) : (1) côté bande propriétaire, bouton "Rendre hostile" sur la carte du guerrier (`WarriorRow.CanToggleHostile`/`WarbandDetailViewModel.ToggleHostile`) exclut sa contribution de la Valeur pour cette bataille (`Warrior.IsHostileThisBattle`) sans le supprimer du roster - à la Fin de Partie, `ApplyWandererDeparturesAsync` produit une phrase d'historique différenciée puis le retire comme tout Vagabond, uniquement si la paire a effectivement changé de camp. (1b, 2026-09-01, retour utilisateur - complète le point ci-dessus) si la bande propriétaire a plutôt GARDÉ le contrôle après une tentative adverse (payé sa propre contre-offre, voir l'exemple Steiner/Albrecht du livre - "seul le camp qui obtient OU GARDE le contrôle paie"), une carte "C'est l'heure de payer !" à l'étape Dramatis Personae (`ShowPairRetentionOption`, visible seulement si cette bande possède déjà la paire) prend un montant libre (0/vide = aucune tentative cette partie) et le déduit de SA trésorerie en tout dernier ("à la fin de tous les décomptes", retour utilisateur). (2) côté n'importe quelle autre bande (même sur un autre appareil, aucun lien de données entre bandes) : case "Corruption de Marquand Volker & Ulli Leitpold" à l'étape Prisonniers **renommée "Prisonniers & Corruption"** (`EndOfGameDialogViewModel.ShowPairCorruptionOption`, visible seulement si cette bande ne possède pas déjà la paire) + montant, déduit de SA propre trésorerie. **"Où est l'Argent ?" ✅ (2026-09-01, révisée le même jour)** : repli PARTAGÉ entre (1b) et (2) - une bande ne peut jamais déclencher les deux à la fois, donc aucun risque à réutiliser le même sous-système (`WheresMoneyChoiceLabels`, déclaré dans `EndOfGameDialogViewModel.Captives.cs`) - si le montant saisi (corruption OU rétention) dépasse le solde prévisionnel de la bande à cette étape (`IsPairCorruptionUnaffordable`/`IsPairRetentionUnaffordable`, même principe que `RareItemPurchaseRemainingTreasury`). (1b) est en plus désormais bloqué si la paire est hostile CETTE bataille (`!Warrior.IsHostileThisBattle`, retour utilisateur - hostile veut dire corrompu donc de toute façon parti·e sans contre-offre possible). **Déterminé automatiquement depuis le 2026-09-02, plus de choix manuel du joueur** (retour utilisateur -
+"on détermine automatiquement si on a le duel ou non, pas de choix dans le picker") : `WantsEquipmentSeizure`/`WantsDuel` (`Captives.cs`) comparent la valeur totale du stash de bande à la somme
+due - le stash suffit → **"Céder du matériel"** ; sinon → **"Duel avec le meneur"**, seule alternative
+qui reste. `SeizedEquipmentItems` parcourt l'inventaire de bande snapshotté à l'ouverture du wizard
+(`_warbandInventory`) trié par valeur DÉCROISSANTE (`WarbandEquipment.SellValue`, révisé le 2026-09-02 -
+"on prend les équipements les plus valuables d'abord", perdre un minimum d'OBJETS plutôt qu'un minimum de
+valeur, ex. une Épée en Gromril à 60 CO + 3 Épées classiques à 10 CO pour une rançon de 50 CO → on ne
+perd QUE l'Épée en Gromril) et accumule jusqu'à atteindre/dépasser le montant demandé, affiché en chips ;
+les objets choisis sont réellement retirés de l'inventaire à l'application
+(`WarbandDetailViewModel.EndOfGame.ApplyPairEquipmentSeizureIfNeededAsync`, `RemoveWarbandEquipmentAsync`
+par objet). "Duel avec le meneur" a sa propre étape de wizard dédiée (`StepKind.PairDuel`,
+`EndOfGameDialogViewModel.PairDuel.cs`) pour éviter de surcharger la carte Prisonniers/Dramatis
+Personae : reprend le gabarit visuel de Vendu aux Fosses (retour utilisateur explicite) - une carte
+profil par participant (meneur de bande via `DuelLeaderRow`, Marquand et Ulli via `DuelMarquand`/
+`DuelUlli` résolus depuis le catalogue) avec `StatRowView` + chips Équipement/Compétences pour le
+meneur, Compétences seules pour Marquand/Ulli (pas d'équipement résolu en objets pour eux, hors
+périmètre) ; `WonDuel`/`PairDuelRoll` (toujours `InjurySubRollEntry`, D66 sur la table des Blessures
+Graves Héros en cas de défaite, appliqué au meneur) peuplés/effacés automatiquement dès que `WantsDuel`
+devient vrai/faux (`SyncPairDuelRoll`). Étape entièrement absente si aucun des deux montants n'est
+impayable. 📝 "Inséparables" (rester à 4" l'un de l'autre, traîner le partenaire hors du champ) —
+positionnement sur table, hors périmètre de l'app de toute façon. |
 | **Veskit, Bourreau Suprême** | Skavens (Clan Eshin) | Frais en or (HireCost/Upkeep) ✅. Rien d'autre en attente — pas Vagabond. |
 
 ## Historique
 
+- **2026-09-02 (suite, "si on a engager la paire, on ne doit pas voir la case de corruption")** :
+  `ShowPairCorruptionOption` (étape Prisonniers) restait vraie même quand le joueur venait de recruter
+  Marquand &amp; Ulli via la recherche "Personnage spécial" DANS LA MÊME Fin de Partie - l'étape
+  Prisonniers précède l'étape Achat/Recrutement dans l'ordre du wizard (Steps), et cette propriété était
+  figée une fois pour toutes à la construction (avant que `RareItemSearchEntries` existe même). Convertie
+  en propriété CALCULÉE : reste fausse si la bande possède déjà la paire dans son roster (comme avant),
+  ou si `IsPairBeingRecruitedThisWizard` (une entrée de recherche a `IsRecruited` = vrai ET vise Marquand/
+  Ulli) - notifiée depuis le handler `WantsToRecruit`/`IsCharacterFound` déjà existant des
+  `RareItemSearchEntries` (`EndOfGameDialogViewModel.cs`), donc si le joueur revient en arrière à l'étape
+  Prisonniers après avoir recruté la paire plus loin dans le wizard, la case a disparu.
+- **2026-09-02 (suite, "on détermine automatiquement si on a le duel ou non, pas de choix dans le
+  picker" + tri par valeur inversé pour Céder du matériel).** Deux changements sur "Où est l'Argent ?"
+  (`EndOfGameDialogViewModel.Captives.cs`). (1) Le Picker manuel (WheresMoneyChoiceLabels/
+  SelectedWheresMoneyChoice, retiré entièrement) est remplacé par une détermination automatique :
+  `WantsEquipmentSeizure`/`WantsDuel` comparent la valeur totale du stash de bande
+  (`WarbandInventoryTotalValue`) au montant dû - le stash suffit → céder du matériel (jamais de duel
+  dans ce cas) ; sinon → duel avec le meneur, seule alternative qui reste. (2) `SeizedEquipmentItems`
+  trie désormais le stash en ordre DÉCROISSANT de valeur (`OrderByDescending`, remplace l'ancien tri
+  croissant) : "on prend les équipements les plus valuables d'abord jusqu'à atteindre la somme" (retour
+  utilisateur, exemple donné - une Épée en Gromril à 60 CO + 3 Épées classiques à 10 CO pour une rançon
+  de 50 CO → on ne perd QUE l'Épée en Gromril). Perdre un minimum d'OBJETS (même si ça dépasse un peu la
+  somme due) plutôt qu'un minimum de VALEUR, contrairement à l'ancien tri. `WonDuel`/`PairDuelRoll` sont
+  désormais peuplés/effacés automatiquement (`SyncPairDuelRoll`, appelé depuis les handlers de
+  changement de PairCorruptionAmount/PairRetentionAmount/WantsToRecordPairCorruption - `WantsDuel` est
+  une propriété calculée, pas un ObservableProperty, donc pas de `partial void OnXxxChanged` direct
+  possible dessus).
+- **2026-09-02 (retour utilisateur, "peu importe la somme que je mets, pas de choix") : trésorerie
+  seuil rendue visible + rafraîchissement corrigé.** Le joueur testait le bloc "C'est l'heure de
+  payer !" (rétention) - trésorerie de la bande affichée sur sa fiche : 599, montant saisi : 600 -
+  et n'obtenait ni blocage ni bloc "Où est l'Argent ?". Cause probable : rien à l'écran ne montrait
+  le VRAI seuil comparé (`DramatisPersonaeBaselineTreasury`), qui peut différer de la trésorerie
+  persistée affichée sur la fiche de bande dès que CETTE Fin de Partie a rapporté de l'or
+  (Exploration/Vente de pierres magiques, pas encore enregistré au moment du test). Ajout d'un
+  affichage direct (`DramatisPersonaeBaselineTreasuryDisplay`, "Trésorerie disponible pour ce
+  paiement : X CO") au-dessus du champ de montant, dans les deux blocs (Prisonniers/Corruption ET
+  Dramatis Personae/Rétention). Corrigé au passage un vrai bug de fraîcheur trouvé en creusant :
+  `IsPairCorruptionUnaffordable`/`IsPairRetentionUnaffordable` (dérivées de ce même seuil) n'étaient
+  jamais notifiées quand la trésorerie changeait AILLEURS dans le wizard (achat/recrutement d'Objet
+  rare, ou case Payer/Renvoyer d'un Johann/Veskit/Marianna/Nicodemus coché APRÈS la saisie du montant
+  de corruption/rétention) - le calcul était toujours juste au moment de le relire, mais la Vue
+  n'était jamais prévenue qu'il fallait le relire dans ce cas précis.
+- **2026-09-01 (suite, révision "Où est l'Argent ?" - rétention hostile-gatée, sélection auto de
+  matériel, duel en étape dédiée)** : trois retours utilisateur groupés sur le repli "Où est l'Argent ?"
+  livré plus tôt le même jour. (1) `BuildPairRetentionOption` exclut désormais un couple actuellement
+  hostile (`!Warrior.IsHostileThisBattle`) - hostile veut dire déjà corrompu cette bataille, donc "payer
+  pour le garder" n'a plus de sens. (2) "Céder du matériel" n'est plus un simple rappel textuel : nouvel
+  algorithme glouton (`SeizedEquipmentItems`, `EndOfGameDialogViewModel.Captives.cs`) qui parcourt
+  l'inventaire de bande (nouveau paramètre `warbandInventory` au constructeur du dialog) trié par valeur
+  croissante et accumule jusqu'au montant demandé sans dépasser inutilement, affiché en chips ; les
+  objets sélectionnés sont réellement retirés de l'inventaire à l'application
+  (`ApplyPairEquipmentSeizureIfNeededAsync`, `WarbandDetailViewModel.EndOfGame.cs`). (3) "Duel avec le
+  meneur" déménagé dans sa propre étape de wizard (`StepKind.PairDuel`, nouveau fichier
+  `EndOfGameDialogViewModel.PairDuel.cs`) pour éviter une carte Prisonniers/Dramatis Personae trop
+  chargée, avec le même gabarit visuel de comparaison de profils que "Vendu aux Fosses" (une carte par
+  participant - meneur/Marquand/Ulli - `StatRowView` + chips) plutôt que le simple duo case-à-cocher/
+  sous-jet d'avant. `WonDuel`/`PairDuelRoll` (mécanique D66 inchangée) déplacés de fichier avec l'étape,
+  toujours partagés entre les deux contextes déclencheurs (corruption/rétention) puisque mutuellement
+  exclusifs pour une même bande.
 - **2026-09-01 (suite, "Une Poignée d'Or", mécanique par mécanique)** : la corruption elle-même
   ("A Fistful of Crowns" - enchère secrète adverse à un tour quelconque de la partie, l'app ne peut
   simuler ni le tour par tour ni le secret) est traitée après-coup plutôt qu'au Lancement de Partie,

@@ -120,7 +120,7 @@ public partial class WarbandDetailViewModel
 
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, ownedEquipmentItemIds, cooldownDramatisPersonaIds, pitFighterProfile, pitFighterEquipment);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, ownedEquipmentItemIds, cooldownDramatisPersonaIds, Inventory.ToList(), pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -142,6 +142,7 @@ public partial class WarbandDetailViewModel
             await _warbandService.ClearAllDramatisPersonaCooldownsAsync(Warband.Id);
             await ApplyWandererDeparturesAsync(dialogViewModel, sentences);
             await ApplyDramatisPersonaUpkeepAsync(dialogViewModel, sentences);
+            await ApplyPairEquipmentSeizureIfNeededAsync(dialogViewModel, sentences);
             await ApplyPairDuelIfNeededAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
@@ -1091,7 +1092,9 @@ public partial class WarbandDetailViewModel
     /// traitement que le refus d'un Franc-Tireur (retrait complet, équipement/compétences avec) : une
     /// future recherche recréera une fiche neuve. Traite aussi, en fin de méthode, l'éventuel paiement
     /// "Une Poignée d'Or" d'une bande qui n'a pas la paire (voir EndOfGameDialogViewModel.
-    /// WantsToRecordPairCorruption) - même étape du wizard, sujet indépendant.</summary>
+    /// WantsToRecordPairCorruption - saisi à l'étape Prisonniers du wizard depuis le 2026-09-01, voir
+    /// EndOfGameDialogViewModel.Captives.cs, mais appliqué ici avec le reste de la comptabilité Dramatis
+    /// Personae, sujet indépendant de l'étape qui l'affiche).</summary>
     private async Task ApplyDramatisPersonaUpkeepAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
         if (Warband is null) return;
@@ -1132,22 +1135,57 @@ public partial class WarbandDetailViewModel
             await _warbandService.SaveWarbandAsync(Warband);
             sentences.Add(string.Format(Loc["HistoryPairCorruptionPaidSentence"], corruptionAmount));
         }
+
+        // "C'est l'heure de payer !" (2026-09-01) - cas symétrique pour une bande qui possède DÉJÀ Ulli &
+        // Marquand (EndOfGameDialogViewModel.ShowPairRetentionOption) : ce qu'elle a dû payer pour les
+        // GARDER après une tentative adverse ("seul le camp qui obtient OU GARDE le contrôle paie", voir
+        // la SpecialRule "A Fistful of Crowns"). 0/vide (pas de tentative) ne fait rien - PairRetentionAmount
+        // reste alors vide, int.TryParse échoue, ce bloc est un no-op. Appliqué en tout dernier (après la
+        // boucle Payer/Renvoyer ci-dessus) - "à la fin de tous les décomptes", retour utilisateur.
+        if (int.TryParse(dialogViewModel.PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
+        {
+            Warband.Treasury -= retentionAmount;
+            await _warbandService.SaveWarbandAsync(Warband);
+            sentences.Add(string.Format(Loc["HistoryPairRetentionPaidSentence"], dialogViewModel.PairRetentionLabel, retentionAmount));
+        }
     }
 
-    /// <summary>"Où est l'Argent ?" (2026-09-01) - repli si la corruption ci-dessus dépasserait le solde
-    /// prévisionnel de la bande (EndOfGameDialogViewModel.IsPairCorruptionUnaffordable). "Céder du
-    /// matériel" reste purement un rappel textuel (voir WantsEquipmentSeizure's own doc) - rien à
-    /// appliquer ici pour ce choix, seul "Duel avec le meneur" a un effet réel. Même principe que Vendu
-    /// aux Fosses (WonPitFight/SoldToPitsRerollRoll, voir ApplyWarriorOutcomesAsync) mais appliqué au
-    /// meneur de CETTE bande (Warrior.IsLeader) plutôt qu'à un guerrier hors de combat, et SANS la perte
-    /// d'équipement inconditionnelle propre au Gladiateur (pas dans le texte de cette règle-ci) : victoire
-    /// = rien de plus, défaite = un sous-jet D66 sur la table des Blessures Graves Héros, résolu par la
-    /// même mécanique (GetOrCreateInjury/AddWarriorInjuryAsync/ApplySeriousInjuryEffectAsync) mais avec sa
-    /// propre petite fonction locale plutôt que celle - déjà locale à ApplyWarriorOutcomesAsync, donc hors
-    /// de portée d'ici - qu'utilise Vendu aux Fosses.</summary>
+    /// <summary>"Où est l'Argent ?" - "Céder du matériel" (2026-09-01, retour utilisateur - remplace
+    /// l'ancien simple rappel textuel) : retire réellement du stash de la bande les objets sélectionnés
+    /// automatiquement par EndOfGameDialogViewModel.SeizedEquipmentItems (plus petit au plus grand, arrêt
+    /// dès la cible couverte - voir sa propre doc). Une ligne = une pile entière (RemoveWarbandEquipmentAsync
+    /// supprime la ligne, jamais de retrait partiel, même simplification que partout ailleurs dans l'app).</summary>
+    private async Task ApplyPairEquipmentSeizureIfNeededAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        var isUnaffordable = dialogViewModel.IsPairCorruptionUnaffordable || dialogViewModel.IsPairRetentionUnaffordable;
+        if (Warband is null || !isUnaffordable || !dialogViewModel.WantsEquipmentSeizure) return;
+
+        var seized = dialogViewModel.SeizedEquipmentItems;
+        if (seized.Count == 0) return;
+
+        foreach (var item in seized)
+            await _warbandService.RemoveWarbandEquipmentAsync(item.Id);
+
+        var pairLabel = dialogViewModel.IsPairCorruptionUnaffordable ? dialogViewModel.PairCorruptionLabel : dialogViewModel.PairRetentionLabel;
+        sentences.Add(string.Format(Loc["HistoryPairEquipmentSeizedSentence"], pairLabel, dialogViewModel.SeizedEquipmentTotalValue));
+    }
+
+    /// <summary>"Où est l'Argent ?" (2026-09-01) - repli si le montant à payer dépasserait le solde
+    /// prévisionnel de la bande, dans l'un ou l'autre des deux cas mutuellement exclusifs (une bande ne
+    /// possède jamais Ulli &amp; Marquand ET tente de les débaucher à la fois) : IsPairCorruptionUnaffordable
+    /// (Captives.cs, ne les possède pas) ou IsPairRetentionUnaffordable (DramatisPersonae.cs, les possède
+    /// déjà). Voir ApplyPairEquipmentSeizureIfNeededAsync juste au-dessus pour l'autre choix possible
+    /// ("Céder du matériel"). Même principe que Vendu aux Fosses (WonPitFight/SoldToPitsRerollRoll, voir
+    /// ApplyWarriorOutcomesAsync) mais appliqué au meneur de CETTE bande (Warrior.IsLeader) plutôt qu'à un
+    /// guerrier hors de combat, et SANS la perte d'équipement inconditionnelle propre au Gladiateur (pas
+    /// dans le texte de cette règle-ci) : victoire = rien de plus, défaite = un sous-jet D66 sur la table
+    /// des Blessures Graves Héros, résolu par la même mécanique (GetOrCreateInjury/AddWarriorInjuryAsync/
+    /// ApplySeriousInjuryEffectAsync) mais avec sa propre petite fonction locale plutôt que celle - déjà
+    /// locale à ApplyWarriorOutcomesAsync, donc hors de portée d'ici - qu'utilise Vendu aux Fosses.</summary>
     private async Task ApplyPairDuelIfNeededAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
     {
-        if (Warband is null || !dialogViewModel.IsPairCorruptionUnaffordable || !dialogViewModel.WantsDuel) return;
+        var isUnaffordable = dialogViewModel.IsPairCorruptionUnaffordable || dialogViewModel.IsPairRetentionUnaffordable;
+        if (Warband is null || !isUnaffordable || !dialogViewModel.WantsDuel) return;
 
         var leaderRow = dialogViewModel.WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
         if (leaderRow is null) return;

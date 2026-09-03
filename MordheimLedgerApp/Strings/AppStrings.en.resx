@@ -507,6 +507,9 @@
   <data name="WarbandCreateTabNames" xml:space="preserve">
     <value>Names</value>
   </data>
+  <data name="WarbandCreateTabHiredSwordNames" xml:space="preserve">
+    <value>Names (Hired Swords)</value>
+  </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Equipment Lists</value>
   </data>
@@ -1007,6 +1010,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGamePairCorruptionOptionFormat" xml:space="preserve">
     <value>Corruption of {0} (A Fistful of Crowns)</value>
   </data>
+  <data name="EndOfGamePairRetentionHint" xml:space="preserve">
+    <value>A Fistful of Crowns: amount paid to keep them after an enemy bribery attempt - leave at 0 if no attempt happened.</value>
+  </data>
   <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
     <value>Insufficient treasury to equip this prisoner - choose another group or "Do not recruit".</value>
   </data>
@@ -1343,12 +1349,6 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>New roll</value>
   </data>
-  <data name="EndOfGameWheresMoneyEquipmentChoice" xml:space="preserve">
-    <value>Hand over equipment</value>
-  </data>
-  <data name="EndOfGameWheresMoneyDuelChoice" xml:space="preserve">
-    <value>Duel with the leader</value>
-  </data>
   <data name="EndOfGamePairDuelRollLabel" xml:space="preserve">
     <value>Duel roll</value>
   </data>
@@ -1356,10 +1356,16 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Where's the Money?</value>
   </data>
   <data name="EndOfGameWheresMoneyHint" xml:space="preserve">
-    <value>The warband can't pay the bribe - equipment seized or an immediate duel with the leader.</value>
+    <value>The warband can't pay in gold - does the stash cover it? It's seized automatically. Otherwise, duel with the leader.</value>
   </data>
-  <data name="EndOfGameWheresMoneyEquipmentHint" xml:space="preserve">
-    <value>Once this End of Game is saved, manually remove equipment of equal value from the Inventory.</value>
+  <data name="EndOfGameWheresMoneyDuelNote" xml:space="preserve">
+    <value>The stash isn't enough: duel with the leader (next step).</value>
+  </data>
+  <data name="EndOfGameSeizedEquipmentTotalFormat" xml:space="preserve">
+    <value>Seized items: {0} gc (needed: {1} gc)</value>
+  </data>
+  <data name="EndOfGameDramatisPersonaeBaselineTreasuryFormat" xml:space="preserve">
+    <value>Treasury available for this payment: {0} gc</value>
   </data>
   <data name="EndOfGamePairDuelWonLabel" xml:space="preserve">
     <value>The leader won the duel</value>
@@ -1367,8 +1373,11 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGamePairDuelRerollHeading" xml:space="preserve">
     <value>Defeat: roll on the Serious Injury table</value>
   </data>
+  <data name="EndOfGamePairDuelHeading" xml:space="preserve">
+    <value>Duel with the leader</value>
+  </data>
   <data name="EndOfGameCaptivesHeading" xml:space="preserve">
-    <value>Enemy prisoners</value>
+    <value>Prisoners &amp; Bribery</value>
   </data>
   <data name="EndOfGameCapturedEnemiesToggle" xml:space="preserve">
     <value>Enemy heroes were captured this game</value>
@@ -1576,6 +1585,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryPairCorruptionPaidSentence" xml:space="preserve">
     <value>The warband bribed Ulli &amp; Marquand for {0} gc (A Fistful of Crowns).</value>
+  </data>
+  <data name="HistoryPairRetentionPaidSentence" xml:space="preserve">
+    <value>The warband paid {1} gc to keep {0} against a bribery attempt (A Fistful of Crowns).</value>
+  </data>
+  <data name="HistoryPairEquipmentSeizedSentence" xml:space="preserve">
+    <value>{0} seized {1} gc worth of the warband's equipment for lack of payment (Where's the Money?).</value>
   </data>
   <data name="HistoryPairDuelWonSentence" xml:space="preserve">
     <value>{0} fought Ulli &amp; Marquand in a duel and survived (Where's the Money?).</value>

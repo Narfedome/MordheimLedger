@@ -73,6 +73,12 @@ public partial class WarbandDetailViewModel
         var warbandArchetypeName = (await _libraryService.GetWarbandArchetypesAsync("en"))
             .First(a => a.Id == Warband.WarbandArchetypeId).Name;
 
+        // Étape "Recrutement" (livre, étape 8) - MaxWarriors pour RecruitmentRules.CanRecruit, voir
+        // EndOfGameDialogViewModel.Recruitment.cs. Null impossible en pratique (l'archétype de CETTE
+        // bande, déjà résolu par Warband.WarbandArchetypeId à l'ouverture de la page) - même confiance
+        // que warbandArchetypeName ci-dessus (.First, échoue fort plutôt que de tolérer un null silencieux).
+        var recruitableWarbandArchetype = (await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, language))!;
+
         // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - limité aux
         // archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
         var englishWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en");
@@ -133,7 +139,8 @@ public partial class WarbandDetailViewModel
 
         var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, dramatisPersonaStartingEquipmentById, ownedEquipmentItemIds, cooldownDramatisPersonaIds, Inventory.ToList(), pitFighterProfile, pitFighterEquipment);
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, dramatisPersonaStartingEquipmentById, ownedEquipmentItemIds, cooldownDramatisPersonaIds,
+            Inventory.ToList(), localizedWarriorArchetypes, recruitableWarbandArchetype, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -158,6 +165,8 @@ public partial class WarbandDetailViewModel
             await ApplyPairEquipmentSeizureIfNeededAsync(dialogViewModel, sentences);
             await ApplyPairDuelIfNeededAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
+            await ApplyRecruitmentAsync(dialogViewModel, sentences);
+            await ApplyHenchmanRecruitmentAsync(dialogViewModel, language, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
@@ -1240,7 +1249,7 @@ public partial class WarbandDetailViewModel
         // accès aux fiches Marquand/Ulli elles-mêmes.
         //
         // !IsPairCorruptionUnaffordable (2026-09-04, retour utilisateur - vrai bug trouvé en creusant un
-        // signalement sur les valeurs du magot) : payer en or ne se fait QUE si la bande peut réellement
+        // signalement sur les valeurs de la réserve) : payer en or ne se fait QUE si la bande peut réellement
         // payer - "instead" dans "if the controlling warband can't pay a successful bribe... the pair
         // INSTEAD seizes an equal value of equipment" est une lecture stricte confirmée par l'utilisateur
         // (aucun or ne sort du tout dans le cas impayable, Céder du matériel/Duel couvre l'INTÉGRALITÉ du
@@ -1372,6 +1381,133 @@ public partial class WarbandDetailViewModel
             Warband.Treasury -= hiredSword.HireCost;
             await _warbandService.SaveWarbandAsync(Warband);
             sentences.Add(string.Format(Loc["HistoryHiredSwordHiredSentence"], name, hiredSword.Name));
+        }
+    }
+
+    /// <summary>Étape "Recrutement" (livre, étape 8) - transforme WarriorRecruitRow/WarriorNameSlot
+    /// (EndOfGameDialogViewModel.Recruitment.cs, de simples brouillons en mémoire jusqu'ici) en vrais
+    /// Warrior, au même moment que tout le reste de ce wizard (Terminer) - jamais avant, voir la doc de
+    /// classe d'EndOfGameDialogViewModel.Recruitment.cs pour pourquoi (refus explicite de l'utilisateur
+    /// d'un mécanisme "recruter puis annuler"). Miroir de la boucle Héros de WarbandEditDialogViewModel.
+    /// Save() - pas un appel direct à cette méthode, simplifiée : toujours une recrue NEUVE (jamais
+    /// ExistingWarrior à synchroniser), équipement toujours Commun (voir AddRecruitEquipment.commonOnly).
+    /// Cette passe ne couvre que les Héros (voir HeroRecruitRows) - Hommes de main (groupes existants avec
+    /// le budget vétérans, ou tout nouveau groupe) restent à construire, voir EndOfGameDialogViewModel.
+    /// Recruitment.cs.</summary>
+    private async Task ApplyRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        // Pas d'équipement/sort ici (retour utilisateur 2026-09-05 - "on a juste un step pour recruter
+        // les héros, on n'a pas les équipements à gérer là") : un Héros fraîchement recruté rejoint la
+        // bande "nu", équipé ensuite via l'étape Achat d'équipement (à construire) qui verse dans la
+        // réserve de la bande plutôt que sur ce guerrier précis.
+        var totalCost = 0;
+        foreach (var row in dialogViewModel.HeroRecruitRows.Where(r => r.Count > 0))
+        {
+            foreach (var slot in row.NameSlots)
+            {
+                var name = slot.Name.Trim();
+                await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name);
+                totalCost += row.Cost;
+                sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
+            }
+        }
+
+        if (totalCost > 0)
+        {
+            Warband.Treasury -= totalCost;
+            await _warbandService.SaveWarbandAsync(Warband);
+        }
+    }
+
+    /// <summary>Étape "Recrutement des Hommes de main" (livre, étape 8, suite) - même principe
+    /// qu'ApplyRecruitmentAsync (Héros) : brouillon en mémoire depuis EndOfGameDialogViewModel.
+    /// Recruitment.cs, appliqué ici seulement à Terminer. Groupes existants (ExistingHenchmanTopUps,
+    /// budget vétérans déjà validé côté wizard, SEUL endroit où l'équipement se calcule automatiquement -
+    /// retour utilisateur 2026-09-05) puis un éventuel nouveau groupe (HenchmanRecruitRows/
+    /// HenchmanGroupDrafts, équipé à l'étape RecruitHenchmenEquipment - choix libre au picker, jamais tiré
+    /// de la réserve, contrairement aux groupes existants ci-dessus). Réserve rechargée FRAÎCHEMENT depuis
+    /// la base ici (pas dialogViewModel's propre _warbandInventory, un instantané figé à l'ouverture du
+    /// wizard) pour refléter tout ce qu'un apply step précédent dans CE MÊME pipeline (ex. "Céder du
+    /// matériel") a déjà retiré de la réserve.</summary>
+    private async Task ApplyHenchmanRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        var stashPool = await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+
+        async Task<int> ConsumeOrBuyAsync(int warriorId, EquipmentItem item, SpecialRule? materialRule, int quantity)
+        {
+            var remaining = quantity;
+            foreach (var stashRow in stashPool.Where(w => w.Item.Id == item.Id && w.MaterialRule?.Id == materialRule?.Id).ToList())
+            {
+                if (remaining <= 0) break;
+                await _warbandService.RemoveWarbandEquipmentAsync(stashRow.Id);
+                await _warbandService.AddWarriorEquipmentAsync(warriorId, stashRow.Item, materialRule: stashRow.MaterialRule, foundValueOverride: stashRow.FoundValueOverride);
+                stashPool.Remove(stashRow);
+                remaining--;
+            }
+
+            if (remaining <= 0) return 0;
+
+            await _warbandService.AddWarriorEquipmentAsync(warriorId, item, quantity: remaining, materialRule: materialRule);
+            // Dague gratuite - même règle que EndOfGameDialogViewModel.GetTopUpBreakdown (même bug/même
+            // fix, retour utilisateur 2026-09-05) : chaque unité achetée ici est la dague personnelle
+            // gratuite d'une recrue neuve différente, jamais gratuite si un matériau a été choisi.
+            var isFreeDagger = item.IsFreeDagger && materialRule is null;
+            return remaining * EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: isFreeDagger);
+        }
+
+        var totalCost = 0;
+
+        foreach (var topUp in dialogViewModel.ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
+        {
+            var warrior = topUp.Row.Warrior;
+            // Capturé AVANT l'incrément ci-dessous : un groupe est UN SEUL Warrior (HeadCount = l'effectif),
+            // donc WarriorEquipment.Quantity y est déjà le TOTAL pour tout le groupe (ex. 3 Épées pour 3
+            // Guerriers), jamais "par modèle" - diviser par l'effectif ACTUEL (avant ce top-up) retrouve la
+            // quantité par modèle, voir EndOfGameDialogViewModel.GetTopUpBreakdown (même bug/même fix, même
+            // retour utilisateur 2026-09-05 - "on rajoute un guerrier... l'épée coute 30, hors l'épée coute
+            // 10"). Muter HeadCount avant de lire cette quantité aurait faussé le calcul.
+            var groupHeadCount = Math.Max(1, warrior.HeadCount);
+            warrior.HeadCount += topUp.AddCount;
+            await _warbandService.SaveWarriorAsync(warrior);
+
+            foreach (var equipment in topUp.CurrentEquipment)
+                totalCost += await ConsumeOrBuyAsync(warrior.Id, equipment.Item, equipment.MaterialRule, topUp.AddCount * equipment.Quantity / groupHeadCount);
+
+            totalCost += topUp.AddCount * (topUp.ArchetypeCost + 2 * topUp.GroupExperience);
+            sentences.Add(string.Format(Loc["HistoryHenchmanTopUpSentence"], topUp.AddCount, warrior.Name));
+        }
+
+        foreach (var row in dialogViewModel.HenchmanRecruitRows)
+        {
+            foreach (var group in row.HenchmanGroupDrafts)
+            {
+                var name = group.Name.Trim();
+                var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name, headCount: group.Count);
+                totalCost += group.Count * row.Cost;
+
+                // Équipement acheté à l'étape RecruitHenchmenEquipment (choix libre, jamais tiré de la
+                // réserve - contrairement au top-up d'un groupe existant ci-dessus). Quantity = group.Count
+                // (pas 1) : un groupe est UN SEUL Warrior (HeadCount = l'effectif), donc Quantity y
+                // représente déjà le TOTAL pour tout le groupe - même convention que le fix ci-dessus sur
+                // les groupes existants (bug 2026-09-05, "l'épée coute 30, hors l'épée coute 10").
+                foreach (var pick in group.Equipment)
+                {
+                    await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, quantity: group.Count, materialRule: pick.MaterialRule);
+                    totalCost += group.Count * pick.Cost;
+                }
+
+                sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
+            }
+        }
+
+        if (totalCost > 0)
+        {
+            Warband.Treasury -= totalCost;
+            await _warbandService.SaveWarbandAsync(Warband);
         }
     }
 

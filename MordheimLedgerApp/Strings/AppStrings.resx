@@ -1356,10 +1356,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Où est l'Argent ?</value>
   </data>
   <data name="EndOfGameWheresMoneyHint" xml:space="preserve">
-    <value>La bande ne peut pas payer en or - le magot couvre la somme ? Il est cédé automatiquement. Sinon, duel avec le meneur.</value>
+    <value>La bande ne peut pas payer en or - la réserve couvre la somme ? Elle est cédée automatiquement. Sinon, duel avec le meneur.</value>
   </data>
   <data name="EndOfGameWheresMoneyDuelNote" xml:space="preserve">
-    <value>Le magot ne suffit pas : duel avec le meneur (étape suivante).</value>
+    <value>La réserve ne suffit pas : duel avec le meneur (étape suivante).</value>
   </data>
   <data name="EndOfGameSeizedEquipmentTotalFormat" xml:space="preserve">
     <value>Objets saisis : {0} CO (besoin : {1} CO)</value>
@@ -1411,6 +1411,42 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Trésorerie restante : {0} CO</value>
+  </data>
+  <data name="EndOfGameRecruitmentHeading" xml:space="preserve">
+    <value>Recrutement des Héros</value>
+  </data>
+  <data name="EndOfGameRecruitmentHeroesHeading" xml:space="preserve">
+    <value>Héros</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenHeading" xml:space="preserve">
+    <value>Recrutement des Hommes de main</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenExistingHeading" xml:space="preserve">
+    <value>Groupes existants</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenExistingHint" xml:space="preserve">
+    <value>Budget de vétérans disponibles : {0} XP (jet de l'étape Disponibilité des Vétérans). Chaque recrue coûte le prix normal du type + son équipement (comme le reste du groupe) + 2 CO par point d'Expérience du groupe.</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenNewHeading" xml:space="preserve">
+    <value>Nouveau groupe</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenEquipmentHeading" xml:space="preserve">
+    <value>Équipement des nouveaux groupes</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenNamesHeading" xml:space="preserve">
+    <value>Noms des nouveaux groupes</value>
+  </data>
+  <data name="EndOfGameRecruitStashUsedFormat" xml:space="preserve">
+    <value>{0} objet(s) pris dans la réserve plutôt qu'acheté(s) à neuf.</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenRecruitmentCostLabel" xml:space="preserve">
+    <value>Recrutement</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenSurchargeLabel" xml:space="preserve">
+    <value>Surtaxe d'Expérience</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenTotalLabel" xml:space="preserve">
+    <value>Total</value>
   </data>
   <data name="EndOfGameCharacterWyrdstoneCostValue" xml:space="preserve">
     <value>1 pierre magique</value>
@@ -1642,6 +1678,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
     <value>{0} le {1} rejoint la bande.</value>
+  </data>
+  <data name="HistoryRecruitedSentence" xml:space="preserve">
+    <value>{0} le {1} rejoint la bande (recrutement).</value>
+  </data>
+  <data name="HistoryHenchmanTopUpSentence" xml:space="preserve">
+    <value>{0} recrue(s) supplémentaire(s) ajoutée(s) au groupe {1}.</value>
   </data>
   <data name="HistoryHiredSwordFreeGrantSentence" xml:space="preserve">
     <value>{0} rejoint la bande gratuitement pour la prochaine bataille (Une Faveur Rendue).</value>

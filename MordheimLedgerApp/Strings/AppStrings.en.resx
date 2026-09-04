@@ -1412,6 +1412,42 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Remaining treasury: {0} gc</value>
   </data>
+  <data name="EndOfGameRecruitmentHeading" xml:space="preserve">
+    <value>Hero recruitment</value>
+  </data>
+  <data name="EndOfGameRecruitmentHeroesHeading" xml:space="preserve">
+    <value>Heroes</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenHeading" xml:space="preserve">
+    <value>Henchmen recruitment</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenExistingHeading" xml:space="preserve">
+    <value>Existing groups</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenExistingHint" xml:space="preserve">
+    <value>Available veteran budget: {0} XP (rolled in the Available Veterans step). Each recruit costs the type's normal price + its equipment (same as the rest of the group) + 2 gc per Experience point of the group.</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenNewHeading" xml:space="preserve">
+    <value>New group</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenEquipmentHeading" xml:space="preserve">
+    <value>Equip the new groups</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenNamesHeading" xml:space="preserve">
+    <value>Name the new groups</value>
+  </data>
+  <data name="EndOfGameRecruitStashUsedFormat" xml:space="preserve">
+    <value>{0} item(s) taken from the reserve instead of bought new.</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenRecruitmentCostLabel" xml:space="preserve">
+    <value>Recruitment</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenSurchargeLabel" xml:space="preserve">
+    <value>Experience surcharge</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenTotalLabel" xml:space="preserve">
+    <value>Total</value>
+  </data>
   <data name="EndOfGameCharacterWyrdstoneCostValue" xml:space="preserve">
     <value>1 wyrdstone shard</value>
   </data>
@@ -1642,6 +1678,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
     <value>{0} the {1} joins the warband.</value>
+  </data>
+  <data name="HistoryRecruitedSentence" xml:space="preserve">
+    <value>{0} the {1} joins the warband (recruitment).</value>
+  </data>
+  <data name="HistoryHenchmanTopUpSentence" xml:space="preserve">
+    <value>{0} new recruit(s) added to the {1} group.</value>
   </data>
   <data name="HistoryHiredSwordFreeGrantSentence" xml:space="preserve">
     <value>{0} joins the warband free of charge for the next battle (Returning a Favour).</value>

@@ -115,6 +115,14 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// (Library CRUD tab, every normal multi-item purchase picker).</summary>
     public bool SingleSelectMode { get; set; }
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) for the End of Game "Recrutement" step -
+    /// a newly hired recruit "can only buy Common items from his warband's equipment chart freely...
+    /// may only be given Rare items if the warband can obtain them via the normal trading rules"
+    /// (rulebook, "New Recruits") - excludes every item with a Rarity value (EquipmentItem.Rarity.
+    /// HasValue), regardless of category or AllowedEquipmentListItemIds membership. False everywhere
+    /// else (every other picker still lets a Rare list member through).</summary>
+    public bool CommonOnly { get; set; }
+
     public bool ShowBudget => AvailableGold.HasValue;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
@@ -229,6 +237,9 @@ public partial class EquipmentItemViewModel : BaseViewModel
                 filtered = filtered.Where(BroadBandScoped);
             }
         }
+
+        if (CommonOnly)
+            filtered = filtered.Where(i => !i.Rarity.HasValue);
 
         var groups = new ObservableCollection<EquipmentItemGroup>();
         foreach (var item in filtered)

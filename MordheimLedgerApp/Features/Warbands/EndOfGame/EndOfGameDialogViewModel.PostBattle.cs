@@ -133,7 +133,14 @@ public partial class EndOfGameDialogViewModel
     [ObservableProperty]
     private string? veteranExperienceRoll;
 
-    partial void OnVeteranExperienceRollChanged(string? value) => VeteranExperienceRollError = null;
+    partial void OnVeteranExperienceRollChanged(string? value)
+    {
+        VeteranExperienceRollError = null;
+        // Le budget vétérans (RemainingVeteranBudget, EndOfGameDialogViewModel.Recruitment.cs) en dépend
+        // directement - étape RecruitHenchmen, toujours APRÈS celle-ci dans la séquence.
+        OnPropertyChanged(nameof(RemainingVeteranBudget));
+        OnPropertyChanged(nameof(RecruitHenchmenExistingHintDisplay));
+    }
 
     [ObservableProperty]
     private string? veteranExperienceRollError;

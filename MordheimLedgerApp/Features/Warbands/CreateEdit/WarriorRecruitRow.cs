@@ -296,7 +296,18 @@ public partial class WarriorRecruitRow : ObservableObject
     /// des équipements différents à une partie du type recruté - voir HenchmanGroupDraft.</summary>
     public ObservableCollection<HenchmanGroupDraft> HenchmanGroupDrafts { get; } = new();
 
-    public string CountDisplay => $"{Count}/{(Archetype.MaxCount?.ToString() ?? "∞")}";
+    /// <summary>Effectif déjà dans la bande AVANT cette étape, hors de toute portée de ce Row (0 par
+    /// défaut - WarbandEditDialogViewModel n'y touche jamais, Count y contient déjà le roster existant via
+    /// les slots pré-remplis). Poussé par EndOfGameDialogViewModel.Recruitment (ExistingCountForArchetype)
+    /// juste après la construction, cas différent : les Héros/Hommes de main déjà recrutés vivent dans
+    /// WarriorRows, pas dans des slots de CE Row, donc Count n'y démarre qu'à 0 (nouvelles recrues de cette
+    /// session uniquement) - sans ce terme, CountDisplay montrerait "0/1" pour un type déjà au complet
+    /// (retour utilisateur 2026-09-05 - "pourquoi les héros déjà créer ne sont pas comptabilisé").</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CountDisplay))]
+    private int externalHeadCount;
+
+    public string CountDisplay => $"{Count + ExternalHeadCount}/{(Archetype.MaxCount?.ToString() ?? "∞")}";
 
     /// <summary>Recalculée par WarbandEditDialogViewModel après chaque changement (budget/effectif
     /// bande dépendent des AUTRES lignes, pas seulement de celle-ci) - voir UpdateRecruitability.</summary>

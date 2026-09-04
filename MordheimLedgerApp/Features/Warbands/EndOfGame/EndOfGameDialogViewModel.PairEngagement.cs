@@ -26,9 +26,9 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// PairDuel.cs, sa propre étape) reste inchangé, seulement déplacé dans ce fichier.
 ///
 /// **Céder du matériel vs Duel : déterminé automatiquement, plus de choix manuel (2026-09-02, retour
-/// utilisateur)** - `WantsEquipmentSeizure`/`WantsDuel` comparent la valeur totale du magot de bande
-/// (`WarbandInventoryTotalValue`) au montant dû : le magot suffit → céder du matériel (jamais de duel
-/// dans ce cas) ; le magot ne suffit pas → duel avec le meneur (seule alternative qui reste).
+/// utilisateur)** - `WantsEquipmentSeizure`/`WantsDuel` comparent la valeur totale de la réserve de bande
+/// (`WarbandInventoryTotalValue`) au montant dû : la réserve suffit → céder du matériel (jamais de duel
+/// dans ce cas) ; la réserve ne suffit pas → duel avec le meneur (seule alternative qui reste).
 ///
 /// **Générique depuis le 2026-09-04 (retour utilisateur) : piloté par la SpecialRule "A Fistful of
 /// Crowns"/"Une Poignée d'Or", pas par FeeKind.Pair.** `_fistfulOfCrownsPersonaIds` (résolue via
@@ -263,7 +263,7 @@ public partial class EndOfGameDialogViewModel
     public bool IsPairCorruptionUnaffordable => WantsToRecordPairCorruption
         && int.TryParse(PairCorruptionAmount, out var amount) && amount > DramatisPersonaeBaselineTreasury;
 
-    /// <summary>Valeur totale du magot de bande, toutes lignes confondues - seule mesure qui tranche
+    /// <summary>Valeur totale de la réserve de bande, toutes lignes confondues - seule mesure qui tranche
     /// automatiquement entre Céder du matériel et Duel avec le meneur.</summary>
     private int WarbandInventoryTotalValue => _warbandInventory.Sum(w => w.SellValue);
 
@@ -273,17 +273,17 @@ public partial class EndOfGameDialogViewModel
         ? corruptionAmount
         : IsPairRetentionUnaffordable && int.TryParse(PairRetentionAmount, out var retentionAmount) ? retentionAmount : 0;
 
-    /// <summary>Automatique : le magot de la bande, à lui seul, couvre le montant dû -> elle cède du
+    /// <summary>Automatique : la réserve de la bande, à elle seule, couvre le montant dû -> elle cède du
     /// matériel plutôt que de risquer son meneur en duel. Faux si aucun paiement n'est dû
-    /// (PairPaymentTargetAmount == 0) ou si le magot ne suffit pas (voir WantsDuel, l'autre branche).</summary>
+    /// (PairPaymentTargetAmount == 0) ou si la réserve ne suffit pas (voir WantsDuel, l'autre branche).</summary>
     public bool WantsEquipmentSeizure => PairPaymentTargetAmount > 0 && WarbandInventoryTotalValue >= PairPaymentTargetAmount;
 
-    /// <summary>Automatique : le magot ne suffit pas à couvrir le montant dû -> seule alternative qui
+    /// <summary>Automatique : la réserve ne suffit pas à couvrir le montant dû -> seule alternative qui
     /// reste, un duel avec le meneur de bande (voir WantsEquipmentSeizure, l'autre branche - les deux
     /// sont mutuellement exclusives et ne couvrent jamais PairPaymentTargetAmount == 0 à la fois).</summary>
     public bool WantsDuel => PairPaymentTargetAmount > 0 && WarbandInventoryTotalValue < PairPaymentTargetAmount;
 
-    /// <summary>"Céder du matériel" : sélection automatique dans le magot de bande, du PLUS VALEUREUX
+    /// <summary>"Céder du matériel" : sélection automatique dans la réserve de bande, du PLUS VALEUREUX
     /// objet au moins valeureux ("on prend les équipements les plus valuable d'abord jusqu'à atteindre la
     /// somme", ex. une Épée en Gromril à 60 CO + 3 Épées classiques à 10 CO chacune pour une rançon de
     /// 50 CO -> on ne perd QUE l'Épée en Gromril, jamais les 3 armes bon marché en plus). Perdre un
@@ -291,7 +291,7 @@ public partial class EndOfGameDialogViewModel
     /// boucle s'arrête dès que la cible est atteinte/dépassée. Une ligne = une pile ENTIÈRE (jamais un
     /// retrait partiel - aucun mécanisme de pile partielle ailleurs dans l'app, voir
     /// AlternativePaymentItemId's own doc). N'est en pratique appelée que quand WantsEquipmentSeizure est
-    /// vrai (le magot suffit), donc n'a normalement jamais besoin de vider tout le magot sans atteindre
+    /// vrai (la réserve suffit), donc n'a normalement jamais besoin de vider toute la réserve sans atteindre
     /// la cible - conservé quand même en repli défensif.</summary>
     public List<WarbandEquipment> SeizedEquipmentItems
     {
@@ -316,7 +316,7 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Computed here (not nested in a XAML StringFormat, invalid syntax for a {loc:Loc} value) -
     /// "Objets saisis : X CO (besoin : Y CO)" pour que le joueur voie tout de suite si la sélection
-    /// automatique couvre bien la cible (elle ne le peut pas toujours - un magot trop pauvre saisit tout
+    /// automatique couvre bien la cible (elle ne le peut pas toujours - une réserve trop pauvre saisit tout
     /// ce qu'il a sans jamais atteindre PairPaymentTargetAmount, voir SeizedEquipmentItems's own doc).</summary>
     public string SeizedEquipmentTotalDisplay => string.Format(Loc["EndOfGameSeizedEquipmentTotalFormat"], SeizedEquipmentTotalValue, PairPaymentTargetAmount);
 }

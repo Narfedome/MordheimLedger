@@ -16,7 +16,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// à la table, coche simplement victoire/défaite (WonDuel).
 ///
 /// **Générique depuis le 2026-09-04 (retour utilisateur - "si le personnage a la règle c'est l'heure de
-/// payer, on réutilise la mécanique du combat/vol de magot") : DuelOpponents affiche 1 ou 2 cartes
+/// payer, on réutilise la mécanique du combat/vol de réserve") : DuelOpponents affiche 1 ou 2 cartes
 /// selon PairedWithDramatisPersona, pas 2 fixes (Marquand + Ulli).** Ulli &amp; Marquand restent le seul
 /// cas réel aujourd'hui (2 cartes) ; un futur Dramatis Persona solo portant "A Fistful of Crowns" sans
 /// partenaire n'afficherait qu'une seule carte, sans rien à changer dans ce fichier ni le XAML.

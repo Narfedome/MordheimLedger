@@ -51,6 +51,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private readonly ILibraryService _libraryService;
     private readonly IHiredSwordPickerService _hiredSwordPicker;
     private readonly IEquipmentPickerService _equipmentPicker;
+    private readonly ISellEquipmentPickerService _sellEquipmentPicker;
     private readonly IDramatisPersonaPickerService _dramatisPersonaPicker;
     private readonly int _warbandArchetypeId;
 
@@ -565,7 +566,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyDictionary<int, List<EquipmentQuantityChip>> dramatisPersonaStartingEquipmentById, IReadOnlyCollection<int> ownedEquipmentItemIds, IReadOnlyCollection<int> cooldownDramatisPersonaIds, List<WarbandEquipment> warbandInventory, List<WarriorArchetype> recruitableWarriorArchetypes,
+    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, ISellEquipmentPickerService sellEquipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyDictionary<int, List<EquipmentQuantityChip>> dramatisPersonaStartingEquipmentById, IReadOnlyCollection<int> ownedEquipmentItemIds, IReadOnlyCollection<int> cooldownDramatisPersonaIds, List<WarbandEquipment> warbandInventory, List<WarriorArchetype> recruitableWarriorArchetypes,
         WarbandArchetype recruitableWarbandArchetype, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
     {
         _skillPicker = skillPicker;
@@ -573,6 +574,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _libraryService = libraryService;
         _hiredSwordPicker = hiredSwordPicker;
         _equipmentPicker = equipmentPicker;
+        _sellEquipmentPicker = sellEquipmentPicker;
         _dramatisPersonaPicker = dramatisPersonaPicker;
         _warbandArchetypeId = warbandArchetypeId;
         _warbandArchetypeName = warbandArchetypeName;

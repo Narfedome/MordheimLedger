@@ -307,7 +307,7 @@ public partial class EndOfGameDialogViewModel
         foreach (var sale in PendingSales.Where(c => c.IsFromStash))
         {
             var key = (sale.Item.Id, sale.MaterialRule?.Id);
-            pool[key] = Math.Max(0, pool.GetValueOrDefault(key) - sale.Quantity);
+            pool[key] = Math.Max(0, pool.GetValueOrDefault(key) - sale.SelectedQuantity);
         }
         return pool;
     }

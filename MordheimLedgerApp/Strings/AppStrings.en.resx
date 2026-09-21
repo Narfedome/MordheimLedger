@@ -1424,9 +1424,6 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameEquipmentTradingStashSource" xml:space="preserve">
     <value>Stash</value>
   </data>
-  <data name="EndOfGameSellEquipmentDialogTitle" xml:space="preserve">
-    <value>Sell Equipment</value>
-  </data>
   <data name="EndOfGameSellEquipmentTotalLabel" xml:space="preserve">
     <value>Sale total</value>
   </data>

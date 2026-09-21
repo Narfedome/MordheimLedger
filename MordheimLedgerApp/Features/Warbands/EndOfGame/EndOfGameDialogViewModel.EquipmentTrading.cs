@@ -12,23 +12,33 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// l'achat vente d'équipement, puis le recrutement avec l'assignation des équipements de la stash je me
 /// demande si ça serait pas plus simple dans notre gestion"). Deux sections indépendantes :
 ///
-/// **Achat** : choix libre au picker (commonOnly, comme le reste du recrutement), rejoint la réserve de
-/// la bande - PAS assigné à un guerrier précis ici (PurchasedReserveItems, de simples EquipmentPick sans
-/// slot/groupe porteur, réutilisés tels quels).
+/// **Achat** : choix libre au picker partagé (_equipmentPicker, commonOnly, comme le reste du
+/// recrutement), rejoint la réserve de la bande - PAS assigné à un guerrier précis ici
+/// (PurchasedReserveItems, de simples EquipmentPick sans slot/groupe porteur, réutilisés tels quels).
 ///
 /// **Vente** : livre des règles - "Warriors can automatically sell equipment for half its listed price...
 /// rare equipment and weapons which have a variable price, the warband receives half of the basic cost
 /// only" ET "trade in weapons and equipment... swapped around the warband" (donc pas SEULEMENT la réserve
-/// - l'équipement DÉJÀ PORTÉ par un guerrier actif aussi, retour utilisateur explicite après une première
-/// version scopée à tort à la seule réserve). SellEquipmentDialog (Codex/chips, sélection multiple,
-/// retour utilisateur - "affichage façon chiplistitem/codex... on ouvre l'inventaire façon codex,
-/// sélection multiple, on valide") liste tout ce qui est vendable (réserve + porté), PendingSales garde
-/// les lignes confirmées comme des chips retirables (RemoveSaleEquipment, la croix). Ne porte QUE sur
-/// l'équipement DÉJÀ LÀ avant cette partie (WarbandEquipment de _warbandInventory + WarriorEquipment déjà
-/// porté) - jamais un achat de CETTE session (Achat ci-dessus, ou un pick de l'étape Recrutement) : annuler
-/// un achat en cours de session retire simplement le pick (RemoveReserveEquipment/RemoveRecruitEquipment),
-/// ce n'est jamais une "vente" à moitié prix (retour utilisateur - "si on fait un achat et que finalement
-/// on change d'avis, on considère que l'objet n'est pas acheté").
+/// - l'équipement DÉJÀ PORTÉ par un guerrier actif aussi). Ne porte QUE sur l'équipement DÉJÀ LÀ avant
+/// cette partie (WarbandEquipment de _warbandInventory + WarriorEquipment déjà porté) OU trouvé PENDANT
+/// cette même partie via Exploration - jamais un achat de CETTE session (Achat ci-dessus, ou un pick de
+/// l'étape Recrutement) : annuler un achat en cours de session retire simplement le pick
+/// (RemoveReserveEquipment/RemoveRecruitEquipment), ce n'est jamais une "vente" à moitié prix.
+///
+/// **Historique de design (2026-09-21)** : Vente a d'abord vécu derrière un "+" ouvrant SellEquipmentDialog
+/// (un popup DialogContent&lt;T&gt; bespoke), puis une itération affichée en ligne directement sur cette
+/// étape - ni l'une ni l'autre ne correspondait au standard de l'app. Retour utilisateur final : "on
+/// utilise le sélecteur qu'on a toujours eu dans l'appli. Ouverture d'une nouvelle page... grouper par
+/// personnage/groupe/réserve. Fin le classique d'un sélecteur qu'on avait jusque-là" - _sellEquipmentPicker
+/// (ISellEquipmentPickerService/SellEquipmentSelectorPage) suit exactement la même famille que
+/// _equipmentPicker/IMutationPickerService et consorts (page poussée modalement via PushModalAsync, pas un
+/// dialog). PendingSales reste la liste PERSISTANTE des ventes confirmées (chips retirables sur cet écran,
+/// comme Achat) ; BuildSellableCandidates() reconstruit à CHAQUE ouverture du picker (jamais mis en cache)
+/// ce qui reste vendable, en retranchant ce qui est déjà dans PendingSales - le picker n'affiche donc
+/// jamais deux fois la même unité déjà vendue. Reconstruire à la demande (pas au constructeur du wizard)
+/// règle aussi un problème de timing : à l'ouverture du wizard, l'étape Exploration (antérieure dans
+/// Steps) n'a pas encore été jouée, donc PendingExplorationStashItems() y serait vide - reconstruire
+/// seulement quand le joueur clique "+" (forcément après avoir déjà traversé Exploration) évite ce piège.
 ///
 /// Le solde de cette étape (Achat en dépense, Vente en recette) rejoint EndOfGameTreasuryRemaining comme
 /// tout le reste du wizard ; la réserve qui en résulte (pré-partie + Exploration + Achat - Vente) est ce
@@ -80,7 +90,8 @@ public partial class EndOfGameDialogViewModel
         NotifyTreasuryChanged();
     }
 
-    // --- Vente : réserve pré-partie + équipement déjà porté, jamais un achat de cette session -----------
+    // --- Vente : réserve pré-partie + équipement déjà porté + trouvailles d'Exploration, jamais un achat
+    // de cette session - même famille de picker (page poussée modalement) que le reste de l'app ------------
 
     public ObservableCollection<SellableEquipmentCandidate> PendingSales { get; } = new();
 
@@ -93,25 +104,41 @@ public partial class EndOfGameDialogViewModel
     /// total").</summary>
     public int EquipmentTradingNetTotal => PendingSalesTotal - PurchasedReserveItemsCost;
 
-    /// <summary>Tout ce qui existait déjà AVANT cette partie et peut donc être vendu (livre des règles -
-    /// "swapped around the warband from one fighter to another") : la réserve pré-partie
-    /// (_warbandInventory, jamais ce que l'étape Achat vient d'y ajouter) puis l'équipement déjà porté par
-    /// chaque guerrier actif (WarriorRows - tous, y compris un guerrier Hors de combat cette partie : son
-    /// équipement existait bien avant, seul son statut change). SelectableCandidateKey (IsFromStash,
-    /// SourceId) exclut ce qui est déjà dans PendingSales, pour ne jamais proposer deux fois la même
-    /// ligne au picker.</summary>
+    /// <summary>Tout ce qui existait déjà AVANT cette partie, OU a été trouvé PENDANT cette même partie via
+    /// Exploration, et peut donc être vendu (livre des règles - "swapped around the warband from one
+    /// fighter to another") : la réserve pré-partie (_warbandInventory, jamais ce que l'étape Achat vient
+    /// d'y ajouter), les trouvailles d'Exploration de cette partie (PendingExplorationStashItems -
+    /// regroupées par (Item, MaterialRule), une trouvaille peut provenir de plusieurs sources indépendantes
+    /// du même jet), puis l'équipement déjà porté par chaque guerrier actif (WarriorRows - tous, y compris
+    /// un guerrier Hors de combat cette partie : son équipement existait bien avant, seul son statut
+    /// change). Reconstruite à CHAQUE appel (jamais mise en cache) - alreadyPendingQty retranche, par
+    /// source (IsFromStash, SourceId), tout ce qui est déjà dans PendingSales pour cette ligne : le
+    /// candidat proposé au picker ne porte que le RELIQUAT, jamais réexcluant la ligne entière tant qu'il
+    /// en reste au moins un.</summary>
     private IEnumerable<SellableEquipmentCandidate> BuildSellableCandidates()
     {
-        var alreadyPending = PendingSales.Select(c => (c.IsFromStash, c.SourceId)).ToHashSet();
+        var alreadyPendingQty = PendingSales.GroupBy(c => (c.IsFromStash, c.SourceId)).ToDictionary(g => g.Key, g => g.Sum(c => c.SelectedQuantity));
 
         foreach (var stashItem in _warbandInventory)
-            if (!alreadyPending.Contains((true, stashItem.Id)))
-                yield return new SellableEquipmentCandidate(stashItem);
+        {
+            var remaining = stashItem.Quantity - alreadyPendingQty.GetValueOrDefault((true, stashItem.Id));
+            if (remaining > 0) yield return new SellableEquipmentCandidate(stashItem, remaining);
+        }
+
+        foreach (var group in PendingExplorationStashItems().GroupBy(x => (x.Item.Id, MaterialRuleId: x.MaterialRule?.Id)))
+        {
+            var (item, materialRule, _) = group.First();
+            var sourceId = SellableEquipmentCandidate.SyntheticExplorationSourceId(item.Id, materialRule?.Id);
+            var remaining = group.Sum(x => x.Quantity) - alreadyPendingQty.GetValueOrDefault((true, sourceId));
+            if (remaining > 0) yield return new SellableEquipmentCandidate(item, materialRule, remaining);
+        }
 
         foreach (var row in WarriorRows)
             foreach (var equipment in row.Warrior.Equipment)
-                if (!alreadyPending.Contains((false, equipment.Id)))
-                    yield return new SellableEquipmentCandidate(equipment, row.Warrior.Name);
+            {
+                var remaining = equipment.Quantity - alreadyPendingQty.GetValueOrDefault((false, equipment.Id));
+                if (remaining > 0) yield return new SellableEquipmentCandidate(equipment, row.Warrior.Name, remaining);
+            }
     }
 
     [RelayCommand]
@@ -123,15 +150,12 @@ public partial class EndOfGameDialogViewModel
             // Bouton "+" toujours cliquable même quand il n'y a rien à vendre (pas de désactivation
             // conditionnelle) - un no-op silencieux se lisait comme "le menu ne s'ouvre pas" (retour
             // utilisateur 2026-09-05) - message explicite à la place.
-            await ShowInfoAsync(Loc["EndOfGameSellEquipmentDialogTitle"], Loc["EndOfGameNoSellableEquipment"]);
+            await ShowInfoAsync(Loc["EndOfGameEquipmentTradingSellHeading"], Loc["EndOfGameNoSellableEquipment"]);
             return;
         }
 
-        var viewModel = new SellEquipmentDialogViewModel(candidates);
-        var confirmed = await ShowDialogAsync(new SellEquipmentDialog(viewModel));
-        if (confirmed != true) return;
-
-        foreach (var candidate in viewModel.Candidates.Where(c => c.IsSelected))
+        var selected = await _sellEquipmentPicker.PickSaleAsync(candidates);
+        foreach (var candidate in selected)
             PendingSales.Add(candidate);
 
         NotifyTreasuryChanged();

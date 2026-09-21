@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:picker="clr-namespace:MordheimLedgerApp.Components.PickerSelectorLayout"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.SellEquipmentSelectorPage"
+             x:Name="root"
+             Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
+
+    <!-- Poussée nue (pas de NavigationPage, voir SellEquipmentPickerService) - voir PickerSelectorLayout
+         pour le pourquoi. Même famille que EquipmentItemSelectorPage/MutationSelectorPage (retour
+         utilisateur 2026-09-21 - "on utilise le sélecteur qu'on a toujours eu dans l'appli... fin le
+         classique d'un sélecteur qu'on avait jusque-là") : grille de tuiles groupée (CollectionView
+         IsGrouped="True", CodexGroupHeaderStyle/CodexTileFrameStyle) plutôt qu'un popup ou un affichage en
+         ligne sur le wizard - Réserve en premier puis une section par guerrier porteur. -->
+    <picker:PickerSelectorLayout Title="{loc:Loc EndOfGameEquipmentTradingSellHeading}" BackCommand="{Binding CancelCommand}">
+        <Grid RowSpacing="8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Padding="10,6">
+                <Label Grid.Column="0" Text="{loc:Loc EndOfGameSellEquipmentTotalLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                <Label Grid.Column="1" Text="{Binding TotalSellPrice}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+            </Grid>
+
+            <CollectionView Grid.Row="1" ItemsSource="{Binding Groups}" IsGrouped="True"
+                            SelectionMode="None" ItemSizingStrategy="MeasureFirstItem">
+                <CollectionView.Behaviors>
+                    <components:ResponsiveGridSpanBehavior/>
+                </CollectionView.Behaviors>
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="local:SellableEquipmentGroup">
+                        <Label Text="{Binding Name}" Style="{StaticResource CodexGroupHeaderStyle}"/>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="local:SellableEquipmentCandidate">
+                        <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList/>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Stroke" Value="LightSkyBlue"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid Style="{StaticResource CodexTileFrameStyle}">
+                                <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                           FontFamily="RpgAwesome" FontSize="20" TextColor="{DynamicResource AppAccent}" HorizontalOptions="Center"/>
+                                    <Label Text="{Binding Name}" Style="{StaticResource CodexTileNameLabelStyle}"
+                                           HorizontalOptions="Center" HorizontalTextAlignment="Center" Margin="5,0"/>
+                                    <Label Text="{Binding UnitSellPriceDisplay}" Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
+                                    <HorizontalStackLayout Spacing="2" HorizontalOptions="Center">
+                                        <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                     Icon="{x:Static icons:SolidFont.Minus}"
+                                                     IconSize="9" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                     Opacity="{Binding CanDecrement, Converter={StaticResource BoolToOpacityConverter}}"
+                                                     InputTransparent="{Binding CanDecrement, Converter={StaticResource InverseBoolConverter}}"
+                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.DecrementCommand}"
+                                                     CommandParameter="{Binding .}"/>
+                                        <Label Text="{Binding CountDisplay}" FontSize="10" VerticalOptions="Center"
+                                               WidthRequest="28" HorizontalTextAlignment="Center"/>
+                                        <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                     Icon="{x:Static icons:SolidFont.Plus}"
+                                                     IconSize="9" ButtonWidthRequest="18" ButtonHeightRequest="18"
+                                                     Opacity="{Binding CanIncrement, Converter={StaticResource BoolToOpacityConverter}}"
+                                                     InputTransparent="{Binding CanIncrement, Converter={StaticResource InverseBoolConverter}}"
+                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.IncrementCommand}"
+                                                     CommandParameter="{Binding .}"/>
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8">
+                <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
+                                             Command="{Binding ConfirmCommand}"
+                                             Tooltip="{loc:Loc LibConfirm}"/>
+                <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleXmark}"
+                                             Command="{Binding CancelCommand}"
+                                             Tooltip="{loc:Loc LibCancel}"/>
+            </HorizontalStackLayout>
+        </Grid>
+    </picker:PickerSelectorLayout>
+</ContentPage>

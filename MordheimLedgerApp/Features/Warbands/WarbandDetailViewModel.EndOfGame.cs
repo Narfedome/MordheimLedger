@@ -137,7 +137,7 @@ public partial class WarbandDetailViewModel
         // en cooldown pour CETTE bande.
         var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(Warband.Id);
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _sellEquipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
             warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
             warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, dramatisPersonaStartingEquipmentById, ownedEquipmentItemIds, cooldownDramatisPersonaIds,
             Inventory.ToList(), localizedWarriorArchetypes, recruitableWarbandArchetype, pitFighterProfile, pitFighterEquipment);
@@ -166,8 +166,11 @@ public partial class WarbandDetailViewModel
             await ApplyPairDuelIfNeededAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
             // Doit rester AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync : ceux-ci consomment
-            // en priorité la réserve que cette étape vient de remplir/vider (voir leur propre doc).
-            await ApplyEquipmentTradingAsync(dialogViewModel, sentences);
+            // en priorité la réserve que cette étape vient de remplir/vider (voir leur propre doc). Doit
+            // rester APRÈS ApplyExplorationOutcomeAsync (plus haut) : une vente peut porter sur une
+            // trouvaille d'Exploration de cette même partie (SellableEquipmentCandidate.IsFromExploration),
+            // qui n'existe en base qu'une fois cette étape-là appliquée.
+            await ApplyEquipmentTradingAsync(dialogViewModel, language, sentences);
             await ApplyRecruitmentAsync(dialogViewModel, language, sentences);
             await ApplyHenchmanRecruitmentAsync(dialogViewModel, language, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
@@ -1477,12 +1480,28 @@ public partial class WarbandDetailViewModel
     /// equipment for half its listed price... the warband receives half of the basic cost only" pour un
     /// prix variable - retire de la réserve (WarbandEquipment) OU du guerrier qui le porte
     /// (WarriorEquipment, "trade in weapons and equipment... swapped around the warband" - pas seulement
-    /// la réserve), crédite SellPrice (déjà calculé sur le candidat, jamais recalculé ici).</summary>
-    private async Task ApplyEquipmentTradingAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    /// la réserve), crédite SellPrice (déjà calculé sur le candidat, jamais recalculé ici).
+    ///
+    /// **Vente partielle** (retour utilisateur 2026-09-21, revu par rapport à une première version "ligne
+    /// entière uniquement") : candidate.SelectedQuantity peut être inférieur à la quantité réelle de la
+    /// ligne d'origine - supprime toujours la ligne existante puis recrée le reliquat (aucune méthode de
+    /// service dédiée à la réduction partielle, voir IWarbandService), MaterialRule/FoundValueOverride
+    /// reportés sur la ligne recréée. Ne préserve PAS BlessingRule sur le reliquat porté (AddWarriorEquipmentAsync
+    /// ne l'accepte pas) - lacune acceptée, une arme bénie fait rarement partie d'une pile de quantité &gt; 1.
+    ///
+    /// Un candidat IsFromExploration (trouvaille de cette même partie) n'a pas de StashItem connu à
+    /// l'ouverture du dialog - ApplyExplorationOutcomeAsync ne l'a ajouté en base que juste avant cette
+    /// étape (voir SaveAsync's own commentaire d'ordre) - re-résout le(s) vrai(s) WarbandEquipment
+    /// fraîchement créé(s) via un fetch tardif, même idiome que ConsumeReserveOrBuyAsync (jamais réutiliser
+    /// un id connu à l'ouverture du dialog, qui n'existait pas encore) ; peut consommer plusieurs lignes
+    /// (une trouvaille peut avoir été ajoutée en plusieurs AddWarbandEquipmentAsync distincts - objet
+    /// principal + objet bonus identiques par exemple) et réduire partiellement la dernière.</summary>
+    private async Task ApplyEquipmentTradingAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
     {
         if (Warband is null) return;
 
         var netGold = 0;
+        List<WarbandEquipment>? freshStashForExplorationSales = null;
 
         foreach (var pick in dialogViewModel.PurchasedReserveItems)
         {
@@ -1494,12 +1513,43 @@ public partial class WarbandDetailViewModel
         foreach (var candidate in dialogViewModel.PendingSales)
         {
             if (candidate.StashItem is { } stashItem)
+            {
                 await _warbandService.RemoveWarbandEquipmentAsync(stashItem.Id);
+                var leftover = stashItem.Quantity - candidate.SelectedQuantity;
+                if (leftover > 0)
+                    await _warbandService.AddWarbandEquipmentAsync(Warband.Id, stashItem.Item, quantity: leftover, materialRule: stashItem.MaterialRule, foundValueOverride: stashItem.FoundValueOverride);
+            }
             else if (candidate.CarriedItem is { } carriedItem)
+            {
                 await _warbandService.RemoveWarriorEquipmentAsync(carriedItem.Id);
+                var leftover = carriedItem.Quantity - candidate.SelectedQuantity;
+                if (leftover > 0)
+                    await _warbandService.AddWarriorEquipmentAsync(carriedItem.WarriorId, carriedItem.Item, quantity: leftover, materialRule: carriedItem.MaterialRule, foundValueOverride: carriedItem.FoundValueOverride);
+            }
+            else if (candidate.IsFromExploration)
+            {
+                freshStashForExplorationSales ??= await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+                var remaining = candidate.SelectedQuantity;
+                foreach (var row in freshStashForExplorationSales.Where(w => w.Item.Id == candidate.Item.Id && w.MaterialRule?.Id == candidate.MaterialRule?.Id).ToList())
+                {
+                    if (remaining <= 0) break;
+                    await _warbandService.RemoveWarbandEquipmentAsync(row.Id);
+                    freshStashForExplorationSales.Remove(row);
+                    if (row.Quantity > remaining)
+                    {
+                        var recreated = await _warbandService.AddWarbandEquipmentAsync(Warband.Id, row.Item, quantity: row.Quantity - remaining, materialRule: row.MaterialRule, foundValueOverride: row.FoundValueOverride);
+                        freshStashForExplorationSales.Add(recreated);
+                        remaining = 0;
+                    }
+                    else
+                    {
+                        remaining -= row.Quantity;
+                    }
+                }
+            }
 
             netGold += candidate.SellPrice;
-            sentences.Add(string.Format(Loc["HistoryEquipmentSoldSentence"], candidate.Name, candidate.SellPrice));
+            sentences.Add(string.Format(Loc["HistoryEquipmentSoldSentence"], candidate.SoldLabel, candidate.SellPrice));
         }
 
         if (netGold != 0)

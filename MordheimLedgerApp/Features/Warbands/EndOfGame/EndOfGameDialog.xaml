@@ -2205,9 +2205,13 @@
                     </FlexLayout>
                 </VerticalStackLayout>
 
-                <!-- Vente : réserve pré-partie + équipement DÉJÀ porté (livre des règles - "trade in
-                     weapons and equipment... swapped around the warband"), jamais un achat de cette
-                     session. SellEquipmentDialog (multi-sélection) puis chips retirables. -->
+                <!-- Vente : réserve pré-partie + trouvailles d'Exploration + équipement DÉJÀ porté (livre
+                     des règles - "trade in weapons and equipment... swapped around the warband"), jamais
+                     un achat de cette session. "+" ouvre le picker "classique" de l'app (nouvelle page
+                     poussée modalement, SellEquipmentSelectorPage - retour utilisateur 2026-09-21, "on
+                     utilise le sélecteur qu'on a toujours eu dans l'appli... fin le classique d'un
+                     sélecteur qu'on avait jusque-là"), les lignes confirmées réapparaissent en chips
+                     retirables ici, même idiome que l'Achat ci-dessus. -->
                 <VerticalStackLayout Spacing="6">
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellHeading}" FontSize="12"
@@ -2221,6 +2225,7 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="local:SellableEquipmentCandidate">
                                 <components:ChipView Item="{Binding .}"
+                                                      NameOverride="{Binding SoldLabel}"
                                                       IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                       IconFontFamily="RpgAwesome"
                                                       RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveSaleEquipmentCommand}"/>

@@ -1424,9 +1424,6 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameEquipmentTradingStashSource" xml:space="preserve">
     <value>Réserve</value>
   </data>
-  <data name="EndOfGameSellEquipmentDialogTitle" xml:space="preserve">
-    <value>Vendre de l'équipement</value>
-  </data>
   <data name="EndOfGameSellEquipmentTotalLabel" xml:space="preserve">
     <value>Total de la vente</value>
   </data>

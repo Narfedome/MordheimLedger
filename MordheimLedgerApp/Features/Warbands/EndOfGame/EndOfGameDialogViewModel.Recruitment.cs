@@ -8,52 +8,50 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>Quatre étapes "Recrutement" (livre, étape 8 - "Hire New Recruits &amp; Buy Common Items") :
-/// StepKind.RecruitHeroes, StepKind.RecruitHenchmen, StepKind.RecruitHenchmenEquipment puis
-/// StepKind.RecruitHenchmenNames, chacune dans sa propre carte (2026-09-05, retour utilisateur - "on doit
-/// avoir un step Recrutement des héros, recrutement d'homme d'armes" - revient sur une première version à
-/// carte unique jugée pas assez claire ; même jour, second retour - "les nouveaux groupes de Hommes de
-/// main [doivent être] dans un step supplémentaire, car on doit les nommer après les avoir équipés", puis
-/// précisé une fois construit sans l'étape Équipement entre les deux ("l'idée c'est de reprendre la même
-/// mécanique qu'on a dans le WarbandEdit. Recrutement des effectifs -&gt; équipement des nouveaux groupes
-/// -&gt; nommage") : même précédent que WarbandEditDialogViewModel, Warriors (steppers) -&gt; Equipment
-/// -&gt; WarriorNames, jamais mélangés - RecruitHenchmenEquipment s'est donc intercalé entre RecruitHenchmen
-/// et RecruitHenchmenNames plutôt que l'inverse. Réutilise directement les types de brouillon déjà
-/// décorrélés de WarbandEditDialogViewModel (WarriorRecruitRow/WarriorNameSlot/HenchmanGroupDraft,
-/// EquipmentPick, voir leur propre doc de classe - "Purement de la présentation... aplati en vrais
-/// Warrior au moment de persister, rien avant") plutôt que de rouvrir ce dialog mature mid-wizard : celui-
-/// ci écrit en base IMMÉDIATEMENT à sa fermeture (Save()), ce qui casserait l'invariant "rien en base tant
-/// que Terminer n'a pas tourné" de tout le reste de ce wizard - refus explicite de l'utilisateur d'un
-/// mécanisme de rollback ("on peut pas jouer à mumuse avec la bdd"). Les guerriers recrutés ici ne
-/// deviennent de vrais Warrior qu'à WarbandDetailViewModel.EndOfGame.ApplyRecruitmentAsync, même moment
-/// que tout le reste du wizard.
+/// <summary>Recrutement (livre, étape 8 - "Hire New Recruits &amp; Buy Common Items" - "this is done in
+/// any order and may be done several times") : une SÉQUENCE d'étapes dédiées plutôt qu'une carte à
+/// onglets - voir StepKind.RecruitHeroesCount/RecruitHeroDetail/RecruitVeteranTopUp/
+/// RecruitHenchmenCount/RecruitHenchmenEquipment/RecruitHenchmenNames dans EndOfGameDialogViewModel.cs's
+/// Steps.
+///
+/// **Historique de design** : deux itérations avant celle-ci. (1) 2026-09-05, trois étapes de wizard
+/// séparées (Héros/Hommes de main/Équipement Hommes de main) - jugées trop rigides face au livre ("any
+/// order... several times"), fusionnées en (2) une carte unique à 2 onglets internes librement
+/// navigables (Guerriers/Équipement, RecruitmentTab), pour rester dans l'esprit "any order" tout en
+/// homogénéisant Héros et Hommes de main (équipés au même endroit). Retour utilisateur 2026-09-21 : ce
+/// mélange dans un même écran restait confus - "on manque d'homogénéité... on va reprendre le système
+/// qu'on a dans WarbandEditDialog... écran par écran, step by step". Design (3), actuel : repasse à des
+/// étapes séquentielles strictes, mais avec une différence clé par rapport à (1) - Héros : une étape
+/// PAR héros recruté (StepKind.RecruitHeroDetail, dynamique, même principe que Blessure/Progression -
+/// WizardStep.RecruitHeroSlot) combinant nom ET équipement pour CE héros précis sur le même écran ("ce
+/// qui permet d'assigner directement les items au personnage") - contrairement à (2), les Héros ne sont
+/// donc plus nommés dans une étape Noms commune à la fin. Hommes de main : le top-up des groupes déjà
+/// existants (budget vétérans) devient sa propre étape (RecruitVeteranTopUp), puis un nouveau groupe
+/// garde 3 étapes distinctes (Effectif/Équipement/Noms) - ces 3-là reprennent le contenu exact qui vivait
+/// dans l'onglet Guerriers/Équipement de (2), juste déplacé en écrans séparés.
+///
+/// Réutilise directement les types de brouillon déjà décorrélés de WarbandEditDialogViewModel
+/// (WarriorRecruitRow/WarriorNameSlot/HenchmanGroupDraft, EquipmentPick, voir leur propre doc de classe -
+/// "Purement de la présentation... aplati en vrais Warrior au moment de persister, rien avant") plutôt
+/// que de rouvrir ce dialog mature mid-wizard : celui-ci écrit en base IMMÉDIATEMENT à sa fermeture
+/// (Save()), ce qui casserait l'invariant "rien en base tant que Terminer n'a pas tourné" de tout le
+/// reste de ce wizard - refus explicite de l'utilisateur d'un mécanisme de rollback ("on peut pas jouer
+/// à mumuse avec la bdd"). Les guerriers recrutés ici ne deviennent de vrais Warrior qu'à
+/// WarbandDetailViewModel.EndOfGame.ApplyRecruitmentAsync, même moment que tout le reste du wizard.
 ///
 /// isExistingWarband: false partout (contrairement au mode "Bande existante" du dialog réutilisé) : la
 /// trésorerie est ENFORCÉE (RecruitmentRules.CanRecruit compare contre EndOfGameTreasuryRemaining, pas
-/// une saisie libre non contrôlée) et les onglets Compétences/XP restent masqués (RecruitSlot.
-/// ShowSkillsTab) - une recrue en pleine campagne n'a pas d'historique papier à importer, contrairement
-/// au cas "Bande existante" du dialog d'origine.
+/// une saisie libre non contrôlée) et les onglets Compétences/XP de RecruitSlotTabsView restent masqués
+/// (RecruitSlot.ShowSkillsTab) - une recrue en pleine campagne n'a pas d'historique papier à importer,
+/// contrairement au cas "Bande existante" du dialog d'origine.
 ///
-/// RecruitHenchmen regroupe DEUX sous-sections dans la même carte (confirmé par l'utilisateur) : groupes
-/// déjà existants (ExistingHenchmanTopUps, budget vétérans - voir sa propre doc de classe) puis un tout
-/// nouveau groupe (HenchmanRecruitRows, steppers seuls - juste l'effectif, ni équipement ni nom à ce
-/// stade). RecruitHenchmenEquipment équipe ENSUITE ces nouveaux groupes (achat "Objets Communs
-/// uniquement" - livre des règles, "can only buy Common items... freely", voir
-/// IEquipmentPickerService.PickEquipmentAsync's commonOnly - les Objets Rares ont déjà leur propre étape
-/// plus tôt dans ce wizard), avec Diviser un groupe (SplitHenchmanGroupDraft, même mécanique que
-/// WarbandEditDialogViewModel) pour équiper différemment une partie d'un même type recruté - c'est
-/// exactement pourquoi le nommage attend une étape encore après (RecruitHenchmenNames) : le nombre RÉEL de
-/// groupes à nommer n'est connu qu'une fois cette division éventuelle faite. **Les Héros restent "nus" en
-/// sortant de RecruitHeroes** (pas concernés par cette passe) : leur propre étape d'achat (à construire -
-/// versé dans la réserve de la bande plutôt qu'assigné directement, équipé séparément via le flux existant
-/// hors wizard) reste hors périmètre. Le SEUL endroit où l'équipement se calcule AUTOMATIQUEMENT (jamais un
-/// choix libre) est le top-up d'un groupe EXISTANT (ExistingHenchmanTopUp - "New Henchmen must be armed
-/// and equipped in the same way as existing members of the group") : réserve en priorité sur tout ce
-/// qu'il faut acheter (retour utilisateur - "si on a une arme dans la réserve... on la prend plutôt que de
-/// la vendre") - voir GetTopUpBreakdown/HenchmanRecruitmentTotalCost, et son détail de coût "poussé" sur
-/// chaque ExistingHenchmanTopUp.Breakdown (retour utilisateur - "il faut détailler le calcul au
-/// recrutement de vétéran"). RecruitHenchmenEquipment, à l'inverse, est un choix libre au picker comme
-/// WarbandEditDialogViewModel.AddEquipment - jamais tiré de la réserve.</summary>
+/// Groupes EXISTANTS (RecruitVeteranTopUp) : équipement TOUJOURS AUTOMATIQUE (livre des règles,
+/// "New Henchmen must be armed and equipped in the same way as existing members of the group"), jamais
+/// un choix libre - voir GetTopUpBreakdown. Nouveau groupe : achat libre au picker (commonOnly: true -
+/// "can only buy Common items... freely", les Objets Rares ont déjà leur propre étape plus tôt dans ce
+/// wizard), avec Diviser (SplitHenchmanGroupDraft, même mécanique que WarbandEditDialogViewModel) pour
+/// équiper différemment une partie d'un même type recruté - c'est pourquoi son étape Noms (nombre RÉEL
+/// de groupes) vient APRÈS celle d'Équipement, jamais avant.</summary>
 public partial class EndOfGameDialogViewModel
 {
     /// <summary>WarbandArchetype complet de CETTE bande (contrairement à _warbandArchetypeId/
@@ -67,17 +65,24 @@ public partial class EndOfGameDialogViewModel
     /// (voir recruitableWarriorArchetypes, chargé par l'appelant comme dramatisPersonaCatalog/
     /// localizedHiredSwords etc.) plutôt que paresseusement à l'entrée de cette étape : ce wizard ne charge
     /// jamais de données async après sa propre construction, Next()/Previous() restent volontairement
-    /// synchrones. Filtré aux Héros pour cette passe (voir la doc de classe) - les archétypes Homme de
-    /// main sont bien dans RecruitRows mais pas encore exploités par une section dédiée.</summary>
+    /// synchrones.</summary>
     public ObservableCollection<WarriorRecruitRow> RecruitRows { get; } = new();
 
     public IEnumerable<WarriorRecruitRow> HeroRecruitRows => RecruitRows.Where(r => r.IsHero);
 
-    /// <summary>Sous-ensemble de HeroRecruitRows effectivement recruté (Count &gt; 0) - alimente le bloc
-    /// Nom/Équipement affiché sous la liste à steppers (WarriorRecruitListView), même idiome que
-    /// WarbandEditDialogViewModel.RecruitedRows. Recalculée à chaque Increment/Decrement (voir
-    /// UpdateRecruitRowsEligibility).</summary>
+    /// <summary>Sous-ensemble de HeroRecruitRows effectivement recruté (Count &gt; 0) - source directe des
+    /// étapes dynamiques StepKind.RecruitHeroDetail (une par NameSlot, voir EndOfGameDialogViewModel.cs's
+    /// Steps), même idiome que WarbandEditDialogViewModel.RecruitedRows. Recalculée à chaque
+    /// Increment/Decrement (voir UpdateRecruitRowsEligibility).</summary>
     public IEnumerable<WarriorRecruitRow> RecruitedHeroRows => HeroRecruitRows.Where(r => r.Count > 0);
+
+    /// <summary>Effectif de bande projeté/plafond ("12/15") - même formule que
+    /// WarbandEditDialogViewModel.RosterCountDisplay, affichée à l'étape RecruitHeroesCount (retour
+    /// utilisateur 2026-09-05 - "manque d'homogénéité... par rapport à ce qui se fait lorsque l'on crée
+    /// une nouvelle bande" : la validation appliquait déjà MaxWarriors via CanRecruit, mais ne l'affichait
+    /// nulle part en toutes lettres, contrairement à la création). "∞" si l'archétype n'a pas de plafond.</summary>
+    public string RecruitmentRosterCountDisplay =>
+        $"{TotalWarriorCountAfterRecruitment}/{_recruitableWarbandArchetype.MaxWarriors?.ToString() ?? "∞"}";
 
     /// <summary>Même format que RareItemPurchaseRemainingTreasuryDisplay ("Trésorerie restante : {0} CO") -
     /// clé resx partagée plutôt que dupliquée, ce texte n'est pas propre à l'étape Objets rares malgré son
@@ -96,6 +101,8 @@ public partial class EndOfGameDialogViewModel
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
         WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.Warrior.HeadCount);
 
+    // --- Héros : effectif -----------------------------------------------------------------------------
+
     [RelayCommand]
     private void IncrementRecruit(WarriorRecruitRow row)
     {
@@ -110,7 +117,7 @@ public partial class EndOfGameDialogViewModel
             row.NameSlots.Add(slot);
             RenumberRecruitHeroLabels(row);
             // Suggestion pré-remplie (comme WarbandEditDialogViewModel.PopulateSuggestedNames), pas
-            // seulement un Placeholder : sans ça, ValidateRecruitmentStep bloquerait tant que le joueur
+            // seulement un Placeholder : sans ça, ValidateRecruitNamesStep bloquerait tant que le joueur
             // n'a pas explicitement retapé un nom déjà visible à l'écran (le Placeholder d'un Entry vide
             // ne compte jamais comme une vraie valeur) - modifiable ensuite comme n'importe quel autre nom.
             slot.Name = slot.ArchetypeLabel;
@@ -145,14 +152,16 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Recalcule CanIncrement de chaque ligne - le MaxWarriors de la bande et la trésorerie
     /// dépendent de TOUTES les lignes/étapes, pas seulement celle qui vient de changer. Notifie aussi
-    /// StepLabel/IsLastStep : RecruitedHenchmanRows passant de/à vide fait apparaître/disparaître
-    /// RecruitHenchmenEquipment/RecruitHenchmenNames (retour utilisateur 2026-09-05 - "si il n'y a pas de
-    /// nouveau groupe, on n'affiche pas les step d'équipement et de nom"), même idiome que
-    /// RareItemSearchEntries/WarriorRows ailleurs dans ce fichier pour une étape qui apparaît/disparaît.</summary>
+    /// StepLabel/IsLastStep : RecruitedHeroRows/RecruitedHenchmanRows passant de/à vide fait
+    /// apparaître/disparaître les étapes dynamiques RecruitHeroDetail et RecruitHenchmenEquipment/Names
+    /// (retour utilisateur - "si il n'y a pas de nouveau groupe, on n'affiche pas les step d'équipement et
+    /// de nom"), même idiome que RareItemSearchEntries/WarriorRows ailleurs dans ce fichier pour une étape
+    /// qui apparaît/disparaît.</summary>
     private void UpdateRecruitRowsEligibility()
     {
         OnPropertyChanged(nameof(RecruitedHeroRows));
         OnPropertyChanged(nameof(RecruitedHenchmanRows));
+        OnPropertyChanged(nameof(RecruitmentRosterCountDisplay));
         OnPropertyChanged(nameof(StepLabel));
         OnPropertyChanged(nameof(IsLastStep));
         foreach (var row in RecruitRows)
@@ -160,29 +169,11 @@ public partial class EndOfGameDialogViewModel
                 TotalWarriorCountAfterRecruitment, _recruitableWarbandArchetype.MaxWarriors, isExistingWarband: false, EndOfGameTreasuryRemaining, row.Cost);
     }
 
-    /// <summary>Un nom requis pour chaque Héros recruté (livre des règles) - suggéré automatiquement
-    /// depuis ArchetypeLabel dès qu'un slot apparaît (voir IncrementRecruit) plutôt qu'une étape Noms
-    /// séparée comme le dialog d'origine : une seule carte pour toute cette étape, pas de sous-assistant à
-    /// plusieurs pages ici.</summary>
-    private bool ValidateRecruitHeroesStep()
-    {
-        foreach (var row in HeroRecruitRows)
-        {
-            foreach (var slot in row.NameSlots.Where(s => string.IsNullOrWhiteSpace(s.Name)))
-            {
-                RecruitHeroesError = string.Format(Loc["WarbandsWarriorNameRequired"], row.Name);
-                return false;
-            }
-        }
+    // Rien à valider pour l'étape RecruitHeroesCount (steppers seuls) - le nom et l'équipement de chaque
+    // héros se valident/s'achètent dans sa propre étape RecruitHeroDetail (ValidateRecruitHeroDetailStep,
+    // plus bas).
 
-        RecruitHeroesError = null;
-        return true;
-    }
-
-    [ObservableProperty]
-    private string? recruitHeroesError;
-
-    // --- Étape RecruitHenchmen : groupes existants (budget vétérans) + nouveau groupe -------------------
+    // --- Hommes de main : groupes existants (budget vétérans) + nouveau groupe ---------------------------
 
     /// <summary>Une ligne par groupe d'Homme de main encore actif ce tour (WarriorRows, jamais un Héros) -
     /// peuplée une seule fois par BuildExistingHenchmanTopUps (appelée depuis le constructeur principal,
@@ -286,19 +277,91 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Combien d'exemplaires de CET item+matériau la réserve de la bande contient - point de
     /// départ du calcul de chaque groupe existant (GetTopUpBreakdown), qui en consomme au fil de l'eau
-    /// dans l'ordre d'ExistingHenchmanTopUps. Reconstruit à chaque appel plutôt que mis en cache :
-    /// _warbandInventory est un simple instantané figé (jamais modifié par ce wizard tant que Terminer n'a
-    /// pas tourné), donc toujours cohérent sans état supplémentaire à synchroniser.</summary>
-    private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildStashPool() =>
-        _warbandInventory.GroupBy(w => (w.Item.Id, w.MaterialRule?.Id)).ToDictionary(g => g.Key, g => g.Count());
+    /// dans l'ordre d'ExistingHenchmanTopUps, ET point de départ de BuildAvailableReservePool (réserve
+    /// disponible pour les NOUVELLES recrues à l'étape Recrutement). Reconstruit à chaque appel plutôt
+    /// que mis en cache : _warbandInventory est un simple instantané figé (jamais modifié par ce wizard
+    /// tant que Terminer n'a pas tourné), donc toujours cohérent sans état supplémentaire à synchroniser.
+    /// Additionne PendingExplorationStashItems (retour utilisateur - "les items récupérés dans
+    /// l'exploration chart ne sont pas comptabilisés dans le contexte du end of game pour le
+    /// recrutement") : un objet trouvé PENDANT cette même Fin de Partie (étape Exploration, plus tôt dans
+    /// le wizard) n'existe pas encore dans _warbandInventory (figé à l'OUVERTURE du wizard) tant que
+    /// ApplyExplorationOutcomeAsync n'a pas réellement tourné, à Terminer - or celui-ci s'exécute
+    /// justement AVANT ApplyHenchmanRecruitmentAsync dans le pipeline de Terminer, donc l'objet SERA bien
+    /// disponible au moment réel du calcul. Additionne aussi PurchasedReserveItems (étape Achat/Vente,
+    /// juste avant Recrutement - EndOfGameDialogViewModel.EquipmentTrading.cs) et soustrait la PORTION
+    /// réserve de PendingSales (IsFromStash - une vente d'équipement DÉJÀ PORTÉ par un guerrier ne touche
+    /// jamais ce pool, voir SellableEquipmentCandidate's own doc).</summary>
+    private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildStashPool()
+    {
+        var pool = _warbandInventory.GroupBy(w => (w.Item.Id, w.MaterialRule?.Id)).ToDictionary(g => g.Key, g => g.Count());
+        foreach (var (item, materialRule, quantity) in PendingExplorationStashItems())
+        {
+            var key = (item.Id, materialRule?.Id);
+            pool[key] = pool.GetValueOrDefault(key) + quantity;
+        }
+        foreach (var pick in PurchasedReserveItems)
+        {
+            var key = (pick.Item.Id, pick.MaterialRule?.Id);
+            pool[key] = pool.GetValueOrDefault(key) + 1;
+        }
+        foreach (var sale in PendingSales.Where(c => c.IsFromStash))
+        {
+            var key = (sale.Item.Id, sale.MaterialRule?.Id);
+            pool[key] = Math.Max(0, pool.GetValueOrDefault(key) - sale.Quantity);
+        }
+        return pool;
+    }
 
-    /// <summary>Détail de coût d'UN groupe existant (retour utilisateur 2026-09-05 - "il faut détailler le
-    /// calcul au recrutement de vétéran") : recrutement + une ligne par type d'équipement du groupe (avec
-    /// combien vient de la réserve, gratuit) + la surtaxe d'Expérience. Rejoue la consommation de réserve
-    /// de TOUS les groupes qui précèdent CELUI-CI dans ExistingHenchmanTopUps (ordre fixe) avant de
-    /// calculer ses propres lignes, pour rester cohérent d'un groupe à l'autre - un même exemplaire de
-    /// réserve ne peut jamais être compté deux fois. HenchmanRecruitmentTotalCost (trésorerie) additionne
-    /// simplement Total sur chaque groupe, dans le même ordre.</summary>
+    /// <summary>Réserve encore DISPONIBLE pour la prochaine recrue (Héros ou nouveau groupe d'Hommes de
+    /// main) à l'étape Recrutement - part de BuildStashPool (pré-partie + Exploration + Achat - Vente),
+    /// puis en retranche ce qui a déjà été réservé par les groupes EXISTANTS (top-up, rejoue le même
+    /// calcul que GetTopUpBreakdown - dupliqué ici plutôt que refactorisé, GetTopUpBreakdown ne renvoie
+    /// pas son pool final) ET par les picks déjà marqués FromReserve sur les Héros/nouveaux groupes de
+    /// CETTE session (voir AddRecruitEquipment) - un même exemplaire ne peut jamais être compté deux fois,
+    /// même principe que GetTopUpBreakdown pour les groupes existants entre eux.</summary>
+    private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildAvailableReservePool()
+    {
+        var pool = BuildStashPool();
+
+        foreach (var topUp in ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
+        {
+            var groupHeadCount = Math.Max(1, topUp.Row.Warrior.HeadCount);
+            foreach (var equipment in topUp.CurrentEquipment)
+            {
+                var neededQty = topUp.AddCount * equipment.Quantity / groupHeadCount;
+                var key = (equipment.Item.Id, equipment.MaterialRule?.Id);
+                var consumed = Math.Min(pool.GetValueOrDefault(key), neededQty);
+                if (consumed > 0) pool[key] = pool[key] - consumed;
+            }
+        }
+
+        // Un pick FromReserve consomme 1 exemplaire pour un Héros (toujours seul), mais group.Count pour
+        // un nouveau groupe d'Hommes de main (le lot entier vient de la réserve d'un coup - tout-ou-rien,
+        // voir AddRecruitEquipment's own doc, pas de mélange partiel réserve/achat au sein d'un pick).
+        foreach (var pick in HeroRecruitRows.SelectMany(r => r.NameSlots).SelectMany(s => s.Equipment).Where(p => p.FromReserve))
+        {
+            var key = (pick.Item.Id, pick.MaterialRule?.Id);
+            var available = pool.GetValueOrDefault(key);
+            if (available > 0) pool[key] = available - 1;
+        }
+        foreach (var group in HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts))
+        foreach (var pick in group.Equipment.Where(p => p.FromReserve))
+        {
+            var key = (pick.Item.Id, pick.MaterialRule?.Id);
+            var consumed = Math.Min(pool.GetValueOrDefault(key), group.Count);
+            if (consumed > 0) pool[key] = pool[key] - consumed;
+        }
+
+        return pool;
+    }
+
+    /// <summary>Détail de coût d'UN groupe existant (retour utilisateur - "il faut détailler le calcul au
+    /// recrutement de vétéran") : recrutement + une ligne par type d'équipement du groupe (avec combien
+    /// vient de la réserve, gratuit) + la surtaxe d'Expérience. Rejoue la consommation de réserve de TOUS
+    /// les groupes qui précèdent CELUI-CI dans ExistingHenchmanTopUps (ordre fixe) avant de calculer ses
+    /// propres lignes, pour rester cohérent d'un groupe à l'autre - un même exemplaire de réserve ne peut
+    /// jamais être compté deux fois. HenchmanRecruitmentTotalCost (trésorerie) additionne simplement Total
+    /// sur chaque groupe, dans le même ordre.</summary>
     public HenchmanTopUpCostBreakdown GetTopUpBreakdown(ExistingHenchmanTopUp topUp)
     {
         if (topUp.AddCount == 0)
@@ -315,13 +378,12 @@ public partial class EndOfGameDialogViewModel
 
             // Un groupe d'Hommes de main est UN SEUL Warrior (HeadCount = l'effectif, voir sa propre doc) -
             // WarriorEquipment.Quantity y est donc déjà le TOTAL pour tout le groupe (ex. 3 Épées pour 3
-            // Guerriers), jamais une quantité "par modèle" comme pour un Héros/une munition (bug trouvé
-            // 2026-09-05, retour utilisateur - "on rajoute un guerrier... l'épée coute 30, hors l'épée coute
-            // 10" : neededQty = AddCount * equipment.Quantity comptait Quantity une seconde fois en plus de
-            // AddCount, au lieu de n'utiliser que la quantité PAR MODÈLE qu'elle représente déjà divisée par
-            // l'effectif actuel). Diviser par l'effectif AVANT ce top-up (current.Row.Warrior.HeadCount,
-            // jamais encore muté ici - la mutation réelle n'arrive qu'à Terminer) retrouve cette quantité
-            // par modèle.
+            // Guerriers), jamais une quantité "par modèle" comme pour un Héros/une munition (bug trouvé -
+            // "on rajoute un guerrier... l'épée coute 30, hors l'épée coute 10" : neededQty = AddCount *
+            // equipment.Quantity comptait Quantity une seconde fois en plus de AddCount, au lieu de
+            // n'utiliser que la quantité PAR MODÈLE qu'elle représente déjà divisée par l'effectif actuel).
+            // Diviser par l'effectif AVANT ce top-up (current.Row.Warrior.HeadCount, jamais encore muté ici
+            // - la mutation réelle n'arrive qu'à Terminer) retrouve cette quantité par modèle.
             var groupHeadCount = Math.Max(1, current.Row.Warrior.HeadCount);
 
             foreach (var equipment in current.CurrentEquipment)
@@ -336,10 +398,7 @@ public partial class EndOfGameDialogViewModel
                 // ajoutée est un modèle NEUF qui n'en porte encore aucune, donc CHAQUE dague achetée ici
                 // correspond à la dague personnelle gratuite d'une recrue différente - jamais gratuite si
                 // un matériau a été choisi sur cette ligne (Gromril/Ithilmar = amélioration délibérée, voir
-                // EquipmentPricing.IsFreeDaggerEligible). Manquait entièrement (retour utilisateur
-                // 2026-09-05 - "la dague gratuite n'est pas gérée dans les vétérans") : ce toBuy était
-                // toujours facturé plein tarif, y compris pour la toute première dague de chaque nouvelle
-                // recrue.
+                // EquipmentPricing.IsFreeDaggerEligible).
                 var isFreeDagger = equipment.Item.IsFreeDagger && equipment.MaterialRule is null;
                 var cost = toBuy * EquipmentPricing.CalculateCost(equipment.Item.Cost, equipment.MaterialRule?.CostMultiplier, isFree: isFreeDagger);
 
@@ -361,35 +420,29 @@ public partial class EndOfGameDialogViewModel
             topUp.AddCount * 2 * topUp.GroupExperience, stashUsedTotal);
     }
 
-    /// <summary>Coût total du recrutement d'Hommes de main en attente - groupes existants (GetTopUpBreakdown,
-    /// réserve déduite) additionnés dans l'ordre d'ExistingHenchmanTopUps, plus le recrutement ET
-    /// l'équipement (RecruitHenchmenEquipment, choix libre - jamais tiré de la réserve) d'un éventuel
-    /// nouveau groupe. Formule d'équipement identique à WarbandEditDialogViewModel.TotalSpent (coût par
-    /// exemplaire × effectif du groupe, EquipmentPick.Cost porte déjà le prix unitaire). Recalculé à chaque
-    /// lecture, donc toujours cohérent entre cet aperçu (EndOfGameTreasuryRemaining) et l'application
-    /// réelle à Terminer (WarbandDetailViewModel.EndOfGame.ApplyHenchmanRecruitmentAsync, même
-    /// algorithme).</summary>
+    /// <summary>Coût total des Hommes de main en attente - groupes existants (GetTopUpBreakdown, réserve
+    /// déduite) additionnés dans l'ordre d'ExistingHenchmanTopUps, plus le recrutement ET l'équipement
+    /// (étape RecruitHenchmenEquipment, choix au picker - réserve en priorité depuis l'étape Achat/Vente
+    /// précédente, voir AddRecruitEquipment, sinon plein tarif) d'un éventuel nouveau groupe.
+    /// EquipmentPick.Cost porte déjà le prix unitaire (0 si FromReserve) - même formule que
+    /// WarbandEditDialogViewModel.TotalSpent (coût par exemplaire × effectif du groupe). Recalculé à
+    /// chaque lecture, donc toujours cohérent entre cet aperçu (EndOfGameTreasuryRemaining) et
+    /// l'application réelle à Terminer (WarbandDetailViewModel.EndOfGame.ApplyHenchmanRecruitmentAsync,
+    /// même algorithme).</summary>
     private int HenchmanRecruitmentTotalCost() =>
         ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
         + HenchmanRecruitRows.Sum(r => r.HenchmanGroupDrafts.Sum(g => g.Count) * r.Cost)
         + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count);
 
-    /// <summary>Plus rien à valider ici depuis que les noms (livre des règles - "you will need to...
-    /// name each Henchman group") ont leur propre étape, StepKind.RecruitHenchmenNames, juste après
-    /// (2026-09-05, retour utilisateur - "on doit les nommer après les avoir équipés") - le budget
-    /// vétérans est déjà appliqué en direct par IncrementHenchmanTopUp lui-même (rien à revalider ici a
-    /// posteriori). RecruitHenchmenError conservé (toujours bindé côté XAML) au cas où une future
-    /// validation propre à CETTE étape s'y ajoute.</summary>
-    private bool ValidateRecruitHenchmenStep()
-    {
-        RecruitHenchmenError = null;
-        return true;
-    }
+    /// <summary>Coût de l'équipement acheté pour les Héros recrutés cette session (étape RecruitHeroDetail,
+    /// choix au picker - réserve en priorité, voir AddRecruitEquipment) - toujours ×1 (jamais de groupe
+    /// côté Héros, contrairement aux Hommes de main).</summary>
+    private int HeroEquipmentTotalCost() => HeroRecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
 
-    [ObservableProperty]
-    private string? recruitHenchmenError;
-
-    // --- Étape RecruitHenchmenEquipment : achat pour les nouveaux groupes, APRÈS RecruitHenchmen --------
+    // --- Équipement : achat pour Héros (WarriorNameSlot, étape RecruitHeroDetail) ET nouveaux groupes
+    // d'Hommes de main (HenchmanGroupDraft, étape RecruitHenchmenEquipment) - réserve en priorité (étape
+    // Achat/Vente précédente), sinon plein tarif - jamais les groupes existants (équipement automatique,
+    // voir plus haut) ---------------------------------------------------------------------------------
 
     /// <summary>Détache un second HenchmanGroupDraft du groupe tapé - même mécanique que
     /// WarbandEditDialogViewModel.SplitHenchmanGroupDraft (livre des règles : "if your Henchman group has
@@ -421,18 +474,44 @@ public partial class EndOfGameDialogViewModel
             row.HenchmanGroupDrafts[i].Name = multiple ? $"{row.Archetype.Name} {i + 1}" : row.Archetype.Name;
     }
 
-    /// <summary>Achat d'équipement pour un nouveau groupe d'Hommes de main - même logique que
-    /// WarbandEditDialogViewModel.AddEquipment (picker filtré par EquipmentListId/WarriorArchetypeId, choix
-    /// de matériau pour les armes de corps à corps via un seul MaterialPickerDialog paginé, arrêt au
-    /// premier objet trop cher), réduite au seul cas HenchmanGroupDraft (pas de WarriorNameSlot ici, voir la
-    /// doc de classe - les Héros restent hors de cette étape) et sans Compétences (mode Bande existante
-    /// uniquement, jamais le cas ici). commonOnly: true (livre des règles - "can only buy Common items...
-    /// freely", les Objets Rares ont déjà leur propre étape plus tôt dans ce wizard).</summary>
+    /// <summary>Achat d'équipement pour une cible : un WarriorNameSlot (Héros) ou un HenchmanGroupDraft
+    /// (nouveau groupe d'Hommes de main, jamais un groupe déjà existant - son équipement reste
+    /// automatique). Même logique que WarbandEditDialogViewModel.AddEquipment (picker filtré par
+    /// EquipmentListId/WarriorArchetypeId, choix de matériau pour les armes de corps à corps via un seul
+    /// MaterialPickerDialog paginé, arrêt au premier objet trop cher), sans Compétences/Sorts (mode Bande
+    /// existante uniquement, jamais le cas ici). commonOnly: true (livre des règles - "can only buy Common
+    /// items... freely", les Objets Rares ont déjà leur propre étape plus tôt dans ce wizard). Réserve en
+    /// priorité (2026-09-05, retour utilisateur - "si on faisait d'abord l'achat vente d'équipement, puis
+    /// le recrutement avec l'assignation des équipements de la stash") : si BuildAvailableReservePool en
+    /// contient déjà assez pour TOUT le lot (perUnitCost, l'effectif du groupe pour un Homme de main - 1
+    /// pour un Héros), le pick est FromReserve (gratuit, les consomme) plutôt qu'acheté au plein tarif -
+    /// simplification délibérée, pas de mélange partiel réserve/achat au sein d'un même pick (contrairement
+    /// à GetTopUpBreakdown, qui gère ce mélange pour les groupes EXISTANTS via une ligne de coût détaillée
+    /// séparée - un nouveau pick reste ici un choix unique au picker).</summary>
     [RelayCommand]
-    private async Task AddHenchmanGroupEquipment(HenchmanGroupDraft group)
+    private async Task AddRecruitEquipment(object target)
     {
-        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, group.Row.Archetype.EquipmentListId, group.Row.Archetype.Id,
-            EndOfGameTreasuryRemaining, group.Count, group.Equipment.Any(p => p.Item.IsFreeDagger), commonOnly: true);
+        WarriorRecruitRow row;
+        ObservableCollection<EquipmentPick> destination;
+        int perUnitCost;
+        switch (target)
+        {
+            case WarriorNameSlot slot:
+                row = slot.Row;
+                destination = slot.Equipment;
+                perUnitCost = 1;
+                break;
+            case HenchmanGroupDraft group:
+                row = group.Row;
+                destination = group.Equipment;
+                perUnitCost = group.Count;
+                break;
+            default:
+                return;
+        }
+
+        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
+            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true);
 
         // Un seul dialog paginé pour toutes les armes de corps à corps du lot - voir
         // WarbandEditDialogViewModel.AddEquipment pour le détail de cette logique, reprise à l'identique.
@@ -444,7 +523,7 @@ public partial class EndOfGameDialogViewModel
                 .Where(r => r.CostMultiplier.HasValue).ToList();
             if (materialRules.Count > 0)
             {
-                var hasFreeDaggerSlot = group.Equipment.Any(p => p.Item.IsFreeDagger);
+                var hasFreeDaggerSlot = destination.Any(p => p.Item.IsFreeDagger);
                 var choices = new List<MaterialChoice>();
                 foreach (var item in meleeItems)
                 {
@@ -464,59 +543,102 @@ public partial class EndOfGameDialogViewModel
                 : null;
             var pick = new EquipmentPick(equipmentItem, materialRule)
             {
-                IsFree = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, group.Equipment.Any(p => p.Item.IsFreeDagger)) && materialRule is null
+                IsFree = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, destination.Any(p => p.Item.IsFreeDagger)) && materialRule is null
             };
 
-            // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe) - sélection multiple :
-            // on s'arrête au premier objet trop cher plutôt que de tout annuler, même logique que
-            // WarbandEditDialogViewModel.AddEquipment.
-            if (EndOfGameTreasuryRemaining < pick.Cost * group.Count)
+            if (!pick.IsFree)
+            {
+                var reserveKey = (equipmentItem.Id, materialRule?.Id);
+                if (BuildAvailableReservePool().GetValueOrDefault(reserveKey) >= perUnitCost)
+                    pick.FromReserve = true;
+            }
+
+            // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
+            // main, 1 pour un Héros) - sélection multiple : on s'arrête au premier objet trop cher plutôt
+            // que de tout annuler, même logique que WarbandEditDialogViewModel.AddEquipment.
+            if (EndOfGameTreasuryRemaining < pick.Cost * perUnitCost)
             {
                 await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
                 break;
             }
 
-            group.Equipment.Add(pick);
+            destination.Add(pick);
             NotifyTreasuryChanged();
         }
 
         // Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
         // guerrier, livre des règles) - voir WeaponLimits/WarbandEditDialogViewModel.AddEquipment.
-        if (WeaponLimits.ExceedsLimits(group.Equipment.Select(p => p.Item)))
-            await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], group.Name));
+        if (WeaponLimits.ExceedsLimits(destination.Select(p => p.Item)))
+        {
+            var warriorLabel = target switch
+            {
+                WarriorNameSlot { Name.Length: > 0 } nameSlot => nameSlot.Name,
+                HenchmanGroupDraft group => group.Name,
+                _ => row.Name
+            };
+            await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], warriorLabel));
+        }
     }
 
     /// <summary>Tap sur un chip d'équipement acheté - même recap qu'ailleurs dans l'app (voir
     /// WarbandEditDialogViewModel.ShowEquipmentDetail).</summary>
     [RelayCommand]
-    private Task ShowHenchmanGroupEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule);
+    private Task ShowRecruitEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule);
 
-    /// <summary>Retire un EquipmentPick de quel que HenchmanGroupDraft le contient - identité de référence,
-    /// pas besoin de savoir d'avance lequel puisque chaque instance n'est ajoutée qu'à une seule
-    /// collection.</summary>
+    /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un WarriorNameSlot
+    /// ou d'un HenchmanGroupDraft) - identité de référence, pas besoin de savoir d'avance laquelle puisque
+    /// chaque instance n'est ajoutée qu'à une seule collection. Même idiome que
+    /// WarbandEditDialogViewModel.RemoveEquipment.</summary>
     [RelayCommand]
-    private void RemoveHenchmanGroupEquipment(EquipmentPick pick)
+    private void RemoveRecruitEquipment(EquipmentPick pick)
     {
-        foreach (var group in HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts))
+        foreach (var row in RecruitRows)
         {
-            if (group.Equipment.Remove(pick))
+            foreach (var slot in row.NameSlots)
             {
-                NotifyTreasuryChanged();
-                return;
+                if (slot.Equipment.Remove(pick))
+                {
+                    NotifyTreasuryChanged();
+                    return;
+                }
+            }
+            foreach (var group in row.HenchmanGroupDrafts)
+            {
+                if (group.Equipment.Remove(pick))
+                {
+                    NotifyTreasuryChanged();
+                    return;
+                }
             }
         }
     }
 
-    // --- Étape RecruitHenchmenNames : noms des nouveaux groupes, APRÈS RecruitHenchmenEquipment ---------
+    // --- Validation par étape : nom de CE héros (RecruitHeroDetail, une étape par héros) et noms des
+    // nouveaux groupes d'Hommes de main (RecruitHenchmenNames, tous ensemble après Équipement - le
+    // nombre RÉEL de groupes n'est stable qu'une fois cette étape quittée, un Split peut en créer
+    // d'autres). Les groupes déjà existants n'ont rien à nommer (déjà nommés). ---------------------------
 
-    /// <summary>Un nom requis pour chaque nouveau groupe (livre des règles - "you will need to... name
-    /// each Henchman group") - pré-rempli avec le nom de l'archétype dès la création (IncrementHenchmanGroup/
-    /// RenumberHenchmanGroupDrafts après un Split) mais modifiable, contrairement aux Héros ce garde-fou ne
-    /// mord donc que si le joueur a vidé le champ après coup. Étape à part depuis 2026-09-05 (retour
-    /// utilisateur - "on doit les nommer après les avoir équipés", même précédent que
-    /// WarbandEditDialogViewModel Warriors -&gt; Equipment -&gt; WarriorNames), APRÈS RecruitHenchmenEquipment
-    /// précisément pour que le nombre réel de groupes (un Split peut en créer d'autres) soit connu avant de
-    /// les nommer. Les groupes existants n'ont rien à nommer ici (déjà nommés).</summary>
+    /// <summary>Nom requis pour CE héros précis (livre des règles - un nom par recrue), pré-rempli
+    /// (ArchetypeLabel via IncrementRecruit) mais modifiable - ce garde-fou ne mord donc que si le joueur
+    /// a vidé le champ après coup.</summary>
+    private bool ValidateRecruitHeroDetailStep(WarriorNameSlot slot)
+    {
+        if (string.IsNullOrWhiteSpace(slot.Name))
+        {
+            RecruitHeroDetailError = string.Format(Loc["WarbandsWarriorNameRequired"], slot.Row.Name);
+            return false;
+        }
+
+        RecruitHeroDetailError = null;
+        return true;
+    }
+
+    [ObservableProperty]
+    private string? recruitHeroDetailError;
+
+    /// <summary>Un nom requis pour chaque nouveau groupe d'Hommes de main (livre des règles - "you will
+    /// need to... name each Henchman group"), pré-rempli (nom d'archétype via IncrementHenchmanGroup/
+    /// RenumberHenchmanGroupDrafts après un Split) mais modifiable.</summary>
     private bool ValidateRecruitHenchmenNamesStep()
     {
         foreach (var row in HenchmanRecruitRows)

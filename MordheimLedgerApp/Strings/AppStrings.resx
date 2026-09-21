@@ -1412,14 +1412,50 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Trésorerie restante : {0} CO</value>
   </data>
+  <data name="EndOfGameEquipmentTradingHeading" xml:space="preserve">
+    <value>Achat/Vente d'équipement</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingBuyHeading" xml:space="preserve">
+    <value>Achat</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingSellHeading" xml:space="preserve">
+    <value>Vente</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingStashSource" xml:space="preserve">
+    <value>Réserve</value>
+  </data>
+  <data name="EndOfGameSellEquipmentDialogTitle" xml:space="preserve">
+    <value>Vendre de l'équipement</value>
+  </data>
+  <data name="EndOfGameSellEquipmentTotalLabel" xml:space="preserve">
+    <value>Total de la vente</value>
+  </data>
+  <data name="EndOfGameNoSellableEquipment" xml:space="preserve">
+    <value>Aucun objet à vendre.</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingBuyCostLabel" xml:space="preserve">
+    <value>Coût de l'achat</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingSellGainLabel" xml:space="preserve">
+    <value>Gain de la vente</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingNetTotalLabel" xml:space="preserve">
+    <value>Total</value>
+  </data>
   <data name="EndOfGameRecruitmentHeading" xml:space="preserve">
-    <value>Recrutement des Héros</value>
+    <value>Recrutement — Héros</value>
   </data>
   <data name="EndOfGameRecruitmentHeroesHeading" xml:space="preserve">
     <value>Héros</value>
   </data>
-  <data name="EndOfGameRecruitHenchmenHeading" xml:space="preserve">
-    <value>Recrutement des Hommes de main</value>
+  <data name="EndOfGameRecruitHeroDetailHeading" xml:space="preserve">
+    <value>Détail du héros</value>
+  </data>
+  <data name="EndOfGameRecruitHeroProgressLabel" xml:space="preserve">
+    <value>Héros {0}/{1}</value>
+  </data>
+  <data name="EndOfGameRecruitVeteranTopUpHeading" xml:space="preserve">
+    <value>Recrutement des vétérans</value>
   </data>
   <data name="EndOfGameRecruitHenchmenExistingHeading" xml:space="preserve">
     <value>Groupes existants</value>
@@ -1431,7 +1467,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Nouveau groupe</value>
   </data>
   <data name="EndOfGameRecruitHenchmenEquipmentHeading" xml:space="preserve">
-    <value>Équipement des nouveaux groupes</value>
+    <value>Nouveau groupe — Équipement</value>
   </data>
   <data name="EndOfGameRecruitHenchmenNamesHeading" xml:space="preserve">
     <value>Noms des nouveaux groupes</value>
@@ -1681,6 +1717,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryRecruitedSentence" xml:space="preserve">
     <value>{0} le {1} rejoint la bande (recrutement).</value>
+  </data>
+  <data name="HistoryEquipmentPurchasedSentence" xml:space="preserve">
+    <value>{0} acheté et versé dans la réserve.</value>
+  </data>
+  <data name="HistoryEquipmentSoldSentence" xml:space="preserve">
+    <value>{0} vendu pour {1} CO.</value>
   </data>
   <data name="HistoryHenchmanTopUpSentence" xml:space="preserve">
     <value>{0} recrue(s) supplémentaire(s) ajoutée(s) au groupe {1}.</value>

@@ -375,7 +375,8 @@ public class AppDatabase
                 GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
                 IsSellable = eq.IsSellable,
                 GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
-                IsUniqueArtefact = eq.IsUniqueArtefact
+                IsUniqueArtefact = eq.IsUniqueArtefact,
+                IsExplorationOnly = eq.IsExplorationOnly
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
@@ -1161,7 +1162,8 @@ public class AppDatabase
                 GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
                 IsSellable = eq.IsSellable,
                 GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
-                IsUniqueArtefact = eq.IsUniqueArtefact
+                IsUniqueArtefact = eq.IsUniqueArtefact,
+                IsExplorationOnly = eq.IsExplorationOnly
             };
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);

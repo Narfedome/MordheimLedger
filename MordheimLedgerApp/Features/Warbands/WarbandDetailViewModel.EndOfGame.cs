@@ -165,7 +165,10 @@ public partial class WarbandDetailViewModel
             await ApplyPairEquipmentSeizureIfNeededAsync(dialogViewModel, sentences);
             await ApplyPairDuelIfNeededAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
-            await ApplyRecruitmentAsync(dialogViewModel, sentences);
+            // Doit rester AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync : ceux-ci consomment
+            // en priorité la réserve que cette étape vient de remplir/vider (voir leur propre doc).
+            await ApplyEquipmentTradingAsync(dialogViewModel, sentences);
+            await ApplyRecruitmentAsync(dialogViewModel, language, sentences);
             await ApplyHenchmanRecruitmentAsync(dialogViewModel, language, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
@@ -1394,22 +1397,41 @@ public partial class WarbandDetailViewModel
     /// Cette passe ne couvre que les Héros (voir HeroRecruitRows) - Hommes de main (groupes existants avec
     /// le budget vétérans, ou tout nouveau groupe) restent à construire, voir EndOfGameDialogViewModel.
     /// Recruitment.cs.</summary>
-    private async Task ApplyRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    private async Task ApplyRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
     {
         if (Warband is null) return;
 
-        // Pas d'équipement/sort ici (retour utilisateur 2026-09-05 - "on a juste un step pour recruter
-        // les héros, on n'a pas les équipements à gérer là") : un Héros fraîchement recruté rejoint la
-        // bande "nu", équipé ensuite via l'étape Achat d'équipement (à construire) qui verse dans la
-        // réserve de la bande plutôt que sur ce guerrier précis.
+        // Équipement acheté à l'onglet Équipement de l'étape Recrutement - réserve en priorité (étape
+        // Achat/Vente juste avant, déjà appliquée à ce stade du pipeline), sinon plein tarif - voir
+        // ConsumeReserveOrBuyAsync's own doc. Persisté directement sur ce Héros (2026-09-05, retour
+        // utilisateur - "on peut mélanger les deux, comme dans le warband edit" - abandon du plan
+        // antérieur "achat versé dans la réserve").
+        var stashPool = await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
         var totalCost = 0;
         foreach (var row in dialogViewModel.HeroRecruitRows.Where(r => r.Count > 0))
         {
             foreach (var slot in row.NameSlots)
             {
                 var name = slot.Name.Trim();
-                await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name);
+                var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name);
                 totalCost += row.Cost;
+
+                foreach (var pick in slot.Equipment)
+                {
+                    if (pick.IsFree)
+                    {
+                        // Dague gratuite déjà déterminée au moment du pick (AddRecruitEquipment, sensible
+                        // à ce que ce slot porte déjà ou non - contrairement à ConsumeReserveOrBuyAsync's
+                        // propre règle interne, pensée pour le top-up des groupes existants) - jamais
+                        // re-dérivée ici, coûte 0 quelle que soit sa provenance.
+                        await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                    }
+                    else
+                    {
+                        totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, pick.Item, pick.MaterialRule, quantity: 1, applyFreeDaggerRule: false);
+                    }
+                }
+
                 sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
             }
         }
@@ -1421,44 +1443,87 @@ public partial class WarbandDetailViewModel
         }
     }
 
-    /// <summary>Étape "Recrutement des Hommes de main" (livre, étape 8, suite) - même principe
-    /// qu'ApplyRecruitmentAsync (Héros) : brouillon en mémoire depuis EndOfGameDialogViewModel.
-    /// Recruitment.cs, appliqué ici seulement à Terminer. Groupes existants (ExistingHenchmanTopUps,
-    /// budget vétérans déjà validé côté wizard, SEUL endroit où l'équipement se calcule automatiquement -
-    /// retour utilisateur 2026-09-05) puis un éventuel nouveau groupe (HenchmanRecruitRows/
-    /// HenchmanGroupDrafts, équipé à l'étape RecruitHenchmenEquipment - choix libre au picker, jamais tiré
-    /// de la réserve, contrairement aux groupes existants ci-dessus). Réserve rechargée FRAÎCHEMENT depuis
-    /// la base ici (pas dialogViewModel's propre _warbandInventory, un instantané figé à l'ouverture du
-    /// wizard) pour refléter tout ce qu'un apply step précédent dans CE MÊME pipeline (ex. "Céder du
-    /// matériel") a déjà retiré de la réserve.</summary>
+    /// <summary>Réserve en priorité, sinon achète au plein tarif - factorisé ici (ApplyRecruitmentAsync/
+    /// ApplyHenchmanRecruitmentAsync) plutôt que dupliqué en closure locale par méthode. stashPool est
+    /// MUTÉ en place (List, passé par référence) au fil des appels successifs - chaque appelant doit le
+    /// fetcher une seule fois via GetWarbandEquipmentAsync puis le réutiliser pour tous ses propres appels,
+    /// jamais re-fetcher entre deux consommations du même pipeline. applyFreeDaggerRule: true seulement
+    /// pour le top-up d'un groupe EXISTANT (chaque unité achetée ici EST la dague personnelle gratuite
+    /// d'une recrue neuve différente, voir ApplyHenchmanRecruitmentAsync's own doc) - false pour un pick
+    /// Héros/nouveau groupe, où IsFree est déjà déterminé au moment du pick (AddRecruitEquipment) et geré
+    /// séparément par l'appelant, jamais re-dérivé ici.</summary>
+    private async Task<int> ConsumeReserveOrBuyAsync(List<WarbandEquipment> stashPool, int warriorId, EquipmentItem item, SpecialRule? materialRule, int quantity, bool applyFreeDaggerRule)
+    {
+        var remaining = quantity;
+        foreach (var stashRow in stashPool.Where(w => w.Item.Id == item.Id && w.MaterialRule?.Id == materialRule?.Id).ToList())
+        {
+            if (remaining <= 0) break;
+            await _warbandService.RemoveWarbandEquipmentAsync(stashRow.Id);
+            await _warbandService.AddWarriorEquipmentAsync(warriorId, stashRow.Item, materialRule: stashRow.MaterialRule, foundValueOverride: stashRow.FoundValueOverride);
+            stashPool.Remove(stashRow);
+            remaining--;
+        }
+
+        if (remaining <= 0) return 0;
+
+        await _warbandService.AddWarriorEquipmentAsync(warriorId, item, quantity: remaining, materialRule: materialRule);
+        var isFreeDagger = applyFreeDaggerRule && item.IsFreeDagger && materialRule is null;
+        return remaining * EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: isFreeDagger);
+    }
+
+    /// <summary>Étape "Achat/Vente d'équipement" (livre, étape 9 - "Reallocate equipment") - juste AVANT
+    /// Recrutement dans le pipeline (voir SaveAsync's own commentaire d'ordre). Achat : rejoint la réserve
+    /// (jamais assigné à un guerrier ici). Vente : livre des règles - "Warriors can automatically sell
+    /// equipment for half its listed price... the warband receives half of the basic cost only" pour un
+    /// prix variable - retire de la réserve (WarbandEquipment) OU du guerrier qui le porte
+    /// (WarriorEquipment, "trade in weapons and equipment... swapped around the warband" - pas seulement
+    /// la réserve), crédite SellPrice (déjà calculé sur le candidat, jamais recalculé ici).</summary>
+    private async Task ApplyEquipmentTradingAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        var netGold = 0;
+
+        foreach (var pick in dialogViewModel.PurchasedReserveItems)
+        {
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, pick.Item, materialRule: pick.MaterialRule);
+            netGold -= pick.Cost;
+            sentences.Add(string.Format(Loc["HistoryEquipmentPurchasedSentence"], pick.Name));
+        }
+
+        foreach (var candidate in dialogViewModel.PendingSales)
+        {
+            if (candidate.StashItem is { } stashItem)
+                await _warbandService.RemoveWarbandEquipmentAsync(stashItem.Id);
+            else if (candidate.CarriedItem is { } carriedItem)
+                await _warbandService.RemoveWarriorEquipmentAsync(carriedItem.Id);
+
+            netGold += candidate.SellPrice;
+            sentences.Add(string.Format(Loc["HistoryEquipmentSoldSentence"], candidate.Name, candidate.SellPrice));
+        }
+
+        if (netGold != 0)
+        {
+            Warband.Treasury += netGold;
+            await _warbandService.SaveWarbandAsync(Warband);
+        }
+    }
+
+    /// <summary>Étape "Recrutement" (livre, étape 8, suite) - même principe qu'ApplyRecruitmentAsync
+    /// (Héros) : brouillon en mémoire depuis EndOfGameDialogViewModel.Recruitment.cs, appliqué ici
+    /// seulement à Terminer. Groupes existants (ExistingHenchmanTopUps, budget vétérans déjà validé côté
+    /// wizard, SEUL endroit où l'équipement se calcule automatiquement) puis un éventuel nouveau groupe
+    /// (HenchmanRecruitRows/HenchmanGroupDrafts, équipé à l'onglet Équipement de la même étape - réserve en
+    /// priorité comme les groupes existants ci-dessous, voir ConsumeReserveOrBuyAsync's own doc, sinon
+    /// plein tarif). Réserve rechargée FRAÎCHEMENT depuis la base ici (pas dialogViewModel's propre
+    /// _warbandInventory, un instantané figé à l'ouverture du wizard) pour refléter tout ce qu'un apply
+    /// step précédent dans CE MÊME pipeline (Achat/Vente d'équipement, "Céder du matériel"...) a déjà
+    /// retiré/ajouté à la réserve.</summary>
     private async Task ApplyHenchmanRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
     {
         if (Warband is null) return;
 
         var stashPool = await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
-
-        async Task<int> ConsumeOrBuyAsync(int warriorId, EquipmentItem item, SpecialRule? materialRule, int quantity)
-        {
-            var remaining = quantity;
-            foreach (var stashRow in stashPool.Where(w => w.Item.Id == item.Id && w.MaterialRule?.Id == materialRule?.Id).ToList())
-            {
-                if (remaining <= 0) break;
-                await _warbandService.RemoveWarbandEquipmentAsync(stashRow.Id);
-                await _warbandService.AddWarriorEquipmentAsync(warriorId, stashRow.Item, materialRule: stashRow.MaterialRule, foundValueOverride: stashRow.FoundValueOverride);
-                stashPool.Remove(stashRow);
-                remaining--;
-            }
-
-            if (remaining <= 0) return 0;
-
-            await _warbandService.AddWarriorEquipmentAsync(warriorId, item, quantity: remaining, materialRule: materialRule);
-            // Dague gratuite - même règle que EndOfGameDialogViewModel.GetTopUpBreakdown (même bug/même
-            // fix, retour utilisateur 2026-09-05) : chaque unité achetée ici est la dague personnelle
-            // gratuite d'une recrue neuve différente, jamais gratuite si un matériau a été choisi.
-            var isFreeDagger = item.IsFreeDagger && materialRule is null;
-            return remaining * EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: isFreeDagger);
-        }
-
         var totalCost = 0;
 
         foreach (var topUp in dialogViewModel.ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
@@ -1475,7 +1540,8 @@ public partial class WarbandDetailViewModel
             await _warbandService.SaveWarriorAsync(warrior);
 
             foreach (var equipment in topUp.CurrentEquipment)
-                totalCost += await ConsumeOrBuyAsync(warrior.Id, equipment.Item, equipment.MaterialRule, topUp.AddCount * equipment.Quantity / groupHeadCount);
+                totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, equipment.Item, equipment.MaterialRule,
+                    quantity: topUp.AddCount * equipment.Quantity / groupHeadCount, applyFreeDaggerRule: true);
 
             totalCost += topUp.AddCount * (topUp.ArchetypeCost + 2 * topUp.GroupExperience);
             sentences.Add(string.Format(Loc["HistoryHenchmanTopUpSentence"], topUp.AddCount, warrior.Name));
@@ -1489,15 +1555,21 @@ public partial class WarbandDetailViewModel
                 var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name, headCount: group.Count);
                 totalCost += group.Count * row.Cost;
 
-                // Équipement acheté à l'étape RecruitHenchmenEquipment (choix libre, jamais tiré de la
-                // réserve - contrairement au top-up d'un groupe existant ci-dessus). Quantity = group.Count
-                // (pas 1) : un groupe est UN SEUL Warrior (HeadCount = l'effectif), donc Quantity y
-                // représente déjà le TOTAL pour tout le groupe - même convention que le fix ci-dessus sur
-                // les groupes existants (bug 2026-09-05, "l'épée coute 30, hors l'épée coute 10").
+                // Équipement acheté à l'onglet Équipement de l'étape Recrutement - réserve en priorité
+                // (ConsumeReserveOrBuyAsync), sinon plein tarif. Quantity = group.Count (pas 1) : un
+                // groupe est UN SEUL Warrior (HeadCount = l'effectif), donc Quantity y représente déjà le
+                // TOTAL pour tout le groupe - même convention que le fix ci-dessus sur les groupes
+                // existants (bug 2026-09-05, "l'épée coute 30, hors l'épée coute 10").
                 foreach (var pick in group.Equipment)
                 {
-                    await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, quantity: group.Count, materialRule: pick.MaterialRule);
-                    totalCost += group.Count * pick.Cost;
+                    if (pick.IsFree)
+                    {
+                        // Dague gratuite déjà déterminée au moment du pick (AddRecruitEquipment) - jamais
+                        // re-dérivée ici, voir ApplyRecruitmentAsync's même logique côté Héros.
+                        await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, quantity: group.Count, materialRule: pick.MaterialRule);
+                        continue;
+                    }
+                    totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, pick.Item, pick.MaterialRule, quantity: group.Count, applyFreeDaggerRule: false);
                 }
 
                 sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));

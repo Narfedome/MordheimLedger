@@ -116,6 +116,18 @@ public class EquipmentItem
     /// RestrictedToWarriorArchetypeIds.</summary>
     public bool IsUniqueArtefact { get; set; }
 
+    /// <summary>True for an item found ONLY via the Exploration table (Jewelsmith's gems - Quartz
+    /// Stones/Amethyst/Necklace, or the Training Manual) - never sold by a Trading Post merchant, only
+    /// ever gained as loot and then optionally resold. Distinct field from IsSellable (a true fact about
+    /// the item - these ARE sellable - but a SEPARATE concern from whether it can be bought in the first
+    /// place; conflating the two by reusing IsSellable alone for both was flagged as unclear, 2026-09-05
+    /// retour utilisateur - "dans le json c'est pas explicite... je veux mettre un objet non achetable
+    /// comme je fais ?"). Same exclusion point as MagicalArtefact/IsUniqueArtefact (see
+    /// EquipmentItemViewModel.ApplyFilter's AllowedWarbandArchetypeId branch) - Codex/CRUD browsing and
+    /// any detail/recap dialog still show it normally, only purchase/recruitment pickers hide it.
+    /// Seed-only for now (no EquipmentItemEditDialog UI), same precedent as IsUniqueArtefact.</summary>
+    public bool IsExplorationOnly { get; set; }
+
     /// <summary>Null for almost every item. Non-null marks an item that grants this many EXTRA dice to
     /// the warband's post-battle Exploration roll while carried by a warrior (e.g. the All-seeing Eye
     /// of Numas - Œil Omniscient de Numas: "roll two dice instead of one for the bearer"). Computed live

@@ -1412,14 +1412,50 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Remaining treasury: {0} gc</value>
   </data>
+  <data name="EndOfGameEquipmentTradingHeading" xml:space="preserve">
+    <value>Buy/Sell Equipment</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingBuyHeading" xml:space="preserve">
+    <value>Buy</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingSellHeading" xml:space="preserve">
+    <value>Sell</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingStashSource" xml:space="preserve">
+    <value>Stash</value>
+  </data>
+  <data name="EndOfGameSellEquipmentDialogTitle" xml:space="preserve">
+    <value>Sell Equipment</value>
+  </data>
+  <data name="EndOfGameSellEquipmentTotalLabel" xml:space="preserve">
+    <value>Sale total</value>
+  </data>
+  <data name="EndOfGameNoSellableEquipment" xml:space="preserve">
+    <value>Nothing to sell.</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingBuyCostLabel" xml:space="preserve">
+    <value>Purchase cost</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingSellGainLabel" xml:space="preserve">
+    <value>Sale gain</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingNetTotalLabel" xml:space="preserve">
+    <value>Total</value>
+  </data>
   <data name="EndOfGameRecruitmentHeading" xml:space="preserve">
-    <value>Hero recruitment</value>
+    <value>Recruitment — Heroes</value>
   </data>
   <data name="EndOfGameRecruitmentHeroesHeading" xml:space="preserve">
     <value>Heroes</value>
   </data>
-  <data name="EndOfGameRecruitHenchmenHeading" xml:space="preserve">
-    <value>Henchmen recruitment</value>
+  <data name="EndOfGameRecruitHeroDetailHeading" xml:space="preserve">
+    <value>Hero details</value>
+  </data>
+  <data name="EndOfGameRecruitHeroProgressLabel" xml:space="preserve">
+    <value>Hero {0}/{1}</value>
+  </data>
+  <data name="EndOfGameRecruitVeteranTopUpHeading" xml:space="preserve">
+    <value>Recruiting veterans</value>
   </data>
   <data name="EndOfGameRecruitHenchmenExistingHeading" xml:space="preserve">
     <value>Existing groups</value>
@@ -1431,10 +1467,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>New group</value>
   </data>
   <data name="EndOfGameRecruitHenchmenEquipmentHeading" xml:space="preserve">
-    <value>Equip the new groups</value>
+    <value>New group — Equipment</value>
   </data>
   <data name="EndOfGameRecruitHenchmenNamesHeading" xml:space="preserve">
-    <value>Name the new groups</value>
+    <value>Name your new groups</value>
   </data>
   <data name="EndOfGameRecruitStashUsedFormat" xml:space="preserve">
     <value>{0} item(s) taken from the reserve instead of bought new.</value>
@@ -1681,6 +1717,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="HistoryRecruitedSentence" xml:space="preserve">
     <value>{0} the {1} joins the warband (recruitment).</value>
+  </data>
+  <data name="HistoryEquipmentPurchasedSentence" xml:space="preserve">
+    <value>{0} bought and added to the stash.</value>
+  </data>
+  <data name="HistoryEquipmentSoldSentence" xml:space="preserve">
+    <value>{0} sold for {1} gc.</value>
   </data>
   <data name="HistoryHenchmanTopUpSentence" xml:space="preserve">
     <value>{0} new recruit(s) added to the {1} group.</value>

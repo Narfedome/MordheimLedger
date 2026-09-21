@@ -2170,160 +2170,224 @@
                        TextColor="{StaticResource AppDanger}" IsVisible="{Binding IsDuelLost}"/>
             </VerticalStackLayout>
 
-            <!-- Étape : Recrutement des Héros (livre, étape 8 - "Hire New Recruits & Buy Common Items").
-                 Toujours présente (comme Prisonniers/Expérience), 0 à N recrues autorisées, en tout ordre.
-                 2026-09-05, retour utilisateur ("on a juste un step pour recruter les héros, on n'a pas
-                 les équipements à gérer là, on affiche la limite de guerrier de la bande") : juste
-                 steppers + Nom, l'équipement est acheté plus tard dans une étape dédiée (verse dans la
-                 réserve de la bande pour un Héros, jamais assigné directement ici) - voir
-                 EndOfGameDialogViewModel.Recruitment.cs. -->
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHeroesStep}">
+            <!-- Étape : Achat/Vente d'équipement (livre, étape 9 - "Reallocate equipment") - juste AVANT
+                 Recrutement (2026-09-05, retour utilisateur - "si on faisait d'abord l'achat vente
+                 d'équipement, puis le recrutement avec l'assignation des équipements de la stash") -
+                 remplit/vide la réserve de toute la bande ; Recrutement source ensuite ses achats en
+                 priorité depuis cette réserve - voir EndOfGameDialogViewModel.EquipmentTrading.cs. -->
+            <VerticalStackLayout Spacing="14" IsVisible="{Binding IsEquipmentTradingStep}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+
+                <!-- Achat : choix libre au picker (commonOnly), rejoint la réserve - pas assigné à un
+                     guerrier ici (PurchasedReserveItems, EquipmentPick sans slot/groupe porteur). -->
+                <VerticalStackLayout Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingBuyHeading}" FontSize="12"
+                               FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.Plus}"
+                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                      Command="{Binding AddReserveEquipmentCommand}"/>
+                    </Grid>
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding PurchasedReserveItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="createEdit:EquipmentPick">
+                                <components:ChipView Item="{Binding .}"
+                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowReserveEquipmentDetailCommand}"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveReserveEquipmentCommand}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+
+                <!-- Vente : réserve pré-partie + équipement DÉJÀ porté (livre des règles - "trade in
+                     weapons and equipment... swapped around the warband"), jamais un achat de cette
+                     session. SellEquipmentDialog (multi-sélection) puis chips retirables. -->
+                <VerticalStackLayout Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellHeading}" FontSize="12"
+                               FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.Plus}"
+                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                      Command="{Binding AddSaleEquipmentCommand}"/>
+                    </Grid>
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding PendingSales}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:SellableEquipmentCandidate">
+                                <components:ChipView Item="{Binding .}"
+                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveSaleEquipmentCommand}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+
+                <!-- Bilan Achat/Vente (retour utilisateur 2026-09-05 - "il faudrait en dessous un libellé
+                     indiquant combien d'or ça coûte, combien d'or on gagne, et le total"). -->
+                <VerticalStackLayout Spacing="2">
+                    <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}" Margin="0,2"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingBuyCostLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Grid.Column="1" Text="{Binding PurchasedReserveItemsCost}" FontSize="11"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellGainLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Grid.Column="1" Text="{Binding PendingSalesTotal}" FontSize="11"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingNetTotalLabel}" FontSize="12" FontAttributes="Bold"/>
+                        <Label Grid.Column="1" Text="{Binding EquipmentTradingNetTotal}" FontSize="12" FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Recrutement (livre, étape 8 - "Hire New Recruits & Buy Common Items" - "this is done in
+                 any order and may be done several times") : refondu en étapes séquentielles dédiées
+                 (2026-09-21, retour utilisateur - "on manque d'homogénéité... on reprend le système qu'on
+                 a dans WarbandEditDialog... écran par écran, step by step"), après qu'une première version
+                 à 2 onglets librement navigables (Guerriers/Équipement, une seule carte pour Héros ET
+                 Hommes de main) se soit révélée confuse - voir EndOfGameDialogViewModel.Recruitment.cs. -->
+
+            <!-- Étape : Héros - effectif (steppers seuls, toujours présente). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHeroesCountStep}">
                 <Grid ColumnDefinitions="*,Auto">
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitmentHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
-
+                <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <components:WarriorRecruitListView ItemsSource="{Binding HeroRecruitRows}"
                                                     HeaderText="{loc:Loc EndOfGameRecruitmentHeroesHeading}"
                                                     IncrementCommand="{Binding IncrementRecruitCommand}"
                                                     DecrementCommand="{Binding DecrementRecruitCommand}"/>
+            </VerticalStackLayout>
 
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHeroRows}" Spacing="10">
+            <!-- Étape : Détail d'un héros recruté (dynamique, une étape PAR héros - même principe que
+                 Blessure/Progression) - nom ET équipement pour CE héros précis sur le même écran, "ce qui
+                 permet d'assigner directement les items au personnage" (retour utilisateur). Même
+                 RecruitSlotTabsView que WarbandEditDialogViewModel (Compétences/XP/Sorts hors mode Bande
+                 existante ne s'appliquent jamais à ce contexte). -->
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsRecruitHeroDetailStep}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHeroDetailHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitHeroProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Label Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Entry Text="{Binding CurrentRecruitHeroSlot.Name}" Placeholder="{Binding CurrentRecruitHeroSlot.ArchetypeLabel}" FontSize="13"/>
+                        <components:RecruitSlotTabsView Item="{Binding CurrentRecruitHeroSlot}"
+                              IsVisible="{Binding CurrentRecruitHeroSlot.ShowTabsView}"
+                              AddEquipmentCommand="{Binding AddRecruitEquipmentCommand}"
+                              RemoveEquipmentCommand="{Binding RemoveRecruitEquipmentCommand}"
+                              ShowEquipmentDetailCommand="{Binding ShowRecruitEquipmentDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Label Text="{Binding RecruitHeroDetailError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding RecruitHeroDetailError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <!-- Étape : Recrutement des vétérans - groupes d'Hommes de main déjà existants (budget
+                 vétérans, équipement TOUJOURS AUTOMATIQUE, livre des règles) - absente s'il n'y en a
+                 aucun (HasExistingHenchmanGroups gate déjà l'étape elle-même). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitVeteranTopUpStep}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitVeteranTopUpHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Label Text="{Binding RecruitHenchmenExistingHintDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExistingHenchmanTopUps}" Spacing="8">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="createEdit:WarriorRecruitRow">
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding NameSlots}" Spacing="6">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="createEdit:WarriorNameSlot">
-                                        <Entry Text="{Binding Name}" Placeholder="{Binding ArchetypeLabel}"/>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                        <DataTemplate x:DataType="local:ExistingHenchmanTopUp">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="10">
+                                <VerticalStackLayout Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="12"/>
+                                        <HorizontalStackLayout Grid.Column="1" Spacing="6">
+                                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Icon="{x:Static icons:SolidFont.Minus}"
+                                                                          IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementHenchmanTopUpCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                            <Label Text="{Binding AddCount}" FontSize="12" WidthRequest="24"
+                                                   HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                                          IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementHenchmanTopUpCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                        </HorizontalStackLayout>
+                                    </Grid>
+                                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentEquipment}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="models:WarriorEquipment">
+                                                <components:ChipView Item="{Binding .}"
+                                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+                                    <VerticalStackLayout Spacing="2" IsVisible="{Binding HasAddCount}">
+                                        <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}" Margin="0,2"/>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenRecruitmentCostLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Label Grid.Column="1" Text="{Binding Breakdown.RecruitmentCost}" FontSize="11"/>
+                                        </Grid>
+                                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Breakdown.EquipmentLines}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="local:HenchmanEquipmentCostLine">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <Label Grid.Column="0" Text="{Binding Name}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                        <Label Grid.Column="1" Text="{Binding Cost}" FontSize="11"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenSurchargeLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Label Grid.Column="1" Text="{Binding Breakdown.SurchargeCost}" FontSize="11"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenTotalLabel}" FontSize="12" FontAttributes="Bold"/>
+                                            <Label Grid.Column="1" Text="{Binding Breakdown.Total}" FontSize="12" FontAttributes="Bold"/>
+                                        </Grid>
+                                        <Label Text="{Binding StashItemsUsedDisplay}" FontSize="11" TextColor="{DynamicResource AppAccent}"
+                                               IsVisible="{Binding Breakdown.HasStashSavings}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-
-                <Label Text="{Binding RecruitHeroesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                       IsVisible="{Binding RecruitHeroesError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
-            <!-- Étape : Recrutement des Hommes de main (livre, étape 8, suite) - groupes existants (budget
-                 vétérans, SEUL endroit où l'équipement se calcule automatiquement - retour utilisateur
-                 2026-09-05) puis un éventuel nouveau groupe VIDE (équipé plus tard, comme les Héros) - voir
-                 EndOfGameDialogViewModel.Recruitment.cs pour l'algorithme exact (HenchmanRecruitmentTotalCost/
-                 GetTopUpBreakdown). -->
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHenchmenStep}">
+            <!-- Étape : Nouveau groupe d'Hommes de main - effectif (steppers seuls, toujours présente -
+                 livre des règles "may be done several times"). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHenchmenCountStep}">
                 <Grid ColumnDefinitions="*,Auto">
-                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenNewHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
-
-                <!-- Groupes existants : équipement AUTOMATIQUE (copié du groupe, jamais un choix libre -
-                     livre des règles "New Henchmen must be armed and equipped in the same way as existing
-                     members of the group"), plafonné par le budget vétérans. Détail du calcul affiché sous
-                     chaque groupe (retour utilisateur - "il faut détailler le calcul au recrutement de
-                     vétéran") : recrutement, une ligne par type d'équipement (rayée + 0 CO si pris dans la
-                     réserve), surtaxe d'Expérience, total. -->
-                <VerticalStackLayout Spacing="8" IsVisible="{Binding HasExistingHenchmanGroups}">
-                    <Label Text="{loc:Loc EndOfGameRecruitHenchmenExistingHeading}" FontSize="12"
-                           FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding RecruitHenchmenExistingHintDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExistingHenchmanTopUps}" Spacing="8">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="local:ExistingHenchmanTopUp">
-                                <Border Style="{StaticResource SectionCardBorderStyle}" Padding="10">
-                                    <VerticalStackLayout Spacing="6">
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="12"/>
-                                            <HorizontalStackLayout Grid.Column="1" Spacing="6">
-                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                              Icon="{x:Static icons:SolidFont.Minus}"
-                                                                              IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementHenchmanTopUpCommand}"
-                                                                              CommandParameter="{Binding .}"/>
-                                                <Label Text="{Binding AddCount}" FontSize="12" WidthRequest="24"
-                                                       HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                              Icon="{x:Static icons:SolidFont.Plus}"
-                                                                              IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementHenchmanTopUpCommand}"
-                                                                              CommandParameter="{Binding .}"/>
-                                            </HorizontalStackLayout>
-                                        </Grid>
-                                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentEquipment}">
-                                            <BindableLayout.ItemTemplate>
-                                                <DataTemplate x:DataType="models:WarriorEquipment">
-                                                    <components:ChipView Item="{Binding .}"
-                                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                                          IconFontFamily="RpgAwesome"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
-                                                </DataTemplate>
-                                            </BindableLayout.ItemTemplate>
-                                        </FlexLayout>
-                                        <!-- Détail de coût - Breakdown est "poussé" par le ViewModel après
-                                             tout Increment/Decrement (voir ExistingHenchmanTopUp.Breakdown),
-                                             pas calculé ici : dépend de TOUS les groupes à la fois (réserve
-                                             partagée, consommée dans l'ordre). -->
-                                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasAddCount}">
-                                            <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}" Margin="0,2"/>
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenRecruitmentCostLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                                <Label Grid.Column="1" Text="{Binding Breakdown.RecruitmentCost}" FontSize="11"/>
-                                            </Grid>
-                                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Breakdown.EquipmentLines}">
-                                                <BindableLayout.ItemTemplate>
-                                                    <DataTemplate x:DataType="local:HenchmanEquipmentCostLine">
-                                                        <Grid ColumnDefinitions="*,Auto">
-                                                            <Label Grid.Column="0" Text="{Binding Name}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                                            <Label Grid.Column="1" Text="{Binding Cost}" FontSize="11"/>
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </BindableLayout.ItemTemplate>
-                                            </VerticalStackLayout>
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenSurchargeLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                                                <Label Grid.Column="1" Text="{Binding Breakdown.SurchargeCost}" FontSize="11"/>
-                                            </Grid>
-                                            <Grid ColumnDefinitions="*,Auto">
-                                                <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenTotalLabel}" FontSize="12" FontAttributes="Bold"/>
-                                                <Label Grid.Column="1" Text="{Binding Breakdown.Total}" FontSize="12" FontAttributes="Bold"/>
-                                            </Grid>
-                                            <Label Text="{Binding StashItemsUsedDisplay}" FontSize="11" TextColor="{DynamicResource AppAccent}"
-                                                   IsVisible="{Binding Breakdown.HasStashSavings}"/>
-                                        </VerticalStackLayout>
-                                    </VerticalStackLayout>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-
-                <!-- Nouveau groupe : même principe que les Héros, mais steppers SEULS ici - toujours VIDE,
-                     équipé plus tard dans l'étape Achat d'équipement, nommé encore plus tard dans sa propre
-                     étape StepKind.RecruitHenchmenNames (2026-09-05, retour utilisateur - "on doit les
-                     nommer après les avoir équipés") - voir la doc de classe d'EndOfGameDialogViewModel.
-                     Recruitment.cs. -->
-                <Label Text="{loc:Loc EndOfGameRecruitHenchmenNewHeading}" FontSize="12"
-                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
                 <components:WarriorRecruitListView ItemsSource="{Binding HenchmanRecruitRows}"
                                                     HeaderText="{loc:Loc EndOfGameRecruitHenchmenNewHeading}"
                                                     IncrementCommand="{Binding IncrementHenchmanGroupCommand}"
                                                     DecrementCommand="{Binding DecrementHenchmanGroupCommand}"/>
-
-                <Label Text="{Binding RecruitHenchmenError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                       IsVisible="{Binding RecruitHenchmenError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
-            <!-- Étape : Équipement des nouveaux groupes d'Hommes de main - entre RecruitHenchmen et
-                 RecruitHenchmenNames (2026-09-05, retour utilisateur - "l'idée c'est de reprendre la même
-                 mécanique qu'on a dans le WarbandEdit. Recrutement des effectifs -> équipement des nouveaux
-                 groupes -> nommage") : même RecruitSlotTabsView que WarbandEditDialogViewModel (onglet
-                 Équipement seul ici - Compétences/XP/Sorts ne s'appliquent jamais à ce contexte, voir
-                 RecruitSlot.ShowSkillsTab/IsSpellcaster), avec Diviser pour équiper différemment une partie
-                 d'un même type recruté - voir EndOfGameDialogViewModel.Recruitment.cs. Les Héros restent
-                 hors de cette étape (leur propre achat, versé dans la réserve, reste à construire). -->
-            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHenchmenEquipmentStep}">
-                <Label Text="{loc:Loc EndOfGameRecruitHenchmenEquipmentHeading}" FontAttributes="Bold"/>
-
+            <!-- Étape : Nouveau groupe d'Hommes de main - équipement (achat libre, avec Diviser pour
+                 équiper différemment une partie d'un même type recruté - absente si aucun nouveau groupe). -->
+            <VerticalStackLayout Spacing="14" IsVisible="{Binding IsRecruitHenchmenEquipmentStep}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenEquipmentHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHenchmanRows}" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="createEdit:WarriorRecruitRow">
@@ -2335,8 +2399,6 @@
                                                 <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalOptions="Center"/>
                                                 <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
                                                        TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                                                <!-- Font Awesome n'a qu'un seul glyphe "split" (haut+gauche) - Rotation="-90"
-                                                     le tourne en "gauche+bas", même idiome que WarbandEditDialog.xaml. -->
                                                 <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                                               Icon="{x:Static icons:SolidFont.ArrowsSplitUpAndLeft}"
                                                                               Rotation="-90"
@@ -2348,9 +2410,9 @@
                                             </Grid>
                                             <components:RecruitSlotTabsView Item="{Binding .}"
                                                   IsVisible="{Binding ShowTabsView}"
-                                                  AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AddHenchmanGroupEquipmentCommand}"
-                                                  RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveHenchmanGroupEquipmentCommand}"
-                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowHenchmanGroupEquipmentDetailCommand}"/>
+                                                  AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AddRecruitEquipmentCommand}"
+                                                  RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveRecruitEquipmentCommand}"
+                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"/>
                                         </VerticalStackLayout>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -2360,27 +2422,32 @@
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
-            <!-- Étape : Noms des nouveaux groupes d'Hommes de main - APRÈS RecruitHenchmenEquipment
-                 (2026-09-05, retour utilisateur - "on doit les nommer après les avoir équipés" ; le nombre
-                 réel de groupes n'est connu qu'une fois un éventuel Diviser fait) - voir
-                 EndOfGameDialogViewModel.Recruitment.cs. -->
+            <!-- Étape : Nouveau groupe d'Hommes de main - noms (le nombre RÉEL de groupes n'est connu
+                 qu'une fois l'étape Équipement passée, un Diviser peut en créer d'autres - absente si
+                 aucun nouveau groupe). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHenchmenNamesStep}">
                 <Label Text="{loc:Loc EndOfGameRecruitHenchmenNamesHeading}" FontAttributes="Bold"/>
-
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHenchmanRows}" Spacing="8">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="createEdit:WarriorRecruitRow">
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}" Spacing="6">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="createEdit:HenchmanGroupDraft">
-                                        <Entry Text="{Binding Name}"/>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <Entry Text="{Binding Name}" FontSize="13"/>
+                                                <Label Text="{Binding EquipmentSummary}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding EquipmentSummary, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
+                                                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-
                 <Label Text="{Binding RecruitHenchmenNamesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding RecruitHenchmenNamesError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>

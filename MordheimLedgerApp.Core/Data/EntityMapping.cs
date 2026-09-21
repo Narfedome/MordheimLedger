@@ -760,7 +760,8 @@ public static class EntityMapping
         GrantsRareItemSearchBonus = e.GrantsRareItemSearchBonus,
         IsSellable = e.IsSellable,
         GrantsBonusExplorationDice = e.GrantsBonusExplorationDice,
-        IsUniqueArtefact = e.IsUniqueArtefact
+        IsUniqueArtefact = e.IsUniqueArtefact,
+        IsExplorationOnly = e.IsExplorationOnly
     };
 
     public static EquipmentList ToModel(this EquipmentListEntity e, IReadOnlyDictionary<string, string> translations,
@@ -912,7 +913,8 @@ public static class EntityMapping
         GrantsRareItemSearchBonus = m.GrantsRareItemSearchBonus,
         IsSellable = m.IsSellable,
         GrantsBonusExplorationDice = m.GrantsBonusExplorationDice,
-        IsUniqueArtefact = m.IsUniqueArtefact
+        IsUniqueArtefact = m.IsUniqueArtefact,
+        IsExplorationOnly = m.IsExplorationOnly
     };
 
     /// <param name="equipment">Carried items, loaded separately via the join table (sqlite-net does no joins).</param>

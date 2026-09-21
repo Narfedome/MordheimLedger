@@ -155,8 +155,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsDramatisPersonaeStep))]
     [NotifyPropertyChangedFor(nameof(IsPairEngagementStep))]
     [NotifyPropertyChangedFor(nameof(IsPairDuelStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHeroesStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenStep))]
+    [NotifyPropertyChangedFor(nameof(IsEquipmentTradingStep))]
+    [NotifyPropertyChangedFor(nameof(IsRecruitHeroesCountStep))]
+    [NotifyPropertyChangedFor(nameof(IsRecruitHeroDetailStep))]
+    [NotifyPropertyChangedFor(nameof(IsRecruitVeteranTopUpStep))]
+    [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenCountStep))]
     [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenEquipmentStep))]
     [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenNamesStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
@@ -168,6 +171,8 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(CurrentAdvanceWarrior))]
     [NotifyPropertyChangedFor(nameof(CurrentAdvanceRolls))]
     [NotifyPropertyChangedFor(nameof(AdvanceProgressLabel))]
+    [NotifyPropertyChangedFor(nameof(CurrentRecruitHeroSlot))]
+    [NotifyPropertyChangedFor(nameof(RecruitHeroProgressLabel))]
     [NotifyPropertyChangedFor(nameof(CanGoBack))]
     [NotifyPropertyChangedFor(nameof(IsLastStep))]
     [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -178,7 +183,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, RecruitHeroes, RecruitHenchmen, RecruitHenchmenEquipment, RecruitHenchmenNames, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -192,7 +197,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// principal de Warrior (comportement d'origine) ; non-null = une "Blessures multiples" sous-jet
     /// précis de Warrior.MultipleInjuryRolls (un guerrier peut donc enchaîner plusieurs étapes Vendu aux
     /// Fosses dans la même Fin de Partie, une par occurrence de 65). Voir CurrentPitFightOutcome.</summary>
-    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null, bool IsExplorationAdvance = false, InjurySubRollEntry? SubRoll = null);
+    private sealed record WizardStep(StepKind Kind, WarriorOutcomeRow? Warrior = null, bool IsExplorationAdvance = false, InjurySubRollEntry? SubRoll = null, WarriorNameSlot? RecruitHeroSlot = null);
 
     // --- Trésorerie : UNE seule source de vérité pour tout le wizard (2026-09-03, retour utilisateur -
     // "on n'utilise pas le même solde de trésorerie à la corruption et à l'achat d'objet rare... on doit
@@ -228,7 +233,10 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         - DramatisPersonaUpkeepEntries.Where(e => e.WillPay == true && !e.IsWyrdstoneFee).Sum(e => e.UpkeepCost)
         - PairPaymentAmountCommitted
         - HeroRecruitRows.Sum(r => r.Count * r.Cost)
-        - HenchmanRecruitmentTotalCost();
+        - HeroEquipmentTotalCost()
+        - HenchmanRecruitmentTotalCost()
+        - PurchasedReserveItems.Sum(p => p.Cost)
+        + PendingSales.Sum(c => c.SellPrice);
 
     /// <summary>Notifie tout ce qui dépend de EndOfGameTreasuryRemaining - un seul point d'entrée plutôt
     /// qu'une longue liste de [NotifyPropertyChangedFor] dupliquée sur chaque propriété/collection qui
@@ -253,6 +261,9 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         OnPropertyChanged(nameof(SeizedEquipmentTotalValue));
         OnPropertyChanged(nameof(SeizedEquipmentTotalDisplay));
         OnPropertyChanged(nameof(RecruitmentTreasuryDisplay));
+        OnPropertyChanged(nameof(PurchasedReserveItemsCost));
+        OnPropertyChanged(nameof(PendingSalesTotal));
+        OnPropertyChanged(nameof(EquipmentTradingNetTotal));
     }
 
     /// <summary>ExplorationResult ne s'ajoute que si un résultat a effectivement été déclenché par le
@@ -320,11 +331,6 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // Personnage (2026-08-31).
             if (HasEligibleHeroesForRareItems) steps.Add(new(StepKind.RareItems));
             if (RareItemSearchEntries.Any(e => e.IsFound)) steps.Add(new(StepKind.RareItemPurchase));
-            // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
-            // voir EndOfGameDialogViewModel.HiredSwords.cs. Placée après l'or d'Exploration (le joueur
-            // décide en connaissant sa trésorerie finale, voir HiredSwordTreasuryAfter), entièrement
-            // absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance).
-            if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
             // Dramatis Personae : solde des personnages à frais en or/pierre magique déjà engagés
             // (Johann/Veskit/Marianna/Nicodemus) - voir EndOfGameDialogViewModel.DramatisPersonae.cs.
             // Aucun recrutement combiné ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis
@@ -344,30 +350,46 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // possible désormais que Corruption/Rétention partagent la même étape juste au-dessus (avant
             // le 2026-09-04, il fallait DEUX points d'ancrage distincts selon le cas).
             if (WantsDuel) steps.Add(new(StepKind.PairDuel));
-            // Recrutement (livre, étape 8 - "Hire New Recruits & Buy Common Items") : DEUX étapes
-            // dédiées (2026-09-05, retour utilisateur - "on doit avoir un step Recrutement des héros,
-            // recrutement d'homme d'armes") plutôt qu'une seule carte mélangeant les deux, toujours
-            // présentes (comme Prisonniers/Expérience), 0 à N recrues en tout ordre - voir
-            // EndOfGameDialogViewModel.Recruitment.cs.
-            steps.Add(new(StepKind.RecruitHeroes));
-            steps.Add(new(StepKind.RecruitHenchmen));
-            // Équipement PUIS Noms des nouveaux groupes : deux étapes À PART, juste après (2026-09-05,
-            // retour utilisateur - "on doit les nommer après les avoir équipés", précisé ensuite - "l'idée
-            // c'est de reprendre la même mécanique qu'on a dans le WarbandEdit. Recrutement des effectifs ->
-            // équipement des nouveaux groupes -> nommage") - même précédent que WarbandEditDialogViewModel
-            // (Warriors -> Equipment -> WarriorNames, jamais mélangé). Contrairement à RecruitHeroes/
-            // RecruitHenchmen (toujours présentes, rien à recruter n'y est pas gênant à montrer), ces deux-là
-            // n'ont RIEN à afficher tant qu'aucun nouveau groupe n'a été recruté (RecruitedHenchmanRows) - un
-            // groupe existant qui reçoit un top-up ne compte pas, lui n'a ni équipement ni nom à saisir ici
-            // (voir la doc de classe de EndOfGameDialogViewModel.Recruitment.cs). Retirées entièrement plutôt
-            // que montrées vides (retour utilisateur 2026-09-05 - "si il n'y a pas de nouveau groupe, on
-            // n'affiche pas les step d'équipement et de nom"), même principe que WyrdstoneSale/HiredSwords/
-            // RareItems ci-dessus.
+            // Recrutement (livre, étape 8 - "Hire New Recruits & Buy Common Items" - "this is done in any
+            // order and may be done several times") : refondu en étapes séquentielles dédiées (2026-09-21,
+            // retour utilisateur - "on manque d'homogénéité... je pense que pour que ce soit plus simple, on
+            // va reprendre le système qu'on a dans WarbandEditDialog... écran par écran, step by step") après
+            // qu'une première version à 2 onglets librement navigables (Guerriers/Équipement, une seule
+            // carte pour Héros ET Hommes de main) se soit révélée confuse à l'usage. Voir
+            // EndOfGameDialogViewModel.Recruitment.cs pour le détail de chaque étape. Achat/Vente
+            // d'équipement (juste avant, inchangée) remplit/vide la réserve de toute la bande ; ce qui suit
+            // source ses achats en priorité depuis cette réserve plutôt que d'acheter systématiquement au
+            // plein tarif - voir BuildStashPool/BuildAvailableReservePool.
+            steps.Add(new(StepKind.EquipmentTrading));
+            // Héros : effectif (steppers, toujours présente) puis UNE étape PAR héros réellement recruté
+            // (dynamique, même principe que Blessure/Progression - un guerrier par étape plutôt qu'une
+            // liste) combinant nom ET achat d'équipement pour CE héros précis - "ce qui permet d'assigner
+            // directement les items au personnage" (retour utilisateur), plutôt que les nommer tous ensemble
+            // dans une étape Noms commune à la fin comme la version précédente.
+            steps.Add(new(StepKind.RecruitHeroesCount));
+            steps.AddRange(RecruitedHeroRows.SelectMany(r => r.NameSlots)
+                .Select(slot => new WizardStep(StepKind.RecruitHeroDetail, RecruitHeroSlot: slot)));
+            // Hommes de main : top-up des groupes déjà existants (budget vétérans, équipement automatique)
+            // dans sa PROPRE étape - absente s'il n'y a aucun groupe existant à renforcer, même principe que
+            // WyrdstoneSale/RareItems ci-dessus. Puis un éventuel nouveau groupe, en 3 étapes distinctes
+            // (Effectif toujours présente - "may be done several times" - puis Équipement/Noms, absentes
+            // toutes les deux si rien n'a été recruté) reprenant tel quel le contenu qui vivait avant dans
+            // l'onglet Guerriers/Équipement de l'ancienne étape Recrutement fusionnée.
+            if (HasExistingHenchmanGroups) steps.Add(new(StepKind.RecruitVeteranTopUp));
+            steps.Add(new(StepKind.RecruitHenchmenCount));
             if (RecruitedHenchmanRows.Any())
             {
                 steps.Add(new(StepKind.RecruitHenchmenEquipment));
                 steps.Add(new(StepKind.RecruitHenchmenNames));
             }
+            // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
+            // voir EndOfGameDialogViewModel.HiredSwords.cs. Après tout le recrutement (2026-09-21, retour
+            // utilisateur - "les francs-tireurs sont après le recrutement", confirmé comme une demande de
+            // réordonnancement plutôt qu'un bug : Francs-Tireurs est conceptuellement un autre mécanisme de
+            // recrutement, le joueur décide en connaissant sa trésorerie ET son roster finaux, recrutement de
+            // guerriers compris) - entièrement absente si aucun Franc-Tireur n'est concerné
+            // (HasAnyHiredSwordRelevance).
+            if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -405,11 +427,33 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsDramatisPersonaeStep => Current.Kind == StepKind.DramatisPersonae;
     public bool IsPairEngagementStep => Current.Kind == StepKind.PairEngagement;
     public bool IsPairDuelStep => Current.Kind == StepKind.PairDuel;
-    public bool IsRecruitHeroesStep => Current.Kind == StepKind.RecruitHeroes;
+    public bool IsEquipmentTradingStep => Current.Kind == StepKind.EquipmentTrading;
+    public bool IsRecruitHeroesCountStep => Current.Kind == StepKind.RecruitHeroesCount;
+    public bool IsRecruitHeroDetailStep => Current.Kind == StepKind.RecruitHeroDetail;
+    public bool IsRecruitVeteranTopUpStep => Current.Kind == StepKind.RecruitVeteranTopUp;
+    public bool IsRecruitHenchmenCountStep => Current.Kind == StepKind.RecruitHenchmenCount;
     public bool IsRecruitHenchmenEquipmentStep => Current.Kind == StepKind.RecruitHenchmenEquipment;
     public bool IsRecruitHenchmenNamesStep => Current.Kind == StepKind.RecruitHenchmenNames;
-    public bool IsRecruitHenchmenStep => Current.Kind == StepKind.RecruitHenchmen;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
+
+    /// <summary>Le seul héros affiché à l'étape RecruitHeroDetail courante - une étape par héros recruté,
+    /// jamais une liste (même principe que CurrentInjuryWarrior/CurrentAdvanceWarrior).</summary>
+    public WarriorNameSlot? CurrentRecruitHeroSlot => Current.RecruitHeroSlot;
+
+    /// <summary>"Héros X/Y" - même idiome que InjuryProgressLabel/AdvanceProgressLabel, index de
+    /// CurrentRecruitHeroSlot parmi tous les héros recrutés cette étape.</summary>
+    public string RecruitHeroProgressLabel
+    {
+        get
+        {
+            var slot = CurrentRecruitHeroSlot;
+            if (slot is null) return string.Empty;
+
+            var slots = RecruitedHeroRows.SelectMany(r => r.NameSlots).ToList();
+            var index = slots.IndexOf(slot);
+            return index < 0 ? string.Empty : string.Format(Loc["EndOfGameRecruitHeroProgressLabel"], index + 1, slots.Count);
+        }
+    }
 
     /// <summary>Le seul guerrier affiché à l'étape Blessure courante - une étape par guerrier coché
     /// hors de combat, jamais une liste (voir la doc de classe).</summary>
@@ -732,8 +776,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             StepKind.DramatisPersonae => ValidateDramatisPersonaeStep(),
             StepKind.PairEngagement => ValidatePairEngagementStep(),
             StepKind.PairDuel => ValidatePairDuelStep(),
-            StepKind.RecruitHeroes => ValidateRecruitHeroesStep(),
-            StepKind.RecruitHenchmen => ValidateRecruitHenchmenStep(),
+            StepKind.RecruitHeroDetail => ValidateRecruitHeroDetailStep(CurrentRecruitHeroSlot!),
             StepKind.RecruitHenchmenNames => ValidateRecruitHenchmenNamesStep(),
             _ => true
         };

@@ -1206,4 +1206,56 @@ public partial class EndOfGameDialogViewModel
 
         return CheckRoll(amountMissing == true || henchmanQuantityMissing, () => ExplorationAmountError = Loc["EndOfGameRollRequired"]);
     }
+
+    /// <summary>Tous les objets qui rejoindront la réserve de la bande à Terminer, en provenance de la
+    /// Table d'Exploration UNIQUEMENT (forme à branche unique + forme "Trésor Caché/Bande Massacrée" à
+    /// seuils indépendants + objet bonus Boutique/Bâtiment Éventré) - PAS les Objets Rares (étape séparée,
+    /// plus tard dans ce wizard). Miroir client-side de WarbandDetailViewModel.EndOfGame.
+    /// ApplyExplorationOutcomeAsync (AddOneItemToInventoryAsync), en WarbandEquipment déjà résolus
+    /// (ResolvedExplorationItem et consorts, jamais recalculé ici) plutôt qu'écrit en base : ce wizard
+    /// n'écrit rien avant Terminer (voir la doc de classe globale), mais BuildStashPool
+    /// (EndOfGameDialogViewModel.Recruitment.cs) a besoin de savoir CE QUI SERA dans la réserve pour
+    /// calculer correctement le top-up "réserve en priorité" d'un groupe d'Hommes de main existant - sans
+    /// ce miroir, un objet trouvé PENDANT cette même partie n'était jamais compté disponible tant que
+    /// Terminer n'avait pas tourné (retour utilisateur - "les items récupérés dans l'exploration chart ne
+    /// sont pas comptabilisés dans le contexte du end of game pour le recrutement"). L'application réelle
+    /// (ApplyExplorationOutcomeAsync) tourne de toute façon AVANT ApplyHenchmanRecruitmentAsync dans le
+    /// pipeline de Terminer (voir WarbandDetailViewModel.EndOfGame.SaveAsync) - le montant réellement
+    /// débité à Terminer était déjà correct, seul cet aperçu en direct manquait. Toute divergence avec
+    /// ApplyExplorationOutcomeAsync romprait cette cohérence aperçu/application réelle - garder les deux
+    /// synchronisés.</summary>
+    public IEnumerable<(EquipmentItem Item, SpecialRule? MaterialRule, int Quantity)> PendingExplorationStashItems()
+    {
+        if (ResolvedExplorationItem is { } item && int.TryParse(ExplorationItemQuantity, out var itemQuantity) && itemQuantity > 0)
+            yield return (item.Item, item.MaterialRule, itemQuantity);
+
+        // SecondaryEquipmentItemName est toujours un "ET" en un seul exemplaire, jamais soumis à un jet
+        // de quantité (voir ApplyExplorationOutcomeAsync's own doc) - quantité 1 fixe.
+        if (ResolvedExplorationSecondaryItem is { } secondaryItem)
+            yield return (secondaryItem.Item, secondaryItem.MaterialRule, 1);
+
+        if (ShowArtefactRoll && ResolvedArtefactItem is { } artefactItem)
+            yield return (artefactItem.Item, artefactItem.MaterialRule, 1);
+
+        // "Roll for every item on the list separately" (Trésor Caché/Bande Massacrée) - plusieurs lignes
+        // peuvent chacune avoir franchi leur propre seuil, voir IndependentOutcomeEntries's own doc.
+        if (IsIndependentThresholdResult)
+        {
+            foreach (var entry in IndependentOutcomeEntries.Where(e => e.ShowResult))
+            {
+                if (entry.IsArtefact && entry.ResolvedArtefactItem is { } entryArtefact)
+                    yield return (entryArtefact.Item, entryArtefact.MaterialRule, 1);
+                else if (entry.IsItem && entry.ResolvedItem is { } entryItem && int.TryParse(entry.ItemQuantity, out var entryQuantity) && entryQuantity > 0)
+                    yield return (entryItem.Item, entryItem.MaterialRule, entryQuantity);
+            }
+        }
+
+        // Objet bonus sur le même dé (Boutique) / test de Commandement additionnel du chef (Bâtiment
+        // Éventré) - toujours un exemplaire, indépendants du Kind principal ci-dessus.
+        if (BonusItem is { } bonusItem)
+            yield return (bonusItem.Item, bonusItem.MaterialRule, 1);
+
+        if (BonusStatTestItem is { } bonusStatItem)
+            yield return (bonusStatItem.Item, bonusStatItem.MaterialRule, 1);
+    }
 }

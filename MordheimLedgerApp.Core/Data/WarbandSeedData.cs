@@ -237,6 +237,10 @@ public class EquipmentSeedData
     /// <summary>See EquipmentItem.IsUniqueArtefact. False/absent for almost every item - true only for a
     /// one-of-a-kind item permanently tied to a single owner (e.g. a Dramatis Persona's unique gear).</summary>
     public bool IsUniqueArtefact { get; set; }
+
+    /// <summary>See EquipmentItem.IsExplorationOnly. False/absent for almost every item - true only for a
+    /// find never sold by a merchant (e.g. the Jewelsmith's gems, the Training Manual).</summary>
+    public bool IsExplorationOnly { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames

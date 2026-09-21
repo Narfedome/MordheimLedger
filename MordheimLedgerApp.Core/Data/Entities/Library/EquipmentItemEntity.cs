@@ -35,4 +35,7 @@ public class EquipmentItemEntity
 
     /// <summary>See Models.Library.EquipmentItem.IsUniqueArtefact.</summary>
     public bool IsUniqueArtefact { get; set; }
+
+    /// <summary>See Models.Library.EquipmentItem.IsExplorationOnly.</summary>
+    public bool IsExplorationOnly { get; set; }
 }

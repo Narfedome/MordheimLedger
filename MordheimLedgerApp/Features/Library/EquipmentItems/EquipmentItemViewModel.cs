@@ -194,8 +194,15 @@ public partial class EquipmentItemViewModel : BaseViewModel
             // Ienh-Khain) - un objet unique propre à un seul Dramatis Persona, jamais achetable non plus,
             // mais qui n'appartient à aucune des 6 Artefacts Magiques canoniques de la table d'Exploration
             // (voir EquipmentCategory.MagicalArtefact, réservé à celle-ci - décision utilisateur 2026-08-31
-            // de ne pas réutiliser cette catégorie pour ce cas).
-            filtered = filtered.Where(i => i.Category != EquipmentCategory.MagicalArtefact && !i.IsUniqueArtefact);
+            // de ne pas réutiliser cette catégorie pour ce cas). Même principe pour IsExplorationOnly (ex.
+            // Manuel d'Entraînement, Pierres de Quartz, Améthyste, Collier) : trouvés uniquement via
+            // l'Exploration (Bijoutier etc.), jamais vendus par un marchand - certains n'ont même pas de
+            // Rarity renseignée (donc passeraient le filtre CommonOnly sans cette exclusion). Champ DÉDIÉ,
+            // pas une réutilisation d'IsSellable (retour utilisateur 2026-09-05 - "dans le json c'est pas
+            // explicite... je veux mettre un objet non achetable comme je fais ?" - les deux notions sont
+            // des faits séparés sur un même objet : IsSellable dit "revendable", IsExplorationOnly dit "pas
+            // achetable au départ", voir EquipmentItem.IsExplorationOnly's own doc).
+            filtered = filtered.Where(i => i.Category != EquipmentCategory.MagicalArtefact && !i.IsUniqueArtefact && !i.IsExplorationOnly);
 
             bool WarriorOk(EquipmentItem i) => i.RestrictedToWarriorArchetypeIds.Count == 0
                 || (AllowedWarriorArchetypeId is { } wa && i.RestrictedToWarriorArchetypeIds.Contains(wa));
@@ -238,8 +245,18 @@ public partial class EquipmentItemViewModel : BaseViewModel
             }
         }
 
+        // Certains objets ont une disponibilité conditionnelle à la composition de la bande (ex.
+        // Champignons Bonnets de Fou, Rare 9 - "Common if warband includes Goblins", retour utilisateur
+        // 2026-09-05) : Rare pour tout le monde, mais Commun dès qu'on achète POUR un guerrier restreint
+        // (RestrictedToWarriorArchetypeIds) éligible - même signal qu'AllowedWarriorArchetypeId utilisé
+        // par WarriorOk ci-dessus, réévalué ici plutôt que remonté hors de son scope local. Approximation
+        // délibérée : "acheter pour CE guerrier précis" plutôt qu'une vraie recherche "la bande possède
+        // déjà un Gobelin dans son roster" (pas de contexte roster complet disponible ici) - suffisant
+        // pour le cas réel (équiper un guerrier restreint déjà recruté), pas encore pour un achat général
+        // en réserve (étape Achat/Vente) sans guerrier précis visé.
         if (CommonOnly)
-            filtered = filtered.Where(i => !i.Rarity.HasValue);
+            filtered = filtered.Where(i => !i.Rarity.HasValue
+                || (i.RestrictedToWarriorArchetypeIds.Count > 0 && AllowedWarriorArchetypeId is { } commonWa && i.RestrictedToWarriorArchetypeIds.Contains(commonWa)));
 
         var groups = new ObservableCollection<EquipmentItemGroup>();
         foreach (var item in filtered)

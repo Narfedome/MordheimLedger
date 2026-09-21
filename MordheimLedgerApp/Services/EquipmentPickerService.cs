@@ -36,10 +36,15 @@ public interface IEquipmentPickerService
     /// the band - user request 2026-08-28), rather than one specific warrior's own list. commonOnly: true
     /// excludes every Rare item regardless of category/list membership (see EquipmentItemViewModel.
     /// CommonOnly) - used by the End of Game wizard's "Recrutement" step (a new recruit "can only buy
-    /// Common items... freely", rulebook), false everywhere else.</summary>
+    /// Common items... freely", rulebook), false everywhere else. reserveQuantities: non-null pins a
+    /// "Réserve" section at the top of the picker, listing items the warband already has in stock - keyed
+    /// by EquipmentItem.Id, quantity summed across materials but MaterialRule carrying a representative
+    /// material when one exists (see EquipmentItemViewModel.ReserveQuantities) - null everywhere else
+    /// (this picker doesn't otherwise know about a warband's inventory).</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
-        bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false);
+        bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -55,7 +60,8 @@ public class EquipmentPickerService : IEquipmentPickerService
 
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
-        bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false)
+        bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -76,6 +82,7 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.SingleSelectMode = singleSelect;
         viewModel.RareSearchMode = rareSearchMode;
         viewModel.CommonOnly = commonOnly;
+        viewModel.ReserveQuantities = reserveQuantities;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
         // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
         // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).

@@ -355,6 +355,34 @@ public partial class EndOfGameDialogViewModel
         return pool;
     }
 
+    /// <summary>Le matériau RÉELLEMENT associé à un exemplaire disponible en réserve pour cet Item - null si
+    /// aucun exemplaire dispo (achat neuf classique) ou si la seule variante dispo est sans matériau.
+    /// Retour utilisateur 2026-09-21 - "une épée ornée gagnée à l'Exploration s'affiche en épée simple et
+    /// une épée simple est donnée à la recrue au lieu de l'épée (o)" : AddRecruitEquipment ne vérifiait
+    /// jusque-là que la variante SANS matériau dans BuildAvailableReservePool (clé (Item.Id, null)), donc
+    /// une trouvaille avec matériau (Gromril/Ithilmar, ou une "Épée Ornée" à SpecialRule dédiée) n'était
+    /// jamais reconnue comme disponible - le pick partait acheté à neuf, sans matériau, au lieu de
+    /// consommer le VRAI exemplaire en stock. BuildAvailableReservePool ne renvoie que des identifiants
+    /// (Item.Id, MaterialRule.Id) - cette méthode retrouve l'objet SpecialRule réel en cherchant dans les
+    /// deux mêmes sources que BuildStashPool (réserve pré-partie + trouvailles d'Exploration de cette
+    /// partie), jamais reconstitué à la main.</summary>
+    private SpecialRule? ResolveAvailableReserveMaterial(int itemId, int perUnitCost)
+    {
+        var pool = BuildAvailableReservePool();
+        var availableMaterialIds = pool.Where(kv => kv.Key.ItemId == itemId && kv.Value >= perUnitCost)
+            .Select(kv => kv.Key.MaterialRuleId).ToHashSet();
+        if (availableMaterialIds.Count == 0) return null;
+
+        var fromInventory = _warbandInventory.FirstOrDefault(w => w.Item.Id == itemId && availableMaterialIds.Contains(w.MaterialRule?.Id));
+        if (fromInventory is not null) return fromInventory.MaterialRule;
+
+        foreach (var (item, materialRule, _) in PendingExplorationStashItems())
+            if (item.Id == itemId && availableMaterialIds.Contains(materialRule?.Id))
+                return materialRule;
+
+        return null;
+    }
+
     /// <summary>Détail de coût d'UN groupe existant (retour utilisateur - "il faut détailler le calcul au
     /// recrutement de vétéran") : recrutement + une ligne par type d'équipement du groupe (avec combien
     /// vient de la réserve, gratuit) + la surtaxe d'Expérience. Rejoue la consommation de réserve de TOUS
@@ -476,18 +504,27 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Achat d'équipement pour une cible : un WarriorNameSlot (Héros) ou un HenchmanGroupDraft
     /// (nouveau groupe d'Hommes de main, jamais un groupe déjà existant - son équipement reste
-    /// automatique). Même logique que WarbandEditDialogViewModel.AddEquipment (picker filtré par
-    /// EquipmentListId/WarriorArchetypeId, choix de matériau pour les armes de corps à corps via un seul
-    /// MaterialPickerDialog paginé, arrêt au premier objet trop cher), sans Compétences/Sorts (mode Bande
-    /// existante uniquement, jamais le cas ici). commonOnly: true (livre des règles - "can only buy Common
-    /// items... freely", les Objets Rares ont déjà leur propre étape plus tôt dans ce wizard). Réserve en
-    /// priorité (2026-09-05, retour utilisateur - "si on faisait d'abord l'achat vente d'équipement, puis
-    /// le recrutement avec l'assignation des équipements de la stash") : si BuildAvailableReservePool en
-    /// contient déjà assez pour TOUT le lot (perUnitCost, l'effectif du groupe pour un Homme de main - 1
-    /// pour un Héros), le pick est FromReserve (gratuit, les consomme) plutôt qu'acheté au plein tarif -
-    /// simplification délibérée, pas de mélange partiel réserve/achat au sein d'un même pick (contrairement
-    /// à GetTopUpBreakdown, qui gère ce mélange pour les groupes EXISTANTS via une ligne de coût détaillée
-    /// séparée - un nouveau pick reste ici un choix unique au picker).</summary>
+    /// automatique). Contrairement à WarbandEditDialogViewModel.AddEquipment, jamais filtré par
+    /// EquipmentListId (retour utilisateur 2026-09-21 - "ce que j'imaginais pour l'équipement c'est soit de
+    /// piocher dans la réserve, soit avoir accès à ce qu'on peut acheter au magasin, en faisant fi de la
+    /// liste d'équipement du personnage") : au comptoir d'une recrue en pleine campagne, le choix est le
+    /// large pool "commun + objets de la bande" (comme WarriorOk/BroadBandScoped dans
+    /// EquipmentItemViewModel.ApplyFilter quand AllowedEquipmentListItemIds est null), pas la liste
+    /// d'équipement propre à SON type - seul RestrictedToWarriorArchetypeIds (warriorArchetypeId, toujours
+    /// passé) continue de narrower les objets réservés à d'autres archétypes précis. commonOnly: true
+    /// (livre des règles - "can only buy Common items... freely", les Objets Rares ont déjà leur propre
+    /// étape plus tôt dans ce wizard) -
+    /// jamais de choix de matériau pour les armes de corps à corps (retour utilisateur 2026-09-21, revu par
+    /// rapport à une première version qui ouvrait MaterialPickerDialog ici : Gromril/Ithilmar sont des
+    /// améliorations RARES, jamais proposées par un marchand qui ne vend QUE des Objets Communs, même
+    /// raison que AddReserveEquipment côté Achat). Réserve en priorité (2026-09-05, retour utilisateur -
+    /// "si on faisait d'abord l'achat vente d'équipement, puis le recrutement avec l'assignation des
+    /// équipements de la stash") : si BuildAvailableReservePool en contient déjà assez pour TOUT le lot
+    /// (perUnitCost, l'effectif du groupe pour un Homme de main - 1 pour un Héros), le pick est FromReserve
+    /// (gratuit, les consomme) plutôt qu'acheté au plein tarif - simplification délibérée, pas de mélange
+    /// partiel réserve/achat au sein d'un même pick (contrairement à GetTopUpBreakdown, qui gère ce mélange
+    /// pour les groupes EXISTANTS via une ligne de coût détaillée séparée - un nouveau pick reste ici un
+    /// choix unique au picker).</summary>
     [RelayCommand]
     private async Task AddRecruitEquipment(object target)
     {
@@ -510,47 +547,55 @@ public partial class EndOfGameDialogViewModel
                 return;
         }
 
-        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
-            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true);
+        // Section "Réserve" épinglée en haut du picker (retour utilisateur 2026-09-21 - "je pense qu'il
+        // peut être utile d'afficher les équipements présents dans la réserve dans le sélecteur", puis
+        // "on affiche aussi si il y a un matériau sur l'arme") - regroupé par Item.Id (une seule tuile par
+        // Item, pas par variante de matériau - EquipmentItemRow/EquipmentItemView affichent une tuile par
+        // Item), mais MaterialRule porte un matériau représentatif quand il y en a un en stock (résolu via
+        // ResolveAvailableReserveMaterial - même simplification "un seul matériau représentatif" que côté
+        // application du pick, voir sa propre doc), affiché en suffixe sur la tuile (ex. "Épée (Ornée)").
+        var reserveQuantities = BuildAvailableReservePool()
+            .GroupBy(kv => kv.Key.ItemId)
+            .ToDictionary(g => g.Key, g => (g.Sum(kv => kv.Value), ResolveAvailableReserveMaterial(g.Key, perUnitCost)));
 
-        // Un seul dialog paginé pour toutes les armes de corps à corps du lot - voir
-        // WarbandEditDialogViewModel.AddEquipment pour le détail de cette logique, reprise à l'identique.
-        var meleeMaterials = new Queue<SpecialRule?>();
-        var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
-        if (meleeItems.Count > 0)
-        {
-            var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
-                .Where(r => r.CostMultiplier.HasValue).ToList();
-            if (materialRules.Count > 0)
-            {
-                var hasFreeDaggerSlot = destination.Any(p => p.Item.IsFreeDagger);
-                var choices = new List<MaterialChoice>();
-                foreach (var item in meleeItems)
-                {
-                    choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], EquipmentPricing.IsFreeDaggerEligible(item.IsFreeDagger, hasFreeDaggerSlot)));
-                    if (item.IsFreeDagger) hasFreeDaggerSlot = true;
-                }
-                var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
-                foreach (var choice in choices)
-                    meleeMaterials.Enqueue(confirmed == true ? choice.SelectedMaterial : null);
-            }
-        }
+        // equipmentListId volontairement omis (null) - voir la doc de classe de cette méthode : le large
+        // pool "commun + objets de la bande" s'applique ici, jamais la liste d'équipement propre au type
+        // recruté.
+        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, equipmentListId: null, row.Archetype.Id,
+            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities);
 
+        // Jamais de CHOIX interactif de matériau ici (retour utilisateur 2026-09-21 - même raison que
+        // AddReserveEquipment/EquipmentTrading.cs) : Gromril/Ithilmar sont des améliorations RARES
+        // (SpecialRule.CostMultiplier), jamais proposées par un marchand qui ne vend QUE des Objets
+        // Communs (commonOnly: true, comme cette étape) - une recrue en pleine campagne s'équipe au même
+        // comptoir que l'Achat, pas de raison de traiter les deux différemment. Un matériau peut malgré
+        // tout être ATTACHÉ automatiquement, sans choix du joueur, quand l'objet vient de la réserve (une
+        // trouvaille d'Exploration a pu arriver avec un matériau déjà déterminé, ex. une Épée Ornée) - voir
+        // ResolveAvailableReserveMaterial ci-dessous.
         foreach (var equipmentItem in items)
         {
-            var materialRule = equipmentItem.Category == EquipmentCategory.MeleeWeapon && meleeMaterials.Count > 0
-                ? meleeMaterials.Dequeue()
-                : null;
-            var pick = new EquipmentPick(equipmentItem, materialRule)
-            {
-                IsFree = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, destination.Any(p => p.Item.IsFreeDagger)) && materialRule is null
-            };
+            // Réserve vérifiée EN PREMIER, avant toute considération de dague gratuite (retour utilisateur
+            // 2026-09-21 - "la première dague qu'on valide est une dague simple... la mécanique de dague
+            // gratuite ne doit être que sur la partie achat qu'on a déjà en place et pas sur la réserve") :
+            // un exemplaire en réserve (Dague Ornée trouvée à l'Exploration comprise) reste TOUJOURS son
+            // vrai matériau et repart marqué FromReserve, jamais réinterprété comme "la dague gratuite" du
+            // guerrier (qui ne concerne QUE ce qui est acheté à neuf au comptoir, EquipmentPick.Cost étant
+            // déjà à 0 pour FromReserve comme pour IsFree - inutile et faux de cumuler les deux ici).
+            var reserveMaterial = ResolveAvailableReserveMaterial(equipmentItem.Id, perUnitCost);
+            var reserveKey = (equipmentItem.Id, (int?)null);
+            var fromReserve = reserveMaterial is not null || BuildAvailableReservePool().GetValueOrDefault(reserveKey) >= perUnitCost;
 
-            if (!pick.IsFree)
+            EquipmentPick pick;
+            if (fromReserve)
             {
-                var reserveKey = (equipmentItem.Id, materialRule?.Id);
-                if (BuildAvailableReservePool().GetValueOrDefault(reserveKey) >= perUnitCost)
-                    pick.FromReserve = true;
+                pick = new EquipmentPick(equipmentItem, reserveMaterial) { FromReserve = true };
+            }
+            else
+            {
+                pick = new EquipmentPick(equipmentItem, materialRule: null)
+                {
+                    IsFree = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, destination.Any(p => p.Item.IsFreeDagger))
+                };
             }
 
             // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
@@ -566,18 +611,14 @@ public partial class EndOfGameDialogViewModel
             NotifyTreasuryChanged();
         }
 
-        // Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
-        // guerrier, livre des règles) - voir WeaponLimits/WarbandEditDialogViewModel.AddEquipment.
-        if (WeaponLimits.ExceedsLimits(destination.Select(p => p.Item)))
-        {
-            var warriorLabel = target switch
-            {
-                WarriorNameSlot { Name.Length: > 0 } nameSlot => nameSlot.Name,
-                HenchmanGroupDraft group => group.Name,
-                _ => row.Name
-            };
-            await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], warriorLabel));
-        }
+        // L'avertissement "2 armes de corps à corps / 2 armes de tir différentes max par guerrier" ne se
+        // déclenche plus ici (retour utilisateur 2026-09-21 - "on a plus rien qui s'affiche lorsqu'on
+        // valide quelque chose... les avertissements devraient se mettre au moment où on change de step en
+        // cliquant sur next") : un ShowInfoAsync lancé juste après la fermeture du picker (lui-même une
+        // page plein écran poussée modalement) se prenait dans la même course de navigation modale que la
+        // page qui se dépile - voir EndOfGameDialogViewModel.cs's Next()/ShowWeaponLimitWarningIfNeededAsync,
+        // qui vérifie la même règle mais au clic sur Suivant, une fois qu'on est bien revenu sur cette
+        // étape (plus aucune transition modale en cours).
     }
 
     /// <summary>Tap sur un chip d'équipement acheté - même recap qu'ailleurs dans l'app (voir

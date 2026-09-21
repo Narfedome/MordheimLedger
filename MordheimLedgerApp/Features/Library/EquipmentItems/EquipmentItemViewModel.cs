@@ -123,6 +123,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// else (every other picker still lets a Rare list member through).</summary>
     public bool CommonOnly { get; set; }
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants a "Réserve" section
+    /// pinned at the top of the picker, listing items the warband already has in stock - keyed by
+    /// EquipmentItem.Id. Quantity is summed across materials (still just one tile per Item, not per
+    /// variant - EquipmentItemRow/EquipmentItemView show one tile per Item), but MaterialRule carries a
+    /// REPRESENTATIVE material for that stock when one exists (ex. Gromril, or a dedicated "Ornate Weapon"
+    /// rule for an Exploration find) - retour utilisateur 2026-09-21, "dans le sélecteur on affiche aussi
+    /// si il y a un matériau sur l'arme" - shown as a name suffix (EquipmentItemRow.NameDisplay). Null
+    /// (every other picker) omits the section entirely.</summary>
+    public IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? ReserveQuantities { get; set; }
+
     public bool ShowBudget => AvailableGold.HasValue;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
@@ -212,29 +222,22 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
             if (AllowedEquipmentListItemIds is { } listIds)
             {
-                if (RareSearchMode)
-                {
-                    // Objets rares (union des listes de la bande, voir EndOfGameDialogViewModel.
-                    // RareItems.cs) : seules les armes/armures sont vraiment rattachées à une liste
-                    // d'équipement - le reste du catalogue (Divers/Consommable/Drogues/Munitions/
-                    // Montures) vient du Trading Post général, jamais listé nulle part, donc pas à
-                    // restreindre par liste (retour utilisateur 2026-08-28) - repasse sur le large
-                    // "commun + objets de la bande" habituel, qui exclut déjà correctement un objet
-                    // restreint à une AUTRE bande (ex. Marteau des Sorcières pour des Skavens) via
-                    // RestrictedToWarbandArchetypeIds, sans rapport avec les listes.
-                    var listScopedCategories = new[]
-                        { EquipmentCategory.MeleeWeapon, EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
-                    filtered = filtered.Where(i => listScopedCategories.Contains(i.Category)
-                        ? listIds.Contains(i.Id) && WarriorOk(i)
-                        : BroadBandScoped(i));
-                }
-                else
-                {
-                    // Recruit picker: the assigned list is the sole source of truth for what this warrior
-                    // can buy - Rare items reachable by this warrior are list members too, just narrowed to
-                    // specific archetypes via RestrictedToWarriorArchetypeIds where the list is shared.
-                    filtered = filtered.Where(i => listIds.Contains(i.Id) && WarriorOk(i));
-                }
+                // Seules les armes/armures sont vraiment rattachées à une liste d'équipement - le reste du
+                // catalogue (Divers/Consommable/Drogues/Munitions/Montures) vient du Trading Post général,
+                // jamais listé nulle part, donc pas à restreindre par liste (retour utilisateur 2026-08-28,
+                // étendu 2026-09-21 : "la liste des items dispo n'est pas limitée aux items que l'on peut
+                // équiper... on bloque juste si une arme ou une armure n'est pas présent dans la liste
+                // d'équipement du personnage" - ce même principe, jusque-là réservé à RareSearchMode, doit
+                // s'appliquer aussi au picker de recrutement/achat normal, pas seulement à la recherche
+                // d'Objets rares). Repasse sur le large "commun + objets de la bande" habituel pour tout le
+                // reste, qui exclut déjà correctement un objet restreint à une AUTRE bande (ex. Marteau des
+                // Sorcières pour des Skavens) via RestrictedToWarbandArchetypeIds, sans rapport avec les
+                // listes.
+                var listScopedCategories = new[]
+                    { EquipmentCategory.MeleeWeapon, EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
+                filtered = filtered.Where(i => listScopedCategories.Contains(i.Category)
+                    ? listIds.Contains(i.Id) && WarriorOk(i)
+                    : BroadBandScoped(i));
             }
             else
             {
@@ -259,18 +262,29 @@ public partial class EquipmentItemViewModel : BaseViewModel
                 || (i.RestrictedToWarriorArchetypeIds.Count > 0 && AllowedWarriorArchetypeId is { } commonWa && i.RestrictedToWarriorArchetypeIds.Contains(commonWa)));
 
         var groups = new ObservableCollection<EquipmentItemGroup>();
+        var reserveGroup = ReserveQuantities is { Count: > 0 } ? new EquipmentItemGroup(LocalizationService.Instance["EndOfGameEquipmentTradingStashSource"]) : null;
         foreach (var item in filtered)
         {
             var groupName = CategoryLabel(item.Category);
             var group = groups.FirstOrDefault(g => g.Name == groupName);
             if (group is null)
             {
-                group = new EquipmentItemGroup(groupName);
+                group = new EquipmentItemGroup(groupName) { ShowHeader = ShowGroupHeaders };
                 groups.Add(group);
             }
             var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
             group.Add(new EquipmentItemRow(item, isFreeForThisPurchase));
+
+            // Une tuile "Réserve" SÉPARÉE (jamais la même instance que celle de la catégorie ci-dessus,
+            // voir EquipmentItemRow.IsReserveRow's own doc) - retour utilisateur 2026-09-21 : "aujourd'hui
+            // si on a une épée dans la réserve elle ne s'affiche plus dans la section du marché, et si on
+            // la sélectionne dans la réserve elle coûte des golds et on peut en prendre de façon
+            // illimitée" - les deux tuiles cohabitent et peuvent être choisies en même temps (ex. 2 en
+            // réserve + 1 achetée), chacune avec son propre stepper/prix/plafond.
+            if (reserveGroup is not null && ReserveQuantities!.TryGetValue(item.Id, out var reserveStock) && reserveStock.Quantity > 0)
+                reserveGroup.Add(new EquipmentItemRow(item, reserveStock.Quantity, reserveStock.MaterialRule));
         }
+        if (reserveGroup is { Count: > 0 }) groups.Insert(0, reserveGroup);
         EquipmentItemGroups = groups;
 
         SelectedRow = null;
@@ -329,12 +343,15 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// <summary>Un exemplaire de plus de cette tuile - le stepper reste affiché en permanence (même à
     /// Quantity == 0), donc "+" doit aussi pouvoir sélectionner la tuile en un seul geste (0 -&gt; 1), pas
     /// seulement l'incrémenter une fois déjà sélectionnée via Select. Pas de plafond ni de vérification de
-    /// budget ici, même logique "estimation live" que BudgetDisplay ; l'affordabilité réelle est vérifiée
-    /// objet par objet au moment de l'achat (WarbandEditDialogViewModel/WarriorEditDialogViewModel.
-    /// AddEquipment), qui s'arrête au premier objet trop cher.</summary>
+    /// budget pour un achat normal, même logique "estimation live" que BudgetDisplay ; l'affordabilité
+    /// réelle est vérifiée objet par objet au moment de l'achat (WarbandEditDialogViewModel/
+    /// WarriorEditDialogViewModel.AddEquipment), qui s'arrête au premier objet trop cher. Une tuile Réserve
+    /// (row.IsReserveRow), en revanche, EST plafonnée à ReserveAvailable (row.CanIncrement) - stock déjà
+    /// possédé et limité, retour utilisateur 2026-09-21.</summary>
     [RelayCommand]
     private void IncrementQuantity(EquipmentItemRow row)
     {
+        if (!row.CanIncrement) return;
         row.Quantity++;
         if (row.Quantity == 1)
         {

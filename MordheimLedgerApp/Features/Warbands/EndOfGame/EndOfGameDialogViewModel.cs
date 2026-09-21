@@ -749,10 +749,42 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     }
 
     [RelayCommand]
-    private void Next()
+    private async Task Next()
     {
         if (!ValidateCurrentStep()) return;
+        await ShowWeaponLimitWarningIfNeededAsync();
         if (StepIndex < Steps.Count - 1) StepIndex++;
+    }
+
+    /// <summary>Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
+    /// guerrier, livre des règles - voir WeaponLimits) - déclenché au clic sur Suivant plutôt
+    /// qu'immédiatement après la fermeture du picker d'équipement (retour utilisateur 2026-09-21 - "on a
+    /// plus rien qui s'affiche lorsqu'on valide quelque chose") : un dialog ouvert juste après le picker
+    /// (une page plein écran poussée modalement, EquipmentItemSelectorPage) se prenait dans la même course
+    /// de navigation modale que la page en train de se dépiler. Au clic sur Suivant, aucune transition
+    /// modale n'est plus en cours - le dialog s'affiche normalement. Ne bloque jamais Next() (toujours
+    /// appelé APRÈS ValidateCurrentStep, qui seul peut empêcher d'avancer) - juste informatif, comme
+    /// c'était déjà le cas avant.</summary>
+    private async Task ShowWeaponLimitWarningIfNeededAsync()
+    {
+        switch (Current.Kind)
+        {
+            case StepKind.RecruitHeroDetail when CurrentRecruitHeroSlot is { } slot:
+                await WarnIfExceedsWeaponLimits(slot.Equipment, slot.Name.Length > 0 ? slot.Name : slot.ArchetypeLabel);
+                break;
+            case StepKind.RecruitHenchmenEquipment:
+                // Plusieurs groupes possibles sur cette étape (contrairement à RecruitHeroDetail, une
+                // étape par héros) - un avertissement par groupe fautif, l'un après l'autre.
+                foreach (var group in RecruitedHenchmanRows.SelectMany(r => r.HenchmanGroupDrafts))
+                    await WarnIfExceedsWeaponLimits(group.Equipment, group.Name);
+                break;
+        }
+    }
+
+    private async Task WarnIfExceedsWeaponLimits(IEnumerable<EquipmentPick> equipment, string targetLabel)
+    {
+        if (!WeaponLimits.ExceedsLimits(equipment.Select(p => p.Item))) return;
+        await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], targetLabel));
     }
 
     /// <summary>Bloque le passage à l'étape suivante tant qu'un jet visible de l'étape courante est vide

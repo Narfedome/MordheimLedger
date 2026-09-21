@@ -27,8 +27,14 @@ public partial class ExistingHenchmanTopUp : ObservableObject
     public string Name => Row.Warrior.Name;
 
     /// <summary>Expérience du groupe ENTIER (partagée par tous ses membres, livre des règles) - c'est ce
-    /// chiffre, PAS le nombre de recrues, que le budget vétérans limite.</summary>
-    public int GroupExperience => Row.Warrior.Experience;
+    /// chiffre, PAS le nombre de recrues, que le budget vétérans limite. Warrior.Experience seul seraît la
+    /// valeur AVANT cette même Fin de Partie (la mutation réelle n'arrive qu'à Terminer, comme HeadCount -
+    /// voir GetTopUpBreakdown) : il faut donc y ajouter l'XP gagnée plus tôt dans CE wizard (étape
+    /// Expérience/ExperienceGained, blessure grave/SeriousInjuryBonusExperience, Exploration/
+    /// ExplorationBonusExperience) pour refléter l'Expérience RÉELLE du groupe au moment du recrutement de
+    /// vétérans - bug signalé 2026-09-21 : un groupe gagnant 5 PX à l'étape Expérience ne voyait jamais
+    /// cette surtaxe appliquée ici, restée calculée sur l'ancienne valeur.</summary>
+    public int GroupExperience => Row.Warrior.Experience + Row.ExperienceGained + Row.SeriousInjuryBonusExperience + Row.ExplorationBonusExperience;
 
     /// <summary>Coût de recrutement normal du type (WarriorArchetype.Cost) - résolu via la même
     /// WarriorRecruitRow que la section Nouveau groupe ci-dessous, retrouvée par WarriorArchetypeId à la

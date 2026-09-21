@@ -325,10 +325,10 @@ public partial class EndOfGameDialogViewModel
 
         foreach (var topUp in ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
         {
-            var groupHeadCount = Math.Max(1, topUp.Row.Warrior.HeadCount);
+            // Quantity par modèle, pas totale pour le groupe - voir GetTopUpBreakdown's own doc.
             foreach (var equipment in topUp.CurrentEquipment)
             {
-                var neededQty = topUp.AddCount * equipment.Quantity / groupHeadCount;
+                var neededQty = topUp.AddCount * equipment.Quantity;
                 var key = (equipment.Item.Id, equipment.MaterialRule?.Id);
                 var consumed = Math.Min(pool.GetValueOrDefault(key), neededQty);
                 if (consumed > 0) pool[key] = pool[key] - consumed;
@@ -404,19 +404,16 @@ public partial class EndOfGameDialogViewModel
             var isTarget = ReferenceEquals(current, topUp);
             if (isTarget) lines = new List<HenchmanEquipmentCostLine>();
 
-            // Un groupe d'Hommes de main est UN SEUL Warrior (HeadCount = l'effectif, voir sa propre doc) -
-            // WarriorEquipment.Quantity y est donc déjà le TOTAL pour tout le groupe (ex. 3 Épées pour 3
-            // Guerriers), jamais une quantité "par modèle" comme pour un Héros/une munition (bug trouvé -
-            // "on rajoute un guerrier... l'épée coute 30, hors l'épée coute 10" : neededQty = AddCount *
-            // equipment.Quantity comptait Quantity une seconde fois en plus de AddCount, au lieu de
-            // n'utiliser que la quantité PAR MODÈLE qu'elle représente déjà divisée par l'effectif actuel).
-            // Diviser par l'effectif AVANT ce top-up (current.Row.Warrior.HeadCount, jamais encore muté ici
-            // - la mutation réelle n'arrive qu'à Terminer) retrouve cette quantité par modèle.
-            var groupHeadCount = Math.Max(1, current.Row.Warrior.HeadCount);
-
+            // WarriorEquipment.Quantity d'un groupe d'Hommes de main est déjà une quantité PAR MODÈLE (ex.
+            // "Hache" = 1 hache par membre, "Hache x2" = 2 par membre - jamais un total pour tout le groupe,
+            // confirmé par l'utilisateur 2026-09-21) : chaque recrue ajoutée a donc simplement besoin
+            // d'autant d'exemplaires que Quantity, multiplié par le nombre de recrues. Ancienne version
+            // divisait par l'effectif du groupe (en supposant Quantity = TOTAL du groupe), ce qui écrasait
+            // le résultat à 0 dès que AddCount * Quantity restait inférieur à l'effectif (bug signalé sur un
+            // groupe de 3 avec Quantity=1 : 1*1/3=0, 2*1/3=0).
             foreach (var equipment in current.CurrentEquipment)
             {
-                var neededQty = current.AddCount * equipment.Quantity / groupHeadCount;
+                var neededQty = current.AddCount * equipment.Quantity;
                 var key = (equipment.Item.Id, equipment.MaterialRule?.Id);
                 var available = stashPool.GetValueOrDefault(key);
                 var fromStash = Math.Min(available, neededQty);

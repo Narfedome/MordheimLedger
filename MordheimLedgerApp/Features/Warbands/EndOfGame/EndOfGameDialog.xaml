@@ -2306,6 +2306,7 @@
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitVeteranTopUpHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
+                <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Label Text="{Binding RecruitHenchmenExistingHintDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExistingHenchmanTopUps}" Spacing="8">
                     <BindableLayout.ItemTemplate>
@@ -2320,7 +2321,7 @@
                                                                           IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementHenchmanTopUpCommand}"
                                                                           CommandParameter="{Binding .}"/>
-                                            <Label Text="{Binding AddCount}" FontSize="12" WidthRequest="24"
+                                            <Label Text="{Binding CountDisplay}" FontSize="12" WidthRequest="38"
                                                    HorizontalTextAlignment="Center" VerticalOptions="Center"/>
                                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                           Icon="{x:Static icons:SolidFont.Plus}"
@@ -2380,6 +2381,7 @@
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenNewHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
+                <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <components:WarriorRecruitListView ItemsSource="{Binding HenchmanRecruitRows}"
                                                     HeaderText="{loc:Loc EndOfGameRecruitHenchmenNewHeading}"
                                                     IncrementCommand="{Binding IncrementHenchmanGroupCommand}"

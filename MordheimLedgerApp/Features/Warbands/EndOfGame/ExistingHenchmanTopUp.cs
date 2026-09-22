@@ -41,10 +41,34 @@ public partial class ExistingHenchmanTopUp : ObservableObject
     /// construction de cette ligne plutôt que dupliquée ici.</summary>
     public int ArchetypeCost => _archetypeRow.Cost;
 
+    /// <summary>Id du WarriorArchetype de ce groupe - permet à EndOfGameDialogViewModel.
+    /// IncrementHenchmanTopUp de retrouver l'effectif déjà recruté de CE type (ExistingCountForArchetype)
+    /// pour appliquer WarriorArchetype.MaxCount, retour utilisateur 2026-09-22 - "selon le type de
+    /// henchmen... on a une limite de personnage max parfois" (jusque-là seul le budget XP bloquait
+    /// l'incrément, jamais MaxCount ni MaxWarriors).</summary>
+    public int WarriorArchetypeId => _archetypeRow.Archetype.Id;
+
+    /// <summary>Plafond de ce type (WarriorArchetype.MaxCount, null = pas de plafond) - voir
+    /// WarriorArchetypeId's own doc.</summary>
+    public int? MaxCountForType => _archetypeRow.Archetype.MaxCount;
+
+    /// <summary>Effectif de ce type ailleurs dans la bande (poussé une fois par
+    /// EndOfGameDialogViewModel.BuildExistingHenchmanTopUps juste après la construction, même idiome que
+    /// WarriorRecruitRow.ExternalHeadCount - ne bouge jamais pendant cette étape, seul AddCount change) -
+    /// permet CountDisplay ("X/Y", même format que WarriorRecruitRow.CountDisplay), retour utilisateur
+    /// 2026-09-22 - "ça serait top si l'affichage on avait la même chose qu'au recrutement des
+    /// recrues".</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CountDisplay))]
+    private int existingCountForType;
+
+    public string CountDisplay => $"{ExistingCountForType + AddCount}/{(MaxCountForType?.ToString() ?? "∞")}";
+
     public IReadOnlyList<WarriorEquipment> CurrentEquipment => Row.Warrior.Equipment;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasAddCount))]
+    [NotifyPropertyChangedFor(nameof(CountDisplay))]
     private int addCount;
 
     /// <summary>Pilote l'affichage du détail de coût (AddCount == 0 -&gt; rien à montrer) - IsNotNullConverter

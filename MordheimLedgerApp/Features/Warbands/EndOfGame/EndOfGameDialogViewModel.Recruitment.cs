@@ -90,10 +90,14 @@ public partial class EndOfGameDialogViewModel
     public string RecruitmentTreasuryDisplay => string.Format(Loc["EndOfGameRareItemTreasuryFormat"], EndOfGameTreasuryRemaining);
 
     /// <summary>Effectif total de la bande APRÈS ce recrutement (guerriers déjà là + nouvelles recrues de
-    /// cette étape) - comparé à WarbandArchetype.MaxWarriors par RecruitmentRules.CanRecruit, même principe
-    /// que WarbandEditDialogViewModel.TotalWarriorCount mais en partant d'un roster déjà existant plutôt
-    /// que de zéro.</summary>
-    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.Warrior.HeadCount) + RecruitRows.Sum(r => r.Count);
+    /// cette étape + vétérans ajoutés aux groupes existants) - comparé à WarbandArchetype.MaxWarriors par
+    /// RecruitmentRules.CanRecruit, même principe que WarbandEditDialogViewModel.TotalWarriorCount mais en
+    /// partant d'un roster déjà existant plutôt que de zéro. Inclut ExistingHenchmanTopUps.AddCount depuis
+    /// le 2026-09-22 (retour utilisateur - "la limite de la taille de la bande à prendre en compte aussi
+    /// dans le recrutement des vétérans") : ExistingHenchmanTopUps est peuplé dès le constructeur (AddCount
+    /// à 0 au départ), donc toujours sûr à additionner ici même avant d'atteindre cette étape.</summary>
+    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.Warrior.HeadCount) + RecruitRows.Sum(r => r.Count)
+        + ExistingHenchmanTopUps.Sum(t => t.AddCount);
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
     /// WarriorArchetype.MaxCount. Compte tous les guerriers vivants (WarriorRows exclut déjà les morts/
@@ -186,7 +190,10 @@ public partial class EndOfGameDialogViewModel
         {
             var archetypeRow = RecruitRows.FirstOrDefault(r => r.Archetype.Id == row.Warrior.WarriorArchetypeId);
             if (archetypeRow is null) continue; // ne devrait pas arriver (archétype retiré du catalogue entre-temps)
-            ExistingHenchmanTopUps.Add(new ExistingHenchmanTopUp(row, archetypeRow));
+            ExistingHenchmanTopUps.Add(new ExistingHenchmanTopUp(row, archetypeRow)
+            {
+                ExistingCountForType = ExistingCountForArchetype(archetypeRow.Archetype.Id)
+            });
         }
         RefreshHenchmanTopUpBreakdowns();
     }
@@ -218,8 +225,19 @@ public partial class EndOfGameDialogViewModel
     private void IncrementHenchmanTopUp(ExistingHenchmanTopUp topUp)
     {
         if (topUp.GroupExperience > RemainingVeteranBudget) return;
+        // WarriorArchetype.MaxCount et WarbandArchetype.MaxWarriors - jusqu'ici seul le budget XP
+        // bloquait l'incrément, retour utilisateur 2026-09-22. isExistingWarband: true réutilise
+        // RecruitmentRules.CanRecruit uniquement pour ses deux gardes MaxCount/MaxWarriors, en
+        // désactivant volontairement sa garde trésorerie (déjà gérée séparément par le budget XP et par
+        // le coût total affiché - pas de vérification treasury<cost pertinente ici, le coût réel dépend
+        // de la réserve/GetTopUpBreakdown, pas d'un simple ArchetypeCost).
+        if (!RecruitmentRules.CanRecruit(ExistingCountForArchetype(topUp.WarriorArchetypeId) + topUp.AddCount, topUp.MaxCountForType,
+                TotalWarriorCountAfterRecruitment, _recruitableWarbandArchetype.MaxWarriors, isExistingWarband: true, EndOfGameTreasuryRemaining, cost: 0))
+            return;
+
         topUp.AddCount++;
         RefreshHenchmanTopUpBreakdowns();
+        UpdateRecruitRowsEligibility();
         NotifyTreasuryChanged();
         OnPropertyChanged(nameof(RemainingVeteranBudget));
         OnPropertyChanged(nameof(RecruitHenchmenExistingHintDisplay));
@@ -231,6 +249,7 @@ public partial class EndOfGameDialogViewModel
         if (topUp.AddCount == 0) return;
         topUp.AddCount--;
         RefreshHenchmanTopUpBreakdowns();
+        UpdateRecruitRowsEligibility();
         NotifyTreasuryChanged();
         OnPropertyChanged(nameof(RemainingVeteranBudget));
         OnPropertyChanged(nameof(RecruitHenchmenExistingHintDisplay));

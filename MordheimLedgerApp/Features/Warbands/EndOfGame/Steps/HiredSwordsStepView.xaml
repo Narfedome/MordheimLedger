@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.HiredSwordsStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Francs-Tireurs - solde des Francs-Tireurs déjà engagés (Picker Payer/Renvoyer,
+                 même idiome que le Picker de sort de Prisonniers ci-dessus) ET recrutement optionnel d'un
+                 nouveau (Picker + nom, gratuit ou payant selon CanAffordNewHiredSword/
+                 EndOfGameTreasuryRemaining) - voir EndOfGamePageViewModel.HiredSwords.cs. Entièrement
+                 absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance, voir Steps dans
+                 le ViewModel). -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameHiredSwordsHeading}" FontAttributes="Bold"/>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding HiredSwordUpkeepEntries}" Spacing="8"
+                                      IsVisible="{Binding HasHiredSwordUpkeep}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:HiredSwordUpkeepEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding DisplayName}" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1" Text="{Binding UpkeepCost}" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </Grid>
+                                    <!-- Prépayé par "Une Faveur Rendue" (Exploration 3,6) : rien à choisir,
+                                         juste affiché - voir HasChoice/IsPrepaidFree. -->
+                                    <Label Text="{loc:Loc EndOfGameHiredSwordPrepaidLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding IsPrepaidFree}"/>
+                                    <VerticalStackLayout Spacing="4" IsVisible="{Binding HasChoice}">
+                                        <Picker ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
+                                        <Label Text="{Binding ChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding ChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Recrutement optionnel - "Aucun" reste un choix complet (même idiome que
+                     SentHeroOptions/WeaponBlessingOptions ci-dessus), pas de bouton "Engager" dédié : le
+                     "Suivant" du wizard bloque déjà si le nom manque ou si la trésorerie ne suit pas (voir
+                     ValidateHiredSwordsStep). -->
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding HasHiredSwordsToRecruit}">
+                    <Label Text="{loc:Loc EndOfGameHiredSwordRecruitHeading}" FontAttributes="Bold"/>
+                    <Picker Title="{loc:Loc EndOfGameHiredSwordRecruitPh}"
+                            ItemsSource="{Binding AvailableHiredSwordRecruitOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                            SelectedItem="{Binding SelectedNewHiredSwordOption}"/>
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding SelectedNewHiredSword, Converter={StaticResource IsNotNullConverter}}">
+                        <Entry Text="{Binding NewHiredSwordName}" Placeholder="{loc:Loc EndOfGameHiredSwordNamePh}"/>
+                        <Label Text="{Binding NewHiredSwordNameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding NewHiredSwordNameError, Converter={StaticResource IsNotNullConverter}}"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{loc:Loc HiredSwordHireCostPh}" VerticalOptions="Center"/>
+                            <Label Grid.Column="1" Text="{Binding SelectedNewHiredSword.HireCost}" VerticalOptions="Center"/>
+                        </Grid>
+                        <Label Text="{Binding NewHiredSwordAffordError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding NewHiredSwordAffordError, Converter={StaticResource IsNotNullConverter}}"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+</ContentView>

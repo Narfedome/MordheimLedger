@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.RecruitHenchmenCountStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Nouveau groupe d'Hommes de main - effectif (steppers seuls, toujours présente -
+                 livre des règles "may be done several times"). -->
+            <VerticalStackLayout Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenNewHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <components:WarriorRecruitListView ItemsSource="{Binding HenchmanRecruitRows}"
+                                                    HeaderText="{loc:Loc EndOfGameRecruitHenchmenNewHeading}"
+                                                    IncrementCommand="{Binding IncrementHenchmanGroupCommand}"
+                                                    DecrementCommand="{Binding DecrementHenchmanGroupCommand}"/>
+            </VerticalStackLayout>
+
+</ContentView>

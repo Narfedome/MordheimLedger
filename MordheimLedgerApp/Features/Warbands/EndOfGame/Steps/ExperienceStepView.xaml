@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ExperienceStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Expérience (livre - saisie libre, pas de calcul assisté). Pas de Statut ici :
+                 entièrement auto-géré depuis l'étape Blessure. Le jet de progression (palier franchi)
+                 est déplacé dans sa propre étape juste après, voir IsAdvanceStep - un guerrier peut
+                 franchir plusieurs paliers d'un coup, ça ne tient plus sur une carte imbriquée ici. -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc EndOfGameExperienceHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                            <!-- Un guerrier mort (étape Blessure) ou qui ne gagne jamais d'XP (règle
+                                 "Never Gains Experience", ex. Zombies) n'a rien à faire ici - retiré de
+                                 cette étape plutôt que juste grisé, voir ShowsInExperienceStep. -->
+                            <Border Style="{StaticResource SectionCardBorderStyle}"
+                                    IsVisible="{Binding ShowsInExperienceStep}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </Grid>
+                                    <Entry Text="{Binding ExperienceGainedText}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameXpPh}">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+</ContentView>

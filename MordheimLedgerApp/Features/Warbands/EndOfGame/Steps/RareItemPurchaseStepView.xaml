@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.RareItemPurchaseStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Achat des objets rares / Recrutement des personnages trouvés (livre, étapes 6b+7 -
+                 séparées de la recherche, retour utilisateur 2026-08-28 : jamais un achat/recrutement
+                 automatique sur un jet réussi). Une carte par recherche RÉUSSIE de l'un ou l'autre mode
+                 (RareItemsWithResults, voir RareItemSearchEntry.IsFound) - une recherche ratée n'apparaît
+                 pas ici. Côté Objet : case "Acheter" décochable (WantsToBuy, coché par défaut) ; si
+                 l'objet a un prix variable (HasVariablePrice, ex. "10 CO + 1D6"), un jet de supplément
+                 doit être fait avant de connaître le prix réel ("attention au prix variable !").
+                 Trésorerie restante recalculée en direct (RareItemPurchaseRemainingTreasury) ; le bouton
+                 Suivant du wizard reste actif mais ValidateRareItemPurchaseStep bloque le passage si le
+                 total coché dépasserait la trésorerie (IsRareItemPurchaseBlocked, bandeau dédié
+                 ci-dessous). Côté Personnage : case "Recruter" décochable (WantsToRecruit, coché par
+                 défaut) ; un personnage à frais - en or (RareItemSearchEntry.HasHireCost, ex. Johann/
+                 Veskit/Marianna) OU en pierre magique (HasWyrdstoneCost, Nicodemus uniquement - "il n'a
+                 aucun intérêt pour l'or", pas d'option or pour lui) - affiche son coût
+                 (HasEngagementCost/EngagementCostDisplay, unifié entre les deux devises) et compte dans le
+                 bandeau bloquant correspondant (trésorerie ou stock de pierres magiques, 2026-09-01, user
+                 request). Bertha (None)/Ulli &amp; Marquand (Pair) restent hors périmètre, voir leur
+                 propre doc. Un personnage à frais en or a en plus, s'il a un objet de paiement alternatif
+                 ET que la bande en possède un exemplaire (HasAlternativePaymentOption, ex. Johann/Ombre
+                 Cramoisie), une case pour payer avec l'objet à la place de l'or. Entièrement absente si
+                 aucune recherche n'a abouti (voir Steps). -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameRareItemPurchaseHeading}" FontAttributes="Bold"/>
+                <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameRareItemPurchaseBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsRareItemPurchaseBlocked}"/>
+                <Label Text="{Binding RareItemPurchaseRemainingWyrdstoneShardsDisplay}" FontAttributes="Bold"
+                       IsVisible="{Binding HasWyrdstoneCostEntries}"/>
+                <Label Text="{loc:Loc EndOfGameRareItemPurchaseWyrdstoneBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsRareItemPurchaseWyrdstoneBlocked}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RareItemsWithResults}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:RareItemSearchEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding HeroName}" FontAttributes="Bold"/>
+
+                                    <!-- Côté Personnage trouvé -->
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" IsVisible="{Binding IsSearchingForCharacter}">
+                                        <components:ChipView Grid.Column="0" Item="{Binding SelectedCharacter}"
+                                                              NameOverride="{Binding SelectedCharacterDisplayName}"
+                                                              IconGlyph="{x:Static icons:RpgFont.RaDuel}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowCharacterDetailCommand}"/>
+                                        <Label Grid.Column="1" Text="{loc:Loc EndOfGameCharacterRecruitLabel}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <CheckBox Grid.Column="2" IsChecked="{Binding WantsToRecruit}" VerticalOptions="Center"/>
+                                    </Grid>
+
+                                    <!-- Frais d'engagement (or OU pierre magique, voir HasEngagementCost) - visible
+                                         seulement si le joueur a laissé "Recruter" coché. -->
+                                    <VerticalStackLayout Spacing="6" IsVisible="{Binding IsRecruited}">
+                                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasEngagementCost}">
+                                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameCharacterHireCostPh}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Label Grid.Column="1" Text="{Binding EngagementCostDisplay}" VerticalOptions="Center"/>
+                                        </Grid>
+                                        <HorizontalStackLayout Spacing="8" IsVisible="{Binding HasAlternativePaymentOption}">
+                                            <CheckBox IsChecked="{Binding WantsToPayWithAlternativeItem}" VerticalOptions="Center"/>
+                                            <Label Text="{Binding AlternativePaymentItemLabel}" VerticalOptions="Center" FontSize="12"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!-- Côté Objet trouvé -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter, Converter={StaticResource InverseBoolConverter}}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                            <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
+                                                                  IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareItemDetailCommand}"/>
+                                            <Label Grid.Column="1" Text="{Binding CostDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <CheckBox Grid.Column="2" IsChecked="{Binding WantsToBuy}" VerticalOptions="Center"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding HasVariablePrice}">
+                                            <Entry Grid.Column="0" Text="{Binding PriceRoll}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollRarePriceCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding PriceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding PriceRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+</ContentView>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.DramatisPersonaeStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Dramatis Personae (solde des personnages à frais récurrents déjà engagés - en or
+                 pour Johann/Veskit/Marianna, en pierre magique pour Nicodemus, voir
+                 EndOfGamePageViewModel.DramatisPersonae.cs). Même carte/Picker Payer-Renvoyer que
+                 Francs-Tireurs ci-dessus, sans le bloc recrutement (déjà couvert par la recherche
+                 "Personnage spécial"). UpkeepCostDisplay (pas UpkeepCost brut) pour que la devise soit
+                 lisible ("1 pierre magique" plutôt qu'un "1" ambigu). -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameDramatisPersonaeHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DramatisPersonaUpkeepEntries}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:DramatisPersonaUpkeepEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="6">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Grid.Column="0" Text="{Binding DisplayName}" FontAttributes="Bold"/>
+                                        <Label Grid.Column="1" Text="{Binding UpkeepCostDisplay}" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </Grid>
+                                    <VerticalStackLayout Spacing="4">
+                                        <Picker ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
+                                        <Label Text="{Binding ChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding ChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+</ContentView>

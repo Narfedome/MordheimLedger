@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.PitFightStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Vendu aux Fosses (65, Héros uniquement) - combat de gladiateur contre un
+                 Gladiateur ("Pit Fighter", catalogue Franc-Tireur/HiredSword - adversaire éphémère,
+                 jamais recruté, voir WarriorOutcomeRow.PitFighterProfile). 2026-09-04, retour
+                 utilisateur ("comme pour le combat avec les dramatis, les duels de l'arène devraient
+                 être séparés dans un step séparé") : sa propre étape juste après la carte Blessure du
+                 guerrier concerné (voir Steps/IsPitFightStep), plutôt qu'un bloc embarqué dans cette
+                 dernière - même principe que PairDuel après PairEngagement. CurrentInjuryWarrior reste
+                 valable ici (Current.Warrior, indépendant du Kind). Deux "fiches perso" côte à côte -
+                 même gabarit de carte que la fiche guerrier de WarbandDetailPage (SectionCardBorderStyle,
+                 nom+rôle, StatRowView resserré 10/13, chips Équipement/Compétences/Règles spéciales)
+                 pour une vraie comparaison, comme sur la fiche officielle - pas de moteur de combat, le
+                 joueur coche simplement victoire/défaite. -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameSoldToPitsHeading}" FontAttributes="Bold"/>
+                <!-- Contexte de l'occurrence (2026-09-04, retour utilisateur - un guerrier peut enchaîner
+                     plusieurs combats de gladiateur dans la même Fin de Partie si plusieurs jets tombent
+                     sur 65) : masqué pour le jet principal, affiche "Blessure X/Y" pour un sous-jet. -->
+                <Label Text="{Binding CurrentPitFightSubRoll.Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                       IsVisible="{Binding IsPitFightMainOccurrence, Converter={StaticResource InverseBoolConverter}}"/>
+
+                <!-- Ce guerrier : équipement/compétences ACTUELS (Warrior.Equipment/Skills), mêmes chips
+                     tapables que la fiche du roster. -->
+                <Border Style="{StaticResource SectionCardBorderStyle}" Padding="8">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding CurrentInjuryWarrior.Name}" FontAttributes="Bold" FontSize="12"
+                               HorizontalTextAlignment="Center"/>
+                        <components:StatRowView Item="{Binding CurrentInjuryWarrior.Warrior}"
+                                                 MovementText="{Binding CurrentInjuryWarrior.Warrior.MovementDisplay}"
+                                                 Margin="0,6,0,6" AbbrFontSize="10" ValueFontSize="13"/>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding CurrentInjuryWarrior.HasEquipment}">
+                            <Label Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.Warrior.Equipment}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorEquipment">
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding CurrentInjuryWarrior.HasSkills}">
+                            <Label Text="{loc:Loc WarriorsSkillsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.Warrior.Skills}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorSkill">
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjurySkillDetailCommand}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+                        <!-- Règles spéciales de combat (2026-09-04, retour utilisateur) - une seule icône
+                             par notion (Scroll), donc ChipListView plutôt qu'un FlexLayout manuel comme
+                             Équipement/Compétences ci-dessus (voir CLAUDE.md § Icônes). -->
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
+                                                  ItemsSource="{Binding CurrentInjuryWarrior.SpecialRules}"
+                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorSpecialRuleDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Le Gladiateur : équipement de départ FIXE (HiredSword.StartingEquipmentIds, déjà
+                     résolu en EquipmentItem - PitFighterEquipment) + règles spéciales de combat
+                     (HiredSword.SpecialRules). Pas de compétences (ce Gladiateur n'est jamais recruté,
+                     jamais de compétence réellement apprise - voir la note retirée le 2026-09-04, retour
+                     utilisateur). -->
+                <Border Style="{StaticResource SectionCardBorderStyle}" Padding="8">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding CurrentInjuryWarrior.PitFighterProfile.Name}" FontAttributes="Bold" FontSize="12"
+                               HorizontalTextAlignment="Center"/>
+                        <components:StatRowView Item="{Binding CurrentInjuryWarrior.PitFighterProfile}"
+                                                 MovementText="{Binding CurrentInjuryWarrior.PitFighterProfile.Movement}"
+                                                 Margin="0,6,0,6" AbbrFontSize="10" ValueFontSize="13"/>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding CurrentInjuryWarrior.HasPitFighterEquipment}">
+                            <Label Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.PitFighterEquipment}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="library:EquipmentItem">
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowPitFighterEquipmentDetailCommand}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
+                                                  ItemsSource="{Binding CurrentInjuryWarrior.PitFighterProfile.SpecialRules}"
+                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowPitFighterSpecialRuleDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- WonPitFight/SoldToPitsRerollRoll bindés sur CurrentPitFightOutcome (IPitFightOutcome),
+                     pas CurrentInjuryWarrior directement (2026-09-04) : ce guerrier et le Gladiateur sont
+                     partagés par toutes les occurrences ci-dessus, mais victoire/défaite+relance sont
+                     PROPRES à CETTE occurrence (jet principal ou tel sous-jet précis) - WarriorOutcomeRow
+                     et InjurySubRollEntry partagent la même forme pour ça, voir IPitFightOutcome. -->
+                <HorizontalStackLayout Spacing="8">
+                    <CheckBox IsChecked="{Binding CurrentPitFightOutcome.WonPitFight}" VerticalOptions="Center"/>
+                    <Label Text="{loc:Loc EndOfGameSoldToPitsWonLabel}" VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
+                <!-- Défaite : un unique sous-jet D66 sur la même table (réutilise InjurySubRollEntry,
+                     même DataTemplate/commandes AutoRoll que MultipleInjuryRolls/l'étape Blessure). -->
+                <VerticalStackLayout IsVisible="{Binding CurrentPitFightOutcome.HasSoldToPitsRerollRoll}" Spacing="6">
+                    <Label Text="{loc:Loc EndOfGameSoldToPitsRerollHeading}" FontSize="12"
+                           FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{loc:Loc EndOfGameSoldToPitsRerollHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentPitFightOutcome.SoldToPitsRerollRoll}" Spacing="6">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                <VerticalStackLayout Spacing="4">
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                        <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                               Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                      CommandParameter="{Binding .}"
+                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                    </Grid>
+                                    <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                           IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+
+                                    <!-- Sous-jet imbriqué : cette relance tombe elle-même sur 35
+                                         (Blessure profonde). -->
+                                    <VerticalStackLayout IsVisible="{Binding ShowDeepWoundSubRoll}" Spacing="4">
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                            <Entry Grid.Column="0" Text="{Binding DeepWoundSubRoll}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                        <Label Text="{Binding DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Sous-jet imbriqué : cette relance tombe elle-même sur 61
+                                         (Capturé). -->
+                                    <VerticalStackLayout IsVisible="{Binding ShowCapturedChoice}" Spacing="4">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <CheckBox IsChecked="{Binding IsRansomed}" VerticalOptions="Center"/>
+                                            <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>
+                                        </HorizontalStackLayout>
+                                        <Entry IsVisible="{Binding IsRansomed}" Text="{Binding RansomAmount}"
+                                               Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="120">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                        <Label Text="{Binding CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+</ContentView>

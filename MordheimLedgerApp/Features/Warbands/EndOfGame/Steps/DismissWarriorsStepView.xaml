@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.DismissWarriorsStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Renvoyer (livre des règles - "Disbanding a Warband" + FAQ officielle citée par
+                 l'utilisateur 2026-09-22 - le joueur peut renvoyer n'importe quel guerrier à tout moment
+                 de la séquence post-bataille, son équipement rejoignant la réserve) - juste AVANT
+                 Achat/Vente, toujours présente. Case à cocher pour un Héros, stepper -/+ pour un groupe
+                 d'Hommes de main (renvoi partiel), même structure que l'étape "Hors de combat" plus haut.
+                 Voir EndOfGamePageViewModel.Dismissal.cs. -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc EndOfGameDismissHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameDismissHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DismissibleWarriorRows}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </VerticalStackLayout>
+                                    <CheckBox Grid.Column="1" IsChecked="{Binding IsDismissed}" VerticalOptions="Center"
+                                              IsVisible="{Binding IsHero}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
+                                                            IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                        <!-- DismissLabel affiche l'effectif RESTANT (pas le nombre renvoyé)
+                                             - le "-" renvoie donc une figurine de plus (IncrementDismiss),
+                                             le "+" annule un renvoi (DecrementDismiss), voir DismissLabel's
+                                             own doc. -->
+                                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementDismissCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                        <Label Text="{Binding DismissLabel}" WidthRequest="36" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementDismissCommand}"
+                                                                      CommandParameter="{Binding .}"/>
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <!-- Récap "Équipement récupéré" - même composant ChipListView que partout ailleurs (fiche
+                     guerrier, Bibliothèque), auto-masqué (ShowSection) tant que rien n'est renvoyé. -->
+                <components:ChipListView HeaderText="{loc:Loc EndOfGameDismissRecoveredEquipmentHeading}"
+                                          ItemsSource="{Binding RecoveredDismissedEquipmentChips}"
+                                          IconGlyph="{x:Static icons:SolidFont.BoxOpen}"
+                                          HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                          Command="{Binding ShowDismissedEquipmentDetailCommand}"/>
+            </VerticalStackLayout>
+
+</ContentView>

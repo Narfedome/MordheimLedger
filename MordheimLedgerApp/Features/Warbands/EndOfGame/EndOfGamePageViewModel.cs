@@ -163,33 +163,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     private string selectedResult = string.Empty;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsResultStep))]
-    [NotifyPropertyChangedFor(nameof(IsOutOfActionStep))]
-    [NotifyPropertyChangedFor(nameof(IsInjuryStep))]
-    [NotifyPropertyChangedFor(nameof(IsPitFightStep))]
-    [NotifyPropertyChangedFor(nameof(IsCaptivesStep))]
-    [NotifyPropertyChangedFor(nameof(IsExperienceStep))]
-    [NotifyPropertyChangedFor(nameof(IsAdvanceStep))]
-    [NotifyPropertyChangedFor(nameof(IsExplorationRollStep))]
-    [NotifyPropertyChangedFor(nameof(IsExplorationResultStep))]
-    [NotifyPropertyChangedFor(nameof(IsWyrdstoneSaleStep))]
-    [NotifyPropertyChangedFor(nameof(IsAvailableVeteransStep))]
-    [NotifyPropertyChangedFor(nameof(IsRareItemsStep))]
-    [NotifyPropertyChangedFor(nameof(IsRareItemPurchaseStep))]
-    [NotifyPropertyChangedFor(nameof(IsHiredSwordsStep))]
-    [NotifyPropertyChangedFor(nameof(IsDramatisPersonaeStep))]
-    [NotifyPropertyChangedFor(nameof(IsPairEngagementStep))]
-    [NotifyPropertyChangedFor(nameof(IsPairDuelStep))]
-    [NotifyPropertyChangedFor(nameof(IsDismissWarriorsStep))]
-    [NotifyPropertyChangedFor(nameof(IsEquipmentTradingStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHeroesCountStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHeroDetailStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitVeteranTopUpStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenCountStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenEquipmentStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenNamesStep))]
-    [NotifyPropertyChangedFor(nameof(IsEquipmentReallocationStep))]
-    [NotifyPropertyChangedFor(nameof(IsRecapStep))]
+    [NotifyPropertyChangedFor(nameof(CurrentStepKind))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(CurrentPitFightOutcome))]
     [NotifyPropertyChangedFor(nameof(CurrentPitFightSubRoll))]
@@ -210,7 +184,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
+    /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)
+    /// - le convertisseur, hors de cette classe, doit pouvoir lire cette valeur pour choisir la bonne
+    /// vue.</summary>
+    public enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -444,39 +421,12 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         }
     }
 
-    public bool IsResultStep => Current.Kind == StepKind.Result;
-    public bool IsOutOfActionStep => Current.Kind == StepKind.OutOfAction;
-    public bool IsInjuryStep => Current.Kind == StepKind.Injury;
-
-    /// <summary>Étape "Vendu aux Fosses" (2026-09-04, retour utilisateur - "comme pour le combat avec les
-    /// dramatis, les duels de l'arène devraient être séparés dans un step séparé") : jusque-là embarquée
-    /// à l'intérieur de la même carte Blessure que le guerrier concerné (ShowSoldToThePits en bas de
-    /// carte), désormais sa propre étape juste après - même principe que PairEngagement/PairDuel pour
-    /// Une Poignée d'Or. CurrentInjuryWarrior reste valable ici (Current.Warrior, indépendant du Kind).</summary>
-    public bool IsPitFightStep => Current.Kind == StepKind.PitFight;
-    public bool IsCaptivesStep => Current.Kind == StepKind.Captives;
-    public bool IsExperienceStep => Current.Kind == StepKind.Experience;
-    public bool IsAdvanceStep => Current.Kind == StepKind.Advance;
-    public bool IsExplorationRollStep => Current.Kind == StepKind.ExplorationRoll;
-    public bool IsExplorationResultStep => Current.Kind == StepKind.ExplorationResult;
-    public bool IsWyrdstoneSaleStep => Current.Kind == StepKind.WyrdstoneSale;
-    public bool IsAvailableVeteransStep => Current.Kind == StepKind.AvailableVeterans;
-    public bool IsRareItemsStep => Current.Kind == StepKind.RareItems;
-    public bool IsRareItemPurchaseStep => Current.Kind == StepKind.RareItemPurchase;
-    public bool IsHiredSwordsStep => Current.Kind == StepKind.HiredSwords;
-    public bool IsDramatisPersonaeStep => Current.Kind == StepKind.DramatisPersonae;
-    public bool IsPairEngagementStep => Current.Kind == StepKind.PairEngagement;
-    public bool IsPairDuelStep => Current.Kind == StepKind.PairDuel;
-    public bool IsDismissWarriorsStep => Current.Kind == StepKind.DismissWarriors;
-    public bool IsEquipmentTradingStep => Current.Kind == StepKind.EquipmentTrading;
-    public bool IsRecruitHeroesCountStep => Current.Kind == StepKind.RecruitHeroesCount;
-    public bool IsRecruitHeroDetailStep => Current.Kind == StepKind.RecruitHeroDetail;
-    public bool IsRecruitVeteranTopUpStep => Current.Kind == StepKind.RecruitVeteranTopUp;
-    public bool IsRecruitHenchmenCountStep => Current.Kind == StepKind.RecruitHenchmenCount;
-    public bool IsRecruitHenchmenEquipmentStep => Current.Kind == StepKind.RecruitHenchmenEquipment;
-    public bool IsRecruitHenchmenNamesStep => Current.Kind == StepKind.RecruitHenchmenNames;
-    public bool IsEquipmentReallocationStep => Current.Kind == StepKind.EquipmentReallocation;
-    public bool IsRecapStep => Current.Kind == StepKind.Recap;
+    /// <summary>Pilote StepViewConverter (Converters/StepViewConverter.cs, 2026-09-22) - une vue par
+    /// étape (Steps/*StepView.xaml), construite à la demande, plutôt que les ~27 blocs IsXxxStep que
+    /// EndOfGamePage.xaml construisait/liait tous d'un coup à l'ouverture (cause de la lenteur signalée
+    /// par l'utilisateur) - ces ~27 propriétés IsXxxStep ont été retirées avec ce refactor, plus aucun
+    /// binding ne les lit.</summary>
+    public StepKind CurrentStepKind => Current.Kind;
 
     /// <summary>Le seul héros affiché à l'étape RecruitHeroDetail courante - une étape par héros recruté,
     /// jamais une liste (même principe que CurrentInjuryWarrior/CurrentAdvanceWarrior).</summary>
@@ -644,6 +594,21 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         _sellEquipmentPicker = sellEquipmentPicker;
         _dramatisPersonaPicker = dramatisPersonaPicker;
         _warbandService = warbandService;
+
+        // Déplacé depuis InitializeAsync (2026-09-22, retour utilisateur - "on a perdu la valeur par
+        // défaut du victoire défaite") : contrairement au reste de InitializeAsync, ces 3 options sont
+        // fixes (jamais dépendantes de WarbandId/du chargement DB) - les construire ici, dans le
+        // constructeur synchrone, garantit qu'elles existent AVANT que la page ne pose son premier
+        // binding (ResultStepView est la toute première vue construite, StepKind.Result étant
+        // inconditionnellement l'étape 0 - voir Steps). Les poser dans InitializeAsync (async, après
+        // le binding déjà posé) laissait une fenêtre où le Picker se liait sur une liste encore vide,
+        // avant qu'un défaut ne soit sélectionné - la même classe de bug que WarriorRows/
+        // RareItemSearchEntries plus tôt dans cette session, réglée cette fois en évitant carrément la
+        // course plutôt qu'en notifiant après coup.
+        ResultOptions.Add(Loc["EndOfGameResultVictory"]);
+        ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
+        ResultOptions.Add(Loc["EndOfGameResultDraw"]);
+        SelectedResult = ResultOptions[0];
     }
 
     /// <summary>Reconstruit tout l'état du wizard depuis WarbandId seul (Shell [QueryProperty], voir
@@ -764,8 +729,15 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var allWarriors = await _warbandService.GetWarriorsAsync(warbandId, language);
             var allRows = rosterBuilder.BuildRows(allWarriors);
             // Même filtre que WarbandDetailViewModel.AllActiveWarriorRows (voir sa doc) : exclut
-            // Mort/Retraité, garde Malade (voir _allActiveWarriorRows's own doc).
-            _allActiveWarriorRows = allRows.Where(r => !r.IsDead && !r.IsRetired).ToList();
+            // Mort/Retraité, garde Malade (voir _allActiveWarriorRows's own doc). Ordre forcé Chef
+            // d'abord, puis autres Héros (Francs-Tireurs/Dramatis Personae inclus, IsHero vaut vrai pour
+            // eux aussi), puis groupes d'Hommes de main - retour utilisateur 2026-09-22, pour que toutes
+            // les listes de ce wizard qui énumèrent WarriorRows dans cet ordre (Hors de combat, Blessure,
+            // Expérience, Progression...) le respectent. OrderBy est un tri stable : au sein d'un même
+            // groupe, l'ordre relatif renvoyé par la base (allWarriors) est conservé.
+            _allActiveWarriorRows = allRows.Where(r => !r.IsDead && !r.IsRetired)
+                .OrderBy(r => r.Warrior.IsLeader ? 0 : r.Warrior.IsHero ? 1 : 2)
+                .ToList();
             var activeWarriorRows = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Active).ToList();
 
             _warbandArchetypeId = Warband.WarbandArchetypeId;
@@ -791,11 +763,6 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             _localizedEquipmentCatalog = localizedEquipment;
             foreach (var archetype in localizedWarriorArchetypes)
                 RecruitRows.Add(new WarriorRecruitRow(archetype, isEditingWarband: false));
-
-            ResultOptions.Add(Loc["EndOfGameResultVictory"]);
-            ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
-            ResultOptions.Add(Loc["EndOfGameResultDraw"]);
-            SelectedResult = ResultOptions[0];
 
             // Snapshot pour AdvanceRollEntry.CanPromote (promotion Homme de main -> Héros, jet 10-12) -
             // voir sa doc pour les limites acceptées (ne suit pas les promotions résolues plus tôt dans

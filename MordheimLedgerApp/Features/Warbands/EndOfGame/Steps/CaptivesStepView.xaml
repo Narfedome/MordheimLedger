@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.CaptivesStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Prisonniers ennemis - une seule fois pour toute la bande (pas par guerrier),
+                 juste après les étapes Blessure. Ce que CETTE bande a capturé sur l'adversaire, sans
+                 rapport avec Capturé (61, l'inverse - un DE NOS guerriers capturé PAR l'adversaire, voir
+                 IsInjuryStep). Demandé par l'utilisateur (2026-08-27) en repensant Capturé : la bande
+                 adverse n'est pas modélisée, mais NOTRE propre type de bande l'est bien - Tué (Zombie)/
+                 Sacrifié (XP) n'apparaissent donc que pour les Morts-Vivants/le Culte des Possédés (voir
+                 IsUndeadWarband/IsPossessedWarband), Rançon/Vendu aux esclavagistes toujours proposés. -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameCaptivesHeading}" FontAttributes="Bold"/>
+                <!-- Grid Auto,* plutôt que HorizontalStackLayout (2026-09-01, retour utilisateur -
+                     "Corruption de Marquand Volker & Ulli Leitpold (Une Poignée d'Or)" coupé net par le
+                     bord du dialog) : dans un HorizontalStackLayout, le Label reçoit une largeur non
+                     bornée et ne peut donc jamais retourner à la ligne, quel que soit son
+                     LineBreakMode - la colonne * borne sa largeur disponible et laisse le retour à la
+                     ligne par défaut faire son travail. -->
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <CheckBox Grid.Column="0" IsChecked="{Binding HasCapturedEnemies}" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="{loc:Loc EndOfGameCapturedEnemiesToggle}" VerticalOptions="Center"/>
+                </Grid>
+
+                <VerticalStackLayout Spacing="12" IsVisible="{Binding HasCapturedEnemies}">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="{loc:Loc EndOfGameCapturedEnemyCountLabel}" VerticalOptions="Center"/>
+                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Command="{Binding DecrementCapturedEnemyCountCommand}"/>
+                        <Label Text="{Binding CapturedEnemyCount}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Command="{Binding IncrementCapturedEnemyCountCommand}"/>
+                    </HorizontalStackLayout>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding CapturedEnemies}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:CapturedEnemyEntry">
+                                <Border Style="{StaticResource SectionCardBorderStyle}">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding Index, StringFormat='{0}'}" FontAttributes="Bold"/>
+                                        <Picker Title="{loc:Loc EndOfGameCapturedEnemyFatePh}"
+                                                ItemsSource="{Binding FateLabels}"
+                                                SelectedItem="{Binding SelectedFateLabel}"/>
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding ShowGoldAmount}">
+                                            <Entry Grid.Column="0" Text="{Binding GoldAmount}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameCapturedEnemyGoldPh}" WidthRequest="90">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSoldToSlaversCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding FateError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding FateError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+</ContentView>

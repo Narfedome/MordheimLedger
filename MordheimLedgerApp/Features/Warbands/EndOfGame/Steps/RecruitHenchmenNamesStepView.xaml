@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:createEdit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.RecruitHenchmenNamesStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Nouveau groupe d'Hommes de main - noms (le nombre RÉEL de groupes n'est connu
+                 qu'une fois l'étape Équipement passée, un Diviser peut en créer d'autres - absente si
+                 aucun nouveau groupe). -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameRecruitHenchmenNamesHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHenchmanRows}" Spacing="8">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="createEdit:WarriorRecruitRow">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}" Spacing="6">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="createEdit:HenchmanGroupDraft">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                <Entry Text="{Binding Name}" FontSize="13"/>
+                                                <Label Text="{Binding EquipmentSummary}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding EquipmentSummary, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
+                                                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <Label Text="{Binding RecruitHenchmenNamesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding RecruitHenchmenNamesError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+</ContentView>

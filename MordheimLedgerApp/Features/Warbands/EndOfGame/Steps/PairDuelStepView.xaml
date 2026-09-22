@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.PairDuelStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Duel avec le meneur (2026-09-01, retour utilisateur - "on reprend l'affichage du
+                 duel de l'arène dans les blessures", sa propre étape "quitte à le mettre dans un step
+                 supplémentaire pour éviter une page trop longue") - même gabarit de carte que Vendu aux
+                 Fosses (SectionCardBorderStyle, nom + StatRowView resserré 10/13) mais empilé pour 3
+                 participants (meneur + Marquand + Ulli, jamais un seul des deux) plutôt que 2 côte à côte
+                 - pas de moteur de combat, le joueur coche simplement victoire/défaite juste en dessous. -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGamePairDuelHeading}" FontAttributes="Bold"/>
+
+                <!-- Le meneur : équipement/compétences ACTUELS (Warrior.Equipment/Skills), mêmes chips
+                     tapables que la fiche du roster - même bloc que "Ce guerrier" de Vendu aux Fosses. -->
+                <Border Style="{StaticResource SectionCardBorderStyle}" Padding="8">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{Binding DuelLeaderRow.Name}" FontAttributes="Bold" FontSize="12"
+                               HorizontalTextAlignment="Center"/>
+                        <components:StatRowView Item="{Binding DuelLeaderRow.Warrior}"
+                                                 MovementText="{Binding DuelLeaderRow.Warrior.MovementDisplay}"
+                                                 Margin="0,6,0,6" AbbrFontSize="10" ValueFontSize="13"/>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding DuelLeaderRow.HasEquipment}">
+                            <Label Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding DuelLeaderRow.Warrior.Equipment}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorEquipment">
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding DuelLeaderRow.HasSkills}">
+                            <Label Text="{loc:Loc WarriorsSkillsHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
+                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding DuelLeaderRow.Warrior.Skills}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WarriorSkill">
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjurySkillDetailCommand}"/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
+                        </VerticalStackLayout>
+                        <!-- Règles spéciales de combat (2026-09-04, retour utilisateur) - même commande
+                             partagée que Vendu aux Fosses ("Ce guerrier"), voir EndOfGamePageViewModel.
+                             Injury.cs. -->
+                        <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
+                                                  ItemsSource="{Binding DuelLeaderRow.SpecialRules}"
+                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                  HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorSpecialRuleDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Adversaire(s) : profil catalogue (DuelOpponents, résolus depuis
+                     _dramatisPersonaCatalog, jamais depuis WarriorRows - le meneur les affronte qu'ils
+                     soient recrutés par CETTE bande ou celle d'en face) - 1 ou 2 cartes selon
+                     PairedWithDramatisPersona (2026-09-04, retour utilisateur "rendre le truc générique" -
+                     Marquand + Ulli aujourd'hui, un futur personnage solo portant la même SpecialRule
+                     n'afficherait qu'une carte, rien à changer ici). Compétences déjà résolues
+                     (DramatisPersona.Skills). Équipement de départ (2026-09-03, retour utilisateur - "les
+                     armes ne sont pas affichées... dans le combat contre la paire") via
+                     DuelOpponentDisplay.Equipment, résolu en amont en EquipmentQuantityChip (même helper
+                     que DetailDialogService, voir WarbandDetailViewModel.EndOfGame). -->
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DuelOpponents}" Spacing="12">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:DuelOpponentDisplay">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="8">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding Persona.Name}" FontAttributes="Bold" FontSize="12"
+                                           HorizontalTextAlignment="Center"/>
+                                    <components:StatRowView Item="{Binding Persona}"
+                                                             MovementText="{Binding Persona.Movement}"
+                                                             Margin="0,6,0,6" AbbrFontSize="10" ValueFontSize="13"/>
+                                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="components:EquipmentQuantityChip">
+                                                <components:ChipView Item="{Binding .}"
+                                                                      IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowDuelEquipmentDetailCommand}"/>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+                                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Persona.Skills}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="library:Skill">
+                                                <components:ChipView Item="{Binding .}"
+                                                                      IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowDuelSkillDetailCommand}"/>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+                                    <!-- Règles spéciales de combat (2026-09-04, retour utilisateur). -->
+                                    <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
+                                                              ItemsSource="{Binding Persona.SpecialRules}"
+                                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                              HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowDuelSpecialRuleDetailCommand}"/>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <CheckBox Grid.Column="0" IsChecked="{Binding WonDuel}" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="{loc:Loc EndOfGamePairDuelWonLabel}" VerticalOptions="Center"/>
+                </Grid>
+
+                <!-- Défaite = mort automatique du meneur (2026-09-03, retour utilisateur - "en cas de
+                     défaite, le chef de bande est forcément mort") : pas de jet à saisir, contrairement à
+                     Vendu aux Fosses/D66-65 dont une première version s'inspirait par erreur (retiré). -->
+                <Label Text="{loc:Loc EndOfGamePairDuelLostNote}" FontSize="11" FontAttributes="Bold"
+                       TextColor="{StaticResource AppDanger}" IsVisible="{Binding IsDuelLost}"/>
+            </VerticalStackLayout>
+
+</ContentView>

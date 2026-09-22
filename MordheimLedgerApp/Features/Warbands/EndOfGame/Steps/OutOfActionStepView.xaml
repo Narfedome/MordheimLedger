@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.OutOfActionStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+    <!-- Étape : Hors de combat - vue d'ensemble, aucun outil de jet ici (chaque guerrier/groupe
+         concerné reçoit sa propre étape Blessure juste après, une carte par écran plutôt que
+         toutes en même temps). Un Héros (toujours 1 figurine) se coche/décoche ; un groupe
+         d'Hommes de main indique combien de figurines sont hors de combat via un stepper - le
+         jet de Blessure Grave se fait par figurine, pas une fois pour tout le groupe. -->
+    <VerticalStackLayout Spacing="8">
+        <Label Text="{loc:Loc EndOfGameOutOfAction}" FontAttributes="Bold"/>
+        <Label Text="{loc:Loc EndOfGameOutOfActionHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+        <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="8">
+            <BindableLayout.ItemTemplate>
+                <DataTemplate x:DataType="local:WarriorOutcomeRow">
+                    <Border Style="{StaticResource SectionCardBorderStyle}">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            </VerticalStackLayout>
+                            <CheckBox Grid.Column="1" IsChecked="{Binding IsOutOfAction}" VerticalOptions="Center"
+                                      IsVisible="{Binding IsHero}"/>
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
+                                                    IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementOutOfActionCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                                <Label Text="{Binding OutOfActionLabel}" WidthRequest="36" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementOutOfActionCommand}"
+                                                              CommandParameter="{Binding .}"/>
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </BindableLayout.ItemTemplate>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentView>

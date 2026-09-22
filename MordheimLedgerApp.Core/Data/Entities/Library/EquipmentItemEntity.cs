@@ -32,4 +32,10 @@ public class EquipmentItemEntity
     public int? GrantsRareItemSearchBonus { get; set; }
     public bool IsSellable { get; set; }
     public int? GrantsBonusExplorationDice { get; set; }
+
+    /// <summary>See Models.Library.EquipmentItem.IsUniqueArtefact.</summary>
+    public bool IsUniqueArtefact { get; set; }
+
+    /// <summary>See Models.Library.EquipmentItem.IsExplorationOnly.</summary>
+    public bool IsExplorationOnly { get; set; }
 }

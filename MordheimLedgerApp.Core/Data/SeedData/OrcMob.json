@@ -572,6 +572,7 @@
       "category": "DrugsAndPoisons",
       "cost": 30,
       "costRandomMax": 18,
+      "rarity": 9,
       "description": {
         "en": "Common only if the warband includes at least one Goblin. A Goblin Warrior may eat these before a battle to gain Frenzy. After the battle, roll a D6: on a 1 the model becomes permanently Stupid. Required to wield a Ball & Chain.",
         "fr": "Disponibilité Commune uniquement si la bande compte au moins un Gobelin. Un Guerrier Gobelin peut en consommer avant une bataille pour gagner la Frénésie. Après la bataille, lancez 1D6 : sur un 1, la figurine devient Stupide de façon permanente. Nécessaires pour manier une Chaîne & boulet."

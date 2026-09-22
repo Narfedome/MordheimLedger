@@ -188,6 +188,35 @@ public class LibraryService : ILibraryService
         return rows.Select(r => r.ToModel(translations, restrictions, startingEquipment, specialRules, magicSchoolsById)).ToList();
     }
 
+    public async Task<List<DramatisPersona>> GetDramatisPersonaeAsync(string languageCode)
+    {
+        await _db.Initialization;
+        var rows = await _db.Connection.Table<DramatisPersonaEntity>().ToListAsync();
+        var translations = await ResolveTranslationsAsync(rows.SelectMany(r => new[] { r.NameKey, r.DescriptionKey, r.PairDescriptionKey }), languageCode);
+        var restrictions = await LoadDramatisPersonaRestrictionsAsync();
+        var specialRules = await LoadDramatisPersonaSpecialRulesAsync(languageCode);
+        var startingEquipment = await LoadDramatisPersonaEquipmentAsync();
+        var skills = await LoadDramatisPersonaSkillsAsync(languageCode);
+        var magicSchoolsById = (await GetMagicSchoolsAsync(languageCode)).ToDictionary(s => s.Id);
+        // Résout AlternativePaymentItemId (ex. Johann/Ombre Cramoisie) - même dictionnaire complet que
+        // partout ailleurs où un DramatisPersona référence un objet du catalogue (voir StartingEquipmentIds
+        // plus haut dans cette méthode).
+        var equipmentById = (await GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
+        var models = rows.Select(r => r.ToModel(translations, restrictions, specialRules, startingEquipment, skills, magicSchoolsById, equipmentById)).ToList();
+
+        // Résout PairedWithDramatisPersonaId (Ulli/Marquand, 2026-09-01) - navigation self-référente,
+        // donc résolue APRÈS que tous les modèles existent (pas de dictionnaire passé à ToModel comme les
+        // autres résolutions ci-dessus, plus simple ainsi pour une auto-référence).
+        var modelsById = models.ToDictionary(m => m.Id);
+        foreach (var model in models)
+        {
+            if (model.PairedWithDramatisPersonaId is { } pairedId)
+                model.PairedWithDramatisPersona = modelsById.GetValueOrDefault(pairedId);
+        }
+
+        return models.OrderBy(r => r.Name).ToList();
+    }
+
     public async Task<List<Injury>> GetInjuriesAsync(string languageCode)
     {
         await _db.Initialization;
@@ -369,6 +398,62 @@ public class LibraryService : ILibraryService
         var links = await _db.Connection.Table<HiredSwordSpecialRuleEntity>().ToListAsync();
         return links.GroupBy(l => l.HiredSwordId)
             .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
+    private async Task<Dictionary<int, List<int>>> LoadDramatisPersonaRestrictionsAsync()
+    {
+        var rows = await _db.Connection.Table<WarbandArchetypeDramatisPersonaEntity>().ToListAsync();
+        return rows.GroupBy(r => r.DramatisPersonaId).ToDictionary(g => g.Key, g => g.Select(r => r.WarbandArchetypeId).ToList());
+    }
+
+    private async Task<Dictionary<int, List<SpecialRule>>> LoadDramatisPersonaSpecialRulesAsync(string languageCode)
+    {
+        var rulesById = (await GetSpecialRulesAsync(languageCode)).ToDictionary(r => r.Id);
+        var links = await _db.Connection.Table<DramatisPersonaSpecialRuleEntity>().ToListAsync();
+        return links.GroupBy(l => l.DramatisPersonaId)
+            .ToDictionary(g => g.Key, g => g.Select(l => rulesById[l.SpecialRuleId]).ToList());
+    }
+
+    private async Task SaveDramatisPersonaRestrictionsAsync(int dramatisPersonaId, List<int> warbandArchetypeIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandArchetypeDramatisPersonaEntity WHERE DramatisPersonaId = ?", dramatisPersonaId);
+        foreach (var warbandArchetypeId in warbandArchetypeIds)
+            await _db.Connection.InsertAsync(new WarbandArchetypeDramatisPersonaEntity { DramatisPersonaId = dramatisPersonaId, WarbandArchetypeId = warbandArchetypeId });
+    }
+
+    private async Task SaveDramatisPersonaSpecialRulesAsync(int dramatisPersonaId, List<SpecialRule> specialRules)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM DramatisPersonaSpecialRuleEntity WHERE DramatisPersonaId = ?", dramatisPersonaId);
+        foreach (var rule in specialRules)
+            await _db.Connection.InsertAsync(new DramatisPersonaSpecialRuleEntity { DramatisPersonaId = dramatisPersonaId, SpecialRuleId = rule.Id });
+    }
+
+    private async Task<Dictionary<int, List<int>>> LoadDramatisPersonaEquipmentAsync()
+    {
+        var rows = await _db.Connection.Table<DramatisPersonaEquipmentEntity>().ToListAsync();
+        return rows.GroupBy(r => r.DramatisPersonaId).ToDictionary(g => g.Key, g => g.Select(r => r.EquipmentItemId).ToList());
+    }
+
+    private async Task SaveDramatisPersonaEquipmentAsync(int dramatisPersonaId, List<int> equipmentItemIds)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM DramatisPersonaEquipmentEntity WHERE DramatisPersonaId = ?", dramatisPersonaId);
+        foreach (var equipmentItemId in equipmentItemIds)
+            await _db.Connection.InsertAsync(new DramatisPersonaEquipmentEntity { DramatisPersonaId = dramatisPersonaId, EquipmentItemId = equipmentItemId });
+    }
+
+    private async Task<Dictionary<int, List<Skill>>> LoadDramatisPersonaSkillsAsync(string languageCode)
+    {
+        var skillsById = (await GetSkillsAsync(languageCode)).ToDictionary(s => s.Id);
+        var links = await _db.Connection.Table<DramatisPersonaSkillEntity>().ToListAsync();
+        return links.GroupBy(l => l.DramatisPersonaId)
+            .ToDictionary(g => g.Key, g => g.Select(l => skillsById[l.SkillId]).ToList());
+    }
+
+    private async Task SaveDramatisPersonaSkillsAsync(int dramatisPersonaId, List<Skill> skills)
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM DramatisPersonaSkillEntity WHERE DramatisPersonaId = ?", dramatisPersonaId);
+        foreach (var skill in skills)
+            await _db.Connection.InsertAsync(new DramatisPersonaSkillEntity { DramatisPersonaId = dramatisPersonaId, SkillId = skill.Id });
     }
 
     /// <summary>Seed-only axis (see Skill.RestrictedToWarriorArchetypeIds) - loaded/saved here so
@@ -606,6 +691,30 @@ public class LibraryService : ILibraryService
         await SaveHiredSwordSpecialRulesAsync(hiredSword.Id, hiredSword.SpecialRules);
     }
 
+    public async Task SaveDramatisPersonaAsync(DramatisPersona dramatisPersona, string languageCode)
+    {
+        await _db.Initialization;
+        await ApplyTranslationsAsync(dramatisPersona, languageCode);
+
+        if (dramatisPersona.Id == 0)
+        {
+            var entity = dramatisPersona.ToEntity();
+            await _db.Connection.InsertAsync(entity);
+            dramatisPersona.Id = entity.Id;
+        }
+        else
+        {
+            var existing = await _db.Connection.FindAsync<DramatisPersonaEntity>(dramatisPersona.Id);
+            if (existing?.Source == ContentSource.Official) dramatisPersona.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(dramatisPersona.ToEntity());
+        }
+
+        await SaveDramatisPersonaRestrictionsAsync(dramatisPersona.Id, dramatisPersona.RestrictedToWarbandArchetypeIds);
+        await SaveDramatisPersonaSpecialRulesAsync(dramatisPersona.Id, dramatisPersona.SpecialRules);
+        await SaveDramatisPersonaEquipmentAsync(dramatisPersona.Id, dramatisPersona.StartingEquipmentIds);
+        await SaveDramatisPersonaSkillsAsync(dramatisPersona.Id, dramatisPersona.Skills);
+    }
+
     public async Task SaveInjuryAsync(Injury injury, string languageCode)
     {
         await _db.Initialization;
@@ -781,6 +890,14 @@ public class LibraryService : ILibraryService
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
     }
 
+    private async Task ApplyTranslationsAsync(DramatisPersona m, string languageCode)
+    {
+        m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
+        m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
+            ? null
+            : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+    }
+
     private async Task ApplyTranslationsAsync(Injury m, string languageCode)
     {
         m.NameKey = await SetTranslationAsync(m.NameKey, languageCode, m.Name);
@@ -871,6 +988,12 @@ public class LibraryService : ILibraryService
     {
         await _db.Initialization;
         await _db.Connection.DeleteAsync<HiredSwordEntity>(hiredSwordId);
+    }
+
+    public async Task DeleteDramatisPersonaAsync(int dramatisPersonaId)
+    {
+        await _db.Initialization;
+        await _db.Connection.DeleteAsync<DramatisPersonaEntity>(dramatisPersonaId);
     }
 
     public async Task DeleteInjuryAsync(int injuryId)

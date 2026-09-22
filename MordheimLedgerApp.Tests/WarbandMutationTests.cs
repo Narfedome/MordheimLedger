@@ -1,4 +1,5 @@
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
@@ -156,6 +157,260 @@ public class WarbandMutationTests : IDisposable
         Assert.NotEmpty(carried.Item.SpecialRules);
     }
 
+    /// <summary>Bertha's own catalogue entry lists "Sigmarite Warhammer" twice in
+    /// DramatisPersonae.json.startingEquipmentNames (she carries two) - locks in the 2026-09-01 fix
+    /// (user report: "j'ai pas réussi à le gérer") for two distinct bugs found together: (1) the
+    /// EquipmentItemId resolution used to go through EquipmentItem.Where(id-list.Contains(...)), which
+    /// silently collapsed the duplicate since it iterates the catalog, never the id list twice; (2) even
+    /// with the id preserved twice, RecruitDramatisPersonaAsync used to insert one WarriorEquipment row
+    /// per occurrence instead of a single row with Quantity=2. Both fixed together: a single row,
+    /// Quantity=2, "Sigmarite Warhammer x2" (see WarriorEquipment.NameDisplay's own quantity suffix, also
+    /// new this pass).</summary>
+    [Fact]
+    public async Task RecruitingBertha_ConsolidatesDuplicateStartingEquipmentIntoOneQuantityTwoRow()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+
+        var bertha = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
+        var allEquipment = await _library.GetEquipmentItemsAsync("en");
+        // Même résolution que l'appelant réel (WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync) -
+        // par id, pas par Where(catalog).Contains(ids), pour préserver les doublons.
+        var startingEquipment = bertha.StartingEquipmentIds.Select(id => allEquipment.First(e => e.Id == id)).ToList();
+        Assert.Equal(2, startingEquipment.Count(e => e.Name == "Sigmarite Warhammer"));
+
+        var recruited = await _warbands.RecruitDramatisPersonaAsync(warband.Id, bertha, "Bertha", startingEquipment, bertha.Skills);
+
+        var roster = await _warbands.GetWarriorsAsync(warband.Id, "en");
+        var warrior = Assert.Single(roster, w => w.Id == recruited.Id);
+        var warhammer = Assert.Single(warrior.Equipment, e => e.Item.Name == "Sigmarite Warhammer");
+        Assert.Equal(2, warhammer.Quantity);
+        Assert.Equal("Sigmarite Warhammer x2", warhammer.NameDisplay);
+        Assert.Equal(4, warrior.Equipment.Count); // Warhammer(x2)/Gromril Armour/Blessed Water/Holy Relic - 4 distinct rows, not 5.
+    }
+
+    /// <summary>The fix above only helps a fresh install: an already-seeded database (Bertha seeded with
+    /// a single Sigmarite Warhammer row, before her JSON entry gained the duplicate on 2026-09-01) never
+    /// re-runs SeedDramatisPersonaeAsync (empty-catalog gate only fires once) - same class of bug as
+    /// ExplorationResults_DuplicatedByADoubleSeed_AreBackfilledOnNextLaunch above, fixed the same way via
+    /// a dedicated Backfill* method (BackfillDramatisPersonaStartingEquipmentAsync) that runs
+    /// unconditionally on every launch and re-syncs a mismatched Official persona's equipment row count
+    /// from the JSON.</summary>
+    [Fact]
+    public async Task DramatisPersonaEquipment_StaleFromBeforeADuplicateWasAdded_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var bertha = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
+        var allEquipment = await _library.GetEquipmentItemsAsync("en");
+        var warhammerId = allEquipment.Single(e => e.Name == "Sigmarite Warhammer").Id;
+
+        // Simule une base seedée AVANT l'ajout du doublon dans DramatisPersonae.json : ne garder qu'UNE
+        // seule ligne DramatisPersonaEquipmentEntity pour le Marteau de Sigmarite (au lieu de 2).
+        var warhammerRows = await _db.Connection.Table<DramatisPersonaEquipmentEntity>()
+            .Where(r => r.DramatisPersonaId == bertha.Id && r.EquipmentItemId == warhammerId).ToListAsync();
+        Assert.Equal(2, warhammerRows.Count);
+        await _db.Connection.DeleteAsync(warhammerRows[0]);
+
+        // Rouvrir la même base (nouvelle instance AppDatabase sur le même fichier) rejoue InitializeAsync -
+        // le garde-fou de seed ne se redéclenche pas, mais le backfill tourne à chaque lancement.
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedBertha = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
+        Assert.Equal(2, reopenedBertha.StartingEquipmentIds.Count(id => id == warhammerId));
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same class of bug as the equipment-count backfill above, for the OTHER field
+    /// BackfillDramatisPersonaStartingEquipmentAsync now also fixes: an already-seeded database has
+    /// Johann's AlternativePaymentItemId still null (seeded before this field/JSON entry existed) - the
+    /// backfill overwrites the plain FK column directly (no join table involved, simpler than the
+    /// equipment-count fix) once it disagrees with DramatisPersonae.json's current
+    /// alternativePaymentItemName.</summary>
+    [Fact]
+    public async Task DramatisPersonaAlternativePaymentItem_StaleFromBeforeItExisted_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var johann = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Johann"));
+        Assert.NotNull(johann.AlternativePaymentItemId);
+
+        // Simule une base seedée AVANT l'ajout du champ - efface la valeur déjà résolue.
+        var entity = await _db.Connection.FindAsync<DramatisPersonaEntity>(johann.Id);
+        entity.AlternativePaymentItemId = null;
+        await _db.Connection.UpdateAsync(entity);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedJohann = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Johann"));
+        Assert.Equal("Crimson Shade", reopenedJohann.AlternativePaymentItem?.Name);
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same backfill, same class of bug, for the pairing fields added 2026-09-01 ("on va bien
+    /// s'amuser pour finaliser le duo") - an already-seeded database has Ulli/Marquand's
+    /// PairedWithDramatisPersonaId/IsHiddenFromSearchPicker still at their defaults (null/false).</summary>
+    [Fact]
+    public async Task DramatisPersonaPairing_StaleFromBeforeItExisted_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var marquand = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        var ulli = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Ulli Leitpold");
+
+        // Simule une base seedée AVANT l'ajout des champs - efface les valeurs déjà résolues.
+        var marquandEntity = await _db.Connection.FindAsync<DramatisPersonaEntity>(marquand.Id);
+        marquandEntity.PairedWithDramatisPersonaId = null;
+        await _db.Connection.UpdateAsync(marquandEntity);
+        var ulliEntity = await _db.Connection.FindAsync<DramatisPersonaEntity>(ulli.Id);
+        ulliEntity.PairedWithDramatisPersonaId = null;
+        ulliEntity.IsHiddenFromSearchPicker = false;
+        await _db.Connection.UpdateAsync(ulliEntity);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedPersonae = await reopenedLibrary.GetDramatisPersonaeAsync("en");
+        var reopenedMarquand = reopenedPersonae.Single(p => p.Name == "Marquand Volker");
+        var reopenedUlli = reopenedPersonae.Single(p => p.Name == "Ulli Leitpold");
+        Assert.Equal("Ulli Leitpold", reopenedMarquand.PairedWithDramatisPersona?.Name);
+        Assert.Equal("Marquand Volker", reopenedUlli.PairedWithDramatisPersona?.Name);
+        Assert.True(reopenedUlli.IsHiddenFromSearchPicker);
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same class of bug again: "A Fistful of Crowns"/"Une Poignée d'Or" (2026-09-01) was split
+    /// out of Marquand/Ulli's free-text Description into a real SpecialRule AFTER the pair had already
+    /// seeded once - a database seeded before that split never picks it up without a dedicated backfill
+    /// (BackfillDramatisPersonaSpecialRulesAsync). Additive-only: removing just this one link (simulating
+    /// the stale state) and reopening must add it back WITHOUT touching "Inseparable", which was already
+    /// there and must survive untouched.</summary>
+    [Fact]
+    public async Task DramatisPersonaSpecialRule_AddedAfterADatabaseWasAlreadySeeded_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var marquand = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        Assert.Equal(2, marquand.SpecialRules.Count);
+
+        // Simule une base seedée AVANT l'ajout de la règle - retire uniquement son lien de jointure,
+        // laisse "Inseparable" intact.
+        var staleLinks = await _db.Connection.Table<DramatisPersonaSpecialRuleEntity>()
+            .Where(l => l.DramatisPersonaId == marquand.Id).ToListAsync();
+        var fistfulLink = staleLinks.Single(l => l.SpecialRuleId == marquand.SpecialRules.Single(r => r.Name == "A Fistful of Crowns").Id);
+        await _db.Connection.DeleteAsync(fistfulLink);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedMarquand = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        Assert.Equal(new[] { "A Fistful of Crowns", "Inseparable" }, reopenedMarquand.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same class of bug again: Marquand/Ulli's Description text (2026-09-01, replaced their
+    /// short trimmed bio with each half's real individual biography) and Marquand's new PairDescription
+    /// (the shared "duo" lore, previously nonexistent) both need to reach an already-seeded database -
+    /// BackfillDramatisPersonaDescriptionsAsync compares against the CURRENT English text (not a simple
+    /// missing-row check like the other Backfill* methods), so this simulates BOTH a stale existing
+    /// Description (old text still in the DB) and a genuinely missing PairDescriptionKey (null, as any
+    /// database seeded before this field existed would have).</summary>
+    [Fact]
+    public async Task DramatisPersonaDescriptions_StaleOrMissing_AreBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var marquand = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        var marquandEntity = await _db.Connection.FindAsync<DramatisPersonaEntity>(marquand.Id);
+        var staleDescKey = marquandEntity.DescriptionKey!;
+        var staleTranslation = await _db.Connection.Table<TranslationEntity>()
+            .Where(t => t.Key == staleDescKey && t.LanguageCode == "en").FirstAsync();
+        staleTranslation.Value = "stale placeholder bio";
+        await _db.Connection.UpdateAsync(staleTranslation);
+        marquandEntity.PairDescriptionKey = null;
+        await _db.Connection.UpdateAsync(marquandEntity);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedMarquand = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
+        Assert.Contains("mercenary and assassin", reopenedMarquand.Description);
+        Assert.NotNull(reopenedMarquand.PairDescription);
+        Assert.Contains("Marquand Volker and Ulli Leitpold", reopenedMarquand.PairDescription);
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Same class of bug again, one layer up: Equipment.json has no dedup-at-runtime mechanism
+    /// at all (unlike DramatisPersona/Skill/Mutation), so a genuinely NEW entry added to it after a
+    /// database already seeded once (2026-09-01: "Dagger (Johann)") would otherwise never reach a machine
+    /// that had already seeded before that entry existed - fixed via BackfillNewEquipmentItemsAsync,
+    /// which only INSERTS items missing by English name (mirrors SeedEquipmentAsync's own per-item logic),
+    /// never touches an existing row.</summary>
+    [Fact]
+    public async Task NewEquipmentItem_AddedAfterADatabaseWasAlreadySeeded_IsBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var johannDagger = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Dagger (Johann)");
+
+        // Simule une base seedée AVANT l'ajout de "Dagger (Johann)" à Equipment.json : supprime la ligne
+        // (+ sa règle Parade attachée) comme si elle n'avait jamais existé.
+        await _db.Connection.ExecuteAsync("DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ?", johannDagger.Id);
+        await _db.Connection.DeleteAsync<EquipmentItemEntity>(johannDagger.Id);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedDagger = Assert.Single(await reopenedLibrary.GetEquipmentItemsAsync("en"), e => e.Name == "Dagger (Johann)");
+        Assert.True(reopenedDagger.IsUniqueArtefact);
+        Assert.Equal(0, reopenedDagger.Cost);
+        Assert.Contains(reopenedDagger.SpecialRules, r => r.Name == "Parry (Sword)");
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Second case the same backfill covers: an ALREADY-existing equipment item whose
+    /// specialRules changed (2026-09-01: "Wizard's Staff (Nicodemus)" gained "Concussion"/
+    /// "Parry (Buckler)" alongside its own "Two-Handed Grip") - detected by a rule-COUNT mismatch and
+    /// re-synced (delete + reinsert), same idiom as the DramatisPersona equipment-count backfill.</summary>
+    [Fact]
+    public async Task EquipmentItemSpecialRules_StaleFromBeforeTheyWereAdded_AreBackfilledOnNextLaunch()
+    {
+        await _db.Initialization;
+
+        var staff = (await _library.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Wizard's Staff (Nicodemus)");
+        Assert.Equal(3, staff.SpecialRules.Count);
+
+        // Simule une base seedée AVANT l'ajout de Concussion/Parry (Buckler) : ne garder que "Two-Handed
+        // Grip" (sa règle d'origine).
+        var twoHandedGripRule = staff.SpecialRules.Single(r => r.Name == "Two-Handed Grip");
+        await _db.Connection.ExecuteAsync(
+            "DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ? AND SpecialRuleId != ?", staff.Id, twoHandedGripRule.Id);
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var reopenedLibrary = new LibraryService(reopenedDb);
+
+        var reopenedStaff = (await reopenedLibrary.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Wizard's Staff (Nicodemus)");
+        Assert.Equal(new[] { "Concussion", "Parry (Buckler)", "Two-Handed Grip" },
+            reopenedStaff.SpecialRules.Select(r => r.Name).OrderBy(n => n));
+
+        await reopenedDb.Connection.CloseAsync();
+    }
+
     /// <summary>Shrine's blessing (see ExplorationOutcome.GrantsWeaponBlessing) attaches "Blessed
     /// Weapon" via WarriorEquipment.BlessingRule - a SEPARATE slot from MaterialRule (Gromril/Ithilmar/
     /// Ornate), confirmed by the user 2026-08-21: a weapon already in Gromril that also gets blessed
@@ -250,5 +505,30 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal("Corpse", corpse.Name);
 
         await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Délai de re-recherche (2026-09-01, "on va bien s'amuser pour finaliser le duo") - voir
+    /// DramatisPersona.RequiresCooldownBeforeResearch. Couvre les 3 opérations CRUD de
+    /// WarbandService directement (pas le picker/le wizard, testés côté tête MAUI, hors périmètre de ce
+    /// projet de tests) : Add pose un cooldown, Get le retrouve, Clear efface tout pour la bande - jamais
+    /// pour une AUTRE bande (Aenur pourrait être en cooldown pour la Bande A tout en restant recherchable
+    /// par la Bande B).</summary>
+    [Fact]
+    public async Task DramatisPersonaCooldown_AddGetClear_ScopedPerWarband()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warbandA = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var warbandB = await _warbands.CreateWarbandAsync("The Iron Fists", warbandArchetype);
+
+        var aenur = (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Aenur"));
+        Assert.True(aenur.RequiresCooldownBeforeResearch);
+
+        await _warbands.AddDramatisPersonaCooldownAsync(warbandA.Id, aenur.Id);
+
+        Assert.Equal(new[] { aenur.Id }, await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandA.Id));
+        Assert.Empty(await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandB.Id));
+
+        await _warbands.ClearAllDramatisPersonaCooldownsAsync(warbandA.Id);
+        Assert.Empty(await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandA.Id));
     }
 }

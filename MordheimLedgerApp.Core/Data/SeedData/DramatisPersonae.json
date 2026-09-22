@@ -1,0 +1,288 @@
+[
+  {
+    "name": { "en": "Aenur, the Sword of Twilight", "fr": "Aenur, l'Épée du Crépuscule" },
+    "description": {
+      "en": "A tall, pale Elf swordsman of unknown origin, Aenur single-handedly slew the entire Possessed warband of Karl Zimmeran and cleansed the Beastmen-overrun Rat Hole. He appears unannounced at a warband's camp whenever they prepare to explore the inner city, offering his services - what he truly seeks in the ruins, no-one knows.",
+      "fr": "Grand escrimeur elfe au teint pâle et aux origines mystérieuses, Aenur a exterminé à lui seul la bande des Possédés de Karl Zimmeran et purgé le Trou du Rat de ses Hommes-Bêtes. Il se présente sans prévenir au campement d'une bande qui s'apprête à explorer la ville intérieure, offrant ses services - ce qu'il cherche vraiment dans les ruines reste un mystère."
+    },
+    "movement": 5, "weaponSkill": 8, "ballisticSkill": 4, "strength": 4, "toughness": 3,
+    "wounds": 2, "initiative": 7, "attacks": 3, "leadership": 8,
+    "feeKind": "Gold",
+    "hireCost": 150,
+    "ratingBonus": 100,
+    "isWanderer": true,
+    "requiresCooldownBeforeResearch": true,
+    "startingEquipmentNames": ["Ithilmar Armour", "Elven Cloak", "Ienh-Khain"],
+    "skillNames": ["Strike to Injure", "Expert Swordsman", "Step Aside", "Sprint", "Lightning Reflexes", "Dodge", "Mighty Blow"],
+    "specialRules": [
+      {
+        "name": { "en": "Invincible Swordsman", "fr": "Escrimeur Invincible" },
+        "description": {
+          "en": "This warrior always hits his opponents on a roll of 2+ in hand-to-hand combat.",
+          "fr": "Ce guerrier touche toujours ses adversaires sur un jet de 2+ en corps à corps."
+        }
+      }
+    ],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "WitchHunters",
+      "SistersOfSigmar", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Bertha Bestraufrung, High Matriarch of the Sisterhood", "fr": "Bertha Bestraufrung, Haute Matriarche de la Confrérie" },
+    "description": {
+      "en": "Bertha rose rapidly through the ranks of the Sisters of Sigmar to become High Matriarch and Abedissa of Sigmar's Rock, of pure Unberogen blood and unwavering devotion.\n\nHire Fee: none in gold. A Sisters of Sigmar warband may send one or more Heroines to seek an audience with Bertha (roll under their Initiative, as a normal special-character search). She only agrees to personally join the battle if the enemy warband's Rating is higher than the Sisters' own - roll a D6 per the table below, once per battle the player wishes her aid: 0-49 points difference = will not come; 50-99 = 6+; 100-149 = 5+; 150-199 = 4+; 200+ = 3+.",
+      "fr": "Bertha a gravi rapidement les échelons des Sœurs de Sigmar pour devenir Haute Matriarche et Abbesse du Rocher de Sigmar, de pur sang Unberogen et d'une dévotion inébranlable.\n\nFrais d'engagement : aucun en or. Une bande des Sœurs de Sigmar peut envoyer une ou plusieurs Héroïnes chercher audience auprès de Bertha (jet sous leur Initiative, comme une recherche de personnage spécial classique). Elle n'accepte de rejoindre personnellement la bataille que si la Valeur de la bande adverse dépasse celle des Sœurs - jet de 1D6 selon le tableau suivant, à refaire à chaque bataille où son aide est sollicitée : 0-49 points d'écart = ne vient pas ; 50-99 = 6+ ; 100-149 = 5+ ; 150-199 = 4+ ; 200+ = 3+."
+    },
+    "movement": 4, "weaponSkill": 5, "ballisticSkill": 3, "strength": 4, "toughness": 4,
+    "wounds": 2, "initiative": 4, "attacks": 3, "leadership": 10,
+    "feeKind": "None",
+    "ratingBonus": 105,
+    "isWanderer": true,
+    "requiresRatingDisadvantage": true,
+    "startingEquipmentNames": [ "Sigmarite Warhammer", "Sigmarite Warhammer", "Gromril Armour", "Blessed Water", "Holy Relic" ],
+    "skillNames": ["Mighty Blow", "Unstoppable Charge", "Righteous Fury"],
+    "specialRules": [
+      {
+        "name": { "en": "High Matriarch", "fr": "Haute Matriarche" },
+        "description": {
+          "en": "This warrior automatically becomes the leader of any warband she joins.",
+          "fr": "Cette guerrière devient automatiquement la meneuse de toute bande qu'elle rejoint."
+        }
+      },
+      {
+        "name": { "en": "Sigmar's Handmaiden", "fr": "Servante de Sigmar" },
+        "description": {
+          "en": "This warrior is favoured above all other Sisters in the eyes of Sigmar - she gains +2 to all her rolls to see whether her Prayers of Sigmar are granted.",
+          "fr": "Cette guerrière est favorisée entre toutes les Sœurs aux yeux de Sigmar - elle gagne +2 à tous ses jets pour savoir si ses Prières de Sigmar sont accordées."
+        }
+      }
+    ],
+    "magicSchoolName": { "en": "Prayers of Sigmar", "fr": "Prières de Sigmar" },
+    "restrictedToWarbandNames": ["SistersOfSigmar"]
+  },
+  {
+    "name": { "en": "Countess Marianna Chevaux, Vampire Assassin", "fr": "Comtesse Marianna Chevaux, Assassin Vampire" },
+    "description": {
+      "en": "Once an assassin-thief, Marianna was tainted with Vampirism by the ancient Lahmian Serutat while stealing the gem known as the Noctu from her crypt. A half-vampire now hiding in Mordheim, she hunts the city's Undead for information on Serutat's whereabouts while hiring out her assassin's skills. Her blades are coated in essence of garlic, which acts as Black Lotus against Vampires.",
+      "fr": "Ancienne voleuse-assassin, Marianna a été touchée par la malédiction vampirique de l'antique Lahmienne Serutat en dérobant le joyau appelé le Noctu dans sa crypte. Devenue mi-vampire, elle se cache désormais à Mordheim où elle traque les Morts-Vivants de la cité pour retrouver la trace de Serutat, tout en louant ses talents d'assassin. Ses lames sont enduites d'essence d'ail, qui agit comme le Lotus Noir contre les Vampires."
+    },
+    "movement": 6, "weaponSkill": 6, "ballisticSkill": 6, "strength": 4, "toughness": 4,
+    "wounds": 2, "initiative": 9, "attacks": 3, "leadership": 9,
+    "feeKind": "Gold",
+    "hireCost": 150,
+    "upkeep": 75,
+    "ratingBonus": 90,
+    "isWanderer": false,
+    "startingEquipmentNames": ["Rapier", "Dagger", "Throwing Knives", "Crossbow Pistol", "The Noctu"],
+    "skillNames": ["Combat Master", "Step Aside", "Leap", "Acrobat", "Lightning Reflexes", "Dodge", "Jump Up", "Scale Sheer Surfaces"],
+    "specialRules": [
+      { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" } },
+      { "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" } },
+      { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" } },
+      {
+        "name": { "en": "No Pain (Marianna)", "fr": "Sans Douleur (Marianna)" },
+        "description": {
+          "en": "This warrior treats a stunned result as knocked down instead. Combined with Jump Up, she can never actually be knocked down either - only losing her last Wound takes her out of action.",
+          "fr": "Cette guerrière traite un résultat Étourdi comme Mis à terre à la place. Combiné à Se Relever d'un Bond, elle ne peut de toute façon jamais être mise à terre - seule la perte de sa dernière Blessure la met hors de combat."
+        }
+      },
+      {
+        "name": {
+          "en": "Fighting Undead",
+          "fr": "Combattre les morts-vivants"
+        },
+        "description": {
+          "en": "All Vampires hate Marianna (a personal enmity, not a band-wide Hatred).",
+          "fr": "Tous les Vampires haïssent Marianna (une inimitié personnelle, pas une Haine de bande)."
+        }
+      },
+      {
+        "name": { "en": "You Can Never Escape Your Past...", "fr": "On n'échappe jamais à son passé..." },
+        "description": {
+          "en": "On the game's last turn while Marianna still stands, or as soon as a warband routs, roll a D6 - 1-3: she leaves the warband's service after the game; 4-5: she stays for another game if the warband can afford her upkeep; 6: a group of Serutat's minions ambushes her (D3+1 Zombies, D3+1 Ghouls, or a Vampire + 2 Ghouls per a further D6) for D3 extra turns - if the warband helps her survive she fights the next battle for free, otherwise she leaves.",
+          "fr": "Au dernier tour de la partie tant que Marianna tient encore debout, ou dès qu'une bande est mise en déroute, jet de 1D6 - 1-3 : elle quitte le service de la bande après la partie ; 4-5 : elle reste pour une bataille de plus si la bande peut payer sa solde ; 6 : un groupe de sbires de Serutat lui tombe dessus (1D3+1 Zombies, 1D3+1 Goules, ou un Vampire + 2 Goules selon un second 1D6) pour 1D3 tours supplémentaires - si la bande l'aide à survivre, elle combat gratuitement la bataille suivante, sinon elle part."
+        }
+      }
+    ],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "SkavenOfClanEshin", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Johann the Knife", "fr": "Johann le Couteau" },
+    "description": {
+      "en": "The most famous of Mordheim's cutthroats and assassins for hire, Johann carries countless lethal daggers and a purse heavy with the gold of the many wealthy but unskilful opponents he has despatched. His blades are coated with Black Lotus. He is addicted to Crimson Shade.",
+      "fr": "Le plus célèbre des coupe-jarrets et assassins à louer de Mordheim, Johann porte d'innombrables dagues mortelles et une bourse alourdie par l'or des nombreux adversaires riches mais peu doués qu'il a expédiés. Ses lames sont enduites de Lotus Noir. Il est dépendant à l'Ombre Cramoisie."
+    },
+    "movement": 4, "weaponSkill": 3, "ballisticSkill": 6, "strength": 4, "toughness": 3,
+    "wounds": 2, "initiative": 6, "attacks": 1, "leadership": 7,
+    "feeKind": "Gold",
+    "hireCost": 70,
+    "upkeep": 30,
+    "ratingBonus": 60,
+    "isWanderer": false,
+    "alternativePaymentItemName": "Crimson Shade",
+    "startingEquipmentNames": [ "Throwing Knives", "Dagger (Johann)", "Dagger (Johann)" ],
+    "skillNames": ["Dodge", "Scale Sheer Surfaces", "Quick Shot", "Eagle Eyes", "Knife Fighter"],
+    "specialRules": [
+      {
+        "name": { "en": "Knife Fighter Extraordinaire", "fr": "Combattant au Couteau Extraordinaire" },
+        "description": {
+          "en": "Unlike a normal warrior, this warrior can combine the Knife Fighter and Quick Shot skills at once (up to six Throwing Knives in one turn if he doesn't move).",
+          "fr": "Contrairement à un guerrier normal, ce guerrier peut cumuler les compétences Combattant au Couteau et Tir Rapide en même temps (jusqu'à six Couteaux de Lancer en un tour s'il ne se déplace pas)."
+        }
+      }
+    ],
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "WitchHunters",
+      "SistersOfSigmar", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Nicodemus, the Cursed Pilgrim", "fr": "Nicodemus, le Pèlerin Maudit" },
+    "description": {
+      "en": "Once a wizard's apprentice, Nicodemus freed a Chaos Daemon from a magic lantern and wished to become the greatest wizard known to Mankind - the Daemon granted his wish all too literally, cursing him to grow larger by the week. Only a potion needing regular infusions of wyrdstone delays the effect, drawing him ever back to Mordheim.",
+      "fr": "Ancien apprenti sorcier, Nicodemus a libéré un Démon du Chaos emprisonné dans une lanterne magique et souhaité devenir le plus grand sorcier connu de l'Humanité - le Démon a exaucé son vœu bien trop littéralement, le condamnant à grandir chaque semaine davantage. Seule une potion nécessitant des infusions régulières de pierre magique retarde l'effet, ce qui le ramène sans cesse vers Mordheim."
+    },
+    "movement": 4, "weaponSkill": 3, "ballisticSkill": 3, "strength": 4, "toughness": 4,
+    "wounds": 2, "initiative": 3, "attacks": 1, "leadership": 8,
+    "feeKind": "Wyrdstone",
+    "ratingBonus": 85,
+    "isWanderer": false,
+    "startingEquipmentNames": ["Wizard's Staff (Nicodemus)"],
+    "skillNames": ["Sorcery", "Fearsome"],
+    "specialRules": [
+      {
+        "name": { "en": "Cursed", "fr": "Maudit" },
+        "description": {
+          "en": "This warrior has no interest in gold - he must be paid a wyrdstone shard when he joins the warband and after every battle he fights, including the first. If the warband has no shard to give, or would rather sell it, he leaves and never returns.",
+          "fr": "Ce guerrier ne s'intéresse pas à l'or - il doit recevoir un éclat de pierre magique dès qu'il rejoint la bande, puis après chaque bataille qu'il livre, y compris la première. Si la bande n'a pas d'éclat à lui donner, ou préfère le vendre, il part et ne revient jamais."
+        }
+      }
+    ],
+    "magicSchoolName": { "en": "Lesser Magic", "fr": "Magie Mineure" },
+    "restrictedToWarbandNames": [
+      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "SistersOfSigmar", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Marquand Volker", "fr": "Marquand Volker" },
+    "description": {
+      "en": "Reputedly the son of wealthy Marienburg merchants, what made Marquand embark on a career as a gambler and then a mercenary and assassin is unknown. What is known about this apparent 'fop' is that his appearance belies his true nature for he is quite deadly and entirely devoid of any morals. Marquand personifies Mordheim 'The City of the Damned' for he is corrupt and rotten to the core - just like that place he calls his 'home'. An expert swordsman and master of the throwing knife, there are few who have crossed him and lived. In the darkened corners of taverns, tales are told in nervous whispers about this cold-hearted killer's reputation: that he killed his first victim before he was ten; that he cut the heart out of the Duke of Suddenland while the Duke's wife slept on beside him. His deadliest foe is the Witch Hunter captain Gottlieb, 'The Flayer', whose face Marquand horribly disfigured whilst the erstwhile servant of Sigmar was attempting to redeem Marquand of his sins.",
+      "fr": "Réputé fils de riches marchands de Marienburg, on ignore ce qui a poussé Marquand à embrasser une carrière de joueur, puis de mercenaire et d'assassin. Ce que l'on sait de cet apparent « freluquet », c'est que son apparence dément sa vraie nature : il est aussi mortel que totalement dénué de morale. Marquand incarne Mordheim, « la Cité des Damnés », car il est corrompu et pourri jusqu'à l'os - tout comme cet endroit qu'il appelle son « foyer ». Escrimeur expert et maître du couteau de lancer, peu de ceux qui l'ont croisé y ont survécu. Dans les recoins sombres des tavernes, on chuchote nerveusement des récits sur la réputation de ce tueur au cœur froid : qu'il aurait tué sa première victime avant ses dix ans ; qu'il aurait arraché le cœur du duc de Suddenland pendant que l'épouse de celui-ci dormait à ses côtés. Son pire ennemi est le capitaine Chasseur de Sorcières Gottlieb, « l'Écorcheur », dont Marquand a horriblement défiguré le visage alors que cet ancien serviteur de Sigmar tentait de le racheter de ses péchés."
+    },
+    "pairDescription": {
+      "en": "Never in the history of the Empire have there been such a villainous pair of rogues as Marquand Volker and Ulli Leitpold. Once brigands in a mercenary regiment responsible for a long list of crimes, they were caught by bounty hunters and enlisted into the slave army of the Count of Stirland. The pair escaped their captors on the outskirts of Mordheim, City of the Damned, a ruinous place where death and glory could be found in equal measure. The infamous bandits instantly recognised it as home.\n\nUlli and Marquand quickly developed a strong rapport with the scum of Mordheim, a place inhabited by the corrupt and immoral outcasts of society. Their martial prowess and ruthless guile soon earned the nefarious partners in crime a high degree of notoriety. As a result, the less noble traders and prospectors of the accursed city eagerly sought out the services of these talented scoundrels.\n\nBut their assistance did not come without a high price. Whilst the pair would consider any task thrown their way for a mere handful of gold coin, their loyalty was as fickle as the winds of Chaos. They built up a reputation of betraying employers and stabbing them in the back for the sake of a single crown. They were certainly not beyond using foul and despicable tricks to save their own worthless hides or line their own pockets.\n\nWhat became of the despicable pair, none can say but legends of their deeds can to this day be heard in taverns throughout the Old World. Each story is more outlandish than the next but few ever doubt the truth behind these fantastic tales.\n\nHire Fee: 30 gc for the pair (recruited together with Ulli Leitpold - HireCost here is the shared total, not per person; RatingBonus is split 30/30 between the two entries so their combined contribution still totals the book's +60). Where's the Money?: if the controlling warband can't pay a successful bribe (in gold or wyrdstone, sold if necessary), the pair instead seizes an equal value of equipment, or else fights the warband leader to the death in an immediate 1-on-1 - see the pair's 'A Fistful of Crowns' rule for the bribe itself.",
+      "fr": "Jamais dans l'histoire de l'Empire n'a-t-on vu une paire de crapules aussi infâme que Marquand Volker et Ulli Leitpold. Autrefois brigands dans un régiment mercenaire responsable d'une longue liste de crimes, ils furent capturés par des chasseurs de primes et enrôlés dans l'armée d'esclaves du comte de Stirland. La paire échappa à ses geôliers aux abords de Mordheim, la Cité des Damnés, un lieu en ruines où la mort et la gloire se trouvaient à parts égales. Les tristement célèbres bandits reconnurent aussitôt cet endroit comme leur foyer.\n\nUlli et Marquand nouèrent rapidement des liens solides avec la lie de Mordheim, un lieu peuplé par les exclus corrompus et immoraux de la société. Leur prouesse martiale et leur ruse impitoyable valurent bientôt aux deux infâmes complices une grande notoriété. En conséquence, les marchands et prospecteurs les moins nobles de la cité maudite recherchèrent avidement les services de ces talentueux vauriens.\n\nMais leur aide n'était jamais gratuite. Si la paire acceptait n'importe quelle tâche pour une simple poignée de pièces d'or, leur loyauté était aussi versatile que les vents du Chaos. Ils se forgèrent une réputation de traîtres, prêts à poignarder leurs employeurs dans le dos pour une seule couronne. Ils n'hésitaient certainement pas à recourir à des ruses viles et méprisables pour sauver leur misérable peau ou remplir leurs poches.\n\nCe qu'il advint de cette paire méprisable, nul ne saurait le dire, mais des légendes sur leurs exploits se racontent encore aujourd'hui dans les tavernes du Vieux Monde. Chaque récit est plus extravagant que le précédent, mais peu doutent de la vérité derrière ces histoires fantastiques.\n\nFrais d'engagement : 30 CO pour la paire (recruté avec Ulli Leitpold - le coût indiqué ici est le total partagé, pas par personne ; le bonus de Valeur est réparti 30/30 entre les deux fiches pour retomber sur le total de +60 du livre). Où est l'Argent ? : si la bande employeuse ne peut pas payer une corruption réussie (en or ou en pierre magique, vendue si nécessaire), la paire saisit à la place un équipement de valeur équivalente, ou combat le meneur de bande à mort en duel immédiat - voir la règle « Une Poignée d'Or » de la paire pour la corruption elle-même."
+    },
+    "movement": 4, "weaponSkill": 5, "ballisticSkill": 4, "strength": 3, "toughness": 3,
+    "wounds": 2, "initiative": 5, "attacks": 2, "leadership": 8,
+    "feeKind": "Pair",
+    "hireCost": 30,
+    "ratingBonus": 30,
+    "isWanderer": true,
+    "requiresCooldownBeforeResearch": true,
+    "pairedWithPersonaName": "Ulli Leitpold",
+    "startingEquipmentNames": ["Sword", "Light Armour", "Throwing Knives"],
+    "skillNames": ["Step Aside", "Knife Fighter", "Lightning Reflexes"],
+    "specialRules": [
+      {
+        "name": { "en": "Inseparable", "fr": "Inséparables" },
+        "description": {
+          "en": "This warrior and their partner are like brothers and totally inseparable - they must be hired as a pair and must remain within 4\" of each other. If one is taken Out of Action, the other will attempt to drag him off the battlefield and to safety.",
+          "fr": "Ce guerrier et son complice sont comme des frères et totalement inséparables - ils doivent être engagés en tant que paire et rester à moins de 4\" l'un de l'autre. Si l'un est mis hors de combat, l'autre tente de le traîner hors du champ de bataille, en lieu sûr."
+        }
+      },
+      {
+        "name": { "en": "A Fistful of Crowns", "fr": "Une Poignée d'Or" },
+        "description": {
+          "en": "At the start of the game, an enemy player may secretly note a bribe to buy the pair's allegiance (must exceed their hire fee). The employer may secretly note a counter-bid the same way. At the start of any of his turns, the enemy may reveal his bribe (even in close combat) - if it beats the hire fee plus the counter-bid, the pair switches to his control until the end of the game. Only the player who wins or keeps control pays the amount he staked; losing control costs nothing. With more than two players, several may attempt this at different moments - whoever ends up in control pays their own bid.",
+          "fr": "Au début de la partie, un joueur adverse peut noter secrètement une offre pour acheter l'allégeance de la paire (elle doit dépasser leurs frais de recrutement). L'employeur peut de même noter secrètement une contre-offre. Au début de n'importe lequel de ses tours, l'adversaire peut révéler son offre (même au corps à corps) - si elle dépasse les frais de recrutement plus la contre-offre, la paire passe sous son contrôle jusqu'à la fin de la partie. Seul le joueur qui obtient ou garde le contrôle paie le montant misé ; en perdre le contrôle ne coûte rien. À plus de deux joueurs, plusieurs peuvent tenter leur chance à des moments différents - celui qui finit par avoir le contrôle paie sa propre offre."
+        }
+      }
+    ],
+    "restrictedToWarbandNames": [
+      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "SkavenOfClanEshin", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Ulli Leitpold", "fr": "Ulli Leitpold" },
+    "description": {
+      "en": "Marquand's sidekick and partner in crime. Little is known about this huge framed Middenheimer, apart from it is unwise to be caught anywhere near the business end of his massive warhammer! The tales tell that Ulli Leitpold started out as a mercenary soldier, often in the service of the armies of the Count of Stirland, and that he was present at the slaughter that ensued at the third siege of Nuln. Life as a mercenary is presumably where he derives his unthinking greed and cold nature, no doubt. Ulli spent some time as a bandit and thief and teamed up with Marquand when they were captured by bounty hunters and sentenced to live out their days in the penal battalions of the Count of Stirland. Neither as subtle or as flash as his Marienburg colleague, Ulli prefers to use a combination of brute force and low cunning to achieve his goals.",
+      "fr": "Le comparse et complice de crime de Marquand. On sait peu de choses sur ce colosse originaire de Middenheim, si ce n'est qu'il est imprudent de se trouver près de l'extrémité affûtée de son immense marteau de guerre ! Les récits racontent qu'Ulli Leitpold a débuté comme mercenaire, souvent au service des armées du comte de Stirland, et qu'il était présent au massacre du troisième siège de Nuln. C'est sans doute de sa vie de mercenaire qu'il tire sa cupidité irréfléchie et son caractère froid. Ulli a passé un temps comme bandit et voleur, et s'est associé à Marquand lorsqu'ils furent capturés par des chasseurs de primes et condamnés à finir leurs jours dans les bataillons pénitentiaires du comte de Stirland. Moins subtil et moins flamboyant que son collègue de Marienburg, Ulli préfère une combinaison de force brute et de ruse grossière pour parvenir à ses fins."
+    },
+    "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 4, "toughness": 3,
+    "wounds": 2, "initiative": 4, "attacks": 2, "leadership": 7,
+    "feeKind": "Pair",
+    "hireCost": 30,
+    "ratingBonus": 30,
+    "isWanderer": true,
+    "requiresCooldownBeforeResearch": true,
+    "pairedWithPersonaName": "Marquand Volker",
+    "hiddenFromSearchPicker": true,
+    "startingEquipmentNames": ["Hammer", "Light Armour"],
+    "skillNames": ["Strongman", "Unstoppable Charge", "Combat Master"],
+    "specialRules": [
+      {
+        "name": { "en": "Inseparable", "fr": "Inséparables" },
+        "description": {
+          "en": "This warrior and their partner are like brothers and totally inseparable - they must be hired as a pair and must remain within 4\" of each other. If one is taken Out of Action, the other will attempt to drag him off the battlefield and to safety.",
+          "fr": "Ce guerrier et son complice sont comme des frères et totalement inséparables - ils doivent être engagés en tant que paire et rester à moins de 4\" l'un de l'autre. Si l'un est mis hors de combat, l'autre tente de le traîner hors du champ de bataille, en lieu sûr."
+        }
+      },
+      {
+        "name": { "en": "A Fistful of Crowns", "fr": "Une Poignée d'Or" },
+        "description": {
+          "en": "At the start of the game, an enemy player may secretly note a bribe to buy the pair's allegiance (must exceed their hire fee). The employer may secretly note a counter-bid the same way. At the start of any of his turns, the enemy may reveal his bribe (even in close combat) - if it beats the hire fee plus the counter-bid, the pair switches to his control until the end of the game. Only the player who wins or keeps control pays the amount he staked; losing control costs nothing. With more than two players, several may attempt this at different moments - whoever ends up in control pays their own bid.",
+          "fr": "Au début de la partie, un joueur adverse peut noter secrètement une offre pour acheter l'allégeance de la paire (elle doit dépasser leurs frais de recrutement). L'employeur peut de même noter secrètement une contre-offre. Au début de n'importe lequel de ses tours, l'adversaire peut révéler son offre (même au corps à corps) - si elle dépasse les frais de recrutement plus la contre-offre, la paire passe sous son contrôle jusqu'à la fin de la partie. Seul le joueur qui obtient ou garde le contrôle paie le montant misé ; en perdre le contrôle ne coûte rien. À plus de deux joueurs, plusieurs peuvent tenter leur chance à des moments différents - celui qui finit par avoir le contrôle paie sa propre offre."
+        }
+      }
+    ],
+    "restrictedToWarbandNames": [
+      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
+      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
+      "SkavenOfClanEshin", "Kislevites"
+    ]
+  },
+  {
+    "name": { "en": "Veskit, High Executioner of Clan Eshin", "fr": "Veskit, Bourreau Suprême du Clan Eshin" },
+    "description": {
+      "en": "Once a talented Clan Eshin assassin, Veskit was rebuilt by Clan Skryre's Warlock Engineers after nearly dying on a mission for Clan Skryre, becoming more machine than living thing. The Nightmaster now sends him to Mordheim to deter man-things from exploring the city the Skaven consider rightfully theirs. His metallic body accounts for his unusually high Toughness and 3+ armour save.\n\nHire Fee: 80 gc to hire, +35 gc upkeep.",
+      "fr": "Ancien assassin talentueux du Clan Eshin, Veskit a été reconstruit par les Ingénieurs Sorciers du Clan Skryre après avoir failli mourir lors d'une mission pour leur compte, devenant davantage machine que créature vivante. Le Maître de la Nuit l'envoie désormais à Mordheim pour dissuader les choses-hommes d'explorer la cité que les Skavens considèrent comme leur étant due. Son corps métallique explique sa haute Endurance inhabituelle et sa sauvegarde d'armure de 3+.\n\nFrais d'engagement : 80 CO à l'engagement, +35 CO de solde."
+    },
+    "movement": 5, "weaponSkill": 5, "ballisticSkill": 4, "strength": 4, "toughness": 4,
+    "wounds": 2, "initiative": 5, "attacks": 4, "leadership": 8,
+    "feeKind": "Gold",
+    "hireCost": 80,
+    "upkeep": 35,
+    "ratingBonus": 70,
+    "isWanderer": false,
+    "startingEquipmentNames": ["Eshin Fighting Claws (Veskit)"],
+    "specialRules": [
+      { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" } },
+      {
+        "name": { "en": "No Pain (Veskit)", "fr": "Sans Douleur (Veskit)" },
+        "description": {
+          "en": "This warrior ignores knocked down and stunned results on the Injury chart entirely - only losing his last Wound takes him out of action.",
+          "fr": "Ce guerrier ignore totalement les résultats Mis à terre et Étourdi sur le tableau des blessures - seule la perte de sa dernière Blessure le met hors de combat."
+        }
+      },
+      {
+        "name": { "en": "Unblinking Eye", "fr": "Œil qui ne Cille Jamais" },
+        "description": {
+          "en": "Thanks to sorcerous implants, this warrior can spot hidden enemies within twice his Initiative value in inches.",
+          "fr": "Grâce à des implants sorciers, ce guerrier repère les ennemis cachés dans un rayon égal à deux fois sa valeur d'Initiative, en pouces."
+        }
+      }
+    ],
+    "restrictedToWarbandNames": ["SkavenOfClanEshin"]
+  }
+]

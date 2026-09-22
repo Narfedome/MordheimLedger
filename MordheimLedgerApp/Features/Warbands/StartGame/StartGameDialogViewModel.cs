@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.StartGame;
 
@@ -14,18 +16,45 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
 
     public List<UnavailableWarriorRow> UnavailableWarriors { get; }
     public List<OldWoundWarriorEntry> OldWoundEntries { get; }
+    public List<DramatisPersonaAidEntry> AidEntries { get; }
     public string? NextGameNote { get; }
 
     public bool HasUnavailableWarriors => UnavailableWarriors.Count > 0;
     public bool HasOldWoundRolls => OldWoundEntries.Count > 0;
+    public bool HasAidEntries => AidEntries.Count > 0;
     public bool HasNextGameNote => !string.IsNullOrWhiteSpace(NextGameNote);
-    public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasNextGameNote;
+    public bool HasNothingToShow => !HasUnavailableWarriors && !HasOldWoundRolls && !HasAidEntries && !HasNextGameNote;
 
-    public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries, string? nextGameNote)
+    /// <summary>One line per RatingGapAidTable.Tier (plus a leading "won't come" row for anything below
+    /// the first tier) - built from the table's actual data (user request 2026-09-01: "à voir si on a les
+    /// valeurs modifiables plutôt qu'un resx") rather than one hand-written resx sentence, so this
+    /// explanation can never silently drift out of sync with the roll logic itself if the table's
+    /// breakpoints ever change - both read RatingGapAidTable.Tiers. Shown once for the whole "Aide
+    /// conditionnelle" section (every AidEntries card follows the same shared table), not per card.</summary>
+    public List<string> AidRuleTierRows { get; }
+
+    public StartGameDialogViewModel(List<UnavailableWarriorRow> unavailableWarriors, List<OldWoundWarriorEntry> oldWoundEntries,
+        List<DramatisPersonaAidEntry> aidEntries, string? nextGameNote)
     {
         UnavailableWarriors = unavailableWarriors;
         OldWoundEntries = oldWoundEntries;
+        AidEntries = aidEntries;
         NextGameNote = nextGameNote;
+        AidRuleTierRows = BuildAidRuleTierRows();
+    }
+
+    private static List<string> BuildAidRuleTierRows()
+    {
+        var loc = LocalizationService.Instance;
+        var rows = new List<string> { string.Format(loc["StartGameAidTierWontComeFormat"], RatingGapAidTable.Tiers[0].MinDifference) };
+        for (var i = 0; i < RatingGapAidTable.Tiers.Count; i++)
+        {
+            var tier = RatingGapAidTable.Tiers[i];
+            rows.Add(i + 1 < RatingGapAidTable.Tiers.Count
+                ? string.Format(loc["StartGameAidTierRangeFormat"], tier.MinDifference, RatingGapAidTable.Tiers[i + 1].MinDifference - 1, tier.RequiredRoll)
+                : string.Format(loc["StartGameAidTierOpenFormat"], tier.MinDifference, tier.RequiredRoll));
+        }
+        return rows;
     }
 
     [RelayCommand]
@@ -35,4 +64,7 @@ public partial class StartGameDialogViewModel : DialogViewModel<bool>
     // tiré par l'appli, modifiable ensuite si le joueur préfère lancer son propre dé physique.
     [RelayCommand]
     private void AutoRoll(OldWoundRollEntry entry) => entry.ManualRoll = Random.Shared.Next(1, 7).ToString();
+
+    [RelayCommand]
+    private void AutoRollAid(DramatisPersonaAidEntry entry) => entry.Roll = Random.Shared.Next(1, 7).ToString();
 }

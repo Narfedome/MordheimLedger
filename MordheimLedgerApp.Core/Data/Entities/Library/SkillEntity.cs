@@ -12,4 +12,7 @@ public class SkillEntity
     public string? DescriptionKey { get; set; }
     public ContentSource Source { get; set; }
     public string? ImagePath { get; set; }
+
+    /// <summary>Comma-separated WarbandArchetype ids - see Skill.HatredTargetWarbandArchetypeIds.</summary>
+    public string? HatredTargetWarbandArchetypeIds { get; set; }
 }

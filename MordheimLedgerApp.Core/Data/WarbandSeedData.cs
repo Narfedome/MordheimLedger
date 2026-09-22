@@ -233,6 +233,14 @@ public class EquipmentSeedData
 
     /// <summary>See EquipmentItem.GrantsBonusExplorationDice. Null for almost every item.</summary>
     public int? GrantsBonusExplorationDice { get; set; }
+
+    /// <summary>See EquipmentItem.IsUniqueArtefact. False/absent for almost every item - true only for a
+    /// one-of-a-kind item permanently tied to a single owner (e.g. a Dramatis Persona's unique gear).</summary>
+    public bool IsUniqueArtefact { get; set; }
+
+    /// <summary>See EquipmentItem.IsExplorationOnly. False/absent for almost every item - true only for a
+    /// find never sold by a merchant (e.g. the Jewelsmith's gems, the Training Manual).</summary>
+    public bool IsExplorationOnly { get; set; }
 }
 
 /// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
@@ -372,6 +380,13 @@ public class SkillSeedData
     /// may pick this skill (e.g. "Da Cunnin' Plan" -&gt; ["Orc Boss"]) - null/empty = every warrior of the
     /// restricted warband(s) can pick it. Only meaningful alongside RestrictedToThisWarband.</summary>
     public List<string>? RestrictedToWarriorNames { get; set; }
+
+    /// <summary>Warband file stems this skill grants Hatred against (e.g. Sisters of Sigmar's "Righteous
+    /// Fury" -&gt; Skaven of Clan Eshin/Undead/Cult of the Possessed/Beastmen Raiders) - see
+    /// Skill.HatredTargetWarbandArchetypeIds, same deferred-resolution mechanism as
+    /// SpecialRuleSeedData.HatredTargetWarbandNames (added 2026-09-01, so a target band doesn't need to
+    /// have seeded yet).</summary>
+    public List<string>? HatredTargetWarbandNames { get; set; }
 }
 
 /// <summary>One Hired Sword catalog entry (Data/SeedData/HiredSwords.json, always common - no per-band
@@ -418,6 +433,87 @@ public class HiredSwordSeedData
     /// resolved via the same FindOrCreateMagicSchoolAsync cache SeedMagicSchoolsAsync already populates
     /// from MagicSchools.json, whichever of the two seeds first.</summary>
     public LocalizedText? MagicSchoolName { get; set; }
+}
+
+/// <summary>One named "Dramatis Persona"/special character (Data/SeedData/DramatisPersonae.json, a
+/// single shared catalog seeded like HiredSwords.json - not declared per-band) - see
+/// Models.Library.DramatisPersona for why this is a separate, deliberately smaller shape than
+/// HiredSwordSeedData (no AllowedSkillCategories/StartingEquipmentNames: these characters don't advance
+/// or shop, their gear/skills stay part of Description).</summary>
+public class DramatisPersonaSeedData
+{
+    public LocalizedText Name { get; set; } = new();
+    public LocalizedText? Description { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.PairDescription - the shared "duo" lore text, only set
+    /// on Marquand's entry. Null for every other persona (Ulli included - hers is null, only Marquand
+    /// carries it, see IsHiddenFromSearchPicker for why he's the "primary" of the pair).</summary>
+    public LocalizedText? PairDescription { get; set; }
+
+    public int Movement { get; set; }
+    public int WeaponSkill { get; set; }
+    public int BallisticSkill { get; set; }
+    public int Strength { get; set; }
+    public int Toughness { get; set; }
+    public int Wounds { get; set; }
+    public int Initiative { get; set; }
+    public int Attacks { get; set; }
+    public int Leadership { get; set; }
+
+    /// <summary>Matches MordheimLedgerApp.Core.Models.Library.DramatisPersonaHireFeeKind member names
+    /// ("Gold"/"None"/"Wyrdstone"/"Pair") - see that enum's doc.</summary>
+    public string FeeKind { get; set; } = nameof(MordheimLedgerApp.Core.Models.Library.DramatisPersonaHireFeeKind.Gold);
+
+    public int? HireCost { get; set; }
+    public int? Upkeep { get; set; }
+    public int RatingBonus { get; set; }
+    public bool IsWanderer { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.RequiresRatingDisadvantage - false for almost every
+    /// character.</summary>
+    public bool RequiresRatingDisadvantage { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.RequiresCooldownBeforeResearch - true for Aenur and
+    /// Ulli &amp; Marquand only.</summary>
+    public bool RequiresCooldownBeforeResearch { get; set; }
+
+    /// <summary>English Name of another DramatisPersonaSeedData entry in the SAME file - see
+    /// Models.Library.DramatisPersona.PairedWithDramatisPersonaId. Resolved AFTER the whole file is seeded
+    /// (deferred, see AppDatabase.SeedDramatisPersonaeAsync's pendingPairings) since the referenced entry
+    /// may appear later in the array. Null for every persona except Ulli/Marquand.</summary>
+    public string? PairedWithPersonaName { get; set; }
+
+    /// <summary>See Models.Library.DramatisPersona.IsHiddenFromSearchPicker - true for Ulli only.</summary>
+    public bool HiddenFromSearchPicker { get; set; }
+
+    /// <summary>Same mechanism as HiredSwordSeedData.RestrictedToWarbandNames - null/empty = hireable by
+    /// every warband.</summary>
+    public List<string>? RestrictedToWarbandNames { get; set; }
+
+    /// <summary>Every clean, single-effect rule (reused or genuinely unique to this character) - found-
+    /// or-created the same way as HiredSwordSeedData.SpecialRules. Only real branching/multi-step systems
+    /// stay free text in Description instead (see DramatisPersona's own doc).</summary>
+    public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
+
+    /// <summary>English Name(s) of EquipmentSeedData entries - same resolution as
+    /// HiredSwordSeedData.StartingEquipmentNames (runs after SeedEquipmentAsync, resolved against
+    /// _equipmentIdsByEnglishName, throws on an unknown name).</summary>
+    public List<string> StartingEquipmentNames { get; set; } = new();
+
+    /// <summary>English Name(s) of SkillSeedData entries this character already knows (e.g. Aenur:
+    /// "Strike to Injure") - resolved against _skillIdsByEnglishName (runs after SeedSkillsAsync, throws
+    /// on an unknown name, same fail-fast precedent as StartingEquipmentNames).</summary>
+    public List<string> SkillNames { get; set; } = new();
+
+    /// <summary>See Models.Library.DramatisPersona.MagicSchoolId - same name-only stub idiom as
+    /// HiredSwordSeedData.MagicSchoolName.</summary>
+    public LocalizedText? MagicSchoolName { get; set; }
+
+    /// <summary>English Name of an EquipmentSeedData/Equipment.json entry - see Models.Library.
+    /// DramatisPersona.AlternativePaymentItemId. Same resolution as StartingEquipmentNames (runs after
+    /// SeedEquipmentAsync, resolved against _equipmentIdsByEnglishName, throws on an unknown name). Null
+    /// for almost every character - only meaningful when FeeKind is Gold.</summary>
+    public string? AlternativePaymentItemName { get; set; }
 }
 
 /// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to

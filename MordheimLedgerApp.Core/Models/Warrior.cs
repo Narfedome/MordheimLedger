@@ -47,6 +47,38 @@ public class Warrior
     /// every other warrior.</summary>
     public bool HiredSwordUpkeepPrepaid { get; set; }
 
+    /// <summary>Non-null only for a warrior recruited from the Dramatis Personae catalogue (see
+    /// Library.DramatisPersona) - a third parallel to HiredSwordId, but NOT the same shape: unlike a
+    /// Hired Sword, EntityMapping.ToWarrior(this DramatisPersona, ...) sets IsHero TRUE and
+    /// GainsExperience FALSE, straight from the rulebook's own "Experience, Injuries and Equipment"
+    /// section for special characters ("do not earn Experience points... suffer serious injuries, just
+    /// like Heroes"). That gets the full Hero-shaped post-battle Serious Injury flow (D66 table,
+    /// Captured/Sold to the Pits...) for free via the plain Warrior.IsHero checks already spread through
+    /// WarriorOutcomeRow, without needing to also recognize IsDramatisPersona at each one. Roster
+    /// grouping still keeps them in their own block, not Heroes (see WarbandDetailViewModel.LoadAsync).
+    /// Still deliberately NOT wiring every OTHER HiredSword integration point (Wyrdstone-sale headcount
+    /// exclusion, a dedicated upkeep step, Wanderer one-battle lifecycle...) - those stay manual/
+    /// player-tracked until a real need surfaces, same incremental precedent as HiredSword's own
+    /// history.</summary>
+    public int? DramatisPersonaId { get; set; }
+
+    public bool IsDramatisPersona => DramatisPersonaId.HasValue;
+
+    /// <summary>Snapshot of DramatisPersona.RatingBonus at recruitment - same "never a live re-lookup"
+    /// convention as HiredSwordBaseRating.</summary>
+    public int? DramatisPersonaRatingBonus { get; set; }
+
+    /// <summary>Only meaningful for Ulli &amp; Marquand's "A Fistful of Crowns" bribe rule (2026-09-01) -
+    /// manually toggled by the player on the roster card once an enemy successfully bribes the pair away
+    /// mid-battle (the app can't detect this itself, see the SpecialRule's own description). While true,
+    /// this warrior's Rating contribution is excluded from WarbandDetailViewModel's Rating sum (they're
+    /// fighting for someone else this battle) but the row stays fully in the roster - not deleted, not
+    /// moved. Cleared automatically at the next End of Game regardless of outcome (see
+    /// WarbandDetailViewModel.EndOfGame.ApplyDramatisPersonaCorruptionAsync) - moot beyond that single
+    /// battle anyway since Ulli &amp; Marquand are Wanderers and leave the roster at every End of Game
+    /// (IsWanderer) whether or not they were hostile this battle. False for every other warrior.</summary>
+    public bool IsHostileThisBattle { get; set; }
+
     public string Name { get; set; } = string.Empty;
     public bool IsHero { get; set; }
     public int Cost { get; set; }

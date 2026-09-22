@@ -12,26 +12,30 @@ using System.Windows.Input;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 {
-    /// <summary>4 étapes (Général/Guerriers/Équipement/Noms) : Règles/Magie n'ont pas de sens ici - Item
-    /// est un Warband (l'instance jouée), qui n'a pas sa propre copie de ces catalogues, elle référence
-    /// ceux de son WarbandArchetype (consultables via ShowArchetypeDetail/le Codex). Général = Nom de la
-    /// bande + choix de l'Archetype (ChipItemView, sélection unique obligatoire) ; Guerriers = un
-    /// WarriorRecruitRow par type recrutable (WarriorRecruitListView : juste un compteur 0/MaxCount, pas
-    /// de nom individuel ici) ; Équipement = achat par sous-groupe nommé pour les Hommes de main
-    /// (HenchmanGroupDraft, même équipement au sein d'un groupe - livre des règles, SplitHenchmanGroupDraft pour en
-    /// détacher un second) et par individu pour les Héros (WarriorNameSlot.Equipment, chacun peut
-    /// différer) ; Noms = un champ par recrue Héros/groupe d'Hommes de main, une fois l'équipement connu -
-    /// séparé de Guerriers/Équipement pour que le joueur nomme en connaissant déjà l'équipement de chacun
-    /// (PopulateSuggestedNames reprend l'étiquette déjà numérotée à l'étape Équipement, voir
-    /// WarriorNameSlot.ArchetypeLabel). Tout est aplati en vrais
-    /// Warrior/WarriorEquipment seulement au Save - rien n'est persisté avant.</summary>
+    /// <summary>6 étapes (Général/Guerriers/Équipement/Noms/Mercenaires/Noms) : Règles/Magie n'ont pas de
+    /// sens ici - Item est un Warband (l'instance jouée), qui n'a pas sa propre copie de ces catalogues,
+    /// elle référence ceux de son WarbandArchetype (consultables via ShowArchetypeDetail/le Codex).
+    /// Général = Nom de la bande + choix de l'Archetype (ChipItemView, sélection unique obligatoire) ;
+    /// Guerriers = un WarriorRecruitRow par type recrutable (WarriorRecruitListView : juste un compteur
+    /// 0/MaxCount, pas de nom individuel ici) ; Équipement = achat par sous-groupe nommé pour les Hommes
+    /// de main (HenchmanGroupDraft, même équipement au sein d'un groupe - livre des règles,
+    /// SplitHenchmanGroupDraft pour en détacher un second) et par individu pour les Héros
+    /// (WarriorNameSlot.Equipment, chacun peut différer) ; Noms (Héros/Hommes de main) = un champ par
+    /// recrue Héros/groupe d'Hommes de main, une fois l'équipement connu - séparé de Guerriers/Équipement
+    /// pour que le joueur nomme en connaissant déjà l'équipement de chacun (PopulateSuggestedNames reprend
+    /// l'étiquette déjà numérotée à l'étape Équipement, voir WarriorNameSlot.ArchetypeLabel) ; Mercenaires
+    /// = recrutement des Francs-Tireurs (gear fixe, aucun équipement à choisir) ; Noms (Francs-Tireurs) =
+    /// leur propre étape de nommage, à la toute fin - séparée de la première étape Noms le 2026-09-01
+    /// (retour utilisateur : "guerrier equipement noms, franc tireur nom") plutôt qu'une 3e section
+    /// partagée avec les Héros/Hommes de main. Tout est aplati en vrais Warrior/WarriorEquipment seulement
+    /// au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
-        /// <summary>Général/Guerriers/Équipement/Mercenaires/Noms - toujours 5, y compris à la toute
+        /// <summary>Général/Guerriers/Équipement/Noms/Mercenaires/Noms - toujours 6, y compris à la toute
         /// première création (retour utilisateur : contrairement à une décision antérieure, un Franc-
         /// Tireur EST recrutable dès la création d'une bande neuve, pas seulement en Mode Libre/bande
         /// déjà existante).</summary>
-        private const int StepCount = 5;
+        private const int StepCount = 6;
 
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
@@ -84,8 +88,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [NotifyPropertyChangedFor(nameof(IsGeneralTab))]
         [NotifyPropertyChangedFor(nameof(IsWarriorsTab))]
         [NotifyPropertyChangedFor(nameof(IsEquipmentTab))]
-        [NotifyPropertyChangedFor(nameof(IsNamesTab))]
+        [NotifyPropertyChangedFor(nameof(IsWarriorNamesTab))]
         [NotifyPropertyChangedFor(nameof(IsMercenariesTab))]
+        [NotifyPropertyChangedFor(nameof(IsHiredSwordNamesTab))]
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -94,19 +99,27 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public bool IsWarriorsTab => SelectedTab == 1;
         public bool IsEquipmentTab => SelectedTab == 2;
 
-        /// <summary>Juste après Équipement, avant Noms - engagement des Francs-Tireurs, séparé de
+        /// <summary>Juste après Équipement - nommage des Héros/groupes d'Hommes de main une fois leur
+        /// équipement connu (voir PopulateSuggestedNames). Distincte de la 2e étape Noms plus bas
+        /// (IsHiredSwordNamesTab, Francs-Tireurs) depuis le 2026-09-01 (retour utilisateur : "guerrier
+        /// equipement noms, franc tireur nom") - auparavant une 3e section partagée de la même étape,
+        /// après Mercenaires.</summary>
+        private const int WarriorNamesTabIndex = 3;
+        public bool IsWarriorNamesTab => SelectedTab == WarriorNamesTabIndex;
+
+        /// <summary>Juste après Noms (Héros/Hommes de main) - engagement des Francs-Tireurs, séparé de
         /// Guerriers puisqu'un Franc-Tireur n'est ni un Héros ni un Homme de main du catalogue
         /// WarriorArchetype (aucun équipement/compétence à choisir, gear fixe - voir HiredSwordRecruitRow)
         /// et ne compte jamais dans MaxWarriors/MaxCount (RecruitmentRules.CanRecruitHiredSword).
         /// Disponible dès la toute première création de bande (retour utilisateur explicite - contrairement
-        /// à une décision antérieure, pas réservé au Mode Libre/bande déjà existante). Placé AVANT Noms
-        /// (contrairement à une passe précédente qui l'avait mis en dernier) : le joueur doit avoir choisi
-        /// ses Francs-Tireurs avant d'arriver à l'étape qui les nomme (voir la 3e section de Noms,
-        /// IsNamesTab).</summary>
-        public bool IsMercenariesTab => SelectedTab == 3;
+        /// à une décision antérieure, pas réservé au Mode Libre/bande déjà existante).</summary>
+        public bool IsMercenariesTab => SelectedTab == 4;
 
-        private const int NamesTabIndex = 4;
-        public bool IsNamesTab => SelectedTab == NamesTabIndex;
+        /// <summary>Dernière étape - nommage des Francs-Tireurs recrutés à l'étape Mercenaires juste
+        /// avant, dans sa propre étape depuis le 2026-09-01 (voir WarriorNamesTabIndex's own doc) plutôt
+        /// que la 3e section de la même étape que les Héros/Hommes de main.</summary>
+        private const int HiredSwordNamesTabIndex = 5;
+        public bool IsHiredSwordNamesTab => SelectedTab == HiredSwordNamesTabIndex;
 
         /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
         public bool CanGoBack => SelectedTab > 0;
@@ -237,6 +250,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [ObservableProperty]
         private string? namesError;
 
+        /// <summary>Même principe que NamesError mais pour la 2e étape Noms (Francs-Tireurs, voir
+        /// IsHiredSwordNamesTab) - une erreur propre, pas partagée avec NamesError, pour que chaque étape
+        /// garde son propre message plutôt qu'un état résiduel de l'autre.</summary>
+        [ObservableProperty]
+        private string? hiredSwordNamesError;
+
         /// <summary>Coché = on importe une bande déjà jouée sur papier plutôt qu'un recrutement neuf :
         /// trésorerie libre (TreasuryOverride), aucun contrôle budgétaire (recrutement/achats), et
         /// possibilité d'assigner des compétences/sorts déjà appris pendant l'étape Équipement (voir
@@ -329,9 +348,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         [RelayCommand]
-        private async Task ShowNamesTab()
+        private async Task ShowWarriorNamesTab()
         {
-            SelectedTab = NamesTabIndex;
+            SelectedTab = WarriorNamesTabIndex;
             await EnsureRecruitableArchetypesLoadedAsync();
             PopulateSuggestedNames();
         }
@@ -339,7 +358,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [RelayCommand]
         private async Task ShowMercenariesTab()
         {
-            SelectedTab = 3;
+            SelectedTab = 4;
+            await EnsureRecruitableArchetypesLoadedAsync();
+        }
+
+        [RelayCommand]
+        private async Task ShowHiredSwordNamesTab()
+        {
+            SelectedTab = HiredSwordNamesTabIndex;
             await EnsureRecruitableArchetypesLoadedAsync();
         }
 
@@ -907,7 +933,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
         /// <summary>Onglet Guerriers : effectif minimum de la bande, présence au bon nombre de chaque type
         /// "obligatoire" (MinCount &gt; 0, ex. le meneur unique d'une bande - voir WarriorArchetype.
-        /// MinCount). Les noms se valident séparément, à l'étape Noms (voir ValidateNamesStep).</summary>
+        /// MinCount). Les noms se valident séparément, à l'étape Noms (voir ValidateWarriorNamesStep).</summary>
         private bool ValidateWarriorsStep()
         {
             if (Archetype is null) return false;
@@ -928,11 +954,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             return true;
         }
 
-        /// <summary>Étape Noms : un nom renseigné pour chaque recrue Héros et chaque sous-groupe
-        /// d'Hommes de main (livre des règles : "you will need to... name each Henchman group") -
-        /// PopulateSuggestedNames pré-remplit déjà tout à l'entrée de cette étape, donc ce garde-fou ne
-        /// mord que si le joueur a vidé un champ après coup.</summary>
-        private bool ValidateNamesStep()
+        /// <summary>Étape Noms (Héros/Hommes de main) : un nom renseigné pour chaque recrue Héros et
+        /// chaque sous-groupe d'Hommes de main (livre des règles : "you will need to... name each
+        /// Henchman group") - PopulateSuggestedNames pré-remplit déjà tout à l'entrée de cette étape,
+        /// donc ce garde-fou ne mord que si le joueur a vidé un champ après coup. Les Francs-Tireurs ont
+        /// leur propre étape/validation séparée depuis le 2026-09-01 - voir ValidateHiredSwordNamesStep.</summary>
+        private bool ValidateWarriorNamesStep()
         {
             foreach (var row in RecruitRows.Where(r => r.IsHero))
             {
@@ -952,21 +979,26 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 }
             }
 
-            // Francs-Tireurs recrutés à l'étape Mercenaires (voir IsMercenariesTab/RecruitedHiredSwordRows)
-            // - même exigence qu'un Héros, une identité propre. Vit ici plutôt que dans un
-            // ValidateMercenariesStep séparé : le champ Nom lui-même est édité sur CETTE étape (3e
-            // section, voir WarbandEditDialog.xaml), pas sur Mercenaires (qui n'est plus qu'une sélection
-            // via ChipListView, aucun champ à valider là-bas).
+            NamesError = null;
+            return true;
+        }
+
+        /// <summary>Étape Noms (Francs-Tireurs) : même exigence qu'un Héros, une identité propre pour
+        /// chaque Franc-Tireur recruté à l'étape Mercenaires (IsMercenariesTab/RecruitedHiredSwordRows) -
+        /// dans sa propre étape/validation depuis le 2026-09-01 (retour utilisateur), auparavant une 3e
+        /// section de ValidateNamesStep partagée avec les Héros/Hommes de main.</summary>
+        private bool ValidateHiredSwordNamesStep()
+        {
             foreach (var row in HiredSwordRows.Where(r => r.IsRecruited))
             {
                 if (string.IsNullOrWhiteSpace(row.Name))
                 {
-                    NamesError = string.Format(Loc["WarbandsWarriorNameRequired"], row.HiredSword.Name);
+                    HiredSwordNamesError = string.Format(Loc["WarbandsWarriorNameRequired"], row.HiredSword.Name);
                     return false;
                 }
             }
 
-            NamesError = null;
+            HiredSwordNamesError = null;
             return true;
         }
 
@@ -988,19 +1020,24 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         /// <summary>Mode assistant uniquement (bouton Suivant) - avance d'une étape, Général→Guerriers→
-        /// Équipement→Noms. Validé par étape : en quittant Général, bloque tant que Nom/Archetype ne sont
-        /// pas renseignés ; en quittant Guerriers, bloque tant que ValidateWarriorsStep échoue (effectif
-        /// minimum). Les noms eux-mêmes ne sont validés qu'à l'étape Noms (ValidateNamesStep, via Save).</summary>
+        /// Équipement→Noms→Mercenaires→Noms. Validé par étape : en quittant Général, bloque tant que
+        /// Nom/Archetype ne sont pas renseignés ; en quittant Guerriers, bloque tant que
+        /// ValidateWarriorsStep échoue (effectif minimum) ; en quittant la 1re étape Noms, bloque tant que
+        /// ValidateWarriorNamesStep échoue - contrairement à une passe précédente (une seule étape Noms,
+        /// toujours en dernier), celle-ci n'est plus la dernière étape donc a besoin de son propre garde-fou
+        /// ici, pas seulement au Save(). La 2e étape Noms (Francs-Tireurs) reste sans garde-fou dans Next -
+        /// elle EST la dernière étape, comme l'ancienne étape Noms unique, validée au Save().</summary>
         [RelayCommand]
         private async Task Next()
         {
             if (IsGeneralTab && !ValidateGeneralStep()) return;
             if (IsWarriorsTab && !ValidateWarriorsStep()) return;
+            if (IsWarriorNamesTab && !ValidateWarriorNamesStep()) return;
             if (SelectedTab >= StepCount - 1) return;
             SelectedTab++;
 
             if (IsWarriorsTab || IsEquipmentTab || IsMercenariesTab) await EnsureRecruitableArchetypesLoadedAsync();
-            if (IsNamesTab) PopulateSuggestedNames();
+            if (IsWarriorNamesTab) PopulateSuggestedNames();
         }
 
         /// <summary>Mode assistant uniquement (bouton Précédent).</summary>
@@ -1064,9 +1101,15 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
 
             PopulateSuggestedNames();
-            if (!ValidateNamesStep())
+            if (!ValidateWarriorNamesStep())
             {
-                SelectedTab = NamesTabIndex;
+                SelectedTab = WarriorNamesTabIndex;
+                return;
+            }
+
+            if (!ValidateHiredSwordNamesStep())
+            {
+                SelectedTab = HiredSwordNamesTabIndex;
                 return;
             }
 

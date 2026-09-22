@@ -30,6 +30,16 @@ public class WarriorEntity
     /// <summary>See Models.Warrior.HiredSwordUpkeepPrepaid.</summary>
     public bool HiredSwordUpkeepPrepaid { get; set; }
 
+    /// <summary>See Models.Warrior.DramatisPersonaId.</summary>
+    [Indexed]
+    public int? DramatisPersonaId { get; set; }
+
+    /// <summary>See Models.Warrior.DramatisPersonaRatingBonus.</summary>
+    public int? DramatisPersonaRatingBonus { get; set; }
+
+    /// <summary>See Models.Warrior.IsHostileThisBattle.</summary>
+    public bool IsHostileThisBattle { get; set; }
+
     public string Name { get; set; } = string.Empty;
     public bool IsHero { get; set; }
     public int Cost { get; set; }

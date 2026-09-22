@@ -45,6 +45,11 @@ public interface ILibraryService
     /// RestrictedToWarbandArchetypeIds, as the source list for actual recruitment (warband-creation
     /// wizard/End of Game "Francs-Tireurs" - callers filter by eligibility themselves).</summary>
     Task<List<HiredSword>> GetHiredSwordsAsync(string languageCode);
+
+    /// <summary>Dramatis Personae catalogue (e.g. "Aenur, the Sword of Twilight") - see
+    /// Models.Library.DramatisPersona. Catalog-only for now (not yet a recruitment source), unfiltered by
+    /// RestrictedToWarbandArchetypeIds - callers filter by eligibility themselves.</summary>
+    Task<List<DramatisPersona>> GetDramatisPersonaeAsync(string languageCode);
     Task<List<Injury>> GetInjuriesAsync(string languageCode);
 
     /// <summary>Every entry of the rulebook's Exploration chart (doubles through six-of-a-kind), each
@@ -109,6 +114,11 @@ public interface ILibraryService
     /// <summary>Also replaces the Hired Sword's warband-restriction rows and its fixed starting-equipment
     /// rows (see HiredSword.RestrictedToWarbandArchetypeIds/StartingEquipmentIds) with the current lists.</summary>
     Task SaveHiredSwordAsync(HiredSword hiredSword, string languageCode);
+
+    /// <summary>Also replaces the Dramatis Persona's warband-restriction, SpecialRule, starting-equipment
+    /// and Skill rows (see DramatisPersona.RestrictedToWarbandArchetypeIds/SpecialRules/
+    /// StartingEquipmentIds/Skills) with the current lists.</summary>
+    Task SaveDramatisPersonaAsync(DramatisPersona dramatisPersona, string languageCode);
     Task SaveInjuryAsync(Injury injury, string languageCode);
     Task SaveSpellAsync(Spell spell, string languageCode);
     Task SaveSpecialRuleAsync(SpecialRule rule, string languageCode);
@@ -123,6 +133,7 @@ public interface ILibraryService
     Task DeleteEquipmentListAsync(int equipmentListId);
     Task DeleteSkillAsync(int skillId);
     Task DeleteHiredSwordAsync(int hiredSwordId);
+    Task DeleteDramatisPersonaAsync(int dramatisPersonaId);
     Task DeleteInjuryAsync(int injuryId);
     Task DeleteSpellAsync(int spellId);
     Task DeleteSpecialRuleAsync(int specialRuleId);

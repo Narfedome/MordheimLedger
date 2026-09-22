@@ -33,4 +33,13 @@ public class Skill
     /// Orc Boss only). Only meaningful alongside a non-empty RestrictedToWarbandArchetypeIds. Seed-only
     /// for now - no SkillEditDialog UI, populated exclusively via WarbandSeedData.Skills.</summary>
     public List<int> RestrictedToWarriorArchetypeIds { get; set; } = new();
+
+    /// <summary>Same field/meaning as SpecialRule.HatredTargetWarbandArchetypeIds (a skill-level parallel,
+    /// added 2026-09-01) - empty = not a Hatred-granting skill. Non-empty = this skill grants Hatred
+    /// against these specific WarbandArchetypes (e.g. Bertha/Sisters of Sigmar's "Righteous Fury" -
+    /// "Hatred against Skaven, Undead, Possessed, Beastmen..."). Seed-only for now, same precedent as
+    /// RestrictedToWarriorArchetypeIds - no SkillEditDialog UI yet. See WarbandDetailViewModel.
+    /// BuildSkillHatredChips, the Hatred section's dedicated (not shared with "Règles spéciales") source
+    /// for skill-granted Hatred.</summary>
+    public List<int> HatredTargetWarbandArchetypeIds { get; set; } = new();
 }

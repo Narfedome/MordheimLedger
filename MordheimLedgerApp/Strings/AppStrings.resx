@@ -507,6 +507,9 @@
   <data name="WarbandCreateTabNames" xml:space="preserve">
     <value>Noms</value>
   </data>
+  <data name="WarbandCreateTabHiredSwordNames" xml:space="preserve">
+    <value>Noms (Francs-Tireurs)</value>
+  </data>
   <data name="WarbandArchetypeTabEquipment" xml:space="preserve">
     <value>Listes d'équipement</value>
   </data>
@@ -678,6 +681,15 @@
   <data name="WarriorsHatredChipFormat" xml:space="preserve">
     <value>Haine : {0}</value>
   </data>
+  <data name="WarriorsPairHireFeeFormat" xml:space="preserve">
+    <value>Frais : {0} CO</value>
+  </data>
+  <data name="WarriorsHostileToggleLabel" xml:space="preserve">
+    <value>Rendre hostile</value>
+  </data>
+  <data name="WarriorsHostileActiveLabel" xml:space="preserve">
+    <value>Hostile</value>
+  </data>
   <data name="WarriorsHatredHeading" xml:space="preserve">
     <value>Haine</value>
   </data>
@@ -722,11 +734,65 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="HiredSwordNoMagicSchool" xml:space="preserve">
     <value>Aucune (pas un lanceur de sorts)</value>
   </data>
+  <data name="DramatisPersonaAlternativePaymentItemPh" xml:space="preserve">
+    <value>Objet de paiement alternatif</value>
+  </data>
+  <data name="DramatisPersonaNoAlternativePaymentItem" xml:space="preserve">
+    <value>Aucun (or uniquement)</value>
+  </data>
   <data name="HiredSwordCreateTitle" xml:space="preserve">
     <value>Nouveau franc-tireur</value>
   </data>
   <data name="HiredSwordEditTitle" xml:space="preserve">
     <value>Modifier le franc-tireur</value>
+  </data>
+  <data name="LibTabDramatisPersonae" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="DramatisPersonaNamePh" xml:space="preserve">
+    <value>Nom du personnage</value>
+  </data>
+  <data name="DramatisPersonaFeeKindPh" xml:space="preserve">
+    <value>Type de frais</value>
+  </data>
+  <data name="DramatisPersonaFeeKindGold" xml:space="preserve">
+    <value>Or (engagement + entretien)</value>
+  </data>
+  <data name="DramatisPersonaFeeKindNone" xml:space="preserve">
+    <value>Gratuit (conditionnel)</value>
+  </data>
+  <data name="DramatisPersonaFeeKindWyrdstone" xml:space="preserve">
+    <value>Pierre magique</value>
+  </data>
+  <data name="DramatisPersonaFeeKindPair" xml:space="preserve">
+    <value>Frais partagés (paire)</value>
+  </data>
+  <data name="DramatisPersonaFeeNone" xml:space="preserve">
+    <value>Gratuit</value>
+  </data>
+  <data name="DramatisPersonaFeeWyrdstone" xml:space="preserve">
+    <value>Pierre magique</value>
+  </data>
+  <data name="DramatisPersonaFeePairFormat" xml:space="preserve">
+    <value>{0} CO (paire)</value>
+  </data>
+  <data name="DramatisPersonaRatingBonusPh" xml:space="preserve">
+    <value>Valeur de bande</value>
+  </data>
+  <data name="DramatisPersonaIsWandererPh" xml:space="preserve">
+    <value>Vagabond (une seule bataille)</value>
+  </data>
+  <data name="DramatisPersonaPairProfilesPh" xml:space="preserve">
+    <value>Profils</value>
+  </data>
+  <data name="DramatisPersonaRequiresRatingDisadvantagePh" xml:space="preserve">
+    <value>N'aide que si la bande adverse a une Valeur supérieure (barème écart de Valeur)</value>
+  </data>
+  <data name="DramatisPersonaCreateTitle" xml:space="preserve">
+    <value>Nouveau Dramatis Persona</value>
+  </data>
+  <data name="DramatisPersonaEditTitle" xml:space="preserve">
+    <value>Modifier le Dramatis Persona</value>
   </data>
   <data name="MutationNamePh" xml:space="preserve">
     <value>Nom de la mutation</value>
@@ -938,6 +1004,15 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Jet requis avant de continuer.</value>
   </data>
+  <data name="EndOfGameAmountRequired" xml:space="preserve">
+    <value>Montant requis avant de continuer.</value>
+  </data>
+  <data name="EndOfGamePairCorruptionOptionFormat" xml:space="preserve">
+    <value>Corruption de {0} (Une Poignée d'Or)</value>
+  </data>
+  <data name="EndOfGamePairRetentionHint" xml:space="preserve">
+    <value>Une Poignée d'Or : montant payé pour les garder après une tentative de corruption adverse - laissez à 0 si aucune tentative n'a eu lieu.</value>
+  </data>
   <data name="EndOfGameEquippedHenchmanUnaffordable" xml:space="preserve">
     <value>Trésorerie insuffisante pour équiper ce prisonnier - choisis un autre groupe ou "Ne pas recruter".</value>
   </data>
@@ -1052,6 +1127,39 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="StartGameOldWoundFail" xml:space="preserve">
     <value>Ne peut pas combattre</value>
   </data>
+  <data name="StartGameAidHeading" xml:space="preserve">
+    <value>Aide conditionnelle</value>
+  </data>
+  <data name="StartGameAidEnemyRatingPh" xml:space="preserve">
+    <value>Valeur de la bande adverse</value>
+  </data>
+  <data name="StartGameAidWontCome" xml:space="preserve">
+    <value>N'acceptera pas d'aider cette fois (écart trop faible)</value>
+  </data>
+  <data name="StartGameAidRequiredRollFormat" xml:space="preserve">
+    <value>Jet requis : {0}+</value>
+  </data>
+  <data name="StartGameAidSuccess" xml:space="preserve">
+    <value>Accepte d'aider</value>
+  </data>
+  <data name="StartGameAidFailure" xml:space="preserve">
+    <value>N'aide pas cette fois</value>
+  </data>
+  <data name="StartGameAidExplanation" xml:space="preserve">
+    <value>Ce personnage n'accepte de rejoindre personnellement le combat que si la bande adverse a une Valeur supérieure à la vôtre. Saisissez la Valeur de la bande adverse ci-dessous pour connaître le jet à réussir :</value>
+  </data>
+  <data name="StartGameAidWillLeaveWarband" xml:space="preserve">
+    <value>Sera retiré(e) de la bande en confirmant - il faudra le/la rechercher à nouveau.</value>
+  </data>
+  <data name="StartGameAidTierWontComeFormat" xml:space="preserve">
+    <value>Moins de {0} points d'écart : ne vient pas</value>
+  </data>
+  <data name="StartGameAidTierRangeFormat" xml:space="preserve">
+    <value>{0} à {1} points d'écart : jet de {2}+</value>
+  </data>
+  <data name="StartGameAidTierOpenFormat" xml:space="preserve">
+    <value>{0} points d'écart ou plus : jet de {1}+</value>
+  </data>
   <data name="StartGameNextGameNoteHeading" xml:space="preserve">
     <value>Effets actifs pour cette partie</value>
   </data>
@@ -1093,6 +1201,75 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRecapHeading" xml:space="preserve">
     <value>Récapitulatif</value>
+  </data>
+  <data name="EndOfGameRecapProjectedRatingFormat" xml:space="preserve">
+    <value>Valeur de bande projetée : {0}</value>
+  </data>
+  <data name="EndOfGameRecapWyrdstoneHeading" xml:space="preserve">
+    <value>Vente de pierre magique</value>
+  </data>
+  <data name="EndOfGameRecapVeteransHeading" xml:space="preserve">
+    <value>Disponibilité des vétérans</value>
+  </data>
+  <data name="EndOfGameRecapVeteransFormat" xml:space="preserve">
+    <value>Jet : {0} PX</value>
+  </data>
+  <data name="EndOfGameRecapRareItemsHeading" xml:space="preserve">
+    <value>Objets rares</value>
+  </data>
+  <data name="EndOfGameRecapRareCharacterFormat" xml:space="preserve">
+    <value>{0} a trouvé : {1}</value>
+  </data>
+  <data name="EndOfGameRecapRareItemFormat" xml:space="preserve">
+    <value>{0} a acheté : {1} ({2} CO)</value>
+  </data>
+  <data name="EndOfGameRecapDramatisPersonaeHeading" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="EndOfGameRecapPaidFormat" xml:space="preserve">
+    <value>{0} : payé ({1})</value>
+  </data>
+  <data name="EndOfGameRecapDismissedFormat" xml:space="preserve">
+    <value>{0} : renvoyé</value>
+  </data>
+  <data name="EndOfGameRecapPairHeading" xml:space="preserve">
+    <value>Une Poignée d'Or</value>
+  </data>
+  <data name="EndOfGameRecapPairDuelFormat" xml:space="preserve">
+    <value>Duel : {0}</value>
+  </data>
+  <data name="EndOfGameRecapPairCorruptionFormat" xml:space="preserve">
+    <value>{0} : corruption de {1} CO</value>
+  </data>
+  <data name="EndOfGameRecapPairRetentionFormat" xml:space="preserve">
+    <value>{0} : rétention de {1} CO</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordsHeading" xml:space="preserve">
+    <value>Francs-Tireurs</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordPrepaidFormat" xml:space="preserve">
+    <value>{0} : solde déjà réglée</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordHiredFormat" xml:space="preserve">
+    <value>Engagé : {0} ({1} CO)</value>
+  </data>
+  <data name="EndOfGameRecapDismissedHeading" xml:space="preserve">
+    <value>Renvoyés</value>
+  </data>
+  <data name="EndOfGameRecapDismissedWarriorFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="EndOfGameRecapEquipmentTradingHeading" xml:space="preserve">
+    <value>Achat/Vente d'équipement</value>
+  </data>
+  <data name="EndOfGameRecapRecruitmentHeading" xml:space="preserve">
+    <value>Recrutement</value>
+  </data>
+  <data name="EndOfGameRecapHenchmanGroupFormat" xml:space="preserve">
+    <value>{0} ×{1}</value>
+  </data>
+  <data name="EndOfGameRecapVeteranTopUpFormat" xml:space="preserve">
+    <value>{0} : +{1}</value>
   </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0} : aucun changement</value>
@@ -1223,11 +1400,17 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameCapturedRansomAmountPh" xml:space="preserve">
     <value>Montant (CO)</value>
   </data>
+  <data name="EndOfGamePairCorruptionAmountPh" xml:space="preserve">
+    <value>Montant payé (CO)</value>
+  </data>
   <data name="EndOfGameSoldToPitsHeading" xml:space="preserve">
     <value>Combat de gladiateur</value>
   </data>
   <data name="EndOfGameSoldToPitsWonLabel" xml:space="preserve">
     <value>A gagné le combat (+50 CO, +2 PX, garde son équipement)</value>
+  </data>
+  <data name="EndOfGameSoldToPitsInlineHint" xml:space="preserve">
+    <value>Ce sous-jet a lui-même déclenché un combat de gladiateur - voir l'étape dédiée.</value>
   </data>
   <data name="EndOfGameSoldToPitsRerollHeading" xml:space="preserve">
     <value>Défaite : relance sur la même table</value>
@@ -1237,6 +1420,30 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>Nouveau jet</value>
+  </data>
+  <data name="EndOfGameWheresMoneyHeading" xml:space="preserve">
+    <value>Où est l'Argent ?</value>
+  </data>
+  <data name="EndOfGameWheresMoneyHint" xml:space="preserve">
+    <value>La bande ne peut pas payer en or - la réserve couvre la somme ? Elle est cédée automatiquement. Sinon, duel avec le meneur.</value>
+  </data>
+  <data name="EndOfGameWheresMoneyDuelNote" xml:space="preserve">
+    <value>La réserve ne suffit pas : duel avec le meneur (étape suivante).</value>
+  </data>
+  <data name="EndOfGameSeizedEquipmentTotalFormat" xml:space="preserve">
+    <value>Objets saisis : {0} CO (besoin : {1} CO)</value>
+  </data>
+  <data name="EndOfGameDramatisPersonaeBaselineTreasuryFormat" xml:space="preserve">
+    <value>Trésorerie disponible pour ce paiement : {0} CO</value>
+  </data>
+  <data name="EndOfGamePairDuelWonLabel" xml:space="preserve">
+    <value>Le meneur a gagné le duel</value>
+  </data>
+  <data name="EndOfGamePairDuelLostNote" xml:space="preserve">
+    <value>Défaite : le meneur est tué.</value>
+  </data>
+  <data name="EndOfGamePairDuelHeading" xml:space="preserve">
+    <value>Duel avec le meneur</value>
   </data>
   <data name="EndOfGameCaptivesHeading" xml:space="preserve">
     <value>Prisonniers ennemis</value>
@@ -1258,6 +1465,210 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameHiredSwordsHeading" xml:space="preserve">
     <value>Francs-Tireurs</value>
+  </data>
+  <data name="EndOfGameDramatisPersonaeHeading" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="EndOfGamePairEngagementHeading" xml:space="preserve">
+    <value>Une Poignée d'Or</value>
+  </data>
+  <data name="EndOfGameRareItemsHeading" xml:space="preserve">
+    <value>Objets rares</value>
+  </data>
+  <data name="EndOfGameRareItemsIntro" xml:space="preserve">
+    <value>Un jet de 2D6 au maximum par Héros vivant - facultatif, jamais obligatoire.</value>
+  </data>
+  <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
+    <value>Trésorerie restante : {0} CO</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationHeading" xml:space="preserve">
+    <value>Réallouer l'équipement</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationHint" xml:space="preserve">
+    <value>Déplacez un objet vers un autre Héros ou la réserve, gratuitement.</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationDestinationTitle" xml:space="preserve">
+    <value>Déplacer vers…</value>
+  </data>
+  <data name="HistoryEquipmentReallocatedSentence" xml:space="preserve">
+    <value>{0} rejoint {1}.</value>
+  </data>
+  <data name="EndOfGameDismissHeading" xml:space="preserve">
+    <value>Renvoyer des guerriers</value>
+  </data>
+  <data name="EndOfGameDismissHint" xml:space="preserve">
+    <value>Un guerrier renvoyé restitue son équipement à la réserve de la bande.</value>
+  </data>
+  <data name="EndOfGameDismissRecoveredEquipmentHeading" xml:space="preserve">
+    <value>Équipement récupéré</value>
+  </data>
+  <data name="HistoryWarriorDismissedSentence" xml:space="preserve">
+    <value>{0} a été renvoyé, son équipement rejoint la réserve.</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingHeading" xml:space="preserve">
+    <value>Achat/Vente d'équipement</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingBuyHeading" xml:space="preserve">
+    <value>Achat</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingSellHeading" xml:space="preserve">
+    <value>Vente</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingStashSource" xml:space="preserve">
+    <value>Réserve</value>
+  </data>
+  <data name="EndOfGameSellEquipmentTotalLabel" xml:space="preserve">
+    <value>Total de la vente</value>
+  </data>
+  <data name="EndOfGameNoSellableEquipment" xml:space="preserve">
+    <value>Aucun objet à vendre.</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingBuyCostLabel" xml:space="preserve">
+    <value>Coût de l'achat</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingSellGainLabel" xml:space="preserve">
+    <value>Gain de la vente</value>
+  </data>
+  <data name="EndOfGameEquipmentTradingNetTotalLabel" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="EndOfGameRecruitmentHeading" xml:space="preserve">
+    <value>Recrutement — Héros</value>
+  </data>
+  <data name="EndOfGameRecruitmentHeroesHeading" xml:space="preserve">
+    <value>Héros</value>
+  </data>
+  <data name="EndOfGameRecruitHeroDetailHeading" xml:space="preserve">
+    <value>Détail du héros</value>
+  </data>
+  <data name="EndOfGameRecruitHeroProgressLabel" xml:space="preserve">
+    <value>Héros {0}/{1}</value>
+  </data>
+  <data name="EndOfGameRecruitVeteranTopUpHeading" xml:space="preserve">
+    <value>Recrutement des vétérans</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenExistingHeading" xml:space="preserve">
+    <value>Groupes existants</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenExistingHint" xml:space="preserve">
+    <value>Budget de vétérans disponibles : {0} XP (jet de l'étape Disponibilité des Vétérans). Chaque recrue coûte le prix normal du type + son équipement (comme le reste du groupe) + 2 CO par point d'Expérience du groupe.</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenNewHeading" xml:space="preserve">
+    <value>Nouveau groupe</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenEquipmentHeading" xml:space="preserve">
+    <value>Nouveau groupe — Équipement</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenNamesHeading" xml:space="preserve">
+    <value>Noms des nouveaux groupes</value>
+  </data>
+  <data name="EndOfGameRecruitStashUsedFormat" xml:space="preserve">
+    <value>{0} objet(s) pris dans la réserve plutôt qu'acheté(s) à neuf.</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenRecruitmentCostLabel" xml:space="preserve">
+    <value>Recrutement</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenSurchargeLabel" xml:space="preserve">
+    <value>Surtaxe d'Expérience</value>
+  </data>
+  <data name="EndOfGameRecruitHenchmenTotalLabel" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="EndOfGameCharacterWyrdstoneCostValue" xml:space="preserve">
+    <value>1 pierre magique</value>
+  </data>
+  <data name="EndOfGameWyrdstoneShardsRemainingFormat" xml:space="preserve">
+    <value>Pierres magiques restantes : {0}</value>
+  </data>
+  <data name="EndOfGameRareItemSearchButton" xml:space="preserve">
+    <value>Chercher un objet rare</value>
+  </data>
+  <data name="EndOfGameCharacterSearchButton" xml:space="preserve">
+    <value>Chercher un personnage</value>
+  </data>
+  <data name="EndOfGameCharacterRecruitLabel" xml:space="preserve">
+    <value>Recruter</value>
+  </data>
+  <data name="EndOfGameCharacterHireCostPh" xml:space="preserve">
+    <value>Frais d'engagement</value>
+  </data>
+  <data name="EndOfGameCharacterHireCostFree" xml:space="preserve">
+    <value>Gratuit</value>
+  </data>
+  <data name="EndOfGameCharacterAlternativePaymentFormat" xml:space="preserve">
+    <value>Payer avec {0} à la place</value>
+  </data>
+  <data name="EndOfGameRareItemRarityFormat" xml:space="preserve">
+    <value>Rare {0}</value>
+  </data>
+  <data name="EndOfGameRareItemBonusFormat" xml:space="preserve">
+    <value>Bonus au jet : +{0}</value>
+  </data>
+  <data name="EndOfGameRareItemSuccessFormat" xml:space="preserve">
+    <value>Trouvé ! (jet total {0})</value>
+  </data>
+  <data name="EndOfGameRareItemFailureFormat" xml:space="preserve">
+    <value>Introuvable cette fois (jet total {0})</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseHeading" xml:space="preserve">
+    <value>Achat des objets trouvés</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
+    <value>Trésorerie insuffisante - décochez un objet ou ajustez les jets avant de continuer.</value>
+  </data>
+  <data name="EndOfGameRareItemPurchaseWyrdstoneBlockedMessage" xml:space="preserve">
+    <value>Pas assez de pierres magiques pour payer Nicodemus - vendez-en moins à l'étape précédente ou décochez son recrutement.</value>
+  </data>
+  <data name="EndOfGameRareItemFixedCostFormat" xml:space="preserve">
+    <value>{0} CO</value>
+  </data>
+  <data name="EndOfGameRareItemRollPricePrompt" xml:space="preserve">
+    <value>Effectuer le jet de valeur</value>
+  </data>
+  <data name="EndOfGameRareItemModeObjectLabel" xml:space="preserve">
+    <value>Objet rare</value>
+  </data>
+  <data name="EndOfGameRareItemModeCharacterLabel" xml:space="preserve">
+    <value>Personnage spécial</value>
+  </data>
+  <data name="EndOfGameRareItemCharacterNamePh" xml:space="preserve">
+    <value>Nom du personnage recherché</value>
+  </data>
+  <data name="EndOfGameRareItemCharacterInitiativeFormat" xml:space="preserve">
+    <value>Initiative {0}</value>
+  </data>
+  <data name="EndOfGameBaselineWyrdstoneFormat" xml:space="preserve">
+    <value>Total des dés : {0} → Pierre magique trouvée : {1} éclat(s)</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleHeading" xml:space="preserve">
+    <value>Vente de pierre magique</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleIntro" xml:space="preserve">
+    <value>Pas obligatoire de tout vendre maintenant - le reste du stock attend en réserve.</value>
+  </data>
+  <data name="EndOfGameWyrdstoneFoundThisGameFormat" xml:space="preserve">
+    <value>Grâce à votre exploration, vous avez trouvé {0} éclat(s) de pierre magique.</value>
+  </data>
+  <data name="EndOfGameWyrdstoneExistingStockFormat" xml:space="preserve">
+    <value>Stock déjà en réserve : {0} éclat(s).</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleTableTitle" xml:space="preserve">
+    <value>Barème (éclats vendus × effectif de la bande)</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleTableShardsHeader" xml:space="preserve">
+    <value>Éclats</value>
+  </data>
+  <data name="EndOfGameWyrdstoneShardsToSellLabel" xml:space="preserve">
+    <value>Éclats à vendre</value>
+  </data>
+  <data name="EndOfGameWyrdstoneSaleValueFormat" xml:space="preserve">
+    <value>Vendre {0} éclat(s) pour {1} CO</value>
+  </data>
+  <data name="EndOfGameAvailableVeteransHeading" xml:space="preserve">
+    <value>Disponibilité des Vétérans</value>
+  </data>
+  <data name="EndOfGameAvailableVeteransIntro" xml:space="preserve">
+    <value>Jet de 2D6 : expérience totale de vétérans disponibles pour renforcer un groupe d'Hommes de main existant, valable pour cette séquence uniquement - non cumulable d'une Fin de Partie à l'autre.</value>
   </data>
   <data name="EndOfGameHiredSwordPayAction" xml:space="preserve">
     <value>Payer</value>
@@ -1297,6 +1708,60 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryCapturedEnemySacrificedSentence" xml:space="preserve">
     <value>Un prisonnier ennemi a été sacrifié : {0} gagne 1 PX.</value>
+  </data>
+  <data name="HistoryBaselineWyrdstoneSentence" xml:space="preserve">
+    <value>La bande a trouvé {0} éclat(s) de pierre magique en explorant.</value>
+  </data>
+  <data name="HistoryWyrdstoneSaleSentence" xml:space="preserve">
+    <value>La bande vend {0} éclat(s) de pierre magique pour {1} CO.</value>
+  </data>
+  <data name="HistoryAvailableVeteransSentence" xml:space="preserve">
+    <value>Vétérans disponibles ce jour pour renforcer les groupes d'Hommes de main : {0} PX (non cumulables).</value>
+  </data>
+  <data name="HistoryRareItemFoundSentence" xml:space="preserve">
+    <value>{0} déniche un objet rare : {1}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedGoldSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande contre {2} CO.</value>
+  </data>
+  <data name="HistoryDramatisPersonaPairRecruitedGoldSentence" xml:space="preserve">
+    <value>{0} retrouve {1} et {2}, qui rejoignent la bande contre {3} CO.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedWithItemSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande contre {2}.</value>
+  </data>
+  <data name="HistoryDramatisPersonaRecruitedWyrdstoneSentence" xml:space="preserve">
+    <value>{0} retrouve {1}, qui rejoint la bande contre un éclat de pierre magique.</value>
+  </data>
+  <data name="HistoryDramatisPersonaWyrdstoneUpkeepPaidSentence" xml:space="preserve">
+    <value>{0} reçoit son éclat de pierre magique.</value>
+  </data>
+  <data name="HistoryDramatisPersonaUpkeepRefusedSentence" xml:space="preserve">
+    <value>{0} quitte la bande, sa solde n'ayant pas été payée - une nouvelle recherche sera nécessaire pour la récupérer.</value>
+  </data>
+  <data name="HistoryDramatisPersonaDepartedSentence" xml:space="preserve">
+    <value>{0} quitte la bande (Vagabond) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>
+  </data>
+  <data name="HistoryDramatisPersonaCorruptedSentence" xml:space="preserve">
+    <value>{0} a combattu pour l'adversaire cette bataille (corrompu·e via Une Poignée d'Or) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>
+  </data>
+  <data name="HistoryPairCorruptionPaidSentence" xml:space="preserve">
+    <value>La bande a corrompu Ulli &amp; Marquand pour {0} CO (Une Poignée d'Or).</value>
+  </data>
+  <data name="HistoryPairRetentionPaidSentence" xml:space="preserve">
+    <value>La bande a payé {1} CO pour garder {0} face à une tentative de corruption (Une Poignée d'Or).</value>
+  </data>
+  <data name="HistoryPairEquipmentSeizedSentence" xml:space="preserve">
+    <value>{0} a saisi du matériel de la bande pour {1} CO, faute de paiement (Où est l'Argent ?).</value>
+  </data>
+  <data name="HistoryPairDuelWonSentence" xml:space="preserve">
+    <value>{0} a affronté Ulli &amp; Marquand en duel et a survécu (Où est l'Argent ?).</value>
+  </data>
+  <data name="HistoryPairDuelLostSentence" xml:space="preserve">
+    <value>{0} a affronté Ulli &amp; Marquand en duel et en est mort (Où est l'Argent ?).</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>
@@ -1339,6 +1804,18 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="HistoryHiredSwordHiredSentence" xml:space="preserve">
     <value>{0} le {1} rejoint la bande.</value>
+  </data>
+  <data name="HistoryRecruitedSentence" xml:space="preserve">
+    <value>{0} le {1} rejoint la bande (recrutement).</value>
+  </data>
+  <data name="HistoryEquipmentPurchasedSentence" xml:space="preserve">
+    <value>{0} acheté et versé dans la réserve.</value>
+  </data>
+  <data name="HistoryEquipmentSoldSentence" xml:space="preserve">
+    <value>{0} vendu pour {1} CO.</value>
+  </data>
+  <data name="HistoryHenchmanTopUpSentence" xml:space="preserve">
+    <value>{0} recrue(s) supplémentaire(s) ajoutée(s) au groupe {1}.</value>
   </data>
   <data name="HistoryHiredSwordFreeGrantSentence" xml:space="preserve">
     <value>{0} rejoint la bande gratuitement pour la prochaine bataille (Une Faveur Rendue).</value>

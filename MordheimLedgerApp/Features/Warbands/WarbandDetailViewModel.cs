@@ -26,9 +26,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private readonly ISpellPickerService _spellPicker;
     private readonly IMutationPickerService _mutationPicker;
     private readonly IHiredSwordPickerService _hiredSwordPicker;
+    private readonly IDramatisPersonaPickerService _dramatisPersonaPicker;
+    private readonly ISellEquipmentPickerService _sellEquipmentPicker;
 
     private List<WarriorArchetype> _recruitableArchetypes = new();
     private List<HiredSword> _recruitableHiredSwords = new();
+    private List<DramatisPersona> _recruitableDramatisPersonae = new();
     private List<SpecialRule> _bandWideSpecialRules = new();
     private List<MagicSchool> _bandMagicSchools = new();
 
@@ -67,17 +70,55 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [ObservableProperty]
     private ObservableCollection<WarriorRow> henchmen = new();
 
+    /// <summary>Own block, split out of Henchmen (2026-09-01, user request) - a recruited Hired Sword
+    /// (Warrior.IsHiredSword) used to land in Henchmen (IsHero stays false for these, see the model's own
+    /// doc) with just a distinguishing RoleName label, no separate visual grouping. Empty for most bands
+    /// (no Hired Sword recruited) - see HasHiredSwords, which hides the whole block then.</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasHiredSwords))]
+    private ObservableCollection<WarriorRow> hiredSwords = new();
+
+    /// <summary>Same split, for a recruited Dramatis Persona (Warrior.IsDramatisPersona) - see
+    /// HiredSwords' own doc, identical reasoning/history.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasDramatisPersonae))]
+    private ObservableCollection<WarriorRow> dramatisPersonae = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasDeadWarriors))]
     private ObservableCollection<WarriorRow> deadWarriors = new();
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRetiredWarriors))]
     private ObservableCollection<WarriorRow> retiredWarriors = new();
+
+    public bool HasHiredSwords => HiredSwords.Count > 0;
+    public bool HasDramatisPersonae => DramatisPersonae.Count > 0;
+
+    /// <summary>Every living, active-roster warrior across all four groups (Heroes/Henchmen/HiredSwords/
+    /// DramatisPersonae) - the same set "Heroes.Concat(Henchmen)" used to mean before Francs-Tireurs/
+    /// Dramatis Personae got their own blocks (2026-09-01). Callers that need "everyone who could fight
+    /// this battle" (Rating, Start Game, End of Game, inventory reassignment) should use this instead of
+    /// concatenating the four groups by hand.</summary>
+    public IEnumerable<WarriorRow> AllActiveWarriorRows => Heroes.Concat(Henchmen).Concat(HiredSwords).Concat(DramatisPersonae);
+
+    /// <summary>Hides the whole Morts/Retraités block when empty (user request 2026-09-01) - unlike
+    /// Heroes/Henchmen, which every warband always has at least one of, these (and the two groups above)
+    /// are the exception rather than the rule for most bands.</summary>
+    public bool HasDeadWarriors => DeadWarriors.Count > 0;
+    public bool HasRetiredWarriors => RetiredWarriors.Count > 0;
 
     [ObservableProperty]
     private bool heroesExpanded = true;
 
     [ObservableProperty]
     private bool henchmenExpanded = true;
+
+    [ObservableProperty]
+    private bool hiredSwordsExpanded = true;
+
+    [ObservableProperty]
+    private bool dramatisPersonaeExpanded = true;
 
     [ObservableProperty]
     private bool deadExpanded;
@@ -103,7 +144,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
     public WarbandDetailViewModel(IWarbandService warbandService, ILibraryService libraryService, IDetailDialogService detailDialogs,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, IInjuryPickerService injuryPicker,
-        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker)
+        ISpellPickerService spellPicker, IMutationPickerService mutationPicker, IHiredSwordPickerService hiredSwordPicker,
+        IDramatisPersonaPickerService dramatisPersonaPicker, ISellEquipmentPickerService sellEquipmentPicker)
     {
         _warbandService = warbandService;
         _libraryService = libraryService;
@@ -114,6 +156,8 @@ public partial class WarbandDetailViewModel : BaseViewModel
         _spellPicker = spellPicker;
         _mutationPicker = mutationPicker;
         _hiredSwordPicker = hiredSwordPicker;
+        _dramatisPersonaPicker = dramatisPersonaPicker;
+        _sellEquipmentPicker = sellEquipmentPicker;
 
         // Le roster affiche des noms d'Équipement/Compétences/Blessures résolus dans la langue courante
         // - sans ça, ils resteraient périmés si la langue change pendant que cette page est déjà
@@ -134,6 +178,12 @@ public partial class WarbandDetailViewModel : BaseViewModel
     private void ToggleHenchmen() => HenchmenExpanded = !HenchmenExpanded;
 
     [RelayCommand]
+    private void ToggleHiredSwords() => HiredSwordsExpanded = !HiredSwordsExpanded;
+
+    [RelayCommand]
+    private void ToggleDramatisPersonae() => DramatisPersonaeExpanded = !DramatisPersonaeExpanded;
+
+    [RelayCommand]
     private void ToggleDead() => DeadExpanded = !DeadExpanded;
 
     [RelayCommand]
@@ -152,6 +202,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
             // toujours afficher son nom, même si son entrée catalogue a depuis été restreinte à d'autres
             // bandes).
             _recruitableHiredSwords = await _libraryService.GetHiredSwordsAsync(LocalizationService.Instance.Language);
+            // Même besoin, pour la résolution du RoleName/SpecialRules/MagicSchool d'un guerrier recruté
+            // depuis le catalogue Dramatis Personae (voir ToRow) - catalogue complet, même raison.
+            _recruitableDramatisPersonae = await _libraryService.GetDramatisPersonaeAsync(LocalizationService.Instance.Language);
             var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
             _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
             _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
@@ -160,12 +213,25 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
             var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
             var rows = loaded.Select(ToRow).ToList();
-            Heroes = new ObservableCollection<WarriorRow>(rows.Where(r => r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
-            Henchmen = new ObservableCollection<WarriorRow>(rows.Where(r => !r.Warrior.IsHero && !r.IsDead && !r.IsRetired));
+            var alive = rows.Where(r => !r.IsDead && !r.IsRetired).ToList();
+            // Francs-Tireurs/Dramatis Personae : blocs à part depuis le 2026-09-01 (retour utilisateur) -
+            // avant, un Franc-Tireur recruté tombait dans Henchmen (IsHero=false pour lui, voir sa propre
+            // doc). Un Dramatis Persona recruté a IsHero=TRUE en revanche (règle du livre : "suffer
+            // serious injuries, just like Heroes" - voir EntityMapping.ToWarrior(this DramatisPersona,
+            // ...) pour le raisonnement complet), donc explicitement exclu ici pour ne pas doublonner
+            // avec son propre bloc DramatisPersonae ci-dessous.
+            Heroes = new ObservableCollection<WarriorRow>(alive.Where(r => r.Warrior.IsHero && !r.Warrior.IsDramatisPersona));
+            Henchmen = new ObservableCollection<WarriorRow>(alive.Where(r => !r.Warrior.IsHero && !r.Warrior.IsHiredSword && !r.Warrior.IsDramatisPersona));
+            HiredSwords = new ObservableCollection<WarriorRow>(alive.Where(r => r.Warrior.IsHiredSword));
+            DramatisPersonae = new ObservableCollection<WarriorRow>(alive.Where(r => r.Warrior.IsDramatisPersona));
             DeadWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsDead));
             RetiredWarriors = new ObservableCollection<WarriorRow>(rows.Where(r => r.IsRetired));
-            Rating = Heroes.Concat(Henchmen).Sum(r => WarbandRatingRules.WarriorContribution(
-                r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating));
+            // Exclut du calcul tout guerrier basculé "hostile" via "Une Poignée d'Or" (2026-09-01, Ulli &
+            // Marquand corrompus par l'adversaire pour cette bataille - voir Warrior.IsHostileThisBattle) :
+            // il reste dans le roster (pas supprimé), juste sans contribution à la Valeur tant que le
+            // flag est actif.
+            Rating = alive.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
+                r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
 
             var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);
             Inventory = new ObservableCollection<WarbandEquipment>(inventory);
@@ -183,7 +249,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private async Task ShowInventory()
     {
-        var candidates = Heroes.Concat(Henchmen).ToList();
+        var candidates = AllActiveWarriorRows.ToList();
         var dialogViewModel = new WarbandInventoryDialogViewModel(Inventory, candidates, _warbandService);
         await ShowDialogAsync(new WarbandInventoryDialog(dialogViewModel));
         await LoadAsync(WarbandId);
@@ -199,33 +265,51 @@ public partial class WarbandDetailViewModel : BaseViewModel
         if (warrior.HiredSwordId is { } hiredSwordId)
         {
             var hiredSword = _recruitableHiredSwords.FirstOrDefault(h => h.Id == hiredSwordId);
-            var hiredSwordEquipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
-            var hiredSwordMergedRules = _bandWideSpecialRules.Concat(hiredSword?.SpecialRules ?? new List<SpecialRule>())
-                .Concat(hiredSwordEquipmentRules).DistinctBy(r => r.Id);
+            var hiredSwordMergedRules = _bandWideSpecialRules.Concat(hiredSword?.SpecialRules ?? new List<SpecialRule>()).DistinctBy(r => r.Id);
             var hiredSwordHatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
-                .Concat(BuildRuleHatredChips(hiredSwordMergedRules));
+                .Concat(BuildRuleHatredChips(HatredSourceRules(warrior, hiredSwordMergedRules)))
+                .Concat(BuildSkillHatredChips(warrior.Skills.Select(s => s.Item)));
             var hiredSwordMagicSchools = hiredSword?.MagicSchool is { } school ? new List<MagicSchool> { school } : null;
             return new WarriorRow(warrior, hiredSword?.Name ?? "?", BuildSpecialRuleChips(hiredSwordMergedRules), hiredSwordMagicSchools, hiredSwordHatredChips);
         }
 
+        // Même raisonnement pour un guerrier recruté depuis le catalogue Dramatis Personae (voir
+        // Warrior.IsDramatisPersona) - ni WarriorArchetypeId ni HiredSwordId ne sont renseignés pour lui,
+        // il tomberait sinon dans la branche générique ci-dessous avec archetype=null (aucune SpecialRule/
+        // MagicSchool/Hatred résolue - bug trouvé le 2026-09-01 en câblant son propre bloc de roster).
+        // RoleName vide (contrairement au Franc-Tireur ci-dessus) : Warrior.Name EST déjà le nom du
+        // personnage (voir WarbandService.RecruitDramatisPersonaAsync, persona.Name recopié tel quel à
+        // l'engagement) - afficher le nom du catalogue en RoleName aurait juste répété le titre de la
+        // carte (retour utilisateur 2026-09-01). Vide plutôt que "?" : même convention que
+        // WarriorRow.HeadCountDisplay, une chaîne vide se rend invisible dans la Grid de la carte.
+        if (warrior.DramatisPersonaId is { } dramatisPersonaId)
+        {
+            var persona = _recruitableDramatisPersonae.FirstOrDefault(p => p.Id == dramatisPersonaId);
+            var personaMergedRules = _bandWideSpecialRules.Concat(persona?.SpecialRules ?? new List<SpecialRule>()).DistinctBy(r => r.Id);
+            var personaHatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
+                .Concat(BuildRuleHatredChips(HatredSourceRules(warrior, personaMergedRules)))
+                .Concat(BuildSkillHatredChips(warrior.Skills.Select(s => s.Item)));
+            var personaMagicSchools = persona?.MagicSchool is { } personaSchool ? new List<MagicSchool> { personaSchool } : null;
+            return new WarriorRow(warrior, string.Empty, BuildSpecialRuleChips(personaMergedRules), personaMagicSchools, personaHatredChips, persona);
+        }
+
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == warrior.WarriorArchetypeId);
         var archetypeRules = archetype?.SpecialRules ?? new List<SpecialRule>();
-        // Un objet équipé (ex. Marteau des Sorcières) peut lui aussi accorder une règle spéciale - avant
-        // ce correctif, seule la fusion bande+archétype était faite, les règles portées par
-        // l'équipement n'apparaissaient jamais en chip sur la carte guerrier.
-        var equipmentRules = warrior.Equipment.SelectMany(e => e.Item.SpecialRules);
-        // Une Blessure Grave qui accorde une règle permanente (Folie 24 -> Stupidité/Frénésie, Bras
-        // amputé -> Armes à une main uniquement, voir Injury.SpecialRules) n'est PAS fusionnée ici -
-        // contrairement à l'équipement, le rappel de règle vit uniquement derrière la puce Blessure
-        // elle-même (InjuryDetailDialog affiche la SpecialRule en puce imbriquée) : demande explicite de
-        // l'utilisateur 2026-08-26, pour éviter la puce en double (une fois via "Folie : Stupidité" dans
-        // Blessures, une fois via "Stupidité" dans Règles spéciales).
-        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).Concat(equipmentRules).DistinctBy(r => r.Id);
+        // Une règle accordée par un objet équipé (ex. Marteau des Sorcières) ou par une Blessure Grave
+        // permanente (Folie 24 -> Stupidité/Frénésie, voir Injury.SpecialRules) n'est PAS fusionnée ici -
+        // chacune reste visible uniquement derrière sa propre puce (celle de l'objet/EquipmentDetailDialog,
+        // celle de la Blessure/InjuryDetailDialog qui affiche la SpecialRule en puce imbriquée) plutôt que
+        // remontée aussi dans Règles spéciales. Revenu sur la fusion équipement (2026-09-01, retour
+        // utilisateur - initialement un correctif volontaire, jugé après coup produire le même risque de
+        // puce en double déjà écarté pour les Blessures le 2026-08-26 : "une fois via ... dans Blessures,
+        // une fois via ... dans Règles spéciales").
+        var mergedRules = _bandWideSpecialRules.Concat(archetypeRules).DistinctBy(r => r.Id);
         // Un lanceur de sorts pioche dans les écoles de SA bande (pas d'affiliation propre au guerrier) -
         // voir WarriorRow.MagicSchools. Vide pour tout autre guerrier.
         var magicSchools = archetype?.IsSpellcaster == true ? _bandMagicSchools : null;
         var hatredChips = warrior.Hatreds.Select(h => new WarriorHatredChip { Item = h, Name = string.Format(Loc["WarriorsHatredChipFormat"], h.Name) })
-            .Concat(BuildRuleHatredChips(mergedRules));
+            .Concat(BuildRuleHatredChips(HatredSourceRules(warrior, mergedRules)))
+            .Concat(BuildSkillHatredChips(warrior.Skills.Select(s => s.Item)));
         return new WarriorRow(warrior, archetype?.Name ?? "?", BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
     }
 
@@ -252,6 +336,36 @@ public partial class WarbandDetailViewModel : BaseViewModel
             }
             if (rule.HatredTargetsSpellcasters)
                 chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], Loc["HatredTargetSpellcasters"]) });
+        }
+        return chips;
+    }
+
+    /// <summary>Every SpecialRule that could plausibly grant Hatred for this warrior, gathered
+    /// independently of whatever BuildSpecialRuleChips shows in "Règles spéciales" - the two sections
+    /// deliberately no longer share one list (2026-09-01, user request/regression report): "Règles
+    /// spéciales" dropped equipment-granted rules to avoid duplicate chips (see the "change partout"
+    /// note in ToRow), but "Haine" must still see them - a Hatred-granting weapon (or anything else) has
+    /// to show up there regardless of what the generic rules list decides to display. baseRules is
+    /// whatever this branch already resolved (band-wide + archetype/HiredSword/DramatisPersona's own
+    /// SpecialRules); equipment is added back in on top, specifically for this computation. Skills are
+    /// a separate source (see BuildSkillHatredChips below, e.g. Bertha's "Righteous Fury") since Skill
+    /// carries its own HatredTargetWarbandArchetypeIds rather than reusing SpecialRule's.</summary>
+    private static IEnumerable<SpecialRule> HatredSourceRules(Warrior warrior, IEnumerable<SpecialRule> baseRules) =>
+        baseRules.Concat(warrior.Equipment.SelectMany(e => e.Item.SpecialRules)).DistinctBy(r => r.Id);
+
+    /// <summary>Same explosion as BuildRuleHatredChips, reading Skill.HatredTargetWarbandArchetypeIds
+    /// instead of SpecialRule's - e.g. Bertha's "Righteous Fury" (Skill, Sœurs de Sigmar) grants Hatred
+    /// against Skaven/Undead/Possédés/Hommes-Bêtes. Skill has no spellcaster-trait target equivalent to
+    /// SpecialRule.HatredTargetsSpellcasters, so this only explodes the band-target list. Added
+    /// 2026-09-01 per user request ("des skill" - the one Hatred source not yet covered by
+    /// HatredSourceRules).</summary>
+    private List<WarriorHatredChip> BuildSkillHatredChips(IEnumerable<Skill> skills)
+    {
+        var chips = new List<WarriorHatredChip>();
+        foreach (var skill in skills)
+        {
+            foreach (var targetId in skill.HatredTargetWarbandArchetypeIds)
+                chips.Add(new WarriorHatredChip { Name = string.Format(Loc["WarriorsHatredChipFormat"], _warbandArchetypeNames.GetValueOrDefault(targetId, "?")) });
         }
         return chips;
     }
@@ -283,6 +397,39 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ShowHistoryTab() => ShowHistory = true;
 
+    /// <summary>"Rendre hostile" - Une Poignée d'Or (2026-09-01, Ulli &amp; Marquand uniquement, see
+    /// WarriorRow.CanToggleHostile). Purely a manual player-facing bookkeeping toggle: the app can't
+    /// detect a mid-battle secret bribe itself (see the SpecialRule's own description), so the player
+    /// flips this once an enemy successfully corrupts the pair. Persists immediately (same
+    /// no-Enregistrer-button convention as ShowInventory) and recomputes Rating right away, excluding
+    /// their contribution while the flag is set (see LoadAsync). Bascule TOUJOURS les deux moitiés de la
+    /// paire ensemble (2026-09-01, retour utilisateur) - Ulli et Marquand sont corrompus ou non comme un
+    /// seul bloc dans le livre, jamais l'un sans l'autre ; tapoter la carte de l'un des deux suffit,
+    /// l'autre suit automatiquement au même état (pas un toggle indépendant du sien).</summary>
+    [RelayCommand]
+    private async Task ToggleHostile(WarriorRow row)
+    {
+        if (Warband is null) return;
+
+        var newValue = !row.IsHostileThisBattle;
+        row.IsHostileThisBattle = newValue;
+        row.Warrior.IsHostileThisBattle = newValue;
+        await _warbandService.SaveWarriorAsync(row.Warrior);
+
+        var persona = _recruitableDramatisPersonae.FirstOrDefault(p => p.Id == row.Warrior.DramatisPersonaId);
+        if (persona?.PairedWithDramatisPersonaId is { } partnerId
+            && DramatisPersonae.FirstOrDefault(r => r.Warrior.DramatisPersonaId == partnerId) is { } partnerRow
+            && partnerRow.IsHostileThisBattle != newValue)
+        {
+            partnerRow.IsHostileThisBattle = newValue;
+            partnerRow.Warrior.IsHostileThisBattle = newValue;
+            await _warbandService.SaveWarriorAsync(partnerRow.Warrior);
+        }
+
+        Rating = AllActiveWarriorRows.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
+            r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
+    }
+
     [RelayCommand]
     private async Task EditWarrior(WarriorRow row)
     {
@@ -296,7 +443,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
         // tous les Starting*/IncreasedCharacteristics/SickGamesRemaining/Hatreds manquaient déjà tous,
         // silencieusement effacés à chaque édition - CanUseEquipment=false est précisément ce qui masque
         // le bouton "+" équipement d'un Franc-Tireur, donc ce trou touchait directement la nouvelle
-        // fonctionnalité, pas seulement un bug préexistant sans rapport).
+        // fonctionnalité, pas seulement un bug préexistant sans rapport). Même classe de bug trouvée en
+        // passant le 2026-09-01 en câblant IsHostileThisBattle (Une Poignée d'Or) :
+        // DramatisPersonaId/DramatisPersonaRatingBonus manquaient déjà tous les deux - éditer un guerrier
+        // recruté depuis le catalogue Dramatis Personae via ce bouton Éditer effaçait silencieusement son
+        // lien vers son personnage catalogue au premier Enregistrer. Corrigé au passage.
         var copy = new Warrior
         {
             Id = w.Id,
@@ -305,6 +456,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
             HiredSwordId = w.HiredSwordId,
             HiredSwordBaseRating = w.HiredSwordBaseRating,
             HiredSwordUpkeepPrepaid = w.HiredSwordUpkeepPrepaid,
+            DramatisPersonaId = w.DramatisPersonaId,
+            DramatisPersonaRatingBonus = w.DramatisPersonaRatingBonus,
+            IsHostileThisBattle = w.IsHostileThisBattle,
             Name = w.Name,
             IsHero = w.IsHero,
             Cost = w.Cost,

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Features.Warbands.EndOfGame;
 using MordheimLedgerApp.Features.Warbands.StartGame;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
@@ -20,7 +21,7 @@ public partial class WarbandDetailViewModel
         if (Warband is null) return;
 
         var unavailableWarriors = new List<UnavailableWarriorRow>();
-        foreach (var row in Heroes.Concat(Henchmen).Where(r => r.Warrior.Status == WarriorStatus.Sick))
+        foreach (var row in AllActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick))
             unavailableWarriors.Add(new UnavailableWarriorRow(row, row.SickChipText));
         foreach (var row in RetiredWarriors)
             unavailableWarriors.Add(new UnavailableWarriorRow(row, Loc["WarriorStatusRetired"]));
@@ -37,7 +38,7 @@ public partial class WarbandDetailViewModel
         // guerrier qui a accumulé 2 Vieilles blessures distinctes (2 résultats Serious Injury différents
         // tombés sur 32 au fil des parties) teste chacune indépendamment, un seul échec parmi ses jets
         // suffit à le sortir de la partie (OldWoundWarriorEntry.HasFailure).
-        var oldWoundEntries = Heroes.Concat(Henchmen)
+        var oldWoundEntries = AllActiveWarriorRows
             .Where(r => r.Warrior.Status == WarriorStatus.Active)
             .Select(r => (r.Warrior, Count: r.Warrior.Injuries.Count(i => InjuryCatalogLookup.RollRangeMatches(i.Item.RollRange, 32))))
             .Where(x => x.Count > 0)
@@ -45,7 +46,20 @@ public partial class WarbandDetailViewModel
                 Enumerable.Range(1, x.Count).Select(n => new OldWoundRollEntry(x.Count > 1 ? $"{Loc["StartGameOldWoundRollLabel"]} {n}" : string.Empty)).ToList()))
             .ToList();
 
-        var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, Warband.NextGameNote);
+        // Aide conditionnelle (ex. Bertha) : voir DramatisPersonaAidEntry - vérifié ICI (pas à la Fin de
+        // Partie) car c'est le seul moment où le prochain adversaire est sur le point d'être connu. Un
+        // guerrier Actif recruté depuis le catalogue Dramatis Personae (Warrior.DramatisPersonaId) dont
+        // l'entrée exige RequiresRatingDisadvantage obtient sa carte - même filtre Status == Active que
+        // OldWoundEntries ci-dessus (un guerrier Malade/Mort/Retraité ne combat de toute façon pas cette
+        // partie, inutile de lui faire passer ce test).
+        var dramatisPersonaeById = (await _libraryService.GetDramatisPersonaeAsync(LocalizationService.Instance.Language)).ToDictionary(p => p.Id);
+        var aidEntries = AllActiveWarriorRows
+            .Where(r => r.Warrior.Status == WarriorStatus.Active)
+            .Where(r => r.Warrior.DramatisPersonaId is { } id && dramatisPersonaeById.TryGetValue(id, out var persona) && persona.RequiresRatingDisadvantage)
+            .Select(r => new DramatisPersonaAidEntry(r.Warrior, dramatisPersonaeById[r.Warrior.DramatisPersonaId!.Value].Name, Rating))
+            .ToList();
+
+        var dialogViewModel = new StartGameDialogViewModel(unavailableWarriors, oldWoundEntries, aidEntries, Warband.NextGameNote);
         if (await ShowDialogAsync(new StartGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -66,6 +80,17 @@ public partial class WarbandDetailViewModel
                 await _warbandService.SaveWarriorAsync(entry.Warrior);
                 sentences.Add(string.Format(Loc["HistoryOldWoundFailSentence"], entry.Warrior.Name));
             }
+            // Aide conditionnelle ratée (ex. Bertha : écart trop faible ou jet manqué) - voir
+            // DramatisPersonaAidEntry.WontFight. Retrait immédiat plutôt que d'attendre la Fin de Partie
+            // (ApplyWandererDeparturesAsync la retirerait de toute façon puisqu'elle est Vagabonde, mais
+            // seulement une fois cette bataille "traitée" - la retirer ICI reflète honnêtement qu'elle
+            // n'a jamais rejoint la bande pour cette partie, retour utilisateur 2026-09-01).
+            foreach (var entry in dialogViewModel.AidEntries.Where(e => e.WontFight))
+            {
+                await _warbandService.DeleteWarriorAsync(entry.Warrior.Id);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaDepartedSentence"], entry.Warrior.Name));
+            }
+
             if (sentences.Count > 0)
                 await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
 

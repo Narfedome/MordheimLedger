@@ -29,6 +29,21 @@ public partial class EndOfGameDialogViewModel
                         valid &= CheckRoll(!sub.HasValidDeepWoundSubRoll, () => sub.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
                     if (sub.ShowCapturedChoice && sub.IsRansomed)
                         valid &= CheckRoll(!sub.HasValidRansomAmount, () => sub.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+
+                    // 2026-09-04, retour utilisateur ("les rolls des blessures doivent être les mêmes
+                    // qu'une blessure classique") : un sous-jet doit valider Rancune/la branche exactement
+                    // comme le jet principal ci-dessus - Vendu aux Fosses (65) est validé à part, sur sa
+                    // propre étape (voir ValidatePitFightStep, une étape par occurrence).
+                    if (sub.ShowHatredSection)
+                    {
+                        if (sub.HatredScope is null)
+                            valid &= CheckRoll(true, () => sub.HatredRollError = Loc["EndOfGameRollRequired"]);
+                        else
+                            valid &= CheckRoll(!sub.HasHatredTarget, () => sub.HatredRollError = Loc["EndOfGameHatredTargetRequired"]);
+                    }
+
+                    if (sub.ShowInjuryBranchSubRoll)
+                        valid &= CheckRoll(!sub.HasValidInjuryBranchSubRoll, () => sub.InjuryBranchRollError = Loc["EndOfGameRollRequired"]);
                 }
             }
 
@@ -48,18 +63,6 @@ public partial class EndOfGameDialogViewModel
 
             if (row.ShowCapturedChoice && row.IsRansomed)
                 valid &= CheckRoll(!row.HasValidRansomAmount, () => row.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
-
-            if (row.ShowSoldToThePits && !row.WonPitFight)
-            {
-                foreach (var reroll in row.SoldToPitsRerollRoll)
-                {
-                    valid &= CheckRoll(string.IsNullOrWhiteSpace(reroll.InjuryResultText), () => reroll.RollError = Loc["EndOfGameRollRequired"]);
-                    if (reroll.ShowDeepWoundSubRoll)
-                        valid &= CheckRoll(!reroll.HasValidDeepWoundSubRoll, () => reroll.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
-                    if (reroll.ShowCapturedChoice && reroll.IsRansomed)
-                        valid &= CheckRoll(!reroll.HasValidRansomAmount, () => reroll.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
-                }
-            }
         }
         else
         {
@@ -67,6 +70,28 @@ public partial class EndOfGameDialogViewModel
                 valid &= CheckRoll(string.IsNullOrWhiteSpace(figure.InjuryResultText), () => figure.RollError = Loc["EndOfGameRollRequired"]);
         }
 
+        return valid;
+    }
+
+    /// <summary>Étape "Vendu aux Fosses", extraite de la carte Blessure le 2026-09-04 (retour utilisateur -
+    /// voir IsPitFightStep). Depuis la même date, une étape par occurrence (jet principal ou sous-jet
+    /// "Blessures multiples") - CurrentPitFightOutcome (IPitFightOutcome) pointe vers la bonne selon
+    /// Current.SubRoll, donc plus besoin d'un paramètre WarriorOutcomeRow ici. Rien à valider en cas de
+    /// victoire (WonPitFight) ; en cas de défaite, le sous-jet de relance (SoldToPitsRerollRoll) doit
+    /// être complet.</summary>
+    private bool ValidatePitFightStep()
+    {
+        if (CurrentPitFightOutcome is not { } outcome || outcome.WonPitFight) return true;
+
+        var valid = true;
+        foreach (var reroll in outcome.SoldToPitsRerollRoll)
+        {
+            valid &= CheckRoll(string.IsNullOrWhiteSpace(reroll.InjuryResultText), () => reroll.RollError = Loc["EndOfGameRollRequired"]);
+            if (reroll.ShowDeepWoundSubRoll)
+                valid &= CheckRoll(!reroll.HasValidDeepWoundSubRoll, () => reroll.DeepWoundRollError = Loc["EndOfGameRollRequired"]);
+            if (reroll.ShowCapturedChoice && reroll.IsRansomed)
+                valid &= CheckRoll(!reroll.HasValidRansomAmount, () => reroll.CapturedChoiceError = Loc["EndOfGameRollRequired"]);
+        }
         return valid;
     }
 
@@ -129,6 +154,16 @@ public partial class EndOfGameDialogViewModel
     [RelayCommand]
     private void AutoRollSubDeepWound(InjurySubRollEntry entry) => entry.DeepWoundSubRoll = SeriousInjuryEffectTable.RollD3().ToString();
 
+    // Même sous-jet de Rancune (56)/de branche (23/25/24) qu'AutoRollHatred/AutoRollInjuryBranch
+    // ci-dessous, pour un sous-jet "Blessures multiples" qui tombe lui-même sur ces résultats
+    // (2026-09-04, retour utilisateur - "les rolls des blessures doivent être les mêmes qu'une
+    // blessure classique").
+    [RelayCommand]
+    private void AutoRollSubHatred(InjurySubRollEntry entry) => entry.HatredSubRoll = HatredTargetTable.RollDice().ToString();
+
+    [RelayCommand]
+    private void AutoRollSubInjuryBranch(InjurySubRollEntry entry) => entry.InjuryBranchSubRoll = SeriousInjuryEffectTable.RollSubDie().ToString();
+
     // Portée "toutes les bandes de ce type" (6) uniquement - la seule portée référençant un vrai
     // WarbandArchetype du catalogue (les 3 autres sont résolues à la frappe dans un simple champ texte,
     // voir WarriorOutcomeRow.OnHatredTargetFreeTextInputChanged - l'appli ne suit pas les bandes/
@@ -145,18 +180,34 @@ public partial class EndOfGameDialogViewModel
         row.SetHatredTarget(archetypes[index]);
     }
 
+    // Même dialog, pour un sous-jet "Blessures multiples" qui tombe lui-même sur la portée 6 de
+    // Rancune (2026-09-04, retour utilisateur).
+    [RelayCommand]
+    private async Task PickSubHatredWarbandArchetype(InjurySubRollEntry entry)
+    {
+        var archetypes = await _libraryService.GetWarbandArchetypesAsync(Loc.Language);
+        var index = await ShowActionSheetIndexAsync(Loc["EndOfGameHatredPickWarbandArchetype"], archetypes.Select(a => a.Name).ToArray());
+        if (index < 0) return;
+
+        entry.SetHatredTarget(archetypes[index]);
+    }
+
     // Confirmation de la portée 6 en chip (ChipView), même langage tap-to-detail/croix-pour-retirer que
     // le reste de l'app plutôt qu'un label brut.
     [RelayCommand]
     private Task ShowHatredArchetypeDetail(WarbandArchetype archetype) => _detailDialogs.ShowWarbandArchetypeDetailDialogAsync(archetype);
 
-    // ChipView ne transmet que l'item tapé (l'archétype lui-même, pas son WarriorOutcomeRow propriétaire)
-    // - même patron que RemoveAdvanceSkill/RemoveAdvanceSpell (EndOfGameDialogViewModel.Advance.cs).
+    // ChipView ne transmet que l'item tapé (l'archétype lui-même, pas son propriétaire) - même patron
+    // que RemoveAdvanceSkill/RemoveAdvanceSpell (EndOfGameDialogViewModel.Advance.cs). Cherche aussi
+    // parmi les sous-jets "Blessures multiples" (2026-09-04) : la chip peut venir d'un jet principal OU
+    // d'un sous-jet, une seule commande partagée gère les deux.
     [RelayCommand]
     private void RemoveHatredArchetype(WarbandArchetype archetype)
     {
         foreach (var row in WarriorRows.Where(r => r.HatredTargetWarbandArchetype == archetype))
             row.ClearHatredTargetWarbandArchetype();
+        foreach (var sub in WarriorRows.SelectMany(r => r.MultipleInjuryRolls).Where(s => s.HatredTargetWarbandArchetype == archetype))
+            sub.ClearHatredTargetWarbandArchetype();
     }
 
     // Rappel de règle pour une branche qui accorde une SpecialRule permanente (Folie 24 -> Stupidité/
@@ -182,4 +233,16 @@ public partial class EndOfGameDialogViewModel
     // un vrai EquipmentItem, pas un WarriorEquipment (ce Gladiateur n'est jamais recruté).
     [RelayCommand]
     private Task ShowPitFighterEquipmentDetail(EquipmentItem item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item);
+
+    /// <summary>Règles spéciales de combat du "vrai" guerrier côté "Ce guerrier"/"Le meneur" (WarriorOutcomeRow.
+    /// SpecialRules, déjà fusionné - voir sa doc) - 2026-09-04, retour utilisateur ("il faut rajouter dans
+    /// les 2 cas les règles spéciales du combat"). Partagé entre Vendu aux Fosses (Injury) et Duel avec le
+    /// meneur (PairDuel) : même type de chip des deux côtés, pas de raison de dupliquer la commande.</summary>
+    [RelayCommand]
+    private Task ShowWarriorSpecialRuleDetail(SpecialRuleChip item) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(item.Item);
+
+    /// <summary>Règles spéciales du Gladiateur (HiredSword.SpecialRules, déjà résolues côté catalogue) -
+    /// même contexte que ShowWarriorSpecialRuleDetail ci-dessus, côté adversaire de Vendu aux Fosses.</summary>
+    [RelayCommand]
+    private Task ShowPitFighterSpecialRuleDetail(SpecialRule item) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(item);
 }

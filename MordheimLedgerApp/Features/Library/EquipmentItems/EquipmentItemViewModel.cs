@@ -98,6 +98,41 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     public bool IsCategoryLocked => LockedCategory.HasValue;
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) for the End of Game "Objets rares" step -
+    /// excludes common (Rarity null) MissileWeapon/BlackPowderWeapon/Armour items, which have no search
+    /// path at all in that context (no Rarity to roll against, and Gromril/Ithilmar only apply to melee
+    /// weapons - see RareItemSearchEntry.IsMaterialEligible): showing them would just be dead-end
+    /// clutter. Every other category (MeleeWeapon - common ones ARE searchable via a material - Misc/
+    /// Consumable/etc.) and any genuinely Rare item regardless of category stay visible - user request
+    /// 2026-08-28, explicit that the restriction is "juste pour les armes/armure", not the whole
+    /// catalog. False everywhere else.</summary>
+    public bool RareSearchMode { get; set; }
+
+    /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants at most one item
+    /// picked at a time (e.g. the End of Game "Objets rares" step - a Hero nominates ONE item to attempt
+    /// their single roll against, "You may also only make one roll for each Hero"). Tapping a new tile
+    /// replaces any previous selection instead of adding to it - see Select. False everywhere else
+    /// (Library CRUD tab, every normal multi-item purchase picker).</summary>
+    public bool SingleSelectMode { get; set; }
+
+    /// <summary>Set by EquipmentPickerService (before LoadData) for the End of Game "Recrutement" step -
+    /// a newly hired recruit "can only buy Common items from his warband's equipment chart freely...
+    /// may only be given Rare items if the warband can obtain them via the normal trading rules"
+    /// (rulebook, "New Recruits") - excludes every item with a Rarity value (EquipmentItem.Rarity.
+    /// HasValue), regardless of category or AllowedEquipmentListItemIds membership. False everywhere
+    /// else (every other picker still lets a Rare list member through).</summary>
+    public bool CommonOnly { get; set; }
+
+    /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants a "Réserve" section
+    /// pinned at the top of the picker, listing items the warband already has in stock - keyed by
+    /// EquipmentItem.Id. Quantity is summed across materials (still just one tile per Item, not per
+    /// variant - EquipmentItemRow/EquipmentItemView show one tile per Item), but MaterialRule carries a
+    /// REPRESENTATIVE material for that stock when one exists (ex. Gromril, or a dedicated "Ornate Weapon"
+    /// rule for an Exploration find) - retour utilisateur 2026-09-21, "dans le sélecteur on affiche aussi
+    /// si il y a un matériau sur l'arme" - shown as a name suffix (EquipmentItemRow.NameDisplay). Null
+    /// (every other picker) omits the section entirely.</summary>
+    public IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? ReserveQuantities { get; set; }
+
     public bool ShowBudget => AvailableGold.HasValue;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
@@ -152,42 +187,104 @@ public partial class EquipmentItemViewModel : BaseViewModel
         IEnumerable<EquipmentItem> filtered = _allItems;
         if (SelectedCategory is { } category)
             filtered = filtered.Where(i => i.Category == category);
+        if (RareSearchMode)
+        {
+            var weaponOrArmourWithNoSearchPath = new[]
+                { EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
+            filtered = filtered.Where(i => i.Rarity.HasValue || i.Category == EquipmentCategory.MeleeWeapon
+                || !weaponOrArmourWithNoSearchPath.Contains(i.Category));
+        }
         if (AllowedWarbandArchetypeId is { } warbandId)
         {
             // Les Artefacts Magiques ne se trouvent que via la table dédiée de l'Exploration - jamais
             // achetables ni ajoutables à une liste d'équipement de départ (demande explicite de
             // l'utilisateur, 2026-08-20). Ne s'applique qu'ici (contexte "achat"/liste, jamais au Codex/
             // CRUD ci-dessus où AllowedWarbandArchetypeId reste null) - la consultation en lecture seule
-            // du Codex les affiche normalement.
-            filtered = filtered.Where(i => i.Category != EquipmentCategory.MagicalArtefact);
+            // du Codex les affiche normalement. Même exclusion pour IsUniqueArtefact (ex. l'épée d'Aenur,
+            // Ienh-Khain) - un objet unique propre à un seul Dramatis Persona, jamais achetable non plus,
+            // mais qui n'appartient à aucune des 6 Artefacts Magiques canoniques de la table d'Exploration
+            // (voir EquipmentCategory.MagicalArtefact, réservé à celle-ci - décision utilisateur 2026-08-31
+            // de ne pas réutiliser cette catégorie pour ce cas). Même principe pour IsExplorationOnly (ex.
+            // Manuel d'Entraînement, Pierres de Quartz, Améthyste, Collier) : trouvés uniquement via
+            // l'Exploration (Bijoutier etc.), jamais vendus par un marchand - certains n'ont même pas de
+            // Rarity renseignée (donc passeraient le filtre CommonOnly sans cette exclusion). Champ DÉDIÉ,
+            // pas une réutilisation d'IsSellable (retour utilisateur 2026-09-05 - "dans le json c'est pas
+            // explicite... je veux mettre un objet non achetable comme je fais ?" - les deux notions sont
+            // des faits séparés sur un même objet : IsSellable dit "revendable", IsExplorationOnly dit "pas
+            // achetable au départ", voir EquipmentItem.IsExplorationOnly's own doc).
+            filtered = filtered.Where(i => i.Category != EquipmentCategory.MagicalArtefact && !i.IsUniqueArtefact && !i.IsExplorationOnly);
 
             bool WarriorOk(EquipmentItem i) => i.RestrictedToWarriorArchetypeIds.Count == 0
                 || (AllowedWarriorArchetypeId is { } wa && i.RestrictedToWarriorArchetypeIds.Contains(wa));
 
-            filtered = AllowedEquipmentListItemIds is { } listIds
-                // Recruit picker: the assigned list is the sole source of truth for what this warrior
-                // can buy - Rare items reachable by this warrior are list members too, just narrowed to
-                // specific archetypes via RestrictedToWarriorArchetypeIds where the list is shared.
-                ? filtered.Where(i => listIds.Contains(i.Id) && WarriorOk(i))
+            bool BroadBandScoped(EquipmentItem i) =>
+                i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId);
+
+            if (AllowedEquipmentListItemIds is { } listIds)
+            {
+                // Seules les armes/armures sont vraiment rattachées à une liste d'équipement - le reste du
+                // catalogue (Divers/Consommable/Drogues/Munitions/Montures) vient du Trading Post général,
+                // jamais listé nulle part, donc pas à restreindre par liste (retour utilisateur 2026-08-28,
+                // étendu 2026-09-21 : "la liste des items dispo n'est pas limitée aux items que l'on peut
+                // équiper... on bloque juste si une arme ou une armure n'est pas présent dans la liste
+                // d'équipement du personnage" - ce même principe, jusque-là réservé à RareSearchMode, doit
+                // s'appliquer aussi au picker de recrutement/achat normal, pas seulement à la recherche
+                // d'Objets rares). Repasse sur le large "commun + objets de la bande" habituel pour tout le
+                // reste, qui exclut déjà correctement un objet restreint à une AUTRE bande (ex. Marteau des
+                // Sorcières pour des Skavens) via RestrictedToWarbandArchetypeIds, sans rapport avec les
+                // listes.
+                var listScopedCategories = new[]
+                    { EquipmentCategory.MeleeWeapon, EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
+                filtered = filtered.Where(i => listScopedCategories.Contains(i.Category)
+                    ? listIds.Contains(i.Id) && WarriorOk(i)
+                    : BroadBandScoped(i));
+            }
+            else
+            {
                 // Broad warband-scoped browse (EquipmentList editor's own "add item" picker, or a
                 // warrior with no assigned list) - common pool + this band's own items, unchanged from
                 // before EquipmentList existed.
-                : filtered.Where(i => i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId));
+                filtered = filtered.Where(BroadBandScoped);
+            }
         }
 
+        // Certains objets ont une disponibilité conditionnelle à la composition de la bande (ex.
+        // Champignons Bonnets de Fou, Rare 9 - "Common if warband includes Goblins", retour utilisateur
+        // 2026-09-05) : Rare pour tout le monde, mais Commun dès qu'on achète POUR un guerrier restreint
+        // (RestrictedToWarriorArchetypeIds) éligible - même signal qu'AllowedWarriorArchetypeId utilisé
+        // par WarriorOk ci-dessus, réévalué ici plutôt que remonté hors de son scope local. Approximation
+        // délibérée : "acheter pour CE guerrier précis" plutôt qu'une vraie recherche "la bande possède
+        // déjà un Gobelin dans son roster" (pas de contexte roster complet disponible ici) - suffisant
+        // pour le cas réel (équiper un guerrier restreint déjà recruté), pas encore pour un achat général
+        // en réserve (étape Achat/Vente) sans guerrier précis visé.
+        if (CommonOnly)
+            filtered = filtered.Where(i => !i.Rarity.HasValue
+                || (i.RestrictedToWarriorArchetypeIds.Count > 0 && AllowedWarriorArchetypeId is { } commonWa && i.RestrictedToWarriorArchetypeIds.Contains(commonWa)));
+
         var groups = new ObservableCollection<EquipmentItemGroup>();
+        var reserveGroup = ReserveQuantities is { Count: > 0 } ? new EquipmentItemGroup(LocalizationService.Instance["EndOfGameEquipmentTradingStashSource"]) : null;
         foreach (var item in filtered)
         {
             var groupName = CategoryLabel(item.Category);
             var group = groups.FirstOrDefault(g => g.Name == groupName);
             if (group is null)
             {
-                group = new EquipmentItemGroup(groupName);
+                group = new EquipmentItemGroup(groupName) { ShowHeader = ShowGroupHeaders };
                 groups.Add(group);
             }
             var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
             group.Add(new EquipmentItemRow(item, isFreeForThisPurchase));
+
+            // Une tuile "Réserve" SÉPARÉE (jamais la même instance que celle de la catégorie ci-dessus,
+            // voir EquipmentItemRow.IsReserveRow's own doc) - retour utilisateur 2026-09-21 : "aujourd'hui
+            // si on a une épée dans la réserve elle ne s'affiche plus dans la section du marché, et si on
+            // la sélectionne dans la réserve elle coûte des golds et on peut en prendre de façon
+            // illimitée" - les deux tuiles cohabitent et peuvent être choisies en même temps (ex. 2 en
+            // réserve + 1 achetée), chacune avec son propre stepper/prix/plafond.
+            if (reserveGroup is not null && ReserveQuantities!.TryGetValue(item.Id, out var reserveStock) && reserveStock.Quantity > 0)
+                reserveGroup.Add(new EquipmentItemRow(item, reserveStock.Quantity, reserveStock.MaterialRule));
         }
+        if (reserveGroup is { Count: > 0 }) groups.Insert(0, reserveGroup);
         EquipmentItemGroups = groups;
 
         SelectedRow = null;
@@ -206,7 +303,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     /// <summary>Tap sur la tuile elle-même (pas sur le stepper +/-) : bascule 0/1 exemplaire, comme avant
     /// l'ajout du stepper de quantité - IncrementQuantity/DecrementQuantity gèrent le reste une fois
-    /// sélectionnée.</summary>
+    /// sélectionnée. En SingleSelectMode, sélectionner une nouvelle tuile désélectionne d'abord toute
+    /// autre tuile déjà choisie (jamais un panier) - voir SingleSelectMode.</summary>
     [RelayCommand]
     private void Select(EquipmentItemRow row)
     {
@@ -224,6 +322,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
         }
         else
         {
+            if (SingleSelectMode)
+            {
+                foreach (var other in SelectedRows.ToList())
+                {
+                    other.Quantity = 0;
+                    other.IsSelected = false;
+                }
+                SelectedRows.Clear();
+            }
+
             row.Quantity = 1;
             row.IsSelected = true;
             SelectedRows.Add(row);
@@ -235,12 +343,15 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// <summary>Un exemplaire de plus de cette tuile - le stepper reste affiché en permanence (même à
     /// Quantity == 0), donc "+" doit aussi pouvoir sélectionner la tuile en un seul geste (0 -&gt; 1), pas
     /// seulement l'incrémenter une fois déjà sélectionnée via Select. Pas de plafond ni de vérification de
-    /// budget ici, même logique "estimation live" que BudgetDisplay ; l'affordabilité réelle est vérifiée
-    /// objet par objet au moment de l'achat (WarbandEditDialogViewModel/WarriorEditDialogViewModel.
-    /// AddEquipment), qui s'arrête au premier objet trop cher.</summary>
+    /// budget pour un achat normal, même logique "estimation live" que BudgetDisplay ; l'affordabilité
+    /// réelle est vérifiée objet par objet au moment de l'achat (WarbandEditDialogViewModel/
+    /// WarriorEditDialogViewModel.AddEquipment), qui s'arrête au premier objet trop cher. Une tuile Réserve
+    /// (row.IsReserveRow), en revanche, EST plafonnée à ReserveAvailable (row.CanIncrement) - stock déjà
+    /// possédé et limité, retour utilisateur 2026-09-21.</summary>
     [RelayCommand]
     private void IncrementQuantity(EquipmentItemRow row)
     {
+        if (!row.CanIncrement) return;
         row.Quantity++;
         if (row.Quantity == 1)
         {

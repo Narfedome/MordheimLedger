@@ -60,6 +60,7 @@
         "en": "Hatred against Skaven, Undead, Possessed, Beastmen, Dark Elves and other evil warbands.",
         "fr": "Haine envers les Skavens, Morts-vivants, Possédés, Hommes-Bêtes, Elfes Noirs et autres bandes maléfiques."
       },
+      "hatredTargetWarbandNames": ["SkavenOfClanEshin", "Undead", "CultOfThePossessed", "BeastmenRaiders"],
       "restrictedToThisWarband": true
     },
     {

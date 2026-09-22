@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -30,9 +31,9 @@ public partial class WarbandDetailViewModel
         // la prochaine fin de partie, pas celle-ci (revenu sur ce point le 2026-08-18 : l'ancienne
         // version effaçait le statut avant même de construire activeWarriorRows, donc le guerrier
         // participait normalement à la fin de partie censée représenter la partie qu'il ratait).
-        var previouslySickWarriors = Heroes.Concat(Henchmen).Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
+        var previouslySickWarriors = AllActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
 
-        var activeWarriorRows = Heroes.Concat(Henchmen)
+        var activeWarriorRows = AllActiveWarriorRows
             .Where(r => r.Warrior.Status == WarriorStatus.Active)
             .ToList();
         if (activeWarriorRows.Count == 0)
@@ -72,6 +73,12 @@ public partial class WarbandDetailViewModel
         var warbandArchetypeName = (await _libraryService.GetWarbandArchetypesAsync("en"))
             .First(a => a.Id == Warband.WarbandArchetypeId).Name;
 
+        // Étape "Recrutement" (livre, étape 8) - MaxWarriors pour RecruitmentRules.CanRecruit, voir
+        // EndOfGameDialogViewModel.Recruitment.cs. Null impossible en pratique (l'archétype de CETTE
+        // bande, déjà résolu par Warband.WarbandArchetypeId à l'ouverture de la page) - même confiance
+        // que warbandArchetypeName ci-dessus (.First, échoue fort plutôt que de tolérer un null silencieux).
+        var recruitableWarbandArchetype = (await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, language))!;
+
         // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - limité aux
         // archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
         var englishWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en");
@@ -107,9 +114,33 @@ public partial class WarbandDetailViewModel
             ? new List<EquipmentItem>()
             : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
 
-        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, Warband.WarbandArchetypeId,
-            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
-            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment);
+        // Étape "Dramatis Personae" (upkeep, voir EndOfGameDialogViewModel.DramatisPersonae.cs) + choix
+        // "payer avec l'objet alternatif" de l'étape Achat (RareItemSearchEntry.HasAlternativePaymentOption) -
+        // même catalogue localisé que localizedHiredSwords ci-dessus, même raison (résout FeeKind/Upkeep/
+        // AlternativePaymentItemId d'un personnage déjà recruté, jamais stockés sur Warrior lui-même).
+        var dramatisPersonaCatalog = await _libraryService.GetDramatisPersonaeAsync(language);
+        // Équipement de départ de chaque Dramatis Persona (Marquand & Ulli notamment, "Duel avec le
+        // meneur" - retour utilisateur 2026-09-03 : "les armes ne sont pas affichées... dans le combat
+        // contre la paire") - résolu ici en amont, même idiome que pitFighterEquipment ci-dessus :
+        // DramatisPersona.StartingEquipmentIds reste une simple liste d'ids catalogue (voir sa doc), le
+        // modèle n'a jamais porté sa propre résolution en vrais EquipmentItem. Même helper que
+        // DetailDialogService.ShowDramatisPersonaDetailDialogAsync (EquipmentQuantityChip.GroupFrom, gère
+        // les doublons - ex. Bertha "x2 Marteaux de Sigmarite" - contrairement au simple Where+Contains
+        // utilisé pour le Gladiateur), résolu pour TOUT le catalogue plutôt que seulement la paire :
+        // aussi peu coûteux, et réutilisable si un futur écran de ce wizard a besoin d'un autre Dramatis
+        // Persona.
+        var dramatisPersonaStartingEquipmentById = dramatisPersonaCatalog.ToDictionary(p => p.Id,
+            p => p.StartingEquipmentIds.Count == 0 ? new List<EquipmentQuantityChip>() : EquipmentQuantityChip.GroupFrom(p.StartingEquipmentIds, localizedEquipment));
+        var ownedEquipmentItemIds = Inventory.Select(w => w.Item.Id).ToHashSet();
+        // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - voir DramatisPersona.
+        // RequiresCooldownBeforeResearch) - exclut du picker "Personnage spécial" tout personnage encore
+        // en cooldown pour CETTE bande.
+        var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(Warband.Id);
+
+        var dialogViewModel = new EndOfGameDialogViewModel(activeWarriorRows, _skillPicker, _detailDialogs, _libraryService, _hiredSwordPicker, _equipmentPicker, _sellEquipmentPicker, _dramatisPersonaPicker, Warband.WarbandArchetypeId,
+            warbandArchetypeName, Warband.PendingExplorationBonusDie, Warband.HasCatacombReroll, Warband.Treasury, Warband.WyrdstoneShards, explorationResults, equipmentItemsByEnglishName, specialRulesByEnglishName,
+            warriorArchetypesByEnglishName, skillIdsByEnglishName, injuryCatalog, localizedHiredSwords, dramatisPersonaCatalog, dramatisPersonaStartingEquipmentById, ownedEquipmentItemIds, cooldownDramatisPersonaIds,
+            Inventory.ToList(), localizedWarriorArchetypes, recruitableWarbandArchetype, pitFighterProfile, pitFighterEquipment);
         if (await ShowDialogAsync(new EndOfGameDialog(dialogViewModel)) != true) return;
 
         await Loading.RunAsync(async () =>
@@ -119,11 +150,43 @@ public partial class WarbandDetailViewModel
             await ApplyExplorationOutcomeAsync(dialogViewModel, englishEquipment, equipmentItemsByEnglishName, englishSpecialRules, sentences);
             await ApplyWarriorOutcomesAsync(dialogViewModel, language, sentences);
             await ApplyCapturedEnemiesAsync(dialogViewModel, warriorArchetypesByEnglishName, sentences);
+            await ApplyWyrdstoneSaleAsync(dialogViewModel, sentences);
+            ApplyAvailableVeterans(dialogViewModel, sentences);
+            await ApplyRareItemSearchAsync(dialogViewModel, localizedEquipment, sentences);
+            // Délai de re-recherche (Aenur/Ulli & Marquand) : reste d'abord toute trace de cooldown
+            // PRÉEXISTANTE (posée à une Fin de Partie antérieure) - le picker de CETTE Fin de Partie les
+            // a déjà exclus, donc atteindre ce point veut dire "une bataille a été jouée sans eux",
+            // satisfaisant la condition. Doit rester AVANT ApplyWandererDeparturesAsync, qui peut poser un
+            // NOUVEAU cooldown pour un départ de CETTE Fin de Partie - sinon ce nettoyage l'effacerait
+            // aussitôt.
+            await _warbandService.ClearAllDramatisPersonaCooldownsAsync(Warband.Id);
+            await ApplyWandererDeparturesAsync(dialogViewModel, sentences);
+            await ApplyDramatisPersonaUpkeepAsync(dialogViewModel, sentences);
+            await ApplyPairEquipmentSeizureIfNeededAsync(dialogViewModel, sentences);
+            await ApplyPairDuelIfNeededAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
+            // Doit rester AVANT ApplyEquipmentTradingAsync : un guerrier renvoyé restitue son équipement à
+            // la réserve, qui doit exister en base pour que la Vente (juste après) puisse le proposer -
+            // voir SellableEquipmentCandidate.IsFromDismissal. Doit rester APRÈS ApplyWarriorOutcomesAsync
+            // (plus haut) : les morts de CETTE bataille réduisent déjà Warrior.HeadCount avant qu'on
+            // reclampe DismissCount contre l'effectif RÉEL (voir ApplyDismissalsAsync's own doc).
+            await ApplyDismissalsAsync(dialogViewModel, sentences);
+            // Doit rester AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync : ceux-ci consomment
+            // en priorité la réserve que cette étape vient de remplir/vider (voir leur propre doc). Doit
+            // rester APRÈS ApplyExplorationOutcomeAsync (plus haut) : une vente peut porter sur une
+            // trouvaille d'Exploration OU un renvoi de cette même partie (SellableEquipmentCandidate.
+            // IsFromExploration/IsFromDismissal), qui n'existent en base qu'une fois ces étapes-là
+            // appliquées.
+            await ApplyEquipmentTradingAsync(dialogViewModel, language, sentences);
+            await ApplyRecruitmentAsync(dialogViewModel, language, sentences);
+            await ApplyHenchmanRecruitmentAsync(dialogViewModel, language, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
             await ApplySicknessLifecycleAsync(dialogViewModel, previouslySickWarriors);
+            // Réallouer l'équipement : TOUT DERNIER dans le pipeline - voir ApplyEquipmentReallocationAsync's
+            // own doc, doit voir l'état final de tout ce qui précède (Renvoyer/Vente/Recrutement).
+            await ApplyEquipmentReallocationAsync(dialogViewModel, language, sentences);
 
             // La partie est terminée : redonne la main à "Lancer la partie" sur cette page (voir
             // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée (Fin de Partie
@@ -165,6 +228,18 @@ public partial class WarbandDetailViewModel
         {
             Warband.NextGameNote = null;
             await _warbandService.SaveWarbandAsync(Warband);
+        }
+
+        // "Add the results together and consult the chart..." (Core.Rules.WyrdstoneShardsTable) - un
+        // SECOND effet du même jet, entièrement additif à l'éventuel résultat de doublons/triplets
+        // ci-dessous (TriggeredExplorationResult) : s'applique TOUJOURS, même sans aucun résultat
+        // spécial déclenché. dialogViewModel.BaselineWyrdstoneShardsFound vaut 0 si aucun Héros n'a
+        // survécu (aucun dé lancé), donc rien à faire dans ce cas.
+        if (dialogViewModel.BaselineWyrdstoneShardsFound > 0)
+        {
+            Warband.WyrdstoneShards += dialogViewModel.BaselineWyrdstoneShardsFound;
+            await _warbandService.SaveWarbandAsync(Warband);
+            sentences.Add(string.Format(Loc["HistoryBaselineWyrdstoneSentence"], dialogViewModel.BaselineWyrdstoneShardsFound));
         }
 
         // Même résolution nom-anglais-vers-Id que le chargement de la page, réutilisée ici pour
@@ -261,7 +336,7 @@ public partial class WarbandDetailViewModel
                 // Traînard, branche Possédés - même idiome que BonusStatTestLeader (Bâtiment Éventré) :
                 // pas d'erreur bloquante si le chef n'est pas disponible cette partie (mort/malade/hors
                 // de combat), le bonus est simplement indisponible.
-                var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                var leader = AllActiveWarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
                 if (leader is not null)
                 {
                     leader.Warrior.Experience += leaderXp;
@@ -464,9 +539,10 @@ public partial class WarbandDetailViewModel
         //
         // branchSubRoll : pour Blessure au bras/Jambe écrasée (23/25), le catalogue a 2 entrées par roll
         // (légère "2-6"/grave "1", voir Injury.BranchRange) - non-null sélectionne la bonne, null retombe
-        // sur l'entrée générique (BranchRange vide) si elle existe, sinon une entrée arbitraire (cas
-        // hors-périmètre : un sous-jet "Blessures multiples" tombant sur 23/25 n'a pas de sous-jet de
-        // branche imbriqué dans ce wizard).
+        // sur l'entrée générique (BranchRange vide) si elle existe, sinon une entrée arbitraire. Un
+        // sous-jet "Blessures multiples" tombant sur 23/25 a bien son propre sous-jet de branche depuis
+        // le 2026-09-04 (retour utilisateur - voir ApplyInjuryRollCoreAsync plus bas), donc branchSubRoll
+        // n'est plus réservé au seul jet principal.
         async Task<Injury> GetOrCreateInjuryAsync(int roll, bool isHero, string fallbackText, int? branchSubRoll = null)
         {
             injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
@@ -492,6 +568,102 @@ public partial class WarbandDetailViewModel
             // recalculé une seule fois, pour couvrir le cas (rare) où les deux occurrences tombent dans
             // la même Fin de Partie.
             var alreadyBlindedInOneEye = warrior.Injuries.Any(i => InjuryCatalogLookup.RollRangeMatches(i.Item.RollRange, 31));
+
+            // 2026-09-04, retour utilisateur ("les rolls des blessures doivent être les mêmes qu'une
+            // blessure classique... on peut tirer 2 fois Folie qui nous fait roll la folie une fois
+            // chacun") : résout + applique UN jet D66 complet (catalogue Injury + effet Palier 1 +
+            // branche 23/25/24 + Rancune 56) - partagé par chaque sous-jet "Blessures multiples" de CE
+            // guerrier (foreach (var sub in row.MultipleInjuryRolls) plus bas) et par la relance d'un
+            // combat de gladiateur perdu (voir ApplyPitFightEntryAsync juste après), pour que les deux se
+            // comportent EXACTEMENT comme le jet principal ci-dessus plutôt que la version tronquée
+            // (Palier 1 seul, sans branche/Rancune) qui existait avant cette passe. Ne décide PAS de
+            // Mort/Capturé/Vendu aux Fosses : chaque appelant garde sa propre branche pour ça, la
+            // conséquence (HeadCount/Status/reroll) diffère légèrement selon le contexte (voir plus bas).
+            async Task<bool> ApplyInjuryRollCoreAsync(InjurySubRollEntry entry)
+            {
+                if (string.IsNullOrWhiteSpace(entry.InjuryResultText)) return false;
+
+                var entryChanged = false;
+                var hasRoll = int.TryParse(entry.ManualRoll, out var roll);
+                int? entryBranchSubRoll = entry.ShowInjuryBranchSubRoll && int.TryParse(entry.InjuryBranchSubRoll, out var branchRoll) ? branchRoll : null;
+
+                var entryOutcome = entry.ShowInjuryBranchSubRoll
+                    ? entry.InjuryBranchOutcome
+                    : hasRoll && SeriousInjuryEffectTable.TryGetOutcome(roll, alreadyBlindedInOneEye, out var o) ? o : null;
+                if (entryOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
+                    entryOutcome = entryOutcome with { Value = int.TryParse(entry.DeepWoundSubRoll, out var d3) ? d3 : SeriousInjuryEffectTable.RollD3() };
+
+                var entryIsTemporary = entryOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
+                var entryInjury = await GetOrCreateInjuryAsync(hasRoll ? roll : -1, warrior.IsHero, entry.ResolvedInjuryText, entryBranchSubRoll);
+                await _warbandService.AddWarriorInjuryAsync(warrior.Id, entryInjury, entryIsTemporary);
+                sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, entry.ResolvedInjuryText));
+
+                if (entryOutcome is not null)
+                {
+                    entryChanged |= await ApplySeriousInjuryEffectAsync(warrior, entryOutcome);
+                    if (entryOutcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
+                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
+                }
+                if (hasRoll && roll == 31) alreadyBlindedInOneEye = true;
+
+                if (entry.HasHatredTarget)
+                {
+                    await _warbandService.AddWarriorHatredAsync(warrior.Id, entry.HatredTargetWarbandArchetypeId, entry.HatredTargetFreeText);
+                    var hatredLabel = string.Format(Loc["WarriorsHatredChipFormat"], entry.HatredTargetDisplayName);
+                    sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
+                }
+
+                return entryChanged;
+            }
+
+            // Vendu aux Fosses (65) pour UNE occurrence - un sous-jet "Blessures multiples" qui tombe sur
+            // 65 (jamais le jet principal, qui garde son propre bloc plus bas, inchangé par cette passe).
+            // Même issue Victoire/Défaite que le jet principal (voir ce bloc pour la doc détaillée) :
+            // victoire = or/XP, équipement intact ; défaite = relance (entry.SoldToPitsRerollRoll),
+            // équipement perdu sans condition si le guerrier survit à cette relance.
+            async Task<bool> ApplyPitFightEntryAsync(InjurySubRollEntry entry)
+            {
+                if (entry.WonPitFight)
+                {
+                    Warband.Treasury += 50;
+                    warrior.Experience += 2;
+                    sentences.Add(string.Format(Loc["HistorySoldToPitsWonSentence"], warrior.Name));
+                    return true;
+                }
+
+                if (entry.SoldToPitsRerollRoll.FirstOrDefault() is not { } reroll || string.IsNullOrWhiteSpace(reroll.InjuryResultText))
+                    return false;
+
+                await ApplyInjuryRollCoreAsync(reroll);
+
+                if (reroll.IsDeath)
+                {
+                    warrior.Status = WarriorStatus.Dead;
+                    sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                }
+                else if (reroll.ShowCapturedChoice && reroll.IsRansomed && int.TryParse(reroll.RansomAmount, out var rerollRansom))
+                {
+                    Warband.Treasury -= rerollRansom;
+                    sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, rerollRansom));
+                }
+                else if (reroll.ShowCapturedChoice)
+                {
+                    warrior.Status = WarriorStatus.Dead;
+                    foreach (var equipment in warrior.Equipment.ToList())
+                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                    warrior.Equipment.Clear();
+                    sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
+                }
+                else
+                {
+                    foreach (var equipment in warrior.Equipment.ToList())
+                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+                    warrior.Equipment.Clear();
+                    sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
+                }
+
+                return true;
+            }
 
             if (row.ExperienceGained != 0)
             {
@@ -712,42 +884,34 @@ public partial class WarbandDetailViewModel
             }
 
             // "Blessures multiples" (16/21) : jusqu'à 6 sous-jets supplémentaires sur la table, chacun
-            // devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus.
+            // devient sa propre Injury en plus du texte "Blessures multiples" ci-dessus - même
+            // résolution complète que le jet principal (branche 23/25/24, Rancune 56, Vendu aux Fosses
+            // 65 avec sa propre relance, Mort) depuis le 2026-09-04 (retour utilisateur - "les rolls des
+            // blessures doivent être les mêmes qu'une blessure classique"), voir ApplyInjuryRollCoreAsync/
+            // ApplyPitFightEntryAsync plus haut. Un sous-jet tombant lui-même sur "Blessures multiples"
+            // (16/21) n'explose PAS en sous-sous-jets (confirmé explicitement par l'utilisateur - "pour
+            // une 2ème blessure multiple, on ne peut pas en envoyer une autre si on est déjà en blessure
+            // multiple") : il reste simplement le texte de référence créé par ApplyInjuryRollCoreAsync,
+            // sans branche supplémentaire (cette entrée n'a jamais porté de mécanisme d'explosion).
             foreach (var sub in row.MultipleInjuryRolls)
             {
                 if (string.IsNullOrWhiteSpace(sub.InjuryResultText)) continue;
 
-                var hasSubRoll = int.TryParse(sub.ManualRoll, out var subRoll);
+                changed |= await ApplyInjuryRollCoreAsync(sub);
 
-                // Même table Palier 1 que le jet principal ci-dessus (un sous-jet "Blessures multiples"
-                // est un jet D66 complet sur cette même table) - à l'exception de la branche 23/25, qui
-                // n'a pas de sous-jet dédié ici (pas de second niveau de jet imbriqué dans ce wizard,
-                // décision de portée) : reste texte de référence pur pour ce cas précis, comme avant
-                // cette passe (GetOrCreateInjuryAsync retombe alors sur l'entrée catalogue générique).
-                var subOutcome = hasSubRoll && SeriousInjuryEffectTable.TryGetOutcome(subRoll, alreadyBlindedInOneEye, out var o) ? o : null;
-
-                // Même principe que pour le jet principal ci-dessus : le nombre de parties manquées est
-                // le 1D3 saisi par le joueur (sub.DeepWoundSubRoll), pas un jet invisible.
-                if (subOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
-                    subOutcome = subOutcome with { Value = int.TryParse(sub.DeepWoundSubRoll, out var subD3) ? subD3 : SeriousInjuryEffectTable.RollD3() };
-
-                var subIsTemporary = subOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
-
-                var subInjury = await GetOrCreateInjuryAsync(hasSubRoll ? subRoll : -1, warrior.IsHero, sub.InjuryResultText);
-                await _warbandService.AddWarriorInjuryAsync(warrior.Id, subInjury, subIsTemporary);
-                sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, sub.InjuryResultText));
-
-                if (subOutcome is not null)
+                // Mort (11-15) : jusqu'à cette passe, un sous-jet tombant sur la Mort n'était PAS
+                // appliqué du tout (seul Capturé l'était) - un vrai manque, pas seulement Rancune/
+                // Branche/Vendu aux Fosses. Le jet principal n'a pas besoin de ce bloc : sa propre Mort
+                // passe par row.Status (déjà appliqué plus haut, avant ce sous-jet).
+                if (sub.IsDeath)
                 {
-                    changed |= await ApplySeriousInjuryEffectAsync(warrior, subOutcome);
-                    if (subOutcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
-                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
+                    warrior.Status = WarriorStatus.Dead;
+                    sentences.Add(string.Format(Loc["HistoryDeathSentence"], warrior.Name));
+                    changed = true;
                 }
-                if (hasSubRoll && subRoll == 31) alreadyBlindedInOneEye = true;
-
                 // Capturé (61) : même principe que le jet principal ci-dessus, pour un sous-jet
                 // "Blessures multiples" qui tombe lui-même sur 61.
-                if (sub.ShowCapturedChoice)
+                else if (sub.ShowCapturedChoice)
                 {
                     if (sub.IsRansomed && int.TryParse(sub.RansomAmount, out var subRansomAmount))
                     {
@@ -763,6 +927,13 @@ public partial class WarbandDetailViewModel
                         sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     changed = true;
+                }
+                // Vendu aux Fosses (65) : même principe, pour un sous-jet qui tombe lui-même sur 65 - sa
+                // propre étape de combat de gladiateur (EndOfGameDialogViewModel.Steps, une étape par
+                // occurrence, 2026-09-04 retour utilisateur).
+                else if (sub.ShowSoldToThePits)
+                {
+                    changed |= await ApplyPitFightEntryAsync(sub);
                 }
             }
 
@@ -855,7 +1026,7 @@ public partial class WarbandDetailViewModel
                     break;
 
                 case CapturedEnemyFate.SacrificedForXp:
-                    var leader = Heroes.Concat(Henchmen).FirstOrDefault(r => r.Warrior.IsLeader);
+                    var leader = AllActiveWarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
                     if (leader is not null)
                     {
                         leader.Warrior.Experience += 1;
@@ -865,6 +1036,316 @@ public partial class WarbandDetailViewModel
                     break;
             }
         }
+    }
+
+    /// <summary>Étape "Vente de pierre magique" (livre, étape 4 - EndOfGameDialogViewModel.
+    /// IsWyrdstoneSaleStep) : absente du wizard si le stock était vide à l'ouverture (voir Steps), donc
+    /// ShardsToSell reste à 0 par défaut dans ce cas - rien à faire, pas besoin de re-vérifier ici.</summary>
+    private async Task ApplyWyrdstoneSaleAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null || dialogViewModel.ShardsToSell <= 0) return;
+
+        var gold = dialogViewModel.WyrdstoneSaleValue;
+        Warband.WyrdstoneShards -= dialogViewModel.ShardsToSell;
+        Warband.Treasury += gold;
+        await _warbandService.SaveWarbandAsync(Warband);
+        sentences.Add(string.Format(Loc["HistoryWyrdstoneSaleSentence"], dialogViewModel.ShardsToSell, gold));
+    }
+
+    /// <summary>Étape "Disponibilité des Vétérans" (livre, étape 5 - EndOfGameDialogViewModel.
+    /// IsAvailableVeteransStep) : toujours présente dans le wizard, donc VeteranExperienceRoll est
+    /// toujours renseigné ici (bloqué par ValidateAvailableVeteransStep sinon). Contrairement à un
+    /// premier essai de ce chantier, ce pool n'est PAS persisté sur Warband - retour utilisateur
+    /// 2026-08-28, texte du livre à l'appui ("Nouvelles recrues et groupes d'Hommes de main existants",
+    /// p.144) : ce jet ne sert qu'à recruter DURANT CETTE séquence (étape 8, pas encore construite), les
+    /// points excédentaires sont perdus, rien ne se cumule d'une Fin de Partie à l'autre. Juste une
+    /// entrée d'Historique pour trace du jet, aucun état durable.</summary>
+    private void ApplyAvailableVeterans(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (!int.TryParse(dialogViewModel.VeteranExperienceRoll, out var pool)) return;
+
+        sentences.Add(string.Format(Loc["HistoryAvailableVeteransSentence"], pool));
+    }
+
+    /// <summary>Étapes "Objets rares" + "Achat" (livre, étape 6, scindée en 2 - EndOfGameDialogViewModel.
+    /// IsRareItemsStep/IsRareItemPurchaseStep, retour utilisateur 2026-08-28 : jamais d'achat automatique
+    /// sur un jet réussi, une case "Acheter" décidée par le joueur sur une étape séparée) : chaque
+    /// recherche réellement ACHETÉE (RareItemSearchEntry.IsPurchased - jet réussi ET case cochée ET prix
+    /// définitivement connu, le step Achat bloquant Next si le total coché dépasserait la trésorerie) va
+    /// dans l'inventaire de bande NON assigné (IWarbandService.AddWarbandEquipmentAsync, même flux qu'un
+    /// objet trouvé en Exploration - à équiper plus tard via WarbandInventoryDialog), payé (Warband.
+    /// Treasury -= EffectiveCost, prix de base ajusté Gromril/Ithilmar si un matériau est attaché PLUS le
+    /// supplément de prix variable éventuel - voir RareItemSearchEntry.EffectiveCost/HasVariablePrice) et
+    /// emporte la SpecialRule avec elle (MaterialRule, même mécanisme que "Épée Ornée" - Charrette
+    /// Renversée). Une recherche sans objet choisi, ratée, ou décochée ne fait rien pour ce Héros -
+    /// aucune pénalité au livre dans aucun de ces cas.</summary>
+    /// <summary>Étape Achat/Recrutement (EndOfGameDialogViewModel.IsRareItemPurchaseStep) - traite les
+    /// deux modes (RareItemSearchEntry.IsSearchingForCharacter) : objets achetés (IsPurchased, inchangé)
+    /// ET personnages recrutés (IsRecruited). Un personnage à frais en or (RareItemSearchEntry.
+    /// HasHireCost - Johann/Veskit/Marianna, PAS Bertha/None ni Nicodemus/Wyrdstone ni Ulli & Marquand/
+    /// Pair) prélève désormais réellement son HireCost sur la trésorerie (2026-09-01, user request),
+    /// SAUF s'il a un objet de paiement alternatif ET que le joueur a coché cette option
+    /// (IsPayingWithAlternativeItem, ex. Johann/Ombre Cramoisie) - dans ce cas un exemplaire de l'objet
+    /// est retiré de l'inventaire de bande à la place (retrait total de la pile, voir DramatisPersona.
+    /// AlternativePaymentItemId's own doc - pas de mécanisme de pile partielle dans cette app). Un
+    /// personnage sans frais (Bertha) reste inséré gratuitement comme avant.</summary>
+    private async Task ApplyRareItemSearchAsync(EndOfGameDialogViewModel dialogViewModel, List<EquipmentItem> localizedEquipment, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var entry in dialogViewModel.RareItemSearchEntries.Where(e => e.IsPurchased))
+        {
+            var item = entry.SelectedItem!;
+            Warband.Treasury -= entry.EffectiveCost!.Value;
+            await _warbandService.SaveWarbandAsync(Warband);
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, item, materialRule: entry.SelectedMaterial);
+            var displayName = entry.SelectedMaterial is { } material ? $"{item.Name} ({material.Abbreviation})" : item.Name;
+            sentences.Add(string.Format(Loc["HistoryRareItemFoundSentence"], entry.HeroName, displayName));
+        }
+
+        foreach (var entry in dialogViewModel.RareItemSearchEntries.Where(e => e.IsRecruited))
+        {
+            var persona = entry.SelectedCharacter!;
+
+            // Recrute UN personnage (persona ou son partenaire de paire) - factorisé car Ulli & Marquand
+            // (2026-09-01, "vous devez les recruter tous les deux pour une bataille") appellent ceci deux
+            // fois pour un seul frais (voir plus bas), tous les autres personnages une seule fois.
+            // "id => catalog.First(...)" plutôt que "catalog.Where(id contains)" - ce dernier itère le
+            // CATALOGUE (jamais deux fois le même EquipmentItem), donc perdrait silencieusement un doublon
+            // (ex. Bertha : StartingEquipmentIds contient deux fois l'id du Marteau de Guerre Sigmarite,
+            // voir DramatisPersonae.json - retour utilisateur 2026-09-01, "j'ai pas réussi à le gérer").
+            // RecruitDramatisPersonaAsync regroupe ensuite ces doublons en une seule WarriorEquipment row
+            // à Quantity=2 plutôt que deux rows identiques.
+            async Task RecruitOneAsync(DramatisPersona toRecruit)
+            {
+                var recruitEquipment = toRecruit.StartingEquipmentIds
+                    .Select(itemId => localizedEquipment.FirstOrDefault(e => e.Id == itemId))
+                    .Where(item => item is not null)
+                    .Select(item => item!)
+                    .ToList();
+                await _warbandService.RecruitDramatisPersonaAsync(Warband.Id, toRecruit, toRecruit.Name, recruitEquipment, toRecruit.Skills);
+            }
+
+            if (entry.HasWyrdstoneCost)
+            {
+                // Nicodemus - "he has no interest in gold... must be paid a wyrdstone shard when he
+                // joins the warband" (2026-09-01, "on a qu'a brancher la wyrstone à son paiement"). Pas
+                // de repli sur l'or : il n'a aucune option de paiement en or, contrairement à Johann.
+                Warband.WyrdstoneShards -= entry.EffectiveWyrdstoneCostForShards;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWyrdstoneSentence"], entry.HeroName, persona.Name));
+            }
+            else if (!entry.HasHireCost)
+            {
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
+            }
+            else if (entry.IsPayingWithAlternativeItem
+                && Inventory.FirstOrDefault(w => w.Item.Id == persona.AlternativePaymentItemId) is { } paymentStash)
+            {
+                await _warbandService.RemoveWarbandEquipmentAsync(paymentStash.Id);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWithItemSentence"], entry.HeroName, persona.Name, paymentStash.Item.Name));
+            }
+            else
+            {
+                // Repli sur l'or si "payer avec l'objet" était coché mais que l'objet a entre-temps
+                // disparu de l'inventaire (deux Héros cherchant/recrutant le même personnage la même Fin
+                // de Partie, cas limite non bloqué par l'UI) - même comportement que si la case n'avait
+                // jamais été cochée. Couvre aussi Ulli & Marquand (FeeKind.Pair, "30 Couronnes d'Or pour
+                // les deux" - un seul HireCost partagé, jamais doublé) : sentence dédiée nommant les deux
+                // quand persona.PairedWithDramatisPersona est renseigné.
+                Warband.Treasury -= persona.HireCost!.Value;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(persona.PairedWithDramatisPersona is { } pairPartner
+                    ? string.Format(Loc["HistoryDramatisPersonaPairRecruitedGoldSentence"], entry.HeroName, persona.Name, pairPartner.Name, persona.HireCost!.Value)
+                    : string.Format(Loc["HistoryDramatisPersonaRecruitedGoldSentence"], entry.HeroName, persona.Name, persona.HireCost!.Value));
+            }
+
+            await RecruitOneAsync(persona);
+            // "Ulli et Marquand ne se séparent jamais et vous devez les recruter tous les deux pour une
+            // bataille" - recrute automatiquement le partenaire caché du picker (voir
+            // DramatisPersona.IsHiddenFromSearchPicker), sans frais supplémentaire (déjà couvert ci-dessus).
+            if (persona.PairedWithDramatisPersona is { } partner)
+                await RecruitOneAsync(partner);
+        }
+    }
+
+    /// <summary>"Vagabond" departure (voir DramatisPersona.IsWanderer) - retour utilisateur 2026-09-01 :
+    /// Bertha "sort complètement de la bande" après CHAQUE bataille (qu'elle ait pu se battre ou non - le
+    /// jet d'Aide conditionnelle du Lancement de Partie, voir RatingGapAidTable, décide seulement si elle
+    /// a participé à CETTE bataille, pas si elle repart ensuite : elle repart de toute façon), et ne peut
+    /// être réintégrée que par une nouvelle recherche de Personnage spécial. Généralisé aux 3 personnages
+    /// Vagabonds (Aenur, Ulli &amp; Marquand aussi - IsWanderer documente déjà "never stays with the
+    /// warband beyond one battle" pour eux également), pas seulement Bertha - confirmé via
+    /// AskUserQuestion. Retrait COMPLET (WarbandService.DeleteWarriorAsync, équipement/compétences avec)
+    /// plutôt qu'un statut "Parti(e)" dédié - décision utilisateur (même question) : une future recherche
+    /// recrée une fiche neuve, aucun historique de blessure conservé, mais évite d'avoir deux fiches du
+    /// même personnage en même temps.
+    ///
+    /// Scope volontairement dialogViewModel.WarriorRows (le roster Actif figé à L'OUVERTURE de ce wizard)
+    /// plutôt que le roster courant : un Personnage spécial fraîchement recruté PENDANT cette même Fin de
+    /// Partie (juste au-dessus, ApplyRareItemSearchAsync) n'apparaît jamais dans WarriorRows - il reste
+    /// donc pour au moins la prochaine bataille, comme voulu ("A request for Bertha to aid the warband
+    /// must be made for EACH battle" implique qu'une fois recrutée elle participe à celle-ci, puis repart
+    /// à LA FIN de celle-ci, pas immédiatement). Mort/Retraité exclus : déjà des états terminaux gérés
+    /// ailleurs, rien à faire de plus pour eux ici.</summary>
+    private async Task ApplyWandererDeparturesAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var row in dialogViewModel.WarriorRows)
+        {
+            var warrior = row.Warrior;
+            if (!warrior.IsDramatisPersona || warrior.Status is WarriorStatus.Dead or WarriorStatus.Retired) continue;
+
+            var persona = _recruitableDramatisPersonae.FirstOrDefault(p => p.Id == warrior.DramatisPersonaId);
+            if (persona is not { IsWanderer: true }) continue;
+
+            await _warbandService.DeleteWarriorAsync(warrior.Id);
+            // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - PAS Bertha, voir
+            // RequiresCooldownBeforeResearch's own doc) - posé APRÈS le nettoyage global juste avant cet
+            // appel (voir EndOfGame()), donc jamais effacé par lui.
+            if (persona.RequiresCooldownBeforeResearch)
+                await _warbandService.AddDramatisPersonaCooldownAsync(Warband.Id, persona.Id);
+            // Une Poignée d'Or (2026-09-01) : un guerrier basculé "hostile" sur sa carte (voir
+            // WarbandDetailViewModel.ToggleHostile) part de toute façon comme tout Vagabond, mais avec
+            // une phrase d'historique distincte - il quitte parce que l'adversaire l'a corrompu, pas
+            // simplement parce qu'il repart de lui-même. Pas de paiement côté CETTE bande (voir
+            // EndOfGameDialogViewModel.DramatisPersonae.cs's own doc - seul le camp qui gagne le contrôle
+            // paie, jamais celui qui les a recrutés).
+            sentences.Add(string.Format(warrior.IsHostileThisBattle ? Loc["HistoryDramatisPersonaCorruptedSentence"] : Loc["HistoryDramatisPersonaDepartedSentence"], warrior.Name));
+        }
+    }
+
+    /// <summary>Étape "Dramatis Personae" (EndOfGameDialogViewModel.IsDramatisPersonaeStep) - règle la
+    /// solde de chaque Dramatis Persona à frais récurrents déjà engagé : en or (Johann/Veskit/Marianna)
+    /// OU en pierre magique (Nicodemus, DramatisPersonaUpkeepEntry.IsWyrdstoneFee - 2026-09-01, "on a
+    /// qu'a brancher la wyrstone à son paiement"). Même Payer/Renvoyer que ApplyHiredSwordUpkeepAsync
+    /// ci-dessous, mais sans équivalent d'IsPrepaidFree (rien comme "Une Faveur Rendue" n'existe pour un
+    /// Dramatis Persona) et sans recrutement combiné (un Dramatis Persona se recrute via
+    /// ApplyRareItemSearchAsync, pas ici). Solde refusée/impayée = il quitte la bande pour de bon - même
+    /// traitement que le refus d'un Franc-Tireur (retrait complet, équipement/compétences avec) : une
+    /// future recherche recréera une fiche neuve. Traite aussi, en fin de méthode, l'éventuel paiement
+    /// "Une Poignée d'Or" (Corruption ou Rétention de Marquand &amp; Ulli - voir EndOfGameDialogViewModel.
+    /// WantsToRecordPairCorruption/PairRetentionAmount, saisis sur l'étape "Une Poignée d'Or" dédiée
+    /// depuis le 2026-09-04, voir EndOfGameDialogViewModel.PairEngagement.cs), appliqué ici avec le reste
+    /// de la comptabilité Dramatis Personae, sujet indépendant de l'étape qui l'affiche.</summary>
+    private async Task ApplyDramatisPersonaUpkeepAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var entry in dialogViewModel.DramatisPersonaUpkeepEntries)
+        {
+            var warrior = entry.Warrior;
+
+            if (entry.WillPay == true && entry.IsWyrdstoneFee)
+            {
+                Warband.WyrdstoneShards -= entry.UpkeepCost;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaWyrdstoneUpkeepPaidSentence"], warrior.Name));
+            }
+            else if (entry.WillPay == true)
+            {
+                Warband.Treasury -= entry.UpkeepCost;
+                await _warbandService.SaveWarbandAsync(Warband);
+                sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPaidSentence"], warrior.Name, entry.UpkeepCost));
+            }
+            else
+            {
+                await _warbandService.DeleteWarriorAsync(warrior.Id);
+                sentences.Add(string.Format(Loc["HistoryDramatisPersonaUpkeepRefusedSentence"], warrior.Name));
+            }
+        }
+
+        // Une Poignée d'Or (2026-09-01) : case optionnelle pour une bande qui n'a PAS déjà Ulli &
+        // Marquand (voir EndOfGameDialogViewModel.ShowPairCorruptionOption) - elle vient de gagner leur
+        // contrôle par corruption réussie, donc paie SA PROPRE trésorerie (jamais celle qui les a
+        // recrutés à l'origine, voir la SpecialRule "A Fistful of Crowns"). Ne recrute PAS réellement la
+        // paire ici (aucune ligne Warrior créée) - purement le paiement, cohérent avec "sur un autre
+        // appareil pas celle présente en local" (retour utilisateur) : cette bande n'a pas forcément
+        // accès aux fiches Marquand/Ulli elles-mêmes.
+        //
+        // !IsPairCorruptionUnaffordable (2026-09-04, retour utilisateur - vrai bug trouvé en creusant un
+        // signalement sur les valeurs de la réserve) : payer en or ne se fait QUE si la bande peut réellement
+        // payer - "instead" dans "if the controlling warband can't pay a successful bribe... the pair
+        // INSTEAD seizes an equal value of equipment" est une lecture stricte confirmée par l'utilisateur
+        // (aucun or ne sort du tout dans le cas impayable, Céder du matériel/Duel couvre l'INTÉGRALITÉ du
+        // montant) - sans ce garde-fou, la trésorerie était débitée du montant COMPLET ICI, EN PLUS de la
+        // saisie d'équipement/du duel appliqués séparément (ApplyPairEquipmentSeizureIfNeededAsync/
+        // ApplyPairDuelIfNeededAsync juste en dessous) : double paiement (or perdu ET objets/meneur
+        // perdus pour la même dette).
+        if (dialogViewModel.WantsToRecordPairCorruption && !dialogViewModel.IsPairCorruptionUnaffordable
+            && int.TryParse(dialogViewModel.PairCorruptionAmount, out var corruptionAmount))
+        {
+            Warband.Treasury -= corruptionAmount;
+            await _warbandService.SaveWarbandAsync(Warband);
+            sentences.Add(string.Format(Loc["HistoryPairCorruptionPaidSentence"], corruptionAmount));
+        }
+
+        // "C'est l'heure de payer !" (2026-09-01) - cas symétrique pour une bande qui possède DÉJÀ Ulli &
+        // Marquand (EndOfGameDialogViewModel.ShowPairRetentionOption) : ce qu'elle a dû payer pour les
+        // GARDER après une tentative adverse ("seul le camp qui obtient OU GARDE le contrôle paie", voir
+        // la SpecialRule "A Fistful of Crowns"). 0/vide (pas de tentative) ne fait rien - PairRetentionAmount
+        // reste alors vide, int.TryParse échoue, ce bloc est un no-op. Appliqué en tout dernier (après la
+        // boucle Payer/Renvoyer ci-dessus) - "à la fin de tous les décomptes", retour utilisateur. Même
+        // garde-fou !IsPairRetentionUnaffordable que la Corruption ci-dessus (2026-09-04) - double
+        // paiement sinon.
+        if (!dialogViewModel.IsPairRetentionUnaffordable
+            && int.TryParse(dialogViewModel.PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
+        {
+            Warband.Treasury -= retentionAmount;
+            await _warbandService.SaveWarbandAsync(Warband);
+            sentences.Add(string.Format(Loc["HistoryPairRetentionPaidSentence"], dialogViewModel.PairRetentionLabel, retentionAmount));
+        }
+    }
+
+    /// <summary>"Où est l'Argent ?" - "Céder du matériel" (2026-09-01, retour utilisateur - remplace
+    /// l'ancien simple rappel textuel) : retire réellement du stash de la bande les objets sélectionnés
+    /// automatiquement par EndOfGameDialogViewModel.SeizedEquipmentItems (plus petit au plus grand, arrêt
+    /// dès la cible couverte - voir sa propre doc). Une ligne = une pile entière (RemoveWarbandEquipmentAsync
+    /// supprime la ligne, jamais de retrait partiel, même simplification que partout ailleurs dans l'app).</summary>
+    private async Task ApplyPairEquipmentSeizureIfNeededAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        var isUnaffordable = dialogViewModel.IsPairCorruptionUnaffordable || dialogViewModel.IsPairRetentionUnaffordable;
+        if (Warband is null || !isUnaffordable || !dialogViewModel.WantsEquipmentSeizure) return;
+
+        var seized = dialogViewModel.SeizedEquipmentItems;
+        if (seized.Count == 0) return;
+
+        foreach (var item in seized)
+            await _warbandService.RemoveWarbandEquipmentAsync(item.Id);
+
+        var pairLabel = dialogViewModel.IsPairCorruptionUnaffordable ? dialogViewModel.PairCorruptionLabel : dialogViewModel.PairRetentionLabel;
+        sentences.Add(string.Format(Loc["HistoryPairEquipmentSeizedSentence"], pairLabel, dialogViewModel.SeizedEquipmentTotalValue));
+    }
+
+    /// <summary>"Où est l'Argent ?" (2026-09-01) - repli si le montant à payer dépasserait le solde
+    /// prévisionnel de la bande, dans l'un ou l'autre des deux cas mutuellement exclusifs (une bande ne
+    /// possède jamais Ulli &amp; Marquand ET tente de les débaucher à la fois) : IsPairCorruptionUnaffordable
+    /// (ne les possède pas) ou IsPairRetentionUnaffordable (les possède déjà) - toutes deux dans
+    /// EndOfGameDialogViewModel.PairEngagement.cs. Voir ApplyPairEquipmentSeizureIfNeededAsync juste
+    /// au-dessus pour l'autre choix possible
+    /// ("Céder du matériel"). Victoire = rien de plus ; défaite = mort automatique du meneur (2026-09-03,
+    /// retour utilisateur - "en cas de défaite, le chef de bande est forcément mort"), pas de jet sur la
+    /// table des Blessures Graves contrairement à une première version qui s'inspirait par erreur de
+    /// Vendu aux Fosses (WonPitFight/SoldToPitsRerollRoll) - absent du texte de cette règle-ci.</summary>
+    private async Task ApplyPairDuelIfNeededAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        var isUnaffordable = dialogViewModel.IsPairCorruptionUnaffordable || dialogViewModel.IsPairRetentionUnaffordable;
+        if (Warband is null || !isUnaffordable || !dialogViewModel.WantsDuel) return;
+
+        var leaderRow = dialogViewModel.WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+        if (leaderRow is null) return;
+        var warrior = leaderRow.Warrior;
+
+        if (dialogViewModel.WonDuel)
+        {
+            sentences.Add(string.Format(Loc["HistoryPairDuelWonSentence"], warrior.Name));
+            return;
+        }
+
+        warrior.Status = WarriorStatus.Dead;
+        sentences.Add(string.Format(Loc["HistoryPairDuelLostSentence"], warrior.Name));
+        await _warbandService.SaveWarriorAsync(warrior);
     }
 
     /// <summary>Étape "Francs-Tireurs" (EndOfGameDialogViewModel.IsHiredSwordsStep) - règle la solde de
@@ -916,6 +1397,300 @@ public partial class WarbandDetailViewModel
             Warband.Treasury -= hiredSword.HireCost;
             await _warbandService.SaveWarbandAsync(Warband);
             sentences.Add(string.Format(Loc["HistoryHiredSwordHiredSentence"], name, hiredSword.Name));
+        }
+    }
+
+    /// <summary>Étape "Recrutement" (livre, étape 8) - transforme WarriorRecruitRow/WarriorNameSlot
+    /// (EndOfGameDialogViewModel.Recruitment.cs, de simples brouillons en mémoire jusqu'ici) en vrais
+    /// Warrior, au même moment que tout le reste de ce wizard (Terminer) - jamais avant, voir la doc de
+    /// classe d'EndOfGameDialogViewModel.Recruitment.cs pour pourquoi (refus explicite de l'utilisateur
+    /// d'un mécanisme "recruter puis annuler"). Miroir de la boucle Héros de WarbandEditDialogViewModel.
+    /// Save() - pas un appel direct à cette méthode, simplifiée : toujours une recrue NEUVE (jamais
+    /// ExistingWarrior à synchroniser), équipement toujours Commun (voir AddRecruitEquipment.commonOnly).
+    /// Cette passe ne couvre que les Héros (voir HeroRecruitRows) - Hommes de main (groupes existants avec
+    /// le budget vétérans, ou tout nouveau groupe) restent à construire, voir EndOfGameDialogViewModel.
+    /// Recruitment.cs.</summary>
+    private async Task ApplyRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        // Équipement acheté à l'onglet Équipement de l'étape Recrutement - réserve en priorité (étape
+        // Achat/Vente juste avant, déjà appliquée à ce stade du pipeline), sinon plein tarif - voir
+        // ConsumeReserveOrBuyAsync's own doc. Persisté directement sur ce Héros (2026-09-05, retour
+        // utilisateur - "on peut mélanger les deux, comme dans le warband edit" - abandon du plan
+        // antérieur "achat versé dans la réserve").
+        var stashPool = await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+        var totalCost = 0;
+        foreach (var row in dialogViewModel.HeroRecruitRows.Where(r => r.Count > 0))
+        {
+            foreach (var slot in row.NameSlots)
+            {
+                var name = slot.Name.Trim();
+                var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name);
+                totalCost += row.Cost;
+
+                foreach (var pick in slot.Equipment)
+                {
+                    if (pick.IsFree)
+                    {
+                        // Dague gratuite déjà déterminée au moment du pick (AddRecruitEquipment, sensible
+                        // à ce que ce slot porte déjà ou non - contrairement à ConsumeReserveOrBuyAsync's
+                        // propre règle interne, pensée pour le top-up des groupes existants) - jamais
+                        // re-dérivée ici, coûte 0 quelle que soit sa provenance.
+                        await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                    }
+                    else
+                    {
+                        totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, pick.Item, pick.MaterialRule, quantity: 1, applyFreeDaggerRule: false);
+                    }
+                }
+
+                sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
+            }
+        }
+
+        if (totalCost > 0)
+        {
+            Warband.Treasury -= totalCost;
+            await _warbandService.SaveWarbandAsync(Warband);
+        }
+    }
+
+    /// <summary>Réserve en priorité, sinon achète au plein tarif - factorisé ici (ApplyRecruitmentAsync/
+    /// ApplyHenchmanRecruitmentAsync) plutôt que dupliqué en closure locale par méthode. stashPool est
+    /// MUTÉ en place (List, passé par référence) au fil des appels successifs - chaque appelant doit le
+    /// fetcher une seule fois via GetWarbandEquipmentAsync puis le réutiliser pour tous ses propres appels,
+    /// jamais re-fetcher entre deux consommations du même pipeline. applyFreeDaggerRule: true seulement
+    /// pour le top-up d'un groupe EXISTANT (chaque unité achetée ici EST la dague personnelle gratuite
+    /// d'une recrue neuve différente, voir ApplyHenchmanRecruitmentAsync's own doc) - false pour un pick
+    /// Héros/nouveau groupe, où IsFree est déjà déterminé au moment du pick (AddRecruitEquipment) et geré
+    /// séparément par l'appelant, jamais re-dérivé ici.</summary>
+    private async Task<int> ConsumeReserveOrBuyAsync(List<WarbandEquipment> stashPool, int warriorId, EquipmentItem item, SpecialRule? materialRule, int quantity, bool applyFreeDaggerRule)
+    {
+        var remaining = quantity;
+        foreach (var stashRow in stashPool.Where(w => w.Item.Id == item.Id && w.MaterialRule?.Id == materialRule?.Id).ToList())
+        {
+            if (remaining <= 0) break;
+            await _warbandService.RemoveWarbandEquipmentAsync(stashRow.Id);
+            await _warbandService.AddWarriorEquipmentAsync(warriorId, stashRow.Item, materialRule: stashRow.MaterialRule, foundValueOverride: stashRow.FoundValueOverride);
+            stashPool.Remove(stashRow);
+            remaining--;
+        }
+
+        if (remaining <= 0) return 0;
+
+        await _warbandService.AddWarriorEquipmentAsync(warriorId, item, quantity: remaining, materialRule: materialRule);
+        var isFreeDagger = applyFreeDaggerRule && item.IsFreeDagger && materialRule is null;
+        return remaining * EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: isFreeDagger);
+    }
+
+    /// <summary>Étape "Renvoyer" (livre des règles - "Disbanding a Warband" + FAQ officielle - "you are
+    /// allowed to dismiss any warrior at any time during the post-battle sequence... transfer the
+    /// warrior's weapons and gear to your stash and then dismiss him") - juste AVANT Achat/Vente dans le
+    /// pipeline. Un Héros (DismissCount == HeadCount == 1) ou un groupe d'Hommes de main ENTIÈREMENT
+    /// renvoyé (DismissCount == HeadCount) restitue TOUT son équipement à la réserve puis passe
+    /// WarriorStatus.Retired (jamais DeleteWarriorAsync, qui effacerait son historique - même statut que
+    /// la retraite d'Œil crevé). Un renvoi PARTIEL d'un groupe (DismissCount &lt; HeadCount) restitue
+    /// seulement la part des figurines qui partent (Quantity × DismissCount, Quantity étant une quantité
+    /// PAR MODÈLE - voir ExistingHenchmanTopUp.GetTopUpBreakdown's own doc) et laisse la ligne
+    /// WarriorEquipment elle-même intacte (les figurines restantes portent toujours la même quantité par
+    /// modèle), ne touchant que Warrior.HeadCount.</summary>
+    private async Task ApplyDismissalsAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var row in dialogViewModel.WarriorRows.Where(r => r.DismissCount > 0))
+        {
+            var warrior = row.Warrior;
+            // Filet de sécurité : le stepper de cette étape borne DismissCount sur le HeadCount affiché
+            // PENDANT le wizard (jamais remis à jour en direct par les morts de CETTE bataille, qui ne
+            // mutent Warrior.HeadCount qu'à ApplyWarriorOutcomesAsync, juste avant cet appel - même
+            // limitation acceptée que partout ailleurs dans ce wizard). Reclamper ici contre le HeadCount
+            // RÉEL évite un HeadCount négatif si des figurines sont mortes entre-temps.
+            var dismissCount = Math.Min(row.DismissCount, warrior.HeadCount);
+            if (dismissCount <= 0) continue;
+
+            var fullyDismissed = dismissCount >= warrior.HeadCount;
+
+            foreach (var equipment in warrior.Equipment.ToList())
+            {
+                await _warbandService.AddWarbandEquipmentAsync(Warband.Id, equipment.Item,
+                    quantity: equipment.Quantity * dismissCount, materialRule: equipment.MaterialRule,
+                    foundValueOverride: equipment.FoundValueOverride);
+                if (fullyDismissed)
+                    await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+            }
+
+            if (fullyDismissed)
+                warrior.Status = WarriorStatus.Retired;
+            else
+                warrior.HeadCount -= dismissCount;
+
+            await _warbandService.SaveWarriorAsync(warrior);
+            sentences.Add(string.Format(Loc["HistoryWarriorDismissedSentence"], row.Name));
+        }
+    }
+
+    /// <summary>Étape "Achat/Vente d'équipement" (livre, étape 9 - "Reallocate equipment") - juste AVANT
+    /// Recrutement dans le pipeline (voir SaveAsync's own commentaire d'ordre). Achat : rejoint la réserve
+    /// (jamais assigné à un guerrier ici). Vente : livre des règles - "Warriors can automatically sell
+    /// equipment for half its listed price... the warband receives half of the basic cost only" pour un
+    /// prix variable - retire de la réserve (WarbandEquipment) OU du guerrier qui le porte
+    /// (WarriorEquipment, "trade in weapons and equipment... swapped around the warband" - pas seulement
+    /// la réserve), crédite SellPrice (déjà calculé sur le candidat, jamais recalculé ici).
+    ///
+    /// **Vente partielle** (retour utilisateur 2026-09-21, revu par rapport à une première version "ligne
+    /// entière uniquement") : candidate.SelectedQuantity peut être inférieur à la quantité réelle de la
+    /// ligne d'origine - supprime toujours la ligne existante puis recrée le reliquat (aucune méthode de
+    /// service dédiée à la réduction partielle, voir IWarbandService), MaterialRule/FoundValueOverride
+    /// reportés sur la ligne recréée. Ne préserve PAS BlessingRule sur le reliquat porté (AddWarriorEquipmentAsync
+    /// ne l'accepte pas) - lacune acceptée, une arme bénie fait rarement partie d'une pile de quantité &gt; 1.
+    ///
+    /// Un candidat IsFromExploration (trouvaille de cette même partie) n'a pas de StashItem connu à
+    /// l'ouverture du dialog - ApplyExplorationOutcomeAsync ne l'a ajouté en base que juste avant cette
+    /// étape (voir SaveAsync's own commentaire d'ordre) - re-résout le(s) vrai(s) WarbandEquipment
+    /// fraîchement créé(s) via un fetch tardif, même idiome que ConsumeReserveOrBuyAsync (jamais réutiliser
+    /// un id connu à l'ouverture du dialog, qui n'existait pas encore) ; peut consommer plusieurs lignes
+    /// (une trouvaille peut avoir été ajoutée en plusieurs AddWarbandEquipmentAsync distincts - objet
+    /// principal + objet bonus identiques par exemple) et réduire partiellement la dernière.</summary>
+    private async Task ApplyEquipmentTradingAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        var netGold = 0;
+        List<WarbandEquipment>? freshStashForExplorationSales = null;
+
+        foreach (var pick in dialogViewModel.PurchasedReserveItems)
+        {
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, pick.Item, materialRule: pick.MaterialRule);
+            netGold -= pick.Cost;
+            sentences.Add(string.Format(Loc["HistoryEquipmentPurchasedSentence"], pick.Name));
+        }
+
+        foreach (var candidate in dialogViewModel.PendingSales)
+        {
+            if (candidate.StashItem is { } stashItem)
+            {
+                await _warbandService.RemoveWarbandEquipmentAsync(stashItem.Id);
+                var leftover = stashItem.Quantity - candidate.SelectedQuantity;
+                if (leftover > 0)
+                    await _warbandService.AddWarbandEquipmentAsync(Warband.Id, stashItem.Item, quantity: leftover, materialRule: stashItem.MaterialRule, foundValueOverride: stashItem.FoundValueOverride);
+            }
+            else if (candidate.CarriedItem is { } carriedItem)
+            {
+                await _warbandService.RemoveWarriorEquipmentAsync(carriedItem.Id);
+                var leftover = carriedItem.Quantity - candidate.SelectedQuantity;
+                if (leftover > 0)
+                    await _warbandService.AddWarriorEquipmentAsync(carriedItem.WarriorId, carriedItem.Item, quantity: leftover, materialRule: carriedItem.MaterialRule, foundValueOverride: carriedItem.FoundValueOverride);
+            }
+            else if (candidate.IsFromExploration || candidate.IsFromDismissal)
+            {
+                // Même mécanisme pour les deux provenances : ni l'une ni l'autre n'a de WarbandEquipment.Id
+                // stable au moment de construire ce candidat (ApplyExplorationOutcomeAsync/
+                // ApplyDismissalsAsync ne le crée qu'à Terminer, juste avant cette méthode) - re-résolu ici
+                // par un fetch tardif plutôt qu'un id connu à l'avance.
+                freshStashForExplorationSales ??= await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+                var remaining = candidate.SelectedQuantity;
+                foreach (var row in freshStashForExplorationSales.Where(w => w.Item.Id == candidate.Item.Id && w.MaterialRule?.Id == candidate.MaterialRule?.Id).ToList())
+                {
+                    if (remaining <= 0) break;
+                    await _warbandService.RemoveWarbandEquipmentAsync(row.Id);
+                    freshStashForExplorationSales.Remove(row);
+                    if (row.Quantity > remaining)
+                    {
+                        var recreated = await _warbandService.AddWarbandEquipmentAsync(Warband.Id, row.Item, quantity: row.Quantity - remaining, materialRule: row.MaterialRule, foundValueOverride: row.FoundValueOverride);
+                        freshStashForExplorationSales.Add(recreated);
+                        remaining = 0;
+                    }
+                    else
+                    {
+                        remaining -= row.Quantity;
+                    }
+                }
+            }
+
+            netGold += candidate.SellPrice;
+            sentences.Add(string.Format(Loc["HistoryEquipmentSoldSentence"], candidate.SoldLabel, candidate.SellPrice));
+        }
+
+        if (netGold != 0)
+        {
+            Warband.Treasury += netGold;
+            await _warbandService.SaveWarbandAsync(Warband);
+        }
+    }
+
+    /// <summary>Étape "Recrutement" (livre, étape 8, suite) - même principe qu'ApplyRecruitmentAsync
+    /// (Héros) : brouillon en mémoire depuis EndOfGameDialogViewModel.Recruitment.cs, appliqué ici
+    /// seulement à Terminer. Groupes existants (ExistingHenchmanTopUps, budget vétérans déjà validé côté
+    /// wizard, SEUL endroit où l'équipement se calcule automatiquement) puis un éventuel nouveau groupe
+    /// (HenchmanRecruitRows/HenchmanGroupDrafts, équipé à l'onglet Équipement de la même étape - réserve en
+    /// priorité comme les groupes existants ci-dessous, voir ConsumeReserveOrBuyAsync's own doc, sinon
+    /// plein tarif). Réserve rechargée FRAÎCHEMENT depuis la base ici (pas dialogViewModel's propre
+    /// _warbandInventory, un instantané figé à l'ouverture du wizard) pour refléter tout ce qu'un apply
+    /// step précédent dans CE MÊME pipeline (Achat/Vente d'équipement, "Céder du matériel"...) a déjà
+    /// retiré/ajouté à la réserve.</summary>
+    private async Task ApplyHenchmanRecruitmentAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        var stashPool = await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+        var totalCost = 0;
+
+        foreach (var topUp in dialogViewModel.ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
+        {
+            var warrior = topUp.Row.Warrior;
+            // Capturé AVANT l'incrément ci-dessous : un groupe est UN SEUL Warrior (HeadCount = l'effectif),
+            // donc WarriorEquipment.Quantity y est déjà le TOTAL pour tout le groupe (ex. 3 Épées pour 3
+            // Guerriers), jamais "par modèle" - diviser par l'effectif ACTUEL (avant ce top-up) retrouve la
+            // quantité par modèle, voir EndOfGameDialogViewModel.GetTopUpBreakdown (même bug/même fix, même
+            // retour utilisateur 2026-09-05 - "on rajoute un guerrier... l'épée coute 30, hors l'épée coute
+            // 10"). Muter HeadCount avant de lire cette quantité aurait faussé le calcul.
+            var groupHeadCount = Math.Max(1, warrior.HeadCount);
+            warrior.HeadCount += topUp.AddCount;
+            await _warbandService.SaveWarriorAsync(warrior);
+
+            foreach (var equipment in topUp.CurrentEquipment)
+                totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, equipment.Item, equipment.MaterialRule,
+                    quantity: topUp.AddCount * equipment.Quantity / groupHeadCount, applyFreeDaggerRule: true);
+
+            totalCost += topUp.AddCount * (topUp.ArchetypeCost + 2 * topUp.GroupExperience);
+            sentences.Add(string.Format(Loc["HistoryHenchmanTopUpSentence"], topUp.AddCount, warrior.Name));
+        }
+
+        foreach (var row in dialogViewModel.HenchmanRecruitRows)
+        {
+            foreach (var group in row.HenchmanGroupDrafts)
+            {
+                var name = group.Name.Trim();
+                var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name, headCount: group.Count);
+                totalCost += group.Count * row.Cost;
+
+                // Équipement acheté à l'onglet Équipement de l'étape Recrutement - réserve en priorité
+                // (ConsumeReserveOrBuyAsync), sinon plein tarif. Quantity = group.Count (pas 1) : un
+                // groupe est UN SEUL Warrior (HeadCount = l'effectif), donc Quantity y représente déjà le
+                // TOTAL pour tout le groupe - même convention que le fix ci-dessus sur les groupes
+                // existants (bug 2026-09-05, "l'épée coute 30, hors l'épée coute 10").
+                foreach (var pick in group.Equipment)
+                {
+                    if (pick.IsFree)
+                    {
+                        // Dague gratuite déjà déterminée au moment du pick (AddRecruitEquipment) - jamais
+                        // re-dérivée ici, voir ApplyRecruitmentAsync's même logique côté Héros.
+                        await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, quantity: group.Count, materialRule: pick.MaterialRule);
+                        continue;
+                    }
+                    totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, pick.Item, pick.MaterialRule, quantity: group.Count, applyFreeDaggerRule: false);
+                }
+
+                sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
+            }
+        }
+
+        if (totalCost > 0)
+        {
+            Warband.Treasury -= totalCost;
+            await _warbandService.SaveWarbandAsync(Warband);
         }
     }
 
@@ -1060,6 +1835,90 @@ public partial class WarbandDetailViewModel
         {
             devouredHero.Warrior.Status = WarriorStatus.Dead;
             await _warbandService.SaveWarriorAsync(devouredHero.Warrior);
+        }
+    }
+
+    /// <summary>Étape "Réallouer l'équipement" (livre, étape 9) - TOUT DERNIER dans le pipeline (voir
+    /// EndOfGame's commentaire d'ordre), pour voir l'état final de tout ce que Renvoyer/Vente/Recrutement
+    /// ont déjà appliqué. dialogViewModel.WarriorRows[i].Warrior.Equipment/ReallocationReserve ont été
+    /// mutés directement en mémoire pendant la session interactive (voir EndOfGameDialogViewModel.
+    /// Reallocation.cs) - jamais persisté avant cet appel. Diffe chaque liste courante contre son
+    /// instantané d'origine (WarriorOutcomeRow.OriginalEquipmentIds / dialogViewModel.
+    /// OriginalReserveEquipmentIds, capturés avant toute interaction) : un id d'origine absent maintenant
+    /// = parti ailleurs (RemoveXxxAsync) ; un id NÉGATIF présent maintenant = arrivé d'ailleurs
+    /// (AddXxxAsync, jamais un vrai id avant cet appel - voir ReallocatableItem/
+    /// AddToReallocationCarrier). Les recrues n'ont rien de spécial ici : ApplyRecruitmentAsync (plus haut
+    /// dans le pipeline) a déjà traité WarriorNameSlot.Equipment tel quel, cette étape n'y touche que
+    /// PENDANT la session interactive (Add/Remove direct sur ce même brouillon), jamais à Terminer.
+    ///
+    /// Cas particulier - "extras" de réserve (id == 0, voir EndOfGameDialogViewModel.Reallocation.cs's
+    /// EnsureReallocationReserveExtrasAdded) : un objet trouvé à l'Exploration/renvoyé/acheté PENDANT ce
+    /// même wizard n'a pas encore de vraie ligne WarbandEquipment au moment d'ouvrir cette étape, mais EN
+    /// AURA une par les étapes plus tôt dans CE MÊME pipeline (ApplyExplorationOutcomeAsync/
+    /// ApplyDismissalsAsync/ApplyEquipmentTradingAsync, toutes avant celle-ci) - jamais recréé ici si le
+    /// joueur ne l'a pas déplacé (déjà couvert), mais s'il l'a déplacé vers un Héros/une recrue, la VRAIE
+    /// ligne (déjà créée) doit être retrouvée par une requête fraîche (même idiome que
+    /// SellableEquipmentCandidate.IsFromExploration/IsFromDismissal dans ApplyEquipmentTradingAsync) et
+    /// supprimée - un simple diff par id est impossible ici puisque toutes les entrées "extras" partagent
+    /// l'id 0.</summary>
+    private async Task ApplyEquipmentReallocationAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var row in dialogViewModel.WarriorRows.Where(r => r.IsHero))
+        {
+            foreach (var goneId in row.OriginalEquipmentIds.Where(id => row.Warrior.Equipment.All(we => we.Id != id)))
+                await _warbandService.RemoveWarriorEquipmentAsync(goneId);
+
+            foreach (var arrived in row.Warrior.Equipment.Where(we => we.Id < 0).ToList())
+            {
+                var created = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, arrived.Item, arrived.Quantity, arrived.MaterialRule, arrived.FoundValueOverride);
+                if (arrived.BlessingRule is { } blessing)
+                    await _warbandService.SetWarriorEquipmentBlessingRuleAsync(created.Id, blessing.Id);
+                sentences.Add(string.Format(Loc["HistoryEquipmentReallocatedSentence"], arrived.NameDisplay, row.Name));
+            }
+        }
+
+        foreach (var goneId in dialogViewModel.OriginalReserveEquipmentIds.Where(id => dialogViewModel.ReallocationReserve.All(w => w.Id != id)))
+            await _warbandService.RemoveWarbandEquipmentAsync(goneId);
+
+        foreach (var arrived in dialogViewModel.ReallocationReserve.Where(w => w.Id < 0).ToList())
+        {
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, arrived.Item, arrived.Quantity, arrived.MaterialRule, arrived.FoundValueOverride);
+            sentences.Add(string.Format(Loc["HistoryEquipmentReallocatedSentence"], arrived.NameDisplay, Loc["EndOfGameEquipmentTradingStashSource"]));
+        }
+
+        if (dialogViewModel.ReallocationReserveExtrasOriginal.Count > 0)
+        {
+            List<WarbandEquipment>? freshStash = null;
+            foreach (var group in dialogViewModel.ReallocationReserveExtrasOriginal.GroupBy(x => (x.Item.Id, MaterialRuleId: x.MaterialRule?.Id)))
+            {
+                var originalQty = group.Sum(x => x.Quantity);
+                var stillThereQty = dialogViewModel.ReallocationReserve
+                    .Where(w => w.Id == 0 && w.Item.Id == group.Key.Id && w.MaterialRule?.Id == group.Key.MaterialRuleId)
+                    .Sum(w => w.Quantity);
+                var movedAwayQty = originalQty - stillThereQty;
+                if (movedAwayQty <= 0) continue;
+
+                freshStash ??= await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+                var remaining = movedAwayQty;
+                foreach (var row in freshStash.Where(w => w.Item.Id == group.Key.Id && w.MaterialRule?.Id == group.Key.MaterialRuleId).ToList())
+                {
+                    if (remaining <= 0) break;
+                    await _warbandService.RemoveWarbandEquipmentAsync(row.Id);
+                    freshStash.Remove(row);
+                    if (row.Quantity > remaining)
+                    {
+                        var recreated = await _warbandService.AddWarbandEquipmentAsync(Warband.Id, row.Item, quantity: row.Quantity - remaining, materialRule: row.MaterialRule, foundValueOverride: row.FoundValueOverride);
+                        freshStash.Add(recreated);
+                        remaining = 0;
+                    }
+                    else
+                    {
+                        remaining -= row.Quantity;
+                    }
+                }
+            }
         }
     }
 }

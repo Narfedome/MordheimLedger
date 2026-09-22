@@ -11,6 +11,7 @@ using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.HiredSwords;
+using MordheimLedgerApp.Features.Library.DramatisPersonae;
 using MordheimLedgerApp.Features.Library.MagicSchools;
 using MordheimLedgerApp.Features.Library.RacialProfiles;
 using MordheimLedgerApp.Features.Library.Races;
@@ -22,6 +23,7 @@ using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 using Microsoft.Extensions.Logging;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
+using MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 namespace MordheimLedgerApp
 {
@@ -169,6 +171,14 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<HiredSwordSelectorPage>();
             builder.Services.AddSingleton<IHiredSwordPickerNavigationService, HiredSwordPickerNavigationService>();
             builder.Services.AddSingleton<IHiredSwordPickerService, HiredSwordPickerService>();
+            builder.Services.AddTransient<DramatisPersonaViewModel>();
+            builder.Services.AddTransient<DramatisPersonaSelectorPage>();
+            builder.Services.AddSingleton<IDramatisPersonaPickerNavigationService, DramatisPersonaPickerNavigationService>();
+            builder.Services.AddSingleton<IDramatisPersonaPickerService, DramatisPersonaPickerService>();
+            builder.Services.AddTransient<SellEquipmentSelectorViewModel>();
+            builder.Services.AddTransient<SellEquipmentSelectorPage>();
+            builder.Services.AddSingleton<ISellEquipmentPickerNavigationService, SellEquipmentPickerNavigationService>();
+            builder.Services.AddSingleton<ISellEquipmentPickerService, SellEquipmentPickerService>();
             builder.Services.AddTransient<MagicSchoolViewModel>();
             builder.Services.AddTransient<MagicSchoolSelectorPage>();
             builder.Services.AddTransient<MagicSchoolListPage>();

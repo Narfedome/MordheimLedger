@@ -37,6 +37,18 @@ public interface IWarbandService
     /// Favour"'s free grant) using the same inline idiom as every other cost in this codebase.</summary>
     Task<Warrior> RecruitHiredSwordAsync(int warbandId, HiredSword hiredSword, string name, IReadOnlyList<EquipmentItem> startingEquipment);
 
+    /// <summary>Same shape as RecruitHiredSwordAsync, for a Dramatis Persona (see
+    /// Models.Library.DramatisPersona) - also inserts the character's fixed Skills as real WarriorSkill
+    /// rows (startingSkills, DramatisPersona.Skills as-is - a Dramatis Persona already knows these, no
+    /// Advance-roll pick involved). Does NOT touch Warband.Treasury or apply a hire fee - deliberately
+    /// deferred, see Models.Warrior.DramatisPersonaId's own doc.</summary>
+    Task<Warrior> RecruitDramatisPersonaAsync(int warbandId, DramatisPersona dramatisPersona, string name, IReadOnlyList<EquipmentItem> startingEquipment, IReadOnlyList<Skill> startingSkills);
+
+    /// <summary>See Models.Library.DramatisPersona.RequiresCooldownBeforeResearch's own doc.</summary>
+    Task<List<int>> GetDramatisPersonaCooldownIdsAsync(int warbandId);
+    Task AddDramatisPersonaCooldownAsync(int warbandId, int dramatisPersonaId);
+    Task ClearAllDramatisPersonaCooldownsAsync(int warbandId);
+
     /// <summary>Inserts an already fully-built Warrior as-is (no WarriorArchetype involved) - for the
     /// Henchman-to-Hero promotion (Advance roll 10-12), whose new Hero is cloned from the live group's
     /// own stats/XP (see EntityMapping.CloneAsPromotedHero) rather than seeded from a catalog template.</summary>

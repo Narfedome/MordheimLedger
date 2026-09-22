@@ -7,6 +7,7 @@ using MordheimLedgerApp.Features.Library.Spells;
 using MordheimLedgerApp.Features.Library.SpecialRules;
 using MordheimLedgerApp.Features.Library.Mutations;
 using MordheimLedgerApp.Features.Library.HiredSwords;
+using MordheimLedgerApp.Features.Library.DramatisPersonae;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes;
 
 namespace MordheimLedgerApp.Features.Library;
@@ -34,7 +35,7 @@ public partial class LibraryViewModel : BaseViewModel
     private static readonly string[] TabKeys =
     [
         "TabWarbands", "LibTabTradingPost", "TabSkills", "TabInjuries",
-        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabHiredSwords"
+        "LibTabSpells", "LibTabSpecialRules", "LibTabMutations", "LibTabHiredSwords", "LibTabDramatisPersonae"
     ];
 
     public WarbandArchetypeViewModel WarbandArchetypes { get; }
@@ -45,6 +46,7 @@ public partial class LibraryViewModel : BaseViewModel
     public SpecialRuleViewModel SpecialRules { get; }
     public MutationViewModel Mutations { get; }
     public HiredSwordViewModel HiredSwords { get; }
+    public DramatisPersonaViewModel DramatisPersonae { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsWarbandsTab))]
@@ -55,6 +57,7 @@ public partial class LibraryViewModel : BaseViewModel
     [NotifyPropertyChangedFor(nameof(IsSpecialRulesTab))]
     [NotifyPropertyChangedFor(nameof(IsMutationsTab))]
     [NotifyPropertyChangedFor(nameof(IsHiredSwordsTab))]
+    [NotifyPropertyChangedFor(nameof(IsDramatisPersonaeTab))]
     private int selectedTab;
 
     /// <summary>Displayed on the single section-picker Button - see SelectTab. Distinct from a direct
@@ -71,8 +74,9 @@ public partial class LibraryViewModel : BaseViewModel
     public bool IsSpecialRulesTab => SelectedTab == 5;
     public bool IsMutationsTab => SelectedTab == 6;
     public bool IsHiredSwordsTab => SelectedTab == 7;
+    public bool IsDramatisPersonaeTab => SelectedTab == 8;
 
-    // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 7 autres ne le sont qu'au
+    // Bandes (onglet 0) est chargé dès InitializeAsync (voir plus bas) - les 8 autres ne le sont qu'au
     // premier passage sur leur onglet, voir EnsureTabLoadedAsync.
     private bool _equipmentItemsLoaded;
     private bool _skillsLoaded;
@@ -81,10 +85,11 @@ public partial class LibraryViewModel : BaseViewModel
     private bool _specialRulesLoaded;
     private bool _mutationsLoaded;
     private bool _hiredSwordsLoaded;
+    private bool _dramatisPersonaeLoaded;
 
     public LibraryViewModel(WarbandArchetypeViewModel warbandArchetypes, EquipmentItemViewModel equipmentItems,
         SkillViewModel skills, InjuryViewModel injuries, SpellViewModel spells, SpecialRuleViewModel specialRules,
-        MutationViewModel mutations, HiredSwordViewModel hiredSwords)
+        MutationViewModel mutations, HiredSwordViewModel hiredSwords, DramatisPersonaViewModel dramatisPersonae)
     {
         WarbandArchetypes = warbandArchetypes;
         EquipmentItems = equipmentItems;
@@ -94,6 +99,7 @@ public partial class LibraryViewModel : BaseViewModel
         SpecialRules = specialRules;
         Mutations = mutations;
         HiredSwords = hiredSwords;
+        DramatisPersonae = dramatisPersonae;
         RefreshSelectedTabLabel();
     }
 
@@ -151,6 +157,9 @@ public partial class LibraryViewModel : BaseViewModel
                 break;
             case 7:
                 if (!_hiredSwordsLoaded) { await HiredSwords.InitializeAsync(); _hiredSwordsLoaded = true; }
+                break;
+            case 8:
+                if (!_dramatisPersonaeLoaded) { await DramatisPersonae.InitializeAsync(); _dramatisPersonaeLoaded = true; }
                 break;
         }
     }

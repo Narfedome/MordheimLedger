@@ -1,7 +1,9 @@
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Features.Library.DramatisPersonae.CreateEdit;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Features.Library.HiredSwords.CreateEdit;
 using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
@@ -49,6 +51,20 @@ public interface IDetailDialogService
     Task ShowSpecialRuleDetailDialogAsync(SpecialRule item);
     Task ShowMutationDetailDialogAsync(Mutation item);
     Task ShowHiredSwordDetailDialogAsync(HiredSword item);
+
+    /// <summary>Always the plain full profile (stat line/equipment/skills) of THIS specific persona, even
+    /// if it's one half of a pair (e.g. Ulli &amp; Marquand) - 2026-09-01, user request: the Codex must show
+    /// the tapped persona's own sheet directly, not a pair summary. Recruitment-flavored callers
+    /// (DramatisPersonaViewModel.ShowDetails in selector mode, EndOfGameDialogViewModel.RareItems.
+    /// ShowCharacterDetail) call ShowDramatisPersonaPairDetailDialogAsync instead when the target is
+    /// paired - see their own doc for the exact split.</summary>
+    Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item);
+
+    /// <summary>Pair summary (Description + shared SpecialRules + 2 profile chips, see
+    /// DramatisPersonaPairDetailDialogViewModel) - only ever called explicitly by a recruitment-context
+    /// caller for an item known to be paired (see ShowDramatisPersonaDetailDialogAsync's own doc).</summary>
+    Task ShowDramatisPersonaPairDetailDialogAsync(DramatisPersona item);
+
     Task ShowSpellDetailDialogAsync(Spell item);
     Task ShowInjuryDetailDialogAsync(Injury item);
 }
@@ -132,8 +148,8 @@ public class DetailDialogService : IDetailDialogService
             : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
 
         var startingEquipment = item.StartingEquipmentIds.Count == 0
-            ? new List<EquipmentItem>()
-            : (await _libraryService.GetEquipmentItemsAsync(language)).Where(e => item.StartingEquipmentIds.Contains(e.Id)).ToList();
+            ? new List<EquipmentQuantityChip>()
+            : EquipmentQuantityChip.GroupFrom(item.StartingEquipmentIds, await _libraryService.GetEquipmentItemsAsync(language));
 
         var magicSchoolSpells = item.MagicSchool is null
             ? new List<Spell>()
@@ -141,6 +157,39 @@ public class DetailDialogService : IDetailDialogService
 
         await ShowAsync(new HiredSwordDetailDialog(new HiredSwordDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands, magicSchoolSpells, this)));
     }
+
+    /// <summary>Toujours le profil complet de CE personnage précis (stats/équipement/compétences), même
+    /// s'il fait partie d'une paire - 2026-09-01, retour utilisateur : le Codex doit montrer directement
+    /// la fiche du personnage tapé, pas le résumé de paire. Les appelants "contexte recrutement" (picker/
+    /// wizard Fin de Partie) appellent explicitement ShowDramatisPersonaPairDetailDialogAsync à la place
+    /// quand ils veulent ce résumé - voir DramatisPersonaViewModel.ShowDetails/EndOfGameDialogViewModel.
+    /// RareItems.ShowCharacterDetail pour le clivage exact.</summary>
+    public async Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item)
+    {
+        var language = LocalizationService.Instance.Language;
+        var allWarbands = await _libraryService.GetWarbandArchetypesAsync(language);
+        var restrictedWarbands = item.RestrictedToWarbandArchetypeIds.Count == 0
+            ? new List<WarbandArchetype>()
+            : allWarbands.Where(w => item.RestrictedToWarbandArchetypeIds.Contains(w.Id)).ToList();
+
+        var startingEquipment = item.StartingEquipmentIds.Count == 0
+            ? new List<EquipmentQuantityChip>()
+            : EquipmentQuantityChip.GroupFrom(item.StartingEquipmentIds, await _libraryService.GetEquipmentItemsAsync(language));
+
+        var magicSchoolSpells = item.MagicSchool is null
+            ? new List<Spell>()
+            : (await _libraryService.GetSpellsAsync(language)).Where(s => s.MagicSchoolId == item.MagicSchool.Id).ToList();
+
+        await ShowAsync(new DramatisPersonaDetailDialog(new DramatisPersonaDetailDialogViewModel(item, startingEquipment, restrictedWarbands, allWarbands, magicSchoolSpells, this)));
+    }
+
+    /// <summary>Résumé de paire (Description + règles communes + 2 chips profil) - 2026-09-01, contexte
+    /// recrutement uniquement (voir ShowDramatisPersonaDetailDialogAsync's own doc). item n'a pas besoin
+    /// d'être vérifié paired ici - l'appelant a déjà fait ce choix, seul un item réellement paired est
+    /// jamais passé (DramatisPersonaPairDetailDialogViewModel gère un Profiles à 1 seul élément si jamais
+    /// PairedWithDramatisPersona était null, par défense).</summary>
+    public Task ShowDramatisPersonaPairDetailDialogAsync(DramatisPersona item) =>
+        ShowAsync(new DramatisPersonaPairDetailDialog(new DramatisPersonaPairDetailDialogViewModel(item, this)));
 
     public Task ShowSpellDetailDialogAsync(Spell item) =>
         ShowAsync(new SpellDetailDialog(new SpellDetailDialogViewModel(item)));

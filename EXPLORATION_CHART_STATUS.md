@@ -64,8 +64,6 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
 - **Groupe C restant** : Une Faveur Rendue (3,6) exige les Mercenaires à Louer (Hired Swords), pas encore
   implémentés (leur propre mécanique de progression, mélange Héros/Homme de main - chantier à part,
   reporté explicitement le 2026-08-21).
-- **Vente de la pierre magique** : `Warband.WyrdstoneShards` s'accumule déjà (Puits/Bâtiment Éventré/La Fosse), mais l'étape wizard dédiée à la revente n'existe pas encore — table de prix pas encore fournie.
-
 ## Journal
 
 - **2026-08-18** — Socle (jet de dés, détection du résultat unique, sous-jet à branches exclusives) validé sur Cadavre ; reste du Groupe A à branches fixes complété ; correctifs Wyrdstone/branches `None`/règle Gromril ; découpage en deux étapes (jet puis résultat) ; suppression du tirage automatique (le joueur tape son jet ou clique le dé) ; quantité d'objet fixe (`x1`) sans jet sauf indication contraire ; Boutique (forme mixte Or+Objet sur le même dé) ; correction de l'affichage des noms d'objet (anglais → langue courante) ; inventaire de bande (`WarbandEquipment`) pour les objets trouvés non assignés à un guerrier.
@@ -457,3 +455,39 @@ pur, pas encore d'UI), — = codé mais pas encore rejoué en vrai (dernier poin
   contrairement au rappel Traînard (consommé une fois montré), celui-ci reste affiché à VIE une fois
   acquis, jamais consommé. Le joueur relance lui-même son dé physique et retape la nouvelle valeur dans
   le champ existant - aucune UI de relance, aucun changement au nombre de dés affiché.
+- **2026-08-28 (pierre magique trouvée + vente + Disponibilité des Vétérans)** — Branche
+  `feature/end-of-game-wyrdstone-and-remaining-steps`, suite du backlog post-PR#13. Trois ajouts :
+  (1) **Gap de fond découvert** : le total des dés d'Exploration ("Add the results together and consult
+  the chart below to see how many shards of wyrdstone you have found", p.134) n'était PAS mécanisé du
+  tout - seuls 3 résultats spécifiques (Puits/Bâtiment Éventré/La Fosse) accordaient de la pierre magique
+  comme effet propre à LEUR branche. Ce barème (1-5→1, 6-11→2, 12-17→3, 18-24→4, 25-30→5, 31-35→6, 36+→7)
+  est en réalité un SECOND effet, universel et additif, de CHAQUE jet d'Exploration - déclenché même sans
+  aucun doublon/triplet. `Core.Rules.WyrdstoneShardsTable.GetShards` + `EndOfGameDialogViewModel.
+  BaselineWyrdstoneShardsFound` (aperçu en direct à l'étape du jet) + appliqué inconditionnellement dans
+  `ApplyExplorationOutcomeAsync`, en plus de tout résultat spécial éventuel. (2) **Vente de pierre
+  magique** (étape 4 du livre) : nouvelle étape wizard conditionnelle (absente si le stock est vide),
+  barème fourni par l'utilisateur (image du tableau officiel, lignes = éclats vendus 1 à "8+", colonnes =
+  effectif de la bande bucketé) - `Core.Rules.WyrdstoneSaleTable.GetNetGold`, stepper +/- borné au stock,
+  aperçu du gain en direct. Vendre reste optionnel (RAW : "pas obligatoire de tout vendre tout de suite").
+  **Corrigé dans la foulée** (retour utilisateur immédiat, texte du livre "Selling Wyrdstone" à l'appui -
+  "you do not have to sell all your wyrdstone immediately... you may want to hoard it and sell it later" :
+  rien n'interdit de revendre ce qui vient d'être trouvé) : `MaxShardsToSell` (et la condition de présence
+  de l'étape dans `Steps`) sommait initialement seulement `_currentWyrdstoneShards` (le stock figé à
+  l'ouverture du wizard), ce qui rendait la pierre magique trouvée PENDANT ce même passage (point 1
+  ci-dessus) invendable avant la Fin de Partie suivante - bloquant dès la toute première partie jouée
+  (aucun stock préexistant, donc étape absente malgré une trouvaille fraîche). `MaxShardsToSell` inclut
+  maintenant `_currentWyrdstoneShards + BaselineWyrdstoneShardsFound`, notifié depuis
+  `ResolveExplorationResult` (même choke point que le reste de l'étape Exploration) - la sauvegarde
+  elle-même (`ApplyExplorationOutcomeAsync` puis `ApplyWyrdstoneSaleAsync`, dans cet ordre) était déjà
+  correcte, seul le plafond affiché/appliqué côté wizard était trop restrictif. (3) **Disponibilité
+  des Vétérans** (étape 5 du livre, choisie par l'utilisateur pour démarrer le chantier "étapes 5-10") :
+  simple jet 2D6 saisi/tapé, toujours présente dans le wizard, juste tracé en Historique. **Corrigé dans
+  la foulée** (retour utilisateur, texte du livre "Nouvelles recrues et groupes d'Hommes de main
+  existants" p.144 à l'appui) : une première passe persistait le résultat (`Warband.
+  AvailableVeteranExperience`, affiché en rappel permanent sur `WarbandDetailPage`) en anticipation de
+  l'étape 8 pas encore construite - or le livre est explicite, ce pool ne sert QUE durant la séquence où
+  il est jeté ("les points excédentaires sont perdus"), rien ne se cumule d'une Fin de Partie à l'autre.
+  Persistance entièrement retirée (`Warband.AvailableVeteranExperience` supprimé du modèle/entité/mapping,
+  bannière `WarbandDetailPage` retirée) - le jet reste dans le wizard (utile le jour où l'étape 8 existera
+  et pourra le consommer DANS LA MÊME séquence) mais ne laisse plus aucune trace persistante au-delà de
+  l'entrée d'Historique.

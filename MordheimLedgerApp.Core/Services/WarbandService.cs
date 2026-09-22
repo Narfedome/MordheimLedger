@@ -77,7 +77,7 @@ public class WarbandService : IWarbandService
         var warriors = await _db.Connection.Table<WarriorEntity>()
             .Where(w => w.WarbandId == warbandId && w.Status != WarriorStatus.Dead && w.Status != WarriorStatus.Retired)
             .ToListAsync();
-        return warriors.Sum(w => WarbandRatingRules.WarriorContribution(w.IsLargeCreature, w.Experience, w.HeadCount, w.HiredSwordBaseRating));
+        return warriors.Sum(w => WarbandRatingRules.WarriorContribution(w.IsLargeCreature, w.Experience, w.HeadCount, w.HiredSwordBaseRating, w.DramatisPersonaRatingBonus));
     }
 
     public async Task<List<Warrior>> GetWarriorsAsync(int warbandId, string languageCode)
@@ -197,6 +197,62 @@ public class WarbandService : IWarbandService
             await AddWarriorEquipmentAsync(warrior.Id, item);
 
         return warrior;
+    }
+
+    public async Task<Warrior> RecruitDramatisPersonaAsync(int warbandId, DramatisPersona dramatisPersona, string name, IReadOnlyList<EquipmentItem> startingEquipment, IReadOnlyList<Skill> startingSkills)
+    {
+        await _db.Initialization;
+        var warrior = dramatisPersona.ToWarrior(name);
+        warrior.WarbandId = warbandId;
+        var entity = warrior.ToEntity();
+        await _db.Connection.InsertAsync(entity);
+        warrior.Id = entity.Id;
+
+        // Groupé par objet (ex. Bertha : deux Marteaux de Guerre Sigmarites, voir
+        // DramatisPersonae.json.startingEquipmentNames) - une seule WarriorEquipment row par objet distinct,
+        // Quantity = nombre d'occurrences, plutôt qu'une row par occurrence. La liste appelante (résolue
+        // depuis DramatisPersona.StartingEquipmentIds, qui garde les doublons) contiendrait sinon le même
+        // Id plusieurs fois - insérer une row par occurrence créerait autant de puces identiques sur la
+        // carte au lieu d'une seule "x2" (WarriorEquipment.NameDisplay, retour utilisateur 2026-09-01).
+        foreach (var group in startingEquipment.GroupBy(item => item.Id))
+            await AddWarriorEquipmentAsync(warrior.Id, group.First(), quantity: group.Count());
+        foreach (var skill in startingSkills)
+            await AddWarriorSkillAsync(warrior.Id, skill);
+
+        return warrior;
+    }
+
+    /// <summary>DramatisPersona ids currently "on cooldown" for this warband - see Models.Library.
+    /// DramatisPersona.RequiresCooldownBeforeResearch's own doc. Consumed by the "Personnage spécial"
+    /// search picker (excludes these) and by WarbandDetailViewModel.EndOfGame (clears/sets rows at Apply
+    /// time).</summary>
+    public async Task<List<int>> GetDramatisPersonaCooldownIdsAsync(int warbandId)
+    {
+        await _db.Initialization;
+        return (await _db.Connection.Table<WarbandDramatisPersonaCooldownEntity>().Where(r => r.WarbandId == warbandId).ToListAsync())
+            .Select(r => r.DramatisPersonaId)
+            .ToList();
+    }
+
+    /// <summary>Marks a persona as on cooldown for this warband - called when a RequiresCooldownBeforeResearch
+    /// persona departs (ApplyWandererDeparturesAsync). No dedup guard: a persona can only depart once per
+    /// warband at a time (they're either on the roster or not), so a duplicate row can't happen in
+    /// practice.</summary>
+    public async Task AddDramatisPersonaCooldownAsync(int warbandId, int dramatisPersonaId)
+    {
+        await _db.Initialization;
+        await _db.Connection.InsertAsync(new WarbandDramatisPersonaCooldownEntity { WarbandId = warbandId, DramatisPersonaId = dramatisPersonaId });
+    }
+
+    /// <summary>Clears every cooldown row for this warband - called at the START of ApplyRareItemSearchAsync's
+    /// processing (before any NEW departure this same End of Game could add a fresh one): reaching this End
+    /// of Game at all already means "the warband fought a battle" since the persona was excluded from being
+    /// re-sought this session (picker-side filter), so whatever was on cooldown going into this wizard has
+    /// now satisfied "at least one battle without them".</summary>
+    public async Task ClearAllDramatisPersonaCooldownsAsync(int warbandId)
+    {
+        await _db.Initialization;
+        await _db.Connection.ExecuteAsync("DELETE FROM WarbandDramatisPersonaCooldownEntity WHERE WarbandId = ?", warbandId);
     }
 
     public async Task InsertWarriorAsync(Warrior warrior)

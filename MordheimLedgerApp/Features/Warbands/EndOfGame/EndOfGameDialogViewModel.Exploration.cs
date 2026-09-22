@@ -23,7 +23,13 @@ public partial class EndOfGameDialogViewModel
     // par l'utilisateur le 2026-08-17). Le nombre de dés ne peut varier qu'entre Result/HorsDeCombat
     // (déjà résolus quand on atteint cette étape) et le moment où on l'atteint, donc SyncExplorationDice
     // n'a besoin d'être appelée qu'en y entrant (OnStepIndexChanged) plutôt qu'à chaque frappe.
-    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction);
+    //
+    // Dramatis Personae exclus (2026-09-01, retour utilisateur) : IsHero vaut TRUE pour eux (voir
+    // Warrior.DramatisPersonaId's own doc - même flux Blessures Graves qu'un Héros normal), mais ce
+    // sont des figurines à part, pas des Héros au sens de cette règle du livre - même limite déjà
+    // connue/documentée pour le décompte de tête à la vente de pierre magique (voir
+    // DRAMATIS_PERSONAE_STATUS.md), corrigée ici pour l'Exploration.
+    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona);
     public bool WonLastGame => ResultOptions.Count > 0 && SelectedResult == ResultOptions[0];
 
     /// <summary>Dés bonus depuis l'équipement porté par les guerriers encore debout (ex. l'Œil
@@ -49,6 +55,23 @@ public partial class EndOfGameDialogViewModel
     public bool ShowCatacombRerollReminder => _hasCatacombReroll;
 
     public ObservableCollection<ExplorationDieEntry> ExplorationDice { get; } = new();
+
+    /// <summary>"Add the results together and consult the chart..." (Core.Rules.WyrdstoneShardsTable) -
+    /// a SECOND, universal effect of this same roll, entirely additive to whatever specific chart entry
+    /// TriggeredExplorationResult may also resolve (doubles/triples only) - applies even when no doubles
+    /// are rolled at all. 0 while any die is still empty (mirrors ResolveExplorationResult's own guard),
+    /// notified via ResolveExplorationResult (the same single choke point already called on every die
+    /// change).</summary>
+    public int BaselineWyrdstoneShardsFound => ExplorationDice.Any(d => d.Value is null)
+        ? 0
+        : WyrdstoneShardsTable.GetShards(ExplorationDice.Sum(d => d.Value!.Value));
+
+    /// <summary>Formatted display text, detailing the dice total behind BaselineWyrdstoneShardsFound
+    /// (retour utilisateur 2026-08-28 : "détailler le résultat" plutôt qu'un nombre nu) - computed here
+    /// rather than nesting {loc:Loc} inside a StringFormat attribute (not valid XAML, see
+    /// WyrdstoneSaleValueDisplay). 0 while any die is still empty, same guard as BaselineWyrdstoneShardsFound.</summary>
+    public string BaselineWyrdstoneShardsFoundDisplay => string.Format(Loc["EndOfGameBaselineWyrdstoneFormat"],
+        ExplorationDice.Any(d => d.Value is null) ? 0 : ExplorationDice.Sum(d => d.Value!.Value), BaselineWyrdstoneShardsFound);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasExplorationResult))]
@@ -327,13 +350,14 @@ public partial class EndOfGameDialogViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowEquippedHenchmanTreasury))]
-    [NotifyPropertyChangedFor(nameof(EquippedHenchmanTreasuryAfter))]
-    [NotifyPropertyChangedFor(nameof(CanAffordEquippedHenchman))]
     private EquippedHenchmanGroupOption? selectedEquippedHenchmanGroupOption;
 
     partial void OnSelectedEquippedHenchmanGroupOptionChanged(EquippedHenchmanGroupOption? value)
     {
         if (value?.Group is not null) EquippedHenchmanError = null;
+        // Son coût d'équipement dispute désormais la même trésorerie que le reste du wizard (2026-09-03,
+        // voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
+        NotifyTreasuryChanged();
     }
 
     [ObservableProperty]
@@ -343,18 +367,20 @@ public partial class EndOfGameDialogViewModel
     /// d'afficher un calcul de trésorerie pour une option qui n'en change rien.</summary>
     public bool ShowEquippedHenchmanTreasury => SelectedEquippedHenchmanGroupOption?.Group is not null;
 
-    /// <summary>Trésorerie actuelle (au moment d'ouvrir ce wizard, voir _currentTreasury) + l'or de CETTE
-    /// branche (le même 2D6 que ExplorationGoldAmount, l'escorte hors de la ville) - le coût de
-    /// l'équipement du groupe choisi. Peut afficher un total négatif (voir CanAffordEquippedHenchman) :
-    /// c'est justement le signal qui bloque la progression.</summary>
-    public int EquippedHenchmanTreasuryAfter => _currentTreasury
-        + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
-        - (SelectedEquippedHenchmanGroupOption?.EquipmentCost ?? 0);
+    /// <summary>Alias de EndOfGameTreasuryRemaining (2026-09-03, retour utilisateur - "un seul solde de
+    /// trésorerie qu'on ajuste au fur et à mesure des étapes") : le coût de l'équipement du groupe choisi
+    /// est déjà retranché de ce solde unique, cette propriété ne fait plus que l'exposer sous son ancien
+    /// nom pour l'affichage existant (EndOfGameEquippedHenchmanTreasuryAfterLabel). Peut afficher un total
+    /// négatif (voir CanAffordEquippedHenchman) : c'est justement le signal qui bloque la progression.</summary>
+    public int EquippedHenchmanTreasuryAfter => EndOfGameTreasuryRemaining;
 
-    public bool CanAffordEquippedHenchman => SelectedEquippedHenchmanGroupOption?.Group is null
-        || RecruitmentRules.CanAffordEquippedHenchman(
-            _currentTreasury + (int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0),
-            SelectedEquippedHenchmanGroupOption.EquipmentCost);
+    /// <summary>Le coût de SelectedEquippedHenchmanGroupOption est déjà retranché de
+    /// EndOfGameTreasuryRemaining (2026-09-03, voir sa doc) - remplace l'ancien appel direct à
+    /// Core.Rules.RecruitmentRules.CanAffordEquippedHenchman (toujours testée/utilisée telle quelle
+    /// ailleurs, voir RulesTests.cs - seul CE point d'appel change), qui ne tenait compte que de la
+    /// trésorerie de base + l'or d'Exploration, jamais des Objets rares/Francs-Tireurs/Corruption-
+    /// Rétention décidés ailleurs dans ce même wizard.</summary>
+    public bool CanAffordEquippedHenchman => SelectedEquippedHenchmanGroupOption?.Group is null || EndOfGameTreasuryRemaining >= 0;
 
     // --- Bénédiction d'arme (Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières) ---------------
     //
@@ -833,7 +859,11 @@ public partial class EndOfGameDialogViewModel
     partial void OnExplorationGoldAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
     partial void OnExplorationItemQuantityChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
     partial void OnExplorationItemFoundValueChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
-    partial void OnExplorationWyrdstoneAmountChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null; }
+    partial void OnExplorationWyrdstoneAmountChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value)) ExplorationAmountError = null;
+        NotifyWyrdstoneFoundThisGameChanged();
+    }
 
     private void SyncExplorationDice()
     {
@@ -856,6 +886,9 @@ public partial class EndOfGameDialogViewModel
     /// plutôt que de laisser une résolution obsolète affichée.</summary>
     private void ResolveExplorationResult()
     {
+        OnPropertyChanged(nameof(BaselineWyrdstoneShardsFound));
+        OnPropertyChanged(nameof(BaselineWyrdstoneShardsFoundDisplay));
+        NotifyWyrdstoneFoundThisGameChanged();
         TriggeredExplorationResult = null;
         ExplorationSubRoll = string.Empty;
         ExplorationSubRollError = null;
@@ -1172,5 +1205,57 @@ public partial class EndOfGameDialogViewModel
             && string.IsNullOrWhiteSpace(ExplorationItemQuantity);
 
         return CheckRoll(amountMissing == true || henchmanQuantityMissing, () => ExplorationAmountError = Loc["EndOfGameRollRequired"]);
+    }
+
+    /// <summary>Tous les objets qui rejoindront la réserve de la bande à Terminer, en provenance de la
+    /// Table d'Exploration UNIQUEMENT (forme à branche unique + forme "Trésor Caché/Bande Massacrée" à
+    /// seuils indépendants + objet bonus Boutique/Bâtiment Éventré) - PAS les Objets Rares (étape séparée,
+    /// plus tard dans ce wizard). Miroir client-side de WarbandDetailViewModel.EndOfGame.
+    /// ApplyExplorationOutcomeAsync (AddOneItemToInventoryAsync), en WarbandEquipment déjà résolus
+    /// (ResolvedExplorationItem et consorts, jamais recalculé ici) plutôt qu'écrit en base : ce wizard
+    /// n'écrit rien avant Terminer (voir la doc de classe globale), mais BuildStashPool
+    /// (EndOfGameDialogViewModel.Recruitment.cs) a besoin de savoir CE QUI SERA dans la réserve pour
+    /// calculer correctement le top-up "réserve en priorité" d'un groupe d'Hommes de main existant - sans
+    /// ce miroir, un objet trouvé PENDANT cette même partie n'était jamais compté disponible tant que
+    /// Terminer n'avait pas tourné (retour utilisateur - "les items récupérés dans l'exploration chart ne
+    /// sont pas comptabilisés dans le contexte du end of game pour le recrutement"). L'application réelle
+    /// (ApplyExplorationOutcomeAsync) tourne de toute façon AVANT ApplyHenchmanRecruitmentAsync dans le
+    /// pipeline de Terminer (voir WarbandDetailViewModel.EndOfGame.SaveAsync) - le montant réellement
+    /// débité à Terminer était déjà correct, seul cet aperçu en direct manquait. Toute divergence avec
+    /// ApplyExplorationOutcomeAsync romprait cette cohérence aperçu/application réelle - garder les deux
+    /// synchronisés.</summary>
+    public IEnumerable<(EquipmentItem Item, SpecialRule? MaterialRule, int Quantity)> PendingExplorationStashItems()
+    {
+        if (ResolvedExplorationItem is { } item && int.TryParse(ExplorationItemQuantity, out var itemQuantity) && itemQuantity > 0)
+            yield return (item.Item, item.MaterialRule, itemQuantity);
+
+        // SecondaryEquipmentItemName est toujours un "ET" en un seul exemplaire, jamais soumis à un jet
+        // de quantité (voir ApplyExplorationOutcomeAsync's own doc) - quantité 1 fixe.
+        if (ResolvedExplorationSecondaryItem is { } secondaryItem)
+            yield return (secondaryItem.Item, secondaryItem.MaterialRule, 1);
+
+        if (ShowArtefactRoll && ResolvedArtefactItem is { } artefactItem)
+            yield return (artefactItem.Item, artefactItem.MaterialRule, 1);
+
+        // "Roll for every item on the list separately" (Trésor Caché/Bande Massacrée) - plusieurs lignes
+        // peuvent chacune avoir franchi leur propre seuil, voir IndependentOutcomeEntries's own doc.
+        if (IsIndependentThresholdResult)
+        {
+            foreach (var entry in IndependentOutcomeEntries.Where(e => e.ShowResult))
+            {
+                if (entry.IsArtefact && entry.ResolvedArtefactItem is { } entryArtefact)
+                    yield return (entryArtefact.Item, entryArtefact.MaterialRule, 1);
+                else if (entry.IsItem && entry.ResolvedItem is { } entryItem && int.TryParse(entry.ItemQuantity, out var entryQuantity) && entryQuantity > 0)
+                    yield return (entryItem.Item, entryItem.MaterialRule, entryQuantity);
+            }
+        }
+
+        // Objet bonus sur le même dé (Boutique) / test de Commandement additionnel du chef (Bâtiment
+        // Éventré) - toujours un exemplaire, indépendants du Kind principal ci-dessus.
+        if (BonusItem is { } bonusItem)
+            yield return (bonusItem.Item, bonusItem.MaterialRule, 1);
+
+        if (BonusStatTestItem is { } bonusStatItem)
+            yield return (bonusStatItem.Item, bonusStatItem.MaterialRule, 1);
     }
 }

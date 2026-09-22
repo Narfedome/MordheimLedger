@@ -32,7 +32,23 @@ public class EquipmentPick
     /// WarriorNameSlot's in-memory Equipment list.</summary>
     public bool IsFree { get; set; }
 
-    public int Cost => EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, IsFree);
+    /// <summary>Set true by the caller (EndOfGameDialogViewModel.Recruitment.AddRecruitEquipment) when
+    /// this pick was already sitting in the band's réserve (unassigned WarbandEquipment, from before this
+    /// same session - see BuildAvailableReservePool) rather than bought fresh - 2026-09-05, retour
+    /// utilisateur "assignation des équipements de la stash" plutôt qu'un achat systématique au picker.
+    /// Distinct from IsFree (dague gratuite, une règle différente) même si les deux ramènent Cost à 0 -
+    /// gardés séparés pour ne pas mélanger deux raisons différentes d'être gratuit.</summary>
+    public bool FromReserve { get; set; }
+
+    /// <summary>Set true by the caller (EndOfGameDialogViewModel.Reallocation) when this pick represents
+    /// an item moved for free from an existing Hero or the reserve via the "Réallouer l'équipement" step
+    /// (livre des règles - "Swap equipment between models as desired") - never a new purchase. Distinct
+    /// from FromReserve (which means "consumed from the band's shared stash pool during Recruitment") and
+    /// IsFree (free dagger) even though all three zero out Cost, same reasoning as those two: never mix
+    /// two different reasons for being free.</summary>
+    public bool IsReallocated { get; set; }
+
+    public int Cost => EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, IsFree || FromReserve || IsReallocated);
 
     /// <summary>Null = pick à acheter au Save (comportement d'origine). Non-null = id du WarriorEquipment
     /// déjà en base que ce pick représente (bande rouverte pour édition, voir RecruitSlot constructeur) -

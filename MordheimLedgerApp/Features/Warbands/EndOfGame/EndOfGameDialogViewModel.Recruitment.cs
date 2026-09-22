@@ -520,16 +520,16 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Achat d'équipement pour une cible : un WarriorNameSlot (Héros) ou un HenchmanGroupDraft
     /// (nouveau groupe d'Hommes de main, jamais un groupe déjà existant - son équipement reste
-    /// automatique). Contrairement à WarbandEditDialogViewModel.AddEquipment, jamais filtré par
-    /// EquipmentListId (retour utilisateur 2026-09-21 - "ce que j'imaginais pour l'équipement c'est soit de
-    /// piocher dans la réserve, soit avoir accès à ce qu'on peut acheter au magasin, en faisant fi de la
-    /// liste d'équipement du personnage") : au comptoir d'une recrue en pleine campagne, le choix est le
-    /// large pool "commun + objets de la bande" (comme WarriorOk/BroadBandScoped dans
-    /// EquipmentItemViewModel.ApplyFilter quand AllowedEquipmentListItemIds est null), pas la liste
-    /// d'équipement propre à SON type - seul RestrictedToWarriorArchetypeIds (warriorArchetypeId, toujours
-    /// passé) continue de narrower les objets réservés à d'autres archétypes précis. commonOnly: true
-    /// (livre des règles - "can only buy Common items... freely", les Objets Rares ont déjà leur propre
-    /// étape plus tôt dans ce wizard) -
+    /// automatique). Filtré par row.Archetype.EquipmentListId (la liste propre au type recruté), même
+    /// principe que WarbandEditDialogViewModel.AddEquipment - **revenu sur une version "achat libre"
+    /// (equipmentListId: null) du 2026-09-05** (retour utilisateur d'alors - "ce que j'imaginais pour
+    /// l'équipement c'est soit de piocher dans la réserve, soit avoir accès à ce qu'on peut acheter au
+    /// magasin, en faisant fi de la liste d'équipement du personnage") : FAQ officielle citée par
+    /// l'utilisateur 2026-09-22 - "you must always equip any newly hired warriors using the equipment list
+    /// from your warband" (Héros ET Hommes de main confirmés). RestrictedToWarriorArchetypeIds
+    /// (warriorArchetypeId, toujours passé) continue de narrower en plus les objets réservés à d'autres
+    /// archétypes précis. commonOnly: true (livre des règles - "can only buy Common items... freely", les
+    /// Objets Rares ont déjà leur propre étape plus tôt dans ce wizard) -
     /// jamais de choix de matériau pour les armes de corps à corps (retour utilisateur 2026-09-21, revu par
     /// rapport à une première version qui ouvrait MaterialPickerDialog ici : Gromril/Ithilmar sont des
     /// améliorations RARES, jamais proposées par un marchand qui ne vend QUE des Objets Communs, même
@@ -574,10 +574,12 @@ public partial class EndOfGameDialogViewModel
             .GroupBy(kv => kv.Key.ItemId)
             .ToDictionary(g => g.Key, g => (g.Sum(kv => kv.Value), ResolveAvailableReserveMaterial(g.Key, perUnitCost)));
 
-        // equipmentListId volontairement omis (null) - voir la doc de classe de cette méthode : le large
-        // pool "commun + objets de la bande" s'applique ici, jamais la liste d'équipement propre au type
-        // recruté.
-        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, equipmentListId: null, row.Archetype.Id,
+        // equipmentListId = la liste propre au type recruté (row.Archetype.EquipmentListId) - revenu sur la
+        // version "achat libre" (equipmentListId: null) du 2026-09-05 : FAQ officielle citée par
+        // l'utilisateur 2026-09-22 - "you must always equip any newly hired warriors using the equipment
+        // list from your warband", confirmée pour Héros ET Hommes de main. RestrictedToWarriorArchetypeIds
+        // (row.Archetype.Id) continue de s'appliquer par-dessus, comme avant.
+        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
             EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities);
 
         // Jamais de CHOIX interactif de matériau ici (retour utilisateur 2026-09-21 - même raison que

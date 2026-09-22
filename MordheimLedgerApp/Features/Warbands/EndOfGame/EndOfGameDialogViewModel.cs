@@ -156,6 +156,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsDramatisPersonaeStep))]
     [NotifyPropertyChangedFor(nameof(IsPairEngagementStep))]
     [NotifyPropertyChangedFor(nameof(IsPairDuelStep))]
+    [NotifyPropertyChangedFor(nameof(IsDismissWarriorsStep))]
     [NotifyPropertyChangedFor(nameof(IsEquipmentTradingStep))]
     [NotifyPropertyChangedFor(nameof(IsRecruitHeroesCountStep))]
     [NotifyPropertyChangedFor(nameof(IsRecruitHeroDetailStep))]
@@ -184,7 +185,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -361,6 +362,14 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // d'équipement (juste avant, inchangée) remplit/vide la réserve de toute la bande ; ce qui suit
             // source ses achats en priorité depuis cette réserve plutôt que d'acheter systématiquement au
             // plein tarif - voir BuildStashPool/BuildAvailableReservePool.
+            // Renvoyer (livre des règles - "Disbanding a Warband" + FAQ officielle citée par
+            // l'utilisateur 2026-09-22 - "you are allowed to dismiss any warrior at any time during the
+            // post-battle sequence... transfer the warrior's weapons and gear to your stash and then
+            // dismiss him") : toujours présente juste avant Achat/Vente, jamais conditionnelle (le joueur
+            // peut ne renvoyer personne) - pour que l'équipement récupéré puisse ensuite être vendu OU
+            // réutilisé gratuitement pour équiper une nouvelle recrue (Recrutement, plus loin dans ce même
+            // wizard). Voir EndOfGameDialogViewModel.Dismissal.cs.
+            steps.Add(new(StepKind.DismissWarriors));
             steps.Add(new(StepKind.EquipmentTrading));
             // Héros : effectif (steppers, toujours présente) puis UNE étape PAR héros réellement recruté
             // (dynamique, même principe que Blessure/Progression - un guerrier par étape plutôt qu'une
@@ -428,6 +437,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsDramatisPersonaeStep => Current.Kind == StepKind.DramatisPersonae;
     public bool IsPairEngagementStep => Current.Kind == StepKind.PairEngagement;
     public bool IsPairDuelStep => Current.Kind == StepKind.PairDuel;
+    public bool IsDismissWarriorsStep => Current.Kind == StepKind.DismissWarriors;
     public bool IsEquipmentTradingStep => Current.Kind == StepKind.EquipmentTrading;
     public bool IsRecruitHeroesCountStep => Current.Kind == StepKind.RecruitHeroesCount;
     public bool IsRecruitHeroDetailStep => Current.Kind == StepKind.RecruitHeroDetail;
@@ -744,6 +754,18 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                 // ExplorationDieEntry ailleurs dans ce fichier.
                 if (e.PropertyName == nameof(WarriorOutcomeRow.DistributedExplorationExperience))
                     OnPropertyChanged(nameof(DistributedExperienceRemaining));
+
+                // Renvoyer (case à cocher d'un Héros en binding direct TwoWay, jamais une commande) - seul
+                // cet abonnement couvre uniformément la case Héros ET le stepper de groupe (Increment/
+                // DecrementDismiss, qui rafraîchissent déjà l'éligibilité de Recrutement elles-mêmes) pour
+                // rafraîchir le récap "Équipement récupéré" et l'éligibilité de Recrutement dans le cas
+                // Héros.
+                if (e.PropertyName == nameof(WarriorOutcomeRow.DismissCount))
+                {
+                    OnPropertyChanged(nameof(RecoveredDismissedEquipmentChips));
+                    UpdateRecruitRowsEligibility();
+                    RefreshHenchmanTopUpBreakdowns();
+                }
             };
         }
     }

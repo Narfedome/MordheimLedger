@@ -44,6 +44,15 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// ApplyEquipmentTradingAsync.</summary>
     public bool IsFromExploration { get; }
 
+    /// <summary>True pour de l'équipement restitué à la réserve par l'étape "Renvoyer", juste avant
+    /// Achat/Vente (PendingDismissedEquipment) - même situation qu'IsFromExploration (pas encore de
+    /// WarbandEquipment réel au moment de construire ce candidat, ApplyDismissalsAsync ne le crée qu'à
+    /// Terminer, AVANT ApplyEquipmentTradingAsync dans le pipeline) : traité par le même mécanisme de
+    /// "re-requête fraîche + retrait/recréation du reliquat" dans ApplyEquipmentTradingAsync. Séparé
+    /// d'IsFromExploration (pas juste réutilisé) pour ne pas mélanger deux provenances distinctes dans
+    /// l'Historique/le débogage, même si la mécanique de persistance est identique.</summary>
+    public bool IsFromDismissal { get; }
+
     public EquipmentItem Item { get; }
     public SpecialRule? MaterialRule { get; }
 
@@ -102,10 +111,16 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// <summary>Identité stable de la ligne source (IsFromStash + SourceId forme une clé unique, un
     /// WarbandEquipment.Id et un WarriorEquipment.Id vivent dans deux tables différentes donc peuvent
     /// coïncider numériquement sans IsFromStash pour les distinguer) - synthétisé négatif (jamais un vrai
-    /// id positif) pour une trouvaille d'Exploration, qui n'en a pas encore un réel.</summary>
-    public int SourceId => StashItem?.Id ?? CarriedItem?.Id ?? SyntheticExplorationSourceId(Item.Id, MaterialRule?.Id);
+    /// id positif) pour une trouvaille d'Exploration ou un renvoi, qui n'en ont pas encore un réel. Les
+    /// deux formules synthétiques restent distinctes (offset +1 vs +2) pour qu'une trouvaille et un renvoi
+    /// portant sur le même (Item, MaterialRule) cette même partie ne se fassent jamais passer pour la même
+    /// source.</summary>
+    public int SourceId => StashItem?.Id ?? CarriedItem?.Id
+        ?? (IsFromDismissal ? SyntheticDismissalSourceId(Item.Id, MaterialRule?.Id) : SyntheticExplorationSourceId(Item.Id, MaterialRule?.Id));
 
     public static int SyntheticExplorationSourceId(int itemId, int? materialRuleId) => -(itemId * 1_000_003 + (materialRuleId ?? 0) + 1);
+
+    public static int SyntheticDismissalSourceId(int itemId, int? materialRuleId) => -(itemId * 1_000_003 + (materialRuleId ?? 0) + 2);
 
     /// <summary>Combien de cette ligne on vend réellement - stepper borné [0, OwnedQuantity] sur
     /// SellEquipmentSelectorPage (IncrementCommand/DecrementCommand).</summary>
@@ -163,12 +178,24 @@ public partial class SellableEquipmentCandidate : ObservableObject
     }
 
     public SellableEquipmentCandidate(EquipmentItem explorationItem, SpecialRule? materialRule, int ownedQuantity)
+        : this(explorationItem, materialRule, ownedQuantity, isFromDismissal: false)
     {
-        IsFromExploration = true;
-        Item = explorationItem;
+    }
+
+    /// <summary>Équipement restitué à la réserve par l'étape "Renvoyer" - factory nommée plutôt qu'un 4e
+    /// constructeur positionnel (même liste de paramètres que le constructeur Exploration ci-dessus,
+    /// impossible à surcharger sans le distinguer autrement).</summary>
+    public static SellableEquipmentCandidate ForDismissal(EquipmentItem item, SpecialRule? materialRule, int ownedQuantity) =>
+        new(item, materialRule, ownedQuantity, isFromDismissal: true);
+
+    private SellableEquipmentCandidate(EquipmentItem item, SpecialRule? materialRule, int ownedQuantity, bool isFromDismissal)
+    {
+        IsFromExploration = !isFromDismissal;
+        IsFromDismissal = isFromDismissal;
+        Item = item;
         MaterialRule = materialRule;
         OwnedQuantity = ownedQuantity;
         SaleQuantityMultiplier = 1;
-        NameDisplay = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{explorationItem.Name} ({abbr})" : explorationItem.Name;
+        NameDisplay = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{item.Name} ({abbr})" : item.Name;
     }
 }

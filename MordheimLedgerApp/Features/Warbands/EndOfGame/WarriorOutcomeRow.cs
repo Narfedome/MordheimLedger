@@ -122,6 +122,42 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     public string OutOfActionLabel => $"{OutOfActionCount}/{HeadCount}";
 
+    /// <summary>Nombre de figurines renvoyées volontairement à l'étape "Renvoyer" (livre des règles,
+    /// "Disbanding a Warband" + FAQ officielle - "you are allowed to dismiss any warrior at any time
+    /// during the post-battle sequence... transfer the warrior's weapons and gear to your stash and then
+    /// dismiss him") - toujours 0 ou 1 pour un Héros, jusqu'à HeadCount pour un groupe d'Hommes de main
+    /// (renvoi partiel supporté, même mécanique que le stepper de Recrutement des vétérans). Son
+    /// équipement rejoint la réserve à Terminer (voir WarbandDetailViewModel.EndOfGame.
+    /// ApplyDismissalsAsync), jamais perdu.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsDismissed))]
+    [NotifyPropertyChangedFor(nameof(DismissLabel))]
+    private int dismissCount;
+
+    /// <summary>Wrapper booléen pour la case à cocher d'un Héros - même idiome qu'IsOutOfAction.</summary>
+    public bool IsDismissed
+    {
+        get => DismissCount > 0;
+        set => DismissCount = value ? 1 : 0;
+    }
+
+    /// <summary>Affiche l'effectif RESTANT (HeadCount - DismissCount), pas le nombre renvoyé - retour
+    /// utilisateur 2026-09-22 : "il faut pour les hommes de main partir de l'effectif max... afficher 3/3
+    /// et juste mettre le moins pour renvoyer un membre" - plus intuitif que partir de 0/3 et
+    /// incrémenter. Le "-" (IncrementDismissCommand) réduit donc ce nombre affiché, le "+"
+    /// (DecrementDismissCommand) l'augmente (annule un renvoi) - DismissCount lui-même reste inchangé
+    /// (toujours "combien de figurines renvoyées"), seul l'affichage/les boutons sont inversés.</summary>
+    public string DismissLabel => $"{HeadCount - DismissCount}/{HeadCount}";
+
+    /// <summary>True quand TOUTES les figurines restantes sont renvoyées - déclenche WarriorStatus.
+    /// Retired à Terminer plutôt qu'une simple réduction de HeadCount (voir ApplyDismissalsAsync).</summary>
+    public bool IsFullyDismissed => DismissCount > 0 && DismissCount >= HeadCount;
+
+    /// <summary>Éligible à l'étape Renvoyer - jamais un Franc-Tireur/Dramatis Persona (déjà leur propre
+    /// mécanisme Payer/Renvoyer, HiredSwordUpkeepEntry/DramatisPersonaUpkeepEntry), jamais un guerrier
+    /// déjà mort ce tour (rien à renvoyer).</summary>
+    public bool CanBeDismissed => !IsDead && !Warrior.IsHiredSword && !Warrior.IsDramatisPersona;
+
     /// <summary>OutOfActionCount change (case cochée/décochée pour un Héros, stepper +/- pour un groupe
     /// d'Hommes de main) : ce guerrier n'a plus d'étape Blessure dans le wizard si la valeur retombe à 0
     /// (voir EndOfGameDialogViewModel.Steps), donc plus rien à y montrer. Héros et groupe divergent

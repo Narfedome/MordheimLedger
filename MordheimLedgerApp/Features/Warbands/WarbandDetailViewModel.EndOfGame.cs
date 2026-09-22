@@ -165,11 +165,18 @@ public partial class WarbandDetailViewModel
             await ApplyPairEquipmentSeizureIfNeededAsync(dialogViewModel, sentences);
             await ApplyPairDuelIfNeededAsync(dialogViewModel, sentences);
             await ApplyHiredSwordUpkeepAsync(dialogViewModel, sentences);
+            // Doit rester AVANT ApplyEquipmentTradingAsync : un guerrier renvoyé restitue son équipement à
+            // la réserve, qui doit exister en base pour que la Vente (juste après) puisse le proposer -
+            // voir SellableEquipmentCandidate.IsFromDismissal. Doit rester APRÈS ApplyWarriorOutcomesAsync
+            // (plus haut) : les morts de CETTE bataille réduisent déjà Warrior.HeadCount avant qu'on
+            // reclampe DismissCount contre l'effectif RÉEL (voir ApplyDismissalsAsync's own doc).
+            await ApplyDismissalsAsync(dialogViewModel, sentences);
             // Doit rester AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync : ceux-ci consomment
             // en priorité la réserve que cette étape vient de remplir/vider (voir leur propre doc). Doit
             // rester APRÈS ApplyExplorationOutcomeAsync (plus haut) : une vente peut porter sur une
-            // trouvaille d'Exploration de cette même partie (SellableEquipmentCandidate.IsFromExploration),
-            // qui n'existe en base qu'une fois cette étape-là appliquée.
+            // trouvaille d'Exploration OU un renvoi de cette même partie (SellableEquipmentCandidate.
+            // IsFromExploration/IsFromDismissal), qui n'existent en base qu'une fois ces étapes-là
+            // appliquées.
             await ApplyEquipmentTradingAsync(dialogViewModel, language, sentences);
             await ApplyRecruitmentAsync(dialogViewModel, language, sentences);
             await ApplyHenchmanRecruitmentAsync(dialogViewModel, language, sentences);
@@ -1474,6 +1481,53 @@ public partial class WarbandDetailViewModel
         return remaining * EquipmentPricing.CalculateCost(item.Cost, materialRule?.CostMultiplier, isFree: isFreeDagger);
     }
 
+    /// <summary>Étape "Renvoyer" (livre des règles - "Disbanding a Warband" + FAQ officielle - "you are
+    /// allowed to dismiss any warrior at any time during the post-battle sequence... transfer the
+    /// warrior's weapons and gear to your stash and then dismiss him") - juste AVANT Achat/Vente dans le
+    /// pipeline. Un Héros (DismissCount == HeadCount == 1) ou un groupe d'Hommes de main ENTIÈREMENT
+    /// renvoyé (DismissCount == HeadCount) restitue TOUT son équipement à la réserve puis passe
+    /// WarriorStatus.Retired (jamais DeleteWarriorAsync, qui effacerait son historique - même statut que
+    /// la retraite d'Œil crevé). Un renvoi PARTIEL d'un groupe (DismissCount &lt; HeadCount) restitue
+    /// seulement la part des figurines qui partent (Quantity × DismissCount, Quantity étant une quantité
+    /// PAR MODÈLE - voir ExistingHenchmanTopUp.GetTopUpBreakdown's own doc) et laisse la ligne
+    /// WarriorEquipment elle-même intacte (les figurines restantes portent toujours la même quantité par
+    /// modèle), ne touchant que Warrior.HeadCount.</summary>
+    private async Task ApplyDismissalsAsync(EndOfGameDialogViewModel dialogViewModel, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var row in dialogViewModel.WarriorRows.Where(r => r.DismissCount > 0))
+        {
+            var warrior = row.Warrior;
+            // Filet de sécurité : le stepper de cette étape borne DismissCount sur le HeadCount affiché
+            // PENDANT le wizard (jamais remis à jour en direct par les morts de CETTE bataille, qui ne
+            // mutent Warrior.HeadCount qu'à ApplyWarriorOutcomesAsync, juste avant cet appel - même
+            // limitation acceptée que partout ailleurs dans ce wizard). Reclamper ici contre le HeadCount
+            // RÉEL évite un HeadCount négatif si des figurines sont mortes entre-temps.
+            var dismissCount = Math.Min(row.DismissCount, warrior.HeadCount);
+            if (dismissCount <= 0) continue;
+
+            var fullyDismissed = dismissCount >= warrior.HeadCount;
+
+            foreach (var equipment in warrior.Equipment.ToList())
+            {
+                await _warbandService.AddWarbandEquipmentAsync(Warband.Id, equipment.Item,
+                    quantity: equipment.Quantity * dismissCount, materialRule: equipment.MaterialRule,
+                    foundValueOverride: equipment.FoundValueOverride);
+                if (fullyDismissed)
+                    await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+            }
+
+            if (fullyDismissed)
+                warrior.Status = WarriorStatus.Retired;
+            else
+                warrior.HeadCount -= dismissCount;
+
+            await _warbandService.SaveWarriorAsync(warrior);
+            sentences.Add(string.Format(Loc["HistoryWarriorDismissedSentence"], row.Name));
+        }
+    }
+
     /// <summary>Étape "Achat/Vente d'équipement" (livre, étape 9 - "Reallocate equipment") - juste AVANT
     /// Recrutement dans le pipeline (voir SaveAsync's own commentaire d'ordre). Achat : rejoint la réserve
     /// (jamais assigné à un guerrier ici). Vente : livre des règles - "Warriors can automatically sell
@@ -1526,8 +1580,12 @@ public partial class WarbandDetailViewModel
                 if (leftover > 0)
                     await _warbandService.AddWarriorEquipmentAsync(carriedItem.WarriorId, carriedItem.Item, quantity: leftover, materialRule: carriedItem.MaterialRule, foundValueOverride: carriedItem.FoundValueOverride);
             }
-            else if (candidate.IsFromExploration)
+            else if (candidate.IsFromExploration || candidate.IsFromDismissal)
             {
+                // Même mécanisme pour les deux provenances : ni l'une ni l'autre n'a de WarbandEquipment.Id
+                // stable au moment de construire ce candidat (ApplyExplorationOutcomeAsync/
+                // ApplyDismissalsAsync ne le crée qu'à Terminer, juste avant cette méthode) - re-résolu ici
+                // par un fetch tardif plutôt qu'un id connu à l'avance.
                 freshStashForExplorationSales ??= await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
                 var remaining = candidate.SelectedQuantity;
                 foreach (var row in freshStashForExplorationSales.Where(w => w.Item.Id == candidate.Item.Id && w.MaterialRule?.Id == candidate.MaterialRule?.Id).ToList())

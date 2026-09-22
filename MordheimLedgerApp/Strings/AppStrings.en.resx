@@ -1412,6 +1412,18 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Remaining treasury: {0} gc</value>
   </data>
+  <data name="EndOfGameDismissHeading" xml:space="preserve">
+    <value>Dismiss Warriors</value>
+  </data>
+  <data name="EndOfGameDismissHint" xml:space="preserve">
+    <value>A dismissed warrior returns their equipment to the warband's stash.</value>
+  </data>
+  <data name="EndOfGameDismissRecoveredEquipmentHeading" xml:space="preserve">
+    <value>Recovered equipment</value>
+  </data>
+  <data name="HistoryWarriorDismissedSentence" xml:space="preserve">
+    <value>{0} was dismissed, their equipment joins the stash.</value>
+  </data>
   <data name="EndOfGameEquipmentTradingHeading" xml:space="preserve">
     <value>Buy/Sell Equipment</value>
   </data>

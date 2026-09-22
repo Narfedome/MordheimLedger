@@ -1412,6 +1412,18 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Trésorerie restante : {0} CO</value>
   </data>
+  <data name="EndOfGameDismissHeading" xml:space="preserve">
+    <value>Renvoyer des guerriers</value>
+  </data>
+  <data name="EndOfGameDismissHint" xml:space="preserve">
+    <value>Un guerrier renvoyé restitue son équipement à la réserve de la bande.</value>
+  </data>
+  <data name="EndOfGameDismissRecoveredEquipmentHeading" xml:space="preserve">
+    <value>Équipement récupéré</value>
+  </data>
+  <data name="HistoryWarriorDismissedSentence" xml:space="preserve">
+    <value>{0} a été renvoyé, son équipement rejoint la réserve.</value>
+  </data>
   <data name="EndOfGameEquipmentTradingHeading" xml:space="preserve">
     <value>Achat/Vente d'équipement</value>
   </data>

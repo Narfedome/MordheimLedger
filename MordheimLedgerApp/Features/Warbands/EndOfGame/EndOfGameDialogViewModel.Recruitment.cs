@@ -90,20 +90,26 @@ public partial class EndOfGameDialogViewModel
     public string RecruitmentTreasuryDisplay => string.Format(Loc["EndOfGameRareItemTreasuryFormat"], EndOfGameTreasuryRemaining);
 
     /// <summary>Effectif total de la bande APRÈS ce recrutement (guerriers déjà là + nouvelles recrues de
-    /// cette étape + vétérans ajoutés aux groupes existants) - comparé à WarbandArchetype.MaxWarriors par
-    /// RecruitmentRules.CanRecruit, même principe que WarbandEditDialogViewModel.TotalWarriorCount mais en
-    /// partant d'un roster déjà existant plutôt que de zéro. Inclut ExistingHenchmanTopUps.AddCount depuis
-    /// le 2026-09-22 (retour utilisateur - "la limite de la taille de la bande à prendre en compte aussi
-    /// dans le recrutement des vétérans") : ExistingHenchmanTopUps est peuplé dès le constructeur (AddCount
-    /// à 0 au départ), donc toujours sûr à additionner ici même avant d'atteindre cette étape.</summary>
-    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.Warrior.HeadCount) + RecruitRows.Sum(r => r.Count)
+    /// cette étape + vétérans ajoutés aux groupes existants - renvois de l'étape Renvoyer) - comparé à
+    /// WarbandArchetype.MaxWarriors par RecruitmentRules.CanRecruit, même principe que
+    /// WarbandEditDialogViewModel.TotalWarriorCount mais en partant d'un roster déjà existant plutôt que de
+    /// zéro. Inclut ExistingHenchmanTopUps.AddCount depuis le 2026-09-22 (retour utilisateur - "la limite
+    /// de la taille de la bande à prendre en compte aussi dans le recrutement des vétérans") :
+    /// ExistingHenchmanTopUps est peuplé dès le constructeur (AddCount à 0 au départ), donc toujours sûr à
+    /// additionner ici même avant d'atteindre cette étape. Retranche WarriorRows.DismissCount (même jour,
+    /// retour utilisateur - "dans les recrutement, il faut soustraire les effectifs") : un guerrier renvoyé
+    /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place, même limitation "stale jusqu'à
+    /// Terminer" qu'ailleurs dans ce wizard (DismissCount plafonné à HeadCount par le stepper, jamais
+    /// négatif).</summary>
+    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.Warrior.HeadCount - r.DismissCount) + RecruitRows.Sum(r => r.Count)
         + ExistingHenchmanTopUps.Sum(t => t.AddCount);
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
     /// WarriorArchetype.MaxCount. Compte tous les guerriers vivants (WarriorRows exclut déjà les morts/
-    /// retraités - voir WarbandDetailViewModel.EndOfGame's activeWarriorRows), pas seulement les Héros.</summary>
+    /// retraités - voir WarbandDetailViewModel.EndOfGame's activeWarriorRows), pas seulement les Héros.
+    /// Retranche DismissCount, même raison que TotalWarriorCountAfterRecruitment.</summary>
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
-        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.Warrior.HeadCount);
+        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.Warrior.HeadCount - r.DismissCount);
 
     // --- Héros : effectif -----------------------------------------------------------------------------
 
@@ -169,8 +175,17 @@ public partial class EndOfGameDialogViewModel
         OnPropertyChanged(nameof(StepLabel));
         OnPropertyChanged(nameof(IsLastStep));
         foreach (var row in RecruitRows)
+        {
+            // ExternalHeadCount (affiché par CountDisplay, "X/Y") doit lui aussi refléter un renvoi
+            // pendant à l'étape Renvoyer (retour utilisateur 2026-09-22 - "dans les écrans de recrutement
+            // sur les -/+ les dismissed ne sont pas décomptés") : posé une seule fois au constructeur
+            // jusqu'ici (DismissCount valait alors toujours 0), jamais rafraîchi depuis - cette méthode est
+            // déjà appelée à chaque changement de DismissCount (voir l'abonnement PropertyChanged sur
+            // WarriorRows), donc le bon endroit pour le tenir à jour.
+            row.ExternalHeadCount = ExistingCountForArchetype(row.Archetype.Id);
             row.CanIncrement = RecruitmentRules.CanRecruit(ExistingCountForArchetype(row.Archetype.Id) + row.Count, row.Archetype.MaxCount,
                 TotalWarriorCountAfterRecruitment, _recruitableWarbandArchetype.MaxWarriors, isExistingWarband: false, EndOfGameTreasuryRemaining, row.Cost);
+        }
     }
 
     // Rien à valider pour l'étape RecruitHeroesCount (steppers seuls) - le nom et l'équipement de chaque
@@ -201,11 +216,20 @@ public partial class EndOfGameDialogViewModel
     /// <summary>Recalcule et "pousse" le détail de coût (ExistingHenchmanTopUp.Breakdown) de CHAQUE groupe
     /// existant - appelée après tout Increment/DecrementHenchmanTopUp (un changement sur UN groupe peut
     /// affecter le détail d'un AUTRE, la réserve étant partagée et consommée dans l'ordre, voir
-    /// GetTopUpBreakdown) et une première fois à la construction.</summary>
+    /// GetTopUpBreakdown), une première fois à la construction, ET à chaque changement de DismissCount
+    /// (voir l'abonnement PropertyChanged sur WarriorRows dans EndOfGameDialogViewModel.cs). Rafraîchit
+    /// aussi ExistingCountForType (retour utilisateur 2026-09-22 - "dans les écrans de recrutement sur les
+    /// -/+ les dismissed ne sont pas décomptés... pas bon pour les vétérans") : posé une seule fois par
+    /// BuildExistingHenchmanTopUps jusqu'ici (DismissCount valait alors toujours 0), jamais rafraîchi
+    /// depuis - même bug/même correctif que WarriorRecruitRow.ExternalHeadCount côté
+    /// UpdateRecruitRowsEligibility.</summary>
     private void RefreshHenchmanTopUpBreakdowns()
     {
         foreach (var topUp in ExistingHenchmanTopUps)
+        {
+            topUp.ExistingCountForType = ExistingCountForArchetype(topUp.WarriorArchetypeId);
             topUp.Breakdown = GetTopUpBreakdown(topUp);
+        }
     }
 
     /// <summary>Budget vétérans restant (livre des règles - "you can hire as many warriors as you wish, as
@@ -314,6 +338,15 @@ public partial class EndOfGameDialogViewModel
     {
         var pool = _warbandInventory.GroupBy(w => (w.Item.Id, w.MaterialRule?.Id)).ToDictionary(g => g.Key, g => g.Count());
         foreach (var (item, materialRule, quantity) in PendingExplorationStashItems())
+        {
+            var key = (item.Id, materialRule?.Id);
+            pool[key] = pool.GetValueOrDefault(key) + quantity;
+        }
+        // Renvoyer (étape juste avant Achat/Vente) : même principe que les trouvailles d'Exploration -
+        // l'équipement restitué par un guerrier renvoyé n'existe pas encore dans _warbandInventory, mais
+        // ApplyDismissalsAsync s'exécute AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync dans le
+        // pipeline de Terminer, donc il SERA bien disponible au moment réel du calcul.
+        foreach (var (item, materialRule, quantity) in PendingDismissedEquipment())
         {
             var key = (item.Id, materialRule?.Id);
             pool[key] = pool.GetValueOrDefault(key) + quantity;

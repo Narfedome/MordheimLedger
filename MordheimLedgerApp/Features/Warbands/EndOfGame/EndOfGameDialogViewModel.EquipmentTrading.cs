@@ -133,7 +133,21 @@ public partial class EndOfGameDialogViewModel
             if (remaining > 0) yield return new SellableEquipmentCandidate(item, materialRule, remaining);
         }
 
-        foreach (var row in WarriorRows)
+        // Renvoyer (étape juste avant celle-ci) : même principe que les trouvailles d'Exploration -
+        // l'équipement restitué par un guerrier renvoyé cette même partie doit pouvoir être revendu ici.
+        foreach (var group in PendingDismissedEquipment().GroupBy(x => (x.Item.Id, MaterialRuleId: x.MaterialRule?.Id)))
+        {
+            var (item, materialRule, _) = group.First();
+            var sourceId = SellableEquipmentCandidate.SyntheticDismissalSourceId(item.Id, materialRule?.Id);
+            var remaining = group.Sum(x => x.Quantity) - alreadyPendingQty.GetValueOrDefault((true, sourceId));
+            if (remaining > 0) yield return SellableEquipmentCandidate.ForDismissal(item, materialRule, remaining);
+        }
+
+        // IsFullyDismissed exclu : tout son équipement est déjà compté ci-dessus via
+        // PendingDismissedEquipment (étape Renvoyer) - le montrer aussi ici le compterait deux fois. Un
+        // renvoi PARTIEL (groupe d'Hommes de main) laisse cette ligne intacte à dessein : les figurines
+        // restantes portent toujours la même quantité PAR MODÈLE, encore vendable normalement.
+        foreach (var row in WarriorRows.Where(r => !r.IsFullyDismissed))
             foreach (var equipment in row.Warrior.Equipment)
             {
                 var remaining = equipment.Quantity - alreadyPendingQty.GetValueOrDefault((false, equipment.Id));

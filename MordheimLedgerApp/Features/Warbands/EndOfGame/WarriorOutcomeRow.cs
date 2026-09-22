@@ -17,6 +17,14 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     public Warrior Warrior { get; }
     public string Name => Warrior.Name;
 
+    /// <summary>Instantané des ids WarriorEquipment RÉELLEMENT en base pour ce guerrier, capturé UNE FOIS
+    /// à la construction (avant toute interaction du joueur) - permet à WarbandDetailViewModel.EndOfGame.
+    /// ApplyEquipmentReallocationAsync de savoir, après une session de Réallouer l'équipement qui mute
+    /// Warrior.Equipment directement en mémoire, ce qui a été RETIRÉ (id présent ici mais absent de
+    /// Warrior.Equipment maintenant) - un id ajouté par Réallouer est toujours négatif (synthétique,
+    /// jamais présent ici), donc jamais confondu avec un retrait.</summary>
+    public IReadOnlyCollection<int> OriginalEquipmentIds { get; }
+
     /// <summary>The archetype's name (e.g. "Zombie", "Capitaine") shown instead of a plain Héros/Homme
     /// de main label on every step of this wizard - same value as WarriorRow.RoleName, passed in by
     /// the caller (WarbandDetailViewModel.EndOfGame already has it resolved for the roster).</summary>
@@ -820,6 +828,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         IReadOnlyList<EquipmentItem>? pitFighterEquipment = null, IEnumerable<SpecialRuleChip>? specialRules = null)
     {
         Warrior = warrior;
+        OriginalEquipmentIds = warrior.Equipment.Select(we => we.Id).ToList();
         ArchetypeName = archetypeName;
         GainsExperience = gainsExperience;
         _startingHeroCount = startingHeroCount;

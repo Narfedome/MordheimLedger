@@ -1412,6 +1412,18 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Remaining treasury: {0} gc</value>
   </data>
+  <data name="EndOfGameEquipmentReallocationHeading" xml:space="preserve">
+    <value>Reallocate Equipment</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationHint" xml:space="preserve">
+    <value>Move an item to another Hero or to the stash, for free.</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationDestinationTitle" xml:space="preserve">
+    <value>Move to…</value>
+  </data>
+  <data name="HistoryEquipmentReallocatedSentence" xml:space="preserve">
+    <value>{0} moves to {1}.</value>
+  </data>
   <data name="EndOfGameDismissHeading" xml:space="preserve">
     <value>Dismiss Warriors</value>
   </data>

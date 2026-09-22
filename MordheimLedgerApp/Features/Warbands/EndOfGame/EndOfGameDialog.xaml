@@ -2507,6 +2507,35 @@
                        IsVisible="{Binding RecruitHenchmenNamesError, Converter={StaticResource IsNotNullConverter}}"/>
             </VerticalStackLayout>
 
+            <!-- Étape : Réallouer l'équipement (livre, étape 9 - "Swap equipment between models as
+                 desired") - dernière étape avant le Récapitulatif, après Achat/Vente ET tout le
+                 recrutement. Héros existants + nouvelles recrues de cette partie + Réserve uniquement
+                 (jamais un groupe d'Hommes de main, équipement partagé pour tout le groupe) - une
+                 ChipListView par porteur, icône ⇄ sur chaque chip pour déplacer CET objet précis,
+                 gratuitement. Voir EndOfGameDialogViewModel.Reallocation.cs. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEquipmentReallocationStep}">
+                <Label Text="{loc:Loc EndOfGameEquipmentReallocationHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameEquipmentReallocationHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ReallocationCarriers}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:ReallocationCarrier">
+                            <!-- Nom du porteur en Label séparé, HORS de la ChipListView (pas
+                                 HeaderText/AlwaysShowSection) - le guerrier doit rester visible même à 0
+                                 objet (retour utilisateur 2026-09-22), et ChipListView.AlwaysShowSection ne
+                                 s'appliquait pas de façon fiable une fois généré dynamiquement par ce
+                                 BindableLayout imbriqué. -->
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <components:ChipListView ItemsSource="{Binding Items}"
+                                                          IconGlyph="{x:Static icons:SolidFont.BoxOpen}"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowReallocationItemDetailCommand}"
+                                                          MoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=MoveReallocationItemCommand}"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
             <!-- Étape : Récapitulatif (pas une étape du livre - relecture avant d'enregistrer) -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsRecapStep}">
                 <Label Text="{loc:Loc EndOfGameRecapHeading}" FontAttributes="Bold"/>

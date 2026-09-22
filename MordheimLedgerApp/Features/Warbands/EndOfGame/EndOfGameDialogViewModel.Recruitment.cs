@@ -174,6 +174,13 @@ public partial class EndOfGameDialogViewModel
         OnPropertyChanged(nameof(RecruitmentRosterCountDisplay));
         OnPropertyChanged(nameof(StepLabel));
         OnPropertyChanged(nameof(IsLastStep));
+        // ReallocationCarriers dépend de RecruitedHeroRows (nouvelles recrues) - retour utilisateur
+        // 2026-09-22 : "une nouvelle recrue qui n'est pas affichée" à l'étape Réallouer. ReallocationCarriers
+        // est une propriété "live" (jamais mise en cache), mais MAUI évalue le binding
+        // BindableLayout.ItemsSource UNE SEULE FOIS, tôt (avant même tout recrutement) - sans notification
+        // explicite, l'affichage ne se rafraîchit jamais quand une recrue s'ajoute ensuite (même si la
+        // commande MoveReallocationItem, qui relit la propriété directement en C#, voit bien la recrue).
+        OnPropertyChanged(nameof(ReallocationCarriers));
         foreach (var row in RecruitRows)
         {
             // ExternalHeadCount (affiché par CountDisplay, "X/Y") doit lui aussi refléter un renvoi

@@ -184,6 +184,9 @@ public partial class WarbandDetailViewModel
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant maintenant explicite ici plutôt qu'implicite dans l'ordre du code.
             await ApplySicknessLifecycleAsync(dialogViewModel, previouslySickWarriors);
+            // Réallouer l'équipement : TOUT DERNIER dans le pipeline - voir ApplyEquipmentReallocationAsync's
+            // own doc, doit voir l'état final de tout ce qui précède (Renvoyer/Vente/Recrutement).
+            await ApplyEquipmentReallocationAsync(dialogViewModel, language, sentences);
 
             // La partie est terminée : redonne la main à "Lancer la partie" sur cette page (voir
             // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée (Fin de Partie
@@ -1832,6 +1835,90 @@ public partial class WarbandDetailViewModel
         {
             devouredHero.Warrior.Status = WarriorStatus.Dead;
             await _warbandService.SaveWarriorAsync(devouredHero.Warrior);
+        }
+    }
+
+    /// <summary>Étape "Réallouer l'équipement" (livre, étape 9) - TOUT DERNIER dans le pipeline (voir
+    /// EndOfGame's commentaire d'ordre), pour voir l'état final de tout ce que Renvoyer/Vente/Recrutement
+    /// ont déjà appliqué. dialogViewModel.WarriorRows[i].Warrior.Equipment/ReallocationReserve ont été
+    /// mutés directement en mémoire pendant la session interactive (voir EndOfGameDialogViewModel.
+    /// Reallocation.cs) - jamais persisté avant cet appel. Diffe chaque liste courante contre son
+    /// instantané d'origine (WarriorOutcomeRow.OriginalEquipmentIds / dialogViewModel.
+    /// OriginalReserveEquipmentIds, capturés avant toute interaction) : un id d'origine absent maintenant
+    /// = parti ailleurs (RemoveXxxAsync) ; un id NÉGATIF présent maintenant = arrivé d'ailleurs
+    /// (AddXxxAsync, jamais un vrai id avant cet appel - voir ReallocatableItem/
+    /// AddToReallocationCarrier). Les recrues n'ont rien de spécial ici : ApplyRecruitmentAsync (plus haut
+    /// dans le pipeline) a déjà traité WarriorNameSlot.Equipment tel quel, cette étape n'y touche que
+    /// PENDANT la session interactive (Add/Remove direct sur ce même brouillon), jamais à Terminer.
+    ///
+    /// Cas particulier - "extras" de réserve (id == 0, voir EndOfGameDialogViewModel.Reallocation.cs's
+    /// EnsureReallocationReserveExtrasAdded) : un objet trouvé à l'Exploration/renvoyé/acheté PENDANT ce
+    /// même wizard n'a pas encore de vraie ligne WarbandEquipment au moment d'ouvrir cette étape, mais EN
+    /// AURA une par les étapes plus tôt dans CE MÊME pipeline (ApplyExplorationOutcomeAsync/
+    /// ApplyDismissalsAsync/ApplyEquipmentTradingAsync, toutes avant celle-ci) - jamais recréé ici si le
+    /// joueur ne l'a pas déplacé (déjà couvert), mais s'il l'a déplacé vers un Héros/une recrue, la VRAIE
+    /// ligne (déjà créée) doit être retrouvée par une requête fraîche (même idiome que
+    /// SellableEquipmentCandidate.IsFromExploration/IsFromDismissal dans ApplyEquipmentTradingAsync) et
+    /// supprimée - un simple diff par id est impossible ici puisque toutes les entrées "extras" partagent
+    /// l'id 0.</summary>
+    private async Task ApplyEquipmentReallocationAsync(EndOfGameDialogViewModel dialogViewModel, string language, List<string> sentences)
+    {
+        if (Warband is null) return;
+
+        foreach (var row in dialogViewModel.WarriorRows.Where(r => r.IsHero))
+        {
+            foreach (var goneId in row.OriginalEquipmentIds.Where(id => row.Warrior.Equipment.All(we => we.Id != id)))
+                await _warbandService.RemoveWarriorEquipmentAsync(goneId);
+
+            foreach (var arrived in row.Warrior.Equipment.Where(we => we.Id < 0).ToList())
+            {
+                var created = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, arrived.Item, arrived.Quantity, arrived.MaterialRule, arrived.FoundValueOverride);
+                if (arrived.BlessingRule is { } blessing)
+                    await _warbandService.SetWarriorEquipmentBlessingRuleAsync(created.Id, blessing.Id);
+                sentences.Add(string.Format(Loc["HistoryEquipmentReallocatedSentence"], arrived.NameDisplay, row.Name));
+            }
+        }
+
+        foreach (var goneId in dialogViewModel.OriginalReserveEquipmentIds.Where(id => dialogViewModel.ReallocationReserve.All(w => w.Id != id)))
+            await _warbandService.RemoveWarbandEquipmentAsync(goneId);
+
+        foreach (var arrived in dialogViewModel.ReallocationReserve.Where(w => w.Id < 0).ToList())
+        {
+            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, arrived.Item, arrived.Quantity, arrived.MaterialRule, arrived.FoundValueOverride);
+            sentences.Add(string.Format(Loc["HistoryEquipmentReallocatedSentence"], arrived.NameDisplay, Loc["EndOfGameEquipmentTradingStashSource"]));
+        }
+
+        if (dialogViewModel.ReallocationReserveExtrasOriginal.Count > 0)
+        {
+            List<WarbandEquipment>? freshStash = null;
+            foreach (var group in dialogViewModel.ReallocationReserveExtrasOriginal.GroupBy(x => (x.Item.Id, MaterialRuleId: x.MaterialRule?.Id)))
+            {
+                var originalQty = group.Sum(x => x.Quantity);
+                var stillThereQty = dialogViewModel.ReallocationReserve
+                    .Where(w => w.Id == 0 && w.Item.Id == group.Key.Id && w.MaterialRule?.Id == group.Key.MaterialRuleId)
+                    .Sum(w => w.Quantity);
+                var movedAwayQty = originalQty - stillThereQty;
+                if (movedAwayQty <= 0) continue;
+
+                freshStash ??= await _warbandService.GetWarbandEquipmentAsync(Warband.Id, language);
+                var remaining = movedAwayQty;
+                foreach (var row in freshStash.Where(w => w.Item.Id == group.Key.Id && w.MaterialRule?.Id == group.Key.MaterialRuleId).ToList())
+                {
+                    if (remaining <= 0) break;
+                    await _warbandService.RemoveWarbandEquipmentAsync(row.Id);
+                    freshStash.Remove(row);
+                    if (row.Quantity > remaining)
+                    {
+                        var recreated = await _warbandService.AddWarbandEquipmentAsync(Warband.Id, row.Item, quantity: row.Quantity - remaining, materialRule: row.MaterialRule, foundValueOverride: row.FoundValueOverride);
+                        freshStash.Add(recreated);
+                        remaining = 0;
+                    }
+                    else
+                    {
+                        remaining -= row.Quantity;
+                    }
+                }
+            }
         }
     }
 }

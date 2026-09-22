@@ -71,6 +71,18 @@ public partial class ChipView : ContentView
         set => SetValue(RemoveCommandProperty, value);
     }
 
+    // Non renseignée (défaut) : pas de bouton ⇄. Renseignée : petite icône d'échange en bout de chip
+    // (avant le Xmark s'il est aussi présent), invoquée avec Item en CommandParameter - Réallouer
+    // l'équipement (2026-09-22), même schéma exact que RemoveCommand.
+    public static readonly BindableProperty MoveCommandProperty =
+        BindableProperty.Create(nameof(MoveCommand), typeof(ICommand), typeof(ChipView));
+
+    public ICommand? MoveCommand
+    {
+        get => (ICommand?)GetValue(MoveCommandProperty);
+        set => SetValue(MoveCommandProperty, value);
+    }
+
     public ChipView()
     {
         InitializeComponent();

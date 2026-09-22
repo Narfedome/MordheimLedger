@@ -164,6 +164,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenCountStep))]
     [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenEquipmentStep))]
     [NotifyPropertyChangedFor(nameof(IsRecruitHenchmenNamesStep))]
+    [NotifyPropertyChangedFor(nameof(IsEquipmentReallocationStep))]
     [NotifyPropertyChangedFor(nameof(IsRecapStep))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]
     [NotifyPropertyChangedFor(nameof(CurrentPitFightOutcome))]
@@ -185,7 +186,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
     }
 
-    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, Recap }
+    private enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -400,6 +401,11 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // guerriers compris) - entièrement absente si aucun Franc-Tireur n'est concerné
             // (HasAnyHiredSwordRelevance).
             if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
+            // Réallouer l'équipement (livre, étape 9 - "Swap equipment between models as desired") :
+            // toute DERNIÈRE étape avant le Récapitulatif, après Achat/Vente ET tout le recrutement (ordre
+            // du livre) - voir EndOfGameDialogViewModel.Reallocation.cs. Absente si aucun Héros
+            // existant/recrue n'est éligible (rien à réallouer).
+            if (HasEligibleReallocationCarriers) steps.Add(new(StepKind.EquipmentReallocation));
             steps.Add(new(StepKind.Recap));
             return steps;
         }
@@ -445,6 +451,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     public bool IsRecruitHenchmenCountStep => Current.Kind == StepKind.RecruitHenchmenCount;
     public bool IsRecruitHenchmenEquipmentStep => Current.Kind == StepKind.RecruitHenchmenEquipment;
     public bool IsRecruitHenchmenNamesStep => Current.Kind == StepKind.RecruitHenchmenNames;
+    public bool IsEquipmentReallocationStep => Current.Kind == StepKind.EquipmentReallocation;
     public bool IsRecapStep => Current.Kind == StepKind.Recap;
 
     /// <summary>Le seul héros affiché à l'étape RecruitHeroDetail courante - une étape par héros recruté,
@@ -632,6 +639,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         BuildPairCorruptionOption();
         BuildPairRetentionOption();
         BuildExistingHenchmanTopUps();
+        InitializeReallocation();
 
         // Payer/Renvoyer un Johann/Veskit/Marianna/Nicodemus change EndOfGameTreasuryRemaining (une
         // solde en or payée ici dispute la même trésorerie que tout le reste du wizard, 2026-09-03) -

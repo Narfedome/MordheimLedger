@@ -1412,6 +1412,18 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRareItemTreasuryFormat" xml:space="preserve">
     <value>Trésorerie restante : {0} CO</value>
   </data>
+  <data name="EndOfGameEquipmentReallocationHeading" xml:space="preserve">
+    <value>Réallouer l'équipement</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationHint" xml:space="preserve">
+    <value>Déplacez un objet vers un autre Héros ou la réserve, gratuitement.</value>
+  </data>
+  <data name="EndOfGameEquipmentReallocationDestinationTitle" xml:space="preserve">
+    <value>Déplacer vers…</value>
+  </data>
+  <data name="HistoryEquipmentReallocatedSentence" xml:space="preserve">
+    <value>{0} rejoint {1}.</value>
+  </data>
   <data name="EndOfGameDismissHeading" xml:space="preserve">
     <value>Renvoyer des guerriers</value>
   </data>

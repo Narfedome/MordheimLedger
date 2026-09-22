@@ -44,6 +44,7 @@
                                           IconGlyph="{Binding Source={x:Reference root}, Path=IconGlyph}"
                                           IconFontFamily="{Binding Source={x:Reference root}, Path=IconFontFamily}"
                                           Command="{Binding Source={x:Reference root}, Path=Command}"
+                                          MoveCommand="{Binding Source={x:Reference root}, Path=MoveCommand}"
                                           RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveCommand}"/>
                 </DataTemplate>
             </BindableLayout.ItemTemplate>

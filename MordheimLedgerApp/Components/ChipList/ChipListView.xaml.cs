@@ -122,6 +122,18 @@ public partial class ChipListView : ContentView
         set => SetValue(RemoveCommandProperty, value);
     }
 
+    // Non renseignée (défaut) : pas d'icône ⇄ sur les chips. Renseignée : chaque chip affiche une petite
+    // icône d'échange supplémentaire (avant le Xmark s'il est aussi présent), invoquée avec l'item du
+    // chip en CommandParameter - Réallouer l'équipement (2026-09-22), même idée que RemoveCommand.
+    public static readonly BindableProperty MoveCommandProperty =
+        BindableProperty.Create(nameof(MoveCommand), typeof(ICommand), typeof(ChipListView));
+
+    public ICommand? MoveCommand
+    {
+        get => (ICommand?)GetValue(MoveCommandProperty);
+        set => SetValue(MoveCommandProperty, value);
+    }
+
     // Non renseigné (défaut) : la section entière (header inclus) se masque si ItemsSource est vide.
     // Renseigné : affiché à la place du FlexLayout quand ItemsSource est vide (ex. "Réservé à ces
     // bandes : vide = commun à toutes les bandes" sur EquipmentItemDetailDialog).

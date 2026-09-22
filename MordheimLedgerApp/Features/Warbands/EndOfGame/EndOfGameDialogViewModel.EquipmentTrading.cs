@@ -137,7 +137,12 @@ public partial class EndOfGameDialogViewModel
             foreach (var equipment in row.Warrior.Equipment)
             {
                 var remaining = equipment.Quantity - alreadyPendingQty.GetValueOrDefault((false, equipment.Id));
-                if (remaining > 0) yield return new SellableEquipmentCandidate(equipment, row.Warrior.Name, remaining);
+                // WarriorEquipment.Quantity d'un groupe d'Hommes de main est une quantité PAR MODÈLE (voir
+                // ExistingHenchmanTopUp.GroupExperience/GetTopUpBreakdown's own doc) - chaque "cran" vendu
+                // ici retire donc Effectif objets physiques d'un coup, jamais 1 seul (retour utilisateur
+                // 2026-09-22 - "la vente ne comptabilise qu'une arme et pas l'arme×effectif"). Toujours 1
+                // pour un Héros (HeadCount == 1 par construction).
+                if (remaining > 0) yield return new SellableEquipmentCandidate(equipment, row.Warrior.Name, remaining, saleQuantityMultiplier: Math.Max(1, row.Warrior.HeadCount));
             }
     }
 

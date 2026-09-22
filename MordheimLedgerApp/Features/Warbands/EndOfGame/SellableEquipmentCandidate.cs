@@ -53,16 +53,32 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// SelectedQuantity, jamais dépassable.</summary>
     public int OwnedQuantity { get; }
 
+    /// <summary>1 pour tout sauf l'équipement PORTÉ par un groupe d'Hommes de main (effectif > 1) - dans ce
+    /// cas, WarriorEquipment.Quantity (OwnedQuantity ici) est une quantité PAR MODÈLE (ex. "Hache" = 1 par
+    /// membre, voir WarriorEquipment.NameDisplay/GetTopUpBreakdown pour le même principe), donc CHAQUE
+    /// exemplaire "par modèle" retiré du groupe correspond en réalité à Effectif objets physiques quittant
+    /// la bande à la fois - retour utilisateur 2026-09-22 - "la vente ne comptabilise qu'une arme et pas
+    /// l'arme×effectif". SelectedQuantity reste en unités "par modèle" (borne OwnedQuantity/leftover
+    /// inchangés, cohérent avec ApplyEquipmentTradingAsync qui retranche directement de
+    /// WarriorEquipment.Quantity) - seul ce multiplicateur convertit en or/quantité RÉELLEMENT
+    /// vendue.</summary>
+    public int SaleQuantityMultiplier { get; }
+
     public string NameDisplay { get; }
 
     /// <summary>Alias - ChipView lie son Label directement sur Name, même idiome que WarbandEquipment/
     /// WarriorEquipment.</summary>
     public string Name => NameDisplay;
 
+    /// <summary>Quantité RÉELLEMENT retirée de la bande (SelectedQuantity × SaleQuantityMultiplier) -
+    /// distincte de SelectedQuantity pour un groupe d'Hommes de main, voir SaleQuantityMultiplier's own
+    /// doc.</summary>
+    public int TotalPhysicalQuantitySold => SelectedQuantity * SaleQuantityMultiplier;
+
     /// <summary>Nom affiché dans l'Historique de la partie une fois la vente appliquée à Terminer -
-    /// suffixé "× N" quand la vente est PARTIELLE (SelectedQuantity &gt; 1), pour ne pas laisser croire que
-    /// toute la pile part alors qu'il en reste en réserve/porté.</summary>
-    public string SoldLabel => SelectedQuantity > 1 ? $"{NameDisplay} × {SelectedQuantity}" : NameDisplay;
+    /// suffixé "× N" quand la vente est PARTIELLE (TotalPhysicalQuantitySold &gt; 1), pour ne pas laisser
+    /// croire que toute la pile part alors qu'il en reste en réserve/porté.</summary>
+    public string SoldLabel => TotalPhysicalQuantitySold > 1 ? $"{NameDisplay} × {TotalPhysicalQuantitySold}" : NameDisplay;
 
     /// <summary>"Réserve" pour un objet non porté (stash ou trouvaille d'Exploration, les deux affichent le
     /// même libellé), sinon le nom du guerrier qui le porte - utilisé comme nom de section dans
@@ -72,10 +88,12 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// tuile).</summary>
     public string SourceLabel => CarrierName ?? LocalizationService.Instance["EndOfGameEquipmentTradingStashSource"];
 
-    /// <summary>Prix de vente À L'UNITÉ (pas SellPrice, qui porte sur SelectedQuantity) - affiché sur
-    /// chaque tuile de SellEquipmentSelectorPage pour aider à décider quoi vendre, à la place du
-    /// SourceLabel désormais redondant avec l'en-tête de section (Groups).</summary>
-    public string UnitSellPriceDisplay => $"{EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier)} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
+    /// <summary>Prix de vente PAR CRAN de stepper (pas SellPrice, qui porte sur SelectedQuantity au complet)
+    /// - affiché sur chaque tuile de SellEquipmentSelectorPage pour aider à décider quoi vendre, à la place
+    /// du SourceLabel désormais redondant avec l'en-tête de section (Groups). Multiplié par
+    /// SaleQuantityMultiplier pour un groupe d'Hommes de main (chaque cran retire Effectif objets, pas 1),
+    /// jamais pour tout le reste (multiplicateur toujours 1).</summary>
+    public string UnitSellPriceDisplay => $"{EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier) * SaleQuantityMultiplier} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
 
     /// <summary>Réserve (stash pré-partie OU trouvaille d'Exploration cette partie, les deux rejoignent le
     /// même pool - voir BuildStashPool) plutôt que porté par un guerrier.</summary>
@@ -113,9 +131,9 @@ public partial class SellableEquipmentCandidate : ObservableObject
 
     /// <summary>Livre des règles - "half its listed price"/"half of the basic cost only" pour un prix
     /// variable : toujours le coût de BASE du catalogue (jamais FoundValueOverride/le jet trouvé), pour
-    /// la quantité réellement mise en vente (SelectedQuantity, jamais OwnedQuantity) - voir
+    /// la quantité RÉELLEMENT mise en vente (TotalPhysicalQuantitySold, jamais OwnedQuantity) - voir
     /// Core.Rules.EquipmentPricing.CalculateSellPrice.</summary>
-    public int SellPrice => EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier) * SelectedQuantity;
+    public int SellPrice => EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier) * TotalPhysicalQuantitySold;
 
     public SellableEquipmentCandidate(WarbandEquipment stashItem, int ownedQuantity)
     {
@@ -123,16 +141,18 @@ public partial class SellableEquipmentCandidate : ObservableObject
         Item = stashItem.Item;
         MaterialRule = stashItem.MaterialRule;
         OwnedQuantity = ownedQuantity;
+        SaleQuantityMultiplier = 1;
         NameDisplay = stashItem.NameDisplay;
     }
 
-    public SellableEquipmentCandidate(WarriorEquipment carriedItem, string carrierName, int ownedQuantity)
+    public SellableEquipmentCandidate(WarriorEquipment carriedItem, string carrierName, int ownedQuantity, int saleQuantityMultiplier = 1)
     {
         CarriedItem = carriedItem;
         CarrierName = carrierName;
         Item = carriedItem.Item;
         MaterialRule = carriedItem.MaterialRule;
         OwnedQuantity = ownedQuantity;
+        SaleQuantityMultiplier = saleQuantityMultiplier;
         // Jamais carriedItem.NameDisplay tel quel : celui-ci suffixe déjà " x{Quantity}" pour le stock
         // TOTAL porté (voir WarriorEquipment.NameDisplay) - une vente partielle a sa propre quantité
         // (SelectedQuantity, voir SoldLabel/CountDisplay), le nom de base ne doit porter que
@@ -148,6 +168,7 @@ public partial class SellableEquipmentCandidate : ObservableObject
         Item = explorationItem;
         MaterialRule = materialRule;
         OwnedQuantity = ownedQuantity;
+        SaleQuantityMultiplier = 1;
         NameDisplay = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{explorationItem.Name} ({abbr})" : explorationItem.Name;
     }
 }

@@ -15,7 +15,7 @@ namespace MordheimLedgerApp.Core.Rules;
 /// Verified against the rulebook (p. 118-119) via RulesReference/Campagne.md. The "Blessures
 /// multiples" result (16, 21) means rolling 1D6 to determine how many more sub-rolls to make on this
 /// same table (not a fixed count) - the End of Game wizard has the player roll that 1D6 itself (see
-/// EndOfGameDialogViewModel.WarriorOutcomeRow.SetMultipleInjuryCount), then resolves that many
+/// EndOfGamePageViewModel.WarriorOutcomeRow.SetMultipleInjuryCount), then resolves that many
 /// sub-rolls (MultipleInjuryRolls), each becoming its own Injury on the warrior alongside the main
 /// "Blessures multiples" text. The rulebook says to re-roll any further Dead/Captured/Multiple
 /// Injuries sub-result, but the app deliberately does NOT enforce or auto-reroll that itself (explicit

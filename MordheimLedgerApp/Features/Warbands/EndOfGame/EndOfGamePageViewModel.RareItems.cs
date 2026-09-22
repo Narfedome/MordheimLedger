@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 
@@ -23,10 +24,15 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// steps. Dramatis Personae never search either (2026-09-03, user feedback) even though Warrior.IsHero
 /// is true for them (same Serious Injury/XP flow as a real Hero) - excluded explicitly at the
 /// RareItemSearchEntries construction site and in HasEligibleHeroesForRareItems below, same limitation
-/// already fixed for SurvivingHeroCount (EndOfGameDialogViewModel.Exploration.cs).</summary>
-public partial class EndOfGameDialogViewModel
+/// already fixed for SurvivingHeroCount (EndOfGamePageViewModel.Exploration.cs).</summary>
+public partial class EndOfGamePageViewModel
 {
-    public ObservableCollection<RareItemSearchEntry> RareItemSearchEntries { get; }
+    /// <summary>[ObservableProperty] plutôt qu'un simple { get; private set; } - même raison que
+    /// EndOfGamePageViewModel.WarriorRows (voir sa doc) : peuplée dans InitializeAsync/
+    /// WireUpChangeNotifications (async), pas le constructeur, donc a besoin de la notification
+    /// PropertyChanged générée pour que les bindings XAML déjà posés apprennent la nouvelle instance.</summary>
+    [ObservableProperty]
+    private ObservableCollection<RareItemSearchEntry> rareItemSearchEntries = new();
 
     /// <summary>Drives whether the search step exists at all (Steps) - "Warriors taken out of action
     /// during the last battle may not look for rare items", so a Hero currently marked Hors de combat
@@ -164,7 +170,7 @@ public partial class EndOfGameDialogViewModel
     private void AutoRollRarePrice(RareItemSearchEntry entry) => entry.PriceRoll = Random.Shared.Next(1, 7).ToString();
 
     /// <summary>Base commune de trésorerie pour TOUT le wizard (pas seulement cette étape, malgré son nom
-    /// - voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining, seul appelant en dehors de ce fichier
+    /// - voir EndOfGamePageViewModel.EndOfGameTreasuryRemaining, seul appelant en dehors de ce fichier
     /// depuis le 2026-09-03) : la trésorerie de la bande avant cette Fin de Partie, plus ce que CETTE
     /// partie a rapporté (or d'Exploration + Vente de pierres magiques, WyrdstoneSaleValue - cette étape
     /// précède celle-ci dans l'ordre du wizard, son gain est donc déjà connu). Purely a live preview -

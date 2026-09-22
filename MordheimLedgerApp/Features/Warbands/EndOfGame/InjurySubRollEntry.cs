@@ -7,10 +7,10 @@ using MordheimLedgerApp.Services;
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Shape shared by WarriorOutcomeRow's main roll and InjurySubRollEntry for the "Vendu aux
-/// Fosses" (65) gladiator duel state (WonPitFight/SoldToPitsRerollRoll) - lets EndOfGameDialogViewModel
+/// Fosses" (65) gladiator duel state (WonPitFight/SoldToPitsRerollRoll) - lets EndOfGamePageViewModel
 /// bind/validate the PitFight step against whichever occurrence is current (the main roll, or one
 /// specific "Blessures multiples" sub-roll) without a big if/else per property. See
-/// EndOfGameDialogViewModel.CurrentPitFightOutcome (2026-09-04, retour utilisateur - "à chaque blessure
+/// EndOfGamePageViewModel.CurrentPitFightOutcome (2026-09-04, retour utilisateur - "à chaque blessure
 /// on refait un D66 avec le sous-jet adéquat", extending Vendu aux Fosses to sub-rolls too).</summary>
 public interface IPitFightOutcome
 {
@@ -74,7 +74,7 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
     private string manualRoll = string.Empty;
 
     /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
-    /// EndOfGameDialogViewModel.Next si ce jet est encore vide/invalide à ce moment-là.</summary>
+    /// EndOfGamePageViewModel.Next si ce jet est encore vide/invalide à ce moment-là.</summary>
     [ObservableProperty]
     private string? rollError;
 
@@ -237,7 +237,7 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
     [NotifyPropertyChangedFor(nameof(HasHatredTarget))]
     private WarbandArchetype? hatredTargetWarbandArchetype;
 
-    /// <summary>Appelée par EndOfGameDialogViewModel.Injury.PickSubHatredWarbandArchetype une fois le
+    /// <summary>Appelée par EndOfGamePageViewModel.Injury.PickSubHatredWarbandArchetype une fois le
     /// dialog résolu (portée 6 uniquement).</summary>
     public void SetHatredTarget(WarbandArchetype archetype)
     {
@@ -305,7 +305,7 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
 
     /// <summary>Même principe que WarriorOutcomeRow.ShowSoldToThePits, pour un sous-jet "Blessures
     /// multiples" qui tombe lui-même sur "Vendu aux Fosses" (65) - déclenche sa propre étape de combat de
-    /// gladiateur (EndOfGameDialogViewModel.Steps, une étape PAR occurrence plutôt qu'une seule pour tout
+    /// gladiateur (EndOfGamePageViewModel.Steps, une étape PAR occurrence plutôt qu'une seule pour tout
     /// le guerrier, 2026-09-04 retour utilisateur).</summary>
     public bool ShowSoldToThePits => IsHero && int.TryParse(ManualRoll, out var roll) && roll == 65;
 

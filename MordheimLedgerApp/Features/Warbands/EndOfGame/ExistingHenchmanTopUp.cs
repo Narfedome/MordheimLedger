@@ -7,14 +7,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Ligne d'ajout de recrues à un groupe d'Hommes de main DÉJÀ dans le roster (livre des règles,
 /// "New Recruits and Existing Henchman Groups") - une par groupe encore actif ce tour
-/// (EndOfGameDialogViewModel.WarriorRows, Homme de main). AddCount recrues supplémentaires, plafonnées
+/// (EndOfGamePageViewModel.WarriorRows, Homme de main). AddCount recrues supplémentaires, plafonnées
 /// par le budget vétérans déjà tiré à l'étape Disponibilité des Vétérans (VeteranExperienceRoll) - "you
 /// can hire as many warriors as you wish, as long as their combined Experience does not exceed your dice
 /// roll" : chaque recrue "coûte" GroupExperience points de ce budget (le groupe entier partage la même
 /// Expérience, voir Warrior.Experience). Équipées comme le reste du groupe (CurrentEquipment, jamais un
 /// choix libre - "New Henchmen must be armed and equipped in the same way as existing members of the
 /// group") : le prix payé pour cet équipement vient en priorité de la réserve de la bande plutôt qu'un
-/// achat à neuf (retour utilisateur 2026-09-05 - voir EndOfGameDialogViewModel.GetTopUpBreakdown), sinon
+/// achat à neuf (retour utilisateur 2026-09-05 - voir EndOfGamePageViewModel.GetTopUpBreakdown), sinon
 /// le prix plein s'ajoute au coût de recrutement normal du type + la surtaxe "2 CO par point d'Expérience
 /// en trop". C'est le SEUL endroit de tout le recrutement où l'équipement se calcule automatiquement
 /// (retour utilisateur explicite) - un nouveau groupe (HenchmanRecruitRows) part vide, équipé plus tard
@@ -41,7 +41,7 @@ public partial class ExistingHenchmanTopUp : ObservableObject
     /// construction de cette ligne plutôt que dupliquée ici.</summary>
     public int ArchetypeCost => _archetypeRow.Cost;
 
-    /// <summary>Id du WarriorArchetype de ce groupe - permet à EndOfGameDialogViewModel.
+    /// <summary>Id du WarriorArchetype de ce groupe - permet à EndOfGamePageViewModel.
     /// IncrementHenchmanTopUp de retrouver l'effectif déjà recruté de CE type (ExistingCountForArchetype)
     /// pour appliquer WarriorArchetype.MaxCount, retour utilisateur 2026-09-22 - "selon le type de
     /// henchmen... on a une limite de personnage max parfois" (jusque-là seul le budget XP bloquait
@@ -53,7 +53,7 @@ public partial class ExistingHenchmanTopUp : ObservableObject
     public int? MaxCountForType => _archetypeRow.Archetype.MaxCount;
 
     /// <summary>Effectif de ce type ailleurs dans la bande (poussé une fois par
-    /// EndOfGameDialogViewModel.BuildExistingHenchmanTopUps juste après la construction, même idiome que
+    /// EndOfGamePageViewModel.BuildExistingHenchmanTopUps juste après la construction, même idiome que
     /// WarriorRecruitRow.ExternalHeadCount - ne bouge jamais pendant cette étape, seul AddCount change) -
     /// permet CountDisplay ("X/Y", même format que WarriorRecruitRow.CountDisplay), retour utilisateur
     /// 2026-09-22 - "ça serait top si l'affichage on avait la même chose qu'au recrutement des
@@ -75,10 +75,10 @@ public partial class ExistingHenchmanTopUp : ObservableObject
     /// ne convient pas ici (AddCount est un int, jamais null).</summary>
     public bool HasAddCount => AddCount > 0;
 
-    /// <summary>Détail de coût "poussé" par EndOfGameDialogViewModel.RefreshHenchmanTopUpBreakdowns
+    /// <summary>Détail de coût "poussé" par EndOfGamePageViewModel.RefreshHenchmanTopUpBreakdowns
     /// (appelée après tout Increment/Decrement/à la construction) plutôt que calculé ici à la demande - ce
     /// calcul dépend de TOUS les ExistingHenchmanTopUps à la fois (réserve partagée, consommée dans
-    /// l'ordre, voir EndOfGameDialogViewModel.GetTopUpBreakdown), pas seulement de cette ligne, donc n'a
+    /// l'ordre, voir EndOfGamePageViewModel.GetTopUpBreakdown), pas seulement de cette ligne, donc n'a
     /// pas sa place comme simple propriété calculée ici. Même idiome "push" que WarriorRecruitRow.
     /// CanIncrement (UpdateRecruitRowsEligibility). Vide par défaut (avant tout Increment).</summary>
     [ObservableProperty]
@@ -99,7 +99,7 @@ public partial class ExistingHenchmanTopUp : ObservableObject
 /// <summary>Une ligne du détail de coût affiché sous chaque ExistingHenchmanTopUp (retour utilisateur
 /// 2026-09-05 - "il faut détailler le calcul au recrutement de vétéran") : un type d'équipement du
 /// groupe, combien il en faut au total pour les recrues ajoutées, combien viennent de la réserve (donc
-/// gratuits) et le coût réel de ce qui reste à acheter. Voir EndOfGameDialogViewModel.GetTopUpBreakdown.</summary>
+/// gratuits) et le coût réel de ce qui reste à acheter. Voir EndOfGamePageViewModel.GetTopUpBreakdown.</summary>
 public sealed record HenchmanEquipmentCostLine(string Name, int Quantity, int Cost, int StashUsed);
 
 /// <summary>Détail complet du coût d'UN ExistingHenchmanTopUp - recrutement (ArchetypeCost × AddCount),

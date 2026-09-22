@@ -6,13 +6,13 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>"Roll for every item on the list separately" shape (Trésor Caché/Bande Massacrée - see
 /// Core.Rules.ExplorationOutcomeResolver.IsIndependentThresholdResult) - populated once per triggered
-/// résultat (ResolveExplorationResult, EndOfGameDialogViewModel.Exploration.cs) rather than resolving
+/// résultat (ResolveExplorationResult, EndOfGamePageViewModel.Exploration.cs) rather than resolving
 /// to a SINGLE ResolvedExplorationOutcome like every other shape in this wizard : plusieurs lignes
 /// peuvent franchir leur propre seuil à la fois, donc ça a besoin de sa propre liste plutôt que la
 /// plomberie à branche unique (IsExplorationGold/Item/Wyrdstone, ShowExplorationXxxRoll...) utilisée
 /// partout ailleurs. Mockup confirmé avec l'utilisateur (2026-08-24) avant implémentation, calqué sur
 /// les patterns déjà en place (sous-jet, Objet, Artefact) plutôt qu'un nouveau langage visuel.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     public bool IsIndependentThresholdResult => TriggeredExplorationResult is { } result
         && ExplorationOutcomeResolver.IsIndependentThresholdResult(result);

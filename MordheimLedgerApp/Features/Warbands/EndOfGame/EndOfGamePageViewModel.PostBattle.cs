@@ -6,8 +6,8 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Post-battle sequence steps 4 (Selling Wyrdstone) and 5 (Check available veterans) - both
 /// whole-band, single-card steps (like Captives/Experience), never per-warrior. See
-/// EndOfGameDialogViewModel.Steps for their conditional placement.</summary>
-public partial class EndOfGameDialogViewModel
+/// EndOfGamePageViewModel.Steps for their conditional placement.</summary>
+public partial class EndOfGamePageViewModel
 {
     // --- Étape : Vente de pierre magique (livre, étape 4) ---------------------------------------
 
@@ -21,7 +21,7 @@ public partial class EndOfGameDialogViewModel
     private int shardsToSell;
 
     /// <summary>La vente de pierre magique dispute la même trésorerie que le reste du wizard (2026-09-03,
-    /// voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc) - un
+    /// voir EndOfGamePageViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc) - un
     /// changement manuel du joueur (Incrémenter/Décrémenter) doit donc se répercuter partout ailleurs
     /// (Achat d'Objets rares, Corruption/Rétention...). Reste un choix ENTIÈREMENT manuel - "The warband
     /// SHOULD sell any Wyrdstone necessary..." est une recommandation du livre, pas une obligation
@@ -108,7 +108,7 @@ public partial class EndOfGameDialogViewModel
     /// <summary>Choke point partagé pour tout ce qui dérive de FoundThisGameWyrdstoneShards - appelé
     /// depuis ResolveExplorationResult (un dé d'Exploration change) ET OnExplorationWyrdstoneAmountChanged
     /// (le montant d'un résultat Puits/Bâtiment Éventré/La Fosse est saisi/modifié séparément, après la
-    /// résolution du dé), les deux dans EndOfGameDialogViewModel.Exploration.cs.</summary>
+    /// résolution du dé), les deux dans EndOfGamePageViewModel.Exploration.cs.</summary>
     private void NotifyWyrdstoneFoundThisGameChanged()
     {
         OnPropertyChanged(nameof(FoundThisGameWyrdstoneShards));
@@ -136,7 +136,7 @@ public partial class EndOfGameDialogViewModel
     partial void OnVeteranExperienceRollChanged(string? value)
     {
         VeteranExperienceRollError = null;
-        // Le budget vétérans (RemainingVeteranBudget, EndOfGameDialogViewModel.Recruitment.cs) en dépend
+        // Le budget vétérans (RemainingVeteranBudget, EndOfGamePageViewModel.Recruitment.cs) en dépend
         // directement - étape RecruitHenchmen, toujours APRÈS celle-ci dans la séquence.
         OnPropertyChanged(nameof(RemainingVeteranBudget));
         OnPropertyChanged(nameof(RecruitHenchmenExistingHintDisplay));

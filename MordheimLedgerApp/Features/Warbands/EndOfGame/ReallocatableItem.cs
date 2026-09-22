@@ -11,7 +11,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// Carrier porte la référence stable (WarriorOutcomeRow/WarriorNameSlot, jamais recréés pendant le
 /// wizard) permettant de retrouver la VRAIE collection à modifier au moment du déplacement, même si
 /// ReallocationCarrier lui-même est recréé à chaque accès à ReallocationCarriers - voir
-/// EndOfGameDialogViewModel.Reallocation.cs's MoveReallocationItem.</summary>
+/// EndOfGamePageViewModel.Reallocation.cs's MoveReallocationItem.</summary>
 public sealed class ReallocatableItem
 {
     public WarriorEquipment? WarriorEquipmentSource { get; }
@@ -62,7 +62,7 @@ public sealed class ReallocatableItem
 public enum ReallocationCarrierKind { ExistingHero, NewRecruit, Reserve }
 
 /// <summary>Qui peut actuellement porter/recevoir un ReallocatableItem - recréé à chaque accès à
-/// EndOfGameDialogViewModel.ReallocationCarriers (jamais mis en cache, même principe que
+/// EndOfGamePageViewModel.ReallocationCarriers (jamais mis en cache, même principe que
 /// DismissibleWarriorRows) pour refléter en direct les décisions des étapes précédentes (Renvoyer,
 /// Recrutement) : ExistingHeroRow/NewRecruitSlot restent néanmoins des références STABLES tout au long
 /// du wizard, donc valables même une fois ce wrapper "périmé".</summary>

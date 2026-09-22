@@ -25,7 +25,7 @@ public interface IEquipmentPickerService
     /// SelectAnimal to reuse this same picker pre-filtered to EquipmentCategory.Animal instead of a
     /// separate Animal-only picker. singleSelect: true restricts the picker to at most one tile at a
     /// time (see EquipmentItemViewModel.SingleSelectMode) - used by the End of Game wizard's "Objets
-    /// rares" step (EndOfGameDialogViewModel.RareItems.cs), where a Hero is nominating exactly ONE item
+    /// rares" step (EndOfGamePageViewModel.RareItems.cs), where a Hero is nominating exactly ONE item
     /// to attempt a 2D6 search roll against ("You may also only make one roll for each Hero"), not doing
     /// a normal multi-item purchase. rareSearchMode: true alongside singleSelect for that same step -
     /// hides common ranged weapons/armour, which have no search path there (see EquipmentItemViewModel.

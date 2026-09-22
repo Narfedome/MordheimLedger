@@ -42,7 +42,7 @@ public static class ExperienceMilestones
 
     /// <summary>Number of milestone boxes strictly after `from` and at or before `to` - a warrior can
     /// cross more than one at once (e.g. survival XP + Challenger bonus stacked), each requiring its
-    /// own separate 2D6 progression roll (see EndOfGameDialogViewModel's Progression step).</summary>
+    /// own separate 2D6 progression roll (see EndOfGamePageViewModel's Progression step).</summary>
     public static int MilestonesCrossedCount(bool isHero, int from, int to)
     {
         if (to <= from) return 0;

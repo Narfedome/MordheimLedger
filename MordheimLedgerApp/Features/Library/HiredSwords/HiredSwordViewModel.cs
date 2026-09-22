@@ -11,7 +11,7 @@ namespace MordheimLedgerApp.Features.Library.HiredSwords;
 
 /// <summary>Catalog of Hired Sword archetypes (e.g. "Gladiateur"/"Pit Fighter") - CRUD AND picker mode
 /// (added when Hired Swords became actually recruitable into a Warband - see WarbandEditDialogViewModel/
-/// EndOfGameDialogViewModel's HiredSwords steps) - same IsSelectorMode/SelectedRows/ConfirmSelection
+/// EndOfGamePageViewModel's HiredSwords steps) - same IsSelectorMode/SelectedRows/ConfirmSelection
 /// bascule as MagicSchoolViewModel. Flat list, no grouping (removed on user request - too few entries so
 /// far to warrant it).</summary>
 public partial class HiredSwordViewModel : BaseViewModel
@@ -53,7 +53,7 @@ public partial class HiredSwordViewModel : BaseViewModel
     public int? AllowedWarbandArchetypeId { get; set; }
 
     /// <summary>Set by HiredSwordPickerService - types déjà activement engagés dans la bande (voir
-    /// WarbandEditDialogViewModel.HiredSwordRows/EndOfGameDialogViewModel.HiredSwordUpkeepEntries),
+    /// WarbandEditDialogViewModel.HiredSwordRows/EndOfGamePageViewModel.HiredSwordUpkeepEntries),
     /// jamais réofferts au picker ("un seul de chaque type", livre des règles). Null en usage Codex.</summary>
     public IReadOnlyList<int>? ExcludedHiredSwordIds { get; set; }
 

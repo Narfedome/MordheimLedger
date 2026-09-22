@@ -9,7 +9,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// <summary>One Hero's rare item search attempt (post-battle sequence step 6, "Rare items" - p.145):
 /// "Whenever a Hero wants to buy a rare item, roll 2D6 and compare the result to the [Rarity] number
 /// stated... You may also only make one roll for each Hero looking for rare items." Nominating an item
-/// is optional (a Hero may simply not search) - see EndOfGameDialogViewModel.RareItems.cs for the
+/// is optional (a Hero may simply not search) - see EndOfGamePageViewModel.RareItems.cs for the
 /// availability-roll step this backs (one entry per living Hero not taken Out of Action this battle) and
 /// the separate Purchase step (WantsToBuy/PriceRoll below) that follows it - a distinct step rather than
 /// an implicit auto-buy on success, per user request 2026-08-28: "1re étape : jet de dispo. Si roll
@@ -172,7 +172,7 @@ public partial class RareItemSearchEntry : ObservableObject
         : string.Format(_loc[IsSuccess ? "EndOfGameRareItemSuccessFormat" : "EndOfGameRareItemFailureFormat"], TotalRoll);
 
     // --- Étape Achat (livre, suite de la même étape 6 - séparée en carte à part, voir
-    // EndOfGameDialogViewModel.IsRareItemPurchaseStep) -------------------------------------------
+    // EndOfGamePageViewModel.IsRareItemPurchaseStep) -------------------------------------------
 
     /// <summary>Null = fixed price (EquipmentItem.Cost alone). Non-null = a random supplement must be
     /// rolled on top before the real price is known (e.g. "10 gc + 1D6") - user request 2026-08-28,
@@ -222,7 +222,7 @@ public partial class RareItemSearchEntry : ObservableObject
     /// <summary>Whether the player wants this find bought at all - defaults true (finding it usually means
     /// wanting it), but purchase is never automatic/implicit: the player can still decline (e.g. to keep
     /// gold for something else), and the whole Purchase step blocks progression if the CHECKED total
-    /// would exceed the warband's treasury (see EndOfGameDialogViewModel.RareItemPurchaseRemainingTreasury) -
+    /// would exceed the warband's treasury (see EndOfGamePageViewModel.RareItemPurchaseRemainingTreasury) -
     /// there's deliberately no per-entry "can't afford" auto-skip here, unlike an earlier pass of this
     /// step. Only meaningful when IsSuccess.</summary>
     [ObservableProperty]
@@ -232,14 +232,14 @@ public partial class RareItemSearchEntry : ObservableObject
     /// <summary>The item is bought - treasury debited, added to the band's (unassigned) stash with its
     /// material attached - only if all three hold: the availability roll succeeded, the player left
     /// "Acheter" checked, and the price is fully known (fixed, or a variable supplement already rolled).
-    /// Consumed by WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync.</summary>
+    /// Consumed by EndOfGamePageViewModel.Apply.ApplyRareItemSearchAsync.</summary>
     public bool IsPurchased => IsSuccess && WantsToBuy && EffectiveCost.HasValue;
 
     // --- Recherche de Personnage Spécial (livre, "Looking for special characters" p.146) - alternative
     // à la recherche d'objet rare ci-dessus, voir IsSearchingForCharacter -----------------------------
 
     /// <summary>Null = aucun personnage choisi - une recherche est facultative, comme pour SelectedItem.
-    /// Choisi via DramatisPersonaPickerService (voir EndOfGameDialogViewModel.RareItems.cs), narrowé aux
+    /// Choisi via DramatisPersonaPickerService (voir EndOfGamePageViewModel.RareItems.cs), narrowé aux
     /// personnages éligibles à la bande du Héros qui cherche (RestrictedToWarbandArchetypeIds).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedCharacter))]
@@ -327,13 +327,13 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsRecruited))]
     private bool wantsToRecruit = true;
 
-    /// <summary>Consumed by WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync - a found character
+    /// <summary>Consumed by EndOfGamePageViewModel.Apply.ApplyRareItemSearchAsync - a found character
     /// actually joins the roster only if the player left "Recruter" checked.</summary>
     public bool IsRecruited => IsCharacterFound && WantsToRecruit;
 
     /// <summary>Unified "this entry has a positive result" regardless of mode - IsSuccess (Objet) or
     /// IsCharacterFound (Personnage) depending on IsSearchingForCharacter. Feeds the shared Purchase step
-    /// list (EndOfGameDialogViewModel.RareItems.cs.RareItemsWithResults), which now shows a card per
+    /// list (EndOfGamePageViewModel.RareItems.cs.RareItemsWithResults), which now shows a card per
     /// successful search of EITHER kind.</summary>
     public bool IsFound => IsSearchingForCharacter ? IsCharacterFound : IsSuccess;
 
@@ -344,9 +344,9 @@ public partial class RareItemSearchEntry : ObservableObject
     // pas besoin d'un chemin séparé. Recruter le personnage "caché" du duo (Ulli, jamais son propre choix
     // dans le picker - voir DramatisPersona.IsHiddenFromSearchPicker) ne double jamais ce coût : seul
     // Marquand est un vrai RareItemSearchEntry.SelectedCharacter possible, Ulli est recrutée EN PLUS de
-    // lui sans frais propre (voir WarbandDetailViewModel.EndOfGame.ApplyRareItemSearchAsync). None
+    // lui sans frais propre (voir EndOfGamePageViewModel.Apply.ApplyRareItemSearchAsync). None
     // (Bertha) ne prélève rien de toute façon, Wyrdstone (Nicodemus) reste séparé (vraie autre devise, son
-    // propre bandeau "pierres magiques restantes" - voir EndOfGameDialogViewModel.RareItems.cs).
+    // propre bandeau "pierres magiques restantes" - voir EndOfGamePageViewModel.RareItems.cs).
     public bool HasHireCost => SelectedCharacter is { HireCost: not null } and { FeeKind: DramatisPersonaHireFeeKind.Gold or DramatisPersonaHireFeeKind.Pair };
 
     /// <summary>"Gratuit" once IsPayingWithAlternativeItem is checked - reflects EffectiveHireCostForTreasury
@@ -402,7 +402,7 @@ public partial class RareItemSearchEntry : ObservableObject
 
     /// <summary>What actually gets deducted from the treasury for this entry - 0 whenever gold isn't the
     /// payment method (no hire cost at all, or paying with the alternative item instead). Feeds
-    /// EndOfGameDialogViewModel.RareItems.cs's RareItemPurchaseTotalCost, the same running total/
+    /// EndOfGamePageViewModel.RareItems.cs's RareItemPurchaseTotalCost, the same running total/
     /// affordability block already used for rare item purchases - a character's gold fee competes for the
     /// same treasury, same "bloquer le step si trésorerie négative" rule.</summary>
     public int EffectiveHireCostForTreasury => HasHireCost && !IsPayingWithAlternativeItem ? SelectedCharacter!.HireCost!.Value : 0;

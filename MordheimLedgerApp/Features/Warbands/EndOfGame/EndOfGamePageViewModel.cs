@@ -44,58 +44,60 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// figurine sans affecter les autres - WarbandDetailViewModel.EndOfGame décompte les morts pour
 /// décrémenter Warrior.HeadCount à l'enregistrement (jamais pendant le wizard lui-même).
 /// </summary>
-public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
+[QueryProperty(nameof(WarbandId), "warbandId")]
+public partial class EndOfGamePageViewModel : BaseViewModel
 {
     private readonly ISkillPickerService _skillPicker;
     private readonly IDetailDialogService _detailDialogs;
     private readonly ILibraryService _libraryService;
+    private readonly IWarbandService _warbandService;
     private readonly IHiredSwordPickerService _hiredSwordPicker;
     private readonly IEquipmentPickerService _equipmentPicker;
     private readonly ISellEquipmentPickerService _sellEquipmentPicker;
     private readonly IDramatisPersonaPickerService _dramatisPersonaPicker;
-    private readonly int _warbandArchetypeId;
+    private int _warbandArchetypeId;
 
     /// <summary>EquipmentItem ids the warband's unassigned inventory currently owns at least one of -
     /// passed straight through to each RareItemSearchEntry (see its own doc) to decide whether an
     /// alternative-payment option (e.g. Johann/Crimson Shade) can even be offered.</summary>
-    private readonly IReadOnlyCollection<int> _ownedEquipmentItemIds;
+    private IReadOnlyCollection<int> _ownedEquipmentItemIds = new List<int>();
 
     /// <summary>DramatisPersona ids currently on cooldown for this warband (2026-09-01, délai de
     /// re-recherche - voir DramatisPersona.RequiresCooldownBeforeResearch) - passed to
     /// IDramatisPersonaPickerService.PickDramatisPersonaAsync so the "Personnage spécial" search picker
     /// never even shows them as an option.</summary>
-    private readonly IReadOnlyCollection<int> _cooldownDramatisPersonaIds;
+    private IReadOnlyCollection<int> _cooldownDramatisPersonaIds = new List<int>();
 
     /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
     /// Eshin") - needed alongside _warbandArchetypeId because a Groupe B "conditional on warband type"
     /// Exploration branch (Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome) matches by name,
     /// not Id (see ExplorationOutcome.RestrictedToWarbandArchetypeNames - a plain string reference, same
     /// idiom as EquipmentItemName, since this is fixed rulebook content with no editor).</summary>
-    private readonly string _warbandArchetypeName;
+    private string _warbandArchetypeName = string.Empty;
 
     /// <summary>Captured once at dialog construction (see Warband.PendingExplorationBonusDie) - read by
     /// ExplorationDiceCount, never reassigned mid-wizard: the flag itself is only cleared on the Warband
     /// once this Fin de Partie is actually saved (WarbandDetailViewModel.EndOfGame).</summary>
-    private readonly bool _pendingExplorationBonusDie;
+    private bool _pendingExplorationBonusDie;
 
     /// <summary>Captured once at dialog construction (see Warband.HasCatacombReroll) - permanent, unlike
     /// _pendingExplorationBonusDie, so it's only ever read to show an informational reminder in the
     /// Exploration roll step (ShowCatacombRerollReminder), never cleared/consumed.</summary>
-    private readonly bool _hasCatacombReroll;
+    private bool _hasCatacombReroll;
 
     /// <summary>Snapshot of Warband.Treasury at dialog-open time (see EquippedHenchmanTreasuryAfter,
     /// Prisonniers' "autres bandes" branch) - the wizard never writes to the real Warband mid-dialog
     /// (only WarbandDetailViewModel.EndOfGame does, at Save), so this stays a plain frozen number for
     /// the affordability preview rather than a live reference.</summary>
-    private readonly int _currentTreasury;
+    private int _currentTreasury;
 
     /// <summary>Snapshot of Warband.WyrdstoneShards at dialog-open time (see _currentTreasury for the
     /// same reasoning) - drives whether the Wyrdstone Sale step even appears (Steps) and bounds
     /// ShardsToSell. Never live-updated mid-wizard: only WarbandDetailViewModel.EndOfGame writes to the
     /// real Warband, at Save.</summary>
-    private readonly int _currentWyrdstoneShards;
+    private int _currentWyrdstoneShards;
 
-    private readonly List<ExplorationResult> _explorationResults;
+    private List<ExplorationResult> _explorationResults = new();
 
     /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
     /// wizard qui référence le catalogue Équipement par nom anglais brut plutôt que par Id
@@ -104,39 +106,61 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     /// refait à chaque résolution de branche. L'item entier (pas juste son nom) permet d'afficher un
     /// vrai ChipView tapable (icône de catégorie + popup détail via _detailDialogs) plutôt qu'un simple
     /// Label - même langage d'interaction que le reste de l'app pour toute référence Équipement.</summary>
-    private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName;
+    private IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName = new Dictionary<string, EquipmentItem>();
 
     /// <summary>Même idée que _equipmentItemsByEnglishName, pour ExplorationOutcome.MaterialRuleName (ex.
     /// "Ornate Weapon") - permet au ChipView d'afficher "Épée (O)" comme n'importe quel objet en Gromril/
     /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
-    private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
+    private IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName = new Dictionary<string, SpecialRule>();
+
+    /// <summary>Catalogues bruts (pas les dictionnaires anglais->résolu ci-dessus) nécessaires au
+    /// pipeline Apply*Async (EndOfGamePageViewModel.Apply.cs, voir ApplyExplorationOutcomeAsync/
+    /// ApplyRareItemSearchAsync) pour matcher un nom anglais brut (ExplorationOutcome.EquipmentItemName/
+    /// MaterialRuleName) contre le catalogue complet, ou pour résoudre un objet localisé à ajouter à
+    /// l'inventaire - vivaient comme simples variables locales dans WarbandDetailViewModel.EndOfGame()
+    /// avant le passage en page Shell (2026-09-22), promus en champs pour survivre entre InitializeAsync
+    /// (où ils sont chargés) et FinishAsync (où le pipeline les consomme).</summary>
+    private List<EquipmentItem> _englishEquipmentCatalog = new();
+    private List<SpecialRule> _englishSpecialRulesCatalog = new();
+    private List<EquipmentItem> _localizedEquipmentCatalog = new();
 
     /// <summary>Snapshot de l'inventaire de bande (voir WarbandDetailViewModel.Inventory) au moment
     /// d'ouvrir ce wizard - 2026-09-01, "Céder du matériel" (Où est l'Argent) : sélection automatique
-    /// d'objets dont la somme couvre le manque, voir EndOfGameDialogViewModel.Captives.cs's
+    /// d'objets dont la somme couvre le manque, voir EndOfGamePageViewModel.Captives.cs's
     /// SeizedEquipmentItems. Jamais modifié depuis ce wizard (aucun achat/vente d'objet de bande ici) -
     /// une simple liste figée suffit, pas besoin de la revalider en direct.</summary>
-    private readonly List<WarbandEquipment> _warbandInventory;
+    private List<WarbandEquipment> _warbandInventory = new();
 
     /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
     /// ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - même besoin que
     /// _equipmentItemsByEnglishName, mais limité aux archétypes de LA bande jouée (une branche
     /// conditionnée à une bande ne référence jamais l'archétype d'une autre).</summary>
-    private readonly IReadOnlyDictionary<string, WarriorArchetype> _warriorArchetypesByEnglishName;
+    private IReadOnlyDictionary<string, WarriorArchetype> _warriorArchetypesByEnglishName = new Dictionary<string, WarriorArchetype>();
 
     /// <summary>Nom anglais -> Id de compétence, pour résoudre EquipmentItem.GrantsSpecificSkillName
     /// (voir Core.Rules.SkillEligibility.EffectiveExtraSkillNames) vers les ids que _skillPicker attend -
     /// le picker travaille sur son propre catalogue localisé, ce dictionnaire ne sert qu'à traverser la
     /// frontière anglais->id une fois, ici, plutôt qu'à chaque PickAdvanceSkill.</summary>
-    private readonly IReadOnlyDictionary<string, int> _skillIdsByEnglishName;
-
-    protected override bool CancelResult => false;
-
-    public ObservableCollection<string> ResultOptions { get; } = new();
-    public ObservableCollection<WarriorOutcomeRow> WarriorRows { get; }
+    private IReadOnlyDictionary<string, int> _skillIdsByEnglishName = new Dictionary<string, int>();
 
     [ObservableProperty]
-    private string selectedResult;
+    private int warbandId;
+
+    public ObservableCollection<string> ResultOptions { get; } = new();
+
+    /// <summary>[ObservableProperty] plutôt qu'un simple { get; private set; } - nécessaire depuis que
+    /// cette collection est peuplée dans InitializeAsync (async, après que la page ait déjà posé son
+    /// BindingContext) plutôt que dans le constructeur : sans la notification PropertyChanged générée par
+    /// [ObservableProperty], BindableLayout.ItemsSource="{Binding WarriorRows}" reste accroché à
+    /// l'instance VIDE capturée au tout premier binding et n'apprend jamais qu'une nouvelle instance a été
+    /// affectée (bug trouvé le 2026-09-22, retour utilisateur - "pour les blessures, aucun personnage ne
+    /// s'affiche"). Même raison que WarbandDetailViewModel.Heroes/Henchmen, déjà [ObservableProperty] pour
+    /// exactement ce même besoin.</summary>
+    [ObservableProperty]
+    private ObservableCollection<WarriorOutcomeRow> warriorRows = new();
+
+    [ObservableProperty]
+    private string selectedResult = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsResultStep))]
@@ -335,7 +359,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             if (HasEligibleHeroesForRareItems) steps.Add(new(StepKind.RareItems));
             if (RareItemSearchEntries.Any(e => e.IsFound)) steps.Add(new(StepKind.RareItemPurchase));
             // Dramatis Personae : solde des personnages à frais en or/pierre magique déjà engagés
-            // (Johann/Veskit/Marianna/Nicodemus) - voir EndOfGameDialogViewModel.DramatisPersonae.cs.
+            // (Johann/Veskit/Marianna/Nicodemus) - voir EndOfGamePageViewModel.DramatisPersonae.cs.
             // Aucun recrutement combiné ici contrairement à Francs-Tireurs (le recrutement d'un Dramatis
             // Persona passe déjà par la recherche "Personnage spécial", RareItems/RareItemPurchase
             // ci-dessus) - entièrement absente si aucun personnage concerné.
@@ -345,7 +369,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // pour éviter de mélanger et de surcharger") : sa propre étape juste après Dramatis Personae,
             // regroupe Corruption (ShowPairCorruptionOption - bande qui NE possède PAS la paire) et
             // Rétention/"C'est l'heure de payer !" (ShowPairRetentionOption - bande qui la possède DÉJÀ),
-            // mutuellement exclusives par bande - voir EndOfGameDialogViewModel.PairEngagement.cs. Vivait
+            // mutuellement exclusives par bande - voir EndOfGamePageViewModel.PairEngagement.cs. Vivait
             // avant ça scindée entre l'étape Prisonniers (Corruption) et Dramatis Personae (Rétention).
             if (ShowPairCorruptionOption || ShowPairRetentionOption) steps.Add(new(StepKind.PairEngagement));
             // Duel avec le meneur : sa propre étape juste après (2026-09-03, retour utilisateur - "le duel
@@ -359,7 +383,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // va reprendre le système qu'on a dans WarbandEditDialog... écran par écran, step by step") après
             // qu'une première version à 2 onglets librement navigables (Guerriers/Équipement, une seule
             // carte pour Héros ET Hommes de main) se soit révélée confuse à l'usage. Voir
-            // EndOfGameDialogViewModel.Recruitment.cs pour le détail de chaque étape. Achat/Vente
+            // EndOfGamePageViewModel.Recruitment.cs pour le détail de chaque étape. Achat/Vente
             // d'équipement (juste avant, inchangée) remplit/vide la réserve de toute la bande ; ce qui suit
             // source ses achats en priorité depuis cette réserve plutôt que d'acheter systématiquement au
             // plein tarif - voir BuildStashPool/BuildAvailableReservePool.
@@ -369,7 +393,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             // dismiss him") : toujours présente juste avant Achat/Vente, jamais conditionnelle (le joueur
             // peut ne renvoyer personne) - pour que l'équipement récupéré puisse ensuite être vendu OU
             // réutilisé gratuitement pour équiper une nouvelle recrue (Recrutement, plus loin dans ce même
-            // wizard). Voir EndOfGameDialogViewModel.Dismissal.cs.
+            // wizard). Voir EndOfGamePageViewModel.Dismissal.cs.
             steps.Add(new(StepKind.DismissWarriors));
             steps.Add(new(StepKind.EquipmentTrading));
             // Héros : effectif (steppers, toujours présente) puis UNE étape PAR héros réellement recruté
@@ -394,7 +418,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
                 steps.Add(new(StepKind.RecruitHenchmenNames));
             }
             // Francs-Tireurs : solde des Francs-Tireurs déjà engagés + recrutement optionnel d'un nouveau -
-            // voir EndOfGameDialogViewModel.HiredSwords.cs. Après tout le recrutement (2026-09-21, retour
+            // voir EndOfGamePageViewModel.HiredSwords.cs. Après tout le recrutement (2026-09-21, retour
             // utilisateur - "les francs-tireurs sont après le recrutement", confirmé comme une demande de
             // réordonnancement plutôt qu'un bug : Francs-Tireurs est conceptuellement un autre mécanisme de
             // recrutement, le joueur décide en connaissant sa trésorerie ET son roster finaux, recrutement de
@@ -403,7 +427,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
             if (HasAnyHiredSwordRelevance) steps.Add(new(StepKind.HiredSwords));
             // Réallouer l'équipement (livre, étape 9 - "Swap equipment between models as desired") :
             // toute DERNIÈRE étape avant le Récapitulatif, après Achat/Vente ET tout le recrutement (ordre
-            // du livre) - voir EndOfGameDialogViewModel.Reallocation.cs. Absente si aucun Héros
+            // du livre) - voir EndOfGamePageViewModel.Reallocation.cs. Absente si aucun Héros
             // existant/recrue n'est éligible (rien à réallouer).
             if (HasEligibleReallocationCarriers) steps.Add(new(StepKind.EquipmentReallocation));
             steps.Add(new(StepKind.Recap));
@@ -583,8 +607,34 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         ? string.Format(Loc["EndOfGameCapturedEnemiesSummary"], CapturedEnemyCount)
         : string.Empty;
 
-    public EndOfGameDialogViewModel(IEnumerable<WarriorRow> activeWarriorRows, ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService, IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, ISellEquipmentPickerService sellEquipmentPicker, IDramatisPersonaPickerService dramatisPersonaPicker, int warbandArchetypeId, string warbandArchetypeName, bool pendingExplorationBonusDie, bool hasCatacombReroll, int currentTreasury, int currentWyrdstoneShards, List<ExplorationResult> explorationResults, IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName, IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, IReadOnlyDictionary<string, int> skillIdsByEnglishName, IReadOnlyList<Injury> injuryCatalog, List<HiredSword> hiredSwordCatalog, List<DramatisPersona> dramatisPersonaCatalog, IReadOnlyDictionary<int, List<EquipmentQuantityChip>> dramatisPersonaStartingEquipmentById, IReadOnlyCollection<int> ownedEquipmentItemIds, IReadOnlyCollection<int> cooldownDramatisPersonaIds, List<WarbandEquipment> warbandInventory, List<WarriorArchetype> recruitableWarriorArchetypes,
-        WarbandArchetype recruitableWarbandArchetype, HiredSword? pitFighterProfile = null, IReadOnlyList<EquipmentItem>? pitFighterEquipment = null)
+    /// <summary>Bande éditée par ce wizard - résolue depuis WarbandId (QueryProperty) dans
+    /// InitializeAsync, jamais null une fois cette dernière terminée avec succès (voir son garde).
+    /// Membre plutôt que variable locale : le pipeline Apply*Async (EndOfGamePageViewModel.Apply.cs) en
+    /// a besoin comme WarbandDetailViewModel.Warband en avait besoin avant ce refactor.</summary>
+    public Warband? Warband { get; private set; }
+
+    /// <summary>Every living, active-roster warrior across all four groups (Heroes/Henchmen/HiredSwords/
+    /// DramatisPersonae), Sick included, Dead/Retired excluded - même ensemble que
+    /// WarbandDetailViewModel.AllActiveWarriorRows (voir sa doc), nécessaire ici uniquement pour
+    /// retrouver "le chef" pour quelques bonus étroits d'Exploration/Prisonniers (voir
+    /// ApplyExplorationOutcomeAsync/ApplyCapturedEnemiesAsync), qu'il participe ou non à CETTE bataille.
+    /// Instantané figé pris une fois dans InitializeAsync, même raisonnement que tous les autres
+    /// instantanés pré-bataille de ce ViewModel (_warbandInventory etc.) - jamais rechargé en cours de
+    /// wizard.</summary>
+    private List<WarriorRow> _allActiveWarriorRows = new();
+
+    /// <summary>Sous-ensemble Hommes de main de _allActiveWarriorRows - même filtre que
+    /// WarbandDetailViewModel.Henchmen (voir sa doc), nécessaire au pipeline Apply*Async (ex. fusionner
+    /// une trouvaille de Traînard/Prisonniers/"Tué et transformé en Zombie" dans un groupe déjà existant
+    /// plutôt que d'en créer un nouveau) - même instantané figé pré-bataille que Henchmen l'était côté
+    /// WarbandDetailViewModel avant ce refactor (chargé une fois, jamais republié en cours de wizard).</summary>
+    private IEnumerable<WarriorRow> Henchmen => _allActiveWarriorRows.Where(r => !r.Warrior.IsHero && !r.Warrior.IsHiredSword && !r.Warrior.IsDramatisPersona);
+
+    partial void OnWarbandIdChanged(int value) => _ = InitializeAsync(value);
+
+    public EndOfGamePageViewModel(ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService,
+        IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, ISellEquipmentPickerService sellEquipmentPicker,
+        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -593,54 +643,207 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         _equipmentPicker = equipmentPicker;
         _sellEquipmentPicker = sellEquipmentPicker;
         _dramatisPersonaPicker = dramatisPersonaPicker;
-        _warbandArchetypeId = warbandArchetypeId;
-        _warbandArchetypeName = warbandArchetypeName;
-        _pendingExplorationBonusDie = pendingExplorationBonusDie;
-        _hasCatacombReroll = hasCatacombReroll;
-        _currentTreasury = currentTreasury;
-        _currentWyrdstoneShards = currentWyrdstoneShards;
-        _explorationResults = explorationResults;
-        _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
-        _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
-        _specialRulesByEnglishName = specialRulesByEnglishName;
-        _warbandInventory = warbandInventory;
-        _skillIdsByEnglishName = skillIdsByEnglishName;
-        _hiredSwordCatalog = hiredSwordCatalog;
-        _dramatisPersonaCatalog = dramatisPersonaCatalog;
-        _dramatisPersonaStartingEquipmentById = dramatisPersonaStartingEquipmentById;
-        _ownedEquipmentItemIds = ownedEquipmentItemIds;
-        _cooldownDramatisPersonaIds = cooldownDramatisPersonaIds;
-        _recruitableWarbandArchetype = recruitableWarbandArchetype;
-        foreach (var archetype in recruitableWarriorArchetypes)
-            RecruitRows.Add(new WarriorRecruitRow(archetype, isEditingWarband: false));
+        _warbandService = warbandService;
+    }
 
-        ResultOptions.Add(Loc["EndOfGameResultVictory"]);
-        ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
-        ResultOptions.Add(Loc["EndOfGameResultDraw"]);
-        selectedResult = ResultOptions[0];
+    /// <summary>Reconstruit tout l'état du wizard depuis WarbandId seul (Shell [QueryProperty], voir
+    /// OnWarbandIdChanged) - remplace l'ancien constructeur de EndOfGameDialogViewModel (~25 paramètres)
+    /// ET la préparation qui vivait avant dans WarbandDetailViewModel.EndOfGame() (catalogues,
+    /// dictionnaires anglais->localisé, snapshot d'inventaire) : tout est une fonction pure de
+    /// (warbandId, état DB actuel, langue courante), rien n'est encore aléatoire/dépendant d'une
+    /// interaction utilisateur à ce stade - re-dériver depuis WarbandId seul est donc correct, pas un
+    /// compromis. Le garde "Warband null"/"aucun guerrier actif" reste côté WarbandDetailViewModel.
+    /// EndOfGame() (avant la navigation), pour ne jamais pousser cette page sur un cas où il n'y a rien à
+    /// enregistrer.</summary>
+    private async Task InitializeAsync(int warbandId)
+    {
+        await Loading.RunAsync(async () =>
+        {
+            Warband = await _warbandService.GetWarbandAsync(warbandId);
+            if (Warband is null) return;
 
-        // Snapshot pour AdvanceRollEntry.CanPromote (promotion Homme de main -> Héros, jet 10-12) - voir
-        // sa doc pour les limites acceptées (ne suit pas les promotions résolues plus tôt dans la même
-        // Fin de Partie ; se base sur activeWarriorRows - un Héros Malade cette partie, donc absent
-        // d'activeWarriorRows, n'est pas compté ici, sous-estimation mineure du plafond de 6 acceptée
-        // plutôt que de faire remonter le roster complet de la bande jusqu'à ce ViewModel).
-        var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
-        WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
-            new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment, r.SpecialRules)));
+            var language = LocalizationService.Instance.Language;
+            var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
 
-        // Effectif déjà recruté de chaque type, poussé sur CountDisplay (voir WarriorRecruitRow.
-        // ExternalHeadCount) - doit suivre WarriorRows (ExistingCountForArchetype s'appuie dessus), pas
-        // avant.
-        foreach (var row in RecruitRows)
-            row.ExternalHeadCount = ExistingCountForArchetype(row.Archetype.Id);
+            // ExplorationOutcome.EquipmentItemName référence le catalogue par nom ANGLAIS brut (voir sa
+            // doc) plutôt que par Id - construit une seule fois ici (Id introuvable autrement en anglais
+            // uniquement) et transmis au wizard sous forme d'EquipmentItem entier (pas juste son nom)
+            // pour qu'il affiche un vrai ChipView tapable (icône + popup détail) résolu dans la langue
+            // courante, au lieu du nom anglais tel quel (ex. "Axe" affiché même en français avant ce
+            // correctif).
+            var englishEquipment = await _libraryService.GetEquipmentItemsAsync("en");
+            var localizedEquipment = language == "en" ? englishEquipment : await _libraryService.GetEquipmentItemsAsync(language);
+            var equipmentItemsByEnglishName = englishEquipment.ToDictionary(e => e.Name,
+                e => localizedEquipment.FirstOrDefault(l => l.Id == e.Id) ?? e);
 
-        BuildHiredSwordUpkeepEntries();
-        BuildDramatisPersonaUpkeepEntries();
-        BuildPairCorruptionOption();
-        BuildPairRetentionOption();
-        BuildExistingHenchmanTopUps();
-        InitializeReallocation();
+            // Même besoin pour ExplorationOutcome.MaterialRuleName (ex. "Ornate Weapon") - permet au
+            // wizard d'afficher "Épée (O)" plutôt que le nom nu, comme n'importe quel objet en
+            // Gromril/Ithilmar.
+            var englishSpecialRules = await _libraryService.GetSpecialRulesAsync("en");
+            var localizedSpecialRules = language == "en" ? englishSpecialRules : await _libraryService.GetSpecialRulesAsync(language);
+            var specialRulesByEnglishName = englishSpecialRules.ToDictionary(r => r.Name,
+                r => localizedSpecialRules.FirstOrDefault(l => l.Id == r.Id) ?? r);
 
+            // Pour EquipmentItem.GrantsSpecificSkillName (ex. Haggle du symbole de la Maison du Marchand)
+            // - seul l'Id compte pour le picker de compétence (son propre catalogue est déjà localisé),
+            // pas besoin de résoudre un objet Skill localisé comme les deux dictionnaires ci-dessus.
+            var skillIdsByEnglishName = (await _libraryService.GetSkillsAsync("en")).ToDictionary(s => s.Name, s => s.Id);
+
+            // ExplorationOutcome.RestrictedToWarbandArchetypeNames (Groupe B "conditionné par la bande" -
+            // Traînard, Prisonniers, Cimetière, bénédiction du Sanctuaire) matche par nom anglais, pas Id
+            // - même besoin que les dictionnaires ci-dessus.
+            var warbandArchetypeName = (await _libraryService.GetWarbandArchetypesAsync("en"))
+                .First(a => a.Id == Warband.WarbandArchetypeId).Name;
+
+            // Étape "Recrutement" (livre, étape 8) - MaxWarriors pour RecruitmentRules.CanRecruit, voir
+            // EndOfGamePageViewModel.Recruitment.cs. Null impossible en pratique (l'archétype de CETTE
+            // bande, résolu depuis Warband.WarbandArchetypeId).
+            var warbandArchetype = (await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, language))!;
+            var bandWideSpecialRules = warbandArchetype.SpecialRules ?? new List<SpecialRule>();
+            var bandMagicSchools = warbandArchetype.MagicSchools ?? new List<MagicSchool>();
+
+            // Toutes les bandes (pas seulement la nôtre) - une règle de Haine peut cibler n'importe
+            // laquelle, voir WarriorRosterBuilder.BuildSpecialRuleChips.
+            var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(language);
+            var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
+
+            // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - limité
+            // aux archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
+            var englishWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en");
+            var localizedWarriorArchetypes = language == "en" ? englishWarriorArchetypes : await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, language);
+            var warriorArchetypesByEnglishName = englishWarriorArchetypes.ToDictionary(a => a.Name,
+                a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
+
+            // Pour l'aperçu en direct des SpecialRules attachées à une branche de Blessure Grave (ex.
+            // Folie 24 -> Stupidité/Frénésie) - déjà pleinement résolu (SpecialRules incluses, voir
+            // LibraryService.GetInjuriesAsync) donc réutilisable tel quel par WarriorOutcomeRow, via
+            // InjuryCatalogLookup (même logique de correspondance par jet que GetOrCreateInjuryAsync,
+            // partagée pour ne pas dupliquer le parseur de RollRange).
+            var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
+
+            // Pour la comparaison de profil de "Vendu aux Fosses" (65) - le Gladiateur ("Pit Fighter",
+            // catalogue Franc-Tireur/HiredSword) est un adversaire éphémère (jamais recruté dans la
+            // bande, voir Models.Library.HiredSword), simple lookup par nom anglais comme les
+            // dictionnaires ci-dessus.
+            var englishHiredSwords = await _libraryService.GetHiredSwordsAsync("en");
+            // Catalogue complet localisé - à la fois pour le Gladiateur éphémère ci-dessous (Vendu aux
+            // Fosses) ET, sans rapport avec lui, pour l'étape "Francs-Tireurs" (upkeep/recrutement réel
+            // dans NOTRE bande - voir EndOfGamePageViewModel.HiredSwords.cs).
+            var localizedHiredSwords = language == "en" ? englishHiredSwords : await _libraryService.GetHiredSwordsAsync(language);
+            var pitFighterEnglish = englishHiredSwords.FirstOrDefault(h => h.Name == "Pit Fighter");
+            var pitFighterProfile = pitFighterEnglish is null
+                ? null
+                : localizedHiredSwords.FirstOrDefault(h => h.Id == pitFighterEnglish.Id) ?? pitFighterEnglish;
+
+            // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
+            // même carte comparative - même idiome que localizedEquipment ci-dessus.
+            var pitFighterEquipment = pitFighterProfile is null
+                ? new List<EquipmentItem>()
+                : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
+
+            // Étape "Dramatis Personae" (upkeep, voir EndOfGamePageViewModel.DramatisPersonae.cs) + choix
+            // "payer avec l'objet alternatif" de l'étape Achat (RareItemSearchEntry.
+            // HasAlternativePaymentOption) - même catalogue localisé que localizedHiredSwords ci-dessus.
+            var dramatisPersonaCatalog = await _libraryService.GetDramatisPersonaeAsync(language);
+            // Équipement de départ de chaque Dramatis Persona (Marquand & Ulli notamment) - même helper
+            // que DetailDialogService.ShowDramatisPersonaDetailDialogAsync (EquipmentQuantityChip.
+            // GroupFrom, gère les doublons).
+            var dramatisPersonaStartingEquipmentById = dramatisPersonaCatalog.ToDictionary(p => p.Id,
+                p => p.StartingEquipmentIds.Count == 0 ? new List<EquipmentQuantityChip>() : EquipmentQuantityChip.GroupFrom(p.StartingEquipmentIds, localizedEquipment));
+
+            var warbandInventory = await _warbandService.GetWarbandEquipmentAsync(warbandId, language);
+            var ownedEquipmentItemIds = warbandInventory.Select(w => w.Item.Id).ToHashSet();
+
+            // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - voir DramatisPersona.
+            // RequiresCooldownBeforeResearch) - exclut du picker "Personnage spécial" tout personnage
+            // encore en cooldown pour CETTE bande.
+            var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(Warband.Id);
+
+            var rosterBuilder = new WarriorRosterBuilder(localizedWarriorArchetypes, localizedHiredSwords, dramatisPersonaCatalog,
+                bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames);
+            var allWarriors = await _warbandService.GetWarriorsAsync(warbandId, language);
+            var allRows = rosterBuilder.BuildRows(allWarriors);
+            // Même filtre que WarbandDetailViewModel.AllActiveWarriorRows (voir sa doc) : exclut
+            // Mort/Retraité, garde Malade (voir _allActiveWarriorRows's own doc).
+            _allActiveWarriorRows = allRows.Where(r => !r.IsDead && !r.IsRetired).ToList();
+            var activeWarriorRows = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Active).ToList();
+
+            _warbandArchetypeId = Warband.WarbandArchetypeId;
+            _warbandArchetypeName = warbandArchetypeName;
+            _pendingExplorationBonusDie = Warband.PendingExplorationBonusDie;
+            _hasCatacombReroll = Warband.HasCatacombReroll;
+            _currentTreasury = Warband.Treasury;
+            _currentWyrdstoneShards = Warband.WyrdstoneShards;
+            _explorationResults = explorationResults;
+            _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
+            _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
+            _specialRulesByEnglishName = specialRulesByEnglishName;
+            _warbandInventory = warbandInventory.ToList();
+            _skillIdsByEnglishName = skillIdsByEnglishName;
+            _hiredSwordCatalog = localizedHiredSwords;
+            _dramatisPersonaCatalog = dramatisPersonaCatalog;
+            _dramatisPersonaStartingEquipmentById = dramatisPersonaStartingEquipmentById;
+            _ownedEquipmentItemIds = ownedEquipmentItemIds;
+            _cooldownDramatisPersonaIds = cooldownDramatisPersonaIds;
+            _recruitableWarbandArchetype = warbandArchetype;
+            _englishEquipmentCatalog = englishEquipment;
+            _englishSpecialRulesCatalog = englishSpecialRules;
+            _localizedEquipmentCatalog = localizedEquipment;
+            foreach (var archetype in localizedWarriorArchetypes)
+                RecruitRows.Add(new WarriorRecruitRow(archetype, isEditingWarband: false));
+
+            ResultOptions.Add(Loc["EndOfGameResultVictory"]);
+            ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
+            ResultOptions.Add(Loc["EndOfGameResultDraw"]);
+            SelectedResult = ResultOptions[0];
+
+            // Snapshot pour AdvanceRollEntry.CanPromote (promotion Homme de main -> Héros, jet 10-12) -
+            // voir sa doc pour les limites acceptées (ne suit pas les promotions résolues plus tôt dans
+            // la même Fin de Partie ; se base sur activeWarriorRows - un Héros Malade cette partie, donc
+            // absent d'activeWarriorRows, n'est pas compté ici, sous-estimation mineure du plafond de 6
+            // acceptée plutôt que de faire remonter le roster complet de la bande jusqu'à ce ViewModel).
+            var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
+            WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
+                new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment, r.SpecialRules)));
+
+            // Effectif déjà recruté de chaque type, poussé sur CountDisplay (voir WarriorRecruitRow.
+            // ExternalHeadCount) - doit suivre WarriorRows (ExistingCountForArchetype s'appuie dessus), pas
+            // avant.
+            foreach (var row in RecruitRows)
+                row.ExternalHeadCount = ExistingCountForArchetype(row.Archetype.Id);
+
+            BuildHiredSwordUpkeepEntries();
+            BuildDramatisPersonaUpkeepEntries();
+            BuildPairCorruptionOption();
+            BuildPairRetentionOption();
+            BuildExistingHenchmanTopUps();
+            InitializeReallocation();
+
+            WireUpChangeNotifications();
+
+            // Tout ce qui précède mute un grand nombre de propriétés (calculées ou { get; private set; })
+            // qui n'ont pas leur propre [ObservableProperty] - dans l'ancienne dialog, tout ce chargement
+            // tournait dans le constructeur, AVANT que la dialog ne soit même construite/liée en XAML,
+            // donc aucune notification n'était nécessaire nulle part. Une page Shell lie son
+            // BindingContext dès sa construction, avant que cet InitializeAsync (async) n'ait tourné - les
+            // bindings déjà posés (Une Poignée d'Or/ShowPairRetentionOption, Francs-Tireurs, Renvoyer,
+            // Recrutement...) restent donc accrochés à l'état initial vide tant que rien ne les notifie
+            // explicitement (bug trouvé le 2026-09-22, retour utilisateur - plusieurs étapes sans aucune
+            // donnée visible). Plutôt que de traquer un par un chaque propriété concernée (surface bien
+            // trop large sur un ViewModel de cette taille), un seul PropertyChanged avec un nom vide -
+            // idiome standard "toutes les propriétés ont changé", respecté par le moteur de binding MAUI -
+            // force TOUS les bindings déjà posés sur cette page à se relire une fois le chargement fini.
+            OnPropertyChanged(string.Empty);
+        });
+    }
+
+    /// <summary>Tous les abonnements PropertyChanged posés jusque-là dans le constructeur (avant que
+    /// InitializeAsync le remplace) - déplacés tels quels dans leur propre méthode plutôt que dans le
+    /// bloc Loading.RunAsync ci-dessus, purement pour la lisibilité (le bloc était déjà long avant
+    /// l'ajout de tout le chargement de catalogues qui vivait avant dans WarbandDetailViewModel.
+    /// EndOfGame()).</summary>
+    private void WireUpChangeNotifications()
+    {
         // Payer/Renvoyer un Johann/Veskit/Marianna/Nicodemus change EndOfGameTreasuryRemaining (une
         // solde en or payée ici dispute la même trésorerie que tout le reste du wizard, 2026-09-03) -
         // sans cette notification, le bloc "Où est l'Argent ?" (et tout le reste : Achat d'Objets rares,
@@ -675,7 +878,7 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
         // trouver des objets rares/personnages spéciaux, c'est que les héros") : IsHero vaut TRUE pour
         // eux (même flux Blessures Graves/XP qu'un vrai Héros), mais ce sont des figurines à part, pas
         // des Héros au sens de cette règle du livre - même limite déjà corrigée pour SurvivingHeroCount
-        // (EndOfGameDialogViewModel.Exploration.cs) et connue pour le décompte de tête à la vente de
+        // (EndOfGamePageViewModel.Exploration.cs) et connue pour le décompte de tête à la vente de
         // pierre magique (voir DRAMATIS_PERSONAE_STATUS.md).
         RareItemSearchEntries = new ObservableCollection<RareItemSearchEntry>(
             WarriorRows.Where(r => r.Warrior.IsHero && !r.Warrior.IsDramatisPersona).Select(r => new RareItemSearchEntry(r, Loc, _ownedEquipmentItemIds)));
@@ -871,6 +1074,93 @@ public partial class EndOfGameDialogViewModel : DialogViewModel<bool>
     private void DecrementOutOfAction(WarriorOutcomeRow row) =>
         row.OutOfActionCount = Math.Max(0, row.OutOfActionCount - 1);
 
+    /// <summary>"Annuler"/flèche retour d'en-tête/geste OS (voir EndOfGamePage.xaml.cs's
+    /// OnBackButtonPressed) - seul changement de comportement observable de tout le passage en page
+    /// Shell (2026-09-22, décision utilisateur explicite) : une dialog fermée par le système équivalait
+    /// silencieusement à Annuler (DialogStack.ModalPopped) ; une page Shell n'a pas cet équivalent
+    /// gratuit. Retour silencieux tant que rien n'a été saisi (StepIndex == 0, même seuil que
+    /// CanGoBack) ; sinon confirmation avant de perdre la saisie du wizard (jamais persistée avant
+    /// FinishAsync de toute façon, donc rien n'est réellement perdu côté données - juste la saisie en
+    /// cours).</summary>
     [RelayCommand]
-    private void Save() => Close(true);
+    private async Task Exit()
+    {
+        if (StepIndex > 0 && !await ConfirmAsync(Loc["EndOfGameExitConfirmTitle"], Loc["EndOfGameExitConfirmMessage"]))
+            return;
+
+        await Shell.Current.GoToAsync("..");
+    }
+
+    /// <summary>Étape "Récapitulatif", bouton Terminer - remplace l'ancien Close(true)/DialogViewModel
+    /// depuis le passage en page Shell (2026-09-22) : plus de Task&lt;bool&gt; à faire remonter à
+    /// l'appelant, ce ViewModel lance lui-même tout le pipeline Apply*Async (déplacé depuis
+    /// WarbandDetailViewModel.EndOfGame.cs, voir EndOfGamePageViewModel.Apply.cs) puis navigue en
+    /// arrière - WarbandDetailPage se rafraîchit tout seul au retour (voir son OnAppearing). Ordre des
+    /// appels inchangé (voir chaque Apply*Async's own doc pour les contraintes d'ordre encore
+    /// pertinentes - statut/effectif, pas la réserve).</summary>
+    [RelayCommand]
+    private async Task Finish()
+    {
+        if (Warband is null) return;
+
+        await Loading.RunAsync(async () =>
+        {
+            var language = LocalizationService.Instance.Language;
+            var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], SelectedResult) };
+
+            await ApplyExplorationOutcomeAsync(_englishEquipmentCatalog, _equipmentItemsByEnglishName, _englishSpecialRulesCatalog, sentences);
+            await ApplyWarriorOutcomesAsync(language, sentences);
+            await ApplyCapturedEnemiesAsync(_warriorArchetypesByEnglishName, sentences);
+            await ApplyWyrdstoneSaleAsync(sentences);
+            ApplyAvailableVeterans(sentences);
+            await ApplyRareItemSearchAsync(_localizedEquipmentCatalog, sentences);
+            // Délai de re-recherche (Aenur/Ulli & Marquand) : reste d'abord toute trace de cooldown
+            // PRÉEXISTANTE (posée à une Fin de Partie antérieure) - le picker de CETTE Fin de Partie les
+            // a déjà exclus, donc atteindre ce point veut dire "une bataille a été jouée sans eux",
+            // satisfaisant la condition. Doit rester AVANT ApplyWandererDeparturesAsync, qui peut poser
+            // un NOUVEAU cooldown pour un départ de CETTE Fin de Partie.
+            await _warbandService.ClearAllDramatisPersonaCooldownsAsync(Warband.Id);
+            await ApplyWandererDeparturesAsync(sentences);
+            await ApplyDramatisPersonaUpkeepAsync(sentences);
+            await ApplyPairEquipmentSeizureIfNeededAsync(sentences);
+            await ApplyPairDuelIfNeededAsync(sentences);
+            await ApplyHiredSwordUpkeepAsync(sentences);
+            // Doit rester AVANT ApplyEquipmentTradingAsync : un guerrier renvoyé restitue son équipement
+            // à la réserve, qui doit exister en base pour que la Vente (juste après) puisse le proposer -
+            // voir SellableEquipmentCandidate.IsFromDismissal. Doit rester APRÈS
+            // ApplyWarriorOutcomesAsync (plus haut) : les morts de CETTE bataille réduisent déjà
+            // Warrior.HeadCount avant qu'on reclampe DismissCount contre l'effectif RÉEL (voir
+            // ApplyDismissalsAsync's own doc).
+            await ApplyDismissalsAsync(sentences);
+            // Doit rester AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync : ceux-ci consomment
+            // en priorité la réserve que cette étape vient de remplir/vider. Doit rester APRÈS
+            // ApplyExplorationOutcomeAsync (plus haut) : une vente peut porter sur une trouvaille
+            // d'Exploration OU un renvoi de cette même partie.
+            await ApplyEquipmentTradingAsync(language, sentences);
+            await ApplyRecruitmentAsync(language, sentences);
+            await ApplyHenchmanRecruitmentAsync(language, sentences);
+            // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
+            // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
+            // 2026-08-18) - invariant explicite ici plutôt qu'implicite dans l'ordre du code.
+            // previouslySickWarriors vient de _allActiveWarriorRows, un instantané figé pris dans
+            // InitializeAsync avant toute interaction du joueur avec ce wizard (même snapshot que
+            // l'ancien previouslySickWarriors, capturé au tout début de WarbandDetailViewModel.
+            // EndOfGame() avant ce refactor) - son contenu ne change jamais en cours de wizard, donc le
+            // recalculer ici plutôt qu'au tout début produit exactement le même résultat.
+            var previouslySickWarriors = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
+            await ApplySicknessLifecycleAsync(previouslySickWarriors);
+            // Réallouer l'équipement : TOUT DERNIER dans le pipeline - doit voir l'état final de tout ce
+            // qui précède (Renvoyer/Vente/Recrutement).
+            await ApplyEquipmentReallocationAsync(language, sentences);
+
+            // La partie est terminée : redonne la main à "Lancer la partie" sur la fiche de bande (voir
+            // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée.
+            Warband.GameInProgress = false;
+            await _warbandService.SaveWarbandAsync(Warband);
+
+            await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
+        });
+
+        await Shell.Current.GoToAsync("..");
+    }
 }

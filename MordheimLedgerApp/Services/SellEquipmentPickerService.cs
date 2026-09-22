@@ -7,7 +7,7 @@ public interface ISellEquipmentPickerService
 {
     /// <summary>candidates : lignes réellement vendables à cet instant précis (réserve + trouvailles
     /// d'Exploration + équipement porté, quantité déjà disponible calculée par l'appelant - voir
-    /// EndOfGameDialogViewModel.EquipmentTrading.cs's BuildSellableCandidates) - jamais interrogé ici via
+    /// EndOfGamePageViewModel.EquipmentTrading.cs's BuildSellableCandidates) - jamais interrogé ici via
     /// un service Library, contrairement aux autres pickers de cette famille (EquipmentPickerService...).</summary>
     Task<IReadOnlyList<SellableEquipmentCandidate>> PickSaleAsync(IEnumerable<SellableEquipmentCandidate> candidates);
 }

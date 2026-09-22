@@ -7,7 +7,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// <summary>Étape "Renvoyer" (livre des règles - "Disbanding a Warband" + FAQ officielle citée par
 /// l'utilisateur 2026-09-22 - "you are allowed to dismiss any warrior at any time during the post-battle
 /// sequence... you can first transfer the wounded warrior's weapons and gear to your stash and then
-/// dismiss him") - toujours présente, juste AVANT Achat/Vente (voir EndOfGameDialogViewModel.cs's Steps) :
+/// dismiss him") - toujours présente, juste AVANT Achat/Vente (voir EndOfGamePageViewModel.cs's Steps) :
 /// un guerrier renvoyé restitue tout son équipement à la réserve plutôt que de le perdre, réutilisable
 /// ensuite au choix (vendu à l'étape Achat/Vente ou réattribué gratuitement à une nouvelle recrue à
 /// l'étape Recrutement - voir BuildStashPool/BuildSellableCandidates).
@@ -19,7 +19,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// voir ExistingHenchmanTopUp.cs's GetTopUpBreakdown - la ligne d'équipement elle-même ne change pas pour
 /// un renvoi partiel, seul Warrior.HeadCount diminue à Terminer, voir WarbandDetailViewModel.EndOfGame.
 /// ApplyDismissalsAsync).</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     /// <summary>Guerriers éligibles au renvoi - jamais un Franc-Tireur/Dramatis Persona (déjà leur propre
     /// mécanisme Payer/Renvoyer) ni un guerrier déjà mort ce tour.</summary>
@@ -28,7 +28,7 @@ public partial class EndOfGameDialogViewModel
     // Le rafraîchissement de l'éligibilité de Recrutement (TotalWarriorCountAfterRecruitment retranche
     // DismissCount, retour utilisateur - "dans les recrutement, il faut soustraire les effectifs") et du
     // récap "Équipement récupéré" se fait uniformément via l'abonnement row.PropertyChanged sur
-    // DismissCount dans EndOfGameDialogViewModel.cs, pas ici - il couvre aussi bien ce stepper que la case
+    // DismissCount dans EndOfGamePageViewModel.cs, pas ici - il couvre aussi bien ce stepper que la case
     // à cocher d'un Héros (binding direct, jamais une commande).
     [RelayCommand]
     private void IncrementDismiss(WarriorOutcomeRow row) => row.DismissCount = Math.Min(row.HeadCount, row.DismissCount + 1);
@@ -60,7 +60,7 @@ public partial class EndOfGameDialogViewModel
 }
 
 /// <summary>Une ligne du récap "Équipement récupéré" de l'étape Renvoyer - voir
-/// EndOfGameDialogViewModel.RecoveredDismissedEquipmentChips. Name suffixé "xN" comme
+/// EndOfGamePageViewModel.RecoveredDismissedEquipmentChips. Name suffixé "xN" comme
 /// WarriorEquipment.NameDisplay quand la quantité restituée dépasse 1.</summary>
 public sealed class DismissedEquipmentChip
 {

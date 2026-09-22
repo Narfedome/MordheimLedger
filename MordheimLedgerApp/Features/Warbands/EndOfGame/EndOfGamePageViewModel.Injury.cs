@@ -6,10 +6,10 @@ using MordheimLedgerApp.Core.Rules;
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Étape Blessure (une carte par guerrier hors de combat coché, voir la doc de classe du
-/// fichier principal) - validation + commandes de jet. Extrait de EndOfGameDialogViewModel.cs
+/// fichier principal) - validation + commandes de jet. Extrait de EndOfGamePageViewModel.cs
 /// (2026-08-18, refactor de découpage, voir CLAUDE.md) : aucun changement de comportement, pur
 /// déplacement de membres.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     private bool ValidateInjuryStep(WarriorOutcomeRow row)
     {
@@ -169,7 +169,7 @@ public partial class EndOfGameDialogViewModel
     // voir WarriorOutcomeRow.OnHatredTargetFreeTextInputChanged - l'appli ne suit pas les bandes/
     // guerriers adverses comme données structurées, retour utilisateur explicite). Nécessite un dialog
     // (ActionSheet), impossible à déclencher depuis un simple setter de propriété - même patron que
-    // PickAdvanceSkill/PickAdvanceSpell (EndOfGameDialogViewModel.Advance.cs).
+    // PickAdvanceSkill/PickAdvanceSpell (EndOfGamePageViewModel.Advance.cs).
     [RelayCommand]
     private async Task PickHatredWarbandArchetype(WarriorOutcomeRow row)
     {
@@ -198,7 +198,7 @@ public partial class EndOfGameDialogViewModel
     private Task ShowHatredArchetypeDetail(WarbandArchetype archetype) => _detailDialogs.ShowWarbandArchetypeDetailDialogAsync(archetype);
 
     // ChipView ne transmet que l'item tapé (l'archétype lui-même, pas son propriétaire) - même patron
-    // que RemoveAdvanceSkill/RemoveAdvanceSpell (EndOfGameDialogViewModel.Advance.cs). Cherche aussi
+    // que RemoveAdvanceSkill/RemoveAdvanceSpell (EndOfGamePageViewModel.Advance.cs). Cherche aussi
     // parmi les sous-jets "Blessures multiples" (2026-09-04) : la chip peut venir d'un jet principal OU
     // d'un sous-jet, une seule commande partagée gère les deux.
     [RelayCommand]

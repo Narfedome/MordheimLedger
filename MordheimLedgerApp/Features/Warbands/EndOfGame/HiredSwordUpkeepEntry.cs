@@ -5,7 +5,7 @@ using MordheimLedgerApp.Core.Models.Library;
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Un Franc-Tireur déjà activement engagé dans la bande (Warrior.IsHiredSword), à l'étape
-/// "Francs-Tireurs" du wizard Fin de Partie - voir EndOfGameDialogViewModel.HiredSwordUpkeepEntries.
+/// "Francs-Tireurs" du wizard Fin de Partie - voir EndOfGamePageViewModel.HiredSwordUpkeepEntries.
 /// Le livre : la solde se règle après CHAQUE bataille (y compris la toute première) ou il quitte la
 /// bande (perd toute son XP, même s'il est réengagé plus tard - voir Warrior.HiredSwordId). Choix
 /// Payer/Renvoyer via un Picker à deux options (même idiome que CapturedEnemyEntry.FateLabels/
@@ -24,6 +24,7 @@ public partial class HiredSwordUpkeepEntry : ObservableObject
 
     public List<string> ChoiceLabels { get; }
     private readonly string _payLabel;
+    private readonly string _noneLabel;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WillPay))]
@@ -34,18 +35,23 @@ public partial class HiredSwordUpkeepEntry : ObservableObject
         if (value is not null) ChoiceError = null;
     }
 
-    /// <summary>Résolu depuis SelectedChoiceLabel - null tant qu'aucune option n'est choisie. Consommé
-    /// par WarbandDetailViewModel.EndOfGame.ApplyHiredSwordUpkeepAsync.</summary>
-    public bool? WillPay => SelectedChoiceLabel is null ? null : SelectedChoiceLabel == _payLabel;
+    /// <summary>Résolu depuis SelectedChoiceLabel - null tant que "Aucun" (le choix par défaut, voir le
+    /// constructeur) ou rien du tout n'est sélectionné. Consommé par EndOfGamePageViewModel.Apply.
+    /// ApplyHiredSwordUpkeepAsync.</summary>
+    public bool? WillPay => SelectedChoiceLabel is null || SelectedChoiceLabel == _noneLabel ? null : SelectedChoiceLabel == _payLabel;
 
     [ObservableProperty]
     private string? choiceError;
 
-    public HiredSwordUpkeepEntry(Warrior warrior, HiredSword hiredSword, string payLabel, string dismissLabel)
+    public HiredSwordUpkeepEntry(Warrior warrior, HiredSword hiredSword, string noneLabel, string payLabel, string dismissLabel)
     {
         Warrior = warrior;
         HiredSword = hiredSword;
         _payLabel = payLabel;
-        ChoiceLabels = new List<string> { payLabel, dismissLabel };
+        _noneLabel = noneLabel;
+        // "Aucun" en premier, présélectionné (retour utilisateur 2026-09-22) - même raisonnement que
+        // CapturedEnemyEntry.FateLabels, voir sa doc.
+        ChoiceLabels = new List<string> { noneLabel, payLabel, dismissLabel };
+        SelectedChoiceLabel = noneLabel;
     }
 }

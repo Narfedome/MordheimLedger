@@ -11,7 +11,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// <summary>Recrutement (livre, étape 8 - "Hire New Recruits &amp; Buy Common Items" - "this is done in
 /// any order and may be done several times") : une SÉQUENCE d'étapes dédiées plutôt qu'une carte à
 /// onglets - voir StepKind.RecruitHeroesCount/RecruitHeroDetail/RecruitVeteranTopUp/
-/// RecruitHenchmenCount/RecruitHenchmenEquipment/RecruitHenchmenNames dans EndOfGameDialogViewModel.cs's
+/// RecruitHenchmenCount/RecruitHenchmenEquipment/RecruitHenchmenNames dans EndOfGamePageViewModel.cs's
 /// Steps.
 ///
 /// **Historique de design** : deux itérations avant celle-ci. (1) 2026-09-05, trois étapes de wizard
@@ -37,7 +37,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// (Save()), ce qui casserait l'invariant "rien en base tant que Terminer n'a pas tourné" de tout le
 /// reste de ce wizard - refus explicite de l'utilisateur d'un mécanisme de rollback ("on peut pas jouer
 /// à mumuse avec la bdd"). Les guerriers recrutés ici ne deviennent de vrais Warrior qu'à
-/// WarbandDetailViewModel.EndOfGame.ApplyRecruitmentAsync, même moment que tout le reste du wizard.
+/// EndOfGamePageViewModel.Apply.ApplyRecruitmentAsync, même moment que tout le reste du wizard.
 ///
 /// isExistingWarband: false partout (contrairement au mode "Bande existante" du dialog réutilisé) : la
 /// trésorerie est ENFORCÉE (RecruitmentRules.CanRecruit compare contre EndOfGameTreasuryRemaining, pas
@@ -52,14 +52,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// wizard), avec Diviser (SplitHenchmanGroupDraft, même mécanique que WarbandEditDialogViewModel) pour
 /// équiper différemment une partie d'un même type recruté - c'est pourquoi son étape Noms (nombre RÉEL
 /// de groupes) vient APRÈS celle d'Équipement, jamais avant.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     /// <summary>WarbandArchetype complet de CETTE bande (contrairement à _warbandArchetypeId/
     /// _warbandArchetypeName, déjà connus avant cette étape mais insuffisants ici) - nécessaire pour
     /// MaxWarriors (RecruitmentRules.CanRecruit). Chargé par l'appelant (WarbandDetailViewModel.EndOfGame)
     /// comme tout le reste des données de ce wizard, jamais paresseusement ici - voir sa propre doc de
     /// classe pour pourquoi cette étape n'a pas de chargement asynchrone à elle.</summary>
-    private readonly WarbandArchetype _recruitableWarbandArchetype;
+    private WarbandArchetype _recruitableWarbandArchetype = new();
 
     /// <summary>WarriorArchetype recrutables pour CETTE bande - peuplés une seule fois au constructeur
     /// (voir recruitableWarriorArchetypes, chargé par l'appelant comme dramatisPersonaCatalog/
@@ -71,7 +71,7 @@ public partial class EndOfGameDialogViewModel
     public IEnumerable<WarriorRecruitRow> HeroRecruitRows => RecruitRows.Where(r => r.IsHero);
 
     /// <summary>Sous-ensemble de HeroRecruitRows effectivement recruté (Count &gt; 0) - source directe des
-    /// étapes dynamiques StepKind.RecruitHeroDetail (une par NameSlot, voir EndOfGameDialogViewModel.cs's
+    /// étapes dynamiques StepKind.RecruitHeroDetail (une par NameSlot, voir EndOfGamePageViewModel.cs's
     /// Steps), même idiome que WarbandEditDialogViewModel.RecruitedRows. Recalculée à chaque
     /// Increment/Decrement (voir UpdateRecruitRowsEligibility).</summary>
     public IEnumerable<WarriorRecruitRow> RecruitedHeroRows => HeroRecruitRows.Where(r => r.Count > 0);
@@ -224,7 +224,7 @@ public partial class EndOfGameDialogViewModel
     /// existant - appelée après tout Increment/DecrementHenchmanTopUp (un changement sur UN groupe peut
     /// affecter le détail d'un AUTRE, la réserve étant partagée et consommée dans l'ordre, voir
     /// GetTopUpBreakdown), une première fois à la construction, ET à chaque changement de DismissCount
-    /// (voir l'abonnement PropertyChanged sur WarriorRows dans EndOfGameDialogViewModel.cs). Rafraîchit
+    /// (voir l'abonnement PropertyChanged sur WarriorRows dans EndOfGamePageViewModel.cs). Rafraîchit
     /// aussi ExistingCountForType (retour utilisateur 2026-09-22 - "dans les écrans de recrutement sur les
     /// -/+ les dismissed ne sont pas décomptés... pas bon pour les vétérans") : posé une seule fois par
     /// BuildExistingHenchmanTopUps jusqu'ici (DismissCount valait alors toujours 0), jamais rafraîchi
@@ -338,7 +338,7 @@ public partial class EndOfGameDialogViewModel
     /// ApplyExplorationOutcomeAsync n'a pas réellement tourné, à Terminer - or celui-ci s'exécute
     /// justement AVANT ApplyHenchmanRecruitmentAsync dans le pipeline de Terminer, donc l'objet SERA bien
     /// disponible au moment réel du calcul. Additionne aussi PurchasedReserveItems (étape Achat/Vente,
-    /// juste avant Recrutement - EndOfGameDialogViewModel.EquipmentTrading.cs) et soustrait la PORTION
+    /// juste avant Recrutement - EndOfGamePageViewModel.EquipmentTrading.cs) et soustrait la PORTION
     /// réserve de PendingSales (IsFromStash - une vente d'équipement DÉJÀ PORTÉ par un guerrier ne touche
     /// jamais ce pool, voir SellableEquipmentCandidate's own doc).</summary>
     private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildStashPool()
@@ -511,7 +511,7 @@ public partial class EndOfGameDialogViewModel
     /// EquipmentPick.Cost porte déjà le prix unitaire (0 si FromReserve) - même formule que
     /// WarbandEditDialogViewModel.TotalSpent (coût par exemplaire × effectif du groupe). Recalculé à
     /// chaque lecture, donc toujours cohérent entre cet aperçu (EndOfGameTreasuryRemaining) et
-    /// l'application réelle à Terminer (WarbandDetailViewModel.EndOfGame.ApplyHenchmanRecruitmentAsync,
+    /// l'application réelle à Terminer (EndOfGamePageViewModel.Apply.ApplyHenchmanRecruitmentAsync,
     /// même algorithme).</summary>
     private int HenchmanRecruitmentTotalCost() =>
         ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
@@ -674,7 +674,7 @@ public partial class EndOfGameDialogViewModel
         // valide quelque chose... les avertissements devraient se mettre au moment où on change de step en
         // cliquant sur next") : un ShowInfoAsync lancé juste après la fermeture du picker (lui-même une
         // page plein écran poussée modalement) se prenait dans la même course de navigation modale que la
-        // page qui se dépile - voir EndOfGameDialogViewModel.cs's Next()/ShowWeaponLimitWarningIfNeededAsync,
+        // page qui se dépile - voir EndOfGamePageViewModel.cs's Next()/ShowWeaponLimitWarningIfNeededAsync,
         // qui vérifie la même règle mais au clic sur Suivant, une fois qu'on est bien revenu sur cette
         // étape (plus aucune transition modale en cours).
     }

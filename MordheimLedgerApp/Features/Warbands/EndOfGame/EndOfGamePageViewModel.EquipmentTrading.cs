@@ -43,8 +43,8 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// Le solde de cette étape (Achat en dépense, Vente en recette) rejoint EndOfGameTreasuryRemaining comme
 /// tout le reste du wizard ; la réserve qui en résulte (pré-partie + Exploration + Achat - Vente) est ce
 /// que Recrutement consomme en priorité avant d'acheter au plein tarif - voir
-/// EndOfGameDialogViewModel.Recruitment.cs's BuildStashPool/BuildAvailableReservePool.</summary>
-public partial class EndOfGameDialogViewModel
+/// EndOfGamePageViewModel.Recruitment.cs's BuildStashPool/BuildAvailableReservePool.</summary>
+public partial class EndOfGamePageViewModel
 {
     // --- Achat : choix libre, rejoint la réserve (pas assigné à un guerrier ici) -----------------------
 

@@ -9,7 +9,7 @@ namespace MordheimLedgerApp.Components;
 /// a numeric soft keyboard (Keyboard="Numeric" alone doesn't block a physical keyboard, e.g. on
 /// Windows). Kept separate from switching these fields to a numeric-typed property (int/int?): the End
 /// of Game wizard's dice-roll and PX fields are deliberately bound as plain strings so an empty field
-/// stays empty instead of showing a forced "0" (see EndOfGameDialogViewModel's ManualRoll/
+/// stays empty instead of showing a forced "0" (see EndOfGamePageViewModel's ManualRoll/
 /// ExperienceGainedText/etc.) - this behavior gets the "can't type letters" benefit without giving that
 /// up.
 ///

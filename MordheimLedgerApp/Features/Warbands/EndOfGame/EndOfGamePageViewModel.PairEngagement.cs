@@ -19,8 +19,8 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// ci-dessous, une seule étape à un seul emplacement fixe plutôt que scindée à nouveau en deux endroits.
 ///
 /// Ancienne organisation (avant ce découpage) : la Corruption vivait sur l'étape Prisonniers
-/// (EndOfGameDialogViewModel.Captives.cs) et la Rétention sur l'étape Dramatis Personae
-/// (EndOfGameDialogViewModel.DramatisPersonae.cs) - retour utilisateur explicite du 2026-09-01 ("dans la
+/// (EndOfGamePageViewModel.Captives.cs) et la Rétention sur l'étape Dramatis Personae
+/// (EndOfGamePageViewModel.DramatisPersonae.cs) - retour utilisateur explicite du 2026-09-01 ("dans la
 /// section des frais d'entretien, on doit les avoir") puis reconsidéré le 2026-09-04 pour les regrouper
 /// ici. Le sous-système partagé "Où est l'Argent ?" (WantsEquipmentSeizure/WantsDuel - WonDuel vit dans
 /// PairDuel.cs, sa propre étape) reste inchangé, seulement déplacé dans ce fichier.
@@ -35,11 +35,11 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// `_specialRulesByEnglishName`, même idiome que le reste du wizard pour identifier une règle précise
 /// indépendamment de la langue courante) - n'importe quel futur Dramatis Persona, seul ou en paire,
 /// portant cette même SpecialRule hérite automatiquement de tout ce mécanisme (Corruption, Rétention,
-/// Où est l'Argent, et - voir EndOfGameDialogViewModel.PairDuel.cs - le Duel lui-même). FeeKind.Pair
+/// Où est l'Argent, et - voir EndOfGamePageViewModel.PairDuel.cs - le Duel lui-même). FeeKind.Pair
 /// reste un sujet distinct : le mécanisme de recrutement COMBINÉ propre à Ulli &amp; Marquand (30 CO à
 /// deux, un seul HireCost jamais doublé) - une SpecialRule "A Fistful of Crowns" solo sur un futur
 /// personnage n'impliquerait pas forcément FeeKind.Pair.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     private bool ValidatePairEngagementStep()
     {
@@ -49,7 +49,7 @@ public partial class EndOfGameDialogViewModel
 
         // Céder du matériel / Duel avec le meneur : déterminé automatiquement (voir WantsEquipmentSeizure/
         // WantsDuel), plus rien à valider ici - le duel (WonDuel) a sa propre étape (StepKind.PairDuel,
-        // voir EndOfGameDialogViewModel.PairDuel.cs), sans rien à valider non plus (défaite = mort
+        // voir EndOfGamePageViewModel.PairDuel.cs), sans rien à valider non plus (défaite = mort
         // automatique, pas de jet). PairRetentionAmount reste un champ libre optionnel (0/vide = aucune
         // tentative cette partie), rien à exiger dessus.
         return valid;
@@ -97,7 +97,7 @@ public partial class EndOfGameDialogViewModel
     /// L'étape Achat/Recrutement précède cette étape-ci dans l'ordre du wizard (Steps), donc cette
     /// décision est déjà connue au moment d'afficher cette carte - reste quand même réévaluée en direct
     /// (notifiée depuis le handler WantsToRecruit de RareItemSearchEntries, voir
-    /// EndOfGameDialogViewModel.cs) au cas où le joueur reviendrait en arrière.</summary>
+    /// EndOfGamePageViewModel.cs) au cas où le joueur reviendrait en arrière.</summary>
     public bool ShowPairCorruptionOption => _pairPersona is not null && !_pairAlreadyOwnedInRoster && !IsPairBeingRecruitedThisWizard;
 
     /// <summary>Voir la doc de ShowPairCorruptionOption - vrai dès qu'une recherche "Personnage spécial"
@@ -119,7 +119,7 @@ public partial class EndOfGameDialogViewModel
 
     // Les [NotifyPropertyChangedFor] individuels (IsPairCorruptionUnaffordable/WantsEquipmentSeizure/
     // WantsDuel/SeizedEquipmentItems/etc.) ont été remplacés par un seul appel à NotifyTreasuryChanged()
-    // dans les handlers ci-dessous - voir sa doc (EndOfGameDialogViewModel.cs) : ce montant dispute
+    // dans les handlers ci-dessous - voir sa doc (EndOfGamePageViewModel.cs) : ce montant dispute
     // désormais la MÊME trésorerie que le reste du wizard (achat d'Objets rares, Francs-Tireurs...), une
     // longue liste dupliquée par propriété devenait trop facile à laisser incomplète (voir le bug
     // IsPairDuelStep trouvé le 2026-09-03).
@@ -205,7 +205,7 @@ public partial class EndOfGameDialogViewModel
         ResetWonDuelIfNoLongerNeeded();
     }
 
-    /// <summary>Repéré à la construction (voir EndOfGameDialogViewModel ctor, appelée APRÈS
+    /// <summary>Repéré à la construction (voir EndOfGamePageViewModel ctor, appelée APRÈS
     /// BuildPairCorruptionOption qui peuple _fistfulOfCrownsPersonaIds) - true si CETTE bande a déjà un
     /// personnage portant "A Fistful of Crowns" dans son roster actif, peu importe laquelle des fiches
     /// concernées (pour la paire, Marquand ou Ulli).</summary>

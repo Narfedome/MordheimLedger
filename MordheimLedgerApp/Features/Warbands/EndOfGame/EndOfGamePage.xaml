@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
-               xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
                xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
                xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
                xmlns:advance="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
                xmlns:createEdit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
-               x:TypeArguments="system:Boolean"
-               x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGameDialog"
-               x:DataType="local:EndOfGameDialogViewModel"
-               BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="380">
-        <dialogs:StableHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Label Text="{loc:Loc EndOfGameTitle}"
-                   Style="{StaticResource DialogTitleLabelStyle}"/>
+               x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGamePage"
+               x:DataType="local:EndOfGamePageViewModel"
+               Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <header:DetailPageHeaderView Grid.Row="0" Title="{loc:Loc EndOfGameTitle}" BackCommand="{Binding ExitCommand}"/>
+        <ScrollView Grid.Row="1">
+        <VerticalStackLayout Spacing="16" Padding="16">
             <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
 
             <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
@@ -54,11 +52,11 @@
                                     <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
                                                             IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
                                         <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementOutOfActionCommand}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementOutOfActionCommand}"
                                                                       CommandParameter="{Binding .}"/>
                                         <Label Text="{Binding OutOfActionLabel}" WidthRequest="36" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
                                         <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementOutOfActionCommand}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementOutOfActionCommand}"
                                                                       CommandParameter="{Binding .}"/>
                                     </HorizontalStackLayout>
                                 </Grid>
@@ -144,7 +142,7 @@
                                                         </Entry.Behaviors>
                                                     </Entry>
                                                     <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
                                                                                   CommandParameter="{Binding .}"
                                                                                   Tooltip="{loc:Loc EndOfGameRoll}"/>
                                                 </Grid>
@@ -163,7 +161,7 @@
                                                             </Entry.Behaviors>
                                                         </Entry>
                                                         <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubDeepWoundCommand}"
                                                                                       CommandParameter="{Binding .}"
                                                                                       Tooltip="{loc:Loc EndOfGameRoll}"/>
                                                     </Grid>
@@ -205,7 +203,7 @@
                                                             </Entry.Behaviors>
                                                         </Entry>
                                                         <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubHatredCommand}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubHatredCommand}"
                                                                                       CommandParameter="{Binding .}"
                                                                                       Tooltip="{loc:Loc EndOfGameRoll}"/>
                                                     </Grid>
@@ -215,7 +213,7 @@
                                                     <Button Text="{loc:Loc EndOfGameHatredPickWarbandArchetype}" Style="{StaticResource DialogSecondaryButtonStyle}"
                                                             FontSize="12" Padding="8,4" HorizontalOptions="Start"
                                                             IsVisible="{Binding ShowHatredArchetypePicker}"
-                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=PickSubHatredWarbandArchetypeCommand}"
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=PickSubHatredWarbandArchetypeCommand}"
                                                             CommandParameter="{Binding .}"/>
                                                     <Label Text="{Binding HatredRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                            IsVisible="{Binding HatredRollError, Converter={StaticResource IsNotNullConverter}}"/>
@@ -224,8 +222,8 @@
                                                     <components:ChipView IsVisible="{Binding HatredTargetWarbandArchetype, Converter={StaticResource IsNotNullConverter}}"
                                                                           Item="{Binding HatredTargetWarbandArchetype}"
                                                                           IconGlyph="{x:Static icons:SolidFont.Users}"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowHatredArchetypeDetailCommand}"
-                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveHatredArchetypeCommand}"/>
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowHatredArchetypeDetailCommand}"
+                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveHatredArchetypeCommand}"/>
                                                 </VerticalStackLayout>
 
                                                 <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
@@ -242,7 +240,7 @@
                                                             </Entry.Behaviors>
                                                         </Entry>
                                                         <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryBranchCommand}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryBranchCommand}"
                                                                                       CommandParameter="{Binding .}"
                                                                                       Tooltip="{loc:Loc EndOfGameRoll}"/>
                                                     </Grid>
@@ -256,7 +254,7 @@
                                                             <DataTemplate x:DataType="library:SpecialRule">
                                                                 <components:ChipView Item="{Binding .}"
                                                                                       IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
                                                             </DataTemplate>
                                                         </BindableLayout.ItemTemplate>
                                                     </FlexLayout>
@@ -364,7 +362,7 @@
                                         <DataTemplate x:DataType="library:SpecialRule">
                                             <components:ChipView Item="{Binding .}"
                                                                   IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </FlexLayout>
@@ -430,7 +428,7 @@
                                                     </Entry.Behaviors>
                                                 </Entry>
                                                 <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
                                                                               CommandParameter="{Binding .}"
                                                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
                                             </Grid>
@@ -483,7 +481,7 @@
                                         <components:ChipView Item="{Binding .}"
                                                               IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
@@ -496,7 +494,7 @@
                                         <components:ChipView Item="{Binding .}"
                                                               IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjurySkillDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjurySkillDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
@@ -508,7 +506,7 @@
                                                   ItemsSource="{Binding CurrentInjuryWarrior.SpecialRules}"
                                                   IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
-                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowWarriorSpecialRuleDetailCommand}"/>
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorSpecialRuleDetailCommand}"/>
                     </VerticalStackLayout>
                 </Border>
 
@@ -532,7 +530,7 @@
                                         <components:ChipView Item="{Binding .}"
                                                               IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowPitFighterEquipmentDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowPitFighterEquipmentDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
@@ -541,7 +539,7 @@
                                                   ItemsSource="{Binding CurrentInjuryWarrior.PitFighterProfile.SpecialRules}"
                                                   IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
-                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowPitFighterSpecialRuleDetailCommand}"/>
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowPitFighterSpecialRuleDetailCommand}"/>
                     </VerticalStackLayout>
                 </Border>
 
@@ -573,7 +571,7 @@
                                             </Entry.Behaviors>
                                         </Entry>
                                         <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
                                                                       CommandParameter="{Binding .}"
                                                                       Tooltip="{loc:Loc EndOfGameRoll}"/>
                                     </Grid>
@@ -592,7 +590,7 @@
                                                 </Entry.Behaviors>
                                             </Entry>
                                             <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubDeepWoundCommand}"
                                                                           CommandParameter="{Binding .}"
                                                                           Tooltip="{loc:Loc EndOfGameRoll}"/>
                                         </Grid>
@@ -671,7 +669,7 @@
                                                 </Entry.Behaviors>
                                             </Entry>
                                             <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollSoldToSlaversCommand}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSoldToSlaversCommand}"
                                                                           CommandParameter="{Binding .}"
                                                                           Tooltip="{loc:Loc EndOfGameRoll}"/>
                                         </Grid>
@@ -780,7 +778,7 @@
                                         </Entry.Behaviors>
                                     </Entry>
                                     <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollExplorationDieCommand}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollExplorationDieCommand}"
                                                                   CommandParameter="{Binding .}"
                                                                   Tooltip="{loc:Loc EndOfGameRoll}"/>
                                 </Grid>
@@ -798,7 +796,7 @@
             </VerticalStackLayout>
 
             <!-- Étape : Exploration - résultat. N'apparaît dans le wizard que si le jet précédent a
-                 déclenché un résultat (voir EndOfGameDialogViewModel.Steps) - jamais plusieurs à la
+                 déclenché un résultat (voir EndOfGamePageViewModel.Steps) - jamais plusieurs à la
                  fois. Les objets trouvés vont dans l'inventaire de bande (pas de choix de guerrier ici,
                  voir WarbandEquipment) - à équiper plus tard depuis la fiche de bande. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsExplorationResultStep}">
@@ -848,8 +846,8 @@
                              réussissent automatiquement (voir StatTestAutoPasses). -->
                         <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
                             <Picker IsVisible="{Binding ShowStatTestHeroPicker}" Title="{loc:Loc EndOfGameStatTestHeroPh}"
-                                    ItemsSource="{Binding StatTestEligibleHeroes}" ItemDisplayBinding="{Binding Name}"
-                                    SelectedItem="{Binding StatTestHero}"/>
+                                    ItemsSource="{Binding StatTestHeroOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                    SelectedItem="{Binding SelectedStatTestHeroOption}"/>
                             <Label Text="{loc:Loc EndOfGameStatTestAutoPass}" FontSize="12" FontAttributes="Italic"
                                    TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding StatTestAutoPasses}"/>
                             <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding ShowStatTestRoll}">
@@ -1148,11 +1146,11 @@
                                                 <Label Grid.Column="0" Text="{Binding Name}" VerticalOptions="Center"/>
                                                 <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
                                                     <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementDistributedExperienceCommand}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementDistributedExperienceCommand}"
                                                                                   CommandParameter="{Binding .}"/>
                                                     <Label Text="{Binding DistributedExplorationExperience}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
                                                     <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementDistributedExperienceCommand}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementDistributedExperienceCommand}"
                                                                                   CommandParameter="{Binding .}"/>
                                                 </HorizontalStackLayout>
                                             </Grid>
@@ -1233,7 +1231,7 @@
                                          pas de tap "pour ouvrir" en plus pour un choix binaire.
                                          RadioButtonGroup.SelectedValue lié directement au nom ANGLAIS du
                                          catalogue (Value de chaque RadioButton), pas un index - voir
-                                         EndOfGameDialogViewModel.SelectedExplorationItemName. Chaque
+                                         EndOfGamePageViewModel.SelectedExplorationItemName. Chaque
                                          option affiche le vrai ChipView tapable (icône + popup détail) en
                                          FRÈRE du RadioButton, jamais dans RadioButton.Content : un View
                                          arbitraire en Content ne s'affichait pas côté Windows/WinUI
@@ -1605,14 +1603,14 @@
 
                                     <!-- Côté Personnage spécial - même motif "Chercher..." + ChipView tapable
                                          que le côté Objet (SelectCharacterCommand ouvre le picker Dramatis
-                                         Personae, narrowé à cette bande - voir EndOfGameDialogViewModel.
+                                         Personae, narrowé à cette bande - voir EndOfGamePageViewModel.
                                          RareItems.cs.SelectCharacter). -->
                                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter}">
                                         <components:IconTextButton IsVisible="{Binding HasSelectedCharacter, Converter={StaticResource InverseBoolConverter}}"
                                                                     Icon="{x:Static icons:SolidFont.MagnifyingGlass}"
                                                                     Text="{loc:Loc EndOfGameCharacterSearchButton}"
                                                                     TextColor="{DynamicResource AppAccent}"
-                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=SelectCharacterCommand}"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectCharacterCommand}"
                                                                     CommandParameter="{Binding .}"/>
 
                                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedCharacter}">
@@ -1621,9 +1619,9 @@
                                                                       NameOverride="{Binding SelectedCharacterDisplayName}"
                                                                       IconGlyph="{x:Static icons:RpgFont.RaDuel}"
                                                                       IconFontFamily="RpgAwesome"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowCharacterDetailCommand}"/>
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowCharacterDetailCommand}"/>
                                                 <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Xmark}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ClearCharacterCommand}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ClearCharacterCommand}"
                                                                               CommandParameter="{Binding .}"/>
                                             </Grid>
                                             <Label Text="{Binding CharacterInitiativeDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -1659,7 +1657,7 @@
                                                                 Icon="{x:Static icons:SolidFont.MagnifyingGlass}"
                                                                 Text="{loc:Loc EndOfGameRareItemSearchButton}"
                                                                 TextColor="{DynamicResource AppAccent}"
-                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=SelectRareItemCommand}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectRareItemCommand}"
                                                                 CommandParameter="{Binding .}"/>
 
                                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedItem}">
@@ -1667,10 +1665,10 @@
                                             <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
                                                                   IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                   IconFontFamily="RpgAwesome"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareItemDetailCommand}"/>
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareItemDetailCommand}"/>
                                             <Label Grid.Column="1" Text="{Binding RarityDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                                             <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Xmark}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ClearRareItemCommand}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ClearRareItemCommand}"
                                                                           CommandParameter="{Binding .}"/>
                                         </Grid>
 
@@ -1689,7 +1687,7 @@
                                             <Border Style="{StaticResource ChipBorderStyle}" Padding="10,6">
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding SelectMaterialCommand}"
-                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=GromrilMaterial}"/>
+                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial}"/>
                                                 </Border.GestureRecognizers>
                                                 <Border.Triggers>
                                                     <DataTrigger TargetType="Border" Binding="{Binding SelectedMaterial.Abbreviation}" Value="G">
@@ -1698,17 +1696,17 @@
                                                 </Border.Triggers>
                                                 <HorizontalStackLayout Spacing="4">
                                                     <Label Text="{x:Static icons:RpgFont.RaAnvil}" FontFamily="RpgAwesome" FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=GromrilMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
+                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
                                                     <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleInfo}" Style="{StaticResource GhostIconButtonStyle}"
                                                                                   IconSize="10" Padding="0"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareMaterialDetailCommand}"
-                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=GromrilMaterial}"/>
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareMaterialDetailCommand}"
+                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial}"/>
                                                 </HorizontalStackLayout>
                                             </Border>
                                             <Border Style="{StaticResource ChipBorderStyle}" Padding="10,6">
                                                 <Border.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding SelectMaterialCommand}"
-                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IthilmarMaterial}"/>
+                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial}"/>
                                                 </Border.GestureRecognizers>
                                                 <Border.Triggers>
                                                     <DataTrigger TargetType="Border" Binding="{Binding SelectedMaterial.Abbreviation}" Value="I">
@@ -1717,11 +1715,11 @@
                                                 </Border.Triggers>
                                                 <HorizontalStackLayout Spacing="4">
                                                     <Label Text="{x:Static icons:RpgFont.RaAnvil}" FontFamily="RpgAwesome" FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IthilmarMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
+                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
                                                     <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleInfo}" Style="{StaticResource GhostIconButtonStyle}"
                                                                                   IconSize="10" Padding="0"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareMaterialDetailCommand}"
-                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IthilmarMaterial}"/>
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareMaterialDetailCommand}"
+                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial}"/>
                                                 </HorizontalStackLayout>
                                             </Border>
                                         </HorizontalStackLayout>
@@ -1738,7 +1736,7 @@
                                                     </Entry.Behaviors>
                                                 </Entry>
                                                 <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollRareItemCommand}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollRareItemCommand}"
                                                                               CommandParameter="{Binding .}"
                                                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
                                             </Grid>
@@ -1807,7 +1805,7 @@
                                                               NameOverride="{Binding SelectedCharacterDisplayName}"
                                                               IconGlyph="{x:Static icons:RpgFont.RaDuel}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowCharacterDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowCharacterDetailCommand}"/>
                                         <Label Grid.Column="1" Text="{loc:Loc EndOfGameCharacterRecruitLabel}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                                         <CheckBox Grid.Column="2" IsChecked="{Binding WantsToRecruit}" VerticalOptions="Center"/>
                                     </Grid>
@@ -1831,7 +1829,7 @@
                                             <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
                                                                   IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                   IconFontFamily="RpgAwesome"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRareItemDetailCommand}"/>
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareItemDetailCommand}"/>
                                             <Label Grid.Column="1" Text="{Binding CostDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
                                             <CheckBox Grid.Column="2" IsChecked="{Binding WantsToBuy}" VerticalOptions="Center"/>
                                         </Grid>
@@ -1843,7 +1841,7 @@
                                                 </Entry.Behaviors>
                                             </Entry>
                                             <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AutoRollRarePriceCommand}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollRarePriceCommand}"
                                                                           CommandParameter="{Binding .}"
                                                                           Tooltip="{loc:Loc EndOfGameRoll}"/>
                                         </Grid>
@@ -1860,7 +1858,7 @@
             <!-- Étape : Francs-Tireurs - solde des Francs-Tireurs déjà engagés (Picker Payer/Renvoyer,
                  même idiome que le Picker de sort de Prisonniers ci-dessus) ET recrutement optionnel d'un
                  nouveau (Picker + nom, gratuit ou payant selon CanAffordNewHiredSword/
-                 EndOfGameTreasuryRemaining) - voir EndOfGameDialogViewModel.HiredSwords.cs. Entièrement
+                 EndOfGameTreasuryRemaining) - voir EndOfGamePageViewModel.HiredSwords.cs. Entièrement
                  absente si aucun Franc-Tireur n'est concerné (HasAnyHiredSwordRelevance, voir Steps dans
                  le ViewModel). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsHiredSwordsStep}">
@@ -1898,8 +1896,8 @@
                 <VerticalStackLayout Spacing="6" IsVisible="{Binding HasHiredSwordsToRecruit}">
                     <Label Text="{loc:Loc EndOfGameHiredSwordRecruitHeading}" FontAttributes="Bold"/>
                     <Picker Title="{loc:Loc EndOfGameHiredSwordRecruitPh}"
-                            ItemsSource="{Binding AvailableHiredSwordsToRecruit}" ItemDisplayBinding="{Binding Name}"
-                            SelectedItem="{Binding SelectedNewHiredSword}"/>
+                            ItemsSource="{Binding AvailableHiredSwordRecruitOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                            SelectedItem="{Binding SelectedNewHiredSwordOption}"/>
                     <VerticalStackLayout Spacing="4" IsVisible="{Binding SelectedNewHiredSword, Converter={StaticResource IsNotNullConverter}}">
                         <Entry Text="{Binding NewHiredSwordName}" Placeholder="{loc:Loc EndOfGameHiredSwordNamePh}"/>
                         <Label Text="{Binding NewHiredSwordNameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
@@ -1916,7 +1914,7 @@
 
             <!-- Étape : Dramatis Personae (solde des personnages à frais récurrents déjà engagés - en or
                  pour Johann/Veskit/Marianna, en pierre magique pour Nicodemus, voir
-                 EndOfGameDialogViewModel.DramatisPersonae.cs). Même carte/Picker Payer-Renvoyer que
+                 EndOfGamePageViewModel.DramatisPersonae.cs). Même carte/Picker Payer-Renvoyer que
                  Francs-Tireurs ci-dessus, sans le bloc recrutement (déjà couvert par la recherche
                  "Personnage spécial"). UpkeepCostDisplay (pas UpkeepCost brut) pour que la devise soit
                  lisible ("1 pierre magique" plutôt qu'un "1" ambigu). -->
@@ -1949,7 +1947,7 @@
                  autre step pour éviter de mélanger et de surcharger") : regroupe les deux moitiés
                  mutuellement exclusives - "Corruption de Marquand Volker & Ulli Leitpold" (bande qui NE
                  possède PAS la paire, ShowPairCorruptionOption) et "C'est l'heure de payer !" (bande qui
-                 la possède DÉJÀ, ShowPairRetentionOption) - voir EndOfGameDialogViewModel.
+                 la possède DÉJÀ, ShowPairRetentionOption) - voir EndOfGamePageViewModel.
                  PairEngagement.cs. Vivait avant ce regroupement scindée entre l'étape Prisonniers
                  (Corruption) et Dramatis Personae (Rétention). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsPairEngagementStep}">
@@ -1998,7 +1996,7 @@
                 </VerticalStackLayout>
 
                 <!-- Où est l'Argent ? : partagée entre les deux cas ci-dessus (WantsEquipmentSeizure/
-                     WantsDuel/SeizedEquipmentItems, voir EndOfGameDialogViewModel.PairEngagement.cs) - une
+                     WantsDuel/SeizedEquipmentItems, voir EndOfGamePageViewModel.PairEngagement.cs) - une
                      bande ne déclenche jamais les deux à la fois (elle possède la paire ou non), aucun
                      conflit à partager le même état. Déterminé AUTOMATIQUEMENT (retour utilisateur "pas de
                      choix dans le picker") - "Duel avec le meneur" a sa propre étape juste après
@@ -2077,7 +2075,7 @@
                                         <components:ChipView Item="{Binding .}"
                                                               IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
@@ -2090,19 +2088,19 @@
                                         <components:ChipView Item="{Binding .}"
                                                               IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                                               IconFontFamily="RpgAwesome"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjurySkillDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjurySkillDetailCommand}"/>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
                         </VerticalStackLayout>
                         <!-- Règles spéciales de combat (2026-09-04, retour utilisateur) - même commande
-                             partagée que Vendu aux Fosses ("Ce guerrier"), voir EndOfGameDialogViewModel.
+                             partagée que Vendu aux Fosses ("Ce guerrier"), voir EndOfGamePageViewModel.
                              Injury.cs. -->
                         <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
                                                   ItemsSource="{Binding DuelLeaderRow.SpecialRules}"
                                                   IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                                   HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
-                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowWarriorSpecialRuleDetailCommand}"/>
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorSpecialRuleDetailCommand}"/>
                     </VerticalStackLayout>
                 </Border>
 
@@ -2132,7 +2130,7 @@
                                                 <components:ChipView Item="{Binding .}"
                                                                       IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                       IconFontFamily="RpgAwesome"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowDuelEquipmentDetailCommand}"/>
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowDuelEquipmentDetailCommand}"/>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
                                     </FlexLayout>
@@ -2142,7 +2140,7 @@
                                                 <components:ChipView Item="{Binding .}"
                                                                       IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                                                       IconFontFamily="RpgAwesome"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowDuelSkillDetailCommand}"/>
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowDuelSkillDetailCommand}"/>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
                                     </FlexLayout>
@@ -2151,7 +2149,7 @@
                                                               ItemsSource="{Binding Persona.SpecialRules}"
                                                               IconGlyph="{x:Static icons:SolidFont.Scroll}"
                                                               HeaderFontSize="10" HeaderTextColor="{DynamicResource AppTextMuted}"
-                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowDuelSpecialRuleDetailCommand}"/>
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowDuelSpecialRuleDetailCommand}"/>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
@@ -2175,7 +2173,7 @@
                  de la séquence post-bataille, son équipement rejoignant la réserve) - juste AVANT
                  Achat/Vente, toujours présente. Case à cocher pour un Héros, stepper -/+ pour un groupe
                  d'Hommes de main (renvoi partiel), même structure que l'étape "Hors de combat" plus haut.
-                 Voir EndOfGameDialogViewModel.Dismissal.cs. -->
+                 Voir EndOfGamePageViewModel.Dismissal.cs. -->
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsDismissWarriorsStep}">
                 <Label Text="{loc:Loc EndOfGameDismissHeading}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameDismissHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -2197,11 +2195,11 @@
                                              le "+" annule un renvoi (DecrementDismiss), voir DismissLabel's
                                              own doc. -->
                                         <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementDismissCommand}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementDismissCommand}"
                                                                       CommandParameter="{Binding .}"/>
                                         <Label Text="{Binding DismissLabel}" WidthRequest="36" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
                                         <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementDismissCommand}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementDismissCommand}"
                                                                       CommandParameter="{Binding .}"/>
                                     </HorizontalStackLayout>
                                 </Grid>
@@ -2222,7 +2220,7 @@
                  Recrutement (2026-09-05, retour utilisateur - "si on faisait d'abord l'achat vente
                  d'équipement, puis le recrutement avec l'assignation des équipements de la stash") -
                  remplit/vide la réserve de toute la bande ; Recrutement source ensuite ses achats en
-                 priorité depuis cette réserve - voir EndOfGameDialogViewModel.EquipmentTrading.cs. -->
+                 priorité depuis cette réserve - voir EndOfGamePageViewModel.EquipmentTrading.cs. -->
             <VerticalStackLayout Spacing="14" IsVisible="{Binding IsEquipmentTradingStep}">
                 <Grid ColumnDefinitions="*,Auto">
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingHeading}" FontAttributes="Bold"/>
@@ -2246,8 +2244,8 @@
                                 <components:ChipView Item="{Binding .}"
                                                       IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                       IconFontFamily="RpgAwesome"
-                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowReserveEquipmentDetailCommand}"
-                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveReserveEquipmentCommand}"/>
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowReserveEquipmentDetailCommand}"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveReserveEquipmentCommand}"/>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </FlexLayout>
@@ -2276,7 +2274,7 @@
                                                       NameOverride="{Binding SoldLabel}"
                                                       IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                       IconFontFamily="RpgAwesome"
-                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveSaleEquipmentCommand}"/>
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveSaleEquipmentCommand}"/>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </FlexLayout>
@@ -2306,7 +2304,7 @@
                  (2026-09-21, retour utilisateur - "on manque d'homogénéité... on reprend le système qu'on
                  a dans WarbandEditDialog... écran par écran, step by step"), après qu'une première version
                  à 2 onglets librement navigables (Guerriers/Équipement, une seule carte pour Héros ET
-                 Hommes de main) se soit révélée confuse - voir EndOfGameDialogViewModel.Recruitment.cs. -->
+                 Hommes de main) se soit révélée confuse - voir EndOfGamePageViewModel.Recruitment.cs. -->
 
             <!-- Étape : Héros - effectif (steppers seuls, toujours présente). -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecruitHeroesCountStep}">
@@ -2367,14 +2365,14 @@
                                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                           Icon="{x:Static icons:SolidFont.Minus}"
                                                                           IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=DecrementHenchmanTopUpCommand}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementHenchmanTopUpCommand}"
                                                                           CommandParameter="{Binding .}"/>
                                             <Label Text="{Binding CountDisplay}" FontSize="12" WidthRequest="38"
                                                    HorizontalTextAlignment="Center" VerticalOptions="Center"/>
                                             <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                                           Icon="{x:Static icons:SolidFont.Plus}"
                                                                           IconSize="11" ButtonWidthRequest="26" ButtonHeightRequest="26"
-                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=IncrementHenchmanTopUpCommand}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementHenchmanTopUpCommand}"
                                                                           CommandParameter="{Binding .}"/>
                                         </HorizontalStackLayout>
                                     </Grid>
@@ -2384,7 +2382,7 @@
                                                 <components:ChipView Item="{Binding .}"
                                                                       IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                       IconFontFamily="RpgAwesome"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryEquipmentDetailCommand}"/>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
                                     </FlexLayout>
@@ -2460,14 +2458,14 @@
                                                                               Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
                                                                               IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                                               IsVisible="{Binding CanSplit}"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
                                                                               CommandParameter="{Binding .}"/>
                                             </Grid>
                                             <components:RecruitSlotTabsView Item="{Binding .}"
                                                   IsVisible="{Binding ShowTabsView}"
-                                                  AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=AddRecruitEquipmentCommand}"
-                                                  RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=RemoveRecruitEquipmentCommand}"
-                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"/>
+                                                  AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitEquipmentCommand}"
+                                                  RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitEquipmentCommand}"
+                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"/>
                                         </VerticalStackLayout>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -2512,7 +2510,7 @@
                  recrutement. Héros existants + nouvelles recrues de cette partie + Réserve uniquement
                  (jamais un groupe d'Hommes de main, équipement partagé pour tout le groupe) - une
                  ChipListView par porteur, icône ⇄ sur chaque chip pour déplacer CET objet précis,
-                 gratuitement. Voir EndOfGameDialogViewModel.Reallocation.cs. -->
+                 gratuitement. Voir EndOfGamePageViewModel.Reallocation.cs. -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEquipmentReallocationStep}">
                 <Label Text="{loc:Loc EndOfGameEquipmentReallocationHeading}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameEquipmentReallocationHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
@@ -2528,8 +2526,8 @@
                                 <Label Text="{Binding Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
                                 <components:ChipListView ItemsSource="{Binding Items}"
                                                           IconGlyph="{x:Static icons:SolidFont.BoxOpen}"
-                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=ShowReallocationItemDetailCommand}"
-                                                          MoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGameDialogViewModel}}, Path=MoveReallocationItemCommand}"/>
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowReallocationItemDetailCommand}"
+                                                          MoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=MoveReallocationItemCommand}"/>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
@@ -2569,7 +2567,7 @@
 
                 <!-- Sections ajoutées le 2026-09-22 (retour utilisateur - "un récap de toutes les étapes
                      qu'on a fait") : chacune réutilise telle quelle une donnée déjà exposée par l'étape
-                     correspondante, voir EndOfGameDialogViewModel.Recap.cs. Réallouer l'équipement reste
+                     correspondante, voir EndOfGamePageViewModel.Recap.cs. Réallouer l'équipement reste
                      hors de ce récap (aucune trace de ses déplacements gardée pour l'instant). -->
                 <VerticalStackLayout Spacing="2" IsVisible="{Binding HasWyrdstoneSaleRecap}">
                     <Label Text="{loc:Loc EndOfGameRecapWyrdstoneHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
@@ -2681,27 +2679,33 @@
                     </VerticalStackLayout>
                 </VerticalStackLayout>
             </VerticalStackLayout>
-
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <Button Grid.Column="0"
-                        Text="{loc:Loc BtnCancel}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding CancelCommand}"/>
-                <Button Grid.Column="1"
-                        Text="{loc:Loc LibBack}"
-                        Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding BackCommand}"
-                        IsEnabled="{Binding CanGoBack}"/>
-                <Button Grid.Column="2"
-                        Text="{loc:Loc LibNext}"
-                        Command="{Binding NextCommand}"
-                        IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
-                <Button Grid.Column="2"
-                        Text="{loc:Loc BtnSave}"
-                        Command="{Binding SaveCommand}"
-                        IsVisible="{Binding IsLastStep}"/>
-            </Grid>
         </VerticalStackLayout>
-        </dialogs:StableHeightScrollView>
-    </Border>
-</dialogs:DialogContent>
+        </ScrollView>
+
+        <!-- Épinglée en bas de l'écran (2026-09-22, retour utilisateur - "on a plus la contrainte du
+             dialog") : dans une dialog, ce bloc défilait avec le reste du contenu (largeur de carte fixe,
+             toujours proche) ; en page pleine, un wizard aussi long que celui-ci laisserait les boutons
+             hors champ la plupart du temps s'ils restaient dans le ScrollView - troisième ligne de la
+             Grid racine plutôt qu'en toute fin du contenu défilant. -->
+        <BoxView Grid.Row="2" Style="{StaticResource ChapterDividerStyle}" VerticalOptions="Start"/>
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="10" Padding="16,12" BackgroundColor="{DynamicResource AppBackground}">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding ExitCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc LibBack}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding BackCommand}"
+                    IsEnabled="{Binding CanGoBack}"/>
+            <Button Grid.Column="2"
+                    Text="{loc:Loc LibNext}"
+                    Command="{Binding NextCommand}"
+                    IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
+            <Button Grid.Column="2"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding FinishCommand}"
+                    IsVisible="{Binding IsLastStep}"/>
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -6,7 +6,7 @@ namespace MordheimLedgerApp.Core.Rules;
 /// more mouths to feed). Rows = shards sold at once (1 to "8+", clamped), columns = warriors currently in
 /// the warband, bucketed (1-3/4-6/7-9/10-12/13-15/16+). Selling is never obligatory, and the shard count
 /// consulted here is whatever the player chooses to sell THIS time, not necessarily the warband's whole
-/// stock (Warband.WyrdstoneShards) - see EndOfGameDialogViewModel's Wyrdstone Sale step.</summary>
+/// stock (Warband.WyrdstoneShards) - see EndOfGamePageViewModel's Wyrdstone Sale step.</summary>
 public static class WyrdstoneSaleTable
 {
     // [shardsSold - 1, warriorCountBucket] -> net gold crowns. Source: book table, p.134.
@@ -36,7 +36,7 @@ public static class WyrdstoneSaleTable
 
     /// <summary>1-6, matching the table's 6 warrior-count columns in order (1-3/4-6/7-9/10-12/13-15/16+) -
     /// exposed separately (not just an internal GetNetGold detail) so the wizard's reference table
-    /// display (EndOfGameDialogViewModel.WyrdstoneSaleTableRows) can highlight the single cell that
+    /// display (EndOfGamePageViewModel.WyrdstoneSaleTableRows) can highlight the single cell that
     /// applies to the current warband, without duplicating these bucket boundaries in the UI layer.</summary>
     public static int GetWarriorCountBucketIndex(int warriorCount) => warriorCount switch
     {

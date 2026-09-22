@@ -9,14 +9,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Étape Exploration (Séquence d'après-bataille, "Revenus" - voir Core.Rules.ExplorationChart
 /// et Models.Library.ExplorationResult/ExplorationOutcome) : dés, sous-jet, test de caractéristique,
-/// objet bonus, validation. Extrait de EndOfGameDialogViewModel.cs (2026-08-18, refactor de découpage,
+/// objet bonus, validation. Extrait de EndOfGamePageViewModel.cs (2026-08-18, refactor de découpage,
 /// voir CLAUDE.md) après deux bugs réels d'ordonnancement trouvés dans cette zone (Boutique/bonus,
 /// statut Sick) - c'est le plus gros morceau du wizard, isolé pour que son périmètre soit visible d'un
 /// coup d'œil plutôt que noyé dans le reste. La résolution des règles elle-même (quelle Outcome
 /// s'applique) vit dans Core.Rules.ExplorationOutcomeResolver, testée ; ce fichier ne fait
 /// qu'orchestrer l'UI (quel champ est lié à quoi, quand un jet a été saisi) et appeler ce resolver.
 /// Aucun changement de comportement - pur déplacement de membres.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     // Un D6 par Héros survivant sans être hors de combat (jamais les Hommes de main) + 1D6 si la
     // bande a gagné, plafonné à 6 dés (voir Core.Rules.ExplorationChart - règle du livre confirmée
@@ -356,7 +356,7 @@ public partial class EndOfGameDialogViewModel
     {
         if (value?.Group is not null) EquippedHenchmanError = null;
         // Son coût d'équipement dispute désormais la même trésorerie que le reste du wizard (2026-09-03,
-        // voir EndOfGameDialogViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
+        // voir EndOfGamePageViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
         NotifyTreasuryChanged();
     }
 
@@ -597,6 +597,21 @@ public partial class EndOfGameDialogViewModel
     public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
 
     public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+
+    /// <summary>Wraps the Picker's actual items - même idiome que SentHeroOptions (voir sa doc) : un
+    /// "Aucun" pseudo-choix en premier (Hero null) plutôt qu'un Picker vide/placeholder, retour
+    /// utilisateur 2026-09-22 étendu à tous les combos du wizard hors Résultat.</summary>
+    public List<StatTestHeroOption> StatTestHeroOptions =>
+        new List<StatTestHeroOption> { new(Loc["LibNoneOption"], null) }
+            .Concat(StatTestEligibleHeroes.Select(h => new StatTestHeroOption(h.Name, h)))
+            .ToList();
+
+    public sealed record StatTestHeroOption(string DisplayName, WarriorOutcomeRow? Hero);
+
+    [ObservableProperty]
+    private StatTestHeroOption? selectedStatTestHeroOption;
+
+    partial void OnSelectedStatTestHeroOptionChanged(StatTestHeroOption? value) => StatTestHero = value?.Hero;
 
     /// <summary>Faux pour un test ciblant toujours le chef (ex. Taverne) - StatTestHero est alors
     /// renseigné automatiquement (voir ResolveExplorationResult), aucun choix du joueur nécessaire, donc
@@ -898,7 +913,9 @@ public partial class EndOfGameDialogViewModel
         ExplorationItemFoundValue = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
-        StatTestHero = null;
+        // Passe par SelectedStatTestHeroOption (pas StatTestHero directement) pour que le Picker affiche
+        // "Aucun" comme valeur par défaut plutôt qu'un placeholder vide - voir StatTestHeroOptions.
+        SelectedStatTestHeroOption = StatTestHeroOptions[0];
         StatTestRoll = string.Empty;
         StatTestError = null;
         ExplorationDoubleDie1 = string.Empty;
@@ -964,7 +981,7 @@ public partial class EndOfGameDialogViewModel
             ApplyResolvedOutcome(warbandOutcome);
 
         // Trésor Caché/Bande Massacrée : "roll for every item on the list separately" - sans effet (liste
-        // vide) pour toute autre forme, voir EndOfGameDialogViewModel.IndependentOutcomes.cs.
+        // vide) pour toute autre forme, voir EndOfGamePageViewModel.IndependentOutcomes.cs.
         SyncIndependentOutcomeEntries();
     }
 
@@ -1071,10 +1088,10 @@ public partial class EndOfGameDialogViewModel
     // "vous gagnez gratuitement les services d'un Mercenaire à Louer au choix (parmi ceux disponibles
     // pour votre bande) pour la durée de la prochaine bataille" - même catalogue éligible que l'étape
     // "Francs-Tireurs" plus loin dans le wizard (AvailableHiredSwordsToRecruit, voir
-    // EndOfGameDialogViewModel.HiredSwords.cs : déjà filtré par restriction de bande ET par "pas déjà
+    // EndOfGamePageViewModel.HiredSwords.cs : déjà filtré par restriction de bande ET par "pas déjà
     // activement engagé"), réutilisé tel quel plutôt que dupliqué - contrairement à ce recrutement
     // optionnel PAYANT là-bas, celui-ci est GRATUIT (HireCost jamais déduit, voir
-    // WarbandDetailViewModel.EndOfGame.ApplyExplorationOutcomeAsync) et pose Warrior.
+    // EndOfGamePageViewModel.Apply.ApplyExplorationOutcomeAsync) et pose Warrior.
     // HiredSwordUpkeepPrepaid pour que la toute PROCHAINE solde soit déjà couverte ("libre de charge
     // pour la prochaine bataille"). Limite acceptée : si le même type est ALSO choisi à l'étape
     // "Francs-Tireurs" plus loin dans ce même wizard (les deux lisent la même liste live, qui ne se met
@@ -1095,7 +1112,7 @@ public partial class EndOfGameDialogViewModel
 
     partial void OnSelectedFreeHiredSwordChanged(HiredSword? value) => FreeHiredSwordError = null;
 
-    /// <summary>0 ou 1 élément - le ChipListView de l'étape (voir EndOfGameDialog.xaml), même idiome que
+    /// <summary>0 ou 1 élément - le ChipListView de l'étape (voir EndOfGamePage.xaml), même idiome que
     /// HiredSwordEditDialogViewModel.MagicSchools pour un FK unique affiché comme une liste.</summary>
     public List<HiredSword> FreeHiredSwordChipItems => SelectedFreeHiredSword is { } h ? new List<HiredSword> { h } : new List<HiredSword>();
 
@@ -1214,13 +1231,13 @@ public partial class EndOfGameDialogViewModel
     /// ApplyExplorationOutcomeAsync (AddOneItemToInventoryAsync), en WarbandEquipment déjà résolus
     /// (ResolvedExplorationItem et consorts, jamais recalculé ici) plutôt qu'écrit en base : ce wizard
     /// n'écrit rien avant Terminer (voir la doc de classe globale), mais BuildStashPool
-    /// (EndOfGameDialogViewModel.Recruitment.cs) a besoin de savoir CE QUI SERA dans la réserve pour
+    /// (EndOfGamePageViewModel.Recruitment.cs) a besoin de savoir CE QUI SERA dans la réserve pour
     /// calculer correctement le top-up "réserve en priorité" d'un groupe d'Hommes de main existant - sans
     /// ce miroir, un objet trouvé PENDANT cette même partie n'était jamais compté disponible tant que
     /// Terminer n'avait pas tourné (retour utilisateur - "les items récupérés dans l'exploration chart ne
     /// sont pas comptabilisés dans le contexte du end of game pour le recrutement"). L'application réelle
     /// (ApplyExplorationOutcomeAsync) tourne de toute façon AVANT ApplyHenchmanRecruitmentAsync dans le
-    /// pipeline de Terminer (voir WarbandDetailViewModel.EndOfGame.SaveAsync) - le montant réellement
+    /// pipeline de Terminer (voir EndOfGamePageViewModel.Apply.SaveAsync) - le montant réellement
     /// débité à Terminer était déjà correct, seul cet aperçu en direct manquait. Toute divergence avec
     /// ApplyExplorationOutcomeAsync romprait cette cohérence aperçu/application réelle - garder les deux
     /// synchronisés.</summary>

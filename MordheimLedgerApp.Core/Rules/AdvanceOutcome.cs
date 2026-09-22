@@ -5,7 +5,7 @@ namespace MordheimLedgerApp.Core.Rules;
 public enum AdvanceKind
 {
     /// <summary>Pick a new Skill from an available table, or (Hero Wizard only) a new permanent Spell
-    /// instead - see EndOfGameDialogViewModel.Advance's skill-or-spell buttons.</summary>
+    /// instead - see EndOfGamePageViewModel.Advance's skill-or-spell buttons.</summary>
     Skill,
 
     /// <summary>+1 to one characteristic - which one, and how it's resolved, is given by ChoiceMode/
@@ -35,7 +35,7 @@ public enum CharacteristicChoiceMode
 }
 
 /// <summary>Structured result of resolving a Hero/Henchman Advance 2D6 roll against
-/// HeroAdvanceTable/HenchmanAdvanceTable - drives EndOfGameDialogViewModel.Advance's UI (which
+/// HeroAdvanceTable/HenchmanAdvanceTable - drives EndOfGamePageViewModel.Advance's UI (which
 /// sub-roll/choice/skill-or-spell affordance to show) and WarbandDetailViewModel.EndOfGame's actual
 /// stat mutation. Deliberately additive alongside the existing TryGetTextKey/IsSkill/RollDice (still
 /// used for the flavor-text subtitle) rather than replacing them.</summary>

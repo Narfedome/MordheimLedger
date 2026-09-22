@@ -11,25 +11,25 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// "C'est l'heure de payer !"/"Corruption de Marquand Volker &amp; Ulli Leitpold" vivaient ici (et sur
 /// l'étape Prisonniers) jusqu'au 2026-09-04, retour utilisateur : regroupées dans leur propre étape "Une
 /// Poignée d'Or" juste après celle-ci (StepKind.PairEngagement, voir
-/// EndOfGameDialogViewModel.PairEngagement.cs) - la Corruption s'apparente à un "hire", la Rétention à un
+/// EndOfGamePageViewModel.PairEngagement.cs) - la Corruption s'apparente à un "hire", la Rétention à un
 /// "upkeep", mais les deux sont mutuellement exclusives et partagent tout leur état, donc une seule étape
 /// à un seul emplacement plutôt que scindées en deux.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     /// <summary>Catalogue complet (non filtré) - permet de résoudre le profil (FeeKind/Upkeep/Name,
     /// jamais stockés sur Warrior lui-même) d'un Dramatis Persona déjà engagé, même principe que
-    /// _hiredSwordCatalog (EndOfGameDialogViewModel.HiredSwords.cs). Aussi consommé par
-    /// EndOfGameDialogViewModel.PairEngagement.cs (Une Poignée d'Or), même catalogue.</summary>
-    private readonly List<DramatisPersona> _dramatisPersonaCatalog;
+    /// _hiredSwordCatalog (EndOfGamePageViewModel.HiredSwords.cs). Aussi consommé par
+    /// EndOfGamePageViewModel.PairEngagement.cs (Une Poignée d'Or), même catalogue.</summary>
+    private List<DramatisPersona> _dramatisPersonaCatalog = new();
 
     public ObservableCollection<DramatisPersonaUpkeepEntry> DramatisPersonaUpkeepEntries { get; } = new();
 
     public bool HasDramatisPersonaeUpkeep => DramatisPersonaUpkeepEntries.Count > 0;
 
-    /// <summary>Peuplée une seule fois à la construction du dialog (voir EndOfGameDialogViewModel ctor) -
+    /// <summary>Peuplée une seule fois à la construction du dialog (voir EndOfGamePageViewModel ctor) -
     /// mêmes vrais guerriers déjà recrutés que BuildHiredSwordUpkeepEntries, filtrés à FeeKind.Gold avec
     /// un Upkeep renseigné, OU FeeKind.Wyrdstone (Bertha/Ulli &amp; Marquand n'apparaissent jamais ici -
-    /// leur propre paiement, "Où est l'Argent ?", est à part, voir EndOfGameDialogViewModel.
+    /// leur propre paiement, "Où est l'Argent ?", est à part, voir EndOfGamePageViewModel.
     /// PairEngagement.cs).</summary>
     private void BuildDramatisPersonaUpkeepEntries()
     {

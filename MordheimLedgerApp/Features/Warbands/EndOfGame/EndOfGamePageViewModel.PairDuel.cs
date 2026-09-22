@@ -8,7 +8,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Étape "Duel avec le meneur" (StepKind.PairDuel, 2026-09-01, retour utilisateur - "quitte à le
 /// mettre dans un step supplémentaire pour éviter une page trop longue") - sa propre étape, séparée de la
-/// carte "Une Poignée d'Or" qui la déclenche (voir IsPairDuelStep/EndOfGameDialogViewModel.
+/// carte "Une Poignée d'Or" qui la déclenche (voir IsPairDuelStep/EndOfGamePageViewModel.
 /// PairEngagement.cs), pour ne pas surcharger cette dernière. Affiche le profil comparatif du meneur de
 /// bande et du/des adversaire(s) - même principe que la comparaison "Ce guerrier"/"Le Gladiateur" de
 /// Vendu aux Fosses (WarriorOutcomeRow.ShowSoldToThePits), généralisé à N participants (voir
@@ -22,12 +22,12 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// partenaire n'afficherait qu'une seule carte, sans rien à changer dans ce fichier ni le XAML.
 ///
 /// **Position dans le wizard : toujours juste après l'étape "Une Poignée d'Or"** (voir
-/// EndOfGameDialogViewModel.Steps) - un seul point d'ancrage possible depuis que Corruption et Rétention
+/// EndOfGamePageViewModel.Steps) - un seul point d'ancrage possible depuis que Corruption et Rétention
 /// partagent la même étape (2026-09-04, retour utilisateur), plus besoin de deux positions distinctes
 /// comme avant ce regroupement (juste après Prisonniers si Corruption, juste après Dramatis Personae si
 /// Rétention - une première version l'insérait même à une position FIXE avant tout ça, juste avant
 /// Récapitulatif, trompeuse pour la Corruption qui se déclenchait tôt dans le wizard).</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     /// <summary>Le meneur de CETTE bande (Warrior.IsLeader) - null si mort/retraité/malade cette partie
     /// (absent de WarriorRows), auquel cas la carte reste simplement vide plutôt qu'une erreur bloquante,
@@ -36,7 +36,7 @@ public partial class EndOfGameDialogViewModel
 
     /// <summary>Le Dramatis Persona "A Fistful of Crowns" concerné par CETTE bande, quel que soit le sens
     /// (Corruption via _pairPersona si non possédé, Rétention via _ownedPairPersona si déjà possédé -
-    /// mutuellement exclusifs par bande, voir EndOfGameDialogViewModel.PairEngagement.cs) - toujours le
+    /// mutuellement exclusifs par bande, voir EndOfGamePageViewModel.PairEngagement.cs) - toujours le
     /// représentant "visible" du groupe (IsHiddenFromSearchPicker exclut un éventuel partenaire caché du
     /// picker de recherche, ex. Ulli).</summary>
     private DramatisPersona? DuelPrimaryPersona => _ownedPairPersona ?? _pairPersona;
@@ -65,7 +65,7 @@ public partial class EndOfGameDialogViewModel
     /// lui-même reste une simple liste d'ids catalogue (voir sa doc), jamais résolue sur le modèle - ce
     /// dictionnaire couvre tout le catalogue, pas seulement Marquand/Ulli (peu coûteux, réutilisable si
     /// besoin ailleurs).</summary>
-    private readonly IReadOnlyDictionary<int, List<EquipmentQuantityChip>> _dramatisPersonaStartingEquipmentById;
+    private IReadOnlyDictionary<int, List<EquipmentQuantityChip>> _dramatisPersonaStartingEquipmentById = new Dictionary<int, List<EquipmentQuantityChip>>();
 
     private List<EquipmentQuantityChip> ResolveDuelOpponentEquipment(DramatisPersona persona) => _dramatisPersonaStartingEquipmentById.GetValueOrDefault(persona.Id) ?? new();
 
@@ -92,10 +92,10 @@ public partial class EndOfGameDialogViewModel
     /// Vendu aux Fosses dont elle s'inspirait par erreur.</summary>
     private bool ValidatePairDuelStep() => true;
 
-    /// <summary>Même principe que WonPitFight (Vendu aux Fosses, EndOfGameDialogViewModel.Injury.cs) mais
+    /// <summary>Même principe que WonPitFight (Vendu aux Fosses, EndOfGamePageViewModel.Injury.cs) mais
     /// appliqué au chef de bande de CETTE session plutôt qu'à un guerrier hors de combat - décoché par
     /// défaut (défaite). Défaite = mort automatique du meneur (2026-09-03, retour utilisateur), pas de
-    /// jet à résoudre - voir WarbandDetailViewModel.EndOfGame.ApplyPairDuelIfNeededAsync.</summary>
+    /// jet à résoudre - voir EndOfGamePageViewModel.Apply.ApplyPairDuelIfNeededAsync.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDuelLost))]
     private bool wonDuel;
@@ -107,7 +107,7 @@ public partial class EndOfGameDialogViewModel
 }
 
 /// <summary>Un profil de duel (nom/stats/compétences via Persona, équipement déjà résolu à part - voir
-/// EndOfGameDialogViewModel.DuelOpponents's own doc). Type de haut niveau plutôt qu'imbriqué dans la
+/// EndOfGamePageViewModel.DuelOpponents's own doc). Type de haut niveau plutôt qu'imbriqué dans la
 /// classe du ViewModel, pour rester référençable depuis x:DataType en XAML sans la syntaxe de type
 /// imbriqué (peu fiable côté compilateur XAML source-gen de ce projet).</summary>
 public sealed record DuelOpponentDisplay(DramatisPersona Persona, List<EquipmentQuantityChip> Equipment);

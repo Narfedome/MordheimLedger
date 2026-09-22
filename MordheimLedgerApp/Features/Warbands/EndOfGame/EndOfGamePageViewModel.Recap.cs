@@ -5,20 +5,20 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// <summary>Étape "Récapitulatif" (pas une étape du livre - relecture avant d'Enregistrer) - étoffée le
 /// 2026-09-22 (retour utilisateur : "c'est censé être un récap de toutes les étapes qu'on a fait") pour
 /// couvrir toutes les décisions prises ailleurs dans ce même wizard, pas seulement Résultat/Exploration/
-/// Prisonniers/le résumé par guerrier (déjà dans EndOfGameDialog.xaml avant cette passe). Chaque section
+/// Prisonniers/le résumé par guerrier (déjà dans EndOfGamePage.xaml avant cette passe). Chaque section
 /// ci-dessous réutilise TELLES QUELLES des données déjà exposées par l'étape correspondante (aucune
 /// nouvelle logique de calcul, sauf ProjectedWarbandRating) - un simple aperçu en lecture seule, jamais
 /// une source de vérité pour Terminer.
 ///
 /// Réallouer l'équipement (dernière étape ajoutée) reste HORS de ce récap : c'est la seule qui ne garde
-/// aucune trace de ses déplacements (juste une mutation en mémoire, voir EndOfGameDialogViewModel.
+/// aucune trace de ses déplacements (juste une mutation en mémoire, voir EndOfGamePageViewModel.
 /// Reallocation.cs), retour utilisateur explicite - "on peut si besoin le faire plus tard".</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     public bool HasWyrdstoneSaleRecap => ShardsToSell > 0;
 
     /// <summary>Toujours affiché (le jet a lieu à chaque Fin de Partie, que la bande recrute ou non des
-    /// vétérans - voir EndOfGameDialogViewModel.Recruitment.cs's RemainingVeteranBudget's own doc).</summary>
+    /// vétérans - voir EndOfGamePageViewModel.Recruitment.cs's RemainingVeteranBudget's own doc).</summary>
     public string AvailableVeteransRecapDisplay => string.Format(Loc["EndOfGameRecapVeteransFormat"], VeteranExperienceRoll);
 
     public bool HasRareItemsRecap => RareItemsWithResults.Count > 0;
@@ -32,7 +32,7 @@ public partial class EndOfGameDialogViewModel
     public IEnumerable<string> DramatisPersonaeRecapLines => DramatisPersonaUpkeepEntries.Where(e => e.WillPay.HasValue)
         .Select(e => string.Format(e.WillPay == true ? Loc["EndOfGameRecapPaidFormat"] : Loc["EndOfGameRecapDismissedFormat"], e.DisplayName, e.UpkeepCostDisplay));
 
-    /// <summary>Corruption/Rétention/Duel sont mutuellement exclusifs (voir EndOfGameDialogViewModel.
+    /// <summary>Corruption/Rétention/Duel sont mutuellement exclusifs (voir EndOfGamePageViewModel.
     /// PairEngagement.cs/.PairDuel.cs) - au plus une des trois branches produit une ligne.</summary>
     public string? PairEngagementRecapDisplay
     {

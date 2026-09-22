@@ -55,7 +55,7 @@ public interface IDetailDialogService
     /// <summary>Always the plain full profile (stat line/equipment/skills) of THIS specific persona, even
     /// if it's one half of a pair (e.g. Ulli &amp; Marquand) - 2026-09-01, user request: the Codex must show
     /// the tapped persona's own sheet directly, not a pair summary. Recruitment-flavored callers
-    /// (DramatisPersonaViewModel.ShowDetails in selector mode, EndOfGameDialogViewModel.RareItems.
+    /// (DramatisPersonaViewModel.ShowDetails in selector mode, EndOfGamePageViewModel.RareItems.
     /// ShowCharacterDetail) call ShowDramatisPersonaPairDetailDialogAsync instead when the target is
     /// paired - see their own doc for the exact split.</summary>
     Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item);
@@ -162,7 +162,7 @@ public class DetailDialogService : IDetailDialogService
     /// s'il fait partie d'une paire - 2026-09-01, retour utilisateur : le Codex doit montrer directement
     /// la fiche du personnage tapé, pas le résumé de paire. Les appelants "contexte recrutement" (picker/
     /// wizard Fin de Partie) appellent explicitement ShowDramatisPersonaPairDetailDialogAsync à la place
-    /// quand ils veulent ce résumé - voir DramatisPersonaViewModel.ShowDetails/EndOfGameDialogViewModel.
+    /// quand ils veulent ce résumé - voir DramatisPersonaViewModel.ShowDetails/EndOfGamePageViewModel.
     /// RareItems.ShowCharacterDetail pour le clivage exact.</summary>
     public async Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item)
     {

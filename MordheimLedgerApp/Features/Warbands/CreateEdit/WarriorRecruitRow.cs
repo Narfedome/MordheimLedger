@@ -298,7 +298,7 @@ public partial class WarriorRecruitRow : ObservableObject
 
     /// <summary>Effectif déjà dans la bande AVANT cette étape, hors de toute portée de ce Row (0 par
     /// défaut - WarbandEditDialogViewModel n'y touche jamais, Count y contient déjà le roster existant via
-    /// les slots pré-remplis). Poussé par EndOfGameDialogViewModel.Recruitment (ExistingCountForArchetype)
+    /// les slots pré-remplis). Poussé par EndOfGamePageViewModel.Recruitment (ExistingCountForArchetype)
     /// juste après la construction, cas différent : les Héros/Hommes de main déjà recrutés vivent dans
     /// WarriorRows, pas dans des slots de CE Row, donc Count n'y démarre qu'à 0 (nouvelles recrues de cette
     /// session uniquement) - sans ce terme, CountDisplay montrerait "0/1" pour un type déjà au complet

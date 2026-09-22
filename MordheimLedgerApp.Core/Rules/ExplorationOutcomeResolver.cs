@@ -5,7 +5,7 @@ namespace MordheimLedgerApp.Core.Rules;
 /// <summary>
 /// Which ExplorationOutcome branch of an already-triggered ExplorationResult applies, given whatever
 /// the player has entered so far (a sub-roll, a stat test, a shared die also used for a bonus check).
-/// Extracted from EndOfGameDialogViewModel (2026-08-18) after two bugs slipped through undetected there
+/// Extracted from EndOfGamePageViewModel (2026-08-18) after two bugs slipped through undetected there
 /// - this logic is real rules resolution, not UI orchestration, and belongs where MordheimLedgerApp.Tests
 /// can actually reach it (same "rules-to-Core" precedent as SeriousInjuryTable/HeroAdvanceTable, see
 /// CLAUDE.md). ExplorationChart (dice count/multiples/shards) resolves WHICH ExplorationResult a roll

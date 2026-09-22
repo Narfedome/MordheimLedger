@@ -32,7 +32,7 @@ public class EquipmentPick
     /// WarriorNameSlot's in-memory Equipment list.</summary>
     public bool IsFree { get; set; }
 
-    /// <summary>Set true by the caller (EndOfGameDialogViewModel.Recruitment.AddRecruitEquipment) when
+    /// <summary>Set true by the caller (EndOfGamePageViewModel.Recruitment.AddRecruitEquipment) when
     /// this pick was already sitting in the band's réserve (unassigned WarbandEquipment, from before this
     /// same session - see BuildAvailableReservePool) rather than bought fresh - 2026-09-05, retour
     /// utilisateur "assignation des équipements de la stash" plutôt qu'un achat systématique au picker.
@@ -40,7 +40,7 @@ public class EquipmentPick
     /// gardés séparés pour ne pas mélanger deux raisons différentes d'être gratuit.</summary>
     public bool FromReserve { get; set; }
 
-    /// <summary>Set true by the caller (EndOfGameDialogViewModel.Reallocation) when this pick represents
+    /// <summary>Set true by the caller (EndOfGamePageViewModel.Reallocation) when this pick represents
     /// an item moved for free from an existing Hero or the reserve via the "Réallouer l'équipement" step
     /// (livre des règles - "Swap equipment between models as desired") - never a new purchase. Distinct
     /// from FromReserve (which means "consumed from the band's shared stash pool during Recruitment") and

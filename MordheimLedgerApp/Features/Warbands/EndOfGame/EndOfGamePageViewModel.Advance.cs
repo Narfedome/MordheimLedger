@@ -7,12 +7,12 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Étape Progression (une carte par guerrier ayant franchi un palier d'XP, voir la doc de
 /// classe du fichier principal) - validation + commandes de jet + choix de compétence. Extrait de
-/// EndOfGameDialogViewModel.cs (2026-08-18, refactor de découpage, voir CLAUDE.md) : aucun changement
+/// EndOfGamePageViewModel.cs (2026-08-18, refactor de découpage, voir CLAUDE.md) : aucun changement
 /// de comportement, pur déplacement de membres.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     /// <summary>Prend directement la collection à valider (AdvanceRolls ou ExplorationAdvanceRolls, voir
-    /// EndOfGameDialogViewModel.CurrentAdvanceRolls) plutôt qu'un WarriorOutcomeRow - le même guerrier
+    /// EndOfGamePageViewModel.CurrentAdvanceRolls) plutôt qu'un WarriorOutcomeRow - le même guerrier
     /// peut traverser cette étape deux fois (voir WizardStep.IsExplorationAdvance), chaque passage ne
     /// devant valider que SES propres jets.</summary>
     private bool ValidateAdvanceStep(IEnumerable<AdvanceRollEntry> rolls)

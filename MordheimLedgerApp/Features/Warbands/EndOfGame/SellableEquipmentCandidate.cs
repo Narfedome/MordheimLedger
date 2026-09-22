@@ -16,7 +16,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// facturé du tout). Un objet TROUVÉ via Exploration cette même partie, en revanche, EST vendable : retour
 /// utilisateur 2026-09-21 - "j'avais fait un jet d'exploration qui m'a permis de trouver une épée et une
 /// dague ornée. dans la vente, les 2 objets ne sont pas apparents" - une trouvaille rejoint la réserve de
-/// la bande (voir EndOfGameDialogViewModel.Recruitment.cs's BuildStashPool, qui la traite déjà comme telle
+/// la bande (voir EndOfGamePageViewModel.Recruitment.cs's BuildStashPool, qui la traite déjà comme telle
 /// pour le Recrutement) donc doit être vendable au même titre que le reste de la réserve, cohérent avec le
 /// livre des règles ("trade in weapons and equipment... swapped around the warband").
 ///
@@ -26,7 +26,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// réduire ou non") : SelectedQuantity (stepper sur SellEquipmentSelectorPage) va de 0 à OwnedQuantity,
 /// jamais au-delà - contrairement au stepper d'achat standard (EquipmentItemView.xaml), qui n'a pas de
 /// plafond réel côté catalogue. Vendre moins que OwnedQuantity laisse le reste en place (réserve ou
-/// porté) ; voir WarbandDetailViewModel.EndOfGame.ApplyEquipmentTradingAsync pour la réduction de quantité
+/// porté) ; voir EndOfGamePageViewModel.Apply.ApplyEquipmentTradingAsync pour la réduction de quantité
 /// à Terminer (supprime la ligne existante puis recrée le reliquat, aucune méthode de service dédiée à la
 /// réduction partielle n'existe).</summary>
 public partial class SellableEquipmentCandidate : ObservableObject
@@ -38,7 +38,7 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// <summary>True pour un objet trouvé via Exploration cette même partie (PendingExplorationStashItems) -
     /// il n'existe pas encore de WarbandEquipment réel au moment de construire ce candidat,
     /// ApplyExplorationOutcomeAsync ne le crée qu'à Terminer (avant ApplyEquipmentTradingAsync dans le
-    /// pipeline - voir WarbandDetailViewModel.EndOfGame.SaveAsync). Compte comme réserve (IsFromStash) pour
+    /// pipeline - voir EndOfGamePageViewModel.Apply.SaveAsync). Compte comme réserve (IsFromStash) pour
     /// BuildStashPool/l'affichage, mais sa suppression à Terminer doit re-résoudre le vrai id fraîchement
     /// créé plutôt que réutiliser un id connu à la construction de ce candidat - voir
     /// ApplyEquipmentTradingAsync.</summary>
@@ -57,7 +57,7 @@ public partial class SellableEquipmentCandidate : ObservableObject
     public SpecialRule? MaterialRule { get; }
 
     /// <summary>Combien de cette ligne sont disponibles à la vente dans CE picker (stock réel moins ce qui
-    /// est déjà dans PendingSales pour cette même source - voir EndOfGameDialogViewModel.EquipmentTrading.
+    /// est déjà dans PendingSales pour cette même source - voir EndOfGamePageViewModel.EquipmentTrading.
     /// cs's BuildSellableCandidates, reconstruite à chaque ouverture du picker) - plafond du stepper
     /// SelectedQuantity, jamais dépassable.</summary>
     public int OwnedQuantity { get; }

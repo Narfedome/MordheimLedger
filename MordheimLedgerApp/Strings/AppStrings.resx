@@ -471,6 +471,9 @@
   <data name="LibNext" xml:space="preserve">
     <value>Suivant</value>
   </data>
+  <data name="LibNoneOption" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
   <data name="WarbandArchetypeNamePh" xml:space="preserve">
     <value>Nom de la bande</value>
   </data>
@@ -898,6 +901,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameNoWarriors" xml:space="preserve">
     <value>Aucun guerrier actif dans cette bande.</value>
+  </data>
+  <data name="EndOfGameExitConfirmTitle" xml:space="preserve">
+    <value>Abandonner cette Fin de Partie ?</value>
+  </data>
+  <data name="EndOfGameExitConfirmMessage" xml:space="preserve">
+    <value>Rien n'est encore enregistré. Quitter maintenant annule toute la saisie de ce wizard.</value>
   </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Résultat</value>

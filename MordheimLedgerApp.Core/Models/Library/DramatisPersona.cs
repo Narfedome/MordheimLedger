@@ -142,7 +142,7 @@ public class DramatisPersona
     /// re-describing it in prose. False for every other character.
     ///
     /// Data-only, NOT wired into the End of Game wizard's "Personnage spécial" search (RareItemSearchEntry/
-    /// EndOfGameDialogViewModel.RareItems.cs) - realized 2026-08-31, in conversation with the user, that it
+    /// EndOfGamePageViewModel.RareItems.cs) - realized 2026-08-31, in conversation with the user, that it
     /// can't be: the Rating gap needs the NEXT battle's opponent, which isn't known yet at the end of the
     /// CURRENT one. This check belongs to a future "Start of Game" flow (matching an opponent, comparing
     /// Ratings) that doesn't exist in the app yet - not a gap in the End of Game wizard to fill later, a

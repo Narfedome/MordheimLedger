@@ -16,7 +16,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 ///
 /// **Mécanisme** (le point délicat - voir aussi ReallocatableItem.cs) : une recrue de cette session
 /// n'est qu'un brouillon (WarriorNameSlot/EquipmentPick, jamais un vrai Warrior avant Terminer - voir
-/// EndOfGameDialogViewModel.Recruitment.cs's doc de classe), alors qu'un Héros déjà actif et la réserve
+/// EndOfGamePageViewModel.Recruitment.cs's doc de classe), alors qu'un Héros déjà actif et la réserve
 /// pré-partie sont de VRAIES lignes DB pas encore touchées par ce wizard. Ce wizard ne persiste jamais
 /// rien avant Terminer, donc "déplacer" un objet réel reste purement en mémoire jusque-là :
 /// - Retirer d'un Héros existant/de la Réserve = simple .Remove() sur la liste réelle (l'objet retiré
@@ -30,13 +30,13 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// - Ajouter/retirer chez une recrue = simple Add/Remove sur son EquipmentPick.Equipment brouillon,
 ///   déjà le mécanisme d'AddRecruitEquipment/RemoveRecruitEquipment - rien de spécial à faire à
 ///   Terminer pour ce côté, ApplyRecruitmentAsync (déjà dans le pipeline) traite ce brouillon tel quel.</summary>
-public partial class EndOfGameDialogViewModel
+public partial class EndOfGamePageViewModel
 {
     private int _nextSyntheticReallocationId = -1;
 
     /// <summary>Copie de travail de la réserve pré-partie - JAMAIS _warbandInventory directement, qui
     /// doit rester un instantané figé pour Captives/BuildStashPool/BuildSellableCandidates. Peuplée une
-    /// seule fois au constructeur principal (voir son appel dans EndOfGameDialogViewModel.cs).</summary>
+    /// seule fois au constructeur principal (voir son appel dans EndOfGamePageViewModel.cs).</summary>
     public List<WarbandEquipment> ReallocationReserve { get; private set; } = new();
 
     /// <summary>Instantané des ids WarbandEquipment RÉELLEMENT en base (= _warbandInventory, jamais muté)

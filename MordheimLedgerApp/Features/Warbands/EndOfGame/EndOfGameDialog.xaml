@@ -2557,6 +2557,7 @@
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
+                <Label Text="{Binding ProjectedWarbandRatingDisplay}" FontAttributes="Bold"/>
                 <Label Text="{Binding SummaryCapturedEnemiesText}" IsVisible="{Binding HasCapturedEnemies}"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="4">
                     <BindableLayout.ItemTemplate>
@@ -2564,6 +2565,120 @@
                             <Label Text="{Binding SummaryText}" FontSize="13"/>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <!-- Sections ajoutées le 2026-09-22 (retour utilisateur - "un récap de toutes les étapes
+                     qu'on a fait") : chacune réutilise telle quelle une donnée déjà exposée par l'étape
+                     correspondante, voir EndOfGameDialogViewModel.Recap.cs. Réallouer l'équipement reste
+                     hors de ce récap (aucune trace de ses déplacements gardée pour l'instant). -->
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasWyrdstoneSaleRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapWyrdstoneHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding WyrdstoneSaleValueDisplay}" FontSize="13"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc EndOfGameRecapVeteransHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding AvailableVeteransRecapDisplay}" FontSize="13"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasRareItemsRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapRareItemsHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RareItemsRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasDramatisPersonaeRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapDramatisPersonaeHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding DramatisPersonaeRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding PairEngagementRecapDisplay, Converter={StaticResource IsNotNullConverter}}">
+                    <Label Text="{loc:Loc EndOfGameRecapPairHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Text="{Binding PairEngagementRecapDisplay}" FontSize="13"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasHiredSwordsRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapHiredSwordsHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding HiredSwordsRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasDismissedWarriorsRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapDismissedHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding DismissedWarriorsRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <components:ChipListView HeaderText="{loc:Loc EndOfGameDismissRecoveredEquipmentHeading}"
+                                              ItemsSource="{Binding RecoveredDismissedEquipmentChips}"
+                                              IconGlyph="{x:Static icons:SolidFont.BoxOpen}"
+                                              HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasEquipmentTradingRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapEquipmentTradingHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding EquipmentTradingPurchasedRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding EquipmentTradingSoldRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingNetTotalLabel}" FontSize="12" FontAttributes="Bold"/>
+                        <Label Grid.Column="1" Text="{Binding EquipmentTradingNetTotal}" FontSize="12" FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasRecruitmentRecap}">
+                    <Label Text="{loc:Loc EndOfGameRecapRecruitmentHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHeroesRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHenchmenRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding VeteranTopUpsRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </VerticalStackLayout>
 

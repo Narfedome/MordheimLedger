@@ -1202,6 +1202,75 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRecapHeading" xml:space="preserve">
     <value>Summary</value>
   </data>
+  <data name="EndOfGameRecapProjectedRatingFormat" xml:space="preserve">
+    <value>Projected warband rating: {0}</value>
+  </data>
+  <data name="EndOfGameRecapWyrdstoneHeading" xml:space="preserve">
+    <value>Wyrdstone sale</value>
+  </data>
+  <data name="EndOfGameRecapVeteransHeading" xml:space="preserve">
+    <value>Availability of veterans</value>
+  </data>
+  <data name="EndOfGameRecapVeteransFormat" xml:space="preserve">
+    <value>Roll: {0} XP</value>
+  </data>
+  <data name="EndOfGameRecapRareItemsHeading" xml:space="preserve">
+    <value>Rare items</value>
+  </data>
+  <data name="EndOfGameRecapRareCharacterFormat" xml:space="preserve">
+    <value>{0} found: {1}</value>
+  </data>
+  <data name="EndOfGameRecapRareItemFormat" xml:space="preserve">
+    <value>{0} bought: {1} ({2} gc)</value>
+  </data>
+  <data name="EndOfGameRecapDramatisPersonaeHeading" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="EndOfGameRecapPaidFormat" xml:space="preserve">
+    <value>{0}: paid ({1})</value>
+  </data>
+  <data name="EndOfGameRecapDismissedFormat" xml:space="preserve">
+    <value>{0}: dismissed</value>
+  </data>
+  <data name="EndOfGameRecapPairHeading" xml:space="preserve">
+    <value>A Handful of Gold</value>
+  </data>
+  <data name="EndOfGameRecapPairDuelFormat" xml:space="preserve">
+    <value>Duel: {0}</value>
+  </data>
+  <data name="EndOfGameRecapPairCorruptionFormat" xml:space="preserve">
+    <value>{0}: corruption of {1} gc</value>
+  </data>
+  <data name="EndOfGameRecapPairRetentionFormat" xml:space="preserve">
+    <value>{0}: retention of {1} gc</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordsHeading" xml:space="preserve">
+    <value>Hired Swords</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordPrepaidFormat" xml:space="preserve">
+    <value>{0}: upkeep already paid</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordHiredFormat" xml:space="preserve">
+    <value>Hired: {0} ({1} gc)</value>
+  </data>
+  <data name="EndOfGameRecapDismissedHeading" xml:space="preserve">
+    <value>Dismissed</value>
+  </data>
+  <data name="EndOfGameRecapDismissedWarriorFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="EndOfGameRecapEquipmentTradingHeading" xml:space="preserve">
+    <value>Buy/Sell Equipment</value>
+  </data>
+  <data name="EndOfGameRecapRecruitmentHeading" xml:space="preserve">
+    <value>Recruitment</value>
+  </data>
+  <data name="EndOfGameRecapHenchmanGroupFormat" xml:space="preserve">
+    <value>{0} ×{1}</value>
+  </data>
+  <data name="EndOfGameRecapVeteranTopUpFormat" xml:space="preserve">
+    <value>{0}: +{1}</value>
+  </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0}: no change</value>
   </data>

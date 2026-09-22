@@ -1202,6 +1202,75 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRecapHeading" xml:space="preserve">
     <value>Récapitulatif</value>
   </data>
+  <data name="EndOfGameRecapProjectedRatingFormat" xml:space="preserve">
+    <value>Valeur de bande projetée : {0}</value>
+  </data>
+  <data name="EndOfGameRecapWyrdstoneHeading" xml:space="preserve">
+    <value>Vente de pierre magique</value>
+  </data>
+  <data name="EndOfGameRecapVeteransHeading" xml:space="preserve">
+    <value>Disponibilité des vétérans</value>
+  </data>
+  <data name="EndOfGameRecapVeteransFormat" xml:space="preserve">
+    <value>Jet : {0} PX</value>
+  </data>
+  <data name="EndOfGameRecapRareItemsHeading" xml:space="preserve">
+    <value>Objets rares</value>
+  </data>
+  <data name="EndOfGameRecapRareCharacterFormat" xml:space="preserve">
+    <value>{0} a trouvé : {1}</value>
+  </data>
+  <data name="EndOfGameRecapRareItemFormat" xml:space="preserve">
+    <value>{0} a acheté : {1} ({2} CO)</value>
+  </data>
+  <data name="EndOfGameRecapDramatisPersonaeHeading" xml:space="preserve">
+    <value>Dramatis Personae</value>
+  </data>
+  <data name="EndOfGameRecapPaidFormat" xml:space="preserve">
+    <value>{0} : payé ({1})</value>
+  </data>
+  <data name="EndOfGameRecapDismissedFormat" xml:space="preserve">
+    <value>{0} : renvoyé</value>
+  </data>
+  <data name="EndOfGameRecapPairHeading" xml:space="preserve">
+    <value>Une Poignée d'Or</value>
+  </data>
+  <data name="EndOfGameRecapPairDuelFormat" xml:space="preserve">
+    <value>Duel : {0}</value>
+  </data>
+  <data name="EndOfGameRecapPairCorruptionFormat" xml:space="preserve">
+    <value>{0} : corruption de {1} CO</value>
+  </data>
+  <data name="EndOfGameRecapPairRetentionFormat" xml:space="preserve">
+    <value>{0} : rétention de {1} CO</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordsHeading" xml:space="preserve">
+    <value>Francs-Tireurs</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordPrepaidFormat" xml:space="preserve">
+    <value>{0} : solde déjà réglée</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordHiredFormat" xml:space="preserve">
+    <value>Engagé : {0} ({1} CO)</value>
+  </data>
+  <data name="EndOfGameRecapDismissedHeading" xml:space="preserve">
+    <value>Renvoyés</value>
+  </data>
+  <data name="EndOfGameRecapDismissedWarriorFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="EndOfGameRecapEquipmentTradingHeading" xml:space="preserve">
+    <value>Achat/Vente d'équipement</value>
+  </data>
+  <data name="EndOfGameRecapRecruitmentHeading" xml:space="preserve">
+    <value>Recrutement</value>
+  </data>
+  <data name="EndOfGameRecapHenchmanGroupFormat" xml:space="preserve">
+    <value>{0} ×{1}</value>
+  </data>
+  <data name="EndOfGameRecapVeteranTopUpFormat" xml:space="preserve">
+    <value>{0} : +{1}</value>
+  </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0} : aucun changement</value>
   </data>

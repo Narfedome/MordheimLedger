@@ -34,20 +34,27 @@ public partial class EndOfGamePageViewModel
 {
     private int _nextSyntheticReallocationId = -1;
 
-    /// <summary>Copie de travail de la réserve pré-partie - JAMAIS _warbandInventory directement, qui
-    /// doit rester un instantané figé pour Captives/BuildStashPool/BuildSellableCandidates. Peuplée une
-    /// seule fois au constructeur principal (voir son appel dans EndOfGamePageViewModel.cs).</summary>
-    public List<WarbandEquipment> ReallocationReserve { get; private set; } = new();
+    /// <summary>Copie de travail de la réserve pré-partie - depuis l'unification de la réserve
+    /// (2026-09-23), seedée depuis _originalReserveSnapshot (JAMAIS _reserve directement) : Réallouer
+    /// doit rester insensible aux ventes de CETTE session (limite connue acceptée, voir
+    /// EnsureReallocationReserveExtrasAdded's own doc - "un objet vendu puis encore visible ici ne ferait
+    /// qu'un déplacement sans effet"), alors que _reserve EST réduite en direct par chaque vente
+    /// confirmée. Peuplée une seule fois au constructeur principal (voir son appel dans
+    /// EndOfGamePageViewModel.cs) - des COPIES indépendantes de _originalReserveSnapshot, jamais les
+    /// mêmes instances (dont Quantity ne doit justement jamais changer, voir sa propre doc).</summary>
+    public List<ReserveLine> ReallocationReserve { get; private set; } = new();
 
-    /// <summary>Instantané des ids WarbandEquipment RÉELLEMENT en base (= _warbandInventory, jamais muté)
-    /// - même rôle que WarriorOutcomeRow.OriginalEquipmentIds côté Réserve, pour
+    /// <summary>Instantané des SourceId RÉELLEMENT en base (= _originalReserveSnapshot, jamais muté) -
+    /// même rôle que WarriorOutcomeRow.OriginalEquipmentIds côté Réserve, pour
     /// ApplyEquipmentReallocationAsync.</summary>
     public IReadOnlyCollection<int> OriginalReserveEquipmentIds { get; private set; } = Array.Empty<int>();
 
     private void InitializeReallocation()
     {
-        ReallocationReserve = _warbandInventory.ToList();
-        OriginalReserveEquipmentIds = _warbandInventory.Select(w => w.Id).ToList();
+        ReallocationReserve = _originalReserveSnapshot
+            .Select(l => new ReserveLine(l.Item, l.MaterialRule, l.Quantity, l.Origin, l.SourceId, l.FoundValueOverride))
+            .ToList();
+        OriginalReserveEquipmentIds = _originalReserveSnapshot.Select(l => l.SourceId!.Value).ToList();
     }
 
     private bool _reallocationReserveExtrasAdded;
@@ -62,16 +69,19 @@ public partial class EndOfGamePageViewModel
     /// <summary>Complète ReallocationReserve avec ce que les étapes précédentes de ce même wizard
     /// (Exploration, Renvoyer, Achat) ont ajouté à la réserve - jamais fait au constructeur
     /// (InitializeReallocation), qui tourne bien avant qu'aucune de ces étapes n'ait eu lieu, seulement à
-    /// la première visite RÉELLE de cette étape (appelée en tête de ReallocationCarriers). Id = 0
-    /// (délibérément, ni id réel positif ni id synthétique négatif) pour ces entrées : elles seront de
-    /// VRAIES lignes WarbandEquipment d'ici Terminer - ApplyExplorationOutcomeAsync/ApplyDismissalsAsync/
+    /// la première visite RÉELLE de cette étape (appelée en tête de ReallocationCarriers). SourceId null
+    /// (ni réel positif ni synthétique négatif) pour ces entrées : elles seront de VRAIES lignes
+    /// WarbandEquipment d'ici Terminer - ApplyExplorationOutcomeAsync/ApplyDismissalsAsync/
     /// ApplyEquipmentTradingAsync les créent chacune à leur tour, plus tôt dans le pipeline qu'
     /// ApplyEquipmentReallocationAsync - donc jamais recréées ici si le joueur ne les touche pas ; si
     /// déplacées ailleurs, ApplyEquipmentReallocationAsync les retrouve par une requête fraîche (même
-    /// idiome que SellableEquipmentCandidate.IsFromExploration/IsFromDismissal) plutôt que par id.
-    /// N'inclut PAS ce qui a déjà été vendu (Vente) : limite connue acceptée, un objet vendu puis encore
-    /// visible ici ne ferait qu'un déplacement sans effet (suppression silencieuse d'une ligne déjà
-    /// absente), jamais de doublon ni d'erreur.</summary>
+    /// idiome que SellableEquipmentCandidate.IsFromExploration/IsFromDismissal) plutôt que par id. Achat
+    /// (PurchasedReserveItems) fusionné ici en extra AUSSI, malgré rejoignant déjà _reserve en direct
+    /// (EndOfGamePageViewModel.EquipmentTrading.cs) - _reserve n'est délibérément pas la source de
+    /// ReallocationReserve (voir sa propre doc), donc un Achat doit être re-fusionné ici comme les deux
+    /// autres. N'inclut PAS ce qui a déjà été vendu (Vente) : limite connue acceptée, un objet vendu puis
+    /// encore visible ici ne ferait qu'un déplacement sans effet (suppression silencieuse d'une ligne
+    /// déjà absente), jamais de doublon ni d'erreur.</summary>
     private void EnsureReallocationReserveExtrasAdded()
     {
         if (_reallocationReserveExtrasAdded) return;
@@ -79,12 +89,12 @@ public partial class EndOfGamePageViewModel
 
         foreach (var (item, materialRule, quantity) in PendingExplorationStashItems().Concat(PendingDismissedEquipment()))
         {
-            ReallocationReserve.Add(new WarbandEquipment { Item = item, MaterialRule = materialRule, Quantity = quantity });
+            ReallocationReserve.Add(new ReserveLine(item, materialRule, quantity, ReserveLineOrigin.Exploration));
             _reallocationReserveExtrasOriginal.Add((item, materialRule, quantity));
         }
         foreach (var pick in PurchasedReserveItems)
         {
-            ReallocationReserve.Add(new WarbandEquipment { Item = pick.Item, MaterialRule = pick.MaterialRule, Quantity = 1 });
+            ReallocationReserve.Add(new ReserveLine(pick.Item, pick.MaterialRule, 1, ReserveLineOrigin.Purchase));
             _reallocationReserveExtrasOriginal.Add((pick.Item, pick.MaterialRule, 1));
         }
     }
@@ -143,7 +153,7 @@ public partial class EndOfGamePageViewModel
                 item.Carrier.NewRecruitSlot!.Equipment.Remove(item.DraftPickSource!);
                 break;
             case ReallocationCarrierKind.Reserve:
-                ReallocationReserve.Remove(item.WarbandEquipmentSource!);
+                ReallocationReserve.Remove(item.ReserveLineSource!);
                 break;
         }
     }
@@ -171,14 +181,7 @@ public partial class EndOfGamePageViewModel
                     destination.NewRecruitSlot!.Equipment.Add(new EquipmentPick(item.Item, item.MaterialRule) { IsReallocated = true });
                 break;
             case ReallocationCarrierKind.Reserve:
-                ReallocationReserve.Add(new WarbandEquipment
-                {
-                    Id = _nextSyntheticReallocationId--,
-                    Item = item.Item,
-                    MaterialRule = item.MaterialRule,
-                    Quantity = item.Quantity,
-                    FoundValueOverride = item.FoundValueOverride
-                });
+                ReallocationReserve.Add(new ReserveLine(item.Item, item.MaterialRule, item.Quantity, ReserveLineOrigin.Purchase, _nextSyntheticReallocationId--, item.FoundValueOverride));
                 break;
         }
     }

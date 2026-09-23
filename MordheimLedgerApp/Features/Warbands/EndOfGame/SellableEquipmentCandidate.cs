@@ -31,7 +31,17 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// réduction partielle n'existe).</summary>
 public partial class SellableEquipmentCandidate : ObservableObject
 {
-    public WarbandEquipment? StashItem { get; }
+    /// <summary>Réserve pré-partie/Achat de CETTE session (ReserveCollection, 2026-09-23 - unification de
+    /// la réserve) - remplace l'ancien StashItem (WarbandEquipment). Confirmer la vente d'un candidat
+    /// construit depuis une ReserveLine retire directement la quantité vendue de CETTE ligne (voir
+    /// EndOfGamePageViewModel.EquipmentTrading.cs's AddSaleEquipment) - contrairement à
+    /// IsFromExploration/IsFromDismissal (toujours en attente d'une vraie ligne DB avant Terminer),
+    /// ReserveSource référence une ligne DÉJÀ dans _reserve (réelle - SourceId renseigné - ou déjà
+    /// "réelle en session" - un Achat de cette partie), donc jamais besoin de la retrouver par une requête
+    /// fraîche à Terminer pour la portion réserve. RemoveSaleEquipment (annuler une vente confirmée avant
+    /// Terminer) restaure la quantité sur cette même ligne (ReserveCollection.RestoreLine).</summary>
+    public ReserveLine? ReserveSource { get; }
+
     public WarriorEquipment? CarriedItem { get; }
     public string? CarrierName { get; }
 
@@ -104,18 +114,17 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// jamais pour tout le reste (multiplicateur toujours 1).</summary>
     public string UnitSellPriceDisplay => $"{EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier) * SaleQuantityMultiplier} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
 
-    /// <summary>Réserve (stash pré-partie OU trouvaille d'Exploration cette partie, les deux rejoignent le
-    /// même pool - voir BuildStashPool) plutôt que porté par un guerrier.</summary>
+    /// <summary>Réserve (ReserveSource pré-partie/Achat OU trouvaille d'Exploration/renvoi cette partie)
+    /// plutôt que porté par un guerrier.</summary>
     public bool IsFromStash => CarriedItem is null;
 
-    /// <summary>Identité stable de la ligne source (IsFromStash + SourceId forme une clé unique, un
-    /// WarbandEquipment.Id et un WarriorEquipment.Id vivent dans deux tables différentes donc peuvent
-    /// coïncider numériquement sans IsFromStash pour les distinguer) - synthétisé négatif (jamais un vrai
-    /// id positif) pour une trouvaille d'Exploration ou un renvoi, qui n'en ont pas encore un réel. Les
-    /// deux formules synthétiques restent distinctes (offset +1 vs +2) pour qu'une trouvaille et un renvoi
-    /// portant sur le même (Item, MaterialRule) cette même partie ne se fassent jamais passer pour la même
-    /// source.</summary>
-    public int SourceId => StashItem?.Id ?? CarriedItem?.Id
+    /// <summary>Identité stable de la ligne source, pour le "déjà en attente de vente" de
+    /// BuildSellableCandidates (voir EndOfGamePageViewModel.EquipmentTrading.cs) - UNIQUEMENT pertinent
+    /// pour Exploration/Dismissal/Carried : un candidat ReserveSource n'en a plus besoin depuis
+    /// l'unification de la réserve (2026-09-23) - vendre décrémente directement sa ReserveLine, donc
+    /// _reserve.Lines reflète déjà toute vente précédente sans qu'il faille la retrancher ici (jamais lu
+    /// pour cette provenance).</summary>
+    public int SourceId => CarriedItem?.Id
         ?? (IsFromDismissal ? SyntheticDismissalSourceId(Item.Id, MaterialRule?.Id) : SyntheticExplorationSourceId(Item.Id, MaterialRule?.Id));
 
     public static int SyntheticExplorationSourceId(int itemId, int? materialRuleId) => -(itemId * 1_000_003 + (materialRuleId ?? 0) + 1);
@@ -150,14 +159,14 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// Core.Rules.EquipmentPricing.CalculateSellPrice.</summary>
     public int SellPrice => EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier) * TotalPhysicalQuantitySold;
 
-    public SellableEquipmentCandidate(WarbandEquipment stashItem, int ownedQuantity)
+    public SellableEquipmentCandidate(ReserveLine reserveLine, int ownedQuantity)
     {
-        StashItem = stashItem;
-        Item = stashItem.Item;
-        MaterialRule = stashItem.MaterialRule;
+        ReserveSource = reserveLine;
+        Item = reserveLine.Item;
+        MaterialRule = reserveLine.MaterialRule;
         OwnedQuantity = ownedQuantity;
         SaleQuantityMultiplier = 1;
-        NameDisplay = stashItem.NameDisplay;
+        NameDisplay = reserveLine.NameDisplay;
     }
 
     public SellableEquipmentCandidate(WarriorEquipment carriedItem, string carrierName, int ownedQuantity, int saleQuantityMultiplier = 1)

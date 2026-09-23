@@ -4,7 +4,6 @@
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
-             xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.PairEngagementStepView"
              x:DataType="local:EndOfGamePageViewModel">
             <!-- Étape : Une Poignée d'Or (2026-09-04, retour utilisateur - "il faut la mettre au moment du
@@ -77,7 +76,7 @@
                                FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
                         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SeizedEquipmentItems}">
                             <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:WarbandEquipment">
+                                <DataTemplate x:DataType="local:ReserveLine">
                                     <components:ChipView Item="{Binding .}"
                                                           IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                           IconFontFamily="RpgAwesome"/>
@@ -100,7 +99,7 @@
                                FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
                         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SeizedEquipmentItems}">
                             <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="models:WarbandEquipment">
+                                <DataTemplate x:DataType="local:ReserveLine">
                                     <components:ChipView Item="{Binding .}"
                                                           IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                           IconFontFamily="RpgAwesome"/>

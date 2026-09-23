@@ -955,9 +955,9 @@ public partial class EndOfGamePageViewModel
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
             }
             else if (entry.IsPayingWithAlternativeItem
-                && _warbandInventory.FirstOrDefault(w => w.Item.Id == persona.AlternativePaymentItemId) is { } paymentStash)
+                && _originalReserveSnapshot.FirstOrDefault(w => w.Item.Id == persona.AlternativePaymentItemId) is { } paymentStash)
             {
-                await _warbandService.RemoveWarbandEquipmentAsync(paymentStash.Id);
+                await _warbandService.RemoveWarbandEquipmentAsync(paymentStash.SourceId!.Value);
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWithItemSentence"], entry.HeroName, persona.Name, paymentStash.Item.Name));
             }
             else
@@ -1126,8 +1126,10 @@ public partial class EndOfGamePageViewModel
         var seized = SeizedEquipmentItems;
         if (seized.Count == 0) return;
 
+        // SourceId toujours renseigné ici : SeizedEquipmentItems vient exclusivement de
+        // _originalReserveSnapshot (PreExisting, une ligne réelle par ligne WarbandEquipment).
         foreach (var item in seized)
-            await _warbandService.RemoveWarbandEquipmentAsync(item.Id);
+            await _warbandService.RemoveWarbandEquipmentAsync(item.SourceId!.Value);
 
         var pairLabel = IsPairCorruptionUnaffordable ? PairCorruptionLabel : PairRetentionLabel;
         sentences.Add(string.Format(Loc["HistoryPairEquipmentSeizedSentence"], pairLabel, SeizedEquipmentTotalValue));
@@ -1384,12 +1386,14 @@ public partial class EndOfGamePageViewModel
 
         foreach (var candidate in PendingSales)
         {
-            if (candidate.StashItem is { } stashItem)
+            if (candidate.ReserveSource is { } line)
             {
-                await _warbandService.RemoveWarbandEquipmentAsync(stashItem.Id);
-                var leftover = stashItem.Quantity - candidate.SelectedQuantity;
-                if (leftover > 0)
-                    await _warbandService.AddWarbandEquipmentAsync(Warband.Id, stashItem.Item, quantity: leftover, materialRule: stashItem.MaterialRule, foundValueOverride: stashItem.FoundValueOverride);
+                // La vente a déjà décrémenté line.Quantity en direct (AddSaleEquipment/ReserveCollection.
+                // RemoveLine) - il ne reste qu'à synchroniser la vraie ligne DB (SourceId, toujours réel
+                // pour cette provenance) sur cette quantité finale, jamais besoin de re-lire SelectedQuantity ici.
+                await _warbandService.RemoveWarbandEquipmentAsync(line.SourceId!.Value);
+                if (line.Quantity > 0)
+                    await _warbandService.AddWarbandEquipmentAsync(Warband.Id, line.Item, quantity: line.Quantity, materialRule: line.MaterialRule, foundValueOverride: line.FoundValueOverride);
             }
             else if (candidate.CarriedItem is { } carriedItem)
             {
@@ -1666,16 +1670,16 @@ public partial class EndOfGamePageViewModel
     /// dans le pipeline) a déjà traité WarriorNameSlot.Equipment tel quel, cette étape n'y touche que
     /// PENDANT la session interactive (Add/Remove direct sur ce même brouillon), jamais à Terminer.
     ///
-    /// Cas particulier - "extras" de réserve (id == 0, voir EndOfGamePageViewModel.Reallocation.cs's
-    /// EnsureReallocationReserveExtrasAdded) : un objet trouvé à l'Exploration/renvoyé/acheté PENDANT ce
-    /// même wizard n'a pas encore de vraie ligne WarbandEquipment au moment d'ouvrir cette étape, mais EN
-    /// AURA une par les étapes plus tôt dans CE MÊME pipeline (ApplyExplorationOutcomeAsync/
-    /// ApplyDismissalsAsync/ApplyEquipmentTradingAsync, toutes avant celle-ci) - jamais recréé ici si le
-    /// joueur ne l'a pas déplacé (déjà couvert), mais s'il l'a déplacé vers un Héros/une recrue, la VRAIE
-    /// ligne (déjà créée) doit être retrouvée par une requête fraîche (même idiome que
-    /// SellableEquipmentCandidate.IsFromExploration/IsFromDismissal dans ApplyEquipmentTradingAsync) et
-    /// supprimée - un simple diff par id est impossible ici puisque toutes les entrées "extras" partagent
-    /// l'id 0.</summary>
+    /// Cas particulier - "extras" de réserve (ReserveLine.SourceId null, voir EndOfGamePageViewModel.
+    /// Reallocation.cs's EnsureReallocationReserveExtrasAdded) : un objet trouvé à l'Exploration/renvoyé/
+    /// acheté PENDANT ce même wizard n'a pas encore de vraie ligne WarbandEquipment au moment d'ouvrir
+    /// cette étape, mais EN AURA une par les étapes plus tôt dans CE MÊME pipeline
+    /// (ApplyExplorationOutcomeAsync/ApplyDismissalsAsync/ApplyEquipmentTradingAsync, toutes avant
+    /// celle-ci) - jamais recréé ici si le joueur ne l'a pas déplacé (déjà couvert), mais s'il l'a déplacé
+    /// vers un Héros/une recrue, la VRAIE ligne (déjà créée) doit être retrouvée par une requête fraîche
+    /// (même idiome que SellableEquipmentCandidate.IsFromExploration/IsFromDismissal dans
+    /// ApplyEquipmentTradingAsync) et supprimée - un simple diff par id est impossible ici puisque toutes
+    /// les entrées "extras" partagent SourceId == null.</summary>
     private async Task ApplyEquipmentReallocationAsync(string language, List<string> sentences)
     {
         if (Warband is null) return;
@@ -1694,10 +1698,10 @@ public partial class EndOfGamePageViewModel
             }
         }
 
-        foreach (var goneId in OriginalReserveEquipmentIds.Where(id => ReallocationReserve.All(w => w.Id != id)))
+        foreach (var goneId in OriginalReserveEquipmentIds.Where(id => ReallocationReserve.All(w => w.SourceId != id)))
             await _warbandService.RemoveWarbandEquipmentAsync(goneId);
 
-        foreach (var arrived in ReallocationReserve.Where(w => w.Id < 0).ToList())
+        foreach (var arrived in ReallocationReserve.Where(w => w.SourceId < 0).ToList())
         {
             await _warbandService.AddWarbandEquipmentAsync(Warband.Id, arrived.Item, arrived.Quantity, arrived.MaterialRule, arrived.FoundValueOverride);
             sentences.Add(string.Format(Loc["HistoryEquipmentReallocatedSentence"], arrived.NameDisplay, Loc["EndOfGameEquipmentTradingStashSource"]));
@@ -1710,7 +1714,7 @@ public partial class EndOfGamePageViewModel
             {
                 var originalQty = group.Sum(x => x.Quantity);
                 var stillThereQty = ReallocationReserve
-                    .Where(w => w.Id == 0 && w.Item.Id == group.Key.Id && w.MaterialRule?.Id == group.Key.MaterialRuleId)
+                    .Where(w => w.SourceId is null && w.Item.Id == group.Key.Id && w.MaterialRule?.Id == group.Key.MaterialRuleId)
                     .Sum(w => w.Quantity);
                 var movedAwayQty = originalQty - stillThereQty;
                 if (movedAwayQty <= 0) continue;

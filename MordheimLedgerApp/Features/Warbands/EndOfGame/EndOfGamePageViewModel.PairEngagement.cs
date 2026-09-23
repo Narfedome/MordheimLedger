@@ -265,7 +265,7 @@ public partial class EndOfGamePageViewModel
 
     /// <summary>Valeur totale de la réserve de bande, toutes lignes confondues - seule mesure qui tranche
     /// automatiquement entre Céder du matériel et Duel avec le meneur.</summary>
-    private int WarbandInventoryTotalValue => _warbandInventory.Sum(w => w.SellValue);
+    private int WarbandInventoryTotalValue => _originalReserveSnapshot.Sum(w => w.SellValue);
 
     /// <summary>Montant réellement dû à cette étape (corruption OU rétention, jamais les deux - voir la
     /// doc de classe) - 0 si aucun des deux blocs Où est l'Argent n'est actif.</summary>
@@ -293,16 +293,16 @@ public partial class EndOfGamePageViewModel
     /// AlternativePaymentItemId's own doc). N'est en pratique appelée que quand WantsEquipmentSeizure est
     /// vrai (la réserve suffit), donc n'a normalement jamais besoin de vider toute la réserve sans atteindre
     /// la cible - conservé quand même en repli défensif.</summary>
-    public List<WarbandEquipment> SeizedEquipmentItems
+    public List<ReserveLine> SeizedEquipmentItems
     {
         get
         {
             var target = PairPaymentTargetAmount;
-            if (target <= 0) return new List<WarbandEquipment>();
+            if (target <= 0) return new List<ReserveLine>();
 
-            var seized = new List<WarbandEquipment>();
+            var seized = new List<ReserveLine>();
             var sum = 0;
-            foreach (var item in _warbandInventory.OrderByDescending(w => w.SellValue))
+            foreach (var item in _originalReserveSnapshot.OrderByDescending(w => w.SellValue))
             {
                 if (sum >= target) break;
                 seized.Add(item);

@@ -76,6 +76,11 @@ public partial class EndOfGamePageViewModel
             }
 
             PurchasedReserveItems.Add(pick);
+            // Rejoint _reserve immédiatement (2026-09-23, unification de la réserve) - PurchasedReserveItems
+            // reste la liste d'AFFICHAGE (chips individuellement retirables, un pick par achat) ; _reserve
+            // est LA source que Recrutement/Vente/Réallouer consomment, plus besoin de la re-fusionner à
+            // chaque lecture (voir BuildStashPool's own doc).
+            _reserve.Add(pick.Item, pick.MaterialRule, 1, ReserveLineOrigin.Purchase);
             NotifyTreasuryChanged();
         }
     }
@@ -87,6 +92,7 @@ public partial class EndOfGamePageViewModel
     private void RemoveReserveEquipment(EquipmentPick pick)
     {
         PurchasedReserveItems.Remove(pick);
+        _reserve.Remove(pick.Item.Id, pick.MaterialRule?.Id, 1);
         NotifyTreasuryChanged();
     }
 
@@ -105,25 +111,30 @@ public partial class EndOfGamePageViewModel
     public int EquipmentTradingNetTotal => PendingSalesTotal - PurchasedReserveItemsCost;
 
     /// <summary>Tout ce qui existait déjà AVANT cette partie, OU a été trouvé PENDANT cette même partie via
-    /// Exploration, et peut donc être vendu (livre des règles - "swapped around the warband from one
-    /// fighter to another") : la réserve pré-partie (_warbandInventory, jamais ce que l'étape Achat vient
-    /// d'y ajouter), les trouvailles d'Exploration de cette partie (PendingExplorationStashItems -
-    /// regroupées par (Item, MaterialRule), une trouvaille peut provenir de plusieurs sources indépendantes
-    /// du même jet), puis l'équipement déjà porté par chaque guerrier actif (WarriorRows - tous, y compris
-    /// un guerrier Hors de combat cette partie : son équipement existait bien avant, seul son statut
-    /// change). Reconstruite à CHAQUE appel (jamais mise en cache) - alreadyPendingQty retranche, par
-    /// source (IsFromStash, SourceId), tout ce qui est déjà dans PendingSales pour cette ligne : le
-    /// candidat proposé au picker ne porte que le RELIQUAT, jamais réexcluant la ligne entière tant qu'il
-    /// en reste au moins un.</summary>
+    /// Exploration/Renvoyer, et peut donc être vendu (livre des règles - "swapped around the warband from
+    /// one fighter to another") : la réserve pré-partie (_reserve, filtrée sur Origin.PreExisting -
+    /// JAMAIS un objet Purchase de cette même session, voir la doc de classe - "annuler un achat... ce
+    /// n'est jamais une vente"), les trouvailles d'Exploration/Renvoyer de cette partie
+    /// (PendingExplorationStashItems/PendingDismissedEquipment - regroupées par (Item, MaterialRule), une
+    /// trouvaille peut provenir de plusieurs sources indépendantes du même jet), puis l'équipement déjà
+    /// porté par chaque guerrier actif (WarriorRows - tous, y compris un guerrier Hors de combat cette
+    /// partie : son équipement existait bien avant, seul son statut change). Reconstruite à CHAQUE appel
+    /// (jamais mise en cache).
+    ///
+    /// Depuis l'unification de la réserve (2026-09-23), _reserve.Lines est DÉJÀ à jour de toute vente
+    /// précédemment confirmée cette même session (retirée en direct au moment de la confirmation, voir
+    /// AddSaleEquipment) - plus besoin d'alreadyPendingQty pour cette portion. Exploration/Dismissal
+    /// restent hors de _reserve (voir ReserveCollection's own doc) donc gardent leur propre décompte
+    /// alreadyPendingQty, comme avant.</summary>
     private IEnumerable<SellableEquipmentCandidate> BuildSellableCandidates()
     {
-        var alreadyPendingQty = PendingSales.GroupBy(c => (c.IsFromStash, c.SourceId)).ToDictionary(g => g.Key, g => g.Sum(c => c.SelectedQuantity));
+        foreach (var line in _reserve.Lines.Where(l => l.Origin == ReserveLineOrigin.PreExisting && l.Quantity > 0))
+            yield return new SellableEquipmentCandidate(line, line.Quantity);
 
-        foreach (var stashItem in _warbandInventory)
-        {
-            var remaining = stashItem.Quantity - alreadyPendingQty.GetValueOrDefault((true, stashItem.Id));
-            if (remaining > 0) yield return new SellableEquipmentCandidate(stashItem, remaining);
-        }
+        // Exploration/Dismissal/Carried seulement - un candidat ReserveSource (réserve pré-partie/Achat)
+        // n'a plus besoin de ce décompte, voir la doc de méthode ci-dessus.
+        var alreadyPendingQty = PendingSales.Where(c => c.ReserveSource is null)
+            .GroupBy(c => (c.IsFromStash, c.SourceId)).ToDictionary(g => g.Key, g => g.Sum(c => c.SelectedQuantity));
 
         foreach (var group in PendingExplorationStashItems().GroupBy(x => (x.Item.Id, MaterialRuleId: x.MaterialRule?.Id)))
         {
@@ -175,7 +186,14 @@ public partial class EndOfGamePageViewModel
 
         var selected = await _sellEquipmentPicker.PickSaleAsync(candidates);
         foreach (var candidate in selected)
+        {
             PendingSales.Add(candidate);
+            // Retire IMMÉDIATEMENT de _reserve pour un candidat ReserveSource (2026-09-23, unification de
+            // la réserve) - Exploration/Dismissal/Carried restent inchangés (pas dans _reserve, voir
+            // ReserveCollection's own doc), leur retrait réel reste géré à Terminer comme avant.
+            if (candidate.ReserveSource is { } line)
+                _reserve.RemoveLine(line, candidate.SelectedQuantity);
+        }
 
         NotifyTreasuryChanged();
     }
@@ -184,6 +202,10 @@ public partial class EndOfGamePageViewModel
     private void RemoveSaleEquipment(SellableEquipmentCandidate candidate)
     {
         PendingSales.Remove(candidate);
+        // Restaure la quantité sur la MÊME ReserveLine (annuler une vente déjà confirmée) - jamais une
+        // nouvelle ligne, RestoreLine réinsère l'instance d'origine si elle avait été entièrement vidée.
+        if (candidate.ReserveSource is { } line)
+            _reserve.RestoreLine(line, candidate.SelectedQuantity);
         NotifyTreasuryChanged();
     }
 }

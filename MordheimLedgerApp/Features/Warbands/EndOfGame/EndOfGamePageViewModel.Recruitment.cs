@@ -329,44 +329,32 @@ public partial class EndOfGamePageViewModel
     /// départ du calcul de chaque groupe existant (GetTopUpBreakdown), qui en consomme au fil de l'eau
     /// dans l'ordre d'ExistingHenchmanTopUps, ET point de départ de BuildAvailableReservePool (réserve
     /// disponible pour les NOUVELLES recrues à l'étape Recrutement). Reconstruit à chaque appel plutôt
-    /// que mis en cache : _warbandInventory est un simple instantané figé (jamais modifié par ce wizard
-    /// tant que Terminer n'a pas tourné), donc toujours cohérent sans état supplémentaire à synchroniser.
-    /// Additionne PendingExplorationStashItems (retour utilisateur - "les items récupérés dans
-    /// l'exploration chart ne sont pas comptabilisés dans le contexte du end of game pour le
-    /// recrutement") : un objet trouvé PENDANT cette même Fin de Partie (étape Exploration, plus tôt dans
-    /// le wizard) n'existe pas encore dans _warbandInventory (figé à l'OUVERTURE du wizard) tant que
-    /// ApplyExplorationOutcomeAsync n'a pas réellement tourné, à Terminer - or celui-ci s'exécute
-    /// justement AVANT ApplyHenchmanRecruitmentAsync dans le pipeline de Terminer, donc l'objet SERA bien
-    /// disponible au moment réel du calcul. Additionne aussi PurchasedReserveItems (étape Achat/Vente,
-    /// juste avant Recrutement - EndOfGamePageViewModel.EquipmentTrading.cs) et soustrait la PORTION
-    /// réserve de PendingSales (IsFromStash - une vente d'équipement DÉJÀ PORTÉ par un guerrier ne touche
-    /// jamais ce pool, voir SellableEquipmentCandidate's own doc).</summary>
+    /// que mis en cache - _reserve (ReserveCollection, 2026-09-23) est maintenant LA source pour la
+    /// réserve pré-partie/Achat/Vente (mutée en direct au moment où le joueur confirme chaque décision -
+    /// voir EndOfGamePageViewModel.EquipmentTrading.cs), ce qui élimine le besoin de PurchasedReserveItems/
+    /// PendingSales ici (déjà reflétés dans _reserve). Exploration ET Renvoyer restent fusionnés ici en
+    /// LECTURE plutôt que poussés dans _reserve (voir ReserveCollection's own doc) : Exploration parce
+    /// que ses champs restent modifiables tant que l'étape est ouverte (pas de moment "confirmé"
+    /// unique) ; Renvoyer parce que DismissCount se modifie par DEUX voies distinctes (case à cocher
+    /// Héros ET stepper de groupe, WarriorOutcomeRow.IsDismissed contourne les commandes Increment/
+    /// DecrementDismiss) sans point d'accroche commun fiable pour un delta symétrique.</summary>
     private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildStashPool()
     {
-        var pool = _warbandInventory.GroupBy(w => (w.Item.Id, w.MaterialRule?.Id)).ToDictionary(g => g.Key, g => g.Count());
+        var pool = new Dictionary<(int, int?), int>();
+        foreach (var line in _reserve.Lines)
+        {
+            var key = (line.Item.Id, line.MaterialRule?.Id);
+            pool[key] = pool.GetValueOrDefault(key) + line.Quantity;
+        }
         foreach (var (item, materialRule, quantity) in PendingExplorationStashItems())
         {
             var key = (item.Id, materialRule?.Id);
             pool[key] = pool.GetValueOrDefault(key) + quantity;
         }
-        // Renvoyer (étape juste avant Achat/Vente) : même principe que les trouvailles d'Exploration -
-        // l'équipement restitué par un guerrier renvoyé n'existe pas encore dans _warbandInventory, mais
-        // ApplyDismissalsAsync s'exécute AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync dans le
-        // pipeline de Terminer, donc il SERA bien disponible au moment réel du calcul.
         foreach (var (item, materialRule, quantity) in PendingDismissedEquipment())
         {
             var key = (item.Id, materialRule?.Id);
             pool[key] = pool.GetValueOrDefault(key) + quantity;
-        }
-        foreach (var pick in PurchasedReserveItems)
-        {
-            var key = (pick.Item.Id, pick.MaterialRule?.Id);
-            pool[key] = pool.GetValueOrDefault(key) + 1;
-        }
-        foreach (var sale in PendingSales.Where(c => c.IsFromStash))
-        {
-            var key = (sale.Item.Id, sale.MaterialRule?.Id);
-            pool[key] = Math.Max(0, pool.GetValueOrDefault(key) - sale.SelectedQuantity);
         }
         return pool;
     }
@@ -432,8 +420,8 @@ public partial class EndOfGamePageViewModel
             .Select(kv => kv.Key.MaterialRuleId).ToHashSet();
         if (availableMaterialIds.Count == 0) return null;
 
-        var fromInventory = _warbandInventory.FirstOrDefault(w => w.Item.Id == itemId && availableMaterialIds.Contains(w.MaterialRule?.Id));
-        if (fromInventory is not null) return fromInventory.MaterialRule;
+        var fromReserve = _reserve.Lines.FirstOrDefault(w => w.Item.Id == itemId && availableMaterialIds.Contains(w.MaterialRule?.Id));
+        if (fromReserve is not null) return fromReserve.MaterialRule;
 
         foreach (var (item, materialRule, _) in PendingExplorationStashItems())
             if (item.Id == itemId && availableMaterialIds.Contains(materialRule?.Id))

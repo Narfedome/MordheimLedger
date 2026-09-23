@@ -124,12 +124,22 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     private List<SpecialRule> _englishSpecialRulesCatalog = new();
     private List<EquipmentItem> _localizedEquipmentCatalog = new();
 
-    /// <summary>Snapshot de l'inventaire de bande (voir WarbandDetailViewModel.Inventory) au moment
-    /// d'ouvrir ce wizard - 2026-09-01, "Céder du matériel" (Où est l'Argent) : sélection automatique
-    /// d'objets dont la somme couvre le manque, voir EndOfGamePageViewModel.Captives.cs's
-    /// SeizedEquipmentItems. Jamais modifié depuis ce wizard (aucun achat/vente d'objet de bande ici) -
-    /// une simple liste figée suffit, pas besoin de la revalider en direct.</summary>
-    private List<WarbandEquipment> _warbandInventory = new();
+    /// <summary>Réserve d'équipement de la bande - UNE seule source de vérité pour tout le wizard
+    /// (2026-09-23, retour utilisateur - "pour l'inventaire on va unifié le tout", voir ReserveCollection's
+    /// own doc), remplace l'ancien _warbandInventory (instantané figé lu indépendamment à 3 endroits -
+    /// BuildStashPool, BuildSellableCandidates, ReallocationReserve, chacun avec sa propre convention d'id
+    /// synthétique). Seedée une seule fois dans InitializeAsync depuis une lecture DB fraîche, mutée en
+    /// direct par Achat/Vente/Renvoyer au moment où le joueur confirme sa décision.</summary>
+    private ReserveCollection _reserve = new();
+
+    /// <summary>Instantané FIGÉ de la réserve pré-partie (jamais muté, contrairement à _reserve
+    /// ci-dessus) - gardé UNIQUEMENT pour les deux endroits qui doivent volontairement rester limités au
+    /// stock d'AVANT cette bataille : EndOfGamePageViewModel.PairEngagement.cs's
+    /// WarbandInventoryTotalValue/SeizedEquipmentItems ("Céder du matériel", sélection automatique
+    /// d'objets dont la somme couvre le manque) et EndOfGamePageViewModel.Apply.cs's paiement Dramatis
+    /// Persona par objet alternatif (Johann) - comportement actuel intentionnel à préserver, pas un
+    /// artefact à corriger (voir la mémoire project-end-of-game-shell-and-reserve-refactor).</summary>
+    private List<ReserveLine> _originalReserveSnapshot = new();
 
     /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
     /// ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - même besoin que
@@ -765,7 +775,17 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
             _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
             _specialRulesByEnglishName = specialRulesByEnglishName;
-            _warbandInventory = warbandInventory.ToList();
+            // Une ligne PreExisting par ligne WarbandEquipment réelle, jamais fusionnées entre elles
+            // (chacune garde son SourceId réel - voir ReserveCollection.Add's own doc) - _reserve est la
+            // copie VIVANTE (mutée par Achat/Vente/Renvoyer au fil du wizard). _originalReserveSnapshot
+            // reçoit ses PROPRES instances ReserveLine (jamais les mêmes objets que _reserve.Lines, dont
+            // la Quantity est mutable en place - un partage de référence romprait le "jamais muté" promis
+            // par sa propre doc dès la première vente/consommation).
+            foreach (var stashItem in warbandInventory)
+            {
+                _reserve.Add(stashItem.Item, stashItem.MaterialRule, stashItem.Quantity, ReserveLineOrigin.PreExisting, stashItem.Id, stashItem.FoundValueOverride);
+                _originalReserveSnapshot.Add(new ReserveLine(stashItem.Item, stashItem.MaterialRule, stashItem.Quantity, ReserveLineOrigin.PreExisting, stashItem.Id, stashItem.FoundValueOverride));
+            }
             _skillIdsByEnglishName = skillIdsByEnglishName;
             _hiredSwordCatalog = localizedHiredSwords;
             _dramatisPersonaCatalog = dramatisPersonaCatalog;

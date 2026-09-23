@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ExperienceStepView"
              x:DataType="local:EndOfGamePageViewModel">
@@ -22,7 +23,10 @@
                                     IsVisible="{Binding ShowsInExperienceStep}">
                                 <VerticalStackLayout Spacing="8">
                                     <Grid ColumnDefinitions="*,Auto">
-                                        <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <components:ChipView Grid.Column="0" Item="{Binding .}"
+                                                              IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorRecapCommand}"/>
                                         <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                                     </Grid>
                                     <Entry Text="{Binding ExperienceGainedText}" Keyboard="Numeric"

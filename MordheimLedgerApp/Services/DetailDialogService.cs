@@ -13,6 +13,8 @@ using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
 using MordheimLedgerApp.Features.Library.Spells.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
+using MordheimLedgerApp.Features.Warbands;
+using MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 namespace MordheimLedgerApp.Services;
 
@@ -67,6 +69,15 @@ public interface IDetailDialogService
 
     Task ShowSpellDetailDialogAsync(Spell item);
     Task ShowInjuryDetailDialogAsync(Injury item);
+
+    /// <summary>Récap en lecture seule d'un guerrier DÉJÀ ACTIF (jamais un WarriorArchetype candidat au
+    /// recrutement, couvert par ShowWarriorArchetypeDetailDialogAsync) - 2026-09-23, chip tapable sur
+    /// plusieurs étapes du wizard Fin de Partie (Renvoyer/Vétérans/Hors de combat/Blessure/Progression/
+    /// Expérience). Aucune résolution catalogue async nécessaire ici (contrairement à
+    /// ShowHiredSwordDetailDialogAsync et consorts) - Warrior porte déjà Equipment/Skills/Spells/
+    /// Mutations ; archetypeName/specialRules doivent être fournis par l'appelant (WarriorOutcomeRow les
+    /// a déjà résolus), ce service n'a pas accès à la logique de fusion archétype+bande+équipement.</summary>
+    Task ShowWarriorDetailDialogAsync(Warrior warrior, string archetypeName, IReadOnlyList<SpecialRuleChip> specialRules);
 }
 
 public class DetailDialogService : IDetailDialogService
@@ -196,4 +207,7 @@ public class DetailDialogService : IDetailDialogService
 
     public Task ShowInjuryDetailDialogAsync(Injury item) =>
         ShowAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(item, this)));
+
+    public Task ShowWarriorDetailDialogAsync(Warrior warrior, string archetypeName, IReadOnlyList<SpecialRuleChip> specialRules) =>
+        ShowAsync(new WarriorRecapDialog(new WarriorRecapDialogViewModel(warrior, archetypeName, specialRules, this)));
 }

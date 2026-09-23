@@ -123,6 +123,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// else (every other picker still lets a Rare list member through).</summary>
     public bool CommonOnly { get; set; }
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) - true (défaut, inchangé) laisse le "+"
+    /// créer un nouvel objet catalogue directement depuis le sélecteur (achat/recrutement classique
+    /// d'une bande). False pour tous les sélecteurs du wizard Fin de Partie (2026-09-23, retour
+    /// utilisateur - "dans les sélecteurs du end of game, on ne doit pas avoir le + pour créer un
+    /// nouvel élément") : créer un objet catalogue à la volée n'a pas sa place au milieu de ce wizard
+    /// (Achat/Vente, Recrutement, Objets rares - PickRareEquipmentAsync le pose toujours à false, jamais
+    /// exposé en paramètre puisque exclusif à ce contexte). Sans effet en mode CRUD (Bibliothèque), qui
+    /// a son propre bouton "+" séparé (IsCrud, toujours visible).</summary>
+    public bool AllowCreate { get; set; } = true;
+
     /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants a "Réserve" section
     /// pinned at the top of the picker, listing items the warband already has in stock - keyed by
     /// EquipmentItem.Id. Quantity is summed across materials (still just one tile per Item, not per

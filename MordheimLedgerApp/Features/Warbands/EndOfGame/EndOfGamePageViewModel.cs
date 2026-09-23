@@ -1094,6 +1094,16 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     private void DecrementOutOfAction(WarriorOutcomeRow row) =>
         row.OutOfActionCount = Math.Max(0, row.OutOfActionCount - 1);
 
+    /// <summary>Chip tapable sur le nom d'un guerrier DÉJÀ ACTIF, réutilisée par plusieurs étapes du
+    /// wizard (Renvoyer/Vétérans/Hors de combat/Blessure/Progression/Expérience) - 2026-09-23, retour
+    /// utilisateur "plutôt que d'avoir un label ou une chip non interagissable, ça serait top de pouvoir
+    /// cliquer sur une chip qui nous révèle le détail du personnage". Distinct de
+    /// EndOfGamePageViewModel.Recruitment.cs's ShowWarriorDetail (archétype candidat, pas encore un vrai
+    /// Warrior) - voir WarriorRecapDialogViewModel's own doc pour la distinction complète.</summary>
+    [RelayCommand]
+    private Task ShowWarriorRecap(WarriorOutcomeRow row) =>
+        _detailDialogs.ShowWarriorDetailDialogAsync(row.Warrior, row.ArchetypeName, row.SpecialRules);
+
     /// <summary>"Annuler"/flèche retour d'en-tête/geste OS (voir EndOfGamePage.xaml.cs's
     /// OnBackButtonPressed) - seul changement de comportement observable de tout le passage en page
     /// Shell (2026-09-22, décision utilisateur explicite) : une dialog fermée par le système équivalait

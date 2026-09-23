@@ -40,11 +40,14 @@ public interface IEquipmentPickerService
     /// "Réserve" section at the top of the picker, listing items the warband already has in stock - keyed
     /// by EquipmentItem.Id, quantity summed across materials but MaterialRule carrying a representative
     /// material when one exists (see EquipmentItemViewModel.ReserveQuantities) - null everywhere else
-    /// (this picker doesn't otherwise know about a warband's inventory).</summary>
+    /// (this picker doesn't otherwise know about a warband's inventory). allowCreate: false hides the
+    /// picker's own "+" (create a brand-new catalog item on the fly, see EquipmentItemViewModel.
+    /// AllowCreate) - every End of Game wizard caller passes false (2026-09-23, user request - creating
+    /// a catalog item mid-wizard is out of place there), true (default, unchanged) everywhere else.</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null);
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true);
 
     /// <summary>Dédié à l'étape "Objets rares" (EndOfGamePageViewModel.RareItems.cs) - contrairement à
     /// PickEquipmentAsync, renvoie aussi le MaterialRule choisi (2026-09-23, retour utilisateur - "on
@@ -73,7 +76,7 @@ public class EquipmentPickerService : IEquipmentPickerService
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null)
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -95,6 +98,7 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.RareSearchMode = rareSearchMode;
         viewModel.CommonOnly = commonOnly;
         viewModel.ReserveQuantities = reserveQuantities;
+        viewModel.AllowCreate = allowCreate;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
         // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
         // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).
@@ -130,6 +134,9 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.AvailableGold = availableGold;
         viewModel.SingleSelectMode = true;
         viewModel.RareSearchMode = true;
+        // Toujours false ici (jamais exposé en paramètre) - exclusif au wizard Fin de Partie, voir
+        // EquipmentItemViewModel.AllowCreate's own doc.
+        viewModel.AllowCreate = false;
         var page = new EquipmentItemSelectorPage(viewModel);
 
         var window = Shell.Current.Window;

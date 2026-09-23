@@ -20,7 +20,10 @@
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="8">
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
-                            <Label Grid.Column="0" Text="{Binding CurrentInjuryWarrior.Name}" FontAttributes="Bold"/>
+                            <components:ChipView Grid.Column="0" Item="{Binding CurrentInjuryWarrior}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowWarriorRecapCommand}"/>
                             <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                             <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de mort (voir
                                  ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe

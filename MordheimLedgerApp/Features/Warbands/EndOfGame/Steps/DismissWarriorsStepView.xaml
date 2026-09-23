@@ -22,7 +22,10 @@
                             <Border Style="{StaticResource SectionCardBorderStyle}">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <components:ChipView Item="{Binding .}"
+                                                              IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
+                                                              IconFontFamily="RpgAwesome"
+                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorRecapCommand}"/>
                                         <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                                     </VerticalStackLayout>
                                     <CheckBox Grid.Column="1" IsChecked="{Binding IsDismissed}" VerticalOptions="Center"

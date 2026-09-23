@@ -23,7 +23,8 @@
                 <components:WarriorRecruitListView ItemsSource="{Binding HeroRecruitRows}"
                                                     HeaderText="{loc:Loc EndOfGameRecruitmentHeroesHeading}"
                                                     IncrementCommand="{Binding IncrementRecruitCommand}"
-                                                    DecrementCommand="{Binding DecrementRecruitCommand}"/>
+                                                    DecrementCommand="{Binding DecrementRecruitCommand}"
+                                                    DetailCommand="{Binding ShowWarriorDetailCommand}"/>
             </VerticalStackLayout>
 
 </ContentView>

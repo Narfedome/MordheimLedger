@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:advance="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.AdvanceStepView"
              x:DataType="local:EndOfGamePageViewModel">
@@ -23,7 +25,10 @@
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="8">
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{Binding CurrentAdvanceWarrior.Name}" FontAttributes="Bold"/>
+                            <components:ChipView Grid.Column="0" Item="{Binding CurrentAdvanceWarrior}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowWarriorRecapCommand}"/>
                             <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="10">

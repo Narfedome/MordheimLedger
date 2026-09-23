@@ -64,7 +64,7 @@ public partial class EndOfGamePageViewModel
         // CostMultiplier), jamais proposées par un marchand qui ne vend QUE des Objets Communs
         // (commonOnly: true) - contrairement à AddRecruitEquipment (choix libre pour un guerrier précis,
         // pas limité au commerce ordinaire) où le choix de matériau reste légitime.
-        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, availableGold: EndOfGameTreasuryRemaining, commonOnly: true);
+        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, availableGold: EndOfGameTreasuryRemaining, commonOnly: true, allowCreate: false);
 
         foreach (var equipmentItem in items)
         {

@@ -17,7 +17,8 @@
                 <components:WarriorRecruitListView ItemsSource="{Binding HenchmanRecruitRows}"
                                                     HeaderText="{loc:Loc EndOfGameRecruitHenchmenNewHeading}"
                                                     IncrementCommand="{Binding IncrementHenchmanGroupCommand}"
-                                                    DecrementCommand="{Binding DecrementHenchmanGroupCommand}"/>
+                                                    DecrementCommand="{Binding DecrementHenchmanGroupCommand}"
+                                                    DetailCommand="{Binding ShowWarriorDetailCommand}"/>
             </VerticalStackLayout>
 
 </ContentView>

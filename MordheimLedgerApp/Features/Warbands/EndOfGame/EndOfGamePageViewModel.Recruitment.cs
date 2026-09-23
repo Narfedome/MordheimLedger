@@ -111,6 +111,29 @@ public partial class EndOfGamePageViewModel
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
         WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.Warrior.HeadCount - r.DismissCount);
 
+    /// <summary>Chip tapable sur chaque ligne de WarriorRecruitListView (Steps/RecruitHeroesCountStepView.
+    /// xaml/RecruitHenchmenCountStepView.xaml's DetailCommand) - 2026-09-23, retour utilisateur "plutôt
+    /// que d'avoir un label ou une chip non interagissable, ça serait top de pouvoir cliquer sur une chip
+    /// qui nous révèle le détail du personnage/archétype". Ce candidat n'est encore qu'un WarriorArchetype
+    /// du catalogue (pas un vrai Warrior recruté), donc même mécanisme que
+    /// WarbandEditDialogViewModel.ShowWarriorDetail (copié à l'identique) plutôt que le nouveau dialog
+    /// récap Guerrier (ShowWarriorRecapCommand, EndOfGamePageViewModel.cs) réservé aux guerriers déjà
+    /// actifs. row.Archetype n'a que le résumé déjà chargé pour la liste - re-résolu en entier ici pour le
+    /// récap (description complète etc.), comme WarbandEditDialogViewModel le fait.</summary>
+    [RelayCommand]
+    private async Task ShowWarriorDetail(WarriorRecruitRow row)
+    {
+        var language = LocalizationService.Instance.Language;
+        WarriorArchetype? fullWarrior = null;
+        await Loading.RunAsync(async () => fullWarrior = await Task.Run(() => _libraryService.GetWarriorArchetypeAsync(row.Archetype.Id, language)));
+        if (fullWarrior is null) return;
+
+        // Pas de listes d'équipement chargées à ce stade (le nom de la liste, pas son contenu, n'est pas
+        // utile ici) - EquipmentListDisplay retombe sur "aucune" dans le dialog récap, même limite
+        // acceptée que WarbandEditDialogViewModel.ShowWarriorDetail.
+        await _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(fullWarrior, Array.Empty<NamedRef>());
+    }
+
     // --- Héros : effectif -----------------------------------------------------------------------------
 
     [RelayCommand]
@@ -608,7 +631,7 @@ public partial class EndOfGamePageViewModel
         // list from your warband", confirmée pour Héros ET Hommes de main. RestrictedToWarriorArchetypeIds
         // (row.Archetype.Id) continue de s'appliquer par-dessus, comme avant.
         var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
-            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities);
+            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities, allowCreate: false);
 
         // Jamais de CHOIX interactif de matériau ici (retour utilisateur 2026-09-21 - même raison que
         // AddReserveEquipment/EquipmentTrading.cs) : Gromril/Ithilmar sont des améliorations RARES

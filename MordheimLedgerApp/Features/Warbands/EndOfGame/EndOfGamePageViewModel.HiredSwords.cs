@@ -53,10 +53,22 @@ public partial class EndOfGamePageViewModel
 
     public sealed record HiredSwordRecruitOption(string DisplayName, HiredSword? HiredSword);
 
-    [ObservableProperty]
     private HiredSwordRecruitOption? selectedNewHiredSwordOption;
 
-    partial void OnSelectedNewHiredSwordOptionChanged(HiredSwordRecruitOption? value) => SelectedNewHiredSword = value?.HiredSword;
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : garde contre le null transitoire remonté
+    /// par le Picker TwoWay (HiredSwordsStepView.xaml) au réattachement de la vue mise en cache par étape.
+    /// Le setter ignore toute valeur absente d'AvailableHiredSwordRecruitOptions.</summary>
+    public HiredSwordRecruitOption? SelectedNewHiredSwordOption
+    {
+        get => selectedNewHiredSwordOption;
+        set
+        {
+            if (value is null || !AvailableHiredSwordRecruitOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedNewHiredSwordOption, value)) return;
+            SelectedNewHiredSword = value.HiredSword;
+        }
+    }
 
     private bool HasAnyHiredSwordRelevance => HiredSwordUpkeepEntries.Count > 0 || AvailableHiredSwordsToRecruit.Count > 0;
 

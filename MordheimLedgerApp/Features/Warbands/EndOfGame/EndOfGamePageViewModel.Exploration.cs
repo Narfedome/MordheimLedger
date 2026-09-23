@@ -140,10 +140,25 @@ public partial class EndOfGamePageViewModel
 
     public sealed record SentHeroOption(string DisplayName, WarriorOutcomeRow? Hero);
 
-    [ObservableProperty]
     private SentHeroOption? selectedSentHeroOption;
 
-    partial void OnSelectedSentHeroOptionChanged(SentHeroOption? value) => SentHero = value?.Hero;
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : Picker.SelectedItem
+    /// (ExplorationResultStepView.xaml) est lié TwoWay - la vue mise en cache par étape (StepViewConverter)
+    /// peut faire remonter un null transitoire au réattachement après un retour en arrière, écrasant
+    /// silencieusement le vrai choix. Le setter ignore toute valeur absente de SentHeroOptions (record -
+    /// List.Contains y résout par égalité structurelle, chaque Hero restant une référence WarriorOutcomeRow
+    /// stable même si SentHeroOptions elle-même est recalculée à chaque lecture).</summary>
+    public SentHeroOption? SelectedSentHeroOption
+    {
+        get => selectedSentHeroOption;
+        set
+        {
+            if (value is null || !SentHeroOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedSentHeroOption, value)) return;
+            SentHero = value.Hero;
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowExplorationSubRoll))]
@@ -348,16 +363,26 @@ public partial class EndOfGamePageViewModel
     private static int EquippedHenchmanGroupCost(WarriorOutcomeRow group) =>
         group.Warrior.Equipment.Sum(e => EquipmentPricing.CalculateCost(e.Item.Cost, e.MaterialRule?.CostMultiplier, isFree: false));
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowEquippedHenchmanTreasury))]
     private EquippedHenchmanGroupOption? selectedEquippedHenchmanGroupOption;
 
-    partial void OnSelectedEquippedHenchmanGroupOptionChanged(EquippedHenchmanGroupOption? value)
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : garde contre le null transitoire remonté
+    /// par le Picker TwoWay (ExplorationResultStepView.xaml) au réattachement de la vue mise en cache par
+    /// étape. Le setter ignore toute valeur absente d'EquippedHenchmanGroupOptions.</summary>
+    public EquippedHenchmanGroupOption? SelectedEquippedHenchmanGroupOption
     {
-        if (value?.Group is not null) EquippedHenchmanError = null;
-        // Son coût d'équipement dispute désormais la même trésorerie que le reste du wizard (2026-09-03,
-        // voir EndOfGamePageViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
-        NotifyTreasuryChanged();
+        get => selectedEquippedHenchmanGroupOption;
+        set
+        {
+            if (value is null || !EquippedHenchmanGroupOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedEquippedHenchmanGroupOption, value)) return;
+
+            OnPropertyChanged(nameof(ShowEquippedHenchmanTreasury));
+            if (value.Group is not null) EquippedHenchmanError = null;
+            // Son coût d'équipement dispute désormais la même trésorerie que le reste du wizard (2026-09-03,
+            // voir EndOfGamePageViewModel.EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc).
+            NotifyTreasuryChanged();
+        }
     }
 
     [ObservableProperty]
@@ -408,9 +433,22 @@ public partial class EndOfGamePageViewModel
                     .Select(e => new WeaponBlessingOption($"{hero.Name} — {e.NameDisplay}", hero, e))))
             .ToList();
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(BlessedWeaponPreview))]
     private WeaponBlessingOption? selectedWeaponBlessingOption;
+
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : garde contre le null transitoire remonté
+    /// par le Picker TwoWay (ExplorationResultStepView.xaml) au réattachement de la vue mise en cache par
+    /// étape. Le setter ignore toute valeur absente de WeaponBlessingOptions.</summary>
+    public WeaponBlessingOption? SelectedWeaponBlessingOption
+    {
+        get => selectedWeaponBlessingOption;
+        set
+        {
+            if (value is null || !WeaponBlessingOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedWeaponBlessingOption, value)) return;
+            OnPropertyChanged(nameof(BlessedWeaponPreview));
+        }
+    }
 
     /// <summary>Aperçu jetable (jamais persisté tel quel - même idiome que BuildDisplayItem/
     /// ResolvedExplorationItem) du chip de l'arme choisie une fois bénie : combine son MaterialRule
@@ -608,10 +646,22 @@ public partial class EndOfGamePageViewModel
 
     public sealed record StatTestHeroOption(string DisplayName, WarriorOutcomeRow? Hero);
 
-    [ObservableProperty]
     private StatTestHeroOption? selectedStatTestHeroOption;
 
-    partial void OnSelectedStatTestHeroOptionChanged(StatTestHeroOption? value) => StatTestHero = value?.Hero;
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : garde contre le null transitoire remonté
+    /// par le Picker TwoWay (ExplorationResultStepView.xaml) au réattachement de la vue mise en cache par
+    /// étape. Le setter ignore toute valeur absente de StatTestHeroOptions.</summary>
+    public StatTestHeroOption? SelectedStatTestHeroOption
+    {
+        get => selectedStatTestHeroOption;
+        set
+        {
+            if (value is null || !StatTestHeroOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedStatTestHeroOption, value)) return;
+            StatTestHero = value.Hero;
+        }
+    }
 
     /// <summary>Faux pour un test ciblant toujours le chef (ex. Taverne) - StatTestHero est alors
     /// renseigné automatiquement (voir ResolveExplorationResult), aucun choix du joueur nécessaire, donc

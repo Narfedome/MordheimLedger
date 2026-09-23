@@ -36,13 +36,24 @@ public partial class DramatisPersonaUpkeepEntry : ObservableObject
     private readonly string _payLabel;
     private readonly string _noneLabel;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(WillPay))]
     private string? selectedChoiceLabel;
 
-    partial void OnSelectedChoiceLabelChanged(string? value)
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : Picker.SelectedItem
+    /// (DramatisPersonaeStepView.xaml) est lié TwoWay - la vue mise en cache par étape (StepViewConverter)
+    /// peut faire remonter un null transitoire au réattachement après un retour en arrière, écrasant
+    /// silencieusement le vrai choix. Le setter ignore toute valeur absente de ChoiceLabels.</summary>
+    public string? SelectedChoiceLabel
     {
-        if (value is not null) ChoiceError = null;
+        get => selectedChoiceLabel;
+        set
+        {
+            if (value is null || !ChoiceLabels.Contains(value)) return;
+            if (!SetProperty(ref selectedChoiceLabel, value)) return;
+
+            OnPropertyChanged(nameof(WillPay));
+            ChoiceError = null;
+        }
     }
 
     /// <summary>Résolu depuis SelectedChoiceLabel - null tant que "Aucun" (le choix par défaut, voir le

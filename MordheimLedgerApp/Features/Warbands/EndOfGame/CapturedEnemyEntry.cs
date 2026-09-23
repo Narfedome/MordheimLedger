@@ -25,15 +25,27 @@ public partial class CapturedEnemyEntry : ObservableObject
     public int Index { get; }
     public List<string> FateLabels { get; } = new();
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectedFate))]
-    [NotifyPropertyChangedFor(nameof(ShowGoldAmount))]
     private string? selectedFateLabel;
 
-    partial void OnSelectedFateLabelChanged(string? value)
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : Picker.SelectedItem (CaptivesStepView.
+    /// xaml) est lié TwoWay - la vue mise en cache par étape (StepViewConverter) peut faire remonter un
+    /// null transitoire au réattachement après un retour en arrière (Précédent), écrasant silencieusement
+    /// le vrai choix déjà fait. Le setter ignore toute valeur absente de FateLabels (donc null ou
+    /// périmée) au lieu de l'accepter aveuglément.</summary>
+    public string? SelectedFateLabel
     {
-        if (value is not null) FateError = null;
-        if (!ShowGoldAmount) GoldAmount = string.Empty;
+        get => selectedFateLabel;
+        set
+        {
+            if (value is null || !FateLabels.Contains(value)) return;
+            if (!SetProperty(ref selectedFateLabel, value)) return;
+
+            OnPropertyChanged(nameof(SelectedFate));
+            OnPropertyChanged(nameof(ShowGoldAmount));
+            FateError = null;
+            if (!ShowGoldAmount) GoldAmount = string.Empty;
+        }
     }
 
     /// <summary>Résolu depuis SelectedFateLabel - null tant qu'aucune option n'est choisie. Consommé par

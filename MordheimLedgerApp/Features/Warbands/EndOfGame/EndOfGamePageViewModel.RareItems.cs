@@ -63,23 +63,24 @@ public partial class EndOfGamePageViewModel
     public SpecialRule? GromrilMaterial => RareMaterialOptions.FirstOrDefault(r => r.Abbreviation == "G");
     public SpecialRule? IthilmarMaterial => RareMaterialOptions.FirstOrDefault(r => r.Abbreviation == "I");
 
-    /// <summary>Opens the Trading Post picker in SingleSelectMode (see IEquipmentPickerService) - the
+    /// <summary>Opens the Trading Post picker via PickRareEquipmentAsync (IEquipmentPickerService) - the
     /// player is nominating exactly ONE item to attempt this Hero's single roll against ("You may also
-    /// only make one roll for each Hero"), never a normal multi-item purchase (no quantity UI shows -
-    /// SingleSelectMode). availableGold IS passed (2026-09-23, retour utilisateur - "afficher la
-    /// trésorerie dans le sélecteur") purely for ShowBudget's informational display - this step commits
-    /// nothing, the real cost/affordability is decided independently at the Achat step that follows
-    /// (RareItemPurchaseTotalCost/IsRareItemPurchaseBlocked). Minor known quirk: EquipmentItemViewModel's
-    /// IsFreeForThisPurchase also keys off AvailableGold.HasValue, so a Dagger tile would show "Gratuit"
-    /// here even though searching never grants a free dagger - harmless since only entry.SelectedItem is
-    /// kept, never the picker's displayed price. Scoped to the UNION of every equipment list this warband's
-    /// recruitable WarriorArchetypes use
-    /// (allowedEquipmentListItemIds, resolved fresh on each open rather than cached - a handful of
-    /// GetEquipmentListItemIdsAsync calls, cheap) - NOT the searching Hero's own list, since "un héros
-    /// peut chercher un équipement qui n'est pas forcément pour lui" (found item goes to the band's
-    /// stash, not straight onto this Hero - user request 2026-08-28). Picking again replaces any previous
-    /// choice and clears the roll/material/purchase state (see RareItemSearchEntry.OnSelectedItemChanged),
-    /// same as ResolveExplorationResult resetting downstream state on a new die.</summary>
+    /// only make one roll for each Hero"), never a normal multi-item purchase. Melee weapon tiles show a
+    /// Gromril/Ithilmar variant right alongside the plain one (2026-09-23, retour utilisateur - "on
+    /// pourrait directement proposer les armes en ithilmar et les armes en gromril à l'achat plutôt que
+    /// d'avoir un sélecteur neutre et devoir cliquer sur une chip") - picking one sets SelectedMaterial
+    /// directly, no separate pill tap needed afterward (the pills on this step stay as a fallback/
+    /// override, unchanged). availableGold IS passed for ShowBudget's informational display - this step
+    /// commits nothing, the real cost/affordability is decided independently at the Achat step that
+    /// follows (RareItemPurchaseTotalCost/IsRareItemPurchaseBlocked). Scoped to the UNION of every
+    /// equipment list this warband's recruitable WarriorArchetypes use (allowedEquipmentListItemIds,
+    /// resolved fresh on each open rather than cached - a handful of GetEquipmentListItemIdsAsync calls,
+    /// cheap) - NOT the searching Hero's own list, since "un héros peut chercher un équipement qui n'est
+    /// pas forcément pour lui" (found item goes to the band's stash, not straight onto this Hero - user
+    /// request 2026-08-28). Picking again replaces any previous choice and clears the roll/material/
+    /// purchase state (see RareItemSearchEntry.OnSelectedItemChanged - SelectedItem MUST be set before
+    /// SelectedMaterial below, its changed-hook resets the latter to null), same as ResolveExplorationResult
+    /// resetting downstream state on a new die.</summary>
     [RelayCommand]
     private async Task SelectRareItem(RareItemSearchEntry entry)
     {
@@ -93,11 +94,11 @@ public partial class EndOfGamePageViewModel
         foreach (var listId in listIds)
             allowedItemIds.UnionWith(await _libraryService.GetEquipmentListItemIdsAsync(listId));
 
-        var picked = await _equipmentPicker.PickEquipmentAsync(_warbandArchetypeId, availableGold: RareItemPurchaseRemainingTreasury,
-            singleSelect: true, rareSearchMode: true, allowedEquipmentListItemIds: allowedItemIds);
-        if (picked.Count == 0) return;
+        var picked = await _equipmentPicker.PickRareEquipmentAsync(_warbandArchetypeId, allowedItemIds, RareItemPurchaseRemainingTreasury);
+        if (picked is not { } result) return;
 
-        entry.SelectedItem = picked[0];
+        entry.SelectedItem = result.Item;
+        entry.SelectedMaterial = result.MaterialRule;
     }
 
     // Item, pas entry : ChipView.Command reçoit toujours Item comme CommandParameter (voir ChipView.xaml),

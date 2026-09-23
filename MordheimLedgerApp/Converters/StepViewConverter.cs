@@ -5,15 +5,29 @@ using MordheimLedgerApp.Features.Warbands.EndOfGame.Steps;
 namespace MordheimLedgerApp.Converters
 {
     /// <summary>Choisit la vue de l'étape courante du wizard Fin de Partie (2026-09-22, voir
-    /// EndOfGamePageViewModel.CurrentStepKind's own doc) - une instance fraîche à chaque changement
-    /// d'étape, jamais mise en cache : chaque étape ne garde son état que dans EndOfGamePageViewModel
-    /// (source unique partagée par toutes les étapes), rien à préserver côté vue entre deux passages sur
-    /// la même étape. Toutes les StepKind sont couvertes - EndOfGamePage.xaml ne garde plus aucun bloc
-    /// IsXxxStep historique.</summary>
+    /// EndOfGamePageViewModel.CurrentStepKind's own doc) - une instance PAR StepKind, créée une seule
+    /// fois puis réutilisée (_cache), pas reconstruite à chaque conversion. Revenu sur le choix initial
+    /// "jamais de cache" (retour utilisateur 2026-09-22 - le Picker Résultat "apparaît une demi seconde
+    /// puis disparaît") : EndOfGamePageViewModel.InitializeAsync termine par un
+    /// OnPropertyChanged(string.Empty) (rafraîchissement générique, nécessaire pour d'autres propriétés -
+    /// voir sa doc), qui refait relire CurrentStepKind par ce convertisseur MÊME QUAND l'étape n'a pas
+    /// changé (Résultat, toujours l'étape 0, encore active à ce moment-là) - sans cache, ce second appel
+    /// construisait une DEUXIÈME instance de ResultStepView, dont le Picker n'a alors plus le temps de se
+    /// stabiliser avant d'être affiché (masquant/perdant la sélection déjà correcte de la première
+    /// instance). Avec le cache, ce second appel renvoie la MÊME instance (déjà correctement affichée),
+    /// donc ContentView.Content ne change même pas de référence - rien à reconstruire. Chaque étape ne
+    /// garde son état que dans EndOfGamePageViewModel (source unique partagée par toutes les étapes) -
+    /// réutiliser l'instance de vue ne change rien à ça, juste une économie de reconstruction.</summary>
     public sealed class StepViewConverter : IValueConverter
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-            value is EndOfGamePageViewModel.StepKind kind ? kind switch
+        private readonly Dictionary<EndOfGamePageViewModel.StepKind, ContentView> _cache = new();
+
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is not EndOfGamePageViewModel.StepKind kind) return null;
+            if (_cache.TryGetValue(kind, out var cached)) return cached;
+
+            ContentView? view = kind switch
             {
                 EndOfGamePageViewModel.StepKind.Result => new ResultStepView(),
                 EndOfGamePageViewModel.StepKind.OutOfAction => new OutOfActionStepView(),
@@ -43,7 +57,11 @@ namespace MordheimLedgerApp.Converters
                 EndOfGamePageViewModel.StepKind.EquipmentReallocation => new EquipmentReallocationStepView(),
                 EndOfGamePageViewModel.StepKind.Recap => new RecapStepView(),
                 _ => null
-            } : null;
+            };
+
+            if (view is not null) _cache[kind] = view;
+            return view;
+        }
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
             throw new NotSupportedException();

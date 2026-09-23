@@ -162,6 +162,21 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     [ObservableProperty]
     private string selectedResult = string.Empty;
 
+    /// <summary>Contourne un bug d'affichage WinUI (Picker.SelectedItem posé dans le constructeur, avant
+    /// que le contrôle natif n'existe encore - retour utilisateur 2026-09-22 : "j'ai rien qui s'affiche
+    /// dans le combo pourtant quand je clique dessus je vois que c'est Victoire de sélectionné", donc la
+    /// VALEUR est bien correcte, seul le texte affiché par le ComboBox natif ne se met jamais à jour tant
+    /// qu'aucune interaction ne force un redessin). Appelée depuis ResultStepView (Picker.Loaded, son
+    /// propre handler natif existe à coup sûr à ce moment-là) - un aller-retour par une valeur absente de
+    /// ResultOptions puis retour à la valeur réelle force le ComboBox WinUI à se redessiner, sans changer
+    /// la donnée elle-même (déjà correcte).</summary>
+    public void RefreshResultPickerDisplay()
+    {
+        var current = SelectedResult;
+        SelectedResult = string.Empty;
+        SelectedResult = current;
+    }
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentStepKind))]
     [NotifyPropertyChangedFor(nameof(CurrentInjuryWarrior))]

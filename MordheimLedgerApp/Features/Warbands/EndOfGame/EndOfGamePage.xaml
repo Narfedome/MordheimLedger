@@ -30,8 +30,11 @@
         <header:DetailPageHeaderView Grid.Row="0" Title="{loc:Loc EndOfGameTitle}" BackCommand="{Binding ExitCommand}"/>
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Spacing="16" Padding="16">
-            <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"/>
-
+            <!-- Pas de compteur "Étape X/Y" (retiré 2026-09-22, retour utilisateur - "elle fluctue en
+                 fonction de certaines conditions, ça ne sert pas de le mettre") : Steps.Count varie
+                 dynamiquement (guerriers Hors de combat, jets déclenchés, recrutement...), un total qui
+                 change sans arrêt n'est pas un repère utile pour le joueur. EndOfGamePageViewModel.
+                 StepLabel reste défini (nettoyage séparé si besoin) mais n'est plus affiché nulle part. -->
             <ContentView Content="{Binding CurrentStepKind, Converter={StaticResource StepViewConverter}}"/>
 
         </VerticalStackLayout>

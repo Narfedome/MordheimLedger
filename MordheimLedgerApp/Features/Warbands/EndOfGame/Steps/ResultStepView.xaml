@@ -7,7 +7,8 @@
              x:DataType="local:EndOfGamePageViewModel">
     <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
     <VerticalStackLayout Spacing="12">
-        <Picker Title="{loc:Loc EndOfGameResultPh}"
+        <Label Text="{loc:Loc EndOfGameResultPh}" FontAttributes="Bold"/>
+        <Picker x:Name="ResultPicker"
                 ItemsSource="{Binding ResultOptions}"
                 SelectedItem="{Binding SelectedResult}"/>
     </VerticalStackLayout>

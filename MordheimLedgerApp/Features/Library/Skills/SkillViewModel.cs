@@ -65,7 +65,7 @@ public partial class SkillViewModel : BaseViewModel
 
     /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by SkillPickerService
     /// before construction) = only skills whose RestrictedToWarbandArchetypeIds is empty (common) or
-    /// contains this id are shown - see WarriorEditDialogViewModel.AddSkill/EndOfGameDialogViewModel.</summary>
+    /// contains this id are shown - see WarriorEditDialogViewModel.AddSkill/EndOfGamePageViewModel.</summary>
     public int? AllowedWarbandArchetypeId { get; set; }
 
     /// <summary>Same idea as AllowedWarbandArchetypeId, one level down: only skills whose

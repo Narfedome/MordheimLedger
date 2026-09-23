@@ -8,7 +8,7 @@ public interface ISkillPickerService
 {
     /// <summary>warbandArchetypeId: only skills whose RestrictedToWarbandArchetypeIds is empty (common)
     /// or contains this id are selectable - see WarriorEditDialogViewModel.AddSkill/
-    /// EndOfGameDialogViewModel's Advance roll skill choice. warriorArchetypeId: same idea one level
+    /// EndOfGamePageViewModel's Advance roll skill choice. warriorArchetypeId: same idea one level
     /// down, null = no further filtering (e.g. picking for a Warrior whose archetype isn't relevant).
     /// allowedCategories: further restrict to these SkillCategory values (the warrior's own "skill
     /// table" row, e.g. WarriorArchetype/Warrior.AllowedSkillCategories) - null/omitted = no category

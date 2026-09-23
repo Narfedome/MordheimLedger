@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:header="clr-namespace:MordheimLedgerApp.Components.DetailPageHeader"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+               xmlns:advance="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
+               xmlns:createEdit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:converters="clr-namespace:MordheimLedgerApp.Converters"
+               x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.EndOfGamePage"
+               x:DataType="local:EndOfGamePageViewModel"
+               Shell.NavBarIsVisible="False">
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False"/>
+    </Shell.BackButtonBehavior>
+
+    <ContentPage.Resources>
+        <!-- Une vue par étape (2026-09-22, optimisation de l'ouverture) - voir StepViewConverter's own
+             doc. Chaque StepKind a sa propre vue sous Steps/*StepView.xaml (toutes liées au même
+             EndOfGamePageViewModel partagé, aucune donnée à transmettre entre elles) - ce fichier ne
+             construit donc plus que la vue de l'étape COURANTE, pas les ~27 d'un coup comme avant. -->
+        <converters:StepViewConverter x:Key="StepViewConverter"/>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <header:DetailPageHeaderView Grid.Row="0" Title="{loc:Loc EndOfGameTitle}" BackCommand="{Binding ExitCommand}"/>
+        <ScrollView Grid.Row="1">
+        <VerticalStackLayout Spacing="16" Padding="16">
+            <!-- Pas de compteur "Étape X/Y" (retiré 2026-09-22, retour utilisateur - "elle fluctue en
+                 fonction de certaines conditions, ça ne sert pas de le mettre") : Steps.Count varie
+                 dynamiquement (guerriers Hors de combat, jets déclenchés, recrutement...), un total qui
+                 change sans arrêt n'est pas un repère utile pour le joueur. EndOfGamePageViewModel.
+                 StepLabel reste défini (nettoyage séparé si besoin) mais n'est plus affiché nulle part. -->
+            <ContentView Content="{Binding CurrentStepKind, Converter={StaticResource StepViewConverter}}"/>
+
+        </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Épinglée en bas de l'écran (2026-09-22, retour utilisateur - "on a plus la contrainte du
+             dialog") : dans une dialog, ce bloc défilait avec le reste du contenu (largeur de carte fixe,
+             toujours proche) ; en page pleine, un wizard aussi long que celui-ci laisserait les boutons
+             hors champ la plupart du temps s'ils restaient dans le ScrollView - troisième ligne de la
+             Grid racine plutôt qu'en toute fin du contenu défilant. -->
+        <BoxView Grid.Row="2" Style="{StaticResource ChapterDividerStyle}" VerticalOptions="Start"/>
+        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="10" Padding="16,12" BackgroundColor="{DynamicResource AppBackground}">
+            <Button Grid.Column="0"
+                    Text="{loc:Loc BtnCancel}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding ExitCommand}"/>
+            <Button Grid.Column="1"
+                    Text="{loc:Loc LibBack}"
+                    Style="{StaticResource DialogSecondaryButtonStyle}"
+                    Command="{Binding BackCommand}"
+                    IsEnabled="{Binding CanGoBack}"/>
+            <Button Grid.Column="2"
+                    Text="{loc:Loc LibNext}"
+                    Command="{Binding NextCommand}"
+                    IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
+            <Button Grid.Column="2"
+                    Text="{loc:Loc BtnSave}"
+                    Command="{Binding FinishCommand}"
+                    IsVisible="{Binding IsLastStep}"/>
+        </Grid>
+    </Grid>
+</ContentPage>

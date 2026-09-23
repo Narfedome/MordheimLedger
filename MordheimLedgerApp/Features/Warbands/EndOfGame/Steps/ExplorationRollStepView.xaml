@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ExplorationRollStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Exploration - jet (livre, chapitre "Revenus"). Nombre de dés calculé
+                 automatiquement (1D6 par Héros survivant + 1D6 si victoire, plafonné à 6 - voir
+                 Core.Rules.ExplorationChart), le joueur saisit ou tire chaque dé. La résolution du
+                 résultat éventuellement déclenché (au plus un, voir ExplorationChart.DetectMultiples)
+                 vit dans une étape séparée juste après (IsExplorationResultStep, n'apparaît que si un
+                 doublon/triple/etc a effectivement été trouvé) plutôt que sur ce même écran - même
+                 découpage "une étape par sujet" que Hors de combat/Blessure ailleurs dans ce wizard. -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="{loc:Loc EndOfGameExplorationHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameExplorationDiceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <!-- Traînard, "autres bandes" : purement un rappel textuel, ne change pas le nombre de
+                     dés affiché plus bas - voir ExplorationDiceCount pour pourquoi. -->
+                <Label Text="{loc:Loc EndOfGamePendingBonusDieReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       IsVisible="{Binding ShowPendingExplorationBonusDieReminder}"/>
+                <!-- Entrée des Catacombes : rappel permanent (jamais consommé, contrairement au rappel
+                     Traînard ci-dessus) - voir Warband.HasCatacombReroll. -->
+                <Label Text="{loc:Loc EndOfGameCatacombRerollReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       IsVisible="{Binding ShowCatacombRerollReminder}"/>
+
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:ExplorationDieEntry">
+                            <VerticalStackLayout Spacing="4" Margin="0,0,10,10">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6">
+                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollExplorationDieCommand}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+
+                <!-- "Add the results together..." (Core.Rules.WyrdstoneShardsTable) - effet SÉPARÉ et
+                     ADDITIF du jet, indépendant du résultat éventuel des doublons/triplets ci-dessous
+                     (IsExplorationResultStep) - toujours appliqué, même sans aucun résultat spécial. -->
+                <Label Text="{Binding BaselineWyrdstoneShardsFoundDisplay}" FontAttributes="Bold"/>
+            </VerticalStackLayout>
+
+</ContentView>

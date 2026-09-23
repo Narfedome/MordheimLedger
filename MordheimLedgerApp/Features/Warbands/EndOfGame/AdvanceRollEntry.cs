@@ -19,7 +19,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// (10-12, see HenchmanAdvanceTable.IsPromotion) expands this same card in place with the 2 skill
 /// tables + the promoted Hero's immediate Advance roll (NestedHeroRoll) - a NESTED AdvanceRollEntry
 /// rather than a new WizardStep, deliberately, per the hazard already documented on
-/// EndOfGameDialogViewModel.WizardStep.IsExplorationAdvance (Steps is recomputed on every access; a
+/// EndOfGamePageViewModel.WizardStep.IsExplorationAdvance (Steps is recomputed on every access; a
 /// step whose visibility flips true after the player has scrolled past it corrupts navigation). If the
 /// source group still has members left after promoting one, a second nested roll (NestedHenchmanRoll,
 /// SuppressPromotion: true - a 10-12 there re-rolls instead of promoting a second model, per the
@@ -34,7 +34,7 @@ public partial class AdvanceRollEntry : ObservableObject
     /// pass) rather than expanding a third level of nesting.</summary>
     private readonly bool _suppressPromotion;
 
-    /// <summary>Snapshot of the warband's Hero count at wizard-open time (EndOfGameDialogViewModel
+    /// <summary>Snapshot of the warband's Hero count at wizard-open time (EndOfGamePageViewModel
     /// construction) - compared against PromotionRules.MaxHeroes for CanPromote. Does NOT account for
     /// another Henchman group promoting earlier in this SAME End of Game pass - a documented,
     /// deliberately accepted simplification (crossing the 6-Hero cap via two separate promotions in one
@@ -85,7 +85,7 @@ public partial class AdvanceRollEntry : ObservableObject
     private string manualRoll = string.Empty;
 
     /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
-    /// EndOfGameDialogViewModel.Next si ce jet (ou le choix de caractéristique qu'il implique) est
+    /// EndOfGamePageViewModel.Next si ce jet (ou le choix de caractéristique qu'il implique) est
     /// encore vide/invalide à ce moment-là.</summary>
     [ObservableProperty]
     private string? rollError;
@@ -184,7 +184,7 @@ public partial class AdvanceRollEntry : ObservableObject
     public bool HasSkillSelected => SelectedSkills.Count > 0;
 
     /// <summary>Sort permanent choisi à la place d'une compétence (ShowSpellOption) - EXCLUSIF de
-    /// SelectedSkills, voir OnManualRollChanged/EndOfGameDialogViewModel.PickAdvanceSkill/
+    /// SelectedSkills, voir OnManualRollChanged/EndOfGamePageViewModel.PickAdvanceSkill/
     /// PickAdvanceSpell (choisir l'un efface l'autre).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSpellSelected))]
@@ -475,7 +475,7 @@ public partial class AdvanceRollEntry : ObservableObject
     /// null si rien ne manque (voir IsFullyResolved). Remplace un unique message générique "Un jet est
     /// requis" qui s'appliquait même quand le jet PRINCIPAL était déjà fait mais qu'il restait un choix
     /// à faire (compétence/sort, sous-jet, caractéristique...) - demande explicite du 2026-08-24 : "trop
-    /// étrange de dire qu'il faut le jet alors qu'on l'a fait". Seul EndOfGameDialogViewModel.
+    /// étrange de dire qu'il faut le jet alors qu'on l'a fait". Seul EndOfGamePageViewModel.
     /// ValidateAdvanceStep l'utilise (posé dans AdvanceRollEntry.RollError). Recouvre récursivement le
     /// cas Promotion (NestedHeroRoll/NestedHenchmanRoll) - jamais de cycle possible, ceux-ci ne peuvent
     /// eux-mêmes jamais être Kind == Promotion (voir SuppressPromotion et HeroAdvanceTable, qui n'a

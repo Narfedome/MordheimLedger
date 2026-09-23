@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.InjuryStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Blessure - une carte par guerrier/groupe coché hors de combat, un seul à la
+                 fois (CurrentInjuryWarrior), pas une liste. Héros et groupe d'Hommes de main divergent
+                 ici : un Héros a un seul jet (+ ses éventuels sous-jets de Blessures multiples) ;
+                 un groupe a un jet D6 indépendant par figurine hors de combat (FigureInjuryRolls). -->
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameInjuriesHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding InjuryProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <components:ChipView Grid.Column="0" Item="{Binding CurrentInjuryWarrior}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowWarriorRecapCommand}"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                            <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de mort (voir
+                                 ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe
+                                 perd des figurines (HeadCount) plutôt que de passer Mort d'un coup. -->
+                            <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.IsDead}"
+                                   TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
+                        </Grid>
+
+                        <!-- Héros : un seul jet (+ Blessures multiples éventuelles). Le joueur peut soit
+                             laisser l'appli tirer les dés (Dice = jet aléatoire + popup de résultat
+                             immédiate), soit lancer ses propres dés à la table et saisir le score
+                             lui-même : dès que la saisie est un jet complet et valide, le résultat
+                             s'affiche tout seul sous le champ (pas de bouton à cliquer). -->
+                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero}" Spacing="8">
+                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.ManualRoll}" Keyboard="Numeric"
+                                       Placeholder="{Binding CurrentInjuryWarrior.RollPlaceholder}" WidthRequest="70">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                              Command="{Binding AutoRollCommand}"
+                                                              CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                            </Grid>
+                            <Label Text="{Binding CurrentInjuryWarrior.RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                            <Label Text="{Binding CurrentInjuryWarrior.InjuryResultText}" FontSize="12"/>
+
+                            <!-- Résultat "Blessures multiples" (16/21) : 1D6 pour savoir combien de
+                                 sous-jets faire sur cette même table, puis un jet D66 par sous-jet. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowMultipleInjuriesSection}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameMultipleInjuriesHeading}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameMultipleInjuryCountPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollMultipleInjuryCountCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.MultipleInjuryCountError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.MultipleInjuryCountError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.MultipleInjuryRolls}" Spacing="6">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                           Placeholder="{loc:Loc EndOfGameRollPh}" WidthRequest="70">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                                  CommandParameter="{Binding .}"
+                                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                </Grid>
+                                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 35 (Blessure profonde). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowDeepWoundSubRoll}" Spacing="4">
+                                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding DeepWoundSubRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubDeepWoundCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                    </Grid>
+                                                    <Label Text="{Binding DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                    <Label Text="{Binding DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 61 (Capturé). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowCapturedChoice}" Spacing="4">
+                                                    <HorizontalStackLayout Spacing="8">
+                                                        <CheckBox IsChecked="{Binding IsRansomed}" VerticalOptions="Center"/>
+                                                        <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>
+                                                    </HorizontalStackLayout>
+                                                    <Entry IsVisible="{Binding IsRansomed}" Text="{Binding RansomAmount}"
+                                                           Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="120">
+                                                        <Entry.Behaviors>
+                                                            <components:DigitsOnlyBehavior/>
+                                                        </Entry.Behaviors>
+                                                    </Entry>
+                                                    <Label Text="{Binding CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 56 (Rancune) - même sous-jet 1D6 de
+                                                     portée + choix de cible que le jet principal ci-dessous
+                                                     (2026-09-04, retour utilisateur - "les rolls des
+                                                     blessures doivent être les mêmes qu'une blessure
+                                                     classique"). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowHatredSection}" Spacing="4">
+                                                    <Label Text="{loc:Loc EndOfGameHatredScopeHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding HatredSubRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameHatredSubRollPh}" WidthRequest="70">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubHatredCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                    </Grid>
+                                                    <Entry IsVisible="{Binding ShowHatredFreeTextEntry}"
+                                                           Text="{Binding HatredTargetFreeTextInput}"
+                                                           Placeholder="{Binding HatredFreeTextPlaceholder}"/>
+                                                    <Button Text="{loc:Loc EndOfGameHatredPickWarbandArchetype}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                                                            FontSize="12" Padding="8,4" HorizontalOptions="Start"
+                                                            IsVisible="{Binding ShowHatredArchetypePicker}"
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=PickSubHatredWarbandArchetypeCommand}"
+                                                            CommandParameter="{Binding .}"/>
+                                                    <Label Text="{Binding HatredRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding HatredRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                    <Label Text="{Binding HatredTargetDisplayName}" FontSize="12"
+                                                           IsVisible="{Binding ShowHatredFreeTextEntry}"/>
+                                                    <components:ChipView IsVisible="{Binding HatredTargetWarbandArchetype, Converter={StaticResource IsNotNullConverter}}"
+                                                                          Item="{Binding HatredTargetWarbandArchetype}"
+                                                                          IconGlyph="{x:Static icons:SolidFont.Users}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowHatredArchetypeDetailCommand}"
+                                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveHatredArchetypeCommand}"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 23 (Blessure au bras)/25 (Jambe
+                                                     écrasée)/24 (Folie) - même branche 1D6 que le jet
+                                                     principal, y compris la chip de règle spéciale pour
+                                                     Folie (Stupidité/Frénésie). -->
+                                                <VerticalStackLayout IsVisible="{Binding ShowInjuryBranchSubRoll}" Spacing="4">
+                                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                        <Entry Grid.Column="0" Text="{Binding InjuryBranchSubRoll}" Keyboard="Numeric"
+                                                               Placeholder="{loc:Loc EndOfGameInjuryBranchSubRollPh}" WidthRequest="70">
+                                                            <Entry.Behaviors>
+                                                                <components:DigitsOnlyBehavior/>
+                                                            </Entry.Behaviors>
+                                                        </Entry>
+                                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryBranchCommand}"
+                                                                                      CommandParameter="{Binding .}"
+                                                                                      Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                                    </Grid>
+                                                    <Label Text="{Binding InjuryBranchRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                           IsVisible="{Binding InjuryBranchRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                                    <Label Text="{Binding InjuryBranchResultText}" FontSize="12" FontAttributes="Bold"
+                                                           IsVisible="{Binding HasInjuryBranchSpecialRules, Converter={StaticResource InverseBoolConverter}}"/>
+                                                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding InjuryBranchSpecialRules}"
+                                                                IsVisible="{Binding HasInjuryBranchSpecialRules}">
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate x:DataType="library:SpecialRule">
+                                                                <components:ChipView Item="{Binding .}"
+                                                                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </FlexLayout>
+                                                </VerticalStackLayout>
+
+                                                <!-- Sous-jet imbriqué : ce sous-jet "Blessures multiples"
+                                                     tombe lui-même sur 65 (Vendu aux Fosses) - juste un
+                                                     rappel ici, le combat de gladiateur lui-même se résout
+                                                     dans sa propre étape (une par occurrence, voir
+                                                     IsPitFightStep plus bas). -->
+                                                <Label Text="{loc:Loc EndOfGameSoldToPitsInlineHint}" FontSize="11"
+                                                       FontAttributes="Italic" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding ShowSoldToThePits}"/>
+                                            </VerticalStackLayout>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Rancune" (56) : 1D6 pour savoir quelle est la portée de la
+                                 Haine (Core.Rules.HatredTargetTable), PUIS un champ adapté à cette
+                                 portée. L'appli ne suit pas les bandes/guerriers adverses comme données
+                                 structurées (retour utilisateur explicite - rien à choisir dans un
+                                 picker de toute façon) : portées 1-4 (individu/chef) et 5 (cette bande)
+                                 sont un simple champ texte à la frappe, seule la portée 6 (toutes les
+                                 bandes de ce type) garde un picker structuré, car elle référence un vrai
+                                 WarbandArchetype du catalogue. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowHatredSection}" Spacing="6">
+                                <Label Text="{loc:Loc EndOfGameHatredHeading}" FontSize="12"
+                                       FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{loc:Loc EndOfGameHatredScopeHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.HatredSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameHatredSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollHatredCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+
+                                <Entry IsVisible="{Binding CurrentInjuryWarrior.ShowHatredFreeTextEntry}"
+                                       Text="{Binding CurrentInjuryWarrior.HatredTargetFreeTextInput}"
+                                       Placeholder="{Binding CurrentInjuryWarrior.HatredFreeTextPlaceholder}"/>
+
+                                <Button Text="{loc:Loc EndOfGameHatredPickWarbandArchetype}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                                        FontSize="12" Padding="8,4" HorizontalOptions="Start"
+                                        IsVisible="{Binding CurrentInjuryWarrior.ShowHatredArchetypePicker}"
+                                        Command="{Binding PickHatredWarbandArchetypeCommand}"
+                                        CommandParameter="{Binding CurrentInjuryWarrior}"/>
+
+                                <Label Text="{Binding CurrentInjuryWarrior.HatredRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.HatredRollError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                <!-- Portées 1-5 (texte libre) : simple confirmation, l'Entry ci-dessus
+                                     affiche déjà la saisie. -->
+                                <Label Text="{Binding CurrentInjuryWarrior.HatredTargetDisplayName}" FontSize="12"
+                                       IsVisible="{Binding CurrentInjuryWarrior.ShowHatredFreeTextEntry}"/>
+
+                                <!-- Portée 6 : chip tapable (détail de l'archétype) + retirable (relance
+                                     le picker), même langage que le reste de l'app plutôt qu'un label
+                                     brut. -->
+                                <components:ChipView IsVisible="{Binding CurrentInjuryWarrior.HatredTargetWarbandArchetype, Converter={StaticResource IsNotNullConverter}}"
+                                                      Item="{Binding CurrentInjuryWarrior.HatredTargetWarbandArchetype}"
+                                                      IconGlyph="{x:Static icons:SolidFont.Users}"
+                                                      Command="{Binding ShowHatredArchetypeDetailCommand}"
+                                                      RemoveCommand="{Binding RemoveHatredArchetypeCommand}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Blessure au bras" (23) / "Jambe écrasée" (25) : le texte des
+                                 deux branches est déjà visible ci-dessus (InjuryResultText) - ce 1D6
+                                 détermine laquelle s'applique réellement (branche 2-6 = rate la
+                                 prochaine bataille, mécanisée ; branche 1 = grave, reste texte seul). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowInjuryBranchSubRoll}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.InjuryBranchSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameInjuryBranchSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollInjuryBranchCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.InjuryBranchRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <!-- Confirmation : le résultat réellement résolu par cette branche (ex.
+                                     "Bras amputé : ..."), pas le texte général des deux branches déjà
+                                     affiché plus haut - même langage que la confirmation de portée de
+                                     Rancune (HatredTargetDisplayName) plus haut dans cette étape. Reste
+                                     un simple texte pour 23/25 (aucune SpecialRule attachée à ces
+                                     branches) - une chip tapable la remplace dès qu'il y en a une (Folie
+                                     24 -> Stupidité/Frénésie, voir InjuryBranchSpecialRules), "il faut
+                                     mettre le chip plutôt que du texte" (retour utilisateur 2026-08-25). -->
+                                <Label Text="{Binding CurrentInjuryWarrior.InjuryBranchResultText}" FontSize="12" FontAttributes="Bold"
+                                       IsVisible="{Binding CurrentInjuryWarrior.HasInjuryBranchSpecialRules, Converter={StaticResource InverseBoolConverter}}"/>
+                                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.InjuryBranchSpecialRules}"
+                                            IsVisible="{Binding CurrentInjuryWarrior.HasInjuryBranchSpecialRules}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="library:SpecialRule">
+                                            <components:ChipView Item="{Binding .}"
+                                                                  IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowInjuryBranchSpecialRuleDetailCommand}"/>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Blessure profonde" (35) : 1D3 déterminant le nombre de parties
+                                 manquées - jusqu'ici tiré silencieusement par l'appli sans que le joueur
+                                 ne le voie ni ne le saisisse (retour utilisateur 2026-08-26). -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowDeepWoundSubRoll}" Spacing="6">
+                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Entry Grid.Column="0" Text="{Binding CurrentInjuryWarrior.DeepWoundSubRoll}" Keyboard="Numeric"
+                                           Placeholder="{loc:Loc EndOfGameDeepWoundSubRollPh}" WidthRequest="70">
+                                        <Entry.Behaviors>
+                                            <components:DigitsOnlyBehavior/>
+                                        </Entry.Behaviors>
+                                    </Entry>
+                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                  Command="{Binding AutoRollDeepWoundCommand}"
+                                                                  CommandParameter="{Binding CurrentInjuryWarrior}"
+                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                </Grid>
+                                <Label Text="{Binding CurrentInjuryWarrior.DeepWoundRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.DeepWoundRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                <Label Text="{Binding CurrentInjuryWarrior.DeepWoundConfirmationText}" FontSize="12" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+
+                            <!-- Résultat "Capturé" (61) : portée revue à la baisse (2026-08-27, voir
+                                 SERIOUS_INJURIES_STATUS.md) - le livre décrit 5 issues nommées mais
+                                 toutes racontent une décision du CAPTEUR (bande adverse non modélisée),
+                                 seule la rançon change réellement quelque chose de notre point de vue
+                                 (coût déduit de notre trésorerie, le guerrier revient). Décoché = perdu,
+                                 considéré mort - même traitement que toute autre issue non ransomée. -->
+                            <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.ShowCapturedChoice}" Spacing="6">
+                                <HorizontalStackLayout Spacing="8">
+                                    <CheckBox IsChecked="{Binding CurrentInjuryWarrior.IsRansomed}" VerticalOptions="Center"/>
+                                    <Label Text="{loc:Loc EndOfGameCapturedRansomLabel}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                                <Entry IsVisible="{Binding CurrentInjuryWarrior.IsRansomed}" Text="{Binding CurrentInjuryWarrior.RansomAmount}"
+                                       Keyboard="Numeric" Placeholder="{loc:Loc EndOfGameCapturedRansomAmountPh}" WidthRequest="120">
+                                    <Entry.Behaviors>
+                                        <components:DigitsOnlyBehavior/>
+                                    </Entry.Behaviors>
+                                </Entry>
+                                <Label Text="{Binding CurrentInjuryWarrior.CapturedChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                       IsVisible="{Binding CurrentInjuryWarrior.CapturedChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+
+                        <!-- Groupe d'Hommes de main : un jet D6 indépendant par figurine hors de combat
+                             (FigureInjuryRolls, déjà peuplé au nombre indiqué à l'étape précédente),
+                             même résolution automatique que côté Héros ci-dessus. -->
+                        <VerticalStackLayout IsVisible="{Binding CurrentInjuryWarrior.IsHero, Converter={StaticResource InverseBoolConverter}}" Spacing="10">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.FigureInjuryRolls}" Spacing="6">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="local:InjurySubRollEntry">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="{Binding Label}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="70">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
+                                                                              CommandParameter="{Binding .}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+</ContentView>

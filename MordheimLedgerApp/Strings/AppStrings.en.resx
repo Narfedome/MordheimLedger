@@ -471,6 +471,9 @@
   <data name="LibNext" xml:space="preserve">
     <value>Next</value>
   </data>
+  <data name="LibNoneOption" xml:space="preserve">
+    <value>None</value>
+  </data>
   <data name="WarbandArchetypeNamePh" xml:space="preserve">
     <value>Warband name</value>
   </data>
@@ -898,6 +901,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameNoWarriors" xml:space="preserve">
     <value>No active warrior in this warband.</value>
+  </data>
+  <data name="EndOfGameExitConfirmTitle" xml:space="preserve">
+    <value>Abandon this End of Game?</value>
+  </data>
+  <data name="EndOfGameExitConfirmMessage" xml:space="preserve">
+    <value>Nothing has been saved yet. Leaving now discards everything entered in this wizard.</value>
   </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Result</value>
@@ -1490,6 +1499,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameEquipmentReallocationDestinationTitle" xml:space="preserve">
     <value>Move to…</value>
   </data>
+  <data name="EndOfGameReallocationQuantityTitle" xml:space="preserve">
+    <value>Move how many?</value>
+  </data>
+  <data name="EndOfGameReallocationQuantityPrompt" xml:space="preserve">
+    <value>How many to move? (1-{0})</value>
+  </data>
   <data name="HistoryEquipmentReallocatedSentence" xml:space="preserve">
     <value>{0} moves to {1}.</value>
   </data>
@@ -1615,6 +1630,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
     <value>Not enough gold - uncheck an item or adjust the rolls before continuing.</value>
+  </data>
+  <data name="EndOfGameTreasuryBlockedMessage" xml:space="preserve">
+    <value>Not enough gold - adjust your choices before continuing.</value>
   </data>
   <data name="EndOfGameRareItemPurchaseWyrdstoneBlockedMessage" xml:space="preserve">
     <value>Not enough wyrdstone shards to pay Nicodemus - sell fewer at the previous step or uncheck his recruitment.</value>

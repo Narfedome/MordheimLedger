@@ -21,4 +21,18 @@ public partial class WarbandDetailPage : ContentPage
             RosterScroll.HorizontalOptions = LayoutOptions.Center;
         }
     }
+
+    // Rafraîchit à chaque retour sur cette page (ex. depuis EndOfGamePage, qui persiste puis navigue
+    // en arrière) - même pattern que les pages Bibliothèque (ex. RaceListPage.xaml.cs). Nécessaire
+    // depuis que Fin de Partie est une page Shell distincte plutôt qu'une dialog : OnWarbandIdChanged
+    // (WarbandDetailViewModel) ne se redéclenche pas quand l'id est inchangé après un
+    // Shell.GoToAsync(".."), contrairement à l'ancien flux où EndOfGame() rappelait LoadAsync
+    // directement dans le même appel de commande.
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (BindingContext is WarbandDetailViewModel vm)
+            await vm.LoadAsync(vm.WarbandId);
+    }
 }

@@ -25,6 +25,14 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// jamais présent ici), donc jamais confondu avec un retrait.</summary>
     public IReadOnlyCollection<int> OriginalEquipmentIds { get; }
 
+    /// <summary>Quantité RÉELLEMENT en base pour chaque id d'OriginalEquipmentIds, capturée au même
+    /// instant (2026-09-23, ajouté pour la sélection de quantité de Réallouer) - permet à
+    /// ApplyEquipmentReallocationAsync de détecter un déplacement PARTIEL (la ligne reste, avec son id
+    /// réel inchangé, mais sa Quantity a été réduite en mémoire) en plus des cas déjà couverts
+    /// (disparue/arrivée) - sans ce second instantané, une réduction de quantité ne serait jamais
+    /// synchronisée vers la DB et dupliquerait silencieusement l'objet déplacé.</summary>
+    public IReadOnlyDictionary<int, int> OriginalEquipmentQuantities { get; }
+
     /// <summary>The archetype's name (e.g. "Zombie", "Capitaine") shown instead of a plain Héros/Homme
     /// de main label on every step of this wizard - same value as WarriorRow.RoleName, passed in by
     /// the caller (WarbandDetailViewModel.EndOfGame already has it resolved for the roster).</summary>
@@ -37,7 +45,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     /// <summary>Copie de WarriorRow.MagicSchools (bande entière, déjà vide côté appelant pour tout
     /// guerrier dont l'archétype n'est pas IsSpellcaster - voir WarriorRow) - consommée par
-    /// EndOfGameDialogViewModel.PickAdvanceSpell (tirage 1D6 sur ces écoles, même mécanisme que
+    /// EndOfGamePageViewModel.PickAdvanceSpell (tirage 1D6 sur ces écoles, même mécanisme que
     /// WarriorEditDialogViewModel.AddSpell). IsSpellcaster (passé à chaque AdvanceRollEntry créé par ce
     /// row, pour ShowSpellOption) en est directement dérivé.</summary>
     public IReadOnlyList<MagicSchool> MagicSchools { get; }
@@ -49,7 +57,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     public bool ShowsInExperienceStep => !IsDead && GainsExperience;
 
     /// <summary>Saisie libre du PX gagné cette partie (scénario + survie + bonus outsider - non calculé,
-    /// voir la doc de classe d'EndOfGameDialogViewModel) - texte plutôt qu'int pour que le champ parte
+    /// voir la doc de classe d'EndOfGamePageViewModel) - texte plutôt qu'int pour que le champ parte
     /// vide au lieu d'afficher "0" par défaut, même motif que ManualRoll plus bas.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
@@ -76,7 +84,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// totalement distinct d'ExperienceGained (l'étape Expérience, plus tôt dans le wizard, pour l'XP de
     /// bataille normale) : deux sources d'XP différentes, jamais mélangées pour éviter qu'un retour en
     /// arrière sur l'étape Expérience affiche une valeur modifiée par une étape plus tardive. Remis à 0 à
-    /// chaque nouveau résultat d'Exploration déclenché (EndOfGameDialogViewModel.ResolveExplorationResult),
+    /// chaque nouveau résultat d'Exploration déclenché (EndOfGamePageViewModel.ResolveExplorationResult),
     /// pas seulement quand ce guerrier change.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExplorationBonusExperience))]
@@ -88,7 +96,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     /// <summary>Montant fixe accordé par une branche d'Exploration ciblant TOUJOURS le chef, sans jet ni
     /// choix du joueur (Traînard, branche Possédés - "le chef gagne +1 Expérience", voir
-    /// ExplorationOutcome.GrantsLeaderExperience) - renseigné par EndOfGameDialogViewModel sur la seule
+    /// ExplorationOutcome.GrantsLeaderExperience) - renseigné par EndOfGamePageViewModel sur la seule
     /// ligne dont Warrior.IsLeader est vrai quand cette branche se résout (0 pour tout autre guerrier),
     /// même idiome que DistributedExplorationExperience mais sans steppeur puisqu'il n'y a rien à
     /// répartir.</summary>
@@ -168,7 +176,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     /// <summary>OutOfActionCount change (case cochée/décochée pour un Héros, stepper +/- pour un groupe
     /// d'Hommes de main) : ce guerrier n'a plus d'étape Blessure dans le wizard si la valeur retombe à 0
-    /// (voir EndOfGameDialogViewModel.Steps), donc plus rien à y montrer. Héros et groupe divergent
+    /// (voir EndOfGamePageViewModel.Steps), donc plus rien à y montrer. Héros et groupe divergent
     /// ensuite : un Héros efface son unique jet (ManualRoll/InjuryResultText/Blessures multiples/statut
     /// dérivé) ; un groupe resynchronise juste FigureInjuryRolls sur le nouveau compte (peut aussi
     /// grandir, contrairement au cas Héros qui ne vaut jamais plus que 1).</summary>
@@ -215,7 +223,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     private string manualRoll = string.Empty;
 
     /// <summary>Message affiché sous le champ ManualRoll si le joueur essaie de passer à l'étape
-    /// suivante (EndOfGameDialogViewModel.Next) sans jet valide - jamais posé par une simple frappe,
+    /// suivante (EndOfGamePageViewModel.Next) sans jet valide - jamais posé par une simple frappe,
     /// seulement par cette validation ; effacé dès que le jet redevient valide (ci-dessous), pas
     /// seulement au prochain essai de Suivant.</summary>
     [ObservableProperty]
@@ -435,7 +443,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// une portée en texte libre, via PickHatredWarbandArchetypeCommand pour la portée 6). Pas de préfixe
     /// "Haine :" ici (voir WarriorHatred.Name) - purement informatif pour ce wizard, le préfixe
     /// s'applique à l'affichage en chip une fois la partie enregistrée (WarbandDetailViewModel.
-    /// BuildSpecialRuleChips's cousin, voir WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync).</summary>
+    /// BuildSpecialRuleChips's cousin, voir EndOfGamePageViewModel.Apply.ApplyWarriorOutcomesAsync).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     [NotifyPropertyChangedFor(nameof(HasHatredTarget))]
@@ -458,7 +466,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     [NotifyPropertyChangedFor(nameof(HasHatredTarget))]
     private WarbandArchetype? hatredTargetWarbandArchetype;
 
-    /// <summary>Appelée par EndOfGameDialogViewModel.Injury.PickHatredWarbandArchetype une fois le dialog
+    /// <summary>Appelée par EndOfGamePageViewModel.Injury.PickHatredWarbandArchetype une fois le dialog
     /// résolu (portée 6 uniquement - les autres se résolvent à la frappe, voir
     /// OnHatredTargetFreeTextInputChanged).</summary>
     public void SetHatredTarget(WarbandArchetype archetype)
@@ -538,7 +546,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// <summary>Résolu depuis ManualRoll+InjuryBranchSubRoll (voir Core.Rules.SeriousInjuryEffectTable.
     /// TryGetBranchSubRollOutcome) - null tant que le sous-jet n'est pas encore saisi/valide, ainsi que
     /// pour la branche grave (1) qui reste hors Palier 1 (aucun effet mécanisé, cf. la doc de la
-    /// table). Consommé par WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync pour appliquer
+    /// table). Consommé par EndOfGamePageViewModel.Apply.ApplyWarriorOutcomesAsync pour appliquer
     /// l'effet réel.</summary>
     public SeriousInjuryOutcome? InjuryBranchOutcome =>
         int.TryParse(ManualRoll, out var roll) && int.TryParse(InjuryBranchSubRoll, out var subRoll) &&
@@ -577,7 +585,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     /// <summary>True dès que le sous-jet est un 1D3 valide (1-3) - sert à la fois à valider avant de
     /// continuer (ValidateInjuryStep) et à résoudre le nombre réel de parties manquées appliqué à la
-    /// sauvegarde (voir WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync).</summary>
+    /// sauvegarde (voir EndOfGamePageViewModel.Apply.ApplyWarriorOutcomesAsync).</summary>
     public bool HasValidDeepWoundSubRoll => int.TryParse(DeepWoundSubRoll, out var subRoll) && subRoll is >= 1 and <= 3;
 
     /// <summary>Confirmation affichée sous le sous-jet une fois valide, ex. "2 parties manquées" -
@@ -604,7 +612,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     /// <summary>Coché si le joueur choisit de payer une rançon pour récupérer ce guerrier - décoché
     /// (par défaut) signifie "perdu" (voir Core.Rules... non, pas de table Core ici, la logique est
-    /// trop simple pour le justifier : voir WarbandDetailViewModel.EndOfGame.ApplyWarriorOutcomesAsync).</summary>
+    /// trop simple pour le justifier : voir EndOfGamePageViewModel.Apply.ApplyWarriorOutcomesAsync).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     private bool isRansomed;
@@ -763,11 +771,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// ExperienceGained + SeriousInjuryBonusExperience) plutôt que depuis Warrior.Experience directement -
     /// évite de recompter/refaire jeter un palier déjà traité par MilestoneCount ci-dessus. Nécessaire
     /// parce que l'Exploration (chapitre "Revenus") a lieu APRÈS la Progression dans la séquence
-    /// officielle du livre (voir la doc de classe d'EndOfGameDialogViewModel) : un palier uniquement
+    /// officielle du livre (voir la doc de classe d'EndOfGamePageViewModel) : un palier uniquement
     /// atteint grâce à cet XP-là ne peut être détecté qu'une fois l'Exploration résolue, jamais pendant la
     /// Progression elle-même. Réutilise exactement la même mécanique (ExperienceMilestones,
     /// AdvanceRollEntry, HeroAdvanceTable/HenchmanAdvanceTable) via une deuxième carte Progression
-    /// insérée après l'étape Exploration - voir EndOfGameDialogViewModel.Steps/
+    /// insérée après l'étape Exploration - voir EndOfGamePageViewModel.Steps/
     /// WizardStep.IsExplorationAdvance.</summary>
     public int ExplorationMilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero,
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience,
@@ -809,7 +817,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         }
     }
 
-    /// <summary>Nombre de Héros de la bande à l'ouverture du wizard (voir EndOfGameDialogViewModel) -
+    /// <summary>Nombre de Héros de la bande à l'ouverture du wizard (voir EndOfGamePageViewModel) -
     /// transmis tel quel à chaque AdvanceRollEntry créé par ce row pour AdvanceRollEntry.CanPromote,
     /// voir sa doc pour la limite acceptée (ne suit pas les promotions résolues plus tôt dans la même
     /// Fin de Partie).</summary>
@@ -829,6 +837,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     {
         Warrior = warrior;
         OriginalEquipmentIds = warrior.Equipment.Select(we => we.Id).ToList();
+        OriginalEquipmentQuantities = warrior.Equipment.ToDictionary(we => we.Id, we => we.Quantity);
         ArchetypeName = archetypeName;
         GainsExperience = gainsExperience;
         _startingHeroCount = startingHeroCount;

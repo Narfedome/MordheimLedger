@@ -15,7 +15,7 @@ public interface IHiredSwordPickerService
     Task<IReadOnlyList<HiredSword>> PickHiredSwordsAsync(int? warbandArchetypeId = null, IReadOnlyList<int>? excludedHiredSwordIds = null);
 
     /// <summary>Sélection unique (ex. "Une Faveur Rendue" - un seul Franc-Tireur gratuit à la fois, voir
-    /// EndOfGameDialogViewModel.Exploration.cs) - même filtres que PickHiredSwordsAsync, null si annulé.</summary>
+    /// EndOfGamePageViewModel.Exploration.cs) - même filtres que PickHiredSwordsAsync, null si annulé.</summary>
     Task<HiredSword?> PickHiredSwordAsync(int? warbandArchetypeId = null, IReadOnlyList<int>? excludedHiredSwordIds = null);
 }
 

@@ -15,7 +15,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 ///
 /// Résolu via DI (AddTransient, comme MutationViewModel/EquipmentItemViewModel) mais initialisé APRÈS
 /// résolution (Initialize) par SellEquipmentPickerService plutôt qu'au constructeur - Candidates vient du
-/// wizard appelant (EndOfGameDialogViewModel.EquipmentTrading.cs's BuildSellableCandidates, calculé à la
+/// wizard appelant (EndOfGamePageViewModel.EquipmentTrading.cs's BuildSellableCandidates, calculé à la
 /// demande à chaque ouverture pour refléter la réserve à cet instant précis, jamais interrogé ici via un
 /// service Library comme les autres pickers de cette famille).</summary>
 public partial class SellEquipmentSelectorViewModel : ObservableObject

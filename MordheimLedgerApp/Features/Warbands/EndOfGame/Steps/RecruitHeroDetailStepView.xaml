@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.RecruitHeroDetailStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Détail d'un héros recruté (dynamique, une étape PAR héros - même principe que
+                 Blessure/Progression) - nom ET équipement pour CE héros précis sur le même écran, "ce qui
+                 permet d'assigner directement les items au personnage" (retour utilisateur). Même
+                 RecruitSlotTabsView que WarbandEditDialogViewModel (Compétences/XP/Sorts hors mode Bande
+                 existante ne s'appliquent jamais à ce contexte). -->
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHeroDetailHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitHeroProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Label Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc EndOfGameTreasuryBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsTreasuryBlocked}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Entry Text="{Binding CurrentRecruitHeroSlot.Name}" Placeholder="{Binding CurrentRecruitHeroSlot.ArchetypeLabel}" FontSize="13"/>
+                        <components:RecruitSlotTabsView Item="{Binding CurrentRecruitHeroSlot}"
+                              IsVisible="{Binding CurrentRecruitHeroSlot.ShowTabsView}"
+                              AddEquipmentCommand="{Binding AddRecruitEquipmentCommand}"
+                              RemoveEquipmentCommand="{Binding RemoveRecruitEquipmentCommand}"
+                              ShowEquipmentDetailCommand="{Binding ShowRecruitEquipmentDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Label Text="{Binding RecruitHeroDetailError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding RecruitHeroDetailError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+</ContentView>

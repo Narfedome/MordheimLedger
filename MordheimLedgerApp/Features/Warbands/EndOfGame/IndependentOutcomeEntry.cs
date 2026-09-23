@@ -14,7 +14,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// for a fixed-quantity Item, a second D6 on the Magical Artefacts table for a TriggersArtefactRoll
 /// branch - same ArtefactRoll/MagicalArtefactTable mechanism already built for Villa d'un Noble). The
 /// Auto branch (SubRollMin null, e.g. Hidden Treasure's flat 5D6x5 gold) skips the check entirely -
-/// always "passed", no CheckRoll UI shown for it (see EndOfGameDialog.xaml).</summary>
+/// always "passed", no CheckRoll UI shown for it (see EndOfGamePage.xaml).</summary>
 public partial class IndependentOutcomeEntry : ObservableObject
 {
     private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName;
@@ -25,7 +25,7 @@ public partial class IndependentOutcomeEntry : ObservableObject
     public ExplorationOutcome Outcome { get; }
 
     /// <summary>Nom de l'objet/or/pierre magique affiché en en-tête de ligne - résolu une fois à la
-    /// construction (voir EndOfGameDialogViewModel.ResolveIndependentOutcomeLabel), pas recalculé ici.</summary>
+    /// construction (voir EndOfGamePageViewModel.ResolveIndependentOutcomeLabel), pas recalculé ici.</summary>
     public string Label { get; }
 
     public bool IsAuto => Outcome.SubRollMin is null;

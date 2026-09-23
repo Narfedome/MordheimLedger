@@ -16,7 +16,7 @@ public static class HeroAdvanceTable
 
     /// <summary>True for the "Compétence" results (2-5, 10-12) - the only Advance rolls where the app
     /// lets the player pick an actual Skill from the Library and attach it directly, rather than just
-    /// showing descriptive text (see EndOfGameDialogViewModel.PickAdvanceSkill).</summary>
+    /// showing descriptive text (see EndOfGamePageViewModel.PickAdvanceSkill).</summary>
     public static bool IsSkill(int roll) => Array.IndexOf(SkillRolls, roll) >= 0;
 
     public static bool TryGetTextKey(int roll, out string key)

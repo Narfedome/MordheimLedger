@@ -471,6 +471,9 @@
   <data name="LibNext" xml:space="preserve">
     <value>Suivant</value>
   </data>
+  <data name="LibNoneOption" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
   <data name="WarbandArchetypeNamePh" xml:space="preserve">
     <value>Nom de la bande</value>
   </data>
@@ -898,6 +901,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameNoWarriors" xml:space="preserve">
     <value>Aucun guerrier actif dans cette bande.</value>
+  </data>
+  <data name="EndOfGameExitConfirmTitle" xml:space="preserve">
+    <value>Abandonner cette Fin de Partie ?</value>
+  </data>
+  <data name="EndOfGameExitConfirmMessage" xml:space="preserve">
+    <value>Rien n'est encore enregistré. Quitter maintenant annule toute la saisie de ce wizard.</value>
   </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Résultat</value>
@@ -1490,6 +1499,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameEquipmentReallocationDestinationTitle" xml:space="preserve">
     <value>Déplacer vers…</value>
   </data>
+  <data name="EndOfGameReallocationQuantityTitle" xml:space="preserve">
+    <value>Déplacer combien ?</value>
+  </data>
+  <data name="EndOfGameReallocationQuantityPrompt" xml:space="preserve">
+    <value>Combien d'exemplaires déplacer ? (1-{0})</value>
+  </data>
   <data name="HistoryEquipmentReallocatedSentence" xml:space="preserve">
     <value>{0} rejoint {1}.</value>
   </data>
@@ -1615,6 +1630,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
     <value>Trésorerie insuffisante - décochez un objet ou ajustez les jets avant de continuer.</value>
+  </data>
+  <data name="EndOfGameTreasuryBlockedMessage" xml:space="preserve">
+    <value>Trésorerie insuffisante - ajustez vos choix avant de continuer.</value>
   </data>
   <data name="EndOfGameRareItemPurchaseWyrdstoneBlockedMessage" xml:space="preserve">
     <value>Pas assez de pierres magiques pour payer Nicodemus - vendez-en moins à l'étape précédente ou décochez son recrutement.</value>

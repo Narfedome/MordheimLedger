@@ -5,17 +5,17 @@ using MordheimLedgerApp.Features.Warbands.CreateEdit;
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Un objet réallocable - wrapper unifié (même idiome que SellableEquipmentCandidate) sur
-/// EXACTEMENT une des trois sources possibles : un WarriorEquipment porté par un Héros déjà actif, un
-/// WarbandEquipment de la réserve (ReallocationReserve, jamais _warbandInventory directement - voir sa
-/// propre doc), ou un EquipmentPick brouillon porté par une nouvelle recrue (WarriorNameSlot.Equipment).
-/// Carrier porte la référence stable (WarriorOutcomeRow/WarriorNameSlot, jamais recréés pendant le
-/// wizard) permettant de retrouver la VRAIE collection à modifier au moment du déplacement, même si
-/// ReallocationCarrier lui-même est recréé à chaque accès à ReallocationCarriers - voir
-/// EndOfGameDialogViewModel.Reallocation.cs's MoveReallocationItem.</summary>
+/// EXACTEMENT une des trois sources possibles : un WarriorEquipment porté par un Héros déjà actif, une
+/// ReserveLine de la réserve (ReallocationReserve, jamais _reserve/_originalReserveSnapshot directement -
+/// voir sa propre doc), ou un EquipmentPick brouillon porté par une nouvelle recrue
+/// (WarriorNameSlot.Equipment). Carrier porte la référence stable (WarriorOutcomeRow/WarriorNameSlot,
+/// jamais recréés pendant le wizard) permettant de retrouver la VRAIE collection à modifier au moment du
+/// déplacement, même si ReallocationCarrier lui-même est recréé à chaque accès à
+/// ReallocationCarriers - voir EndOfGamePageViewModel.Reallocation.cs's MoveReallocationItem.</summary>
 public sealed class ReallocatableItem
 {
     public WarriorEquipment? WarriorEquipmentSource { get; }
-    public WarbandEquipment? WarbandEquipmentSource { get; }
+    public ReserveLine? ReserveLineSource { get; }
     public EquipmentPick? DraftPickSource { get; }
 
     public EquipmentItem Item { get; }
@@ -34,9 +34,9 @@ public sealed class ReallocatableItem
         Name = source.NameDisplay;
     }
 
-    public ReallocatableItem(WarbandEquipment source, ReallocationCarrier carrier)
+    public ReallocatableItem(ReserveLine source, ReallocationCarrier carrier)
     {
-        WarbandEquipmentSource = source;
+        ReserveLineSource = source;
         Carrier = carrier;
         Item = source.Item;
         MaterialRule = source.MaterialRule;
@@ -53,16 +53,16 @@ public sealed class ReallocatableItem
     }
 
     /// <summary>Quantité réelle du lot déplacé - 1 pour un brouillon de recrue (EquipmentPick n'a pas de
-    /// notion de quantité empilée), sinon la Quantity réelle de la ligne DB.</summary>
-    public int Quantity => WarriorEquipmentSource?.Quantity ?? WarbandEquipmentSource?.Quantity ?? 1;
+    /// notion de quantité empilée), sinon la Quantity réelle de la ligne.</summary>
+    public int Quantity => WarriorEquipmentSource?.Quantity ?? ReserveLineSource?.Quantity ?? 1;
 
-    public int? FoundValueOverride => WarriorEquipmentSource?.FoundValueOverride ?? WarbandEquipmentSource?.FoundValueOverride;
+    public int? FoundValueOverride => WarriorEquipmentSource?.FoundValueOverride ?? ReserveLineSource?.FoundValueOverride;
 }
 
 public enum ReallocationCarrierKind { ExistingHero, NewRecruit, Reserve }
 
 /// <summary>Qui peut actuellement porter/recevoir un ReallocatableItem - recréé à chaque accès à
-/// EndOfGameDialogViewModel.ReallocationCarriers (jamais mis en cache, même principe que
+/// EndOfGamePageViewModel.ReallocationCarriers (jamais mis en cache, même principe que
 /// DismissibleWarriorRows) pour refléter en direct les décisions des étapes précédentes (Renvoyer,
 /// Recrutement) : ExistingHeroRow/NewRecruitSlot restent néanmoins des références STABLES tout au long
 /// du wizard, donc valables même une fois ce wrapper "périmé".</summary>
@@ -72,17 +72,17 @@ public sealed class ReallocationCarrier
     public ReallocationCarrierKind Kind { get; }
     public WarriorOutcomeRow? ExistingHeroRow { get; }
     public WarriorNameSlot? NewRecruitSlot { get; }
-    private readonly List<WarbandEquipment>? _reserve;
+    private readonly List<ReserveLine>? _reserve;
 
     public IEnumerable<ReallocatableItem> Items => Kind switch
     {
         ReallocationCarrierKind.ExistingHero => ExistingHeroRow!.Warrior.Equipment.Select(we => new ReallocatableItem(we, this)),
         ReallocationCarrierKind.NewRecruit => NewRecruitSlot!.Equipment.Select(p => new ReallocatableItem(p, this)),
-        ReallocationCarrierKind.Reserve => _reserve!.Select(wb => new ReallocatableItem(wb, this)),
+        ReallocationCarrierKind.Reserve => _reserve!.Select(rl => new ReallocatableItem(rl, this)),
         _ => Enumerable.Empty<ReallocatableItem>()
     };
 
-    private ReallocationCarrier(string name, ReallocationCarrierKind kind, WarriorOutcomeRow? hero, WarriorNameSlot? recruit, List<WarbandEquipment>? reserve)
+    private ReallocationCarrier(string name, ReallocationCarrierKind kind, WarriorOutcomeRow? hero, WarriorNameSlot? recruit, List<ReserveLine>? reserve)
     {
         Name = name;
         Kind = kind;
@@ -97,7 +97,7 @@ public sealed class ReallocationCarrier
     // que RecruitHeroDetail (déjà validée, obligatoirement remplie), le nom réel est toujours disponible.
     public static ReallocationCarrier ForRecruit(WarriorNameSlot slot) =>
         new(string.IsNullOrWhiteSpace(slot.Name) ? slot.ArchetypeLabel : slot.Name, ReallocationCarrierKind.NewRecruit, null, slot, null);
-    public static ReallocationCarrier ForReserve(List<WarbandEquipment> reserve, string label) => new(label, ReallocationCarrierKind.Reserve, null, null, reserve);
+    public static ReallocationCarrier ForReserve(List<ReserveLine> reserve, string label) => new(label, ReallocationCarrierKind.Reserve, null, null, reserve);
 
     /// <summary>Deux instances désignent le même porteur RÉEL si elles pointent la même référence
     /// stable (ExistingHeroRow/NewRecruitSlot) ou sont toutes deux la Réserve - jamais une égalité

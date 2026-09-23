@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.RareItemsStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Objets rares / Personnages spéciaux (livre, étape 6a+7 fusionnées côté recherche -
+                 une carte par Héros vivant non Hors de combat (RareItemSearchEntries construite une fois
+                 pour tous les Héros dans le constructeur - IsVisible masque ceux Hors de combat plutôt que
+                 les retirer, voir HasEligibleHeroesForRareItems). Switch Objet/Personnage en tête de carte
+                 (RareItemSearchEntry.IsSearchingForCharacter/SetSearchModeCommand) - "Heroes who are
+                 looking for a special character cannot look for rare items", jamais les deux à la fois ;
+                 basculer réinitialise systématiquement les deux côtés (voir
+                 OnIsSearchingForCharacterChanged, retour utilisateur 2026-08-28). Côté Objet : "Chercher un
+                 objet" ouvre le Trading Post complet en SingleSelectMode (un seul objet à la fois - "you
+                 may only make one roll for each Hero"). Une arme de corps à corps COMMUNE OU RARE choisie
+                 peut en plus être forgée en Gromril/Ithilmar (pilules tapables, voir IsMaterialEligible/
+                 EffectiveRarity), auquel cas c'est la Rareté DU MATÉRIAU (ou la plus haute des deux) qui est
+                 recherchée. Côté Personnage : nom en saisie libre pour l'instant (pas de catalogue Dramatis
+                 Personae encore - le sélecteur remplacera ce champ une fois la liste envoyée), jet de 1D6
+                 comparé à l'Initiative DU HÉROS CHERCHEUR (pas une Rareté - réussi si le jet est SOUS
+                 l'Initiative, voir IsCharacterFound). Cette étape détermine SEULEMENT IsSuccess/
+                 IsCharacterFound - l'achat/recrutement se décide sur l'étape séparée suivante
+                 (IsRareItemPurchaseStep - pour l'instant scopée aux objets, le recrutement de personnage
+                 n'est pas encore câblé, frais d'embauche/entretien pas encore tranchés). Entièrement
+                 absente si aucun Héros n'est éligible (voir Steps). -->
+            <VerticalStackLayout Spacing="12">
+                <Label Text="{loc:Loc EndOfGameRareItemsHeading}" FontAttributes="Bold"/>
+                <Label Text="{loc:Loc EndOfGameRareItemsIntro}" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RareItemSearchEntries}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:RareItemSearchEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}"
+                                    IsVisible="{Binding Hero.IsOutOfAction, Converter={StaticResource InverseBoolConverter}}">
+                                <VerticalStackLayout Spacing="8">
+                                    <Label Text="{Binding HeroName}" FontAttributes="Bold"/>
+
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="0" Margin="0,0,0,4">
+                                        <Border Grid.Column="0" Style="{StaticResource ChipBorderStyle}" Padding="0,6" HorizontalOptions="Fill">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SetSearchModeCommand}" CommandParameter="{x:Boolean False}"/>
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSearchingForCharacter}" Value="False">
+                                                    <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{loc:Loc EndOfGameRareItemModeObjectLabel}" FontSize="12" HorizontalTextAlignment="Center"/>
+                                        </Border>
+                                        <Border Grid.Column="1" Style="{StaticResource ChipBorderStyle}" Padding="0,6" HorizontalOptions="Fill">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SetSearchModeCommand}" CommandParameter="{x:Boolean True}"/>
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSearchingForCharacter}" Value="True">
+                                                    <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Label Text="{loc:Loc EndOfGameRareItemModeCharacterLabel}" FontSize="12" HorizontalTextAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Côté Personnage spécial - même motif "Chercher..." + ChipView tapable
+                                         que le côté Objet (SelectCharacterCommand ouvre le picker Dramatis
+                                         Personae, narrowé à cette bande - voir EndOfGamePageViewModel.
+                                         RareItems.cs.SelectCharacter). -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter}">
+                                        <components:IconTextButton IsVisible="{Binding HasSelectedCharacter, Converter={StaticResource InverseBoolConverter}}"
+                                                                    Icon="{x:Static icons:SolidFont.MagnifyingGlass}"
+                                                                    Text="{loc:Loc EndOfGameCharacterSearchButton}"
+                                                                    TextColor="{DynamicResource AppAccent}"
+                                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectCharacterCommand}"
+                                                                    CommandParameter="{Binding .}"/>
+
+                                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedCharacter}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                                <components:ChipView Grid.Column="0" Item="{Binding SelectedCharacter}"
+                                                                      NameOverride="{Binding SelectedCharacterDisplayName}"
+                                                                      IconGlyph="{x:Static icons:RpgFont.RaDuel}"
+                                                                      IconFontFamily="RpgAwesome"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowCharacterDetailCommand}"/>
+                                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Xmark}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ClearCharacterCommand}"
+                                                                              CommandParameter="{Binding .}"/>
+                                            </Grid>
+                                            <Label Text="{Binding CharacterInitiativeDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding CharacterRoll}" Keyboard="Numeric"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding AutoRollCharacterCommand}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding CharacterRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding CharacterRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{Binding CharacterResultDisplay}" FontAttributes="Bold" IsVisible="{Binding HasCharacterResult}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsCharacterFound}" Value="True">
+                                                        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsCharacterFound}" Value="False">
+                                                        <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <!-- Côté Objet rare -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter, Converter={StaticResource InverseBoolConverter}}">
+                                    <components:IconTextButton IsVisible="{Binding HasSelectedItem, Converter={StaticResource InverseBoolConverter}}"
+                                                                Icon="{x:Static icons:SolidFont.MagnifyingGlass}"
+                                                                Text="{loc:Loc EndOfGameRareItemSearchButton}"
+                                                                TextColor="{DynamicResource AppAccent}"
+                                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectRareItemCommand}"
+                                                                CommandParameter="{Binding .}"/>
+
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedItem}">
+                                        <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
+                                            <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
+                                                                  IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                  IconFontFamily="RpgAwesome"
+                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareItemDetailCommand}"/>
+                                            <Label Grid.Column="1" Text="{Binding RarityDisplay}" VerticalOptions="Center" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Xmark}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ClearRareItemCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                        </Grid>
+
+                                        <!-- Matériau (arme de corps à corps uniquement, commune ou déjà Rare -
+                                             voir IsMaterialEligible) - 2 pilules tapables plutôt qu'un
+                                             RadioButton (jugé trop plain visuellement, retour utilisateur
+                                             2026-08-28) : le tap sur la pilule SÉLECTIONNE (RareItemSearchEntry.
+                                             SelectMaterialCommand, bascule si déjà choisie), un petit bouton
+                                             "i" à part ouvre la vraie fiche de la règle - séparé plutôt que sur
+                                             le même tap, contrairement au reste de l'app où une puce tapée
+                                             ouvre toujours son détail (ChipView), parce qu'ici le tap doit
+                                             plutôt sélectionner. Seulement 2 matériaux existent (Gromril/
+                                             Ithilmar, voir GromrilMaterial/IthilmarMaterial) donc codées en dur
+                                             plutôt qu'une boucle générique. -->
+                                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsMaterialEligible}">
+                                            <Border Style="{StaticResource ChipBorderStyle}" Padding="10,6">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding SelectMaterialCommand}"
+                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial}"/>
+                                                </Border.GestureRecognizers>
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedMaterial.Abbreviation}" Value="G">
+                                                        <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <Label Text="{x:Static icons:RpgFont.RaAnvil}" FontFamily="RpgAwesome" FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
+                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleInfo}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  IconSize="10" Padding="0"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareMaterialDetailCommand}"
+                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial}"/>
+                                                </HorizontalStackLayout>
+                                            </Border>
+                                            <Border Style="{StaticResource ChipBorderStyle}" Padding="10,6">
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding SelectMaterialCommand}"
+                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial}"/>
+                                                </Border.GestureRecognizers>
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedMaterial.Abbreviation}" Value="I">
+                                                        <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <Label Text="{x:Static icons:RpgFont.RaAnvil}" FontFamily="RpgAwesome" FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
+                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleInfo}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  IconSize="10" Padding="0"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareMaterialDetailCommand}"
+                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial}"/>
+                                                </HorizontalStackLayout>
+                                            </Border>
+                                        </HorizontalStackLayout>
+
+                                        <Label Text="{Binding BonusDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                               IsVisible="{Binding HasBonus}"/>
+
+                                        <VerticalStackLayout Spacing="8" IsVisible="{Binding HasRarity}">
+                                            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                                                <Entry Grid.Column="0" Text="{Binding Roll}" Keyboard="Numeric"
+                                                       Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="90">
+                                                    <Entry.Behaviors>
+                                                        <components:DigitsOnlyBehavior/>
+                                                    </Entry.Behaviors>
+                                                </Entry>
+                                                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollRareItemCommand}"
+                                                                              CommandParameter="{Binding .}"
+                                                                              Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                            </Grid>
+                                            <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                            <Label Text="{Binding ResultDisplay}" FontAttributes="Bold" IsVisible="{Binding HasResult}">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSuccess}" Value="True">
+                                                        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSuccess}" Value="False">
+                                                        <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+</ContentView>

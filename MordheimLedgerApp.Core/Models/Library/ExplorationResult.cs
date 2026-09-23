@@ -40,7 +40,7 @@ public class ExplorationResult
     /// this + the resolved branch's own BranchText instead of the full multi-branch Description for
     /// those entries (retrofitted 2026-08-20 after showing the full Description there turned out to
     /// bury the one branch that actually applies to the playing warband among three others that don't -
-    /// see EndOfGameDialogViewModel.ExplorationResultDescriptionText). Description itself is untouched,
+    /// see EndOfGamePageViewModel.ExplorationResultDescriptionText). Description itself is untouched,
     /// still the authoritative full-text reference.</summary>
     public string? ShortDescription { get; set; }
 
@@ -65,14 +65,14 @@ public class ExplorationResult
     /// stat (e.g. Puits/Toughness, Taverne/Leadership) - the wizard shows a roll field (plus, for Puits,
     /// a Hero picker - see StatTestTargetsLeader) instead of (or alongside) the usual sub-roll, computes
     /// pass/fail itself (comparing an already-known stat to an already-entered roll is arithmetic, not a
-    /// decision made for the player - see EndOfGameDialogViewModel), and picks the Outcome whose
+    /// decision made for the player - see EndOfGamePageViewModel), and picks the Outcome whose
     /// StatTestPass matches. Null = no stat test, the vast majority of entries.</summary>
     public ExplorationStatField? StatTestField { get; set; }
 
     /// <summary>True = this StatTestField-gated test always targets the warband's leader (Warrior.
     /// IsLeader), never a Hero the player picks (e.g. Taverne/Commandement: "The warband's leader must
     /// take a Leadership test") - the wizard sets StatTestHero automatically instead of showing
-    /// StatTestEligibleHeroes' picker (see EndOfGameDialogViewModel.ShowStatTestHeroPicker). If the
+    /// StatTestEligibleHeroes' picker (see EndOfGamePageViewModel.ShowStatTestHeroPicker). If the
     /// leader isn't available this game (dead/sick/out of action), the test is simply skipped, no
     /// blocking error - same "unavailable, not forced" idiom as BonusStatTestField's leader lookup.
     /// False (e.g. Puits/Endurance) = the player picks who takes the test. Meaningless when StatTestField
@@ -82,7 +82,7 @@ public class ExplorationResult
     /// <summary>English WarbandArchetype.Name(s) that automatically pass this StatTestField-gated test,
     /// no roll needed (e.g. Taverne: "Undead, Witch Hunter and Sisters of Sigmar warbands automatically
     /// pass this test") - the wizard resolves straight to the Outcome whose StatTestPass is true as soon
-    /// as the result triggers, skipping the roll field entirely (see EndOfGameDialogViewModel.
+    /// as the result triggers, skipping the roll field entirely (see EndOfGamePageViewModel.
     /// StatTestAutoPasses). Empty (almost every entry) = no such exception, the test always requires a
     /// roll. Plain string reference resolved at consumption time, same idiom as
     /// ExplorationOutcome.RestrictedToWarbandArchetypeNames - fixed rulebook content, no editor.</summary>

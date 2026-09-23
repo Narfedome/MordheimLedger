@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ResultStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+    <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
+    <VerticalStackLayout Spacing="12">
+        <Label Text="{loc:Loc EndOfGameResultPh}" FontAttributes="Bold"/>
+        <Picker x:Name="ResultPicker"
+                ItemsSource="{Binding ResultOptions}"
+                SelectedItem="{Binding SelectedResult}"/>
+    </VerticalStackLayout>
+</ContentView>

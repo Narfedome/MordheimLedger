@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+               xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.WarriorRecapDialog"
+               x:DataType="local:WarriorRecapDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
+        <dialogs:StableHeightScrollView>
+        <VerticalStackLayout Spacing="16">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+
+            <Label Text="{Binding ArchetypeName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+
+            <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}"/>
+
+            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Warrior.GainsExperience}">
+                <Label Grid.Column="0" Text="{loc:Loc WarriorsExperienceHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Grid.Column="1" Text="{Binding Warrior.Experience}" TextColor="{DynamicResource AppText}"/>
+            </Grid>
+
+            <!-- ChipView (pas ChipListView) : l'icône varie par item (EquipmentCategoryIconConverter),
+                 même motif que la carte guerrier (WarbandDetailPage.xaml)/HiredSwordDetailDialog. -->
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding HasEquipment}">
+                <Label Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Warrior.Equipment}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorEquipment">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorRecapDialogViewModel}}, Path=ShowEquipmentDetailCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding HasSkills}">
+                <Label Text="{loc:Loc WarriorsSkillsHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Warrior.Skills}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:WarriorSkill">
+                            <components:ChipView Item="{Binding .}"
+                                                  IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorRecapDialogViewModel}}, Path=ShowSkillDetailCommand}"/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                      ItemsSource="{Binding SpecialRules}"
+                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
+
+            <components:ChipListView HeaderText="{loc:Loc WarriorsSpellsHeading}"
+                                      ItemsSource="{Binding Warrior.Spells}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowSpellDetailCommand}"/>
+
+            <components:ChipListView HeaderText="{loc:Loc WarriorsMutationsHeading}"
+                                      ItemsSource="{Binding Warrior.Mutations}"
+                                      IconGlyph="{x:Static icons:RpgFont.RaBiohazard}"
+                                      IconFontFamily="RpgAwesome"
+                                      Command="{Binding ShowMutationDetailCommand}"/>
+        </VerticalStackLayout>
+        </dialogs:StableHeightScrollView>
+    </Border>
+</dialogs:DialogContent>

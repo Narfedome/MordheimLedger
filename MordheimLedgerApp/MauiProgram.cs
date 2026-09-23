@@ -132,6 +132,8 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<WarbandListPage>();
             builder.Services.AddTransient<WarbandDetailViewModel>();
             builder.Services.AddTransient<WarbandDetailPage>();
+            builder.Services.AddTransient<EndOfGamePageViewModel>();
+            builder.Services.AddTransient<EndOfGamePage>();
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<SettingsPage>();
             builder.Services.AddTransient<WarbandArchetypeViewModel>();

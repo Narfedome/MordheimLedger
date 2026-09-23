@@ -3,10 +3,10 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>One captured enemy hero's fate, chosen by the player - see EndOfGameDialogViewModel.
+/// <summary>One captured enemy hero's fate, chosen by the player - see EndOfGamePageViewModel.
 /// CapturedEnemies. Ransomed/SoldToSlavers are always offered (any band can do either); KilledForZombie
 /// only for an Undead warband, SacrificedForXp only for Cult of the Possessed (see
-/// EndOfGameDialogViewModel.IsUndeadWarband/IsPossessedWarband) - this is the reverse side of the
+/// EndOfGamePageViewModel.IsUndeadWarband/IsPossessedWarband) - this is the reverse side of the
 /// simplified Captured (61) mechanic: there, OUR warrior is captured by an unmodeled opponent; here,
 /// WE are the captor, so OUR warband's own type genuinely gates what's available, no opponent data
 /// needed.</summary>
@@ -25,19 +25,31 @@ public partial class CapturedEnemyEntry : ObservableObject
     public int Index { get; }
     public List<string> FateLabels { get; } = new();
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectedFate))]
-    [NotifyPropertyChangedFor(nameof(ShowGoldAmount))]
     private string? selectedFateLabel;
 
-    partial void OnSelectedFateLabelChanged(string? value)
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : Picker.SelectedItem (CaptivesStepView.
+    /// xaml) est lié TwoWay - la vue mise en cache par étape (StepViewConverter) peut faire remonter un
+    /// null transitoire au réattachement après un retour en arrière (Précédent), écrasant silencieusement
+    /// le vrai choix déjà fait. Le setter ignore toute valeur absente de FateLabels (donc null ou
+    /// périmée) au lieu de l'accepter aveuglément.</summary>
+    public string? SelectedFateLabel
     {
-        if (value is not null) FateError = null;
-        if (!ShowGoldAmount) GoldAmount = string.Empty;
+        get => selectedFateLabel;
+        set
+        {
+            if (value is null || !FateLabels.Contains(value)) return;
+            if (!SetProperty(ref selectedFateLabel, value)) return;
+
+            OnPropertyChanged(nameof(SelectedFate));
+            OnPropertyChanged(nameof(ShowGoldAmount));
+            FateError = null;
+            if (!ShowGoldAmount) GoldAmount = string.Empty;
+        }
     }
 
     /// <summary>Résolu depuis SelectedFateLabel - null tant qu'aucune option n'est choisie. Consommé par
-    /// WarbandDetailViewModel.EndOfGame.ApplyCapturedEnemiesAsync pour appliquer le vrai effet (or gagné,
+    /// EndOfGamePageViewModel.Apply.ApplyCapturedEnemiesAsync pour appliquer le vrai effet (or gagné,
     /// Zombie recruté, +1 XP au chef).</summary>
     public CapturedEnemyFate? SelectedFate =>
         SelectedFateLabel is { } label && _fateByLabel.TryGetValue(label, out var fate) ? fate : null;
@@ -72,6 +84,16 @@ public partial class CapturedEnemyEntry : ObservableObject
             _fateByLabel[label] = fate;
             FateLabels.Add(label);
         }
+
+        // "Aucun" en premier, présélectionné (retour utilisateur 2026-09-22 - "il faudrait rajouter la
+        // valeur par défaut aucun" sur tous les combos hors Résultat) : jamais ajouté à _fateByLabel, donc
+        // SelectedFate résout toujours vers null tant que ce choix reste sélectionné - même mécanisme que
+        // SentHeroOptions/EquippedHenchmanGroupOptions/WeaponBlessingOptions (leur propre premier choix à
+        // payload nullable), juste par une liste de string ici plutôt qu'un record. Un vrai item visible
+        // plutôt qu'un simple Title en placeholder : permet de revenir en arrière une fois qu'on a changé
+        // d'avis, ce que le Picker ne permet pas nativement une fois une vraie option choisie.
+        FateLabels.Add(loc["LibNoneOption"]);
+        SelectedFateLabel = FateLabels[0];
 
         AddFate(CapturedEnemyFate.Ransomed);
         AddFate(CapturedEnemyFate.SoldToSlavers);

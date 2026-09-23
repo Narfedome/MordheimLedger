@@ -6,7 +6,7 @@ using MordheimLedgerApp.Services;
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>A recurring-fee Dramatis Persona already actively in the roster, at the "Dramatis Personae"
-/// step of the End of Game wizard - see EndOfGameDialogViewModel.DramatisPersonae.cs.
+/// step of the End of Game wizard - see EndOfGamePageViewModel.DramatisPersonae.cs.
 /// BuildDramatisPersonaUpkeepEntries. Covers two currencies: Gold (Johann/Veskit/Marianna) and Wyrdstone
 /// (Nicodemus, 2026-09-01 - "he has no interest in gold... must be paid a wyrdstone shard... after every
 /// battle he fights") - NOT Bertha/None nor Ulli &amp; Marquand/Pair, both still out of scope, see
@@ -34,19 +34,32 @@ public partial class DramatisPersonaUpkeepEntry : ObservableObject
 
     public List<string> ChoiceLabels { get; }
     private readonly string _payLabel;
+    private readonly string _noneLabel;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(WillPay))]
     private string? selectedChoiceLabel;
 
-    partial void OnSelectedChoiceLabelChanged(string? value)
+    /// <summary>Backing field manuel plutôt qu'un simple [ObservableProperty] (2026-09-23, même correctif
+    /// qu'EndOfGamePageViewModel.SelectedResult - voir sa doc) : Picker.SelectedItem
+    /// (DramatisPersonaeStepView.xaml) est lié TwoWay - la vue mise en cache par étape (StepViewConverter)
+    /// peut faire remonter un null transitoire au réattachement après un retour en arrière, écrasant
+    /// silencieusement le vrai choix. Le setter ignore toute valeur absente de ChoiceLabels.</summary>
+    public string? SelectedChoiceLabel
     {
-        if (value is not null) ChoiceError = null;
+        get => selectedChoiceLabel;
+        set
+        {
+            if (value is null || !ChoiceLabels.Contains(value)) return;
+            if (!SetProperty(ref selectedChoiceLabel, value)) return;
+
+            OnPropertyChanged(nameof(WillPay));
+            ChoiceError = null;
+        }
     }
 
-    /// <summary>Résolu depuis SelectedChoiceLabel - null tant qu'aucune option n'est choisie. Consommé
-    /// par WarbandDetailViewModel.EndOfGame.ApplyDramatisPersonaUpkeepAsync.</summary>
-    public bool? WillPay => SelectedChoiceLabel is null ? null : SelectedChoiceLabel == _payLabel;
+    /// <summary>Résolu depuis SelectedChoiceLabel - null tant que "Aucun" (le choix par défaut, voir le
+    /// constructeur) ou rien du tout n'est sélectionné. Consommé par EndOfGamePageViewModel.Apply.
+    /// ApplyDramatisPersonaUpkeepAsync.</summary>
+    public bool? WillPay => SelectedChoiceLabel is null || SelectedChoiceLabel == _noneLabel ? null : SelectedChoiceLabel == _payLabel;
 
     [ObservableProperty]
     private string? choiceError;
@@ -56,6 +69,10 @@ public partial class DramatisPersonaUpkeepEntry : ObservableObject
         Warrior = warrior;
         Persona = persona;
         _payLabel = payLabel;
-        ChoiceLabels = new List<string> { payLabel, dismissLabel };
+        _noneLabel = LocalizationService.Instance["LibNoneOption"];
+        // "Aucun" en premier, présélectionné (retour utilisateur 2026-09-22) - même raisonnement que
+        // CapturedEnemyEntry.FateLabels, voir sa doc.
+        ChoiceLabels = new List<string> { _noneLabel, payLabel, dismissLabel };
+        SelectedChoiceLabel = _noneLabel;
     }
 }

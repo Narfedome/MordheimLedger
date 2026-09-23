@@ -20,7 +20,7 @@
                 </Entry.Behaviors>
             </Entry>
             <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                          Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=AutoRollAdvanceCommand}"
+                                          Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=AutoRollAdvanceCommand}"
                                           CommandParameter="{Binding .}"
                                           Tooltip="{loc:Loc EndOfGameRoll}"/>
         </Grid>
@@ -31,7 +31,7 @@
         <!-- Résultat "Compétence" (voir AdvanceOutcome.Kind == Skill) : choix direct dans la
              Bibliothèque, ou (Héros sorcier, ShowSpellOption) tirage 1D6 d'un sort permanent à la place -
              "OU" entre les 2 boutons, mutuellement exclusifs (choisir l'un efface l'autre, voir
-             EndOfGameDialogViewModel.PickAdvanceSkill/PickAdvanceSpell). La puce du résultat choisi
+             EndOfGamePageViewModel.PickAdvanceSkill/PickAdvanceSpell). La puce du résultat choisi
              s'affiche SOUS les boutons (pas à côté) une fois l'un des deux tranché - voir
              ShowSkillOrSpellButtons, qui masque alors les boutons entièrement. Rattaché au guerrier à
              l'enregistrement du wizard, pas tout de suite. -->
@@ -40,7 +40,7 @@
                 <Button Text="{loc:Loc EndOfGamePickSkill}"
                         Style="{StaticResource DialogSecondaryButtonStyle}"
                         FontSize="12" Padding="8,4"
-                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=PickAdvanceSkillCommand}"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=PickAdvanceSkillCommand}"
                         CommandParameter="{Binding .}"/>
                 <Label Text="{loc:Loc EndOfGameOr}" VerticalOptions="Center" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
                        IsVisible="{Binding ShowSpellOption}"/>
@@ -48,7 +48,7 @@
                         Style="{StaticResource DialogSecondaryButtonStyle}"
                         FontSize="12" Padding="8,4"
                         IsVisible="{Binding ShowSpellOption}"
-                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=PickAdvanceSpellCommand}"
+                        Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=PickAdvanceSpellCommand}"
                         CommandParameter="{Binding .}"/>
             </HorizontalStackLayout>
             <!-- ChipView (pas ChipListView) : même motif que WarriorEditDialog (icône par catégorie de
@@ -60,8 +60,8 @@
                         <components:ChipView Item="{Binding .}"
                                               IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
                                               IconFontFamily="RpgAwesome"
-                                              Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=ShowSkillDetailCommand}"
-                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=RemoveAdvanceSkillCommand}"/>
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=ShowSkillDetailCommand}"
+                                              RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=RemoveAdvanceSkillCommand}"/>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </FlexLayout>
@@ -69,8 +69,8 @@
                                   IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
                                   IconFontFamily="RpgAwesome"
                                   IsVisible="{Binding HasSpellSelected}"
-                                  Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=RemoveAdvanceSpellCommand}"/>
+                                  Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=ShowSpellDetailCommand}"
+                                  RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=RemoveAdvanceSpellCommand}"/>
         </VerticalStackLayout>
 
         <!-- Résultat "Caractéristique" (voir AdvanceOutcome.Kind == CharacteristicIncrease) : sous-jet
@@ -87,7 +87,7 @@
                     </Entry.Behaviors>
                 </Entry>
                 <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                              Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGameDialogViewModel}}, Path=AutoRollSubRollCommand}"
+                                              Command="{Binding Source={RelativeSource AncestorType={x:Type eog:EndOfGamePageViewModel}}, Path=AutoRollSubRollCommand}"
                                               CommandParameter="{Binding .}"
                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
             </Grid>

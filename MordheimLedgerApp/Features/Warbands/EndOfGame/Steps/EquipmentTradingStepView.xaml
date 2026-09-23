@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:createEdit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.EquipmentTradingStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Achat/Vente d'équipement (livre, étape 9 - "Reallocate equipment") - juste AVANT
+                 Recrutement (2026-09-05, retour utilisateur - "si on faisait d'abord l'achat vente
+                 d'équipement, puis le recrutement avec l'assignation des équipements de la stash") -
+                 remplit/vide la réserve de toute la bande ; Recrutement source ensuite ses achats en
+                 priorité depuis cette réserve - voir EndOfGamePageViewModel.EquipmentTrading.cs. -->
+            <VerticalStackLayout Spacing="14">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Label Text="{loc:Loc EndOfGameTreasuryBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsTreasuryBlocked}"/>
+
+                <!-- Achat : choix libre au picker (commonOnly), rejoint la réserve - pas assigné à un
+                     guerrier ici (PurchasedReserveItems, EquipmentPick sans slot/groupe porteur). -->
+                <VerticalStackLayout Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingBuyHeading}" FontSize="12"
+                               FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.Plus}"
+                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                      Command="{Binding AddReserveEquipmentCommand}"/>
+                    </Grid>
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding PurchasedReserveItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="createEdit:EquipmentPick">
+                                <components:ChipView Item="{Binding .}"
+                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowReserveEquipmentDetailCommand}"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveReserveEquipmentCommand}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+
+                <!-- Vente : réserve pré-partie + trouvailles d'Exploration + équipement DÉJÀ porté (livre
+                     des règles - "trade in weapons and equipment... swapped around the warband"), jamais
+                     un achat de cette session. "+" ouvre le picker "classique" de l'app (nouvelle page
+                     poussée modalement, SellEquipmentSelectorPage - retour utilisateur 2026-09-21, "on
+                     utilise le sélecteur qu'on a toujours eu dans l'appli... fin le classique d'un
+                     sélecteur qu'on avait jusque-là"), les lignes confirmées réapparaissent en chips
+                     retirables ici, même idiome que l'Achat ci-dessus. -->
+                <VerticalStackLayout Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellHeading}" FontSize="12"
+                               FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.Plus}"
+                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                      Command="{Binding AddSaleEquipmentCommand}"/>
+                    </Grid>
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding PendingSales}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:SellableEquipmentCandidate">
+                                <components:ChipView Item="{Binding .}"
+                                                      NameOverride="{Binding SoldLabel}"
+                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveSaleEquipmentCommand}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+
+                <!-- Bilan Achat/Vente (retour utilisateur 2026-09-05 - "il faudrait en dessous un libellé
+                     indiquant combien d'or ça coûte, combien d'or on gagne, et le total"). -->
+                <VerticalStackLayout Spacing="2">
+                    <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}" Margin="0,2"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingBuyCostLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Grid.Column="1" Text="{Binding PurchasedReserveItemsCost}" FontSize="11"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellGainLabel}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Grid.Column="1" Text="{Binding PendingSalesTotal}" FontSize="11"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingNetTotalLabel}" FontSize="12" FontAttributes="Bold"/>
+                        <Label Grid.Column="1" Text="{Binding EquipmentTradingNetTotal}" FontSize="12" FontAttributes="Bold"/>
+                    </Grid>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+</ContentView>

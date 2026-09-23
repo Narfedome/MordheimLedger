@@ -490,7 +490,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
 
         // Well (1 1): a Toughness test gates one bonus wyrdstone shard (pass) against sickness (fail) -
         // both branches Auto (no sub-roll), the wizard picks Pass/Fail itself by comparing the chosen
-        // Hero's roll to their Toughness (see EndOfGameDialogViewModel.ResolveStatTest).
+        // Hero's roll to their Toughness (see EndOfGamePageViewModel.ResolveStatTest).
         var well = results.Single(r => r.DiceCount == 2 && r.Value == 1);
         Assert.Equal(ExplorationStatField.Toughness, well.StatTestField);
         Assert.Equal(2, well.Outcomes.Count);

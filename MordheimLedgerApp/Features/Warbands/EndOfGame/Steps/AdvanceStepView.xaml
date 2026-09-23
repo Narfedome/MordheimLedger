@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:advance="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.AdvanceStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Progression - une carte par guerrier ayant franchi un palier d'XP à l'étape
+                 précédente (CurrentAdvanceWarrior, même principe que CurrentInjuryWarrior - le wizard
+                 saute entièrement cette étape si personne n'a franchi de palier, voir Steps dans le
+                 ViewModel). Un guerrier qui saute plusieurs paliers d'un coup a une carte par palier
+                 (AdvanceRolls) empilée dans cette même étape - même résolution automatique que les
+                 Blessures Graves, purement descriptif. Réapparaît une seconde fois après Exploration pour
+                 un palier atteint uniquement grâce à son XP (CurrentAdvanceRolls bascule alors sur
+                 ExplorationAdvanceRolls - voir WizardStep.IsExplorationAdvance), sans rien dupliquer côté
+                 XAML. -->
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameAdvanceHeading}" FontAttributes="Bold"/>
+                    <Label Grid.Column="1" Text="{Binding AdvanceProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <components:ChipView Grid.Column="0" Item="{Binding CurrentAdvanceWarrior}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding ShowWarriorRecapCommand}"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                        </Grid>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="10">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:AdvanceRollEntry">
+                                    <advance:AdvanceRollEntryView Entry="{Binding .}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+</ContentView>

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Resources.Icons;
 using MordheimLedgerApp.Services;
 
@@ -57,11 +58,20 @@ public partial class EquipmentItemRow : ObservableObject
     /// coexistaient en réserve pour le même Item, cas rare non géré séparément).</summary>
     public SpecialRule? ReserveMaterialRule { get; }
 
+    /// <summary>Matériau proposé pour cette tuile de catalogue NEUVE (ex. "Épée (Gromril)"), distinct de
+    /// ReserveMaterialRule (stock déjà possédé, jamais choisi ici) - une tuile PAR matériau éligible
+    /// générée par EquipmentItemViewModel.ApplyFilter quand RareSearchMode est actif et que l'objet est
+    /// une arme de corps à corps (voir RareItemSearchEntry.IsMaterialEligible, même règle) - 2026-09-23,
+    /// retour utilisateur "on pourrait directement proposer les armes en ithilmar et les armes en
+    /// gromril à l'achat plutôt que d'avoir un sélecteur neutre et devoir cliquer sur une chip". Jamais
+    /// posé en même temps que ReserveMaterialRule (deux constructeurs distincts, jamais combinés).</summary>
+    public SpecialRule? MaterialRule { get; }
+
     /// <summary>Nom affiché sur la tuile - suffixé "(abréviation du matériau)" pour une tuile Réserve dont
-    /// le stock a un matériau (ex. "Épée (Ornée)"), comme WarbandEquipment/WarriorEquipment.NameDisplay
-    /// ailleurs dans l'app. Jamais suffixé pour une tuile de catégorie normale (achat neuf, sans matériau
-    /// choisi ici).</summary>
-    public string NameDisplay => ReserveMaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
+    /// le stock a un matériau (ex. "Épée (Ornée)") OU une tuile de variante matériau (ex. "Épée
+    /// (Gromril)"), comme WarbandEquipment/WarriorEquipment.NameDisplay ailleurs dans l'app. Jamais
+    /// suffixé pour une tuile de catégorie normale (achat neuf sans matériau).</summary>
+    public string NameDisplay => (ReserveMaterialRule ?? MaterialRule)?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
 
     /// <summary>Le stepper +/- reste affiché en permanence en mode picker (même à Quantity == 0, "+"
     /// sélectionne et incrémente en un seul geste) - CanDecrement grise juste "-" tant qu'il n'y a rien à
@@ -82,9 +92,13 @@ public partial class EquipmentItemRow : ObservableObject
     /// EquipmentItemViewModel.BudgetDisplay et à ConfirmSelection (via
     /// Enumerable.Repeat(Item, Quantity)). Toujours 0 pour une tuile Réserve (stock déjà possédé, jamais
     /// facturé). Pour un objet éligible à la dague gratuite, seul le premier exemplaire est gratuit ; tout
-    /// exemplaire supplémentaire compte au prix normal (voir EquipmentItem.IsFreeDagger) - pour tout autre
-    /// objet, simple Quantity × Cost.</summary>
-    public int TotalCost => IsReserveRow ? 0 : IsFreeForThisPurchase ? Math.Max(0, Quantity - 1) * Item.Cost : Quantity * Item.Cost;
+    /// exemplaire supplémentaire compte au prix normal (voir EquipmentItem.IsFreeDagger). Pour une tuile
+    /// de variante matériau (MaterialRule), le coût unitaire est ajusté par son CostMultiplier (Core.
+    /// Rules.EquipmentPricing.CalculateCost, même formule qu'un achat normal - MaterialRule null se
+    /// comporte comme avant, multiplicateur ×1) - pour tout autre objet, simple Quantity × Cost.</summary>
+    public int TotalCost => IsReserveRow ? 0
+        : IsFreeForThisPurchase ? Math.Max(0, Quantity - 1) * Item.Cost
+        : Quantity * EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, isFree: false);
 
     /// <summary>Ligne d'info secondaire de la tuile (CodexTileSecondaryLabelStyle) - "CO"/"GC" en toutes
     /// lettres plutôt qu'une icône (pièces trop peu distinguable à la taille d'une tuile). Rarity absent
@@ -105,8 +119,21 @@ public partial class EquipmentItemRow : ObservableObject
             }
 
             var abbr = LocalizationService.Instance["LibGoldCrownsAbbr"];
-            var cost = Item.CostRandomMax is { } max ? $"{Item.Cost}-{Item.Cost + max}" : Item.Cost.ToString();
-            return Item.Rarity.HasValue ? $"{cost} {abbr} · R{Item.Rarity}" : $"{cost} {abbr}";
+            // Coût ET rareté ajustés par MaterialRule quand posé (tuile de variante matériau, ex.
+            // "Épée (Gromril)") - null se comporte comme avant (coût/rareté nus de l'objet). Même formule
+            // de rareté combinée que RareItemSearchEntry.EffectiveRarity (le plus haut des deux, l'un
+            // seul s'il n'y en a qu'un) - dupliquée ici à dessein plutôt que remontée en commun, deux
+            // domaines distincts (tuile de picker générique vs entrée de recherche du wizard).
+            var unitCost = EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, isFree: false);
+            var cost = Item.CostRandomMax is { } max ? $"{unitCost}-{unitCost + max}" : unitCost.ToString();
+            var effectiveRarity = (Item.Rarity, MaterialRule?.Rarity) switch
+            {
+                ({ } itemRarity, { } materialRarity) => Math.Max(itemRarity, materialRarity),
+                ({ } itemRarity, null) => itemRarity,
+                (null, { } materialRarity) => materialRarity,
+                _ => (int?)null
+            };
+            return effectiveRarity.HasValue ? $"{cost} {abbr} · R{effectiveRarity}" : $"{cost} {abbr}";
         }
     }
 
@@ -142,5 +169,12 @@ public partial class EquipmentItemRow : ObservableObject
         IsReserveRow = true;
         ReserveAvailable = reserveAvailable;
         ReserveMaterialRule = reserveMaterialRule;
+    }
+
+    /// <summary>Tuile de variante matériau (RareSearchMode) - voir MaterialRule's own doc.</summary>
+    public EquipmentItemRow(EquipmentItem item, SpecialRule materialRule)
+    {
+        Item = item;
+        MaterialRule = materialRule;
     }
 }

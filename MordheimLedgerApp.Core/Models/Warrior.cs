@@ -30,7 +30,7 @@ public class Warrior
     /// rulebook), but Advances still roll on the Hero table ("roll on the Heroes Advancement table as
     /// opposed to Henchmen") - every call site that picks HeroAdvanceTable/HenchmanAdvanceTable checks
     /// `IsHero || IsHiredSword` instead of IsHero alone (see WarriorOutcomeRow.SyncAdvanceRolls/
-    /// SyncExplorationAdvanceRolls, EndOfGameDialogViewModel.Advance.cs) - the one place these two
+    /// SyncExplorationAdvanceRolls, EndOfGamePageViewModel.Advance.cs) - the one place these two
     /// concerns needed decoupling.</summary>
     public bool IsHiredSword => HiredSwordId.HasValue;
 
@@ -170,7 +170,7 @@ public class Warrior
 
     /// <summary>Which of the 6 rulebook Skill lists this warrior may pick an Advance from - copied from
     /// the recruiting WarriorArchetype at recruitment (see WarriorArchetype.AllowedSkillCategories), so
-    /// the End of Game Advance skill picker can filter to it (see EndOfGameDialogViewModel.
+    /// the End of Game Advance skill picker can filter to it (see EndOfGamePageViewModel.
     /// PickAdvanceSkill). Empty = not seeded/unknown, not "may pick nothing".</summary>
     public List<Library.SkillCategory> AllowedSkillCategories { get; set; } = new();
 

@@ -70,7 +70,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// <summary>Onglets Profil/Équipement/Compétences/Blessures/Sorts/Mutations - même pattern toggle
     /// (pas de vrai TabbedPage) que Roster/Historique sur WarbandDetailPage, adapté à 6 sections avec un
     /// index plutôt que des bools séparés (précédent local : CurrentStep/IsStepN de
-    /// EndOfGameDialogViewModel). Profil (Nom/XP/stats/Mouvement/Animal) sorti de la zone toujours
+    /// EndOfGamePageViewModel). Profil (Nom/XP/stats/Mouvement/Animal) sorti de la zone toujours
     /// visible au-dessus des onglets vers son propre onglet, par défaut - même précédent que l'onglet
     /// Profil de WarriorArchetypeEditDialog (Bibliothèque), pour désencombrer un dialog qui avait grossi
     /// jusqu'à empiler 5 champs fixes au-dessus de 5 onglets.</summary>

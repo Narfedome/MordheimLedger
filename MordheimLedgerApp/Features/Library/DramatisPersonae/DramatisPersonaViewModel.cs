@@ -11,7 +11,7 @@ namespace MordheimLedgerApp.Features.Library.DramatisPersonae;
 
 /// <summary>Catalog of Dramatis Personae/special characters (e.g. "Aenur, the Sword of Twilight") -
 /// CRUD AND picker mode (added when the End of Game wizard's "Personnage spécial" search step started
-/// referencing the real catalog instead of free-text - see EndOfGameDialogViewModel.RareItems.cs) - same
+/// referencing the real catalog instead of free-text - see EndOfGamePageViewModel.RareItems.cs) - same
 /// IsSelectorMode/SelectedRows/ConfirmSelection bascule as HiredSwordViewModel. Flat list, no grouping,
 /// same "too few entries to warrant it" call as HiredSwordView. Single-select only for now (see
 /// IDramatisPersonaPickerService) - SelectedRows still exists for symmetry with HiredSwordViewModel's

@@ -25,7 +25,7 @@ public interface IEquipmentPickerService
     /// SelectAnimal to reuse this same picker pre-filtered to EquipmentCategory.Animal instead of a
     /// separate Animal-only picker. singleSelect: true restricts the picker to at most one tile at a
     /// time (see EquipmentItemViewModel.SingleSelectMode) - used by the End of Game wizard's "Objets
-    /// rares" step (EndOfGameDialogViewModel.RareItems.cs), where a Hero is nominating exactly ONE item
+    /// rares" step (EndOfGamePageViewModel.RareItems.cs), where a Hero is nominating exactly ONE item
     /// to attempt a 2D6 search roll against ("You may also only make one roll for each Hero"), not doing
     /// a normal multi-item purchase. rareSearchMode: true alongside singleSelect for that same step -
     /// hides common ranged weapons/armour, which have no search path there (see EquipmentItemViewModel.
@@ -40,11 +40,26 @@ public interface IEquipmentPickerService
     /// "Réserve" section at the top of the picker, listing items the warband already has in stock - keyed
     /// by EquipmentItem.Id, quantity summed across materials but MaterialRule carrying a representative
     /// material when one exists (see EquipmentItemViewModel.ReserveQuantities) - null everywhere else
-    /// (this picker doesn't otherwise know about a warband's inventory).</summary>
+    /// (this picker doesn't otherwise know about a warband's inventory). allowCreate: false hides the
+    /// picker's own "+" (create a brand-new catalog item on the fly, see EquipmentItemViewModel.
+    /// AllowCreate) - every End of Game wizard caller passes false (2026-09-23, user request - creating
+    /// a catalog item mid-wizard is out of place there), true (default, unchanged) everywhere else.</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null);
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true);
+
+    /// <summary>Dédié à l'étape "Objets rares" (EndOfGamePageViewModel.RareItems.cs) - contrairement à
+    /// PickEquipmentAsync, renvoie aussi le MaterialRule choisi (2026-09-23, retour utilisateur - "on
+    /// pourrait directement proposer les armes en ithilmar et les armes en gromril à l'achat plutôt que
+    /// d'avoir un sélecteur neutre et devoir cliquer sur une chip"). Réutilise la même page/VM
+    /// (EquipmentItemSelectorPage/EquipmentItemViewModel) - RareSearchMode (toujours actif ici, jamais
+    /// exposé en paramètre) génère une tuile de variante matériau par matériau éligible (Gromril/Ithilmar)
+    /// pour chaque arme de corps à corps, voir EquipmentItemViewModel.ApplyFilter - mais via un retour
+    /// DÉDIÉ, sans toucher au contrat IReadOnlyList&lt;EquipmentItem&gt; de PickEquipmentAsync (jamais de
+    /// matériau, ses 10 autres appelants restent inchangés). Toujours singleSelect en interne (une seule
+    /// tuile choisie, comme PickEquipmentAsync's singleSelect). null si annulé.</summary>
+    Task<(EquipmentItem Item, SpecialRule? MaterialRule)?> PickRareEquipmentAsync(int warbandArchetypeId, HashSet<int> allowedEquipmentListItemIds, int availableGold);
 }
 
 public class EquipmentPickerService : IEquipmentPickerService
@@ -61,7 +76,7 @@ public class EquipmentPickerService : IEquipmentPickerService
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null)
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -83,6 +98,7 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.RareSearchMode = rareSearchMode;
         viewModel.CommonOnly = commonOnly;
         viewModel.ReserveQuantities = reserveQuantities;
+        viewModel.AllowCreate = allowCreate;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
         // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
         // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).
@@ -103,5 +119,42 @@ public class EquipmentPickerService : IEquipmentPickerService
         await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(page), "EquipmentPicker.Push");
 
         return await tcs.Task;
+    }
+
+    public async Task<(EquipmentItem Item, SpecialRule? MaterialRule)?> PickRareEquipmentAsync(int warbandArchetypeId, HashSet<int> allowedEquipmentListItemIds, int availableGold)
+    {
+        var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
+
+        var navigationService = _provider.GetRequiredService<IEquipmentPickerNavigationService>();
+        navigationService.RegisterTaskSource(tcs);
+
+        var viewModel = _provider.GetRequiredService<EquipmentItemViewModel>();
+        viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        viewModel.AllowedEquipmentListItemIds = allowedEquipmentListItemIds;
+        viewModel.AvailableGold = availableGold;
+        viewModel.SingleSelectMode = true;
+        viewModel.RareSearchMode = true;
+        // Toujours false ici (jamais exposé en paramètre) - exclusif au wizard Fin de Partie, voir
+        // EquipmentItemViewModel.AllowCreate's own doc.
+        viewModel.AllowCreate = false;
+        var page = new EquipmentItemSelectorPage(viewModel);
+
+        var window = Shell.Current.Window;
+        void OnModalPopped(object? sender, ModalPoppedEventArgs e)
+        {
+            if (!ReferenceEquals(e.Modal, page))
+                return;
+            window.ModalPopped -= OnModalPopped;
+            tcs.TrySetResult(Array.Empty<EquipmentItem>());
+        }
+        window.ModalPopped += OnModalPopped;
+
+        await DialogNavigationGate.RunAsync(() => Shell.Current.Navigation.PushModalAsync(page), "EquipmentPicker.Push");
+
+        var result = await tcs.Task;
+        // SelectedRows n'est jamais vidé par ConfirmSelection/Cancel (EquipmentItemViewModel.cs) - result
+        // (via la même TCS que PickEquipmentAsync) reste la SEULE façon fiable de distinguer une annulation
+        // (Count == 0) d'une confirmation, SingleSelectMode garantissant au plus une ligne dans SelectedRows.
+        return result.Count == 0 ? null : (result[0], viewModel.SelectedRows.FirstOrDefault()?.MaterialRule);
     }
 }

@@ -123,6 +123,16 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// else (every other picker still lets a Rare list member through).</summary>
     public bool CommonOnly { get; set; }
 
+    /// <summary>Set by EquipmentPickerService (before LoadData) - true (défaut, inchangé) laisse le "+"
+    /// créer un nouvel objet catalogue directement depuis le sélecteur (achat/recrutement classique
+    /// d'une bande). False pour tous les sélecteurs du wizard Fin de Partie (2026-09-23, retour
+    /// utilisateur - "dans les sélecteurs du end of game, on ne doit pas avoir le + pour créer un
+    /// nouvel élément") : créer un objet catalogue à la volée n'a pas sa place au milieu de ce wizard
+    /// (Achat/Vente, Recrutement, Objets rares - PickRareEquipmentAsync le pose toujours à false, jamais
+    /// exposé en paramètre puisque exclusif à ce contexte). Sans effet en mode CRUD (Bibliothèque), qui
+    /// a son propre bouton "+" séparé (IsCrud, toujours visible).</summary>
+    public bool AllowCreate { get; set; } = true;
+
     /// <summary>Set by EquipmentPickerService (before LoadData) when the caller wants a "Réserve" section
     /// pinned at the top of the picker, listing items the warband already has in stock - keyed by
     /// EquipmentItem.Id. Quantity is summed across materials (still just one tile per Item, not per
@@ -166,10 +176,21 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
+    /// <summary>Gromril/Ithilmar (les seules SpecialRule avec CostMultiplier+Rarity, même filtre que
+    /// EndOfGamePageViewModel.RareItems.cs's RareMaterialOptions) - chargé UNIQUEMENT quand RareSearchMode
+    /// est actif (seul appelant qui en a besoin, voir ApplyFilter), jamais interrogé pour les 9 autres
+    /// usages de ce picker partagé.</summary>
+    private List<SpecialRule> _rareMaterialOptions = new();
+
     private async Task LoadData()
     {
         _allItems = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+        if (RareSearchMode)
+        {
+            var specialRules = await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language);
+            _rareMaterialOptions = specialRules.Where(r => r.CostMultiplier.HasValue && r.Rarity.HasValue).ToList();
+        }
         if (LockedCategory is { } locked) SelectedCategory = locked;
         RefreshSelectedCategoryLabel();
         ApplyFilter();
@@ -272,8 +293,29 @@ public partial class EquipmentItemViewModel : BaseViewModel
                 group = new EquipmentItemGroup(groupName) { ShowHeader = ShowGroupHeaders };
                 groups.Add(group);
             }
-            var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
-            group.Add(new EquipmentItemRow(item, isFreeForThisPurchase));
+            // Tuile nue omise en RareSearchMode pour une arme de corps à corps COMMUNE (pas de Rarity) -
+            // 2026-09-23, retour utilisateur "vu que c'est que pour les armes rare on peut enlever les
+            // armes sans amélioration pour les armes communes" : sans matériau, une arme commune n'a
+            // aucune Rarity à rechercher (RareItemSearchEntry.EffectiveRarity serait null, "disponible
+            // sans jet" - pas une vraie recherche), donc rien à proposer ici. Une arme déjà Rare garde SA
+            // tuile nue (recherchable à sa propre Rarity, le matériau n'est qu'un supplément optionnel).
+            var isMeleeWeapon = item.Category == EquipmentCategory.MeleeWeapon;
+            var skipPlainTile = RareSearchMode && isMeleeWeapon && !item.Rarity.HasValue;
+            if (!skipPlainTile)
+            {
+                var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
+                group.Add(new EquipmentItemRow(item, isFreeForThisPurchase));
+            }
+
+            // Variantes matériau (RareSearchMode uniquement, 2026-09-23) - une tuile de plus par matériau
+            // éligible (Gromril/Ithilmar) pour toute arme de corps à corps, commune OU déjà Rare (même
+            // règle qu'RareItemSearchEntry.IsMaterialEligible - "toute arme de corps à corps peuvent être
+            // en gromril, même les armes rares") : évite d'avoir à choisir l'objet nu puis taper une
+            // pastille à part sur l'étape, la tuile porte directement le matériau (EquipmentItemRow.
+            // MaterialRule, lu par EquipmentPickerService.PickRareEquipmentAsync à la confirmation).
+            if (RareSearchMode && isMeleeWeapon)
+                foreach (var material in _rareMaterialOptions)
+                    group.Add(new EquipmentItemRow(item, material));
 
             // Une tuile "Réserve" SÉPARÉE (jamais la même instance que celle de la catégorie ci-dessus,
             // voir EquipmentItemRow.IsReserveRow's own doc) - retour utilisateur 2026-09-21 : "aujourd'hui
@@ -493,7 +535,11 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     /// <summary>Read-only recap popup (tile info button). AllowConcurrentExecutions : voir
     /// WarbandArchetypeViewModel.ShowDetails - une seule commande partagée par toutes les tuiles, sinon
-    /// elles se désactivent toutes ensemble tant qu'un dialog est ouvert.</summary>
+    /// elles se désactivent toutes ensemble tant qu'un dialog est ouvert. Matériau passé (2026-09-23,
+    /// retour utilisateur - "dans le détail de l'arme on ait la chip de l'amélioration") pour qu'une
+    /// tuile Réserve OU de variante matériau (ReserveMaterialRule/MaterialRule - mutuellement exclusifs,
+    /// jamais posés ensemble) affiche la même chip matériau que partout ailleurs dans l'app plutôt que
+    /// la fiche nue de l'objet, jusque-là ignorée par ce seul bouton "i" du picker.</summary>
     [RelayCommand(AllowConcurrentExecutions = true)]
-    private Task ShowDetails(EquipmentItemRow row) => _detailDialogs.ShowEquipmentDetailDialogAsync(row.Item);
+    private Task ShowDetails(EquipmentItemRow row) => _detailDialogs.ShowEquipmentDetailDialogAsync(row.Item, row.ReserveMaterialRule ?? row.MaterialRule);
 }

@@ -13,6 +13,8 @@ using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
 using MordheimLedgerApp.Features.Library.Spells.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarbandArchetypes.CreateEdit;
 using MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit;
+using MordheimLedgerApp.Features.Warbands;
+using MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 namespace MordheimLedgerApp.Services;
 
@@ -55,7 +57,7 @@ public interface IDetailDialogService
     /// <summary>Always the plain full profile (stat line/equipment/skills) of THIS specific persona, even
     /// if it's one half of a pair (e.g. Ulli &amp; Marquand) - 2026-09-01, user request: the Codex must show
     /// the tapped persona's own sheet directly, not a pair summary. Recruitment-flavored callers
-    /// (DramatisPersonaViewModel.ShowDetails in selector mode, EndOfGameDialogViewModel.RareItems.
+    /// (DramatisPersonaViewModel.ShowDetails in selector mode, EndOfGamePageViewModel.RareItems.
     /// ShowCharacterDetail) call ShowDramatisPersonaPairDetailDialogAsync instead when the target is
     /// paired - see their own doc for the exact split.</summary>
     Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item);
@@ -67,6 +69,15 @@ public interface IDetailDialogService
 
     Task ShowSpellDetailDialogAsync(Spell item);
     Task ShowInjuryDetailDialogAsync(Injury item);
+
+    /// <summary>Récap en lecture seule d'un guerrier DÉJÀ ACTIF (jamais un WarriorArchetype candidat au
+    /// recrutement, couvert par ShowWarriorArchetypeDetailDialogAsync) - 2026-09-23, chip tapable sur
+    /// plusieurs étapes du wizard Fin de Partie (Renvoyer/Vétérans/Hors de combat/Blessure/Progression/
+    /// Expérience). Aucune résolution catalogue async nécessaire ici (contrairement à
+    /// ShowHiredSwordDetailDialogAsync et consorts) - Warrior porte déjà Equipment/Skills/Spells/
+    /// Mutations ; archetypeName/specialRules doivent être fournis par l'appelant (WarriorOutcomeRow les
+    /// a déjà résolus), ce service n'a pas accès à la logique de fusion archétype+bande+équipement.</summary>
+    Task ShowWarriorDetailDialogAsync(Warrior warrior, string archetypeName, IReadOnlyList<SpecialRuleChip> specialRules);
 }
 
 public class DetailDialogService : IDetailDialogService
@@ -162,7 +173,7 @@ public class DetailDialogService : IDetailDialogService
     /// s'il fait partie d'une paire - 2026-09-01, retour utilisateur : le Codex doit montrer directement
     /// la fiche du personnage tapé, pas le résumé de paire. Les appelants "contexte recrutement" (picker/
     /// wizard Fin de Partie) appellent explicitement ShowDramatisPersonaPairDetailDialogAsync à la place
-    /// quand ils veulent ce résumé - voir DramatisPersonaViewModel.ShowDetails/EndOfGameDialogViewModel.
+    /// quand ils veulent ce résumé - voir DramatisPersonaViewModel.ShowDetails/EndOfGamePageViewModel.
     /// RareItems.ShowCharacterDetail pour le clivage exact.</summary>
     public async Task ShowDramatisPersonaDetailDialogAsync(DramatisPersona item)
     {
@@ -196,4 +207,7 @@ public class DetailDialogService : IDetailDialogService
 
     public Task ShowInjuryDetailDialogAsync(Injury item) =>
         ShowAsync(new InjuryDetailDialog(new InjuryDetailDialogViewModel(item, this)));
+
+    public Task ShowWarriorDetailDialogAsync(Warrior warrior, string archetypeName, IReadOnlyList<SpecialRuleChip> specialRules) =>
+        ShowAsync(new WarriorRecapDialog(new WarriorRecapDialogViewModel(warrior, archetypeName, specialRules, this)));
 }

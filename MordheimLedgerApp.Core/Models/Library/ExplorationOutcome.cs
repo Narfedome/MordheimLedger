@@ -89,7 +89,7 @@ public class ExplorationOutcome
     /// Note label so the player reads a real sentence, properly localized, rather than a terse tag.
     /// Contrast ExplorationResult.ShortDescription (the shared intro sentence every branch follows) -
     /// together they replace the full multi-branch Description on the wizard's Result step (see
-    /// EndOfGameDialogViewModel.ExplorationResultDescriptionText). Retrofitted 2026-08-20 after Note
+    /// EndOfGamePageViewModel.ExplorationResultDescriptionText). Retrofitted 2026-08-20 after Note
     /// turned out to matter for real UI display, not just an internal tag as originally planned - see
     /// BranchTextKey for the translation slot.</summary>
     public string? BranchText { get; set; }
@@ -112,7 +112,7 @@ public class ExplorationOutcome
     /// you roll on the Exploration chart, roll one dice more than usual and discard any one dice") - the
     /// End of Game wizard sets Warband.PendingExplorationBonusDie when this branch resolves, consumed as
     /// a +1 to Core.Rules.ExplorationChart.ComputeDiceCount's bonusDice the NEXT time this warband opens
-    /// the End of Game wizard (see EndOfGameDialogViewModel.ExplorationDiceCount). False/default for
+    /// the End of Game wizard (see EndOfGamePageViewModel.ExplorationDiceCount). False/default for
     /// every other branch.</summary>
     public bool GrantsNextExplorationBonusDie { get; set; }
 
@@ -126,7 +126,7 @@ public class ExplorationOutcome
     /// split it (e.g. Prisoners' Possessed branch: "D3 Experience distributed amongst their Heroes") -
     /// contrast GrantsLeaderExperience, a flat amount to the single leader only with no distribution
     /// choice. The wizard shows a roll field for the total (still the player's own physical roll, never
-    /// auto-rolled) plus a +/- stepper per Hero (see EndOfGameDialogViewModel.
+    /// auto-rolled) plus a +/- stepper per Hero (see EndOfGamePageViewModel.
     /// DistributedExperienceRemaining, which must reach exactly 0 before the player can continue - a
     /// mockup confirmed this shape with the user 2026-08-20). Null for every other branch.</summary>
     public string? GrantsDistributedHeroExperienceFormula { get; set; }
@@ -205,7 +205,7 @@ public class ExplorationOutcome
     /// blessing differs), same "independent of Kind" idiom as GrantsOptionalEquippedHenchman. The player
     /// picks one of a Hero's own already-carried weapons (never a Henchman group's - a group's Equipment
     /// is shared across several models, not a single weapon to bless - nor the warband's unassigned
-    /// stash) via EndOfGameDialogViewModel.WeaponBlessingOptions; the chosen WarriorEquipment.MaterialRule
+    /// stash) via EndOfGamePageViewModel.WeaponBlessingOptions; the chosen WarriorEquipment.MaterialRule
     /// is set to the "Blessed Weapon" SpecialRule (see SpecialRules.json), same mechanism as a Gromril/
     /// Ithilmar purchase rather than a bespoke bool flag - reuses the existing chip/abbreviation display
     /// as-is. False/default for every other branch.</summary>
@@ -224,7 +224,7 @@ public class ExplorationOutcome
     /// Sword... for the duration of the next battle, free of charge") - same "independent of Kind" idiom
     /// as GrantsOptionalEquippedHenchman/GrantsWeaponBlessing. Unlike GrantsFreeHenchmanArchetypeName (a
     /// FIXED archetype from the book), the player picks which Hired Sword type to engage at resolution
-    /// time (EndOfGameDialogViewModel.Exploration.cs), since that's a real choice offered by the book
+    /// time (EndOfGamePageViewModel.Exploration.cs), since that's a real choice offered by the book
     /// ("choose from those available to your warband"), not a fixed name - resolved via
     /// WarbandService.RecruitHiredSwordAsync (free, HireCost not deducted) with Warrior.
     /// HiredSwordUpkeepPrepaid set so the very next End of Game's upkeep step shows it already covered.

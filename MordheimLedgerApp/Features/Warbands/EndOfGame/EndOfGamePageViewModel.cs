@@ -267,6 +267,14 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         - PurchasedReserveItems.Sum(p => p.Cost)
         + PendingSales.Sum(c => c.SellPrice);
 
+    /// <summary>Alias générique d'IsRareItemPurchaseBlocked (même flag, EndOfGameTreasuryRemaining &lt; 0)
+    /// - nom neutre pour être réutilisé par le bandeau "Suivant bloqué" de plusieurs étapes distinctes
+    /// (Achat/Vente d'équipement, Détail Héros recruté, Équipement Hommes de main, Vétérans), pas juste
+    /// Objets rares (2026-09-23, retour utilisateur - même dialog qui clignote après le picker déjà
+    /// réglée une fois pour les limites d'armes, à généraliser ici plutôt que dupliquer une propriété par
+    /// étape). IsRareItemPurchaseBlocked reste tel quel (déjà équivalent), pas de renommage superflu.</summary>
+    public bool IsTreasuryBlocked => EndOfGameTreasuryRemaining < 0;
+
     /// <summary>Notifie tout ce qui dépend de EndOfGameTreasuryRemaining - un seul point d'entrée plutôt
     /// qu'une longue liste de [NotifyPropertyChangedFor] dupliquée sur chaque propriété/collection qui
     /// influence ce solde, pour réduire le risque d'en oublier une (voir le bug IsPairDuelStep du
@@ -278,6 +286,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasury));
         OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
         OnPropertyChanged(nameof(IsRareItemPurchaseBlocked));
+        OnPropertyChanged(nameof(IsTreasuryBlocked));
         OnPropertyChanged(nameof(CanAffordNewHiredSword));
         OnPropertyChanged(nameof(CanAffordEquippedHenchman));
         OnPropertyChanged(nameof(EquippedHenchmanTreasuryAfter));
@@ -1045,7 +1054,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             StepKind.DramatisPersonae => ValidateDramatisPersonaeStep(),
             StepKind.PairEngagement => ValidatePairEngagementStep(),
             StepKind.PairDuel => ValidatePairDuelStep(),
+            StepKind.EquipmentTrading => !IsTreasuryBlocked,
             StepKind.RecruitHeroDetail => ValidateRecruitHeroDetailStep(CurrentRecruitHeroSlot!),
+            StepKind.RecruitVeteranTopUp => !IsTreasuryBlocked,
+            StepKind.RecruitHenchmenEquipment => !IsTreasuryBlocked,
             StepKind.RecruitHenchmenNames => ValidateRecruitHenchmenNamesStep(),
             _ => true
         };

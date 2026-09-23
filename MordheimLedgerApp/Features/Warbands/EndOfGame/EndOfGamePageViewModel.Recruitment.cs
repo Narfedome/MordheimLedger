@@ -644,15 +644,12 @@ public partial class EndOfGamePageViewModel
                 };
             }
 
-            // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
-            // main, 1 pour un Héros) - sélection multiple : on s'arrête au premier objet trop cher plutôt
-            // que de tout annuler, même logique que WarbandEditDialogViewModel.AddEquipment.
-            if (EndOfGameTreasuryRemaining < pick.Cost * perUnitCost)
-            {
-                await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-                break;
-            }
-
+            // Plus de dialog "fonds insuffisants" ici (retirée 2026-09-23, même correctif que
+            // AddReserveEquipment/EquipmentTrading.cs - elle s'affichait une demi-seconde puis
+            // disparaissait, même course de navigation modale que l'avertissement de limite d'armes
+            // ci-dessous). Tous les objets choisis rejoignent la cible ; un solde négatif bloque Suivant
+            // via IsTreasuryBlocked (bandeau dédié dans RecruitHeroDetailStepView.xaml/
+            // RecruitHenchmenEquipmentStepView.xaml).
             destination.Add(pick);
             NotifyTreasuryChanged();
         }
@@ -707,17 +704,25 @@ public partial class EndOfGamePageViewModel
 
     /// <summary>Nom requis pour CE héros précis (livre des règles - un nom par recrue), pré-rempli
     /// (ArchetypeLabel via IncrementRecruit) mais modifiable - ce garde-fou ne mord donc que si le joueur
-    /// a vidé le champ après coup.</summary>
+    /// a vidé le champ après coup. Bloque aussi Suivant si la trésorerie est passée négative
+    /// (IsTreasuryBlocked, 2026-09-23 - remplace l'ancienne dialog "fonds insuffisants" déclenchée juste
+    /// après le picker, qui clignotait/restait bloquée à cause de la course de navigation modale - même
+    /// correctif que ShowWeaponLimitWarningIfNeededAsync) : les deux checks restent indépendants, comme
+    /// ValidateRareItemPurchaseStep.</summary>
     private bool ValidateRecruitHeroDetailStep(WarriorNameSlot slot)
     {
+        var valid = true;
         if (string.IsNullOrWhiteSpace(slot.Name))
         {
             RecruitHeroDetailError = string.Format(Loc["WarbandsWarriorNameRequired"], slot.Row.Name);
-            return false;
+            valid = false;
+        }
+        else
+        {
+            RecruitHeroDetailError = null;
         }
 
-        RecruitHeroDetailError = null;
-        return true;
+        return valid && !IsTreasuryBlocked;
     }
 
     [ObservableProperty]

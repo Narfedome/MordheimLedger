@@ -1499,6 +1499,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameEquipmentReallocationDestinationTitle" xml:space="preserve">
     <value>Déplacer vers…</value>
   </data>
+  <data name="EndOfGameReallocationQuantityTitle" xml:space="preserve">
+    <value>Déplacer combien ?</value>
+  </data>
+  <data name="EndOfGameReallocationQuantityPrompt" xml:space="preserve">
+    <value>Combien d'exemplaires déplacer ? (1-{0})</value>
+  </data>
   <data name="HistoryEquipmentReallocatedSentence" xml:space="preserve">
     <value>{0} rejoint {1}.</value>
   </data>
@@ -1624,6 +1630,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRareItemPurchaseBlockedMessage" xml:space="preserve">
     <value>Trésorerie insuffisante - décochez un objet ou ajustez les jets avant de continuer.</value>
+  </data>
+  <data name="EndOfGameTreasuryBlockedMessage" xml:space="preserve">
+    <value>Trésorerie insuffisante - ajustez vos choix avant de continuer.</value>
   </data>
   <data name="EndOfGameRareItemPurchaseWyrdstoneBlockedMessage" xml:space="preserve">
     <value>Pas assez de pierres magiques pour payer Nicodemus - vendez-en moins à l'étape précédente ou décochez son recrutement.</value>

@@ -18,6 +18,8 @@
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
+                <Label Text="{loc:Loc EndOfGameTreasuryBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsTreasuryBlocked}"/>
 
                 <!-- Achat : choix libre au picker (commonOnly), rejoint la réserve - pas assigné à un
                      guerrier ici (PurchasedReserveItems, EquipmentPick sans slot/groupe porteur). -->

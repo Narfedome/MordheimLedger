@@ -68,13 +68,12 @@ public partial class EndOfGamePageViewModel
 
         foreach (var equipmentItem in items)
         {
+            // Plus de dialog "fonds insuffisants" ici (retirée 2026-09-23, retour utilisateur - elle
+            // s'affichait une demi-seconde puis disparaissait, le joueur restant bloqué dans le picker :
+            // même course de navigation modale que ShowWeaponLimitWarningIfNeededAsync's own doc décrit
+            // déjà). Tous les objets choisis rejoignent la réserve ; un solde négatif bloque Suivant via
+            // IsTreasuryBlocked (bandeau dédié dans EquipmentTradingStepView.xaml).
             var pick = new EquipmentPick(equipmentItem, materialRule: null);
-            if (EndOfGameTreasuryRemaining < pick.Cost)
-            {
-                await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-                break;
-            }
-
             PurchasedReserveItems.Add(pick);
             // Rejoint _reserve immédiatement (2026-09-23, unification de la réserve) - PurchasedReserveItems
             // reste la liste d'AFFICHAGE (chips individuellement retirables, un pick par achat) ; _reserve

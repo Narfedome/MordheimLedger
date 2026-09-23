@@ -65,9 +65,15 @@ public partial class EndOfGamePageViewModel
 
     /// <summary>Opens the Trading Post picker in SingleSelectMode (see IEquipmentPickerService) - the
     /// player is nominating exactly ONE item to attempt this Hero's single roll against ("You may also
-    /// only make one roll for each Hero"), never a normal multi-item purchase (no budget/quantity UI
-    /// shows either, since availableGold stays null here - see EquipmentItemView.xaml's ShowBudget gate).
-    /// Scoped to the UNION of every equipment list this warband's recruitable WarriorArchetypes use
+    /// only make one roll for each Hero"), never a normal multi-item purchase (no quantity UI shows -
+    /// SingleSelectMode). availableGold IS passed (2026-09-23, retour utilisateur - "afficher la
+    /// trésorerie dans le sélecteur") purely for ShowBudget's informational display - this step commits
+    /// nothing, the real cost/affordability is decided independently at the Achat step that follows
+    /// (RareItemPurchaseTotalCost/IsRareItemPurchaseBlocked). Minor known quirk: EquipmentItemViewModel's
+    /// IsFreeForThisPurchase also keys off AvailableGold.HasValue, so a Dagger tile would show "Gratuit"
+    /// here even though searching never grants a free dagger - harmless since only entry.SelectedItem is
+    /// kept, never the picker's displayed price. Scoped to the UNION of every equipment list this warband's
+    /// recruitable WarriorArchetypes use
     /// (allowedEquipmentListItemIds, resolved fresh on each open rather than cached - a handful of
     /// GetEquipmentListItemIdsAsync calls, cheap) - NOT the searching Hero's own list, since "un héros
     /// peut chercher un équipement qui n'est pas forcément pour lui" (found item goes to the band's
@@ -87,8 +93,8 @@ public partial class EndOfGamePageViewModel
         foreach (var listId in listIds)
             allowedItemIds.UnionWith(await _libraryService.GetEquipmentListItemIdsAsync(listId));
 
-        var picked = await _equipmentPicker.PickEquipmentAsync(_warbandArchetypeId, singleSelect: true, rareSearchMode: true,
-            allowedEquipmentListItemIds: allowedItemIds);
+        var picked = await _equipmentPicker.PickEquipmentAsync(_warbandArchetypeId, availableGold: RareItemPurchaseRemainingTreasury,
+            singleSelect: true, rareSearchMode: true, allowedEquipmentListItemIds: allowedItemIds);
         if (picked.Count == 0) return;
 
         entry.SelectedItem = picked[0];

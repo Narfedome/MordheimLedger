@@ -1661,10 +1661,12 @@ public partial class EndOfGamePageViewModel
     /// EndOfGame's commentaire d'ordre), pour voir l'état final de tout ce que Renvoyer/Vente/Recrutement
     /// ont déjà appliqué. WarriorRows[i].Warrior.Equipment/ReallocationReserve ont été
     /// mutés directement en mémoire pendant la session interactive (voir EndOfGamePageViewModel.
-    /// Reallocation.cs) - jamais persisté avant cet appel. Diffe chaque liste courante contre son
-    /// instantané d'origine (WarriorOutcomeRow.OriginalEquipmentIds / 
-    /// OriginalReserveEquipmentIds, capturés avant toute interaction) : un id d'origine absent maintenant
-    /// = parti ailleurs (RemoveXxxAsync) ; un id NÉGATIF présent maintenant = arrivé d'ailleurs
+    /// Reallocation.cs) - jamais persisté avant cet appel. Diffe chaque ligne courante contre son
+    /// instantané d'origine (WarriorOutcomeRow.OriginalEquipmentIds/OriginalEquipmentQuantities côté
+    /// Héros, _originalReserveSnapshot côté Réserve, tous capturés avant toute interaction) : un id
+    /// d'origine absent maintenant OU présent avec une Quantity réduite (déplacement PARTIEL, 2026-09-23
+    /// - voir MoveReallocationItem) = tout ou partie parti ailleurs (RemoveXxxAsync, puis
+    /// AddXxxAsync du reliquat si &gt; 0) ; un id NÉGATIF présent maintenant = arrivé d'ailleurs
     /// (AddXxxAsync, jamais un vrai id avant cet appel - voir ReallocatableItem/
     /// AddToReallocationCarrier). Les recrues n'ont rien de spécial ici : ApplyRecruitmentAsync (plus haut
     /// dans le pipeline) a déjà traité WarriorNameSlot.Equipment tel quel, cette étape n'y touche que
@@ -1686,8 +1688,24 @@ public partial class EndOfGamePageViewModel
 
         foreach (var row in WarriorRows.Where(r => r.IsHero))
         {
-            foreach (var goneId in row.OriginalEquipmentIds.Where(id => row.Warrior.Equipment.All(we => we.Id != id)))
-                await _warbandService.RemoveWarriorEquipmentAsync(goneId);
+            // Compare chaque id d'origine à son état courant (absent = déplacé entièrement ailleurs,
+            // Quantity réduite = déplacement PARTIEL - voir MoveReallocationItem/
+            // RemoveFromReallocationCarrier) - les deux cas se synchronisent de la même façon (delete +
+            // recreate, seule primitive disponible côté service, pas d'update de quantité en place) ;
+            // inchangé (même Quantity qu'à l'ouverture du wizard) ne fait rien.
+            foreach (var id in row.OriginalEquipmentIds)
+            {
+                var current = row.Warrior.Equipment.FirstOrDefault(we => we.Id == id);
+                if (current is not null && current.Quantity == row.OriginalEquipmentQuantities[id]) continue;
+
+                await _warbandService.RemoveWarriorEquipmentAsync(id);
+                if (current is { Quantity: > 0 })
+                {
+                    var recreated = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, current.Item, current.Quantity, current.MaterialRule, current.FoundValueOverride);
+                    if (current.BlessingRule is { } keptBlessing)
+                        await _warbandService.SetWarriorEquipmentBlessingRuleAsync(recreated.Id, keptBlessing.Id);
+                }
+            }
 
             foreach (var arrived in row.Warrior.Equipment.Where(we => we.Id < 0).ToList())
             {
@@ -1698,8 +1716,18 @@ public partial class EndOfGamePageViewModel
             }
         }
 
-        foreach (var goneId in OriginalReserveEquipmentIds.Where(id => ReallocationReserve.All(w => w.SourceId != id)))
-            await _warbandService.RemoveWarbandEquipmentAsync(goneId);
+        // Même principe côté Réserve : _originalReserveSnapshot porte déjà SourceId+Quantity figés (pas
+        // besoin d'un second dictionnaire comme côté Héros) - absente ou Quantity réduite synchronisent
+        // toutes deux vers la DB, inchangée ne fait rien.
+        foreach (var original in _originalReserveSnapshot)
+        {
+            var current = ReallocationReserve.FirstOrDefault(w => w.SourceId == original.SourceId);
+            if (current is not null && current.Quantity == original.Quantity) continue;
+
+            await _warbandService.RemoveWarbandEquipmentAsync(original.SourceId!.Value);
+            if (current is { Quantity: > 0 })
+                await _warbandService.AddWarbandEquipmentAsync(Warband.Id, current.Item, current.Quantity, current.MaterialRule, current.FoundValueOverride);
+        }
 
         foreach (var arrived in ReallocationReserve.Where(w => w.SourceId < 0).ToList())
         {

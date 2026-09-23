@@ -25,6 +25,14 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// jamais présent ici), donc jamais confondu avec un retrait.</summary>
     public IReadOnlyCollection<int> OriginalEquipmentIds { get; }
 
+    /// <summary>Quantité RÉELLEMENT en base pour chaque id d'OriginalEquipmentIds, capturée au même
+    /// instant (2026-09-23, ajouté pour la sélection de quantité de Réallouer) - permet à
+    /// ApplyEquipmentReallocationAsync de détecter un déplacement PARTIEL (la ligne reste, avec son id
+    /// réel inchangé, mais sa Quantity a été réduite en mémoire) en plus des cas déjà couverts
+    /// (disparue/arrivée) - sans ce second instantané, une réduction de quantité ne serait jamais
+    /// synchronisée vers la DB et dupliquerait silencieusement l'objet déplacé.</summary>
+    public IReadOnlyDictionary<int, int> OriginalEquipmentQuantities { get; }
+
     /// <summary>The archetype's name (e.g. "Zombie", "Capitaine") shown instead of a plain Héros/Homme
     /// de main label on every step of this wizard - same value as WarriorRow.RoleName, passed in by
     /// the caller (WarbandDetailViewModel.EndOfGame already has it resolved for the roster).</summary>
@@ -829,6 +837,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     {
         Warrior = warrior;
         OriginalEquipmentIds = warrior.Equipment.Select(we => we.Id).ToList();
+        OriginalEquipmentQuantities = warrior.Equipment.ToDictionary(we => we.Id, we => we.Quantity);
         ArchetypeName = archetypeName;
         GainsExperience = gainsExperience;
         _startingHeroCount = startingHeroCount;

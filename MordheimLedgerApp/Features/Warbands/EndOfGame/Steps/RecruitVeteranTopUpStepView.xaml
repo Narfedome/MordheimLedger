@@ -18,6 +18,8 @@
                 </Grid>
                 <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 <Label Text="{Binding RecruitHenchmenExistingHintDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc EndOfGameTreasuryBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsTreasuryBlocked}"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExistingHenchmanTopUps}" Spacing="8">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:ExistingHenchmanTopUp">

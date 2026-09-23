@@ -17,6 +17,8 @@
                     <Label Grid.Column="1" Text="{Binding RecruitHeroProgressLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
                 <Label Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{loc:Loc EndOfGameTreasuryBlockedMessage}" TextColor="{StaticResource AppDanger}" FontSize="12"
+                       IsVisible="{Binding IsTreasuryBlocked}"/>
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="8">
                         <Entry Text="{Binding CurrentRecruitHeroSlot.Name}" Placeholder="{Binding CurrentRecruitHeroSlot.ArchetypeLabel}" FontSize="13"/>

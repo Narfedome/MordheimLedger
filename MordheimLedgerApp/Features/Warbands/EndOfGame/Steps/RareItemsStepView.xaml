@@ -30,6 +30,7 @@
             <VerticalStackLayout Spacing="12">
                 <Label Text="{loc:Loc EndOfGameRareItemsHeading}" FontAttributes="Bold"/>
                 <Label Text="{loc:Loc EndOfGameRareItemsIntro}" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding RareItemPurchaseRemainingTreasuryDisplay}" FontAttributes="Bold"/>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding RareItemSearchEntries}" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:RareItemSearchEntry">

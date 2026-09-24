@@ -211,11 +211,10 @@ que deviné :
   `WarbandMutationTests.RecruitedWarrior_CarriedEquipment_HasSpecialRulesResolved`.
 - `ExperienceTrackView` sur mobile : le nombre de cases par ligne (30 pour un Héros, comme sur la
   feuille imprimée en 3 lignes) reste fixe à dessein — ne pas le recalculer depuis la largeur
-  disponible (essayé puis annulé, ça casse la mise en page "3 lignes" voulue). C'est la case
-  elle-même (`BoxSize`, bindable property) qui rétrécit sur un écran étroit, entre `DefaultBoxSize`
-  (12) et `MinBoxSize` (7). Nécessite que l'appelant (`WarbandDetailPage.xaml`) NE pose PAS
-  `HorizontalOptions="Center"` sur l'instance : ça la ferait se réduire à son propre contenu, rendant
-  la mesure de largeur circulaire — le centrage visuel se fait déjà à l'intérieur du composant.
+  disponible (essayé puis annulé, ça casse la mise en page "3 lignes" voulue). Cases de taille fixe
+  (10px, 12px sur Desktop). **Dessinée par une seule `GraphicsView`** (`ExperienceTrackDrawable`,
+  2026-09-24) plutôt qu'un `Border` natif par case : 90 `Border` par Héros, reconstruits 3 fois par
+  carte, étaient le premier coût d'ouverture d'une fiche de bande - ne pas revenir à une vue par case.
 
 **Tuiles du Codex + dialogs récap en lecture seule** (branche `feature/codex-tile-recap-ui`, 2 commits,
 pas encore mergée sur `master`) : passe de polish sur les 8 onglets Codex (Bandes, Trading Post,

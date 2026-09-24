@@ -16,7 +16,7 @@
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:StableHeightScrollView>
+        <dialogs:AnimatedHeightScrollView>
         <VerticalStackLayout Spacing="16">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
@@ -41,6 +41,6 @@
                                       IconGlyph="{x:Static icons:SolidFont.Users}"
                                       Command="{Binding ShowWarbandDetailCommand}"/>
         </VerticalStackLayout>
-        </dialogs:StableHeightScrollView>
+        </dialogs:AnimatedHeightScrollView>
     </Border>
 </dialogs:DialogContent>

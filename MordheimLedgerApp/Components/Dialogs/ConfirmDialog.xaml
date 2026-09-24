@@ -8,8 +8,11 @@
                x:DataType="dialogs:ConfirmDialogViewModel"
                BackgroundColor="Transparent"
                Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+               VerticalOptions="Center">
+    <!-- Centré sur toutes les plateformes, contrairement aux autres dialogs (Start + marge haute sur
+         mobile pour laisser la place au clavier) : aucun champ de saisie ici, donc pas de clavier à
+         éviter - et une confirmation ouverte par-dessus un autre dialog (abandon des modifications,
+         DialogViewModel.Cancel) se retrouvait collée en haut, sur le dialog parent. -->
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="320">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"

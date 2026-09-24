@@ -145,6 +145,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
     public bool ShowBudget => AvailableGold.HasValue;
 
+    /// <summary>Stepper -/+ par tuile : seulement là où un budget s'applique (ShowBudget) ET où plusieurs
+    /// exemplaires ont un sens - jamais en SingleSelectMode (ex. Objets rares du wizard Fin de Partie, un
+    /// seul objet recherché par Héros), où "+" contournait en plus la sélection unique (IncrementQuantity
+    /// ajoute la tuile sans désélectionner les autres, contrairement à Select) - retour utilisateur
+    /// 2026-09-24.</summary>
+    public bool ShowQuantityStepper => ShowBudget && !SingleSelectMode;
+
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
     /// ignores any material-rule cost multiplier (Gromril...), only decided by the caller after the
     /// picker closes, so this is an estimate, not the exact final cost. Sums EquipmentItemRow.TotalCost

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit;
@@ -26,7 +27,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
     /// own group here - now just an EquipmentCategory, so a mount's rules fall under Objets like any
     /// other EquipmentItem's.</summary>
     [ObservableProperty]
-    private ObservableCollection<SpecialRuleGroup> specialRuleGroups = new();
+    private PagedGroupCollection<SpecialRuleGroup, SpecialRuleRow> specialRuleGroups = new();
 
     private string AllGroupsLabel => Loc["LibFilterAll"];
     private string WarbandGroupLabel => Loc["LibFilterSpecialRuleWarbands"];
@@ -147,7 +148,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
             }
             group.Add(new SpecialRuleRow(item));
         }
-        SpecialRuleGroups = groups;
+        SpecialRuleGroups = new PagedGroupCollection<SpecialRuleGroup, SpecialRuleRow>(groups, g => new SpecialRuleGroup(g.Name));
 
         SelectedRow = null;
         SelectedRows.Clear();
@@ -197,8 +198,13 @@ public partial class SpecialRuleViewModel : BaseViewModel
         // créations/sélections avant de Confirmer).
         if (IsSelectorMode)
         {
-            var row = SpecialRuleGroups.SelectMany(g => g).FirstOrDefault(r => r.Item.Id == newItem.Id);
-            if (row != null) Select(row);
+            // AllRows : la nouvelle tuile peut être dans une page pas encore chargée (PagedGroupCollection).
+            var row = SpecialRuleGroups.AllRows.FirstOrDefault(r => r.Item.Id == newItem.Id);
+            if (row != null)
+            {
+                SpecialRuleGroups.EnsureLoaded(row);
+                Select(row);
+            }
         }
     }
 

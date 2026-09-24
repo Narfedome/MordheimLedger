@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.RacialProfiles;
@@ -27,7 +28,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
     /// SpellViewModel.SpellGroups), the header is just hidden outside the "All warbands" filter where
     /// it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<WarbandArchetypeGroup> warbandArchetypeGroups = new();
+    private PagedGroupCollection<WarbandArchetypeGroup, WarbandArchetypeRow> warbandArchetypeGroups = new();
 
     private string AllGradesLabel => Loc["WarbandGradeFilterAll"];
 
@@ -119,7 +120,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             }
             group.Add(new WarbandArchetypeRow(item));
         }
-        WarbandArchetypeGroups = groups;
+        WarbandArchetypeGroups = new PagedGroupCollection<WarbandArchetypeGroup, WarbandArchetypeRow>(groups, g => new WarbandArchetypeGroup(g.Name));
 
         SelectedRow = null;
         SelectedRows.Clear();

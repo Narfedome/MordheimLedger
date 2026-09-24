@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.MagicSchools;
@@ -27,7 +28,7 @@ public partial class SpellViewModel : BaseViewModel
     /// DmTools' TrackItems/TrackGroup), the header is just hidden outside the "All schools" filter
     /// where it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<SpellGroup> spellGroups = new();
+    private PagedGroupCollection<SpellGroup, SpellRow> spellGroups = new();
 
     /// <summary>Null (Library CRUD tab) = no filter, shows every school's spells. Non-null (picker mode,
     /// set by SpellPickerService before construction) = only spells whose MagicSchool.Id is in this set,
@@ -118,7 +119,7 @@ public partial class SpellViewModel : BaseViewModel
             }
             group.Add(new SpellRow(item));
         }
-        SpellGroups = groups;
+        SpellGroups = new PagedGroupCollection<SpellGroup, SpellRow>(groups, g => new SpellGroup(g.Name));
 
         SelectedRow = null;
         SelectedRows.Clear();

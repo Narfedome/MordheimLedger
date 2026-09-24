@@ -260,8 +260,8 @@ public class AppDatabase
     }
 
     /// <summary>One-time-per-row data fix for WarriorArchetypes seeded before RacialProfileId existed -
-    /// same idiom as BackfillWarbandArchetypeRaceAsync just above (runs unconditionally every launch,
-    /// cheap no-op once every row has a real RacialProfileId). Ensures RacialProfiles.json is seeded
+    /// same idiom as BackfillWarbandArchetypeRaceAsync just above, except gated by PRAGMA user_version
+    /// (see RacialProfileBackfillDataVersion) rather than by its own row filter. Ensures RacialProfiles.json is seeded
     /// first (FindOrCreateRacialProfileAsync is DB-aware, safe even on a launch where
     /// SeedOfficialContentAsync never ran), then re-reads all 15 warband JSON files (LoadWarbandSeedDataAsync)
     /// to resolve each stale WarriorArchetype's profile by English Name against WarriorSeedData.
@@ -282,7 +282,22 @@ public class AppDatabase
         "SkavenOfClanEshin.json", "SistersOfSigmar.json", "Kislevites.json"
     ];
 
+    /// <summary>Valeur de PRAGMA user_version une fois BackfillWarriorArchetypeRacialProfileAsync passé -
+    /// son filtre "RacialProfileId == 0" ne suffit pas à le rendre no-op, 0 étant aussi la valeur
+    /// légitime d'un archétype sans profil (quelques archétypes officiels, tout archétype Custom) : il
+    /// relisait donc RacialProfiles.json + les 15 fichiers de bande + toutes les traductions anglaises à
+    /// CHAQUE lancement (~140 ms sur PC sur ~220 ms d'init, mesuré le 2026-09-24 - bien plus sur
+    /// téléphone), bloquant la liste des bandes derrière Initialization.</summary>
+    private const int RacialProfileBackfillDataVersion = 1;
+
     private async Task BackfillWarriorArchetypeRacialProfileAsync()
+    {
+        if (await _db.ExecuteScalarAsync<int>("PRAGMA user_version") >= RacialProfileBackfillDataVersion) return;
+        await BackfillWarriorArchetypeRacialProfileOnceAsync();
+        await _db.ExecuteAsync($"PRAGMA user_version = {RacialProfileBackfillDataVersion}");
+    }
+
+    private async Task BackfillWarriorArchetypeRacialProfileOnceAsync()
     {
         var staleArchetypes = (await _db.Table<WarriorArchetypeEntity>().ToListAsync())
             .Where(a => a.RacialProfileId == 0)

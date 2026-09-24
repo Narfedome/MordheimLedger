@@ -27,10 +27,20 @@ public partial class WarbandDetailPage : ContentPage
     // depuis que Fin de Partie est une page Shell distincte plutôt qu'une dialog : OnWarbandIdChanged
     // (WarbandDetailViewModel) ne se redéclenche pas quand l'id est inchangé après un
     // Shell.GoToAsync(".."), contrairement à l'ancien flux où EndOfGame() rappelait LoadAsync
-    // directement dans le même appel de commande.
+    // directement dans le même appel de commande. Pas au PREMIER affichage : le paramètre de
+    // navigation (warbandId) a déjà déclenché LoadAsync via OnWarbandIdChanged - recharger ici aussi
+    // construisait tout le roster deux fois à chaque ouverture (repéré le 2026-09-24).
+    private bool _hasAppeared;
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        if (!_hasAppeared)
+        {
+            _hasAppeared = true;
+            return;
+        }
 
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 

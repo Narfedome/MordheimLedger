@@ -59,8 +59,9 @@ public sealed class DialogStack
         // Filet de sécurité (même idiome que les ~10 XxxPickerService) : si la page est dépilée par le
         // bouton/geste retour d'Android plutôt que par Enregistrer/Annuler/tap sur le fond, aucun
         // CloseRequested n'est jamais levé - sans ce filet, tcs.Task ne se résoudrait jamais et
-        // l'appelant resterait bloqué indéfiniment. On réutilise CancelCommand (même résultat qu'un tap
-        // sur le fond) plutôt que résoudre tcs directement, pour garder un seul chemin de fermeture -
+        // l'appelant resterait bloqué indéfiniment. ForceCancel (même résultat qu'un tap sur le fond, MAIS
+        // sans la confirmation "modifications non enregistrées" de CancelCommand - la page est déjà partie,
+        // trop tard pour demander) plutôt que résoudre tcs directement, pour garder un seul chemin de fermeture -
         // poppedNatively empêche alors le PopModalAsync plus bas de dépiler une SECONDE fois (la page
         // est déjà partie).
         var window = currentPage.Window;
@@ -69,9 +70,13 @@ public sealed class DialogStack
             if (!ReferenceEquals(e.Modal, dialogPage)) return;
             if (window is not null) window.ModalPopped -= OnModalPopped;
             poppedNatively = true;
-            viewModel.CancelCommand.Execute(null);
+            viewModel.ForceCancel();
         }
         if (window is not null) window.ModalPopped += OnModalPopped;
+
+        // Référence pour la confirmation "modifications non enregistrées" (DialogViewModel.EditableState) -
+        // le ViewModel est entièrement construit à ce stade.
+        viewModel.CaptureInitialState();
 
         // Sérialisé (voir DialogNavigationGate) : un XxxPickerService peut pousser sa propre page modale
         // pendant que CE PushModalAsync est encore en train de s'installer (bouton du dialog lui-même

@@ -908,6 +908,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameExitConfirmMessage" xml:space="preserve">
     <value>Nothing has been saved yet. Leaving now discards everything entered in this wizard.</value>
   </data>
+  <data name="DialogDiscardChangesTitle" xml:space="preserve">
+    <value>Discard changes?</value>
+  </data>
+  <data name="DialogDiscardChangesMessage" xml:space="preserve">
+    <value>Your changes in this dialog have not been saved and will be lost.</value>
+  </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Result</value>
   </data>

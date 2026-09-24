@@ -22,6 +22,8 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, SpecialRules.Select(r => r.Id), MovementInput };
+
     [ObservableProperty]
     private WarriorArchetype item;
 

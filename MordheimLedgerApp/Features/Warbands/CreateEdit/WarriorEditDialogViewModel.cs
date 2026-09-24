@@ -33,6 +33,11 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    /// <summary>Voir DialogViewModel.EditableState - seulement le profil (Item, Animal compris) et la
+    /// saisie du Mouvement : Équipement/Compétences/Blessures/Sorts/Mutations sont déjà persistés au fil
+    /// de l'eau (voir Equipment), rien à perdre de ce côté en annulant.</summary>
+    protected override object? EditableState => new object?[] { Item, MovementInput };
+
     /// <summary>Masque le bouton "x" de retrait d'un objet d'équipement pour un Franc-Tireur (livre des
     /// règles, section Hired Swords : "A player cannot buy extra weapons or equipment for a Hired Sword,
     /// and he cannot sell the Hired Sword's weapons or equipment") - CanUseEquipment est déjà ce qui

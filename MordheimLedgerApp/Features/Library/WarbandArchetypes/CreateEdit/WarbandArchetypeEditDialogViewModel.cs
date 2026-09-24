@@ -52,6 +52,8 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, SpecialRules.Select(r => r.Id), MagicSchools.Select(s => s.Id), Warriors, EquipmentLists };
+
     [ObservableProperty]
     private WarbandArchetype item;
 
@@ -268,11 +270,12 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         if (Item.Id != 0)
         {
             var language = LocalizationService.Instance.Language;
-            await Loading.RunAsync(async () =>
+            // Chargement à la demande, pas une modification - voir EditableState.
+            await RunBaselineNeutralAsync(() => Loading.RunAsync(async () =>
             {
                 var loaded = await Task.Run(() => _libraryService.GetWarriorArchetypesAsync(Item.Id, language));
                 Warriors = new ObservableCollection<WarriorArchetype>(loaded);
-            });
+            }));
         }
         _warriorsLoaded = true;
     }
@@ -283,11 +286,11 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         if (Item.Id != 0)
         {
             var language = LocalizationService.Instance.Language;
-            await Loading.RunAsync(async () =>
+            await RunBaselineNeutralAsync(() => Loading.RunAsync(async () =>
             {
                 var loaded = await Task.Run(() => _libraryService.GetEquipmentListsAsync(Item.Id, language));
                 EquipmentLists = new ObservableCollection<EquipmentList>(loaded);
-            });
+            }));
         }
         _equipmentListsLoaded = true;
     }

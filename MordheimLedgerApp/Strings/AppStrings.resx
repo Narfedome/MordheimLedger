@@ -908,6 +908,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameExitConfirmMessage" xml:space="preserve">
     <value>Rien n'est encore enregistré. Quitter maintenant annule toute la saisie de ce wizard.</value>
   </data>
+  <data name="DialogDiscardChangesTitle" xml:space="preserve">
+    <value>Abandonner les modifications ?</value>
+  </data>
+  <data name="DialogDiscardChangesMessage" xml:space="preserve">
+    <value>Les modifications de ce dialog n'ont pas été enregistrées et seront perdues.</value>
+  </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Résultat</value>
   </data>

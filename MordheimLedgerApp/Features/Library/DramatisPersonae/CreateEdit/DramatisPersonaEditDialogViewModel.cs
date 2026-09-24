@@ -21,6 +21,8 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, MovementInput, WarbandRestriction.SelectedIds, SpecialRules.Select(r => r.Id), StartingEquipment.Select(e => e.Id), Skills.Select(s => s.Id), MagicSchools.Select(s => s.Id), AlternativePaymentItems.Select(i => i.Id) };
+
     [ObservableProperty]
     private DramatisPersona item;
 

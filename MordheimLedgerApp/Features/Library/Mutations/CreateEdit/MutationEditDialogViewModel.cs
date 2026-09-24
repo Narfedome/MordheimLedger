@@ -11,6 +11,8 @@ public partial class MutationEditDialogViewModel : DialogViewModel<bool>
 {
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds };
+
     [ObservableProperty]
     private Mutation item;
 

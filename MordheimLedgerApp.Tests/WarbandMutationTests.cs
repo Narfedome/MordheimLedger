@@ -531,4 +531,66 @@ public class WarbandMutationTests : IDisposable
         await _warbands.ClearAllDramatisPersonaCooldownsAsync(warbandA.Id);
         Assert.Empty(await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandA.Id));
     }
+
+    /// <summary>Cache de lecture d'AppDatabase (2026-09-24) : une édition du catalogue doit être visible
+    /// dès la lecture suivante - nom (traduction, Update ORM) comme restrictions vidées (DELETE en SQL
+    /// brut sans Insert derrière, invisible pour TableChanged - voir LibraryService.
+    /// ExecuteRawDeleteAsync).</summary>
+    [Fact]
+    public async Task EditingCatalogItem_IsVisibleImmediately_DespiteReadCache()
+    {
+        var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.RestrictedToWarbandArchetypeIds.Count > 0);
+
+        item.Name = "Renamed Item";
+        item.RestrictedToWarbandArchetypeIds = new List<int>();
+        await _library.SaveEquipmentItemAsync(item, "en");
+
+        var reloaded = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Id == item.Id);
+        Assert.Equal("Renamed Item", reloaded.Name);
+        Assert.Empty(reloaded.RestrictedToWarbandArchetypeIds);
+        Assert.Equal(ContentSource.Modified, reloaded.Source);
+    }
+
+    /// <summary>BackfillWarriorArchetypeRacialProfileAsync (2026-09-24) : gardé par PRAGMA user_version
+    /// plutôt que par son propre filtre (qui ne se refermait jamais, 0 étant aussi "aucun profil") - doit
+    /// quand même réparer une base antérieure au marqueur, puis ne plus jamais retourner relire les JSON.</summary>
+    [Fact]
+    public async Task RacialProfileBackfill_RunsOnLegacyDatabase_ThenIsMarkedDone()
+    {
+        await _db.Initialization;
+        Assert.True(await _db.Connection.ExecuteScalarAsync<int>("PRAGMA user_version") >= 1);
+
+        var reiklanders = await GetReiklandersAsync();
+        var captain = (await _library.GetWarriorArchetypesAsync(reiklanders.Id, "en")).First(a => a.RacialProfileId != 0);
+        var expectedProfileId = captain.RacialProfileId;
+
+        // Simule une base d'avant RacialProfileId ET d'avant le marqueur.
+        var entity = await _db.Connection.FindAsync<WarriorArchetypeEntity>(captain.Id);
+        entity.RacialProfileId = 0;
+        await _db.Connection.UpdateAsync(entity);
+        await _db.Connection.ExecuteAsync("PRAGMA user_version = 0");
+        await _db.Connection.CloseAsync();
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        var repaired = await reopenedDb.Connection.FindAsync<WarriorArchetypeEntity>(captain.Id);
+        Assert.Equal(expectedProfileId, repaired.RacialProfileId);
+        Assert.True(await reopenedDb.Connection.ExecuteScalarAsync<int>("PRAGMA user_version") >= 1);
+        await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>Les modèles sont reconstruits à chaque appel depuis les lignes cachées - modifier un
+    /// modèle renvoyé sans le sauvegarder ne doit pas fuiter dans les lectures suivantes.</summary>
+    [Fact]
+    public async Task MutatingReturnedModel_DoesNotLeakIntoCache()
+    {
+        var first = (await _library.GetEquipmentItemsAsync("en")).First();
+        var originalName = first.Name;
+        first.Name = "Unsaved Change";
+        first.SpecialRules.Clear();
+
+        var again = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Id == first.Id);
+        Assert.Equal(originalName, again.Name);
+        Assert.NotSame(first, again);
+    }
 }

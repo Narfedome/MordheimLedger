@@ -5,6 +5,7 @@
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:palette="clr-namespace:MordheimLedgerApp.Components.PalettePicker"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              x:Class="MordheimLedgerApp.Features.Settings.SettingsPage"
              x:DataType="local:SettingsViewModel">
 
@@ -101,6 +102,35 @@
                         </Label.GestureRecognizers>
                     </Label>
                 </Grid>
+            </Border>
+
+            <!-- Sources & remerciements -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{loc:Loc SettingsCreditsTitle}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                    <Label Text="{loc:Loc SettingsCreditsDesc}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <!-- Site à gauche, Discord en icône seule à droite sur la même ligne. -->
+                    <Grid ColumnDefinitions="*,auto">
+                        <Label Grid.Column="0" Text="{loc:Loc SettingsCreditsGlmSite}" TextColor="{DynamicResource AppAccent}"
+                               VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenGrandeLibrairieSiteCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                     IconFont="FontBrands"
+                                                     Icon="{x:Static icons:BrandFont.Discord}"
+                                                     IconColor="{DynamicResource AppAccent}"
+                                                     Tooltip="{loc:Loc SettingsCreditsGlmDiscord}"
+                                                     VerticalOptions="Center"
+                                                     Command="{Binding OpenGrandeLibrairieDiscordCommand}"/>
+                    </Grid>
+                    <Label Text="{loc:Loc SettingsCreditsMordheimer}" TextColor="{DynamicResource AppAccent}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenMordheimerCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
             </Border>
 
             <!-- Réinitialiser la base - dev/beta uniquement pour l'instant : reseed depuis les JSON

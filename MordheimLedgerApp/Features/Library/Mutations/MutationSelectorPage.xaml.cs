@@ -13,6 +13,8 @@ public partial class MutationSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is MutationViewModel vm)
             await vm.InitializeAsync();
     }

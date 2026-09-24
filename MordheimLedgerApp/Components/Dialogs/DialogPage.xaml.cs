@@ -28,4 +28,14 @@ public partial class DialogPage : ContentPage
     }
 
     private void OnBackdropTapped(object? sender, TappedEventArgs e) => _onBackdropTapped();
+
+    /// <summary>Bouton retour Android : même chemin que le tap sur le fond (CancelCommand, donc avec la
+    /// confirmation "modifications non enregistrées" si besoin) plutôt que de laisser la plateforme
+    /// dépiler la page d'office - une fois dépilée, il serait trop tard pour demander (voir
+    /// DialogStack.OnModalPopped).</summary>
+    protected override bool OnBackButtonPressed()
+    {
+        _onBackdropTapped();
+        return true;
+    }
 }

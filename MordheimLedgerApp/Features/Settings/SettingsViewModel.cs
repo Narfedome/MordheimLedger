@@ -49,6 +49,20 @@ namespace MordheimLedgerApp.Features.Settings
         public async Task ReportBug() =>
             await Launcher.OpenAsync(new Uri("https://docs.google.com/forms/d/e/1FAIpQLSdg2q1o01eGZsFvd0qIwOqYEVKDwBikQ0g7FWLSWHenKqeW0g/viewform?usp=dialog"));
 
+        // Sources & remerciements - lien Discord repris tel quel de la page d'accueil du site de la
+        // Grande Librairie (invitation publique).
+        [RelayCommand]
+        public async Task OpenGrandeLibrairieSite() =>
+            await Launcher.OpenAsync(new Uri("https://sites.google.com/view/grande-librairie-de-mordheim/accueil"));
+
+        [RelayCommand]
+        public async Task OpenGrandeLibrairieDiscord() =>
+            await Launcher.OpenAsync(new Uri("https://discord.gg/Fbn4CrCCA6"));
+
+        [RelayCommand]
+        public async Task OpenMordheimer() =>
+            await Launcher.OpenAsync(new Uri("https://mordheimer.net"));
+
         /// <summary>Wipes every table (all campaigns/warbands AND any Library edits/custom content) and
         /// re-seeds from the bundled JSON (see AppDatabase.ResetAsync) - the point is to let dev/beta
         /// iteration re-run the seed after a Core schema/data change without manually deleting the db

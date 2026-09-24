@@ -12,6 +12,8 @@ public partial class InjuryEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => Item;
+
     public ObservableCollection<string> CategoryOptions { get; } = new();
 
     [ObservableProperty]

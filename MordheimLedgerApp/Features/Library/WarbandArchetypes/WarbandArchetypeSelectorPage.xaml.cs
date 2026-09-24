@@ -31,6 +31,8 @@ public partial class WarbandArchetypeSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is WarbandArchetypeViewModel vm)
             await vm.InitializeAsync();
     }

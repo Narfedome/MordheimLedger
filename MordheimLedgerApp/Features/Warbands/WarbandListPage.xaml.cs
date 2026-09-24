@@ -28,10 +28,19 @@ public partial class WarbandListPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (args.WasPreviousPageACommunityToolkitPopupPage())
             return;
 
-        if (BindingContext is WarbandListViewModel vm)
+        if (BindingContext is not WarbandListViewModel vm) return;
+
+        // Premier chargement (démarrage de l'appli, qui attend aussi l'init de la base) : via
+        // LoadWarbandsCommand pour afficher le spinner (Loading.IsLoading) - retours suivants sur
+        // l'onglet en silencieux, pour ne pas le faire clignoter à chaque changement d'onglet.
+        if (!vm.IsInitialized)
+            await vm.LoadWarbandsCommand.ExecuteAsync(null);
+        else
             await vm.InitializeAsync();
     }
 }

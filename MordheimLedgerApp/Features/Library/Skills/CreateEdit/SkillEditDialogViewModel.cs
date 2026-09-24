@@ -15,6 +15,8 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds, RestrictedWarriors.Select(w => w.Id) };
+
     public ObservableCollection<string> CategoryOptions { get; } = new();
 
     [ObservableProperty]

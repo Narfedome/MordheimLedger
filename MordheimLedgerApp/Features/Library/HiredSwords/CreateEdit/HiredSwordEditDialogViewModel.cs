@@ -38,6 +38,8 @@ public partial class HiredSwordEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, MovementInput, SkillCategoryOptions.Where(o => o.IsChecked).Select(o => o.Category), StartingEquipment.Select(e => e.Id), WarbandRestriction.SelectedIds, SpecialRules.Select(r => r.Id), MagicSchools.Select(s => s.Id) };
+
     [ObservableProperty]
     private HiredSword item;
 

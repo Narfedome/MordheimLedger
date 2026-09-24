@@ -60,6 +60,29 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public bool IsWizardMode { get; }
         protected override bool CancelResult => false;
 
+        /// <summary>Voir DialogViewModel.EditableState - les lignes de recrutement sont projetées sur leurs
+        /// seules valeurs saisies (effectif, noms, XP, équipement/compétences/sorts par slot), pas
+        /// sérialisées telles quelles (commandes, archétypes complets, état d'affichage...).</summary>
+        protected override object? EditableState => new object?[]
+        {
+            Item, Archetype?.Id, IsExistingWarband, TreasuryOverride,
+            RecruitRows.Select(r => new object?[]
+            {
+                r.Archetype.Id, r.Count,
+                r.NameSlots.Select(s => new object?[] { s.Name, SlotState(s) }),
+                r.HenchmanGroupDrafts.Select(g => new object?[] { g.Name, g.Count, SlotState(g) })
+            }),
+            HiredSwordRows.Select(h => new object?[] { h.HiredSword.Id, h.IsRecruited, h.Name })
+        };
+
+        private static object?[] SlotState(RecruitSlot slot) =>
+        [
+            slot.Experience,
+            slot.Equipment.Select(e => new object?[] { e.Item.Id, e.MaterialRule?.Id, e.ExistingId }),
+            slot.Skills.Select(s => s.Id),
+            slot.Spells.Select(s => s.Id)
+        ];
+
         /// <summary>Masque les boutons Ajouter/Retirer de la puce Archetype hors création (Item.Id != 0,
         /// donc IsWizardMode false) - changer l'archétype d'une bande déjà recrutée invaliderait tous les
         /// WarriorArchetypeId déjà liés à ses guerriers, ça n'a plus de sens une fois la bande créée. La
@@ -419,6 +442,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private async Task EnsureRecruitableArchetypesLoadedAsync()
         {
             if (_recruitableLoaded || Archetype is null) return;
+            // Le roster existant pré-remplit RecruitRows (bande rouverte) - pas une modification de
+            // l'utilisateur, voir EditableState.
+            await RunBaselineNeutralAsync(LoadRecruitableArchetypesAsync);
+        }
+
+        private async Task LoadRecruitableArchetypesAsync()
+        {
+            if (Archetype is null) return;
             var language = LocalizationService.Instance.Language;
             List<WarriorArchetype> loaded = new();
             List<HiredSword> loadedHiredSwords = new();

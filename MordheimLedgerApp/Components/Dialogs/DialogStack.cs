@@ -18,6 +18,16 @@ public sealed class DialogStack
 
     private DialogStack() { }
 
+    /// <summary>Vrai uniquement pendant le PopModalAsync d'un dialog en lecture seule
+    /// (ReadOnlyDialogViewModel - fiches détail, puces, récap guerrier). Les pages qui rechargent tout
+    /// dans OnAppearing/OnNavigatedTo (sélecteurs, fiche de bande, listes) le consultent pour ne pas
+    /// recharger au simple retour d'une consultation (2026-09-24, retour utilisateur) : rien n'a pu
+    /// changer. Si la plateforme déclenche l'Appearing après cette fenêtre, la page recharge comme
+    /// avant - jamais de données périmées, juste pas d'économie. Un dialog lecture seule qui persiste
+    /// quand même des changements (WarbandInventoryDialog) doit donc recharger explicitement son
+    /// appelant, ce qu'il fait déjà (WarbandDetailViewModel.ShowInventory).</summary>
+    public bool IsClosingReadOnlyDialog { get; private set; }
+
     /// <summary>Pousse le contenu donné comme sa propre DialogPage modale. Le résultat se résout quand
     /// CE dialog précis se ferme (Save/Cancel/tap sur le fond) - la Page se dépile alors, révélant
     /// exactement ce qu'il y avait en dessous (page normale ou dialog parent), géré par la pile modale
@@ -49,8 +59,9 @@ public sealed class DialogStack
         // Filet de sécurité (même idiome que les ~10 XxxPickerService) : si la page est dépilée par le
         // bouton/geste retour d'Android plutôt que par Enregistrer/Annuler/tap sur le fond, aucun
         // CloseRequested n'est jamais levé - sans ce filet, tcs.Task ne se résoudrait jamais et
-        // l'appelant resterait bloqué indéfiniment. On réutilise CancelCommand (même résultat qu'un tap
-        // sur le fond) plutôt que résoudre tcs directement, pour garder un seul chemin de fermeture -
+        // l'appelant resterait bloqué indéfiniment. ForceCancel (même résultat qu'un tap sur le fond, MAIS
+        // sans la confirmation "modifications non enregistrées" de CancelCommand - la page est déjà partie,
+        // trop tard pour demander) plutôt que résoudre tcs directement, pour garder un seul chemin de fermeture -
         // poppedNatively empêche alors le PopModalAsync plus bas de dépiler une SECONDE fois (la page
         // est déjà partie).
         var window = currentPage.Window;
@@ -59,9 +70,13 @@ public sealed class DialogStack
             if (!ReferenceEquals(e.Modal, dialogPage)) return;
             if (window is not null) window.ModalPopped -= OnModalPopped;
             poppedNatively = true;
-            viewModel.CancelCommand.Execute(null);
+            viewModel.ForceCancel();
         }
         if (window is not null) window.ModalPopped += OnModalPopped;
+
+        // Référence pour la confirmation "modifications non enregistrées" (DialogViewModel.EditableState) -
+        // le ViewModel est entièrement construit à ce stade.
+        viewModel.CaptureInitialState();
 
         // Sérialisé (voir DialogNavigationGate) : un XxxPickerService peut pousser sa propre page modale
         // pendant que CE PushModalAsync est encore en train de s'installer (bouton du dialog lui-même
@@ -72,7 +87,17 @@ public sealed class DialogStack
         var result = await tcs.Task;
         if (window is not null) window.ModalPopped -= OnModalPopped;
         if (!poppedNatively)
-            await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
+        {
+            IsClosingReadOnlyDialog = viewModel is ReadOnlyDialogViewModel;
+            try
+            {
+                await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
+            }
+            finally
+            {
+                IsClosingReadOnlyDialog = false;
+            }
+        }
         return result;
     }
 }

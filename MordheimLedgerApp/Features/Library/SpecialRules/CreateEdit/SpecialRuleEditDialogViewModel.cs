@@ -9,6 +9,8 @@ public partial class SpecialRuleEditDialogViewModel : DialogViewModel<bool>
 {
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, IsMaterialRule };
+
     [ObservableProperty]
     private SpecialRule item;
 

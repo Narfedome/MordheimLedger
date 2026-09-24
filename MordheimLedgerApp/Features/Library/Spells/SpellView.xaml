@@ -48,6 +48,7 @@
              ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
                 <components:ResponsiveGridSpanBehavior/>
+                <components:LoadMoreOnScrollBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>

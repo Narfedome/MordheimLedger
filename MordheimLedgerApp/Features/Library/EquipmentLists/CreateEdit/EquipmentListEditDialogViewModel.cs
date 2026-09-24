@@ -16,6 +16,8 @@ public partial class EquipmentListEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, Items.Select(i => i.Id) };
+
     [ObservableProperty]
     private EquipmentList item;
 

@@ -24,6 +24,8 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => new object?[] { Item, Spells };
+
     [ObservableProperty]
     private MagicSchool item;
 

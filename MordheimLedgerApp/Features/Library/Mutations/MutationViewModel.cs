@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Mutations.CreateEdit;
@@ -23,7 +24,7 @@ public partial class MutationViewModel : BaseViewModel
     /// internally (cf. SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter
     /// where it'd be redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<MutationGroup> mutationGroups = new();
+    private PagedGroupCollection<MutationGroup, MutationRow> mutationGroups = new();
 
     private string AllGroupsLabel => Loc["LibFilterAll"];
     private string CommonLabel => Loc["LibFilterCommon"];
@@ -131,7 +132,7 @@ public partial class MutationViewModel : BaseViewModel
             }
             group.Add(new MutationRow(item));
         }
-        MutationGroups = groups;
+        MutationGroups = new PagedGroupCollection<MutationGroup, MutationRow>(groups, g => new MutationGroup(g.Name));
 
         SelectedRow = null;
         SelectedRows.Clear();

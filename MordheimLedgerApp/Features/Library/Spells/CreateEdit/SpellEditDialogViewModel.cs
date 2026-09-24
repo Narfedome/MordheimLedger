@@ -12,6 +12,8 @@ public partial class SpellEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => Item;
+
     public ObservableCollection<string> MagicSchoolOptions { get; } = new();
 
     [ObservableProperty]

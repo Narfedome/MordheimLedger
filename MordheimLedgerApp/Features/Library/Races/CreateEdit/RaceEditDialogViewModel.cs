@@ -15,6 +15,8 @@ public partial class RaceEditDialogViewModel : DialogViewModel<bool>
 
     protected override bool CancelResult => false;
 
+    protected override object? EditableState => Item;
+
     [ObservableProperty]
     private Race item;
 

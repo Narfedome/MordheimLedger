@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Skills.CreateEdit;
@@ -23,7 +24,7 @@ public partial class SkillViewModel : BaseViewModel
     /// SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter where it'd be
     /// redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<SkillGroup> skillGroups = new();
+    private PagedGroupCollection<SkillGroup, SkillRow> skillGroups = new();
 
     /// <summary>Group headers are redundant once a single category is picked (its name is already on
     /// the filter button) - only shown for the "All" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
@@ -143,7 +144,7 @@ public partial class SkillViewModel : BaseViewModel
             }
             group.Add(new SkillRow(item));
         }
-        SkillGroups = groups;
+        SkillGroups = new PagedGroupCollection<SkillGroup, SkillRow>(groups, g => new SkillGroup(g.Name));
 
         SelectedRow = null;
         SelectedRows.Clear();

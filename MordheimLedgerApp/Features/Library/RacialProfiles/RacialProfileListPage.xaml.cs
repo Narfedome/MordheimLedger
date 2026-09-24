@@ -12,6 +12,8 @@ public partial class RacialProfileListPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is RacialProfileViewModel vm)
             await vm.InitializeAsync();
     }

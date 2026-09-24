@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
@@ -23,7 +24,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// SpellViewModel.SpellGroups), the header is just hidden outside the "All" filter where it'd be
     /// redundant with the filter button already shown above (see ShowGroupHeaders).</summary>
     [ObservableProperty]
-    private ObservableCollection<EquipmentItemGroup> equipmentItemGroups = new();
+    private PagedGroupCollection<EquipmentItemGroup, EquipmentItemRow> equipmentItemGroups = new();
 
     /// <summary>Group headers are redundant once a single category is picked (its name is already on
     /// the filter button) - only shown for the "All" filter, cf. SpellViewModel.ShowGroupHeaders.</summary>
@@ -144,6 +145,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
     public IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? ReserveQuantities { get; set; }
 
     public bool ShowBudget => AvailableGold.HasValue;
+
+    /// <summary>Stepper -/+ par tuile : seulement là où un budget s'applique (ShowBudget) ET où plusieurs
+    /// exemplaires ont un sens - jamais en SingleSelectMode (ex. Objets rares du wizard Fin de Partie, un
+    /// seul objet recherché par Héros), où "+" contournait en plus la sélection unique (IncrementQuantity
+    /// ajoute la tuile sans désélectionner les autres, contrairement à Select) - retour utilisateur
+    /// 2026-09-24.</summary>
+    public bool ShowQuantityStepper => ShowBudget && !SingleSelectMode;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
     /// ignores any material-rule cost multiplier (Gromril...), only decided by the caller after the
@@ -327,7 +335,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
                 reserveGroup.Add(new EquipmentItemRow(item, reserveStock.Quantity, reserveStock.MaterialRule));
         }
         if (reserveGroup is { Count: > 0 }) groups.Insert(0, reserveGroup);
-        EquipmentItemGroups = groups;
+        EquipmentItemGroups = new PagedGroupCollection<EquipmentItemGroup, EquipmentItemRow>(groups, g => new EquipmentItemGroup(g.Name) { ShowHeader = g.ShowHeader });
 
         SelectedRow = null;
         SelectedRows.Clear();
@@ -456,8 +464,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
         // exclut la catégorie du nouvel item - cas limite accepté, pas de changement de filtre forcé.
         if (IsSelectorMode)
         {
-            var row = EquipmentItemGroups.SelectMany(g => g).FirstOrDefault(r => r.Item.Id == newItem.Id);
-            if (row != null) Select(row);
+            // AllRows : la nouvelle tuile peut être dans une page pas encore chargée (PagedGroupCollection).
+            var row = EquipmentItemGroups.AllRows.FirstOrDefault(r => r.Item.Id == newItem.Id);
+            if (row != null)
+            {
+                EquipmentItemGroups.EnsureLoaded(row);
+                Select(row);
+            }
         }
     }
 

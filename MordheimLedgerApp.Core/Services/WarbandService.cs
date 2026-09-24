@@ -34,7 +34,7 @@ public class WarbandService : IWarbandService
     public async Task<string> GetWarbandArchetypeNameAsync(int id, string languageCode)
     {
         await _db.Initialization;
-        var row = await _db.Connection.FindAsync<WarbandArchetypeEntity>(id);
+        var row = (await _db.CachedTableAsync<WarbandArchetypeEntity>()).First(a => a.Id == id);
 
         var translations = await TranslationResolver.ResolveAsync(_db, [row.NameKey, row.DescriptionKey], languageCode);
         return translations[row.NameKey];
@@ -99,47 +99,52 @@ public class WarbandService : IWarbandService
         // celui déjà corrigé pour Equipment/Skill/Mutation (voir le commentaire ci-dessus).
         var injuryById = (await _library.GetInjuriesAsync(languageCode)).ToDictionary(i => i.Id);
 
+        // Chaque table portée chargée UNE fois pour tous les guerriers de la bande (WHERE WarriorId IN
+        // (...)) puis regroupée en mémoire, plutôt que 6 requêtes par guerrier + 2 FindAsync/traductions
+        // par objet porté (N+1 repéré le 2026-09-24 - la fiche de bande et le wizard Fin de Partie
+        // appellent tous deux cette méthode à l'ouverture).
+        var warriorIds = warriorRows.Select(r => r.Id).ToList();
+        var carriedByWarrior = (await _db.Connection.Table<WarriorEquipmentEntity>().Where(e => warriorIds.Contains(e.WarriorId)).ToListAsync()).ToLookup(e => e.WarriorId);
+        var learnedByWarrior = (await _db.Connection.Table<WarriorSkillEntity>().Where(s => warriorIds.Contains(s.WarriorId)).ToListAsync()).ToLookup(s => s.WarriorId);
+        var injuriesByWarrior = (await _db.Connection.Table<WarriorInjuryEntity>().Where(i => warriorIds.Contains(i.WarriorId)).ToListAsync()).ToLookup(i => i.WarriorId);
+        var spellRowsByWarrior = (await _db.Connection.Table<WarriorSpellEntity>().Where(s => warriorIds.Contains(s.WarriorId)).ToListAsync()).ToLookup(s => s.WarriorId);
+        var mutationsByWarrior = (await _db.Connection.Table<WarriorMutationEntity>().Where(m => warriorIds.Contains(m.WarriorId)).ToListAsync()).ToLookup(m => m.WarriorId);
+        var hatredsByWarrior = (await _db.Connection.Table<WarriorHatredEntity>().Where(h => warriorIds.Contains(h.WarriorId)).ToListAsync()).ToLookup(h => h.WarriorId);
+
+        var ruleIds = carriedByWarrior.SelectMany(g => g)
+            .SelectMany(c => new[] { c.MaterialSpecialRuleId, c.BlessingSpecialRuleId });
+        var rulesById = await ResolveSpecialRulesAsync(ruleIds, languageCode);
+        var spellsById = await ResolveSpellsAsync(spellRowsByWarrior.SelectMany(g => g).Select(s => s.SpellId), languageCode);
+        var hatredArchetypeNames = await ResolveWarbandArchetypeNamesAsync(
+            hatredsByWarrior.SelectMany(g => g).Select(h => h.TargetWarbandArchetypeId), languageCode);
+
         var warriors = new List<Warrior>();
         foreach (var row in warriorRows)
         {
-            var carriedRows = await _db.Connection.Table<WarriorEquipmentEntity>().Where(e => e.WarriorId == row.Id).ToListAsync();
             var carried = new List<WarriorEquipment>();
-            foreach (var carriedRow in carriedRows)
+            foreach (var carriedRow in carriedByWarrior[row.Id])
             {
                 if (!equipmentById.TryGetValue(carriedRow.EquipmentItemId, out var item)) continue;
-
-                var materialRule = await ResolveSpecialRuleAsync(carriedRow.MaterialSpecialRuleId, languageCode);
-                var blessingRule = await ResolveSpecialRuleAsync(carriedRow.BlessingSpecialRuleId, languageCode);
-                carried.Add(carriedRow.ToModel(item, materialRule, blessingRule));
+                carried.Add(carriedRow.ToModel(item, LookupRule(rulesById, carriedRow.MaterialSpecialRuleId), LookupRule(rulesById, carriedRow.BlessingSpecialRuleId)));
             }
 
-            var learnedRows = await _db.Connection.Table<WarriorSkillEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
             var learned = new List<WarriorSkill>();
-            foreach (var learnedRow in learnedRows)
+            foreach (var learnedRow in learnedByWarrior[row.Id])
                 if (skillById.TryGetValue(learnedRow.SkillId, out var skill))
                     learned.Add(learnedRow.ToModel(skill));
 
-            var injuryRows = await _db.Connection.Table<WarriorInjuryEntity>().Where(i => i.WarriorId == row.Id).ToListAsync();
             var injuries = new List<WarriorInjury>();
-            foreach (var injuryRow in injuryRows)
+            foreach (var injuryRow in injuriesByWarrior[row.Id])
                 if (injuryById.TryGetValue(injuryRow.InjuryId, out var injury))
                     injuries.Add(injuryRow.ToModel(injury));
 
-            var spellRows = await _db.Connection.Table<WarriorSpellEntity>().Where(s => s.WarriorId == row.Id).ToListAsync();
             var spells = new List<WarriorSpell>();
-            foreach (var spellRow in spellRows)
-            {
-                var spellEntity = await _db.Connection.FindAsync<SpellEntity>(spellRow.SpellId);
-                if (spellEntity is not null)
-                {
-                    var translations = await TranslationResolver.ResolveAsync(_db, [spellEntity.NameKey, spellEntity.DescriptionKey], languageCode);
-                    spells.Add(spellRow.ToModel(spellEntity.ToModel(translations)));
-                }
-            }
+            foreach (var spellRow in spellRowsByWarrior[row.Id])
+                if (spellsById.TryGetValue(spellRow.SpellId, out var spell))
+                    spells.Add(spellRow.ToModel(spell));
 
-            var mutationRows = await _db.Connection.Table<WarriorMutationEntity>().Where(m => m.WarriorId == row.Id).ToListAsync();
             var mutations = new List<WarriorMutation>();
-            foreach (var mutationRow in mutationRows)
+            foreach (var mutationRow in mutationsByWarrior[row.Id])
                 if (mutationById.TryGetValue(mutationRow.MutationId, out var mutation))
                     mutations.Add(mutationRow.ToModel(mutation));
 
@@ -147,29 +152,55 @@ public class WarbandService : IWarbandService
             if (row.AnimalId is { } animalId)
                 equipmentById.TryGetValue(animalId, out animal);
 
-            var hatredRows = await _db.Connection.Table<WarriorHatredEntity>().Where(h => h.WarriorId == row.Id).ToListAsync();
+            // Nom de la cible de Haine - voir Models.WarriorHatred.Name : TargetWarbandArchetypeId passe
+            // par une traduction, TargetFreeText est déjà le nom affiché.
             var hatreds = new List<WarriorHatred>();
-            foreach (var hatredRow in hatredRows)
-                hatreds.Add(hatredRow.ToModel(await ResolveHatredTargetNameAsync(hatredRow, languageCode)));
+            foreach (var hatredRow in hatredsByWarrior[row.Id])
+            {
+                var name = hatredRow.TargetWarbandArchetypeId is { } archetypeId
+                    ? hatredArchetypeNames.GetValueOrDefault(archetypeId, string.Empty)
+                    : hatredRow.TargetFreeText ?? string.Empty;
+                hatreds.Add(hatredRow.ToModel(name));
+            }
 
             warriors.Add(row.ToModel(carried, learned, injuries, spells, mutations, animal, hatreds));
         }
         return warriors;
     }
 
-    /// <summary>Resolves WarriorHatredEntity's target into a display name - see Models.WarriorHatred.Name.
-    /// TargetWarbandArchetypeId needs a translation lookup (no Item to pass through like WarriorInjury),
-    /// TargetFreeText is already the display name.</summary>
-    private async Task<string> ResolveHatredTargetNameAsync(WarriorHatredEntity row, string languageCode)
+    private static SpecialRule? LookupRule(IReadOnlyDictionary<int, SpecialRule> rulesById, int? id) =>
+        id is { } ruleId ? rulesById.GetValueOrDefault(ruleId) : null;
+
+    /// <summary>Version groupée de ResolveSpecialRuleAsync : une requête IN + une résolution de
+    /// traductions pour tout l'ensemble d'ids, quel que soit leur nombre.</summary>
+    private async Task<Dictionary<int, SpecialRule>> ResolveSpecialRulesAsync(IEnumerable<int?> ids, string languageCode)
     {
-        if (row.TargetWarbandArchetypeId is { } archetypeId)
-        {
-            var archetype = await _db.Connection.FindAsync<WarbandArchetypeEntity>(archetypeId);
-            if (archetype is null) return string.Empty;
-            var translations = await TranslationResolver.ResolveAsync(_db, [archetype.NameKey], languageCode);
-            return translations[archetype.NameKey];
-        }
-        return row.TargetFreeText ?? string.Empty;
+        var idList = ids.OfType<int>().Distinct().ToList();
+        if (idList.Count == 0) return new Dictionary<int, SpecialRule>();
+
+        var entities = (await _db.CachedTableAsync<SpecialRuleEntity>()).Where(r => idList.Contains(r.Id)).ToList();
+        var translations = await TranslationResolver.ResolveAsync(_db, entities.SelectMany(e => new[] { e.NameKey, e.DescriptionKey }), languageCode);
+        return entities.ToDictionary(e => e.Id, e => e.ToModel(translations));
+    }
+
+    private async Task<Dictionary<int, Spell>> ResolveSpellsAsync(IEnumerable<int> ids, string languageCode)
+    {
+        var idList = ids.Distinct().ToList();
+        if (idList.Count == 0) return new Dictionary<int, Spell>();
+
+        var entities = (await _db.CachedTableAsync<SpellEntity>()).Where(s => idList.Contains(s.Id)).ToList();
+        var translations = await TranslationResolver.ResolveAsync(_db, entities.SelectMany(e => new[] { e.NameKey, e.DescriptionKey }), languageCode);
+        return entities.ToDictionary(e => e.Id, e => e.ToModel(translations));
+    }
+
+    private async Task<Dictionary<int, string>> ResolveWarbandArchetypeNamesAsync(IEnumerable<int?> ids, string languageCode)
+    {
+        var idList = ids.OfType<int>().Distinct().ToList();
+        if (idList.Count == 0) return new Dictionary<int, string>();
+
+        var entities = (await _db.CachedTableAsync<WarbandArchetypeEntity>()).Where(a => idList.Contains(a.Id)).ToList();
+        var translations = await TranslationResolver.ResolveAsync(_db, entities.Select(e => e.NameKey), languageCode);
+        return entities.ToDictionary(e => e.Id, e => translations[e.NameKey]);
     }
 
     public async Task<Warrior> RecruitWarriorAsync(int warbandId, WarriorArchetype archetype, string name, int headCount = 1)
@@ -312,7 +343,7 @@ public class WarbandService : IWarbandService
     private async Task<SpecialRule?> ResolveSpecialRuleAsync(int? specialRuleId, string languageCode)
     {
         if (specialRuleId is not { } id) return null;
-        var entity = await _db.Connection.FindAsync<SpecialRuleEntity>(id);
+        var entity = (await _db.CachedTableAsync<SpecialRuleEntity>()).FirstOrDefault(r => r.Id == id);
         if (entity is null) return null;
 
         var translations = await TranslationResolver.ResolveAsync(_db, [entity.NameKey, entity.DescriptionKey], languageCode);
@@ -324,13 +355,13 @@ public class WarbandService : IWarbandService
         await _db.Initialization;
         var equipmentById = (await _library.GetEquipmentItemsAsync(languageCode)).ToDictionary(i => i.Id);
         var rows = await _db.Connection.Table<WarbandEquipmentEntity>().Where(e => e.WarbandId == warbandId).ToListAsync();
+        var rulesById = await ResolveSpecialRulesAsync(rows.Select(r => r.MaterialSpecialRuleId), languageCode);
 
         var result = new List<WarbandEquipment>();
         foreach (var row in rows)
         {
             if (!equipmentById.TryGetValue(row.EquipmentItemId, out var item)) continue;
-            var materialRule = await ResolveSpecialRuleAsync(row.MaterialSpecialRuleId, languageCode);
-            result.Add(row.ToModel(item, materialRule));
+            result.Add(row.ToModel(item, LookupRule(rulesById, row.MaterialSpecialRuleId)));
         }
         return result;
     }

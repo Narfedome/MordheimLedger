@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Injuries.CreateEdit;
@@ -19,7 +20,7 @@ public partial class InjuryViewModel : BaseViewModel
     /// <summary>Sections of the grid, one per InjuryCategory (Hero/Henchman) - always grouped
     /// internally, the header is just hidden outside the "All" filter, cf. SkillViewModel.</summary>
     [ObservableProperty]
-    private ObservableCollection<InjuryGroup> injuryGroups = new();
+    private PagedGroupCollection<InjuryGroup, InjuryRow> injuryGroups = new();
 
     /// <summary>Group headers are redundant once a single category is picked (its name is already on
     /// the filter button) - only shown for the "All" filter, cf. SkillViewModel.ShowGroupHeaders.</summary>
@@ -94,7 +95,7 @@ public partial class InjuryViewModel : BaseViewModel
             }
             group.Add(new InjuryRow(item));
         }
-        InjuryGroups = groups;
+        InjuryGroups = new PagedGroupCollection<InjuryGroup, InjuryRow>(groups, g => new InjuryGroup(g.Name));
 
         SelectedRow = null;
         SelectedRows.Clear();

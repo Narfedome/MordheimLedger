@@ -13,6 +13,8 @@ public partial class MagicSchoolSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is MagicSchoolViewModel vm)
             await vm.InitializeAsync();
     }

@@ -35,6 +35,7 @@
                  "gérer" que Race juste au-dessus, glyphe distinct (RaMonsterSkull) pour ne pas réutiliser
                  PersonRays sur un second concept - voir CLAUDE.md § cohérence des icônes. -->
             <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:RpgFont.RaMonsterSkull}"
+                                         IconFont="RpgAwesome"
                                          Command="{Binding ManageRacialProfilesCommand}"
                                          Tooltip="{loc:Loc LibManageRacialProfiles}"/>
         </Grid>
@@ -50,6 +51,7 @@
             ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.Behaviors>
                 <components:ResponsiveGridSpanBehavior/>
+                <components:LoadMoreOnScrollBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
                 <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>

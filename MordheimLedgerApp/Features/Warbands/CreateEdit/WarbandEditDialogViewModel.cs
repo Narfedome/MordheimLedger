@@ -923,7 +923,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
             if (Archetype is null) return;
 
-            var mutations = await _mutationPicker.PickMutationsAsync(Archetype.Id);
+            var unitCount = target is HenchmanGroupDraft henchmen ? henchmen.Count : 1;
+            var mutations = await _mutationPicker.PickMutationsAsync(Archetype.Id, RemainingTreasury, unitCount);
             foreach (var mutation in mutations)
                 destination.Add(mutation);
             UpdateRecruitability();

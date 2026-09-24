@@ -58,6 +58,26 @@ public partial class MutationViewModel : BaseViewModel
     /// is empty (common) or contains this id are shown - see WarriorEditDialogViewModel.AddMutation.</summary>
     public int? AllowedWarbandArchetypeId { get; set; }
 
+    /// <summary>Posé par MutationPickerService quand un budget s'applique (recrutement d'un Possédé/Mutant -
+    /// WarbandEditDialogViewModel.AddMutation, EndOfGamePageViewModel.AddRecruitMutation) : affiche
+    /// dépensé/restant en direct comme le sélecteur d'équipement (EquipmentItemViewModel.BudgetDisplay). Null
+    /// (Codex, fiche guerrier) masque l'affichage.</summary>
+    public int? AvailableGold { get; set; }
+
+    /// <summary>Multiplicateur du coût affiché - effectif d'un groupe d'Hommes de main, 1 pour un Héros.</summary>
+    public int UnitCount { get; set; } = 1;
+
+    public bool ShowBudget => AvailableGold.HasValue;
+
+    public string BudgetDisplay
+    {
+        get
+        {
+            var spent = SelectedRows.Sum(r => r.Item.Cost) * UnitCount;
+            return string.Format(Loc["EquipmentPickerBudgetDisplay"], spent, (AvailableGold ?? 0) - spent);
+        }
+    }
+
     public MutationViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, IMutationPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker)
     {
@@ -137,6 +157,7 @@ public partial class MutationViewModel : BaseViewModel
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
+        OnPropertyChanged(nameof(BudgetDisplay));
     }
 
     [RelayCommand]
@@ -165,6 +186,7 @@ public partial class MutationViewModel : BaseViewModel
         if (row.IsSelected) SelectedRows.Add(row);
         else SelectedRows.Remove(row);
         OnPropertyChanged(nameof(HasSelectedRows));
+        OnPropertyChanged(nameof(BudgetDisplay));
     }
 
     [RelayCommand]

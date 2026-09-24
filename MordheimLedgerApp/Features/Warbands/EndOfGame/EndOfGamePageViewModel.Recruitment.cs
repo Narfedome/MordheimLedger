@@ -709,7 +709,8 @@ public partial class EndOfGamePageViewModel
         };
         if (slot is null) return;
 
-        foreach (var mutation in await _mutationPicker.PickMutationsAsync(_warbandArchetypeId))
+        var unitCount = slot is HenchmanGroupDraft henchmen ? henchmen.Count : 1;
+        foreach (var mutation in await _mutationPicker.PickMutationsAsync(_warbandArchetypeId, EndOfGameTreasuryRemaining, unitCount))
             slot.Mutations.Add(mutation);
         NotifyTreasuryChanged();
         if (slot is WarriorNameSlot hero && RecruitHeroDetailError is not null) ValidateRecruitHeroDetailStep(hero);

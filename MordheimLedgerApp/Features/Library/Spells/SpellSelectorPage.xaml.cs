@@ -13,6 +13,8 @@ public partial class SpellSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is SpellViewModel vm)
             await vm.InitializeAsync();
     }

@@ -28,6 +28,8 @@ public partial class WarbandListPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (args.WasPreviousPageACommunityToolkitPopupPage())
             return;
 

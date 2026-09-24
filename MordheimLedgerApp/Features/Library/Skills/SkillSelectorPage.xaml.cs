@@ -13,6 +13,8 @@ public partial class SkillSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is SkillViewModel vm)
             await vm.InitializeAsync();
     }

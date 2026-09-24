@@ -18,6 +18,16 @@ public sealed class DialogStack
 
     private DialogStack() { }
 
+    /// <summary>Vrai uniquement pendant le PopModalAsync d'un dialog en lecture seule
+    /// (ReadOnlyDialogViewModel - fiches détail, puces, récap guerrier). Les pages qui rechargent tout
+    /// dans OnAppearing/OnNavigatedTo (sélecteurs, fiche de bande, listes) le consultent pour ne pas
+    /// recharger au simple retour d'une consultation (2026-09-24, retour utilisateur) : rien n'a pu
+    /// changer. Si la plateforme déclenche l'Appearing après cette fenêtre, la page recharge comme
+    /// avant - jamais de données périmées, juste pas d'économie. Un dialog lecture seule qui persiste
+    /// quand même des changements (WarbandInventoryDialog) doit donc recharger explicitement son
+    /// appelant, ce qu'il fait déjà (WarbandDetailViewModel.ShowInventory).</summary>
+    public bool IsClosingReadOnlyDialog { get; private set; }
+
     /// <summary>Pousse le contenu donné comme sa propre DialogPage modale. Le résultat se résout quand
     /// CE dialog précis se ferme (Save/Cancel/tap sur le fond) - la Page se dépile alors, révélant
     /// exactement ce qu'il y avait en dessous (page normale ou dialog parent), géré par la pile modale
@@ -72,7 +82,17 @@ public sealed class DialogStack
         var result = await tcs.Task;
         if (window is not null) window.ModalPopped -= OnModalPopped;
         if (!poppedNatively)
-            await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
+        {
+            IsClosingReadOnlyDialog = viewModel is ReadOnlyDialogViewModel;
+            try
+            {
+                await DialogNavigationGate.RunAsync(() => currentPage.Navigation.PopModalAsync(animated: false), $"DialogStack.Pop({dialogName})");
+            }
+            finally
+            {
+                IsClosingReadOnlyDialog = false;
+            }
+        }
         return result;
     }
 }

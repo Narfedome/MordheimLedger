@@ -13,6 +13,8 @@ public partial class InjurySelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is InjuryViewModel vm)
             await vm.InitializeAsync();
     }

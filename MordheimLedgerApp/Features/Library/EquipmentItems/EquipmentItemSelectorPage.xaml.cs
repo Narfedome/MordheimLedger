@@ -13,6 +13,8 @@ public partial class EquipmentItemSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is EquipmentItemViewModel vm)
             await vm.InitializeAsync();
     }

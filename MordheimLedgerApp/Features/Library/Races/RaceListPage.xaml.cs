@@ -12,6 +12,8 @@ public partial class RaceListPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is RaceViewModel vm)
             await vm.InitializeAsync();
     }

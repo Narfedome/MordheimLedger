@@ -35,6 +35,8 @@ public partial class HiredSwordSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is HiredSwordViewModel vm)
             await vm.InitializeAsync();
     }

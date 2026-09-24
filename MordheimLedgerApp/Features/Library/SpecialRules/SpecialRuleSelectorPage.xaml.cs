@@ -13,6 +13,8 @@ public partial class SpecialRuleSelectorPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is SpecialRuleViewModel vm)
             await vm.InitializeAsync();
     }

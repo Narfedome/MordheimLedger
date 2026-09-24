@@ -32,6 +32,8 @@ public partial class WarbandDetailPage : ContentPage
     {
         base.OnAppearing();
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (BindingContext is WarbandDetailViewModel vm)
             await vm.LoadAsync(vm.WarbandId);
     }

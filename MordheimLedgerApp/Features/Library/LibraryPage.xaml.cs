@@ -14,6 +14,8 @@ public partial class LibraryPage : ContentPage
     {
         base.OnNavigatedTo(args);
 
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
         if (args.WasPreviousPageACommunityToolkitPopupPage())
             return;
 

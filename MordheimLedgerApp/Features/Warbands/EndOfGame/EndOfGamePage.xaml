@@ -40,6 +40,15 @@
         </VerticalStackLayout>
         </ScrollView>
 
+        <!-- Spinner au chargement initial ET à chaque Suivant/Précédent (EndOfGamePageViewModel.
+             ChangeStepAsync, 2026-09-24) - voile par-dessus l'étape courante plutôt qu'à sa place, et qui
+             absorbe les taps pendant la transition. Même ActivityIndicator que WarbandDetailPage. -->
+        <Grid Grid.Row="1" IsVisible="{Binding Loading.IsLoading}">
+            <BoxView Color="{DynamicResource AppBackground}" Opacity="0.6"/>
+            <ActivityIndicator IsRunning="{Binding Loading.IsLoading}"
+                               HorizontalOptions="Center" VerticalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+        </Grid>
+
         <!-- Épinglée en bas de l'écran (2026-09-22, retour utilisateur - "on a plus la contrainte du
              dialog") : dans une dialog, ce bloc défilait avec le reste du contenu (largeur de carte fixe,
              toujours proche) ; en page pleine, un wizard aussi long que celui-ci laisserait les boutons

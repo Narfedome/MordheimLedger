@@ -1003,7 +1003,27 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     {
         if (!ValidateCurrentStep()) return;
         await ShowWeaponLimitWarningIfNeededAsync();
-        if (StepIndex < Steps.Count - 1) StepIndex++;
+        if (StepIndex < Steps.Count - 1) await ChangeStepAsync(StepIndex + 1);
+    }
+
+    /// <summary>Spinner pendant le changement d'étape (2026-09-24, retour utilisateur) : la vue de
+    /// l'étape suivante est construite de façon synchrone sur le thread UI au changement de StepIndex
+    /// (StepViewConverter, première visite surtout), ce qui figeait l'écran sans aucun retour visuel.
+    /// Le premier délai laisse une frame au spinner pour se peindre AVANT ce travail synchrone ; le
+    /// second laisse la nouvelle vue se mesurer/s'afficher avant de le masquer.</summary>
+    private async Task ChangeStepAsync(int newIndex)
+    {
+        Loading.Show();
+        try
+        {
+            await Task.Delay(16);
+            StepIndex = newIndex;
+            await Task.Delay(16);
+        }
+        finally
+        {
+            Loading.Hide();
+        }
     }
 
     /// <summary>Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
@@ -1076,9 +1096,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void Back()
+    private async Task Back()
     {
-        if (StepIndex > 0) StepIndex--;
+        if (StepIndex > 0) await ChangeStepAsync(StepIndex - 1);
     }
 
     // Étape "Hors de combat" : un Héros (toujours HeadCount 1) se coche/décoche, mais un groupe

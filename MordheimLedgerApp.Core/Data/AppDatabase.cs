@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
 using MordheimLedgerApp.Core.Data.Entities;
@@ -22,13 +23,89 @@ public class AppDatabase
     public AppDatabase(string path)
     {
         _db = new SQLiteAsyncConnection(path);
+        // Toute écriture ORM (Insert/Update/Delete, d'où qu'elle vienne) évince la table concernée du
+        // cache - les DELETE en SQL brut ne déclenchent pas cet événement, voir InvalidateCachedTable.
+        _db.GetConnection().TableChanged += (_, e) => InvalidateCachedTable(e.Table.MappedType);
         Initialization = InitializeAsync();
     }
+
+    // --- Cache de lecture (2026-09-24) -------------------------------------------------------------
+    // Le catalogue (Library) est relu en entier à chaque Get*Async - et chaque Get*Async en rappelle
+    // d'autres (GetEquipmentItemsAsync -> GetSpecialRulesAsync, GetDramatisPersonaeAsync -> équipement +
+    // compétences + règles...), si bien que l'ouverture du wizard Fin de Partie relisait la même table
+    // d'équipement ~5 fois et les règles spéciales ~10 fois. On ne cache que les LIGNES BRUTES (entités)
+    // et les traductions, jamais les modèles : chaque appel reconstruit des modèles neufs, donc aucun
+    // écran ne partage d'instance mutable avec un autre. Les listes renvoyées ne doivent pas être
+    // modifiées (IReadOnlyList), ni les entités qu'elles contiennent (les Save* relisent via FindAsync).
+    private readonly ConcurrentDictionary<Type, Task<object>> _tableCache = new();
+
+    /// <summary>Contenu complet de la table T, lu une fois puis servi depuis la mémoire jusqu'à la
+    /// prochaine écriture sur T. Réservé aux tables du catalogue et aux traductions (petites, lues bien
+    /// plus souvent qu'écrites).</summary>
+    internal async Task<IReadOnlyList<T>> CachedTableAsync<T>() where T : new()
+    {
+        var task = _tableCache.GetOrAdd(typeof(T), async _ => (object)await _db.Table<T>().ToListAsync());
+        try
+        {
+            return (IReadOnlyList<T>)await task;
+        }
+        catch
+        {
+            // Ne pas garder une lecture en échec en cache pour toujours.
+            _tableCache.TryRemove(new KeyValuePair<Type, Task<object>>(typeof(T), task));
+            throw;
+        }
+    }
+
+    /// <summary>À appeler après tout DELETE/UPDATE en SQL brut (ExecuteAsync) sur une table cachée -
+    /// seules les écritures ORM passent par TableChanged.</summary>
+    internal void InvalidateCachedTable(Type entityType) => _tableCache.TryRemove(entityType, out _);
+
+    internal void InvalidateCachedTable<T>() => InvalidateCachedTable(typeof(T));
+
+    private void InvalidateAllCachedTables() => _tableCache.Clear();
 
     private async Task InitializeAsync()
     {
         await CreateAllTablesAsync();
 
+        // Une seule transaction pour tout le seed/backfill/resync : sans elle, chaque Insert/Update/
+        // Delete de ce pipeline est sa propre transaction implicite, donc un flush disque par ligne -
+        // mesuré le 2026-09-24 : ~45 s au premier lancement et ~4,5 s à CHAQUE lancement (quasi tout
+        // dans ResyncExplorationResultsAsync, ~200 lignes supprimées/réinsérées une à une), que tout
+        // service attend via Initialization avant sa première requête.
+        await RunInTransactionAsync(SeedAndBackfillAsync);
+    }
+
+    /// <summary>BEGIN/COMMIT explicites plutôt que SQLiteAsyncConnection.RunInTransactionAsync, qui
+    /// n'accepte qu'un callback synchrone sur SQLiteConnection - tout le pipeline de seed est écrit en
+    /// async contre _db. Sûr ici : SQLiteAsyncConnection sérialise tout sur une seule connexion par
+    /// chemin, et aucun appelant n'écrit en parallèle (tous les services attendent Initialization,
+    /// ResetAsync aussi). Ne pas appeler d'InsertAllAsync/RunInTransactionAsync à l'intérieur : sqlite-
+    /// net ouvrirait son propre BEGIN, refusé dans une transaction déjà ouverte.</summary>
+    private async Task RunInTransactionAsync(Func<Task> work)
+    {
+        await _db.ExecuteAsync("BEGIN TRANSACTION");
+        try
+        {
+            await work();
+            await _db.ExecuteAsync("COMMIT");
+        }
+        catch
+        {
+            await _db.ExecuteAsync("ROLLBACK");
+            throw;
+        }
+        finally
+        {
+            // Seed/backfill/reset écrivent aussi en SQL brut (DROP, DELETE) - invisible pour
+            // TableChanged, et un ROLLBACK annulerait des lignes éventuellement déjà cachées.
+            InvalidateAllCachedTables();
+        }
+    }
+
+    private async Task SeedAndBackfillAsync()
+    {
         // First-launch only: if the archetype catalog is empty, nothing has been seeded yet (and
         // nothing the player made is at risk of being duplicated).
         if (await _db.Table<WarbandArchetypeEntity>().CountAsync() == 0)
@@ -747,6 +824,7 @@ public class AppDatabase
     {
         await Initialization;
         await DropAllTablesAsync();
+        InvalidateAllCachedTables();
         _specialRuleIdsByEnglishName.Clear();
         _mutationIdsByEnglishName.Clear();
         _magicSchoolIdsByEnglishName.Clear();
@@ -756,13 +834,16 @@ public class AppDatabase
         _warbandArchetypeIdsByFileStem.Clear();
         _pendingSharedRestrictions.Clear();
         await CreateAllTablesAsync();
-        await SeedOfficialContentAsync();
+        await RunInTransactionAsync(async () =>
+        {
+            await SeedOfficialContentAsync();
 
-        // Pas dans SeedOfficialContentAsync (voir ResyncExplorationResultsAsync, appelée à chaque
-        // lancement plutôt que gardée derrière son garde-fou "catalogue vide") - après un DropTableAsync
-        // complet ci-dessus, la table est garantie vide, un seed direct suffit ici (pas besoin du
-        // nettoyage préalable que fait ResyncExplorationResultsAsync sur une base déjà peuplée).
-        await SeedExplorationResultsAsync();
+            // Pas dans SeedOfficialContentAsync (voir ResyncExplorationResultsAsync, appelée à chaque
+            // lancement plutôt que gardée derrière son garde-fou "catalogue vide") - après un DropTableAsync
+            // complet ci-dessus, la table est garantie vide, un seed direct suffit ici (pas besoin du
+            // nettoyage préalable que fait ResyncExplorationResultsAsync sur une base déjà peuplée).
+            await SeedExplorationResultsAsync();
+        });
     }
 
     private async Task SeedOfficialContentAsync()

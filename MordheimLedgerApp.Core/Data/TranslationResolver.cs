@@ -10,20 +10,23 @@ namespace MordheimLedgerApp.Core.Data;
 internal static class TranslationResolver
 {
     /// <summary>Resolves each key to its value in `languageCode`, falling back to whatever other
-    /// language is available, or the key itself as a last-resort visible placeholder. One SQL query
-    /// with an IN clause for the whole key set, instead of one indexed query per distinct key fired
-    /// concurrently via Task.WhenAll (the original approach - it was fine while the catalog was tiny,
-    /// but a single Get*Async can now resolve hundreds of keys at once - 15 seeded warbands + Trading
-    /// Post/Animals/Skills - meaning hundreds of individual round-trips against the same SQLite
-    /// connection every time a catalog tab loads).</summary>
+    /// language is available, or the key itself as a last-resort visible placeholder. Served from
+    /// AppDatabase's cached Translation table (2026-09-24 - was one IN query per call before that,
+    /// itself replacing the original approach of one indexed query per distinct key fired
+    /// concurrently via Task.WhenAll - fine while the catalog was tiny, but a single Get*Async can now
+    /// resolve hundreds of keys at once). SetAsync's Insert/Update evicts the cache via TableChanged.</summary>
     public static async Task<Dictionary<string, string>> ResolveAsync(AppDatabase db, IEnumerable<string?> keys, string languageCode)
     {
         var keySet = keys.Where(k => !string.IsNullOrEmpty(k)).Select(k => k!).Distinct().ToList();
         var result = new Dictionary<string, string>();
         if (keySet.Count == 0) return result;
 
-        var rows = await db.Connection.Table<TranslationEntity>().Where(t => keySet.Contains(t.Key)).ToListAsync();
-        var rowsByKey = rows.ToLookup(r => r.Key);
+        // Table entière depuis le cache d'AppDatabase (voir CachedTableAsync) plutôt qu'un IN par appel -
+        // quelques milliers de lignes, relues des dizaines de fois à l'ouverture d'un écran sinon.
+        var keyFilter = keySet.ToHashSet();
+        var rowsByKey = (await db.CachedTableAsync<TranslationEntity>())
+            .Where(r => keyFilter.Contains(r.Key))
+            .ToLookup(r => r.Key);
 
         foreach (var key in keySet)
         {

@@ -531,4 +531,38 @@ public class WarbandMutationTests : IDisposable
         await _warbands.ClearAllDramatisPersonaCooldownsAsync(warbandA.Id);
         Assert.Empty(await _warbands.GetDramatisPersonaCooldownIdsAsync(warbandA.Id));
     }
+
+    /// <summary>Cache de lecture d'AppDatabase (2026-09-24) : une édition du catalogue doit être visible
+    /// dès la lecture suivante - nom (traduction, Update ORM) comme restrictions vidées (DELETE en SQL
+    /// brut sans Insert derrière, invisible pour TableChanged - voir LibraryService.
+    /// ExecuteRawDeleteAsync).</summary>
+    [Fact]
+    public async Task EditingCatalogItem_IsVisibleImmediately_DespiteReadCache()
+    {
+        var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.RestrictedToWarbandArchetypeIds.Count > 0);
+
+        item.Name = "Renamed Item";
+        item.RestrictedToWarbandArchetypeIds = new List<int>();
+        await _library.SaveEquipmentItemAsync(item, "en");
+
+        var reloaded = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Id == item.Id);
+        Assert.Equal("Renamed Item", reloaded.Name);
+        Assert.Empty(reloaded.RestrictedToWarbandArchetypeIds);
+        Assert.Equal(ContentSource.Modified, reloaded.Source);
+    }
+
+    /// <summary>Les modèles sont reconstruits à chaque appel depuis les lignes cachées - modifier un
+    /// modèle renvoyé sans le sauvegarder ne doit pas fuiter dans les lectures suivantes.</summary>
+    [Fact]
+    public async Task MutatingReturnedModel_DoesNotLeakIntoCache()
+    {
+        var first = (await _library.GetEquipmentItemsAsync("en")).First();
+        var originalName = first.Name;
+        first.Name = "Unsaved Change";
+        first.SpecialRules.Clear();
+
+        var again = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Id == first.Id);
+        Assert.Equal(originalName, again.Name);
+        Assert.NotSame(first, again);
+    }
 }

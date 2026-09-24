@@ -267,6 +267,21 @@
   <data name="SettingsReportBugDesc" xml:space="preserve">
     <value>Ouvrir le formulaire</value>
   </data>
+  <data name="SettingsCreditsTitle" xml:space="preserve">
+    <value>Sources &amp; remerciements</value>
+  </data>
+  <data name="SettingsCreditsDesc" xml:space="preserve">
+    <value>Un grand merci à l'équipe de la Grande Librairie de Mordheim pour son travail de traduction et de compilation des règles, ainsi qu'à mordheimer.net pour son catalogue de référence.</value>
+  </data>
+  <data name="SettingsCreditsGlmSite" xml:space="preserve">
+    <value>La Grande Librairie de Mordheim (site)</value>
+  </data>
+  <data name="SettingsCreditsGlmDiscord" xml:space="preserve">
+    <value>Discord de la Grande Librairie</value>
+  </data>
+  <data name="SettingsCreditsMordheimer" xml:space="preserve">
+    <value>mordheimer.net</value>
+  </data>
   <data name="SettingsResetTitle" xml:space="preserve">
     <value>Réinitialiser les données</value>
   </data>

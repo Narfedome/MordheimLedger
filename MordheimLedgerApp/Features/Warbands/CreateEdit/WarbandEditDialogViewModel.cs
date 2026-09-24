@@ -719,8 +719,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
             if (Archetype is null) return;
 
+            // Coûts appliqués : liste d'équipement du guerrier uniquement (livre - une bande en création
+            // n'achète que dans sa liste, rien du Trading Post hors liste). Mode Libre (bande déjà jouée
+            // sur papier) : tout le catalogue, objets rares/artefacts trouvés en campagne compris.
             var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost,
-                destination.Any(p => p.Item.IsFreeDagger));
+                destination.Any(p => p.Item.IsFreeDagger), equipmentListOnly: !IsExistingWarband, unrestricted: IsExistingWarband);
 
             // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
             // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient

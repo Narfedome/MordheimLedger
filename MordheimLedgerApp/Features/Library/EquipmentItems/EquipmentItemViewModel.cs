@@ -76,6 +76,14 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// list of its own yet and needs the broad "common + this band's own items" browse instead.</summary>
     public HashSet<int>? AllowedEquipmentListItemIds { get; set; }
 
+    /// <summary>Set by EquipmentPickerService for WarbandEditDialogViewModel's rules-applied mode (user
+    /// request 2026-09-24 - a warband being created buys from its equipment list only): EVERY category is
+    /// restricted to AllowedEquipmentListItemIds, not just weapons/armour, and nothing outside the list is
+    /// offered - Rare list members included (a list's own Rare item, e.g. the Mercenaries' Pistol, is
+    /// buyable at creation). A warrior with no list at all falls back to the broad band browse, Common
+    /// items only - no Rare item outside a list either way. False everywhere else.</summary>
+    public bool EquipmentListOnly { get; set; }
+
     /// <summary>Set only by the roster recruit/purchase picker (EquipmentPickerService) when a gold
     /// budget applies to this purchase - null (Library CRUD tab, EquipmentList editor's own "add item"
     /// picker) hides BudgetDisplay entirely. The gold available BEFORE this picker session, not yet
@@ -249,7 +257,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
             bool BroadBandScoped(EquipmentItem i) =>
                 i.RestrictedToWarbandArchetypeIds.Count == 0 || i.RestrictedToWarbandArchetypeIds.Contains(warbandId);
 
-            if (AllowedEquipmentListItemIds is { } listIds)
+            if (EquipmentListOnly)
+            {
+                filtered = AllowedEquipmentListItemIds is { } strictListIds
+                    ? filtered.Where(i => strictListIds.Contains(i.Id) && WarriorOk(i))
+                    : filtered.Where(i => BroadBandScoped(i) && !i.Rarity.HasValue);
+            }
+            else if (AllowedEquipmentListItemIds is { } listIds)
             {
                 // Seules les armes/armures sont vraiment rattachées à une liste d'équipement - le reste du
                 // catalogue (Divers/Consommable/Drogues/Munitions/Montures) vient du Trading Post général,

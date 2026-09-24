@@ -43,11 +43,17 @@ public interface IEquipmentPickerService
     /// (this picker doesn't otherwise know about a warband's inventory). allowCreate: false hides the
     /// picker's own "+" (create a brand-new catalog item on the fly, see EquipmentItemViewModel.
     /// AllowCreate) - every End of Game wizard caller passes false (2026-09-23, user request - creating
-    /// a catalog item mid-wizard is out of place there), true (default, unchanged) everywhere else.</summary>
+    /// a catalog item mid-wizard is out of place there), true (default, unchanged) everywhere else.
+    /// equipmentListOnly: true restricts EVERY category to the resolved equipment list (see
+    /// EquipmentItemViewModel.EquipmentListOnly) - nothing outside the list, Rare list members included -
+    /// used by WarbandEditDialogViewModel's rules-applied mode (warband creation buys from the equipment
+    /// list only, user request 2026-09-24). unrestricted: true ignores every warband/list/warrior filter
+    /// (the whole catalog, artefacts included) - used by the same dialog's free "existing warband" mode, to
+    /// record a warband already played on paper whatever it found along the way.</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true);
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true, bool equipmentListOnly = false, bool unrestricted = false);
 
     /// <summary>Dédié à l'étape "Objets rares" (EndOfGamePageViewModel.RareItems.cs) - contrairement à
     /// PickEquipmentAsync, renvoie aussi le MaterialRule choisi (2026-09-23, retour utilisateur - "on
@@ -76,7 +82,7 @@ public class EquipmentPickerService : IEquipmentPickerService
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true)
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true, bool equipmentListOnly = false, bool unrestricted = false)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -86,10 +92,16 @@ public class EquipmentPickerService : IEquipmentPickerService
         // Résolu manuellement (pas GetRequiredService<EquipmentItemSelectorPage>()) pour pouvoir poser
         // le filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
         var viewModel = _provider.GetRequiredService<EquipmentItemViewModel>();
-        viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
-        viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
-        viewModel.AllowedEquipmentListItemIds = allowedEquipmentListItemIds
-            ?? (equipmentListId is { } id ? await _libraryService.GetEquipmentListItemIdsAsync(id) : null);
+        if (!unrestricted)
+        {
+            // AllowedWarbandArchetypeId laissé null en mode unrestricted : c'est lui qui déclenche tout le
+            // filtrage "achat" d'EquipmentItemViewModel.ApplyFilter (bande, liste, guerrier, artefacts).
+            viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+            viewModel.AllowedWarriorArchetypeId = warriorArchetypeId;
+            viewModel.AllowedEquipmentListItemIds = allowedEquipmentListItemIds
+                ?? (equipmentListId is { } id ? await _libraryService.GetEquipmentListItemIdsAsync(id) : null);
+            viewModel.EquipmentListOnly = equipmentListOnly;
+        }
         viewModel.AvailableGold = availableGold;
         viewModel.UnitCount = unitCount;
         viewModel.AlreadyHasFreeDagger = alreadyHasFreeDagger;

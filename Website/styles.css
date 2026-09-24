@@ -162,7 +162,16 @@ nav.container {
 .hero {
   text-align: center;
   padding: 96px 24px 72px;
-  background: radial-gradient(ellipse at 50% -10%, rgba(201, 166, 107, 0.25), transparent 60%);
+  /* Halo rouge sang centré sur le titre - même ambiance que les images OG (assets/og-image*.png),
+     qui en sont l'aperçu. Se fond dans --bg sur les bords pour enchaîner sans couture avec la suite. */
+  background: radial-gradient(ellipse 70% 75% at 50% 45%, #3a1a17 0%, #1a1210 40%, var(--bg) 72%);
+}
+
+.hero .rule {
+  width: 220px;
+  height: 1px;
+  margin: 0 auto 20px;
+  background: linear-gradient(90deg, transparent, var(--accent-2), var(--accent), var(--accent-2), transparent);
 }
 
 .hero img.hero-logo {
@@ -184,6 +193,12 @@ nav.container {
   color: var(--text-muted);
   max-width: 560px;
   margin: 0 auto 32px;
+  text-wrap: balance;
+}
+
+/* Slogan principal en crème (comme sur l'OG), la ligne secondaire reste atténuée. */
+.hero p.tagline:first-of-type {
+  color: var(--text);
 }
 
 .hero .actions {

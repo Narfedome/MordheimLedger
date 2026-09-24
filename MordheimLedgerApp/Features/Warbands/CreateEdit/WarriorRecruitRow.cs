@@ -36,6 +36,7 @@ public abstract partial class RecruitSlot : ObservableObject
     public IReadOnlyList<WarriorEquipment> BaselineEquipment { get; } = Array.Empty<WarriorEquipment>();
     public IReadOnlyList<WarriorSkill> BaselineSkills { get; } = Array.Empty<WarriorSkill>();
     public IReadOnlyList<WarriorSpell> BaselineSpells { get; } = Array.Empty<WarriorSpell>();
+    public IReadOnlyList<WarriorMutation> BaselineMutations { get; } = Array.Empty<WarriorMutation>();
 
     /// <summary>Effectif déjà en base au moment de la construction (0 pour une nouvelle recrue) - sert de
     /// référence à DecrementWarrior/Save() pour détecter une réduction sous l'effectif déjà réellement
@@ -82,6 +83,18 @@ public abstract partial class RecruitSlot : ObservableObject
     /// n'en lance jamais.</summary>
     public bool IsSpellcaster => Row.Archetype.IsSpellcaster;
 
+    /// <summary>Mutations achetées au recrutement - Possédés/Mutants du Culte des Possédés
+    /// (WarriorArchetype.CanBuyMutations ; livre : "90 gold crowns to hire (+ the cost of mutations)"), dans
+    /// les deux modes, leur coût compté dans le recrutement en mode Coûts appliqués
+    /// (WarbandEditDialogViewModel.TotalSpent). Persisté au Save() via WarbandService.AddWarriorMutationAsync,
+    /// même principe que Skills/Spells (2026-09-24, retour utilisateur - ces guerriers n'avaient jusque-là
+    /// aucun moyen de recevoir leurs mutations à la création).</summary>
+    public ObservableCollection<Mutation> Mutations { get; } = new();
+
+    /// <summary>Passe-plat vers Row.Archetype.CanBuyMutations - masque le sous-onglet Mutations pour tout
+    /// autre type.</summary>
+    public bool CanBuyMutations => Row.Archetype.CanBuyMutations;
+
     /// <summary>Copie de WarbandEditDialogViewModel.IsExistingWarband, tenue à jour à la création du slot
     /// (WarbandEditDialogViewModel.IncrementWarrior/SplitHenchmanGroupDraft) et rétroactivement si la
     /// case est basculée après coup (OnIsExistingWarbandChanged) - RecruitSlot n'a pas de référence au
@@ -101,7 +114,7 @@ public abstract partial class RecruitSlot : ObservableObject
     /// Composant entièrement masqué seulement pour un type qui ne coche aucune de ces trois raisons
     /// (ex. un Zombie hors Bande existante : pas d'équipement, pas de compétences/XP libres, pas de
     /// sorts).</summary>
-    public bool ShowTabsView => CanUseEquipment || IsExistingWarband || IsSpellcaster;
+    public bool ShowTabsView => CanUseEquipment || IsExistingWarband || IsSpellcaster || CanBuyMutations;
 
     /// <summary>Pilote l'onglet Compétences seul (Équipement/Sorts/XP gardent leurs conditions
     /// habituelles) - visible en mode Bande existante (IsExistingWarband, comme avant) OU dès qu'on
@@ -128,12 +141,14 @@ public abstract partial class RecruitSlot : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsSkillsSection))]
     [NotifyPropertyChangedFor(nameof(IsSpellsSection))]
     [NotifyPropertyChangedFor(nameof(IsXpSection))]
+    [NotifyPropertyChangedFor(nameof(IsMutationsSection))]
     private int selectedSection;
 
     public bool IsEquipmentSection => SelectedSection == 0;
     public bool IsSkillsSection => SelectedSection == 1;
     public bool IsSpellsSection => SelectedSection == 2;
     public bool IsXpSection => SelectedSection == 3;
+    public bool IsMutationsSection => SelectedSection == 4;
 
     [RelayCommand]
     private void ShowEquipmentSection() => SelectedSection = 0;
@@ -146,6 +161,9 @@ public abstract partial class RecruitSlot : ObservableObject
 
     [RelayCommand]
     private void ShowXpSection() => SelectedSection = 3;
+
+    [RelayCommand]
+    private void ShowMutationsSection() => SelectedSection = 4;
 
     protected RecruitSlot(WarriorRecruitRow row, bool isExistingWarband, Warrior? existingWarrior = null)
     {
@@ -170,6 +188,7 @@ public abstract partial class RecruitSlot : ObservableObject
             BaselineEquipment = existingWarrior.Equipment.ToList();
             BaselineSkills = existingWarrior.Skills.ToList();
             BaselineSpells = existingWarrior.Spells.ToList();
+            BaselineMutations = existingWarrior.Mutations.ToList();
             BaselineHeadCount = existingWarrior.HeadCount;
             foreach (var we in existingWarrior.Equipment)
                 Equipment.Add(new EquipmentPick(we.Item, we.MaterialRule) { ExistingId = we.Id });
@@ -177,6 +196,8 @@ public abstract partial class RecruitSlot : ObservableObject
                 Skills.Add(ws.Item);
             foreach (var wsp in existingWarrior.Spells)
                 Spells.Add(wsp.Item);
+            foreach (var wm in existingWarrior.Mutations)
+                Mutations.Add(wm.Item);
         }
 
         // Équipement reste l'onglet par défaut même pour un sorcier fraîchement recruté (Sorts n'a pas
@@ -184,7 +205,12 @@ public abstract partial class RecruitSlot : ObservableObject
         // (!CanUseEquipment, ex. un Rat Ogre lanceur de sorts hors Bande existante) : Sorts est alors le
         // seul onglet visible, et démarrer sur Équipement laisserait un contenu orphelin sans bouton pour
         // en sortir.
-        selectedSection = !isExistingWarband && IsSpellcaster && !CanUseEquipment ? 2 : 0;
+        // Même raison pour Mutations : un Possédé ne porte jamais d'équipement, son seul onglet utile à la
+        // création est Mutations.
+        selectedSection = CanUseEquipment ? 0
+            : !isExistingWarband && IsSpellcaster ? 2
+            : CanBuyMutations ? 4
+            : 0;
         // EquipmentSummary est calculée (pas [ObservableProperty]) - Equipment.Add/Remove (AddEquipment/
         // RemoveEquipment de WarbandEditDialogViewModel) ne déclenchent donc aucune notification pour elle
         // sans ce relais explicite, laissant le Label de l'étape Noms vide/périmé tant qu'on ne rouvre pas

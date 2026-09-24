@@ -579,6 +579,28 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
+    /// <summary>BackfillMustStartWithMutationAsync (2026-09-24) : une base seedée avant l'arrivée de la colonne
+    /// (drapeau à false partout, user_version 1) retrouve le Mutant marqué au lancement suivant.</summary>
+    [Fact]
+    public async Task MustStartWithMutationBackfill_FlagsMutantOnLegacyDatabase()
+    {
+        await _db.Initialization;
+        var cult = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Cult of the Possessed");
+        var mutant = (await _library.GetWarriorArchetypesAsync(cult.Id, "en")).Single(w => w.Name == "Mutant");
+
+        var entity = await _db.Connection.FindAsync<WarriorArchetypeEntity>(mutant.Id);
+        entity.MustStartWithMutation = false;
+        await _db.Connection.UpdateAsync(entity);
+        await _db.Connection.ExecuteAsync("PRAGMA user_version = 1");
+        await _db.Connection.CloseAsync();
+
+        var reopenedDb = new AppDatabase(_dbPath);
+        await reopenedDb.Initialization;
+        Assert.True((await reopenedDb.Connection.FindAsync<WarriorArchetypeEntity>(mutant.Id)).MustStartWithMutation);
+        Assert.True(await reopenedDb.Connection.ExecuteScalarAsync<int>("PRAGMA user_version") >= 2);
+        await reopenedDb.Connection.CloseAsync();
+    }
+
     /// <summary>Les modèles sont reconstruits à chaque appel depuis les lignes cachées - modifier un
     /// modèle renvoyé sans le sauvegarder ne doit pas fuiter dans les lectures suivantes.</summary>
     [Fact]

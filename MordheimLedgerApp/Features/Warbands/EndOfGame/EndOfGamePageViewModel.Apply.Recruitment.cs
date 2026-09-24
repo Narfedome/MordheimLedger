@@ -58,6 +58,13 @@ public partial class EndOfGamePageViewModel
                     }
                 }
 
+                // Mutations achetées au recrutement (Possédés/Mutants - livre, "+ the cost of mutations").
+                foreach (var mutation in slot.Mutations)
+                {
+                    await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
+                    totalCost += mutation.Cost;
+                }
+
                 sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
             }
         }
@@ -296,6 +303,12 @@ public partial class EndOfGamePageViewModel
                         continue;
                     }
                     totalCost += await ConsumeReserveOrBuyAsync(stashPool, warrior.Id, pick.Item, pick.MaterialRule, quantity: group.Count, applyFreeDaggerRule: false);
+                }
+
+                foreach (var mutation in group.Mutations)
+                {
+                    await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
+                    totalCost += mutation.Cost * group.Count;
                 }
 
                 sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));

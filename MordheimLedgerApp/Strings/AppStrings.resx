@@ -546,6 +546,12 @@
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé</value>
   </data>
+  <data name="WarriorArchetypeMustStartWithMutation" xml:space="preserve">
+    <value>Mutation obligatoire au recrutement</value>
+  </data>
+  <data name="WarbandsMandatoryMutationMissing" xml:space="preserve">
+    <value>{0} doit commencer la partie avec au moins une mutation.</value>
+  </data>
   <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
     <value>Grande créature</value>
   </data>

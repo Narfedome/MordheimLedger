@@ -45,6 +45,19 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal("Mercenaires Reiklander", reiklanders.Name);
     }
 
+    /// <summary>WarriorArchetype.MustStartWithMutation : seul le Mutant "must start the game with one or more
+    /// mutations" - le Possédé, lui aussi acheteur de mutations, n'y est pas tenu.</summary>
+    [Fact]
+    public async Task CultOfThePossessed_OnlyMutantMustStartWithMutation()
+    {
+        var cult = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Cult of the Possessed");
+        var warriors = await _library.GetWarriorArchetypesAsync(cult.Id, "en");
+
+        var mandatory = warriors.Where(w => w.MustStartWithMutation).Select(w => w.Name).ToList();
+        Assert.Equal(["Mutant"], mandatory);
+        Assert.Contains(warriors, w => w.CanBuyMutations && !w.MustStartWithMutation);
+    }
+
     [Fact]
     public async Task Database_SeedsFifteenWarbandsTotal()
     {

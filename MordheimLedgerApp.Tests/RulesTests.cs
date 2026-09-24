@@ -879,6 +879,25 @@ public class RulesTests
         Assert.False(RecruitmentRules.CanRecruitHiredSword(alreadyHasThisType: false, remainingTreasury: 29, hireCost: 30));
     }
 
+    // "Mutants must start the game with one or more mutations each" vs the Possessed, who only "may".
+    [Fact]
+    public void RecruitmentRules_IsMissingMandatoryMutation_TrueForMandatoryTypeWithoutMutation()
+    {
+        Assert.True(RecruitmentRules.IsMissingMandatoryMutation(mustStartWithMutation: true, mutationCount: 0));
+    }
+
+    [Fact]
+    public void RecruitmentRules_IsMissingMandatoryMutation_FalseOnceOneMutationBought()
+    {
+        Assert.False(RecruitmentRules.IsMissingMandatoryMutation(mustStartWithMutation: true, mutationCount: 1));
+    }
+
+    [Fact]
+    public void RecruitmentRules_IsMissingMandatoryMutation_FalseForOptionalType()
+    {
+        Assert.False(RecruitmentRules.IsMissingMandatoryMutation(mustStartWithMutation: false, mutationCount: 0));
+    }
+
     // --- WarbandRatingRules -----------------------------------------------------------------------
     //
     // Single source of truth replacing two previously-disagreeing inline formulas (WarbandDetailViewModel

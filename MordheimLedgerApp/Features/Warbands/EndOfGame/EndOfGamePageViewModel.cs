@@ -48,6 +48,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 public partial class EndOfGamePageViewModel : BaseViewModel
 {
     private readonly ISkillPickerService _skillPicker;
+    private readonly IMutationPickerService _mutationPicker;
     private readonly IDetailDialogService _detailDialogs;
     private readonly ILibraryService _libraryService;
     private readonly IWarbandService _warbandService;
@@ -624,7 +625,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     public EndOfGamePageViewModel(ISkillPickerService skillPicker, IDetailDialogService detailDialogs, ILibraryService libraryService,
         IHiredSwordPickerService hiredSwordPicker, IEquipmentPickerService equipmentPicker, ISellEquipmentPickerService sellEquipmentPicker,
-        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService)
+        IDramatisPersonaPickerService dramatisPersonaPicker, IWarbandService warbandService, IMutationPickerService mutationPicker)
     {
         _skillPicker = skillPicker;
         _detailDialogs = detailDialogs;
@@ -634,6 +635,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         _sellEquipmentPicker = sellEquipmentPicker;
         _dramatisPersonaPicker = dramatisPersonaPicker;
         _warbandService = warbandService;
+        _mutationPicker = mutationPicker;
 
         // Déplacé depuis InitializeAsync (2026-09-22, retour utilisateur - "on a perdu la valeur par
         // défaut du victoire défaite") : contrairement au reste de InitializeAsync, ces 3 options sont

@@ -527,12 +527,14 @@ public partial class EndOfGamePageViewModel
     private int HenchmanRecruitmentTotalCost() =>
         ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
         + HenchmanRecruitRows.Sum(r => r.HenchmanGroupDrafts.Sum(g => g.Count) * r.Cost)
-        + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count);
+        + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count)
+        + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Mutations.Sum(m => m.Cost) * g.Count);
 
     /// <summary>Coût de l'équipement acheté pour les Héros recrutés cette session (étape RecruitHeroDetail,
     /// choix au picker - réserve en priorité, voir AddRecruitEquipment) - toujours ×1 (jamais de groupe
-    /// côté Héros, contrairement aux Hommes de main).</summary>
-    private int HeroEquipmentTotalCost() => HeroRecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
+    /// côté Héros, contrairement aux Hommes de main). Inclut les mutations achetées (Possédés/Mutants - livre, "+ the cost of
+    /// mutations").</summary>
+    private int HeroEquipmentTotalCost() => HeroRecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost) + s.Mutations.Sum(m => m.Cost));
 
     // --- Équipement : achat pour Héros (WarriorNameSlot, étape RecruitHeroDetail) ET nouveaux groupes
     // d'Hommes de main (HenchmanGroupDraft, étape RecruitHenchmenEquipment) - réserve en priorité (étape
@@ -692,6 +694,41 @@ public partial class EndOfGamePageViewModel
     [RelayCommand]
     private Task ShowRecruitEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule);
 
+    /// <summary>Onglet Mutations d'une recrue (Possédés/Mutants, RecruitSlot.CanBuyMutations) - même
+    /// principe que WarbandEditDialogViewModel.AddMutation : le coût s'ajoute au recrutement (livre, "+ the
+    /// cost of mutations", voir HeroEquipmentTotalCost/HenchmanRecruitmentTotalCost), persisté à Terminer
+    /// (ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync).</summary>
+    [RelayCommand]
+    private async Task AddRecruitMutation(object target)
+    {
+        RecruitSlot? slot = target switch
+        {
+            WarriorNameSlot s => s,
+            HenchmanGroupDraft g => g,
+            _ => null
+        };
+        if (slot is null) return;
+
+        foreach (var mutation in await _mutationPicker.PickMutationsAsync(_warbandArchetypeId))
+            slot.Mutations.Add(mutation);
+        NotifyTreasuryChanged();
+        if (slot is WarriorNameSlot hero && RecruitHeroDetailError is not null) ValidateRecruitHeroDetailStep(hero);
+    }
+
+    [RelayCommand]
+    private Task ShowRecruitMutationDetail(Mutation mutation) => _detailDialogs.ShowMutationDetailDialogAsync(mutation);
+
+    [RelayCommand]
+    private void RemoveRecruitMutation(Mutation mutation)
+    {
+        foreach (var slot in RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts)))
+        {
+            if (!slot.Mutations.Remove(mutation)) continue;
+            NotifyTreasuryChanged();
+            return;
+        }
+    }
+
     /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un WarriorNameSlot
     /// ou d'un HenchmanGroupDraft) - identité de référence, pas besoin de savoir d'avance laquelle puisque
     /// chaque instance n'est ajoutée qu'à une seule collection. Même idiome que
@@ -738,6 +775,12 @@ public partial class EndOfGamePageViewModel
         if (string.IsNullOrWhiteSpace(slot.Name))
         {
             RecruitHeroDetailError = string.Format(Loc["WarbandsWarriorNameRequired"], slot.Row.Name);
+            valid = false;
+        }
+        else if (RecruitmentRules.IsMissingMandatoryMutation(slot.Row.Archetype.MustStartWithMutation, slot.Mutations.Count))
+        {
+            // Mutant - "must start the game with one or more mutations", voir RecruitmentRules.
+            RecruitHeroDetailError = string.Format(Loc["WarbandsMandatoryMutationMissing"], slot.Name.Trim());
             valid = false;
         }
         else

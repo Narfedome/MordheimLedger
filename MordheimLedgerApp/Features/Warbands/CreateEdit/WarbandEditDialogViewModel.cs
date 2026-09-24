@@ -80,7 +80,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             slot.Experience,
             slot.Equipment.Select(e => new object?[] { e.Item.Id, e.MaterialRule?.Id, e.ExistingId }),
             slot.Skills.Select(s => s.Id),
-            slot.Spells.Select(s => s.Id)
+            slot.Spells.Select(s => s.Id),
+            slot.Mutations.Select(m => m.Id)
         ];
 
         /// <summary>Masque les boutons Ajouter/Retirer de la puce Archetype hors création (Item.Id != 0,
@@ -208,7 +209,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private int TotalSpent => RecruitRows.Sum(r => (r.Count - r.ExistingCount) * r.Cost)
             + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost) * g.Count)
             + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost))
+            // Mutations achetées cette session (livre : "+ the cost of mutations" au recrutement) - celles
+            // déjà en base (BaselineMutations) sont déjà payées.
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => NewMutationsCost(g) * g.Count)
+            + RecruitRows.SelectMany(r => r.NameSlots).Sum(NewMutationsCost)
             + HiredSwordRows.Where(r => r.IsRecruited && r.ExistingWarrior is null).Sum(r => r.Cost);
+
+        private static int NewMutationsCost(RecruitSlot slot) =>
+            slot.Mutations.Where(m => slot.BaselineMutations.All(b => b.Item != m)).Sum(m => m.Cost);
 
         /// <summary>Ce qui doit revenir à la trésorerie suite à des actions sur le roster déjà existant -
         /// suppression complète confirmée (Cost du guerrier + son équipement d'origine, voir
@@ -218,7 +226,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// remboursé). Les deux premiers termes ne regardent que les guerriers/groupes concernés ; le
         /// troisième parcourt tout le roster restant (les slots pleinement supprimés n'y figurent plus,
         /// déjà couverts par le premier terme via l'équipement d'origine complet du Warrior).</summary>
-        private int TotalRefunds => _pendingFullDeletions.Sum(w => w.Cost + RefundableEquipmentCost(w.Equipment, _ => true))
+        private int TotalRefunds => _pendingFullDeletions.Sum(w => w.Cost + RefundableEquipmentCost(w.Equipment, _ => true) + w.Mutations.Sum(m => m.Item.Cost))
+            // Mutation déjà payée retirée d'un guerrier existant - même traitement que l'équipement.
+            + RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
+                .Where(s => s.ExistingWarrior != null)
+                .Sum(s => s.BaselineMutations.Where(b => !s.Mutations.Contains(b.Item)).Sum(b => b.Item.Cost))
             + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts.Select(g => (Row: r, Group: g)))
                 .Where(t => t.Group.ExistingWarrior != null && t.Group.Count < t.Group.BaselineHeadCount)
                 .Sum(t => t.Row.Cost * (t.Group.BaselineHeadCount - t.Group.Count))
@@ -269,6 +281,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
         [ObservableProperty]
         private string? warriorsError;
+
+        /// <summary>Étape Équipement - mutation obligatoire manquante (voir ValidateEquipmentStep).</summary>
+        [ObservableProperty]
+        private string? equipmentError;
 
         [ObservableProperty]
         private string? namesError;
@@ -886,6 +902,54 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
+        /// <summary>Sous-onglet Mutations (Possédés/Mutants, RecruitSlot.CanBuyMutations) - les deux modes :
+        /// livre, "90 gold crowns to hire (+ the cost of mutations)", donc facturé au recrutement en mode Coûts
+        /// appliqués (TotalSpent), en mémoire jusqu'au Save. Même cible/idiome qu'AddSkill ; catalogue
+        /// restreint à cette bande (Bénédictions de Nurgle réservées aux Impurs, etc.).</summary>
+        [RelayCommand]
+        private async Task AddMutation(object target)
+        {
+            ObservableCollection<Mutation> destination;
+            switch (target)
+            {
+                case WarriorNameSlot slot:
+                    destination = slot.Mutations;
+                    break;
+                case HenchmanGroupDraft group:
+                    destination = group.Mutations;
+                    break;
+                default:
+                    return;
+            }
+            if (Archetype is null) return;
+
+            var mutations = await _mutationPicker.PickMutationsAsync(Archetype.Id);
+            foreach (var mutation in mutations)
+                destination.Add(mutation);
+            UpdateRecruitability();
+            if (EquipmentError is not null) ValidateEquipmentStep();
+        }
+
+        [RelayCommand]
+        private Task ShowMutationDetail(Mutation mutation) => _detailDialogs.ShowMutationDetailDialogAsync(mutation);
+
+        /// <summary>Retire une mutation de quelle que collection la contient - même idiome que RemoveSkill.</summary>
+        [RelayCommand]
+        private void RemoveMutation(Mutation mutation)
+        {
+            foreach (var row in RecruitRows)
+            {
+                foreach (var group in row.HenchmanGroupDrafts)
+                {
+                    if (group.Mutations.Remove(mutation)) { UpdateRecruitability(); return; }
+                }
+                foreach (var slot in row.NameSlots)
+                {
+                    if (slot.Mutations.Remove(mutation)) { UpdateRecruitability(); return; }
+                }
+            }
+        }
+
         /// <summary>Mode Bande existante uniquement, sous-onglet Sorts (masqué si le type recruté n'est
         /// pas lanceur de sorts - voir RecruitSlot.IsSpellcaster) - assigne un ou plusieurs sorts déjà
         /// appris, filtrés par les écoles de magie de la bande (Archetype.MagicSchools, déjà pleinement
@@ -988,6 +1052,34 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             return true;
         }
 
+        /// <summary>Étape Équipement : chaque NOUVELLE recrue d'un type à mutation obligatoire (Mutant -
+        /// RecruitmentRules.IsMissingMandatoryMutation) doit en avoir au moins une. Mode Coûts appliqués
+        /// uniquement (le mode Libre enregistre un historique tel quel) et jamais pour un guerrier déjà en
+        /// base (ExistingWarrior) - une bande recrutée avant cette règle ne doit pas se retrouver bloquée
+        /// à l'enregistrement.</summary>
+        private bool ValidateEquipmentStep()
+        {
+            if (!IsExistingWarband)
+            {
+                foreach (var row in RecruitRows.Where(r => r.Archetype.MustStartWithMutation))
+                {
+                    var slots = row.NameSlots.Select(s => (Slot: (RecruitSlot)s, Label: s.DisplayLabel))
+                        .Concat(row.HenchmanGroupDrafts.Select(g => (Slot: (RecruitSlot)g, Label: g.Name)));
+                    foreach (var (slot, label) in slots)
+                    {
+                        if (slot.ExistingWarrior is null && RecruitmentRules.IsMissingMandatoryMutation(true, slot.Mutations.Count))
+                        {
+                            EquipmentError = string.Format(Loc["WarbandsMandatoryMutationMissing"], label);
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            EquipmentError = null;
+            return true;
+        }
+
         /// <summary>Étape Noms (Héros/Hommes de main) : un nom renseigné pour chaque recrue Héros et
         /// chaque sous-groupe d'Hommes de main (livre des règles : "you will need to... name each
         /// Henchman group") - PopulateSuggestedNames pré-remplit déjà tout à l'entrée de cette étape,
@@ -1066,6 +1158,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         {
             if (IsGeneralTab && !ValidateGeneralStep()) return;
             if (IsWarriorsTab && !ValidateWarriorsStep()) return;
+            if (IsEquipmentTab && !ValidateEquipmentStep()) return;
             if (IsWarriorNamesTab && !ValidateWarriorNamesStep()) return;
             if (SelectedTab >= StepCount - 1) return;
             SelectedTab++;
@@ -1109,6 +1202,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 await _warbandService.AddWarriorSpellAsync(w.Id, spell);
             foreach (var baseline in slot.BaselineSpells.Where(b => !slot.Spells.Contains(b.Item)))
                 await _warbandService.RemoveWarriorSpellAsync(baseline.Id);
+
+            foreach (var mutation in slot.Mutations.Where(m => slot.BaselineMutations.All(b => b.Item != m)))
+                await _warbandService.AddWarriorMutationAsync(w.Id, mutation);
+            foreach (var baseline in slot.BaselineMutations.Where(b => !slot.Mutations.Contains(b.Item)))
+                await _warbandService.RemoveWarriorMutationAsync(baseline.Id);
         }
 
         /// <summary>Point d'écriture en base pour la bande, les NOUVELLES recrues de cette session
@@ -1131,6 +1229,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (!ValidateWarriorsStep())
             {
                 SelectedTab = 1;
+                return;
+            }
+
+            if (!ValidateEquipmentStep())
+            {
+                SelectedTab = 2;
                 return;
             }
 
@@ -1188,6 +1292,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
                             foreach (var spell in slot.Spells)
                                 await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
+                            foreach (var mutation in slot.Mutations)
+                                await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
                             if (IsExistingWarband && slot.Experience != warrior.Experience)
                             {
                                 warrior.Experience = slot.Experience;
@@ -1215,6 +1321,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
                             foreach (var spell in group.Spells)
                                 await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
+                            foreach (var mutation in group.Mutations)
+                                await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
                             if (IsExistingWarband && group.Experience != warrior.Experience)
                             {
                                 warrior.Experience = group.Experience;

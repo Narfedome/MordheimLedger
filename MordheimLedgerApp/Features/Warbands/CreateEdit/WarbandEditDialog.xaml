@@ -140,6 +140,8 @@
                         <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                         <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding EquipmentError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding EquipmentError, Converter={StaticResource IsNotNullConverter}}"/>
 
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="4">
                             <BindableLayout.ItemTemplate>
@@ -189,7 +191,10 @@
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
                                                               ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"
+                                                              AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddMutationCommand}"
+                                                              RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveMutationCommand}"
+                                                              ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowMutationDetailCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -226,7 +231,10 @@
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
                                                               ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"
+                                                              AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddMutationCommand}"
+                                                              RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveMutationCommand}"
+                                                              ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowMutationDetailCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>

@@ -76,6 +76,12 @@ public class WarriorArchetype
     /// recrutement"). Gates the Mutations tab on WarriorEditDialog - false for every ordinary archetype.</summary>
     public bool CanBuyMutations { get; set; }
 
+    /// <summary>True when CanBuyMutations is a MUST rather than a MAY - Mutants ("Mutants must start the game
+    /// with one or more mutations each") vs the Possessed ("may start the game with one or more mutations").
+    /// Enforced at recruitment (warband wizard and End of Game recruitment) - see RecruitmentRules.
+    /// MissingMandatoryMutation.</summary>
+    public bool MustStartWithMutation { get; set; }
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 

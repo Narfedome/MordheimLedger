@@ -46,4 +46,10 @@ public static class RecruitmentRules
     /// one can always be re-hired as a brand-new row (see Warrior.HiredSwordId doc).</summary>
     public static bool CanRecruitHiredSword(bool alreadyHasThisType, int remainingTreasury, int hireCost) =>
         !alreadyHasThisType && remainingTreasury >= hireCost;
+
+    /// <summary>"Mutants must start the game with one or more mutations each" (Cult of the Possessed) -
+    /// true when a recruit of such a type (WarriorArchetype.MustStartWithMutation) has none yet. The
+    /// Possessed only "may" (MustStartWithMutation false), never flagged here.</summary>
+    public static bool IsMissingMandatoryMutation(bool mustStartWithMutation, int mutationCount) =>
+        mustStartWithMutation && mutationCount == 0;
 }

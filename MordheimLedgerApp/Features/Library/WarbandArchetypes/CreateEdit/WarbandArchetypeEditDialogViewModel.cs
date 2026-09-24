@@ -347,6 +347,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             SpecialRules = new List<SpecialRule>(warrior.SpecialRules),
             IsSpellcaster = warrior.IsSpellcaster,
             CanBuyMutations = warrior.CanBuyMutations,
+            MustStartWithMutation = warrior.MustStartWithMutation,
             EquipmentListId = warrior.EquipmentListId,
             CanUseEquipment = warrior.CanUseEquipment,
             AllowedSkillCategories = new List<SkillCategory>(warrior.AllowedSkillCategories),

@@ -28,7 +28,7 @@
 
     <Grid RowDefinitions="Auto,*,Auto">
         <header:DetailPageHeaderView Grid.Row="0" Title="{loc:Loc EndOfGameTitle}" BackCommand="{Binding ExitCommand}"/>
-        <ScrollView Grid.Row="1">
+        <ScrollView Grid.Row="1" x:Name="StepScroll">
         <VerticalStackLayout Spacing="16" Padding="16">
             <!-- Pas de compteur "Étape X/Y" (retiré 2026-09-22, retour utilisateur - "elle fluctue en
                  fonction de certaines conditions, ça ne sert pas de le mettre") : Steps.Count varie
@@ -39,6 +39,16 @@
 
         </VerticalStackLayout>
         </ScrollView>
+
+        <!-- Badge ⌄ "encore du contenu plus bas" (VerticalScrollHint, voir EndOfGamePage.xaml.cs) - même
+             badge que les dialogs (AnimatedHeightScrollView), la barre de défilement native étant à peine
+             visible sur mobile. -->
+        <Border Grid.Row="1" x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
+                BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
+                StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,6">
+            <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
+                   TextColor="{DynamicResource AppAccent}"/>
+        </Border>
 
         <!-- Spinner au chargement initial ET à chaque Suivant/Précédent (EndOfGamePageViewModel.
              ChangeStepAsync, 2026-09-24) - voile par-dessus l'étape courante plutôt qu'à sa place, et qui

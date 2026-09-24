@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             x:Class="MordheimLedgerApp.Components.ScrollHintHost">
+    <!-- Enveloppe une zone défilante verticale (un ScrollView OU une CollectionView, en Content direct)
+         et y superpose le badge ⌄ "encore du contenu plus bas" - voir ScrollHintHost.xaml.cs. Les
+         Grid.Row/IsVisible de la zone défilante se posent sur cet hôte, pas sur la zone elle-même. -->
+    <ContentView.ControlTemplate>
+        <ControlTemplate>
+            <Grid>
+                <ContentPresenter />
+                <!-- AngleDown plutôt que ChevronDown (déjà l'icône des sections repliables - un glyphe = un
+                     concept), même badge que AnimatedHeightScrollView/EndOfGamePage. -->
+                <Border x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
+                        BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,6">
+                    <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
+                           TextColor="{DynamicResource AppAccent}"/>
+                </Border>
+            </Grid>
+        </ControlTemplate>
+    </ContentView.ControlTemplate>
+</ContentView>

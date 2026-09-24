@@ -11,6 +11,7 @@
 
     <components:WatermarkedLayout>
     <Grid>
+    <components:ScrollHintHost>
     <ScrollView>
         <!-- Cf. DmTools SettingsPage : sur Desktop, une fenêtre large étirait chaque carte de section
              bord à bord - plafonnée et centrée à la place (fait en code-behind, cf. SettingsPage.xaml.cs). -->
@@ -156,6 +157,7 @@
 
         </VerticalStackLayout>
     </ScrollView>
+    </components:ScrollHintHost>
 
     <!-- Bloque toute interaction pendant Loading.IsLoading (ex. réinitialisation de la BDD) - un
          ActivityIndicator seul (comme sur les autres pages) ne suffit pas ici : l'opération est

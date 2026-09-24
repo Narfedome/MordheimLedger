@@ -39,7 +39,10 @@ public partial class AnimatedHeightScrollView : ContentView
     protected override void OnApplyTemplate()
     {
         base.OnApplyTemplate();
-        _scrollView ??= GetTemplateChild("PartScrollView") as ScrollView;
+        if (_scrollView is not null) return;
+        _scrollView = GetTemplateChild("PartScrollView") as ScrollView;
+        if (_scrollView is not null && GetTemplateChild("DownHint") is View downHint)
+            VerticalScrollHint.Attach(_scrollView, downHint);
     }
 
     /// <summary>Regroupe les rafales d'invalidations d'un même changement en une seule mise à jour,

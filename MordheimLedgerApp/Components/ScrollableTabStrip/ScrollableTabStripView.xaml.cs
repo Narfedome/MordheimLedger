@@ -31,6 +31,48 @@ public partial class ScrollableTabStripView : ContentView
         var pan = new PanGestureRecognizer();
         pan.PanUpdated += OnPanUpdated;
         _tabScrollView.GestureRecognizers.Add(pan);
+
+        _leftHint = GetTemplateChild("LeftHint") as View;
+        _rightHint = GetTemplateChild("RightHint") as View;
+        AddHintTap(_leftHint, direction: -1);
+        AddHintTap(_rightHint, direction: 1);
+
+        _tabScrollView.Scrolled += (_, _) => UpdateScrollHints();
+        _tabScrollView.SizeChanged += (_, _) => UpdateScrollHints();
+        // ContentSize change quand un onglet apparaît/disparaît (IsVisible conditionnels des appelants).
+        _tabScrollView.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(ScrollView.ContentSize)) UpdateScrollHints();
+        };
+    }
+
+    private View? _leftHint;
+    private View? _rightHint;
+
+    /// <summary>Badges ‹ / › (voir le XAML) : visibles seulement quand il reste des onglets hors champ de
+    /// ce côté - rien quand toute la bande tient dans la largeur disponible.</summary>
+    private void UpdateScrollHints()
+    {
+        if (_tabScrollView is null) return;
+        const double tolerance = 1;
+        var maxScrollX = _tabScrollView.ContentSize.Width - _tabScrollView.Width;
+        if (_leftHint is not null) _leftHint.IsVisible = maxScrollX > tolerance && _tabScrollView.ScrollX > tolerance;
+        if (_rightHint is not null) _rightHint.IsVisible = maxScrollX > tolerance && _tabScrollView.ScrollX < maxScrollX - tolerance;
+    }
+
+    private void AddHintTap(View? hint, int direction)
+    {
+        if (hint is null) return;
+        var tap = new TapGestureRecognizer();
+        tap.Tapped += async (_, _) =>
+        {
+            if (_tabScrollView is null) return;
+            // Défile d'environ une largeur visible (un peu moins, pour garder un repère), borné au contenu.
+            var maxScrollX = Math.Max(0, _tabScrollView.ContentSize.Width - _tabScrollView.Width);
+            var target = Math.Clamp(_tabScrollView.ScrollX + direction * _tabScrollView.Width * 0.8, 0, maxScrollX);
+            await _tabScrollView.ScrollToAsync(target, 0, animated: true);
+        };
+        hint.GestureRecognizers.Add(tap);
     }
 
     private async void OnPanUpdated(object? sender, PanUpdatedEventArgs e)

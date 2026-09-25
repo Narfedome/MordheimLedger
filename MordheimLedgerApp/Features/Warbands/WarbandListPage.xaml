@@ -90,11 +90,12 @@
                 </VerticalStackLayout>
             </Border>
 
+            <components:ScrollHintHost IsVisible="{Binding HasWarbands}">
             <CollectionView x:Name="WarbandCollection"
                     ItemsSource="{Binding Rows}"
                     SelectionMode="None"
-                    IsVisible="{Binding HasWarbands}"
                     ItemTemplate="{StaticResource WarbandTemplate}"/>
+            </components:ScrollHintHost>
         </Grid>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8">

@@ -98,32 +98,13 @@ public sealed class WarriorRosterBuilder
         return new WarriorRow(warrior, archetype?.Name ?? "?", BuildSpecialRuleChips(mergedRules), magicSchools, hatredChips);
     }
 
-    /// <summary>A rule with a mechanized Hatred target explodes into one chip per target ("Haine :
-    /// Skavens") instead of a single generic "Haine" chip - either a WarbandArchetype target
-    /// (SpecialRule.HatredTargetWarbandArchetypeIds, one chip per band) or the spellcaster-trait target
-    /// (SpecialRule.HatredTargetsSpellcasters, e.g. "Au Bûcher !" - one chip, not band-scoped). A rule
-    /// with neither maps 1:1 to its own catalog Name, unchanged.</summary>
-    private List<SpecialRuleChip> BuildSpecialRuleChips(IEnumerable<SpecialRule> rules)
-    {
-        var chips = new List<SpecialRuleChip>();
-        foreach (var rule in rules)
-        {
-            if (rule.HatredTargetWarbandArchetypeIds.Count == 0 && !rule.HatredTargetsSpellcasters)
-            {
-                chips.Add(new SpecialRuleChip { Item = rule, Name = rule.Name });
-                continue;
-            }
-
-            foreach (var targetId in rule.HatredTargetWarbandArchetypeIds)
-            {
-                var targetName = _warbandArchetypeNames.GetValueOrDefault(targetId, "?");
-                chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], targetName) });
-            }
-            if (rule.HatredTargetsSpellcasters)
-                chips.Add(new SpecialRuleChip { Item = rule, Name = string.Format(Loc["WarriorsHatredChipFormat"], Loc["HatredTargetSpellcasters"]) });
-        }
-        return chips;
-    }
+    /// <summary>One chip per rule, under the rule's own catalog Name - including a Hatred-granting rule
+    /// (e.g. "Au Bûcher !" shows as itself, not as "Haine : Sorciers"). Its mechanized targets are shown
+    /// separately in the card's "Haine" section (BuildRuleHatredChips) - this used to explode such a rule
+    /// into one "Haine : X" chip per target here too, from before that section existed, which duplicated
+    /// every target and hid the rule's real name (user report 2026-09-24, Witch Hunters).</summary>
+    private static List<SpecialRuleChip> BuildSpecialRuleChips(IEnumerable<SpecialRule> rules) =>
+        rules.Select(rule => new SpecialRuleChip { Item = rule, Name = rule.Name }).ToList();
 
     /// <summary>Every SpecialRule that could plausibly grant Hatred for this warrior, gathered
     /// independently of whatever BuildSpecialRuleChips shows in "Règles spéciales" - the two sections

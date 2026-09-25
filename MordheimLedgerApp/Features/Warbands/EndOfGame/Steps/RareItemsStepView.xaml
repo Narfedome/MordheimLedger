@@ -17,7 +17,7 @@
                  OnIsSearchingForCharacterChanged, retour utilisateur 2026-08-28). Côté Objet : "Chercher un
                  objet" ouvre le Trading Post complet en SingleSelectMode (un seul objet à la fois - "you
                  may only make one roll for each Hero"). Une arme de corps à corps COMMUNE OU RARE choisie
-                 peut en plus être forgée en Gromril/Ithilmar (pilules tapables, voir IsMaterialEligible/
+                 peut en plus être forgée en Gromril/Ithilmar, choisi directement sur la tuile du sélecteur (voir
                  EffectiveRarity), auquel cas c'est la Rareté DU MATÉRIAU (ou la plus haute des deux) qui est
                  recherchée. Côté Personnage : nom en saisie libre pour l'instant (pas de catalogue Dramatis
                  Personae encore - le sélecteur remplacera ce champ une fois la liste envoyée), jet de 1D6
@@ -125,7 +125,7 @@
 
                                     <VerticalStackLayout Spacing="8" IsVisible="{Binding HasSelectedItem}">
                                         <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="8">
-                                            <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
+                                            <components:ChipView Grid.Column="0" Item="{Binding .}" NameOverride="{Binding SelectedItemDisplayName}"
                                                                   IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                   IconFontFamily="RpgAwesome"
                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareItemDetailCommand}"/>
@@ -134,58 +134,6 @@
                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ClearRareItemCommand}"
                                                                           CommandParameter="{Binding .}"/>
                                         </Grid>
-
-                                        <!-- Matériau (arme de corps à corps uniquement, commune ou déjà Rare -
-                                             voir IsMaterialEligible) - 2 pilules tapables plutôt qu'un
-                                             RadioButton (jugé trop plain visuellement, retour utilisateur
-                                             2026-08-28) : le tap sur la pilule SÉLECTIONNE (RareItemSearchEntry.
-                                             SelectMaterialCommand, bascule si déjà choisie), un petit bouton
-                                             "i" à part ouvre la vraie fiche de la règle - séparé plutôt que sur
-                                             le même tap, contrairement au reste de l'app où une puce tapée
-                                             ouvre toujours son détail (ChipView), parce qu'ici le tap doit
-                                             plutôt sélectionner. Seulement 2 matériaux existent (Gromril/
-                                             Ithilmar, voir GromrilMaterial/IthilmarMaterial) donc codées en dur
-                                             plutôt qu'une boucle générique. -->
-                                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsMaterialEligible}">
-                                            <Border Style="{StaticResource ChipBorderStyle}" Padding="10,6">
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding SelectMaterialCommand}"
-                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial}"/>
-                                                </Border.GestureRecognizers>
-                                                <Border.Triggers>
-                                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedMaterial.Abbreviation}" Value="G">
-                                                        <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
-                                                    </DataTrigger>
-                                                </Border.Triggers>
-                                                <HorizontalStackLayout Spacing="4">
-                                                    <Label Text="{x:Static icons:RpgFont.RaAnvil}" FontFamily="RpgAwesome" FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
-                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleInfo}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                  IconSize="10" Padding="0"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareMaterialDetailCommand}"
-                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=GromrilMaterial}"/>
-                                                </HorizontalStackLayout>
-                                            </Border>
-                                            <Border Style="{StaticResource ChipBorderStyle}" Padding="10,6">
-                                                <Border.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding SelectMaterialCommand}"
-                                                                          CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial}"/>
-                                                </Border.GestureRecognizers>
-                                                <Border.Triggers>
-                                                    <DataTrigger TargetType="Border" Binding="{Binding SelectedMaterial.Abbreviation}" Value="I">
-                                                        <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
-                                                    </DataTrigger>
-                                                </Border.Triggers>
-                                                <HorizontalStackLayout Spacing="4">
-                                                    <Label Text="{x:Static icons:RpgFont.RaAnvil}" FontFamily="RpgAwesome" FontSize="12" TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial.Name}" FontSize="11" VerticalOptions="Center"/>
-                                                    <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleInfo}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                                  IconSize="10" Padding="0"
-                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareMaterialDetailCommand}"
-                                                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IthilmarMaterial}"/>
-                                                </HorizontalStackLayout>
-                                            </Border>
-                                        </HorizontalStackLayout>
 
                                         <Label Text="{Binding BonusDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
                                                IsVisible="{Binding HasBonus}"/>

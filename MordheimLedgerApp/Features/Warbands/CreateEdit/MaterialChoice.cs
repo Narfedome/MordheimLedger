@@ -6,77 +6,92 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.CreateEdit;
 
-/// <summary>One selectable row within MaterialPickerDialog for a single weapon - "Normal" (Rule == null)
-/// plus one row per eligible material SpecialRule (Gromril, Ithilmar...). IsSelected is toggled by
-/// MaterialChoice.Select, exclusively within that one weapon's Options - same imperative-flag idiom as
-/// EquipmentItemRow.IsSelected rather than a data-trigger comparison against the parent's current
-/// selection.</summary>
+/// <summary>Un segment du sélecteur de matériau d'une arme dans MaterialPickerDialog - "Normal" (Rule ==
+/// null) ou un matériau exclusif (Gromril/Ithilmar/Ornée : SpecialRule avec CostMultiplier, hors
+/// "Blessed Weapon" qui est cumulable et passe par MaterialChoice.IsBlessed).</summary>
 public partial class MaterialOptionRow : ObservableObject
 {
-    /// <summary>The MaterialChoice this row belongs to - lets SelectMaterialCommand toggle exclusivity
-    /// across this row's siblings without the caller having to track which weapon is currently shown.</summary>
     public MaterialChoice Owner { get; }
 
-    /// <summary>Null = Normal (plain Cost, no material).</summary>
     public SpecialRule? Rule { get; }
     public string Name { get; }
-    public string? Description { get; }
-    public int Cost { get; }
-
-    /// <summary>"Gratuit"/"Free" when Cost is 0 (the Normal option of an IsFreeDagger-eligible weapon -
-    /// see MaterialChoice's isFreeEligible constructor param), the usual "{n} CO" otherwise. A material
-    /// row's Cost is never 0 (a Gromril/Ithilmar dagger is a deliberate upgrade, not the free baseline -
-    /// see MaterialChoice constructor), so this only ever reads "Gratuit" on the Normal row.</summary>
-    public string CostDisplay => Cost == 0
-        ? LocalizationService.Instance["LibFreePh"]
-        : $"{Cost} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
 
     [ObservableProperty]
     private bool isSelected;
 
-    public MaterialOptionRow(MaterialChoice owner, SpecialRule? rule, string name, string? description, int cost)
+    public MaterialOptionRow(MaterialChoice owner, SpecialRule? rule, string name)
     {
         Owner = owner;
         Rule = rule;
         Name = name;
-        Description = description;
-        Cost = cost;
     }
 }
 
-/// <summary>One weapon awaiting a material choice within MaterialPickerDialog - one per eligible melee
-/// weapon in the current purchase batch. WarbandEditDialogViewModel/WarriorEditDialogViewModel.
-/// AddEquipment build one of these per melee item and show a single dialog with Précédent/Suivant to
-/// navigate between them, instead of a separate ActionSheet closed and reopened per weapon (explicit
-/// user request - see MaterialPickerDialogViewModel).</summary>
+/// <summary>Une arme du lot d'achat dans MaterialPickerDialog : un matériau exclusif (corps à corps uniquement)
+/// + une bénédiction cumulable (IsBlessed, seulement si la règle "Blessed Weapon" existe).
+/// Le prix affiché suit le choix en direct : un matériau rend payante la première dague gratuite
+/// (livre - "in addition to his free dagger"), la bénédiction (×1) ne change pas le prix.</summary>
 public partial class MaterialChoice : ObservableObject
 {
+    private readonly bool _isFreeEligible;
+
     public EquipmentItem Item { get; }
     public ObservableCollection<MaterialOptionRow> Options { get; }
 
-    public SpecialRule? SelectedMaterial => Options.FirstOrDefault(o => o.IsSelected)?.Rule;
-    public int SelectedCost => Options.FirstOrDefault(o => o.IsSelected)?.Cost ?? Item.Cost;
+    /// <summary>Null si la règle "Blessed Weapon" est absente du catalogue - la ligne Bénie est alors masquée.</summary>
+    public SpecialRule? BlessingRule { get; }
+    public bool CanBeBlessed => BlessingRule is not null;
 
-    /// <param name="isFreeEligible">True when Item.IsFreeDagger and the target doesn't already carry one
-    /// (same check as WarbandEditDialogViewModel/WarriorEditDialogViewModel.AddEquipment's IsFree logic) -
-    /// zeroes only the Normal option's cost to "Gratuit". A Gromril/Ithilmar dagger is a deliberate
-    /// upgrade, not the assumed baseline, so material rows always keep their full multiplied price
-    /// regardless of this flag.</param>
-    public MaterialChoice(EquipmentItem item, IReadOnlyList<SpecialRule> materialRules, string normalLabel, bool isFreeEligible = false)
+    /// <summary>False pour une arme de tir/poudre noire (seul "Normal" dans Options) - la ligne de segments est masquée.</summary>
+    public bool HasMaterialOptions => Options.Count > 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SelectedBlessing))]
+    private bool isBlessed;
+
+    public SpecialRule? SelectedMaterial => Options.FirstOrDefault(o => o.IsSelected)?.Rule;
+    public bool HasMaterial => SelectedMaterial is not null;
+    public SpecialRule? SelectedBlessing => IsBlessed ? BlessingRule : null;
+
+    public int SelectedCost => EquipmentPricing.CalculateCost(Item.Cost, SelectedMaterial?.CostMultiplier, _isFreeEligible && SelectedMaterial is null);
+
+    public string CostDisplay => SelectedCost == 0
+        ? LocalizationService.Instance["LibFreePh"]
+        : $"{SelectedCost} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
+
+    public MaterialChoice(EquipmentItem item, IReadOnlyList<SpecialRule> materialRules, SpecialRule? blessingRule, string normalLabel, bool isFreeEligible = false)
     {
         Item = item;
-        var normalCost = EquipmentPricing.CalculateCost(item.Cost, materialCostMultiplier: null, isFree: isFreeEligible);
-        var options = new List<MaterialOptionRow> { new(this, null, normalLabel, null, normalCost) };
-        options.AddRange(materialRules.Select(r =>
-            new MaterialOptionRow(this, r, r.Name, r.Description, EquipmentPricing.CalculateCost(item.Cost, r.CostMultiplier, isFree: false))));
+        BlessingRule = blessingRule;
+        _isFreeEligible = isFreeEligible;
+        var options = new List<MaterialOptionRow> { new(this, null, normalLabel) };
+        options.AddRange(materialRules.Select(r => new MaterialOptionRow(this, r, ShortName(r.Name, materialRules))));
         Options = new ObservableCollection<MaterialOptionRow>(options);
         Options[0].IsSelected = true;
+    }
+
+    /// <summary>Libellé court d'un segment : "Arme en Gromril"/"Gromril Weapon" -> "Gromril". Retire les mots
+    /// communs à tous les matériaux ("Arme"/"Weapon") puis les petits mots de liaison en tête ("en"), sans
+    /// dépendre d'une langue précise ; retombe sur le nom complet si rien ne reste (un seul matériau).</summary>
+    private static string ShortName(string name, IReadOnlyList<SpecialRule> materialRules)
+    {
+        var common = materialRules
+            .Select(r => r.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsEnumerable())
+            .Aggregate((a, b) => a.Intersect(b, StringComparer.OrdinalIgnoreCase))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var words = name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Where(w => !common.Contains(w))
+            .SkipWhile(w => w.Length <= 3 && w.All(char.IsLower))
+            .ToList();
+        return words.Count > 0 ? string.Join(' ', words) : name;
     }
 
     public void Select(MaterialOptionRow row)
     {
         foreach (var o in Options) o.IsSelected = ReferenceEquals(o, row);
         OnPropertyChanged(nameof(SelectedMaterial));
+        OnPropertyChanged(nameof(HasMaterial));
         OnPropertyChanged(nameof(SelectedCost));
+        OnPropertyChanged(nameof(CostDisplay));
     }
 }

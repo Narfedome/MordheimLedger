@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              x:Class="MordheimLedgerApp.Components.Dialogs.AnimatedHeightScrollView">
     <!-- Un seul enfant attendu (Content de ContentView n'accepte qu'une View) - même idiome
          ContentPresenter que ScrollableTabStripView/PickerSelectorLayout : l'appelant place son
          VerticalStackLayout directement comme Content, sans x:Name ni SizeChanged à câbler lui-même. -->
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <ScrollView x:Name="PartScrollView" VerticalOptions="Start">
-                <ContentPresenter />
-            </ScrollView>
+            <Grid VerticalOptions="Start">
+                <ScrollView x:Name="PartScrollView" VerticalOptions="Start">
+                    <ContentPresenter />
+                </ScrollView>
+                <!-- Badge ⌄ "encore du contenu plus bas" - piloté par VerticalScrollHint (visible seulement
+                     tant qu'on n'est pas en fin de course). AngleDown plutôt que ChevronDown (déjà l'icône
+                     des sections repliables - un glyphe = un concept). -->
+                <Border x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
+                        BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,4">
+                    <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
+                           TextColor="{DynamicResource AppAccent}"/>
+                </Border>
+            </Grid>
         </ControlTemplate>
     </ContentView.ControlTemplate>
 </ContentView>

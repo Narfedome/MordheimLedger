@@ -131,6 +131,8 @@ public class AppDatabase
         await BackfillNeverGainsExperienceAsync();
         await BackfillWarbandArchetypeRaceAsync();
         await BackfillWarriorArchetypeRacialProfileAsync();
+        // Après : versions user_version croissantes (1 puis 2), voir MustStartWithMutationBackfillDataVersion.
+        await BackfillMustStartWithMutationAsync();
         await BackfillWarriorRacialMaxesAsync();
         await BackfillBranchedInjuriesAsync();
         await BackfillInjurySpecialRulesAsync();
@@ -295,6 +297,43 @@ public class AppDatabase
         if (await _db.ExecuteScalarAsync<int>("PRAGMA user_version") >= RacialProfileBackfillDataVersion) return;
         await BackfillWarriorArchetypeRacialProfileOnceAsync();
         await _db.ExecuteAsync($"PRAGMA user_version = {RacialProfileBackfillDataVersion}");
+    }
+
+    /// <summary>user_version une fois BackfillMustStartWithMutationAsync passé - voir
+    /// RacialProfileBackfillDataVersion, même mécanisme (versions croissantes, chaque backfill ne
+    /// s'exécute qu'en dessous de la sienne).</summary>
+    private const int MustStartWithMutationBackfillDataVersion = 2;
+
+    /// <summary>WarriorArchetype.MustStartWithMutation (2026-09-24) : la colonne arrive à false sur une base
+    /// déjà seedée - relit une fois les 15 fichiers de bande pour poser le drapeau sur les archétypes
+    /// concernés (Mutant du Culte des Possédés), par nom anglais, même principe que
+    /// BackfillWarriorArchetypeRacialProfileOnceAsync.</summary>
+    private async Task BackfillMustStartWithMutationAsync()
+    {
+        if (await _db.ExecuteScalarAsync<int>("PRAGMA user_version") >= MustStartWithMutationBackfillDataVersion) return;
+
+        var mandatoryEnglishNames = new HashSet<string>();
+        foreach (var fileName in _warbandFileNames)
+        {
+            var data = await LoadWarbandSeedDataAsync(fileName);
+            foreach (var w in data.Warriors.Where(w => w.MustStartWithMutation))
+                mandatoryEnglishNames.Add(w.Name.En);
+        }
+
+        if (mandatoryEnglishNames.Count > 0)
+        {
+            var englishNamesByKey = (await _db.Table<TranslationEntity>().Where(t => t.LanguageCode == "en").ToListAsync())
+                .ToDictionary(t => t.Key, t => t.Value);
+            foreach (var archetype in await _db.Table<WarriorArchetypeEntity>().ToListAsync())
+            {
+                if (archetype.MustStartWithMutation || archetype.NameKey is null) continue;
+                if (!englishNamesByKey.TryGetValue(archetype.NameKey, out var englishName) || !mandatoryEnglishNames.Contains(englishName)) continue;
+                archetype.MustStartWithMutation = true;
+                await _db.UpdateAsync(archetype);
+            }
+        }
+
+        await _db.ExecuteAsync($"PRAGMA user_version = {MustStartWithMutationBackfillDataVersion}");
     }
 
     private async Task BackfillWarriorArchetypeRacialProfileOnceAsync()
@@ -1128,6 +1167,7 @@ public class AppDatabase
                 Source = ContentSource.Official,
                 IsSpellcaster = w.IsSpellcaster,
                 CanBuyMutations = w.CanBuyMutations,
+                MustStartWithMutation = w.MustStartWithMutation,
                 EquipmentListId = w.EquipmentListName is null ? null : equipmentListIdsByName[w.EquipmentListName],
                 CanUseEquipment = w.CanUseEquipment,
                 AllowedSkillCategories = w.SkillCategories.Select(Enum.Parse<SkillCategory>).ToList(),

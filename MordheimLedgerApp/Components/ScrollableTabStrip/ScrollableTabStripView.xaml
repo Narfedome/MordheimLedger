@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              x:Class="MordheimLedgerApp.Components.ScrollableTabStripView"
              x:Name="root">
     <ContentView.ControlTemplate>
@@ -21,11 +22,31 @@
                  seul ScrollViewer via cet AutomationId plutôt qu'un mapping global à tous les ScrollView
                  de l'appli - molette + drag souris + scrollbar masquée y sont câblés directement sur le
                  ScrollViewer WinUI. -->
-            <ScrollView x:Name="TabScrollView" Orientation="Horizontal" HorizontalScrollBarVisibility="Never"
-                        AutomationId="DragScrollTabStrip"
-                        HorizontalOptions="Fill" VerticalOptions="Fill">
-                <ContentPresenter />
-            </ScrollView>
+            <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                <ScrollView x:Name="TabScrollView" Orientation="Horizontal" HorizontalScrollBarVisibility="Never"
+                            AutomationId="DragScrollTabStrip"
+                            HorizontalOptions="Fill" VerticalOptions="Fill">
+                    <ContentPresenter />
+                </ScrollView>
+                <!-- Indices de défilement (2026-09-24, retour utilisateur - rien ne signalait qu'il restait
+                     des onglets hors champ, la scrollbar étant masquée) : un badge ‹ / › collé au bord,
+                     visible seulement quand il reste du contenu de ce côté (UpdateScrollHints), tapable pour
+                     défiler d'une largeur visible. AngleLeft/AngleRight plutôt que ChevronLeft (déjà la
+                     flèche "retour" de DetailPageHeaderView - un glyphe = un concept). Fond AppSurface : la
+                     plupart des usages vivent dans une carte de dialog. -->
+                <Border x:Name="LeftHint" IsVisible="False" HorizontalOptions="Start" VerticalOptions="Center"
+                        BackgroundColor="{DynamicResource AppSurface}" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10" Padding="6,2">
+                    <Label Text="{x:Static icons:SolidFont.AngleLeft}" FontFamily="FontSolid" FontSize="14"
+                           TextColor="{DynamicResource AppAccent}"/>
+                </Border>
+                <Border x:Name="RightHint" IsVisible="False" HorizontalOptions="End" VerticalOptions="Center"
+                        BackgroundColor="{DynamicResource AppSurface}" StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10" Padding="6,2">
+                    <Label Text="{x:Static icons:SolidFont.AngleRight}" FontFamily="FontSolid" FontSize="14"
+                           TextColor="{DynamicResource AppAccent}"/>
+                </Border>
+            </Grid>
         </ControlTemplate>
     </ContentView.ControlTemplate>
 </ContentView>

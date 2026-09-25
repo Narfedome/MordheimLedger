@@ -32,7 +32,8 @@
                 <Label Grid.Column="1" Text="{Binding TotalSellPrice}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
             </Grid>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding Groups}" IsGrouped="True"
+            <components:ScrollHintHost Grid.Row="1">
+            <CollectionView ItemsSource="{Binding Groups}" IsGrouped="True"
                             SelectionMode="None" ItemSizingStrategy="MeasureFirstItem">
                 <CollectionView.Behaviors>
                     <components:ResponsiveGridSpanBehavior/>
@@ -87,6 +88,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+            </components:ScrollHintHost>
 
             <HorizontalStackLayout Grid.Row="2" Spacing="20" HorizontalOptions="Center" Margin="0,8">
                 <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"

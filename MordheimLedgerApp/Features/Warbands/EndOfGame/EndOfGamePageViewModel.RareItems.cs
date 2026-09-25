@@ -44,33 +44,14 @@ public partial class EndOfGamePageViewModel
     /// obviously in sync.</summary>
     public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona);
 
-    /// <summary>Gromril/Ithilmar - the only two materials with a Rarity (see SpecialRule.Rarity), which
-    /// is exactly what makes a common melee weapon forged from them searchable here (see
-    /// RareItemSearchEntry.EffectiveRarity) - filtered from the same full catalog dictionary already
-    /// loaded for the Exploration step (_specialRulesByEnglishName), no separate query needed. Ornate
-    /// Weapon/Blessed Weapon also have CostMultiplier but no Rarity, so they're naturally excluded - they
-    /// don't change what's searchable, only price/effect.</summary>
-    public List<SpecialRule> RareMaterialOptions => _specialRulesByEnglishName.Values
-        .Where(r => r.CostMultiplier.HasValue && r.Rarity.HasValue)
-        .DistinctBy(r => r.Id)
-        .ToList();
-
-    /// <summary>Exactly 2 pills hardcoded in XAML (no generic loop needed - only Gromril/Ithilmar ever
-    /// qualify for RareMaterialOptions) - resolved by Abbreviation ("G"/"I", stable catalog fields) rather
-    /// than by name, since name is localized and Abbreviation already exists for exactly this
-    /// disambiguation purpose (see the carried-weapon chip, WarriorEquipment.NameDisplay). Null only if
-    /// the catalog seed is ever missing one of them (shouldn't happen, degrades to a hidden pill).</summary>
-    public SpecialRule? GromrilMaterial => RareMaterialOptions.FirstOrDefault(r => r.Abbreviation == "G");
-    public SpecialRule? IthilmarMaterial => RareMaterialOptions.FirstOrDefault(r => r.Abbreviation == "I");
-
     /// <summary>Opens the Trading Post picker via PickRareEquipmentAsync (IEquipmentPickerService) - the
     /// player is nominating exactly ONE item to attempt this Hero's single roll against ("You may also
     /// only make one roll for each Hero"), never a normal multi-item purchase. Melee weapon tiles show a
     /// Gromril/Ithilmar variant right alongside the plain one (2026-09-23, retour utilisateur - "on
     /// pourrait directement proposer les armes en ithilmar et les armes en gromril à l'achat plutôt que
     /// d'avoir un sélecteur neutre et devoir cliquer sur une chip") - picking one sets SelectedMaterial
-    /// directly, no separate pill tap needed afterward (the pills on this step stay as a fallback/
-    /// override, unchanged). availableGold IS passed for ShowBudget's informational display - this step
+    /// directly, the only place it's chosen (the step's own Gromril/Ithilmar pills were removed
+    /// 2026-09-25 as a duplicate of the tile). availableGold IS passed for ShowBudget's informational display - this step
     /// commits nothing, the real cost/affordability is decided independently at the Achat step that
     /// follows (RareItemPurchaseTotalCost/IsRareItemPurchaseBlocked). Scoped to the UNION of every
     /// equipment list this warband's recruitable WarriorArchetypes use (allowedEquipmentListItemIds,
@@ -101,15 +82,11 @@ public partial class EndOfGamePageViewModel
         entry.SelectedMaterial = result.MaterialRule;
     }
 
-    // Item, pas entry : ChipView.Command reçoit toujours Item comme CommandParameter (voir ChipView.xaml),
-    // jamais le BindingContext englobant - suffit ici, la fiche détail ne dépend pas de quel Héros cherche.
+    // Entry (ChipView Item="{Binding .}") plutôt que l'objet seul : la fiche inclut le matériau choisi
+    // sur la tuile (puce "Épée (G)", voir RareItemSearchEntry.SelectedItemDisplayName).
     [RelayCommand]
-    private Task ShowRareItemDetail(EquipmentItem item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item);
-
-    // Même raison : le RadioButton+ChipView du matériau reçoit la SpecialRule elle-même comme
-    // CommandParameter (Item="{Binding .}" dans le DataTemplate de RareMaterialOptions).
-    [RelayCommand]
-    private Task ShowRareMaterialDetail(SpecialRule material) => _detailDialogs.ShowSpecialRuleDetailDialogAsync(material);
+    private Task ShowRareItemDetail(RareItemSearchEntry entry) =>
+        entry.SelectedItem is { } item ? _detailDialogs.ShowEquipmentDetailDialogAsync(item, entry.SelectedMaterial) : Task.CompletedTask;
 
     [RelayCommand]
     private void ClearRareItem(RareItemSearchEntry entry) => entry.SelectedItem = null;
@@ -176,16 +153,6 @@ public partial class EndOfGamePageViewModel
     [RelayCommand]
     private void AutoRollRarePrice(RareItemSearchEntry entry) => entry.PriceRoll = Random.Shared.Next(1, 7).ToString();
 
-    /// <summary>Base commune de trésorerie pour TOUT le wizard (pas seulement cette étape, malgré son nom
-    /// - voir EndOfGamePageViewModel.EndOfGameTreasuryRemaining, seul appelant en dehors de ce fichier
-    /// depuis le 2026-09-03) : la trésorerie de la bande avant cette Fin de Partie, plus ce que CETTE
-    /// partie a rapporté (or d'Exploration + Vente de pierres magiques, WyrdstoneSaleValue - cette étape
-    /// précède celle-ci dans l'ordre du wizard, son gain est donc déjà connu). Purely a live preview -
-    /// nothing is written to the real Warband until WarbandDetailViewModel.EndOfGame saves.</summary>
-    private int RareItemBaselineTreasury => _currentTreasury
-        + (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
-        + WyrdstoneSaleValue;
-
     /// <summary>Sum of EffectiveCost for every entry still checked "Acheter", PLUS EffectiveHireCostForTreasury
     /// for every recruited Gold-fee character still paying in gold (2026-09-01, user request - a
     /// character's hire fee competes for the same treasury as a rare item purchase, same affordability
@@ -225,7 +192,7 @@ public partial class EndOfGamePageViewModel
     /// <summary>Stock déjà connu à ce stade du wizard : l'ancien stock MOINS ce que le joueur a choisi de
     /// vendre à l'étape Vente de pierres magiques (ShardsToSell/MaxShardsToSell, voir PostBattle.cs) -
     /// cette étape se déroule AVANT celle-ci dans l'ordre du wizard (Steps), son choix est donc déjà
-    /// définitif. Même limite que RareItemBaselineTreasury/HiredSwordTreasuryAfter : ne tient pas compte
+    /// définitif. Même limite que TreasuryWithGains/HiredSwordTreasuryAfter : ne tient pas compte
     /// d'une dépense concurrente dans une AUTRE étape (ex. Francs-Tireurs, qui ne consomme de toute façon
     /// jamais de pierres magiques) - pas un problème ici puisque cette étape est la seule à en dépenser.</summary>
     private int RareItemBaselineWyrdstoneShards => MaxShardsToSell - ShardsToSell;

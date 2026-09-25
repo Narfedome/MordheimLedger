@@ -6,8 +6,8 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
 /// <summary>Un objet réallocable - wrapper unifié (même idiome que SellableEquipmentCandidate) sur
 /// EXACTEMENT une des trois sources possibles : un WarriorEquipment porté par un Héros déjà actif, une
-/// ReserveLine de la réserve (ReallocationReserve, jamais _reserve/_originalReserveSnapshot directement -
-/// voir sa propre doc), ou un EquipmentPick brouillon porté par une nouvelle recrue
+/// ReserveLine de la réserve finale (BuildReserve, stade Final - la ligne n'est jamais modifiée,
+/// seule sa clé sert à enregistrer un déplacement), ou un EquipmentPick brouillon porté par une nouvelle recrue
 /// (WarriorNameSlot.Equipment). Carrier porte la référence stable (WarriorOutcomeRow/WarriorNameSlot,
 /// jamais recréés pendant le wizard) permettant de retrouver la VRAIE collection à modifier au moment du
 /// déplacement, même si ReallocationCarrier lui-même est recréé à chaque accès à

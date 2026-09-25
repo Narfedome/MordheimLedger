@@ -30,7 +30,8 @@
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="1" x:Name="ItemsCollection"
+        <components:ScrollHintHost Grid.Row="1">
+        <CollectionView x:Name="ItemsCollection"
            ItemsSource="{Binding InjuryGroups}"
            IsGrouped="True"
            SelectionMode="None"
@@ -91,6 +92,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        </components:ScrollHintHost>
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">

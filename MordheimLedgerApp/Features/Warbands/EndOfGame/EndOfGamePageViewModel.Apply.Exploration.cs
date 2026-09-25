@@ -56,29 +56,19 @@ public partial class EndOfGamePageViewModel
             sentences.Add(string.Format(Loc["HistoryBaselineWyrdstoneSentence"], BaselineWyrdstoneShardsFound));
         }
 
-        // Même résolution nom-anglais-vers-Id que le chargement de la page, réutilisée ici pour
-        // AddWarbandEquipmentAsync (seul l'Id compte, voir WarbandService) et pour la phrase
-        // d'Historique (equipmentItemsByEnglishName donne directement l'item résolu dans la langue
-        // courante). Partagée entre la branche Objet "normale" (ResolvedExplorationOutcome) et l'objet
-        // bonus sur le même dé que l'or (BonusItemOutcome, ex. Boutique - voir EndOfGamePageViewModel).
-        async Task AddOneItemToInventoryAsync(string itemName, int quantity, string? materialRuleName, int? foundValueOverride = null)
+        // Phrase d'Historique seulement : l'objet lui-même entre dans la réserve via PendingExplorationItems
+        // (même résolution, déjà faite pendant le wizard), créée en base une seule fois par
+        // ApplyReserveAsync - plus aucune écriture de WarbandEquipment ici depuis le 2026-09-25.
+        // equipmentItemsByEnglishName donne directement l'item résolu dans la langue courante. Les
+        // paramètres matériau/valeur trouvée restent pour garder les appels ci-dessous inchangés.
+        Task AddOneItemToInventoryAsync(string itemName, int quantity, string? materialRuleName, int? foundValueOverride = null)
         {
-            if (quantity <= 0) return;
-
-            var englishItem = englishEquipment.FirstOrDefault(e => e.Name == itemName);
-            if (englishItem is null) return;
-
-            // Même mécanisme que pour les objets achetés normalement (voir WarriorEquipment.
-            // MaterialRule) : "Hache de Gromril" est une Hache de base + la SpecialRule "Gromril Weapon",
-            // pas un objet distinct du catalogue - "Épée Ornée" (Charrette Renversée) suit le même
-            // principe, et sa vendabilité vient uniquement de SpecialRule.IsResaleUpgrade sur ce
-            // matériau (voir WarbandEquipment.IsSellable), pas d'un champ à part sur l'Outcome.
-            var materialRule = materialRuleName is { } name
-                ? englishSpecialRules.FirstOrDefault(r => r.Name == name) : null;
-
-            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, englishItem, quantity, materialRule, foundValueOverride);
-            var displayName = equipmentItemsByEnglishName.GetValueOrDefault(itemName)?.Name ?? itemName;
-            sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
+            if (quantity > 0 && englishEquipment.Any(e => e.Name == itemName))
+            {
+                var displayName = equipmentItemsByEnglishName.GetValueOrDefault(itemName)?.Name ?? itemName;
+                sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
+            }
+            return Task.CompletedTask;
         }
 
         if (ResolvedExplorationOutcome is { } outcome)

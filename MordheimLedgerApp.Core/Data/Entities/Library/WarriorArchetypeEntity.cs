@@ -33,6 +33,7 @@ public class WarriorArchetypeEntity
     public string? DescriptionKey { get; set; }
     public bool IsSpellcaster { get; set; }
     public bool CanBuyMutations { get; set; }
+    public bool MustStartWithMutation { get; set; }
     public string? ImagePath { get; set; }
     public int? EquipmentListId { get; set; }
     public bool CanUseEquipment { get; set; } = true;

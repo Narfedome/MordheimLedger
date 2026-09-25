@@ -114,6 +114,67 @@ public partial class RecruitSlotTabsView : ContentView
         set => SetValue(ShowSpellRollDialogCommandProperty, value);
     }
 
+    /// <summary>Onglet Mutations (Item.CanBuyMutations, voir RecruitSlot.Mutations) - pas câblé par tous
+    /// les appelants : sans AddMutationCommand (wizard Fin de Partie, pas encore géré), l'onglet reste
+    /// masqué plutôt que d'afficher un "+" inopérant (voir HasMutationCommands).</summary>
+    public static readonly BindableProperty AddMutationCommandProperty =
+        BindableProperty.Create(nameof(AddMutationCommand), typeof(ICommand), typeof(RecruitSlotTabsView),
+            propertyChanged: (b, _, _) => ((RecruitSlotTabsView)b).OnPropertyChanged(nameof(HasMutationCommands)));
+
+    public ICommand? AddMutationCommand
+    {
+        get => (ICommand?)GetValue(AddMutationCommandProperty);
+        set => SetValue(AddMutationCommandProperty, value);
+    }
+
+    public bool HasMutationCommands => AddMutationCommand is not null;
+
+    public static readonly BindableProperty RemoveMutationCommandProperty =
+        BindableProperty.Create(nameof(RemoveMutationCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? RemoveMutationCommand
+    {
+        get => (ICommand?)GetValue(RemoveMutationCommandProperty);
+        set => SetValue(RemoveMutationCommandProperty, value);
+    }
+
+    public static readonly BindableProperty ShowMutationDetailCommandProperty =
+        BindableProperty.Create(nameof(ShowMutationDetailCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? ShowMutationDetailCommand
+    {
+        get => (ICommand?)GetValue(ShowMutationDetailCommandProperty);
+        set => SetValue(ShowMutationDetailCommandProperty, value);
+    }
+
+    /// <summary>Onglet Blessures (RecruitSlot.ShowInjuriesTab - Héros, mode Bande existante uniquement).</summary>
+    public static readonly BindableProperty AddInjuryCommandProperty =
+        BindableProperty.Create(nameof(AddInjuryCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? AddInjuryCommand
+    {
+        get => (ICommand?)GetValue(AddInjuryCommandProperty);
+        set => SetValue(AddInjuryCommandProperty, value);
+    }
+
+    public static readonly BindableProperty RemoveInjuryCommandProperty =
+        BindableProperty.Create(nameof(RemoveInjuryCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? RemoveInjuryCommand
+    {
+        get => (ICommand?)GetValue(RemoveInjuryCommandProperty);
+        set => SetValue(RemoveInjuryCommandProperty, value);
+    }
+
+    public static readonly BindableProperty ShowInjuryDetailCommandProperty =
+        BindableProperty.Create(nameof(ShowInjuryDetailCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? ShowInjuryDetailCommand
+    {
+        get => (ICommand?)GetValue(ShowInjuryDetailCommandProperty);
+        set => SetValue(ShowInjuryDetailCommandProperty, value);
+    }
+
     public RecruitSlotTabsView()
     {
         InitializeComponent();

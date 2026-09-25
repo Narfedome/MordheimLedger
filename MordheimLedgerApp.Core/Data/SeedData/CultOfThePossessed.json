@@ -135,6 +135,7 @@
       "leadership": 7,
       "racialProfileName": "Mutant",
       "canBuyMutations": true,
+      "mustStartWithMutation": true,
       "description": {
         "en": "Revered as the favoured ones of the Dark Gods, their physical disfigurements marking the vileness of their soul - they come in many shapes and sizes, each more bizarre than the next.",
         "fr": "Les Mutants sont célébrés comme les favoris des dieux des ténèbres, leurs difformités montrant la déchéance de leurs âmes. Ils peuvent prendre bien des formes et des tailles différentes, toutes plus bizarres les unes que les autres."

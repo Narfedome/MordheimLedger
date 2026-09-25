@@ -155,6 +155,13 @@
                             <CheckBox IsChecked="{Binding Item.CanBuyMutations}" VerticalOptions="Center"/>
                             <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
+                        <!-- Mutation obligatoire au recrutement (Mutant - "must start the game with one or more
+                             mutations", contrairement au Possédé qui "may") - voir WarriorArchetype.
+                             MustStartWithMutation. Sans effet si la case ci-dessus est décochée. -->
+                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding Item.CanBuyMutations}">
+                            <CheckBox IsChecked="{Binding Item.MustStartWithMutation}" VerticalOptions="Center"/>
+                            <Label Text="{loc:Loc WarriorArchetypeMustStartWithMutation}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
 
                     </VerticalStackLayout>
 

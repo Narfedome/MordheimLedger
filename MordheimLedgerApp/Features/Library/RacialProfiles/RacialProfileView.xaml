@@ -20,7 +20,8 @@
                            VerticalOptions="Center" HorizontalOptions="Center"
                            WidthRequest="120" HeightRequest="120"/>
 
-        <CollectionView Grid.Row="0"
+        <components:ScrollHintHost Grid.Row="0">
+        <CollectionView
                 ItemsSource="{Binding RacialProfiles}"
                 SelectionMode="None">
             <CollectionView.ItemTemplate>
@@ -45,6 +46,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        </components:ScrollHintHost>
 
         <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8">
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"

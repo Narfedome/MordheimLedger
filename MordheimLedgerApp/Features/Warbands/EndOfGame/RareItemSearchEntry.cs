@@ -56,7 +56,7 @@ public partial class RareItemSearchEntry : ObservableObject
     /// OnSelectedItemChanged) - nothing about the last item carries over to a different one.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSelectedItem))]
-    [NotifyPropertyChangedFor(nameof(IsMaterialEligible))]
+    [NotifyPropertyChangedFor(nameof(SelectedItemDisplayName))]
     [NotifyPropertyChangedFor(nameof(EffectiveRarity))]
     [NotifyPropertyChangedFor(nameof(RarityDisplay))]
     [NotifyPropertyChangedFor(nameof(HasRarity))]
@@ -79,7 +79,8 @@ public partial class RareItemSearchEntry : ObservableObject
         PriceRollError = null;
     }
 
-    /// <summary>Only meaningful when IsMaterialEligible - a common melee weapon (Rarity null) forged in
+    /// <summary>Set only from the picker tile (a melee weapon's Gromril/Ithilmar variant, see
+    /// SelectRareItem) - a common melee weapon (Rarity null) forged in
     /// Gromril/Ithilmar becomes a Rare find in its own right, at the MATERIAL's Rarity rather than the
     /// weapon's own (see EffectiveRarity) - user request 2026-08-28: "il manque la gestion pour les
     /// armes du gromril/ithilmar qui augmente la rareté d'une arme de corps à corps en commun". Attached
@@ -94,16 +95,8 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(EffectiveCost))]
     [NotifyPropertyChangedFor(nameof(IsPurchased))]
     [NotifyPropertyChangedFor(nameof(ResultDisplay))]
+    [NotifyPropertyChangedFor(nameof(SelectedItemDisplayName))]
     private SpecialRule? selectedMaterial;
-
-    /// <summary>Tap-to-select on the pill itself (not a separate RadioButton, judged too plain visually -
-    /// user request 2026-08-28) - tapping the already-selected material deselects it, same "tap toggles"
-    /// idiom as EquipmentItemViewModel.Select. Compares by Id, never by reference: RareMaterialOptions is
-    /// one catalog list SHARED across every Hero's entry, so a plain reference check would still work
-    /// here, but Id comparison stays correct even if a future caller ever passes a differently-instanced
-    /// copy of the same catalog row.</summary>
-    [RelayCommand]
-    private void SelectMaterial(SpecialRule material) => SelectedMaterial = SelectedMaterial?.Id == material.Id ? null : material;
 
     /// <summary>Free-typed 2D6 total, same "string Entry" idiom as every other roll in this wizard - the
     /// bonus below (Bonus) is added on top when comparing to EffectiveRarity, never baked into what the
@@ -132,12 +125,11 @@ public partial class RareItemSearchEntry : ObservableObject
 
     public bool HasSelectedItem => SelectedItem is not null;
 
-    /// <summary>Any melee weapon can be forged into Gromril/Ithilmar - common (Rarity null, becomes
-    /// searchable at the material's Rarity, see EffectiveRarity) or already Rare (searched at its own
-    /// Rarity either way, the material is just an optional extra attached on top - user request
-    /// 2026-08-28: "toute arme de corps à corps peuvent être en gromril, même les armes rares"). Never
-    /// offered for a non-weapon (no material role for it in the book).</summary>
-    public bool IsMaterialEligible => SelectedItem?.Category == EquipmentCategory.MeleeWeapon;
+    /// <summary>ChipView.NameOverride de l'objet choisi : "Épée (G)" quand un matériau a été pris sur la
+    /// tuile du sélecteur (seul endroit où il se choisit désormais - les pilules Gromril/Ithilmar de cette
+    /// étape ont été retirées le 2026-09-25, doublon du sélecteur), nom nu sinon.</summary>
+    public string? SelectedItemDisplayName => SelectedItem is null ? null
+        : SelectedMaterial?.Abbreviation is { Length: > 0 } abbr ? $"{SelectedItem.Name} ({abbr})" : SelectedItem.Name;
 
     /// <summary>The higher of the item's own Rarity and the chosen material's (Gromril 11/Ithilmar 9) -
     /// user request 2026-08-28: forging an already-Rare weapon into Gromril/Ithilmar takes the harder of

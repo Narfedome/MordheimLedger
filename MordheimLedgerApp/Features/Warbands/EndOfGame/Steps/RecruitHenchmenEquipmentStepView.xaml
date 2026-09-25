@@ -41,7 +41,10 @@
                                                   IsVisible="{Binding ShowTabsView}"
                                                   AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitEquipmentCommand}"
                                                   RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitEquipmentCommand}"
-                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"/>
+                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"
+                                                  AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitMutationCommand}"
+                                                  RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitMutationCommand}"
+                                                  ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitMutationDetailCommand}"/>
                                         </VerticalStackLayout>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>

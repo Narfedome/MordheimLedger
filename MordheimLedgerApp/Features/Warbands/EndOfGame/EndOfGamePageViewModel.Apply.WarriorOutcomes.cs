@@ -531,21 +531,8 @@ public partial class EndOfGamePageViewModel
     /// caractéristique peut descendre en dessous de 0, comme sur une vraie feuille de bande) ni de
     /// suivi IncreasedCharacteristics (celui-ci ne suit que les gains d'un Homme de main, sans objet
     /// pour une perte).</summary>
-    private static void ApplyCharacteristicPenalty(Warrior warrior, CharacteristicField field)
-    {
-        switch (field)
-        {
-            case CharacteristicField.Movement: warrior.Movement -= 1; break;
-            case CharacteristicField.WeaponSkill: warrior.WeaponSkill -= 1; break;
-            case CharacteristicField.BallisticSkill: warrior.BallisticSkill -= 1; break;
-            case CharacteristicField.Strength: warrior.Strength -= 1; break;
-            case CharacteristicField.Toughness: warrior.Toughness -= 1; break;
-            case CharacteristicField.Wounds: warrior.Wounds -= 1; break;
-            case CharacteristicField.Initiative: warrior.Initiative -= 1; break;
-            case CharacteristicField.Attacks: warrior.Attacks -= 1; break;
-            case CharacteristicField.Leadership: warrior.Leadership -= 1; break;
-        }
-    }
+    private static void ApplyCharacteristicPenalty(Warrior warrior, CharacteristicField field) =>
+        CharacteristicModifier.Apply(warrior, field, -1);
 
     /// <summary>Applique le +1 d'un résultat de Progression "Caractéristique" (voir AdvanceRollEntry.
     /// ResolvedField, déjà validé éligible - maximum racial respecté, et pour un Homme de main jamais

@@ -54,7 +54,8 @@
                             <components:TabToggleButton Text="{loc:Loc LibTabHiredSwords}" Command="{Binding ShowMercenariesTabCommand}"
                                                  IsActive="{Binding IsMercenariesTab}" FontSize="12"/>
                             <components:TabToggleButton Text="{loc:Loc WarbandCreateTabHiredSwordNames}" Command="{Binding ShowHiredSwordNamesTabCommand}"
-                                                 IsActive="{Binding IsHiredSwordNamesTab}" FontSize="12"/>
+                                                 IsActive="{Binding IsHiredSwordNamesTab}" FontSize="12"
+                                                 IsVisible="{Binding HasRecruitedHiredSwords}"/>
                         </HorizontalStackLayout>
                     </components:ScrollableTabStripView>
 
@@ -111,6 +112,12 @@
                                 <Label Text="{Binding Archetype.MaxWarriors}"/>
                             </VerticalStackLayout>
                         </Grid>
+                        <!-- Mode Libre : stock de pierres magiques déjà détenu par une bande jouée sur papier
+                             (Warband.WyrdstoneShards), en saisie libre comme la trésorerie juste au-dessus. -->
+                        <VerticalStackLayout Spacing="4" IsVisible="{Binding IsExistingWarband}">
+                            <Label Text="{loc:Loc WarbandWyrdstoneShardsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Entry Text="{Binding Item.WyrdstoneShards}" Keyboard="Numeric" WidthRequest="100" HorizontalOptions="Start"/>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsWarriorsTab}">
@@ -140,6 +147,8 @@
                         <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
                         <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding EquipmentError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding EquipmentError, Converter={StaticResource IsNotNullConverter}}"/>
 
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="4">
                             <BindableLayout.ItemTemplate>
@@ -189,7 +198,13 @@
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
                                                               ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"
+                                                              AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddMutationCommand}"
+                                                              RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveMutationCommand}"
+                                                              ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowMutationDetailCommand}"
+                                                              AddInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddInjuryCommand}"
+                                                              RemoveInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveInjuryCommand}"
+                                                              ShowInjuryDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowInjuryDetailCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -226,7 +241,13 @@
                                                               AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
                                                               RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
                                                               ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
-                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"/>
+                                                              ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"
+                                                              AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddMutationCommand}"
+                                                              RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveMutationCommand}"
+                                                              ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowMutationDetailCommand}"
+                                                              AddInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddInjuryCommand}"
+                                                              RemoveInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveInjuryCommand}"
+                                                              ShowInjuryDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowInjuryDetailCommand}"/>
                                                     </VerticalStackLayout>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
@@ -341,6 +362,28 @@
 
                         <Label Text="{Binding HiredSwordNamesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding HiredSwordNamesError, Converter={StaticResource IsNotNullConverter}}"/>
+                    </VerticalStackLayout>
+
+                    <!-- Récapitulatif (création pas à pas uniquement, dernière étape - IsRecapTab) : relecture
+                         de toute la bande avant Enregistrer, même esprit que le récap du wizard Fin de Partie
+                         (RecapStepView). Lecture seule - Précédent pour corriger. -->
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding IsRecapTab}">
+                        <Label Text="{Binding RecapTitle}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                        <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding RosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding RecapRatingDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding RecapWyrdstoneDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsExistingWarband}"/>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecapLines}" Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:WarbandRecapLine">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Title}" FontSize="13" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Details}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                               IsVisible="{Binding HasDetails}"/>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
 
                 </VerticalStackLayout>

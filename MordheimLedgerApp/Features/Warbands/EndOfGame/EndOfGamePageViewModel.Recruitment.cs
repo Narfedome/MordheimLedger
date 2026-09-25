@@ -348,171 +348,45 @@ public partial class EndOfGamePageViewModel
         NotifyTreasuryChanged();
     }
 
-    /// <summary>Combien d'exemplaires de CET item+matériau la réserve de la bande contient - point de
-    /// départ du calcul de chaque groupe existant (GetTopUpBreakdown), qui en consomme au fil de l'eau
-    /// dans l'ordre d'ExistingHenchmanTopUps, ET point de départ de BuildAvailableReservePool (réserve
-    /// disponible pour les NOUVELLES recrues à l'étape Recrutement). Reconstruit à chaque appel plutôt
-    /// que mis en cache - _reserve (ReserveCollection, 2026-09-23) est maintenant LA source pour la
-    /// réserve pré-partie/Achat/Vente (mutée en direct au moment où le joueur confirme chaque décision -
-    /// voir EndOfGamePageViewModel.EquipmentTrading.cs), ce qui élimine le besoin de PurchasedReserveItems/
-    /// PendingSales ici (déjà reflétés dans _reserve). Exploration ET Renvoyer restent fusionnés ici en
-    /// LECTURE plutôt que poussés dans _reserve (voir ReserveCollection's own doc) : Exploration parce
-    /// que ses champs restent modifiables tant que l'étape est ouverte (pas de moment "confirmé"
-    /// unique) ; Renvoyer parce que DismissCount se modifie par DEUX voies distinctes (case à cocher
-    /// Héros ET stepper de groupe, WarriorOutcomeRow.IsDismissed contourne les commandes Increment/
-    /// DecrementDismiss) sans point d'accroche commun fiable pour un delta symétrique.</summary>
-    private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildStashPool()
-    {
-        var pool = new Dictionary<(int, int?), int>();
-        foreach (var line in _reserve.Lines)
-        {
-            var key = (line.Item.Id, line.MaterialRule?.Id);
-            pool[key] = pool.GetValueOrDefault(key) + line.Quantity;
-        }
-        foreach (var (item, materialRule, quantity) in PendingExplorationStashItems())
-        {
-            var key = (item.Id, materialRule?.Id);
-            pool[key] = pool.GetValueOrDefault(key) + quantity;
-        }
-        foreach (var (item, materialRule, quantity) in PendingDismissedEquipment())
-        {
-            var key = (item.Id, materialRule?.Id);
-            pool[key] = pool.GetValueOrDefault(key) + quantity;
-        }
-        return pool;
-    }
-
     /// <summary>Réserve encore DISPONIBLE pour la prochaine recrue (Héros ou nouveau groupe d'Hommes de
-    /// main) à l'étape Recrutement - part de BuildStashPool (pré-partie + Exploration + Achat - Vente),
-    /// puis en retranche ce qui a déjà été réservé par les groupes EXISTANTS (top-up, rejoue le même
-    /// calcul que GetTopUpBreakdown - dupliqué ici plutôt que refactorisé, GetTopUpBreakdown ne renvoie
-    /// pas son pool final) ET par les picks déjà marqués FromReserve sur les Héros/nouveaux groupes de
-    /// CETTE session (voir AddRecruitEquipment) - un même exemplaire ne peut jamais être compté deux fois,
-    /// même principe que GetTopUpBreakdown pour les groupes existants entre eux.</summary>
-    private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildAvailableReservePool()
-    {
-        var pool = BuildStashPool();
-
-        foreach (var topUp in ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
-        {
-            // Quantity par modèle, pas totale pour le groupe - voir GetTopUpBreakdown's own doc.
-            foreach (var equipment in topUp.CurrentEquipment)
-            {
-                var neededQty = topUp.AddCount * equipment.Quantity;
-                var key = (equipment.Item.Id, equipment.MaterialRule?.Id);
-                var consumed = Math.Min(pool.GetValueOrDefault(key), neededQty);
-                if (consumed > 0) pool[key] = pool[key] - consumed;
-            }
-        }
-
-        // Un pick FromReserve consomme 1 exemplaire pour un Héros (toujours seul), mais group.Count pour
-        // un nouveau groupe d'Hommes de main (le lot entier vient de la réserve d'un coup - tout-ou-rien,
-        // voir AddRecruitEquipment's own doc, pas de mélange partiel réserve/achat au sein d'un pick).
-        foreach (var pick in HeroRecruitRows.SelectMany(r => r.NameSlots).SelectMany(s => s.Equipment).Where(p => p.FromReserve))
-        {
-            var key = (pick.Item.Id, pick.MaterialRule?.Id);
-            var available = pool.GetValueOrDefault(key);
-            if (available > 0) pool[key] = available - 1;
-        }
-        foreach (var group in HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts))
-        foreach (var pick in group.Equipment.Where(p => p.FromReserve))
-        {
-            var key = (pick.Item.Id, pick.MaterialRule?.Id);
-            var consumed = Math.Min(pool.GetValueOrDefault(key), group.Count);
-            if (consumed > 0) pool[key] = pool[key] - consumed;
-        }
-
-        return pool;
-    }
+    /// main) - la réserve après tout le recrutement déjà décidé (vétérans + picks FromReserve), un même
+    /// exemplaire n'étant jamais compté deux fois. Voir EndOfGamePageViewModel.Reserve.cs.</summary>
+    private Dictionary<(int ItemId, int? MaterialRuleId), int> BuildAvailableReservePool() => BuildReserve(ReserveStage.AfterRecruitment).ToPool();
 
     /// <summary>Le matériau RÉELLEMENT associé à un exemplaire disponible en réserve pour cet Item - null si
     /// aucun exemplaire dispo (achat neuf classique) ou si la seule variante dispo est sans matériau.
     /// Retour utilisateur 2026-09-21 - "une épée ornée gagnée à l'Exploration s'affiche en épée simple et
-    /// une épée simple est donnée à la recrue au lieu de l'épée (o)" : AddRecruitEquipment ne vérifiait
-    /// jusque-là que la variante SANS matériau dans BuildAvailableReservePool (clé (Item.Id, null)), donc
-    /// une trouvaille avec matériau (Gromril/Ithilmar, ou une "Épée Ornée" à SpecialRule dédiée) n'était
-    /// jamais reconnue comme disponible - le pick partait acheté à neuf, sans matériau, au lieu de
-    /// consommer le VRAI exemplaire en stock. BuildAvailableReservePool ne renvoie que des identifiants
-    /// (Item.Id, MaterialRule.Id) - cette méthode retrouve l'objet SpecialRule réel en cherchant dans les
-    /// deux mêmes sources que BuildStashPool (réserve pré-partie + trouvailles d'Exploration de cette
-    /// partie), jamais reconstitué à la main.</summary>
+    /// une épée simple est donnée à la recrue au lieu de l'épée (o)" : une trouvaille avec matériau doit
+    /// être reconnue comme disponible et consommée telle quelle, pas remplacée par un achat neuf sans
+    /// matériau.</summary>
     private SpecialRule? ResolveAvailableReserveMaterial(int itemId, int perUnitCost)
     {
-        var pool = BuildAvailableReservePool();
-        var availableMaterialIds = pool.Where(kv => kv.Key.ItemId == itemId && kv.Value >= perUnitCost)
-            .Select(kv => kv.Key.MaterialRuleId).ToHashSet();
-        if (availableMaterialIds.Count == 0) return null;
-
-        var fromReserve = _reserve.Lines.FirstOrDefault(w => w.Item.Id == itemId && availableMaterialIds.Contains(w.MaterialRule?.Id));
-        if (fromReserve is not null) return fromReserve.MaterialRule;
-
-        foreach (var (item, materialRule, _) in PendingExplorationStashItems())
-            if (item.Id == itemId && availableMaterialIds.Contains(materialRule?.Id))
-                return materialRule;
-
-        return null;
+        var reserve = BuildReserve(ReserveStage.AfterRecruitment);
+        var pool = reserve.ToPool();
+        return reserve.Lines.FirstOrDefault(l => l.Item.Id == itemId && pool[(l.Item.Id, l.MaterialRule?.Id)] >= perUnitCost)?.MaterialRule;
     }
 
     /// <summary>Détail de coût d'UN groupe existant (retour utilisateur - "il faut détailler le calcul au
     /// recrutement de vétéran") : recrutement + une ligne par type d'équipement du groupe (avec combien
-    /// vient de la réserve, gratuit) + la surtaxe d'Expérience. Rejoue la consommation de réserve de TOUS
-    /// les groupes qui précèdent CELUI-CI dans ExistingHenchmanTopUps (ordre fixe) avant de calculer ses
-    /// propres lignes, pour rester cohérent d'un groupe à l'autre - un même exemplaire de réserve ne peut
-    /// jamais être compté deux fois. HenchmanRecruitmentTotalCost (trésorerie) additionne simplement Total
-    /// sur chaque groupe, dans le même ordre.</summary>
+    /// vient de la réserve, gratuit) + la surtaxe d'Expérience. Mise en forme de PlanTopUps, la seule
+    /// définition de la consommation de réserve par les vétérans (voir EndOfGamePageViewModel.Reserve.cs) -
+    /// HenchmanRecruitmentTotalCost (trésorerie) et Terminer additionnent ce même Total.</summary>
     public HenchmanTopUpCostBreakdown GetTopUpBreakdown(ExistingHenchmanTopUp topUp)
     {
-        if (topUp.AddCount == 0)
+        if (topUp.AddCount == 0 || !PlanTopUps().TryGetValue(topUp, out var plan))
             return new HenchmanTopUpCostBreakdown(0, Array.Empty<HenchmanEquipmentCostLine>(), 0, 0);
 
-        var stashPool = BuildStashPool();
-        List<HenchmanEquipmentCostLine>? lines = null;
-        var stashUsedTotal = 0;
-
-        foreach (var current in ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
+        // Nom + matériau (comme WarriorEquipment.NameDisplay), mais SANS son suffixe "xN" - ce N-là est la
+        // Quantity totale déjà existante du groupe, pas NeededQty (le total ADDITIONNEL pour les recrues
+        // ajoutées, affiché séparément par cette ligne).
+        var lines = plan.Select(p =>
         {
-            var isTarget = ReferenceEquals(current, topUp);
-            if (isTarget) lines = new List<HenchmanEquipmentCostLine>();
+            var materialSuffix = p.Equipment.MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $" ({abbr})" : string.Empty;
+            return new HenchmanEquipmentCostLine($"{p.Equipment.Item.Name}{materialSuffix}", p.NeededQty, p.Cost, p.FromStash);
+        }).ToList();
 
-            // WarriorEquipment.Quantity d'un groupe d'Hommes de main est déjà une quantité PAR MODÈLE (ex.
-            // "Hache" = 1 hache par membre, "Hache x2" = 2 par membre - jamais un total pour tout le groupe,
-            // confirmé par l'utilisateur 2026-09-21) : chaque recrue ajoutée a donc simplement besoin
-            // d'autant d'exemplaires que Quantity, multiplié par le nombre de recrues. Ancienne version
-            // divisait par l'effectif du groupe (en supposant Quantity = TOTAL du groupe), ce qui écrasait
-            // le résultat à 0 dès que AddCount * Quantity restait inférieur à l'effectif (bug signalé sur un
-            // groupe de 3 avec Quantity=1 : 1*1/3=0, 2*1/3=0).
-            foreach (var equipment in current.CurrentEquipment)
-            {
-                var neededQty = current.AddCount * equipment.Quantity;
-                var key = (equipment.Item.Id, equipment.MaterialRule?.Id);
-                var available = stashPool.GetValueOrDefault(key);
-                var fromStash = Math.Min(available, neededQty);
-                if (fromStash > 0) stashPool[key] = available - fromStash;
-                var toBuy = neededQty - fromStash;
-                // Dague gratuite (livre des règles - "in addition to his free dagger") : chaque recrue
-                // ajoutée est un modèle NEUF qui n'en porte encore aucune, donc CHAQUE dague achetée ici
-                // correspond à la dague personnelle gratuite d'une recrue différente - jamais gratuite si
-                // un matériau a été choisi sur cette ligne (Gromril/Ithilmar = amélioration délibérée, voir
-                // EquipmentPricing.IsFreeDaggerEligible).
-                var isFreeDagger = equipment.Item.IsFreeDagger && equipment.MaterialRule is null;
-                var cost = toBuy * EquipmentPricing.CalculateCost(equipment.Item.Cost, equipment.MaterialRule?.CostMultiplier, isFree: isFreeDagger);
-
-                if (isTarget)
-                {
-                    // Nom + matériau (comme WarriorEquipment.NameDisplay), mais SANS son suffixe "xN" - ce
-                    // N-là est la Quantity totale déjà existante du groupe, pas neededQty (le total
-                    // ADDITIONNEL pour les recrues ajoutées, affiché séparément par cette ligne).
-                    var materialSuffix = equipment.MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $" ({abbr})" : string.Empty;
-                    lines!.Add(new HenchmanEquipmentCostLine($"{equipment.Item.Name}{materialSuffix}", neededQty, cost, fromStash));
-                    stashUsedTotal += fromStash;
-                }
-            }
-
-            if (isTarget) break;
-        }
-
-        return new HenchmanTopUpCostBreakdown(topUp.AddCount * topUp.ArchetypeCost, lines ?? new List<HenchmanEquipmentCostLine>(),
-            topUp.AddCount * 2 * topUp.GroupExperience, stashUsedTotal);
+        return new HenchmanTopUpCostBreakdown(topUp.AddCount * topUp.ArchetypeCost, lines,
+            topUp.AddCount * 2 * topUp.GroupExperience, plan.Sum(p => p.FromStash));
     }
 
     /// <summary>Coût total des Hommes de main en attente - groupes existants (GetTopUpBreakdown, réserve
@@ -524,15 +398,24 @@ public partial class EndOfGamePageViewModel
     /// chaque lecture, donc toujours cohérent entre cet aperçu (EndOfGameTreasuryRemaining) et
     /// l'application réelle à Terminer (EndOfGamePageViewModel.Apply.ApplyHenchmanRecruitmentAsync,
     /// même algorithme).</summary>
-    private int HenchmanRecruitmentTotalCost() =>
-        ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
-        + HenchmanRecruitRows.Sum(r => r.HenchmanGroupDrafts.Sum(g => g.Count) * r.Cost)
-        + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count);
+    private int HenchmanRecruitmentTotalCost()
+    {
+        var served = ServedReservePicks();
+        return ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
+            + HenchmanRecruitRows.Sum(r => r.HenchmanGroupDrafts.Sum(g => g.Count) * r.Cost)
+            + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => RecruitPickCost(e, served)) * g.Count)
+            + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Mutations.Sum(m => m.Cost) * g.Count);
+    }
 
     /// <summary>Coût de l'équipement acheté pour les Héros recrutés cette session (étape RecruitHeroDetail,
     /// choix au picker - réserve en priorité, voir AddRecruitEquipment) - toujours ×1 (jamais de groupe
-    /// côté Héros, contrairement aux Hommes de main).</summary>
-    private int HeroEquipmentTotalCost() => HeroRecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost));
+    /// côté Héros, contrairement aux Hommes de main). Inclut les mutations achetées (Possédés/Mutants - livre, "+ the cost of
+    /// mutations").</summary>
+    private int HeroEquipmentTotalCost()
+    {
+        var served = ServedReservePicks();
+        return HeroRecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => RecruitPickCost(e, served)) + s.Mutations.Sum(m => m.Cost));
+    }
 
     // --- Équipement : achat pour Héros (WarriorNameSlot, étape RecruitHeroDetail) ET nouveaux groupes
     // d'Hommes de main (HenchmanGroupDraft, étape RecruitHenchmenEquipment) - réserve en priorité (étape
@@ -692,6 +575,42 @@ public partial class EndOfGamePageViewModel
     [RelayCommand]
     private Task ShowRecruitEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule);
 
+    /// <summary>Onglet Mutations d'une recrue (Possédés/Mutants, RecruitSlot.CanBuyMutations) - même
+    /// principe que WarbandEditDialogViewModel.AddMutation : le coût s'ajoute au recrutement (livre, "+ the
+    /// cost of mutations", voir HeroEquipmentTotalCost/HenchmanRecruitmentTotalCost), persisté à Terminer
+    /// (ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync).</summary>
+    [RelayCommand]
+    private async Task AddRecruitMutation(object target)
+    {
+        RecruitSlot? slot = target switch
+        {
+            WarriorNameSlot s => s,
+            HenchmanGroupDraft g => g,
+            _ => null
+        };
+        if (slot is null) return;
+
+        var unitCount = slot is HenchmanGroupDraft henchmen ? henchmen.Count : 1;
+        foreach (var mutation in await _mutationPicker.PickMutationsAsync(_warbandArchetypeId, EndOfGameTreasuryRemaining, unitCount))
+            slot.Mutations.Add(mutation);
+        NotifyTreasuryChanged();
+        if (slot is WarriorNameSlot hero && RecruitHeroDetailError is not null) ValidateRecruitHeroDetailStep(hero);
+    }
+
+    [RelayCommand]
+    private Task ShowRecruitMutationDetail(Mutation mutation) => _detailDialogs.ShowMutationDetailDialogAsync(mutation);
+
+    [RelayCommand]
+    private void RemoveRecruitMutation(Mutation mutation)
+    {
+        foreach (var slot in RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts)))
+        {
+            if (!slot.Mutations.Remove(mutation)) continue;
+            NotifyTreasuryChanged();
+            return;
+        }
+    }
+
     /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un WarriorNameSlot
     /// ou d'un HenchmanGroupDraft) - identité de référence, pas besoin de savoir d'avance laquelle puisque
     /// chaque instance n'est ajoutée qu'à une seule collection. Même idiome que
@@ -738,6 +657,12 @@ public partial class EndOfGamePageViewModel
         if (string.IsNullOrWhiteSpace(slot.Name))
         {
             RecruitHeroDetailError = string.Format(Loc["WarbandsWarriorNameRequired"], slot.Row.Name);
+            valid = false;
+        }
+        else if (RecruitmentRules.IsMissingMandatoryMutation(slot.Row.Archetype.MustStartWithMutation, slot.Mutations.Count))
+        {
+            // Mutant - "must start the game with one or more mutations", voir RecruitmentRules.
+            RecruitHeroDetailError = string.Format(Loc["WarbandsMandatoryMutationMissing"], slot.Name.Trim());
             valid = false;
         }
         else

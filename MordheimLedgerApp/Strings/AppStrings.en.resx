@@ -198,9 +198,6 @@
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Material</value>
   </data>
-  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
-    <value>{0}/{1}</value>
-  </data>
   <data name="WarbandsSplitGroupTitle" xml:space="preserve">
     <value>Split group</value>
   </data>
@@ -215,6 +212,15 @@
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="WarriorsMaterialBlessed" xml:space="preserve">
+    <value>Blessed</value>
+  </data>
+  <data name="WarriorsMaterialAllNormal" xml:space="preserve">
+    <value>All normal</value>
+  </data>
+  <data name="WarriorsMaterialValidate" xml:space="preserve">
+    <value>Confirm</value>
   </data>
   <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
     <value>Empty library</value>
@@ -320,6 +326,9 @@
   </data>
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Wyrdstone:</value>
+  </data>
+  <data name="WarbandWyrdstoneShardsPh" xml:space="preserve">
+    <value>Wyrdstone shards</value>
   </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Heroes</value>
@@ -545,6 +554,12 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possessed</value>
+  </data>
+  <data name="WarriorArchetypeMustStartWithMutation" xml:space="preserve">
+    <value>Must start with a mutation</value>
+  </data>
+  <data name="WarbandsMandatoryMutationMissing" xml:space="preserve">
+    <value>{0} must start the game with at least one mutation.</value>
   </data>
   <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
     <value>Large creature</value>
@@ -2201,4 +2216,40 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
     <value>Never Gains Experience</value>
   </data>
-</root>
+  <data name="EndOfGameScenarioRewardsHeading" xml:space="preserve">
+    <value>Scenario rewards</value>
+  </data>
+  <data name="EndOfGameScenarioRewardsHint" xml:space="preserve">
+    <value>Depends on the scenario played - leave empty if it grants nothing.</value>
+  </data>
+  <data name="EndOfGameScenarioGoldLabel" xml:space="preserve">
+    <value>Gold (gc)</value>
+  </data>
+  <data name="EndOfGameScenarioWyrdstoneLabel" xml:space="preserve">
+    <value>Wyrdstone shards</value>
+  </data>
+  <data name="EndOfGameScenarioItemsHeading" xml:space="preserve">
+    <value>Items</value>
+  </data>
+  <data name="EndOfGameScenarioItemsHint" xml:space="preserve">
+    <value>Added to the stash - give them to a Hero at the Reallocate step.</value>
+  </data>
+  <data name="EndOfGameScenarioGoldRecapFormat" xml:space="preserve">
+    <value>+{0} gc</value>
+  </data>
+  <data name="EndOfGameScenarioWyrdstoneRecapFormat" xml:space="preserve">
+    <value>+{0} wyrdstone shard(s)</value>
+  </data>
+  <data name="HistoryScenarioGoldSentence" xml:space="preserve">
+    <value>The scenario earned {0} gc.</value>
+  </data>
+  <data name="HistoryScenarioWyrdstoneSentence" xml:space="preserve">
+    <value>The scenario earned {0} wyrdstone shard(s).</value>
+  </data>
+  <data name="HistoryScenarioItemSentence" xml:space="preserve">
+    <value>The scenario earned {0} (added to the stash).</value>
+  </data>
+  <data name="EndOfGameExperienceHint" xml:space="preserve">
+    <value>All XP from this game: survival, enemies taken out of action, victory and scenario bonuses.</value>
+  </data>
+</root>

@@ -71,7 +71,7 @@
                                     <!-- Côté Objet trouvé -->
                                     <VerticalStackLayout Spacing="8" IsVisible="{Binding IsSearchingForCharacter, Converter={StaticResource InverseBoolConverter}}">
                                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                                            <components:ChipView Grid.Column="0" Item="{Binding SelectedItem}"
+                                            <components:ChipView Grid.Column="0" Item="{Binding .}" NameOverride="{Binding SelectedItemDisplayName}"
                                                                   IconGlyph="{Binding SelectedItem.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                   IconFontFamily="RpgAwesome"
                                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRareItemDetailCommand}"/>

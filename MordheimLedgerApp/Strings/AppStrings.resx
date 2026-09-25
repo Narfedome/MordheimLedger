@@ -198,9 +198,6 @@
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Matériau</value>
   </data>
-  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
-    <value>{0}/{1}</value>
-  </data>
   <data name="WarbandsSplitGroupTitle" xml:space="preserve">
     <value>Diviser le groupe</value>
   </data>
@@ -215,6 +212,15 @@
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="WarriorsMaterialBlessed" xml:space="preserve">
+    <value>Bénie</value>
+  </data>
+  <data name="WarriorsMaterialAllNormal" xml:space="preserve">
+    <value>Tout normal</value>
+  </data>
+  <data name="WarriorsMaterialValidate" xml:space="preserve">
+    <value>Valider</value>
   </data>
   <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
     <value>Bibliothèque vide</value>
@@ -320,6 +326,9 @@
   </data>
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Pierres magiques :</value>
+  </data>
+  <data name="WarbandWyrdstoneShardsPh" xml:space="preserve">
+    <value>Pierres magiques</value>
   </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Héros</value>
@@ -545,6 +554,12 @@
   </data>
   <data name="WarriorArchetypeCanBuyMutations" xml:space="preserve">
     <value>Mutant/Possédé</value>
+  </data>
+  <data name="WarriorArchetypeMustStartWithMutation" xml:space="preserve">
+    <value>Mutation obligatoire au recrutement</value>
+  </data>
+  <data name="WarbandsMandatoryMutationMissing" xml:space="preserve">
+    <value>{0} doit commencer la partie avec au moins une mutation.</value>
   </data>
   <data name="WarriorArchetypeIsLargeCreature" xml:space="preserve">
     <value>Grande créature</value>
@@ -2201,4 +2216,40 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
     <value>Ne gagne jamais d'Expérience</value>
   </data>
-</root>
+  <data name="EndOfGameScenarioRewardsHeading" xml:space="preserve">
+    <value>Récompenses du scénario</value>
+  </data>
+  <data name="EndOfGameScenarioRewardsHint" xml:space="preserve">
+    <value>Selon le scénario joué - laisser vide s'il n'accorde rien.</value>
+  </data>
+  <data name="EndOfGameScenarioGoldLabel" xml:space="preserve">
+    <value>Or (CO)</value>
+  </data>
+  <data name="EndOfGameScenarioWyrdstoneLabel" xml:space="preserve">
+    <value>Pierres magiques</value>
+  </data>
+  <data name="EndOfGameScenarioItemsHeading" xml:space="preserve">
+    <value>Objets</value>
+  </data>
+  <data name="EndOfGameScenarioItemsHint" xml:space="preserve">
+    <value>Rejoignent la réserve - à donner à un Héros à l'étape Réallouer.</value>
+  </data>
+  <data name="EndOfGameScenarioGoldRecapFormat" xml:space="preserve">
+    <value>+{0} CO</value>
+  </data>
+  <data name="EndOfGameScenarioWyrdstoneRecapFormat" xml:space="preserve">
+    <value>+{0} éclat(s) de pierre magique</value>
+  </data>
+  <data name="HistoryScenarioGoldSentence" xml:space="preserve">
+    <value>Le scénario a rapporté {0} CO.</value>
+  </data>
+  <data name="HistoryScenarioWyrdstoneSentence" xml:space="preserve">
+    <value>Le scénario a rapporté {0} éclat(s) de pierre magique.</value>
+  </data>
+  <data name="HistoryScenarioItemSentence" xml:space="preserve">
+    <value>Le scénario a rapporté {0} (ajouté à la réserve).</value>
+  </data>
+  <data name="EndOfGameExperienceHint" xml:space="preserve">
+    <value>Toute l'XP de la partie : survie, ennemis mis hors de combat, victoire et bonus du scénario.</value>
+  </data>
+</root>

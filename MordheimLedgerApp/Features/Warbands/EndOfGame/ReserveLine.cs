@@ -2,20 +2,27 @@ using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>D'où vient une ligne de réserve - jamais utilisé pour le calcul de pool (deux lignes du
-/// même (Item, Matériau, FoundValueOverride) se fusionnent en une seule quelle que soit leur origine,
-/// voir ReserveCollection.Add), seulement pour les récaps/phrases d'Historique qui doivent distinguer
-/// "acheté" de "récupéré au renvoi" etc.</summary>
-public enum ReserveLineOrigin { PreExisting, Dismissal, Purchase, Exploration }
+/// <summary>D'où vient une ligne de réserve - fait partie de sa clé (ReserveLineKey) : deux lignes nées
+/// pendant le wizard ne se fusionnent que si elles ont la même origine (voir ReserveCollection.Add). Sert
+/// aussi à exclure de la Vente ce qui a été acheté pendant cette même Fin de Partie (Purchase/
+/// RarePurchase - annuler un achat n'est jamais une vente à moitié prix).</summary>
+public enum ReserveLineOrigin { PreExisting, Dismissal, Purchase, Exploration, Scenario, RarePurchase, Reallocation }
 
-/// <summary>Une ligne de la réserve d'équipement de la bande pendant le wizard Fin de Partie (2026-09-23,
-/// unification de la réserve - voir ReserveCollection's own doc) - état de session pur, jamais mappé
-/// vers/depuis la DB directement (même famille qu'EquipmentPick/ReallocatableItem, déjà dans ce dossier
-/// plutôt que Core.Models). SourceId porte l'id RÉEL du WarbandEquipment d'origine pour une ligne
-/// PreExisting (déjà en base à l'ouverture du wizard) - null pour une ligne apparue PENDANT cette même
-/// Fin de Partie (Renvoyer/Achat), qui n'existera en base qu'une fois le pipeline de Terminer passé sur
-/// l'étape correspondante (ApplyDismissalsAsync/ApplyEquipmentTradingAsync) - voir
-/// EndOfGamePageViewModel.Apply.cs pour comment ce cas est reconcilié à Terminer.</summary>
+/// <summary>Identité stable d'une ligne de réserve, indépendante de l'instance : la réserve est
+/// reconstruite à chaque lecture (EndOfGamePageViewModel.BuildReserve), donc une décision qui vise une
+/// ligne précise (vente, déplacement vers un Héros) retient sa clé, jamais sa référence. SourceId non
+/// null = ligne WarbandEquipment réelle d'avant la partie.</summary>
+public sealed record ReserveLineKey(int? SourceId, int ItemId, int? MaterialRuleId, int? FoundValueOverride, ReserveLineOrigin Origin);
+
+/// <summary>Un apport à la réserve pendant la Fin de Partie (Exploration, scénario, objet rare, renvoi,
+/// achat, réallocation) - même forme pour toutes les sources, voir EndOfGamePageViewModel.Gains.cs.</summary>
+public sealed record ReserveInflow(EquipmentItem Item, SpecialRule? MaterialRule, int Quantity, int? FoundValueOverride = null);
+
+/// <summary>Une ligne de la réserve d'équipement de la bande pendant le wizard Fin de Partie - état de
+/// session pur, jamais mappé vers/depuis la DB directement (même famille qu'EquipmentPick/
+/// ReallocatableItem). SourceId porte l'id RÉEL du WarbandEquipment d'origine pour une ligne PreExisting,
+/// null pour une ligne apparue pendant cette Fin de Partie - créée en base à Terminer seulement
+/// (EndOfGamePageViewModel.ApplyReserveAsync).</summary>
 public sealed class ReserveLine
 {
     public EquipmentItem Item { get; }
@@ -34,6 +41,8 @@ public sealed class ReserveLine
         SourceId = sourceId;
         FoundValueOverride = foundValueOverride;
     }
+
+    public ReserveLineKey Key => new(SourceId, Item.Id, MaterialRule?.Id, FoundValueOverride, Origin);
 
     /// <summary>Même idiome que WarbandEquipment.NameDisplay - suffixe le matériau entre parenthèses
     /// quand il y en a un.</summary>

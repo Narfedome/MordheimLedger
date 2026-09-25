@@ -10,7 +10,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// dismiss him") - toujours présente, juste AVANT Achat/Vente (voir EndOfGamePageViewModel.cs's Steps) :
 /// un guerrier renvoyé restitue tout son équipement à la réserve plutôt que de le perdre, réutilisable
 /// ensuite au choix (vendu à l'étape Achat/Vente ou réattribué gratuitement à une nouvelle recrue à
-/// l'étape Recrutement - voir BuildStashPool/BuildSellableCandidates).
+/// l'étape Recrutement - voir BuildReserve/BuildSellableCandidates).
 ///
 /// Héros (HeadCount toujours 1) : case à cocher (WarriorOutcomeRow.IsDismissed). Groupe d'Hommes de main
 /// (HeadCount potentiellement &gt; 1) : stepper -/+ "combien de figurines renvoyer" (0..HeadCount, même
@@ -37,12 +37,12 @@ public partial class EndOfGamePageViewModel
     private void DecrementDismiss(WarriorOutcomeRow row) => row.DismissCount = Math.Max(0, row.DismissCount - 1);
 
     /// <summary>Équipement que le renvoi EN COURS (DismissCount &gt; 0 sur un ou plusieurs guerriers) va
-    /// restituer à la réserve - même forme que PendingExplorationStashItems, consommé par BuildStashPool
-    /// (Recrutement) et BuildSellableCandidates (Vente). Quantity déjà multipliée par le nombre de
-    /// figurines renvoyées (voir la doc de classe - Quantity par modèle).</summary>
-    public IEnumerable<(EquipmentItem Item, SpecialRule? MaterialRule, int Quantity)> PendingDismissedEquipment() =>
+    /// restituer à la réserve - versé dans la réserve par BuildReserve (voir EndOfGamePageViewModel.
+    /// Reserve.cs), créé en base à Terminer par ApplyReserveAsync. Quantity déjà multipliée par le nombre
+    /// de figurines renvoyées (voir la doc de classe - Quantity par modèle).</summary>
+    public IEnumerable<ReserveInflow> PendingDismissedEquipment() =>
         WarriorRows.Where(r => r.DismissCount > 0)
-            .SelectMany(r => r.Warrior.Equipment.Select(e => (e.Item, e.MaterialRule, Quantity: e.Quantity * r.DismissCount)));
+            .SelectMany(r => r.Warrior.Equipment.Select(e => new ReserveInflow(e.Item, e.MaterialRule, e.Quantity * r.DismissCount, e.FoundValueOverride)));
 
     /// <summary>Récap "Équipement récupéré" affiché en direct sur cette étape (retour utilisateur
     /// 2026-09-22 - "quand on clique sur next, on affiche la liste des équipements récupérés après le

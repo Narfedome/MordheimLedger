@@ -302,7 +302,8 @@
         <!-- Pas de CollectionView ici (virtualisation inutile pour un roster de quelques dizaines de
              guerriers max, et une CollectionView imbriquée dans un ScrollView pose des soucis de
              hauteur) : un simple ScrollView + BindableLayout par groupe. -->
-        <ScrollView Grid.Row="2" x:Name="RosterScroll" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
+        <components:ScrollHintHost Grid.Row="2" IsVisible="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}">
+        <ScrollView x:Name="RosterScroll">
             <VerticalStackLayout Spacing="0" Margin="0,8">
 
                 <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
@@ -444,6 +445,7 @@
 
             </VerticalStackLayout>
         </ScrollView>
+        </components:ScrollHintHost>
 
         <Grid Grid.Row="2" RowDefinitions="Auto,*" Margin="0,8" IsVisible="{Binding ShowHistory}">
             <HorizontalStackLayout Grid.Row="0" Spacing="10" Margin="16,0,16,8">
@@ -452,7 +454,8 @@
                                      Tooltip="{loc:Loc HistoryAddNote}"/>
             </HorizontalStackLayout>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding HistoryEntries}">
+            <components:ScrollHintHost Grid.Row="1">
+            <CollectionView ItemsSource="{Binding HistoryEntries}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:HistoryEntry">
                         <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
@@ -465,6 +468,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+            </components:ScrollHintHost>
         </Grid>
         </Grid>
 

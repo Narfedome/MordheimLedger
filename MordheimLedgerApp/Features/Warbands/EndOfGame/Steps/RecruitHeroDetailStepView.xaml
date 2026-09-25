@@ -26,7 +26,10 @@
                               IsVisible="{Binding CurrentRecruitHeroSlot.ShowTabsView}"
                               AddEquipmentCommand="{Binding AddRecruitEquipmentCommand}"
                               RemoveEquipmentCommand="{Binding RemoveRecruitEquipmentCommand}"
-                              ShowEquipmentDetailCommand="{Binding ShowRecruitEquipmentDetailCommand}"/>
+                              ShowEquipmentDetailCommand="{Binding ShowRecruitEquipmentDetailCommand}"
+                              AddMutationCommand="{Binding AddRecruitMutationCommand}"
+                              RemoveMutationCommand="{Binding RemoveRecruitMutationCommand}"
+                              ShowMutationDetailCommand="{Binding ShowRecruitMutationDetailCommand}"/>
                     </VerticalStackLayout>
                 </Border>
                 <Label Text="{Binding RecruitHeroDetailError}" FontSize="11" TextColor="{StaticResource AppDanger}"

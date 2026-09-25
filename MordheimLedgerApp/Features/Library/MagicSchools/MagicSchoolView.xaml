@@ -23,8 +23,8 @@
                            WidthRequest="120" HeightRequest="120"/>
 
         <!-- Liste à plat façon WarbandListPage (BoxView ChapterDividerStyle/SelectionMarkerStyle). -->
-        <CollectionView Grid.Row="0" x:Name="ItemsCollection"
-                IsVisible="{Binding Source={x:Reference root}, Path=UseTileLayout, Converter={StaticResource InverseBoolConverter}}"
+        <components:ScrollHintHost Grid.Row="0" IsVisible="{Binding Source={x:Reference root}, Path=UseTileLayout, Converter={StaticResource InverseBoolConverter}}">
+        <CollectionView x:Name="ItemsCollection"
                 ItemsSource="{Binding MagicSchools}"
                 SelectionMode="None">
             <CollectionView.ItemTemplate>
@@ -44,13 +44,14 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        </components:ScrollHintHost>
 
         <!-- Grille de tuiles à plat (pas de IsGrouped), même gabarit que les autres catalogues
              (SpecialRuleView/MutationView), juste sans en-tête de groupe. Bouton info : réutilise le
              ChipDetailDialog générique (voir MagicSchoolViewModel.ShowDetails), pas de dialog récap dédié
              comme pour les 8 types catalogués. -->
-        <CollectionView Grid.Row="0" x:Name="TilesCollection"
-                IsVisible="{Binding Source={x:Reference root}, Path=UseTileLayout}"
+        <components:ScrollHintHost Grid.Row="0" IsVisible="{Binding Source={x:Reference root}, Path=UseTileLayout}">
+        <CollectionView x:Name="TilesCollection"
                 ItemsSource="{Binding MagicSchools}"
                 SelectionMode="None"
                 ItemSizingStrategy="MeasureFirstItem">
@@ -102,6 +103,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        </components:ScrollHintHost>
 
         <HorizontalStackLayout Grid.Row="1" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">

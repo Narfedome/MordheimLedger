@@ -120,6 +120,9 @@ public class WarriorSeedData
     /// <summary>True for Mutant/Possessed-type archetypes that may buy Mutations at recruitment.</summary>
     public bool CanBuyMutations { get; set; }
 
+    /// <summary>See WarriorArchetype.MustStartWithMutation.</summary>
+    public bool MustStartWithMutation { get; set; }
+
     /// <summary>English Name of one of the parent WarbandSeedData's EquipmentLists entries that this
     /// archetype's Weapons/Armour line draws from - null/omitted = no curated list assigned, falls back
     /// to the full common+band equipment pool in the picker (NOT "never uses equipment" - see

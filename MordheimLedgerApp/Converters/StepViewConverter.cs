@@ -30,6 +30,7 @@ namespace MordheimLedgerApp.Converters
             ContentView? view = kind switch
             {
                 EndOfGamePageViewModel.StepKind.Result => new ResultStepView(),
+                EndOfGamePageViewModel.StepKind.ScenarioRewards => new ScenarioRewardsStepView(),
                 EndOfGamePageViewModel.StepKind.OutOfAction => new OutOfActionStepView(),
                 EndOfGamePageViewModel.StepKind.Injury => new InjuryStepView(),
                 EndOfGamePageViewModel.StepKind.PitFight => new PitFightStepView(),

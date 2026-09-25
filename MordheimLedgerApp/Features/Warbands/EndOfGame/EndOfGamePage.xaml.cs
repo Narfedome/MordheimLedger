@@ -6,6 +6,7 @@ public partial class EndOfGamePage : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
+        Components.VerticalScrollHint.Attach(StepScroll, DownHint);
     }
 
     /// <summary>Geste retour OS/matériel (ex. Android) - une page Shell n'a pas d'équivalent gratuit au

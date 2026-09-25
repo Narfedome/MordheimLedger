@@ -2,44 +2,24 @@ using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>Réserve d'équipement de la bande - UNE seule source de vérité pour tout le wizard Fin de
-/// Partie (2026-09-23, retour utilisateur - "pour l'inventaire on va unifié le tout") : Achat/Vente/
-/// Renvoyer mutent directement CETTE collection au moment où le joueur confirme sa décision, au lieu de
-/// (comme avant) reconstruire indépendamment 3 vues différentes de la même réserve à chaque lecture
-/// (BuildStashPool pour le Recrutement, BuildSellableCandidates pour la Vente, ReallocationReserve pour
-/// Réallouer - chacune avec sa propre convention d'id synthétique). Voir EndOfGamePageViewModel.cs's
-/// champ _reserve.
+/// <summary>Réserve d'équipement de la bande à un instant donné du wizard Fin de Partie. Jamais gardée
+/// en champ ni mutée par une étape : EndOfGamePageViewModel.BuildReserve en construit une neuve à chaque
+/// lecture, à partir de l'instantané d'ouverture et de TOUTES les décisions du wizard (2026-09-25,
+/// retour utilisateur - "qu'on ait qu'une seule source de vérité", fin de l'unification commencée le
+/// 2026-09-23). Voir EndOfGamePageViewModel.Reserve.cs.
 ///
-/// **Granularité ligne = ligne DB** : une PreExisting (déjà en base à l'ouverture du wizard, un
-/// SourceId réel par ligne) ne se fusionne JAMAIS avec une autre, même même Item+Matériau - chaque ligne
-/// réelle reste distincte pour que Terminer sache exactement laquelle réduire/supprimer. Une ligne SANS
-/// SourceId (apparue pendant cette même Fin de Partie - Renvoyer/Achat, pas encore en base) se fusionne
-/// par contre avec une autre ligne SANS SourceId de même (Item, Matériau, FoundValueOverride, Origin) -
-/// ce sont de simples compteurs de session, rien à distinguer avant que Terminer ne les crée réellement.
-///
-/// **Lecture vs écriture** : TotalQuantity est un simple calcul, jamais mutant - tous les aperçus
-/// d'affordabilité en direct (BuildAvailableReservePool, GetTopUpBreakdown...) doivent s'appuyer
-/// dessus, jamais sur Add/Remove/TryConsume, réservés aux actions utilisateur explicitement confirmées.
-///
-/// **Exploration reste hors de cette collection** (voir EndOfGamePageViewModel.Exploration.cs's
-/// PendingExplorationStashItems, laissé tel quel) : ses champs résolus (montant/objet trouvé) sont
-/// saisis en direct par le joueur (Entry, pas un bouton "Confirmer" ponctuel) et peuvent changer de
-/// valeur à tout moment tant que l'étape reste ouverte, y compris après un retour en arrière - il n'y a
-/// pas de moment stable où "pousser" une décision définitive dans cette collection sans devoir suivre et
-/// annuler la précédente valeur poussée à chaque frappe. Les lecteurs de cette collection qui doivent
-/// voir les trouvailles d'Exploration (BuildAvailableReservePool, BuildSellableCandidates, la carte
-/// Réserve de Réallouer) continuent de fusionner PendingExplorationStashItems() en plus de Lines, au
-/// moment de la lecture.</summary>
+/// **Granularité ligne = ligne DB** : une PreExisting (SourceId réel) ne se fusionne JAMAIS avec une
+/// autre, même même Item+Matériau - Terminer doit savoir exactement quelle ligne réelle réduire/supprimer.
+/// Une ligne SANS SourceId (née pendant la Fin de Partie) se fusionne avec une autre ligne sans SourceId
+/// de même (Item, Matériau, FoundValueOverride, Origin).</summary>
 public sealed class ReserveCollection
 {
     private readonly List<ReserveLine> _lines = new();
 
     public IReadOnlyList<ReserveLine> Lines => _lines;
 
-    /// <summary>Ajoute une quantité - fusionne dans une ligne existante SANS SourceId de même clé si une
-    /// telle ligne existe déjà (voir la doc de classe), sinon crée une nouvelle ligne. sourceId renseigné
-    /// UNIQUEMENT pour le seed initial depuis la DB (une ligne PreExisting par ligne WarbandEquipment
-    /// réelle) - jamais pour une décision prise pendant le wizard.</summary>
+    /// <summary>sourceId renseigné UNIQUEMENT pour l'instantané d'ouverture (une ligne PreExisting par
+    /// ligne WarbandEquipment réelle).</summary>
     public void Add(EquipmentItem item, SpecialRule? materialRule, int quantity, ReserveLineOrigin origin, int? sourceId = null, int? foundValueOverride = null)
     {
         if (quantity <= 0) return;
@@ -58,57 +38,56 @@ public sealed class ReserveCollection
         _lines.Add(new ReserveLine(item, materialRule, quantity, origin, sourceId, foundValueOverride));
     }
 
-    /// <summary>Combien d'exemplaires de cet Item+Matériau, toutes lignes/origines confondues - lecture
-    /// pure, jamais mutante. Ignore FoundValueOverride (même principe que l'ancien BuildStashPool - une
-    /// question de DISPONIBILITÉ, pas de quelle ligne précise sera consommée).</summary>
+    public void Add(ReserveInflow inflow, ReserveLineOrigin origin) =>
+        Add(inflow.Item, inflow.MaterialRule, inflow.Quantity, origin, foundValueOverride: inflow.FoundValueOverride);
+
+    /// <summary>Combien d'exemplaires de cet Item+Matériau, toutes lignes/origines confondues.</summary>
     public int TotalQuantity(int itemId, int? materialRuleId) =>
         _lines.Where(l => l.Item.Id == itemId && l.MaterialRule?.Id == materialRuleId).Sum(l => l.Quantity);
 
-    /// <summary>Retire quantity exemplaires si le stock est suffisant (toutes lignes confondues, dans
-    /// l'ordre où elles existent - jamais un ordre garanti entre PreExisting/Dismissal/Purchase), sinon
-    /// ne mute rien et renvoie false.</summary>
-    public bool TryConsume(int itemId, int? materialRuleId, int quantity)
+    /// <summary>Quantités par (Item, Matériau) - la vue qu'utilisent le Recrutement et le sélecteur
+    /// d'équipement (qui ne distinguent ni l'origine ni la valeur trouvée).</summary>
+    public Dictionary<(int ItemId, int? MaterialRuleId), int> ToPool()
     {
-        if (TotalQuantity(itemId, materialRuleId) < quantity) return false;
-        Consume(itemId, materialRuleId, quantity);
-        return true;
+        var pool = new Dictionary<(int ItemId, int? MaterialRuleId), int>();
+        foreach (var line in _lines)
+        {
+            var key = (line.Item.Id, line.MaterialRule?.Id);
+            pool[key] = pool.GetValueOrDefault(key) + line.Quantity;
+        }
+        return pool;
     }
 
-    /// <summary>Retire quantity exemplaires SANS vérifier le stock au préalable (l'appelant sait déjà que
-    /// cette ligne précise en contient assez, ex. annuler un Achat/une vente déjà confirmée) - ne
-    /// descend jamais sous 0 par ligne, la ligne disparaît une fois vidée.</summary>
-    public void Remove(int itemId, int? materialRuleId, int quantity) => Consume(itemId, materialRuleId, quantity);
-
-    private void Consume(int itemId, int? materialRuleId, int quantity)
+    /// <summary>Retire jusqu'à quantity exemplaires de cet Item+Matériau, lignes dans leur ordre
+    /// d'apparition (réserve d'avant la partie d'abord) - renvoie combien ont réellement été retirés.</summary>
+    public int ConsumeUpTo(int itemId, int? materialRuleId, int quantity)
     {
         var remaining = quantity;
         foreach (var line in _lines.Where(l => l.Item.Id == itemId && l.MaterialRule?.Id == materialRuleId).ToList())
         {
             if (remaining <= 0) break;
-            var taken = Math.Min(line.Quantity, remaining);
-            line.Quantity -= taken;
-            remaining -= taken;
-            if (line.Quantity <= 0) _lines.Remove(line);
+            remaining -= Take(line, remaining);
         }
+        return quantity - remaining;
     }
 
-    /// <summary>Retire directement CETTE ligne précise (identité de référence, pas une clé) - pour un
-    /// appelant qui a déjà résolu la ligne exacte à consommer (ex. un candidat de Vente construit
-    /// directement depuis une ReserveLine) plutôt que de rejouer une recherche par clé.</summary>
-    public void RemoveLine(ReserveLine line, int quantity)
+    /// <summary>Retire jusqu'à quantity exemplaires de LA ligne désignée par key (vente, déplacement vers
+    /// un Héros) - sans effet si cette ligne n'existe plus (décision en amont modifiée depuis).</summary>
+    public void RemoveByKey(ReserveLineKey key, int quantity)
     {
-        line.Quantity -= quantity;
+        var line = _lines.FirstOrDefault(l => l.Key == key);
+        if (line is not null) Take(line, quantity);
+    }
+
+    /// <summary>Retire ENTIÈREMENT la ligne réelle sourceId (une pile entière - saisie de matériel,
+    /// paiement en objet).</summary>
+    public void RemoveSource(int sourceId) => _lines.RemoveAll(l => l.SourceId == sourceId);
+
+    private int Take(ReserveLine line, int quantity)
+    {
+        var taken = Math.Min(line.Quantity, quantity);
+        line.Quantity -= taken;
         if (line.Quantity <= 0) _lines.Remove(line);
-    }
-
-    /// <summary>Contrepartie de RemoveLine - restaure quantity sur CETTE MÊME instance de ligne (jamais
-    /// une nouvelle ligne, pour ne pas perdre son identité - ex. SourceId d'une ligne PreExisting) : pour
-    /// annuler une vente déjà confirmée avant Terminer (voir EndOfGamePageViewModel.EquipmentTrading.
-    /// cs's RemoveSaleEquipment). Réinsère la ligne si RemoveLine l'avait entièrement retirée (vente qui
-    /// vidait tout le stock).</summary>
-    public void RestoreLine(ReserveLine line, int quantity)
-    {
-        line.Quantity += quantity;
-        if (!_lines.Contains(line)) _lines.Add(line);
+        return taken;
     }
 }

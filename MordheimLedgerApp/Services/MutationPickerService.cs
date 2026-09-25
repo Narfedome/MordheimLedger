@@ -7,8 +7,10 @@ namespace MordheimLedgerApp.Services;
 public interface IMutationPickerService
 {
     /// <summary>warbandArchetypeId: only mutations whose RestrictedToWarbandArchetypeIds is empty
-    /// (common) or contains this id are selectable - see WarriorEditDialogViewModel.AddMutation.</summary>
-    Task<IReadOnlyList<Mutation>> PickMutationsAsync(int warbandArchetypeId);
+    /// (common) or contains this id are selectable - see WarriorEditDialogViewModel.AddMutation.
+    /// availableGold: non-null shows a live "spent/remaining" line (see MutationViewModel.BudgetDisplay) - set at
+    /// recruitment, where mutations are paid for; unitCount multiplies the cost for a Henchman group.</summary>
+    Task<IReadOnlyList<Mutation>> PickMutationsAsync(int warbandArchetypeId, int? availableGold = null, int unitCount = 1);
 }
 
 public class MutationPickerService : IMutationPickerService
@@ -17,7 +19,7 @@ public class MutationPickerService : IMutationPickerService
 
     public MutationPickerService(IServiceProvider provider) => _provider = provider;
 
-    public async Task<IReadOnlyList<Mutation>> PickMutationsAsync(int warbandArchetypeId)
+    public async Task<IReadOnlyList<Mutation>> PickMutationsAsync(int warbandArchetypeId, int? availableGold = null, int unitCount = 1)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Mutation>>();
 
@@ -28,6 +30,8 @@ public class MutationPickerService : IMutationPickerService
         // filtre AllowedWarbandArchetypeId sur le ViewModel avant que la page ne charge ses données.
         var viewModel = _provider.GetRequiredService<MutationViewModel>();
         viewModel.AllowedWarbandArchetypeId = warbandArchetypeId;
+        viewModel.AvailableGold = availableGold;
+        viewModel.UnitCount = unitCount;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi.
         var page = new MutationSelectorPage(viewModel);
 

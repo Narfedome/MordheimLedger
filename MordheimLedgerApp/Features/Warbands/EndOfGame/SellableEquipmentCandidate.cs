@@ -6,19 +6,14 @@ using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
-/// <summary>Une ligne vendable à l'étape Achat/Vente - un objet de la réserve (WarbandEquipment, déjà là
-/// avant cette partie OU trouvé via Exploration PENDANT cette même partie - voir IsFromExploration), ou
-/// un objet porté par un guerrier ACTIF (WarriorEquipment, déjà porté avant cette partie). Jamais un
-/// objet ACHETÉ pendant cette même Fin de Partie (Achat de cette étape) : annuler un achat de cette
-/// session retire simplement le pick (RemoveReserveEquipment/RemoveRecruitEquipment), ce n'est jamais une
-/// "vente" à proprement parler (retour utilisateur 2026-09-05 - "si on fait un achat et que finalement on
-/// change d'avis, on considère que l'objet n'est pas acheté" - pas de demi-tarif pour ça, juste rien
-/// facturé du tout). Un objet TROUVÉ via Exploration cette même partie, en revanche, EST vendable : retour
-/// utilisateur 2026-09-21 - "j'avais fait un jet d'exploration qui m'a permis de trouver une épée et une
-/// dague ornée. dans la vente, les 2 objets ne sont pas apparents" - une trouvaille rejoint la réserve de
-/// la bande (voir EndOfGamePageViewModel.Recruitment.cs's BuildStashPool, qui la traite déjà comme telle
-/// pour le Recrutement) donc doit être vendable au même titre que le reste de la réserve, cohérent avec le
-/// livre des règles ("trade in weapons and equipment... swapped around the warband").
+/// <summary>Une ligne vendable à l'étape Achat/Vente - une ligne de la réserve (ReserveKey : réserve
+/// d'avant la partie, trouvaille d'Exploration, objet du scénario, équipement rendu par un renvoi - voir
+/// EndOfGamePageViewModel.BuildSellableCandidates) ou un objet porté par un guerrier ACTIF (CarriedItem).
+/// Jamais un objet ACHETÉ pendant cette même Fin de Partie : annuler un achat retire simplement le pick,
+/// ce n'est jamais une "vente" (retour utilisateur 2026-09-05 - "si on fait un achat et que finalement on
+/// change d'avis, on considère que l'objet n'est pas acheté"). Une trouvaille de cette partie, elle, EST
+/// vendable (retour utilisateur 2026-09-21), cohérent avec le livre des règles ("trade in weapons and
+/// equipment... swapped around the warband").
 ///
 /// **Vente partielle** (retour utilisateur 2026-09-21, revu par rapport à une première version "ligne
 /// entière uniquement" - "une sélection avec un affichage en tuile comme dans le codex, avec - et + comme
@@ -31,37 +26,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// réduction partielle n'existe).</summary>
 public partial class SellableEquipmentCandidate : ObservableObject
 {
-    /// <summary>Réserve pré-partie/Achat de CETTE session (ReserveCollection, 2026-09-23 - unification de
-    /// la réserve) - remplace l'ancien StashItem (WarbandEquipment). Confirmer la vente d'un candidat
-    /// construit depuis une ReserveLine retire directement la quantité vendue de CETTE ligne (voir
-    /// EndOfGamePageViewModel.EquipmentTrading.cs's AddSaleEquipment) - contrairement à
-    /// IsFromExploration/IsFromDismissal (toujours en attente d'une vraie ligne DB avant Terminer),
-    /// ReserveSource référence une ligne DÉJÀ dans _reserve (réelle - SourceId renseigné - ou déjà
-    /// "réelle en session" - un Achat de cette partie), donc jamais besoin de la retrouver par une requête
-    /// fraîche à Terminer pour la portion réserve. RemoveSaleEquipment (annuler une vente confirmée avant
-    /// Terminer) restaure la quantité sur cette même ligne (ReserveCollection.RestoreLine).</summary>
-    public ReserveLine? ReserveSource { get; }
+    /// <summary>Clé de la ligne de réserve vendue (null pour un objet porté) - une vente confirmée reste
+    /// dans PendingSales et BuildReserve la retranche de CETTE ligne (stade AfterSales) ; l'annuler revient
+    /// simplement à la retirer de PendingSales. Une clé plutôt que la ligne elle-même : la réserve est
+    /// reconstruite à chaque lecture (voir EndOfGamePageViewModel.Reserve.cs).</summary>
+    public ReserveLineKey? ReserveKey { get; }
 
     public WarriorEquipment? CarriedItem { get; }
     public string? CarrierName { get; }
-
-    /// <summary>True pour un objet trouvé via Exploration cette même partie (PendingExplorationStashItems) -
-    /// il n'existe pas encore de WarbandEquipment réel au moment de construire ce candidat,
-    /// ApplyExplorationOutcomeAsync ne le crée qu'à Terminer (avant ApplyEquipmentTradingAsync dans le
-    /// pipeline - voir EndOfGamePageViewModel.Apply.SaveAsync). Compte comme réserve (IsFromStash) pour
-    /// BuildStashPool/l'affichage, mais sa suppression à Terminer doit re-résoudre le vrai id fraîchement
-    /// créé plutôt que réutiliser un id connu à la construction de ce candidat - voir
-    /// ApplyEquipmentTradingAsync.</summary>
-    public bool IsFromExploration { get; }
-
-    /// <summary>True pour de l'équipement restitué à la réserve par l'étape "Renvoyer", juste avant
-    /// Achat/Vente (PendingDismissedEquipment) - même situation qu'IsFromExploration (pas encore de
-    /// WarbandEquipment réel au moment de construire ce candidat, ApplyDismissalsAsync ne le crée qu'à
-    /// Terminer, AVANT ApplyEquipmentTradingAsync dans le pipeline) : traité par le même mécanisme de
-    /// "re-requête fraîche + retrait/recréation du reliquat" dans ApplyEquipmentTradingAsync. Séparé
-    /// d'IsFromExploration (pas juste réutilisé) pour ne pas mélanger deux provenances distinctes dans
-    /// l'Historique/le débogage, même si la mécanique de persistance est identique.</summary>
-    public bool IsFromDismissal { get; }
 
     public EquipmentItem Item { get; }
     public SpecialRule? MaterialRule { get; }
@@ -114,22 +86,8 @@ public partial class SellableEquipmentCandidate : ObservableObject
     /// jamais pour tout le reste (multiplicateur toujours 1).</summary>
     public string UnitSellPriceDisplay => $"{EquipmentPricing.CalculateSellPrice(Item.Cost, MaterialRule?.CostMultiplier) * SaleQuantityMultiplier} {LocalizationService.Instance["LibGoldCrownsAbbr"]}";
 
-    /// <summary>Réserve (ReserveSource pré-partie/Achat OU trouvaille d'Exploration/renvoi cette partie)
-    /// plutôt que porté par un guerrier.</summary>
+    /// <summary>Réserve plutôt que porté par un guerrier.</summary>
     public bool IsFromStash => CarriedItem is null;
-
-    /// <summary>Identité stable de la ligne source, pour le "déjà en attente de vente" de
-    /// BuildSellableCandidates (voir EndOfGamePageViewModel.EquipmentTrading.cs) - UNIQUEMENT pertinent
-    /// pour Exploration/Dismissal/Carried : un candidat ReserveSource n'en a plus besoin depuis
-    /// l'unification de la réserve (2026-09-23) - vendre décrémente directement sa ReserveLine, donc
-    /// _reserve.Lines reflète déjà toute vente précédente sans qu'il faille la retrancher ici (jamais lu
-    /// pour cette provenance).</summary>
-    public int SourceId => CarriedItem?.Id
-        ?? (IsFromDismissal ? SyntheticDismissalSourceId(Item.Id, MaterialRule?.Id) : SyntheticExplorationSourceId(Item.Id, MaterialRule?.Id));
-
-    public static int SyntheticExplorationSourceId(int itemId, int? materialRuleId) => -(itemId * 1_000_003 + (materialRuleId ?? 0) + 1);
-
-    public static int SyntheticDismissalSourceId(int itemId, int? materialRuleId) => -(itemId * 1_000_003 + (materialRuleId ?? 0) + 2);
 
     /// <summary>Combien de cette ligne on vend réellement - stepper borné [0, OwnedQuantity] sur
     /// SellEquipmentSelectorPage (IncrementCommand/DecrementCommand).</summary>
@@ -161,7 +119,7 @@ public partial class SellableEquipmentCandidate : ObservableObject
 
     public SellableEquipmentCandidate(ReserveLine reserveLine, int ownedQuantity)
     {
-        ReserveSource = reserveLine;
+        ReserveKey = reserveLine.Key;
         Item = reserveLine.Item;
         MaterialRule = reserveLine.MaterialRule;
         OwnedQuantity = ownedQuantity;
@@ -184,27 +142,5 @@ public partial class SellableEquipmentCandidate : ObservableObject
         var abbrs = new[] { carriedItem.MaterialRule?.Abbreviation, carriedItem.BlessingRule?.Abbreviation }
             .Where(a => !string.IsNullOrEmpty(a)).ToList();
         NameDisplay = abbrs.Count > 0 ? $"{carriedItem.Item.Name} ({string.Join(", ", abbrs)})" : carriedItem.Item.Name;
-    }
-
-    public SellableEquipmentCandidate(EquipmentItem explorationItem, SpecialRule? materialRule, int ownedQuantity)
-        : this(explorationItem, materialRule, ownedQuantity, isFromDismissal: false)
-    {
-    }
-
-    /// <summary>Équipement restitué à la réserve par l'étape "Renvoyer" - factory nommée plutôt qu'un 4e
-    /// constructeur positionnel (même liste de paramètres que le constructeur Exploration ci-dessus,
-    /// impossible à surcharger sans le distinguer autrement).</summary>
-    public static SellableEquipmentCandidate ForDismissal(EquipmentItem item, SpecialRule? materialRule, int ownedQuantity) =>
-        new(item, materialRule, ownedQuantity, isFromDismissal: true);
-
-    private SellableEquipmentCandidate(EquipmentItem item, SpecialRule? materialRule, int ownedQuantity, bool isFromDismissal)
-    {
-        IsFromExploration = !isFromDismissal;
-        IsFromDismissal = isFromDismissal;
-        Item = item;
-        MaterialRule = materialRule;
-        OwnedQuantity = ownedQuantity;
-        SaleQuantityMultiplier = 1;
-        NameDisplay = materialRule?.Abbreviation is { Length: > 0 } abbr ? $"{item.Name} ({abbr})" : item.Name;
     }
 }

@@ -19,14 +19,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// EndOfGamePageViewModel.Recruitment.cs's doc de classe), alors qu'un Héros déjà actif et la réserve
 /// pré-partie sont de VRAIES lignes DB pas encore touchées par ce wizard. Ce wizard ne persiste jamais
 /// rien avant Terminer, donc "déplacer" un objet réel reste purement en mémoire jusque-là :
-/// - Retirer d'un Héros existant/de la Réserve = simple .Remove() sur la liste réelle (l'objet retiré
-///   garde son id réel positif, juste absent de la collection en mémoire - rien n'est supprimé en base
-///   avant Terminer).
-/// - Ajouter à un Héros existant/la Réserve = nouvel objet à id SYNTHÉTIQUE NÉGATIF (compteur
-///   décroissant, même idiome que SellableEquipmentCandidate.SyntheticDismissalSourceId) - jamais le
-///   même objet réutilisé (même si le prix de revient est identique, delete+recreate est la seule
-///   primitive disponible côté service, voir WarbandDetailViewModel.EndOfGame.
+/// - Retirer d'un Héros existant = simple .Remove() sur sa liste (l'objet retiré garde son id réel
+///   positif, juste absent de la collection en mémoire - rien n'est supprimé en base avant Terminer).
+/// - Ajouter à un Héros existant = nouvel objet à id SYNTHÉTIQUE NÉGATIF (compteur décroissant) - jamais
+///   le même objet réutilisé (delete+recreate est la seule primitive disponible côté service, voir
 ///   ApplyEquipmentReallocationAsync).
+/// - Réserve (dans un sens ou dans l'autre) = un déplacement enregistré dans _reallocationReserveMoves,
+///   rejoué par BuildReserve - la carte Réserve affiche la réserve finale (BuildReserve, stade Final),
+///   ventes et recrutement compris, écrite à Terminer par ApplyReserveAsync.
 /// - Ajouter/retirer chez une recrue = simple Add/Remove sur son EquipmentPick.Equipment brouillon,
 ///   déjà le mécanisme d'AddRecruitEquipment/RemoveRecruitEquipment - rien de spécial à faire à
 ///   Terminer pour ce côté, ApplyRecruitmentAsync (déjà dans le pipeline) traite ce brouillon tel quel.</summary>
@@ -34,82 +34,45 @@ public partial class EndOfGamePageViewModel
 {
     private int _nextSyntheticReallocationId = -1;
 
-    /// <summary>Copie de travail de la réserve pré-partie - depuis l'unification de la réserve
-    /// (2026-09-23), seedée depuis _originalReserveSnapshot (JAMAIS _reserve directement) : Réallouer
-    /// doit rester insensible aux ventes de CETTE session (limite connue acceptée, voir
-    /// EnsureReallocationReserveExtrasAdded's own doc - "un objet vendu puis encore visible ici ne ferait
-    /// qu'un déplacement sans effet"), alors que _reserve EST réduite en direct par chaque vente
-    /// confirmée. Peuplée une seule fois au constructeur principal (voir son appel dans
-    /// EndOfGamePageViewModel.cs) - des COPIES indépendantes de _originalReserveSnapshot, jamais les
-    /// mêmes instances (dont Quantity ne doit justement jamais changer, voir sa propre doc).</summary>
-    public List<ReserveLine> ReallocationReserve { get; private set; } = new();
+    // État des porteurs à l'entrée dans Réallouer (Suivant) - restauré par UndoReallocation.
+    private List<(WarriorOutcomeRow Row, List<(WarriorEquipment Equipment, int Quantity)> Equipment)> _reallocationHeroSnapshot = new();
+    private List<(WarriorNameSlot Slot, List<EquipmentPick> Picks)> _reallocationRecruitSnapshot = new();
 
-    private void InitializeReallocation()
+    /// <summary>Photographie l'équipement des Héros existants et des recrues au moment d'entrer dans
+    /// Réallouer par Suivant - appelé par Next(). Les objets eux-mêmes ET leur Quantity (un déplacement
+    /// partiel décrémente WarriorEquipment.Quantity en place, voir RemoveFromReallocationCarrier).</summary>
+    private void CaptureReallocationSnapshot()
     {
-        // _originalReserveSnapshot (champ de EndOfGamePageViewModel.cs) sert directement d'instantané
-        // SourceId+Quantity pour ApplyEquipmentReallocationAsync - plus besoin d'un
-        // OriginalReserveEquipmentIds séparé (retiré 2026-09-23, en ajoutant la détection de quantité
-        // réduite, voir Apply.cs).
-        ReallocationReserve = _originalReserveSnapshot
-            .Select(l => new ReserveLine(l.Item, l.MaterialRule, l.Quantity, l.Origin, l.SourceId, l.FoundValueOverride))
+        _reallocationHeroSnapshot = WarriorRows.Where(r => r.IsHero)
+            .Select(r => (r, r.Warrior.Equipment.Select(e => (e, e.Quantity)).ToList()))
             .ToList();
+        _reallocationRecruitSnapshot = RecruitedHeroRows.SelectMany(r => r.NameSlots)
+            .Select(s => (s, s.Equipment.ToList()))
+            .ToList();
+        _reallocationReserveMoves.Clear();
     }
 
-    private bool _reallocationReserveExtrasAdded;
-    private readonly HashSet<EquipmentPick> _mergedPurchasePicks = new();
-    private readonly List<(EquipmentItem Item, SpecialRule? MaterialRule, int Quantity)> _reallocationReserveExtrasOriginal = new();
-
-    /// <summary>Ce que Exploration/Renvoyer/Achat ont ajouté à la réserve depuis l'ouverture du wizard,
-    /// avant que ce même wizard ne les crée réellement en base - snapshot pris au moment de
-    /// EnsureReallocationReserveExtrasAdded (retour utilisateur 2026-09-22 - "les objets trouvés lors de
-    /// l'exploration ne sont pas dans la réserve lors de la réallocation").</summary>
-    public IReadOnlyList<(EquipmentItem Item, SpecialRule? MaterialRule, int Quantity)> ReallocationReserveExtrasOriginal => _reallocationReserveExtrasOriginal;
-
-    /// <summary>Complète ReallocationReserve avec ce que les étapes précédentes de ce même wizard
-    /// (Exploration, Renvoyer, Achat) ont ajouté à la réserve. SourceId null (ni réel positif ni
-    /// synthétique négatif) pour ces entrées : elles seront de VRAIES lignes WarbandEquipment d'ici
-    /// Terminer - ApplyExplorationOutcomeAsync/ApplyDismissalsAsync/ApplyEquipmentTradingAsync les créent
-    /// chacune à leur tour, plus tôt dans le pipeline qu'ApplyEquipmentReallocationAsync - donc jamais
-    /// recréées ici si le joueur ne les touche pas ; si déplacées ailleurs, ApplyEquipmentReallocationAsync
-    /// les retrouve par une requête fraîche (même idiome que SellableEquipmentCandidate.IsFromExploration/
-    /// IsFromDismissal) plutôt que par id. N'inclut PAS ce qui a déjà été vendu (Vente) : limite connue
-    /// acceptée, un objet vendu puis encore visible ici ne ferait qu'un déplacement sans effet
-    /// (suppression silencieuse d'une ligne déjà absente), jamais de doublon ni d'erreur.
-    ///
-    /// Exploration/Renvoyer restent fusionnées UNE SEULE FOIS (à la première visite RÉELLE de cette
-    /// étape, jamais au constructeur InitializeReallocation qui tourne bien avant) - ce sont de pures
-    /// dérivations recalculées à chaque appel (PendingExplorationStashItems/PendingDismissedEquipment),
-    /// re-fusionner à chaque accès reviendrait à dupliquer une quantité déjà comptée, ou pire, à écraser
-    /// un déplacement déjà fait par le joueur dans cette même étape.
-    ///
-    /// Achat (PurchasedReserveItems) fusionné à CHAQUE accès (2026-09-23, correction retour utilisateur -
-    /// "dans l'allocation des items... les achats ne sont pas dans la réserve" : revenir à Achat/Vente
-    /// APRÈS une première visite de Réallouer pour acheter davantage ne remontait jamais dans
-    /// ReallocationReserve, verrouillé par le même garde one-shot qu'Exploration/Renvoyer) - contrairement
-    /// à ces deux dérivations, un Achat est un objet DISCRET et STABLE (EquipmentPick, jamais recréé/
-    /// reconstruit), donc _mergedPurchasePicks (identité de référence) permet de ne fusionner que les
-    /// NOUVEAUX picks à chaque appel sans dupliquer ceux déjà fusionnés (et potentiellement déjà déplacés
-    /// depuis). Annuler un Achat déjà fusionné ici (retour à Achat/Vente, "-") ne retire PAS la ligne déjà
-    /// fusionnée - limite acceptée, symétrique à celle déjà documentée pour Vente ci-dessus, pas rencontrée
-    /// dans le retour utilisateur qui a motivé ce correctif.</summary>
-    private void EnsureReallocationReserveExtrasAdded()
+    /// <summary>Annule tous les déplacements de Réallouer - appelé quand on quitte l'étape par Précédent
+    /// (voir Back()) : un changement fait plus haut dans le wizard (vente, recrutement...) pourrait sinon
+    /// laisser un déplacement pointer vers un objet de la réserve qui n'y est plus.</summary>
+    private void UndoReallocation()
     {
-        if (!_reallocationReserveExtrasAdded)
+        foreach (var (row, equipment) in _reallocationHeroSnapshot)
         {
-            _reallocationReserveExtrasAdded = true;
-            foreach (var (item, materialRule, quantity) in PendingExplorationStashItems().Concat(PendingDismissedEquipment()))
+            row.Warrior.Equipment.Clear();
+            foreach (var (item, quantity) in equipment)
             {
-                ReallocationReserve.Add(new ReserveLine(item, materialRule, quantity, ReserveLineOrigin.Exploration));
-                _reallocationReserveExtrasOriginal.Add((item, materialRule, quantity));
+                item.Quantity = quantity;
+                row.Warrior.Equipment.Add(item);
             }
         }
-
-        foreach (var pick in PurchasedReserveItems)
+        foreach (var (slot, picks) in _reallocationRecruitSnapshot)
         {
-            if (!_mergedPurchasePicks.Add(pick)) continue;
-            ReallocationReserve.Add(new ReserveLine(pick.Item, pick.MaterialRule, 1, ReserveLineOrigin.Purchase));
-            _reallocationReserveExtrasOriginal.Add((pick.Item, pick.MaterialRule, 1));
+            slot.Equipment.Clear();
+            foreach (var pick in picks) slot.Equipment.Add(pick);
         }
+        _reallocationReserveMoves.Clear();
+        OnPropertyChanged(nameof(ReallocationCarriers));
     }
 
     /// <summary>Recréé à chaque accès (jamais mis en cache, même principe que DismissibleWarriorRows) :
@@ -122,8 +85,7 @@ public partial class EndOfGamePageViewModel
     {
         get
         {
-            EnsureReallocationReserveExtrasAdded();
-            yield return ReallocationCarrier.ForReserve(ReallocationReserve, Loc["EndOfGameEquipmentTradingStashSource"]);
+            yield return ReallocationCarrier.ForReserve(BuildReserve(ReserveStage.Final).Lines.ToList(), Loc["EndOfGameEquipmentTradingStashSource"]);
             foreach (var row in WarriorRows.Where(r => r.IsHero && !r.IsFullyDismissed))
                 yield return ReallocationCarrier.ForHero(row);
             foreach (var slot in RecruitedHeroRows.SelectMany(r => r.NameSlots))
@@ -175,10 +137,10 @@ public partial class EndOfGamePageViewModel
             await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], destination.Name));
     }
 
-    /// <summary>Retrait complet de la ligne si quantity couvre tout le lot (comportement inchangé),
-    /// sinon décrémente sa Quantity en mémoire en laissant la ligne (même id réel positif) en place -
-    /// voir EndOfGamePageViewModel.Apply.cs's ApplyEquipmentReallocationAsync pour la synchronisation de
-    /// cette réduction vers la DB à Terminer, nécessaire pour ne pas dupliquer l'objet.</summary>
+    /// <summary>Héros : retrait complet de la ligne si quantity couvre tout le lot, sinon décrémente sa
+    /// Quantity en mémoire (même id réel positif) - voir ApplyEquipmentReallocationAsync pour la
+    /// synchronisation à Terminer. Réserve : enregistre le déplacement (_reallocationReserveMoves), que
+    /// BuildReserve rejoue - la réserve n'est jamais modifiée directement.</summary>
     private void RemoveFromReallocationCarrier(ReallocatableItem item, int quantity)
     {
         switch (item.Carrier.Kind)
@@ -194,11 +156,7 @@ public partial class EndOfGamePageViewModel
                 item.Carrier.NewRecruitSlot!.Equipment.Remove(item.DraftPickSource!);
                 break;
             case ReallocationCarrierKind.Reserve:
-                var line = item.ReserveLineSource!;
-                if (quantity >= line.Quantity)
-                    ReallocationReserve.Remove(line);
-                else
-                    line.Quantity -= quantity;
+                _reallocationReserveMoves.Add(new ReserveMove(item.ReserveLineSource!.Key, quantity, null));
                 break;
         }
     }
@@ -226,7 +184,7 @@ public partial class EndOfGamePageViewModel
                     destination.NewRecruitSlot!.Equipment.Add(new EquipmentPick(item.Item, item.MaterialRule) { IsReallocated = true });
                 break;
             case ReallocationCarrierKind.Reserve:
-                ReallocationReserve.Add(new ReserveLine(item.Item, item.MaterialRule, quantity, ReserveLineOrigin.Purchase, _nextSyntheticReallocationId--, item.FoundValueOverride));
+                _reallocationReserveMoves.Add(new ReserveMove(null, quantity, new ReserveInflow(item.Item, item.MaterialRule, quantity, item.FoundValueOverride)));
                 break;
         }
     }

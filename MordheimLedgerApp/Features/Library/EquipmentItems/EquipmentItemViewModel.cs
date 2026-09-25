@@ -110,7 +110,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// <summary>Set by EquipmentPickerService (before LoadData) for the End of Game "Objets rares" step -
     /// excludes common (Rarity null) MissileWeapon/BlackPowderWeapon/Armour items, which have no search
     /// path at all in that context (no Rarity to roll against, and Gromril/Ithilmar only apply to melee
-    /// weapons - see RareItemSearchEntry.IsMaterialEligible): showing them would just be dead-end
+    /// weapons - any melee weapon, common or rare): showing them would just be dead-end
     /// clutter. Every other category (MeleeWeapon - common ones ARE searchable via a material - Misc/
     /// Consumable/etc.) and any genuinely Rare item regardless of category stay visible - user request
     /// 2026-08-28, explicit that the restriction is "juste pour les armes/armure", not the whole
@@ -193,7 +193,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     /// <summary>Gromril/Ithilmar (les seules SpecialRule avec CostMultiplier+Rarity, même filtre que
-    /// EndOfGamePageViewModel.RareItems.cs's RareMaterialOptions) - chargé UNIQUEMENT quand RareSearchMode
+    /// Gromril/Ithilmar, the only materials with a Rarity) - chargé UNIQUEMENT quand RareSearchMode
     /// est actif (seul appelant qui en a besoin, voir ApplyFilter), jamais interrogé pour les 9 autres
     /// usages de ce picker partagé.</summary>
     private List<SpecialRule> _rareMaterialOptions = new();
@@ -331,7 +331,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
             // Variantes matériau (RareSearchMode uniquement, 2026-09-23) - une tuile de plus par matériau
             // éligible (Gromril/Ithilmar) pour toute arme de corps à corps, commune OU déjà Rare (même
-            // règle qu'RareItemSearchEntry.IsMaterialEligible - "toute arme de corps à corps peuvent être
+            // règle d'origine - "toute arme de corps à corps peuvent être
             // en gromril, même les armes rares") : évite d'avoir à choisir l'objet nu puis taper une
             // pastille à part sur l'étape, la tuile porte directement le matériau (EquipmentItemRow.
             // MaterialRule, lu par EquipmentPickerService.PickRareEquipmentAsync à la confirmation).

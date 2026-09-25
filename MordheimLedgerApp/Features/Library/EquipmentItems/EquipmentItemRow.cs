@@ -61,7 +61,7 @@ public partial class EquipmentItemRow : ObservableObject
     /// <summary>Matériau proposé pour cette tuile de catalogue NEUVE (ex. "Épée (Gromril)"), distinct de
     /// ReserveMaterialRule (stock déjà possédé, jamais choisi ici) - une tuile PAR matériau éligible
     /// générée par EquipmentItemViewModel.ApplyFilter quand RareSearchMode est actif et que l'objet est
-    /// une arme de corps à corps (voir RareItemSearchEntry.IsMaterialEligible, même règle) - 2026-09-23,
+    /// une arme de corps à corps (toute arme de corps à corps, commune ou rare) - 2026-09-23,
     /// retour utilisateur "on pourrait directement proposer les armes en ithilmar et les armes en
     /// gromril à l'achat plutôt que d'avoir un sélecteur neutre et devoir cliquer sur une chip". Jamais
     /// posé en même temps que ReserveMaterialRule (deux constructeurs distincts, jamais combinés).</summary>

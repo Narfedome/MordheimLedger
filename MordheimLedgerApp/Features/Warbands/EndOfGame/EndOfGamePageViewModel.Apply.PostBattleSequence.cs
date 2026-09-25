@@ -130,13 +130,16 @@ public partial class EndOfGamePageViewModel
 
         foreach (var entry in RareItemSearchEntries.Where(e => e.IsPurchased))
         {
+            // L'objet entre dans la réserve via ReserveGains (voir BuildReserve), écrite par ApplyReserveAsync.
             var item = entry.SelectedItem!;
             Warband.Treasury -= entry.EffectiveCost!.Value;
             await _warbandService.SaveWarbandAsync(Warband);
-            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, item, materialRule: entry.SelectedMaterial);
             var displayName = entry.SelectedMaterial is { } material ? $"{item.Name} ({material.Abbreviation})" : item.Name;
             sentences.Add(string.Format(Loc["HistoryRareItemFoundSentence"], entry.HeroName, displayName));
         }
+
+        // Même sélection que la réserve (BuildReserve retire déjà ces lignes) - ici seulement l'historique.
+        var alternativePaymentLines = AlternativePaymentLines();
 
         foreach (var entry in RareItemSearchEntries.Where(e => e.IsRecruited))
         {
@@ -174,10 +177,8 @@ public partial class EndOfGamePageViewModel
             {
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
             }
-            else if (entry.IsPayingWithAlternativeItem
-                && _originalReserveSnapshot.FirstOrDefault(w => w.Item.Id == persona.AlternativePaymentItemId) is { } paymentStash)
+            else if (alternativePaymentLines.TryGetValue(entry, out var paymentStash))
             {
-                await _warbandService.RemoveWarbandEquipmentAsync(paymentStash.SourceId!.Value);
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWithItemSentence"], entry.HeroName, persona.Name, paymentStash.Item.Name));
             }
             else
@@ -334,25 +335,19 @@ public partial class EndOfGamePageViewModel
     }
 
     /// <summary>"Où est l'Argent ?" - "Céder du matériel" (2026-09-01, retour utilisateur - remplace
-    /// l'ancien simple rappel textuel) : retire réellement du stash de la bande les objets sélectionnés
-    /// automatiquement par EndOfGamePageViewModel.SeizedEquipmentItems (plus petit au plus grand, arrêt
-    /// dès la cible couverte - voir sa propre doc). Une ligne = une pile entière (RemoveWarbandEquipmentAsync
-    /// supprime la ligne, jamais de retrait partiel, même simplification que partout ailleurs dans l'app).</summary>
-    private async Task ApplyPairEquipmentSeizureIfNeededAsync(List<string> sentences)
+    /// l'ancien simple rappel textuel) : les objets sélectionnés automatiquement par
+    /// EndOfGamePageViewModel.SeizedEquipmentItems (voir sa propre doc) sont retirés de la réserve finale
+    /// par BuildReserve (SeizedReserveSourceIds - une ligne = une pile entière) et donc de la base par
+    /// ApplyReserveAsync ; ici, seulement la phrase d'historique.</summary>
+    private Task ApplyPairEquipmentSeizureIfNeededAsync(List<string> sentences)
     {
         var isUnaffordable = IsPairCorruptionUnaffordable || IsPairRetentionUnaffordable;
-        if (Warband is null || !isUnaffordable || !WantsEquipmentSeizure) return;
-
-        var seized = SeizedEquipmentItems;
-        if (seized.Count == 0) return;
-
-        // SourceId toujours renseigné ici : SeizedEquipmentItems vient exclusivement de
-        // _originalReserveSnapshot (PreExisting, une ligne réelle par ligne WarbandEquipment).
-        foreach (var item in seized)
-            await _warbandService.RemoveWarbandEquipmentAsync(item.SourceId!.Value);
+        if (Warband is null || !isUnaffordable || !WantsEquipmentSeizure || SeizedEquipmentItems.Count == 0)
+            return Task.CompletedTask;
 
         var pairLabel = IsPairCorruptionUnaffordable ? PairCorruptionLabel : PairRetentionLabel;
         sentences.Add(string.Format(Loc["HistoryPairEquipmentSeizedSentence"], pairLabel, SeizedEquipmentTotalValue));
+        return Task.CompletedTask;
     }
 
     /// <summary>"Où est l'Argent ?" (2026-09-01) - repli si le montant à payer dépasserait le solde

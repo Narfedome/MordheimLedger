@@ -15,14 +15,14 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// de l'étape Expérience, retour utilisateur) - toute l'XP de la partie, scénario et victoire compris, se
 /// saisit à l'étape Expérience.
 ///
-/// - **Or** : ScenarioGold, rejoint RareItemBaselineTreasury (le solde unique du wizard).
+/// - **Or** : ScenarioGold, rejoint GainedGoldThisGame (voir EndOfGamePageViewModel.Gains.cs).
 /// - **Pierres magiques** : ScenarioWyrdstoneShards, rejoint FoundThisGameWyrdstoneShards (vendables à
 ///   l'étape Vente de pierre magique).
 /// - **Objets** : ScenarioRewardItems, rejoignent la réserve comme une trouvaille d'Exploration (voir
-///   PendingExplorationStashItems) - donc visibles au Recrutement, vendables à la Vente et
+///   ReserveGains/BuildReserve) - donc visibles au Recrutement, vendables à la Vente et
 ///   réallouables à un Héros à l'étape Réallouer.
 ///
-/// Tout est persisté à Terminer par ApplyScenarioRewardsAsync.</summary>
+/// Or et pierres magiques persistés à Terminer par ApplyScenarioRewardsAsync, objets par ApplyReserveAsync.</summary>
 public partial class EndOfGamePageViewModel
 {
     /// <summary>Texte plutôt qu'int pour que le champ parte vide (même motif qu'ExperienceGainedText).</summary>
@@ -80,9 +80,8 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    /// <summary>Doit passer AVANT ApplyWyrdstoneSaleAsync (qui retranche les éclats vendus) et
-    /// ApplyEquipmentTradingAsync (qui retrouve en base les objets vendus parmi les trouvailles de cette
-    /// partie, voir SellableEquipmentCandidate.IsFromExploration) - appelé en tête de Finish.</summary>
+    /// <summary>Doit passer AVANT ApplyWyrdstoneSaleAsync (qui retranche les éclats vendus du stock) -
+    /// appelé en tête de Finish.</summary>
     private async Task ApplyScenarioRewardsAsync(List<string> sentences)
     {
         if (Warband is null) return;
@@ -102,10 +101,9 @@ public partial class EndOfGamePageViewModel
         }
         if (changed) await _warbandService.SaveWarbandAsync(Warband);
 
+        // Les objets eux-mêmes entrent dans la réserve via ReserveGains (voir BuildReserve), écrite par
+        // ApplyReserveAsync - ici, seulement l'historique.
         foreach (var pick in ScenarioRewardItems)
-        {
-            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, pick.Item, materialRule: pick.MaterialRule);
             sentences.Add(string.Format(Loc["HistoryScenarioItemSentence"], pick.Name));
-        }
     }
 }

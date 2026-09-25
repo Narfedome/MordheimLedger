@@ -125,21 +125,12 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     private List<SpecialRule> _englishSpecialRulesCatalog = new();
     private List<EquipmentItem> _localizedEquipmentCatalog = new();
 
-    /// <summary>Réserve d'équipement de la bande - UNE seule source de vérité pour tout le wizard
-    /// (2026-09-23, retour utilisateur - "pour l'inventaire on va unifié le tout", voir ReserveCollection's
-    /// own doc), remplace l'ancien _warbandInventory (instantané figé lu indépendamment à 3 endroits -
-    /// BuildStashPool, BuildSellableCandidates, ReallocationReserve, chacun avec sa propre convention d'id
-    /// synthétique). Seedée une seule fois dans InitializeAsync depuis une lecture DB fraîche, mutée en
-    /// direct par Achat/Vente/Renvoyer au moment où le joueur confirme sa décision.</summary>
-    private ReserveCollection _reserve = new();
-
-    /// <summary>Instantané FIGÉ de la réserve pré-partie (jamais muté, contrairement à _reserve
-    /// ci-dessus) - gardé UNIQUEMENT pour les deux endroits qui doivent volontairement rester limités au
-    /// stock d'AVANT cette bataille : EndOfGamePageViewModel.PairEngagement.cs's
-    /// WarbandInventoryTotalValue/SeizedEquipmentItems ("Céder du matériel", sélection automatique
-    /// d'objets dont la somme couvre le manque) et EndOfGamePageViewModel.Apply.cs's paiement Dramatis
-    /// Persona par objet alternatif (Johann) - comportement actuel intentionnel à préserver, pas un
-    /// artefact à corriger (voir la mémoire project-end-of-game-shell-and-reserve-refactor).</summary>
+    /// <summary>Instantané FIGÉ de la réserve à l'ouverture du wizard (une ligne PreExisting par ligne
+    /// WarbandEquipment réelle, jamais mutée) - point de départ de BuildReserve, la seule source de vérité
+    /// de la réserve (voir EndOfGamePageViewModel.Reserve.cs), et référence du diff d'ApplyReserveAsync à
+    /// Terminer. Aussi lu directement par "Céder du matériel" (SeizedEquipmentItems) et le paiement
+    /// Dramatis Persona en objet (AlternativePaymentLines), volontairement limités au stock d'avant la
+    /// bataille.</summary>
     private List<ReserveLine> _originalReserveSnapshot = new();
 
     /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
@@ -261,7 +252,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// propres docs) - chacune compare ce solde APRÈS sa propre dépense (déjà incluse dans la somme
     /// ci-dessous) à zéro, jamais un solde partiel isolé.</summary>
     public int EndOfGameTreasuryRemaining =>
-        RareItemBaselineTreasury
+        TreasuryWithGains
         - (SelectedEquippedHenchmanGroupOption?.EquipmentCost ?? 0)
         - RareItemPurchaseTotalCost
         - (SelectedNewHiredSword?.HireCost ?? 0)
@@ -404,7 +395,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // EndOfGamePageViewModel.Recruitment.cs pour le détail de chaque étape. Achat/Vente
             // d'équipement (juste avant, inchangée) remplit/vide la réserve de toute la bande ; ce qui suit
             // source ses achats en priorité depuis cette réserve plutôt que d'acheter systématiquement au
-            // plein tarif - voir BuildStashPool/BuildAvailableReservePool.
+            // plein tarif - voir BuildReserve (EndOfGamePageViewModel.Reserve.cs).
             // Renvoyer (livre des règles - "Disbanding a Warband" + FAQ officielle citée par
             // l'utilisateur 2026-09-22 - "you are allowed to dismiss any warrior at any time during the
             // post-battle sequence... transfer the warrior's weapons and gear to your stash and then
@@ -610,7 +601,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// retrouver "le chef" pour quelques bonus étroits d'Exploration/Prisonniers (voir
     /// ApplyExplorationOutcomeAsync/ApplyCapturedEnemiesAsync), qu'il participe ou non à CETTE bataille.
     /// Instantané figé pris une fois dans InitializeAsync, même raisonnement que tous les autres
-    /// instantanés pré-bataille de ce ViewModel (_warbandInventory etc.) - jamais rechargé en cours de
+    /// instantanés pré-bataille de ce ViewModel (_originalReserveSnapshot etc.) - jamais rechargé en cours de
     /// wizard.</summary>
     private List<WarriorRow> _allActiveWarriorRows = new();
 
@@ -793,16 +784,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
             _specialRulesByEnglishName = specialRulesByEnglishName;
             // Une ligne PreExisting par ligne WarbandEquipment réelle, jamais fusionnées entre elles
-            // (chacune garde son SourceId réel - voir ReserveCollection.Add's own doc) - _reserve est la
-            // copie VIVANTE (mutée par Achat/Vente/Renvoyer au fil du wizard). _originalReserveSnapshot
-            // reçoit ses PROPRES instances ReserveLine (jamais les mêmes objets que _reserve.Lines, dont
-            // la Quantity est mutable en place - un partage de référence romprait le "jamais muté" promis
-            // par sa propre doc dès la première vente/consommation).
+            // (chacune garde son SourceId réel) - BuildReserve repart de cet instantané à chaque lecture.
             foreach (var stashItem in warbandInventory)
-            {
-                _reserve.Add(stashItem.Item, stashItem.MaterialRule, stashItem.Quantity, ReserveLineOrigin.PreExisting, stashItem.Id, stashItem.FoundValueOverride);
                 _originalReserveSnapshot.Add(new ReserveLine(stashItem.Item, stashItem.MaterialRule, stashItem.Quantity, ReserveLineOrigin.PreExisting, stashItem.Id, stashItem.FoundValueOverride));
-            }
             _skillIdsByEnglishName = skillIdsByEnglishName;
             _hiredSwordCatalog = localizedHiredSwords;
             _dramatisPersonaCatalog = dramatisPersonaCatalog;
@@ -836,7 +820,6 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             BuildPairCorruptionOption();
             BuildPairRetentionOption();
             BuildExistingHenchmanTopUps();
-            InitializeReallocation();
 
             WireUpChangeNotifications();
 
@@ -1006,6 +989,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         if (!ValidateCurrentStep()) return;
         await ShowWeaponLimitWarningIfNeededAsync();
         if (StepIndex < Steps.Count - 1) await ChangeStepAsync(StepIndex + 1);
+        if (Current.Kind == StepKind.EquipmentReallocation) CaptureReallocationSnapshot();
     }
 
     /// <summary>Spinner pendant le changement d'étape (2026-09-24, retour utilisateur) : la vue de
@@ -1108,10 +1092,30 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         return !isMissing;
     }
 
+    /// <summary>Retour en arrière (2026-09-25, retour utilisateur - "reset l'étape si on clique sur
+    /// précédent", version ciblée retenue) : quitter à reculons une étape dont les décisions visent une
+    /// ligne précise de la réserve les annule, pour qu'un changement plus haut dans le wizard ne les
+    /// laisse jamais pointer vers un objet disparu - Réallouer (tous ses déplacements, voir
+    /// UndoReallocation) et Achat/Vente (les ventes seulement, les achats ne dépendent pas de la réserve).
+    /// Le Recrutement n'est jamais effacé : ce qu'une recrue prend dans la réserve est recalculé en direct
+    /// (ConsumeRecruitment/RecruitPickCost).</summary>
     [RelayCommand]
     private async Task Back()
     {
-        if (StepIndex > 0) await ChangeStepAsync(StepIndex - 1);
+        if (StepIndex <= 0) return;
+
+        switch (Current.Kind)
+        {
+            case StepKind.EquipmentReallocation:
+                UndoReallocation();
+                break;
+            case StepKind.EquipmentTrading when PendingSales.Count > 0:
+                PendingSales.Clear();
+                NotifyTreasuryChanged();
+                break;
+        }
+
+        await ChangeStepAsync(StepIndex - 1);
     }
 
     // Étape "Hors de combat" : un Héros (toujours HeadCount 1) se coche/décoche, mais un groupe
@@ -1158,9 +1162,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// depuis le passage en page Shell (2026-09-22) : plus de Task&lt;bool&gt; à faire remonter à
     /// l'appelant, ce ViewModel lance lui-même tout le pipeline Apply*Async (déplacé depuis
     /// WarbandDetailViewModel.EndOfGame.cs, voir EndOfGamePageViewModel.Apply.cs) puis navigue en
-    /// arrière - WarbandDetailPage se rafraîchit tout seul au retour (voir son OnAppearing). Ordre des
-    /// appels inchangé (voir chaque Apply*Async's own doc pour les contraintes d'ordre encore
-    /// pertinentes - statut/effectif, pas la réserve).</summary>
+    /// arrière - WarbandDetailPage se rafraîchit tout seul au retour (voir son OnAppearing). Voir
+    /// chaque Apply*Async's own doc pour les contraintes d'ordre encore pertinentes (statut/effectif) ;
+    /// la réserve n'en impose plus aucune, écrite une seule fois à la fin (ApplyReserveAsync).</summary>
     [RelayCommand]
     private async Task Finish()
     {
@@ -1171,7 +1175,14 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var language = LocalizationService.Instance.Language;
             var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], SelectedResult) };
 
-            // En tête : ses objets/éclats doivent exister en base avant la Vente (voir sa doc).
+            // Réserve finale et consommation des vétérans figées AVANT le pipeline : les Apply*Async
+            // mutent des guerriers (équipement, effectif, XP) dont ces deux calculs dépendent. La réserve
+            // n'est écrite en base qu'une fois, tout à la fin (ApplyReserveAsync) - aucune étape ci-dessous
+            // ne touche plus WarbandEquipment, d'où la fin des contraintes d'ordre liées à la réserve.
+            var finalReserve = BuildReserve(ReserveStage.Final);
+            var topUpPlans = PlanTopUps().ToDictionary(kv => kv.Key, kv => (Plan: kv.Value, Breakdown: GetTopUpBreakdown(kv.Key)));
+            var servedReservePicks = ServedReservePicks();
+
             await ApplyScenarioRewardsAsync(sentences);
             await ApplyExplorationOutcomeAsync(_englishEquipmentCatalog, _equipmentItemsByEnglishName, _englishSpecialRulesCatalog, sentences);
             await ApplyWarriorOutcomesAsync(language, sentences);
@@ -1190,20 +1201,13 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             await ApplyPairEquipmentSeizureIfNeededAsync(sentences);
             await ApplyPairDuelIfNeededAsync(sentences);
             await ApplyHiredSwordUpkeepAsync(sentences);
-            // Doit rester AVANT ApplyEquipmentTradingAsync : un guerrier renvoyé restitue son équipement
-            // à la réserve, qui doit exister en base pour que la Vente (juste après) puisse le proposer -
-            // voir SellableEquipmentCandidate.IsFromDismissal. Doit rester APRÈS
-            // ApplyWarriorOutcomesAsync (plus haut) : les morts de CETTE bataille réduisent déjà
-            // Warrior.HeadCount avant qu'on reclampe DismissCount contre l'effectif RÉEL (voir
-            // ApplyDismissalsAsync's own doc).
+            // Doit rester APRÈS ApplyWarriorOutcomesAsync (plus haut) : les morts de CETTE bataille
+            // réduisent déjà Warrior.HeadCount avant qu'on reclampe DismissCount contre l'effectif RÉEL
+            // (voir ApplyDismissalsAsync's own doc).
             await ApplyDismissalsAsync(sentences);
-            // Doit rester AVANT ApplyRecruitmentAsync/ApplyHenchmanRecruitmentAsync : ceux-ci consomment
-            // en priorité la réserve que cette étape vient de remplir/vider. Doit rester APRÈS
-            // ApplyExplorationOutcomeAsync (plus haut) : une vente peut porter sur une trouvaille
-            // d'Exploration OU un renvoi de cette même partie.
-            await ApplyEquipmentTradingAsync(language, sentences);
-            await ApplyRecruitmentAsync(language, sentences);
-            await ApplyHenchmanRecruitmentAsync(language, sentences);
+            await ApplyEquipmentTradingAsync(sentences);
+            await ApplyRecruitmentAsync(servedReservePicks, sentences);
+            await ApplyHenchmanRecruitmentAsync(topUpPlans, servedReservePicks, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant explicite ici plutôt qu'implicite dans l'ordre du code.
@@ -1214,9 +1218,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // recalculer ici plutôt qu'au tout début produit exactement le même résultat.
             var previouslySickWarriors = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
             await ApplySicknessLifecycleAsync(previouslySickWarriors);
-            // Réallouer l'équipement : TOUT DERNIER dans le pipeline - doit voir l'état final de tout ce
-            // qui précède (Renvoyer/Vente/Recrutement).
-            await ApplyEquipmentReallocationAsync(language, sentences);
+            // Réallouer l'équipement : côté Héros seulement (la Réserve est couverte par ApplyReserveAsync).
+            await ApplyEquipmentReallocationAsync(sentences);
+            await ApplyReserveAsync(finalReserve);
 
             // La partie est terminée : redonne la main à "Lancer la partie" sur la fiche de bande (voir
             // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée.

@@ -80,7 +80,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         private static object?[] SlotState(RecruitSlot slot) =>
         [
             slot.Experience,
-            slot.Equipment.Select(e => new object?[] { e.Item.Id, e.MaterialRule?.Id, e.ExistingId }),
+            slot.Equipment.Select(e => new object?[] { e.Item.Id, e.MaterialRule?.Id, e.BlessingRule?.Id, e.ExistingId }),
             slot.Skills.Select(s => s.Id),
             slot.Spells.Select(s => s.Id),
             slot.Mutations.Select(m => m.Id),
@@ -122,6 +122,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [NotifyPropertyChangedFor(nameof(RecapLines))]
         [NotifyPropertyChangedFor(nameof(RecapTitle))]
         [NotifyPropertyChangedFor(nameof(RecapRatingDisplay))]
+        [NotifyPropertyChangedFor(nameof(RecapWyrdstoneDisplay))]
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -157,6 +158,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public bool IsRecapTab => IsWizardMode && SelectedTab == StepCount - 1;
 
         public string RecapTitle => Archetype is null ? Item.Name : $"{Item.Name} — {Archetype.Name}";
+
+        /// <summary>Mode Libre uniquement - Warband n'est pas observable, d'où une propriété du ViewModel
+        /// rafraîchie à chaque changement d'étape plutôt qu'un binding direct sur Item.WyrdstoneShards.</summary>
+        public string RecapWyrdstoneDisplay => $"{Loc["WarbandsWyrdstoneLabel"]} {Item.WyrdstoneShards}";
 
         /// <summary>Valeur de bande des recrues de cette session (Core.Rules.WarbandRatingRules - même formule
         /// que la fiche de bande), Francs-Tireurs compris.</summary>
@@ -771,6 +776,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             OnPropertyChanged(nameof(StepLabel));
             OnPropertyChanged(nameof(IsHiredSwordNamesTab));
             OnPropertyChanged(nameof(IsRecapTab));
+            // Une erreur de l'étape Équipement (fonds, mutation) se réévalue dès que les achats changent.
+            if (EquipmentError is not null) ValidateEquipmentStep();
 
             if (Archetype is null) return;
             var total = TotalWarriorCount;
@@ -780,12 +787,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         /// <summary>Achat d'équipement pour une cible : un HenchmanGroupDraft (un seul achat, appliqué à tout le
-        /// sous-groupe) ou un WarriorNameSlot (Héros - propre à cette recrue). Même logique que
-        /// WarriorEditDialogViewModel.AddEquipment (picker filtré par EquipmentListId/WarriorArchetypeId,
-        /// choix de matériau pour les armes de corps à corps via un seul MaterialPickerDialog paginé
-        /// Précédent/Suivant plutôt qu'une ActionSheet par arme, arrêt au premier objet trop cher) -
-        /// simplement pas encore de WarriorId réel pour appeler AddWarriorEquipmentAsync, donc on garde
-        /// des EquipmentPick en mémoire jusqu'au Save.</summary>
+        /// sous-groupe) ou un WarriorNameSlot (Héros - propre à cette recrue) - pas encore de WarriorId réel
+        /// pour appeler AddWarriorEquipmentAsync, donc on garde des EquipmentPick en mémoire jusqu'au Save.
+        /// Aucun dialog bloquant après le sélecteur en mode Coûts appliqués (retour utilisateur 2026-09-25,
+        /// un dialog ouvert juste après le sélecteur cassait la pile modale) : les fonds insuffisants sont
+        /// signalés sur l'étape (ValidateEquipmentStep) et la limite d'armes au clic sur Suivant
+        /// (WarnWeaponLimitsAsync), comme dans le wizard Fin de Partie. Seul le mode Libre ouvre
+        /// MaterialPickerDialog, et seulement si le lot contient une arme de corps à corps.</summary>
         [RelayCommand]
         private async Task AddEquipment(object target)
         {
@@ -814,83 +822,58 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             // sur papier) : tout le catalogue, objets rares/artefacts trouvés en campagne compris.
             var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost,
                 destination.Any(p => p.Item.IsFreeDagger), equipmentListOnly: !IsExistingWarband, unrestricted: IsExistingWarband);
+            if (items.Count == 0) return;
 
-            // Un seul dialog paginé pour toutes les armes de corps à corps du lot plutôt qu'une ActionSheet
-            // fermée/rouverte pour chacune - voir MaterialPickerDialogViewModel. Annuler le dialog revient
-            // à choisir "Normal" pour toutes (même comportement qu'annuler l'ancienne ActionSheet par arme).
-            // File plutôt que Dictionary&lt;EquipmentItem, ...&gt; : items peut contenir le MÊME
-            // EquipmentItem plusieurs fois (le picker permet d'acheter plusieurs exemplaires d'un même
-            // objet, voir EquipmentItemViewModel.ConfirmSelection) - un dictionnaire écraserait le premier
-            // choix (ex. Gromril sur la 1re épée longue) par le second (Normal sur la 2e), les deux
-            // partageant la même clé. La file consomme les choix dans le même ordre que meleeItems, qui
-            // suit lui-même l'ordre de items - correct même avec des objets non-armes intercalés.
-            var meleeMaterials = new Queue<SpecialRule?>();
-            var meleeItems = items.Where(i => i.Category == EquipmentCategory.MeleeWeapon).ToList();
-            if (meleeItems.Count > 0)
+            // Matériau (corps à corps) et bénédiction (toute arme) - Tout normal / tap à l'extérieur du
+            // dialog = ni l'un ni l'autre, voir MaterialPickerDialogViewModel.ResolveChoices.
+            List<MaterialChoice> choices = [];
+            bool? confirmed = null;
+            if (IsExistingWarband)
             {
-                var materialRules = (await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language))
-                    .Where(r => r.CostMultiplier.HasValue).ToList();
-                if (materialRules.Count > 0)
-                {
-                    // hasFreeDaggerSlot suit l'ordre des items comme la boucle d'achat plus bas, pour que
-                    // le prix affiché ici (MaterialChoice.isFreeEligible) corresponde exactement à ce qui
-                    // sera effectivement facturé - seule la PREMIÈRE dague du lot (existante ou dans ce
-                    // même lot) est éligible, achetée en "Normal" (voir MaterialChoice, un matériau
-                    // Gromril/Ithilmar reste payant même sur cette dague-là).
-                    var hasFreeDaggerSlot = destination.Any(p => p.Item.IsFreeDagger);
-                    var choices = new List<MaterialChoice>();
-                    foreach (var item in meleeItems)
-                    {
-                        choices.Add(new MaterialChoice(item, materialRules, Loc["WarriorsMaterialNormal"], EquipmentPricing.IsFreeDaggerEligible(item.IsFreeDagger, hasFreeDaggerSlot)));
-                        if (item.IsFreeDagger) hasFreeDaggerSlot = true;
-                    }
-                    var confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices)));
-                    foreach (var choice in choices)
-                        meleeMaterials.Enqueue(confirmed == true ? choice.SelectedMaterial : null);
-                }
+                choices = await MaterialPickerDialogViewModel.BuildChoicesAsync(_libraryService, items, destination.Any(p => p.Item.IsFreeDagger));
+                if (choices.Count > 0)
+                    confirmed = await ShowDialogAsync(new MaterialPickerDialog(new MaterialPickerDialogViewModel(choices, _detailDialogs)));
             }
+            var resolved = MaterialPickerDialogViewModel.ResolveChoices(items, choices, confirmed);
 
-            foreach (var equipmentItem in items)
+            for (var i = 0; i < items.Count; i++)
             {
-                var materialRule = equipmentItem.Category == EquipmentCategory.MeleeWeapon && meleeMaterials.Count > 0
-                    ? meleeMaterials.Dequeue()
-                    : null;
-                var pick = new EquipmentPick(equipmentItem, materialRule)
+                var equipmentItem = items[i];
+                var (materialRule, blessingRule) = resolved[i];
+                destination.Add(new EquipmentPick(equipmentItem, materialRule)
                 {
-                    // La première dague est gratuite par guerrier/groupe, uniquement en "Normal" (livre des
+                    BlessingRule = blessingRule,
+                    // La première dague est gratuite par guerrier/groupe, uniquement sans matériau (livre des
                     // règles : "in addition to his free dagger") - une deuxième dague, ou un matériau
                     // délibérément choisi sur celle-ci, coûte le prix normal et compte dans la limite
                     // d'armes (voir EquipmentItem.IsFreeDagger/WeaponLimits).
                     IsFree = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, destination.Any(p => p.Item.IsFreeDagger)) && materialRule is null
-                };
-
-                // Coût total si on achète maintenant (perUnitCost = l'effectif du groupe pour un Homme de
-                // main, 1 pour un Héros) - sélection multiple : on s'arrête au premier objet trop cher
-                // plutôt que de tout annuler, même logique que WarriorEditDialogViewModel.AddEquipment.
-                if (!IsExistingWarband && RemainingTreasury < pick.Cost * perUnitCost)
-                {
-                    await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-                    break;
-                }
-
-                destination.Add(pick);
-            }
-
-            // Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
-            // guerrier, livre des règles "Starting a Warband") - certaines règles spéciales de bande
-            // (ex. Combat de Queue Skaven) autorisent à dépasser, donc jamais bloquant - voir WeaponLimits.
-            if (WeaponLimits.ExceedsLimits(destination.Select(p => p.Item)))
-            {
-                var warriorLabel = target switch
-                {
-                    WarriorNameSlot { Name.Length: > 0 } nameSlot => nameSlot.Name,
-                    HenchmanGroupDraft group => group.Name,
-                    _ => row.Name
-                };
-                await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], warriorLabel));
+                });
             }
 
             UpdateRecruitability();
+        }
+
+        /// <summary>Avertissement non-bloquant (2 armes de corps à corps / 2 armes de tir différentes max par
+        /// guerrier, livre des règles "Starting a Warband") - certaines règles spéciales de bande (ex. Combat
+        /// de Queue Skaven) autorisent à dépasser, donc jamais bloquant - voir WeaponLimits. Déclenché au clic
+        /// sur Suivant (ou Enregistrer hors assistant) plutôt qu'à la sélection, comme
+        /// EndOfGamePageViewModel.ShowWeaponLimitWarningIfNeededAsync : un dialog ouvert juste après le
+        /// sélecteur cassait la pile modale. Seulement pour les cibles ayant reçu au moins un nouvel achat -
+        /// un guerrier déjà en base resté tel quel n'est pas réaverti.</summary>
+        private async Task WarnWeaponLimitsAsync()
+        {
+            foreach (var row in RecruitRows)
+            {
+                var slots = row.NameSlots.Select(s => (Slot: (RecruitSlot)s, Label: s.DisplayLabel))
+                    .Concat(row.HenchmanGroupDrafts.Select(g => (Slot: (RecruitSlot)g, Label: g.Name)));
+                foreach (var (slot, label) in slots)
+                {
+                    if (slot.Equipment.All(p => p.ExistingId is not null)) continue;
+                    if (WeaponLimits.ExceedsLimits(slot.Equipment.Select(p => p.Item)))
+                        await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], label));
+                }
+            }
         }
 
         /// <summary>Tap sur un chip d'équipement acheté (groupe ou slot Héros) - même recap qu'ailleurs
@@ -898,7 +881,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// pas juste le mini-popup Nom+Description générique (ChipDetailDialog) : un objet d'équipement a
         /// coût/rareté/restrictions propres, pas seulement une description.</summary>
         [RelayCommand]
-        private Task ShowEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule);
+        private Task ShowEquipmentDetail(EquipmentPick pick) => _detailDialogs.ShowEquipmentDetailDialogAsync(pick.Item, pick.MaterialRule, blessingRule: pick.BlessingRule);
 
         /// <summary>Retire un EquipmentPick de quelle que collection le contient (Equipment d'un
         /// HenchmanGroupDraft ou d'un slot Héros) - identité de référence, pas besoin de savoir d'avance
@@ -1002,7 +985,6 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             foreach (var mutation in mutations)
                 destination.Add(mutation);
             UpdateRecruitability();
-            if (EquipmentError is not null) ValidateEquipmentStep();
         }
 
         [RelayCommand]
@@ -1174,6 +1156,14 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         {
             if (!IsExistingWarband)
             {
+                // Fonds insuffisants signalés ici plutôt que par un dialog juste après le sélecteur
+                // d'équipement (voir AddEquipment) - le sélecteur affiche déjà le restant en direct.
+                if (RemainingTreasury < 0)
+                {
+                    EquipmentError = Loc["WarbandsInsufficientFundsMessage"];
+                    return false;
+                }
+
                 foreach (var row in RecruitRows.Where(r => r.Archetype.MustStartWithMutation))
                 {
                     var slots = row.NameSlots.Select(s => (Slot: (RecruitSlot)s, Label: s.DisplayLabel))
@@ -1272,6 +1262,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (IsGeneralTab && !ValidateGeneralStep()) return;
             if (IsWarriorsTab && !ValidateWarriorsStep()) return;
             if (IsEquipmentTab && !ValidateEquipmentStep()) return;
+            if (IsEquipmentTab) await WarnWeaponLimitsAsync();
             if (IsWarriorNamesTab && !ValidateWarriorNamesStep()) return;
             // Plus la dernière étape en création pas à pas (Récapitulatif après, voir StepCount) - validée ici
             // plutôt que seulement au Save.
@@ -1296,6 +1287,16 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// ExistingId est un nouvel achat (AddWarriorEquipmentAsync), une entrée de baseline absente de la
         /// collection courante a été retirée (RemoveWarriorEquipmentAsync) - même identité d'objet pour
         /// Compétences/Sorts (voir RecruitSlot constructeur, Skills/Spells portent directement Item).</summary>
+        /// <summary>Persiste un EquipmentPick sur un guerrier en base - matériau à l'insertion, bénédiction
+        /// ensuite (AddWarriorEquipmentAsync n'a pas de paramètre bénédiction, même idiome que
+        /// EndOfGamePageViewModel.Apply.Recruitment).</summary>
+        private async Task AddPickAsync(int warriorId, EquipmentPick pick)
+        {
+            var carried = await _warbandService.AddWarriorEquipmentAsync(warriorId, pick.Item, materialRule: pick.MaterialRule);
+            if (pick.BlessingRule is { } blessing)
+                await _warbandService.SetWarriorEquipmentBlessingRuleAsync(carried.Id, blessing.Id);
+        }
+
         private async Task SyncExistingSlotAsync(Warrior w, RecruitSlot slot, string name, int? newHeadCount)
         {
             var dirty = false;
@@ -1305,7 +1306,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (dirty) await _warbandService.SaveWarriorAsync(w);
 
             foreach (var pick in slot.Equipment.Where(p => p.ExistingId is null))
-                await _warbandService.AddWarriorEquipmentAsync(w.Id, pick.Item, materialRule: pick.MaterialRule);
+                await AddPickAsync(w.Id, pick);
             foreach (var baseline in slot.BaselineEquipment.Where(b => slot.Equipment.All(p => p.ExistingId != b.Id)))
                 await _warbandService.RemoveWarriorEquipmentAsync(baseline.Id);
 
@@ -1364,6 +1365,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 SelectedTab = 2;
                 return;
             }
+            // Hors assistant, pas de clic sur Suivant pour porter l'avertissement - voir WarnWeaponLimitsAsync.
+            if (!IsWizardMode) await WarnWeaponLimitsAsync();
 
             PopulateSuggestedNames();
             if (!ValidateWarriorNamesStep())
@@ -1391,12 +1394,15 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     var created = await _warbandService.CreateWarbandAsync(Item.Name, Archetype!);
                     warbandId = created.Id;
                     created.Treasury = IsExistingWarband ? TreasuryOverride : Archetype!.StartingTreasury - TotalSpent;
+                    // Mode Libre uniquement (saisie de l'étape Général) - une bande neuve démarre sans pierre.
+                    created.WyrdstoneShards = IsExistingWarband ? Math.Max(0, Item.WyrdstoneShards) : 0;
                     await _warbandService.SaveWarbandAsync(created);
                 }
                 else
                 {
                     warbandId = Item.Id;
                     Item.Treasury = IsExistingWarband ? TreasuryOverride : RosterStartingTreasury - TotalSpent + refunds;
+                    Item.WyrdstoneShards = Math.Max(0, Item.WyrdstoneShards);
                     await _warbandService.SaveWarbandAsync(Item);
                 }
 
@@ -1414,7 +1420,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
                             var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, slot.Name.Trim());
                             foreach (var pick in slot.Equipment)
-                                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                                await AddPickAsync(warrior.Id, pick);
                             foreach (var skill in slot.Skills)
                                 await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
                             foreach (var spell in slot.Spells)
@@ -1447,7 +1453,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
 
                             var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim(), headCount: group.Count);
                             foreach (var pick in group.Equipment)
-                                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
+                                await AddPickAsync(warrior.Id, pick);
                             foreach (var skill in group.Skills)
                                 await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
                             foreach (var spell in group.Spells)

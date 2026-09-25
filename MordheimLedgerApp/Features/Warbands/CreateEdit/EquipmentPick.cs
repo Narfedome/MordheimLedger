@@ -18,10 +18,23 @@ public class EquipmentPick
     /// WarriorEditDialogViewModel.AddEquipment pour le même choix côté guerrier déjà recruté.</summary>
     public SpecialRule? MaterialRule { get; }
 
-    /// <summary>"Sword (G)" when a material with an Abbreviation was chosen, plain "Sword" otherwise -
-    /// keeps the chip compact instead of appending the material's full name (see SpecialRule.
-    /// Abbreviation).</summary>
-    public string Name => MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
+    /// <summary>Null = arme non bénie. Non-null = règle "Blessed Weapon", cumulable avec MaterialRule
+    /// (choisie dans MaterialPickerDialog en création libre) - ne change pas le prix (×1). Persistée au
+    /// Save via WarbandService.SetWarriorEquipmentBlessingRuleAsync, même slot que WarriorEquipment.
+    /// BlessingRule.</summary>
+    public SpecialRule? BlessingRule { get; init; }
+
+    /// <summary>"Sword (G, B)" when a material and/or blessing with an Abbreviation was chosen, plain
+    /// "Sword" otherwise - same idiom as WarriorEquipment.NameDisplay (see SpecialRule.Abbreviation).</summary>
+    public string Name
+    {
+        get
+        {
+            var abbrs = new[] { MaterialRule?.Abbreviation, BlessingRule?.Abbreviation }
+                .Where(a => !string.IsNullOrEmpty(a)).ToList();
+            return abbrs.Count > 0 ? $"{Item.Name} ({string.Join(", ", abbrs)})" : Item.Name;
+        }
+    }
 
     /// <summary>Set true by the caller (WarbandEditDialogViewModel.AddEquipment) when Item.IsFreeDagger
     /// and the target doesn't already carry one - overrides Cost to 0 for this specific pick. Not

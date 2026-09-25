@@ -198,9 +198,6 @@
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Matériau</value>
   </data>
-  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
-    <value>{0}/{1}</value>
-  </data>
   <data name="WarbandsSplitGroupTitle" xml:space="preserve">
     <value>Diviser le groupe</value>
   </data>
@@ -215,6 +212,15 @@
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="WarriorsMaterialBlessed" xml:space="preserve">
+    <value>Bénie</value>
+  </data>
+  <data name="WarriorsMaterialAllNormal" xml:space="preserve">
+    <value>Tout normal</value>
+  </data>
+  <data name="WarriorsMaterialValidate" xml:space="preserve">
+    <value>Valider</value>
   </data>
   <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
     <value>Bibliothèque vide</value>
@@ -320,6 +326,9 @@
   </data>
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Pierres magiques :</value>
+  </data>
+  <data name="WarbandWyrdstoneShardsPh" xml:space="preserve">
+    <value>Pierres magiques</value>
   </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Héros</value>
@@ -2207,4 +2216,4 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
     <value>Ne gagne jamais d'Expérience</value>
   </data>
-</root>
+</root>

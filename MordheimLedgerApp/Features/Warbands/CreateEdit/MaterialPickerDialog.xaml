@@ -2,66 +2,117 @@
 <dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:system="clr-namespace:System;assembly=mscorlib"
                xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.MaterialPickerDialog"
                x:DataType="local:MaterialPickerDialogViewModel"
+               x:Name="root"
                BackgroundColor="Transparent"
                Padding="0"
                VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <VerticalStackLayout Spacing="12">
-            <Grid ColumnDefinitions="*,Auto">
-                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                    <Label Text="{loc:Loc WarriorsMaterialHeading}" Style="{StaticResource DialogTitleLabelStyle}"/>
-                    <Label Text="{Binding Current.Item.Name}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            <Label Text="{loc:Loc WarriorsMaterialHeading}" Style="{StaticResource DialogTitleLabelStyle}"/>
+
+            <!-- Toutes les armes du lot sur un seul écran (plus de pagination). Par arme : nom + prix + ⓘ
+                 (fiche de l'arme avec matériau/bénédiction), segments de matériau exclusifs + ⓘ (règle du
+                 matériau choisi, estompé en Normal - corps à corps uniquement), case Bénie cumulable + ⓘ (toute arme,
+                 tir et poudre noire compris). Cibles tactiles de 40px. -->
+            <ScrollView MaximumHeightRequest="440">
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Choices}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:MaterialChoice">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="10,4">
+                                <VerticalStackLayout Spacing="2">
+                                    <Grid ColumnDefinitions="*,Auto,40">
+                                        <Label Grid.Column="0" Text="{Binding Item.Name}" FontSize="13" FontAttributes="Bold"
+                                               VerticalOptions="Center" LineBreakMode="TailTruncation"/>
+                                        <Label Grid.Column="1" Text="{Binding CostDisplay}" FontSize="12"
+                                               TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                        <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                                     Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                                     Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                                     IconSize="14" ButtonWidthRequest="40" ButtonHeightRequest="40"
+                                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowWeaponDetailCommand}"
+                                                                     CommandParameter="{Binding .}"/>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="*,40" IsVisible="{Binding HasMaterialOptions}">
+                                        <FlexLayout Grid.Column="0" Direction="Row" Wrap="NoWrap" JustifyContent="Start"
+                                                    BindableLayout.ItemsSource="{Binding Options}">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="local:MaterialOptionRow">
+                                                    <Border FlexLayout.Grow="1" FlexLayout.Basis="0" HeightRequest="36" Margin="1,0"
+                                                            StrokeShape="RoundRectangle 8" Stroke="{DynamicResource AppBorder}"
+                                                            BackgroundColor="Transparent" Padding="2,0">
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="BackgroundColor" Value="{DynamicResource AppAccent}"/>
+                                                                <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer
+                                                                Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectMaterialCommand}"
+                                                                CommandParameter="{Binding .}"/>
+                                                        </Border.GestureRecognizers>
+                                                        <Label Text="{Binding Name}" FontSize="12" LineBreakMode="TailTruncation"
+                                                               HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                                            <Label.Triggers>
+                                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                                    <Setter Property="TextColor" Value="{DynamicResource AppBackground}"/>
+                                                                </DataTrigger>
+                                                            </Label.Triggers>
+                                                        </Label>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </FlexLayout>
+                                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                                     Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                                     Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                                     IconSize="14" ButtonWidthRequest="40" ButtonHeightRequest="40"
+                                                                     IsEnabled="{Binding HasMaterial}"
+                                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowMaterialDetailCommand}"
+                                                                     CommandParameter="{Binding .}">
+                                            <components:FaIconButtonView.Triggers>
+                                                <DataTrigger TargetType="components:FaIconButtonView" Binding="{Binding HasMaterial}" Value="False">
+                                                    <Setter Property="Opacity" Value="0.3"/>
+                                                </DataTrigger>
+                                            </components:FaIconButtonView.Triggers>
+                                        </components:FaIconButtonView>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="Auto,*,40" IsVisible="{Binding CanBeBlessed}">
+                                        <CheckBox Grid.Column="0" IsChecked="{Binding IsBlessed}" VerticalOptions="Center"/>
+                                        <Label Grid.Column="1" Text="{loc:Loc WarriorsMaterialBlessed}" FontSize="12" VerticalOptions="Center">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnBlessedLabelTapped"/>
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                        <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                                     Icon="{x:Static icons:SolidFont.CircleInfo}"
+                                                                     Tooltip="{loc:Loc LibDetailsTooltip}"
+                                                                     IconSize="14" ButtonWidthRequest="40" ButtonHeightRequest="40"
+                                                                     Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowBlessingDetailCommand}"
+                                                                     CommandParameter="{Binding .}"/>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-                <Label Grid.Column="1" Text="{Binding StepLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
-                       VerticalOptions="Center" IsVisible="{Binding HasMultiple}"/>
-            </Grid>
-
-            <!-- Une carte tapotable par option (Normal + chaque matériau éligible), liseré accentué sur
-                 celle sélectionnée (SelectableCardBorderStyle, jusqu'ici défini mais inutilisé ailleurs -
-                 exactement le besoin ici). Sélection exclusive gérée par MaterialChoice.Select (drapeau
-                 IsSelected imperatif, même idiome qu'EquipmentItemRow) plutôt qu'un DataTrigger comparant
-                 à la sélection du parent. -->
-            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Current.Options}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="local:MaterialOptionRow">
-                        <Border Style="{StaticResource SelectableCardBorderStyle}" Padding="10,8">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:MaterialPickerDialogViewModel}}, Path=SelectMaterialCommand}"
-                                    CommandParameter="{Binding .}"/>
-                            </Border.GestureRecognizers>
-                            <VerticalStackLayout Spacing="4">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
-                                    <Label Grid.Column="1" Text="{Binding CostDisplay}" FontSize="12"
-                                           TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                                </Grid>
-                                <Label Text="{Binding Description}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
-                                       IsVisible="{Binding Description, Converter={StaticResource IsNotNullConverter}}"/>
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
-
-            <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding HasMultiple}">
-                <Button Grid.Column="0" Text="{loc:Loc LibBack}" Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding BackCommand}" IsEnabled="{Binding CanGoBack}"/>
-                <Button Grid.Column="2" Text="{loc:Loc LibNext}" Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding NextCommand}" IsEnabled="{Binding CanGoNext}"/>
-            </Grid>
+            </ScrollView>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <Button Grid.Column="0" Text="{loc:Loc BtnCancel}" Style="{StaticResource DialogSecondaryButtonStyle}"
-                        Command="{Binding CancelCommand}"/>
-                <Button Grid.Column="1" Text="{loc:Loc BtnSave}" Command="{Binding SaveCommand}"/>
+                <Button Grid.Column="0" Text="{loc:Loc WarriorsMaterialAllNormal}" Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Command="{Binding AllNormalCommand}"/>
+                <Button Grid.Column="1" Text="{loc:Loc WarriorsMaterialValidate}" Command="{Binding SaveCommand}"/>
             </Grid>
         </VerticalStackLayout>
     </Border>

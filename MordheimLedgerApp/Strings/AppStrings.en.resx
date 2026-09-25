@@ -198,9 +198,6 @@
   <data name="WarriorsMaterialHeading" xml:space="preserve">
     <value>Material</value>
   </data>
-  <data name="WarriorsMaterialStepLabel" xml:space="preserve">
-    <value>{0}/{1}</value>
-  </data>
   <data name="WarbandsSplitGroupTitle" xml:space="preserve">
     <value>Split group</value>
   </data>
@@ -215,6 +212,15 @@
   </data>
   <data name="WarriorsMaterialNormal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="WarriorsMaterialBlessed" xml:space="preserve">
+    <value>Blessed</value>
+  </data>
+  <data name="WarriorsMaterialAllNormal" xml:space="preserve">
+    <value>All normal</value>
+  </data>
+  <data name="WarriorsMaterialValidate" xml:space="preserve">
+    <value>Confirm</value>
   </data>
   <data name="WarbandsEmptyLibraryTitle" xml:space="preserve">
     <value>Empty library</value>
@@ -320,6 +326,9 @@
   </data>
   <data name="WarbandsWyrdstoneLabel" xml:space="preserve">
     <value>Wyrdstone:</value>
+  </data>
+  <data name="WarbandWyrdstoneShardsPh" xml:space="preserve">
+    <value>Wyrdstone shards</value>
   </data>
   <data name="WarriorsGroupHeroes" xml:space="preserve">
     <value>Heroes</value>
@@ -2207,4 +2216,4 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
     <value>Never Gains Experience</value>
   </data>
-</root>
+</root>

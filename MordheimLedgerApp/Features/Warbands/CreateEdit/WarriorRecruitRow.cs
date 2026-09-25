@@ -217,7 +217,7 @@ public abstract partial class RecruitSlot : ObservableObject
             BaselineInjuries = existingWarrior.Injuries.ToList();
             BaselineHeadCount = existingWarrior.HeadCount;
             foreach (var we in existingWarrior.Equipment)
-                Equipment.Add(new EquipmentPick(we.Item, we.MaterialRule) { ExistingId = we.Id });
+                Equipment.Add(new EquipmentPick(we.Item, we.MaterialRule) { ExistingId = we.Id, BlessingRule = we.BlessingRule });
             foreach (var ws in existingWarrior.Skills)
                 Skills.Add(ws.Item);
             foreach (var wsp in existingWarrior.Spells)

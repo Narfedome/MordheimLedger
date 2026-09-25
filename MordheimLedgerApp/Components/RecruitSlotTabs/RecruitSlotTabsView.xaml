@@ -121,6 +121,25 @@
                                                   CommandParameter="{Binding Item}"/>
                 </Grid>
         </Grid>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsInjuriesSection}">
+            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Injuries}">
+                <BindableLayout.ItemTemplate>
+                    <!-- Même puce que l'onglet Équipement (ChipView partagé), icône Blessures de la fiche guerrier. -->
+                    <DataTemplate x:DataType="library:Injury">
+                        <components:ChipView Item="{Binding .}"
+                                              IconGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding Source={x:Reference root}, Path=ShowInjuryDetailCommand}"
+                                              RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveInjuryCommand}"/>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          Command="{Binding AddInjuryCommand}"
+                                          CommandParameter="{Binding Item}"/>
+        </Grid>
         <ContentView IsVisible="{Binding HasMutationCommands}">
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsMutationsSection}">
             <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Mutations}">
@@ -141,25 +160,7 @@
                                           CommandParameter="{Binding Item}"/>
         </Grid>
         </ContentView>
-        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsInjuriesSection}">
-            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Injuries}">
-                <BindableLayout.ItemTemplate>
-                    <!-- Même puce que l'onglet Équipement (ChipView partagé), icône Blessures de la fiche guerrier. -->
-                    <DataTemplate x:DataType="library:Injury">
-                        <components:ChipView Item="{Binding .}"
-                                              IconGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
-                                              IconFontFamily="RpgAwesome"
-                                              Command="{Binding Source={x:Reference root}, Path=ShowInjuryDetailCommand}"
-                                              RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveInjuryCommand}"/>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </FlexLayout>
-            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                          Icon="{x:Static icons:SolidFont.Plus}"
-                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                          Command="{Binding AddInjuryCommand}"
-                                          CommandParameter="{Binding Item}"/>
-        </Grid>
+       
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
             <Entry Grid.Column="1" Text="{Binding Item.Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>

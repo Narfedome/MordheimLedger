@@ -15,6 +15,11 @@ public class WarriorArchetypeEntity
     public bool IsHero { get; set; }
     public int Cost { get; set; }
     public ContentSource Source { get; set; }
+
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    [Indexed]
+    public string? OfficialId { get; set; }
     public int? MaxCount { get; set; }
     public int? MinCount { get; set; }
 

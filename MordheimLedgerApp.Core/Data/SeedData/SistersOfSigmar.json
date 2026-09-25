@@ -1,6 +1,7 @@
 {
+  "id": "warband.sisters-of-sigmar",
   "grade": "Core",
-  "race": "Human",
+  "raceId": "race.human",
   "imagePath": "sisters_of_sigmar.jpg",
   "name": {
     "en": "The Sisters of Sigmar",
@@ -12,6 +13,7 @@
   },
   "skills": [
     {
+      "id": "skill.special.sign-of-sigmar",
       "name": {
         "en": "Sign of Sigmar",
         "fr": "Signe de Sigmar"
@@ -24,6 +26,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.protection-of-sigmar",
       "name": {
         "en": "Protection of Sigmar",
         "fr": "Protection de Sigmar"
@@ -36,6 +39,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.utter-determination",
       "name": {
         "en": "Utter Determination",
         "fr": "Détermination Absolue"
@@ -46,11 +50,12 @@
         "fr": "Matriarche seule : peut relancer les tests de Déroute ratés."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Sigmarite Matriarch"
+      "restrictedToWarriorIds": [
+        "warrior.sisters-of-sigmar.sigmarite-matriarch"
       ]
     },
     {
+      "id": "skill.special.righteous-fury",
       "name": {
         "en": "Righteous Fury",
         "fr": "Fureur Vertueuse"
@@ -60,10 +65,11 @@
         "en": "Hatred against Skaven, Undead, Possessed, Beastmen, Dark Elves and other evil warbands.",
         "fr": "Haine envers les Skavens, Morts-vivants, Possédés, Hommes-Bêtes, Elfes Noirs et autres bandes maléfiques."
       },
-      "hatredTargetWarbandNames": ["SkavenOfClanEshin", "Undead", "CultOfThePossessed", "BeastmenRaiders"],
+      "hatredTargetWarbandIds": ["warband.skaven-of-clan-eshin", "warband.undead", "warband.cult-of-the-possessed", "warband.beastmen-raiders"],
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.absolute-faith",
       "name": {
         "en": "Absolute Faith",
         "fr": "Foi Inébranlable"
@@ -78,6 +84,7 @@
   ],
   "magicSchools": [
     {
+      "id": "school.prayers-of-sigmar",
       "name": {
         "en": "Prayers of Sigmar",
         "fr": "Prières de Sigmar"
@@ -89,6 +96,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.sisters-of-sigmar.sigmarite-matriarch",
       "name": {
         "en": "Sigmarite Matriarch",
         "fr": "Matriarche sigmarite"
@@ -108,7 +116,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "The Sigmarite Matriarchs form an inner circle of twelve, answerable to the High Matriarch of the temple - each leads a warband of Sisters in frequent searches of the city, driven by zealous devotion and a relentless will to redeem the Sisterhood in Sigmar's eyes.",
         "fr": "Les matriarches sigmarites constituent un cercle fermé de douze sœurs, rendant des comptes à la Haute Matriarche. Chacune mène une bande de sœurs dans l'exploration des ruines. Les matriarches sont conduites par leur dévotion au culte de Sigmar et une farouche détermination de réhabiliter les sœurs aux yeux des autres serviteurs du culte."
@@ -116,19 +124,21 @@
       "isSpellcaster": true,
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         },
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
           }
         }
       ],
-      "equipmentListName": "Sisters of Sigmar Equipment List",
+      "equipmentListId": "list.sisters-of-sigmar.sisters-of-sigmar-equipment-list",
       "skillCategories": [
         "Combat",
         "Academic",
@@ -138,6 +148,7 @@
       ]
     },
     {
+      "id": "warrior.sisters-of-sigmar.augur",
       "name": {
         "en": "Augur",
         "fr": "Augure"
@@ -155,13 +166,14 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Blind and blessed beyond their comrades, Augurs have given up their sight for second sight, a gift from Sigmar himself - very few are so marked, and they are greatly revered, shaving their heads save for a single long braid.",
         "fr": "Les augures sont aveugles et bénies entre toutes les sœurs. En renonçant à la vue, elles ont obtenu une contrepartie, une vision intérieure, cadeau de leur dieu. Seules quelques-unes d'entre elles subissent ces stigmates et elles sont très respectées par la congrégation. Contrairement aux autres sœurs, elles se rasent la tête, ne gardant qu'une longue tresse."
       },
       "specialRules": [
         {
+          "id": "rule.blessed-sight",
           "name": {
             "en": "Blessed Sight",
             "fr": "Vision Sacrée"
@@ -172,7 +184,7 @@
           }
         }
       ],
-      "equipmentListName": "Sisters of Sigmar Equipment List",
+      "equipmentListId": "list.sisters-of-sigmar.sisters-of-sigmar-equipment-list",
       "skillCategories": [
         "Academic",
         "Speed",
@@ -180,6 +192,7 @@
       ]
     },
     {
+      "id": "warrior.sisters-of-sigmar.sister-superior",
       "name": {
         "en": "Sister Superior",
         "fr": "Sœur supérieure"
@@ -197,12 +210,12 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "A long-serving priestess of the Cult of Sigmar, well versed in temple ritual and an example to the younger Sisters and Novices - any peril lurking in Mordheim's ruins is nothing compared to a Sister Superior's wrath.",
         "fr": "Chaque sœur supérieure est une prêtresse depuis longtemps au service du Culte de Sigmar, très versée dans les rituels du temple et un exemple pour les sœurs plus jeunes et les novices. N'importe quel danger ou ennemi rôdant dans les ruines de Mordheim n'est rien comparé à la colère d'une sœur supérieure."
       },
-      "equipmentListName": "Sisters of Sigmar Equipment List",
+      "equipmentListId": "list.sisters-of-sigmar.sisters-of-sigmar-equipment-list",
       "skillCategories": [
         "Combat",
         "Academic",
@@ -212,6 +225,7 @@
       ]
     },
     {
+      "id": "warrior.sisters-of-sigmar.sigmarite-sister",
       "name": {
         "en": "Sigmarite Sister",
         "fr": "Sœur"
@@ -229,14 +243,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Sworn upon Sigmar's altar to pacify the city and thereby earn redemption for their shamed order - whatever perils stand in their way, they will overcome them.",
         "fr": "Les sœurs de Sigmar savent que leur ordre est discrédité aux yeux de Sigmar, leur dieu. Chacune d'elle a juré sur son autel de pacifier la cité et ainsi d'obtenir la rédemption de leurs péchés. Quels que soient les périls à affronter, elles ne flancheront jamais et poursuivront leur tâche !"
       },
-      "equipmentListName": "Sisters of Sigmar Equipment List"
+      "equipmentListId": "list.sisters-of-sigmar.sisters-of-sigmar-equipment-list"
     },
     {
+      "id": "warrior.sisters-of-sigmar.novices",
       "name": {
         "en": "Novices",
         "fr": "Novices"
@@ -254,16 +269,17 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "The Sisters draw their recruits only from the noblest houses of the Empire - few in number, they must endure years as Novices while their devotion is tested, all eager to prove themselves worthy handmaidens of Sigmar.",
         "fr": "Par tradition les sœurs ne recrutent que parmi les meilleures maisons de l'Empire et les familles de la noblesse considèrent comme un grand honneur d'avoir une fille acceptée dans l'ordre. Malgré le faible nombre des recrues, elles doivent rester des novices pendant plusieurs années au cours desquelles on éprouve la ferveur de leur foi. Toutes sont désireuses de prouver leur valeur et servir parmi les vierges de Sigmar."
       },
-      "equipmentListName": "Sisters of Sigmar Equipment List"
+      "equipmentListId": "list.sisters-of-sigmar.sisters-of-sigmar-equipment-list"
     }
   ],
   "equipment": [
     {
+      "id": "equipment.sigmarite-warhammer",
       "name": {
         "en": "Sigmarite Warhammer",
         "fr": "Marteau de Guerre Sigmarite"
@@ -277,6 +293,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.concussion",
           "name": {
             "en": "Concussion",
             "fr": "Commotion"
@@ -287,6 +304,7 @@
           }
         },
         {
+          "id": "rule.holy-weapon",
           "name": {
             "en": "Holy Weapon",
             "fr": "Arme Sacrée"
@@ -299,6 +317,7 @@
       ]
     },
     {
+      "id": "equipment.steel-whip",
       "name": {
         "en": "Steel Whip",
         "fr": "Fouet d'Acier"
@@ -312,6 +331,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.cannot-be-parried",
           "name": {
             "en": "Cannot be parried",
             "fr": "Ne peut être paré"
@@ -322,6 +342,7 @@
           }
         },
         {
+          "id": "rule.whipcrack",
           "name": {
             "en": "Whipcrack",
             "fr": "Claquement"
@@ -334,6 +355,7 @@
       ]
     },
     {
+      "id": "equipment.blessed-water",
       "name": {
         "en": "Blessed Water",
         "fr": "Eau Bénite"
@@ -346,13 +368,14 @@
         "fr": "Réservée aux Héroïnes. Eau sanctifiée au nom de Sigmar."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Sigmarite Matriarch",
-        "Augur",
-        "Sister Superior"
+      "restrictedToWarriorIds": [
+        "warrior.sisters-of-sigmar.sigmarite-matriarch",
+        "warrior.sisters-of-sigmar.augur",
+        "warrior.sisters-of-sigmar.sister-superior"
       ],
       "specialRules": [
         {
+          "id": "rule.effect-blessed-water",
           "name": {
             "en": "Effect (Blessed Water)",
             "fr": "Effet (Eau Bénite)"
@@ -365,6 +388,7 @@
       ]
     },
     {
+      "id": "equipment.holy-relic",
       "name": {
         "en": "Holy Relic",
         "fr": "Relique Sacrée"
@@ -378,13 +402,14 @@
         "fr": "En cette époque de superstition et de fanatisme religieux, les objets sacrés occupent une place importante dans la vie quotidienne. Les reliques abondent dans le Vieux Monde : cheveux de Sigmar, fragments du marteau d'Ulric, dents de Princes Démons - tout se vend aux hommes en quête de réconfort avant la bataille, ou de protection contre la sorcellerie."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Sigmarite Matriarch",
-        "Augur",
-        "Sister Superior"
+      "restrictedToWarriorIds": [
+        "warrior.sisters-of-sigmar.sigmarite-matriarch",
+        "warrior.sisters-of-sigmar.augur",
+        "warrior.sisters-of-sigmar.sister-superior"
       ],
       "specialRules": [
         {
+          "id": "rule.effect-holy-relic",
           "name": {
             "en": "Effect (Holy Relic)",
             "fr": "Effet (Relique Sacrée)"
@@ -397,6 +422,7 @@
       ]
     },
     {
+      "id": "equipment.holy-tome",
       "name": {
         "en": "Holy Tome",
         "fr": "Livre Saint"
@@ -409,13 +435,14 @@
         "fr": "Recueils de prières et de hauts faits religieux recopiés à la main dans les scriptoriums de Sigmar - un homme de foi qui y récite ses prières y puise une foi renforcée. Coût total de 100 + 1D6x10 CO. Réservé aux Prêtres-Guerriers et aux Sœurs de Sigmar. Un Prêtre-Guerrier ou une Sœur de Sigmar en possession d'un Livre Saint ajoute +1 au résultat lorsqu'il tente de réciter une prière."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Sigmarite Matriarch",
-        "Augur",
-        "Sister Superior"
+      "restrictedToWarriorIds": [
+        "warrior.sisters-of-sigmar.sigmarite-matriarch",
+        "warrior.sisters-of-sigmar.augur",
+        "warrior.sisters-of-sigmar.sister-superior"
       ],
       "specialRules": [
         {
+          "id": "rule.effect-holy-tome",
           "name": {
             "en": "Effect (Holy Tome)",
             "fr": "Effet (Livre Saint)"
@@ -430,27 +457,28 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.sisters-of-sigmar.sisters-of-sigmar-equipment-list",
       "name": {
         "en": "Sisters of Sigmar Equipment List",
         "fr": "Liste d'équipement des Sœurs de Sigmar"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Sigmarite Warhammer",
-        "Flail",
-        "Steel Whip",
-        "Double-handed weapon",
-        "Sling",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Buckler",
-        "Helmet",
-        "Holy Tome",
-        "Blessed Water",
-        "Holy Relic"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.sigmarite-warhammer",
+        "equipment.flail",
+        "equipment.steel-whip",
+        "equipment.double-handed-weapon",
+        "equipment.sling",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.buckler",
+        "equipment.helmet",
+        "equipment.holy-tome",
+        "equipment.blessed-water",
+        "equipment.holy-relic"
       ]
     }
   ]

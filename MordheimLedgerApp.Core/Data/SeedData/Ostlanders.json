@@ -1,6 +1,7 @@
 {
+  "id": "warband.ostlanders",
   "grade": "Grade1a",
-  "race": "Human",
+  "raceId": "race.human",
   "imagePath": "ostlanders_mercenaries.jpg",
   "name": {
     "en": "Ostlander Mercenaries",
@@ -12,6 +13,7 @@
   },
   "specialRules": [
     {
+      "id": "rule.self-reliant",
       "name": {
         "en": "Self-Reliant",
         "fr": "Autonome"
@@ -24,6 +26,7 @@
   ],
   "magicSchools": [
     {
+      "id": "school.prayers-of-taal",
       "name": {
         "en": "Prayers of Taal",
         "fr": "Prières de Taal"
@@ -35,6 +38,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.ostlanders.elder",
       "name": {
         "en": "Elder",
         "fr": "Doyen"
@@ -54,20 +58,21 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "In Ostland, the oldest (or most often, the most impressive) man of the village receives the title of Elder - only through his exhortations can an entire village be convinced to pack up and head to Mordheim to seek its fortune.",
         "fr": "En Ostland, l'homme le plus âgé (ou plus souvent le plus impressionnant) du village reçoit le titre de Doyen - ce n'est que par ses exhortations que tout un village peut être amené à faire ses valises et se rendre à Mordheim pour chercher fortune."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         }
       ],
-      "equipmentListName": "Ostlander Equipment List",
+      "equipmentListId": "list.ostlanders.ostlander-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -77,6 +82,7 @@
       ]
     },
     {
+      "id": "warrior.ostlanders.priest-of-taal",
       "name": {
         "en": "Priest of Taal",
         "fr": "Prêtre de Taal"
@@ -94,13 +100,14 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "All Priests of Taal are said to be born under the darkest phase of the moon - loners by nature, they wander the wild forests of the northern Empire, and none quite know why they've begun joining Ostlander bands digging through the ruins of Mordheim.",
         "fr": "On dit que tous les Prêtres de Taal sont nés pendant la phase la plus sombre de la lune - solitaires par nature, ils errent dans les forêts sauvages du nord de l'Empire, et nul ne sait pourquoi ils ont commencé à se joindre aux bandes d'Ostlanders qui fouillent les ruines de Mordheim."
       },
       "specialRules": [
         {
+          "id": "rule.prayers",
           "name": {
             "en": "Prayers",
             "fr": "Prières"
@@ -111,6 +118,7 @@
           }
         },
         {
+          "id": "rule.frail",
           "name": {
             "en": "Frail",
             "fr": "Frêle"
@@ -122,7 +130,7 @@
         }
       ],
       "isSpellcaster": true,
-      "equipmentListName": "Ostlander Equipment List",
+      "equipmentListId": "list.ostlanders.ostlander-equipment-list",
       "skillCategories": [
         "Combat",
         "Academic",
@@ -132,6 +140,7 @@
       ]
     },
     {
+      "id": "warrior.ostlanders.blood-brother",
       "name": {
         "en": "Blood Brother",
         "fr": "Frère de sang"
@@ -149,12 +158,12 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Ostland villages are generally one large extended family - everyone is somebody's uncle, cousin or brother. Rather than bother with exact family ties, the village's most respected men (other than the Elder) are simply called Blood Brothers.",
         "fr": "Les villages d'Ostland sont généralement composés d'une famille élargie. Tout le monde est l'oncle, le cousin ou le frère d'un des membres du village. Au lieu de s'embêter avec les liens familiaux, les hommes les plus respectés du village (à l'exception du Doyen) sont simplement appelés Frères de sang."
       },
-      "equipmentListName": "Ostlander Equipment List",
+      "equipmentListId": "list.ostlanders.ostlander-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength",
@@ -162,6 +171,7 @@
       ]
     },
     {
+      "id": "warrior.ostlanders.jaeger",
       "name": {
         "en": "Jaeger",
         "fr": "Jaeger"
@@ -179,14 +189,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Some men of Ostland prefer to live alone in the forests of the Old World rather than marry. Though these trappers don't share the tight family bonds of the average Ostlander, they're respected for their forest lore and unshakeable determination.",
         "fr": "Certains hommes de l'Ostland préfèrent vivre seuls dans les forêts du Vieux Monde plutôt que de se marier. Bien que ces trappeurs ne partagent pas les liens familiaux étroits de l'Ostlander moyen, ils sont respectés pour leur connaissance de la forêt et leur détermination sans faille."
       },
-      "equipmentListName": "Jaeger Equipment List"
+      "equipmentListId": "list.ostlanders.jaeger-equipment-list"
     },
     {
+      "id": "warrior.ostlanders.kin",
       "name": {
         "en": "Kin",
         "fr": "Proche"
@@ -204,14 +215,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Most of an Ostlander band's warriors are brothers or cousins of the Elder - most are married men with children to feed. The ruins of Mordheim tempt with a greed few poor villagers can resist.",
         "fr": "La plupart des guerriers d'une bande d'Ostlanders sont des frères ou des cousins du Doyen. La plupart sont des hommes mariés avec des enfants à nourrir. Les ruines de Mordheim attisent une convoitise à laquelle peu de pauvres villageois peuvent résister."
       },
-      "equipmentListName": "Ostlander Equipment List"
+      "equipmentListId": "list.ostlanders.ostlander-equipment-list"
     },
     {
+      "id": "warrior.ostlanders.ne-er-do-well",
       "name": {
         "en": "Ne'er-do-well",
         "fr": "Vaurien"
@@ -229,13 +241,14 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 10,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Every Ostlander loves his beer, but in every village a few take that love to the extreme. Never sober and rarely aware, these fools cut a swathe through Mordheim's streets, hurling insults, committing petty vandalism and sowing chaos wherever they roam.",
         "fr": "Tous les Ostlanders aiment leur bière, mais dans chaque village il y a toujours quelques hommes qui poussent cet amour à l'extrême. Jamais sobres et rarement conscients, ces bouffons se frayent un chemin dans les rues de Mordheim en criant des insultes et en semant le désordre sur leur passage."
       },
       "specialRules": [
         {
+          "id": "rule.drunk",
           "name": {
             "en": "Drunk",
             "fr": "Bourré"
@@ -246,6 +259,7 @@
           }
         },
         {
+          "id": "rule.disreputable",
           "name": {
             "en": "Disreputable",
             "fr": "Irrespectable"
@@ -256,9 +270,10 @@
           }
         }
       ],
-      "equipmentListName": "Ruffian Equipment List"
+      "equipmentListId": "list.ostlanders.ruffian-equipment-list"
     },
     {
+      "id": "warrior.ostlanders.ogre",
       "name": {
         "en": "Ogre",
         "fr": "Ogre"
@@ -277,25 +292,28 @@
       "initiative": 3,
       "attacks": 2,
       "leadership": 7,
-      "racialProfileName": "Ogre",
+      "racialProfileId": "profile.ogre",
       "description": {
         "en": "Ogres are more common in the pine-covered hills of Ostland than anywhere else in the Empire - the rugged mountain men value their muscle above all, and an Ogre's almost legendary strength and ability to shrug off terrible wounds make him a perfect shock trooper, if a costly one to keep fed.",
         "fr": "Il est possible de croiser un Ogre plus fréquemment dans les collines couvertes de pins de l'Ostland que n'importe où ailleurs dans l'Empire - ces créatures brutales sont très recherchées pour leurs muscles, et leur force quasi légendaire ainsi que leur capacité à supporter d'affreuses blessures en font des troupes de choc parfaites, bien que coûteuses à nourrir."
       },
       "specialRules": [
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.large-target",
           "name": {
             "en": "Large Target",
             "fr": "Grande Cible"
           }
         },
         {
+          "id": "rule.combat-and-strength-skills-on-promotion",
           "name": {
             "en": "Combat and Strength Skills on Promotion",
             "fr": "Compétences de Combat et de Force à la promotion"
@@ -306,6 +324,7 @@
           }
         },
         {
+          "id": "rule.slow-learner",
           "name": {
             "en": "Slow Learner",
             "fr": "Lent d'Esprit"
@@ -316,11 +335,12 @@
           }
         }
       ],
-      "equipmentListName": "Ogre Equipment List"
+      "equipmentListId": "list.ostlanders.ogre-equipment-list"
     }
   ],
   "equipment": [
     {
+      "id": "equipment.double-barrelled-pistol",
       "name": {
         "en": "Double-barrelled pistol",
         "fr": "Pistolet à double canon"
@@ -335,6 +355,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "equipment.double-barrelled-hochland-long-rifle",
       "name": {
         "en": "Double-barrelled Hochland long rifle",
         "fr": "Long fusil du Hochland à double canon"
@@ -351,74 +372,78 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.ostlanders.ostlander-equipment-list",
       "name": {
         "en": "Ostlander Equipment List",
         "fr": "Liste d'équipement des Ostlanders"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Spear",
-        "Double-handed weapon",
-        "Bow",
-        "Pistol",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.spear",
+        "equipment.double-handed-weapon",
+        "equipment.bow",
+        "equipment.pistol",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.ostlanders.ruffian-equipment-list",
       "name": {
         "en": "Ruffian Equipment List",
         "fr": "Liste d'équipement des Vauriens"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Double-handed weapon",
-        "Light Armour"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.double-handed-weapon",
+        "equipment.light-armour"
       ]
     },
     {
+      "id": "list.ostlanders.jaeger-equipment-list",
       "name": {
         "en": "Jaeger Equipment List",
         "fr": "Liste d'équipement des Jaeger"
       },
-      "itemNames": [
-        "Dagger",
-        "Axe",
-        "Sword",
-        "Spear",
-        "Pistol",
-        "Double-barrelled pistol",
-        "Bow",
-        "Blunderbuss",
-        "Handgun",
-        "Hunting Rifle",
-        "Double-barrelled Hochland long rifle",
-        "Light Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.spear",
+        "equipment.pistol",
+        "equipment.double-barrelled-pistol",
+        "equipment.bow",
+        "equipment.blunderbuss",
+        "equipment.handgun",
+        "equipment.hunting-rifle",
+        "equipment.double-barrelled-hochland-long-rifle",
+        "equipment.light-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.ostlanders.ogre-equipment-list",
       "name": {
         "en": "Ogre Equipment List",
         "fr": "Liste d'équipement des Ogres"
       },
-      "itemNames": [
-        "Club",
-        "Axe",
-        "Sword",
-        "Double-handed weapon",
-        "Light Armour"
+      "itemIds": [
+        "equipment.club",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.double-handed-weapon",
+        "equipment.light-armour"
       ]
     }
   ],

@@ -197,6 +197,7 @@ public partial class SpellViewModel : BaseViewModel
             RollValue = s.RollValue,
             Difficulty = s.Difficulty,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             ImagePath = s.ImagePath
         };
 

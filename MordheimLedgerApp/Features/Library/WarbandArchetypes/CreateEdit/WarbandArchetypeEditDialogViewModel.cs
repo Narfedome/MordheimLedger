@@ -328,6 +328,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             IsHero = warrior.IsHero,
             Cost = warrior.Cost,
             Source = warrior.Source,
+            OfficialId = warrior.OfficialId,
             MaxCount = warrior.MaxCount,
             Movement = warrior.Movement,
             MovementOverride = warrior.MovementOverride,
@@ -392,6 +393,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
             Name = list.Name,
             NameKey = list.NameKey,
             Source = list.Source,
+            OfficialId = list.OfficialId,
             ItemIds = new List<int>(list.ItemIds)
         };
 

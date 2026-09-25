@@ -1,6 +1,7 @@
 {
+  "id": "warband.skaven-of-clan-eshin",
   "grade": "Core",
-  "race": "Skaven",
+  "raceId": "race.skaven",
   "imagePath": "skaven_clan_eschin.jpg",
   "name": {
     "en": "Skaven of Clan Eshin",
@@ -12,6 +13,7 @@
   },
   "skills": [
     {
+      "id": "skill.special.black-hunger",
       "name": {
         "en": "Black Hunger",
         "fr": "Faim Noire"
@@ -24,6 +26,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.tail-fighting",
       "name": {
         "en": "Tail Fighting",
         "fr": "Combat à la Queue"
@@ -36,6 +39,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.wall-runner",
       "name": {
         "en": "Wall Runner",
         "fr": "Grimpeur"
@@ -48,6 +52,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.art-of-silent-death",
       "name": {
         "en": "Art of Silent Death",
         "fr": "Art de la Mort Silencieuse"
@@ -60,6 +65,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.infiltration",
       "name": {
         "en": "Infiltration",
         "fr": "Infiltration"
@@ -74,6 +80,7 @@
   ],
   "magicSchools": [
     {
+      "id": "school.magic-of-the-horned-rat",
       "name": {
         "en": "Magic of the Horned Rat",
         "fr": "Magie du Rat Cornu"
@@ -85,6 +92,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.skaven-of-clan-eshin.assassin-adept",
       "name": {
         "en": "Assassin Adept",
         "fr": "Adepte assassin"
@@ -104,19 +112,21 @@
       "initiative": 5,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Skaven",
+      "racialProfileId": "profile.skaven",
       "description": {
         "en": "The Nightmaster of Clan Eshin has sent this Assassin to collect precious wyrdstone - success means wealth and status among the clan, failure is best not contemplated.",
         "fr": "Le Maître de la Nuit du clan Eshin a envoyé un de ses lieutenants à la recherche de la précieuse pierre magique. Le succès signifie gloire, descendance et aisance, tandis que la défaite signifie... Mieux vaut ne pas aborder ce sujet."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         },
         {
+          "id": "rule.perfect-killer",
           "name": {
             "en": "Perfect Killer",
             "fr": "Machine à Tuer"
@@ -127,7 +137,7 @@
           }
         }
       ],
-      "equipmentListName": "Heroes Equipment List",
+      "equipmentListId": "list.skaven-of-clan-eshin.heroes-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -138,6 +148,7 @@
       ]
     },
     {
+      "id": "warrior.skaven-of-clan-eshin.black-skaven",
       "name": {
         "en": "Black Skaven",
         "fr": "Skaven noir"
@@ -155,12 +166,12 @@
       "initiative": 5,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Skaven",
+      "racialProfileId": "profile.skaven",
       "description": {
         "en": "The most powerful fighters of Clan Eshin - black-furred killers trained in every martial art of their clan, excelling at ambush and assassination in Mordheim's ruins.",
         "fr": "Les skavens noirs sont les plus puissants de tous les guerriers du clan Eshin, des tueurs chevronnés entraînés à tous les arts martiaux de leurs clans. À Mordheim ils excellent dans les embuscades et les assassinats."
       },
-      "equipmentListName": "Heroes Equipment List",
+      "equipmentListId": "list.skaven-of-clan-eshin.heroes-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -170,6 +181,7 @@
       ]
     },
     {
+      "id": "warrior.skaven-of-clan-eshin.eshin-sorcerer",
       "name": {
         "en": "Eshin Sorcerer",
         "fr": "Sorcier Eshin"
@@ -187,7 +199,7 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Skaven",
+      "racialProfileId": "profile.skaven",
       "description": {
         "en": "The sorcerers of Clan Eshin are black magicians who manufacture the enchanted weapons of the Assassins - their power is slight compared to the Warlocks of Clan Skryre or the mighty Grey Seers, but potent nonetheless.",
         "fr": "Les sorciers du clan Eshin sont des enchanteurs maléfiques qui fabriquent des armes magiques pour les assassins. Bien que leurs pouvoirs soient faibles en comparaison de ceux des technomages du clan Skryre ou des Prophètes Gris, leur sorcellerie est puissante."
@@ -195,13 +207,14 @@
       "isSpellcaster": true,
       "specialRules": [
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
           }
         }
       ],
-      "equipmentListName": "Heroes Equipment List",
+      "equipmentListId": "list.skaven-of-clan-eshin.heroes-equipment-list",
       "skillCategories": [
         "Academic",
         "Speed",
@@ -209,6 +222,7 @@
       ]
     },
     {
+      "id": "warrior.skaven-of-clan-eshin.night-runners",
       "name": {
         "en": "Night Runners",
         "fr": "Coureurs nocturnes"
@@ -226,12 +240,12 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 4,
-      "racialProfileName": "Skaven",
+      "racialProfileId": "profile.skaven",
       "description": {
         "en": "Young apprentices of Clan Eshin, recently initiated into the secrets of the clan - they make up for their lack of knowledge with ambition and energy.",
         "fr": "Les coureurs nocturnes sont de jeunes apprentis du clan Eshin. Récemment initiés dans les secrets du clan, ils compensent leur manque de savoir par l'ambition et l'énergie dont ils font preuve."
       },
-      "equipmentListName": "Henchmen Equipment List",
+      "equipmentListId": "list.skaven-of-clan-eshin.henchmen-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -239,6 +253,7 @@
       ]
     },
     {
+      "id": "warrior.skaven-of-clan-eshin.verminkin",
       "name": {
         "en": "Verminkin",
         "fr": "Vermineux"
@@ -256,14 +271,15 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 5,
-      "racialProfileName": "Skaven",
+      "racialProfileId": "profile.skaven",
       "description": {
         "en": "The Clanrats of Clan Eshin - the strongest among them are initiated into the clan's secrets and begin training to become Assassins, the most feared of Skaven warriors.",
         "fr": "Les vermineux sont les guerriers du clan Eshin. Les plus forts d'entre eux sont initiés aux secrets du clan et sont entraînés pour devenir des assassins, ce sont les plus redoutés des guerriers des clans skavens. Tous rêvent de devenir un jour assassin."
       },
-      "equipmentListName": "Henchmen Equipment List"
+      "equipmentListId": "list.skaven-of-clan-eshin.henchmen-equipment-list"
     },
     {
+      "id": "warrior.skaven-of-clan-eshin.giant-rats",
       "name": {
         "en": "Giant Rats",
         "fr": "Rats géants"
@@ -289,12 +305,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.never-gains-experience",
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
           }
         },
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
@@ -303,6 +321,7 @@
       ]
     },
     {
+      "id": "warrior.skaven-of-clan-eshin.rat-ogre",
       "name": {
         "en": "Rat Ogre",
         "fr": "Rat-ogre"
@@ -321,7 +340,7 @@
       "initiative": 4,
       "attacks": 3,
       "leadership": 4,
-      "racialProfileName": "Rat Ogre",
+      "racialProfileId": "profile.rat-ogre",
       "canUseEquipment": false,
       "description": {
         "en": "Horrible monsters much in demand as bodyguards to important Skaven.",
@@ -329,18 +348,21 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.stupidity-unless-skaven-hero-nearby",
           "name": {
             "en": "Stupidity (Unless Skaven Hero Nearby)",
             "fr": "Stupidité (sauf Héros Skaven à proximité)"
@@ -351,6 +373,7 @@
           }
         },
         {
+          "id": "rule.large-target",
           "name": {
             "en": "Large Target",
             "fr": "Grande Cible"
@@ -361,6 +384,7 @@
   ],
   "equipment": [
     {
+      "id": "equipment.fighting-claws",
       "name": {
         "en": "Fighting Claws",
         "fr": "Griffes de Combat"
@@ -375,6 +399,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.pair",
           "name": {
             "en": "Pair",
             "fr": "Paire"
@@ -385,6 +410,7 @@
           }
         },
         {
+          "id": "rule.climb",
           "name": {
             "en": "Climb",
             "fr": "Escalade"
@@ -395,6 +421,7 @@
           }
         },
         {
+          "id": "rule.parry-fighting-claws",
           "name": {
             "en": "Parry (Fighting Claws)",
             "fr": "Parade (Griffes de Combat)"
@@ -405,6 +432,7 @@
           }
         },
         {
+          "id": "rule.cumbersome-fighting-claws",
           "name": {
             "en": "Cumbersome (Fighting Claws)",
             "fr": "Encombrant (Griffes de Combat)"
@@ -417,6 +445,7 @@
       ]
     },
     {
+      "id": "equipment.weeping-blades",
       "name": {
         "en": "Weeping Blades",
         "fr": "Lames Suintantes"
@@ -431,6 +460,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.pair",
           "name": {
             "en": "Pair",
             "fr": "Paire"
@@ -441,6 +471,7 @@
           }
         },
         {
+          "id": "rule.venomous",
           "name": {
             "en": "Venomous",
             "fr": "Venimeuses"
@@ -451,6 +482,7 @@
           }
         },
         {
+          "id": "rule.parry-weeping-blades",
           "name": {
             "en": "Parry (Weeping Blades)",
             "fr": "Parade (Lames Suintantes)"
@@ -463,6 +495,7 @@
       ]
     },
     {
+      "id": "equipment.blowpipe",
       "name": {
         "en": "Blowpipe",
         "fr": "Sarbacane"
@@ -477,6 +510,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.poison",
           "name": {
             "en": "Poison",
             "fr": "Poison"
@@ -487,6 +521,7 @@
           }
         },
         {
+          "id": "rule.stealthy",
           "name": {
             "en": "Stealthy",
             "fr": "Furtif"
@@ -499,6 +534,7 @@
       ]
     },
     {
+      "id": "equipment.warplock-pistol",
       "name": {
         "en": "Warplock Pistol",
         "fr": "Pistolet à Malepierre"
@@ -513,6 +549,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.prepare-shot",
           "name": {
             "en": "Prepare shot",
             "fr": "Préparation du tir"
@@ -523,6 +560,7 @@
           }
         },
         {
+          "id": "rule.save-modifier-warplock-pistol",
           "name": {
             "en": "Save modifier (Warplock Pistol)",
             "fr": "Modificateur de sauvegarde (Pistolet à Malepierre)"
@@ -533,6 +571,7 @@
           }
         },
         {
+          "id": "rule.hand-to-hand-warplock-pistol",
           "name": {
             "en": "Hand-to-hand (Warplock Pistol)",
             "fr": "Corps à corps (Pistolet à Malepierre)"
@@ -547,41 +586,43 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.skaven-of-clan-eshin.heroes-equipment-list",
       "name": {
         "en": "Heroes Equipment List",
         "fr": "Liste d'équipement des Héros"
       },
-      "itemNames": [
-        "Dagger",
-        "Sword",
-        "Flail",
-        "Spear",
-        "Halberd",
-        "Weeping Blades",
-        "Fighting Claws",
-        "Sling",
-        "Throwing Stars",
-        "Blowpipe",
-        "Warplock Pistol",
-        "Light Armour",
-        "Buckler",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.sword",
+        "equipment.flail",
+        "equipment.spear",
+        "equipment.halberd",
+        "equipment.weeping-blades",
+        "equipment.fighting-claws",
+        "equipment.sling",
+        "equipment.throwing-stars",
+        "equipment.blowpipe",
+        "equipment.warplock-pistol",
+        "equipment.light-armour",
+        "equipment.buckler",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.skaven-of-clan-eshin.henchmen-equipment-list",
       "name": {
         "en": "Henchmen Equipment List",
         "fr": "Liste d'équipement des Hommes de main"
       },
-      "itemNames": [
-        "Dagger",
-        "Club",
-        "Sword",
-        "Spear",
-        "Sling",
-        "Light Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.club",
+        "equipment.sword",
+        "equipment.spear",
+        "equipment.sling",
+        "equipment.light-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     }
   ],

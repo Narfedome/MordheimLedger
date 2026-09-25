@@ -14,6 +14,11 @@ public class ExplorationResultEntity
     public string DescriptionKey { get; set; } = string.Empty;
     public string? ShortDescriptionKey { get; set; }
     public ContentSource Source { get; set; }
+
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    [Indexed]
+    public string? OfficialId { get; set; }
     public bool RollsIndependently { get; set; }
     public ExplorationStatField? StatTestField { get; set; }
     public bool StatTestTargetsLeader { get; set; }

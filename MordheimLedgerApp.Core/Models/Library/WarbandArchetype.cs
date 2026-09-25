@@ -14,6 +14,10 @@ public class WarbandArchetype
     public string Name { get; set; } = string.Empty;
     public ContentSource Source { get; set; }
 
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    public string? OfficialId { get; set; }
+
     /// <summary>Official quality/provenance tier (mordheimer.net's Core/1a/1b/1c/2a classification) -
     /// used to filter/group the Codex Warbands tab, same idiom as Spells grouping by MagicSchool.</summary>
     public WarbandGrade Grade { get; set; }

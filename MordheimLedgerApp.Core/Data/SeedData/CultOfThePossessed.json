@@ -1,6 +1,7 @@
 {
+  "id": "warband.cult-of-the-possessed",
   "grade": "Core",
-  "race": "Chaos Human",
+  "raceId": "race.chaos-human",
   "imagePath": "cult_of_the_possessed.jpg",
   "name": {
     "en": "Cult of the Possessed",
@@ -13,6 +14,7 @@
   "specialRules": [],
   "magicSchools": [
     {
+      "id": "school.chaos-rituals",
       "name": {
         "en": "Chaos Rituals",
         "fr": "Rituels du Chaos"
@@ -24,6 +26,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.cult-of-the-possessed.magister",
       "name": {
         "en": "Magister",
         "fr": "Magister"
@@ -43,7 +46,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Marauder of Chaos",
+      "racialProfileId": "profile.marauder-of-chaos",
       "isSpellcaster": true,
       "description": {
         "en": "Magisters lead the covens of the Possessed, granted magical powers by their patron gods - fanatical followers of the Dark Gods, utterly dedicated to bringing Chaos to the world.",
@@ -51,19 +54,21 @@
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         },
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
           }
         }
       ],
-      "equipmentListName": "Possessed Equipment List",
+      "equipmentListId": "list.cult-of-the-possessed.possessed-equipment-list",
       "skillCategories": [
         "Combat",
         "Academic",
@@ -71,6 +76,7 @@
       ]
     },
     {
+      "id": "warrior.cult-of-the-possessed.the-possessed",
       "name": {
         "en": "The Possessed",
         "fr": "Possédé"
@@ -88,7 +94,7 @@
       "initiative": 4,
       "attacks": 2,
       "leadership": 7,
-      "racialProfileName": "Possessed",
+      "racialProfileId": "profile.possessed",
       "canBuyMutations": true,
       "canUseEquipment": false,
       "description": {
@@ -97,12 +103,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
@@ -116,6 +124,7 @@
       ]
     },
     {
+      "id": "warrior.cult-of-the-possessed.mutant",
       "name": {
         "en": "Mutant",
         "fr": "Mutant"
@@ -133,20 +142,21 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Mutant",
+      "racialProfileId": "profile.mutant",
       "canBuyMutations": true,
       "mustStartWithMutation": true,
       "description": {
         "en": "Revered as the favoured ones of the Dark Gods, their physical disfigurements marking the vileness of their soul - they come in many shapes and sizes, each more bizarre than the next.",
         "fr": "Les Mutants sont célébrés comme les favoris des dieux des ténèbres, leurs difformités montrant la déchéance de leurs âmes. Ils peuvent prendre bien des formes et des tailles différentes, toutes plus bizarres les unes que les autres."
       },
-      "equipmentListName": "Possessed Equipment List",
+      "equipmentListId": "list.cult-of-the-possessed.possessed-equipment-list",
       "skillCategories": [
         "Combat",
         "Speed"
       ]
     },
     {
+      "id": "warrior.cult-of-the-possessed.darksoul",
       "name": {
         "en": "Darksoul",
         "fr": "Damné"
@@ -164,13 +174,14 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Darksoul",
+      "racialProfileId": "profile.darksoul",
       "description": {
         "en": "Men driven insane by daemonic possession - the daemons have left their bodies, but their minds remain scarred, their insane strength making them dangerous fighters revered as holy men by the cult.",
         "fr": "Les Damnés sont des hommes que les possessions démoniaques, très fréquentes juste après la destruction de Mordheim, ont fini par rendre complètement fous. Leur force de déments contribue à faire des Damnés de redoutables combattants. Les autres membres des bandes de Possédés les regardent comme des saints."
       },
       "specialRules": [
         {
+          "id": "rule.crazed",
           "name": {
             "en": "Crazed",
             "fr": "Déments"
@@ -181,9 +192,10 @@
           }
         }
       ],
-      "equipmentListName": "Darksouls Equipment List"
+      "equipmentListId": "list.cult-of-the-possessed.darksouls-equipment-list"
     },
     {
+      "id": "warrior.cult-of-the-possessed.beastman",
       "name": {
         "en": "Beastman",
         "fr": "Homme-Bête"
@@ -201,14 +213,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Beastman",
+      "racialProfileId": "profile.beastman",
       "description": {
         "en": "Mutated monstrosities infesting the forests of the Empire - massive horned creatures with an inhuman resistance to pain, readily allying with the Magisters of the Possessed.",
         "fr": "Les Hommes-Bêtes sont des monstres mutants qui infestent les forêts de l'Empire ; ils possèdent des cornes impressionnantes et sont très durs au mal. Ils se sont très vite alliés aux Magisters des bandes de Possédés."
       },
-      "equipmentListName": "Darksouls Equipment List"
+      "equipmentListId": "list.cult-of-the-possessed.darksouls-equipment-list"
     },
     {
+      "id": "warrior.cult-of-the-possessed.initiate",
       "name": {
         "en": "Initiate",
         "fr": "Initié"
@@ -226,16 +239,17 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Marauder of Chaos",
+      "racialProfileId": "profile.marauder-of-chaos",
       "description": {
         "en": "Chaos adepts aspiring to damnation - their vile deeds have driven them to the brink of insanity.",
         "fr": "Les Initiés sont des adeptes du Chaos aspirant à la damnation. Leurs actes immondes les ont conduits jusqu'aux confins de la folie."
       },
-      "equipmentListName": "Possessed Equipment List"
+      "equipmentListId": "list.cult-of-the-possessed.possessed-equipment-list"
     }
   ],
   "equipment": [
     {
+      "id": "equipment.obsidian-weapon",
       "name": {
         "en": "Obsidian Weapon",
         "fr": "Arme en obsidienne"
@@ -250,6 +264,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "equipment.chaos-armour",
       "name": {
         "en": "Chaos Armour",
         "fr": "Armure du Chaos"
@@ -266,47 +281,49 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.cult-of-the-possessed.possessed-equipment-list",
       "name": {
         "en": "Possessed Equipment List",
         "fr": "Liste d'équipement des Possédés"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Double-handed weapon",
-        "Spear",
-        "Bow",
-        "Short Bow",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet",
-        "Obsidian Weapon",
-        "Chaos Armour"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.double-handed-weapon",
+        "equipment.spear",
+        "equipment.bow",
+        "equipment.short-bow",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet",
+        "equipment.obsidian-weapon",
+        "equipment.chaos-armour"
       ]
     },
     {
+      "id": "list.cult-of-the-possessed.darksouls-equipment-list",
       "name": {
         "en": "Darksouls Equipment List",
         "fr": "Liste d'équipement des Damnés"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Double-handed weapon",
-        "Flail",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet",
-        "Obsidian Weapon",
-        "Chaos Armour"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.double-handed-weapon",
+        "equipment.flail",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet",
+        "equipment.obsidian-weapon",
+        "equipment.chaos-armour"
       ]
     }
   ],

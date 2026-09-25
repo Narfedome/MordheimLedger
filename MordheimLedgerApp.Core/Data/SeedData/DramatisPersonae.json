@@ -1,5 +1,6 @@
 [
   {
+    "id": "persona.aenur-the-sword-of-twilight",
     "name": { "en": "Aenur, the Sword of Twilight", "fr": "Aenur, l'Épée du Crépuscule" },
     "description": {
       "en": "A tall, pale Elf swordsman of unknown origin, Aenur single-handedly slew the entire Possessed warband of Karl Zimmeran and cleansed the Beastmen-overrun Rat Hole. He appears unannounced at a warband's camp whenever they prepare to explore the inner city, offering his services - what he truly seeks in the ruins, no-one knows.",
@@ -12,10 +13,11 @@
     "ratingBonus": 100,
     "isWanderer": true,
     "requiresCooldownBeforeResearch": true,
-    "startingEquipmentNames": ["Ithilmar Armour", "Elven Cloak", "Ienh-Khain"],
-    "skillNames": ["Strike to Injure", "Expert Swordsman", "Step Aside", "Sprint", "Lightning Reflexes", "Dodge", "Mighty Blow"],
+    "startingEquipmentIds": ["equipment.ithilmar-armour", "equipment.elven-cloak", "equipment.ienh-khain"],
+    "skillIds": ["skill.combat.strike-to-injure", "skill.combat.expert-swordsman", "skill.combat.step-aside", "skill.speed.sprint", "skill.speed.lightning-reflexes", "skill.speed.dodge", "skill.strength.mighty-blow"],
     "specialRules": [
       {
+        "id": "rule.invincible-swordsman",
         "name": { "en": "Invincible Swordsman", "fr": "Escrimeur Invincible" },
         "description": {
           "en": "This warrior always hits his opponents on a roll of 2+ in hand-to-hand combat.",
@@ -23,13 +25,14 @@
         }
       }
     ],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "WitchHunters",
-      "SistersOfSigmar", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.orc-mob", "warband.beastmen-raiders", "warband.witch-hunters",
+      "warband.sisters-of-sigmar", "warband.kislevites"
     ]
   },
   {
+    "id": "persona.bertha-bestraufrung-high-matriarch-of-the-sisterhood",
     "name": { "en": "Bertha Bestraufrung, High Matriarch of the Sisterhood", "fr": "Bertha Bestraufrung, Haute Matriarche de la Confrérie" },
     "description": {
       "en": "Bertha rose rapidly through the ranks of the Sisters of Sigmar to become High Matriarch and Abedissa of Sigmar's Rock, of pure Unberogen blood and unwavering devotion.\n\nHire Fee: none in gold. A Sisters of Sigmar warband may send one or more Heroines to seek an audience with Bertha (roll under their Initiative, as a normal special-character search). She only agrees to personally join the battle if the enemy warband's Rating is higher than the Sisters' own - roll a D6 per the table below, once per battle the player wishes her aid: 0-49 points difference = will not come; 50-99 = 6+; 100-149 = 5+; 150-199 = 4+; 200+ = 3+.",
@@ -41,10 +44,11 @@
     "ratingBonus": 105,
     "isWanderer": true,
     "requiresRatingDisadvantage": true,
-    "startingEquipmentNames": [ "Sigmarite Warhammer", "Sigmarite Warhammer", "Gromril Armour", "Blessed Water", "Holy Relic" ],
-    "skillNames": ["Mighty Blow", "Unstoppable Charge", "Righteous Fury"],
+    "startingEquipmentIds": [ "equipment.sigmarite-warhammer", "equipment.sigmarite-warhammer", "equipment.gromril-armour", "equipment.blessed-water", "equipment.holy-relic" ],
+    "skillIds": ["skill.strength.mighty-blow", "skill.strength.unstoppable-charge", "skill.special.righteous-fury"],
     "specialRules": [
       {
+        "id": "rule.high-matriarch",
         "name": { "en": "High Matriarch", "fr": "Haute Matriarche" },
         "description": {
           "en": "This warrior automatically becomes the leader of any warband she joins.",
@@ -52,6 +56,7 @@
         }
       },
       {
+        "id": "rule.sigmar-s-handmaiden",
         "name": { "en": "Sigmar's Handmaiden", "fr": "Servante de Sigmar" },
         "description": {
           "en": "This warrior is favoured above all other Sisters in the eyes of Sigmar - she gains +2 to all her rolls to see whether her Prayers of Sigmar are granted.",
@@ -59,10 +64,11 @@
         }
       }
     ],
-    "magicSchoolName": { "en": "Prayers of Sigmar", "fr": "Prières de Sigmar" },
-    "restrictedToWarbandNames": ["SistersOfSigmar"]
+    "magicSchoolId": "school.prayers-of-sigmar",
+    "restrictedToWarbandIds": ["warband.sisters-of-sigmar"]
   },
   {
+    "id": "persona.countess-marianna-chevaux-vampire-assassin",
     "name": { "en": "Countess Marianna Chevaux, Vampire Assassin", "fr": "Comtesse Marianna Chevaux, Assassin Vampire" },
     "description": {
       "en": "Once an assassin-thief, Marianna was tainted with Vampirism by the ancient Lahmian Serutat while stealing the gem known as the Noctu from her crypt. A half-vampire now hiding in Mordheim, she hunts the city's Undead for information on Serutat's whereabouts while hiring out her assassin's skills. Her blades are coated in essence of garlic, which acts as Black Lotus against Vampires.",
@@ -75,13 +81,14 @@
     "upkeep": 75,
     "ratingBonus": 90,
     "isWanderer": false,
-    "startingEquipmentNames": ["Rapier", "Dagger", "Throwing Knives", "Crossbow Pistol", "The Noctu"],
-    "skillNames": ["Combat Master", "Step Aside", "Leap", "Acrobat", "Lightning Reflexes", "Dodge", "Jump Up", "Scale Sheer Surfaces"],
+    "startingEquipmentIds": ["equipment.rapier", "equipment.dagger", "equipment.throwing-knives", "equipment.crossbow-pistol", "equipment.the-noctu"],
+    "skillIds": ["skill.combat.combat-master", "skill.combat.step-aside", "skill.speed.leap", "skill.speed.acrobat", "skill.speed.lightning-reflexes", "skill.speed.dodge", "skill.speed.jump-up", "skill.speed.scale-sheer-surfaces"],
     "specialRules": [
-      { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" } },
-      { "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" } },
-      { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" } },
+      { "id": "rule.causes-fear", "name": { "en": "Causes Fear", "fr": "Provoque la Peur" } },
+      { "id": "rule.immune-to-poison", "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" } },
+      { "id": "rule.immune-to-psychology", "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" } },
       {
+        "id": "rule.no-pain-marianna",
         "name": { "en": "No Pain (Marianna)", "fr": "Sans Douleur (Marianna)" },
         "description": {
           "en": "This warrior treats a stunned result as knocked down instead. Combined with Jump Up, she can never actually be knocked down either - only losing her last Wound takes her out of action.",
@@ -89,6 +96,7 @@
         }
       },
       {
+        "id": "rule.fighting-undead",
         "name": {
           "en": "Fighting Undead",
           "fr": "Combattre les morts-vivants"
@@ -99,6 +107,7 @@
         }
       },
       {
+        "id": "rule.you-can-never-escape-your-past",
         "name": { "en": "You Can Never Escape Your Past...", "fr": "On n'échappe jamais à son passé..." },
         "description": {
           "en": "On the game's last turn while Marianna still stands, or as soon as a warband routs, roll a D6 - 1-3: she leaves the warband's service after the game; 4-5: she stays for another game if the warband can afford her upkeep; 6: a group of Serutat's minions ambushes her (D3+1 Zombies, D3+1 Ghouls, or a Vampire + 2 Ghouls per a further D6) for D3 extra turns - if the warband helps her survive she fights the next battle for free, otherwise she leaves.",
@@ -106,13 +115,14 @@
         }
       }
     ],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "SkavenOfClanEshin", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.skaven-of-clan-eshin", "warband.kislevites"
     ]
   },
   {
+    "id": "persona.johann-the-knife",
     "name": { "en": "Johann the Knife", "fr": "Johann le Couteau" },
     "description": {
       "en": "The most famous of Mordheim's cutthroats and assassins for hire, Johann carries countless lethal daggers and a purse heavy with the gold of the many wealthy but unskilful opponents he has despatched. His blades are coated with Black Lotus. He is addicted to Crimson Shade.",
@@ -125,11 +135,12 @@
     "upkeep": 30,
     "ratingBonus": 60,
     "isWanderer": false,
-    "alternativePaymentItemName": "Crimson Shade",
-    "startingEquipmentNames": [ "Throwing Knives", "Dagger (Johann)", "Dagger (Johann)" ],
-    "skillNames": ["Dodge", "Scale Sheer Surfaces", "Quick Shot", "Eagle Eyes", "Knife Fighter"],
+    "alternativePaymentItemId": "equipment.crimson-shade",
+    "startingEquipmentIds": [ "equipment.throwing-knives", "equipment.dagger-johann", "equipment.dagger-johann" ],
+    "skillIds": ["skill.speed.dodge", "skill.speed.scale-sheer-surfaces", "skill.shooting.quick-shot", "skill.shooting.eagle-eyes", "skill.combat.knife-fighter"],
     "specialRules": [
       {
+        "id": "rule.knife-fighter-extraordinaire",
         "name": { "en": "Knife Fighter Extraordinaire", "fr": "Combattant au Couteau Extraordinaire" },
         "description": {
           "en": "Unlike a normal warrior, this warrior can combine the Knife Fighter and Quick Shot skills at once (up to six Throwing Knives in one turn if he doesn't move).",
@@ -137,13 +148,14 @@
         }
       }
     ],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "WitchHunters",
-      "SistersOfSigmar", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.orc-mob", "warband.beastmen-raiders", "warband.witch-hunters",
+      "warband.sisters-of-sigmar", "warband.kislevites"
     ]
   },
   {
+    "id": "persona.nicodemus-the-cursed-pilgrim",
     "name": { "en": "Nicodemus, the Cursed Pilgrim", "fr": "Nicodemus, le Pèlerin Maudit" },
     "description": {
       "en": "Once a wizard's apprentice, Nicodemus freed a Chaos Daemon from a magic lantern and wished to become the greatest wizard known to Mankind - the Daemon granted his wish all too literally, cursing him to grow larger by the week. Only a potion needing regular infusions of wyrdstone delays the effect, drawing him ever back to Mordheim.",
@@ -154,10 +166,11 @@
     "feeKind": "Wyrdstone",
     "ratingBonus": 85,
     "isWanderer": false,
-    "startingEquipmentNames": ["Wizard's Staff (Nicodemus)"],
-    "skillNames": ["Sorcery", "Fearsome"],
+    "startingEquipmentIds": ["equipment.wizard-s-staff-nicodemus"],
+    "skillIds": ["skill.academic.sorcery", "skill.strength.fearsome"],
     "specialRules": [
       {
+        "id": "rule.cursed",
         "name": { "en": "Cursed", "fr": "Maudit" },
         "description": {
           "en": "This warrior has no interest in gold - he must be paid a wyrdstone shard when he joins the warband and after every battle he fights, including the first. If the warband has no shard to give, or would rather sell it, he leaves and never returns.",
@@ -165,13 +178,14 @@
         }
       }
     ],
-    "magicSchoolName": { "en": "Lesser Magic", "fr": "Magie Mineure" },
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "SistersOfSigmar", "Kislevites"
+    "magicSchoolId": "school.lesser-magic",
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.orc-mob", "warband.beastmen-raiders", "warband.sisters-of-sigmar", "warband.kislevites"
     ]
   },
   {
+    "id": "persona.marquand-volker",
     "name": { "en": "Marquand Volker", "fr": "Marquand Volker" },
     "description": {
       "en": "Reputedly the son of wealthy Marienburg merchants, what made Marquand embark on a career as a gambler and then a mercenary and assassin is unknown. What is known about this apparent 'fop' is that his appearance belies his true nature for he is quite deadly and entirely devoid of any morals. Marquand personifies Mordheim 'The City of the Damned' for he is corrupt and rotten to the core - just like that place he calls his 'home'. An expert swordsman and master of the throwing knife, there are few who have crossed him and lived. In the darkened corners of taverns, tales are told in nervous whispers about this cold-hearted killer's reputation: that he killed his first victim before he was ten; that he cut the heart out of the Duke of Suddenland while the Duke's wife slept on beside him. His deadliest foe is the Witch Hunter captain Gottlieb, 'The Flayer', whose face Marquand horribly disfigured whilst the erstwhile servant of Sigmar was attempting to redeem Marquand of his sins.",
@@ -188,11 +202,12 @@
     "ratingBonus": 30,
     "isWanderer": true,
     "requiresCooldownBeforeResearch": true,
-    "pairedWithPersonaName": "Ulli Leitpold",
-    "startingEquipmentNames": ["Sword", "Light Armour", "Throwing Knives"],
-    "skillNames": ["Step Aside", "Knife Fighter", "Lightning Reflexes"],
+    "pairedWithPersonaId": "persona.ulli-leitpold",
+    "startingEquipmentIds": ["equipment.sword", "equipment.light-armour", "equipment.throwing-knives"],
+    "skillIds": ["skill.combat.step-aside", "skill.combat.knife-fighter", "skill.speed.lightning-reflexes"],
     "specialRules": [
       {
+        "id": "rule.inseparable",
         "name": { "en": "Inseparable", "fr": "Inséparables" },
         "description": {
           "en": "This warrior and their partner are like brothers and totally inseparable - they must be hired as a pair and must remain within 4\" of each other. If one is taken Out of Action, the other will attempt to drag him off the battlefield and to safety.",
@@ -200,6 +215,7 @@
         }
       },
       {
+        "id": "rule.a-fistful-of-crowns",
         "name": { "en": "A Fistful of Crowns", "fr": "Une Poignée d'Or" },
         "description": {
           "en": "At the start of the game, an enemy player may secretly note a bribe to buy the pair's allegiance (must exceed their hire fee). The employer may secretly note a counter-bid the same way. At the start of any of his turns, the enemy may reveal his bribe (even in close combat) - if it beats the hire fee plus the counter-bid, the pair switches to his control until the end of the game. Only the player who wins or keeps control pays the amount he staked; losing control costs nothing. With more than two players, several may attempt this at different moments - whoever ends up in control pays their own bid.",
@@ -207,13 +223,14 @@
         }
       }
     ],
-    "restrictedToWarbandNames": [
-      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "SkavenOfClanEshin", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.undead", "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.skaven-of-clan-eshin", "warband.kislevites"
     ]
   },
   {
+    "id": "persona.ulli-leitpold",
     "name": { "en": "Ulli Leitpold", "fr": "Ulli Leitpold" },
     "description": {
       "en": "Marquand's sidekick and partner in crime. Little is known about this huge framed Middenheimer, apart from it is unwise to be caught anywhere near the business end of his massive warhammer! The tales tell that Ulli Leitpold started out as a mercenary soldier, often in the service of the armies of the Count of Stirland, and that he was present at the slaughter that ensued at the third siege of Nuln. Life as a mercenary is presumably where he derives his unthinking greed and cold nature, no doubt. Ulli spent some time as a bandit and thief and teamed up with Marquand when they were captured by bounty hunters and sentenced to live out their days in the penal battalions of the Count of Stirland. Neither as subtle or as flash as his Marienburg colleague, Ulli prefers to use a combination of brute force and low cunning to achieve his goals.",
@@ -226,12 +243,13 @@
     "ratingBonus": 30,
     "isWanderer": true,
     "requiresCooldownBeforeResearch": true,
-    "pairedWithPersonaName": "Marquand Volker",
+    "pairedWithPersonaId": "persona.marquand-volker",
     "hiddenFromSearchPicker": true,
-    "startingEquipmentNames": ["Hammer", "Light Armour"],
-    "skillNames": ["Strongman", "Unstoppable Charge", "Combat Master"],
+    "startingEquipmentIds": ["equipment.hammer", "equipment.light-armour"],
+    "skillIds": ["skill.strength.strongman", "skill.strength.unstoppable-charge", "skill.combat.combat-master"],
     "specialRules": [
       {
+        "id": "rule.inseparable",
         "name": { "en": "Inseparable", "fr": "Inséparables" },
         "description": {
           "en": "This warrior and their partner are like brothers and totally inseparable - they must be hired as a pair and must remain within 4\" of each other. If one is taken Out of Action, the other will attempt to drag him off the battlefield and to safety.",
@@ -239,6 +257,7 @@
         }
       },
       {
+        "id": "rule.a-fistful-of-crowns",
         "name": { "en": "A Fistful of Crowns", "fr": "Une Poignée d'Or" },
         "description": {
           "en": "At the start of the game, an enemy player may secretly note a bribe to buy the pair's allegiance (must exceed their hire fee). The employer may secretly note a counter-bid the same way. At the start of any of his turns, the enemy may reveal his bribe (even in close combat) - if it beats the hire fee plus the counter-bid, the pair switches to his control until the end of the game. Only the player who wins or keeps control pays the amount he staked; losing control costs nothing. With more than two players, several may attempt this at different moments - whoever ends up in control pays their own bid.",
@@ -246,13 +265,14 @@
         }
       }
     ],
-    "restrictedToWarbandNames": [
-      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "SkavenOfClanEshin", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.undead", "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.skaven-of-clan-eshin", "warband.kislevites"
     ]
   },
   {
+    "id": "persona.veskit-high-executioner-of-clan-eshin",
     "name": { "en": "Veskit, High Executioner of Clan Eshin", "fr": "Veskit, Bourreau Suprême du Clan Eshin" },
     "description": {
       "en": "Once a talented Clan Eshin assassin, Veskit was rebuilt by Clan Skryre's Warlock Engineers after nearly dying on a mission for Clan Skryre, becoming more machine than living thing. The Nightmaster now sends him to Mordheim to deter man-things from exploring the city the Skaven consider rightfully theirs. His metallic body accounts for his unusually high Toughness and 3+ armour save.\n\nHire Fee: 80 gc to hire, +35 gc upkeep.",
@@ -265,10 +285,11 @@
     "upkeep": 35,
     "ratingBonus": 70,
     "isWanderer": false,
-    "startingEquipmentNames": ["Eshin Fighting Claws (Veskit)"],
+    "startingEquipmentIds": ["equipment.eshin-fighting-claws-veskit"],
     "specialRules": [
-      { "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" } },
+      { "id": "rule.immune-to-psychology", "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" } },
       {
+        "id": "rule.no-pain-veskit",
         "name": { "en": "No Pain (Veskit)", "fr": "Sans Douleur (Veskit)" },
         "description": {
           "en": "This warrior ignores knocked down and stunned results on the Injury chart entirely - only losing his last Wound takes him out of action.",
@@ -276,6 +297,7 @@
         }
       },
       {
+        "id": "rule.unblinking-eye",
         "name": { "en": "Unblinking Eye", "fr": "Œil qui ne Cille Jamais" },
         "description": {
           "en": "Thanks to sorcerous implants, this warrior can spot hidden enemies within twice his Initiative value in inches.",
@@ -283,6 +305,6 @@
         }
       }
     ],
-    "restrictedToWarbandNames": ["SkavenOfClanEshin"]
+    "restrictedToWarbandIds": ["warband.skaven-of-clan-eshin"]
   }
 ]

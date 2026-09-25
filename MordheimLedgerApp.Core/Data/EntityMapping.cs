@@ -61,6 +61,7 @@ public static class EntityMapping
         Id = e.Id,
         Name = ResolveName(e.NameKey, translations),
         Source = e.Source,
+        OfficialId = e.OfficialId,
         Grade = e.Grade,
         StartingTreasury = e.StartingTreasury,
         MaxWarriors = e.MaxWarriors,
@@ -80,6 +81,7 @@ public static class EntityMapping
         Id = m.Id,
         NameKey = m.NameKey ?? string.Empty,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         Grade = m.Grade,
         StartingTreasury = m.StartingTreasury,
         MaxWarriors = m.MaxWarriors,
@@ -99,6 +101,7 @@ public static class EntityMapping
         IsHero = e.IsHero,
         Cost = e.Cost,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         MaxCount = e.MaxCount,
         MinCount = e.MinCount,
         Movement = e.Movement,
@@ -143,6 +146,7 @@ public static class EntityMapping
         IsHero = m.IsHero,
         Cost = m.Cost,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         MaxCount = m.MaxCount,
         MinCount = m.MinCount,
         Movement = m.Movement,
@@ -403,6 +407,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
@@ -418,6 +423,7 @@ public static class EntityMapping
         Category = m.Category,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
         HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds)
     };
@@ -437,6 +443,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         Movement = e.Movement,
         WeaponSkill = e.WeaponSkill,
@@ -464,6 +471,7 @@ public static class EntityMapping
         BaseRating = m.BaseRating,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
         Movement = m.Movement,
         WeaponSkill = m.WeaponSkill,
@@ -494,6 +502,7 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         PairDescriptionKey = e.PairDescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         Movement = e.Movement,
         WeaponSkill = e.WeaponSkill,
@@ -530,6 +539,7 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey,
         PairDescriptionKey = m.PairDescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
         Movement = m.Movement,
         WeaponSkill = m.WeaponSkill,
@@ -562,6 +572,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         Category = e.Category,
         RollRange = e.RollRange,
@@ -575,6 +586,7 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
         Category = m.Category,
         RollRange = m.RollRange,
@@ -594,6 +606,7 @@ public static class EntityMapping
         DescriptionKey = e.DescriptionKey,
         ShortDescriptionKey = e.ShortDescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         RollsIndependently = e.RollsIndependently,
         StatTestField = e.StatTestField,
         StatTestTargetsLeader = e.StatTestTargetsLeader,
@@ -614,6 +627,7 @@ public static class EntityMapping
         DescriptionKey = m.DescriptionKey ?? string.Empty,
         ShortDescriptionKey = m.ShortDescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         RollsIndependently = m.RollsIndependently,
         StatTestField = m.StatTestField,
         StatTestTargetsLeader = m.StatTestTargetsLeader,
@@ -702,6 +716,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         CostMultiplier = e.CostMultiplier,
         Abbreviation = e.Abbreviation,
@@ -719,6 +734,7 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
         CostMultiplier = m.CostMultiplier,
         Abbreviation = m.Abbreviation,
@@ -743,6 +759,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
@@ -774,6 +791,7 @@ public static class EntityMapping
         Name = ResolveName(e.NameKey, translations),
         NameKey = e.NameKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ItemIds = itemsByListId?.GetValueOrDefault(e.Id) ?? new List<int>()
     };
 
@@ -782,7 +800,8 @@ public static class EntityMapping
         Id = m.Id,
         WarbandArchetypeId = m.WarbandArchetypeId,
         NameKey = m.NameKey ?? string.Empty,
-        Source = m.Source
+        Source = m.Source,
+        OfficialId = m.OfficialId
     };
 
     public static Spell ToModel(this SpellEntity e, IReadOnlyDictionary<string, string> translations,
@@ -798,6 +817,7 @@ public static class EntityMapping
         RollValue = e.RollValue,
         Difficulty = e.Difficulty,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty
     };
 
@@ -810,6 +830,7 @@ public static class EntityMapping
         RollValue = m.RollValue,
         Difficulty = m.Difficulty,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath
     };
 
@@ -821,6 +842,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty
     };
 
@@ -830,6 +852,7 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath
     };
 
@@ -840,7 +863,8 @@ public static class EntityMapping
         Description = ResolveDescription(e.DescriptionKey, translations),
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
-        Source = e.Source
+        Source = e.Source,
+        OfficialId = e.OfficialId
     };
 
     public static RaceEntity ToEntity(this Race m) => new()
@@ -848,7 +872,8 @@ public static class EntityMapping
         Id = m.Id,
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
-        Source = m.Source
+        Source = m.Source,
+        OfficialId = m.OfficialId
     };
 
     public static RacialProfile ToModel(this RacialProfileEntity e, IReadOnlyDictionary<string, string> translations) => new()
@@ -859,6 +884,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         Movement = e.Movement,
         MovementOverride = e.MovementOverride,
         WeaponSkill = e.WeaponSkill,
@@ -877,6 +903,7 @@ public static class EntityMapping
         NameKey = m.NameKey ?? string.Empty,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         Movement = m.Movement,
         MovementOverride = m.MovementOverride,
         WeaponSkill = m.WeaponSkill,
@@ -899,6 +926,7 @@ public static class EntityMapping
         CostRandomMax = m.CostRandomMax,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
         IsFreeDagger = m.IsFreeDagger,
         Movement = m.Movement,
@@ -1171,6 +1199,7 @@ public static class EntityMapping
         NameKey = e.NameKey,
         DescriptionKey = e.DescriptionKey,
         Source = e.Source,
+        OfficialId = e.OfficialId,
         ImagePath = e.ImagePath ?? string.Empty,
         RestrictedToWarbandArchetypeIds = restrictions?.GetValueOrDefault(e.Id) ?? new List<int>()
     };
@@ -1182,6 +1211,7 @@ public static class EntityMapping
         Cost = m.Cost,
         DescriptionKey = m.DescriptionKey,
         Source = m.Source,
+        OfficialId = m.OfficialId,
         ImagePath = m.ImagePath
     };
 

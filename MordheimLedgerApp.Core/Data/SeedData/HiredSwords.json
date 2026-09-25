@@ -1,5 +1,6 @@
 [
   {
+    "id": "hiredsword.pit-fighter",
     "name": { "en": "Pit Fighter", "fr": "Gladiateur" },
     "hireCost": 30,
     "upkeep": 15,
@@ -11,14 +12,15 @@
     "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 4, "toughness": 4,
     "wounds": 1, "initiative": 4, "attacks": 2, "leadership": 7,
     "allowedSkillCategories": ["Combat", "Speed", "Strength"],
-    "startingEquipmentNames": ["Morning star", "Helmet", "Spiked gauntlet"],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.morning-star", "equipment.helmet", "equipment.spiked-gauntlet"],
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ]
   },
   {
+    "id": "hiredsword.arabian-merchant",
     "name": { "en": "Arabian Merchant", "fr": "Marchand d'Arabie" },
     "hireCost": 20,
     "upkeep": 10,
@@ -30,13 +32,14 @@
     "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 7,
     "allowedSkillCategories": ["Academic"],
-    "startingEquipmentNames": ["Scimitar"],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.scimitar"],
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ]
   },
   {
+    "id": "hiredsword.beast-hunter",
     "name": { "en": "Beast Hunter", "fr": "Chasseur de Bêtes" },
     "hireCost": 35,
     "upkeep": 15,
@@ -48,13 +51,14 @@
     "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 4,
     "wounds": 1, "initiative": 4, "attacks": 2, "leadership": 7,
     "allowedSkillCategories": ["Combat", "Strength"],
-    "startingEquipmentNames": ["Axe", "Throwing Axe", "Light Armour"],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.axe", "equipment.throwing-axe", "equipment.light-armour"],
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ]
   },
   {
+    "id": "hiredsword.dwarf-troll-slayer",
     "name": { "en": "Dwarf Troll Slayer", "fr": "Tueur de Troll Nain" },
     "hireCost": 25,
     "upkeep": 10,
@@ -66,12 +70,13 @@
     "movement": 3, "weaponSkill": 4, "ballisticSkill": 3, "strength": 3, "toughness": 4,
     "wounds": 1, "initiative": 2, "attacks": 1, "leadership": 9,
     "allowedSkillCategories": ["Combat", "Strength"],
-    "startingEquipmentNames": ["Axe"],
-    "restrictedToWarbandNames": [
-      "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers", "Marienburgers", "WitchHunters"
+    "startingEquipmentIds": ["equipment.axe"],
+    "restrictedToWarbandIds": [
+      "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers", "warband.marienburgers", "warband.witch-hunters"
     ],
     "specialRules": [
       {
+        "id": "rule.death-wish",
         "name": { "en": "Death Wish", "fr": "Vœu de Mort" },
         "description": {
           "en": "This model seeks an honourable death in combat - it is immune to psychology and never takes an Alone Against All test.",
@@ -79,6 +84,7 @@
         }
       },
       {
+        "id": "rule.hard-to-kill",
         "name": { "en": "Hard to Kill", "fr": "Dur à Tuer" },
         "description": {
           "en": "Troll Slayers are tough, resilient individuals who can only be taken out of action on a D6 roll of 6 instead of 5-6 when rolling on the Injury chart. Treat a roll of 5 as stunned.",
@@ -86,6 +92,7 @@
         }
       },
       {
+        "id": "rule.hard-headed",
         "name": { "en": "Hard Headed", "fr": "Tête Dure" },
         "description": {
           "en": "Dwarfs ignore the special rules of maces, hammers etc. - they're not easily knocked out!",
@@ -95,6 +102,7 @@
     ]
   },
   {
+    "id": "hiredsword.elf-ranger",
     "name": { "en": "Elf Ranger", "fr": "Rôdeur Elfe" },
     "hireCost": 40,
     "upkeep": 20,
@@ -106,13 +114,14 @@
     "movement": 5, "weaponSkill": 4, "ballisticSkill": 5, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 6, "attacks": 1, "leadership": 8,
     "allowedSkillCategories": ["Shooting", "Speed"],
-    "startingEquipmentNames": ["Elf Bow", "Sword", "Elven Cloak"],
-    "restrictedToWarbandNames": [
-      "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers", "Marienburgers", "WitchHunters",
-      "DwarfTreasureHunters"
+    "startingEquipmentIds": ["equipment.elf-bow", "equipment.sword", "equipment.elven-cloak"],
+    "restrictedToWarbandIds": [
+      "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers", "warband.marienburgers", "warband.witch-hunters",
+      "warband.dwarf-treasure-hunters"
     ],
     "specialRules": [
       {
+        "id": "rule.seeker",
         "name": { "en": "Seeker", "fr": "Limier" },
         "description": {
           "en": "When rolling on the Exploration chart, the Elf Ranger allows you to modify one dice roll by -1/+1.",
@@ -120,6 +129,7 @@
         }
       },
       {
+        "id": "rule.excellent-sight",
         "name": { "en": "Excellent Sight", "fr": "Vue Perçante" },
         "description": {
           "en": "Elves have eyesight unmatched by mere humans. The Elf Ranger spots Hidden enemies from two times as far away as other warriors (ie, twice his Initiative value in inches).",
@@ -129,6 +139,7 @@
     ]
   },
   {
+    "id": "hiredsword.freelancer",
     "name": { "en": "Freelancer", "fr": "Chevalier Errant" },
     "hireCost": 50,
     "upkeep": 20,
@@ -140,12 +151,13 @@
     "movement": 4, "weaponSkill": 4, "ballisticSkill": 3, "strength": 4, "toughness": 3,
     "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 7,
     "allowedSkillCategories": ["Combat", "Strength"],
-    "startingEquipmentNames": ["Heavy Armour", "Shield", "Lance", "Sword"],
-    "restrictedToWarbandNames": [
-      "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers", "Marienburgers", "WitchHunters"
+    "startingEquipmentIds": ["equipment.heavy-armour", "equipment.shield", "equipment.lance", "equipment.sword"],
+    "restrictedToWarbandIds": [
+      "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers", "warband.marienburgers", "warband.witch-hunters"
     ]
   },
   {
+    "id": "hiredsword.halfling-scout",
     "name": { "en": "Halfling Scout", "fr": "Éclaireur Halfling" },
     "hireCost": 15,
     "upkeep": 5,
@@ -157,14 +169,15 @@
     "movement": 4, "weaponSkill": 2, "ballisticSkill": 4, "strength": 2, "toughness": 2,
     "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
     "allowedSkillCategories": ["Speed", "Shooting"],
-    "startingEquipmentNames": ["Bow", "Dagger", "Helmet"],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "OrcMob", "BeastmenRaiders", "WitchHunters",
-      "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.bow", "equipment.dagger", "equipment.helmet"],
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.orc-mob", "warband.beastmen-raiders", "warband.witch-hunters",
+      "warband.sisters-of-sigmar", "warband.kislevites"
     ],
     "specialRules": [
       {
+        "id": "rule.cook",
         "name": { "en": "Cook", "fr": "Cuisinier" },
         "description": {
           "en": "Halflings are renowned for their cooking skills. A warband with a Halfling Scout may increase its maximum size by +1, as warriors from all around are attracted by the smell of great food! Note that this does not increase the maximum number of Heroes you may have.",
@@ -174,6 +187,7 @@
     ]
   },
   {
+    "id": "hiredsword.highwayman",
     "name": { "en": "Highwayman", "fr": "Bandit de Grand Chemin" },
     "hireCost": 35,
     "upkeep": 20,
@@ -185,14 +199,15 @@
     "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
     "allowedSkillCategories": ["Combat", "Shooting", "Speed"],
-    "startingEquipmentNames": ["Dagger", "Pistol", "Rapier", "Buckler"],
-    "restrictedToWarbandNames": [
-      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "SkavenOfClanEshin", "Kislevites"
+    "startingEquipmentIds": ["equipment.dagger", "equipment.pistol", "equipment.rapier", "equipment.buckler"],
+    "restrictedToWarbandIds": [
+      "warband.undead", "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.skaven-of-clan-eshin", "warband.kislevites"
     ],
     "specialRules": [
       {
+        "id": "rule.expert-pistolier",
         "name": { "en": "Expert Pistolier", "fr": "Pistolier Expert" },
         "description": {
           "en": "A Highwayman's skill with a brace of pistols is unrivalled and as such he combines the effects of the skills Pistolier and Trick Shooter.",
@@ -200,6 +215,7 @@
         }
       },
       {
+        "id": "rule.expert-rider-highwayman",
         "name": { "en": "Expert Rider (Highwayman)", "fr": "Cavalier Expert (Bandit de Grand Chemin)" },
         "description": {
           "en": "A Highwayman is a superb rider and as such while he is mounted he counts as being stationary for the purposes of shooting (no -1 modifier to hit) and he also benefits from the skill as he can reload quickly whilst on horseback.",
@@ -207,6 +223,7 @@
         }
       },
       {
+        "id": "rule.unscrupulous",
         "name": { "en": "Unscrupulous", "fr": "Sans Scrupules" },
         "description": {
           "en": "A Highwayman, despite all his skill and bravado, is not to be trusted. At the end of each battle roll a D6, on a roll of a 1 the warband receives 1 less piece of Treasure than they would normally as the Highwayman has stolen it for himself (this Treasure is not spent on the Highwayman, it is lost!).",
@@ -216,6 +233,7 @@
     ]
   },
   {
+    "id": "hiredsword.imperial-assassin",
     "name": { "en": "Imperial Assassin", "fr": "Assassin Impérial" },
     "hireCost": 40,
     "upkeep": 20,
@@ -227,13 +245,14 @@
     "movement": 4, "weaponSkill": 4, "ballisticSkill": 4, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 5, "attacks": 2, "leadership": 8,
     "allowedSkillCategories": ["Combat", "Shooting", "Speed", "Strength"],
-    "startingEquipmentNames": ["Sword", "Dagger", "Throwing Knives", "Crossbow Pistol"],
-    "restrictedToWarbandNames": [
-      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "BeastmenRaiders", "Kislevites"
+    "startingEquipmentIds": ["equipment.sword", "equipment.dagger", "equipment.throwing-knives", "equipment.crossbow-pistol"],
+    "restrictedToWarbandIds": [
+      "warband.undead", "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.beastmen-raiders", "warband.kislevites"
     ],
     "specialRules": [
       {
+        "id": "rule.poisoner",
         "name": { "en": "Poisoner", "fr": "Empoisonneur" },
         "description": {
           "en": "Assassins specialize in the use of poisons. The Assassin starts each game with his weapons poisoned with either Black Lotus or Dark Venom, decided by the controlling player before the game starts.",
@@ -241,6 +260,7 @@
         }
       },
       {
+        "id": "rule.weapons-master",
         "name": { "en": "Weapons Master", "fr": "Maître d'Armes" },
         "description": {
           "en": "The Assassin is a master of weapons and may use any weapon he finds. Unlike other members of your warband, any weapon you give an Assassin is his to keep. An Assassin will never use a blackpowder weapon as such devices are far too conspicuous for someone in his profession.",
@@ -250,6 +270,7 @@
     ]
   },
   {
+    "id": "hiredsword.ogre-bodyguard",
     "name": { "en": "Ogre Bodyguard", "fr": "Garde du Corps Ogre" },
     "hireCost": 80,
     "upkeep": 30,
@@ -261,18 +282,19 @@
     "movement": 6, "weaponSkill": 3, "ballisticSkill": 2, "strength": 4, "toughness": 4,
     "wounds": 3, "initiative": 3, "attacks": 2, "leadership": 7,
     "allowedSkillCategories": ["Combat", "Strength"],
-    "startingEquipmentNames": ["Club", "Light Armour"],
-    "restrictedToWarbandNames": [
-      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.club", "equipment.light-armour"],
+    "restrictedToWarbandIds": [
+      "warband.undead", "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ],
     "specialRules": [
-      { "name": { "en": "Causes Fear", "fr": "Provoque la Peur" } },
-      { "name": { "en": "Large Target", "fr": "Grande Cible" } }
+      { "id": "rule.causes-fear", "name": { "en": "Causes Fear", "fr": "Provoque la Peur" } },
+      { "id": "rule.large-target", "name": { "en": "Large Target", "fr": "Grande Cible" } }
     ]
   },
   {
+    "id": "hiredsword.roadwarden",
     "name": { "en": "Roadwarden", "fr": "Gardien des Routes" },
     "hireCost": 40,
     "upkeep": 20,
@@ -284,13 +306,14 @@
     "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 8,
     "allowedSkillCategories": ["Combat", "Shooting", "Strength"],
-    "startingEquipmentNames": ["Crossbow", "Horseman's Hammer", "Dagger", "Heavy Armour", "Torch"],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.crossbow", "equipment.horseman-s-hammer", "equipment.dagger", "equipment.heavy-armour", "equipment.torch"],
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ],
     "specialRules": [
       {
+        "id": "rule.expert-rider-roadwarden",
         "name": { "en": "Expert Rider (Roadwarden)", "fr": "Cavalier Expert (Gardien des Routes)" },
         "description": {
           "en": "A highly skilled horseman, a Roadwarden counts as having the Nimble skill whilst on horseback and suffers no modifiers for moving and shooting.",
@@ -298,6 +321,7 @@
         }
       },
       {
+        "id": "rule.lethal-marksman",
         "name": { "en": "Lethal Marksman", "fr": "Tireur Mortel" },
         "description": {
           "en": "A master with the crossbow, a Roadwarden combines the skills of Trick Shooter and Eagle Eyes.",
@@ -305,6 +329,7 @@
         }
       },
       {
+        "id": "rule.stern",
         "name": { "en": "Stern", "fr": "Impassible" },
         "description": {
           "en": "Working alone and in the dark for the majority of his profession the Roadwarden is made of strong stuff indeed. He may re-roll any failed Leadership test for fear, and is immune to the rules for being all alone.",
@@ -314,6 +339,7 @@
     ]
   },
   {
+    "id": "hiredsword.tilean-marksman",
     "name": { "en": "Tilean Marksman", "fr": "Tireur Tiléen" },
     "hireCost": 30,
     "upkeep": 15,
@@ -325,14 +351,15 @@
     "movement": 4, "weaponSkill": 3, "ballisticSkill": 4, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 3, "attacks": 1, "leadership": 7,
     "allowedSkillCategories": ["Shooting"],
-    "startingEquipmentNames": ["Light Armour", "Sword", "Dagger", "Crossbow"],
-    "restrictedToWarbandNames": [
-      "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "BeastmenRaiders", "WitchHunters",
-      "SistersOfSigmar", "Kislevites"
+    "startingEquipmentIds": ["equipment.light-armour", "equipment.sword", "equipment.dagger", "equipment.crossbow"],
+    "restrictedToWarbandIds": [
+      "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.beastmen-raiders", "warband.witch-hunters",
+      "warband.sisters-of-sigmar", "warband.kislevites"
     ],
     "specialRules": [
       {
+        "id": "rule.steady-hands",
         "name": { "en": "Steady Hands", "fr": "Mains Sûres" },
         "description": {
           "en": "The Tilean Marksman's aim never wavers. He ignores 'to hit' modifiers for long range when shooting the crossbow.",
@@ -340,6 +367,7 @@
         }
       },
       {
+        "id": "rule.dead-eye-shot",
         "name": { "en": "Dead Eye Shot", "fr": "Œil de Faucon" },
         "description": {
           "en": "The Marksman has the eyes of an eagle and can hit the smallest target. He ignores 'to hit' modifiers for cover when shooting his crossbow.",
@@ -349,6 +377,7 @@
     ]
   },
   {
+    "id": "hiredsword.warlock",
     "name": { "en": "Warlock", "fr": "Sorcier" },
     "hireCost": 30,
     "upkeep": 15,
@@ -360,15 +389,15 @@
     "movement": 4, "weaponSkill": 2, "ballisticSkill": 2, "strength": 3, "toughness": 3,
     "wounds": 1, "initiative": 4, "attacks": 1, "leadership": 8,
     "allowedSkillCategories": ["Academic"],
-    "startingEquipmentNames": ["Staff"],
-    "magicSchoolName": { "en": "Lesser Magic", "fr": "Magie Mineure" },
-    "restrictedToWarbandNames": [
-      "Undead", "DwarfTreasureHunters", "Averlanders", "Ostlanders", "Reiklanders", "Middenheimers",
-      "Marienburgers", "CarnivalOfChaos", "CultOfThePossessed", "OrcMob", "BeastmenRaiders",
-      "SkavenOfClanEshin", "Kislevites"
+    "startingEquipmentIds": ["equipment.staff"],
+    "magicSchoolId": "school.lesser-magic",
+    "restrictedToWarbandIds": [
+      "warband.undead", "warband.dwarf-treasure-hunters", "warband.averlanders", "warband.ostlanders", "warband.reiklanders", "warband.middenheimers",
+      "warband.marienburgers", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.orc-mob", "warband.beastmen-raiders",
+      "warband.skaven-of-clan-eshin", "warband.kislevites"
     ],
     "specialRules": [
-      { "name": { "en": "Wizard", "fr": "Sorcier" } }
+      { "id": "rule.wizard", "name": { "en": "Wizard", "fr": "Sorcier" } }
     ]
   }
 ]

@@ -199,6 +199,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             Id = s.Id,
             Name = s.Name,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             Grade = s.Grade,
             StartingTreasury = s.StartingTreasury,
             MaxWarriors = s.MaxWarriors,

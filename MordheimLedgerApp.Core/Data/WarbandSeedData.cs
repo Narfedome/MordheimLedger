@@ -17,6 +17,10 @@ public class LocalizedText
 
 public class WarbandSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 
@@ -29,7 +33,7 @@ public class WarbandSeedData
     /// once at seed time (see AppDatabase.FindOrCreateRaceAsync/SeedRacesAsync, seeded before any
     /// warband file, same idiom as MagicSchools above). Every band declares exactly one - see
     /// Models.Library.WarbandArchetype.RaceId.</summary>
-    public string Race { get; set; } = string.Empty;
+    public string RaceId { get; set; } = string.Empty;
 
     /// <summary>Rules SPECIFIC to this warband (e.g. "Ancient Enemies" for Kislevites) - genuinely
     /// common rules (Leader, Wizard, Causes Fear, ...) now live once in Data/SeedData/SpecialRules.json,
@@ -74,18 +78,22 @@ public class WarbandSeedData
     /// <summary>Skills SPECIFIC to this warband (its unique "special skill" table, e.g. Orc Mob's
     /// Waaagh!/'Ard 'Ead/...) - the generic common pool (Combat Master, Step Aside, ...) still lives
     /// once in Data/SeedData/Skills.json, seeded before any warband file. See
-    /// SkillSeedData.RestrictedToThisWarband/RestrictedToWarriorNames.</summary>
+    /// SkillSeedData.RestrictedToThisWarband/RestrictedToWarriorIds.</summary>
     public List<SkillSeedData> Skills { get; set; } = new();
 
     /// <summary>This warband's named starting-equipment lists (e.g. "Skaven Heroes Equipment list",
     /// "Marksman Equipment list") - see EquipmentListSeedData. Each WarriorSeedData references one by
-    /// name via EquipmentListName. Distinct from Equipment above, which is the Rare/Trading-Post
+    /// name via EquipmentListId. Distinct from Equipment above, which is the Rare/Trading-Post
     /// channel (RestrictedToThisWarband), not tied to any list.</summary>
     public List<EquipmentListSeedData> EquipmentLists { get; set; } = new();
 }
 
 public class WarriorSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public bool IsHero { get; set; }
     public int Cost { get; set; }
@@ -127,7 +135,7 @@ public class WarriorSeedData
     /// archetype's Weapons/Armour line draws from - null/omitted = no curated list assigned, falls back
     /// to the full common+band equipment pool in the picker (NOT "never uses equipment" - see
     /// CanUseEquipment for that).</summary>
-    public string? EquipmentListName { get; set; }
+    public string? EquipmentListId { get; set; }
 
     /// <summary>False for archetypes the rulebook explicitly forbids from carrying weapons/armour
     /// (Ghouls, Zombies, Trolls, Rat Ogre, Giant Rats... - see their "No Equipment" special rule) -
@@ -158,11 +166,15 @@ public class WarriorSeedData
     /// never needs one. Declared per-band (here) rather than in a shared lookup table: each band file
     /// already owns everything else specific to its own archetypes, and this keeps a wrong/missing
     /// assignment a one-line fix in the file that actually needs it.</summary>
-    public string? RacialProfileName { get; set; }
+    public string? RacialProfileId { get; set; }
 }
 
 public class EquipmentSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
 
     /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.EquipmentCategory member name.</summary>
@@ -182,7 +194,7 @@ public class EquipmentSeedData
     /// Rare/Trading-Post channel, bought any time and not tied to a starting EquipmentList. Meant for an
     /// entry declared directly inside a per-band file (e.g. Orc Mob's own "Sanglier de guerre"). For a
     /// COMMON catalog entry (Equipment.json) restricted to several named bands at once, use
-    /// RestrictedToWarbandNames instead - the two are mutually exclusive in practice, never both set.</summary>
+    /// RestrictedToWarbandIds instead - the two are mutually exclusive in practice, never both set.</summary>
     public bool RestrictedToThisWarband { get; set; }
 
     /// <summary>File-name stems (e.g. "Reiklanders", "Marienburgers" - the SeedWarbandFromJsonAsync
@@ -192,12 +204,12 @@ public class EquipmentSeedData
     /// (see AppDatabase.SeedOfficialContentAsync) since no WarbandArchetype exists yet when Equipment.json
     /// itself is seeded. Null/empty = no multi-band restriction (still common to everyone, matching the
     /// default RestrictedToWarbandArchetypeIds = empty on the runtime model).</summary>
-    public List<string>? RestrictedToWarbandNames { get; set; }
+    public List<string>? RestrictedToWarbandIds { get; set; }
 
     /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that
     /// alone may have this item (e.g. Averlanders' "Long bow" in the shared Scout list - Bergjaeger
     /// only) - null/empty = every warrior of the restricted warband(s)/list members can have it.</summary>
-    public List<string>? RestrictedToWarriorNames { get; set; }
+    public List<string>? RestrictedToWarriorIds { get; set; }
 
     /// <summary>Weapon/armour-specific rules (e.g. "Parry", "Cutting Edge") - find-or-created by
     /// English Name. Only applied when this item is newly created (see AppDatabase) - a band file
@@ -225,8 +237,8 @@ public class EquipmentSeedData
     /// EquipmentItem.GrantsSkillCategory. Null for almost every item.</summary>
     public string? GrantsSkillCategory { get; set; }
 
-    /// <summary>See EquipmentItem.GrantsSpecificSkillName. Null for almost every item.</summary>
-    public string? GrantsSpecificSkillName { get; set; }
+    /// <summary>See EquipmentItem.GrantsSpecificSkillId. Null for almost every item.</summary>
+    public string? GrantsSpecificSkillId { get; set; }
 
     /// <summary>See EquipmentItem.GrantsRareItemSearchBonus. Null for almost every item.</summary>
     public int? GrantsRareItemSearchBonus { get; set; }
@@ -246,19 +258,27 @@ public class EquipmentSeedData
     public bool IsExplorationOnly { get; set; }
 }
 
-/// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemNames
+/// <summary>One named starting-equipment list (see WarbandSeedData.EquipmentLists) - ItemIds
 /// resolved against either the common Data/SeedData/Equipment.json pool or this same band's own
 /// Equipment declarations at seed time.</summary>
 public class EquipmentListSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
-    public List<string> ItemNames { get; set; } = new();
+    public List<string> ItemIds { get; set; } = new();
 }
 
 public class SpellSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     /// <summary>Must match the English Name of one of the parent WarbandSeedData's MagicSchools entries.</summary>
-    public string MagicSchoolName { get; set; } = string.Empty;
+    public string MagicSchoolId { get; set; } = string.Empty;
     public int RollValue { get; set; }
     public int? Difficulty { get; set; }
     public LocalizedText Name { get; set; } = new();
@@ -269,6 +289,10 @@ public class SpellSeedData
 /// at seed time, same shape/rationale as SpecialRuleSeedData.</summary>
 public class MagicSchoolSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 }
@@ -278,6 +302,10 @@ public class MagicSchoolSeedData
 /// MagicSchoolSeedData.</summary>
 public class RaceSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 }
@@ -291,6 +319,10 @@ public class RaceSeedData
 /// on every WarriorSeedData entry).</summary>
 public class RacialProfileSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
     public int Movement { get; set; }
@@ -310,6 +342,10 @@ public class RacialProfileSeedData
 /// multiple warbands/warrior types resolves to a single shared catalog row instead of duplicate text.</summary>
 public class SpecialRuleSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 
@@ -329,10 +365,10 @@ public class SpecialRuleSeedData
 
     /// <summary>Warband file stems (e.g. "OrcMob") this Hatred-granting rule targets - see
     /// SpecialRule.HatredTargetWarbandArchetypeIds. Resolved the same deferred way as EquipmentSeedData/
-    /// SkillSeedData's RestrictedToWarbandNames (the target WarbandArchetype may not exist yet at seed
+    /// SkillSeedData's RestrictedToWarbandIds (the target WarbandArchetype may not exist yet at seed
     /// time), see AppDatabase's _pendingSharedRestrictions. Null/empty = not a Hatred rule, or one with
     /// no mechanized target yet.</summary>
-    public List<string>? HatredTargetWarbandNames { get; set; }
+    public List<string>? HatredTargetWarbandIds { get; set; }
 
     /// <summary>See SpecialRule.HatredTargetsSpellcasters. False/absent for every rule but "Burn the
     /// Witch!".</summary>
@@ -345,24 +381,32 @@ public class SpecialRuleSeedData
 /// Kermesse du Chaos's Nurgle-themed Bénédictions).</summary>
 public class MutationSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
     public int Cost { get; set; }
 
     /// <summary>True = only this warband may buy it (see WarbandArchetypeMutationEntity) - meant for an
     /// entry declared directly inside a per-band file. For a COMMON catalog entry (Mutations.json)
-    /// restricted to several named bands at once, use RestrictedToWarbandNames instead.</summary>
+    /// restricted to several named bands at once, use RestrictedToWarbandIds instead.</summary>
     public bool RestrictedToThisWarband { get; set; }
 
-    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - only meaningful for an
+    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandIds - only meaningful for an
     /// entry declared in the common Mutations.json catalog.</summary>
-    public List<string>? RestrictedToWarbandNames { get; set; }
+    public List<string>? RestrictedToWarbandIds { get; set; }
 }
 
 /// <summary>One Skill catalog entry - either from the common pool (Data/SeedData/Skills.json, always
 /// unrestricted) or a warband's own special-skill table (WarbandSeedData.Skills).</summary>
 public class SkillSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
 
     /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.SkillCategory member name.</summary>
@@ -372,30 +416,34 @@ public class SkillSeedData
 
     /// <summary>True = only the declaring warband may pick it (see WarbandArchetypeSkillEntity) - meant
     /// for an entry declared directly inside a per-band file. For a COMMON catalog entry (Skills.json)
-    /// restricted to several named bands at once, use RestrictedToWarbandNames instead.</summary>
+    /// restricted to several named bands at once, use RestrictedToWarbandIds instead.</summary>
     public bool RestrictedToThisWarband { get; set; }
 
-    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - only meaningful for an
+    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandIds - only meaningful for an
     /// entry declared in the common Skills.json catalog.</summary>
-    public List<string>? RestrictedToWarbandNames { get; set; }
+    public List<string>? RestrictedToWarbandIds { get; set; }
 
     /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that alone
     /// may pick this skill (e.g. "Da Cunnin' Plan" -&gt; ["Orc Boss"]) - null/empty = every warrior of the
     /// restricted warband(s) can pick it. Only meaningful alongside RestrictedToThisWarband.</summary>
-    public List<string>? RestrictedToWarriorNames { get; set; }
+    public List<string>? RestrictedToWarriorIds { get; set; }
 
     /// <summary>Warband file stems this skill grants Hatred against (e.g. Sisters of Sigmar's "Righteous
     /// Fury" -&gt; Skaven of Clan Eshin/Undead/Cult of the Possessed/Beastmen Raiders) - see
     /// Skill.HatredTargetWarbandArchetypeIds, same deferred-resolution mechanism as
-    /// SpecialRuleSeedData.HatredTargetWarbandNames (added 2026-09-01, so a target band doesn't need to
+    /// SpecialRuleSeedData.HatredTargetWarbandIds (added 2026-09-01, so a target band doesn't need to
     /// have seeded yet).</summary>
-    public List<string>? HatredTargetWarbandNames { get; set; }
+    public List<string>? HatredTargetWarbandIds { get; set; }
 }
 
 /// <summary>One Hired Sword catalog entry (Data/SeedData/HiredSwords.json, always common - no per-band
 /// file declares its own, unlike Skill/Mutation). See Models.Library.HiredSword.</summary>
 public class HiredSwordSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public int HireCost { get; set; }
     public int Upkeep { get; set; }
@@ -418,11 +466,11 @@ public class HiredSwordSeedData
     /// <summary>English Name(s) of EquipmentSeedData entries already seeded from Equipment.json (this
     /// runs after SeedEquipmentAsync) - resolved against _equipmentIdsByEnglishName, throws on an
     /// unknown name (same fail-fast precedent as the other XxxIdsByEnglishName lookups).</summary>
-    public List<string> StartingEquipmentNames { get; set; } = new();
+    public List<string> StartingEquipmentIds { get; set; } = new();
 
-    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandNames - null/empty = hireable by
+    /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandIds - null/empty = hireable by
     /// every warband.</summary>
-    public List<string>? RestrictedToWarbandNames { get; set; }
+    public List<string>? RestrictedToWarbandIds { get; set; }
 
     /// <summary>Named special rules unique to this Hired Sword (e.g. Troll Slayer's "Deathwish") - found-
     /// or-created the same way as EquipmentSeedData.SpecialRules (inline, not a shared-catalog stub).
@@ -435,16 +483,20 @@ public class HiredSwordSeedData
     /// file's SpecialRules/Mutations stubs (see CLAUDE.md's "données communes centralisées" note):
     /// resolved via the same FindOrCreateMagicSchoolAsync cache SeedMagicSchoolsAsync already populates
     /// from MagicSchools.json, whichever of the two seeds first.</summary>
-    public LocalizedText? MagicSchoolName { get; set; }
+    public string? MagicSchoolId { get; set; }
 }
 
 /// <summary>One named "Dramatis Persona"/special character (Data/SeedData/DramatisPersonae.json, a
 /// single shared catalog seeded like HiredSwords.json - not declared per-band) - see
 /// Models.Library.DramatisPersona for why this is a separate, deliberately smaller shape than
-/// HiredSwordSeedData (no AllowedSkillCategories/StartingEquipmentNames: these characters don't advance
+/// HiredSwordSeedData (no AllowedSkillCategories/StartingEquipmentIds: these characters don't advance
 /// or shop, their gear/skills stay part of Description).</summary>
 public class DramatisPersonaSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
 
@@ -484,14 +536,14 @@ public class DramatisPersonaSeedData
     /// Models.Library.DramatisPersona.PairedWithDramatisPersonaId. Resolved AFTER the whole file is seeded
     /// (deferred, see AppDatabase.SeedDramatisPersonaeAsync's pendingPairings) since the referenced entry
     /// may appear later in the array. Null for every persona except Ulli/Marquand.</summary>
-    public string? PairedWithPersonaName { get; set; }
+    public string? PairedWithPersonaId { get; set; }
 
     /// <summary>See Models.Library.DramatisPersona.IsHiddenFromSearchPicker - true for Ulli only.</summary>
     public bool HiddenFromSearchPicker { get; set; }
 
-    /// <summary>Same mechanism as HiredSwordSeedData.RestrictedToWarbandNames - null/empty = hireable by
+    /// <summary>Same mechanism as HiredSwordSeedData.RestrictedToWarbandIds - null/empty = hireable by
     /// every warband.</summary>
-    public List<string>? RestrictedToWarbandNames { get; set; }
+    public List<string>? RestrictedToWarbandIds { get; set; }
 
     /// <summary>Every clean, single-effect rule (reused or genuinely unique to this character) - found-
     /// or-created the same way as HiredSwordSeedData.SpecialRules. Only real branching/multi-step systems
@@ -499,30 +551,34 @@ public class DramatisPersonaSeedData
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 
     /// <summary>English Name(s) of EquipmentSeedData entries - same resolution as
-    /// HiredSwordSeedData.StartingEquipmentNames (runs after SeedEquipmentAsync, resolved against
+    /// HiredSwordSeedData.StartingEquipmentIds (runs after SeedEquipmentAsync, resolved against
     /// _equipmentIdsByEnglishName, throws on an unknown name).</summary>
-    public List<string> StartingEquipmentNames { get; set; } = new();
+    public List<string> StartingEquipmentIds { get; set; } = new();
 
     /// <summary>English Name(s) of SkillSeedData entries this character already knows (e.g. Aenur:
     /// "Strike to Injure") - resolved against _skillIdsByEnglishName (runs after SeedSkillsAsync, throws
-    /// on an unknown name, same fail-fast precedent as StartingEquipmentNames).</summary>
-    public List<string> SkillNames { get; set; } = new();
+    /// on an unknown name, same fail-fast precedent as StartingEquipmentIds).</summary>
+    public List<string> SkillIds { get; set; } = new();
 
     /// <summary>See Models.Library.DramatisPersona.MagicSchoolId - same name-only stub idiom as
     /// HiredSwordSeedData.MagicSchoolName.</summary>
-    public LocalizedText? MagicSchoolName { get; set; }
+    public string? MagicSchoolId { get; set; }
 
     /// <summary>English Name of an EquipmentSeedData/Equipment.json entry - see Models.Library.
-    /// DramatisPersona.AlternativePaymentItemId. Same resolution as StartingEquipmentNames (runs after
+    /// DramatisPersona.AlternativePaymentItemId. Same resolution as StartingEquipmentIds (runs after
     /// SeedEquipmentAsync, resolved against _equipmentIdsByEnglishName, throws on an unknown name). Null
     /// for almost every character - only meaningful when FeeKind is Gold.</summary>
-    public string? AlternativePaymentItemName { get; set; }
+    public string? AlternativePaymentItemId { get; set; }
 }
 
 /// <summary>One row of the rulebook's Serious Injuries charts (Data/SeedData/Injuries.json, common to
 /// every warband - not declared per-band). See Injury.Category/RollRange.</summary>
 public class InjurySeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
 
     /// <summary>Matches an MordheimLedgerApp.Core.Models.Library.InjuryCategory member name.</summary>
@@ -548,6 +604,10 @@ public class InjurySeedData
 /// common - not declared per-band). See Models.Library.ExplorationResult.</summary>
 public class ExplorationResultSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public int DiceCount { get; set; }
     public int Value { get; set; }
     public LocalizedText Name { get; set; } = new();
@@ -568,9 +628,9 @@ public class ExplorationResultSeedData
     /// entry - so far only Tavern (Taverne).</summary>
     public bool StatTestTargetsLeader { get; set; }
 
-    /// <summary>See Models.Library.ExplorationResult.AutoPassStatTestWarbandArchetypeNames. Null/absent
+    /// <summary>See Models.Library.ExplorationResult.AutoPassStatTestWarbandArchetypeIds. Null/absent
     /// for almost every entry - so far only Tavern (Taverne).</summary>
-    public List<string>? AutoPassStatTestWarbandArchetypeNames { get; set; }
+    public List<string>? AutoPassStatTestWarbandArchetypeIds { get; set; }
 
     /// <summary>See Models.Library.ExplorationResult.RequiresDoubleRoll. False/absent for almost every
     /// entry - so far only Merchant's House (Maison du Marchand).</summary>
@@ -599,12 +659,12 @@ public class ExplorationOutcomeSeedData
     public string Kind { get; set; } = "None";
 
     public string? GoldFormula { get; set; }
-    public string? EquipmentItemName { get; set; }
+    public string? EquipmentItemId { get; set; }
     public string? ItemQuantityFormula { get; set; }
     public string? FoundValueFormula { get; set; }
-    public string? MaterialRuleName { get; set; }
-    public string? SecondaryEquipmentItemName { get; set; }
-    public string? AlternativeEquipmentItemName { get; set; }
+    public string? MaterialRuleId { get; set; }
+    public string? SecondaryEquipmentItemId { get; set; }
+    public string? AlternativeEquipmentItemId { get; set; }
     public string? Note { get; set; }
 
     /// <summary>See Models.Library.ExplorationOutcome.BranchText. Null for almost every outcome - so far
@@ -627,8 +687,8 @@ public class ExplorationOutcomeSeedData
     public bool TriggersArtefactRoll { get; set; }
 
     /// <summary>English WarbandArchetype.Name(s) - see Models.Library.ExplorationOutcome.
-    /// RestrictedToWarbandArchetypeNames. Null/absent (almost every outcome) = no restriction.</summary>
-    public List<string>? RestrictedToWarbandArchetypeNames { get; set; }
+    /// RestrictedToWarbandArchetypeIds. Null/absent (almost every outcome) = no restriction.</summary>
+    public List<string>? RestrictedToWarbandArchetypeIds { get; set; }
 
     /// <summary>See Models.Library.ExplorationOutcome.GrantsNextExplorationBonusDie. False/absent for
     /// almost every outcome - so far only Straggler's (Traînard) "any other warband" branch.</summary>
@@ -638,9 +698,9 @@ public class ExplorationOutcomeSeedData
     /// every outcome - so far only Straggler's (Traînard) Possessed branch.</summary>
     public int? GrantsLeaderExperience { get; set; }
 
-    /// <summary>See Models.Library.ExplorationOutcome.GrantsFreeHenchmanArchetypeName. Null/absent for
+    /// <summary>See Models.Library.ExplorationOutcome.GrantsFreeHenchmanArchetypeId. Null/absent for
     /// almost every outcome - so far only Straggler's (Traînard) Undead branch ("Zombie").</summary>
-    public string? GrantsFreeHenchmanArchetypeName { get; set; }
+    public string? GrantsFreeHenchmanArchetypeId { get; set; }
 
     /// <summary>See Models.Library.ExplorationOutcome.GrantsDistributedHeroExperienceFormula. Null for
     /// almost every outcome - so far only Prisoners' Possessed branch ("D3").</summary>
@@ -672,6 +732,10 @@ public class ExplorationOutcomeSeedData
 /// (name-only, no Description, no Spells) to link a spellcaster without redeclaring the table.</summary>
 public class MagicSchoolWithSpellsSeedData
 {
+    /// <summary>Identifiant stable (slug, ex. "equipment.sword") - jamais modifié une fois publié, même si
+    /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
+    public string Id { get; set; } = string.Empty;
+
     public LocalizedText Name { get; set; } = new();
     public LocalizedText? Description { get; set; }
     public List<SpellSeedData> Spells { get; set; } = new();

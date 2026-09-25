@@ -1,5 +1,6 @@
 [
   {
+    "id": "exploration.2-1",
     "diceCount": 2,
     "value": 1,
     "name": { "en": "Well", "fr": "Puits" },
@@ -15,6 +16,7 @@
     ]
   },
   {
+    "id": "exploration.2-2",
     "diceCount": 2,
     "value": 2,
     "name": { "en": "Shop", "fr": "Boutique" },
@@ -25,10 +27,11 @@
     "rollsIndependently": false,
     "outcomes": [
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "D6" },
-      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemName": "Lucky Charm", "itemQuantityFormula": "1" }
+      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemId": "equipment.lucky-charm", "itemQuantityFormula": "1" }
     ]
   },
   {
+    "id": "exploration.2-3",
     "diceCount": 2,
     "value": 3,
     "name": { "en": "Corpse", "fr": "Cadavre" },
@@ -39,13 +42,14 @@
     "rollsIndependently": false,
     "outcomes": [
       { "subRollMin": 1, "subRollMax": 2, "kind": "Gold", "goldFormula": "D6" },
-      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Dagger", "itemQuantityFormula": "1" },
-      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Axe", "itemQuantityFormula": "1" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Sword", "itemQuantityFormula": "1" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Light Armour", "itemQuantityFormula": "1" }
+      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemId": "equipment.dagger", "itemQuantityFormula": "1" },
+      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.axe", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.sword", "itemQuantityFormula": "1" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.light-armour", "itemQuantityFormula": "1" }
     ]
   },
   {
+    "id": "exploration.2-4",
     "diceCount": 2,
     "value": 4,
     "name": { "en": "Straggler", "fr": "Traînard" },
@@ -59,17 +63,18 @@
     },
     "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Skavens : vente aux agents du Clan Eshin", "restrictedToWarbandArchetypeNames": ["Skaven of Clan Eshin"],
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Skavens : vente aux agents du Clan Eshin", "restrictedToWarbandArchetypeIds": ["warband.skaven-of-clan-eshin"],
         "branchText": { "en": "Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc.", "fr": "Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO." } },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsLeaderExperience": 1,
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, +1 Expérience pour le chef", "restrictedToWarbandArchetypeIds": ["warband.cult-of-the-possessed"], "grantsLeaderExperience": 1,
         "branchText": { "en": "Possessed warbands can sacrifice the unfortunate individual for the glory of the Chaos gods - the leader gains +1 Experience.", "fr": "Une bande des Possédés peut le sacrifier à la gloire des dieux du Chaos - le chef gagne +1 Expérience." } },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie", "itemQuantityFormula": "1",
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent un Zombie gratuit", "restrictedToWarbandArchetypeIds": ["warband.undead"], "grantsFreeHenchmanArchetypeId": "warrior.undead.zombie", "itemQuantityFormula": "1",
         "branchText": { "en": "Undead warbands can kill the man and gain a Zombie for no cost.", "fr": "Une bande de Morts-Vivants peut le tuer et gagner un Zombie gratuitement." } },
       { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Autres bandes : un dé supplémentaire au prochain jet d'Exploration", "grantsNextExplorationBonusDie": true,
         "branchText": { "en": "Any other warband can interrogate the man and gain insight into the city: next time you roll on the Exploration chart, roll one dice more than usual and discard any one dice.", "fr": "La bande peut l'interroger et en tirer des renseignements sur la ville : au prochain jet sur la table d'Exploration, lancez un dé de plus que d'habitude et écartez-en un au choix." } }
     ]
   },
   {
+    "id": "exploration.2-5",
     "diceCount": 2,
     "value": 5,
     "name": { "en": "Overturned Cart", "fr": "Charrette Renversée" },
@@ -79,12 +84,13 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Mordheim Map", "itemQuantityFormula": "1" },
+      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.mordheim-map", "itemQuantityFormula": "1" },
       { "subRollMin": 3, "subRollMax": 4, "kind": "Gold", "goldFormula": "2D6" },
-      { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Sword", "secondaryEquipmentItemName": "Dagger", "itemQuantityFormula": "1", "materialRuleName": "Ornate Weapon" }
+      { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.sword", "secondaryEquipmentItemId": "equipment.dagger", "itemQuantityFormula": "1", "materialRuleId": "rule.ornate-weapon" }
     ]
   },
   {
+    "id": "exploration.2-6",
     "diceCount": 2,
     "value": 6,
     "name": { "en": "Ruined Hovels", "fr": "Masures en Ruine" },
@@ -98,6 +104,7 @@
     ]
   },
   {
+    "id": "exploration.3-1",
     "diceCount": 3,
     "value": 1,
     "name": { "en": "Tavern", "fr": "Taverne" },
@@ -108,12 +115,13 @@
     "rollsIndependently": false,
     "statTestField": "Leadership",
     "statTestTargetsLeader": true,
-    "autoPassStatTestWarbandArchetypeNames": ["Undead", "Witch Hunters", "The Sisters of Sigmar"],
+    "autoPassStatTestWarbandArchetypeIds": ["warband.undead", "warband.witch-hunters", "warband.sisters-of-sigmar"],
     "outcomes": [
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "4D6", "note": "Test de Commandement réussi", "statTestPass": true }
     ]
   },
   {
+    "id": "exploration.3-2",
     "diceCount": 3,
     "value": 2,
     "name": { "en": "Smithy", "fr": "Forge" },
@@ -123,15 +131,16 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemName": "Sword", "itemQuantityFormula": "1" },
-      { "subRollMin": 2, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Double-handed weapon", "itemQuantityFormula": "1" },
-      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Flail", "itemQuantityFormula": "1" },
-      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Halberd", "itemQuantityFormula": "D3" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Lance", "itemQuantityFormula": "1" },
+      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemId": "equipment.sword", "itemQuantityFormula": "1" },
+      { "subRollMin": 2, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.double-handed-weapon", "itemQuantityFormula": "1" },
+      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemId": "equipment.flail", "itemQuantityFormula": "1" },
+      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.halberd", "itemQuantityFormula": "D3" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.lance", "itemQuantityFormula": "1" },
       { "subRollMin": 6, "subRollMax": 6, "kind": "Gold", "goldFormula": "2D6" }
     ]
   },
   {
+    "id": "exploration.3-3",
     "diceCount": 3,
     "value": 3,
     "name": { "en": "Prisoners", "fr": "Prisonniers" },
@@ -145,17 +154,18 @@
     },
     "rollsIndependently": true,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Skavens : vente en esclavage", "restrictedToWarbandArchetypeNames": ["Skaven of Clan Eshin"],
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Skavens : vente en esclavage", "restrictedToWarbandArchetypeIds": ["warband.skaven-of-clan-eshin"],
         "branchText": { "en": "Skaven can sell the prisoners into slavery for 3D6 gc.", "fr": "Les Skavens peuvent les vendre en esclavage pour 3D6 CO." } },
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6", "note": "Autres bandes : escorte hors de la ville (un prisonnier peut rejoindre la bande comme Homme de main)", "grantsOptionalEquippedHenchman": true,
         "branchText": { "en": "Other warbands can escort the prisoners out of the city for 2D6 gc, and one prisoner may join the warband as a new Henchman if you can equip him.", "fr": "Les autres bandes peuvent escorter les prisonniers hors de la ville pour 2D6 CO, et l'un d'eux peut rejoindre la bande comme nouvel Homme de main s'il peut être équipé." } },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, D3 Expérience répartis entre les Héros", "restrictedToWarbandArchetypeNames": ["Cult of the Possessed"], "grantsDistributedHeroExperienceFormula": "D3",
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Possédés : sacrifice, D3 Expérience répartis entre les Héros", "restrictedToWarbandArchetypeIds": ["warband.cult-of-the-possessed"], "grantsDistributedHeroExperienceFormula": "D3",
         "branchText": { "en": "Possessed warbands can sacrifice the victims and gain D3 Experience distributed amongst their Heroes.", "fr": "Une bande des Possédés peut sacrifier les victimes et gagner D3 Expérience répartis entre ses Héros." } },
-      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent D3 Zombies gratuits", "restrictedToWarbandArchetypeNames": ["Undead"], "grantsFreeHenchmanArchetypeName": "Zombie", "itemQuantityFormula": "D3",
+      { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Morts-Vivants : gagnent D3 Zombies gratuits", "restrictedToWarbandArchetypeIds": ["warband.undead"], "grantsFreeHenchmanArchetypeId": "warrior.undead.zombie", "itemQuantityFormula": "D3",
         "branchText": { "en": "Undead warbands can kill the prisoners and gain D3 Zombies at no cost.", "fr": "Une bande de Morts-Vivants peut tuer les prisonniers et gagner D3 Zombies gratuitement." } }
     ]
   },
   {
+    "id": "exploration.3-4",
     "diceCount": 3,
     "value": 4,
     "name": { "en": "Fletcher", "fr": "Atelier du Fléchier" },
@@ -165,14 +175,15 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Short Bow", "itemQuantityFormula": "D3" },
-      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Bow", "itemQuantityFormula": "D3" },
-      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Long bow", "itemQuantityFormula": "D3" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Hunting Arrows", "itemQuantityFormula": "1" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Crossbow", "itemQuantityFormula": "D3" }
+      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.short-bow", "itemQuantityFormula": "D3" },
+      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemId": "equipment.bow", "itemQuantityFormula": "D3" },
+      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.long-bow", "itemQuantityFormula": "D3" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.hunting-arrows", "itemQuantityFormula": "1" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.crossbow", "itemQuantityFormula": "D3" }
     ]
   },
   {
+    "id": "exploration.3-5",
     "diceCount": 3,
     "value": 5,
     "name": { "en": "Market Hall", "fr": "Halle du Marché" },
@@ -186,6 +197,7 @@
     ]
   },
   {
+    "id": "exploration.3-6",
     "diceCount": 3,
     "value": 6,
     "name": { "en": "Returning a Favour", "fr": "Une Faveur Rendue" },
@@ -199,6 +211,7 @@
     ]
   },
   {
+    "id": "exploration.4-1",
     "diceCount": 4,
     "value": 1,
     "name": { "en": "Gunsmith", "fr": "Armurier à Poudre" },
@@ -208,15 +221,16 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemName": "Blunderbuss", "itemQuantityFormula": "1" },
-      { "subRollMin": 2, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Pistol", "itemQuantityFormula": "2" },
-      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Duelling Pistol", "itemQuantityFormula": "2" },
-      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Handgun", "itemQuantityFormula": "D3" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Superior Blackpowder", "itemQuantityFormula": "D3" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Hunting Rifle", "itemQuantityFormula": "1" }
+      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemId": "equipment.blunderbuss", "itemQuantityFormula": "1" },
+      { "subRollMin": 2, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.pistol", "itemQuantityFormula": "2" },
+      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemId": "equipment.duelling-pistol", "itemQuantityFormula": "2" },
+      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.handgun", "itemQuantityFormula": "D3" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.superior-blackpowder", "itemQuantityFormula": "D3" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.hunting-rifle", "itemQuantityFormula": "1" }
     ]
   },
   {
+    "id": "exploration.4-2",
     "diceCount": 4,
     "value": 2,
     "name": { "en": "Shrine", "fr": "Sanctuaire" },
@@ -231,13 +245,14 @@
     "rollsIndependently": true,
     "outcomes": [
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Sœurs de Sigmar/Chasseurs de Sorcières : reliques saintes + bénédiction d'arme",
-        "restrictedToWarbandArchetypeNames": ["The Sisters of Sigmar", "Witch Hunters"], "grantsWeaponBlessing": true,
+        "restrictedToWarbandArchetypeIds": ["warband.sisters-of-sigmar", "warband.witch-hunters"], "grantsWeaponBlessing": true,
         "branchText": { "en": "Sisters of Sigmar or Witch Hunter warbands may instead save some holy relics, gaining 3D6 gc from their patrons and a blessing: one chosen weapon always wounds Undead or Possessed models on a to-wound roll of 2+.", "fr": "Une bande Sœurs de Sigmar ou Chasseurs de Sorcières peut à la place sauver quelques reliques saintes : elle gagne 3D6 CO de la part de ses mécènes et une bénédiction - une arme au choix blesse désormais automatiquement tout Mort-Vivant ou Possédé sur un jet pour blesser de 2+." } },
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "note": "Toute autre bande : dépouille le sanctuaire",
         "branchText": { "en": "Your warband may strip the shrine and gain 3D6 gc worth of loot.", "fr": "Votre bande peut dépouiller le sanctuaire et gagner un butin de 3D6 CO." } }
     ]
   },
   {
+    "id": "exploration.4-3",
     "diceCount": 4,
     "value": 3,
     "name": { "en": "Townhouse", "fr": "Maison de Ville" },
@@ -251,6 +266,7 @@
     ]
   },
   {
+    "id": "exploration.4-4",
     "diceCount": 4,
     "value": 4,
     "name": { "en": "Armourer", "fr": "Armurerie" },
@@ -260,14 +276,15 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Shield", "alternativeEquipmentItemName": "Buckler", "itemQuantityFormula": "D3" },
-      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Helmet", "itemQuantityFormula": "D3" },
-      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Light Armour", "itemQuantityFormula": "D3" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Heavy Armour", "itemQuantityFormula": "D3" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Ithilmar Armour", "itemQuantityFormula": "1" }
+      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.shield", "alternativeEquipmentItemId": "equipment.buckler", "itemQuantityFormula": "D3" },
+      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemId": "equipment.helmet", "itemQuantityFormula": "D3" },
+      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.light-armour", "itemQuantityFormula": "D3" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.heavy-armour", "itemQuantityFormula": "D3" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.ithilmar-armour", "itemQuantityFormula": "1" }
     ]
   },
   {
+    "id": "exploration.4-5",
     "diceCount": 4,
     "value": 5,
     "name": { "en": "Graveyard", "fr": "Cimetière" },
@@ -285,11 +302,12 @@
         "branchText": { "en": "Any warband apart from Witch Hunters and Sisters of Sigmar may loot the crypts and gain D6x10 gc worth of loot - but the next time you play against Sisters of Sigmar or Witch Hunters, their entire warband will hate all your models.", "fr": "Toute bande sauf Chasseurs de Sorcières et Sœurs de Sigmar peut piller les cryptes et gagner un butin de D6x10 CO - mais lors de la prochaine partie contre les Chasseurs de Sorcières ou les Sœurs de Sigmar, toute leur bande haïra vos figurines." },
         "nextGameNoteText": { "en": "Next game: Witch Hunters/Sisters of Sigmar hate you (crypts looted at the Graveyard).", "fr": "Prochaine partie : les Chasseurs de Sorcières/Sœurs de Sigmar vous haïssent (cryptes pillées au Cimetière)." } },
       { "subRollMin": null, "subRollMax": null, "kind": "None", "note": "Chasseurs de Sorcières/Sœurs de Sigmar : D6 Expérience répartis entre les Héros",
-        "restrictedToWarbandArchetypeNames": ["Witch Hunters", "The Sisters of Sigmar"], "grantsDistributedHeroExperienceFormula": "D6",
+        "restrictedToWarbandArchetypeIds": ["warband.witch-hunters", "warband.sisters-of-sigmar"], "grantsDistributedHeroExperienceFormula": "D6",
         "branchText": { "en": "Witch Hunters and Sisters of Sigmar may instead seal the graves, gaining D6 Experience distributed amongst their Heroes.", "fr": "Les Chasseurs de Sorcières et Sœurs de Sigmar peuvent à la place sceller les tombes et gagner D6 Expérience répartis entre leurs Héros." } }
     ]
   },
   {
+    "id": "exploration.4-6",
     "diceCount": 4,
     "value": 6,
     "name": { "en": "Catacombs", "fr": "Catacombes" },
@@ -304,6 +322,7 @@
     ]
   },
   {
+    "id": "exploration.5-1",
     "diceCount": 5,
     "value": 1,
     "name": { "en": "Moneylender's House", "fr": "Maison du Prêteur sur Gages" },
@@ -317,6 +336,7 @@
     ]
   },
   {
+    "id": "exploration.5-2",
     "diceCount": 5,
     "value": 2,
     "name": { "en": "Alchemist's Laboratory", "fr": "Laboratoire de l'Alchimiste" },
@@ -326,10 +346,11 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "secondaryEquipmentItemName": "Alchemist's Notebook" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6", "secondaryEquipmentItemId": "equipment.alchemist-s-notebook" }
     ]
   },
   {
+    "id": "exploration.5-3",
     "diceCount": 5,
     "value": 3,
     "name": { "en": "Jewelsmith", "fr": "Bijoutier" },
@@ -339,13 +360,14 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Quartz Stones", "itemQuantityFormula": "1", "foundValueFormula": "D6x5" },
-      { "subRollMin": 3, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Amethyst", "itemQuantityFormula": "1" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Necklace", "itemQuantityFormula": "1" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Ruby", "itemQuantityFormula": "1", "foundValueFormula": "D6x15" }
+      { "subRollMin": 1, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.quartz-stones", "itemQuantityFormula": "1", "foundValueFormula": "D6x5" },
+      { "subRollMin": 3, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.amethyst", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.necklace", "itemQuantityFormula": "1" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.ruby", "itemQuantityFormula": "1", "foundValueFormula": "D6x15" }
     ]
   },
   {
+    "id": "exploration.5-4",
     "diceCount": 5,
     "value": 4,
     "name": { "en": "Merchant's House", "fr": "Maison du Marchand" },
@@ -357,10 +379,11 @@
     "requiresDoubleRoll": true,
     "outcomes": [
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "2D6x5" },
-      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemName": "Order of Freetraders Symbol", "itemQuantityFormula": "1", "requiresDoubleRoll": true }
+      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.order-of-freetraders-symbol", "itemQuantityFormula": "1", "requiresDoubleRoll": true }
     ]
   },
   {
+    "id": "exploration.5-5",
     "diceCount": 5,
     "value": 5,
     "name": { "en": "Shattered Building", "fr": "Bâtiment Éventré" },
@@ -372,10 +395,11 @@
     "bonusStatTestField": "Leadership",
     "outcomes": [
       { "subRollMin": null, "subRollMax": null, "kind": "Wyrdstone", "goldFormula": "D3" },
-      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemName": "Wardog", "itemQuantityFormula": "1", "statTestPass": true }
+      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.wardog", "itemQuantityFormula": "1", "statTestPass": true }
     ]
   },
   {
+    "id": "exploration.5-6",
     "diceCount": 5,
     "value": 6,
     "name": { "en": "Entrance to the Catacombs", "fr": "Entrée des Catacombes" },
@@ -389,6 +413,7 @@
     ]
   },
   {
+    "id": "exploration.6-1",
     "diceCount": 6,
     "value": 1,
     "name": { "en": "The Pit", "fr": "La Fosse" },
@@ -404,6 +429,7 @@
     ]
   },
   {
+    "id": "exploration.6-2",
     "diceCount": 6,
     "value": 2,
     "name": { "en": "Hidden Treasure", "fr": "Trésor Caché" },
@@ -415,15 +441,16 @@
     "outcomes": [
       { "subRollMin": 4, "subRollMax": null, "kind": "Wyrdstone", "goldFormula": "D3" },
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "5D6x5" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Holy Relic", "itemQuantityFormula": "1" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Heavy Armour", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.holy-relic", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.heavy-armour", "itemQuantityFormula": "1" },
       { "subRollMin": 4, "subRollMax": null, "kind": "Gold", "goldFormula": "D3x10" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Elven Cloak", "itemQuantityFormula": "1" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Holy Tome", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.elven-cloak", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.holy-tome", "itemQuantityFormula": "1" },
       { "subRollMin": 5, "subRollMax": null, "kind": "Item", "triggersArtefactRoll": true }
     ]
   },
   {
+    "id": "exploration.6-3",
     "diceCount": 6,
     "value": 3,
     "name": { "en": "Dwarf Smithy", "fr": "Forge Naine" },
@@ -433,15 +460,16 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemName": "Double-handed weapon", "itemQuantityFormula": "D3" },
-      { "subRollMin": 2, "subRollMax": 2, "kind": "Item", "equipmentItemName": "Heavy Armour", "itemQuantityFormula": "D3" },
-      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemName": "Axe", "itemQuantityFormula": "1", "materialRuleName": "Gromril Weapon" },
-      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Hammer", "itemQuantityFormula": "1", "materialRuleName": "Gromril Weapon" },
-      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemName": "Double-handed weapon", "itemQuantityFormula": "1", "materialRuleName": "Gromril Weapon" },
-      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemName": "Gromril Armour", "itemQuantityFormula": "1" }
+      { "subRollMin": 1, "subRollMax": 1, "kind": "Item", "equipmentItemId": "equipment.double-handed-weapon", "itemQuantityFormula": "D3" },
+      { "subRollMin": 2, "subRollMax": 2, "kind": "Item", "equipmentItemId": "equipment.heavy-armour", "itemQuantityFormula": "D3" },
+      { "subRollMin": 3, "subRollMax": 3, "kind": "Item", "equipmentItemId": "equipment.axe", "itemQuantityFormula": "1", "materialRuleId": "rule.gromril-weapon" },
+      { "subRollMin": 4, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.hammer", "itemQuantityFormula": "1", "materialRuleId": "rule.gromril-weapon" },
+      { "subRollMin": 5, "subRollMax": 5, "kind": "Item", "equipmentItemId": "equipment.double-handed-weapon", "itemQuantityFormula": "1", "materialRuleId": "rule.gromril-weapon" },
+      { "subRollMin": 6, "subRollMax": 6, "kind": "Item", "equipmentItemId": "equipment.gromril-armour", "itemQuantityFormula": "1" }
     ]
   },
   {
+    "id": "exploration.6-4",
     "diceCount": 6,
     "value": 4,
     "name": { "en": "Slaughtered Warband", "fr": "Bande Massacrée" },
@@ -452,18 +480,19 @@
     "rollsIndependently": true,
     "outcomes": [
       { "subRollMin": null, "subRollMax": null, "kind": "Gold", "goldFormula": "3D6x5" },
-      { "subRollMin": 4, "subRollMax": null, "kind": "Item", "equipmentItemName": "Light Armour", "itemQuantityFormula": "D3" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Heavy Armour", "itemQuantityFormula": "1" },
-      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemName": "Dagger", "itemQuantityFormula": "D6" },
-      { "subRollMin": 4, "subRollMax": null, "kind": "Item", "equipmentItemName": "Mordheim Map", "itemQuantityFormula": "1" },
-      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemName": "Halberd", "itemQuantityFormula": "D3" },
-      { "subRollMin": 3, "subRollMax": null, "kind": "Item", "equipmentItemName": "Sword", "itemQuantityFormula": "D3" },
-      { "subRollMin": 2, "subRollMax": null, "kind": "Item", "equipmentItemName": "Shield", "itemQuantityFormula": "D3" },
-      { "subRollMin": 4, "subRollMax": null, "kind": "Item", "equipmentItemName": "Bow", "itemQuantityFormula": "D3" },
-      { "subRollMin": 2, "subRollMax": null, "kind": "Item", "equipmentItemName": "Helmet", "itemQuantityFormula": "D3" }
+      { "subRollMin": 4, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.light-armour", "itemQuantityFormula": "D3" },
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.heavy-armour", "itemQuantityFormula": "1" },
+      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.dagger", "itemQuantityFormula": "D6" },
+      { "subRollMin": 4, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.mordheim-map", "itemQuantityFormula": "1" },
+      { "subRollMin": 5, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.halberd", "itemQuantityFormula": "D3" },
+      { "subRollMin": 3, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.sword", "itemQuantityFormula": "D3" },
+      { "subRollMin": 2, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.shield", "itemQuantityFormula": "D3" },
+      { "subRollMin": 4, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.bow", "itemQuantityFormula": "D3" },
+      { "subRollMin": 2, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.helmet", "itemQuantityFormula": "D3" }
     ]
   },
   {
+    "id": "exploration.6-5",
     "diceCount": 6,
     "value": 5,
     "name": { "en": "Fighting Arena", "fr": "Arène de Combat" },
@@ -473,10 +502,11 @@
     },
     "rollsIndependently": false,
     "outcomes": [
-      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemName": "Training Manual", "itemQuantityFormula": "1" }
+      { "subRollMin": null, "subRollMax": null, "kind": "Item", "equipmentItemId": "equipment.training-manual", "itemQuantityFormula": "1" }
     ]
   },
   {
+    "id": "exploration.6-6",
     "diceCount": 6,
     "value": 6,
     "name": { "en": "Noble's Villa", "fr": "Villa d'un Noble" },
@@ -487,7 +517,7 @@
     "rollsIndependently": false,
     "outcomes": [
       { "subRollMin": 1, "subRollMax": 2, "kind": "Gold", "goldFormula": "D6x10" },
-      { "subRollMin": 3, "subRollMax": 4, "kind": "Item", "equipmentItemName": "Crimson Shade", "itemQuantityFormula": "D6" },
+      { "subRollMin": 3, "subRollMax": 4, "kind": "Item", "equipmentItemId": "equipment.crimson-shade", "itemQuantityFormula": "D6" },
       { "subRollMin": 5, "subRollMax": 6, "kind": "Item", "triggersArtefactRoll": true }
     ]
   }

@@ -222,6 +222,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             ImagePath = s.ImagePath,
             CostMultiplier = s.CostMultiplier,
             Abbreviation = s.Abbreviation,

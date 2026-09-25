@@ -153,6 +153,7 @@ public partial class HiredSwordViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             ImagePath = s.ImagePath,
             Movement = s.Movement,
             WeaponSkill = s.WeaponSkill,

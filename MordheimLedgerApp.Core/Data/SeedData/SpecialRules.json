@@ -1,5 +1,6 @@
 [
   {
+    "id": "rule.leader",
     "name": { "en": "Leader", "fr": "Chef" },
     "description": {
       "en": "Any warrior within 6\" of this model may use its Leadership for their tests.",
@@ -7,6 +8,7 @@
     }
   },
   {
+    "id": "rule.wizard",
     "name": { "en": "Wizard", "fr": "Sorcier" },
     "description": {
       "en": "This model is a Wizard and may cast spells (see the Spells library).",
@@ -14,6 +16,7 @@
     }
   },
   {
+    "id": "rule.causes-fear",
     "name": { "en": "Causes Fear", "fr": "Provoque la Peur" },
     "description": {
       "en": "This model causes Fear. Enemies charged by it, or wishing to charge it, must first pass a Fear test (a Leadership test). Failing it when charged: the model must roll 6s to score hits that round. Failing it when trying to charge: the charge fails and the model stays stationary that turn. A model that itself causes Fear ignores these tests.",
@@ -21,6 +24,7 @@
     }
   },
   {
+    "id": "rule.never-gains-experience",
     "name": { "en": "Never Gains Experience", "fr": "Ne gagne jamais d'Expérience" },
     "description": {
       "en": "This model never gains Experience points.",
@@ -28,6 +32,7 @@
     }
   },
   {
+    "id": "rule.large-target",
     "name": { "en": "Large Target", "fr": "Grande Cible" },
     "description": {
       "en": "This model is a Large Target, as defined in the Shooting rules.",
@@ -35,6 +40,7 @@
     }
   },
   {
+    "id": "rule.expert-swordsman",
     "name": { "en": "Expert Swordsman", "fr": "Expert à l'épée" },
     "description": {
       "en": "So skilled with their weapon that they may re-roll failed to-hit rolls when charging - only applies when armed with a normal sword, not a double-handed sword or any other weapon.",
@@ -42,6 +48,7 @@
     }
   },
   {
+    "id": "rule.immune-to-poison",
     "name": { "en": "Immune to Poison", "fr": "Immunité aux Poisons" },
     "description": {
       "en": "This model is unaffected by any poison.",
@@ -49,6 +56,7 @@
     }
   },
   {
+    "id": "rule.immune-to-psychology",
     "name": { "en": "Immune to Psychology", "fr": "Immunité à la Psychologie" },
     "description": {
       "en": "This model is unaffected by psychology and never leaves combat.",
@@ -56,6 +64,7 @@
     }
   },
   {
+    "id": "rule.no-equipment",
     "name": { "en": "No Equipment", "fr": "Sans équipement" },
     "description": {
       "en": "This model may never be equipped with weapons or armour.",
@@ -63,6 +72,7 @@
     }
   },
   {
+    "id": "rule.gromril-weapon",
     "name": { "en": "Gromril Weapon", "fr": "Arme en Gromril" },
     "description": {
       "en": "A gromril weapon has an extra -1 save modifier, and costs four times the price of a normal weapon of its kind. Only a Dwarf Runesmith can forge a weapon from gromril, a rare meteoric iron - a blade fashioned from this metal will stay keen for a thousand years.",
@@ -73,6 +83,7 @@
     "rarity": 11
   },
   {
+    "id": "rule.ithilmar-weapon",
     "name": { "en": "Ithilmar Weapon", "fr": "Arme en Ithilmar" },
     "description": {
       "en": "An ithilmar weapon gives its user +1 Initiative in hand-to-hand combat, and costs three times the price of a normal weapon of its kind. Elven blades are forged from priceless ithilmar, an extremely light but strong metal, found only in the fabled Elven kingdoms.",
@@ -83,6 +94,7 @@
     "rarity": 9
   },
   {
+    "id": "rule.ornate-weapon",
     "name": { "en": "Ornate Weapon", "fr": "Arme Ornée" },
     "description": {
       "en": "This weapon is finely decorated and inlaid with jewels - it fights exactly like a normal weapon of its kind, but is worth twice the normal price if sold.",
@@ -93,6 +105,7 @@
     "isResaleUpgrade": true
   },
   {
+    "id": "rule.blessed-weapon",
     "name": { "en": "Blessed Weapon", "fr": "Arme Bénie" },
     "description": {
       "en": "Blessed by the patrons of the Sisters of Sigmar or the Witch Hunters at a ruined shrine - this weapon always wounds Undead or Possessed models on a to-wound roll of 2+.",
@@ -102,6 +115,7 @@
     "abbreviation": "B"
   },
   {
+    "id": "rule.displayed-gems",
     "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" },
     "description": {
       "en": "The Hero carrying this may display it proudly instead of selling it, gaining +1 to his rolls for locating rare items.",
@@ -109,6 +123,7 @@
     }
   },
   {
+    "id": "rule.frenzy",
     "name": { "en": "Frenzy", "fr": "Frénésie" },
     "description": {
       "en": "A frenzied warrior must always charge any enemy within charge range - the player has no choice. He fights with double Attacks in hand-to-hand combat (an extra Attack for a second weapon isn't doubled), and is immune to all other psychology while he remains within charge range. Being knocked down or stunned ends his frenzy for the rest of the battle, after which he fights normally.",
@@ -116,6 +131,7 @@
     }
   },
   {
+    "id": "rule.hatred",
     "name": { "en": "Hatred", "fr": "Haine" },
     "description": {
       "en": "Warriors fighting an enemy they hate in hand-to-hand combat may re-roll any misses in the first turn of each hand-to-hand combat - this bonus applies only to that first turn, after which the warrior fights normally for the rest of the combat.",

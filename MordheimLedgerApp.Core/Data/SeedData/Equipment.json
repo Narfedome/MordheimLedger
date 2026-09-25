@@ -1,5 +1,6 @@
 [
   {
+    "id": "equipment.dagger",
     "name": {
       "en": "Dagger",
       "fr": "Dague"
@@ -13,6 +14,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.1-enemy-armour-save",
         "name": {
           "en": "+1 Enemy armour save",
           "fr": "Sauvegarde adverse +1"
@@ -25,6 +27,7 @@
     ]
   },
   {
+    "id": "equipment.sword",
     "name": {
       "en": "Sword",
       "fr": "Épée"
@@ -37,6 +40,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.parry-sword",
         "name": {
           "en": "Parry (Sword)",
           "fr": "Parade (Épée)"
@@ -49,6 +53,7 @@
     ]
   },
   {
+    "id": "equipment.scimitar",
     "name": {
       "en": "Scimitar",
       "fr": "Cimeterre"
@@ -61,6 +66,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.parry-sword",
         "name": {
           "en": "Parry (Sword)",
           "fr": "Parade (Épée)"
@@ -69,6 +75,7 @@
     ]
   },
   {
+    "id": "equipment.rapier",
     "name": {
       "en": "Rapier",
       "fr": "Rapière"
@@ -82,6 +89,7 @@
     "specialRules": []
   },
   {
+    "id": "equipment.staff",
     "name": {
       "en": "Staff",
       "fr": "Bâton"
@@ -95,6 +103,7 @@
     "specialRules": []
   },
   {
+    "id": "equipment.hammer",
     "name": {
       "en": "Hammer",
       "fr": "Marteau"
@@ -107,6 +116,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.concussion",
         "name": {
           "en": "Concussion",
           "fr": "Commotion"
@@ -119,6 +129,7 @@
     ]
   },
   {
+    "id": "equipment.axe",
     "name": {
       "en": "Axe",
       "fr": "Hache"
@@ -131,6 +142,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.cutting-edge",
         "name": {
           "en": "Cutting Edge",
           "fr": "Tranchant"
@@ -143,6 +155,7 @@
     ]
   },
   {
+    "id": "equipment.bow",
     "name": {
       "en": "Bow",
       "fr": "Arc"
@@ -155,6 +168,7 @@
     }
   },
   {
+    "id": "equipment.light-armour",
     "name": {
       "en": "Light Armour",
       "fr": "Armure Légère"
@@ -168,6 +182,7 @@
     "specialRules": []
   },
   {
+    "id": "equipment.buckler",
     "name": {
       "en": "Buckler",
       "fr": "Rondache"
@@ -180,6 +195,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.parry-buckler",
         "name": {
           "en": "Parry (Buckler)",
           "fr": "Parade (Rondache)"
@@ -192,6 +208,7 @@
     ]
   },
   {
+    "id": "equipment.mace",
     "name": {
       "en": "Mace",
       "fr": "Masse"
@@ -204,6 +221,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.concussion",
         "name": {
           "en": "Concussion",
           "fr": "Commotion"
@@ -216,6 +234,7 @@
     ]
   },
   {
+    "id": "equipment.morning-star",
     "name": {
       "en": "Morning star",
       "fr": "Morgenstern"
@@ -228,6 +247,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.heavy-morning-star",
         "name": {
           "en": "Heavy (Morning star)",
           "fr": "Lourd (Morgenstern)"
@@ -238,6 +258,7 @@
         }
       },
       {
+        "id": "rule.difficult-to-use",
         "name": {
           "en": "Difficult to use",
           "fr": "Difficile à manier"
@@ -250,6 +271,7 @@
     ]
   },
   {
+    "id": "equipment.spiked-gauntlet",
     "name": {
       "en": "Spiked gauntlet",
       "fr": "Gantelet à pointes"
@@ -263,6 +285,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.parry-spiked-gauntlet",
         "name": {
           "en": "Parry (Spiked Gauntlet)",
           "fr": "Parade (Gantelet à pointes)"
@@ -275,6 +298,7 @@
     ]
   },
   {
+    "id": "equipment.double-handed-weapon",
     "name": {
       "en": "Double-handed weapon",
       "fr": "Arme à deux mains"
@@ -287,6 +311,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.two-handed",
         "name": {
           "en": "Two-handed",
           "fr": "Arme à deux mains"
@@ -297,6 +322,7 @@
         }
       },
       {
+        "id": "rule.strike-last",
         "name": {
           "en": "Strike last",
           "fr": "Frappe en dernier"
@@ -309,6 +335,7 @@
     ]
   },
   {
+    "id": "equipment.spear",
     "name": {
       "en": "Spear",
       "fr": "Lance"
@@ -321,6 +348,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.strike-first",
         "name": {
           "en": "Strike first",
           "fr": "Frappe en premier"
@@ -331,6 +359,7 @@
         }
       },
       {
+        "id": "rule.unwieldy-spear",
         "name": {
           "en": "Unwieldy (Spear)",
           "fr": "Peu maniable (Lance)"
@@ -341,6 +370,7 @@
         }
       },
       {
+        "id": "rule.cavalry-bonus-spear",
         "name": {
           "en": "Cavalry bonus (Spear)",
           "fr": "Bonus de cavalerie (Lance)"
@@ -353,6 +383,7 @@
     ]
   },
   {
+    "id": "equipment.halberd",
     "name": {
       "en": "Halberd",
       "fr": "Hallebarde"
@@ -365,6 +396,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.two-handed",
         "name": {
           "en": "Two-handed",
           "fr": "Arme à deux mains"
@@ -377,6 +409,7 @@
     ]
   },
   {
+    "id": "equipment.crossbow",
     "name": {
       "en": "Crossbow",
       "fr": "Arbalète"
@@ -389,6 +422,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.move-or-fire",
         "name": {
           "en": "Move or fire",
           "fr": "Se déplacer ou tirer"
@@ -401,6 +435,7 @@
     ]
   },
   {
+    "id": "equipment.long-bow",
     "name": {
       "en": "Long bow",
       "fr": "Arc long"
@@ -413,6 +448,7 @@
     }
   },
   {
+    "id": "equipment.pistol",
     "name": {
       "en": "Pistol",
       "fr": "Pistolet"
@@ -425,6 +461,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.prepare-shot",
         "name": {
           "en": "Prepare shot",
           "fr": "Préparation du tir"
@@ -435,6 +472,7 @@
         }
       },
       {
+        "id": "rule.save-modifier",
         "name": {
           "en": "Save modifier",
           "fr": "Modificateur de sauvegarde"
@@ -445,6 +483,7 @@
         }
       },
       {
+        "id": "rule.hand-to-hand",
         "name": {
           "en": "Hand-to-hand",
           "fr": "Corps à corps"
@@ -457,6 +496,7 @@
     ]
   },
   {
+    "id": "equipment.duelling-pistol",
     "name": {
       "en": "Duelling Pistol",
       "fr": "Pistolet de duel"
@@ -469,6 +509,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.accuracy",
         "name": {
           "en": "Accuracy",
           "fr": "Précision"
@@ -479,6 +520,7 @@
         }
       },
       {
+        "id": "rule.prepare-shot-duelling-pistol",
         "name": {
           "en": "Prepare shot (Duelling Pistol)",
           "fr": "Préparation du tir (Pistolet de duel)"
@@ -489,6 +531,7 @@
         }
       },
       {
+        "id": "rule.save-modifier",
         "name": {
           "en": "Save modifier",
           "fr": "Modificateur de sauvegarde"
@@ -499,6 +542,7 @@
         }
       },
       {
+        "id": "rule.hand-to-hand",
         "name": {
           "en": "Hand-to-hand",
           "fr": "Corps à corps"
@@ -511,6 +555,7 @@
     ]
   },
   {
+    "id": "equipment.blunderbuss",
     "name": {
       "en": "Blunderbuss",
       "fr": "Tromblon"
@@ -523,6 +568,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.shot",
         "name": {
           "en": "Shot",
           "fr": "Décharge"
@@ -533,6 +579,7 @@
         }
       },
       {
+        "id": "rule.fire-once",
         "name": {
           "en": "Fire Once",
           "fr": "Tir unique"
@@ -545,6 +592,7 @@
     ]
   },
   {
+    "id": "equipment.handgun",
     "name": {
       "en": "Handgun",
       "fr": "Arquebuse"
@@ -557,6 +605,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.prepare-shot-single-shot",
         "name": {
           "en": "Prepare shot (Single Shot)",
           "fr": "Préparation du tir (Coup unique)"
@@ -567,6 +616,7 @@
         }
       },
       {
+        "id": "rule.move-or-fire",
         "name": {
           "en": "Move or fire",
           "fr": "Se déplacer ou tirer"
@@ -577,6 +627,7 @@
         }
       },
       {
+        "id": "rule.save-modifier-handgun",
         "name": {
           "en": "Save Modifier (Handgun)",
           "fr": "Modificateur de sauvegarde (Arquebuse)"
@@ -589,6 +640,7 @@
     ]
   },
   {
+    "id": "equipment.hunting-rifle",
     "name": {
       "en": "Hunting Rifle",
       "fr": "Long fusil d'Hochland"
@@ -602,6 +654,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.move-or-fire",
         "name": {
           "en": "Move or fire",
           "fr": "Se déplacer ou tirer"
@@ -612,6 +665,7 @@
         }
       },
       {
+        "id": "rule.prepare-shot-single-shot",
         "name": {
           "en": "Prepare shot (Single Shot)",
           "fr": "Préparation du tir (Coup unique)"
@@ -622,6 +676,7 @@
         }
       },
       {
+        "id": "rule.pick-target",
         "name": {
           "en": "Pick target",
           "fr": "Choix de la cible"
@@ -632,6 +687,7 @@
         }
       },
       {
+        "id": "rule.save-modifier",
         "name": {
           "en": "Save modifier",
           "fr": "Modificateur de sauvegarde"
@@ -644,6 +700,7 @@
     ]
   },
   {
+    "id": "equipment.heavy-armour",
     "name": {
       "en": "Heavy Armour",
       "fr": "Armure lourde"
@@ -656,6 +713,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.movement-penalty-heavy-armour",
         "name": {
           "en": "Movement Penalty (Heavy Armour)",
           "fr": "Malus de Mouvement (Armure lourde)"
@@ -668,6 +726,7 @@
     ]
   },
   {
+    "id": "equipment.shield",
     "name": {
       "en": "Shield",
       "fr": "Bouclier"
@@ -680,6 +739,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.combined-save",
         "name": {
           "en": "Combined Save",
           "fr": "Sauvegarde combinée"
@@ -692,6 +752,7 @@
     ]
   },
   {
+    "id": "equipment.helmet",
     "name": {
       "en": "Helmet",
       "fr": "Casque"
@@ -704,6 +765,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.avoid-stun",
         "name": {
           "en": "Avoid Stun",
           "fr": "Évite l'Étourdissement"
@@ -716,6 +778,7 @@
     ]
   },
   {
+    "id": "equipment.short-bow",
     "name": {
       "en": "Short Bow",
       "fr": "Arc court"
@@ -728,6 +791,7 @@
     }
   },
   {
+    "id": "equipment.flail",
     "name": {
       "en": "Flail",
       "fr": "Fléau"
@@ -740,6 +804,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.heavy-flail",
         "name": {
           "en": "Heavy (Flail)",
           "fr": "Lourd (Fléau)"
@@ -750,6 +815,7 @@
         }
       },
       {
+        "id": "rule.two-handed",
         "name": {
           "en": "Two-handed",
           "fr": "Arme à deux mains"
@@ -762,6 +828,7 @@
     ]
   },
   {
+    "id": "equipment.throwing-knives",
     "name": {
       "en": "Throwing Knives",
       "fr": "Couteau de Lancer"
@@ -774,6 +841,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.thrown-weapon",
         "name": {
           "en": "Thrown Weapon",
           "fr": "Arme de jet"
@@ -786,6 +854,7 @@
     ]
   },
   {
+    "id": "equipment.throwing-axe",
     "name": {
       "en": "Throwing Axe",
       "fr": "Hachette de Lancer"
@@ -798,6 +867,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.thrown-weapon",
         "name": {
           "en": "Thrown Weapon",
           "fr": "Arme de jet"
@@ -806,6 +876,7 @@
     ]
   },
   {
+    "id": "equipment.crossbow-pistol",
     "name": {
       "en": "Crossbow Pistol",
       "fr": "Arbalète de Poing"
@@ -818,6 +889,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.shoot-in-hand-to-hand-combat",
         "name": {
           "en": "Shoot In Hand-To-Hand Combat",
           "fr": "Tir en Combat Rapproché"
@@ -828,6 +900,7 @@
         }
       },
       {
+        "id": "rule.hand-to-hand-crossbow-pistol",
         "name": {
           "en": "Hand-to-hand (Crossbow Pistol)",
           "fr": "Corps à corps (Arbalète de Poing)"
@@ -840,6 +913,7 @@
     ]
   },
   {
+    "id": "equipment.sling",
     "name": {
       "en": "Sling",
       "fr": "Fronde"
@@ -852,6 +926,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.fire-twice-at-half-range",
         "name": {
           "en": "Fire twice at half range",
           "fr": "Tir double à mi-portée"
@@ -864,6 +939,7 @@
     ]
   },
   {
+    "id": "equipment.throwing-stars",
     "name": {
       "en": "Throwing Stars",
       "fr": "Étoiles de Jet"
@@ -876,6 +952,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.thrown-weapon",
         "name": {
           "en": "Thrown Weapon",
           "fr": "Arme de jet"
@@ -888,6 +965,7 @@
     ]
   },
   {
+    "id": "equipment.club",
     "name": {
       "en": "Club",
       "fr": "Gourdin"
@@ -900,6 +978,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.concussion",
         "name": {
           "en": "Concussion",
           "fr": "Commotion"
@@ -912,6 +991,7 @@
     ]
   },
   {
+    "id": "equipment.fist",
     "name": {
       "en": "Fist",
       "fr": "Poing"
@@ -924,6 +1004,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.only-one-attack",
         "name": {
           "en": "Only One Attack",
           "fr": "Une Seule Attaque"
@@ -934,6 +1015,7 @@
         }
       },
       {
+        "id": "rule.1-enemy-armour-save",
         "name": {
           "en": "+1 Enemy armour save",
           "fr": "Sauvegarde adverse +1"
@@ -946,6 +1028,7 @@
     ]
   },
   {
+    "id": "equipment.horseman-s-hammer",
     "name": {
       "en": "Horseman's Hammer",
       "fr": "Marteau de Cavalier"
@@ -958,6 +1041,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.two-handed",
         "name": {
           "en": "Two-handed",
           "fr": "Arme à deux mains"
@@ -968,6 +1052,7 @@
         }
       },
       {
+        "id": "rule.cavalry-charge",
         "name": {
           "en": "Cavalry Charge",
           "fr": "Charge de Cavalerie"
@@ -980,6 +1065,7 @@
     ]
   },
   {
+    "id": "equipment.lance",
     "name": {
       "en": "Lance",
       "fr": "Lance de Cavalerie"
@@ -993,6 +1079,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.cavalry-weapon",
         "name": {
           "en": "Cavalry weapon",
           "fr": "Arme de cavalerie"
@@ -1003,6 +1090,7 @@
         }
       },
       {
+        "id": "rule.cavalry-bonus-lance",
         "name": {
           "en": "Cavalry bonus (Lance)",
           "fr": "Bonus de cavalerie (Lance de Cavalerie)"
@@ -1015,6 +1103,7 @@
     ]
   },
   {
+    "id": "equipment.sword-breaker",
     "name": {
       "en": "Sword Breaker",
       "fr": "Brise-épée"
@@ -1028,6 +1117,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.parry-sword-breaker",
         "name": {
           "en": "Parry (Sword Breaker)",
           "fr": "Parade (Brise-épée)"
@@ -1038,6 +1128,7 @@
         }
       },
       {
+        "id": "rule.trap-blade",
         "name": {
           "en": "Trap Blade",
           "fr": "Piège à Lame"
@@ -1050,6 +1141,7 @@
     ]
   },
   {
+    "id": "equipment.elf-bow",
     "name": {
       "en": "Elf Bow",
       "fr": "Arc Elfique"
@@ -1064,6 +1156,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.save-modifier-elf-bow",
         "name": {
           "en": "Save Modifier (Elf Bow)",
           "fr": "Modificateur de sauvegarde (Arc Elfique)"
@@ -1076,6 +1169,7 @@
     ]
   },
   {
+    "id": "equipment.repeater-crossbow",
     "name": {
       "en": "Repeater Crossbow",
       "fr": "Arbalète à Répétition"
@@ -1089,6 +1183,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.fire-twice",
         "name": {
           "en": "Fire twice",
           "fr": "Tir double"
@@ -1101,6 +1196,7 @@
     ]
   },
   {
+    "id": "equipment.gromril-armour",
     "name": {
       "en": "Gromril Armour",
       "fr": "Armure de Gromril"
@@ -1115,6 +1211,7 @@
     "specialRules": []
   },
   {
+    "id": "equipment.ithilmar-armour",
     "name": {
       "en": "Ithilmar Armour",
       "fr": "Armure d'Ithilmar"
@@ -1129,6 +1226,7 @@
     "specialRules": []
   },
   {
+    "id": "equipment.pavise",
     "name": {
       "en": "Pavise",
       "fr": "Pavois"
@@ -1142,6 +1240,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.cover",
         "name": {
           "en": "Cover",
           "fr": "Couvert"
@@ -1152,6 +1251,7 @@
         }
       },
       {
+        "id": "rule.combined-save",
         "name": {
           "en": "Combined Save",
           "fr": "Sauvegarde combinée"
@@ -1162,6 +1262,7 @@
         }
       },
       {
+        "id": "rule.movement-penalty-pavise",
         "name": {
           "en": "Movement Penalty (Pavise)",
           "fr": "Malus de Mouvement (Pavois)"
@@ -1174,6 +1275,7 @@
     ]
   },
   {
+    "id": "equipment.toughened-leathers",
     "name": {
       "en": "Toughened Leathers",
       "fr": "Cuirs Renforcés"
@@ -1186,6 +1288,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.compatibility",
         "name": {
           "en": "Compatibility",
           "fr": "Compatibilité"
@@ -1196,6 +1299,7 @@
         }
       },
       {
+        "id": "rule.sellback",
         "name": {
           "en": "Sellback",
           "fr": "Revente"
@@ -1206,6 +1310,7 @@
         }
       },
       {
+        "id": "rule.spell-casting",
         "name": {
           "en": "Spell Casting",
           "fr": "Incantation"
@@ -1218,6 +1323,7 @@
     ]
   },
   {
+    "id": "equipment.barding",
     "name": {
       "en": "Barding",
       "fr": "Barde"
@@ -1227,6 +1333,7 @@
     "rarity": 8,
     "specialRules": [
       {
+        "id": "rule.movement-penalty-barding",
         "name": {
           "en": "Movement Penalty (Barding)",
           "fr": "Malus de Mouvement (Barde)"
@@ -1237,6 +1344,7 @@
         }
       },
       {
+        "id": "rule.durability",
         "name": {
           "en": "Durability",
           "fr": "Robustesse"
@@ -1249,6 +1357,7 @@
     ]
   },
   {
+    "id": "equipment.hunting-arrows",
     "name": {
       "en": "Hunting Arrows",
       "fr": "Flèches de Chasse"
@@ -1263,6 +1372,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.barbed-arrowheads",
         "name": {
           "en": "Barbed Arrowheads",
           "fr": "Pointes Barbelées"
@@ -1275,6 +1385,7 @@
     ]
   },
   {
+    "id": "equipment.banner",
     "name": {
       "en": "Banner",
       "fr": "Bannière"
@@ -1288,6 +1399,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.rally-point",
         "name": {
           "en": "Rally Point",
           "fr": "Point de Ralliement"
@@ -1300,6 +1412,7 @@
     ]
   },
   {
+    "id": "equipment.bugman-s-ale",
     "name": {
       "en": "Bugman's Ale",
       "fr": "Bière de Bugman"
@@ -1314,6 +1427,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.immune-to-fear",
         "name": {
           "en": "Immune to Fear",
           "fr": "Immunité à la Peur"
@@ -1326,6 +1440,7 @@
     ]
   },
   {
+    "id": "equipment.caltrops",
     "name": {
       "en": "Caltrops",
       "fr": "Chausse-trapes"
@@ -1340,6 +1455,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.charge-range-reduction",
         "name": {
           "en": "Charge Range Reduction",
           "fr": "Réduction de Charge"
@@ -1352,6 +1468,7 @@
     ]
   },
   {
+    "id": "equipment.cathayan-silk-clothes",
     "name": {
       "en": "Cathayan Silk Clothes",
       "fr": "Habits de Soie Cathayenne"
@@ -1366,6 +1483,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.prestige",
         "name": {
           "en": "Prestige",
           "fr": "Prestige"
@@ -1378,6 +1496,7 @@
     ]
   },
   {
+    "id": "equipment.elven-cloak",
     "name": {
       "en": "Elven Cloak",
       "fr": "Cape Elfique"
@@ -1392,6 +1511,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.camouflage",
         "name": {
           "en": "Camouflage",
           "fr": "Camouflage"
@@ -1404,6 +1524,7 @@
     ]
   },
   {
+    "id": "equipment.fire-arrows",
     "name": {
       "en": "Fire Arrows",
       "fr": "Flèches Incendiaires"
@@ -1418,6 +1539,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.set-alight",
         "name": {
           "en": "Set Alight",
           "fr": "Mise à Feu"
@@ -1430,6 +1552,7 @@
     ]
   },
   {
+    "id": "equipment.fire-bomb",
     "name": {
       "en": "Fire Bomb",
       "fr": "Bombe Incendiaire"
@@ -1444,6 +1567,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.explosion",
         "name": {
           "en": "Explosion",
           "fr": "Explosion"
@@ -1456,6 +1580,7 @@
     ]
   },
   {
+    "id": "equipment.flash-powder",
     "name": {
       "en": "Flash Powder",
       "fr": "Poudre Éclair"
@@ -1470,6 +1595,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.blinding",
         "name": {
           "en": "Blinding",
           "fr": "Aveuglement"
@@ -1482,6 +1608,7 @@
     ]
   },
   {
+    "id": "equipment.lantern",
     "name": {
       "en": "Lantern",
       "fr": "Lanterne"
@@ -1490,6 +1617,7 @@
     "cost": 10,
     "specialRules": [
       {
+        "id": "rule.illumination",
         "name": {
           "en": "Illumination",
           "fr": "Éclairage"
@@ -1502,6 +1630,7 @@
     ]
   },
   {
+    "id": "equipment.lock-picks",
     "name": {
       "en": "Lock Picks",
       "fr": "Crochets"
@@ -1515,6 +1644,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.lockpicking",
         "name": {
           "en": "Lockpicking",
           "fr": "Crochetage"
@@ -1527,6 +1657,7 @@
     ]
   },
   {
+    "id": "equipment.lucky-charm",
     "name": {
       "en": "Lucky Charm",
       "fr": "Porte-Bonheur"
@@ -1540,6 +1671,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.lucky-save",
         "name": {
           "en": "Lucky Save",
           "fr": "Chance"
@@ -1552,6 +1684,7 @@
     ]
   },
   {
+    "id": "equipment.mordheim-map",
     "name": {
       "en": "Mordheim Map",
       "fr": "Carte de Mordheim"
@@ -1566,6 +1699,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.guided-exploration",
         "name": {
           "en": "Guided Exploration",
           "fr": "Exploration Guidée"
@@ -1578,6 +1712,7 @@
     ]
   },
   {
+    "id": "equipment.net",
     "name": {
       "en": "Net",
       "fr": "Filet"
@@ -1590,6 +1725,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.entangle",
         "name": {
           "en": "Entangle",
           "fr": "Immobilisation"
@@ -1602,6 +1738,7 @@
     ]
   },
   {
+    "id": "equipment.crimson-shade",
     "name": {
       "en": "Crimson Shade",
       "fr": "Ombre Cramoisie"
@@ -1616,6 +1753,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.stimulant",
         "name": {
           "en": "Stimulant",
           "fr": "Stimulant"
@@ -1626,6 +1764,7 @@
         }
       },
       {
+        "id": "rule.crimson-shade-addiction",
         "name": {
           "en": "Crimson Shade Addiction",
           "fr": "Dépendance à l'Ombre Cramoisie"
@@ -1638,6 +1777,7 @@
     ]
   },
   {
+    "id": "equipment.mandrake-root",
     "name": {
       "en": "Mandrake Root",
       "fr": "Racine de Mandragore"
@@ -1652,6 +1792,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.pain-resistance",
         "name": {
           "en": "Pain Resistance",
           "fr": "Insensibilité à la Douleur"
@@ -1662,6 +1803,7 @@
         }
       },
       {
+        "id": "rule.mandrake-root-toxicity",
         "name": {
           "en": "Mandrake Root Toxicity",
           "fr": "Toxicité de la Mandragore"
@@ -1674,6 +1816,7 @@
     ]
   },
   {
+    "id": "equipment.rabbit-s-foot",
     "name": {
       "en": "Rabbit's Foot",
       "fr": "Patte de Lapin"
@@ -1687,6 +1830,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.lucky-reroll",
         "name": {
           "en": "Lucky Reroll",
           "fr": "Relance Chanceuse"
@@ -1699,6 +1843,7 @@
     ]
   },
   {
+    "id": "equipment.rope-hook",
     "name": {
       "en": "Rope & Hook",
       "fr": "Corde et Grappin"
@@ -1711,6 +1856,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.easier-climbing",
         "name": {
           "en": "Easier Climbing",
           "fr": "Escalade Facilitée"
@@ -1723,6 +1869,7 @@
     ]
   },
   {
+    "id": "equipment.superior-blackpowder",
     "name": {
       "en": "Superior Blackpowder",
       "fr": "Poudre Noire Supérieure"
@@ -1736,6 +1883,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.enhanced-powder",
         "name": {
           "en": "Enhanced Powder",
           "fr": "Poudre Renforcée"
@@ -1748,6 +1896,7 @@
     ]
   },
   {
+    "id": "equipment.telescope",
     "name": {
       "en": "Telescope",
       "fr": "Longue-vue"
@@ -1762,6 +1911,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.extended-range",
         "name": {
           "en": "Extended Range",
           "fr": "Portée Étendue"
@@ -1774,6 +1924,7 @@
     ]
   },
   {
+    "id": "equipment.torch",
     "name": {
       "en": "Torch",
       "fr": "Torche"
@@ -1786,6 +1937,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.firebrand",
         "name": {
           "en": "Firebrand",
           "fr": "Flambeau"
@@ -1798,6 +1950,7 @@
     ]
   },
   {
+    "id": "equipment.war-horn",
     "name": {
       "en": "War Horn",
       "fr": "Cor de Guerre"
@@ -1812,6 +1965,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.war-cry",
         "name": {
           "en": "War Cry",
           "fr": "Sonnerie de Guerre"
@@ -1824,6 +1978,7 @@
     ]
   },
   {
+    "id": "equipment.wyrdstone-pendulum",
     "name": {
       "en": "Wyrdstone Pendulum",
       "fr": "Pendule de Malepierre"
@@ -1838,6 +1993,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.divination",
         "name": {
           "en": "Divination",
           "fr": "Divination"
@@ -1850,6 +2006,7 @@
     ]
   },
   {
+    "id": "equipment.garlic",
     "name": {
       "en": "Garlic",
       "fr": "Ail"
@@ -1862,6 +2019,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.repels-vampires",
         "name": {
           "en": "Repels Vampires",
           "fr": "Répulsion"
@@ -1874,6 +2032,7 @@
     ]
   },
   {
+    "id": "equipment.halfling-cookbook",
     "name": {
       "en": "Halfling Cookbook",
       "fr": "Livre de Cuisine Halfling"
@@ -1888,6 +2047,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.extra-recruit",
         "name": {
           "en": "Extra Recruit",
           "fr": "Recettes Halfling"
@@ -1900,6 +2060,7 @@
     ]
   },
   {
+    "id": "equipment.black-lotus",
     "name": {
       "en": "Black Lotus",
       "fr": "Lotus Noir"
@@ -1914,6 +2075,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.black-lotus-poison",
         "name": {
           "en": "Black Lotus Poison",
           "fr": "Poison du Lotus Noir"
@@ -1926,6 +2088,7 @@
     ]
   },
   {
+    "id": "equipment.dark-venom",
     "name": {
       "en": "Dark Venom",
       "fr": "Venin Sombre"
@@ -1940,6 +2103,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.dark-venom-poison",
         "name": {
           "en": "Dark Venom Poison",
           "fr": "Poison du Venin Sombre"
@@ -1952,6 +2116,7 @@
     ]
   },
   {
+    "id": "equipment.tears-of-shallaya",
     "name": {
       "en": "Tears of Shallaya",
       "fr": "Larmes de Shallaya"
@@ -1966,6 +2131,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.poison-immunity-tears-of-shallaya",
         "name": {
           "en": "Poison Immunity (Tears of Shallaya)",
           "fr": "Immunité aux Poisons (Larmes de Shallaya)"
@@ -1978,6 +2144,7 @@
     ]
   },
   {
+    "id": "equipment.tarot-cards",
     "name": {
       "en": "Tarot Cards",
       "fr": "Cartes de Tarot"
@@ -1991,6 +2158,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.card-divination",
         "name": {
           "en": "Card Divination",
           "fr": "Divination des Cartes"
@@ -2003,6 +2171,7 @@
     ]
   },
   {
+    "id": "equipment.tome-of-magic",
     "name": {
       "en": "Tome of Magic",
       "fr": "Grimoire"
@@ -2017,6 +2186,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.arcane-learning",
         "name": {
           "en": "Arcane Learning",
           "fr": "Apprentissage Arcanique"
@@ -2029,6 +2199,7 @@
     ]
   },
   {
+    "id": "equipment.alchemist-s-notebook",
     "name": {
       "en": "Alchemist's Notebook",
       "fr": "Carnet de l'Alchimiste"
@@ -2043,6 +2214,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.alchemical-study",
         "name": {
           "en": "Alchemical Study",
           "fr": "Étude Alchimique"
@@ -2055,6 +2227,7 @@
     ]
   },
   {
+    "id": "equipment.training-manual",
     "name": {
       "en": "Training Manual",
       "fr": "Manuel d'Entraînement"
@@ -2070,6 +2243,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.combat-training",
         "name": { "en": "Combat Training", "fr": "Formation au Combat" },
         "description": {
           "en": "The Hero carrying this manual may choose from Combat skills whenever he gains a new skill, in addition to those normally available to him, and his Weapon Skill may advance one point beyond the normal maximum.",
@@ -2079,6 +2253,7 @@
     ]
   },
   {
+    "id": "equipment.quartz-stones",
     "name": {
       "en": "Quartz Stones",
       "fr": "Pierres de Quartz"
@@ -2094,10 +2269,11 @@
       "fr": "Une poignée de pierres de quartz valant D6x5 CO si elles sont revendues. Si elles ne sont pas revendues, un Héros peut les exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
-      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+      { "id": "rule.displayed-gems", "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
     ]
   },
   {
+    "id": "equipment.amethyst",
     "name": {
       "en": "Amethyst",
       "fr": "Améthyste"
@@ -2112,10 +2288,11 @@
       "fr": "Une améthyste valant 20 CO si elle est revendue. Si elle n'est pas revendue, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
-      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+      { "id": "rule.displayed-gems", "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
     ]
   },
   {
+    "id": "equipment.necklace",
     "name": {
       "en": "Necklace",
       "fr": "Collier"
@@ -2130,10 +2307,11 @@
       "fr": "Un collier valant 50 CO si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
-      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+      { "id": "rule.displayed-gems", "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
     ]
   },
   {
+    "id": "equipment.ruby",
     "name": {
       "en": "Ruby",
       "fr": "Rubis"
@@ -2149,10 +2327,11 @@
       "fr": "Un rubis valant D6x15 CO si il est revendu. Si il n'est pas revendu, un Héros peut l'exhiber fièrement et gagne +1 sur ses jets pour dénicher des objets rares."
     },
     "specialRules": [
-      { "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
+      { "id": "rule.displayed-gems", "name": { "en": "Displayed Gems", "fr": "Bijoux Exhibés" } }
     ]
   },
   {
+    "id": "equipment.order-of-freetraders-symbol",
     "name": {
       "en": "Order of Freetraders Symbol",
       "fr": "Symbole de l'Ordre des Libres Marchands"
@@ -2160,13 +2339,14 @@
     "category": "MiscellaneousEquipment",
     "cost": 0,
     "isExplorationOnly": true,
-    "grantsSpecificSkillName": "Haggle",
+    "grantsSpecificSkillId": "skill.academic.haggle",
     "description": {
       "en": "A small pewter token stamped with the mark of the Order of Freetraders. A Hero in possession of this symbol may choose the Haggle skill, whatever his usual skill lists.",
       "fr": "Un petit jeton d'étain frappé du sceau de l'Ordre des Libres Marchands. Le Héros qui porte ce symbole peut choisir la compétence Marchandage, quelles que soient ses listes de compétences habituelles."
     },
     "specialRules": [
       {
+        "id": "rule.mark-of-the-freetraders",
         "name": {
           "en": "Mark of the Freetraders",
           "fr": "Sceau des Libres Marchands"
@@ -2179,6 +2359,7 @@
     ]
   },
   {
+    "id": "equipment.healing-herbs",
     "name": {
       "en": "Healing Herbs",
       "fr": "Herbes Curatives"
@@ -2193,6 +2374,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.healing",
         "name": {
           "en": "Healing",
           "fr": "Soin"
@@ -2205,6 +2387,7 @@
     ]
   },
   {
+    "id": "equipment.riding-horse",
     "name": {
       "en": "Riding Horse",
       "fr": "Cheval"
@@ -2216,8 +2399,8 @@
       "en": "Riding horses are not trained for battle and will not normally attack an enemy. However, they are useful for moving rapidly around the site of a battle.",
       "fr": "Les chevaux de selle ne sont pas dressés pour la bataille et n'attaqueront normalement pas un ennemi. Ils restent cependant utiles pour se déplacer rapidement sur le site d'une bataille."
     },
-    "restrictedToWarbandNames": [
-      "Reiklanders", "Marienburgers", "Middenheimers", "Averlanders", "Ostlanders", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.reiklanders", "warband.marienburgers", "warband.middenheimers", "warband.averlanders", "warband.ostlanders", "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ],
     "movement": 8,
     "weaponSkill": 1,
@@ -2230,6 +2413,7 @@
     "leadership": 5
   },
   {
+    "id": "equipment.warhorse",
     "name": {
       "en": "Warhorse",
       "fr": "Destrier"
@@ -2241,8 +2425,8 @@
       "en": "Warhorses are large, well-trained horses, quite at home in battle. They are primarily used by human warbands.",
       "fr": "Les destriers sont de grands chevaux bien dressés, tout à fait à l'aise au combat. Ils sont principalement utilisés par les bandes humaines."
     },
-    "restrictedToWarbandNames": [
-      "Reiklanders", "Marienburgers", "Middenheimers", "Averlanders", "Ostlanders", "WitchHunters", "SistersOfSigmar", "Kislevites"
+    "restrictedToWarbandIds": [
+      "warband.reiklanders", "warband.marienburgers", "warband.middenheimers", "warband.averlanders", "warband.ostlanders", "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites"
     ],
     "movement": 8,
     "weaponSkill": 3,
@@ -2255,6 +2439,7 @@
     "leadership": 5,
     "specialRules": [
       {
+        "id": "rule.battle-schooled",
         "name": {
           "en": "Battle Schooled",
           "fr": "Dressé au Combat"
@@ -2267,6 +2452,7 @@
     ]
   },
   {
+    "id": "equipment.wardog",
     "name": {
       "en": "Wardog",
       "fr": "Chien de guerre"
@@ -2279,9 +2465,9 @@
       "en": "The men of the Empire have always been experts at raising ferocious bloodhounds to guard their cattle and holdings against roaming Goblins and Beastmen. A highly trained wardog is a dangerous opponent and worth its weight in gold in Mordheim.",
       "fr": "Les hommes de l'Empire ont toujours excellé dans l'élevage de féroces molosses pour garder leur bétail et leurs terres contre les Gobelins et les Hommes-Bêtes errants. Un chien de guerre bien dressé est un adversaire dangereux qui vaut son pesant d'or à Mordheim."
     },
-    "restrictedToWarbandNames": [
-      "Reiklanders", "Marienburgers", "Middenheimers", "Averlanders", "Ostlanders", "WitchHunters", "SistersOfSigmar", "Kislevites",
-      "BeastmenRaiders", "CarnivalOfChaos", "CultOfThePossessed", "DwarfTreasureHunters", "OrcMob", "Undead"
+    "restrictedToWarbandIds": [
+      "warband.reiklanders", "warband.marienburgers", "warband.middenheimers", "warband.averlanders", "warband.ostlanders", "warband.witch-hunters", "warband.sisters-of-sigmar", "warband.kislevites",
+      "warband.beastmen-raiders", "warband.carnival-of-chaos", "warband.cult-of-the-possessed", "warband.dwarf-treasure-hunters", "warband.orc-mob", "warband.undead"
     ],
     "movement": 6,
     "weaponSkill": 4,
@@ -2294,6 +2480,7 @@
     "leadership": 5,
     "specialRules": [
       {
+        "id": "rule.fights-as-a-warrior",
         "name": {
           "en": "Fights as a Warrior",
           "fr": "Combat comme un Guerrier"
@@ -2304,6 +2491,7 @@
         }
       },
       {
+        "id": "rule.no-experience",
         "name": {
           "en": "No Experience",
           "fr": "Sans Expérience"
@@ -2314,6 +2502,7 @@
         }
       },
       {
+        "id": "rule.counts-toward-warband-size",
         "name": {
           "en": "Counts Toward Warband Size",
           "fr": "Compte dans l'Effectif de la Bande"
@@ -2326,6 +2515,7 @@
     ]
   },
   {
+    "id": "equipment.boots-and-rope-of-pieter",
     "name": {
       "en": "Boots and Rope of Pieter",
       "fr": "Bottes et Corde de Pieter"
@@ -2338,6 +2528,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.boots-and-rope-of-pieter",
         "name": { "en": "Boots and Rope of Pieter", "fr": "Bottes et Corde de Pieter" },
         "description": {
           "en": "A model wearing these boots may move normally (including running and charging) on any kind of terrain, including vertical surfaces - simply add the horizontal and vertical distances moved together, no Initiative test needed (except to jump across gaps).",
@@ -2347,6 +2538,7 @@
     ]
   },
   {
+    "id": "equipment.the-count-of-ventimiglia-s-misericordia",
     "name": {
       "en": "The Count of Ventimiglia's Misericordia",
       "fr": "Miséricorde du Comte de Ventimiglia"
@@ -2358,8 +2550,9 @@
       "fr": "Cette dague fut utilisée par le célèbre gentilhomme-pirate tiléen connu sous le nom de « Corsaire Noir ». On raconte qu'il la trouva dans d'antiques ruines elfiques, et la légende veut que la lame de cette dague ne puisse jamais être endommagée."
     },
     "specialRules": [
-      { "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } },
+      { "id": "rule.parry-sword", "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } },
       {
+        "id": "rule.the-count-of-ventimiglia-s-misericordia",
         "name": { "en": "The Count of Ventimiglia's Misericordia", "fr": "Miséricorde du Comte de Ventimiglia" },
         "description": {
           "en": "The dagger is treated as a sword (see Parry). Opponents wounded by it are stunned on a roll of 1-3 (Undead are knocked down instead), and put out of action on a 4-6.",
@@ -2369,6 +2562,7 @@
     ]
   },
   {
+    "id": "equipment.att-la-s-plate-mail",
     "name": {
       "en": "Att'la's Plate Mail",
       "fr": "Armure d'Att'la"
@@ -2381,6 +2575,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.rune-of-spell-eating",
         "name": { "en": "Rune of Spell Eating", "fr": "Rune Dévoreuse de Sorts" },
         "description": {
           "en": "The Hero wearing this armour is immune to all spells.",
@@ -2388,6 +2583,7 @@
         }
       },
       {
+        "id": "rule.rune-of-passage",
         "name": { "en": "Rune of Passage", "fr": "Rune de Passage" },
         "description": {
           "en": "The Hero can move through solid objects, like walls (this does not mean he can see through them).",
@@ -2395,6 +2591,7 @@
         }
       },
       {
+        "id": "rule.rune-of-fortitude",
         "name": { "en": "Rune of Fortitude", "fr": "Rune de Robustesse" },
         "description": {
           "en": "The Hero has an extra Wound - this may take his total Wounds above his race's maximum.",
@@ -2404,6 +2601,7 @@
     ]
   },
   {
+    "id": "equipment.bow-of-seeking",
     "name": {
       "en": "Bow of Seeking",
       "fr": "Arc Traqueur"
@@ -2415,9 +2613,10 @@
       "fr": "Cet arc fut offert au Comte Steinhardt par les seigneurs elfes de la Forêt des Ombres."
     },
     "specialRules": [
-      { "name": { "en": "Save Modifier (Elf Bow)", "fr": "Modificateur de sauvegarde (Arc Elfique)" } },
-      { "name": { "en": "Barbed Arrowheads", "fr": "Pointes Barbelées" } },
+      { "id": "rule.save-modifier-elf-bow", "name": { "en": "Save Modifier (Elf Bow)", "fr": "Modificateur de sauvegarde (Arc Elfique)" } },
+      { "id": "rule.barbed-arrowheads", "name": { "en": "Barbed Arrowheads", "fr": "Pointes Barbelées" } },
       {
+        "id": "rule.bow-of-seeking",
         "name": { "en": "Bow of Seeking", "fr": "Arc Traqueur" },
         "description": {
           "en": "Treat this bow as an Elf Bow (see Save Modifier) that always hits its target on a 2+, regardless of any to-hit modifiers, even if the target is behind cover - any arrow shot pursues its target. Such is its deadly precision that every arrow shot with it counts as a Hunting Arrow (+1 on all Injury rolls, see Barbed Arrowheads). Pick any enemy model in range, not just the closest, as long as the shooter is aware of the target's presence and position (even the tip of a target's weapon is enough). If any Dwarf is an eligible target, the arrows always deviate from their intended target to try to hit the Dwarf instead. This bow cannot be used to shoot at Elves.",
@@ -2427,6 +2626,7 @@
     ]
   },
   {
+    "id": "equipment.executioner-s-hood",
     "name": {
       "en": "Executioner's Hood",
       "fr": "Cagoule d'Exécuteur"
@@ -2438,8 +2638,9 @@
       "fr": "Récupérée sur l'épave d'un navire elfe noir, cette cagoule porte des runes maléfiques luisantes qui emplissent son porteur d'une rage irraisonnée."
     },
     "specialRules": [
-      { "name": { "en": "Frenzy", "fr": "Frénésie" } },
+      { "id": "rule.frenzy", "name": { "en": "Frenzy", "fr": "Frénésie" } },
       {
+        "id": "rule.executioner-s-hood",
         "name": { "en": "Executioner's Hood", "fr": "Cagoule d'Exécuteur" },
         "description": {
           "en": "A warrior wearing this becomes subject to and always will be frenzied (see Frenzy), even if he is knocked down or stunned. He also adds +1 to his Strength in close combat, such is the power of his fury. The wearer never leaves combat under any circumstances, and will always attack opponents in base contact until they are taken out of action. If there are any stunned or knocked down models within the wearer's charge range at the beginning of his turn, he will charge and attack the closest one, even if they are members of his own warband - fight the hand-to-hand combat until one of the warriors is taken out of action.",
@@ -2449,6 +2650,7 @@
     ]
   },
   {
+    "id": "equipment.all-seeing-eye-of-numas",
     "name": {
       "en": "All-seeing Eye of Numas",
       "fr": "Œil Omniscient de Numas"
@@ -2462,6 +2664,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.all-seeing-eye-of-numas",
         "name": { "en": "All-seeing Eye of Numas", "fr": "Œil Omniscient de Numas" },
         "description": {
           "en": "The bearer can see all models on the table, even hidden or out of sight, and can guide his warband through the ruins (roll two dice instead of one for him after battle when rolling on the Exploration chart). He also has an additional 6+ save (unmodified by Strength or weapon) against all shooting attacks and close combat strikes, as he can sense the attacks before they are made. All animals (wardogs, horses, etc) fight in Frenzy against the bearer.",
@@ -2471,6 +2674,7 @@
     ]
   },
   {
+    "id": "equipment.ienh-khain",
     "name": { "en": "Ienh-Khain", "fr": "Ienh-Khain" },
     "category": "MeleeWeapon",
     "cost": 0,
@@ -2480,8 +2684,9 @@
       "fr": "La Main de Khaine - une épée à un tranchant, d'une longueur incroyable, portée par l'escrimeur elfe Aenur (voir Dramatis Personae). Jamais à vendre, jamais trouvée sur la table d'Exploration - elle n'appartient qu'à Aenur."
     },
     "specialRules": [
-      { "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } },
+      { "id": "rule.parry-sword", "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } },
       {
+        "id": "rule.ienh-khain-s-edge",
         "name": { "en": "Ienh-Khain's Edge", "fr": "Tranchant d'Ienh-Khain" },
         "description": {
           "en": "This sword adds +1 to its wielder's Strength, and causes a critical hit on a roll of 5-6 (instead of the usual unmodified 6) when rolling to wound.",
@@ -2491,6 +2696,7 @@
     ]
   },
   {
+    "id": "equipment.dagger-johann",
     "name": { "en": "Dagger (Johann)", "fr": "Dague (Johann)" },
     "category": "MeleeWeapon",
     "cost": 0,
@@ -2500,10 +2706,11 @@
       "fr": "Une des innombrables dagues de Johann le Couteau (voir Dramatis Personae) - traitée comme une Épée uniquement pour la règle Parade, pas pour le bonus de sauvegarde d'armure qu'offrent habituellement deux vraies Épées ensemble."
     },
     "specialRules": [
-      { "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } }
+      { "id": "rule.parry-sword", "name": { "en": "Parry (Sword)", "fr": "Parade (Épée)" } }
     ]
   },
   {
+    "id": "equipment.wizard-s-staff-nicodemus",
     "name": { "en": "Wizard's Staff (Nicodemus)", "fr": "Bâton de Sorcier (Nicodemus)" },
     "category": "MeleeWeapon",
     "cost": 0,
@@ -2513,9 +2720,10 @@
       "fr": "L'énorme bâton porté par le pèlerin maudit Nicodemus (voir Dramatis Personae). Jamais à vendre, jamais trouvé sur la table d'Exploration - il n'appartient qu'à Nicodemus."
     },
     "specialRules": [
-      { "name": { "en": "Concussion", "fr": "Commotion" } },
-      { "name": { "en": "Parry (Buckler)", "fr": "Parade (Rondache)" } },
+      { "id": "rule.concussion", "name": { "en": "Concussion", "fr": "Commotion" } },
+      { "id": "rule.parry-buckler", "name": { "en": "Parry (Buckler)", "fr": "Parade (Rondache)" } },
       {
+        "id": "rule.two-handed-grip",
         "name": { "en": "Two-Handed Grip", "fr": "Prise à Deux Mains" },
         "description": {
           "en": "Used two-handed, the staff counts as a Club (see Concussion) and also lets its wielder parry as if armed with a buckler (see Parry). Used one-handed (as a Club, without the Parry) it frees the other hand to cast the Sword of Rezhebel spell - that spell-sword cannot itself be used to parry, being a spell and not a real weapon.",
@@ -2525,6 +2733,7 @@
     ]
   },
   {
+    "id": "equipment.eshin-fighting-claws-veskit",
     "name": { "en": "Eshin Fighting Claws (Veskit)", "fr": "Griffes de Combat d'Eshin (Veskit)" },
     "category": "MeleeWeapon",
     "cost": 0,
@@ -2535,6 +2744,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.integrated-warplock-pistol",
         "name": { "en": "Integrated Warplock Pistol", "fr": "Pistolet Verminique Intégré" },
         "description": {
           "en": "Each claw incorporates a built-in Warplock Pistol, letting the wielder shoot every turn regardless of movement. In close combat the wielder fights at Strength 5 with a -3 armour save modifier, and may still parry twice (once per claw).",
@@ -2544,6 +2754,7 @@
     ]
   },
   {
+    "id": "equipment.the-noctu",
     "name": { "en": "The Noctu", "fr": "Le Noctu" },
     "category": "MiscellaneousEquipment",
     "cost": 0,
@@ -2554,6 +2765,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.veil-of-shadow",
         "name": { "en": "Veil of Shadow", "fr": "Voile d'Ombre" },
         "description": {
           "en": "The gemstone's cloaking properties reduce all shooting to-hit rolls against its bearer by -1.",

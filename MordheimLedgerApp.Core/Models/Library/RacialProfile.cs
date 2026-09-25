@@ -28,6 +28,10 @@ public class RacialProfile
 
     public ContentSource Source { get; set; }
 
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    public string? OfficialId { get; set; }
+
     /// <summary>Non-null overrides the displayed Movement maximum with free text (e.g. "2D6" for Cave
     /// Squigs) - mirrors WarriorArchetype.MovementOverride. Movement itself stays a numeric fallback.</summary>
     public int Movement { get; set; }

@@ -14,6 +14,11 @@ public class EquipmentItemEntity
     public int? CostRandomMax { get; set; }
     public string? DescriptionKey { get; set; }
     public ContentSource Source { get; set; }
+
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    [Indexed]
+    public string? OfficialId { get; set; }
     public string? ImagePath { get; set; }
     public bool IsFreeDagger { get; set; }
 

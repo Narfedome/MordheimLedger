@@ -52,6 +52,10 @@ public class ExplorationResult
 
     public ContentSource Source { get; set; }
 
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    public string? OfficialId { get; set; }
+
     /// <summary>False (most entries) = a single roll picks exactly one mutually exclusive Outcome.
     /// True (e.g. "Hidden Treasure") = every Outcome is checked independently against its own
     /// threshold - see ExplorationOutcome's doc comment for the full mechanic. "Straggler" also sets

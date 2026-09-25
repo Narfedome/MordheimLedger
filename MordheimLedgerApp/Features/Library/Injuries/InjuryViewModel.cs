@@ -165,6 +165,7 @@ public partial class InjuryViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             ImagePath = s.ImagePath,
             Category = s.Category,
             RollRange = s.RollRange

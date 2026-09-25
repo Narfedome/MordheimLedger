@@ -113,7 +113,7 @@ public class AppDatabase
 
         // Bug trouvé le 2026-09-01 en ajoutant BackfillDramatisPersonaSpecialRulesAsync : plusieurs
         // Backfill* méthodes ci-dessous appellent FindOrCreateSpecialRuleAsync (BackfillNewEquipmentItemsAsync,
-        // BackfillInjurySpecialRulesAsync), qui ne consulte QUE le cache _specialRuleIdsByEnglishName - or ce
+        // BackfillInjurySpecialRulesAsync), qui ne consulte QUE le cache _specialRuleIdsByOfficialId - or ce
         // cache n'est peuplé que pendant un SeedOfficialContentAsync frais (voir sa doc), donc reste VIDE à
         // chaque lancement ordinaire (catalogue déjà seedé, le bloc juste au-dessus est sauté). Résultat :
         // un Backfill* qui a besoin d'une règle DÉJÀ existante en base (ex. "Parry (Sword)", partagée par
@@ -276,7 +276,7 @@ public class AppDatabase
     /// array) so the ordered/commented call list there stays easy to scan on its own. Consumed by
     /// BackfillWarriorArchetypeRacialProfileAsync, which needs to revisit every band file regardless of
     /// seeding order.</summary>
-    private static readonly string[] _warbandFileNames =
+    internal static readonly string[] WarbandFileNames =
     [
         "Undead.json", "DwarfTreasureHunters.json", "Averlanders.json", "Ostlanders.json",
         "Reiklanders.json", "Middenheimers.json", "Marienburgers.json", "CarnivalOfChaos.json",
@@ -313,7 +313,7 @@ public class AppDatabase
         if (await _db.ExecuteScalarAsync<int>("PRAGMA user_version") >= MustStartWithMutationBackfillDataVersion) return;
 
         var mandatoryEnglishNames = new HashSet<string>();
-        foreach (var fileName in _warbandFileNames)
+        foreach (var fileName in WarbandFileNames)
         {
             var data = await LoadWarbandSeedDataAsync(fileName);
             foreach (var w in data.Warriors.Where(w => w.MustStartWithMutation))
@@ -346,12 +346,12 @@ public class AppDatabase
         foreach (var seed in await LoadSeedArrayAsync<RacialProfileSeedData>("RacialProfiles.json"))
             await FindOrCreateRacialProfileAsync(seed);
 
-        var racialProfileNameByArchetypeEnglishName = new Dictionary<string, string>();
-        foreach (var fileName in _warbandFileNames)
+        var racialProfileOfficialIdByArchetypeEnglishName = new Dictionary<string, string>();
+        foreach (var fileName in WarbandFileNames)
         {
             var data = await LoadWarbandSeedDataAsync(fileName);
             foreach (var w in data.Warriors)
-                if (w.RacialProfileName is { } profileName) racialProfileNameByArchetypeEnglishName[w.Name.En] = profileName;
+                if (w.RacialProfileId is { } profileOfficialId) racialProfileOfficialIdByArchetypeEnglishName[w.Name.En] = profileOfficialId;
         }
 
         var englishNamesByKey = (await _db.Table<TranslationEntity>().Where(t => t.LanguageCode == "en").ToListAsync())
@@ -360,8 +360,8 @@ public class AppDatabase
         foreach (var archetype in staleArchetypes)
         {
             if (!englishNamesByKey.TryGetValue(archetype.NameKey, out var englishName)) continue;
-            if (!racialProfileNameByArchetypeEnglishName.TryGetValue(englishName, out var profileName)) continue;
-            if (!_racialProfileIdsByEnglishName.TryGetValue(profileName, out var profileId)) continue;
+            if (!racialProfileOfficialIdByArchetypeEnglishName.TryGetValue(englishName, out var profileOfficialId)) continue;
+            if (!_racialProfileIdsByOfficialId.TryGetValue(profileOfficialId, out var profileId)) continue;
 
             archetype.RacialProfileId = profileId;
             await _db.UpdateAsync(archetype);
@@ -451,6 +451,36 @@ public class AppDatabase
     /// Modified/Custom is at risk either way. Known limitation: unlike SeedOfficialContentAsync,
     /// RestrictedToWarbandNames isn't resolvable here (no deferred-resolution queue on this path) - not
     /// needed by any entry added so far, would need extending if a future backfilled item requires it.</summary>
+    /// <summary>Objet du catalogue commun (Equipment.json) tel que le seed l'insère - partagé par
+    /// SeedEquipmentAsync et BackfillNewEquipmentItemsAsync. GrantsSpecificSkillName reste un nom en base
+    /// (lu tel quel par SkillEligibility), résolu ici depuis l'id de compétence du JSON.</summary>
+    private static EquipmentItem NewCommonEquipmentItem(EquipmentSeedData eq) => new()
+    {
+        OfficialId = eq.Id,
+        Category = Enum.Parse<EquipmentCategory>(eq.Category),
+        Cost = eq.Cost,
+        Rarity = eq.Rarity,
+        CostRandomMax = eq.CostRandomMax,
+        Source = ContentSource.Official,
+        IsFreeDagger = eq.IsFreeDagger,
+        Movement = eq.Movement,
+        WeaponSkill = eq.WeaponSkill,
+        BallisticSkill = eq.BallisticSkill,
+        Strength = eq.Strength,
+        Toughness = eq.Toughness,
+        Wounds = eq.Wounds,
+        Initiative = eq.Initiative,
+        Attacks = eq.Attacks,
+        Leadership = eq.Leadership,
+        GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
+        GrantsSpecificSkillName = eq.GrantsSpecificSkillId is { } grantsSkillId ? SeedCatalog.SkillName(grantsSkillId) : null,
+        GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
+        IsSellable = eq.IsSellable,
+        GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
+        IsUniqueArtefact = eq.IsUniqueArtefact,
+        IsExplorationOnly = eq.IsExplorationOnly
+    };
+
     private async Task BackfillNewEquipmentItemsAsync()
     {
         var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
@@ -484,36 +514,12 @@ public class AppDatabase
                 continue;
             }
 
-            var item = new EquipmentItem
-            {
-                Category = Enum.Parse<EquipmentCategory>(eq.Category),
-                Cost = eq.Cost,
-                Rarity = eq.Rarity,
-                CostRandomMax = eq.CostRandomMax,
-                Source = ContentSource.Official,
-                IsFreeDagger = eq.IsFreeDagger,
-                Movement = eq.Movement,
-                WeaponSkill = eq.WeaponSkill,
-                BallisticSkill = eq.BallisticSkill,
-                Strength = eq.Strength,
-                Toughness = eq.Toughness,
-                Wounds = eq.Wounds,
-                Initiative = eq.Initiative,
-                Attacks = eq.Attacks,
-                Leadership = eq.Leadership,
-                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
-                GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
-                GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
-                IsSellable = eq.IsSellable,
-                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
-                IsUniqueArtefact = eq.IsUniqueArtefact,
-                IsExplorationOnly = eq.IsExplorationOnly
-            };
+            var item = NewCommonEquipmentItem(eq);
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
             var itemEntity = item.ToEntity();
             await _db.InsertAsync(itemEntity);
-            _equipmentIdsByEnglishName[eq.Name.En] = itemEntity.Id;
+            _equipmentIdsByOfficialId[eq.Id] = itemEntity.Id;
 
             foreach (var sr in eq.SpecialRules)
             {
@@ -664,7 +670,7 @@ public class AppDatabase
     /// only, matched by (DramatisPersonaId, SpecialRuleId) pair - never touches a rule the persona already
     /// has (e.g. "Inseparable"), so a player who hand-edited a persona's rules in the Codex isn't silently
     /// overwritten. Deliberately does NOT reuse FindOrCreateSpecialRuleAsync's transient
-    /// _specialRuleIdsByEnglishName cache directly - that cache is only populated during a fresh
+    /// _specialRuleIdsByOfficialId cache directly - that cache is only populated during a fresh
     /// SeedOfficialContentAsync pass and stays empty on every ordinary launch, so blindly calling it here
     /// would insert a duplicate SpecialRuleEntity for any rule name that happens to already exist in the
     /// DB. Instead resolves an existing row by English name straight against the DB first (same shape as
@@ -879,13 +885,13 @@ public class AppDatabase
         await Initialization;
         await DropAllTablesAsync();
         InvalidateAllCachedTables();
-        _specialRuleIdsByEnglishName.Clear();
-        _mutationIdsByEnglishName.Clear();
-        _magicSchoolIdsByEnglishName.Clear();
-        _equipmentIdsByEnglishName.Clear();
-        _skillIdsByEnglishName.Clear();
+        _specialRuleIdsByOfficialId.Clear();
+        _mutationIdsByOfficialId.Clear();
+        _magicSchoolIdsByOfficialId.Clear();
+        _equipmentIdsByOfficialId.Clear();
+        _skillIdsByOfficialId.Clear();
         _racialProfileIdsByEnglishName.Clear();
-        _warbandArchetypeIdsByFileStem.Clear();
+        _warbandArchetypeIdsByOfficialId.Clear();
         _pendingSharedRestrictions.Clear();
         await CreateAllTablesAsync();
         await RunInTransactionAsync(async () =>
@@ -952,16 +958,16 @@ public class AppDatabase
 
         // Après les 15 bandes (pas avant, contrairement à HiredSwords) : certains personnages référencent
         // par nom une Compétence propre à une bande (ex. Bertha/"Righteous Fury", propre aux Sœurs de
-        // Sigmar - RestrictedToThisWarband dans SistersOfSigmar.json) via _skillIdsByEnglishName, qui
+        // Sigmar - RestrictedToThisWarband dans SistersOfSigmar.json) via _skillIdsByOfficialId, qui
         // n'existe donc qu'une fois cette bande seedée. Conséquence positive : plus besoin de la passe de
         // résolution différée pour RestrictedToWarbandNames (voir SeedDramatisPersonaeAsync) - chaque
-        // WarbandArchetypeId existe déjà, résolu directement via _warbandArchetypeIdsByFileStem.
+        // WarbandArchetypeId existe déjà, résolu directement via _warbandArchetypeIdsByOfficialId.
         await SeedDramatisPersonaeAsync();
 
         // Deferred resolution: common-catalog entries (Equipment/Skill/Mutation) that named several
         // bands via RestrictedToWarbandNames couldn't resolve a WarbandArchetypeId at seed time, since
         // none of the 15 warband files above had been seeded yet. Every band now exists, so resolve each
-        // file-stem name against _warbandArchetypeIdsByFileStem (throws on an unknown stem - same
+        // file-stem name against _warbandArchetypeIdsByOfficialId (throws on an unknown stem - same
         // fail-fast precedent as the other XxxIdsByEnglishName dictionaries, surfaces a JSON typo at
         // first launch) and insert the matching join row.
         foreach (var pending in _pendingSharedRestrictions)
@@ -971,7 +977,7 @@ public class AppDatabase
             // whole CSV list back in one update, rather than one join row per stem like the other 3 kinds.
             if (pending.Kind == SharedRestrictionKind.SpecialRule)
             {
-                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByFileStem[stem]).ToList();
+                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByOfficialId[stem]).ToList();
                 var ruleEntity = await _db.Table<SpecialRuleEntity>().Where(r => r.Id == pending.ItemId).FirstAsync();
                 ruleEntity.HatredTargetWarbandArchetypeIds = string.Join(',', targetIds);
                 await _db.UpdateAsync(ruleEntity);
@@ -982,7 +988,7 @@ public class AppDatabase
             // (not a join table, see SkillEntity.HatredTargetWarbandArchetypeIds).
             if (pending.Kind == SharedRestrictionKind.SkillHatredTarget)
             {
-                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByFileStem[stem]).ToList();
+                var targetIds = pending.WarbandFileStems.Select(stem => _warbandArchetypeIdsByOfficialId[stem]).ToList();
                 var skillEntityForHatred = await _db.Table<SkillEntity>().Where(s => s.Id == pending.ItemId).FirstAsync();
                 skillEntityForHatred.HatredTargetWarbandArchetypeIds = string.Join(',', targetIds);
                 await _db.UpdateAsync(skillEntityForHatred);
@@ -991,7 +997,7 @@ public class AppDatabase
 
             foreach (var stem in pending.WarbandFileStems)
             {
-                var warbandArchetypeId = _warbandArchetypeIdsByFileStem[stem];
+                var warbandArchetypeId = _warbandArchetypeIdsByOfficialId[stem];
                 switch (pending.Kind)
                 {
                     case SharedRestrictionKind.Equipment:
@@ -1042,14 +1048,14 @@ public class AppDatabase
             // Indexeur direct (pas GetValueOrDefault) : une bande sans "race" reconnue dans Races.json
             // (typo, ou Races.json pas encore seedé avant celle-ci) doit planter au premier lancement
             // plutôt que silencieusement RaceId=0 - même précédent fail-fast que
-            // _warbandArchetypeIdsByFileStem plus bas.
+            // _warbandArchetypeIdsByOfficialId plus bas.
             RaceId = _raceIdsByEnglishName[data.Race]
         };
         warband.NameKey = await SeedTranslationAsync(data.Name.En, data.Name.Fr);
         warband.DescriptionKey = data.Description is null ? null : await SeedTranslationAsync(data.Description.En, data.Description.Fr);
         var warbandEntity = warband.ToEntity();
         await _db.InsertAsync(warbandEntity);
-        _warbandArchetypeIdsByFileStem[Path.GetFileNameWithoutExtension(fileName)] = warbandEntity.Id;
+        _warbandArchetypeIdsByOfficialId[Path.GetFileNameWithoutExtension(fileName)] = warbandEntity.Id;
 
         foreach (var sr in data.SpecialRules)
         {
@@ -1078,11 +1084,11 @@ public class AppDatabase
             // partagé par plusieurs bandes avec des restrictions différentes (ex. Holy Tome : Warrior-
             // Priest chez les Répurgateurs, Héroïnes chez les Sœurs de Sigmar) doit rester une seule
             // ligne de catalogue, chaque bande n'ajoutant que SES propres lignes de restriction.
-            // _equipmentIdsByEnglishName est alimenté aussi bien par le pool commun (SeedEquipmentAsync)
+            // _equipmentIdsByOfficialId est alimenté aussi bien par le pool commun (SeedEquipmentAsync)
             // que par ces déclarations propres aux bandes, contrairement à Equipment.json lui-même qui
             // reste un simple insert sans dédup interne (fichier écrit à la main, garanti sans doublon).
             int itemId;
-            if (_equipmentIdsByEnglishName.TryGetValue(eq.Name.En, out var existingItemId))
+            if (_equipmentIdsByOfficialId.TryGetValue(eq.Name.En, out var existingItemId))
             {
                 itemId = existingItemId;
             }
@@ -1101,7 +1107,7 @@ public class AppDatabase
                 var itemEntity = item.ToEntity();
                 await _db.InsertAsync(itemEntity);
                 itemId = itemEntity.Id;
-                _equipmentIdsByEnglishName[eq.Name.En] = itemId;
+                _equipmentIdsByOfficialId[eq.Name.En] = itemId;
 
                 foreach (var sr in eq.SpecialRules)
                 {
@@ -1134,7 +1140,7 @@ public class AppDatabase
             {
                 var itemId = bandEquipmentIdsByEnglishName.TryGetValue(itemName, out var bandItemId)
                     ? bandItemId
-                    : _equipmentIdsByEnglishName[itemName];
+                    : _equipmentIdsByOfficialId[itemName];
                 await _db.InsertAsync(new EquipmentListItemEntity { EquipmentListId = listEntity.Id, EquipmentItemId = itemId });
             }
         }
@@ -1219,7 +1225,7 @@ public class AppDatabase
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
             var skillEntity = skill.ToEntity();
             await _db.InsertAsync(skillEntity);
-            _skillIdsByEnglishName[sk.Name.En] = skillEntity.Id;
+            _skillIdsByOfficialId[sk.Name.En] = skillEntity.Id;
 
             if (sk.RestrictedToThisWarband)
                 await _db.InsertAsync(new WarbandArchetypeSkillEntity { WarbandArchetypeId = warbandEntity.Id, SkillId = skillEntity.Id });
@@ -1238,7 +1244,7 @@ public class AppDatabase
         {
             var spell = new Spell
             {
-                MagicSchoolId = _magicSchoolIdsByEnglishName[sp.MagicSchoolName],
+                MagicSchoolId = _magicSchoolIdsByOfficialId[sp.MagicSchoolName],
                 RollValue = sp.RollValue,
                 Difficulty = sp.Difficulty,
                 Source = ContentSource.Official
@@ -1276,36 +1282,12 @@ public class AppDatabase
     {
         foreach (var eq in await LoadSeedArrayAsync<EquipmentSeedData>("Equipment.json"))
         {
-            var item = new EquipmentItem
-            {
-                Category = Enum.Parse<EquipmentCategory>(eq.Category),
-                Cost = eq.Cost,
-                Rarity = eq.Rarity,
-                CostRandomMax = eq.CostRandomMax,
-                Source = ContentSource.Official,
-                IsFreeDagger = eq.IsFreeDagger,
-                Movement = eq.Movement,
-                WeaponSkill = eq.WeaponSkill,
-                BallisticSkill = eq.BallisticSkill,
-                Strength = eq.Strength,
-                Toughness = eq.Toughness,
-                Wounds = eq.Wounds,
-                Initiative = eq.Initiative,
-                Attacks = eq.Attacks,
-                Leadership = eq.Leadership,
-                GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
-                GrantsSpecificSkillName = eq.GrantsSpecificSkillName,
-                GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
-                IsSellable = eq.IsSellable,
-                GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
-                IsUniqueArtefact = eq.IsUniqueArtefact,
-                IsExplorationOnly = eq.IsExplorationOnly
-            };
+            var item = NewCommonEquipmentItem(eq);
             item.NameKey = await SeedTranslationAsync(eq.Name.En, eq.Name.Fr);
             item.DescriptionKey = eq.Description is null ? null : await SeedTranslationAsync(eq.Description.En, eq.Description.Fr);
             var itemEntity = item.ToEntity();
             await _db.InsertAsync(itemEntity);
-            _equipmentIdsByEnglishName[eq.Name.En] = itemEntity.Id;
+            _equipmentIdsByOfficialId[eq.Id] = itemEntity.Id;
 
             foreach (var sr in eq.SpecialRules)
             {
@@ -1339,7 +1321,7 @@ public class AppDatabase
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
             var skillEntity = skill.ToEntity();
             await _db.InsertAsync(skillEntity);
-            _skillIdsByEnglishName[sk.Name.En] = skillEntity.Id;
+            _skillIdsByOfficialId[sk.Name.En] = skillEntity.Id;
 
             if (sk.RestrictedToWarbandNames is { Count: > 0 } skWarbandNames)
                 _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Skill, skillEntity.Id, skWarbandNames));
@@ -1350,7 +1332,7 @@ public class AppDatabase
     }
 
     /// <summary>Plain insert, no dedup - the only source of HiredSword data in the seed pipeline. Runs
-    /// after SeedEquipmentAsync (needs _equipmentIdsByEnglishName populated to resolve
+    /// after SeedEquipmentAsync (needs _equipmentIdsByOfficialId populated to resolve
     /// StartingEquipmentNames) and before any SeedWarbandFromJsonAsync call (its RestrictedToWarbandNames
     /// needs the same deferred-resolution pass as Equipment/Skill/Mutation, see SeedOfficialContentAsync).</summary>
     private async Task SeedHiredSwordsAsync()
@@ -1383,7 +1365,7 @@ public class AppDatabase
 
             foreach (var itemName in hs.StartingEquipmentNames)
             {
-                if (!_equipmentIdsByEnglishName.TryGetValue(itemName, out var itemId))
+                if (!_equipmentIdsByOfficialId.TryGetValue(itemName, out var itemId))
                     throw new InvalidOperationException($"HiredSwords.json references unknown equipment '{itemName}'");
                 await _db.InsertAsync(new HiredSwordEquipmentEntity { HiredSwordId = entity.Id, EquipmentItemId = itemId });
             }
@@ -1402,9 +1384,9 @@ public class AppDatabase
     /// <summary>Plain insert, no dedup - the only source of DramatisPersona data in the seed pipeline.
     /// Runs AFTER all 15 SeedWarbandFromJsonAsync calls (unlike SeedHiredSwordsAsync, which runs before
     /// them) - some characters reference a band-exclusive Skill by name (e.g. Bertha/"Righteous Fury",
-    /// RestrictedToThisWarband in SistersOfSigmar.json), which only exists in _skillIdsByEnglishName once
+    /// RestrictedToThisWarband in SistersOfSigmar.json), which only exists in _skillIdsByOfficialId once
     /// that band has seeded. Side benefit: every WarbandArchetypeId already exists by this point, so
-    /// RestrictedToWarbandNames resolves directly via _warbandArchetypeIdsByFileStem - no deferred-
+    /// RestrictedToWarbandNames resolves directly via _warbandArchetypeIdsByOfficialId - no deferred-
     /// resolution pass needed here, unlike Equipment/Skill/Mutation/HiredSword (see
     /// SeedOfficialContentAsync).</summary>
     private async Task SeedDramatisPersonaeAsync()
@@ -1445,7 +1427,7 @@ public class AppDatabase
                 persona.MagicSchoolId = await FindOrCreateMagicSchoolAsync(new MagicSchoolSeedData { Name = magicSchoolName });
             if (dp.AlternativePaymentItemName is { } alternativePaymentItemName)
             {
-                if (!_equipmentIdsByEnglishName.TryGetValue(alternativePaymentItemName, out var alternativePaymentItemId))
+                if (!_equipmentIdsByOfficialId.TryGetValue(alternativePaymentItemName, out var alternativePaymentItemId))
                     throw new InvalidOperationException($"DramatisPersonae.json references unknown equipment '{alternativePaymentItemName}'");
                 persona.AlternativePaymentItemId = alternativePaymentItemId;
             }
@@ -1466,14 +1448,14 @@ public class AppDatabase
 
             foreach (var itemName in dp.StartingEquipmentNames)
             {
-                if (!_equipmentIdsByEnglishName.TryGetValue(itemName, out var itemId))
+                if (!_equipmentIdsByOfficialId.TryGetValue(itemName, out var itemId))
                     throw new InvalidOperationException($"DramatisPersonae.json references unknown equipment '{itemName}'");
                 await _db.InsertAsync(new DramatisPersonaEquipmentEntity { DramatisPersonaId = entity.Id, EquipmentItemId = itemId });
             }
 
             foreach (var skillName in dp.SkillNames)
             {
-                if (!_skillIdsByEnglishName.TryGetValue(skillName, out var skillId))
+                if (!_skillIdsByOfficialId.TryGetValue(skillName, out var skillId))
                     throw new InvalidOperationException($"DramatisPersonae.json references unknown skill '{skillName}'");
                 await _db.InsertAsync(new DramatisPersonaSkillEntity { DramatisPersonaId = entity.Id, SkillId = skillId });
             }
@@ -1481,7 +1463,7 @@ public class AppDatabase
             if (dp.RestrictedToWarbandNames is { Count: > 0 } dpWarbandNames)
             {
                 foreach (var stem in dpWarbandNames)
-                    await _db.InsertAsync(new WarbandArchetypeDramatisPersonaEntity { DramatisPersonaId = entity.Id, WarbandArchetypeId = _warbandArchetypeIdsByFileStem[stem] });
+                    await _db.InsertAsync(new WarbandArchetypeDramatisPersonaEntity { DramatisPersonaId = entity.Id, WarbandArchetypeId = _warbandArchetypeIdsByOfficialId[stem] });
             }
         }
 
@@ -1740,10 +1722,10 @@ public class AppDatabase
     /// the DB for pre-existing rows). Lets e.g. "Leader" attached from 4 different warbands' JSON files
     /// resolve to the SAME catalog row instead of 4 duplicates - keep the English Name verbatim-identical
     /// across files for a rule meant to be shared.</summary>
-    private readonly Dictionary<string, int> _specialRuleIdsByEnglishName = new();
+    private readonly Dictionary<string, int> _specialRuleIdsByOfficialId = new();
 
     /// <summary>Called once at the top of InitializeAsync (2026-09-01, bug fix) - populates
-    /// _specialRuleIdsByEnglishName from whatever SpecialRuleEntity rows already exist in the DB, so any
+    /// _specialRuleIdsByOfficialId from whatever SpecialRuleEntity rows already exist in the DB, so any
     /// Backfill* method calling FindOrCreateSpecialRuleAsync later in the same launch reuses an
     /// already-seeded rule instead of blindly inserting a duplicate (the cache is otherwise only ever
     /// populated live during a fresh SeedOfficialContentAsync pass - see the class doc). No-op on a fresh
@@ -1756,14 +1738,14 @@ public class AppDatabase
             .ToDictionary(t => t.Key, t => t.Value);
         foreach (var rule in await _db.Table<SpecialRuleEntity>().ToListAsync())
         {
-            if (englishTranslations.TryGetValue(rule.NameKey, out var name) && !_specialRuleIdsByEnglishName.ContainsKey(name))
-                _specialRuleIdsByEnglishName[name] = rule.Id;
+            if (englishTranslations.TryGetValue(rule.NameKey, out var name) && !_specialRuleIdsByOfficialId.ContainsKey(name))
+                _specialRuleIdsByOfficialId[name] = rule.Id;
         }
     }
 
     private async Task<int> FindOrCreateSpecialRuleAsync(SpecialRuleSeedData seed)
     {
-        if (_specialRuleIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+        if (_specialRuleIdsByOfficialId.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
         var rule = new SpecialRule { Source = ContentSource.Official, CostMultiplier = seed.CostMultiplier, Abbreviation = seed.Abbreviation, Rarity = seed.Rarity, IsResaleUpgrade = seed.IsResaleUpgrade, HatredTargetsSpellcasters = seed.HatredTargetsSpellcasters };
@@ -1778,18 +1760,18 @@ public class AppDatabase
         if (seed.HatredTargetWarbandNames is { Count: > 0 } hatredTargets)
             _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.SpecialRule, entity.Id, hatredTargets));
 
-        _specialRuleIdsByEnglishName[seed.Name.En] = entity.Id;
+        _specialRuleIdsByOfficialId[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 
     /// <summary>English Name -> already-created MutationEntity id, same rationale/scope as
-    /// _specialRuleIdsByEnglishName - lets the identical rulebook Mutations list (p.76), reused verbatim
+    /// _specialRuleIdsByOfficialId - lets the identical rulebook Mutations list (p.76), reused verbatim
     /// across every Chaos-adjacent warband's JSON, resolve to one shared catalog row.</summary>
-    private readonly Dictionary<string, int> _mutationIdsByEnglishName = new();
+    private readonly Dictionary<string, int> _mutationIdsByOfficialId = new();
 
     private async Task<int> FindOrCreateMutationAsync(MutationSeedData seed, int? warbandArchetypeId)
     {
-        if (_mutationIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+        if (_mutationIdsByOfficialId.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
         var mutation = new Mutation { Source = ContentSource.Official, Cost = seed.Cost };
@@ -1804,19 +1786,19 @@ public class AppDatabase
         if (seed.RestrictedToWarbandNames is { Count: > 0 } muWarbandNames)
             _pendingSharedRestrictions.Add(new PendingSharedRestriction(SharedRestrictionKind.Mutation, entity.Id, muWarbandNames));
 
-        _mutationIdsByEnglishName[seed.Name.En] = entity.Id;
+        _mutationIdsByOfficialId[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 
     /// <summary>English Name -> already-created MagicSchoolEntity id, same rationale/scope as
-    /// _specialRuleIdsByEnglishName - a school like "Necromancy" is declared once per warband's
+    /// _specialRuleIdsByOfficialId - a school like "Necromancy" is declared once per warband's
     /// WarbandSeedData.MagicSchools and then referenced by its Spell entries via
     /// SpellSeedData.MagicSchoolName.</summary>
-    private readonly Dictionary<string, int> _magicSchoolIdsByEnglishName = new();
+    private readonly Dictionary<string, int> _magicSchoolIdsByOfficialId = new();
 
     private async Task<int> FindOrCreateMagicSchoolAsync(MagicSchoolSeedData seed)
     {
-        if (_magicSchoolIdsByEnglishName.TryGetValue(seed.Name.En, out var existingId))
+        if (_magicSchoolIdsByOfficialId.TryGetValue(seed.Name.En, out var existingId))
             return existingId;
 
         var school = new MagicSchool { Source = ContentSource.Official };
@@ -1825,7 +1807,7 @@ public class AppDatabase
         var entity = school.ToEntity();
         await _db.InsertAsync(entity);
 
-        _magicSchoolIdsByEnglishName[seed.Name.En] = entity.Id;
+        _magicSchoolIdsByOfficialId[seed.Name.En] = entity.Id;
         return entity.Id;
     }
 
@@ -1836,7 +1818,7 @@ public class AppDatabase
     }
 
     /// <summary>English Name -> already-created RaceEntity id, same rationale as
-    /// _magicSchoolIdsByEnglishName - a race like "Human" is shared across most of the 15 warband files.
+    /// _magicSchoolIdsByOfficialId - a race like "Human" is shared across most of the 15 warband files.
     /// Unlike the other FindOrCreateXAsync helpers, also checks the DATABASE (not just this in-memory
     /// dict) before creating: BackfillWarbandArchetypeRaceAsync calls this too, on a launch where
     /// SeedOfficialContentAsync (and therefore this dict) never ran because the catalog wasn't empty -
@@ -1929,18 +1911,18 @@ public class AppDatabase
     /// Rare items shared by exactly a couple of bands with different restrictions, e.g. Holy Tome -
     /// Warrior-Priest for Witch Hunters, Heroines for Sisters of Sigmar - one catalog row, two sets of
     /// restriction rows). Also consumed when resolving EquipmentListSeedData.ItemNames.</summary>
-    private readonly Dictionary<string, int> _equipmentIdsByEnglishName = new();
+    private readonly Dictionary<string, int> _equipmentIdsByOfficialId = new();
 
     /// <summary>English Name -> SkillEntity id, populated by SeedSkillsAsync - same purpose as
-    /// _equipmentIdsByEnglishName, needed to resolve DramatisPersonaSeedData.SkillNames (a Dramatis
+    /// _equipmentIdsByOfficialId, needed to resolve DramatisPersonaSeedData.SkillNames (a Dramatis
     /// Persona's fixed known-skills list, not a WarriorArchetype pick-from-category Advance table).</summary>
-    private readonly Dictionary<string, int> _skillIdsByEnglishName = new();
+    private readonly Dictionary<string, int> _skillIdsByOfficialId = new();
 
     /// <summary>Warband JSON file stem (e.g. "Reiklanders", from SeedWarbandFromJsonAsync's fileName
     /// without extension) -> WarbandArchetypeEntity id, populated as each of the 15 warband files seeds.
     /// Lets a common-catalog entry (Equipment/Skill/Mutation) declared BEFORE any warband exists still
     /// name several bands via RestrictedToWarbandNames - see _pendingSharedRestrictions.</summary>
-    private readonly Dictionary<string, int> _warbandArchetypeIdsByFileStem = new();
+    private readonly Dictionary<string, int> _warbandArchetypeIdsByOfficialId = new();
 
     private enum SharedRestrictionKind { Equipment, Skill, Mutation, SpecialRule, HiredSword, SkillHatredTarget }
 

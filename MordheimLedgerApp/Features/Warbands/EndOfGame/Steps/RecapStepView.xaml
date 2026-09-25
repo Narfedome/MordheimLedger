@@ -105,6 +105,18 @@
                                               HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"/>
                 </VerticalStackLayout>
 
+                <!-- Or/pierres magiques/objets du scénario - l'XP figure déjà sur la ligne de chaque guerrier. -->
+                <VerticalStackLayout Spacing="2" IsVisible="{Binding HasScenarioRewardsRecap}">
+                    <Label Text="{loc:Loc EndOfGameScenarioRewardsHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding ScenarioRewardsRecapLines}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Label Text="{Binding .}" FontSize="13"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
                 <VerticalStackLayout Spacing="2" IsVisible="{Binding HasEquipmentTradingRecap}">
                     <Label Text="{loc:Loc EndOfGameRecapEquipmentTradingHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding EquipmentTradingPurchasedRecapLines}" Spacing="2">

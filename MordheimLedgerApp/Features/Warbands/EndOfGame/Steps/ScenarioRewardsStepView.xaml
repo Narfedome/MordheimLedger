@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:createEdit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ScenarioRewardsStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Récompenses du scénario - or, pierres magiques, objets (l'XP du scénario/de la victoire se saisit
+                 à l'étape Expérience). Pas une étape du livre : saisie libre de ce que le scénario
+                 joué accorde) - voir EndOfGamePageViewModel.ScenarioRewards.cs. Tout est facultatif. -->
+            <VerticalStackLayout Spacing="14">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc EndOfGameScenarioRewardsHeading}" FontAttributes="Bold"/>
+                    <Label Text="{loc:Loc EndOfGameScenarioRewardsHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
+
+                <!-- Or et pierres magiques : saisie libre, champ vide = rien. -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <VerticalStackLayout Grid.Column="0" Spacing="4">
+                        <Label Text="{loc:Loc EndOfGameScenarioGoldLabel}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding ScenarioGoldText}" Keyboard="Numeric" Placeholder="0">
+                            <Entry.Behaviors>
+                                <components:DigitsOnlyBehavior/>
+                            </Entry.Behaviors>
+                        </Entry>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="{loc:Loc EndOfGameScenarioWyrdstoneLabel}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding ScenarioWyrdstoneText}" Keyboard="Numeric" Placeholder="0">
+                            <Entry.Behaviors>
+                                <components:DigitsOnlyBehavior/>
+                            </Entry.Behaviors>
+                        </Entry>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Objets : tout le catalogue, rejoignent la réserve (réallouables à l'étape Réallouer). -->
+                <VerticalStackLayout Spacing="6">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{loc:Loc EndOfGameScenarioItemsHeading}" FontSize="12"
+                                   FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{loc:Loc EndOfGameScenarioItemsHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                        </VerticalStackLayout>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.Plus}"
+                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                      VerticalOptions="Start"
+                                                      Command="{Binding AddScenarioItemCommand}"/>
+                    </Grid>
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ScenarioRewardItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="createEdit:EquipmentPick">
+                                <components:ChipView Item="{Binding .}"
+                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowScenarioItemDetailCommand}"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveScenarioItemCommand}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+</ContentView>

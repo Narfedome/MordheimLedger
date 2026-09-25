@@ -184,7 +184,9 @@ public partial class EndOfGamePageViewModel
     /// nothing is written to the real Warband until WarbandDetailViewModel.EndOfGame saves.</summary>
     private int RareItemBaselineTreasury => _currentTreasury
         + (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
-        + WyrdstoneSaleValue;
+        + WyrdstoneSaleValue
+        // Or du scénario (étape Récompenses du scénario, la toute première après Résultat).
+        + ScenarioGold;
 
     /// <summary>Sum of EffectiveCost for every entry still checked "Acheter", PLUS EffectiveHireCostForTreasury
     /// for every recruited Gold-fee character still paying in gold (2026-09-01, user request - a

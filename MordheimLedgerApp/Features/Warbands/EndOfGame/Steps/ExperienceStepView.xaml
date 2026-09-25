@@ -12,7 +12,12 @@
                  est déplacé dans sa propre étape juste après, voir IsAdvanceStep - un guerrier peut
                  franchir plusieurs paliers d'un coup, ça ne tient plus sur une carte imbriquée ici. -->
             <VerticalStackLayout Spacing="8">
-                <Label Text="{loc:Loc EndOfGameExperienceHeading}" FontAttributes="Bold"/>
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc EndOfGameExperienceHeading}" FontAttributes="Bold"/>
+                    <!-- Toute l'XP de la partie se saisit ici, scénario et victoire compris (pas d'étape
+                         XP séparée dans Récompenses du scénario - retirée comme doublon, 2026-09-25). -->
+                    <Label Text="{loc:Loc EndOfGameExperienceHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarriorRows}" Spacing="10">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:WarriorOutcomeRow">
@@ -29,12 +34,26 @@
                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorRecapCommand}"/>
                                         <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
                                     </Grid>
-                                    <Entry Text="{Binding ExperienceGainedText}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameXpPh}">
-                                        <Entry.Behaviors>
-                                            <components:DigitsOnlyBehavior/>
-                                        </Entry.Behaviors>
-                                    </Entry>
+                                    <!-- Steppeur −/+ plutôt qu'une saisie clavier (retour utilisateur 2026-09-25,
+                                         même contrôle que la répartition d'Exploration), champ texte gardé au centre pour saisir directement. -->
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <Label Grid.Column="0" Text="{loc:Loc EndOfGameXpPh}" VerticalOptions="Center"
+                                               TextColor="{DynamicResource AppTextMuted}"/>
+                                        <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=DecrementExperienceGainedCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                            <Entry Text="{Binding ExperienceGainedText}" Keyboard="Numeric" Placeholder="0"
+                                                   WidthRequest="56" HorizontalTextAlignment="Center" VerticalOptions="Center">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=IncrementExperienceGainedCommand}"
+                                                                          CommandParameter="{Binding .}"/>
+                                        </HorizontalStackLayout>
+                                    </Grid>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>

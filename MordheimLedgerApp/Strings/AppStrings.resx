@@ -2216,4 +2216,40 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarriorArchetypeNeverGainsExperience" xml:space="preserve">
     <value>Ne gagne jamais d'Expérience</value>
   </data>
+  <data name="EndOfGameScenarioRewardsHeading" xml:space="preserve">
+    <value>Récompenses du scénario</value>
+  </data>
+  <data name="EndOfGameScenarioRewardsHint" xml:space="preserve">
+    <value>Selon le scénario joué - laisser vide s'il n'accorde rien.</value>
+  </data>
+  <data name="EndOfGameScenarioGoldLabel" xml:space="preserve">
+    <value>Or (CO)</value>
+  </data>
+  <data name="EndOfGameScenarioWyrdstoneLabel" xml:space="preserve">
+    <value>Pierres magiques</value>
+  </data>
+  <data name="EndOfGameScenarioItemsHeading" xml:space="preserve">
+    <value>Objets</value>
+  </data>
+  <data name="EndOfGameScenarioItemsHint" xml:space="preserve">
+    <value>Rejoignent la réserve - à donner à un Héros à l'étape Réallouer.</value>
+  </data>
+  <data name="EndOfGameScenarioGoldRecapFormat" xml:space="preserve">
+    <value>+{0} CO</value>
+  </data>
+  <data name="EndOfGameScenarioWyrdstoneRecapFormat" xml:space="preserve">
+    <value>+{0} éclat(s) de pierre magique</value>
+  </data>
+  <data name="HistoryScenarioGoldSentence" xml:space="preserve">
+    <value>Le scénario a rapporté {0} CO.</value>
+  </data>
+  <data name="HistoryScenarioWyrdstoneSentence" xml:space="preserve">
+    <value>Le scénario a rapporté {0} éclat(s) de pierre magique.</value>
+  </data>
+  <data name="HistoryScenarioItemSentence" xml:space="preserve">
+    <value>Le scénario a rapporté {0} (ajouté à la réserve).</value>
+  </data>
+  <data name="EndOfGameExperienceHint" xml:space="preserve">
+    <value>Toute l'XP de la partie : survie, ennemis mis hors de combat, victoire et bonus du scénario.</value>
+  </data>
 </root>

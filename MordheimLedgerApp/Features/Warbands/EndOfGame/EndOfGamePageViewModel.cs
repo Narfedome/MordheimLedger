@@ -219,7 +219,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)
     /// - le convertisseur, hors de cette classe, doit pouvoir lire cette valeur pour choisir la bonne
     /// vue.</summary>
-    public enum StepKind { Result, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
+    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -320,7 +320,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     {
         get
         {
-            var steps = new List<WizardStep> { new(StepKind.Result), new(StepKind.OutOfAction) };
+            var steps = new List<WizardStep> { new(StepKind.Result), new(StepKind.ScenarioRewards), new(StepKind.OutOfAction) };
             // Vendu aux Fosses (2026-09-04, retour utilisateur) : sa propre étape juste après la carte
             // Blessure du guerrier concerné plutôt qu'un bloc embarqué dans la même carte - même position
             // "juste après" que PairDuel après PairEngagement. D'où une boucle plutôt qu'un simple
@@ -1059,6 +1059,17 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         await ShowInfoAsync(Loc["WarbandsWeaponLimitWarningTitle"], string.Format(Loc["WarbandsWeaponLimitWarningMessage"], targetLabel));
     }
 
+    /// <summary>Steppeur de l'étape Expérience (2026-09-25, retour utilisateur - remplace la saisie clavier).
+    /// ExperienceGainedText reste la source (vide = 0), seule la façon de la modifier change.</summary>
+    [RelayCommand]
+    private void IncrementExperienceGained(WarriorOutcomeRow row) => row.ExperienceGainedText = (row.ExperienceGained + 1).ToString();
+
+    [RelayCommand]
+    private void DecrementExperienceGained(WarriorOutcomeRow row)
+    {
+        if (row.ExperienceGained > 0) row.ExperienceGainedText = (row.ExperienceGained - 1).ToString();
+    }
+
     /// <summary>Bloque le passage à l'étape suivante tant qu'un jet visible de l'étape courante est vide
     /// ou invalide - seules les étapes Blessure et Progression ont des jets à valider (Résultat/Hors de
     /// combat/Expérience/Trésor n'en ont pas). Pose RollError/MultipleInjuryCountError sur chaque jet
@@ -1160,6 +1171,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var language = LocalizationService.Instance.Language;
             var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], SelectedResult) };
 
+            // En tête : ses objets/éclats doivent exister en base avant la Vente (voir sa doc).
+            await ApplyScenarioRewardsAsync(sentences);
             await ApplyExplorationOutcomeAsync(_englishEquipmentCatalog, _equipmentItemsByEnglishName, _englishSpecialRulesCatalog, sentences);
             await ApplyWarriorOutcomesAsync(language, sentences);
             await ApplyCapturedEnemiesAsync(_warriorArchetypesByEnglishName, sentences);

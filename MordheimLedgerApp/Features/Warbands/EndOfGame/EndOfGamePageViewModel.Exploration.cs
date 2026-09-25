@@ -1324,5 +1324,12 @@ public partial class EndOfGamePageViewModel
 
         if (BonusStatTestItem is { } bonusStatItem)
             yield return (bonusStatItem.Item, bonusStatItem.MaterialRule, 1);
+
+        // Objets gagnés au scénario (étape Récompenses du scénario) : même chemin qu'une trouvaille
+        // d'Exploration - réserve visible au Recrutement, vendable, réallouable - plutôt qu'une
+        // quatrième source à fusionner séparément chez chaque lecteur. Persistés par
+        // ApplyScenarioRewardsAsync, en tête de Terminer.
+        foreach (var pick in ScenarioRewardItems)
+            yield return (pick.Item, pick.MaterialRule, 1);
     }
 }

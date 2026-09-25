@@ -45,7 +45,9 @@ public partial class EndOfGamePageViewModel
     /// (MaxShardsToSell) et à l'explication affichée à l'étape Vente (retour utilisateur 2026-08-28 :
     /// "voir d'où sortent nos shards" plutôt qu'un nombre nu).</summary>
     public int FoundThisGameWyrdstoneShards => BaselineWyrdstoneShardsFound +
-        (IsExplorationWyrdstone && int.TryParse(ExplorationWyrdstoneAmount, out var located) ? located : 0);
+        (IsExplorationWyrdstone && int.TryParse(ExplorationWyrdstoneAmount, out var located) ? located : 0)
+        // Éclats accordés par le scénario (étape Récompenses du scénario).
+        + ScenarioWyrdstoneShards;
 
     public bool HasFoundThisGameWyrdstone => FoundThisGameWyrdstoneShards > 0;
 

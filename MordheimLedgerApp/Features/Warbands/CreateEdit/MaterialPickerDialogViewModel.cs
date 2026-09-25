@@ -33,8 +33,9 @@ public partial class MaterialPickerDialogViewModel : DialogViewModel<bool>
     /// (alreadyHasFreeDagger) ou plus tôt dans ce même lot. Liste vide = rien à demander, pas de dialog.
     /// "Blessed Weapon" est repérée par son nom anglais (seul identifiant stable entre langues,
     /// même idiome que EndOfGamePageViewModel._specialRulesByEnglishName) puis sortie des matériaux
-    /// exclusifs.</summary>
-    public static async Task<List<MaterialChoice>> BuildChoicesAsync(ILibraryService libraryService, IEnumerable<EquipmentItem> items, bool alreadyHasFreeDagger)
+    /// exclusifs. allowBlessing: false masque la case Bénie (récompenses de scénario en Fin de Partie :
+    /// l'objet rejoint la réserve, qui ne conserve pas la bénédiction).</summary>
+    public static async Task<List<MaterialChoice>> BuildChoicesAsync(ILibraryService libraryService, IEnumerable<EquipmentItem> items, bool alreadyHasFreeDagger, bool allowBlessing = true)
     {
         var choices = new List<MaterialChoice>();
         var weapons = items.Where(IsWeapon).ToList();
@@ -44,7 +45,7 @@ public partial class MaterialPickerDialogViewModel : DialogViewModel<bool>
         var rules = await libraryService.GetSpecialRulesAsync(language);
         var blessingId = (language == "en" ? rules : await libraryService.GetSpecialRulesAsync("en"))
             .FirstOrDefault(r => r.Name == "Blessed Weapon")?.Id;
-        var blessingRule = rules.FirstOrDefault(r => r.Id == blessingId);
+        var blessingRule = allowBlessing ? rules.FirstOrDefault(r => r.Id == blessingId) : null;
         var materialRules = rules.Where(r => r.CostMultiplier.HasValue && r.Id != blessingId).ToList();
 
         var hasFreeDaggerSlot = alreadyHasFreeDagger;

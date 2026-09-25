@@ -1,3 +1,5 @@
+using MordheimLedgerApp.Core.Models.Library;
+
 namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>What kind of mechanical effect a Serious Injury result applies to the Warrior - see
@@ -85,6 +87,24 @@ public static class SeriousInjuryEffectTable
             _ => null!
         };
         return outcome is not null;
+    }
+
+    /// <summary>The permanent -1 a catalog Injury imposes, if any - for recording an injury chosen from
+    /// the catalog rather than rolled (warband wizard's free mode, importing a warband already played on
+    /// paper, 2026-09-24). Only a Hero injury whose RollRange is a single D66 value mapping to a
+    /// CharacteristicPenalty qualifies (22 Leg Wound, 26 Chest Wound, 31 Blinded in One Eye, 33 Nervous
+    /// Condition, 34 Hand Injury) - every other effect (missed games, lost equipment, +1 XP...) belongs to
+    /// the game where the injury happened, not to a warrior recorded after the fact. Blinded twice
+    /// (forced retirement) is not modelled here: each "31" simply applies its -1 BS.</summary>
+    public static bool TryGetPermanentPenalty(InjuryCategory category, string? rollRange, out CharacteristicField field)
+    {
+        field = default;
+        if (category != InjuryCategory.Hero || !int.TryParse(rollRange?.Trim(), out var roll)) return false;
+        if (!TryGetOutcome(roll, out var outcome) || outcome.Kind != SeriousInjuryEffectKind.CharacteristicPenalty || outcome.Field is not { } penalty)
+            return false;
+
+        field = penalty;
+        return true;
     }
 
     /// <summary>Arm Wound (23) and Smashed Leg (25) both resolve their real-world effect via a further

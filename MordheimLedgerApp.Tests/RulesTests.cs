@@ -208,6 +208,51 @@ public class RulesTests
 
     // --- SeriousInjuryEffectTable (Palier 1 mechanized subset) -----------------------------------
 
+    // --- Blessure du catalogue -> malus permanent (création libre, 2026-09-24) -------------------------
+
+    [Theory]
+    [InlineData("22", CharacteristicField.Movement)]
+    [InlineData("26", CharacteristicField.Toughness)]
+    [InlineData("31", CharacteristicField.BallisticSkill)]
+    [InlineData("33", CharacteristicField.Initiative)]
+    [InlineData(" 34 ", CharacteristicField.WeaponSkill)]
+    public void SeriousInjuryEffectTable_TryGetPermanentPenalty_HeroInjuryWithPenalty(string rollRange, CharacteristicField expected)
+    {
+        Assert.True(SeriousInjuryEffectTable.TryGetPermanentPenalty(InjuryCategory.Hero, rollRange, out var field));
+        Assert.Equal(expected, field);
+    }
+
+    [Theory]
+    [InlineData("35")]      // Blessure profonde - parties manquées, pas un malus permanent
+    [InlineData("36")]      // Dépouillé
+    [InlineData("66")]      // +1 XP
+    [InlineData("11-15")]   // plage, jamais un malus
+    [InlineData("23")]      // à embranchement, pas un malus permanent
+    [InlineData(null)]      // blessure personnalisée sans jet
+    public void SeriousInjuryEffectTable_TryGetPermanentPenalty_FalseWithoutPermanentPenalty(string? rollRange)
+    {
+        Assert.False(SeriousInjuryEffectTable.TryGetPermanentPenalty(InjuryCategory.Hero, rollRange, out _));
+    }
+
+    [Fact]
+    public void SeriousInjuryEffectTable_TryGetPermanentPenalty_FalseForHenchmanInjury()
+    {
+        Assert.False(SeriousInjuryEffectTable.TryGetPermanentPenalty(InjuryCategory.Henchman, "22", out _));
+    }
+
+    [Fact]
+    public void CharacteristicModifier_Apply_AddsDeltaToTheRightCharacteristicOnly()
+    {
+        var warrior = new Warrior { WeaponSkill = 4, BallisticSkill = 3, Movement = 4 };
+
+        CharacteristicModifier.Apply(warrior, CharacteristicField.WeaponSkill, -1);
+        CharacteristicModifier.Apply(warrior, CharacteristicField.Movement, 1);
+
+        Assert.Equal(3, warrior.WeaponSkill);
+        Assert.Equal(5, warrior.Movement);
+        Assert.Equal(3, warrior.BallisticSkill);
+    }
+
     [Fact]
     public void SeriousInjuryEffectTable_22_IsMovementPenalty()
     {

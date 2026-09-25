@@ -20,11 +20,18 @@
          pas. -->
     <VerticalStackLayout BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}" Spacing="4">
         <Grid ColumnDefinitions="*,Auto">
-            <!-- HeaderFontSize a toujours une valeur (14 par défaut) donc bindée directement ;
-                 HeaderTextColor reste null par défaut (usages existants inchangés) - un DataTrigger
-                 n'applique TextColor que si l'appelant l'a renseigné. -->
+            <!-- HeaderFontSize a toujours une valeur (12 par défaut) donc bindée directement ; gris
+                 AppTextMuted par défaut comme les libellés de champ des dialogs - un DataTrigger applique
+                 HeaderTextColor à la place si l'appelant l'a renseigné. -->
             <Label Text="{Binding HeaderText}" Grid.Column="0" VerticalOptions="Center"
                    FontSize="{Binding HeaderFontSize}">
+                <!-- Couleur par défaut via un Style (pas un TextColor local) : une valeur locale
+                     primerait sur le DataTrigger ci-dessous. -->
+                <Label.Style>
+                    <Style TargetType="Label">
+                        <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                    </Style>
+                </Label.Style>
                 <Label.Triggers>
                     <DataTrigger TargetType="Label" Binding="{Binding HeaderTextColor, Converter={StaticResource IsNotNullConverter}}" Value="True">
                         <Setter Property="TextColor" Value="{Binding HeaderTextColor}"/>

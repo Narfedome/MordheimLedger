@@ -16,10 +16,10 @@ public partial class ChipListView : ContentView
         set => SetValue(HeaderTextProperty, value);
     }
 
-    // Non renseignée (défaut) : taille de police par défaut du Label (comportement identique à avant
-    // l'ajout de cette propriété, pour ne rien changer aux usages existants qui ne la précisent pas).
+    // 12 par défaut, comme les libellés de champ des dialogs (Catégorie, Coût...) - 14 jusqu'au
+    // 2026-09-25, qui ressortait plus gros que le reste du dialog (retour utilisateur).
     public static readonly BindableProperty HeaderFontSizeProperty =
-        BindableProperty.Create(nameof(HeaderFontSize), typeof(double), typeof(ChipListView), 14.0);
+        BindableProperty.Create(nameof(HeaderFontSize), typeof(double), typeof(ChipListView), 12.0);
 
     public double HeaderFontSize
     {
@@ -27,9 +27,8 @@ public partial class ChipListView : ContentView
         set => SetValue(HeaderFontSizeProperty, value);
     }
 
-    // Non renseignée (défaut, null) : pas de TextColor explicite sur le header (comportement inchangé
-    // pour les usages existants) - voir ChipListView.xaml, un DataTrigger applique TextColor seulement
-    // si cette propriété est renseignée.
+    // Non renseignée (défaut, null) : gris AppTextMuted, comme les libellés de champ des dialogs - voir
+    // ChipListView.xaml, un DataTrigger applique cette couleur à la place seulement si elle est renseignée.
     public static readonly BindableProperty HeaderTextColorProperty =
         BindableProperty.Create(nameof(HeaderTextColor), typeof(Color), typeof(ChipListView), null);
 

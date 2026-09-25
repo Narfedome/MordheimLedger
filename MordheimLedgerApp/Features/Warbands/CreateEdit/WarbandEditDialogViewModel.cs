@@ -31,11 +31,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
     /// au Save - rien n'est persisté avant.</summary>
     public partial class WarbandEditDialogViewModel : DialogViewModel<bool>
     {
-        /// <summary>Général/Guerriers/Équipement/Noms/Mercenaires/Noms - toujours 6, y compris à la toute
-        /// première création (retour utilisateur : contrairement à une décision antérieure, un Franc-
-        /// Tireur EST recrutable dès la création d'une bande neuve, pas seulement en Mode Libre/bande
-        /// déjà existante).</summary>
-        private const int StepCount = 6;
+        /// <summary>Général/Guerriers/Équipement/Noms/Mercenaires/Noms - la 6e étape (noms des
+        /// Francs-Tireurs) n'existe que si au moins un Franc-Tireur est engagé (2026-09-24, retour
+        /// utilisateur - rien à nommer sinon). Un Franc-Tireur reste recrutable dès la toute première
+        /// création (retour utilisateur antérieur, pas seulement en Mode Libre/bande déjà existante). En
+        /// création pas à pas (IsWizardMode), une étape Récapitulatif de plus, toujours la dernière (même
+        /// jour, retour utilisateur - relire la bande avant de l'enregistrer).</summary>
+        private int StepCount => (HasRecruitedHiredSwords ? 6 : 5) + (IsWizardMode ? 1 : 0);
 
         private readonly IWarbandArchetypePickerService _warbandArchetypePicker;
         private readonly IWarbandService _warbandService;
@@ -81,7 +83,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             slot.Equipment.Select(e => new object?[] { e.Item.Id, e.MaterialRule?.Id, e.ExistingId }),
             slot.Skills.Select(s => s.Id),
             slot.Spells.Select(s => s.Id),
-            slot.Mutations.Select(m => m.Id)
+            slot.Mutations.Select(m => m.Id),
+            slot.Injuries.Select(i => i.Id)
         ];
 
         /// <summary>Masque les boutons Ajouter/Retirer de la puce Archetype hors création (Item.Id != 0,
@@ -115,6 +118,10 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [NotifyPropertyChangedFor(nameof(IsWarriorNamesTab))]
         [NotifyPropertyChangedFor(nameof(IsMercenariesTab))]
         [NotifyPropertyChangedFor(nameof(IsHiredSwordNamesTab))]
+        [NotifyPropertyChangedFor(nameof(IsRecapTab))]
+        [NotifyPropertyChangedFor(nameof(RecapLines))]
+        [NotifyPropertyChangedFor(nameof(RecapTitle))]
+        [NotifyPropertyChangedFor(nameof(RecapRatingDisplay))]
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
@@ -143,7 +150,67 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// avant, dans sa propre étape depuis le 2026-09-01 (voir WarriorNamesTabIndex's own doc) plutôt
         /// que la 3e section de la même étape que les Héros/Hommes de main.</summary>
         private const int HiredSwordNamesTabIndex = 5;
-        public bool IsHiredSwordNamesTab => SelectedTab == HiredSwordNamesTabIndex;
+        public bool IsHiredSwordNamesTab => SelectedTab == HiredSwordNamesTabIndex && HasRecruitedHiredSwords;
+
+        /// <summary>Dernière étape en création pas à pas (voir StepCount) - 6e ou 7e selon qu'un Franc-Tireur
+        /// est engagé : lecture seule de toute la bande avant Enregistrer (RecapLines).</summary>
+        public bool IsRecapTab => IsWizardMode && SelectedTab == StepCount - 1;
+
+        public string RecapTitle => Archetype is null ? Item.Name : $"{Item.Name} — {Archetype.Name}";
+
+        /// <summary>Valeur de bande des recrues de cette session (Core.Rules.WarbandRatingRules - même formule
+        /// que la fiche de bande), Francs-Tireurs compris.</summary>
+        public string RecapRatingDisplay
+        {
+            get
+            {
+                var rating = RecruitRows.Where(r => r.Count > 0).Sum(r =>
+                        r.NameSlots.Sum(s => WarbandRatingRules.WarriorContribution(r.Archetype.IsLargeCreature, s.Experience, 1, null))
+                        + r.HenchmanGroupDrafts.Sum(g => WarbandRatingRules.WarriorContribution(r.Archetype.IsLargeCreature, g.Experience, g.Count, null)))
+                    + RecruitedHiredSwordRows.Sum(h => WarbandRatingRules.WarriorContribution(false, 0, 1, h.HiredSword.BaseRating));
+                return $"{Loc["WarbandRatingPh"]} : {rating}";
+            }
+        }
+
+        /// <summary>Une ligne par Héros, groupe d'Hommes de main et Franc-Tireur recruté (voir WarbandRecapLine).</summary>
+        public IReadOnlyList<WarbandRecapLine> RecapLines
+        {
+            get
+            {
+                var lines = new List<WarbandRecapLine>();
+                foreach (var row in RecruitRows.Where(r => r.Count > 0))
+                {
+                    foreach (var slot in row.NameSlots)
+                    {
+                        var name = string.IsNullOrWhiteSpace(slot.Name) ? slot.DisplayLabel : slot.Name.Trim();
+                        lines.Add(new WarbandRecapLine($"{name} — {row.Archetype.Name}", RecapSlotDetails(slot)));
+                    }
+                    foreach (var group in row.HenchmanGroupDrafts)
+                        lines.Add(new WarbandRecapLine($"{group.Name.Trim()} ({group.Count}×) — {row.Archetype.Name}", RecapSlotDetails(group)));
+                }
+                foreach (var hiredSword in RecruitedHiredSwordRows)
+                    lines.Add(new WarbandRecapLine($"{hiredSword.Name.Trim()} — {hiredSword.HiredSword.Name}", string.Empty));
+                return lines;
+            }
+        }
+
+        private string RecapSlotDetails(RecruitSlot slot)
+        {
+            var parts = new List<string>();
+            void AddPart(string headingKey, IEnumerable<string> names)
+            {
+                var list = names.ToList();
+                if (list.Count > 0) parts.Add($"{Loc[headingKey]} : {string.Join(", ", list)}");
+            }
+
+            AddPart("WarbandCreateTabEquipment", slot.Equipment.Select(e => e.Name));
+            AddPart("WarriorsSkillsHeading", slot.Skills.Select(s => s.Name));
+            AddPart("WarriorsSpellsHeading", slot.Spells.Select(s => s.Name));
+            AddPart("WarriorsMutationsHeading", slot.Mutations.Select(m => m.Name));
+            AddPart("WarriorsInjuriesHeading", slot.Injuries.Select(i => i.Name));
+            if (IsExistingWarband && slot.Experience > 0) parts.Add($"{Loc["WarriorExperiencePh"]} : {slot.Experience}");
+            return string.Join(" · ", parts);
+        }
 
         /// <summary>Mode assistant (IsWizardMode) uniquement : pilote Précédent/le libellé d'étape.</summary>
         public bool CanGoBack => SelectedTab > 0;
@@ -328,12 +395,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 foreach (var slot in row.NameSlots)
                 {
                     slot.IsExistingWarband = value;
-                    slot.SelectedSection = !value && slot.IsSpellcaster && !slot.CanUseEquipment ? 2 : 0;
+                    slot.SelectedSection = slot.DefaultSection;
                 }
                 foreach (var group in row.HenchmanGroupDrafts)
                 {
                     group.IsExistingWarband = value;
-                    group.SelectedSection = !value && group.IsSpellcaster && !group.CanUseEquipment ? 2 : 0;
+                    group.SelectedSection = group.DefaultSection;
                 }
             }
 
@@ -697,6 +764,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             OnPropertyChanged(nameof(RecruitedRows));
             OnPropertyChanged(nameof(RecruitedHiredSwordRows));
             OnPropertyChanged(nameof(HasRecruitedHiredSwords));
+            // Le nombre d'étapes suit HasRecruitedHiredSwords (voir StepCount) - dernier Franc-Tireur retiré
+            // alors qu'on est sur l'étape de leurs noms : on retombe sur Mercenaires.
+            if (SelectedTab >= StepCount) SelectedTab = StepCount - 1;
+            OnPropertyChanged(nameof(IsLastStep));
+            OnPropertyChanged(nameof(StepLabel));
+            OnPropertyChanged(nameof(IsHiredSwordNamesTab));
+            OnPropertyChanged(nameof(IsRecapTab));
 
             if (Archetype is null) return;
             var total = TotalWarriorCount;
@@ -951,6 +1025,44 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
+        /// <summary>Sous-onglet Blessures (Héros, mode Bande existante - RecruitSlot.ShowInjuriesTab) : blessures
+        /// déjà subies par un guerrier importé d'une bande jouée sur papier, en mémoire jusqu'au Save où leur
+        /// malus permanent s'applique au profil (ApplyInjuryPenalties).</summary>
+        [RelayCommand]
+        private async Task AddInjury(object target)
+        {
+            if (target is not RecruitSlot slot) return;
+            foreach (var injury in await _injuryPicker.PickInjuriesAsync())
+                slot.Injuries.Add(injury);
+        }
+
+        [RelayCommand]
+        private Task ShowInjuryDetail(Injury injury) => _detailDialogs.ShowInjuryDetailDialogAsync(injury);
+
+        /// <summary>Retire une blessure de quelle que collection la contient - même idiome que RemoveSkill.</summary>
+        [RelayCommand]
+        private void RemoveInjury(Injury injury)
+        {
+            foreach (var slot in RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts)))
+                if (slot.Injuries.Remove(injury)) return;
+        }
+
+        /// <summary>Malus permanent de chaque blessure (Core.Rules.SeriousInjuryEffectTable.TryGetPermanentPenalty
+        /// - Jambe blessée -1 M, Main blessée -1 CC...) appliqué au profil du guerrier : direction -1 pour une
+        /// blessure ajoutée, +1 pour une blessure déjà en base retirée (annule son malus). Renvoie true si le
+        /// profil a changé (à sauvegarder).</summary>
+        private static bool ApplyInjuryPenalties(Warrior warrior, IEnumerable<Injury> injuries, int direction)
+        {
+            var changed = false;
+            foreach (var injury in injuries)
+            {
+                if (!SeriousInjuryEffectTable.TryGetPermanentPenalty(injury.Category, injury.RollRange, out var field)) continue;
+                CharacteristicModifier.Apply(warrior, field, direction);
+                changed = true;
+            }
+            return changed;
+        }
+
         /// <summary>Mode Bande existante uniquement, sous-onglet Sorts (masqué si le type recruté n'est
         /// pas lanceur de sorts - voir RecruitSlot.IsSpellcaster) - assigne un ou plusieurs sorts déjà
         /// appris, filtrés par les écoles de magie de la bande (Archetype.MagicSchools, déjà pleinement
@@ -1161,6 +1273,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (IsWarriorsTab && !ValidateWarriorsStep()) return;
             if (IsEquipmentTab && !ValidateEquipmentStep()) return;
             if (IsWarriorNamesTab && !ValidateWarriorNamesStep()) return;
+            // Plus la dernière étape en création pas à pas (Récapitulatif après, voir StepCount) - validée ici
+            // plutôt que seulement au Save.
+            if (IsHiredSwordNamesTab && !ValidateHiredSwordNamesStep()) return;
             if (SelectedTab >= StepCount - 1) return;
             SelectedTab++;
 
@@ -1208,6 +1323,17 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 await _warbandService.AddWarriorMutationAsync(w.Id, mutation);
             foreach (var baseline in slot.BaselineMutations.Where(b => !slot.Mutations.Contains(b.Item)))
                 await _warbandService.RemoveWarriorMutationAsync(baseline.Id);
+
+            // Blessures (mode Bande existante) : ajoutées -> malus appliqué, retirées -> malus annulé.
+            var addedInjuries = slot.Injuries.Where(i => slot.BaselineInjuries.All(b => b.Item != i)).ToList();
+            var removedInjuries = slot.BaselineInjuries.Where(b => !slot.Injuries.Contains(b.Item)).ToList();
+            foreach (var injury in addedInjuries)
+                await _warbandService.AddWarriorInjuryAsync(w.Id, injury);
+            foreach (var baseline in removedInjuries)
+                await _warbandService.RemoveWarriorInjuryAsync(baseline.Id);
+            var penaltiesChanged = ApplyInjuryPenalties(w, addedInjuries, direction: -1);
+            penaltiesChanged |= ApplyInjuryPenalties(w, removedInjuries.Select(b => b.Item), direction: 1);
+            if (penaltiesChanged) await _warbandService.SaveWarriorAsync(w);
         }
 
         /// <summary>Point d'écriture en base pour la bande, les NOUVELLES recrues de cette session
@@ -1295,11 +1421,15 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
                             foreach (var mutation in slot.Mutations)
                                 await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
+                            foreach (var injury in slot.Injuries)
+                                await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
+                            var profileChanged = ApplyInjuryPenalties(warrior, slot.Injuries, direction: -1);
                             if (IsExistingWarband && slot.Experience != warrior.Experience)
                             {
                                 warrior.Experience = slot.Experience;
-                                await _warbandService.SaveWarriorAsync(warrior);
+                                profileChanged = true;
                             }
+                            if (profileChanged) await _warbandService.SaveWarriorAsync(warrior);
                         }
                     }
                     else

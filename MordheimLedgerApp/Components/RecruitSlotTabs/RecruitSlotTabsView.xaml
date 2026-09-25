@@ -37,6 +37,11 @@
                                                  IsActive="{Binding Item.IsMutationsSection}" Command="{Binding Item.ShowMutationsSectionCommand}"
                                                  IsVisible="{Binding Item.CanBuyMutations}"/>
                 </ContentView>
+                <!-- Onglet Blessures : Héros en mode Bande existante uniquement (RecruitSlot.ShowInjuriesTab) -
+                     import d'une bande déjà jouée, malus permanents appliqués au Save. -->
+                <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="11"
+                                             IsActive="{Binding Item.IsInjuriesSection}" Command="{Binding Item.ShowInjuriesSectionCommand}"
+                                             IsVisible="{Binding Item.ShowInjuriesTab}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorExperiencePh}" FontSize="11"
                                              IsActive="{Binding Item.IsXpSection}" Command="{Binding Item.ShowXpSectionCommand}"
                                              IsVisible="{Binding Item.IsExistingWarband}"/>
@@ -65,23 +70,11 @@
             <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Skills}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="library:Skill">
-                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSkillDetailCommand}"
-                                                       CommandParameter="{Binding .}"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="4">
-                                <Label Text="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
-                                       FontFamily="RpgAwesome" FontSize="12"
-                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                              Icon="{x:Static icons:SolidFont.Xmark}"
-                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                              Command="{Binding Source={x:Reference root}, Path=RemoveSkillCommand}"
-                                                              CommandParameter="{Binding .}"/>
-                            </HorizontalStackLayout>
-                        </Border>
+                        <components:ChipView Item="{Binding .}"
+                                              IconGlyph="{Binding Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding Source={x:Reference root}, Path=ShowSkillDetailCommand}"
+                                              RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveSkillCommand}"/>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </FlexLayout>
@@ -95,26 +88,13 @@
                 <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Spells}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="library:Spell">
-                            <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowSpellDetailCommand}"
-                                                           CommandParameter="{Binding .}"/>
-                                </Border.GestureRecognizers>
-                                <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{x:Static icons:RpgFont.RaBurningBook}"
-                                           FontFamily="RpgAwesome" FontSize="12"
-                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                    <!-- RollDisplay ("3 - Fireball") plutôt que Name seul - le jet qui a
-                                         déterminé ce sort est une info utile ici (tiré au hasard, pas
-                                         choisi - voir Spell.RollDisplay). -->
-                                    <Label Text="{Binding RollDisplay}" FontSize="11" VerticalOptions="Center"/>
-                                    <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                                  Icon="{x:Static icons:SolidFont.Xmark}"
-                                                                  IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                                  Command="{Binding Source={x:Reference root}, Path=RemoveSpellCommand}"
-                                                                  CommandParameter="{Binding .}"/>
-                                </HorizontalStackLayout>
-                            </Border>
+                            <!-- NameOverride : "3 - Boule de feu" - le jet qui a déterminé ce sort reste affiché (tiré au hasard, pas
+                                 choisi - voir Spell.RollDisplay). -->
+                            <components:ChipView Item="{Binding .}" NameOverride="{Binding RollDisplay}"
+                                                  IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                                  IconFontFamily="RpgAwesome"
+                                                  Command="{Binding Source={x:Reference root}, Path=ShowSpellDetailCommand}"
+                                                  RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveSpellCommand}"/>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
@@ -146,23 +126,11 @@
             <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Mutations}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="library:Mutation">
-                        <Border Style="{StaticResource SectionCardBorderStyle}" Padding="6,3" Margin="0,0,4,4">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={x:Reference root}, Path=ShowMutationDetailCommand}"
-                                                       CommandParameter="{Binding .}"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="4">
-                                <Label Text="{x:Static icons:RpgFont.RaBiohazard}"
-                                       FontFamily="RpgAwesome" FontSize="12"
-                                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
-                                <Label Text="{Binding Name}" FontSize="11" VerticalOptions="Center"/>
-                                <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
-                                                              Icon="{x:Static icons:SolidFont.Xmark}"
-                                                              IconSize="10" ButtonWidthRequest="18" ButtonHeightRequest="18"
-                                                              Command="{Binding Source={x:Reference root}, Path=RemoveMutationCommand}"
-                                                              CommandParameter="{Binding .}"/>
-                            </HorizontalStackLayout>
-                        </Border>
+                        <components:ChipView Item="{Binding .}"
+                                              IconGlyph="{x:Static icons:RpgFont.RaBiohazard}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding Source={x:Reference root}, Path=ShowMutationDetailCommand}"
+                                              RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveMutationCommand}"/>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </FlexLayout>
@@ -173,6 +141,25 @@
                                           CommandParameter="{Binding Item}"/>
         </Grid>
         </ContentView>
+        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsInjuriesSection}">
+            <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Injuries}">
+                <BindableLayout.ItemTemplate>
+                    <!-- Même puce que l'onglet Équipement (ChipView partagé), icône Blessures de la fiche guerrier. -->
+                    <DataTemplate x:DataType="library:Injury">
+                        <components:ChipView Item="{Binding .}"
+                                              IconGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding Source={x:Reference root}, Path=ShowInjuryDetailCommand}"
+                                              RemoveCommand="{Binding Source={x:Reference root}, Path=RemoveInjuryCommand}"/>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                          Command="{Binding AddInjuryCommand}"
+                                          CommandParameter="{Binding Item}"/>
+        </Grid>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
             <Entry Grid.Column="1" Text="{Binding Item.Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>

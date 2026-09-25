@@ -147,6 +147,34 @@ public partial class RecruitSlotTabsView : ContentView
         set => SetValue(ShowMutationDetailCommandProperty, value);
     }
 
+    /// <summary>Onglet Blessures (RecruitSlot.ShowInjuriesTab - Héros, mode Bande existante uniquement).</summary>
+    public static readonly BindableProperty AddInjuryCommandProperty =
+        BindableProperty.Create(nameof(AddInjuryCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? AddInjuryCommand
+    {
+        get => (ICommand?)GetValue(AddInjuryCommandProperty);
+        set => SetValue(AddInjuryCommandProperty, value);
+    }
+
+    public static readonly BindableProperty RemoveInjuryCommandProperty =
+        BindableProperty.Create(nameof(RemoveInjuryCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? RemoveInjuryCommand
+    {
+        get => (ICommand?)GetValue(RemoveInjuryCommandProperty);
+        set => SetValue(RemoveInjuryCommandProperty, value);
+    }
+
+    public static readonly BindableProperty ShowInjuryDetailCommandProperty =
+        BindableProperty.Create(nameof(ShowInjuryDetailCommand), typeof(ICommand), typeof(RecruitSlotTabsView));
+
+    public ICommand? ShowInjuryDetailCommand
+    {
+        get => (ICommand?)GetValue(ShowInjuryDetailCommandProperty);
+        set => SetValue(ShowInjuryDetailCommandProperty, value);
+    }
+
     public RecruitSlotTabsView()
     {
         InitializeComponent();

@@ -114,7 +114,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     public int ExplorationBonusExperience => DistributedExplorationExperience + LeaderExplorationExperience;
 
     public bool IsHero => Warrior.IsHero;
-    public int HeadCount => Warrior.HeadCount;
+
+    /// <summary>Effectif d'AVANT cette bataille, figé à l'ouverture du wizard - Terminer mute Warrior.HeadCount
+    /// (morts, promotion) avant d'appliquer le renvoi, qui doit pourtant raisonner sur les mêmes chiffres
+    /// que ceux affichés pendant le wizard (voir SurvivingHeadCount/EffectiveDismissCount).</summary>
+    public int HeadCount { get; }
 
     /// <summary>Nombre de figurines hors de combat à la fin de la partie - toujours 0 ou 1 pour un Héros
     /// (HeadCount vaut 1), mais peut monter jusqu'à HeadCount pour un groupe d'Hommes de main : chaque
@@ -148,6 +152,8 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDismissed))]
     [NotifyPropertyChangedFor(nameof(DismissLabel))]
+    [NotifyPropertyChangedFor(nameof(EffectiveDismissCount))]
+    [NotifyPropertyChangedFor(nameof(IsFullyDismissed))]
     private int dismissCount;
 
     /// <summary>Wrapper booléen pour la case à cocher d'un Héros - même idiome qu'IsOutOfAction.</summary>
@@ -163,11 +169,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// incrémenter. Le "-" (IncrementDismissCommand) réduit donc ce nombre affiché, le "+"
     /// (DecrementDismissCommand) l'augmente (annule un renvoi) - DismissCount lui-même reste inchangé
     /// (toujours "combien de figurines renvoyées"), seul l'affichage/les boutons sont inversés.</summary>
-    public string DismissLabel => $"{HeadCount - DismissCount}/{HeadCount}";
+    public string DismissLabel => $"{SurvivingHeadCount - EffectiveDismissCount}/{SurvivingHeadCount}";
 
     /// <summary>True quand TOUTES les figurines restantes sont renvoyées - déclenche WarriorStatus.
     /// Retired à Terminer plutôt qu'une simple réduction de HeadCount (voir ApplyDismissalsAsync).</summary>
-    public bool IsFullyDismissed => DismissCount > 0 && DismissCount >= HeadCount;
+    public bool IsFullyDismissed => EffectiveDismissCount > 0 && EffectiveDismissCount >= SurvivingHeadCount;
 
     /// <summary>Éligible à l'étape Renvoyer - jamais un Franc-Tireur/Dramatis Persona (déjà leur propre
     /// mécanisme Payer/Renvoyer, HiredSwordUpkeepEntry/DramatisPersonaUpkeepEntry), jamais un guerrier
@@ -713,7 +719,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     private void PopulateSoldToPitsRerollRoll()
     {
         var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel", injuryCatalog: _injuryCatalog);
-        entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+        entry.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(SummaryText));
+            NotifyDeathStateChanged();
+        };
         SoldToPitsRerollRoll.Add(entry);
         OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
     }
@@ -735,7 +745,49 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     private string selectedStatusLabel = string.Empty;
 
     public WarriorStatus Status => _statusByLabel.GetValueOrDefault(SelectedStatusLabel, Warrior.Status);
-    public bool IsDead => Status == WarriorStatus.Dead;
+
+    /// <summary>Mort à l'issue de CETTE bataille, tel que Terminer l'appliquera - pas seulement la Mort du
+    /// jet principal (Status) : aussi un sous-jet "Blessures multiples" mortel, Capturé non racheté, un
+    /// combat de gladiateur perdu dont la relance est mortelle (InjurySubRollEntry.EndsInDeath), et pour un
+    /// groupe d'Hommes de main, toutes ses figurines mortes sur leur D6. Bug corrigé le 2026-09-28 (retour
+    /// utilisateur) : ces morts-là n'étaient constatées qu'à Terminer, le guerrier restait donc éligible à
+    /// l'XP, au renvoi, au recrutement... pendant tout le wizard.</summary>
+    public bool IsDead => Status == WarriorStatus.Dead
+        || (Warrior.IsHero && (MainRollEndsInDeath || MultipleInjuryRolls.Any(s => s.EndsInDeath)))
+        || (!Warrior.IsHero && HeadCount > 0 && FigureDeathCount >= HeadCount);
+
+    /// <summary>Capturé non racheté ou défaite aux Fosses avec relance mortelle, sur le jet principal - même
+    /// conditions que ApplyWarriorOutcomesAsync. La Mort pure du jet principal passe, elle, par Status.</summary>
+    private bool MainRollEndsInDeath =>
+        (ShowCapturedChoice && !(IsRansomed && int.TryParse(RansomAmount, out _)))
+        || (ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.FirstOrDefault()?.EndsInDeath == true);
+
+    /// <summary>Figurines d'un groupe d'Hommes de main mortes sur leur D6 de Blessure cette bataille.</summary>
+    public int FigureDeathCount => FigureInjuryRolls.Count(f => f.IsDeath);
+
+    /// <summary>Effectif encore vivant après les Blessures de cette bataille - base de tout ce qui compte
+    /// les figurines au-delà de l'étape Blessure (renvoi, recrutement, vente de pierres magiques, Valeur de
+    /// Bande). HeadCount, lui, reste l'effectif d'AVANT la bataille (celui qui a pu être mis hors de
+    /// combat).</summary>
+    public int SurvivingHeadCount => IsDead ? 0 : HeadCount - FigureDeathCount;
+
+    /// <summary>DismissCount ramené à l'effectif survivant - un renvoi saisi puis rendu caduc par un retour
+    /// à l'étape Blessure (le guerrier meurt finalement) ne renvoie ni figurine ni équipement fantôme.</summary>
+    public int EffectiveDismissCount => Math.Min(DismissCount, SurvivingHeadCount);
+
+    private void NotifyDeathStateChanged()
+    {
+        OnPropertyChanged(nameof(IsDead));
+        OnPropertyChanged(nameof(ShowsInExperienceStep));
+        OnPropertyChanged(nameof(CanBeDismissed));
+        OnPropertyChanged(nameof(FigureDeathCount));
+        OnPropertyChanged(nameof(SurvivingHeadCount));
+        OnPropertyChanged(nameof(EffectiveDismissCount));
+        OnPropertyChanged(nameof(DismissLabel));
+        OnPropertyChanged(nameof(IsFullyDismissed));
+        OnPropertyChanged(nameof(HasMilestone));
+        OnPropertyChanged(nameof(HasExplorationMilestone));
+    }
 
     /// <summary>XP accordée par un résultat "Survie Miraculeuse contre Toute Attente" (66, Héros
     /// uniquement - voir Core.Rules.SeriousInjuryEffectTable.GainExperience) - jusqu'ici appliquée
@@ -764,7 +816,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// SeriousInjuryBonusExperience depuis le 2026-09-04 (voir sa doc) en plus d'ExperienceGained.</summary>
     public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience,
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience);
-    public bool HasMilestone => GainsExperience && MilestoneCount > 0;
+    public bool HasMilestone => GainsExperience && !IsDead && MilestoneCount > 0;
 
     /// <summary>Paliers franchis UNIQUEMENT par l'XP accordée en Exploration (ExplorationBonusExperience),
     /// comptés à partir du point où l'étape Progression normale s'est déjà arrêtée (Warrior.Experience +
@@ -781,7 +833,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience,
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience + ExplorationBonusExperience);
 
-    public bool HasExplorationMilestone => GainsExperience && ExplorationMilestoneCount > 0;
+    public bool HasExplorationMilestone => GainsExperience && !IsDead && ExplorationMilestoneCount > 0;
 
     /// <summary>Héros et Hommes de main utilisent deux tables de Blessures Graves totalement
     /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce placeholder garde la
@@ -836,6 +888,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         IReadOnlyList<EquipmentItem>? pitFighterEquipment = null, IEnumerable<SpecialRuleChip>? specialRules = null)
     {
         Warrior = warrior;
+        HeadCount = warrior.HeadCount;
         OriginalEquipmentIds = warrior.Equipment.Select(we => we.Id).ToList();
         OriginalEquipmentQuantities = warrior.Equipment.ToDictionary(we => we.Id, we => we.Quantity);
         ArchetypeName = archetypeName;
@@ -851,6 +904,16 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
             _statusByLabel[_loc[$"WarriorStatus{status}"]] = status;
 
         selectedStatusLabel = _statusByLabel.First(kv => kv.Value == warrior.Status).Key;
+
+        // Saisies de CETTE ligne qui peuvent changer l'issue (voir IsDead) - les sous-jets remontent les
+        // leurs via leur propre abonnement (PopulateMultipleInjuryRolls/SyncFigureInjuryRolls/
+        // PopulateSoldToPitsRerollRoll).
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(SelectedStatusLabel) or nameof(ManualRoll) or nameof(IsRansomed) or nameof(RansomAmount)
+                or nameof(WonPitFight) or nameof(HasMultipleInjuryRolls) or nameof(HasSoldToPitsRerollRoll))
+                NotifyDeathStateChanged();
+        };
     }
 
     /// <summary>Appelé après un jet de Blessure Grave - synchronise le Statut sur le résultat sans
@@ -886,6 +949,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
                 OnPropertyChanged(nameof(SeriousInjuryBonusExperience));
                 SyncAdvanceRolls();
                 SyncExplorationAdvanceRolls();
+                NotifyDeathStateChanged();
             };
             MultipleInjuryRolls.Add(entry);
         }
@@ -907,7 +971,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         while (FigureInjuryRolls.Count < OutOfActionCount)
         {
             var entry = new InjurySubRollEntry(FigureInjuryRolls.Count + 1, OutOfActionCount, isHero: false, labelKey: "EndOfGameFigureLabel");
-            entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
+            entry.PropertyChanged += (_, _) =>
+            {
+                OnPropertyChanged(nameof(SummaryText));
+                NotifyDeathStateChanged();
+            };
             FigureInjuryRolls.Add(entry);
         }
         while (FigureInjuryRolls.Count > OutOfActionCount)
@@ -915,6 +983,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
         foreach (var entry in FigureInjuryRolls)
             entry.UpdateTotal(OutOfActionCount);
+        NotifyDeathStateChanged();
     }
 
     /// <summary>Ajuste AdvanceRolls pour qu'il compte exactement un AdvanceRollEntry par palier

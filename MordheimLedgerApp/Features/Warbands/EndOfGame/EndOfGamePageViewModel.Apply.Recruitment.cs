@@ -75,15 +75,14 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        foreach (var row in WarriorRows.Where(r => r.DismissCount > 0))
+        foreach (var row in WarriorRows.Where(r => r.EffectiveDismissCount > 0))
         {
             var warrior = row.Warrior;
-            // Filet de sécurité : le stepper de cette étape borne DismissCount sur le HeadCount affiché
-            // PENDANT le wizard (jamais remis à jour en direct par les morts de CETTE bataille, qui ne
-            // mutent Warrior.HeadCount qu'à ApplyWarriorOutcomesAsync, juste avant cet appel - même
-            // limitation acceptée que partout ailleurs dans ce wizard). Reclamper ici contre le HeadCount
-            // RÉEL évite un HeadCount négatif si des figurines sont mortes entre-temps.
-            var dismissCount = Math.Min(row.DismissCount, warrior.HeadCount);
+            // EffectiveDismissCount raisonne déjà sur l'effectif SURVIVANT de cette bataille (jamais un
+            // guerrier mort - un Héros mort ne repasse pas Retraité). Reclamper en plus contre le HeadCount
+            // RÉEL couvre ce que le wizard ne prévoit pas (ex. une promotion, appliquée juste avant, qui
+            // retire elle aussi une figurine du groupe).
+            var dismissCount = Math.Min(row.EffectiveDismissCount, warrior.HeadCount);
             if (dismissCount <= 0) continue;
 
             var fullyDismissed = dismissCount >= warrior.HeadCount;

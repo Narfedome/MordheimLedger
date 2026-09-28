@@ -918,8 +918,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
                 // DistributedExplorationExperience/LeaderExplorationExperience : Steps() gagne aussi son
                 // deuxième passage Progression (HasExplorationMilestone) dès que l'XP d'Exploration
                 // change, pas seulement IsOutOfAction/ExperienceGained.
+                // IsDead : un guerrier qui meurt (sous-jet, Capturé perdu...) perd ses étapes Progression.
                 if (e.PropertyName is nameof(WarriorOutcomeRow.IsOutOfAction) or nameof(WarriorOutcomeRow.ExperienceGained)
-                    or nameof(WarriorOutcomeRow.DistributedExplorationExperience) or nameof(WarriorOutcomeRow.LeaderExplorationExperience))
+                    or nameof(WarriorOutcomeRow.DistributedExplorationExperience) or nameof(WarriorOutcomeRow.LeaderExplorationExperience)
+                    or nameof(WarriorOutcomeRow.IsDead))
                 {
                     OnPropertyChanged(nameof(StepLabel));
                     OnPropertyChanged(nameof(IsLastStep));
@@ -937,7 +939,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
                 // DecrementDismiss, qui rafraîchissent déjà l'éligibilité de Recrutement elles-mêmes) pour
                 // rafraîchir le récap "Équipement récupéré" et l'éligibilité de Recrutement dans le cas
                 // Héros.
-                if (e.PropertyName == nameof(WarriorOutcomeRow.DismissCount))
+                // EffectiveDismissCount (et pas seulement DismissCount) : une mort survenue après coup annule
+                // aussi un renvoi déjà saisi - même rafraîchissement.
+                if (e.PropertyName is nameof(WarriorOutcomeRow.DismissCount) or nameof(WarriorOutcomeRow.EffectiveDismissCount))
                 {
                     OnPropertyChanged(nameof(RecoveredDismissedEquipmentChips));
                     UpdateRecruitRowsEligibility();

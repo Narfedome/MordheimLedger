@@ -157,7 +157,9 @@ public partial class EndOfGamePageViewModel
                 return true;
             }
 
-            if (row.ExperienceGained != 0)
+            // Un guerrier mort cette bataille (voir WarriorOutcomeRow.IsDead) ne gagne plus rien : XP ou jets de
+            // Progression saisis AVANT qu'un retour à l'étape Blessure ne le fasse mourir sont ignorés.
+            if (row.ExperienceGained != 0 && !row.IsDead)
             {
                 warrior.Experience += row.ExperienceGained;
                 sentences.Add(string.Format(Loc["HistoryXpSentence"], warrior.Name, row.ExperienceGained));
@@ -194,7 +196,7 @@ public partial class EndOfGamePageViewModel
             // (palier atteint uniquement grâce à l'XP accordée par la table d'Exploration - voir
             // WarriorOutcomeRow.ExplorationMilestoneCount) : même application pour les deux, aucune
             // distinction nécessaire une fois les jets faits.
-            foreach (var advance in row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
+            foreach (var advance in row.IsDead ? [] : row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
             {
                 if (string.IsNullOrWhiteSpace(advance.ResultText)) continue;
 

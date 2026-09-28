@@ -62,9 +62,9 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    public bool HasDismissedWarriorsRecap => WarriorRows.Any(r => r.DismissCount > 0);
+    public bool HasDismissedWarriorsRecap => WarriorRows.Any(r => r.EffectiveDismissCount > 0);
 
-    public IEnumerable<string> DismissedWarriorsRecapLines => WarriorRows.Where(r => r.DismissCount > 0)
+    public IEnumerable<string> DismissedWarriorsRecapLines => WarriorRows.Where(r => r.EffectiveDismissCount > 0)
         .Select(r => string.Format(Loc["EndOfGameRecapDismissedWarriorFormat"], r.Name, r.DismissLabel));
 
     public bool HasEquipmentTradingRecap => PurchasedReserveItems.Count > 0 || PendingSales.Count > 0;
@@ -88,12 +88,7 @@ public partial class EndOfGamePageViewModel
     /// WarbandDetailViewModel.Rating/WarbandService.GetWarbandRatingAsync, aucune nouvelle règle), calculé
     /// côté wizard AVANT Terminer pour que le joueur voie le chiffre avant de valider - la vraie Valeur
     /// (exacte) reste celle recalculée par WarbandDetailViewModel.LoadAsync après Enregistrer, jamais
-    /// remplacée par cet aperçu.
-    ///
-    /// Limite acceptée, non résolue ici : ne recompte pas les figurines mortes de CETTE bataille pour un
-    /// groupe d'Hommes de main - HeadCount reste l'effectif d'AVANT ce tour tant que Terminer n'a pas
-    /// tourné (même limitation "figé jusqu'à Terminer" déjà acceptée partout ailleurs dans ce
-    /// wizard).</summary>
+    /// remplacée par cet aperçu. Compte l'effectif survivant de cette bataille (SurvivingHeadCount).</summary>
     public int ProjectedWarbandRating
     {
         get
@@ -101,7 +96,7 @@ public partial class EndOfGamePageViewModel
             var total = 0;
             foreach (var row in WarriorRows.Where(r => !r.IsDead && !r.Warrior.IsHostileThisBattle))
             {
-                var headCount = row.HeadCount - row.DismissCount;
+                var headCount = row.SurvivingHeadCount - row.EffectiveDismissCount;
                 if (headCount <= 0) continue;
                 var experience = row.Warrior.Experience + row.ExperienceGained + row.SeriousInjuryBonusExperience + row.ExplorationBonusExperience;
                 total += WarbandRatingRules.WarriorContribution(row.Warrior.IsLargeCreature, experience, headCount, row.Warrior.HiredSwordBaseRating, row.Warrior.DramatisPersonaRatingBonus);

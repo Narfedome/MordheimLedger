@@ -337,9 +337,19 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
     private void PopulateSoldToPitsRerollRoll()
     {
         var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel", injuryCatalog: _injuryCatalog);
+        entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(EndsInDeath));
         SoldToPitsRerollRoll.Add(entry);
         OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));
     }
+
+    /// <summary>Ce jet coûte-t-il la vie au guerrier, tel que Terminer l'appliquera
+    /// (EndOfGamePageViewModel.ApplyWarriorOutcomesAsync) : Mort, Capturé non racheté (considéré perdu), ou
+    /// combat de gladiateur perdu dont la relance est elle-même mortelle. Permet au wizard de traiter le
+    /// guerrier comme mort DÈS l'étape Blessure (plus d'XP, plus de renvoi...) plutôt qu'à Terminer
+    /// seulement - voir WarriorOutcomeRow.IsDead.</summary>
+    public bool EndsInDeath => IsDeath
+        || (ShowCapturedChoice && !(IsRansomed && int.TryParse(RansomAmount, out _)))
+        || (ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.FirstOrDefault()?.EndsInDeath == true);
 
     /// <summary>True si le jet actuellement saisi est un résultat de mort (Héros 11-15, Homme de main
     /// 1-2) - utilisé par WarbandDetailViewModel.EndOfGame pour compter les figurines perdues dans un
@@ -355,6 +365,11 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
         IsHero = isHero;
         _labelKey = labelKey;
         _injuryCatalog = injuryCatalog ?? Array.Empty<Injury>();
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(ManualRoll) or nameof(IsRansomed) or nameof(RansomAmount) or nameof(WonPitFight))
+                OnPropertyChanged(nameof(EndsInDeath));
+        };
     }
 
     /// <summary>Steps.SyncFigureInjuryRolls-style syncs (voir WarriorOutcomeRow.SyncFigureInjuryRolls)

@@ -55,12 +55,12 @@ public partial class EndOfGamePageViewModel
     private async Task PickAdvanceSkill(AdvanceRollEntry entry)
     {
         var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry) || r.ExplorationAdvanceRolls.Contains(entry));
-        // EffectiveExtraSkillNames -> ids via _skillIdsByEnglishName : mêmes objets (ex. le symbole de
+        // EffectiveExtraSkillOfficialIds -> ids via _skillIdsByOfficialId : mêmes objets (ex. le symbole de
         // l'Ordre des Libres Marchands) que la Charrette/le Carnet de l'Alchimiste - une compétence
         // précise débloquée hors catégorie plutôt qu'une liste entière, voir EquipmentItem.
-        // GrantsSpecificSkillName.
-        var extraSkillIds = SkillEligibility.EffectiveExtraSkillNames(row.Warrior)
-            .Select(name => _skillIdsByEnglishName.GetValueOrDefault(name))
+        // GrantsSpecificSkillOfficialId.
+        var extraSkillIds = SkillEligibility.EffectiveExtraSkillOfficialIds(row.Warrior)
+            .Select(name => _skillIdsByOfficialId.GetValueOrDefault(name))
             .Where(id => id != 0)
             .ToList();
         // singleSelect: true (2026-09-04, retour utilisateur - "dans la section des advance, il faut

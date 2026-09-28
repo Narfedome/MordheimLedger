@@ -522,7 +522,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
             Attacks = s.Attacks,
             Leadership = s.Leadership,
             GrantsSkillCategory = s.GrantsSkillCategory,
-            GrantsSpecificSkillName = s.GrantsSpecificSkillName,
+            GrantsSpecificSkillOfficialId = s.GrantsSpecificSkillOfficialId,
             GrantsRareItemSearchBonus = s.GrantsRareItemSearchBonus,
             IsSellable = s.IsSellable,
             GrantsBonusExplorationDice = s.GrantsBonusExplorationDice

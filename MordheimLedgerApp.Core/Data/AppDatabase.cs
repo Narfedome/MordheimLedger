@@ -8,7 +8,7 @@ using SQLite;
 
 namespace MordheimLedgerApp.Core.Data;
 
-public class AppDatabase
+public partial class AppDatabase
 {
     private readonly SQLiteAsyncConnection _db;
     public SQLiteAsyncConnection Connection => _db;
@@ -133,6 +133,8 @@ public class AppDatabase
         await BackfillWarriorArchetypeRacialProfileAsync();
         // Après : versions user_version croissantes (1 puis 2), voir MustStartWithMutationBackfillDataVersion.
         await BackfillMustStartWithMutationAsync();
+        // Après les deux précédents (user_version 1 et 2) : il pose user_version 3, qui les sauterait sinon.
+        await AssignOfficialIdsOnceAsync();
         await BackfillWarriorRacialMaxesAsync();
         await BackfillBranchedInjuriesAsync();
         await BackfillInjurySpecialRulesAsync();
@@ -437,23 +439,8 @@ public class AppDatabase
         }
     }
 
-    /// <summary>Equipment.json has no dedup-at-runtime mechanism (see the file's own note in CLAUDE.md) -
-    /// fine for the normal case (SeedEquipmentAsync only ever runs once, on a genuinely empty catalog),
-    /// but any edit to the file made after a machine already seeded once would otherwise silently never
-    /// reach that machine - two independent cases per entry, matched by English name against what's
-    /// already in TranslationEntity: (1) a brand-new entry (2026-09-01: "Dagger (Johann)", a new unique
-    /// artefact for Johann's "counts as a Sword for Parry" mechanic) gets INSERTED (mirrors
-    /// SeedEquipmentAsync's own per-item logic exactly); (2) an ALREADY-existing entry whose specialRules
-    /// changed (2026-09-01: "Wizard's Staff (Nicodemus)" gained "Concussion"/"Parry (Buckler)" alongside
-    /// its own "Two-Handed Grip") gets its EquipmentItemSpecialRuleEntity rows re-synced by COUNT mismatch
-    /// (delete + reinsert, same idiom as BackfillDramatisPersonaStartingEquipmentAsync's equipment-count
-    /// check) - every other field on an existing row is left untouched, so nothing a player edited into
-    /// Modified/Custom is at risk either way. Known limitation: unlike SeedOfficialContentAsync,
-    /// RestrictedToWarbandNames isn't resolvable here (no deferred-resolution queue on this path) - not
-    /// needed by any entry added so far, would need extending if a future backfilled item requires it.</summary>
     /// <summary>Objet du catalogue commun (Equipment.json) tel que le seed l'insère - partagé par
-    /// SeedEquipmentAsync et BackfillNewEquipmentItemsAsync. GrantsSpecificSkillName reste un nom en base
-    /// (lu tel quel par SkillEligibility), résolu ici depuis l'id de compétence du JSON.</summary>
+    /// SeedEquipmentAsync et BackfillNewEquipmentItemsAsync.</summary>
     private static EquipmentItem NewCommonEquipmentItem(EquipmentSeedData eq) => new()
     {
         OfficialId = eq.Id,
@@ -473,7 +460,7 @@ public class AppDatabase
         Attacks = eq.Attacks,
         Leadership = eq.Leadership,
         GrantsSkillCategory = eq.GrantsSkillCategory is { } grantsSkillCategory ? Enum.Parse<SkillCategory>(grantsSkillCategory) : null,
-        GrantsSpecificSkillName = eq.GrantsSpecificSkillId is { } grantsSkillId ? SeedCatalog.SkillName(grantsSkillId) : null,
+        GrantsSpecificSkillOfficialId = eq.GrantsSpecificSkillId,
         GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
         IsSellable = eq.IsSellable,
         GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
@@ -481,6 +468,20 @@ public class AppDatabase
         IsExplorationOnly = eq.IsExplorationOnly
     };
 
+    /// <summary>Equipment.json has no dedup-at-runtime mechanism (see the file's own note in CLAUDE.md) -
+    /// fine for the normal case (SeedEquipmentAsync only ever runs once, on a genuinely empty catalog),
+    /// but any edit to the file made after a machine already seeded once would otherwise silently never
+    /// reach that machine - two independent cases per entry, matched by English name against what's
+    /// already in TranslationEntity: (1) a brand-new entry (2026-09-01: "Dagger (Johann)", a new unique
+    /// artefact for Johann's "counts as a Sword for Parry" mechanic) gets INSERTED (mirrors
+    /// SeedEquipmentAsync's own per-item logic exactly); (2) an ALREADY-existing entry whose specialRules
+    /// changed (2026-09-01: "Wizard's Staff (Nicodemus)" gained "Concussion"/"Parry (Buckler)" alongside
+    /// its own "Two-Handed Grip") gets its EquipmentItemSpecialRuleEntity rows re-synced by COUNT mismatch
+    /// (delete + reinsert, same idiom as BackfillDramatisPersonaStartingEquipmentAsync's equipment-count
+    /// check) - every other field on an existing row is left untouched, so nothing a player edited into
+    /// Modified/Custom is at risk either way. Known limitation: unlike SeedOfficialContentAsync,
+    /// RestrictedToWarbandNames isn't resolvable here (no deferred-resolution queue on this path) - not
+    /// needed by any entry added so far, would need extending if a future backfilled item requires it.</summary>
     private async Task BackfillNewEquipmentItemsAsync()
     {
         var englishTranslations = (await _db.Table<TranslationEntity>().ToListAsync())
@@ -1617,15 +1618,13 @@ public class AppDatabase
     }
 
     /// <summary>Plain insert, no dedup - the rulebook's Exploration chart (doubles through
-    /// six-of-a-kind), common to every warband. EquipmentOutcome.EquipmentItemName is stored as-is (a
+    /// six-of-a-kind), common to every warband. EquipmentOutcome.EquipmentItemOfficialId is stored as-is (a
     /// plain name, not an id): it's resolved by lookup against the Trading Post catalog by the End of
     /// Game wizard at roll time, not at seed time - see Models.Library.ExplorationOutcome.</summary>
     private async Task SeedExplorationResultsAsync()
     {
         foreach (var res in await LoadSeedArrayAsync<ExplorationResultSeedData>("ExplorationResults.json"))
         {
-            // Les références du JSON sont des ids ; les colonnes ci-dessous stockent encore un NOM anglais,
-            // lu tel quel par le wizard Fin de Partie - traduit ici via SeedCatalog.
             var result = new ExplorationResult
             {
                 OfficialId = res.Id,
@@ -1634,7 +1633,7 @@ public class AppDatabase
                 RollsIndependently = res.RollsIndependently,
                 StatTestField = res.StatTestField is { } field ? Enum.Parse<ExplorationStatField>(field) : null,
                 StatTestTargetsLeader = res.StatTestTargetsLeader,
-                AutoPassStatTestWarbandArchetypeNames = (res.AutoPassStatTestWarbandArchetypeIds ?? new()).Select(SeedCatalog.WarbandName).ToList(),
+                AutoPassStatTestWarbandArchetypeOfficialIds = res.AutoPassStatTestWarbandArchetypeIds ?? new(),
                 RequiresDoubleRoll = res.RequiresDoubleRoll,
                 BonusStatTestField = res.BonusStatTestField is { } bonusField ? Enum.Parse<ExplorationStatField>(bonusField) : null,
                 RequiresSentHero = res.RequiresSentHero,
@@ -1660,12 +1659,12 @@ public class AppDatabase
                     SubRollMax = outcome.SubRollMax,
                     Kind = Enum.Parse<ExplorationOutcomeKind>(outcome.Kind),
                     GoldFormula = outcome.GoldFormula,
-                    EquipmentItemName = outcome.EquipmentItemId is { } equipmentItemId ? SeedCatalog.EquipmentName(equipmentItemId) : null,
+                    EquipmentItemOfficialId = outcome.EquipmentItemId,
                     ItemQuantityFormula = outcome.ItemQuantityFormula,
                     FoundValueFormula = outcome.FoundValueFormula,
-                    MaterialRuleName = outcome.MaterialRuleId is { } materialRuleId ? SeedCatalog.SpecialRuleName(materialRuleId) : null,
-                    SecondaryEquipmentItemName = outcome.SecondaryEquipmentItemId is { } secondaryId ? SeedCatalog.EquipmentName(secondaryId) : null,
-                    AlternativeEquipmentItemName = outcome.AlternativeEquipmentItemId is { } alternativeId ? SeedCatalog.EquipmentName(alternativeId) : null,
+                    MaterialRuleOfficialId = outcome.MaterialRuleId,
+                    SecondaryEquipmentItemOfficialId = outcome.SecondaryEquipmentItemId,
+                    AlternativeEquipmentItemOfficialId = outcome.AlternativeEquipmentItemId,
                     Note = outcome.Note,
                     BranchTextKey = branchTextKey,
                     StatTestPass = outcome.StatTestPass,
@@ -1673,12 +1672,12 @@ public class AppDatabase
                     RequiresDoubleRoll = outcome.RequiresDoubleRoll,
                     CausesDeath = outcome.CausesDeath,
                     TriggersArtefactRoll = outcome.TriggersArtefactRoll,
-                    RestrictedToWarbandArchetypeNamesCsv = outcome.RestrictedToWarbandArchetypeIds is { Count: > 0 } warbandIds
-                        ? string.Join(",", warbandIds.Select(SeedCatalog.WarbandName)) : null,
+                    RestrictedToWarbandArchetypeOfficialIdsCsv = outcome.RestrictedToWarbandArchetypeIds is { Count: > 0 } warbandIds
+                        ? string.Join(",", warbandIds) : null,
                     GrantsNextExplorationBonusDie = outcome.GrantsNextExplorationBonusDie,
                     GrantsLeaderExperience = outcome.GrantsLeaderExperience,
                     GrantsDistributedHeroExperienceFormula = outcome.GrantsDistributedHeroExperienceFormula,
-                    GrantsFreeHenchmanArchetypeName = outcome.GrantsFreeHenchmanArchetypeId is { } henchmanId ? SeedCatalog.WarriorName(henchmanId) : null,
+                    GrantsFreeHenchmanArchetypeOfficialId = outcome.GrantsFreeHenchmanArchetypeId,
                     GrantsOptionalEquippedHenchman = outcome.GrantsOptionalEquippedHenchman,
                     NextGameNoteTextKey = nextGameNoteTextKey,
                     GrantsWeaponBlessing = outcome.GrantsWeaponBlessing,

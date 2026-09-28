@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
@@ -31,9 +32,8 @@ public partial class MaterialPickerDialogViewModel : DialogViewModel<bool>
     /// <summary>Une MaterialChoice par arme de items ayant au moins une option, dans leur ordre (relues via
     /// ResolveChoices). La première dague gratuite n'est éligible qu'une fois, qu'elle soit déjà portée
     /// (alreadyHasFreeDagger) ou plus tôt dans ce même lot. Liste vide = rien à demander, pas de dialog.
-    /// "Blessed Weapon" est repérée par son nom anglais (seul identifiant stable entre langues,
-    /// même idiome que EndOfGamePageViewModel._specialRulesByEnglishName) puis sortie des matériaux
-    /// exclusifs. allowBlessing: false masque la case Bénie (récompenses de scénario en Fin de Partie :
+    /// La bénédiction ("Blessed Weapon") est repérée par son id officiel (OfficialIds.BlessedWeaponRule)
+    /// puis sortie des matériaux exclusifs. allowBlessing: false masque la case Bénie (récompenses de scénario en Fin de Partie :
     /// l'objet rejoint la réserve, qui ne conserve pas la bénédiction).</summary>
     public static async Task<List<MaterialChoice>> BuildChoicesAsync(ILibraryService libraryService, IEnumerable<EquipmentItem> items, bool alreadyHasFreeDagger, bool allowBlessing = true)
     {
@@ -41,12 +41,10 @@ public partial class MaterialPickerDialogViewModel : DialogViewModel<bool>
         var weapons = items.Where(IsWeapon).ToList();
         if (weapons.Count == 0) return choices;
 
-        var language = LocalizationService.Instance.Language;
-        var rules = await libraryService.GetSpecialRulesAsync(language);
-        var blessingId = (language == "en" ? rules : await libraryService.GetSpecialRulesAsync("en"))
-            .FirstOrDefault(r => r.Name == "Blessed Weapon")?.Id;
-        var blessingRule = allowBlessing ? rules.FirstOrDefault(r => r.Id == blessingId) : null;
-        var materialRules = rules.Where(r => r.CostMultiplier.HasValue && r.Id != blessingId).ToList();
+        var rules = await libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language);
+        var blessing = rules.FirstOrDefault(r => r.OfficialId == OfficialIds.BlessedWeaponRule);
+        var blessingRule = allowBlessing ? blessing : null;
+        var materialRules = rules.Where(r => r.CostMultiplier.HasValue && r != blessing).ToList();
 
         var hasFreeDaggerSlot = alreadyHasFreeDagger;
         foreach (var item in weapons)

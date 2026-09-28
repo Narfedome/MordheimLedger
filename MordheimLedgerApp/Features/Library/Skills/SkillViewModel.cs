@@ -83,7 +83,7 @@ public partial class SkillViewModel : BaseViewModel
 
     /// <summary>Null (the common case) = no extra skills beyond AllowedCategories. Non-null (set by
     /// SkillPickerService when a carried item unlocks one specific skill outside the Warrior's normal
-    /// categories, see Core.Rules.SkillEligibility.EffectiveExtraSkillNames) = these Skill ids are shown
+    /// categories, see Core.Rules.SkillEligibility.EffectiveExtraSkillOfficialIds) = these Skill ids are shown
     /// too, regardless of Category - an "OR" alongside AllowedCategories, not a further narrowing.</summary>
     public IReadOnlyList<int>? AllowedExtraSkillIds { get; set; }
 

@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -223,16 +224,16 @@ public partial class EndOfGamePageViewModel
     [NotifyPropertyChangedFor(nameof(ShowArtefactRoll))]
     private ExplorationOutcome? resolvedExplorationOutcome;
 
-    /// <summary>ResolvedExplorationOutcome.EquipmentItemName + MaterialRuleName résolus (langue courante),
+    /// <summary>ResolvedExplorationOutcome.EquipmentItemOfficialId + MaterialRuleOfficialId résolus (langue courante),
     /// enveloppés dans un WarbandEquipment jetable (jamais persisté - juste réutilisé pour son
     /// NameDisplay/Name "Épée (O)", exactement le même rendu qu'un objet en Gromril/Ithilmar dans
     /// l'inventaire) plutôt qu'un simple EquipmentItem qui perdrait le matériau à l'affichage. La carte
     /// s'affiche en ChipView tapable (icône de catégorie + popup détail via ShowExplorationItemDetail),
     /// même langage d'interaction que toute autre référence Équipement dans l'app. Passe par
-    /// ChosenExplorationItemName plutôt que directement EquipmentItemName pour tenir compte d'un éventuel
+    /// ChosenExplorationItemName plutôt que directement EquipmentItemOfficialId pour tenir compte d'un éventuel
     /// choix du joueur (voir HasExplorationItemChoice).</summary>
     public WarbandEquipment? ResolvedExplorationItem =>
-        BuildDisplayItem(ChosenExplorationItemName, ResolvedExplorationOutcome?.MaterialRuleName, ParsedExplorationItemFoundValue);
+        BuildDisplayItem(ChosenExplorationItemName, ResolvedExplorationOutcome?.MaterialRuleOfficialId, ParsedExplorationItemFoundValue);
 
     /// <summary>The player's found-value roll, parsed - null while unfilled or for a branch that
     /// doesn't need one (see ShowExplorationItemFoundValueRoll). Threaded into ResolvedExplorationItem
@@ -242,19 +243,19 @@ public partial class EndOfGamePageViewModel
         ResolvedExplorationOutcome?.FoundValueFormula is not null && int.TryParse(ExplorationItemFoundValue, out var value) ? value : null;
 
     /// <summary>Second objet du même branch (ex. Charrette Renversée : Épée + Dague, voir
-    /// ExplorationOutcome.SecondaryEquipmentItemName) - null pour tout le reste de la table. Même
-    /// MaterialRuleName que ResolvedExplorationItem (un seul matériau pour les deux, trouvés ensemble).</summary>
+    /// ExplorationOutcome.SecondaryEquipmentItemOfficialId) - null pour tout le reste de la table. Même
+    /// MaterialRuleOfficialId que ResolvedExplorationItem (un seul matériau pour les deux, trouvés ensemble).</summary>
     public WarbandEquipment? ResolvedExplorationSecondaryItem =>
-        BuildDisplayItem(ResolvedExplorationOutcome?.SecondaryEquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+        BuildDisplayItem(ResolvedExplorationOutcome?.SecondaryEquipmentItemOfficialId, ResolvedExplorationOutcome?.MaterialRuleOfficialId);
 
     /// <summary>Vrai seulement pour une branche à choix (ex. Armurerie 1-2 : "D3 Boucliers ou Rondaches,
-    /// au choix") - AlternativeEquipmentItemName est alors non-null, et le XAML remplace le ChipView unique
+    /// au choix") - AlternativeEquipmentItemOfficialId est alors non-null, et le XAML remplace le ChipView unique
     /// par 2 RadioButton (plus direct qu'un Picker pour un choix binaire - revenu sur ce point le
     /// 2026-08-18, un Picker impose un tap "pour ouvrir" en plus alors que les deux options tiennent
     /// très bien affichées d'un coup).</summary>
-    public bool HasExplorationItemChoice => ResolvedExplorationOutcome?.AlternativeEquipmentItemName is not null;
+    public bool HasExplorationItemChoice => ResolvedExplorationOutcome?.AlternativeEquipmentItemOfficialId is not null;
 
-    /// <summary>Objet "principal" (EquipmentItemName) affiché à côté du premier RadioButton - même
+    /// <summary>Objet "principal" (EquipmentItemOfficialId) affiché à côté du premier RadioButton - même
     /// WarbandEquipment jetable que ResolvedExplorationItem/BuildDisplayItem (icône de catégorie + nom),
     /// pour que chaque option de choix se présente comme n'importe quel autre chip équipement de l'app,
     /// pas un simple Label texte. Rendu comme icône+Label FRÈRE du RadioButton dans le XAML plutôt que
@@ -262,35 +263,35 @@ public partial class EndOfGamePageViewModel
     /// Windows/WinUI (repéré le 2026-08-18 - le RadioButton restait vide, le contenu flottait ailleurs
     /// sur l'écran), le ControlTemplate natif de la plateforme n'attend visiblement qu'une chaîne.</summary>
     public WarbandEquipment? ExplorationItemChoicePrimaryItem =>
-        BuildDisplayItem(ResolvedExplorationOutcome?.EquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+        BuildDisplayItem(ResolvedExplorationOutcome?.EquipmentItemOfficialId, ResolvedExplorationOutcome?.MaterialRuleOfficialId);
 
-    /// <summary>Même chose pour AlternativeEquipmentItemName, le second RadioButton.</summary>
+    /// <summary>Même chose pour AlternativeEquipmentItemOfficialId, le second RadioButton.</summary>
     public WarbandEquipment? ExplorationItemChoiceAlternativeItem =>
-        BuildDisplayItem(ResolvedExplorationOutcome?.AlternativeEquipmentItemName, ResolvedExplorationOutcome?.MaterialRuleName);
+        BuildDisplayItem(ResolvedExplorationOutcome?.AlternativeEquipmentItemOfficialId, ResolvedExplorationOutcome?.MaterialRuleOfficialId);
 
     /// <summary>Nom ANGLAIS de l'objet coché - lié à RadioButtonGroup.SelectedValue (voir le XAML), pas
-    /// un index : chaque RadioButton a directement EquipmentItemName/AlternativeEquipmentItemName comme
+    /// un index : chaque RadioButton a directement EquipmentItemOfficialId/AlternativeEquipmentItemOfficialId comme
     /// Value, donc cette propriété EST déjà le nom à utiliser, aucune traduction supplémentaire requise
-    /// côté ChosenExplorationItemName. EquipmentItemName (l'objet "principal") par défaut, jamais forcé à
+    /// côté ChosenExplorationItemName. EquipmentItemOfficialId (l'objet "principal") par défaut, jamais forcé à
     /// un choix actif (même logique que SelectedResult à l'étape Résultat).</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ResolvedExplorationItem))]
     private string? selectedExplorationItemName;
 
-    /// <summary>L'EquipmentItemName réellement retenu une fois le choix du joueur pris en compte (voir
-    /// HasExplorationItemChoice) - c'est ce nom, pas ExplorationOutcome.EquipmentItemName brut, que
+    /// <summary>L'EquipmentItemOfficialId réellement retenu une fois le choix du joueur pris en compte (voir
+    /// HasExplorationItemChoice) - c'est ce nom, pas ExplorationOutcome.EquipmentItemOfficialId brut, que
     /// WarbandDetailViewModel.EndOfGame doit ajouter à l'inventaire.</summary>
     public string? ChosenExplorationItemName => HasExplorationItemChoice
         ? SelectedExplorationItemName
-        : ResolvedExplorationOutcome?.EquipmentItemName;
+        : ResolvedExplorationOutcome?.EquipmentItemOfficialId;
 
     private WarbandEquipment? BuildDisplayItem(string? itemName, string? materialRuleName, int? foundValueOverride = null)
     {
         if (itemName is not { } name) return null;
-        var item = _equipmentItemsByEnglishName.GetValueOrDefault(name);
+        var item = _equipmentItemsByOfficialId.GetValueOrDefault(name);
         if (item is null) return null;
 
-        var materialRule = materialRuleName is { } ruleName ? _specialRulesByEnglishName.GetValueOrDefault(ruleName) : null;
+        var materialRule = materialRuleName is { } ruleName ? _specialRulesByOfficialId.GetValueOrDefault(ruleName) : null;
         return new WarbandEquipment { Item = item, MaterialRule = materialRule, FoundValueOverride = foundValueOverride };
     }
 
@@ -304,7 +305,7 @@ public partial class EndOfGamePageViewModel
     /// ResolveWarbandOutcome) : la description complète du livre énumère TOUTES les branches par bande,
     /// alors qu'une seule s'applique à la bande jouée - retour utilisateur 2026-08-20, ne montrer que
     /// cette branche plutôt que le paragraphe entier.</summary>
-    public bool IsWarbandConditionedResult => TriggeredExplorationResult?.Outcomes.Any(o => o.RestrictedToWarbandArchetypeNames.Count > 0) == true;
+    public bool IsWarbandConditionedResult => TriggeredExplorationResult?.Outcomes.Any(o => o.RestrictedToWarbandArchetypeOfficialIds.Count > 0) == true;
 
     /// <summary>Texte affiché en haut de l'étape Résultat - la description complète du livre, sauf pour
     /// un résultat conditionné par la bande où seule la phrase d'intro partagée (ExplorationResult.
@@ -321,18 +322,18 @@ public partial class EndOfGamePageViewModel
     /// par la bande.</summary>
     public bool ShowExplorationNoteInBranchSection => IsExplorationNone && !IsWarbandConditionedResult;
 
-    /// <summary>ExplorationOutcome.GrantsFreeHenchmanArchetypeName résolu (ex. "Zombie", Traînard) -
+    /// <summary>ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId résolu (ex. "Zombie", Traînard) -
     /// affiché en ChipView tapable (même langage d'interaction que tout objet trouvé) plutôt qu'en
     /// simple texte, pour que le joueur voie ce qui rejoint sa bande avant même de valider le wizard.</summary>
-    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeName is { } name
-        ? _warriorArchetypesByEnglishName.GetValueOrDefault(name) : null;
+    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeOfficialId is { } name
+        ? _warriorArchetypesByOfficialId.GetValueOrDefault(name) : null;
 
     [RelayCommand]
     private Task ShowFreeHenchmanDetail(WarriorArchetype archetype) => _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(archetype, Array.Empty<NamedRef>());
 
     // --- Recrutement conditionné à l'équipement (Prisonniers, "autres bandes") -----------------
     //
-    // Contrairement à GrantsFreeHenchmanArchetypeName (archétype FIXE du livre, ex. Zombie) et
+    // Contrairement à GrantsFreeHenchmanArchetypeOfficialId (archétype FIXE du livre, ex. Zombie) et
     // GrantsDistributedHeroExperienceFormula (répartition libre entre Héros), cette branche laisse le
     // joueur choisir un groupe d'Hommes de main DÉJÀ existant dans la bande à renforcer - "en utilisant
     // les mêmes caractéristiques que le groupe existant" (règle du livre, RAW ambigu pour une bande sans
@@ -453,14 +454,14 @@ public partial class EndOfGamePageViewModel
     /// <summary>Aperçu jetable (jamais persisté tel quel - même idiome que BuildDisplayItem/
     /// ResolvedExplorationItem) du chip de l'arme choisie une fois bénie : combine son MaterialRule
     /// existant (Gromril/Ithilmar/Ornée, s'il y en a un) avec la SpecialRule "Blessed Weapon" déjà
-    /// résolue dans _specialRulesByEnglishName, pour que le joueur voie tout de suite "Épée (G, B)"
+    /// résolue dans _specialRulesByOfficialId, pour que le joueur voie tout de suite "Épée (G, B)"
     /// avant même de valider le wizard - retour utilisateur explicite (2026-08-21).</summary>
     public WarriorEquipment? BlessedWeaponPreview => SelectedWeaponBlessingOption?.Equipment is { } equipment
         ? new WarriorEquipment
         {
             Item = equipment.Item,
             MaterialRule = equipment.MaterialRule,
-            BlessingRule = _specialRulesByEnglishName.GetValueOrDefault("Blessed Weapon"),
+            BlessingRule = _specialRulesByOfficialId.GetValueOrDefault(OfficialIds.BlessedWeaponRule),
             Quantity = equipment.Quantity
         }
         : null;
@@ -576,10 +577,10 @@ public partial class EndOfGamePageViewModel
 
     public bool HasBonusItem => BonusItemOutcome is not null;
 
-    /// <summary>BonusItemOutcome.EquipmentItemName + MaterialRuleName résolus - même besoin que
+    /// <summary>BonusItemOutcome.EquipmentItemOfficialId + MaterialRuleOfficialId résolus - même besoin que
     /// ResolvedExplorationItem.</summary>
     public WarbandEquipment? BonusItem =>
-        BuildDisplayItem(BonusItemOutcome?.EquipmentItemName, BonusItemOutcome?.MaterialRuleName);
+        BuildDisplayItem(BonusItemOutcome?.EquipmentItemOfficialId, BonusItemOutcome?.MaterialRuleOfficialId);
 
     [RelayCommand]
     private Task ShowExplorationItemDetail(WarbandEquipment item) => _detailDialogs.ShowEquipmentDetailDialogAsync(item.Item, item.MaterialRule, item.FoundValueOverride);
@@ -631,7 +632,7 @@ public partial class EndOfGamePageViewModel
     // avec le test additionnel de Bâtiment Éventré, voir ShowBonusStatTest plus bas) avec deux ajouts :
     // toujours le chef (StatTestTargetsLeader, StatTestHero renseigné automatiquement plutôt que par un
     // Picker - voir ShowStatTestHeroPicker) et une réussite automatique pour certaines bandes du livre
-    // (AutoPassStatTestWarbandArchetypeNames, voir StatTestAutoPasses).
+    // (AutoPassStatTestWarbandArchetypeOfficialIds, voir StatTestAutoPasses).
     public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
 
     public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
@@ -676,7 +677,7 @@ public partial class EndOfGamePageViewModel
     /// <summary>Vrai pour un test de Commandement gating (Taverne) auto-réussi pour certaines bandes du
     /// livre (Morts-Vivants/Chasseurs de Sorcières/Sœurs de Sigmar) - aucun jet à saisir, la branche
     /// Réussite se résout directement dès que le résultat se déclenche (voir ResolveExplorationResult).</summary>
-    public bool StatTestAutoPasses => TriggeredExplorationResult?.AutoPassStatTestWarbandArchetypeNames.Contains(_warbandArchetypeName) == true;
+    public bool StatTestAutoPasses => TriggeredExplorationResult?.AutoPassStatTestWarbandArchetypeOfficialIds.Contains(_warbandArchetypeOfficialId) == true;
 
     /// <summary>Le bloc jet+dé (voir ShowStatTest) ne s'affiche que si un Héros/chef est effectivement
     /// désigné ET que la bande ne réussit pas ce test automatiquement.</summary>
@@ -808,10 +809,10 @@ public partial class EndOfGamePageViewModel
 
     public bool HasBonusStatTestOutcome => BonusStatTestOutcome is not null;
 
-    /// <summary>BonusStatTestOutcome.EquipmentItemName résolu - même besoin que ResolvedExplorationItem/
+    /// <summary>BonusStatTestOutcome.EquipmentItemOfficialId résolu - même besoin que ResolvedExplorationItem/
     /// BonusItem.</summary>
     public WarbandEquipment? BonusStatTestItem =>
-        BuildDisplayItem(BonusStatTestOutcome?.EquipmentItemName, BonusStatTestOutcome?.MaterialRuleName);
+        BuildDisplayItem(BonusStatTestOutcome?.EquipmentItemOfficialId, BonusStatTestOutcome?.MaterialRuleOfficialId);
 
     partial void OnBonusStatTestRollChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) BonusStatTestError = null; }
 
@@ -1024,7 +1025,7 @@ public partial class EndOfGamePageViewModel
         // ResolveAutoOutcome renvoie null pour lui, voir Core.Rules.ExplorationOutcomeResolver.
         var autoOutcome = ExplorationOutcomeResolver.ResolveAutoOutcome(TriggeredExplorationResult);
         if (autoOutcome is not null) ApplyResolvedOutcome(autoOutcome);
-        else if (ExplorationOutcomeResolver.ResolveWarbandOutcome(TriggeredExplorationResult, _warbandArchetypeName) is { } warbandOutcome)
+        else if (ExplorationOutcomeResolver.ResolveWarbandOutcome(TriggeredExplorationResult, _warbandArchetypeOfficialId) is { } warbandOutcome)
             // Groupe B "conditionné par la bande" (Traînard, Prisonniers, Cimetière, bénédiction du
             // Sanctuaire) : la branche applicable se résout d'elle-même depuis l'archétype de la bande
             // jouée, aucune saisie du joueur ne la départage (voir ResolveWarbandOutcome).
@@ -1062,11 +1063,11 @@ public partial class EndOfGamePageViewModel
     private void ApplyResolvedOutcome(ExplorationOutcome outcome)
     {
         ResolvedExplorationOutcome = outcome;
-        SelectedExplorationItemName = outcome.EquipmentItemName;
+        SelectedExplorationItemName = outcome.EquipmentItemOfficialId;
         // ItemQuantityFormula réutilisé tel quel pour la quantité d'un Homme de main gratuit (ex.
         // Prisonniers : D3 Zombies) - même champ, même convention ("1" fixe se renseigne directement,
         // "D3" laisse le champ+dé au joueur), pas seulement pour Kind.Item.
-        if ((outcome.Kind == ExplorationOutcomeKind.Item || outcome.GrantsFreeHenchmanArchetypeName is not null)
+        if ((outcome.Kind == ExplorationOutcomeKind.Item || outcome.GrantsFreeHenchmanArchetypeOfficialId is not null)
             && outcome.ItemQuantityFormula is { } itemFormula && !itemFormula.Contains('D', StringComparison.OrdinalIgnoreCase))
             ExplorationItemQuantity = itemFormula;
         else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone && outcome.GoldFormula is { } wyrdstoneFormula
@@ -1285,7 +1286,7 @@ public partial class EndOfGamePageViewModel
         if (ResolvedExplorationItem is { } item && int.TryParse(ExplorationItemQuantity, out var itemQuantity) && itemQuantity > 0)
             yield return new ReserveInflow(item.Item, item.MaterialRule, itemQuantity, item.FoundValueOverride);
 
-        // SecondaryEquipmentItemName est toujours un "ET" en un seul exemplaire, jamais soumis à un jet
+        // SecondaryEquipmentItemOfficialId est toujours un "ET" en un seul exemplaire, jamais soumis à un jet
         // de quantité (voir ApplyExplorationOutcomeAsync's own doc) - quantité 1 fixe.
         if (ResolvedExplorationSecondaryItem is { } secondaryItem)
             yield return new ReserveInflow(secondaryItem.Item, secondaryItem.MaterialRule, 1);

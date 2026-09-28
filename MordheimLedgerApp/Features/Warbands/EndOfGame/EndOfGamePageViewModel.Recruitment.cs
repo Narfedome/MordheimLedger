@@ -55,7 +55,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 public partial class EndOfGamePageViewModel
 {
     /// <summary>WarbandArchetype complet de CETTE bande (contrairement à _warbandArchetypeId/
-    /// _warbandArchetypeName, déjà connus avant cette étape mais insuffisants ici) - nécessaire pour
+    /// _warbandArchetypeOfficialId, déjà connus avant cette étape mais insuffisants ici) - nécessaire pour
     /// MaxWarriors (RecruitmentRules.CanRecruit). Chargé par l'appelant (WarbandDetailViewModel.EndOfGame)
     /// comme tout le reste des données de ce wizard, jamais paresseusement ici - voir sa propre doc de
     /// classe pour pourquoi cette étape n'a pas de chargement asynchrone à elle.</summary>

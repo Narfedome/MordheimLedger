@@ -17,8 +17,8 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// always "passed", no CheckRoll UI shown for it (see EndOfGamePage.xaml).</summary>
 public partial class IndependentOutcomeEntry : ObservableObject
 {
-    private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName;
-    private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName;
+    private readonly IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByOfficialId;
+    private readonly IReadOnlyDictionary<string, SpecialRule> _specialRulesByOfficialId;
     private readonly IDetailDialogService _detailDialogs;
     private readonly LocalizationService _loc = LocalizationService.Instance;
 
@@ -113,7 +113,7 @@ public partial class IndependentOutcomeEntry : ObservableObject
         if (Outcome.ItemQuantityFormula is { } formula) ItemQuantity = DiceFormula.Roll(formula).ToString();
     }
 
-    public WarbandEquipment? ResolvedItem => IsItem ? BuildDisplayItem(Outcome.EquipmentItemName, Outcome.MaterialRuleName) : null;
+    public WarbandEquipment? ResolvedItem => IsItem ? BuildDisplayItem(Outcome.EquipmentItemOfficialId, Outcome.MaterialRuleOfficialId) : null;
 
     [RelayCommand]
     private Task ShowResolvedItemDetail() => ResolvedItem is { } item
@@ -154,21 +154,21 @@ public partial class IndependentOutcomeEntry : ObservableObject
     private WarbandEquipment? BuildDisplayItem(string? itemName, string? materialRuleName)
     {
         if (itemName is not { } name) return null;
-        var item = _equipmentItemsByEnglishName.GetValueOrDefault(name);
+        var item = _equipmentItemsByOfficialId.GetValueOrDefault(name);
         if (item is null) return null;
 
-        var materialRule = materialRuleName is { } ruleName ? _specialRulesByEnglishName.GetValueOrDefault(ruleName) : null;
+        var materialRule = materialRuleName is { } ruleName ? _specialRulesByOfficialId.GetValueOrDefault(ruleName) : null;
         return new WarbandEquipment { Item = item, MaterialRule = materialRule };
     }
 
     public IndependentOutcomeEntry(ExplorationOutcome outcome, string label, IDetailDialogService detailDialogs,
-        IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, IReadOnlyDictionary<string, SpecialRule> specialRulesByEnglishName)
+        IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByOfficialId, IReadOnlyDictionary<string, SpecialRule> specialRulesByOfficialId)
     {
         Outcome = outcome;
         Label = label;
         _detailDialogs = detailDialogs;
-        _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
-        _specialRulesByEnglishName = specialRulesByEnglishName;
+        _equipmentItemsByOfficialId = equipmentItemsByOfficialId;
+        _specialRulesByOfficialId = specialRulesByOfficialId;
 
         // Quantité fixe ("1", ex. Relique Sainte) : se renseigne directement, ce n'est pas un jet - même
         // convention que ApplyResolvedOutcome dans la forme à branche unique.

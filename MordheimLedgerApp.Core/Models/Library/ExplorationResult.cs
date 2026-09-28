@@ -36,7 +36,7 @@ public class ExplorationResult
     /// <summary>Just the shared intro sentence every branch follows (e.g. Straggler: "Your warband
     /// encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly
     /// possessions.") - null for every entry except a "conditioned by warband identity" result (see
-    /// ExplorationOutcome.RestrictedToWarbandArchetypeNames/BranchText). The wizard's Result step shows
+    /// ExplorationOutcome.RestrictedToWarbandArchetypeOfficialIds/BranchText). The wizard's Result step shows
     /// this + the resolved branch's own BranchText instead of the full multi-branch Description for
     /// those entries (retrofitted 2026-08-20 after showing the full Description there turned out to
     /// bury the one branch that actually applies to the playing warband among three others that don't -
@@ -60,7 +60,7 @@ public class ExplorationResult
     /// True (e.g. "Hidden Treasure") = every Outcome is checked independently against its own
     /// threshold - see ExplorationOutcome's doc comment for the full mechanic. "Straggler" also sets
     /// this (every Outcome Auto, SubRollMin/Max null) for a THIRD, unrelated shape - see
-    /// ExplorationOutcome.RestrictedToWarbandArchetypeNames/Core.Rules.ExplorationOutcomeResolver.
+    /// ExplorationOutcome.RestrictedToWarbandArchetypeOfficialIds/Core.Rules.ExplorationOutcomeResolver.
     /// ResolveWarbandOutcome. "Tavern" does NOT set this any more (2026-08-20): it's a plain
     /// StatTestField-gated test like Well, just leader-targeted - see StatTestTargetsLeader.</summary>
     public bool RollsIndependently { get; set; }
@@ -83,14 +83,14 @@ public class ExplorationResult
     /// is null.</summary>
     public bool StatTestTargetsLeader { get; set; }
 
-    /// <summary>English WarbandArchetype.Name(s) that automatically pass this StatTestField-gated test,
+    /// <summary>WarbandArchetype OfficialId(s) that automatically pass this StatTestField-gated test,
     /// no roll needed (e.g. Taverne: "Undead, Witch Hunter and Sisters of Sigmar warbands automatically
     /// pass this test") - the wizard resolves straight to the Outcome whose StatTestPass is true as soon
     /// as the result triggers, skipping the roll field entirely (see EndOfGamePageViewModel.
     /// StatTestAutoPasses). Empty (almost every entry) = no such exception, the test always requires a
-    /// roll. Plain string reference resolved at consumption time, same idiom as
-    /// ExplorationOutcome.RestrictedToWarbandArchetypeNames - fixed rulebook content, no editor.</summary>
-    public List<string> AutoPassStatTestWarbandArchetypeNames { get; set; } = new();
+    /// roll. Plain OfficialId list compared at consumption time, same idiom as
+    /// ExplorationOutcome.RestrictedToWarbandArchetypeOfficialIds - fixed rulebook content, no editor.</summary>
+    public List<string> AutoPassStatTestWarbandArchetypeOfficialIds { get; set; } = new();
 
     /// <summary>True = this result's Auto branches are mutually exclusive on whether a paired 2D6 roll
     /// shows a double (e.g. Merchant's House - Maison du Marchand: normal roll -&gt; 2D6x5 gc, a double

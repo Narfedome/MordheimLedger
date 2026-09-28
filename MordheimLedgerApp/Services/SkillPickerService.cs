@@ -13,7 +13,7 @@ public interface ISkillPickerService
     /// allowedCategories: further restrict to these SkillCategory values (the warrior's own "skill
     /// table" row, e.g. WarriorArchetype/Warrior.AllowedSkillCategories) - null/omitted = no category
     /// filtering. extraAllowedSkillIds: specific Skill ids shown regardless of category (see
-    /// Core.Rules.SkillEligibility.EffectiveExtraSkillNames, resolved to ids by the caller since this
+    /// Core.Rules.SkillEligibility.EffectiveExtraSkillOfficialIds, resolved to ids by the caller since this
     /// picker's catalog is language-specific) - e.g. Merchant's House's Order of Freetraders symbol
     /// unlocking Haggle alone, not its whole Academic category. singleSelect: restricts the picker to at
     /// most one Skill at a time (see SkillViewModel.SingleSelectMode) - an Advance roll never grants more

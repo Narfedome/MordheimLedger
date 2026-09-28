@@ -615,4 +615,50 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(originalName, again.Name);
         Assert.NotSame(first, again);
     }
+
+    /// <summary>Base installée avant les ids stables : aucune ligne n'a d'OfficialId, user_version s'arrête à 2.
+    /// Au lancement suivant, AssignOfficialIdsOnceAsync doit rendre à chaque entrée officielle exactement l'id
+    /// que lui aurait donné un seed neuf - et jamais à une entrée personnalisée.</summary>
+    [Fact]
+    public async Task OfficialIdBridge_RestoresEveryIdOnPreIdDatabase()
+    {
+        await _db.Initialization;
+        var tables = (await _db.Connection.QueryScalarsAsync<string>("SELECT name FROM sqlite_master WHERE type = 'table'"))
+            .Where(t => _db.Connection.QueryAsync<ColumnInfo>($"PRAGMA table_info(\"{t}\")").Result.Any(c => c.name == "OfficialId"))
+            // Exploration : reconstruite à chaque lancement (ids de ligne neufs), hors du pont.
+            .Where(t => !t.StartsWith("Exploration")).ToList();
+        async Task<List<string>> SnapshotAsync()
+        {
+            var rows = new List<string>();
+            foreach (var t in tables)
+                rows.AddRange((await _db.Connection.QueryAsync<IdRow>($"SELECT Id, OfficialId FROM \"{t}\" WHERE OfficialId IS NOT NULL"))
+                    .Select(r => $"{t}:{r.Id}={r.OfficialId}"));
+            return rows.OrderBy(r => r).ToList();
+        }
+        var expected = await SnapshotAsync();
+        var custom = (await _library.GetSpecialRulesAsync("en")).First();
+
+        foreach (var t in tables)
+            await _db.Connection.ExecuteAsync($"UPDATE \"{t}\" SET OfficialId = NULL");
+        await _db.Connection.ExecuteAsync("UPDATE EquipmentItemEntity SET GrantsSpecificSkillOfficialId = NULL");
+        await _db.Connection.ExecuteAsync("UPDATE SpecialRuleEntity SET Source = ? WHERE Id = ?", ContentSource.Custom, custom.Id);
+        await _db.Connection.ExecuteAsync("PRAGMA user_version = 2");
+        await _db.Connection.CloseAsync();
+
+        var reopened = new AppDatabase(_dbPath);
+        await reopened.Initialization;
+        var restored = new List<string>();
+        foreach (var t in tables)
+            restored.AddRange((await reopened.Connection.QueryAsync<IdRow>($"SELECT Id, OfficialId FROM \"{t}\" WHERE OfficialId IS NOT NULL"))
+                .Select(r => $"{t}:{r.Id}={r.OfficialId}"));
+        var grantedSkills = await reopened.Connection.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM EquipmentItemEntity WHERE GrantsSpecificSkillOfficialId IS NOT NULL");
+        await reopened.Connection.CloseAsync();
+
+        Assert.Equal(expected.Where(r => !r.StartsWith($"SpecialRuleEntity:{custom.Id}=")), restored.OrderBy(r => r));
+        Assert.True(grantedSkills > 0);
+    }
+
+    private class ColumnInfo { public string name { get; set; } = ""; }
+    private class IdRow { public int Id { get; set; } public string OfficialId { get; set; } = ""; }
 }

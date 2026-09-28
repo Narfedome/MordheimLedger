@@ -560,6 +560,53 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
+    private async Task<Dictionary<string, int>> CatalogCountsAsync(AppDatabase db)
+    {
+        var counts = new Dictionary<string, int>();
+        foreach (var table in new[] { "RaceEntity", "RacialProfileEntity", "WarbandArchetypeEntity", "WarriorArchetypeEntity",
+                     "EquipmentItemEntity", "SpecialRuleEntity", "SkillEntity", "OfficialContentHashEntity" })
+            counts[table] = await db.Connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM {table}");
+        return counts;
+    }
+
+    /// <summary>Bouton Réinitialiser des Paramètres : le catalogue revient à l'identique d'un seed neuf, sans
+    /// doublon (RaceEntity n'était pas supprimée - chaque race se dupliquait et la réinitialisation échouait
+    /// sur l'empreinte en double, 2026-09-28), et les parties jouées disparaissent.</summary>
+    [Fact]
+    public async Task Reset_RebuildsTheSameCatalog_AndDropsPlayedData()
+    {
+        await _db.Initialization;
+        var before = await CatalogCountsAsync(_db);
+        await _warbands.CreateWarbandAsync("To be wiped", await GetReiklandersAsync());
+
+        await _db.ResetAsync();
+        await _db.ResetAsync();
+
+        Assert.Equal(before, await CatalogCountsAsync(_db));
+        Assert.Empty(await _warbands.GetWarbandsAsync());
+        Assert.True(await _db.IsOfficialContentUpToDateAsync());
+    }
+
+    /// <summary>Base abîmée par une réinitialisation interrompue avant ce correctif : tables vidées, races
+    /// restées - le lancement suivant doit reseeder sans dupliquer les races ni échouer.</summary>
+    [Fact]
+    public async Task DatabaseWipedExceptRaces_ReseedsWithoutDuplicates()
+    {
+        await _db.Initialization;
+        var before = await CatalogCountsAsync(_db);
+        var tables = await _db.Connection.QueryScalarsAsync<string>(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT IN ('RaceEntity', 'sqlite_sequence')");
+        foreach (var table in tables)
+            await _db.Connection.ExecuteAsync($"DELETE FROM \"{table}\"");
+        await _db.Connection.CloseAsync();
+
+        var reopened = new AppDatabase(_dbPath);
+        await reopened.Initialization;
+
+        Assert.Equal(before, await CatalogCountsAsync(reopened));
+        await reopened.Connection.CloseAsync();
+    }
+
     /// <summary>seed.db3 à jour, générée une fois pour toute la classe : sert de contenu officiel "embarqué"
     /// aux tests qui simulent une base en retard.</summary>
     private static readonly Lazy<Task<string>> FreshSeedPath = new(async () =>

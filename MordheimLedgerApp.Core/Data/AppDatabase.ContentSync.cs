@@ -236,7 +236,7 @@ public partial class AppDatabase
         foreach (var table in OfficialContentSchema.Tables)
             foreach (var row in snapshot.Rows[table.Type].Values)
                 if (snapshot.OfficialIdOf(table.Type, row) is { } officialId)
-                    await _db.InsertAsync(new OfficialContentHashEntity { OfficialId = officialId, Hash = snapshot.ComputeHash(table, row) });
+                    await _db.InsertOrReplaceAsync(new OfficialContentHashEntity { OfficialId = officialId, Hash = snapshot.ComputeHash(table, row) });
     }
 
     private async Task<ContentSyncReport> ApplySeedSnapshotAsync(ContentSnapshot seed)

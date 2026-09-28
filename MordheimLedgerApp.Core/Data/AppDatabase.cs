@@ -432,6 +432,9 @@ public partial class AppDatabase
         await _db.DropTableAsync<ContentMetaEntity>();
         await _db.DropTableAsync<OfficialContentHashEntity>();
         await _db.DropTableAsync<ContentConflictEntity>();
+        // Oubliée jusqu'au 2026-09-28 (masqué par l'ancien seed des races, qui réutilisait une race existante
+        // par nom) - une réinitialisation dupliquait alors chaque race et échouait.
+        await _db.DropTableAsync<RaceEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -1262,8 +1265,14 @@ public partial class AppDatabase
 
     private async Task SeedRacesAsync()
     {
+        // Filet pour une base abîmée par une réinitialisation interrompue (voir DropAllTablesAsync) : le
+        // catalogue y est vide mais les races survivent - les réutiliser par id plutôt que les dupliquer.
+        foreach (var existing in await _db.Table<RaceEntity>().Where(r => r.OfficialId != null).ToListAsync())
+            _raceIdsByOfficialId.TryAdd(existing.OfficialId!, existing.Id);
+
         foreach (var seed in await LoadSeedArrayAsync<RaceSeedData>("Races.json"))
         {
+            if (_raceIdsByOfficialId.ContainsKey(seed.Id)) continue;
             var race = new Race { OfficialId = seed.Id, Source = ContentSource.Official };
             race.NameKey = await SeedTranslationAsync(seed.Name.En, seed.Name.Fr);
             race.DescriptionKey = seed.Description is null ? null : await SeedTranslationAsync(seed.Description.En, seed.Description.Fr);

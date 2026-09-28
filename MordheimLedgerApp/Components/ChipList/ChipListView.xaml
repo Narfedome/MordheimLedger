@@ -4,7 +4,16 @@
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Components.ChipListView"
-             x:Name="root">
+             x:Name="root"
+             IsVisible="{Binding ShowSection, Source={RelativeSource Self}}">
+    <!-- IsVisible répété ici (en plus de celui du VerticalStackLayout interne ci-dessous) : sur Android,
+         un ContentView dont seul le contenu interne est masqué ne se réduit pas toujours à une hauteur
+         nulle dans un parent empilé (VerticalStackLayout) - chaque section vide (ex. Blessures/Haine/
+         Écoles de magie/Sorts/Mutations pour un guerrier qui n'en a aucun) laissait un espace résiduel,
+         cumulé en un grand vide visible avant Équipement. Masquer le ContentView lui-même (pas seulement
+         son contenu) corrige ça - repéré uniquement ici, pas sur les FlexLayout Équipement/Compétences de
+         WarbandDetailPage qui n'ont pas cette indirection ContentView. -->
+
 
     <!-- Généralise le bloc "header + FlexLayout de chips tapotables" dupliqué dans les dialogs récap du
          Codex (WarbandArchetypeDetailDialog, AnimalDetailDialog, EquipmentItemDetailDialog,

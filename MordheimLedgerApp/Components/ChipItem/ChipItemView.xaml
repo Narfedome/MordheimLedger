@@ -4,7 +4,10 @@
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Components.ChipItemView"
-             x:Name="root">
+             x:Name="root"
+             IsVisible="{Binding ShowSection, Source={RelativeSource Self}}">
+    <!-- Voir ChipListView.xaml pour la raison de ce doublon avec le IsVisible du VerticalStackLayout
+         interne ci-dessous (bug de collapse Android sur un ContentView dont seul le contenu est masqué). -->
 
     <VerticalStackLayout
         BindingContext="{x:Reference root}"

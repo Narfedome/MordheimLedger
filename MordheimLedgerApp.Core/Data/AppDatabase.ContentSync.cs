@@ -13,6 +13,14 @@ public sealed record ContentSyncReport(int Updated, int Inserted, int Retired, i
     public bool HasChanges => Updated + Inserted + Retired + Conflicts > 0;
 }
 
+/// <summary>Un champ où la version officielle et celle du joueur diffèrent. Field = nom de colonne (ex.
+/// "Cost", "DescriptionKey") ou de table de jointure (ex. "EquipmentItemSpecialRuleEntity") - l'appli en
+/// fait un libellé. Valeurs déjà en texte (traductions, noms des lignes visées), vides si absentes.</summary>
+public sealed record ContentFieldDifference(string Field, string Official, string Mine);
+
+/// <summary>Entrée Modifiée en attente de choix (voir AppDatabase.GetContentConflictsAsync).</summary>
+public sealed record ContentConflict(string OfficialId, string TableName, string Name, IReadOnlyList<ContentFieldDifference> Differences);
+
 /// <summary>Synchro du contenu officiel (2026-09-28) : met à jour le catalogue d'une base déjà installée
 /// depuis une seed.db3 plus récente, en faisant correspondre les lignes par OfficialId. Les parties jouées
 /// (Warband/Warrior...) ne sont jamais touchées et restent valides : une ligne mise à jour garde son Id local.
@@ -31,9 +39,171 @@ public sealed record ContentSyncReport(int Updated, int Inserted, int Retired, i
 /// les mêmes Id auto-incrémentés, ni les mêmes clés de traduction.</summary>
 public partial class AppDatabase
 {
+    private readonly Func<Task<Stream>>? _officialSeed;
+
+    /// <summary>Bilan de la synchro faite pendant l'initialisation (null si aucune n'a eu lieu).</summary>
+    public ContentSyncReport? StartupSyncReport { get; private set; }
+
+    /// <summary>Erreur de la synchro de démarrage : annulée (transaction), l'appli démarre quand même sur
+    /// l'ancien contenu et retentera au prochain lancement.</summary>
+    public Exception? StartupSyncError { get; private set; }
+
+    private async Task SyncOfficialContentOnStartupAsync()
+    {
+        if (_officialSeed is null || (await ReadContentMetaAsync()).Version >= SeedContent.Version) return;
+        try
+        {
+            StartupSyncReport = await SyncFromStreamAsync(_officialSeed);
+        }
+        catch (Exception ex)
+        {
+            StartupSyncError = ex;
+        }
+    }
+
+    /// <summary>Synchro à la demande (bouton des Paramètres) depuis la seed.db3 embarquée, même si la
+    /// version est déjà à jour - répare aussi une base dont le catalogue aurait dérivé.</summary>
+    public async Task<ContentSyncReport> SyncOfficialContentAsync(Func<Task<Stream>> officialSeed)
+    {
+        await Initialization;
+        return await SyncFromStreamAsync(officialSeed);
+    }
+
     public async Task<ContentSyncReport> SyncOfficialContentAsync(string seedDatabasePath)
     {
         await Initialization;
+        return await SyncFromFileAsync(seedDatabasePath);
+    }
+
+    /// <summary>Entrées Modifiées dont la version officielle a changé, en attente du choix du joueur.</summary>
+    public async Task<int> GetPendingContentConflictCountAsync()
+    {
+        await Initialization;
+        return await _db.Table<ContentConflictEntity>().CountAsync();
+    }
+
+    /// <summary>Entrées en attente de choix, avec pour chacune les champs où la version officielle et celle du
+    /// joueur diffèrent (textes dans languageCode). Une entrée en attente devenue sans objet (plus dans la
+    /// seed, ou plus en local) est retirée au passage.</summary>
+    public async Task<List<ContentConflict>> GetContentConflictsAsync(Func<Task<Stream>> officialSeed, string languageCode)
+    {
+        await Initialization;
+        var pending = await _db.Table<ContentConflictEntity>().ToListAsync();
+        if (pending.Count == 0) return [];
+
+        return await WithSeedFileAsync(officialSeed, async seedPath =>
+        {
+            var seed = await LoadSnapshotAsync(seedPath);
+            var local = await ContentSnapshot.LoadAsync(_db);
+            var conflicts = new List<ContentConflict>();
+            foreach (var entry in pending)
+            {
+                if (FindRows(seed, local, entry) is not var (table, seedRow, localRow))
+                {
+                    await _db.DeleteAsync(entry);
+                    continue;
+                }
+                var mapping = local.Mappings[table.Type];
+                var differences = new List<ContentFieldDifference>();
+                foreach (var column in mapping.Columns.Where(c => !c.IsPK && c.Name is not ("Source" or "OfficialId")))
+                {
+                    var official = seed.Display(table, seedRow, column.Name, languageCode);
+                    var mine = local.Display(table, localRow, column.Name, languageCode);
+                    if (official != mine) differences.Add(new ContentFieldDifference(column.Name, official, mine));
+                }
+                foreach (var join in OfficialContentSchema.Joins.Where(j => j.Owner == table.Type))
+                {
+                    var official = seed.DisplayJoin(join, (int)mapping.PK.GetValue(seedRow), languageCode);
+                    var mine = local.DisplayJoin(join, (int)mapping.PK.GetValue(localRow), languageCode);
+                    if (official != mine) differences.Add(new ContentFieldDifference(join.Type.Name, official, mine));
+                }
+                conflicts.Add(new ContentConflict(entry.OfficialId, entry.TableName,
+                    local.Text((string?)mapping.FindColumn("NameKey").GetValue(localRow), languageCode), differences));
+            }
+            return conflicts;
+        });
+    }
+
+    /// <summary>Choix du joueur sur une entrée en attente : garder sa version (rien ne change, la version
+    /// officielle actuelle est déjà mémorisée - il ne sera plus sollicité tant qu'elle ne rebouge pas) ou
+    /// reprendre l'officielle (réécrite comme à la synchro, repasse en Officielle).</summary>
+    public async Task ResolveContentConflictAsync(string officialId, bool takeOfficial, Func<Task<Stream>> officialSeed)
+    {
+        await Initialization;
+        var entry = await _db.FindAsync<ContentConflictEntity>(officialId);
+        if (entry is null) return;
+        if (!takeOfficial)
+        {
+            await _db.DeleteAsync(entry);
+            return;
+        }
+
+        await WithSeedFileAsync(officialSeed, async seedPath =>
+        {
+            var seed = await LoadSnapshotAsync(seedPath);
+            await RunInTransactionAsync(async () =>
+            {
+                var local = await ContentSnapshot.LoadAsync(_db);
+                if (FindRows(seed, local, entry) is var (table, seedRow, localRow))
+                {
+                    // Toutes les lignes officielles déjà présentes des deux côtés, pour traduire les références.
+                    var localIdBySeedId = OfficialContentSchema.Tables.ToDictionary(t => t.Type, t => seed.IdByOfficialId[t.Type]
+                        .Where(s => local.IdByOfficialId[t.Type].ContainsKey(s.Key))
+                        .ToDictionary(s => s.Value, s => local.IdByOfficialId[t.Type][s.Key]));
+                    await ApplySeedRowAsync(seed, table, seedRow, localRow, localIdBySeedId);
+                }
+                await _db.DeleteAsync(entry);
+            });
+            return true;
+        });
+    }
+
+    private static (CatalogTable Table, object SeedRow, object LocalRow)? FindRows(ContentSnapshot seed, ContentSnapshot local, ContentConflictEntity entry)
+    {
+        var table = OfficialContentSchema.Tables.FirstOrDefault(t => local.Mappings[t.Type].TableName == entry.TableName);
+        if (table is null
+            || !seed.IdByOfficialId[table.Type].TryGetValue(entry.OfficialId, out var seedId)
+            || !local.IdByOfficialId[table.Type].TryGetValue(entry.OfficialId, out var localId))
+            return null;
+        return (table, seed.Rows[table.Type][seedId], local.Rows[table.Type][localId]);
+    }
+
+    private Task<ContentSyncReport> SyncFromStreamAsync(Func<Task<Stream>> officialSeed) =>
+        WithSeedFileAsync(officialSeed, SyncFromFileAsync);
+
+    /// <summary>SQLite ne lit qu'un fichier : l'asset embarqué est d'abord copié dans un fichier temporaire,
+    /// supprimé après usage.</summary>
+    private static async Task<T> WithSeedFileAsync<T>(Func<Task<Stream>> officialSeed, Func<string, Task<T>> use)
+    {
+        var tempPath = Path.Combine(Path.GetTempPath(), $"mordheimledger-official-{Guid.NewGuid():N}.db3");
+        try
+        {
+            await using (var source = await officialSeed())
+            await using (var destination = File.Create(tempPath))
+                await source.CopyToAsync(destination);
+            return await use(tempPath);
+        }
+        finally
+        {
+            File.Delete(tempPath);
+        }
+    }
+
+    private static async Task<ContentSnapshot> LoadSnapshotAsync(string seedDatabasePath)
+    {
+        var connection = new SQLiteAsyncConnection(seedDatabasePath, SQLiteOpenFlags.ReadOnly);
+        try
+        {
+            return await ContentSnapshot.LoadAsync(connection);
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
+    }
+
+    private async Task<ContentSyncReport> SyncFromFileAsync(string seedDatabasePath)
+    {
         var seedConnection = new SQLiteAsyncConnection(seedDatabasePath, SQLiteOpenFlags.ReadOnly);
         try
         {
@@ -256,6 +426,40 @@ public partial class AppDatabase
         public string? OfficialIdOf(Type table, object row) => (string?)Mappings[table].FindColumn("OfficialId").GetValue(row);
 
         public IEnumerable<int> JoinedIds(OwnedJoin join, int ownerId) => _joins[join.Type][ownerId];
+
+        /// <summary>Texte d'une clé de traduction dans languageCode, repli sur l'anglais.</summary>
+        public string Text(string? key, string languageCode)
+        {
+            var byLanguage = TranslationsOf(key ?? string.Empty);
+            return byLanguage.TryGetValue(languageCode, out var text) || byLanguage.TryGetValue("en", out text) ? text : string.Empty;
+        }
+
+        /// <summary>Valeur d'une colonne telle qu'un joueur la lit : texte traduit, nom de la ligne visée,
+        /// liste de noms, ou valeur brute.</summary>
+        public string Display(CatalogTable table, object row, string column, string languageCode)
+        {
+            var value = Mappings[table.Type].FindColumn(column).GetValue(row);
+            if (table.TranslationColumns.Contains(column)) return Text((string?)value, languageCode);
+            if (table.ForeignKeys.FirstOrDefault(f => f.Column == column) is { Target: { } target })
+                return NameOf(target, value as int?, languageCode);
+            if (table.CsvForeignKeys.FirstOrDefault(f => f.Column == column) is { Target: { } csvTarget })
+                return string.Join(", ", ((string?)value ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(id => NameOf(csvTarget, int.Parse(id), languageCode)).Order(StringComparer.CurrentCulture));
+            return value switch
+            {
+                null => string.Empty,
+                bool flag => flag ? "✓" : "✗",
+                _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty,
+            };
+        }
+
+        public string DisplayJoin(OwnedJoin join, int ownerId, string languageCode) =>
+            string.Join(", ", JoinedIds(join, ownerId).Select(id => NameOf(join.Other, id, languageCode)).Order(StringComparer.CurrentCulture));
+
+        private string NameOf(Type table, int? id, string languageCode) =>
+            id is { } value && value != 0 && Rows[table].TryGetValue(value, out var row)
+                ? Text((string?)Mappings[table].FindColumn("NameKey").GetValue(row), languageCode)
+                : string.Empty;
 
         public IReadOnlyDictionary<string, string> TranslationsOf(string key) =>
             _translations.TryGetValue(key, out var byLanguage) ? byLanguage : new SortedDictionary<string, string>();

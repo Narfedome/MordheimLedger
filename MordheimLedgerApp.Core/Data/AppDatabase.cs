@@ -20,8 +20,12 @@ public partial class AppDatabase
     /// </summary>
     public Task Initialization { get; }
 
-    public AppDatabase(string path)
+    /// <param name="officialSeed">Ouvre la seed.db3 embarquée dans l'appli (null en tests/outils) : si elle est
+    /// fournie, l'initialisation synchronise le contenu officiel dès que ContentVersion.json est plus récent
+    /// que la version enregistrée en base - voir SyncOfficialContentAsync, StartupSyncReport.</param>
+    public AppDatabase(string path, Func<Task<Stream>>? officialSeed = null)
     {
+        _officialSeed = officialSeed;
         _db = new SQLiteAsyncConnection(path);
         // Toute écriture ORM (Insert/Update/Delete, d'où qu'elle vienne) évince la table concernée du
         // cache - les DELETE en SQL brut ne déclenchent pas cet événement, voir InvalidateCachedTable.
@@ -75,6 +79,7 @@ public partial class AppDatabase
         // dans ResyncExplorationResultsAsync, ~200 lignes supprimées/réinsérées une à une), que tout
         // service attend via Initialization avant sa première requête.
         await RunInTransactionAsync(SeedAndBackfillAsync);
+        await SyncOfficialContentOnStartupAsync();
     }
 
     /// <summary>BEGIN/COMMIT explicites plutôt que SQLiteAsyncConnection.RunInTransactionAsync, qui
@@ -1039,6 +1044,11 @@ public partial class AppDatabase
     public async Task<(int Version, string? Fingerprint)> GetContentMetaAsync()
     {
         await Initialization;
+        return await ReadContentMetaAsync();
+    }
+
+    private async Task<(int Version, string? Fingerprint)> ReadContentMetaAsync()
+    {
         var meta = (await _db.Table<ContentMetaEntity>().ToListAsync()).ToDictionary(m => m.Key, m => m.Value);
         return (meta.TryGetValue(SeedContent.VersionKey, out var v) && int.TryParse(v, out var version) ? version : 0,
             meta.GetValueOrDefault(SeedContent.FingerprintKey));

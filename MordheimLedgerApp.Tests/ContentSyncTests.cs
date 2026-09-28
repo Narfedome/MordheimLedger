@@ -119,6 +119,62 @@ public class ContentSyncTests : IAsyncLifetime
         Assert.Equal(nameof(EquipmentItemEntity), conflict.TableName);
     }
 
+    private Task<Stream> OpenSeed() => Task.FromResult<Stream>(File.OpenRead(_seedPath));
+
+    /// <summary>Hache modifiée par le joueur (coût 7) alors que l'officielle passe à 99 : en attente de choix.</summary>
+    private async Task CreateAxeConflictAsync()
+    {
+        var mine = await LocalItemAsync("equipment.axe");
+        mine.Cost = 7;
+        await _library.SaveEquipmentItemAsync(mine, "en");
+        var seedAxe = await ByOfficialIdAsync<EquipmentItemEntity>(_seed, "equipment.axe");
+        seedAxe.Cost = 99;
+        await _seed.Connection.UpdateAsync(seedAxe);
+        await SyncAsync();
+    }
+
+    [Fact]
+    public async Task Conflict_ListsOnlyDifferingFields()
+    {
+        await CreateAxeConflictAsync();
+
+        var conflict = Assert.Single(await _local.GetContentConflictsAsync(OpenSeed, "fr"));
+
+        Assert.Equal("equipment.axe", conflict.OfficialId);
+        Assert.Equal("Hache", conflict.Name);
+        Assert.Equal(new ContentFieldDifference("Cost", "99", "7"), Assert.Single(conflict.Differences));
+    }
+
+    [Fact]
+    public async Task Conflict_TakeOfficial_RewritesRowAsOfficial()
+    {
+        await CreateAxeConflictAsync();
+        var id = (await LocalItemAsync("equipment.axe")).Id;
+
+        await _local.ResolveContentConflictAsync("equipment.axe", takeOfficial: true, OpenSeed);
+
+        var axe = await LocalItemAsync("equipment.axe");
+        Assert.Equal(id, axe.Id);
+        Assert.Equal(99, axe.Cost);
+        Assert.Equal(ContentSource.Official, axe.Source);
+        Assert.Equal(0, await _local.GetPendingContentConflictCountAsync());
+    }
+
+    [Fact]
+    public async Task Conflict_KeepMine_NotAskedAgainUntilOfficialChanges()
+    {
+        await CreateAxeConflictAsync();
+
+        await _local.ResolveContentConflictAsync("equipment.axe", takeOfficial: false, OpenSeed);
+        var again = await _local.SyncOfficialContentAsync(_seedPath);
+
+        var axe = await LocalItemAsync("equipment.axe");
+        Assert.Equal(7, axe.Cost);
+        Assert.Equal(ContentSource.Modified, axe.Source);
+        Assert.False(again.HasChanges, again.ToString());
+        Assert.Equal(0, await _local.GetPendingContentConflictCountAsync());
+    }
+
     [Fact]
     public async Task ModifiedRow_NotFlagged_WhenOfficialUnchanged()
     {
@@ -174,6 +230,35 @@ public class ContentSyncTests : IAsyncLifetime
         var house = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Id == custom.Id);
         Assert.Equal(ContentSource.Custom, house.Source);
         Assert.Equal("House rule", house.Name);
+    }
+
+    /// <summary>Au lancement : synchro seulement si la base est en retard sur ContentVersion.json.</summary>
+    [Fact]
+    public async Task Startup_SyncsOnlyWhenDatabaseVersionIsBehind()
+    {
+        var localAxe = await ByOfficialIdAsync<EquipmentItemEntity>(_local, "equipment.axe");
+        localAxe.Cost = 1;
+        await _local.Connection.UpdateAsync(localAxe);
+        await _local.Connection.ExecuteAsync("DELETE FROM ContentMetaEntity");
+        await _local.Connection.CloseAsync();
+        await _seed.Connection.CloseAsync();
+        Task<Stream> OpenSeed() => Task.FromResult<Stream>(File.OpenRead(_seedPath));
+
+        var behind = new AppDatabase(_localPath, OpenSeed);
+        await behind.Initialization;
+        var report = behind.StartupSyncReport;
+        var version = (await behind.GetContentMetaAsync()).Version;
+        var cost = (await ByOfficialIdAsync<EquipmentItemEntity>(behind, "equipment.axe")).Cost;
+        await behind.Connection.CloseAsync();
+        var upToDate = new AppDatabase(_localPath, OpenSeed);
+        await upToDate.Initialization;
+        _local = upToDate;
+
+        Assert.Null(behind.StartupSyncError);
+        Assert.Equal(new ContentSyncReport(1, 0, 0, 0), report);
+        Assert.Equal(SeedContent.Version, version);
+        Assert.NotEqual(1, cost);
+        Assert.Null(upToDate.StartupSyncReport);
     }
 
     [Fact]

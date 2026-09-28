@@ -22,6 +22,7 @@ public partial class WarbandListViewModel : BaseViewModel
     private readonly IInjuryPickerService _injuryPickerService;
     private readonly IMutationPickerService _mutationPickerService;
     private readonly IHiredSwordPickerService _hiredSwordPickerService;
+    private readonly OfficialContentService _officialContent;
     [ObservableProperty]
     private ObservableCollection<WarbandRow> rows = new();
 
@@ -49,8 +50,10 @@ public partial class WarbandListViewModel : BaseViewModel
         IWarbandService warbandService, IWarbandArchetypePickerService warbandArchetypePickerService,
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPickerService,
         ISkillPickerService skillPickerService, ISpellPickerService spellPickerService, IInjuryPickerService injuryPickerService,
-        IMutationPickerService mutationPickerService, IHiredSwordPickerService hiredSwordPickerService)
+        IMutationPickerService mutationPickerService, IHiredSwordPickerService hiredSwordPickerService,
+        OfficialContentService officialContent)
     {
+        _officialContent = officialContent;
         _pickerNavigation = pickerNavigation;
         _warbandService = warbandService;
         _warbandArchetypePickerService = warbandArchetypePickerService;
@@ -77,6 +80,11 @@ public partial class WarbandListViewModel : BaseViewModel
         {
             await InitializeAsync();
         });
+
+        // Première page du Shell : c'est ici qu'on annonce (une seule fois) une mise à jour du contenu
+        // officiel faite pendant le démarrage.
+        if (await _officialContent.TakeStartupMessageAsync() is { } message)
+            await ShowInfoAsync(Loc["OfficialContentTitle"], message);
     }
 
     public async Task InitializeAsync()

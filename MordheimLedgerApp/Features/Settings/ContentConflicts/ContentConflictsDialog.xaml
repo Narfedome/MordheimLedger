@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Settings.ContentConflicts"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Settings.ContentConflicts.ContentConflictsDialog"
+               x:DataType="local:ContentConflictsDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="{OnIdiom Default=360, Desktop=440}">
+        <dialogs:AnimatedHeightScrollView>
+            <VerticalStackLayout Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Grid.Column="0" Text="{loc:Loc ContentConflictsTitle}"
+                           Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Icon="{x:Static icons:SolidFont.Xmark}"
+                                                  IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                                  Command="{Binding CancelCommand}"/>
+                </Grid>
+                <Label Text="{loc:Loc ContentConflictsIntro}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+
+                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Conflicts}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:ContentConflictRow">
+                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                <VerticalStackLayout Spacing="8">
+                                    <VerticalStackLayout>
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{Binding TypeLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Officielle à gauche, celle du joueur à droite, un bloc par champ qui diffère. -->
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                        <Label Grid.Column="0" Text="{loc:Loc ContentConflictOfficial}" FontSize="12"
+                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
+                                        <Label Grid.Column="1" Text="{loc:Loc ContentConflictMine}" FontSize="12"
+                                               FontAttributes="Bold" TextColor="{DynamicResource AppAccent}"/>
+                                    </Grid>
+                                    <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Differences}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:ContentDifferenceRow">
+                                                <VerticalStackLayout Spacing="2">
+                                                    <Label Text="{Binding Label}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                                        <Label Grid.Column="0" Text="{Binding Official}" FontSize="13"/>
+                                                        <Label Grid.Column="1" Text="{Binding Mine}" FontSize="13"/>
+                                                    </Grid>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,4,0,0">
+                                        <Button Grid.Column="0"
+                                                Text="{loc:Loc ContentConflictTakeOfficial}"
+                                                Style="{StaticResource DialogSecondaryButtonStyle}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:ContentConflictsDialogViewModel}}, Path=TakeOfficialCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        <Button Grid.Column="1"
+                                                Text="{loc:Loc ContentConflictKeepMine}"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:ContentConflictsDialogViewModel}}, Path=KeepMineCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </dialogs:AnimatedHeightScrollView>
+    </Border>
+</dialogs:DialogContent>

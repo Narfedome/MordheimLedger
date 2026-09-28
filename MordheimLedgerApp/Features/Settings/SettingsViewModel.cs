@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Features.Settings.ContentConflicts;
 using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
 
@@ -80,6 +81,58 @@ namespace MordheimLedgerApp.Features.Settings
             await ShowInfoAsync(Loc["SettingsResetTitle"], Loc["SettingsResetDone"]);
         }
 
+        /// <summary>Synchro manuelle du contenu officiel depuis la seed.db3 embarquée - même si la version est
+        /// déjà à jour (répare un catalogue qui aurait dérivé). Même avertissement de redémarrage que
+        /// ResetDatabase si quelque chose a changé.</summary>
+        [RelayCommand]
+        public async Task SyncOfficialContent()
+        {
+            ContentSyncReport? report = null;
+            try
+            {
+                await Loading.RunAsync(async () => report = await _officialContent.SyncNowAsync());
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync(ex);
+                return;
+            }
+            await RefreshOfficialContentStatusAsync();
+
+            var message = OfficialContentService.Describe(report!);
+            if (report!.HasChanges) message += "\n\n" + Loc["OfficialContentRestartHint"];
+            await ShowInfoAsync(Loc["OfficialContentTitle"], message);
+            if (report.Conflicts > 0) await ReviewContentConflicts();
+        }
+
+        /// <summary>Choix garder sa version / prendre l'officielle pour chaque entrée en attente.</summary>
+        [RelayCommand]
+        public async Task ReviewContentConflicts()
+        {
+            List<ContentConflict> conflicts = [];
+            await Loading.RunAsync(async () =>
+                conflicts = await _db.GetContentConflictsAsync(OfficialContentService.OpenEmbeddedSeedAsync, Loc.Language));
+            if (conflicts.Count > 0
+                && await ShowDialogAsync(new ContentConflictsDialog(new ContentConflictsDialogViewModel(_db, conflicts))))
+                await ShowInfoAsync(Loc["OfficialContentTitle"], Loc["OfficialContentRestartHint"]);
+            await RefreshOfficialContentStatusAsync();
+        }
+
+        [ObservableProperty]
+        private string officialContentStatus = string.Empty;
+
+        [ObservableProperty]
+        private bool hasPendingContentConflicts;
+
+        private async Task RefreshOfficialContentStatusAsync()
+        {
+            var (version, _) = await _db.GetContentMetaAsync();
+            var pending = await _db.GetPendingContentConflictCountAsync();
+            HasPendingContentConflicts = pending > 0;
+            OfficialContentStatus = string.Format(Loc["OfficialContentVersion"], version)
+                + (pending > 0 ? " · " + string.Format(Loc["OfficialContentPending"], pending) : string.Empty);
+        }
+
         public static Dictionary<string, string> LanguageLabels => LocalizationService.SupportedLanguages;
 
         public ObservableCollection<string> ThemeOptions { get; } = new();
@@ -96,9 +149,13 @@ namespace MordheimLedgerApp.Features.Settings
         [ObservableProperty]
         private AppPalette selectedPalette;
 
-        public SettingsViewModel(AppDatabase db)
+        private readonly OfficialContentService _officialContent;
+
+        public SettingsViewModel(AppDatabase db, OfficialContentService officialContent)
         {
             _db = db;
+            _officialContent = officialContent;
+            _ = RefreshOfficialContentStatusAsync();
             selectedLanguage = Loc.Language;
             selectedPalette = _theme.Palette;
             RebuildThemeOptions();

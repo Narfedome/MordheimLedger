@@ -98,10 +98,9 @@ public partial class EndOfGamePageViewModel
     /// ExistingHenchmanTopUps est peuplé dès le constructeur (AddCount à 0 au départ), donc toujours sûr à
     /// additionner ici même avant d'atteindre cette étape. Retranche WarriorRows.DismissCount (même jour,
     /// retour utilisateur - "dans les recrutement, il faut soustraire les effectifs") : un guerrier renvoyé
-    /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place, même limitation "stale jusqu'à
-    /// Terminer" qu'ailleurs dans ce wizard (DismissCount plafonné à HeadCount par le stepper, jamais
-    /// négatif).</summary>
-    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.Warrior.HeadCount - r.DismissCount) + RecruitRows.Sum(r => r.Count)
+    /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place. Part de l'effectif SURVIVANT
+    /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.</summary>
+    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount) + RecruitRows.Sum(r => r.Count)
         + ExistingHenchmanTopUps.Sum(t => t.AddCount);
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
@@ -109,7 +108,7 @@ public partial class EndOfGamePageViewModel
     /// retraités - voir WarbandDetailViewModel.EndOfGame's activeWarriorRows), pas seulement les Héros.
     /// Retranche DismissCount, même raison que TotalWarriorCountAfterRecruitment.</summary>
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
-        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.Warrior.HeadCount - r.DismissCount);
+        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount);
 
     /// <summary>Chip tapable sur chaque ligne de WarriorRecruitListView (Steps/RecruitHeroesCountStepView.
     /// xaml/RecruitHenchmenCountStepView.xaml's DetailCommand) - 2026-09-23, retour utilisateur "plutôt

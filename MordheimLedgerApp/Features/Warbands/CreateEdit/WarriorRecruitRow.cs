@@ -126,7 +126,7 @@ public abstract partial class RecruitSlot : ObservableObject
     /// Composant entièrement masqué seulement pour un type qui ne coche aucune de ces trois raisons
     /// (ex. un Zombie hors Bande existante : pas d'équipement, pas de compétences/XP libres, pas de
     /// sorts).</summary>
-    public bool ShowTabsView => CanUseEquipment || IsExistingWarband || IsSpellcaster || CanBuyMutations;
+    public bool ShowTabsView => CanUseEquipment || IsExistingWarband || ShowSkillsTab || IsSpellcaster || CanBuyMutations;
 
     /// <summary>Pilote l'onglet Compétences seul (Équipement/Sorts/XP gardent leurs conditions
     /// habituelles) - visible en mode Bande existante (IsExistingWarband, comme avant) OU dès qu'on
@@ -164,12 +164,17 @@ public abstract partial class RecruitSlot : ObservableObject
     public bool IsMutationsSection => SelectedSection == 4;
     public bool IsInjuriesSection => SelectedSection == 5;
 
-    /// <summary>Onglet ouvert par défaut pour le mode courant - Équipement, sauf pour un type qui n'en porte
-    /// jamais : Sorts pour un lanceur de sorts hors Bande existante, sinon Mutations pour un Possédé. Partagé
-    /// par le constructeur et WarbandEditDialogViewModel.OnIsExistingWarbandChanged (bascule de mode).</summary>
+    /// <summary>Onglet ouvert par défaut pour le mode courant - le PREMIER onglet visible, dans l'ordre
+    /// d'affichage de RecruitSlotTabsView (Équipement, Compétences, Sorts, Mutations, Blessures, XP).
+    /// L'onglet Équipement est masqué pour un type qui n'en porte jamais (2026-09-28) : un Possédé ou un
+    /// Zombie en Bande existante n'ouvre donc plus sur un onglet invisible. Partagé par le constructeur et
+    /// WarbandEditDialogViewModel.OnIsExistingWarbandChanged (bascule de mode).</summary>
     public int DefaultSection => CanUseEquipment ? 0
-        : !IsExistingWarband && IsSpellcaster ? 2
+        : ShowSkillsTab ? 1
+        : IsSpellcaster ? 2
         : CanBuyMutations ? 4
+        : ShowInjuriesTab ? 5
+        : IsExistingWarband ? 3
         : 0;
 
     [RelayCommand]

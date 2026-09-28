@@ -19,8 +19,10 @@
              "+"/dé différent selon le mode (voir plus bas). -->
         <components:ScrollableTabStripView>
             <HorizontalStackLayout Spacing="14">
+                <!-- Onglet Équipement : masqué pour un type qui n'en porte jamais (Possédé, Zombie...). -->
                 <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" FontSize="11"
-                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"/>
+                                             IsActive="{Binding Item.IsEquipmentSection}" Command="{Binding Item.ShowEquipmentSectionCommand}"
+                                             IsVisible="{Binding Item.CanUseEquipment}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" FontSize="11"
                                              IsActive="{Binding Item.IsSkillsSection}" Command="{Binding Item.ShowSkillsSectionCommand}"
                                              IsVisible="{Binding Item.ShowSkillsTab}"/>
@@ -30,13 +32,19 @@
                                              IsActive="{Binding Item.IsSpellsSection}" Command="{Binding Item.ShowSpellsSectionCommand}"
                                              IsVisible="{Binding Item.IsSpellcaster}"/>
                 <!-- Onglet Mutations : Possédés/Mutants (RecruitSlot.CanBuyMutations), et seulement si
-                     l'appelant a câblé ses commandes (HasMutationCommands) - wrapper car IsVisible ne
-                     combine pas deux conditions en XAML. -->
-                <ContentView IsVisible="{Binding HasMutationCommands}">
-                    <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" FontSize="11"
-                                                 IsActive="{Binding Item.IsMutationsSection}" Command="{Binding Item.ShowMutationsSectionCommand}"
-                                                 IsVisible="{Binding Item.CanBuyMutations}"/>
-                </ContentView>
+                     l'appelant a câblé ses commandes (HasMutationCommands). Les deux conditions sur l'onglet
+                     lui-même (AllTrueMultiConverter), jamais un ContentView enveloppant : sur Android, une
+                     enveloppe visible autour d'un onglet masqué gardait sa place (trou entre Sorts et
+                     Blessures pour un Magister). -->
+                <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" FontSize="11"
+                                             IsActive="{Binding Item.IsMutationsSection}" Command="{Binding Item.ShowMutationsSectionCommand}">
+                    <components:TabToggleButton.IsVisible>
+                        <MultiBinding Converter="{StaticResource AllTrueMultiConverter}">
+                            <Binding Path="HasMutationCommands"/>
+                            <Binding Path="Item.CanBuyMutations"/>
+                        </MultiBinding>
+                    </components:TabToggleButton.IsVisible>
+                </components:TabToggleButton>
                 <!-- Onglet Blessures : Héros en mode Bande existante uniquement (RecruitSlot.ShowInjuriesTab) -
                      import d'une bande déjà jouée, malus permanents appliqués au Save. -->
                 <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="11"
@@ -140,8 +148,14 @@
                                           Command="{Binding AddInjuryCommand}"
                                           CommandParameter="{Binding Item}"/>
         </Grid>
-        <ContentView IsVisible="{Binding HasMutationCommands}">
-        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsMutationsSection}">
+        <!-- Mêmes deux conditions que l'onglet Mutations, pour la même raison (pas d'enveloppe). -->
+        <Grid ColumnDefinitions="*,Auto">
+            <Grid.IsVisible>
+                <MultiBinding Converter="{StaticResource AllTrueMultiConverter}">
+                    <Binding Path="HasMutationCommands"/>
+                    <Binding Path="Item.IsMutationsSection"/>
+                </MultiBinding>
+            </Grid.IsVisible>
             <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Mutations}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="library:Mutation">
@@ -159,8 +173,7 @@
                                           Command="{Binding AddMutationCommand}"
                                           CommandParameter="{Binding Item}"/>
         </Grid>
-        </ContentView>
-       
+
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsXpSection}">
             <Label Grid.Column="0" Text="{loc:Loc WarriorExperiencePh}" FontSize="11" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
             <Entry Grid.Column="1" Text="{Binding Item.Experience}" Keyboard="Numeric" WidthRequest="60" HorizontalTextAlignment="End"/>

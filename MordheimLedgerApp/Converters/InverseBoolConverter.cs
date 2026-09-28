@@ -67,4 +67,18 @@ namespace MordheimLedgerApp.Converters
         public object[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) =>
             throw new NotImplementedException();
     }
+
+    /// <summary>True seulement si toutes les valeurs liées sont true - pour combiner plusieurs conditions
+    /// IsVisible sur UN élément (MultiBinding) plutôt que d'envelopper l'élément dans un ContentView porteur
+    /// de la seconde condition : sur Android, un ContentView resté visible autour d'un enfant masqué garde
+    /// la place de cet enfant (2026-09-28, trou à la place de l'onglet Mutations d'un Magister,
+    /// RecruitSlotTabsView).</summary>
+    public class AllTrueMultiConverter : IMultiValueConverter
+    {
+        public object? Convert(object?[] values, Type targetType, object? parameter, CultureInfo culture) =>
+            values.All(v => v is true);
+
+        public object[] ConvertBack(object? value, Type[] targetTypes, object? parameter, CultureInfo culture) =>
+            throw new NotImplementedException();
+    }
 }

@@ -32,12 +32,12 @@ public class ExplorationOutcome
     /// rolled by the End of Game wizard, not here (Core.Models stays data-only).</summary>
     public string? GoldFormula { get; set; }
 
-    /// <summary>English Name of an existing MordheimLedgerApp.Core.Models.Library.EquipmentItem for a
-    /// Kind.Item outcome - resolved by lookup (never created) against the already-seeded Trading Post
-    /// catalog, same find-by-name idiom as WarbandDetailViewModel.EndOfGame's Injury lookup.</summary>
-    public string? EquipmentItemName { get; set; }
+    /// <summary>OfficialId of an existing MordheimLedgerApp.Core.Models.Library.EquipmentItem for a
+    /// Kind.Item outcome (e.g. "equipment.axe") - resolved by lookup (never created) against the
+    /// already-seeded Trading Post catalog.</summary>
+    public string? EquipmentItemOfficialId { get; set; }
 
-    /// <summary>Dice formula or fixed count for how many of EquipmentItemName are found (e.g. "D3", "1")
+    /// <summary>Dice formula or fixed count for how many of EquipmentItemOfficialId are found (e.g. "D3", "1")
     /// - only meaningful alongside Kind.Item.</summary>
     public string? ItemQuantityFormula { get; set; }
 
@@ -46,35 +46,35 @@ public class ExplorationOutcome
     /// rolled once by the player at find time, same idiom as GoldFormula, then stored per-instance on
     /// the resulting Models.WarbandEquipment row (see WarbandEquipment.FoundValueOverride) since a
     /// single catalog Cost can't represent a value that varies per find. Null (the common case) = Item.
-    /// Cost/MaterialRuleName pricing applies unchanged (e.g. Jewelsmith's fixed-value Amethyst/
+    /// Cost/MaterialRuleOfficialId pricing applies unchanged (e.g. Jewelsmith's fixed-value Amethyst/
     /// Necklace).</summary>
     public string? FoundValueFormula { get; set; }
 
-    /// <summary>English Name of an existing SpecialRule (a "material rule" like "Gromril Weapon"/
-    /// "Ithilmar Weapon"/"Ornate Weapon" - see SpecialRules.json's CostMultiplier entries) applied on top
-    /// of EquipmentItemName (and SecondaryEquipmentItemName, when present - same material for both, e.g.
+    /// <summary>OfficialId of an existing SpecialRule (a "material rule" like "rule.gromril-weapon"/
+    /// "rule.ithilmar-weapon"/"rule.ornate-weapon" - see SpecialRules.json's CostMultiplier entries) applied on top
+    /// of EquipmentItemOfficialId (and SecondaryEquipmentItemOfficialId, when present - same material for both, e.g.
     /// Overturned Cart's ornate sword+dagger) - e.g. the Exploration chart's "Gromril Axe" is really just
     /// a plain "Axe" with this rule attached, same idiom as WarriorEquipment.MaterialRule at purchase
     /// time. A material with SpecialRule.IsResaleUpgrade set additionally makes the resulting
     /// Models.WarbandEquipment row sellable (see IWarbandService.SellWarbandItemAsync) - reusing the same
     /// CostMultiplier rather than a separate ad-hoc resale field. Null = the plain base item, no
     /// material.</summary>
-    public string? MaterialRuleName { get; set; }
+    public string? MaterialRuleOfficialId { get; set; }
 
     /// <summary>A second item granted by the same branch alongside the first, independent of Kind (e.g.
     /// Overturned Cart 5-6, Kind.Item: "a jewelled sword AND dagger"; Alchemist's Laboratory, Kind.Gold:
     /// gold AND an Alchemist's Notebook - see EquipmentItem.GrantsSkillCategory) - null for every other
     /// branch. Kept as a real catalog item rather than an invented bundle SKU so it can be
     /// equipped/sold separately; always found in quantity 1, unlike ItemQuantityFormula which only
-    /// governs the primary EquipmentItemName.</summary>
-    public string? SecondaryEquipmentItemName { get; set; }
+    /// governs the primary EquipmentItemOfficialId.</summary>
+    public string? SecondaryEquipmentItemOfficialId { get; set; }
 
-    /// <summary>The player's choice between EquipmentItemName and THIS item instead - only one is ever
-    /// granted (an "OR", unlike SecondaryEquipmentItemName's "AND"), e.g. Armourer 1-2: "D3 Shields or
-    /// Bucklers (choose which)". Null for every other branch. Shares ItemQuantityFormula/MaterialRuleName
-    /// with EquipmentItemName - the choice only picks which catalog item, not a different quantity or
+    /// <summary>The player's choice between EquipmentItemOfficialId and THIS item instead - only one is ever
+    /// granted (an "OR", unlike SecondaryEquipmentItemOfficialId's "AND"), e.g. Armourer 1-2: "D3 Shields or
+    /// Bucklers (choose which)". Null for every other branch. Shares ItemQuantityFormula/MaterialRuleOfficialId
+    /// with EquipmentItemOfficialId - the choice only picks which catalog item, not a different quantity or
     /// material.</summary>
-    public string? AlternativeEquipmentItemName { get; set; }
+    public string? AlternativeEquipmentItemOfficialId { get; set; }
 
     /// <summary>Short disambiguating label shown alongside this branch - an internal/technical tag (e.g.
     /// "Skavens : vente aux agents du Clan Eshin") used where a compact identifier is enough - not shown
@@ -85,7 +85,7 @@ public class ExplorationOutcome
 
     /// <summary>The rulebook's own full sentence for THIS branch alone (e.g. "A Skaven warband can sell
     /// the straggler to agents of Clan Eshin and gain 2D6 gc.") - only meaningful for a "conditioned by
-    /// warband identity" result (RestrictedToWarbandArchetypeNames), shown in the wizard instead of the
+    /// warband identity" result (RestrictedToWarbandArchetypeOfficialIds), shown in the wizard instead of the
     /// Note label so the player reads a real sentence, properly localized, rather than a terse tag.
     /// Contrast ExplorationResult.ShortDescription (the shared intro sentence every branch follows) -
     /// together they replace the full multi-branch Description on the wizard's Result step (see
@@ -97,16 +97,15 @@ public class ExplorationOutcome
     /// <summary>Translation slot backing BranchText - persistence-only, not for display.</summary>
     public string? BranchTextKey { get; set; }
 
-    /// <summary>English WarbandArchetype.Name(s) this branch is restricted to (e.g. "Skaven of Clan
-    /// Eshin") - only meaningful when the owning ExplorationResult.RollsIndependently is true and at
+    /// <summary>WarbandArchetype OfficialId(s) this branch is restricted to (e.g. "warband.skaven-of-clan-
+    /// eshin") - only meaningful when the owning ExplorationResult.RollsIndependently is true and at
     /// least one sibling Outcome also sets this (a "branch determined by warband identity" result:
     /// Straggler, Prisoners, Graveyard, Shrine's blessing). Empty = the catch-all branch for every
     /// warband not more specifically claimed by a sibling - see Core.Rules.ExplorationOutcomeResolver.
-    /// ResolveWarbandOutcome. Plain string list resolved by name at consumption time, same idiom as
-    /// EquipmentItemName/MaterialRuleName - this is fixed rulebook content with no editor, so no join
-    /// table/Id resolution is needed (unlike EquipmentItem/Skill/Mutation's editable
-    /// RestrictedToWarbandArchetypeIds).</summary>
-    public List<string> RestrictedToWarbandArchetypeNames { get; set; } = new();
+    /// ResolveWarbandOutcome. Plain OfficialId list compared at consumption time, same idiom as
+    /// EquipmentItemOfficialId/MaterialRuleOfficialId - fixed rulebook content with no editor, so no join
+    /// table is needed (unlike EquipmentItem/Skill/Mutation's editable RestrictedToWarbandArchetypeIds).</summary>
+    public List<string> RestrictedToWarbandArchetypeOfficialIds { get; set; } = new();
 
     /// <summary>True only for Straggler's "any other warband" branch ("interrogate the man... next time
     /// you roll on the Exploration chart, roll one dice more than usual and discard any one dice") - the
@@ -133,12 +132,12 @@ public class ExplorationOutcome
 
     /// <summary>English WarriorArchetype.Name of a Henchman that joins the warband for free - so far
     /// only Straggler's Undead branch ("gain a Zombie at no cost"). Resolved against the CURRENT
-    /// warband's own roster (never another warband's), same plain-string-reference idiom as
-    /// EquipmentItemName. If the warband already has a Henchman group of this same archetype, the new
+    /// warband's own roster (never another warband's), by OfficialId (e.g. "warrior.undead.zombie"), same
+    /// idiom as EquipmentItemOfficialId. If the warband already has a Henchman group of this same archetype, the new
     /// recruit merges into it (HeadCount + 1) rather than creating a separate row - Zombie-type Henchmen
     /// (CanUseEquipment false) never carry equipment that could tell two groups of the same archetype
     /// apart, so they're always the same group regardless. Null for every other branch.</summary>
-    public string? GrantsFreeHenchmanArchetypeName { get; set; }
+    public string? GrantsFreeHenchmanArchetypeOfficialId { get; set; }
 
     /// <summary>Only meaningful when the owning ExplorationResult.StatTestField is set - true = this
     /// branch applies when the chosen Hero's roll succeeded (roll &lt;= stat), false = when it failed,
@@ -169,13 +168,13 @@ public class ExplorationOutcome
     /// <summary>True marks a branch that grants a random entry from the rulebook's fixed 6-item Magical
     /// Artefacts table (Villa d'un Noble's 5-6 sub-roll; also referenced, but not yet wizard-wired
     /// since it needs Groupe B/RollsIndependently support, by Trésor Caché's "Artefact Magique (5+)"
-    /// row) rather than a single fixed EquipmentItemName - the actual item only resolves once the
+    /// row) rather than a single fixed EquipmentItemOfficialId - the actual item only resolves once the
     /// player makes a SECOND, dedicated D6 roll on that table (see Core.Rules.MagicalArtefactTable).
-    /// EquipmentItemName stays null on a branch like this. False/default for every other branch.</summary>
+    /// EquipmentItemOfficialId stays null on a branch like this. False/default for every other branch.</summary>
     public bool TriggersArtefactRoll { get; set; }
 
     /// <summary>True only for Prisoners' "other warbands" catch-all branch ("one prisoner may join the
-    /// warband as a new Henchman if you can equip him") - contrast GrantsFreeHenchmanArchetypeName (a
+    /// warband as a new Henchman if you can equip him") - contrast GrantsFreeHenchmanArchetypeOfficialId (a
     /// FIXED archetype from the book, e.g. Zombie): here the player picks which of the warband's OWN
     /// existing Henchman groups the freed prisoner joins (RAW is ambiguous for a warband with no human
     /// Henchman group - Elves, Dwarfs... - resolved by simply listing whichever groups THIS warband
@@ -183,7 +182,7 @@ public class ExplorationOutcome
     /// normal recruit) - only the cost of replicating the chosen group's CURRENT equipment loadout
     /// (Warrior.Equipment, shared per group) must fit the warband's treasury, confirmed via mockup
     /// (2026-08-21). Coexists with Kind.Gold on this same branch (the 2D6 escort fee) - not
-    /// Kind.None-exclusive like GrantsDistributedHeroExperienceFormula/GrantsFreeHenchmanArchetypeName.
+    /// Kind.None-exclusive like GrantsDistributedHeroExperienceFormula/GrantsFreeHenchmanArchetypeOfficialId.
     /// False/default for every other branch.</summary>
     public bool GrantsOptionalEquippedHenchman { get; set; }
 
@@ -222,7 +221,7 @@ public class ExplorationOutcome
 
     /// <summary>True only for "Returning a Favour" ((3,6) - "you gain the services of any one Hired
     /// Sword... for the duration of the next battle, free of charge") - same "independent of Kind" idiom
-    /// as GrantsOptionalEquippedHenchman/GrantsWeaponBlessing. Unlike GrantsFreeHenchmanArchetypeName (a
+    /// as GrantsOptionalEquippedHenchman/GrantsWeaponBlessing. Unlike GrantsFreeHenchmanArchetypeOfficialId (a
     /// FIXED archetype from the book), the player picks which Hired Sword type to engage at resolution
     /// time (EndOfGamePageViewModel.Exploration.cs), since that's a real choice offered by the book
     /// ("choose from those available to your warband"), not a fixed name - resolved via

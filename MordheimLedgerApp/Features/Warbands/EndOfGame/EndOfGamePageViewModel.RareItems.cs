@@ -65,7 +65,7 @@ public partial class EndOfGamePageViewModel
     [RelayCommand]
     private async Task SelectRareItem(RareItemSearchEntry entry)
     {
-        var listIds = _warriorArchetypesByEnglishName.Values
+        var listIds = _warriorArchetypesByOfficialId.Values
             .Select(a => a.EquipmentListId)
             .Where(id => id.HasValue)
             .Select(id => id!.Value)

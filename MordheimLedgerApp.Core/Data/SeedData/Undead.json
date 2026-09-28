@@ -1,6 +1,7 @@
 {
+  "id": "warband.undead",
   "grade": "Core",
-  "race": "Undead",
+  "raceId": "race.undead",
   "imagePath": "the_undead.jpg",
   "name": {
     "en": "Undead",
@@ -13,6 +14,7 @@
   "specialRules": [],
   "magicSchools": [
     {
+      "id": "school.necromancy",
       "name": {
         "en": "Necromancy",
         "fr": "Nécromancie"
@@ -24,6 +26,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.undead.vampire",
       "name": {
         "en": "Vampire",
         "fr": "Vampire"
@@ -43,37 +46,42 @@
       "initiative": 5,
       "attacks": 2,
       "leadership": 8,
-      "racialProfileName": "Vampire",
+      "racialProfileId": "profile.vampire",
       "description": {
         "en": "Vampires lead the Undead in their search for the magical stones that will give their master the power to conquer the Empire.",
         "fr": "Les vampires conduisent les morts-vivants dans leur quête de la pierre magique qui donnera à leur maître le pouvoir de conquérir l'Empire."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.immune-to-psychology",
           "name": {
             "en": "Immune to Psychology",
             "fr": "Immunité à la Psychologie"
           }
         },
         {
+          "id": "rule.immune-to-poison",
           "name": {
             "en": "Immune to Poison",
             "fr": "Immunité aux Poisons"
           }
         },
         {
+          "id": "rule.not-alive",
           "name": {
             "en": "Not Alive",
             "fr": "Insensible"
@@ -84,7 +92,7 @@
           }
         }
       ],
-      "equipmentListName": "Undead Equipment List",
+      "equipmentListId": "list.undead.undead-equipment-list",
       "skillCategories": [
         "Combat",
         "Academic",
@@ -93,6 +101,7 @@
       ]
     },
     {
+      "id": "warrior.undead.necromancer",
       "name": {
         "en": "Necromancer",
         "fr": "Nécromancien"
@@ -110,13 +119,14 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Necromancers are evil wizards, studying the corrupt art of Necromancy.",
         "fr": "Les nécromanciens sont des sorciers malfaisants, qui étudient les arcanes maudits de la nécromancie."
       },
       "specialRules": [
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
@@ -124,13 +134,14 @@
         }
       ],
       "isSpellcaster": true,
-      "equipmentListName": "Undead Equipment List",
+      "equipmentListId": "list.undead.undead-equipment-list",
       "skillCategories": [
         "Academic",
         "Speed"
       ]
     },
     {
+      "id": "warrior.undead.dreg",
       "name": {
         "en": "Dreg",
         "fr": "Paria"
@@ -148,18 +159,19 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Dregs are the most miserable human survivors of the demise of Mordheim, deformed and rejected individuals often bound in fanatical loyalty to their Undead masters.",
         "fr": "Les parias sont les plus misérables survivants humains de la chute de Mordheim, des individus difformes et rejetés, souvent fanatiquement loyaux envers leurs maîtres morts-vivants."
       },
-      "equipmentListName": "Undead Equipment List",
+      "equipmentListId": "list.undead.undead-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength"
       ]
     },
     {
+      "id": "warrior.undead.zombie",
       "name": {
         "en": "Zombie",
         "fr": "Zombie"
@@ -185,18 +197,21 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.sluggish",
           "name": {
             "en": "Sluggish",
             "fr": "Apathie"
@@ -207,18 +222,21 @@
           }
         },
         {
+          "id": "rule.immune-to-psychology",
           "name": {
             "en": "Immune to Psychology",
             "fr": "Immunité à la Psychologie"
           }
         },
         {
+          "id": "rule.immune-to-poison",
           "name": {
             "en": "Immune to Poison",
             "fr": "Immunité aux Poisons"
           }
         },
         {
+          "id": "rule.not-alive",
           "name": {
             "en": "Not Alive",
             "fr": "Insensible"
@@ -229,6 +247,7 @@
           }
         },
         {
+          "id": "rule.never-gains-experience",
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
@@ -237,6 +256,7 @@
       ]
     },
     {
+      "id": "warrior.undead.ghoul",
       "name": {
         "en": "Ghoul",
         "fr": "Goule"
@@ -254,7 +274,7 @@
       "initiative": 3,
       "attacks": 2,
       "leadership": 5,
-      "racialProfileName": "Ghoul",
+      "racialProfileId": "profile.ghoul",
       "canUseEquipment": false,
       "description": {
         "en": "Ghouls are the descendants of evil and insane men who ate the flesh of the dead to survive the famine.",
@@ -262,12 +282,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
@@ -276,6 +298,7 @@
       ]
     },
     {
+      "id": "warrior.undead.dire-wolf",
       "name": {
         "en": "Dire Wolf",
         "fr": "Loup Funeste"
@@ -301,12 +324,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.pack-charge",
           "name": {
             "en": "Pack Charge",
             "fr": "Charge en Meute"
@@ -317,6 +342,7 @@
           }
         },
         {
+          "id": "rule.sluggish",
           "name": {
             "en": "Sluggish",
             "fr": "Apathie"
@@ -327,24 +353,28 @@
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.immune-to-psychology",
           "name": {
             "en": "Immune to Psychology",
             "fr": "Immunité à la Psychologie"
           }
         },
         {
+          "id": "rule.immune-to-poison",
           "name": {
             "en": "Immune to Poison",
             "fr": "Immunité aux Poisons"
           }
         },
         {
+          "id": "rule.not-alive",
           "name": {
             "en": "Not Alive",
             "fr": "Insensible"
@@ -355,6 +385,7 @@
           }
         },
         {
+          "id": "rule.never-gains-experience",
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
@@ -365,6 +396,7 @@
   ],
   "equipment": [
     {
+      "id": "equipment.book-of-the-dead",
       "name": {
         "en": "Book of the Dead",
         "fr": "Livre des Morts"
@@ -377,34 +409,35 @@
         "fr": "Contient des transcriptions des livres de Nagash, le grand nécromancien - un Nécromancien gagne un nouveau sort de façon permanente, un Vampire peut apprendre la nécromancie via la compétence Savoir Interdit. Coût complet : 200 + 1D6x25 CO."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Vampire",
-        "Necromancer"
+      "restrictedToWarriorIds": [
+        "warrior.undead.vampire",
+        "warrior.undead.necromancer"
       ]
     }
   ],
   "equipmentLists": [
     {
+      "id": "list.undead.undead-equipment-list",
       "name": {
         "en": "Undead Equipment List",
         "fr": "Liste d'équipement des Morts-vivants"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Double-handed weapon",
-        "Spear",
-        "Halberd",
-        "Bow",
-        "Short Bow",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet",
-        "Book of the Dead"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.double-handed-weapon",
+        "equipment.spear",
+        "equipment.halberd",
+        "equipment.bow",
+        "equipment.short-bow",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet",
+        "equipment.book-of-the-dead"
       ]
     }
   ],

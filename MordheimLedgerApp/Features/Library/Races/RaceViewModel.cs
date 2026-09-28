@@ -86,7 +86,8 @@ public partial class RaceViewModel : BaseViewModel
             Description = r.Description,
             NameKey = r.NameKey,
             DescriptionKey = r.DescriptionKey,
-            Source = r.Source
+            Source = r.Source,
+            OfficialId = r.OfficialId
         };
 
         var dialogViewModel = new RaceEditDialogViewModel(copy, Loc["RaceEditTitle"], _libraryService);

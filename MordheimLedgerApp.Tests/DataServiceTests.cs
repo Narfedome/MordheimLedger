@@ -11,10 +11,22 @@ namespace MordheimLedgerApp.Tests;
 public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
 {
     private readonly ILibraryService _library;
+    private readonly AppDatabase _db;
 
     public DataServiceTests(SeededDatabaseFixture fixture)
     {
         _library = fixture.Library;
+        _db = fixture.Db;
+    }
+
+    /// <summary>Le seed note l'empreinte du contenu embarqué - c'est ce que la synchro au lancement compare.</summary>
+    [Fact]
+    public async Task Seed_RecordsContentFingerprint()
+    {
+        var fingerprint = await _db.GetContentFingerprintAsync();
+        Assert.Equal(SeedContent.Fingerprint, fingerprint);
+        Assert.True(await _db.IsOfficialContentUpToDateAsync());
+        Assert.Equal(64, fingerprint!.Length);
     }
 
     /// <summary>The seed covers several warbands (see AppDatabase.SeedWarbandFromJsonAsync) - tests
@@ -467,7 +479,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.False(corpse.RollsIndependently);
         Assert.Equal(5, corpse.Outcomes.Count);
         Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 1, SubRollMax: 2, Kind: ExplorationOutcomeKind.Gold, GoldFormula: "D6" });
-        Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 6, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, EquipmentItemName: "Light Armour" });
+        Assert.Contains(corpse.Outcomes, o => o is { SubRollMin: 6, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, EquipmentItemOfficialId: "equipment.light-armour" });
 
         // Shattered Building (5 5): a flat, automatic wyrdstone outcome (no sub-roll) PLUS an additional
         // Leadership test for a bonus Wardog (see ExplorationResult.BonusStatTestField).
@@ -477,7 +489,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var wyrdstoneOutcome = Assert.Single(shatteredBuilding.Outcomes, o => o.Kind == ExplorationOutcomeKind.Wyrdstone);
         Assert.Equal("D3", wyrdstoneOutcome.GoldFormula);
         Assert.Null(wyrdstoneOutcome.SubRollMin);
-        Assert.Contains(shatteredBuilding.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, EquipmentItemName: "Wardog", StatTestPass: true });
+        Assert.Contains(shatteredBuilding.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, EquipmentItemOfficialId: "equipment.wardog", StatTestPass: true });
 
         // Hidden Treasure (6 2): every Outcome checked independently against its own "N+" threshold
         // (2026-08-24: mechanized via ExplorationOutcomeResolver.IsIndependentThresholdResult - distinct
@@ -497,9 +509,9 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         // containing 'D' = a real roll, same convention as the single-branch shape's ItemQuantityFormula).
         var slaughteredWarband = results.Single(r => r.DiceCount == 6 && r.Value == 4);
         Assert.True(ExplorationOutcomeResolver.IsIndependentThresholdResult(slaughteredWarband));
-        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: null, EquipmentItemName: "Dagger", ItemQuantityFormula: "D6" });
-        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 5, EquipmentItemName: "Heavy Armour", ItemQuantityFormula: "1" });
-        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 2, EquipmentItemName: "Shield", ItemQuantityFormula: "D3" });
+        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: null, EquipmentItemOfficialId: "equipment.dagger", ItemQuantityFormula: "D6" });
+        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 5, EquipmentItemOfficialId: "equipment.heavy-armour", ItemQuantityFormula: "1" });
+        Assert.Contains(slaughteredWarband.Outcomes, o => o is { Kind: ExplorationOutcomeKind.Item, SubRollMin: 2, EquipmentItemOfficialId: "equipment.shield", ItemQuantityFormula: "D3" });
 
         // Well (1 1): a Toughness test gates one bonus wyrdstone shard (pass) against sickness (fail) -
         // both branches Auto (no sub-roll), the wizard picks Pass/Fail itself by comparing the chosen
@@ -516,7 +528,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.False(string.IsNullOrWhiteSpace(well.Description));
 
         // Tavern (3 1): same StatTestField-gated shape as Well, but always the leader (no Hero picker,
-        // StatTestTargetsLeader) and some warbands skip the roll entirely (AutoPassStatTestWarbandArchetypeNames).
+        // StatTestTargetsLeader) and some warbands skip the roll entirely (AutoPassStatTestWarbandArchetypeOfficialIds).
         // Only ONE Outcome (Pass) - a failed test produces nothing at all (2026-08-20 correction: same
         // "no Outcome at all for a failure" shape as Shattered Building's bonus War Dog test), not the
         // smaller consolation Gold the book's D6 text originally suggested.
@@ -524,7 +536,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.Equal(ExplorationStatField.Leadership, tavern.StatTestField);
         Assert.True(tavern.StatTestTargetsLeader);
         Assert.False(tavern.RollsIndependently);
-        Assert.Equal(["Undead", "Witch Hunters", "The Sisters of Sigmar"], tavern.AutoPassStatTestWarbandArchetypeNames);
+        Assert.Equal(["warband.undead", "warband.witch-hunters", "warband.sisters-of-sigmar"], tavern.AutoPassStatTestWarbandArchetypeOfficialIds);
         var tavernPass = Assert.Single(tavern.Outcomes);
         Assert.True(tavernPass.StatTestPass);
         Assert.Equal("4D6", tavernPass.GoldFormula);
@@ -544,7 +556,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var fightingArena = results.Single(r => r.DiceCount == 6 && r.Value == 5);
         var trainingManualOutcome = Assert.Single(fightingArena.Outcomes);
         Assert.Equal(ExplorationOutcomeKind.Item, trainingManualOutcome.Kind);
-        Assert.Equal("Training Manual", trainingManualOutcome.EquipmentItemName);
+        Assert.Equal("equipment.training-manual", trainingManualOutcome.EquipmentItemOfficialId);
         var trainingManual = (await _library.GetEquipmentItemsAsync("en")).Single(i => i.Name == "Training Manual");
         Assert.Equal(100, trainingManual.Cost);
         Assert.True(trainingManual.IsSellable);
@@ -555,7 +567,7 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         // is (see Core.Rules.MagicalArtefactTable).
         var nobleVilla = results.Single(r => r.DiceCount == 6 && r.Value == 6);
         Assert.Equal(3, nobleVilla.Outcomes.Count);
-        Assert.Contains(nobleVilla.Outcomes, o => o is { SubRollMin: 5, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, TriggersArtefactRoll: true, EquipmentItemName: null });
+        Assert.Contains(nobleVilla.Outcomes, o => o is { SubRollMin: 5, SubRollMax: 6, Kind: ExplorationOutcomeKind.Item, TriggersArtefactRoll: true, EquipmentItemOfficialId: null });
 
         // All 6 Magical Artefacts exist in the catalog under the exact English names the table resolves
         // to, and the All-seeing Eye of Numas is the one item wired to the (previously unused)
@@ -598,15 +610,15 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         Assert.True(straggler.RollsIndependently);
         Assert.Equal(4, straggler.Outcomes.Count);
         Assert.All(straggler.Outcomes, o => Assert.Null(o.SubRollMin));
-        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"]) && o.Kind == ExplorationOutcomeKind.Gold && o.GoldFormula == "2D6");
-        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Cult of the Possessed"]));
-        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
-        var stragglerCatchAll = Assert.Single(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.skaven-of-clan-eshin"]) && o.Kind == ExplorationOutcomeKind.Gold && o.GoldFormula == "2D6");
+        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.cult-of-the-possessed"]));
+        Assert.Contains(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.undead"]));
+        var stragglerCatchAll = Assert.Single(straggler.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
         Assert.True(stragglerCatchAll.GrantsNextExplorationBonusDie);
-        var stragglerPossessed = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Cult of the Possessed"]));
+        var stragglerPossessed = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.cult-of-the-possessed"]));
         Assert.Equal(1, stragglerPossessed.GrantsLeaderExperience);
-        var stragglerUndead = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
-        Assert.Equal("Zombie", stragglerUndead.GrantsFreeHenchmanArchetypeName);
+        var stragglerUndead = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.undead"]));
+        Assert.Equal("warrior.undead.zombie", stragglerUndead.GrantsFreeHenchmanArchetypeOfficialId);
 
         // Prisoners (3 3): same "conditioned on warband identity" shape as Straggler - Skaven gold,
         // Undead's free Henchman grant (this time D3 Zombies, a real dice formula rather than
@@ -619,20 +631,20 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var prisoners = results.Single(r => r.DiceCount == 3 && r.Value == 3);
         Assert.True(prisoners.RollsIndependently);
         Assert.Equal(4, prisoners.Outcomes.Count);
-        var prisonersSkaven = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"]));
+        var prisonersSkaven = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.skaven-of-clan-eshin"]));
         Assert.Equal(ExplorationOutcomeKind.Gold, prisonersSkaven.Kind);
         Assert.Equal("3D6", prisonersSkaven.GoldFormula);
         Assert.False(prisonersSkaven.GrantsOptionalEquippedHenchman);
-        var prisonersUndead = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Undead"]));
-        Assert.Equal("Zombie", prisonersUndead.GrantsFreeHenchmanArchetypeName);
+        var prisonersUndead = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.undead"]));
+        Assert.Equal("warrior.undead.zombie", prisonersUndead.GrantsFreeHenchmanArchetypeOfficialId);
         Assert.Equal("D3", prisonersUndead.ItemQuantityFormula);
-        var prisonersPossessed = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Cult of the Possessed"]));
+        var prisonersPossessed = prisoners.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.cult-of-the-possessed"]));
         Assert.Null(prisonersPossessed.GrantsLeaderExperience);
         Assert.Equal("D3", prisonersPossessed.GrantsDistributedHeroExperienceFormula);
-        var prisonersCatchAll = Assert.Single(prisoners.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        var prisonersCatchAll = Assert.Single(prisoners.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
         Assert.Equal(ExplorationOutcomeKind.Gold, prisonersCatchAll.Kind);
         Assert.Equal("2D6", prisonersCatchAll.GoldFormula);
-        Assert.Null(prisonersCatchAll.GrantsFreeHenchmanArchetypeName);
+        Assert.Null(prisonersCatchAll.GrantsFreeHenchmanArchetypeOfficialId);
         Assert.Null(prisonersCatchAll.GrantsDistributedHeroExperienceFormula);
         Assert.True(prisonersCatchAll.GrantsOptionalEquippedHenchman);
         Assert.Equal("A muffled sound comes from one of the buildings - a group of finely dressed people locked in a cellar.", prisoners.ShortDescription);
@@ -650,11 +662,11 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var graveyard = results.Single(r => r.DiceCount == 4 && r.Value == 5);
         Assert.True(graveyard.RollsIndependently);
         Assert.Equal(2, graveyard.Outcomes.Count);
-        var graveyardCatchAll = Assert.Single(graveyard.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        var graveyardCatchAll = Assert.Single(graveyard.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
         Assert.Equal(ExplorationOutcomeKind.Gold, graveyardCatchAll.Kind);
         Assert.Equal("D6x10", graveyardCatchAll.GoldFormula);
         Assert.Equal("Next game: Witch Hunters/Sisters of Sigmar hate you (crypts looted at the Graveyard).", graveyardCatchAll.NextGameNoteText);
-        var graveyardSisters = graveyard.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Witch Hunters", "The Sisters of Sigmar"]));
+        var graveyardSisters = graveyard.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.witch-hunters", "warband.sisters-of-sigmar"]));
         Assert.Equal(ExplorationOutcomeKind.None, graveyardSisters.Kind);
         Assert.Equal("D6", graveyardSisters.GrantsDistributedHeroExperienceFormula);
         Assert.Equal("You find an old graveyard, crammed with ivy-covered sepulchres.", graveyard.ShortDescription);
@@ -667,11 +679,11 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var shrine = results.Single(r => r.DiceCount == 4 && r.Value == 2);
         Assert.True(shrine.RollsIndependently);
         Assert.Equal(2, shrine.Outcomes.Count);
-        var shrineSisters = shrine.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["The Sisters of Sigmar", "Witch Hunters"]));
+        var shrineSisters = shrine.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.sisters-of-sigmar", "warband.witch-hunters"]));
         Assert.Equal(ExplorationOutcomeKind.Gold, shrineSisters.Kind);
         Assert.Equal("3D6", shrineSisters.GoldFormula);
         Assert.True(shrineSisters.GrantsWeaponBlessing);
-        var shrineCatchAll = Assert.Single(shrine.Outcomes, o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        var shrineCatchAll = Assert.Single(shrine.Outcomes, o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
         Assert.Equal(ExplorationOutcomeKind.Gold, shrineCatchAll.Kind);
         Assert.Equal("3D6", shrineCatchAll.GoldFormula);
         Assert.False(shrineCatchAll.GrantsWeaponBlessing);
@@ -682,17 +694,17 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         // multi-branch Description - both must actually be localized (unlike Note, which never was).
         Assert.Equal("Your warband encounters one of the survivors of Mordheim, who has lost his sanity along with all his worldly possessions.", straggler.ShortDescription);
         Assert.Equal("Skaven warbands can sell the straggler to agents of Clan Eshin and gain 2D6 gc.",
-            straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"])).BranchText);
+            straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.skaven-of-clan-eshin"])).BranchText);
         var frResults = await _library.GetExplorationResultsAsync("fr");
         var frStraggler = frResults.Single(r => r.DiceCount == 2 && r.Value == 4);
         Assert.Equal("Votre bande croise l'un des survivants de Mordheim, qui a perdu la raison en même temps que tous ses biens.", frStraggler.ShortDescription);
         Assert.Equal("Une bande Skaven peut le vendre aux agents du Clan Eshin et gagner 2D6 CO.",
-            frStraggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeNames.SequenceEqual(["Skaven of Clan Eshin"])).BranchText);
+            frStraggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.SequenceEqual(["warband.skaven-of-clan-eshin"])).BranchText);
 
         // Dwarf Smithy (6 3): a "Gromril Axe" branch is just the base "Axe" plus the Gromril Weapon
-        // material rule, not a distinct catalog item - see ExplorationOutcome.MaterialRuleName.
+        // material rule, not a distinct catalog item - see ExplorationOutcome.MaterialRuleOfficialId.
         var dwarfSmithy = results.Single(r => r.DiceCount == 6 && r.Value == 3);
-        Assert.Contains(dwarfSmithy.Outcomes, o => o is { EquipmentItemName: "Axe", MaterialRuleName: "Gromril Weapon" });
+        Assert.Contains(dwarfSmithy.Outcomes, o => o is { EquipmentItemOfficialId: "equipment.axe", MaterialRuleOfficialId: "rule.gromril-weapon" });
     }
 
     /// <summary>Every MagicSchool now carries a flavor-text Description (sourced from mordheimer.net's

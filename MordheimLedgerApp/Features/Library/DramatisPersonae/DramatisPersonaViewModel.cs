@@ -169,6 +169,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
             DescriptionKey = s.DescriptionKey,
             PairDescriptionKey = s.PairDescriptionKey,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             ImagePath = s.ImagePath,
             Movement = s.Movement,
             WeaponSkill = s.WeaponSkill,

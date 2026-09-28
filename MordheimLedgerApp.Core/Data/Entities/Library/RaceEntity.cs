@@ -10,4 +10,9 @@ public class RaceEntity
     public string NameKey { get; set; } = string.Empty;
     public string? DescriptionKey { get; set; }
     public ContentSource Source { get; set; }
+
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    [Indexed]
+    public string? OfficialId { get; set; }
 }

@@ -1,6 +1,7 @@
 {
+  "id": "warband.marienburgers",
   "grade": "Core",
-  "race": "Human",
+  "raceId": "race.human",
   "imagePath": "mercenaries_empire.jpg",
   "name": {
     "en": "Marienburg Mercenaries",
@@ -12,6 +13,7 @@
   },
   "specialRules": [
     {
+      "id": "rule.wealthy-traders",
       "name": {
         "en": "Wealthy Traders",
         "fr": "Négociants Fortunés"
@@ -27,6 +29,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.marienburgers.mercenary-captain",
       "name": {
         "en": "Mercenary Captain",
         "fr": "Capitaine mercenaire"
@@ -46,20 +49,21 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "A mercenary captain with solid experience, ready to fight for anyone so long as the price is right - the risks of Mordheim are real, but so are the potential riches.",
         "fr": "Un capitaine mercenaire jouit d'une solide expérience, il affrontera n'importe quoi ou n'importe qui, pour peu que le prix soit convenable. Mordheim offre à de tels hommes des opportunités de richesse incommensurables mais présente des risques bien réels."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         }
       ],
-      "equipmentListName": "Mercenary Equipment List",
+      "equipmentListId": "list.marienburgers.mercenary-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -69,6 +73,7 @@
       ]
     },
     {
+      "id": "warrior.marienburgers.champion",
       "name": {
         "en": "Champion",
         "fr": "Champion"
@@ -86,12 +91,12 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "In every mercenary warband you will find a warrior bigger, stronger (and often uglier) than his comrades - champions answer the challenges levelled at the warband and pick their share of loot right after the captain.",
         "fr": "Dans toutes les bandes de mercenaires vous trouverez un guerrier plus gros, plus fort (souvent plus laid), que les autres. Ils sont appelés champions et relèvent généralement les défis lancés à la bande, touchant leur part de butin juste après le capitaine."
       },
-      "equipmentListName": "Mercenary Equipment List",
+      "equipmentListId": "list.marienburgers.mercenary-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -99,6 +104,7 @@
       ]
     },
     {
+      "id": "warrior.marienburgers.youngblood",
       "name": {
         "en": "Youngblood",
         "fr": "Jeune Loup"
@@ -116,12 +122,12 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Young warriors, still inexperienced but eager to win their spurs in the savage fighting in and around the ruins of Mordheim.",
         "fr": "Ce sont de jeunes guerriers encore inexpérimentés mais avides de gagner du galon au milieu des combats qui se déroulent dans et autour de Mordheim."
       },
-      "equipmentListName": "Mercenary Equipment List",
+      "equipmentListId": "list.marienburgers.mercenary-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -129,6 +135,7 @@
       ]
     },
     {
+      "id": "warrior.marienburgers.warrior",
       "name": {
         "en": "Warrior",
         "fr": "Guerrier"
@@ -146,14 +153,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Most Marienburg warbands are recruited from the dockland thugs, ships' crews and stevedores of the City of Gold - grim, seasoned fighters who form the core of the warband.",
         "fr": "Le gros des bandes de Marienburg est recruté dans les bas-fonds de la Cité de l'Or - marins, dockers et autres - des baroudeurs renfrognés qui constituent le gros de la bande."
       },
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListId": "list.marienburgers.mercenary-equipment-list"
     },
     {
+      "id": "warrior.marienburgers.marksman",
       "name": {
         "en": "Marksman",
         "fr": "Tireur"
@@ -171,14 +179,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "The archers and hunters of the Old World are famed for their skill, said to hit a coin at 300 paces with a long bow.",
         "fr": "Les archers et les chasseurs du Vieux Monde sont réputés pour leur adresse et on dit qu'ils peuvent atteindre une pièce à 300 pieds avec un arc long."
       },
-      "equipmentListName": "Marksman Equipment List"
+      "equipmentListId": "list.marienburgers.marksman-equipment-list"
     },
     {
+      "id": "warrior.marienburgers.swordsman",
       "name": {
         "en": "Swordsman",
         "fr": "Bretteur"
@@ -196,24 +205,26 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Human",
+      "racialProfileId": "profile.human",
       "description": {
         "en": "Marienburg's chief skills lie in duelling and the use of poisons - swordsmen are professional duellists particularly well suited to the fighting that takes place in Mordheim.",
         "fr": "Marienburg excelle dans les duels et l'usage des poisons - les bretteurs sont des duellistes professionnels particulièrement adaptés aux types de combats qui se déroulent dans Mordheim."
       },
       "specialRules": [
         {
+          "id": "rule.expert-swordsman",
           "name": {
             "en": "Expert Swordsman",
             "fr": "Expert à l'épée"
           }
         }
       ],
-      "equipmentListName": "Mercenary Equipment List"
+      "equipmentListId": "list.marienburgers.mercenary-equipment-list"
     }
   ],
   "equipment": [
     {
+      "id": "equipment.rapier",
       "name": {
         "en": "Rapier",
         "fr": "Rapière"
@@ -228,6 +239,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.parry-rapier",
           "name": {
             "en": "Parry (Rapier)",
             "fr": "Parade (Rapière)"
@@ -238,6 +250,7 @@
           }
         },
         {
+          "id": "rule.barrage",
           "name": {
             "en": "Barrage",
             "fr": "Rafale"
@@ -248,6 +261,7 @@
           }
         },
         {
+          "id": "rule.armour-save",
           "name": {
             "en": "Armour Save",
             "fr": "Sauvegarde d'armure"
@@ -262,52 +276,54 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.marienburgers.mercenary-equipment-list",
       "name": {
         "en": "Mercenary Equipment List",
         "fr": "Liste d'équipement des Mercenaires"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Morning star",
-        "Double-handed weapon",
-        "Spear",
-        "Halberd",
-        "Crossbow",
-        "Pistol",
-        "Duelling Pistol",
-        "Bow",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Buckler",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.morning-star",
+        "equipment.double-handed-weapon",
+        "equipment.spear",
+        "equipment.halberd",
+        "equipment.crossbow",
+        "equipment.pistol",
+        "equipment.duelling-pistol",
+        "equipment.bow",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.buckler",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.marienburgers.marksman-equipment-list",
       "name": {
         "en": "Marksman Equipment List",
         "fr": "Liste d'équipement des Tireurs"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Crossbow",
-        "Pistol",
-        "Bow",
-        "Long bow",
-        "Blunderbuss",
-        "Handgun",
-        "Hunting Rifle",
-        "Light Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.crossbow",
+        "equipment.pistol",
+        "equipment.bow",
+        "equipment.long-bow",
+        "equipment.blunderbuss",
+        "equipment.handgun",
+        "equipment.hunting-rifle",
+        "equipment.light-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     }
   ],

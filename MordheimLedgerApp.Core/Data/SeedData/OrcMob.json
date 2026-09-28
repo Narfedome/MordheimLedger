@@ -1,6 +1,7 @@
 {
+  "id": "warband.orc-mob",
   "grade": "Grade1a",
-  "race": "Orc",
+  "raceId": "race.orc",
   "imagePath": "orc_mob.jpg",
   "name": {
     "en": "Orc Mob",
@@ -12,6 +13,7 @@
   },
   "specialRules": [
     {
+      "id": "rule.distasteful-company",
       "name": {
         "en": "Distasteful Company",
         "fr": "Des gens peu recommandables"
@@ -24,6 +26,7 @@
   ],
   "skills": [
     {
+      "id": "skill.special.ard-ead",
       "name": {
         "en": "'Ard 'Ead",
         "fr": "Têt'dure"
@@ -36,6 +39,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.waaagh",
       "name": {
         "en": "Waaagh!",
         "fr": "Waaagh !"
@@ -48,6 +52,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.ere-we-go",
       "name": {
         "en": "'Ere We Go!",
         "fr": "On y va !"
@@ -60,6 +65,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.well-ard",
       "name": {
         "en": "Well 'Ard",
         "fr": "Dur à cuire"
@@ -72,6 +78,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.eadbasher",
       "name": {
         "en": "'Eadbasher",
         "fr": "Coup d'boule"
@@ -84,6 +91,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.da-cunnin-plan",
       "name": {
         "en": "Da Cunnin' Plan",
         "fr": "Rev'nez ici !"
@@ -94,13 +102,14 @@
         "fr": "Chef Orque seul : la bande peut relancer tout test de Déroute raté tant que le Chef n'est pas hors de combat."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Orc Boss"
+      "restrictedToWarriorIds": [
+        "warrior.orc-mob.orc-boss"
       ]
     }
   ],
   "magicSchools": [
     {
+      "id": "school.waaagh-magic",
       "name": {
         "en": "Waaagh! Magic",
         "fr": "Magie Waaagh !"
@@ -112,6 +121,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.orc-mob.orc-boss",
       "name": {
         "en": "Orc Boss",
         "fr": "Chef Orque"
@@ -131,20 +141,21 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Orc",
+      "racialProfileId": "profile.orc",
       "description": {
         "en": "A massive, brutal individual who throws his lads into any fight he thinks he can profit from - the strongest, toughest and most violent of the mob, ready to prove it with his fists to any Boy who thinks otherwise.",
         "fr": "Le Chef Orque est un individu massif et brutal, qui entraîne ses gars dans la moindre bagarre pourvu qu'il pense en tirer profit. Il est le plus fort, le plus résistant et le plus violent de la bande, et si un des Boyz osait s'imaginer le contraire, il le lui démontrerait à coups de poing."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         }
       ],
-      "equipmentListName": "Orc Equipment List",
+      "equipmentListId": "list.orc-mob.orc-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -154,6 +165,7 @@
       ]
     },
     {
+      "id": "warrior.orc-mob.orc-shaman",
       "name": {
         "en": "Orc Shaman",
         "fr": "Chamane Orque"
@@ -171,7 +183,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Orc",
+      "racialProfileId": "profile.orc",
       "description": {
         "en": "Shamans are outcasts of Orc society, gifted by the gods Gork and Mork with powers they can neither understand nor fully control - roaming Orc mobs are often the only place they are respected rather than shunned. May never wear armour.",
         "fr": "Les Chamanes sont des individus à part dans la société orque, bénis par les dieux Gork et Mork qui leur ont accordé des pouvoirs qu'ils ne peuvent ni comprendre ni totalement maîtriser - les bandes en maraude sont souvent les seules à leur offrir un certain statut plutôt que le rejet. Ne porte jamais d'armure."
@@ -179,19 +191,21 @@
       "isSpellcaster": true,
       "specialRules": [
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
           }
         }
       ],
-      "equipmentListName": "Orc Equipment List",
+      "equipmentListId": "list.orc-mob.orc-equipment-list",
       "skillCategories": [
         "Strength",
         "Special"
       ]
     },
     {
+      "id": "warrior.orc-mob.big-un",
       "name": {
         "en": "Big 'Un",
         "fr": "Kosto"
@@ -209,12 +223,12 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Orc",
+      "racialProfileId": "profile.orc",
       "description": {
         "en": "Only the toughest survive and rise through the ranks of Orc society - Big 'Uns are such rising stars, carrying out the Boss's orders and, should he ever fall, deciding on his replacement (usually through personal combat).",
         "fr": "Seuls les plus agressifs peuvent survivre et prospérer au sein de la société orque. Les Kostos font partie de cette élite et font office de bras droit pour le Chef - si jamais ce dernier venait à faillir, c'est probablement un de ses Kostos qui le pousserait dehors pour prendre sa place (le différend étant généralement réglé en combat singulier)."
       },
-      "equipmentListName": "Orc Equipment List",
+      "equipmentListId": "list.orc-mob.orc-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -223,6 +237,7 @@
       ]
     },
     {
+      "id": "warrior.orc-mob.orc-boyz",
       "name": {
         "en": "Orc Boyz",
         "fr": "Boyz Orques"
@@ -240,13 +255,14 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Orc",
+      "racialProfileId": "profile.orc",
       "description": {
         "en": "Savage and tough, Boyz fear nothing they can get their hands on, though they are even more ignorant and superstitious than most other creatures - they form the core of any Orc mob.",
         "fr": "Les Boyz sont sauvages et résistants. Ils ne craignent rien, peut-être parce qu'ils sont encore plus ignorants et superstitieux que n'importe quel autre être - ils constituent le gros des effectifs d'une bande Orque."
       },
       "specialRules": [
         {
+          "id": "rule.animosity",
           "name": {
             "en": "Animosity",
             "fr": "Animosité"
@@ -257,9 +273,10 @@
           }
         }
       ],
-      "equipmentListName": "Orc Equipment List"
+      "equipmentListId": "list.orc-mob.orc-equipment-list"
     },
     {
+      "id": "warrior.orc-mob.goblin-warriors",
       "name": {
         "en": "Goblin Warriors",
         "fr": "Guerriers Gobelins"
@@ -277,13 +294,14 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 5,
-      "racialProfileName": "Goblin",
+      "racialProfileId": "profile.goblin",
       "description": {
         "en": "Used as cannon fodder (and occasionally as a food source!) by their larger Orc cousins - Goblins are less well equipped than Boyz, having to make do with whatever the Orcs do not want. A mob may never field more than twice as many Goblins as Orcs (Heroes included).",
         "fr": "Les Gobelins sont utilisés comme chair à canon (et parfois comme source de nourriture !) par leurs gros cousins Orques. Ils sont moins bien équipés que les Boyz et doivent se contenter de ce que ces derniers n'ont pas voulu. Une bande ne peut jamais compter plus de deux fois plus de Gobelins que d'Orques (Héros inclus)."
       },
       "specialRules": [
         {
+          "id": "rule.animosity",
           "name": {
             "en": "Animosity",
             "fr": "Animosité"
@@ -294,6 +312,7 @@
           }
         },
         {
+          "id": "rule.not-orcs",
           "name": {
             "en": "Not Orcs",
             "fr": "Pas des Orques"
@@ -304,6 +323,7 @@
           }
         },
         {
+          "id": "rule.runts",
           "name": {
             "en": "Runts",
             "fr": "Moins que rien"
@@ -314,9 +334,10 @@
           }
         }
       ],
-      "equipmentListName": "Goblin Equipment List"
+      "equipmentListId": "list.orc-mob.goblin-equipment-list"
     },
     {
+      "id": "warrior.orc-mob.cave-squigs",
       "name": {
         "en": "Cave Squigs",
         "fr": "Squigs des cavernes"
@@ -343,12 +364,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.movement",
           "name": {
             "en": "Movement",
             "fr": "Mouvement"
@@ -359,6 +382,7 @@
           }
         },
         {
+          "id": "rule.minderz",
           "name": {
             "en": "Minderz",
             "fr": "Au pied !"
@@ -369,6 +393,7 @@
           }
         },
         {
+          "id": "rule.not-orcs",
           "name": {
             "en": "Not Orcs",
             "fr": "Pas des Orques"
@@ -379,6 +404,7 @@
           }
         },
         {
+          "id": "rule.never-gains-experience",
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
@@ -387,6 +413,7 @@
       ]
     },
     {
+      "id": "warrior.orc-mob.troll",
       "name": {
         "en": "Troll",
         "fr": "Troll"
@@ -413,18 +440,21 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.stupidity",
           "name": {
             "en": "Stupidity",
             "fr": "Stupidité"
@@ -435,6 +465,7 @@
           }
         },
         {
+          "id": "rule.regeneration",
           "name": {
             "en": "Regeneration",
             "fr": "Régénération"
@@ -445,12 +476,14 @@
           }
         },
         {
+          "id": "rule.never-gains-experience",
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
           }
         },
         {
+          "id": "rule.always-hungry",
           "name": {
             "en": "Always Hungry",
             "fr": "Toujours Faim"
@@ -461,6 +494,7 @@
           }
         },
         {
+          "id": "rule.vomit-attack",
           "name": {
             "en": "Vomit Attack",
             "fr": "Vomi"
@@ -471,6 +505,7 @@
           }
         },
         {
+          "id": "rule.large-target",
           "name": {
             "en": "Large Target",
             "fr": "Grande Cible"
@@ -481,6 +516,7 @@
   ],
   "equipment": [
     {
+      "id": "equipment.ball-chain",
       "name": {
         "en": "Ball & Chain",
         "fr": "Chaîne & boulet"
@@ -491,11 +527,12 @@
         "en": "Goblins only. Two-handed, Colossal Strength (no armour save allowed, Wounds caused are 1D3 instead of 1), Tiring (roll an Injury test for the wielder after the battle), Unpredictable (see below): a huge ball on a long chain, requiring Mad Cap Mushrooms to wield. When first swung, the wielder is moved 2D6\" in a direction chosen by the controlling player; on subsequent Movement phases roll a D6 to see where it drags him next, and it may knock him out of action outright.",
         "fr": "Réservée aux Gobelins. Arme à deux mains, Force Colossale (aucune sauvegarde d'armure, les blessures infligées sont de 1D3 au lieu d'une seule), Épuisante (jet de Blessure pour le porteur après la bataille), Imprévisible (voir ci-dessous) : un énorme boulet fixé au bout d'une longue chaîne, dont le maniement nécessite la consommation de champignons bonnets de fou. Au premier tour où le porteur la fait tournoyer, il est déplacé de 2D6ps dans une direction choisie par son joueur ; aux phases de Mouvement suivantes, un jet de 1D6 détermine où elle l'entraîne, pouvant le mettre hors de combat."
       },
-      "restrictedToWarriorNames": [
-        "Goblin Warriors"
+      "restrictedToWarriorIds": [
+        "warrior.orc-mob.goblin-warriors"
       ],
       "specialRules": [
         {
+          "id": "rule.incredible-force",
           "name": {
             "en": "Incredible Force",
             "fr": "Force Inouïe"
@@ -506,6 +543,7 @@
           }
         },
         {
+          "id": "rule.random",
           "name": {
             "en": "Random",
             "fr": "Imprévisible"
@@ -516,6 +554,7 @@
           }
         },
         {
+          "id": "rule.cumbersome-ball-chain",
           "name": {
             "en": "Cumbersome (Ball & Chain)",
             "fr": "Encombrant (Chaîne & boulet)"
@@ -526,6 +565,7 @@
           }
         },
         {
+          "id": "rule.unwieldy-ball-chain",
           "name": {
             "en": "Unwieldy (Ball & Chain)",
             "fr": "Peu maniable (Chaîne & boulet)"
@@ -538,6 +578,7 @@
       ]
     },
     {
+      "id": "equipment.squig-prodder",
       "name": {
         "en": "Squig Prodder",
         "fr": "Aiguillon à squigs"
@@ -548,11 +589,12 @@
         "en": "Goblins only. A trident on a long haft used to steer Cave Squigs - a Goblin carrying one may control any Squig within 12\" instead of the usual 6\" (see the Minderz rule). Counts as a spear in hand-to-hand combat.",
         "fr": "Réservé aux Gobelins. Un trident fixé au bout d'une longue hampe utilisé pour diriger les Squigs des cavernes - un Gobelin qui en porte un peut contrôler tout Squig à moins de 12ps au lieu des 6ps habituels (voir la règle Au pied !). Considéré comme une lance au Corps à Corps."
       },
-      "restrictedToWarriorNames": [
-        "Goblin Warriors"
+      "restrictedToWarriorIds": [
+        "warrior.orc-mob.goblin-warriors"
       ],
       "specialRules": [
         {
+          "id": "rule.squig-handling",
           "name": {
             "en": "Squig Handling",
             "fr": "Dressage de Squigs"
@@ -565,6 +607,7 @@
       ]
     },
     {
+      "id": "equipment.mad-cap-mushrooms",
       "name": {
         "en": "Mad Cap Mushrooms",
         "fr": "Champignons bonnets de fou"
@@ -577,11 +620,12 @@
         "en": "Common only if the warband includes at least one Goblin. A Goblin Warrior may eat these before a battle to gain Frenzy. After the battle, roll a D6: on a 1 the model becomes permanently Stupid. Required to wield a Ball & Chain.",
         "fr": "Disponibilité Commune uniquement si la bande compte au moins un Gobelin. Un Guerrier Gobelin peut en consommer avant une bataille pour gagner la Frénésie. Après la bataille, lancez 1D6 : sur un 1, la figurine devient Stupide de façon permanente. Nécessaires pour manier une Chaîne & boulet."
       },
-      "restrictedToWarriorNames": [
-        "Goblin Warriors"
+      "restrictedToWarriorIds": [
+        "warrior.orc-mob.goblin-warriors"
       ],
       "specialRules": [
         {
+          "id": "rule.frenzy",
           "name": {
             "en": "Frenzy",
             "fr": "Frénésie"
@@ -592,6 +636,7 @@
           }
         },
         {
+          "id": "rule.side-effect",
           "name": {
             "en": "Side effect",
             "fr": "Effet secondaire"
@@ -606,41 +651,43 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.orc-mob.orc-equipment-list",
       "name": {
         "en": "Orc Equipment List",
         "fr": "Liste d'équipement des Orques"
       },
-      "itemNames": [
-        "Dagger",
-        "Axe",
-        "Sword",
-        "Spear",
-        "Halberd",
-        "Double-handed weapon",
-        "Morning star",
-        "Bow",
-        "Crossbow",
-        "Light Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.spear",
+        "equipment.halberd",
+        "equipment.double-handed-weapon",
+        "equipment.morning-star",
+        "equipment.bow",
+        "equipment.crossbow",
+        "equipment.light-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.orc-mob.goblin-equipment-list",
       "name": {
         "en": "Goblin Equipment List",
         "fr": "Liste d'équipement des Gobelins"
       },
-      "itemNames": [
-        "Dagger",
-        "Club",
-        "Sword",
-        "Spear",
-        "Ball & Chain",
-        "Short Bow",
-        "Shield",
-        "Helmet",
-        "Squig Prodder",
-        "Mad Cap Mushrooms"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.club",
+        "equipment.sword",
+        "equipment.spear",
+        "equipment.ball-chain",
+        "equipment.short-bow",
+        "equipment.shield",
+        "equipment.helmet",
+        "equipment.squig-prodder",
+        "equipment.mad-cap-mushrooms"
       ]
     }
   ],

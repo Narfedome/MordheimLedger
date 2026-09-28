@@ -134,6 +134,31 @@
                 </VerticalStackLayout>
             </Border>
 
+            <!-- Contenu officiel : version en base + synchro manuelle depuis la seed.db3 embarquée (la
+                 synchro automatique a déjà lieu au lancement quand la version de l'appli est plus récente). -->
+            <Border Style="{StaticResource SectionCardBorderStyle}">
+                <Grid ColumnDefinitions="*,auto">
+                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Label Text="{loc:Loc OfficialContentTitle}" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                        <Label Text="{Binding OfficialContentStatus}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{loc:Loc OfficialContentReview}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                               IsVisible="{Binding HasPendingContentConflicts}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ReviewContentConflictsCommand}"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1"
+                           Text="{loc:Loc OfficialContentSyncAction}"
+                           TextColor="{DynamicResource AppAccent}"
+                           VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SyncOfficialContentCommand}"/>
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </Border>
+
             <!-- Réinitialiser la base - dev/beta uniquement pour l'instant : reseed depuis les JSON
                  après un changement de schéma, sans supprimer le fichier .db3 à la main. Rouge
                  (AppDanger) pour bien marquer que c'est destructif/irréversible - double confirmation

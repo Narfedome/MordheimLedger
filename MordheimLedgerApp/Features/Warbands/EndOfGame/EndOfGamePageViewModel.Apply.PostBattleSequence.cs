@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -22,7 +23,7 @@ public partial class EndOfGamePageViewModel
     /// IsPossessedWarband) est une donnée bien réelle - les 4 issues du livre restent toutes
     /// distinguées plutôt que simplifiées.</summary>
     private async Task ApplyCapturedEnemiesAsync(
-        IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByEnglishName, List<string> sentences)
+        IReadOnlyDictionary<string, WarriorArchetype> warriorArchetypesByOfficialId, List<string> sentences)
     {
         if (Warband is null || !HasCapturedEnemies) return;
 
@@ -41,10 +42,10 @@ public partial class EndOfGamePageViewModel
                     break;
 
                 // Fusionne dans un groupe de Zombies déjà existant plutôt que de créer une ligne
-                // séparée - même principe que GrantsFreeHenchmanArchetypeName (Traînard/Prisonniers) plus
+                // séparée - même principe que GrantsFreeHenchmanArchetypeOfficialId (Traînard/Prisonniers) plus
                 // haut dans ce fichier, un Zombie ne pouvant de toute façon porter aucun équipement.
                 case CapturedEnemyFate.KilledForZombie:
-                    if (warriorArchetypesByEnglishName.TryGetValue("Zombie", out var zombieArchetype))
+                    if (warriorArchetypesByOfficialId.TryGetValue(OfficialIds.ZombieWarrior, out var zombieArchetype))
                     {
                         var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == zombieArchetype.Id);
                         if (existingGroup is not null)

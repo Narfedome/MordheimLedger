@@ -1,6 +1,7 @@
 {
+  "id": "warband.dwarf-treasure-hunters",
   "grade": "Grade1a",
-  "race": "Dwarf",
+  "raceId": "race.dwarf",
   "imagePath": "dwarf_treasure_hunters.jpg",
   "name": {
     "en": "Dwarf Treasure Hunters",
@@ -12,6 +13,7 @@
   },
   "specialRules": [
     {
+      "id": "rule.hard-to-kill",
       "name": {
         "en": "Hard to Kill",
         "fr": "Difficiles à Tuer"
@@ -22,6 +24,7 @@
       }
     },
     {
+      "id": "rule.hard-headed",
       "name": {
         "en": "Hard Headed",
         "fr": "Tête Dure"
@@ -32,6 +35,7 @@
       }
     },
     {
+      "id": "rule.no-armour-penalty",
       "name": {
         "en": "No Armour Penalty",
         "fr": "Armure"
@@ -42,6 +46,7 @@
       }
     },
     {
+      "id": "rule.hatred-of-orcs-and-goblins",
       "name": {
         "en": "Hatred of Orcs and Goblins",
         "fr": "Haine des Orques et des Gobelins"
@@ -50,9 +55,10 @@
         "en": "All Dwarfs are subject to Hatred against Orcs and Goblins.",
         "fr": "Tous les nains sont sujets à la Haine envers les orques et les gobelins."
       },
-      "hatredTargetWarbandNames": ["OrcMob"]
+      "hatredTargetWarbandIds": ["warband.orc-mob"]
     },
     {
+      "id": "rule.grudgebearers",
       "name": {
         "en": "Grudgebearers",
         "fr": "Rancuniers"
@@ -63,6 +69,7 @@
       }
     },
     {
+      "id": "rule.unrivalled-miners",
       "name": {
         "en": "Unrivalled Miners",
         "fr": "Mineurs Sans Égaux"
@@ -75,6 +82,7 @@
   ],
   "skills": [
     {
+      "id": "skill.special.master-of-blades",
       "name": {
         "en": "Master of Blades",
         "fr": "Maître d'Armes"
@@ -87,6 +95,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.extra-tough",
       "name": {
         "en": "Extra Tough",
         "fr": "Increvable"
@@ -99,6 +108,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.resource-hunter",
       "name": {
         "en": "Resource Hunter",
         "fr": "Chercheur de Ressources"
@@ -111,6 +121,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.true-grit",
       "name": {
         "en": "True Grit",
         "fr": "Coriace"
@@ -123,6 +134,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.thick-skull",
       "name": {
         "en": "Thick Skull",
         "fr": "Crâne Épais"
@@ -140,6 +152,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.dwarf-treasure-hunters.noble",
       "name": {
         "en": "Noble",
         "fr": "Noble Nain"
@@ -159,20 +172,21 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
-      "racialProfileName": "Dwarf",
+      "racialProfileId": "profile.dwarf",
       "description": {
         "en": "Dwarf nobles are Treasure Hunters who have recruited a band of like-minded kin and left their stronghold in search of riches.",
         "fr": "Les nobles nains sont des Chasseurs de Trésors qui ont recruté une bande de leurs congénères aux motivations similaires et ont quitté leur forteresse en quête de richesses."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         }
       ],
-      "equipmentListName": "Dwarf Warrior Equipment List",
+      "equipmentListId": "list.dwarf-treasure-hunters.dwarf-warrior-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -181,6 +195,7 @@
       ]
     },
     {
+      "id": "warrior.dwarf-treasure-hunters.engineer",
       "name": {
         "en": "Engineer",
         "fr": "Ingénieur Nain"
@@ -198,13 +213,14 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
-      "racialProfileName": "Dwarf",
+      "racialProfileId": "profile.dwarf",
       "description": {
         "en": "Dwarf engineers are highly respected members of Dwarf society, masters of the war machines that made the Dwarf race famous.",
         "fr": "Les ingénieurs nains sont des membres très respectés de la société naine, qui construisent les formidables machines de guerre qui ont fait la réputation légendaire de leur race."
       },
       "specialRules": [
         {
+          "id": "rule.master-gunsmith",
           "name": {
             "en": "Master Gunsmith",
             "fr": "Maître Armurier"
@@ -215,7 +231,7 @@
           }
         }
       ],
-      "equipmentListName": "Thunderer Equipment List",
+      "equipmentListId": "list.dwarf-treasure-hunters.thunderer-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -223,6 +239,7 @@
       ]
     },
     {
+      "id": "warrior.dwarf-treasure-hunters.troll-slayer",
       "name": {
         "en": "Troll Slayer",
         "fr": "Tueur de Trolls Nain"
@@ -240,13 +257,14 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
-      "racialProfileName": "Dwarf",
+      "racialProfileId": "profile.dwarf",
       "description": {
         "en": "Troll Slayers belong to a grim cult dedicated to seeking a heroic death in battle.",
         "fr": "Les Tueurs de Trolls font partie d'un culte sinistre dédié à la recherche obsessionnelle d'une mort héroïque au combat."
       },
       "specialRules": [
         {
+          "id": "rule.death-wish",
           "name": {
             "en": "Death Wish",
             "fr": "Vœu de Mort"
@@ -257,6 +275,7 @@
           }
         },
         {
+          "id": "rule.slayer-skills",
           "name": {
             "en": "Slayer Skills",
             "fr": "Compétences de Tueur"
@@ -267,7 +286,7 @@
           }
         }
       ],
-      "equipmentListName": "Dwarf Warrior Equipment List",
+      "equipmentListId": "list.dwarf-treasure-hunters.dwarf-warrior-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength",
@@ -275,6 +294,7 @@
       ]
     },
     {
+      "id": "warrior.dwarf-treasure-hunters.dwarf-clansman",
       "name": {
         "en": "Dwarf Clansman",
         "fr": "Guerrier Nain"
@@ -292,14 +312,15 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
-      "racialProfileName": "Dwarf",
+      "racialProfileId": "profile.dwarf",
       "description": {
         "en": "Dwarf warriors in all their glory: tenacious, stubborn and unfailingly brave.",
         "fr": "Ce sont des guerriers nains dans toute leur splendeur : tenaces, têtus et d'une bravoure à toute épreuve."
       },
-      "equipmentListName": "Dwarf Warrior Equipment List"
+      "equipmentListId": "list.dwarf-treasure-hunters.dwarf-warrior-equipment-list"
     },
     {
+      "id": "warrior.dwarf-treasure-hunters.dwarf-thunderer",
       "name": {
         "en": "Dwarf Thunderer",
         "fr": "Tireur Nain"
@@ -317,14 +338,15 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 9,
-      "racialProfileName": "Dwarf",
+      "racialProfileId": "profile.dwarf",
       "description": {
         "en": "Dwarf Thunderers are experts with missile weapons - many an Orc or Goblin has died to their crossbow bolts or handgun fire.",
         "fr": "Les tireurs nains sont des experts en armes de tir. Plus d'un orque ou gobelin est mort sous les carreaux de leurs arbalètes ou les balles de leurs arquebuses."
       },
-      "equipmentListName": "Thunderer Equipment List"
+      "equipmentListId": "list.dwarf-treasure-hunters.thunderer-equipment-list"
     },
     {
+      "id": "warrior.dwarf-treasure-hunters.beardling",
       "name": {
         "en": "Beardling",
         "fr": "Poil-au-Menton"
@@ -342,16 +364,17 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Dwarf",
+      "racialProfileId": "profile.dwarf",
       "description": {
         "en": "Young Dwarfs with barely a beard to their name, banded together under an experienced elder in hope of glory and riches.",
         "fr": "Ce sont de jeunes nains à la barbe naissante qui se sont regroupés sous les ordres d'un aîné plus expérimenté dans l'espoir qu'il les conduira vers la gloire et la richesse."
       },
-      "equipmentListName": "Dwarf Warrior Equipment List"
+      "equipmentListId": "list.dwarf-treasure-hunters.dwarf-warrior-equipment-list"
     }
   ],
   "equipment": [
     {
+      "id": "equipment.dwarf-axe",
       "name": {
         "en": "Dwarf axe",
         "fr": "Hache Naine"
@@ -366,6 +389,7 @@
       "restrictedToThisWarband": true,
       "specialRules": [
         {
+          "id": "rule.cutting-edge",
           "name": {
             "en": "Cutting Edge",
             "fr": "Tranchant"
@@ -376,6 +400,7 @@
           }
         },
         {
+          "id": "rule.parry-dwarf-axe",
           "name": {
             "en": "Parry (Dwarf axe)",
             "fr": "Parade (Hache Naine)"
@@ -390,45 +415,47 @@
   ],
   "equipmentLists": [
     {
+      "id": "list.dwarf-treasure-hunters.dwarf-warrior-equipment-list",
       "name": {
         "en": "Dwarf Warrior Equipment List",
         "fr": "Liste d'équipement des Guerriers Nains"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Dwarf axe",
-        "Double-handed weapon",
-        "Spear",
-        "Halberd",
-        "Pistol",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.dwarf-axe",
+        "equipment.double-handed-weapon",
+        "equipment.spear",
+        "equipment.halberd",
+        "equipment.pistol",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.dwarf-treasure-hunters.thunderer-equipment-list",
       "name": {
         "en": "Thunderer Equipment List",
         "fr": "Liste d'équipement des Tireurs Nains"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Pistol",
-        "Crossbow",
-        "Handgun",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.pistol",
+        "equipment.crossbow",
+        "equipment.handgun",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     }
   ],

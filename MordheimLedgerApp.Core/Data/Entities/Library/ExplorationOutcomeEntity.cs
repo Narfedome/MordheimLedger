@@ -17,12 +17,12 @@ public class ExplorationOutcomeEntity
     public int? SubRollMax { get; set; }
     public ExplorationOutcomeKind Kind { get; set; }
     public string? GoldFormula { get; set; }
-    public string? EquipmentItemName { get; set; }
+    public string? EquipmentItemOfficialId { get; set; }
     public string? ItemQuantityFormula { get; set; }
     public string? FoundValueFormula { get; set; }
-    public string? MaterialRuleName { get; set; }
-    public string? SecondaryEquipmentItemName { get; set; }
-    public string? AlternativeEquipmentItemName { get; set; }
+    public string? MaterialRuleOfficialId { get; set; }
+    public string? SecondaryEquipmentItemOfficialId { get; set; }
+    public string? AlternativeEquipmentItemOfficialId { get; set; }
     public string? Note { get; set; }
     public string? BranchTextKey { get; set; }
     public bool? StatTestPass { get; set; }
@@ -32,13 +32,13 @@ public class ExplorationOutcomeEntity
     public bool TriggersArtefactRoll { get; set; }
 
     /// <summary>Comma-separated English WarbandArchetype.Name(s) - see Models.Library.ExplorationOutcome.
-    /// RestrictedToWarbandArchetypeNames. Null/empty = the catch-all branch.</summary>
-    public string? RestrictedToWarbandArchetypeNamesCsv { get; set; }
+    /// RestrictedToWarbandArchetypeOfficialIds. Null/empty = the catch-all branch.</summary>
+    public string? RestrictedToWarbandArchetypeOfficialIdsCsv { get; set; }
 
     public bool GrantsNextExplorationBonusDie { get; set; }
     public int? GrantsLeaderExperience { get; set; }
     public string? GrantsDistributedHeroExperienceFormula { get; set; }
-    public string? GrantsFreeHenchmanArchetypeName { get; set; }
+    public string? GrantsFreeHenchmanArchetypeOfficialId { get; set; }
     public bool GrantsOptionalEquippedHenchman { get; set; }
     public string? NextGameNoteTextKey { get; set; }
     public bool GrantsWeaponBlessing { get; set; }

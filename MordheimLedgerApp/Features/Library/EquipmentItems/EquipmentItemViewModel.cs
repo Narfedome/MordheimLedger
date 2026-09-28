@@ -506,6 +506,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
             NameKey = s.NameKey,
             DescriptionKey = s.DescriptionKey,
             Source = s.Source,
+            OfficialId = s.OfficialId,
             ImagePath = s.ImagePath,
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
             RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds),
@@ -521,7 +522,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
             Attacks = s.Attacks,
             Leadership = s.Leadership,
             GrantsSkillCategory = s.GrantsSkillCategory,
-            GrantsSpecificSkillName = s.GrantsSpecificSkillName,
+            GrantsSpecificSkillOfficialId = s.GrantsSpecificSkillOfficialId,
             GrantsRareItemSearchBonus = s.GrantsRareItemSearchBonus,
             IsSellable = s.IsSellable,
             GrantsBonusExplorationDice = s.GrantsBonusExplorationDice

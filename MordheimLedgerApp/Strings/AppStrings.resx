@@ -288,6 +288,119 @@
   <data name="SettingsCreditsMordheimer" xml:space="preserve">
     <value>mordheimer.net</value>
   </data>
+  <data name="OfficialContentTitle" xml:space="preserve">
+    <value>Contenu officiel</value>
+  </data>
+  <data name="OfficialContentUpToDate" xml:space="preserve">
+    <value>À jour</value>
+  </data>
+  <data name="OfficialContentNotUpToDate" xml:space="preserve">
+    <value>Mise à jour disponible</value>
+  </data>
+  <data name="OfficialContentPending" xml:space="preserve">
+    <value>{0} entrée(s) modifiée(s) en attente de votre choix</value>
+  </data>
+  <data name="OfficialContentSyncAction" xml:space="preserve">
+    <value>Synchroniser</value>
+  </data>
+  <data name="OfficialContentNoChange" xml:space="preserve">
+    <value>Le contenu officiel est déjà à jour.</value>
+  </data>
+  <data name="OfficialContentUpdated" xml:space="preserve">
+    <value>Le contenu officiel a été mis à jour.</value>
+  </data>
+  <data name="OfficialContentUpdatedCount" xml:space="preserve">
+    <value>{0} entrée(s) mise(s) à jour</value>
+  </data>
+  <data name="OfficialContentInsertedCount" xml:space="preserve">
+    <value>{0} nouvelle(s) entrée(s)</value>
+  </data>
+  <data name="OfficialContentRetiredCount" xml:space="preserve">
+    <value>{0} entrée(s) retirée(s) du contenu officiel, conservée(s) comme personnalisée(s)</value>
+  </data>
+  <data name="OfficialContentConflictCount" xml:space="preserve">
+    <value>{0} entrée(s) que vous aviez modifiée(s) ont une nouvelle version officielle</value>
+  </data>
+  <data name="OfficialContentRestartHint" xml:space="preserve">
+    <value>Redémarrez l'application pour rafraîchir les écrans déjà ouverts.</value>
+  </data>
+  <data name="OfficialContentSyncFailed" xml:space="preserve">
+    <value>La mise à jour du contenu officiel a échoué ; elle sera retentée au prochain lancement.
+
+{0}</value>
+  </data>
+  <data name="OfficialContentReview" xml:space="preserve">
+    <value>Examiner</value>
+  </data>
+  <data name="OfficialContentReviewHint" xml:space="preserve">
+    <value>Paramètres › Contenu officiel › Examiner pour choisir quelle version garder.</value>
+  </data>
+  <data name="ContentConflictsTitle" xml:space="preserve">
+    <value>Versions à départager</value>
+  </data>
+  <data name="ContentConflictsIntro" xml:space="preserve">
+    <value>Vous aviez modifié ces entrées, et leur version officielle a changé depuis. Choisissez laquelle garder.</value>
+  </data>
+  <data name="ContentConflictOfficial" xml:space="preserve">
+    <value>Officielle</value>
+  </data>
+  <data name="ContentConflictMine" xml:space="preserve">
+    <value>La vôtre</value>
+  </data>
+  <data name="ContentConflictKeepMine" xml:space="preserve">
+    <value>Garder la mienne</value>
+  </data>
+  <data name="ContentConflictTakeOfficial" xml:space="preserve">
+    <value>Prendre l'officielle</value>
+  </data>
+  <data name="ContentFieldName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="ContentFieldImage" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="ContentTypeWarbandArchetypeEntity" xml:space="preserve">
+    <value>Bande</value>
+  </data>
+  <data name="ContentTypeWarriorArchetypeEntity" xml:space="preserve">
+    <value>Type de guerrier</value>
+  </data>
+  <data name="ContentTypeEquipmentItemEntity" xml:space="preserve">
+    <value>Objet</value>
+  </data>
+  <data name="ContentTypeEquipmentListEntity" xml:space="preserve">
+    <value>Liste d'équipement</value>
+  </data>
+  <data name="ContentTypeSpecialRuleEntity" xml:space="preserve">
+    <value>Règle spéciale</value>
+  </data>
+  <data name="ContentTypeSkillEntity" xml:space="preserve">
+    <value>Compétence</value>
+  </data>
+  <data name="ContentTypeMutationEntity" xml:space="preserve">
+    <value>Mutation</value>
+  </data>
+  <data name="ContentTypeMagicSchoolEntity" xml:space="preserve">
+    <value>École de magie</value>
+  </data>
+  <data name="ContentTypeSpellEntity" xml:space="preserve">
+    <value>Sort</value>
+  </data>
+  <data name="ContentTypeRaceEntity" xml:space="preserve">
+    <value>Race</value>
+  </data>
+  <data name="ContentTypeRacialProfileEntity" xml:space="preserve">
+    <value>Profil racial</value>
+  </data>
+  <data name="ContentTypeInjuryEntity" xml:space="preserve">
+    <value>Blessure</value>
+  </data>
+  <data name="ContentTypeHiredSwordEntity" xml:space="preserve">
+    <value>Franc-tireur</value>
+  </data>
+  <data name="ContentTypeDramatisPersonaEntity" xml:space="preserve">
+    <value>Dramatis Persona</value>
+  </data>
   <data name="SettingsResetTitle" xml:space="preserve">
     <value>Réinitialiser les données</value>
   </data>

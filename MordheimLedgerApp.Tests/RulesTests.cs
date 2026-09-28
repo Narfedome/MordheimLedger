@@ -1213,7 +1213,7 @@ public class RulesTests
         new()
         {
             Kind = kind, SubRollMin = subRollMin, SubRollMax = subRollMax, StatTestPass = statTestPass, RequiresDoubleRoll = requiresDoubleRoll,
-            RestrictedToWarbandArchetypeNames = restrictedToWarbandArchetypeNames ?? [],
+            RestrictedToWarbandArchetypeOfficialIds = restrictedToWarbandArchetypeNames ?? [],
             GrantsNextExplorationBonusDie = grantsNextExplorationBonusDie
         };
 
@@ -1371,7 +1371,7 @@ public class RulesTests
     {
         var outcome = ExplorationOutcomeResolver.ResolveWarbandOutcome(Straggler(), warbandName);
         Assert.Equal(expectedKind, outcome?.Kind);
-        Assert.Contains(warbandName, outcome!.RestrictedToWarbandArchetypeNames);
+        Assert.Contains(warbandName, outcome!.RestrictedToWarbandArchetypeOfficialIds);
     }
 
     [Fact]
@@ -1379,7 +1379,7 @@ public class RulesTests
     {
         var outcome = ExplorationOutcomeResolver.ResolveWarbandOutcome(Straggler(), "Witch Hunters");
         Assert.NotNull(outcome);
-        Assert.Empty(outcome!.RestrictedToWarbandArchetypeNames);
+        Assert.Empty(outcome!.RestrictedToWarbandArchetypeOfficialIds);
         Assert.True(outcome.GrantsNextExplorationBonusDie);
     }
 
@@ -1515,15 +1515,15 @@ public class RulesTests
     public void SkillEligibility_NoGrantingItem_NoExtraSkillNames()
     {
         var warrior = WarriorWith([], new EquipmentItem { Id = 1 });
-        Assert.Empty(SkillEligibility.EffectiveExtraSkillNames(warrior));
+        Assert.Empty(SkillEligibility.EffectiveExtraSkillOfficialIds(warrior));
     }
 
     [Fact]
     public void SkillEligibility_CarriedSymbol_GrantsSpecificSkillName()
     {
-        var symbol = new EquipmentItem { Id = 1, GrantsSpecificSkillName = "Haggle" };
+        var symbol = new EquipmentItem { Id = 1, GrantsSpecificSkillOfficialId = "Haggle" };
         var warrior = WarriorWith([SkillCategory.Combat], symbol);
-        Assert.Equal(["Haggle"], SkillEligibility.EffectiveExtraSkillNames(warrior));
+        Assert.Equal(["Haggle"], SkillEligibility.EffectiveExtraSkillOfficialIds(warrior));
     }
 
     // --- RareItemSearchBonus -------------------------------------------------------------------

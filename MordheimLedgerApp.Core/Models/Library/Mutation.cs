@@ -28,6 +28,10 @@ public class Mutation
 
     public ContentSource Source { get; set; }
 
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    public string? OfficialId { get; set; }
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 

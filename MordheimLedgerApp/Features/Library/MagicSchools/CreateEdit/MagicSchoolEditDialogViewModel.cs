@@ -86,6 +86,7 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
             Description = spell.Description,
             DescriptionKey = spell.DescriptionKey,
             Source = spell.Source,
+            OfficialId = spell.OfficialId,
             ImagePath = spell.ImagePath
         };
 

@@ -18,6 +18,10 @@ public class WarriorArchetype
     public int Cost { get; set; }
     public ContentSource Source { get; set; }
 
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    public string? OfficialId { get; set; }
+
     /// <summary>Null = no recruitment cap tracked (e.g. "0-1 per warband").</summary>
     public int? MaxCount { get; set; }
 

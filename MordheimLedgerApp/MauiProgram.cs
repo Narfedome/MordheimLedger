@@ -120,7 +120,10 @@ namespace MordheimLedgerApp
 #endif
                 ;
 
-            builder.Services.AddSingleton(new AppDatabase(dbPath));
+            // officialSeed : synchro du contenu officiel au lancement dès que les JSON embarqués (empreinte,
+            // voir SeedContent) diffèrent de ceux reçus par la base - voir AppDatabase.SyncOfficialContentAsync.
+            builder.Services.AddSingleton(new AppDatabase(dbPath, OfficialContentService.OpenEmbeddedSeedAsync));
+            builder.Services.AddSingleton<OfficialContentService>();
             builder.Services.AddSingleton<AppShell>();
             builder.Services.AddTransient<OnboardingViewModel>();
             builder.Services.AddTransient<OnboardingPage>();

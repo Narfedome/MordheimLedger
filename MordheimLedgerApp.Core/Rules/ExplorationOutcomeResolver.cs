@@ -35,18 +35,18 @@ public static class ExplorationOutcomeResolver
     /// (Groupe B "conditional on warband type" shape - Straggler, Prisoners, Graveyard, Shrine's
     /// blessing - confirmed with the user 2026-08-20: the rulebook's "a Skaven warband CAN..." phrasing
     /// means the branch is strictly determined by warband identity, never a free choice among all of
-    /// them). Prefers an Outcome specifically restricted to warbandArchetypeName (see ExplorationOutcome.
-    /// RestrictedToWarbandArchetypeNames); falls back to the one unrestricted "catch-all" Outcome for
+    /// them). Prefers an Outcome specifically restricted to warbandArchetypeOfficialId (see ExplorationOutcome.
+    /// RestrictedToWarbandArchetypeOfficialIds); falls back to the one unrestricted "catch-all" Outcome for
     /// every other warband. Null if the result isn't actually this shape (no Outcome carries a
     /// restriction at all - Tavern/Hidden Treasure/Slaughtered Warband are RollsIndependently too but
     /// resolved by ResolveStatTestOutcome/a per-item threshold roll instead, not this).</summary>
-    public static ExplorationOutcome? ResolveWarbandOutcome(ExplorationResult result, string warbandArchetypeName)
+    public static ExplorationOutcome? ResolveWarbandOutcome(ExplorationResult result, string warbandArchetypeOfficialId)
     {
-        if (!result.RollsIndependently || !result.Outcomes.Any(o => o.RestrictedToWarbandArchetypeNames.Count > 0))
+        if (!result.RollsIndependently || !result.Outcomes.Any(o => o.RestrictedToWarbandArchetypeOfficialIds.Count > 0))
             return null;
 
-        return result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeNames.Contains(warbandArchetypeName))
-            ?? result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        return result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeOfficialIds.Contains(warbandArchetypeOfficialId))
+            ?? result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
     }
 
     /// <summary>The mutually-exclusive branch a single sub-roll picks (e.g. Corpse: 1-2 gold, 3 dagger,
@@ -112,11 +112,11 @@ public static class ExplorationOutcomeResolver
     /// can pass at once - contrast ResolveWarbandOutcome, the OTHER RollsIndependently shape (Straggler/
     /// Prisoners/Graveyard/Shrine), which resolves to exactly ONE Outcome chosen by warband identity.
     /// Distinguished from that shape by restriction: this one's Outcomes never carry
-    /// RestrictedToWarbandArchetypeNames at all - see ResolveWarbandOutcome's own guard, which already
+    /// RestrictedToWarbandArchetypeOfficialIds at all - see ResolveWarbandOutcome's own guard, which already
     /// requires at least one restricted Outcome and so never fires for this shape.</summary>
     public static bool IsIndependentThresholdResult(ExplorationResult result) =>
         result.RollsIndependently && result.Outcomes.Count > 0
-        && result.Outcomes.All(o => o.RestrictedToWarbandArchetypeNames.Count == 0);
+        && result.Outcomes.All(o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
 
     /// <summary>A single Outcome's independent threshold check within IsIndependentThresholdResult's
     /// shape - "roll >= threshold" is arithmetic on an already-entered value, not a decision made for the

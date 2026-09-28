@@ -81,6 +81,7 @@ public partial class RacialProfileViewModel : BaseViewModel
             NameKey = r.NameKey,
             DescriptionKey = r.DescriptionKey,
             Source = r.Source,
+            OfficialId = r.OfficialId,
             Movement = r.Movement,
             MovementOverride = r.MovementOverride,
             WeaponSkill = r.WeaponSkill,

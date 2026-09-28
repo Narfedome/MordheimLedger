@@ -1,6 +1,7 @@
 {
+  "id": "warband.beastmen-raiders",
   "grade": "Grade1a",
-  "race": "Beastman",
+  "raceId": "race.beastman",
   "imagePath": "beastmem_raiders.jpg",
   "name": {
     "en": "Beastmen Raiders",
@@ -12,6 +13,7 @@
   },
   "specialRules": [
     {
+      "id": "rule.animals",
       "name": {
         "en": "Animals",
         "fr": "Bestiaux"
@@ -24,6 +26,7 @@
   ],
   "skills": [
     {
+      "id": "skill.special.shaggy-hide",
       "name": {
         "en": "Shaggy Hide",
         "fr": "Peau Hirsute"
@@ -36,6 +39,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.mutant",
       "name": {
         "en": "Mutant",
         "fr": "Mutant"
@@ -48,6 +52,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.fearless",
       "name": {
         "en": "Fearless",
         "fr": "Intrépide"
@@ -60,6 +65,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.horned-one",
       "name": {
         "en": "Horned One",
         "fr": "Cornu"
@@ -72,6 +78,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "skill.special.bellowing-roar",
       "name": {
         "en": "Bellowing Roar",
         "fr": "Rugissement Tonitruant"
@@ -82,11 +89,12 @@
         "fr": "Chef seul : peut relancer les tests de Déroute ratés."
       },
       "restrictedToThisWarband": true,
-      "restrictedToWarriorNames": [
-        "Beastmen Chieftain"
+      "restrictedToWarriorIds": [
+        "warrior.beastmen-raiders.beastmen-chieftain"
       ]
     },
     {
+      "id": "skill.special.manhater",
       "name": {
         "en": "Manhater",
         "fr": "Haine des Hommes"
@@ -101,6 +109,7 @@
   ],
   "magicSchools": [
     {
+      "id": "school.chaos-rituals",
       "name": {
         "en": "Chaos Rituals",
         "fr": "Rituels du Chaos"
@@ -112,6 +121,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.beastmen-raiders.beastmen-chieftain",
       "name": {
         "en": "Beastmen Chieftain",
         "fr": "Chef Homme-Bête"
@@ -131,20 +141,21 @@
       "initiative": 4,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Beastman",
+      "racialProfileId": "profile.beastman",
       "description": {
         "en": "Beastmen chieftains have gained their position through sheer brutality - he leads the Beastmen to Mordheim to gather Chaos Stones for his Herdstone.",
         "fr": "Chez les sauvages Hommes-Bêtes, c'est le Gor le plus puissant qui commande. Il conduit ses semblables dans les ruines de Mordheim en quête de pierres du Chaos qui orneront celle de la Harde."
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List",
+      "equipmentListId": "list.beastmen-raiders.beastmen-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength",
@@ -153,6 +164,7 @@
       ]
     },
     {
+      "id": "warrior.beastmen-raiders.beastmen-shaman",
       "name": {
         "en": "Beastmen Shaman",
         "fr": "Chaman Homme-Bête"
@@ -170,7 +182,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Beastman",
+      "racialProfileId": "profile.beastman",
       "description": {
         "en": "Beastmen Shamans are prophets of the Dark Gods, and the most respected of all Beastmen - may never wear armour.",
         "fr": "Les Chamans Hommes-Bêtes sont les prophètes des Dieux Sombres et ils sont très respectés. Il ne peut en aucun cas porter d'armure."
@@ -178,13 +190,14 @@
       "isSpellcaster": true,
       "specialRules": [
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List",
+      "equipmentListId": "list.beastmen-raiders.beastmen-equipment-list",
       "skillCategories": [
         "Combat",
         "Speed",
@@ -192,6 +205,7 @@
       ]
     },
     {
+      "id": "warrior.beastmen-raiders.bestigor",
       "name": {
         "en": "Bestigor",
         "fr": "Bestigor"
@@ -209,12 +223,12 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Bestigor",
+      "racialProfileId": "profile.bestigor",
       "description": {
         "en": "Bestigors are the largest type of Beastmen, the great horned warriors of the warband - massive creatures with an inhuman resistance to pain.",
         "fr": "Les Bestigors sont les plus grands et les plus puissants Hommes-Bêtes de la Harde. Ils arborent aussi les cornes les plus imposantes et semblent ignorer la douleur."
       },
-      "equipmentListName": "Beastmen Equipment List",
+      "equipmentListId": "list.beastmen-raiders.beastmen-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength",
@@ -222,6 +236,7 @@
       ]
     },
     {
+      "id": "warrior.beastmen-raiders.centigor",
       "name": {
         "en": "Centigor",
         "fr": "Centigor"
@@ -239,13 +254,14 @@
       "initiative": 2,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Centigor",
+      "racialProfileId": "profile.centigor",
       "description": {
         "en": "A disturbing cross between a horse or oxen and a Beastman - the four legs grant great strength and speed while the humanoid torso can wield weapons, a redoutable combination.",
         "fr": "Un Centigor est le mélange contre-nature d'un quadrupède et d'un Homme-Bête. Ses quatre pattes lui permettent de se déplacer très vite et ses bras humanoïdes sont aptes à manier des armes. Il s'agit là d'une redoutable combinaison."
       },
       "specialRules": [
         {
+          "id": "rule.drunken",
           "name": {
             "en": "Drunken",
             "fr": "Ivre"
@@ -256,6 +272,7 @@
           }
         },
         {
+          "id": "rule.woodland-dwelling",
           "name": {
             "en": "Woodland Dwelling",
             "fr": "Habitat forestier"
@@ -266,6 +283,7 @@
           }
         },
         {
+          "id": "rule.trample",
           "name": {
             "en": "Trample",
             "fr": "Piétinement"
@@ -276,7 +294,7 @@
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List",
+      "equipmentListId": "list.beastmen-raiders.beastmen-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength",
@@ -284,6 +302,7 @@
       ]
     },
     {
+      "id": "warrior.beastmen-raiders.ungor",
       "name": {
         "en": "Ungor",
         "fr": "Ungor"
@@ -301,13 +320,14 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Beastman",
+      "racialProfileId": "profile.beastman",
       "description": {
         "en": "Ungor are the most numerous of the Beastmen - small, spiteful creatures, but dangerous in large masses.",
         "fr": "Les Ungors sont les Hommes-Bêtes les plus courants. Ils sont plus frêles que les Gors mais leur cruauté les rend très dangereux s'ils sont en grand nombre."
       },
       "specialRules": [
         {
+          "id": "rule.lowest-of-the-low",
           "name": {
             "en": "Lowest of the Low",
             "fr": "Sous-bêtes"
@@ -318,9 +338,10 @@
           }
         }
       ],
-      "equipmentListName": "Ungor Equipment List"
+      "equipmentListId": "list.beastmen-raiders.ungor-equipment-list"
     },
     {
+      "id": "warrior.beastmen-raiders.gor",
       "name": {
         "en": "Gor",
         "fr": "Gor"
@@ -338,14 +359,15 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 6,
-      "racialProfileName": "Beastman",
+      "racialProfileId": "profile.beastman",
       "description": {
         "en": "Gor are nearly as numerous as Ungor, but larger and more brutish.",
         "fr": "Les Gors sont moins nombreux que les Ungors, mais ils sont bien plus puissants et d'une violence extrême."
       },
-      "equipmentListName": "Beastmen Equipment List"
+      "equipmentListId": "list.beastmen-raiders.beastmen-equipment-list"
     },
     {
+      "id": "warrior.beastmen-raiders.warhounds-of-chaos",
       "name": {
         "en": "Warhounds of Chaos",
         "fr": "Chiens du Chaos"
@@ -371,12 +393,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.never-gains-experience",
           "name": {
             "en": "Never Gains Experience",
             "fr": "Ne gagne jamais d'Expérience"
           }
         },
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
@@ -385,6 +409,7 @@
       ]
     },
     {
+      "id": "warrior.beastmen-raiders.minotaur",
       "name": {
         "en": "Minotaur",
         "fr": "Minotaure"
@@ -403,19 +428,21 @@
       "initiative": 4,
       "attacks": 3,
       "leadership": 8,
-      "racialProfileName": "Minotaur",
+      "racialProfileId": "profile.minotaur",
       "description": {
         "en": "A giant, bull-headed Beastman - so powerful and fearsome that any Beastmen Chieftain will try to recruit one into his warband.",
         "fr": "Le Minotaure est un Homme-Bête géant à tête de taureau. Il est si puissant et effrayant que tout Chef Homme-Bête essaiera d'en recruter un dans sa Harde."
       },
       "specialRules": [
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.bloodgreed",
           "name": {
             "en": "Bloodgreed",
             "fr": "Soif de sang"
@@ -426,6 +453,7 @@
           }
         },
         {
+          "id": "rule.animal",
           "name": {
             "en": "Animal",
             "fr": "Animal"
@@ -436,47 +464,50 @@
           }
         },
         {
+          "id": "rule.large-target",
           "name": {
             "en": "Large Target",
             "fr": "Grande Cible"
           }
         }
       ],
-      "equipmentListName": "Beastmen Equipment List"
+      "equipmentListId": "list.beastmen-raiders.beastmen-equipment-list"
     }
   ],
   "equipmentLists": [
     {
+      "id": "list.beastmen-raiders.beastmen-equipment-list",
       "name": {
         "en": "Beastmen Equipment List",
         "fr": "Liste d'équipement des Hommes-Bêtes"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Halberd",
-        "Double-handed weapon",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.halberd",
+        "equipment.double-handed-weapon",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.beastmen-raiders.ungor-equipment-list",
       "name": {
         "en": "Ungor Equipment List",
         "fr": "Liste d'équipement des Ungors"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Spear",
-        "Shield"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.spear",
+        "equipment.shield"
       ]
     }
   ]

@@ -1,5 +1,6 @@
 [
   {
+    "id": "injury.hero.dead",
     "name": { "en": "Dead", "fr": "Mort" },
     "category": "Hero",
     "rollRange": "11-15",
@@ -9,6 +10,7 @@
     }
   },
   {
+    "id": "injury.hero.multiple-injuries",
     "name": { "en": "Multiple Injuries", "fr": "Blessures multiples" },
     "category": "Hero",
     "rollRange": "16, 21",
@@ -18,6 +20,7 @@
     }
   },
   {
+    "id": "injury.hero.leg-wound",
     "name": { "en": "Leg Wound", "fr": "Blessure à la jambe" },
     "category": "Hero",
     "rollRange": "22",
@@ -27,6 +30,7 @@
     }
   },
   {
+    "id": "injury.hero.arm-wound",
     "name": { "en": "Arm Wound", "fr": "Blessure au bras" },
     "category": "Hero",
     "rollRange": "23",
@@ -36,6 +40,7 @@
     }
   },
   {
+    "id": "injury.hero.arm-wound-minor",
     "name": { "en": "Arm Wound: Minor", "fr": "Blessure au bras : légère" },
     "category": "Hero",
     "rollRange": "23",
@@ -46,6 +51,7 @@
     }
   },
   {
+    "id": "injury.hero.arm-wound-amputated",
     "name": { "en": "Arm Wound: Amputated", "fr": "Blessure au bras : amputé" },
     "category": "Hero",
     "rollRange": "23",
@@ -56,6 +62,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.amputated-arm",
         "name": { "en": "Amputated arm", "fr": "Bras amputé" },
         "description": {
           "en": "This warrior's arm was amputated and replaced with nothing - he can no longer wield two-handed weapons. Purely a reminder: the app does not block equipping a two-handed weapon on this warrior.",
@@ -65,6 +72,7 @@
     ]
   },
   {
+    "id": "injury.hero.madness",
     "name": { "en": "Madness", "fr": "Folie" },
     "category": "Hero",
     "rollRange": "24",
@@ -74,6 +82,7 @@
     }
   },
   {
+    "id": "injury.hero.madness-stupidity",
     "name": { "en": "Madness: Stupidity", "fr": "Folie : Stupidité" },
     "category": "Hero",
     "rollRange": "24",
@@ -84,6 +93,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.stupidity",
         "name": { "en": "Stupidity", "fr": "Stupidité" },
         "description": {
           "en": "At the start of its turn, a Stupid model must pass a Leadership test or remain Stupid until its next turn: it cannot cast spells or fight in hand-to-hand combat (though enemies can still hit it normally). If not in hand-to-hand combat, roll a D6: on 1-3 it shambles forward at half speed (won't charge, stops at an obstacle or a drop, won't shoot); on 4-6 it stands inactive and does nothing.",
@@ -93,6 +103,7 @@
     ]
   },
   {
+    "id": "injury.hero.madness-frenzy",
     "name": { "en": "Madness: Frenzy", "fr": "Folie : Frénésie" },
     "category": "Hero",
     "rollRange": "24",
@@ -103,11 +114,13 @@
     },
     "specialRules": [
       {
+        "id": "rule.frenzy",
         "name": { "en": "Frenzy", "fr": "Frénésie" }
       }
     ]
   },
   {
+    "id": "injury.hero.smashed-leg",
     "name": { "en": "Smashed Leg", "fr": "Jambe écrasée" },
     "category": "Hero",
     "rollRange": "25",
@@ -117,6 +130,7 @@
     }
   },
   {
+    "id": "injury.hero.smashed-leg-minor",
     "name": { "en": "Smashed Leg: Minor", "fr": "Jambe écrasée : légère" },
     "category": "Hero",
     "rollRange": "25",
@@ -127,6 +141,7 @@
     }
   },
   {
+    "id": "injury.hero.smashed-leg-severe",
     "name": { "en": "Smashed Leg: Severe", "fr": "Jambe écrasée : grave" },
     "category": "Hero",
     "rollRange": "25",
@@ -137,6 +152,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.cannot-run",
         "name": { "en": "Cannot Run", "fr": "Ne peut plus courir" },
         "description": {
           "en": "This warrior's leg was crushed - he can no longer run (double move), though he may still charge normally. Purely a reminder: the app does not restrict this warrior's movement.",
@@ -146,6 +162,7 @@
     ]
   },
   {
+    "id": "injury.hero.chest-wound",
     "name": { "en": "Chest Wound", "fr": "Blessure au torse" },
     "category": "Hero",
     "rollRange": "26",
@@ -155,6 +172,7 @@
     }
   },
   {
+    "id": "injury.hero.blinded-in-one-eye",
     "name": { "en": "Blinded in One Eye", "fr": "Œil crevé" },
     "category": "Hero",
     "rollRange": "31",
@@ -164,6 +182,7 @@
     }
   },
   {
+    "id": "injury.hero.old-battle-wound",
     "name": { "en": "Old Battle Wound", "fr": "Vieille blessure" },
     "category": "Hero",
     "rollRange": "32",
@@ -173,6 +192,7 @@
     }
   },
   {
+    "id": "injury.hero.nervous-condition",
     "name": { "en": "Nervous Condition", "fr": "Traumatisme nerveux" },
     "category": "Hero",
     "rollRange": "33",
@@ -182,6 +202,7 @@
     }
   },
   {
+    "id": "injury.hero.hand-injury",
     "name": { "en": "Hand Injury", "fr": "Blessure à la main" },
     "category": "Hero",
     "rollRange": "34",
@@ -191,6 +212,7 @@
     }
   },
   {
+    "id": "injury.hero.deep-wound",
     "name": { "en": "Deep Wound", "fr": "Blessure profonde" },
     "category": "Hero",
     "rollRange": "35",
@@ -200,6 +222,7 @@
     }
   },
   {
+    "id": "injury.hero.robbed",
     "name": { "en": "Robbed", "fr": "Dépouillé" },
     "category": "Hero",
     "rollRange": "36",
@@ -209,6 +232,7 @@
     }
   },
   {
+    "id": "injury.hero.full-recovery",
     "name": { "en": "Full Recovery", "fr": "Récupération totale" },
     "category": "Hero",
     "rollRange": "41-55",
@@ -218,6 +242,7 @@
     }
   },
   {
+    "id": "injury.hero.bitter-enmity",
     "name": { "en": "Bitter Enmity", "fr": "Rancune" },
     "category": "Hero",
     "rollRange": "56",
@@ -227,6 +252,7 @@
     }
   },
   {
+    "id": "injury.hero.captured",
     "name": { "en": "Captured", "fr": "Capturé" },
     "category": "Hero",
     "rollRange": "61",
@@ -236,6 +262,7 @@
     }
   },
   {
+    "id": "injury.hero.hardened",
     "name": { "en": "Hardened", "fr": "Endurci" },
     "category": "Hero",
     "rollRange": "62-63",
@@ -245,6 +272,7 @@
     },
     "specialRules": [
       {
+        "id": "rule.hardened",
         "name": { "en": "Hardened", "fr": "Endurci" },
         "description": {
           "en": "This warrior has seen the worst the Old World has to offer and is no longer troubled by it - permanently immune to Fear. Distinct from Bugman's Ale's own \"Immune to Fear\" (that one lasts a single battle only) - this one never wears off.",
@@ -254,6 +282,7 @@
     ]
   },
   {
+    "id": "injury.hero.horrible-scars",
     "name": { "en": "Horrible Scars", "fr": "Horribles balafres" },
     "category": "Hero",
     "rollRange": "64",
@@ -263,11 +292,13 @@
     },
     "specialRules": [
       {
+        "id": "rule.causes-fear",
         "name": { "en": "Causes Fear", "fr": "Provoque la Peur" }
       }
     ]
   },
   {
+    "id": "injury.hero.sold-to-the-pits",
     "name": { "en": "Sold to the Pits", "fr": "Vendu aux arènes" },
     "category": "Hero",
     "rollRange": "65",
@@ -277,6 +308,7 @@
     }
   },
   {
+    "id": "injury.hero.survives-against-the-odds",
     "name": { "en": "Survives Against the Odds", "fr": "Survie miraculeuse" },
     "category": "Hero",
     "rollRange": "66",
@@ -286,6 +318,7 @@
     }
   },
   {
+    "id": "injury.henchman.lost",
     "name": { "en": "Lost", "fr": "Perdu" },
     "category": "Henchman",
     "rollRange": "1-2",
@@ -295,6 +328,7 @@
     }
   },
   {
+    "id": "injury.henchman.full-recovery",
     "name": { "en": "Full Recovery", "fr": "Récupération totale" },
     "category": "Henchman",
     "rollRange": "3-6",

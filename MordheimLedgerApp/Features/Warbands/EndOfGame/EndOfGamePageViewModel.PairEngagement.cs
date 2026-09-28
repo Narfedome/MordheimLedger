@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 
@@ -32,7 +33,7 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 ///
 /// **Générique depuis le 2026-09-04 (retour utilisateur) : piloté par la SpecialRule "A Fistful of
 /// Crowns"/"Une Poignée d'Or", pas par FeeKind.Pair.** `_fistfulOfCrownsPersonaIds` (résolue via
-/// `_specialRulesByEnglishName`, même idiome que le reste du wizard pour identifier une règle précise
+/// `_specialRulesByOfficialId`, même idiome que le reste du wizard pour identifier une règle précise
 /// indépendamment de la langue courante) - n'importe quel futur Dramatis Persona, seul ou en paire,
 /// portant cette même SpecialRule hérite automatiquement de tout ce mécanisme (Corruption, Rétention,
 /// Où est l'Argent, et - voir EndOfGamePageViewModel.PairDuel.cs - le Duel lui-même). FeeKind.Pair
@@ -84,7 +85,7 @@ public partial class EndOfGamePageViewModel
 
     private void BuildFistfulOfCrownsPersonaIds()
     {
-        var ruleId = _specialRulesByEnglishName.GetValueOrDefault("A Fistful of Crowns")?.Id;
+        var ruleId = _specialRulesByOfficialId.GetValueOrDefault(OfficialIds.FistfulOfCrownsRule)?.Id;
         _fistfulOfCrownsPersonaIds = ruleId is null
             ? new HashSet<int>()
             : _dramatisPersonaCatalog.Where(p => p.SpecialRules.Any(r => r.Id == ruleId)).Select(p => p.Id).ToHashSet();

@@ -1,5 +1,6 @@
 [
   {
+    "id": "race.human",
     "name": { "en": "Human", "fr": "Humain" },
     "description": {
       "en": "The most numerous race of the Old World - Mercenaries, Witch Hunters, Sisters of Sigmar and most other warbands recruit exclusively (or almost exclusively) from human stock.",
@@ -7,6 +8,7 @@
     }
   },
   {
+    "id": "race.chaos-human",
     "name": { "en": "Chaos Human", "fr": "Humain du Chaos" },
     "description": {
       "en": "Humans given over to the Ruinous Powers - Carnival of Chaos and Cult of the Possessed warbands, still human in body (unlike the Beastmen or Skaven) but corrupted in mind and soul.",
@@ -14,6 +16,7 @@
     }
   },
   {
+    "id": "race.skaven",
     "name": { "en": "Skaven", "fr": "Skaven" },
     "description": {
       "en": "Man-rats born of Chaos-tainted mutation, dwelling in the tunnels beneath Mordheim.",
@@ -21,6 +24,7 @@
     }
   },
   {
+    "id": "race.orc",
     "name": { "en": "Orc", "fr": "Orque" },
     "description": {
       "en": "Green-skinned brutes drawn to Mordheim by the promise of plunder and a good fight.",
@@ -28,6 +32,7 @@
     }
   },
   {
+    "id": "race.dwarf",
     "name": { "en": "Dwarf", "fr": "Nain" },
     "description": {
       "en": "Stout, grudge-bearing prospectors, in Mordheim to reclaim wyrdstone lost by their kin.",
@@ -35,6 +40,7 @@
     }
   },
   {
+    "id": "race.elf",
     "name": { "en": "Elf", "fr": "Elfe" },
     "description": {
       "en": "Tall, graceful and long-lived - no Elf warband has been catalogued yet, but the race exists in the setting.",
@@ -42,6 +48,7 @@
     }
   },
   {
+    "id": "race.undead",
     "name": { "en": "Undead", "fr": "Mort-Vivant" },
     "description": {
       "en": "Vampire-led legions of the walking dead - Zombies, Skeletons and worse, animated rather than born.",
@@ -49,6 +56,7 @@
     }
   },
   {
+    "id": "race.beastman",
     "name": { "en": "Beastman", "fr": "Homme-Bête" },
     "description": {
       "en": "Chaos-spawned hybrids of man and beast, roaming Mordheim's ruins in savage warbands.",

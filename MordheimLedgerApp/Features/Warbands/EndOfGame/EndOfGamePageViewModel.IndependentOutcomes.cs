@@ -32,7 +32,7 @@ public partial class EndOfGamePageViewModel
         // pensé pour une liste à l'écran).
         foreach (var outcome in result.Outcomes.OrderBy(IndependentOutcomeSortOrder))
             IndependentOutcomeEntries.Add(new IndependentOutcomeEntry(outcome, ResolveIndependentOutcomeLabel(outcome),
-                _detailDialogs, _equipmentItemsByEnglishName, _specialRulesByEnglishName));
+                _detailDialogs, _equipmentItemsByOfficialId, _specialRulesByOfficialId));
     }
 
     private static int IndependentOutcomeSortOrder(ExplorationOutcome outcome) => outcome switch
@@ -45,7 +45,7 @@ public partial class EndOfGamePageViewModel
         _ => 5
     };
 
-    /// <summary>Nom affiché en en-tête de chaque ligne - dérivé du Kind/EquipmentItemName plutôt qu'un
+    /// <summary>Nom affiché en en-tête de chaque ligne - dérivé du Kind/EquipmentItemOfficialId plutôt qu'un
     /// nouveau champ JSON : sans ambiguïté pour Objet (nom du catalogue)/Artefact/Pierre magique, sauf
     /// pour Or où la branche Auto ("Or trouvé") doit se distinguer d'une branche à seuil (ex. Trésor
     /// Caché : "Gemmes" modélisées en Or D3x10 - voir ExplorationResults.json) - un libellé générique
@@ -54,8 +54,8 @@ public partial class EndOfGamePageViewModel
     private string ResolveIndependentOutcomeLabel(ExplorationOutcome outcome) => outcome switch
     {
         { TriggersArtefactRoll: true } => Loc["EndOfGameArtefactRowLabel"],
-        { Kind: ExplorationOutcomeKind.Item, EquipmentItemName: { } name } =>
-            _equipmentItemsByEnglishName.GetValueOrDefault(name)?.Name ?? name,
+        { Kind: ExplorationOutcomeKind.Item, EquipmentItemOfficialId: { } name } =>
+            _equipmentItemsByOfficialId.GetValueOrDefault(name)?.Name ?? name,
         { Kind: ExplorationOutcomeKind.Gold, SubRollMin: null } => Loc["EndOfGameAutoGoldRowLabel"],
         { Kind: ExplorationOutcomeKind.Gold } => Loc["EndOfGameThresholdGoldRowLabel"],
         { Kind: ExplorationOutcomeKind.Wyrdstone } => Loc["EndOfGameWyrdstoneRowLabel"],

@@ -1,6 +1,7 @@
 {
+  "id": "warband.carnival-of-chaos",
   "grade": "Grade1a",
-  "race": "Chaos Human",
+  "raceId": "race.chaos-human",
   "imagePath": "carnival_of_chaos.jpg",
   "name": {
     "en": "Carnival of Chaos",
@@ -12,6 +13,7 @@
   },
   "specialRules": [
     {
+      "id": "rule.dangerous-to-know",
       "name": {
         "en": "Dangerous to Know",
         "fr": "Sinistre Réputation"
@@ -22,6 +24,7 @@
       }
     },
     {
+      "id": "rule.tainted",
       "name": {
         "en": "Tainted",
         "fr": "Corrompu"
@@ -34,6 +37,7 @@
   ],
   "magicSchools": [
     {
+      "id": "school.nurgle-rituals",
       "name": {
         "en": "Nurgle Rituals",
         "fr": "Rituels de Nurgle"
@@ -45,6 +49,7 @@
   "minWarriors": 3,
   "warriors": [
     {
+      "id": "warrior.carnival-of-chaos.carnival-master",
       "name": {
         "en": "Carnival Master",
         "fr": "Maître de Cérémonie"
@@ -64,7 +69,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 8,
-      "racialProfileName": "Marauder of Chaos",
+      "racialProfileId": "profile.marauder-of-chaos",
       "isSpellcaster": true,
       "description": {
         "en": "The Master is a power-crazed individual who leads his coven of daemonic entertainers throughout the backwaters of the Empire, tainting villages with disease - his cunning enchantments keep his troupe one step ahead of the Witch Hunters.",
@@ -72,19 +77,21 @@
       },
       "specialRules": [
         {
+          "id": "rule.leader",
           "name": {
             "en": "Leader",
             "fr": "Chef"
           }
         },
         {
+          "id": "rule.wizard",
           "name": {
             "en": "Wizard",
             "fr": "Sorcier"
           }
         }
       ],
-      "equipmentListName": "Carnival of Chaos Equipment List",
+      "equipmentListId": "list.carnival-of-chaos.carnival-of-chaos-equipment-list",
       "skillCategories": [
         "Combat",
         "Shooting",
@@ -94,6 +101,7 @@
       ]
     },
     {
+      "id": "warrior.carnival-of-chaos.brute",
       "name": {
         "en": "Brute",
         "fr": "Colosse"
@@ -111,13 +119,14 @@
       "initiative": 2,
       "attacks": 2,
       "leadership": 7,
-      "racialProfileName": "Marauder of Chaos",
+      "racialProfileId": "profile.marauder-of-chaos",
       "description": {
         "en": "A specific type of mutant whose constitution has been bolstered by Nurgle's unnatural vitality - massive, statuesque creatures who play the strongman in the Carnival, wielding huge hammers and flails with reckless abandon.",
         "fr": "Les Colosses sont un type de mutant particulier dont la constitution a été renforcée par la vitalité surnaturelle du Seigneur de la Peste. Ils jouent le rôle d'hommes forts dans le cadre de la kermesse, accumulant les exploits pour susciter l'admiration des foules chétives. Au combat, ils s'arment de lourds marteaux et fléaux qu'ils font tourbillonner autour de leur tête avec une joie puérile."
       },
       "specialRules": [
         {
+          "id": "rule.unnatural-strength",
           "name": {
             "en": "Unnatural Strength",
             "fr": "Force Surnaturelle"
@@ -128,7 +137,7 @@
           }
         }
       ],
-      "equipmentListName": "Brute Equipment List",
+      "equipmentListId": "list.carnival-of-chaos.brute-equipment-list",
       "skillCategories": [
         "Combat",
         "Strength",
@@ -136,6 +145,7 @@
       ]
     },
     {
+      "id": "warrior.carnival-of-chaos.tainted-one",
       "name": {
         "en": "Tainted One",
         "fr": "Impur"
@@ -153,7 +163,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Marauder of Chaos",
+      "racialProfileId": "profile.marauder-of-chaos",
       "canBuyMutations": true,
       "description": {
         "en": "Those most blessed and favoured of Father Nurgle, occupying a position of great importance in the Carnival's hierarchy - so wracked with disease and mutation that it is unsafe for even the other mortal members to touch their bare skin.",
@@ -161,6 +171,7 @@
       },
       "specialRules": [
         {
+          "id": "rule.nurgle-s-blessings",
           "name": {
             "en": "Nurgle's Blessings",
             "fr": "Bénédiction de Nurgle"
@@ -171,13 +182,14 @@
           }
         }
       ],
-      "equipmentListName": "Carnival of Chaos Equipment List",
+      "equipmentListId": "list.carnival-of-chaos.carnival-of-chaos-equipment-list",
       "skillCategories": [
         "Combat",
         "Speed"
       ]
     },
     {
+      "id": "warrior.carnival-of-chaos.plague-bearer",
       "name": {
         "en": "Plague Bearer",
         "fr": "Portepeste"
@@ -195,7 +207,7 @@
       "initiative": 4,
       "attacks": 2,
       "leadership": 10,
-      "racialProfileName": "Plague Bearer",
+      "racialProfileId": "profile.plague-bearer",
       "canUseEquipment": false,
       "description": {
         "en": "Daemons of Nurgle, identified by their cyclopean face and decayed body - revered by the mortal members of the warband as the Tallymen of Plagues, they take great pleasure in their showy roles as stage actors.",
@@ -203,12 +215,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.cloud-of-flies",
           "name": {
             "en": "Cloud of Flies",
             "fr": "Nuage de Mouches"
@@ -219,6 +233,7 @@
           }
         },
         {
+          "id": "rule.stream-of-corruption",
           "name": {
             "en": "Stream of Corruption",
             "fr": "Flot de Corruption"
@@ -229,6 +244,7 @@
           }
         },
         {
+          "id": "rule.demonic",
           "name": {
             "en": "Demonic",
             "fr": "Démons"
@@ -239,24 +255,28 @@
           }
         },
         {
+          "id": "rule.immune-to-poison",
           "name": {
             "en": "Immune to Poison",
             "fr": "Immunité aux Poisons"
           }
         },
         {
+          "id": "rule.immune-to-psychology",
           "name": {
             "en": "Immune to Psychology",
             "fr": "Immunité à la Psychologie"
           }
         },
         {
+          "id": "rule.causes-fear",
           "name": {
             "en": "Causes Fear",
             "fr": "Provoque la Peur"
           }
         },
         {
+          "id": "rule.daemonic-aura",
           "name": {
             "en": "Daemonic Aura",
             "fr": "Aura Démoniaque"
@@ -267,6 +287,7 @@
           }
         },
         {
+          "id": "rule.daemonic-instability",
           "name": {
             "en": "Daemonic Instability",
             "fr": "Instabilité Démoniaque"
@@ -279,6 +300,7 @@
       ]
     },
     {
+      "id": "warrior.carnival-of-chaos.nurgling",
       "name": {
         "en": "Nurgling",
         "fr": "Nurgling"
@@ -296,7 +318,7 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 10,
-      "racialProfileName": "Nurgling",
+      "racialProfileId": "profile.nurgling",
       "canUseEquipment": false,
       "description": {
         "en": "Tiny daemons of Nurgle, seen by his followers as his beloved children - more a nuisance than a real threat individually, but able to overwhelm even the toughest warrior in numbers.",
@@ -304,12 +326,14 @@
       },
       "specialRules": [
         {
+          "id": "rule.no-equipment",
           "name": {
             "en": "No Equipment",
             "fr": "Sans équipement"
           }
         },
         {
+          "id": "rule.cloud-of-flies",
           "name": {
             "en": "Cloud of Flies",
             "fr": "Nuage de Mouches"
@@ -320,6 +344,7 @@
           }
         },
         {
+          "id": "rule.swarm",
           "name": {
             "en": "Swarm",
             "fr": "Nuées"
@@ -330,6 +355,7 @@
           }
         },
         {
+          "id": "rule.demonic",
           "name": {
             "en": "Demonic",
             "fr": "Démons"
@@ -340,18 +366,21 @@
           }
         },
         {
+          "id": "rule.immune-to-poison",
           "name": {
             "en": "Immune to Poison",
             "fr": "Immunité aux Poisons"
           }
         },
         {
+          "id": "rule.immune-to-psychology",
           "name": {
             "en": "Immune to Psychology",
             "fr": "Immunité à la Psychologie"
           }
         },
         {
+          "id": "rule.daemonic-aura",
           "name": {
             "en": "Daemonic Aura",
             "fr": "Aura Démoniaque"
@@ -362,6 +391,7 @@
           }
         },
         {
+          "id": "rule.daemonic-instability",
           "name": {
             "en": "Daemonic Instability",
             "fr": "Instabilité Démoniaque"
@@ -374,6 +404,7 @@
       ]
     },
     {
+      "id": "warrior.carnival-of-chaos.brethren",
       "name": {
         "en": "Brethren",
         "fr": "Frère"
@@ -391,53 +422,56 @@
       "initiative": 3,
       "attacks": 1,
       "leadership": 7,
-      "racialProfileName": "Brethren",
+      "racialProfileId": "profile.brethren",
       "description": {
         "en": "Devoted followers of Nurgle who have fully embraced the path of damnation - in the Carnival, the Brethren take on all the minor roles: stagehands, puppeteers, and the like.",
         "fr": "Les Frères sont les dévots du Seigneur de la Peste, et ils ont totalement adopté sa philosophie en s'engageant sur la voie de la damnation. Dans le cadre de la kermesse, les frères occupent les seconds rôles, ou font office de marionnettistes."
       },
-      "equipmentListName": "Carnival of Chaos Equipment List"
+      "equipmentListId": "list.carnival-of-chaos.carnival-of-chaos-equipment-list"
     }
   ],
   "equipment": [],
   "equipmentLists": [
     {
+      "id": "list.carnival-of-chaos.carnival-of-chaos-equipment-list",
       "name": {
         "en": "Carnival of Chaos Equipment List",
         "fr": "Liste d'équipement de la Kermesse du Chaos"
       },
-      "itemNames": [
-        "Dagger",
-        "Mace",
-        "Hammer",
-        "Axe",
-        "Sword",
-        "Morning star",
-        "Double-handed weapon",
-        "Spear",
-        "Halberd",
-        "Short Bow",
-        "Bow",
-        "Pistol",
-        "Light Armour",
-        "Heavy Armour",
-        "Shield",
-        "Helmet"
+      "itemIds": [
+        "equipment.dagger",
+        "equipment.mace",
+        "equipment.hammer",
+        "equipment.axe",
+        "equipment.sword",
+        "equipment.morning-star",
+        "equipment.double-handed-weapon",
+        "equipment.spear",
+        "equipment.halberd",
+        "equipment.short-bow",
+        "equipment.bow",
+        "equipment.pistol",
+        "equipment.light-armour",
+        "equipment.heavy-armour",
+        "equipment.shield",
+        "equipment.helmet"
       ]
     },
     {
+      "id": "list.carnival-of-chaos.brute-equipment-list",
       "name": {
         "en": "Brute Equipment List",
         "fr": "Liste d'équipement des Colosses"
       },
-      "itemNames": [
-        "Double-handed weapon",
-        "Flail"
+      "itemIds": [
+        "equipment.double-handed-weapon",
+        "equipment.flail"
       ]
     }
   ],
   "mutations": [
     {
+      "id": "mutation.stream-of-corruption",
       "name": {
         "en": "Stream of Corruption",
         "fr": "Flot de Corruption"
@@ -450,6 +484,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "mutation.nurgle-s-rot",
       "name": {
         "en": "Nurgle's Rot",
         "fr": "Pourriture de Nurgle"
@@ -462,6 +497,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "mutation.cloud-of-flies",
       "name": {
         "en": "Cloud of Flies",
         "fr": "Nuage de Mouches"
@@ -474,6 +510,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "mutation.bloated",
       "name": {
         "en": "Bloated",
         "fr": "Horreur Enflée"
@@ -486,6 +523,7 @@
       "restrictedToThisWarband": true
     },
     {
+      "id": "mutation.mark-of-nurgle",
       "name": {
         "en": "Mark of Nurgle",
         "fr": "Marque de Nurgle"

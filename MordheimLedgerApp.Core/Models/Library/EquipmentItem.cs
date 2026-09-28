@@ -32,6 +32,10 @@ public class EquipmentItem
 
     public ContentSource Source { get; set; }
 
+    /// <summary>Identifiant stable du contenu officiel (id slug du JSON de seed, ex. "equipment.sword"),
+    /// jamais modifié ni réattribué - null pour une entrée créée par l'utilisateur.</summary>
+    public string? OfficialId { get; set; }
+
     /// <summary>Empty = no art yet, tile falls back to a glyph (see LibraryItemImageView).</summary>
     public string ImagePath { get; set; } = string.Empty;
 
@@ -82,13 +86,13 @@ public class EquipmentItem
     /// of the Library, just enough logic to resolve which skill lists are on offer, nothing else.</summary>
     public SkillCategory? GrantsSkillCategory { get; set; }
 
-    /// <summary>English Name of an existing Skill. Null for almost every item. Non-null marks an item
+    /// <summary>OfficialId of an existing Skill (e.g. "skill.academic.haggle"). Null for almost every item. Non-null marks an item
     /// that unlocks this ONE specific skill for its carrier's Advance pick regardless of the Warrior's
     /// normal AllowedSkillCategories (e.g. Merchant's House's Order of Freetraders symbol - Maison du
     /// Marchand - unlocks Haggle specifically, not the whole Academic category it belongs to). Narrower
     /// than GrantsSkillCategory (a whole list) - computed live the same way, see Core.Rules.
-    /// SkillEligibility.EffectiveExtraSkillNames.</summary>
-    public string? GrantsSpecificSkillName { get; set; }
+    /// SkillEligibility.EffectiveExtraSkillOfficialIds.</summary>
+    public string? GrantsSpecificSkillOfficialId { get; set; }
 
     /// <summary>Null for almost every item. Non-null marks an item that grants this bonus to a future
     /// Rare Item search roll while carried by a Hero (e.g. the Jewelsmith's gems - Bijoutier - +1 if

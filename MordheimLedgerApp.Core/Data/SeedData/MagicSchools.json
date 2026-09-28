@@ -1,5 +1,6 @@
 ﻿[
   {
+    "id": "school.necromancy",
     "name": {
       "en": "Necromancy",
       "fr": "Nécromancie"
@@ -10,7 +11,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Necromancy",
+        "id": "spell.lifestealer",
+        "magicSchoolId": "school.necromancy",
         "rollValue": 1,
         "difficulty": 10,
         "name": {
@@ -23,7 +25,8 @@
         }
       },
       {
-        "magicSchoolName": "Necromancy",
+        "id": "spell.re-animation",
+        "magicSchoolId": "school.necromancy",
         "rollValue": 2,
         "difficulty": 5,
         "name": {
@@ -36,7 +39,8 @@
         }
       },
       {
-        "magicSchoolName": "Necromancy",
+        "id": "spell.death-vision",
+        "magicSchoolId": "school.necromancy",
         "rollValue": 3,
         "difficulty": 6,
         "name": {
@@ -49,7 +53,8 @@
         }
       },
       {
-        "magicSchoolName": "Necromancy",
+        "id": "spell.spell-of-doom",
+        "magicSchoolId": "school.necromancy",
         "rollValue": 4,
         "difficulty": 9,
         "name": {
@@ -62,7 +67,8 @@
         }
       },
       {
-        "magicSchoolName": "Necromancy",
+        "id": "spell.call-of-vanhel",
+        "magicSchoolId": "school.necromancy",
         "rollValue": 5,
         "difficulty": 6,
         "name": {
@@ -75,7 +81,8 @@
         }
       },
       {
-        "magicSchoolName": "Necromancy",
+        "id": "spell.spell-of-awakening",
+        "magicSchoolId": "school.necromancy",
         "rollValue": 6,
         "difficulty": null,
         "name": {
@@ -90,6 +97,7 @@
     ]
   },
   {
+    "id": "school.prayers-of-taal",
     "name": {
       "en": "Prayers of Taal",
       "fr": "Prières de Taal"
@@ -100,7 +108,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Prayers of Taal",
+        "id": "spell.leap-of-the-stag",
+        "magicSchoolId": "school.prayers-of-taal",
         "rollValue": 1,
         "difficulty": 7,
         "name": {
@@ -113,7 +122,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Taal",
+        "id": "spell.blessed-beer",
+        "magicSchoolId": "school.prayers-of-taal",
         "rollValue": 2,
         "difficulty": 5,
         "name": {
@@ -126,7 +136,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Taal",
+        "id": "spell.bear-s-paw",
+        "magicSchoolId": "school.prayers-of-taal",
         "rollValue": 3,
         "difficulty": 7,
         "name": {
@@ -139,7 +150,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Taal",
+        "id": "spell.earthquake",
+        "magicSchoolId": "school.prayers-of-taal",
         "rollValue": 4,
         "difficulty": 9,
         "name": {
@@ -152,7 +164,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Taal",
+        "id": "spell.entangle",
+        "magicSchoolId": "school.prayers-of-taal",
         "rollValue": 5,
         "difficulty": 8,
         "name": {
@@ -165,7 +178,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Taal",
+        "id": "spell.squirrel-swarm",
+        "magicSchoolId": "school.prayers-of-taal",
         "rollValue": 6,
         "difficulty": 7,
         "name": {
@@ -180,6 +194,7 @@
     ]
   },
   {
+    "id": "school.nurgle-rituals",
     "name": {
       "en": "Nurgle Rituals",
       "fr": "Rituels de Nurgle"
@@ -190,7 +205,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Nurgle Rituals",
+        "id": "spell.daemonic-vigour",
+        "magicSchoolId": "school.nurgle-rituals",
         "rollValue": 1,
         "difficulty": 8,
         "name": {
@@ -203,7 +219,8 @@
         }
       },
       {
-        "magicSchoolName": "Nurgle Rituals",
+        "id": "spell.buboes",
+        "magicSchoolId": "school.nurgle-rituals",
         "rollValue": 2,
         "difficulty": 7,
         "name": {
@@ -216,7 +233,8 @@
         }
       },
       {
-        "magicSchoolName": "Nurgle Rituals",
+        "id": "spell.nurgling-miasma",
+        "magicSchoolId": "school.nurgle-rituals",
         "rollValue": 3,
         "difficulty": 8,
         "name": {
@@ -229,7 +247,8 @@
         }
       },
       {
-        "magicSchoolName": "Nurgle Rituals",
+        "id": "spell.pestilence",
+        "magicSchoolId": "school.nurgle-rituals",
         "rollValue": 4,
         "difficulty": 10,
         "name": {
@@ -242,7 +261,8 @@
         }
       },
       {
-        "magicSchoolName": "Nurgle Rituals",
+        "id": "spell.warty-skin",
+        "magicSchoolId": "school.nurgle-rituals",
         "rollValue": 5,
         "difficulty": 8,
         "name": {
@@ -255,7 +275,8 @@
         }
       },
       {
-        "magicSchoolName": "Nurgle Rituals",
+        "id": "spell.nurgle-s-rot",
+        "magicSchoolId": "school.nurgle-rituals",
         "rollValue": 6,
         "difficulty": 9,
         "name": {
@@ -270,6 +291,7 @@
     ]
   },
   {
+    "id": "school.chaos-rituals",
     "name": {
       "en": "Chaos Rituals",
       "fr": "Rituels du Chaos"
@@ -280,7 +302,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Chaos Rituals",
+        "id": "spell.vision-of-horror",
+        "magicSchoolId": "school.chaos-rituals",
         "rollValue": 1,
         "difficulty": 10,
         "name": {
@@ -293,7 +316,8 @@
         }
       },
       {
-        "magicSchoolName": "Chaos Rituals",
+        "id": "spell.third-eye",
+        "magicSchoolId": "school.chaos-rituals",
         "rollValue": 2,
         "difficulty": 7,
         "name": {
@@ -306,7 +330,8 @@
         }
       },
       {
-        "magicSchoolName": "Chaos Rituals",
+        "id": "spell.black-blood",
+        "magicSchoolId": "school.chaos-rituals",
         "rollValue": 3,
         "difficulty": 8,
         "name": {
@@ -319,7 +344,8 @@
         }
       },
       {
-        "magicSchoolName": "Chaos Rituals",
+        "id": "spell.chaos-temptation",
+        "magicSchoolId": "school.chaos-rituals",
         "rollValue": 4,
         "difficulty": 9,
         "name": {
@@ -332,7 +358,8 @@
         }
       },
       {
-        "magicSchoolName": "Chaos Rituals",
+        "id": "spell.dark-wings",
+        "magicSchoolId": "school.chaos-rituals",
         "rollValue": 5,
         "difficulty": 7,
         "name": {
@@ -345,7 +372,8 @@
         }
       },
       {
-        "magicSchoolName": "Chaos Rituals",
+        "id": "spell.word-of-pain",
+        "magicSchoolId": "school.chaos-rituals",
         "rollValue": 6,
         "difficulty": 7,
         "name": {
@@ -360,6 +388,7 @@
     ]
   },
   {
+    "id": "school.waaagh-magic",
     "name": {
       "en": "Waaagh! Magic",
       "fr": "Magie Waaagh !"
@@ -370,7 +399,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Waaagh! Magic",
+        "id": "spell.led-z-go",
+        "magicSchoolId": "school.waaagh-magic",
         "rollValue": 1,
         "difficulty": 9,
         "name": {
@@ -383,7 +413,8 @@
         }
       },
       {
-        "magicSchoolName": "Waaagh! Magic",
+        "id": "spell.oi-gerroff",
+        "magicSchoolId": "school.waaagh-magic",
         "rollValue": 2,
         "difficulty": 7,
         "name": {
@@ -396,7 +427,8 @@
         }
       },
       {
-        "magicSchoolName": "Waaagh! Magic",
+        "id": "spell.zzap",
+        "magicSchoolId": "school.waaagh-magic",
         "rollValue": 3,
         "difficulty": 9,
         "name": {
@@ -409,7 +441,8 @@
         }
       },
       {
-        "magicSchoolName": "Waaagh! Magic",
+        "id": "spell.fooled-ya",
+        "magicSchoolId": "school.waaagh-magic",
         "rollValue": 4,
         "difficulty": 6,
         "name": {
@@ -422,7 +455,8 @@
         }
       },
       {
-        "magicSchoolName": "Waaagh! Magic",
+        "id": "spell.clubba",
+        "magicSchoolId": "school.waaagh-magic",
         "rollValue": 5,
         "difficulty": 7,
         "name": {
@@ -435,7 +469,8 @@
         }
       },
       {
-        "magicSchoolName": "Waaagh! Magic",
+        "id": "spell.fire-of-gork",
+        "magicSchoolId": "school.waaagh-magic",
         "rollValue": 6,
         "difficulty": 8,
         "name": {
@@ -450,6 +485,7 @@
     ]
   },
   {
+    "id": "school.prayers-of-sigmar",
     "name": {
       "en": "Prayers of Sigmar",
       "fr": "Prières de Sigmar"
@@ -460,7 +496,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Prayers of Sigmar",
+        "id": "spell.the-hammer-of-sigmar",
+        "magicSchoolId": "school.prayers-of-sigmar",
         "rollValue": 1,
         "difficulty": 7,
         "name": {
@@ -473,7 +510,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Sigmar",
+        "id": "spell.hearts-of-steel",
+        "magicSchoolId": "school.prayers-of-sigmar",
         "rollValue": 2,
         "difficulty": 8,
         "name": {
@@ -486,7 +524,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Sigmar",
+        "id": "spell.soulfire",
+        "magicSchoolId": "school.prayers-of-sigmar",
         "rollValue": 3,
         "difficulty": 9,
         "name": {
@@ -499,7 +538,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Sigmar",
+        "id": "spell.shield-of-faith",
+        "magicSchoolId": "school.prayers-of-sigmar",
         "rollValue": 4,
         "difficulty": 6,
         "name": {
@@ -512,7 +552,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Sigmar",
+        "id": "spell.healing-hand",
+        "magicSchoolId": "school.prayers-of-sigmar",
         "rollValue": 5,
         "difficulty": 5,
         "name": {
@@ -525,7 +566,8 @@
         }
       },
       {
-        "magicSchoolName": "Prayers of Sigmar",
+        "id": "spell.armour-of-righteousness",
+        "magicSchoolId": "school.prayers-of-sigmar",
         "rollValue": 6,
         "difficulty": 9,
         "name": {
@@ -540,6 +582,7 @@
     ]
   },
   {
+    "id": "school.magic-of-the-horned-rat",
     "name": {
       "en": "Magic of the Horned Rat",
       "fr": "Magie du Rat Cornu"
@@ -550,7 +593,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Magic of the Horned Rat",
+        "id": "spell.warpfire",
+        "magicSchoolId": "school.magic-of-the-horned-rat",
         "rollValue": 1,
         "difficulty": 8,
         "name": {
@@ -563,7 +607,8 @@
         }
       },
       {
-        "magicSchoolName": "Magic of the Horned Rat",
+        "id": "spell.children-of-the-horned-rat",
+        "magicSchoolId": "school.magic-of-the-horned-rat",
         "rollValue": 2,
         "difficulty": null,
         "name": {
@@ -576,7 +621,8 @@
         }
       },
       {
-        "magicSchoolName": "Magic of the Horned Rat",
+        "id": "spell.gnawdoom",
+        "magicSchoolId": "school.magic-of-the-horned-rat",
         "rollValue": 3,
         "difficulty": 7,
         "name": {
@@ -589,7 +635,8 @@
         }
       },
       {
-        "magicSchoolName": "Magic of the Horned Rat",
+        "id": "spell.black-fury",
+        "magicSchoolId": "school.magic-of-the-horned-rat",
         "rollValue": 4,
         "difficulty": 8,
         "name": {
@@ -602,7 +649,8 @@
         }
       },
       {
-        "magicSchoolName": "Magic of the Horned Rat",
+        "id": "spell.eye-of-the-warp",
+        "magicSchoolId": "school.magic-of-the-horned-rat",
         "rollValue": 5,
         "difficulty": 8,
         "name": {
@@ -615,7 +663,8 @@
         }
       },
       {
-        "magicSchoolName": "Magic of the Horned Rat",
+        "id": "spell.sorcerer-s-curse",
+        "magicSchoolId": "school.magic-of-the-horned-rat",
         "rollValue": 6,
         "difficulty": 6,
         "name": {
@@ -630,6 +679,7 @@
     ]
   },
   {
+    "id": "school.lesser-magic",
     "name": {
       "en": "Lesser Magic",
       "fr": "Magie Mineure"
@@ -640,7 +690,8 @@
     },
     "spells": [
       {
-        "magicSchoolName": "Lesser Magic",
+        "id": "spell.fires-of-u-zhul",
+        "magicSchoolId": "school.lesser-magic",
         "rollValue": 1,
         "difficulty": 7,
         "name": {
@@ -653,7 +704,8 @@
         }
       },
       {
-        "magicSchoolName": "Lesser Magic",
+        "id": "spell.flight-of-zimmeran",
+        "magicSchoolId": "school.lesser-magic",
         "rollValue": 2,
         "difficulty": 7,
         "name": {
@@ -666,7 +718,8 @@
         }
       },
       {
-        "magicSchoolName": "Lesser Magic",
+        "id": "spell.dread-of-aramar",
+        "magicSchoolId": "school.lesser-magic",
         "rollValue": 3,
         "difficulty": 7,
         "name": {
@@ -679,7 +732,8 @@
         }
       },
       {
-        "magicSchoolName": "Lesser Magic",
+        "id": "spell.silver-arrows-of-arha",
+        "magicSchoolId": "school.lesser-magic",
         "rollValue": 4,
         "difficulty": 7,
         "name": {
@@ -692,7 +746,8 @@
         }
       },
       {
-        "magicSchoolName": "Lesser Magic",
+        "id": "spell.luck-of-shemtek",
+        "magicSchoolId": "school.lesser-magic",
         "rollValue": 5,
         "difficulty": 6,
         "name": {
@@ -705,7 +760,8 @@
         }
       },
       {
-        "magicSchoolName": "Lesser Magic",
+        "id": "spell.sword-of-rezhebel",
+        "magicSchoolId": "school.lesser-magic",
         "rollValue": 6,
         "difficulty": 8,
         "name": {

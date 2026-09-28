@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -18,8 +19,7 @@ public partial class EndOfGamePageViewModel
     /// plus un éventuel objet bonus sur ce même jet (Boutique - voir BonusItemOutcome). L'or/objet/
     /// pierre magique trouvé de cette façon s'ajoute à la trésorerie/à l'inventaire exactement comme
     /// n'importe quel autre gain de la partie.</summary>
-    private async Task ApplyExplorationOutcomeAsync(List<EquipmentItem> englishEquipment,
-        IReadOnlyDictionary<string, EquipmentItem> equipmentItemsByEnglishName, List<SpecialRule> englishSpecialRules, List<string> sentences)
+    private async Task ApplyExplorationOutcomeAsync(List<string> sentences)
     {
         if (Warband is null) return;
 
@@ -59,15 +59,12 @@ public partial class EndOfGamePageViewModel
         // Phrase d'Historique seulement : l'objet lui-même entre dans la réserve via PendingExplorationItems
         // (même résolution, déjà faite pendant le wizard), créée en base une seule fois par
         // ApplyReserveAsync - plus aucune écriture de WarbandEquipment ici depuis le 2026-09-25.
-        // equipmentItemsByEnglishName donne directement l'item résolu dans la langue courante. Les
+        // _equipmentItemsByOfficialId donne directement l'item résolu dans la langue courante. Les
         // paramètres matériau/valeur trouvée restent pour garder les appels ci-dessous inchangés.
-        Task AddOneItemToInventoryAsync(string itemName, int quantity, string? materialRuleName, int? foundValueOverride = null)
+        Task AddOneItemToInventoryAsync(string itemOfficialId, int quantity, string? materialRuleOfficialId, int? foundValueOverride = null)
         {
-            if (quantity > 0 && englishEquipment.Any(e => e.Name == itemName))
-            {
-                var displayName = equipmentItemsByEnglishName.GetValueOrDefault(itemName)?.Name ?? itemName;
-                sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, displayName));
-            }
+            if (quantity > 0 && _equipmentItemsByOfficialId.TryGetValue(itemOfficialId, out var item))
+                sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, item.Name));
             return Task.CompletedTask;
         }
 
@@ -84,22 +81,22 @@ public partial class EndOfGamePageViewModel
                 && ChosenExplorationItemName is { } primaryName
                 && int.TryParse(ExplorationItemQuantity, out var quantity))
             {
-                // ChosenExplorationItemName plutôt que outcome.EquipmentItemName brut : tient compte d'un
+                // ChosenExplorationItemName plutôt que outcome.EquipmentItemOfficialId brut : tient compte d'un
                 // éventuel choix du joueur entre deux objets (ex. Armurerie 1-2 : Bouclier OU Rondache,
-                // voir ExplorationOutcome.AlternativeEquipmentItemName). foundValueOverride : seulement
+                // voir ExplorationOutcome.AlternativeEquipmentItemOfficialId). foundValueOverride : seulement
                 // pour une branche dont la valeur trouvée n'est pas le Cost fixe du catalogue (ex.
                 // Bijoutier - Pierres de Quartz/Rubis, voir ExplorationOutcome.FoundValueFormula/
                 // WarbandEquipment.FoundValueOverride) - null pour toute autre branche Item.
                 int? foundValueOverride = outcome.FoundValueFormula is not null
                     && int.TryParse(ExplorationItemFoundValue, out var foundValue) ? foundValue : null;
-                await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleName, foundValueOverride);
+                await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleOfficialId, foundValueOverride);
             }
             else if (outcome.TriggersArtefactRoll && ResolvedArtefactItemName is { } artefactName)
             {
                 // Villa d'un Noble, sous-jet 5-6 : l'objet précis vient du second D6 sur la table des
                 // Artefacts Magiques (voir Core.Rules.MagicalArtefactTable), jamais de
                 // ChosenExplorationItemName - c'est pourquoi ce cas ne tombe pas dans le "else if"
-                // Kind.Item ci-dessus (EquipmentItemName reste null sur cette branche).
+                // Kind.Item ci-dessus (EquipmentItemOfficialId reste null sur cette branche).
                 await AddOneItemToInventoryAsync(artefactName, 1, null);
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
@@ -152,7 +149,7 @@ public partial class EndOfGamePageViewModel
                     sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], ExplorationNoteText));
                 }
             }
-            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeName is { } henchmanName)
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeOfficialId is { } henchmanName)
             {
                 // Traînard/Prisonniers, branche Morts-Vivants ("Zombie") - fusionne dans un groupe
                 // d'Hommes de main déjà existant de ce même archétype plutôt que de créer une ligne
@@ -204,21 +201,21 @@ public partial class EndOfGamePageViewModel
             // Second objet du même branch, INDÉPENDANT du Kind ci-dessus (ex. Charrette Renversée, Kind
             // Item : Épée + Dague ornées ; Laboratoire de l'Alchimiste, Kind Gold : Or + Carnet de
             // l'Alchimiste) - toujours en un seul exemplaire, jamais soumis à un choix du joueur
-            // (SecondaryEquipmentItemName est toujours un "ET", jamais un "OU" - contrairement à
-            // EquipmentItemName/AlternativeEquipmentItemName ci-dessus). Le Carnet de l'Alchimiste n'a
+            // (SecondaryEquipmentItemOfficialId est toujours un "ET", jamais un "OU" - contrairement à
+            // EquipmentItemOfficialId/AlternativeEquipmentItemOfficialId ci-dessus). Le Carnet de l'Alchimiste n'a
             // besoin d'aucune autre logique ici : c'est un objet du catalogue comme un autre
             // (EquipmentItem.GrantsSkillCategory, voir Core.Rules.SkillEligibility) - une fois porté par
             // un guerrier, l'étape Progression existante (PickAdvanceSkill) en tient compte
             // automatiquement, rien à mémoriser côté Warrior/Warband à la sauvegarde de CE wizard.
-            if (outcome.SecondaryEquipmentItemName is { } secondaryName)
-                await AddOneItemToInventoryAsync(secondaryName, 1, outcome.MaterialRuleName);
+            if (outcome.SecondaryEquipmentItemOfficialId is { } secondaryName)
+                await AddOneItemToInventoryAsync(secondaryName, 1, outcome.MaterialRuleOfficialId);
 
             // Prisonniers, branche "autres bandes" - le prisonnier rejoint gratuitement le groupe
             // d'Hommes de main choisi par le joueur (+1 HeadCount, voir EndOfGamePageViewModel.
             // SelectedEquippedHenchmanGroupOption) ; seul le coût de l'équipement répliqué (déjà validé
             // affordable, voir CanAffordEquippedHenchman) est déduit de la trésorerie - jamais de Cost
             // d'archétype, contrairement à un recrutement normal. Indépendant du Kind ci-dessus (coexiste
-            // avec l'or de l'escorte, Kind.Gold), même principe que SecondaryEquipmentItemName.
+            // avec l'or de l'escorte, Kind.Gold), même principe que SecondaryEquipmentItemOfficialId.
             if (outcome.GrantsOptionalEquippedHenchman && SelectedEquippedHenchmanGroupOption?.Group is { } recruitGroup)
             {
                 recruitGroup.Warrior.HeadCount += 1;
@@ -238,7 +235,7 @@ public partial class EndOfGamePageViewModel
             // WeaponBlessingOptions), même mécanisme qu'un achat en Gromril/Ithilmar plutôt qu'un nouveau
             // champ - indépendant du Kind ci-dessus (coexiste avec l'or des reliques, Kind.Gold).
             if (outcome.GrantsWeaponBlessing && SelectedWeaponBlessingOption?.Equipment is { } blessedEquipment
-                && englishSpecialRules.FirstOrDefault(r => r.Name == "Blessed Weapon") is { } blessedRule)
+                && _specialRulesByOfficialId.GetValueOrDefault(OfficialIds.BlessedWeaponRule) is { } blessedRule)
             {
                 await _warbandService.SetWarriorEquipmentBlessingRuleAsync(blessedEquipment.Id, blessedRule.Id);
                 sentences.Add(string.Format(Loc["HistoryWeaponBlessingSentence"],
@@ -256,7 +253,7 @@ public partial class EndOfGamePageViewModel
             }
 
             // Rappel "prochaine partie" (Cimetière catch-all) - indépendant du Kind ci-dessus, même
-            // principe que SecondaryEquipmentItemName/GrantsOptionalEquippedHenchman.
+            // principe que SecondaryEquipmentItemOfficialId/GrantsOptionalEquippedHenchman.
             if (outcome.NextGameNoteText is { } nextGameNote)
             {
                 Warband.NextGameNote = nextGameNote;
@@ -272,7 +269,7 @@ public partial class EndOfGamePageViewModel
                 var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
                 var startingEquipment = localizedEquipment.Where(e => freeHiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
                 // Pas de nom saisi par le joueur - garde le nom du Franc-Tireur (ex. "Gladiateur"), même
-                // idiome que GrantsFreeHenchmanArchetypeName (Zombie).
+                // idiome que GrantsFreeHenchmanArchetypeOfficialId (Zombie).
                 var name = freeHiredSword.Name;
 
                 var recruited = await _warbandService.RecruitHiredSwordAsync(Warband.Id, freeHiredSword, name, startingEquipment);
@@ -306,22 +303,22 @@ public partial class EndOfGamePageViewModel
                 {
                     await AddOneItemToInventoryAsync(artefactName, 1, null);
                 }
-                else if (entry.IsItem && entry.Outcome.EquipmentItemName is { } itemName
+                else if (entry.IsItem && entry.Outcome.EquipmentItemOfficialId is { } itemName
                     && int.TryParse(entry.ItemQuantity, out var quantity))
                 {
-                    await AddOneItemToInventoryAsync(itemName, quantity, entry.Outcome.MaterialRuleName);
+                    await AddOneItemToInventoryAsync(itemName, quantity, entry.Outcome.MaterialRuleOfficialId);
                 }
             }
         }
 
-        if (BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemName is { } bonusItemName)
-            await AddOneItemToInventoryAsync(bonusItemName, 1, bonusOutcome.MaterialRuleName);
+        if (BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemOfficialId is { } bonusItemName)
+            await AddOneItemToInventoryAsync(bonusItemName, 1, bonusOutcome.MaterialRuleOfficialId);
 
         // Test de Commandement additionnel du chef (ex. Bâtiment Éventré : Chien de guerre si réussi) -
         // voir ExplorationResult.BonusStatTestField/EndOfGamePageViewModel.BonusStatTestOutcome,
         // indépendant du Kind principal ci-dessus (coexiste avec les pierres magiques, ne les remplace
         // pas).
-        if (BonusStatTestOutcome is { } bonusStatOutcome && bonusStatOutcome.EquipmentItemName is { } bonusStatItemName)
-            await AddOneItemToInventoryAsync(bonusStatItemName, 1, bonusStatOutcome.MaterialRuleName);
+        if (BonusStatTestOutcome is { } bonusStatOutcome && bonusStatOutcome.EquipmentItemOfficialId is { } bonusStatItemName)
+            await AddOneItemToInventoryAsync(bonusStatItemName, 1, bonusStatOutcome.MaterialRuleOfficialId);
     }
 }

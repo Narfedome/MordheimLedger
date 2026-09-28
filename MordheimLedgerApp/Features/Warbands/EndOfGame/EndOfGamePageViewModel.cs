@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -69,12 +70,12 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// never even shows them as an option.</summary>
     private IReadOnlyCollection<int> _cooldownDramatisPersonaIds = new List<int>();
 
-    /// <summary>English WarbandArchetype.Name of the warband playing this game (e.g. "Skaven of Clan
-    /// Eshin") - needed alongside _warbandArchetypeId because a Groupe B "conditional on warband type"
-    /// Exploration branch (Core.Rules.ExplorationOutcomeResolver.ResolveWarbandOutcome) matches by name,
-    /// not Id (see ExplorationOutcome.RestrictedToWarbandArchetypeNames - a plain string reference, same
-    /// idiom as EquipmentItemName, since this is fixed rulebook content with no editor).</summary>
-    private string _warbandArchetypeName = string.Empty;
+    /// <summary>OfficialId de l'archétype de la bande qui joue (ex. "warband.skaven-of-clan-eshin") - une
+    /// branche d'Exploration "conditionnée par la bande" (Core.Rules.ExplorationOutcomeResolver.
+    /// ResolveWarbandOutcome) désigne ses bandes par id officiel (ExplorationOutcome.
+    /// RestrictedToWarbandArchetypeOfficialIds). Vide pour une bande personnalisée : aucune branche
+    /// conditionnée ne s'applique alors, seule la branche générique.</summary>
+    private string _warbandArchetypeOfficialId = string.Empty;
 
     /// <summary>Captured once at dialog construction (see Warband.PendingExplorationBonusDie) - read by
     /// ExplorationDiceCount, never reassigned mid-wizard: the flag itself is only cleared on the Warband
@@ -100,29 +101,19 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     private List<ExplorationResult> _explorationResults = new();
 
-    /// <summary>Nom anglais -> EquipmentItem résolu dans la langue courante, pour l'unique champ de ce
-    /// wizard qui référence le catalogue Équipement par nom anglais brut plutôt que par Id
-    /// (ExplorationOutcome.EquipmentItemName, voir sa doc) - sans ça, "Axe" s'affichait tel quel même en
-    /// français. Construit une seule fois par l'appelant (WarbandDetailViewModel.EndOfGame) plutôt que
-    /// refait à chaque résolution de branche. L'item entier (pas juste son nom) permet d'afficher un
-    /// vrai ChipView tapable (icône de catégorie + popup détail via _detailDialogs) plutôt qu'un simple
-    /// Label - même langage d'interaction que le reste de l'app pour toute référence Équipement.</summary>
-    private IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByEnglishName = new Dictionary<string, EquipmentItem>();
+    /// <summary>Id officiel -> EquipmentItem dans la langue courante, pour les objets que la table
+    /// d'Exploration désigne par id (ExplorationOutcome.EquipmentItemOfficialId et consorts). L'item entier
+    /// (pas juste son nom) permet d'afficher un vrai ChipView tapable (icône de catégorie + popup détail).
+    /// Une entrée sans OfficialId (créée par l'utilisateur) n'y figure pas - jamais citée par le seed.</summary>
+    private IReadOnlyDictionary<string, EquipmentItem> _equipmentItemsByOfficialId = new Dictionary<string, EquipmentItem>();
 
-    /// <summary>Même idée que _equipmentItemsByEnglishName, pour ExplorationOutcome.MaterialRuleName (ex.
-    /// "Ornate Weapon") - permet au ChipView d'afficher "Épée (O)" comme n'importe quel objet en Gromril/
-    /// Ithilmar (voir WarbandEquipment.NameDisplay) plutôt que le nom nu de l'item.</summary>
-    private IReadOnlyDictionary<string, SpecialRule> _specialRulesByEnglishName = new Dictionary<string, SpecialRule>();
+    /// <summary>Même idée que _equipmentItemsByOfficialId, pour les règles spéciales : matériau d'un objet
+    /// trouvé (ExplorationOutcome.MaterialRuleOfficialId, ex. "Ornate Weapon" -> "Épée (O)"), bénédiction,
+    /// Une Poignée d'Or (voir OfficialIds).</summary>
+    private IReadOnlyDictionary<string, SpecialRule> _specialRulesByOfficialId = new Dictionary<string, SpecialRule>();
 
-    /// <summary>Catalogues bruts (pas les dictionnaires anglais->résolu ci-dessus) nécessaires au
-    /// pipeline Apply*Async (EndOfGamePageViewModel.Apply.cs, voir ApplyExplorationOutcomeAsync/
-    /// ApplyRareItemSearchAsync) pour matcher un nom anglais brut (ExplorationOutcome.EquipmentItemName/
-    /// MaterialRuleName) contre le catalogue complet, ou pour résoudre un objet localisé à ajouter à
-    /// l'inventaire - vivaient comme simples variables locales dans WarbandDetailViewModel.EndOfGame()
-    /// avant le passage en page Shell (2026-09-22), promus en champs pour survivre entre InitializeAsync
-    /// (où ils sont chargés) et FinishAsync (où le pipeline les consomme).</summary>
-    private List<EquipmentItem> _englishEquipmentCatalog = new();
-    private List<SpecialRule> _englishSpecialRulesCatalog = new();
+    /// <summary>Catalogue d'équipement dans la langue courante, conservé entre InitializeAsync (où il est
+    /// chargé) et Finish (où ApplyRareItemSearchAsync le consomme).</summary>
     private List<EquipmentItem> _localizedEquipmentCatalog = new();
 
     /// <summary>Instantané FIGÉ de la réserve à l'ouverture du wizard (une ligne PreExisting par ligne
@@ -133,17 +124,16 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// bataille.</summary>
     private List<ReserveLine> _originalReserveSnapshot = new();
 
-    /// <summary>Nom anglais -> WarriorArchetype résolu dans la langue courante, pour
-    /// ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - même besoin que
-    /// _equipmentItemsByEnglishName, mais limité aux archétypes de LA bande jouée (une branche
-    /// conditionnée à une bande ne référence jamais l'archétype d'une autre).</summary>
-    private IReadOnlyDictionary<string, WarriorArchetype> _warriorArchetypesByEnglishName = new Dictionary<string, WarriorArchetype>();
+    /// <summary>Id officiel -> WarriorArchetype dans la langue courante, pour
+    /// ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId (ex. le Zombie, Traînard) - limité aux
+    /// archétypes de LA bande jouée (une branche conditionnée à une bande ne référence jamais l'archétype
+    /// d'une autre).</summary>
+    private IReadOnlyDictionary<string, WarriorArchetype> _warriorArchetypesByOfficialId = new Dictionary<string, WarriorArchetype>();
 
-    /// <summary>Nom anglais -> Id de compétence, pour résoudre EquipmentItem.GrantsSpecificSkillName
-    /// (voir Core.Rules.SkillEligibility.EffectiveExtraSkillNames) vers les ids que _skillPicker attend -
-    /// le picker travaille sur son propre catalogue localisé, ce dictionnaire ne sert qu'à traverser la
-    /// frontière anglais->id une fois, ici, plutôt qu'à chaque PickAdvanceSkill.</summary>
-    private IReadOnlyDictionary<string, int> _skillIdsByEnglishName = new Dictionary<string, int>();
+    /// <summary>Id officiel -> Id en base de la compétence, pour résoudre EquipmentItem.
+    /// GrantsSpecificSkillOfficialId (voir Core.Rules.SkillEligibility.EffectiveExtraSkillOfficialIds) vers
+    /// les ids que _skillPicker attend.</summary>
+    private IReadOnlyDictionary<string, int> _skillIdsByOfficialId = new Dictionary<string, int>();
 
     [ObservableProperty]
     private int warbandId;
@@ -548,10 +538,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     /// <summary>Coché "Sacrifié" seulement pour le Culte des Possédés (bande précise, pas la race
     /// "Humain du Chaos" qu'elle partage avec la Kermesse du Chaos) et "Tué (Zombie)" seulement pour les
-    /// Morts-Vivants - match par nom anglais de l'archétype de bande jouée (_warbandArchetypeName), même
-    /// idiome que ExplorationOutcome.RestrictedToWarbandArchetypeNames.</summary>
-    private bool IsUndeadWarband => _warbandArchetypeName == "Undead";
-    private bool IsPossessedWarband => _warbandArchetypeName == "Cult of the Possessed";
+    /// Morts-Vivants - comparé à l'id officiel de la bande jouée (_warbandArchetypeOfficialId).</summary>
+    private bool IsUndeadWarband => _warbandArchetypeOfficialId == OfficialIds.UndeadWarband;
+    private bool IsPossessedWarband => _warbandArchetypeOfficialId == OfficialIds.CultOfThePossessedWarband;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryCapturedEnemiesText))]
@@ -653,6 +642,11 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// compromis. Le garde "Warband null"/"aucun guerrier actif" reste côté WarbandDetailViewModel.
     /// EndOfGame() (avant la navigation), pour ne jamais pousser cette page sur un cas où il n'y a rien à
     /// enregistrer.</summary>
+    /// <summary>Index par id officiel d'un catalogue - les entrées personnalisées (sans OfficialId) sont
+    /// ignorées, jamais citées par le contenu officiel.</summary>
+    private static Dictionary<string, T> ByOfficialId<T>(IEnumerable<T> items, Func<T, string?> officialId) =>
+        items.Where(i => officialId(i) is not null).ToDictionary(i => officialId(i)!);
+
     private async Task InitializeAsync(int warbandId)
     {
         await Loading.RunAsync(async () =>
@@ -663,35 +657,16 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var language = LocalizationService.Instance.Language;
             var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
 
-            // ExplorationOutcome.EquipmentItemName référence le catalogue par nom ANGLAIS brut (voir sa
-            // doc) plutôt que par Id - construit une seule fois ici (Id introuvable autrement en anglais
-            // uniquement) et transmis au wizard sous forme d'EquipmentItem entier (pas juste son nom)
-            // pour qu'il affiche un vrai ChipView tapable (icône + popup détail) résolu dans la langue
-            // courante, au lieu du nom anglais tel quel (ex. "Axe" affiché même en français avant ce
-            // correctif).
-            var englishEquipment = await _libraryService.GetEquipmentItemsAsync("en");
-            var localizedEquipment = language == "en" ? englishEquipment : await _libraryService.GetEquipmentItemsAsync(language);
-            var equipmentItemsByEnglishName = englishEquipment.ToDictionary(e => e.Name,
-                e => localizedEquipment.FirstOrDefault(l => l.Id == e.Id) ?? e);
-
-            // Même besoin pour ExplorationOutcome.MaterialRuleName (ex. "Ornate Weapon") - permet au
-            // wizard d'afficher "Épée (O)" plutôt que le nom nu, comme n'importe quel objet en
-            // Gromril/Ithilmar.
-            var englishSpecialRules = await _libraryService.GetSpecialRulesAsync("en");
-            var localizedSpecialRules = language == "en" ? englishSpecialRules : await _libraryService.GetSpecialRulesAsync(language);
-            var specialRulesByEnglishName = englishSpecialRules.ToDictionary(r => r.Name,
-                r => localizedSpecialRules.FirstOrDefault(l => l.Id == r.Id) ?? r);
-
-            // Pour EquipmentItem.GrantsSpecificSkillName (ex. Haggle du symbole de la Maison du Marchand)
-            // - seul l'Id compte pour le picker de compétence (son propre catalogue est déjà localisé),
-            // pas besoin de résoudre un objet Skill localisé comme les deux dictionnaires ci-dessus.
-            var skillIdsByEnglishName = (await _libraryService.GetSkillsAsync("en")).ToDictionary(s => s.Name, s => s.Id);
-
-            // ExplorationOutcome.RestrictedToWarbandArchetypeNames (Groupe B "conditionné par la bande" -
-            // Traînard, Prisonniers, Cimetière, bénédiction du Sanctuaire) matche par nom anglais, pas Id
-            // - même besoin que les dictionnaires ci-dessus.
-            var warbandArchetypeName = (await _libraryService.GetWarbandArchetypesAsync("en"))
-                .First(a => a.Id == Warband.WarbandArchetypeId).Name;
+            // La table d'Exploration, les constantes OfficialIds et les objets qui accordent une compétence
+            // désignent le catalogue par id officiel : index par OfficialId, dans la langue courante, pour
+            // afficher de vrais ChipView tapables (icône + popup détail). Une entrée personnalisée (sans
+            // OfficialId) n'est jamais citée par ces références.
+            var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(language);
+            var equipmentItemsByOfficialId = ByOfficialId(localizedEquipment, e => e.OfficialId);
+            var localizedSpecialRules = await _libraryService.GetSpecialRulesAsync(language);
+            var specialRulesByOfficialId = ByOfficialId(localizedSpecialRules, r => r.OfficialId);
+            var skillIdsByOfficialId = ByOfficialId(await _libraryService.GetSkillsAsync(language), s => s.OfficialId)
+                .ToDictionary(kv => kv.Key, kv => kv.Value.Id);
 
             // Étape "Recrutement" (livre, étape 8) - MaxWarriors pour RecruitmentRules.CanRecruit, voir
             // EndOfGamePageViewModel.Recruitment.cs. Null impossible en pratique (l'archétype de CETTE
@@ -705,12 +680,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(language);
             var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
 
-            // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeName (ex. "Zombie", Traînard) - limité
+            // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId (ex. le Zombie, Traînard) - limité
             // aux archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
-            var englishWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en");
-            var localizedWarriorArchetypes = language == "en" ? englishWarriorArchetypes : await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, language);
-            var warriorArchetypesByEnglishName = englishWarriorArchetypes.ToDictionary(a => a.Name,
-                a => localizedWarriorArchetypes.FirstOrDefault(l => l.Id == a.Id) ?? a);
+            var localizedWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, language);
+            var warriorArchetypesByOfficialId = ByOfficialId(localizedWarriorArchetypes, a => a.OfficialId);
 
             // Pour l'aperçu en direct des SpecialRules attachées à une branche de Blessure Grave (ex.
             // Folie 24 -> Stupidité/Frénésie) - déjà pleinement résolu (SpecialRules incluses, voir
@@ -719,19 +692,12 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // partagée pour ne pas dupliquer le parseur de RollRange).
             var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
 
-            // Pour la comparaison de profil de "Vendu aux Fosses" (65) - le Gladiateur ("Pit Fighter",
-            // catalogue Franc-Tireur/HiredSword) est un adversaire éphémère (jamais recruté dans la
-            // bande, voir Models.Library.HiredSword), simple lookup par nom anglais comme les
-            // dictionnaires ci-dessus.
-            var englishHiredSwords = await _libraryService.GetHiredSwordsAsync("en");
-            // Catalogue complet localisé - à la fois pour le Gladiateur éphémère ci-dessous (Vendu aux
-            // Fosses) ET, sans rapport avec lui, pour l'étape "Francs-Tireurs" (upkeep/recrutement réel
-            // dans NOTRE bande - voir EndOfGamePageViewModel.HiredSwords.cs).
-            var localizedHiredSwords = language == "en" ? englishHiredSwords : await _libraryService.GetHiredSwordsAsync(language);
-            var pitFighterEnglish = englishHiredSwords.FirstOrDefault(h => h.Name == "Pit Fighter");
-            var pitFighterProfile = pitFighterEnglish is null
-                ? null
-                : localizedHiredSwords.FirstOrDefault(h => h.Id == pitFighterEnglish.Id) ?? pitFighterEnglish;
+            // Catalogue complet localisé - à la fois pour le Gladiateur ci-dessous (Vendu aux Fosses, un
+            // adversaire éphémère jamais recruté, voir Models.Library.HiredSword) ET, sans rapport avec lui,
+            // pour l'étape "Francs-Tireurs" (upkeep/recrutement réel dans NOTRE bande - voir
+            // EndOfGamePageViewModel.HiredSwords.cs).
+            var localizedHiredSwords = await _libraryService.GetHiredSwordsAsync(language);
+            var pitFighterProfile = localizedHiredSwords.FirstOrDefault(h => h.OfficialId == OfficialIds.PitFighterHiredSword);
 
             // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
             // même carte comparative - même idiome que localizedEquipment ci-dessus.
@@ -774,28 +740,26 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var activeWarriorRows = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Active).ToList();
 
             _warbandArchetypeId = Warband.WarbandArchetypeId;
-            _warbandArchetypeName = warbandArchetypeName;
+            _warbandArchetypeOfficialId = warbandArchetype.OfficialId ?? string.Empty;
             _pendingExplorationBonusDie = Warband.PendingExplorationBonusDie;
             _hasCatacombReroll = Warband.HasCatacombReroll;
             _currentTreasury = Warband.Treasury;
             _currentWyrdstoneShards = Warband.WyrdstoneShards;
             _explorationResults = explorationResults;
-            _equipmentItemsByEnglishName = equipmentItemsByEnglishName;
-            _warriorArchetypesByEnglishName = warriorArchetypesByEnglishName;
-            _specialRulesByEnglishName = specialRulesByEnglishName;
+            _equipmentItemsByOfficialId = equipmentItemsByOfficialId;
+            _warriorArchetypesByOfficialId = warriorArchetypesByOfficialId;
+            _specialRulesByOfficialId = specialRulesByOfficialId;
             // Une ligne PreExisting par ligne WarbandEquipment réelle, jamais fusionnées entre elles
             // (chacune garde son SourceId réel) - BuildReserve repart de cet instantané à chaque lecture.
             foreach (var stashItem in warbandInventory)
                 _originalReserveSnapshot.Add(new ReserveLine(stashItem.Item, stashItem.MaterialRule, stashItem.Quantity, ReserveLineOrigin.PreExisting, stashItem.Id, stashItem.FoundValueOverride));
-            _skillIdsByEnglishName = skillIdsByEnglishName;
+            _skillIdsByOfficialId = skillIdsByOfficialId;
             _hiredSwordCatalog = localizedHiredSwords;
             _dramatisPersonaCatalog = dramatisPersonaCatalog;
             _dramatisPersonaStartingEquipmentById = dramatisPersonaStartingEquipmentById;
             _ownedEquipmentItemIds = ownedEquipmentItemIds;
             _cooldownDramatisPersonaIds = cooldownDramatisPersonaIds;
             _recruitableWarbandArchetype = warbandArchetype;
-            _englishEquipmentCatalog = englishEquipment;
-            _englishSpecialRulesCatalog = englishSpecialRules;
             _localizedEquipmentCatalog = localizedEquipment;
             foreach (var archetype in localizedWarriorArchetypes)
                 RecruitRows.Add(new WarriorRecruitRow(archetype, isEditingWarband: false));
@@ -1184,9 +1148,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var servedReservePicks = ServedReservePicks();
 
             await ApplyScenarioRewardsAsync(sentences);
-            await ApplyExplorationOutcomeAsync(_englishEquipmentCatalog, _equipmentItemsByEnglishName, _englishSpecialRulesCatalog, sentences);
+            await ApplyExplorationOutcomeAsync(sentences);
             await ApplyWarriorOutcomesAsync(language, sentences);
-            await ApplyCapturedEnemiesAsync(_warriorArchetypesByEnglishName, sentences);
+            await ApplyCapturedEnemiesAsync(_warriorArchetypesByOfficialId, sentences);
             await ApplyWyrdstoneSaleAsync(sentences);
             ApplyAvailableVeterans(sentences);
             await ApplyRareItemSearchAsync(_localizedEquipmentCatalog, sentences);

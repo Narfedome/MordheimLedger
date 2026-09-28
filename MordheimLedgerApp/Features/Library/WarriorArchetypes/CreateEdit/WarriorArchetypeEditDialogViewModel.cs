@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Services;
@@ -124,7 +125,7 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
         isSpellcaster = item.IsSpellcaster;
         isLargeCreature = item.IsLargeCreature;
         canUseEquipment = item.CanUseEquipment;
-        isChief = item.SpecialRules.Any(r => r.Name is "Leader" or "Chef");
+        isChief = item.SpecialRules.Any(r => r.OfficialId == OfficialIds.LeaderRule);
         // Lu depuis le flag lui-même (GainsExperience), pas re-dérivé du nom de la règle attachée à
         // chaque ouverture - c'est précisément pour ne plus dépendre d'un texte éditable que ce flag a
         // été ajouté (voir sa doc). La migration des archétypes seedés avant son existence est gérée une
@@ -179,59 +180,58 @@ public partial class WarriorArchetypeEditDialogViewModel : DialogViewModel<bool>
     partial void OnIsSpellcasterChanged(bool value)
     {
         Item.IsSpellcaster = value;
-        if (value) _ = AddSuggestedRuleAsync("Wizard", "Sorcier");
-        else RemoveSuggestedRule("Wizard", "Sorcier");
+        if (value) _ = AddSuggestedRuleAsync(OfficialIds.WizardRule);
+        else RemoveSuggestedRule(OfficialIds.WizardRule);
     }
 
     partial void OnIsLargeCreatureChanged(bool value)
     {
         Item.IsLargeCreature = value;
-        if (value) _ = AddSuggestedRuleAsync("Large Target", "Grande Cible");
-        else RemoveSuggestedRule("Large Target", "Grande Cible");
+        if (value) _ = AddSuggestedRuleAsync(OfficialIds.LargeTargetRule);
+        else RemoveSuggestedRule(OfficialIds.LargeTargetRule);
     }
 
     partial void OnCanUseEquipmentChanged(bool value)
     {
         Item.CanUseEquipment = value;
-        if (!value) _ = AddSuggestedRuleAsync("No Equipment", "Sans équipement");
-        else RemoveSuggestedRule("No Equipment", "Sans équipement");
+        if (!value) _ = AddSuggestedRuleAsync(OfficialIds.NoEquipmentRule);
+        else RemoveSuggestedRule(OfficialIds.NoEquipmentRule);
     }
 
     partial void OnIsChiefChanged(bool value)
     {
-        if (value) _ = AddSuggestedRuleAsync("Leader", "Chef");
-        else RemoveSuggestedRule("Leader", "Chef");
+        if (value) _ = AddSuggestedRuleAsync(OfficialIds.LeaderRule);
+        else RemoveSuggestedRule(OfficialIds.LeaderRule);
     }
 
     partial void OnNeverGainsExperienceChanged(bool value)
     {
         Item.GainsExperience = !value;
-        if (value) _ = AddSuggestedRuleAsync("Never Gains Experience", "Ne gagne jamais d'Expérience");
-        else RemoveSuggestedRule("Never Gains Experience", "Ne gagne jamais d'Expérience");
+        if (value) _ = AddSuggestedRuleAsync(OfficialIds.NeverGainsExperienceRule);
+        else RemoveSuggestedRule(OfficialIds.NeverGainsExperienceRule);
     }
 
-    /// <summary>Recherche par nom (anglais OU français - Name est déjà résolu dans la langue courante,
-    /// voir LibraryService.GetSpecialRulesAsync) plutôt que par Id, aucun identifiant stable exposé côté
-    /// modèle pour ces règles communes. Catalogue chargé une seule fois puis mis en cache (_specialRuleCatalog).</summary>
-    private async Task<SpecialRule?> FindCatalogRuleAsync(string englishName, string frenchName)
+    /// <summary>Recherche par id officiel (OfficialIds) - jamais par nom, qui est traduit et renommable
+    /// dans la Bibliothèque. Catalogue chargé une seule fois puis mis en cache (_specialRuleCatalog).</summary>
+    private async Task<SpecialRule?> FindCatalogRuleAsync(string officialId)
     {
         _specialRuleCatalog ??= await _libraryService.GetSpecialRulesAsync(LocalizationService.Instance.Language);
-        return _specialRuleCatalog.FirstOrDefault(r => r.Name == englishName || r.Name == frenchName);
+        return _specialRuleCatalog.FirstOrDefault(r => r.OfficialId == officialId);
     }
 
-    private async Task AddSuggestedRuleAsync(string englishName, string frenchName)
+    private async Task AddSuggestedRuleAsync(string officialId)
     {
-        if (SpecialRules.Any(r => r.Name == englishName || r.Name == frenchName)) return;
-        var rule = await FindCatalogRuleAsync(englishName, frenchName);
+        if (SpecialRules.Any(r => r.OfficialId == officialId)) return;
+        var rule = await FindCatalogRuleAsync(officialId);
         if (rule is not null) SpecialRules.Add(rule);
     }
 
     /// <summary>Décocher IsSpellcaster/IsLargeCreature/CanUseEquipment retire la règle associée si
     /// présente - évite qu'une case décochée après une coche accidentelle laisse une chip orpheline et
     /// contradictoire derrière elle.</summary>
-    private void RemoveSuggestedRule(string englishName, string frenchName)
+    private void RemoveSuggestedRule(string officialId)
     {
-        var existing = SpecialRules.FirstOrDefault(r => r.Name == englishName || r.Name == frenchName);
+        var existing = SpecialRules.FirstOrDefault(r => r.OfficialId == officialId);
         if (existing is not null) SpecialRules.Remove(existing);
     }
 

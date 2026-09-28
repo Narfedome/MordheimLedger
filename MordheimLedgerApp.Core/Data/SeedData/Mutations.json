@@ -1,5 +1,6 @@
 [
   {
+    "id": "mutation.daemon-soul",
     "name": { "en": "Daemon Soul", "fr": "Âme démoniaque" },
     "description": {
       "en": "A daemon possesses the mutant's soul, granting a 4+ save against the effects of spells or prayers.",
@@ -8,6 +9,7 @@
     "cost": 20
   },
   {
+    "id": "mutation.great-claw",
     "name": { "en": "Great Claw", "fr": "Pince" },
     "description": {
       "en": "One arm ends in a great crab-like claw - no weapon in that arm, but gains an extra Strength+1 Attack in close combat.",
@@ -16,6 +18,7 @@
     "cost": 50
   },
   {
+    "id": "mutation.cloven-hoofs",
     "name": { "en": "Cloven Hoofs", "fr": "Sabots fendus" },
     "description": {
       "en": "The warrior gains +1 Movement.",
@@ -24,6 +27,7 @@
     "cost": 40
   },
   {
+    "id": "mutation.tentacle",
     "name": { "en": "Tentacle", "fr": "Tentacule" },
     "description": {
       "en": "One arm ends in a tentacle - may grapple an opponent in close combat, reducing its Attacks by 1 (minimum 1); the mutant chooses which Attack is lost.",
@@ -32,6 +36,7 @@
     "cost": 35
   },
   {
+    "id": "mutation.blackblood",
     "name": { "en": "Blackblood", "fr": "Sang acide" },
     "description": {
       "en": "If the mutant suffers a wound in close combat, any model in base contact suffers a Strength 3 hit (no critical hits) from the corrosive spray.",
@@ -40,6 +45,7 @@
     "cost": 30
   },
   {
+    "id": "mutation.spines",
     "name": { "en": "Spines", "fr": "Épines" },
     "description": {
       "en": "Any model in base contact automatically suffers a Strength 1 hit at the start of each close combat phase - spines never cause critical hits.",
@@ -48,6 +54,7 @@
     "cost": 35
   },
   {
+    "id": "mutation.scorpion-tail",
     "name": { "en": "Scorpion Tail", "fr": "Queue de scorpion" },
     "description": {
       "en": "A long barbed venomed tail grants an extra Strength 5 Attack each close combat phase - reduced to Strength 2 if the target is immune to poison.",
@@ -56,6 +63,7 @@
     "cost": 40
   },
   {
+    "id": "mutation.extra-arm",
     "name": { "en": "Extra Arm", "fr": "Bras supplémentaire" },
     "description": {
       "en": "May use any one-handed weapon in the extra arm for +1 Attack in close combat, or carry a shield/buckler. A Possessed choosing this gains an extra Attack but still carries no weapon.",
@@ -64,6 +72,7 @@
     "cost": 40
   },
   {
+    "id": "mutation.hideous",
     "name": { "en": "Hideous", "fr": "Hideux" },
     "description": {
       "en": "This model's appearance is abject - skin hanging in shreds, rotten entrails on display. It causes Fear.",
@@ -72,6 +81,7 @@
     "cost": 40
   },
   {
+    "id": "mutation.crystalline-body",
     "name": { "en": "Crystalline Body", "fr": "Corps cristallin" },
     "description": {
       "en": "The mutant's body becomes living crystal, both hard and brittle. Toughness becomes 6 and Wounds becomes 1 - neither can ever be changed by Experience or another mutation; re-roll any Advance roll that would increase either.",
@@ -80,6 +90,7 @@
     "cost": 60
   },
   {
+    "id": "mutation.venomous-bite",
     "name": { "en": "Venomous Bite", "fr": "Morsure venimeuse" },
     "description": {
       "en": "Small fangs secrete a powerful poison - grants an extra Strength 5 close combat Attack (reduced to Strength 2 against poison-immune targets), or improves an existing bite Attack to include this effect.",
@@ -88,6 +99,7 @@
     "cost": 50
   },
   {
+    "id": "mutation.bulging-brute",
     "name": { "en": "Bulging Brute", "fr": "Brute épaisse" },
     "description": {
       "en": "The power of Chaos grants superhuman strength as muscle mass doubles, at the cost of wits - +2 Strength, -4 Leadership.",
@@ -96,6 +108,7 @@
     "cost": 50
   },
   {
+    "id": "mutation.prehensile-tail",
     "name": { "en": "Prehensile Tail", "fr": "Queue préhensile" },
     "description": {
       "en": "A prehensile tail grows - grants an extra close combat Attack (unless the model already has a tail attack), and can hold a one-handed weapon, shield or buckler if available in its equipment list.",
@@ -104,6 +117,7 @@
     "cost": 50
   },
   {
+    "id": "mutation.scaly-skin",
     "name": { "en": "Scaly Skin", "fr": "Peau écailleuse" },
     "description": {
       "en": "A thin layer of reptilian scales grants a natural 5+ armour save (armour save penalties cannot reduce it past 6+, but a no-save Critical Hit result ignores it entirely); light armour still adds its usual +1.",
@@ -112,6 +126,7 @@
     "cost": 60
   },
   {
+    "id": "mutation.wings",
     "name": { "en": "Wings", "fr": "Ailes" },
     "description": {
       "en": "A pair of wings grow, feathered or leathery - not powerful enough for true flight, but let the mutant glide down from an elevated position: 2\" horizontal move per 1\" of fall.",

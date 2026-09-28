@@ -512,7 +512,11 @@ ces ids, plus par les noms. **Toute modification d'un JSON de `Data/SeedData` im
 `contentVersion` dans `Data/SeedData/ContentVersion.json`** - sinon le build échoue (`DBSEED01`,
 garde-fou de `Tools/DbSeedGenerator` qui compare l'empreinte des JSON à celle de la `seed.db3`
 commitée). C'est ce numéro, stocké en base (`ContentMetaEntity`), qui dira aux bases installées qu'une
-mise à jour du contenu officiel est disponible.
+mise à jour du contenu officiel est disponible. La synchro elle-même (`AppDatabase.SyncOfficialContentAsync`,
+fusion par `OfficialId` depuis la `seed.db3`) s'appuie sur la carte `Core/Data/OfficialContentSchema.cs`
+(tables du catalogue, colonnes de référence, propriétaire de chaque table de jointure) : **toute nouvelle
+table ou colonne de référence du catalogue doit y être ajoutée**, sinon ses id seraient recopiés tels
+quels depuis la seed au lieu d'être traduits vers les id locaux.
 
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
 `get_page_text`) fonctionne.

@@ -830,6 +830,8 @@ public partial class AppDatabase
         await _db.CreateTableAsync<DramatisPersonaSkillEntity>();
         await _db.CreateTableAsync<WarbandDramatisPersonaCooldownEntity>();
         await _db.CreateTableAsync<ContentMetaEntity>();
+        await _db.CreateTableAsync<OfficialContentHashEntity>();
+        await _db.CreateTableAsync<ContentConflictEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -881,6 +883,8 @@ public partial class AppDatabase
         await _db.DropTableAsync<DramatisPersonaSkillEntity>();
         await _db.DropTableAsync<WarbandDramatisPersonaCooldownEntity>();
         await _db.DropTableAsync<ContentMetaEntity>();
+        await _db.DropTableAsync<OfficialContentHashEntity>();
+        await _db.DropTableAsync<ContentConflictEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -1027,6 +1031,7 @@ public partial class AppDatabase
         }
 
         await SetContentMetaAsync(SeedContent.Version, SeedContent.Fingerprint);
+        await StoreOfficialContentHashesAsync();
     }
 
     /// <summary>Version et empreinte du contenu officiel de cette base (voir SeedContent) - version 0 et

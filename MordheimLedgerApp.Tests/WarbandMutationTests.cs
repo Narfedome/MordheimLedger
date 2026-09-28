@@ -626,7 +626,7 @@ public class WarbandMutationTests : IDisposable
         var tables = (await _db.Connection.QueryScalarsAsync<string>("SELECT name FROM sqlite_master WHERE type = 'table'"))
             .Where(t => _db.Connection.QueryAsync<ColumnInfo>($"PRAGMA table_info(\"{t}\")").Result.Any(c => c.name == "OfficialId"))
             // Exploration : reconstruite à chaque lancement (ids de ligne neufs), hors du pont.
-            .Where(t => !t.StartsWith("Exploration")).ToList();
+            .Where(t => !t.StartsWith("Exploration") && t is not (nameof(OfficialContentHashEntity) or nameof(ContentConflictEntity))).ToList();
         async Task<List<string>> SnapshotAsync()
         {
             var rows = new List<string>();

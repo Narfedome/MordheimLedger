@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!--
+  Source éditable de l'image Open Graph (1200x630), en HTML/CSS plutôt qu'en SVG : plus simple à
+  éditer à la main (texte, couleurs, polices en CSS standard) et sans les pièges de compatibilité
+  clip-path/filter/SVG imbriqué qui cassaient sous Inkscape.
+
+  Export en PNG :
+  - Ouvrir ce fichier dans Chrome, ouvrir les DevTools (F12)
+  - Dans l'onglet Elements, sélectionner le <div class="stage">
+  - Clic droit sur l'élément dans l'arbre DOM > "Capture node screenshot"
+    (exporte exactement 1200x630, fond compris, sans dépendre de la taille de la fenêtre)
+  - Enregistrer sous og-image.png / og-image-en.png
+
+  Pour la variante EN : dupliquer ce fichier en og-image-en.html et ne changer que le texte dans
+  <div class="text">, cf. Website/en/index.html pour les taglines exactes.
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>OG - Mordheim Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* Mêmes tokens que Website/styles.css */
+    --bg: #0d0b0a;
+    --accent: #c9a66b;
+    --accent-2: #5c1a1e;
+    --text: #ede0c0;
+    --text-muted: #9c8f72;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: #444; /* juste pour distinguer la scène du reste de la page pendant l'édition */
+  }
+
+  .stage {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    position: relative;
+    /* Formule exacte de .hero dans styles.css */
+    background: radial-gradient(ellipse 70% 75% at 50% 45%, #3a1a17 0%, #1a1210 40%, var(--bg) 72%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Open Sans', sans-serif;
+  }
+
+  .icon {
+    width: 150px;
+    height: 150px;
+    border-radius: 31px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    font-family: 'Pirata One', serif;
+    font-size: 76px;
+    font-weight: 400;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .rule {
+    width: 220px;
+    height: 2px;
+    margin-bottom: 32px;
+    background: linear-gradient(90deg, transparent, var(--accent-2), var(--accent), var(--accent-2), transparent);
+  }
+
+  .tagline {
+    font-size: 30px;
+    line-height: 1.4;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .subtitle {
+    margin-top: 24px;
+    font-size: 19px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage">
+    <img class="icon" src="logo.svg" alt="" />
+
+    <h1>Mordheim Ledger</h1>
+    <div class="rule"></div>
+
+    <div class="tagline">
+      Le carnet de bord de tes bandes<br />
+      à travers les ruines de Mordheim.
+    </div>
+
+    <div class="subtitle">Application communautaire non officielle · 100% hors-ligne</div>
+  </div>
+
+</body>
+</html>

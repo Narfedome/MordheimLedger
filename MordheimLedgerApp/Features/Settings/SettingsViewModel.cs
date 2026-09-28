@@ -126,10 +126,10 @@ namespace MordheimLedgerApp.Features.Settings
 
         private async Task RefreshOfficialContentStatusAsync()
         {
-            var (version, _) = await _db.GetContentMetaAsync();
+            var upToDate = await _db.IsOfficialContentUpToDateAsync();
             var pending = await _db.GetPendingContentConflictCountAsync();
             HasPendingContentConflicts = pending > 0;
-            OfficialContentStatus = string.Format(Loc["OfficialContentVersion"], version)
+            OfficialContentStatus = Loc[upToDate ? "OfficialContentUpToDate" : "OfficialContentNotUpToDate"]
                 + (pending > 0 ? " · " + string.Format(Loc["OfficialContentPending"], pending) : string.Empty);
         }
 

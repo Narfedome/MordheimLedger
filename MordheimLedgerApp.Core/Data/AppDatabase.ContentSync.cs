@@ -50,7 +50,7 @@ public partial class AppDatabase
 
     private async Task SyncOfficialContentOnStartupAsync()
     {
-        if (_officialSeed is null || (await ReadContentMetaAsync()).Version >= SeedContent.Version) return;
+        if (_officialSeed is null || await ReadContentFingerprintAsync() == SeedContent.Fingerprint) return;
         try
         {
             StartupSyncReport = await SyncFromStreamAsync(_officialSeed);
@@ -214,6 +214,7 @@ public partial class AppDatabase
             await RunInTransactionAsync(async () =>
             {
                 report = await ApplySeedSnapshotAsync(seed);
+                await _db.ExecuteAsync("DELETE FROM ContentMetaEntity");
                 foreach (var (key, value) in seedMeta)
                     await _db.InsertOrReplaceAsync(new ContentMetaEntity { Key = key, Value = value });
             });

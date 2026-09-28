@@ -19,15 +19,13 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         _db = fixture.Db;
     }
 
-    /// <summary>Le seed note la version et l'empreinte du contenu embarqué - c'est ce que la synchro et le
-    /// garde-fou de DbSeedGenerator comparent.</summary>
+    /// <summary>Le seed note l'empreinte du contenu embarqué - c'est ce que la synchro au lancement compare.</summary>
     [Fact]
-    public async Task Seed_RecordsContentVersionAndFingerprint()
+    public async Task Seed_RecordsContentFingerprint()
     {
-        var (version, fingerprint) = await _db.GetContentMetaAsync();
-        Assert.True(SeedContent.Version >= 1);
-        Assert.Equal(SeedContent.Version, version);
+        var fingerprint = await _db.GetContentFingerprintAsync();
         Assert.Equal(SeedContent.Fingerprint, fingerprint);
+        Assert.True(await _db.IsOfficialContentUpToDateAsync());
         Assert.Equal(64, fingerprint!.Length);
     }
 

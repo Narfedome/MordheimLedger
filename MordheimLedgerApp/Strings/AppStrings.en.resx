@@ -291,8 +291,11 @@
   <data name="OfficialContentTitle" xml:space="preserve">
     <value>Official content</value>
   </data>
-  <data name="OfficialContentVersion" xml:space="preserve">
-    <value>Version {0}</value>
+  <data name="OfficialContentUpToDate" xml:space="preserve">
+    <value>Up to date</value>
+  </data>
+  <data name="OfficialContentNotUpToDate" xml:space="preserve">
+    <value>Update available</value>
   </data>
   <data name="OfficialContentPending" xml:space="preserve">
     <value>{0} modified entr(y/ies) awaiting your choice</value>
@@ -303,8 +306,8 @@
   <data name="OfficialContentNoChange" xml:space="preserve">
     <value>Official content is already up to date.</value>
   </data>
-  <data name="OfficialContentUpdatedTo" xml:space="preserve">
-    <value>Official content has been updated (version {0}).</value>
+  <data name="OfficialContentUpdated" xml:space="preserve">
+    <value>Official content has been updated.</value>
   </data>
   <data name="OfficialContentUpdatedCount" xml:space="preserve">
     <value>{0} entr(y/ies) updated</value>

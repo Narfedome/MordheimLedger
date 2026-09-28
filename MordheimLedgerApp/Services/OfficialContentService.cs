@@ -14,9 +14,6 @@ public class OfficialContentService
 
     public static Task<Stream> OpenEmbeddedSeedAsync() => FileSystem.OpenAppPackageFileAsync("seed.db3");
 
-    /// <summary>Version du contenu officiel livrée avec cette version de l'appli.</summary>
-    public static int EmbeddedVersion => SeedContent.Version;
-
     public Task<ContentSyncReport> SyncNowAsync() => _db.SyncOfficialContentAsync(OpenEmbeddedSeedAsync);
 
     /// <summary>Message à montrer une fois après une synchro de démarrage qui a changé quelque chose (ou
@@ -31,7 +28,7 @@ public class OfficialContentService
         if (_db.StartupSyncError is { } error)
             return string.Format(loc["OfficialContentSyncFailed"], error.Message);
         if (_db.StartupSyncReport is not { HasChanges: true } report) return null;
-        var message = string.Format(loc["OfficialContentUpdatedTo"], EmbeddedVersion) + "\n\n" + Describe(report);
+        var message = loc["OfficialContentUpdated"] + "\n\n" + Describe(report);
         return report.Conflicts > 0 ? message + "\n\n" + loc["OfficialContentReviewHint"] : message;
     }
 

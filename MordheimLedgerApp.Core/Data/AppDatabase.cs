@@ -21,8 +21,8 @@ public partial class AppDatabase
     public Task Initialization { get; }
 
     /// <param name="officialSeed">Ouvre la seed.db3 embarquée dans l'appli (null en tests/outils) : si elle est
-    /// fournie, l'initialisation synchronise le contenu officiel dès que ContentVersion.json est plus récent
-    /// que la version enregistrée en base - voir SyncOfficialContentAsync, StartupSyncReport.</param>
+    /// fournie, l'initialisation synchronise le contenu officiel dès que l'empreinte des JSON embarqués diffère
+    /// de celle enregistrée en base - voir SeedContent, SyncOfficialContentAsync, StartupSyncReport.</param>
     public AppDatabase(string path, Func<Task<Stream>>? officialSeed = null)
     {
         _officialSeed = officialSeed;
@@ -575,30 +575,23 @@ public partial class AppDatabase
             }
         }
 
-        await SetContentMetaAsync(SeedContent.Version, SeedContent.Fingerprint);
+        await _db.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.FingerprintKey, Value = SeedContent.Fingerprint });
         await StoreOfficialContentHashesAsync();
     }
 
-    /// <summary>Version et empreinte du contenu officiel de cette base (voir SeedContent) - version 0 et
-    /// empreinte nulle pour une base installée avant ContentMetaEntity.</summary>
-    public async Task<(int Version, string? Fingerprint)> GetContentMetaAsync()
+    /// <summary>Empreinte du contenu officiel reçu par cette base (voir SeedContent) - null pour une base
+    /// installée avant ContentMetaEntity.</summary>
+    public async Task<string?> GetContentFingerprintAsync()
     {
         await Initialization;
-        return await ReadContentMetaAsync();
+        return await ReadContentFingerprintAsync();
     }
 
-    private async Task<(int Version, string? Fingerprint)> ReadContentMetaAsync()
-    {
-        var meta = (await _db.Table<ContentMetaEntity>().ToListAsync()).ToDictionary(m => m.Key, m => m.Value);
-        return (meta.TryGetValue(SeedContent.VersionKey, out var v) && int.TryParse(v, out var version) ? version : 0,
-            meta.GetValueOrDefault(SeedContent.FingerprintKey));
-    }
+    /// <summary>Le contenu officiel de cette base est-il celui embarqué dans l'appli ?</summary>
+    public async Task<bool> IsOfficialContentUpToDateAsync() => await GetContentFingerprintAsync() == SeedContent.Fingerprint;
 
-    private async Task SetContentMetaAsync(int version, string fingerprint)
-    {
-        await _db.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.VersionKey, Value = version.ToString() });
-        await _db.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.FingerprintKey, Value = fingerprint });
-    }
+    private async Task<string?> ReadContentFingerprintAsync() =>
+        (await _db.FindAsync<ContentMetaEntity>(SeedContent.FingerprintKey))?.Value;
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior
     /// archetypes, band-specific equipment (with restriction rows where flagged) and spells - each

@@ -232,14 +232,15 @@ public class ContentSyncTests : IAsyncLifetime
         Assert.Equal("House rule", house.Name);
     }
 
-    /// <summary>Au lancement : synchro seulement si la base est en retard sur ContentVersion.json.</summary>
+    /// <summary>Au lancement : synchro seulement si la base a reçu un autre contenu (empreinte différente de
+    /// celle des JSON embarqués).</summary>
     [Fact]
-    public async Task Startup_SyncsOnlyWhenDatabaseVersionIsBehind()
+    public async Task Startup_SyncsOnlyWhenFingerprintDiffers()
     {
         var localAxe = await ByOfficialIdAsync<EquipmentItemEntity>(_local, "equipment.axe");
         localAxe.Cost = 1;
         await _local.Connection.UpdateAsync(localAxe);
-        await _local.Connection.ExecuteAsync("DELETE FROM ContentMetaEntity");
+        await _local.Connection.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.FingerprintKey, Value = "OLD" });
         await _local.Connection.CloseAsync();
         await _seed.Connection.CloseAsync();
         Task<Stream> OpenSeed() => Task.FromResult<Stream>(File.OpenRead(_seedPath));
@@ -247,7 +248,7 @@ public class ContentSyncTests : IAsyncLifetime
         var behind = new AppDatabase(_localPath, OpenSeed);
         await behind.Initialization;
         var report = behind.StartupSyncReport;
-        var version = (await behind.GetContentMetaAsync()).Version;
+        var fingerprint = await behind.GetContentFingerprintAsync();
         var cost = (await ByOfficialIdAsync<EquipmentItemEntity>(behind, "equipment.axe")).Cost;
         await behind.Connection.CloseAsync();
         var upToDate = new AppDatabase(_localPath, OpenSeed);
@@ -256,18 +257,22 @@ public class ContentSyncTests : IAsyncLifetime
 
         Assert.Null(behind.StartupSyncError);
         Assert.Equal(new ContentSyncReport(1, 0, 0, 0), report);
-        Assert.Equal(SeedContent.Version, version);
+        Assert.Equal(SeedContent.Fingerprint, fingerprint);
         Assert.NotEqual(1, cost);
         Assert.Null(upToDate.StartupSyncReport);
     }
 
+    /// <summary>Après synchro, la base porte l'empreinte de la seed reçue - et plus rien d'une éventuelle
+    /// ancienne clé (ex. le numéro ContentVersion d'avant le passage aux empreintes).</summary>
     [Fact]
-    public async Task ContentVersion_TakenFromSeed()
+    public async Task Fingerprint_TakenFromSeed()
     {
-        await _seed.Connection.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.VersionKey, Value = "42" });
+        await _seed.Connection.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.FingerprintKey, Value = "NEW" });
+        await _local.Connection.InsertOrReplaceAsync(new ContentMetaEntity { Key = "ContentVersion", Value = "1" });
 
         await SyncAsync();
 
-        Assert.Equal(42, (await _local.GetContentMetaAsync()).Version);
+        Assert.Equal("NEW", await _local.GetContentFingerprintAsync());
+        Assert.Null(await _local.Connection.FindAsync<ContentMetaEntity>("ContentVersion"));
     }
 }

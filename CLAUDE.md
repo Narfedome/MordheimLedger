@@ -508,21 +508,22 @@ c'est surtout l'ui... ça fait une longueur ingérable dans le dialogue") - `Res
 **Version du contenu officiel (branche `feature/official-content-sync`, 2026-09-28)** : chaque entrée des
 JSON de seed porte un `id` stable (slug, ex. `equipment.axe`, `warrior.undead.zombie`) recopié en
 `OfficialId` en base ; les références entre fichiers et le code (`Core/Data/OfficialIds.cs`) passent par
-ces ids, plus par les noms. **Toute modification d'un JSON de `Data/SeedData` impose d'incrémenter
-`contentVersion` dans `Data/SeedData/ContentVersion.json`** - sinon le build échoue (`DBSEED01`,
-garde-fou de `Tools/DbSeedGenerator` qui compare l'empreinte des JSON à celle de la `seed.db3`
-commitée). C'est ce numéro, stocké en base (`ContentMetaEntity`), qui dira aux bases installées qu'une
-mise à jour du contenu officiel est disponible. La synchro elle-même (`AppDatabase.SyncOfficialContentAsync`,
+ces ids, plus par les noms. **Pas de numéro de version à tenir** : l'identité du contenu officiel est
+l'empreinte SHA-256 de tous les JSON (`Core/Data/SeedContent.cs`, fins de ligne normalisées), stockée en
+base (`ContentMetaEntity`) - un numéro manuel (`ContentVersion.json` + garde-fou de build `DBSEED01`) a
+existé brièvement puis a été remplacé par cette comparaison d'empreintes, sur demande de l'utilisateur
+(automatiser plutôt que penser à incrémenter). La synchro elle-même (`AppDatabase.SyncOfficialContentAsync`,
 fusion par `OfficialId` depuis la `seed.db3`) s'appuie sur la carte `Core/Data/OfficialContentSchema.cs`
 (tables du catalogue, colonnes de référence, propriétaire de chaque table de jointure) : **toute nouvelle
 table ou colonne de référence du catalogue doit y être ajoutée**, sinon ses id seraient recopiés tels
 quels depuis la seed au lieu d'être traduits vers les id locaux.
-Elle tourne au lancement dès que la base est en retard sur `contentVersion` (+ bouton « Synchroniser » des
+Elle tourne au lancement dès que l'empreinte en base diffère de celle des JSON embarqués (+ bouton « Synchroniser » des
 Paramètres) ; une entrée Modifiée dont l'officiel a changé attend le choix du joueur (dialog « Versions à
 départager », `Features/Settings/ContentConflicts/`). **Elle a remplacé les anciens `Backfill*` du
 catalogue** (race des bandes, profil racial, nouveaux objets, Dramatis Personae...) : pour faire arriver
-une correction du contenu officiel sur les bases installées, modifier le JSON et incrémenter
-`contentVersion` suffit - ne plus écrire de `Backfill*` pour ça. Seules restent les réparations des
+une correction du contenu officiel sur les bases installées, modifier le JSON suffit - ne plus écrire de
+`Backfill*` pour ça. Limite : un changement du seul code C# du seed (sans JSON modifié) ne change pas
+l'empreinte, donc ne déclenche rien - le bouton « Synchroniser » couvre ce cas. Seules restent les réparations des
 parties jouées (`RepairPlayedDataAsync`, guerriers déjà recrutés), que la synchro ne touche jamais.
 
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +

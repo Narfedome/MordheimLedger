@@ -505,6 +505,15 @@ c'est surtout l'ui... ça fait une longueur ingérable dans le dialogue") - `Res
   `WarbandRestrictionEditor`) - chaque dialog se réduit à
   `<components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>`.
 
+**Version du contenu officiel (branche `feature/official-content-sync`, 2026-09-28)** : chaque entrée des
+JSON de seed porte un `id` stable (slug, ex. `equipment.axe`, `warrior.undead.zombie`) recopié en
+`OfficialId` en base ; les références entre fichiers et le code (`Core/Data/OfficialIds.cs`) passent par
+ces ids, plus par les noms. **Toute modification d'un JSON de `Data/SeedData` impose d'incrémenter
+`contentVersion` dans `Data/SeedData/ContentVersion.json`** - sinon le build échoue (`DBSEED01`,
+garde-fou de `Tools/DbSeedGenerator` qui compare l'empreinte des JSON à celle de la `seed.db3`
+commitée). C'est ce numéro, stocké en base (`ContentMetaEntity`), qui dira aux bases installées qu'une
+mise à jour du contenu officiel est disponible.
+
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
 `get_page_text`) fonctionne.
 

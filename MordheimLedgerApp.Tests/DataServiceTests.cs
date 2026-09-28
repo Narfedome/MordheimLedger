@@ -11,10 +11,24 @@ namespace MordheimLedgerApp.Tests;
 public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
 {
     private readonly ILibraryService _library;
+    private readonly AppDatabase _db;
 
     public DataServiceTests(SeededDatabaseFixture fixture)
     {
         _library = fixture.Library;
+        _db = fixture.Db;
+    }
+
+    /// <summary>Le seed note la version et l'empreinte du contenu embarqué - c'est ce que la synchro et le
+    /// garde-fou de DbSeedGenerator comparent.</summary>
+    [Fact]
+    public async Task Seed_RecordsContentVersionAndFingerprint()
+    {
+        var (version, fingerprint) = await _db.GetContentMetaAsync();
+        Assert.True(SeedContent.Version >= 1);
+        Assert.Equal(SeedContent.Version, version);
+        Assert.Equal(SeedContent.Fingerprint, fingerprint);
+        Assert.Equal(64, fingerprint!.Length);
     }
 
     /// <summary>The seed covers several warbands (see AppDatabase.SeedWarbandFromJsonAsync) - tests

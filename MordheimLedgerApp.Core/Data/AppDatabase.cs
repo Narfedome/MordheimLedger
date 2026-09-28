@@ -829,6 +829,7 @@ public partial class AppDatabase
         await _db.CreateTableAsync<DramatisPersonaEquipmentEntity>();
         await _db.CreateTableAsync<DramatisPersonaSkillEntity>();
         await _db.CreateTableAsync<WarbandDramatisPersonaCooldownEntity>();
+        await _db.CreateTableAsync<ContentMetaEntity>();
     }
 
     private async Task DropAllTablesAsync()
@@ -879,6 +880,7 @@ public partial class AppDatabase
         await _db.DropTableAsync<DramatisPersonaEquipmentEntity>();
         await _db.DropTableAsync<DramatisPersonaSkillEntity>();
         await _db.DropTableAsync<WarbandDramatisPersonaCooldownEntity>();
+        await _db.DropTableAsync<ContentMetaEntity>();
     }
 
     /// <summary>Wipes every table (all campaign data AND Library edits/custom content) and recreates +
@@ -1023,6 +1025,24 @@ public partial class AppDatabase
                 }
             }
         }
+
+        await SetContentMetaAsync(SeedContent.Version, SeedContent.Fingerprint);
+    }
+
+    /// <summary>Version et empreinte du contenu officiel de cette base (voir SeedContent) - version 0 et
+    /// empreinte nulle pour une base installée avant ContentMetaEntity.</summary>
+    public async Task<(int Version, string? Fingerprint)> GetContentMetaAsync()
+    {
+        await Initialization;
+        var meta = (await _db.Table<ContentMetaEntity>().ToListAsync()).ToDictionary(m => m.Key, m => m.Value);
+        return (meta.TryGetValue(SeedContent.VersionKey, out var v) && int.TryParse(v, out var version) ? version : 0,
+            meta.GetValueOrDefault(SeedContent.FingerprintKey));
+    }
+
+    private async Task SetContentMetaAsync(int version, string fingerprint)
+    {
+        await _db.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.VersionKey, Value = version.ToString() });
+        await _db.InsertOrReplaceAsync(new ContentMetaEntity { Key = SeedContent.FingerprintKey, Value = fingerprint });
     }
 
     /// <summary>Deserializes an embedded Data/SeedData/*.json file and inserts its warband, warrior

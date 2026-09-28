@@ -189,15 +189,10 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(4, warrior.Equipment.Count); // Warhammer(x2)/Gromril Armour/Blessed Water/Holy Relic - 4 distinct rows, not 5.
     }
 
-    /// <summary>The fix above only helps a fresh install: an already-seeded database (Bertha seeded with
-    /// a single Sigmarite Warhammer row, before her JSON entry gained the duplicate on 2026-09-01) never
-    /// re-runs SeedDramatisPersonaeAsync (empty-catalog gate only fires once) - same class of bug as
-    /// ExplorationResults_DuplicatedByADoubleSeed_AreBackfilledOnNextLaunch above, fixed the same way via
-    /// a dedicated Backfill* method (BackfillDramatisPersonaStartingEquipmentAsync) that runs
-    /// unconditionally on every launch and re-syncs a mismatched Official persona's equipment row count
-    /// from the JSON.</summary>
+    /// <summary>Bertha seedée avec un seul Marteau de Sigmarite, avant que son entrée JSON n'en porte deux (2026-09-01) :
+    /// la synchro au démarrage rétablit ses deux lignes d'équipement.</summary>
     [Fact]
-    public async Task DramatisPersonaEquipment_StaleFromBeforeADuplicateWasAdded_IsBackfilledOnNextLaunch()
+    public async Task DramatisPersonaEquipment_StaleFromBeforeADuplicateWasAdded_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -212,10 +207,7 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(2, warhammerRows.Count);
         await _db.Connection.DeleteAsync(warhammerRows[0]);
 
-        // Rouvrir la même base (nouvelle instance AppDatabase sur le même fichier) rejoue InitializeAsync -
-        // le garde-fou de seed ne se redéclenche pas, mais le backfill tourne à chaque lancement.
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedBertha = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Bertha"));
@@ -224,14 +216,10 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>Same class of bug as the equipment-count backfill above, for the OTHER field
-    /// BackfillDramatisPersonaStartingEquipmentAsync now also fixes: an already-seeded database has
-    /// Johann's AlternativePaymentItemId still null (seeded before this field/JSON entry existed) - the
-    /// backfill overwrites the plain FK column directly (no join table involved, simpler than the
-    /// equipment-count fix) once it disagrees with DramatisPersonae.json's current
-    /// alternativePaymentItemName.</summary>
+    /// <summary>Johann seedé avant l'arrivée de son paiement alternatif (AlternativePaymentItemId null) : la synchro
+    /// au démarrage le renseigne.</summary>
     [Fact]
-    public async Task DramatisPersonaAlternativePaymentItem_StaleFromBeforeItExisted_IsBackfilledOnNextLaunch()
+    public async Task DramatisPersonaAlternativePaymentItem_StaleFromBeforeItExisted_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -243,8 +231,7 @@ public class WarbandMutationTests : IDisposable
         entity.AlternativePaymentItemId = null;
         await _db.Connection.UpdateAsync(entity);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedJohann = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name.StartsWith("Johann"));
@@ -253,11 +240,10 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>Same backfill, same class of bug, for the pairing fields added 2026-09-01 ("on va bien
-    /// s'amuser pour finaliser le duo") - an already-seeded database has Ulli/Marquand's
-    /// PairedWithDramatisPersonaId/IsHiddenFromSearchPicker still at their defaults (null/false).</summary>
+    /// <summary>Marquand/Ulli seedés avant les champs de duo (PairedWithDramatisPersonaId/IsHiddenFromSearchPicker) :
+    /// la synchro au démarrage les renseigne, référence croisée comprise.</summary>
     [Fact]
-    public async Task DramatisPersonaPairing_StaleFromBeforeItExisted_IsBackfilledOnNextLaunch()
+    public async Task DramatisPersonaPairing_StaleFromBeforeItExisted_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -273,8 +259,7 @@ public class WarbandMutationTests : IDisposable
         ulliEntity.IsHiddenFromSearchPicker = false;
         await _db.Connection.UpdateAsync(ulliEntity);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedPersonae = await reopenedLibrary.GetDramatisPersonaeAsync("en");
@@ -287,14 +272,10 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>Same class of bug again: "A Fistful of Crowns"/"Une Poignée d'Or" (2026-09-01) was split
-    /// out of Marquand/Ulli's free-text Description into a real SpecialRule AFTER the pair had already
-    /// seeded once - a database seeded before that split never picks it up without a dedicated backfill
-    /// (BackfillDramatisPersonaSpecialRulesAsync). Additive-only: removing just this one link (simulating
-    /// the stale state) and reopening must add it back WITHOUT touching "Inseparable", which was already
-    /// there and must survive untouched.</summary>
+    /// <summary>"A Fistful of Crowns" ajoutée à Marquand après un premier seed : la synchro au démarrage rajoute le
+    /// lien sans perdre "Inseparable".</summary>
     [Fact]
-    public async Task DramatisPersonaSpecialRule_AddedAfterADatabaseWasAlreadySeeded_IsBackfilledOnNextLaunch()
+    public async Task DramatisPersonaSpecialRule_AddedAfterADatabaseWasAlreadySeeded_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -308,8 +289,7 @@ public class WarbandMutationTests : IDisposable
         var fistfulLink = staleLinks.Single(l => l.SpecialRuleId == marquand.SpecialRules.Single(r => r.Name == "A Fistful of Crowns").Id);
         await _db.Connection.DeleteAsync(fistfulLink);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedMarquand = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
@@ -318,15 +298,10 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>Same class of bug again: Marquand/Ulli's Description text (2026-09-01, replaced their
-    /// short trimmed bio with each half's real individual biography) and Marquand's new PairDescription
-    /// (the shared "duo" lore, previously nonexistent) both need to reach an already-seeded database -
-    /// BackfillDramatisPersonaDescriptionsAsync compares against the CURRENT English text (not a simple
-    /// missing-row check like the other Backfill* methods), so this simulates BOTH a stale existing
-    /// Description (old text still in the DB) and a genuinely missing PairDescriptionKey (null, as any
-    /// database seeded before this field existed would have).</summary>
+    /// <summary>Description périmée et PairDescription absente (base d'avant le 2026-09-01) : la synchro au démarrage
+    /// recopie les deux textes.</summary>
     [Fact]
-    public async Task DramatisPersonaDescriptions_StaleOrMissing_AreBackfilledOnNextLaunch()
+    public async Task DramatisPersonaDescriptions_StaleOrMissing_AreRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -340,8 +315,7 @@ public class WarbandMutationTests : IDisposable
         marquandEntity.PairDescriptionKey = null;
         await _db.Connection.UpdateAsync(marquandEntity);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedMarquand = (await reopenedLibrary.GetDramatisPersonaeAsync("en")).Single(p => p.Name == "Marquand Volker");
@@ -352,14 +326,10 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>Same class of bug again, one layer up: Equipment.json has no dedup-at-runtime mechanism
-    /// at all (unlike DramatisPersona/Skill/Mutation), so a genuinely NEW entry added to it after a
-    /// database already seeded once (2026-09-01: "Dagger (Johann)") would otherwise never reach a machine
-    /// that had already seeded before that entry existed - fixed via BackfillNewEquipmentItemsAsync,
-    /// which only INSERTS items missing by English name (mirrors SeedEquipmentAsync's own per-item logic),
-    /// never touches an existing row.</summary>
+    /// <summary>"Dagger (Johann)" ajoutée à Equipment.json après un premier seed : la synchro au démarrage l'insère,
+    /// avec sa règle Parade.</summary>
     [Fact]
-    public async Task NewEquipmentItem_AddedAfterADatabaseWasAlreadySeeded_IsBackfilledOnNextLaunch()
+    public async Task NewEquipmentItem_AddedAfterADatabaseWasAlreadySeeded_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -370,8 +340,7 @@ public class WarbandMutationTests : IDisposable
         await _db.Connection.ExecuteAsync("DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ?", johannDagger.Id);
         await _db.Connection.DeleteAsync<EquipmentItemEntity>(johannDagger.Id);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedDagger = Assert.Single(await reopenedLibrary.GetEquipmentItemsAsync("en"), e => e.Name == "Dagger (Johann)");
@@ -382,12 +351,10 @@ public class WarbandMutationTests : IDisposable
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>Second case the same backfill covers: an ALREADY-existing equipment item whose
-    /// specialRules changed (2026-09-01: "Wizard's Staff (Nicodemus)" gained "Concussion"/
-    /// "Parry (Buckler)" alongside its own "Two-Handed Grip") - detected by a rule-COUNT mismatch and
-    /// re-synced (delete + reinsert), same idiom as the DramatisPersona equipment-count backfill.</summary>
+    /// <summary>Bâton de Nicodemus seedé avant l'ajout de Concussion/Parry (Buckler) : la synchro au démarrage
+    /// rétablit ses trois règles.</summary>
     [Fact]
-    public async Task EquipmentItemSpecialRules_StaleFromBeforeTheyWereAdded_AreBackfilledOnNextLaunch()
+    public async Task EquipmentItemSpecialRules_StaleFromBeforeTheyWereAdded_AreRepairedByOfficialContentSync()
     {
         await _db.Initialization;
 
@@ -400,8 +367,7 @@ public class WarbandMutationTests : IDisposable
         await _db.Connection.ExecuteAsync(
             "DELETE FROM EquipmentItemSpecialRuleEntity WHERE EquipmentItemId = ? AND SpecialRuleId != ?", staff.Id, twoHandedGripRule.Id);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         var reopenedLibrary = new LibraryService(reopenedDb);
 
         var reopenedStaff = (await reopenedLibrary.GetEquipmentItemsAsync("en")).Single(e => e.Name == "Wizard's Staff (Nicodemus)");
@@ -551,38 +517,35 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(ContentSource.Modified, reloaded.Source);
     }
 
-    /// <summary>BackfillWarriorArchetypeRacialProfileAsync (2026-09-24) : gardé par PRAGMA user_version
-    /// plutôt que par son propre filtre (qui ne se refermait jamais, 0 étant aussi "aucun profil") - doit
-    /// quand même réparer une base antérieure au marqueur, puis ne plus jamais retourner relire les JSON.</summary>
+    /// <summary>Type de guerrier seedé avant RacialProfileId (0 partout) : la synchro au démarrage lui rend son
+    /// profil - et, dans la même ouverture, un guerrier déjà recruté récupère ses maximums raciaux
+    /// (RepairPlayedDataAsync tourne APRÈS la synchro, voir AppDatabase.InitializeAsync).</summary>
     [Fact]
-    public async Task RacialProfileBackfill_RunsOnLegacyDatabase_ThenIsMarkedDone()
+    public async Task RacialProfile_MissingOnLegacyDatabase_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
-        Assert.True(await _db.Connection.ExecuteScalarAsync<int>("PRAGMA user_version") >= 1);
-
         var reiklanders = await GetReiklandersAsync();
         var captain = (await _library.GetWarriorArchetypesAsync(reiklanders.Id, "en")).First(a => a.RacialProfileId != 0);
         var expectedProfileId = captain.RacialProfileId;
+        var warband = await _warbands.CreateWarbandAsync("Legacy", reiklanders);
+        var warrior = await _warbands.RecruitWarriorAsync(warband.Id, captain, "Old Captain");
 
-        // Simule une base d'avant RacialProfileId ET d'avant le marqueur.
+        // Simule une base d'avant RacialProfileId : archétype sans profil, guerrier sans maximums.
         var entity = await _db.Connection.FindAsync<WarriorArchetypeEntity>(captain.Id);
         entity.RacialProfileId = 0;
         await _db.Connection.UpdateAsync(entity);
-        await _db.Connection.ExecuteAsync("PRAGMA user_version = 0");
-        await _db.Connection.CloseAsync();
+        await _db.Connection.ExecuteAsync("UPDATE WarriorEntity SET MaxWeaponSkill = NULL WHERE Id = ?", warrior.Id);
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
-        var repaired = await reopenedDb.Connection.FindAsync<WarriorArchetypeEntity>(captain.Id);
-        Assert.Equal(expectedProfileId, repaired.RacialProfileId);
-        Assert.True(await reopenedDb.Connection.ExecuteScalarAsync<int>("PRAGMA user_version") >= 1);
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
+        Assert.Equal(expectedProfileId, (await reopenedDb.Connection.FindAsync<WarriorArchetypeEntity>(captain.Id)).RacialProfileId);
+        Assert.NotNull((await reopenedDb.Connection.FindAsync<WarriorEntity>(warrior.Id)).MaxWeaponSkill);
         await reopenedDb.Connection.CloseAsync();
     }
 
-    /// <summary>BackfillMustStartWithMutationAsync (2026-09-24) : une base seedée avant l'arrivée de la colonne
-    /// (drapeau à false partout, user_version 1) retrouve le Mutant marqué au lancement suivant.</summary>
+    /// <summary>Base seedée avant WarriorArchetype.MustStartWithMutation (drapeau à false partout) : la
+    /// synchro au démarrage remarque le Mutant.</summary>
     [Fact]
-    public async Task MustStartWithMutationBackfill_FlagsMutantOnLegacyDatabase()
+    public async Task MustStartWithMutation_MissingOnLegacyDatabase_IsRepairedByOfficialContentSync()
     {
         await _db.Initialization;
         var cult = (await _library.GetWarbandArchetypesAsync("en")).Single(a => a.Name == "Cult of the Possessed");
@@ -591,14 +554,34 @@ public class WarbandMutationTests : IDisposable
         var entity = await _db.Connection.FindAsync<WarriorArchetypeEntity>(mutant.Id);
         entity.MustStartWithMutation = false;
         await _db.Connection.UpdateAsync(entity);
-        await _db.Connection.ExecuteAsync("PRAGMA user_version = 1");
-        await _db.Connection.CloseAsync();
 
-        var reopenedDb = new AppDatabase(_dbPath);
-        await reopenedDb.Initialization;
+        var reopenedDb = await ReopenBehindOfficialContentAsync();
         Assert.True((await reopenedDb.Connection.FindAsync<WarriorArchetypeEntity>(mutant.Id)).MustStartWithMutation);
-        Assert.True(await reopenedDb.Connection.ExecuteScalarAsync<int>("PRAGMA user_version") >= 2);
         await reopenedDb.Connection.CloseAsync();
+    }
+
+    /// <summary>seed.db3 à jour, générée une fois pour toute la classe : sert de contenu officiel "embarqué"
+    /// aux tests qui simulent une base en retard.</summary>
+    private static readonly Lazy<Task<string>> FreshSeedPath = new(async () =>
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"mordheimledger-fresh-seed-{Guid.NewGuid()}.db3");
+        var seed = new AppDatabase(path);
+        await seed.Initialization;
+        await seed.Connection.CloseAsync();
+        return path;
+    });
+
+    /// <summary>Rouvre la base comme une installation en retard sur le contenu officiel (version effacée) :
+    /// le lancement synchronise depuis la seed à jour, comme dans l'appli.</summary>
+    private async Task<AppDatabase> ReopenBehindOfficialContentAsync()
+    {
+        await _db.Connection.ExecuteAsync("DELETE FROM ContentMetaEntity");
+        await _db.Connection.CloseAsync();
+        var seedPath = await FreshSeedPath.Value;
+        var reopened = new AppDatabase(_dbPath, () => Task.FromResult<Stream>(File.OpenRead(seedPath)));
+        await reopened.Initialization;
+        Assert.Null(reopened.StartupSyncError);
+        return reopened;
     }
 
     /// <summary>Les modèles sont reconstruits à chaque appel depuis les lignes cachées - modifier un

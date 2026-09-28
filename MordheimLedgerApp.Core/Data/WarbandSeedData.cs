@@ -5,7 +5,7 @@ namespace MordheimLedgerApp.Core.Data;
 /// data (universal SpecialRules, the generic Equipment/Skill/Mutation pools, MagicSchools + their
 /// Spells) lives once in its own file (SpecialRules.json/Equipment.json/Mutations.json/Skills.json/
 /// MagicSchools.json), seeded before any warband file - see AppDatabase.SeedOfficialContentAsync().
-/// Warband files only declare what's specific to them, referencing the shared catalogs by English Name
+/// Warband files only declare what's specific to them, referencing the shared catalogs by id
 /// where relevant (SpecialRules/Mutations/MagicSchools). Each translatable field gets a key via the same
 /// SeedTranslationAsync helper.
 /// </summary>
@@ -29,8 +29,8 @@ public class WarbandSeedData
     /// MordheimLedgerApp.Core.Models.Library.WarbandGrade member names exactly (e.g. "Grade1a").</summary>
     public string Grade { get; set; } = nameof(Models.Library.WarbandGrade.Core);
 
-    /// <summary>English Name reference into Data/SeedData/Races.json (e.g. "Human", "Skaven") - resolved
-    /// once at seed time (see AppDatabase.FindOrCreateRaceAsync/SeedRacesAsync, seeded before any
+    /// <summary>Id reference into Data/SeedData/Races.json (e.g. "Human", "Skaven") - resolved
+    /// once at seed time (see AppDatabase.SeedRacesAsync, seeded before any
     /// warband file, same idiom as MagicSchools above). Every band declares exactly one - see
     /// Models.Library.WarbandArchetype.RaceId.</summary>
     public string RaceId { get; set; } = string.Empty;
@@ -71,7 +71,7 @@ public class WarbandSeedData
 
     /// <summary>Mutations SPECIFIC to this warband (e.g. Kermesse du Chaos's Nurgle-themed Bénédictions)
     /// - the generic rulebook-wide pool (p.76) now lives once in Data/SeedData/Mutations.json, seeded
-    /// before any warband file. Still find-or-created by English Name for the rare case two warbands
+    /// before any warband file. Still find-or-created by id for the rare case two warbands
     /// independently need the exact same band-specific mutation.</summary>
     public List<MutationSeedData> Mutations { get; set; } = new();
 
@@ -131,7 +131,7 @@ public class WarriorSeedData
     /// <summary>See WarriorArchetype.MustStartWithMutation.</summary>
     public bool MustStartWithMutation { get; set; }
 
-    /// <summary>English Name of one of the parent WarbandSeedData's EquipmentLists entries that this
+    /// <summary>Id of one of the parent WarbandSeedData's EquipmentLists entries that this
     /// archetype's Weapons/Armour line draws from - null/omitted = no curated list assigned, falls back
     /// to the full common+band equipment pool in the picker (NOT "never uses equipment" - see
     /// CanUseEquipment for that).</summary>
@@ -159,7 +159,7 @@ public class WarriorSeedData
     /// Captain) - exactly one per warband file. See WarriorArchetype.IsLeader.</summary>
     public bool IsLeader { get; set; }
 
-    /// <summary>English Name reference into Data/SeedData/RacialProfiles.json (e.g. "Human", "Vampire")
+    /// <summary>Id reference into Data/SeedData/RacialProfiles.json (e.g. "Human", "Vampire")
     /// - which creature body type's characteristic maximums govern this archetype's Advance rolls, see
     /// WarriorArchetype.RacialProfileId/RacialProfile. Null/omitted for an archetype whose
     /// GainsExperience is false (Zombie, Dire Wolf...) - the Advance step never triggers for it, so it
@@ -206,7 +206,7 @@ public class EquipmentSeedData
     /// default RestrictedToWarbandArchetypeIds = empty on the runtime model).</summary>
     public List<string>? RestrictedToWarbandIds { get; set; }
 
-    /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that
+    /// <summary>Id(s) of WarriorSeedData entries declared in the SAME warband file that
     /// alone may have this item (e.g. Averlanders' "Long bow" in the shared Scout list - Bergjaeger
     /// only) - null/empty = every warrior of the restricted warband(s)/list members can have it.</summary>
     public List<string>? RestrictedToWarriorIds { get; set; }
@@ -277,7 +277,7 @@ public class SpellSeedData
     /// l'entrée est renommée. Toute référence entre fichiers de seed passe par lui, jamais par un nom.</summary>
     public string Id { get; set; } = string.Empty;
 
-    /// <summary>Must match the English Name of one of the parent WarbandSeedData's MagicSchools entries.</summary>
+    /// <summary>Must match the Id of one of the parent WarbandSeedData's MagicSchools entries.</summary>
     public string MagicSchoolId { get; set; } = string.Empty;
     public int RollValue { get; set; }
     public int? Difficulty { get; set; }
@@ -285,7 +285,7 @@ public class SpellSeedData
     public LocalizedText? Description { get; set; }
 }
 
-/// <summary>One magic school entry (see WarbandSeedData.MagicSchools) - find-or-created by English Name
+/// <summary>One magic school entry (see WarbandSeedData.MagicSchools) - find-or-created by id
 /// at seed time, same shape/rationale as SpecialRuleSeedData.</summary>
 public class MagicSchoolSeedData
 {
@@ -298,7 +298,7 @@ public class MagicSchoolSeedData
 }
 
 /// <summary>One race/species entry (Data/SeedData/Races.json, common - not declared per-band) - see
-/// Models.Library.Race. Find-or-created by English Name at seed time, same shape as
+/// Models.Library.Race. find-or-created by id at seed time, same shape as
 /// MagicSchoolSeedData.</summary>
 public class RaceSeedData
 {
@@ -311,7 +311,7 @@ public class RaceSeedData
 }
 
 /// <summary>One creature body type's characteristic maximums (Data/SeedData/RacialProfiles.json,
-/// common - not declared per-band) - see Models.Library.RacialProfile. Find-or-created by English Name
+/// common - not declared per-band) - see Models.Library.RacialProfile. find-or-created by id
 /// at seed time, same shape as RaceSeedData; resolved onto each WarriorArchetype via
 /// AppDatabase._racialProfileNameByWarriorArchetypeEnglishName (not a per-warrior JSON field - a
 /// creature type like "Human" or "Skaven" is shared by dozens of archetypes across the 15 warband
@@ -338,7 +338,7 @@ public class RacialProfileSeedData
 }
 
 /// <summary>One named, reusable SpecialRule entry (see WarbandSeedData.SpecialRules/WarriorSeedData.
-/// SpecialRules) - find-or-created by English Name at seed time so the same rule attached across
+/// SpecialRules) - find-or-created by id at seed time so the same rule attached across
 /// multiple warbands/warrior types resolves to a single shared catalog row instead of duplicate text.</summary>
 public class SpecialRuleSeedData
 {
@@ -375,7 +375,7 @@ public class SpecialRuleSeedData
     public bool HatredTargetsSpellcasters { get; set; }
 }
 
-/// <summary>One entry of the Mutation catalog - find-or-created by English Name at seed time, see
+/// <summary>One entry of the Mutation catalog - find-or-created by id at seed time, see
 /// WarbandSeedData.Mutations. Most entries are shared verbatim across Chaos-adjacent warbands
 /// (RestrictedToThisWarband false); some warbands add their own exclusive entries instead (e.g.
 /// Kermesse du Chaos's Nurgle-themed Bénédictions).</summary>
@@ -423,7 +423,7 @@ public class SkillSeedData
     /// entry declared in the common Skills.json catalog.</summary>
     public List<string>? RestrictedToWarbandIds { get; set; }
 
-    /// <summary>English Name(s) of WarriorSeedData entries declared in the SAME warband file that alone
+    /// <summary>Id(s) of WarriorSeedData entries declared in the SAME warband file that alone
     /// may pick this skill (e.g. "Da Cunnin' Plan" -&gt; ["Orc Boss"]) - null/empty = every warrior of the
     /// restricted warband(s) can pick it. Only meaningful alongside RestrictedToThisWarband.</summary>
     public List<string>? RestrictedToWarriorIds { get; set; }
@@ -463,9 +463,9 @@ public class HiredSwordSeedData
     /// <summary>Matches MordheimLedgerApp.Core.Models.Library.SkillCategory member names.</summary>
     public List<string> AllowedSkillCategories { get; set; } = new();
 
-    /// <summary>English Name(s) of EquipmentSeedData entries already seeded from Equipment.json (this
-    /// runs after SeedEquipmentAsync) - resolved against _equipmentIdsByEnglishName, throws on an
-    /// unknown name (same fail-fast precedent as the other XxxIdsByEnglishName lookups).</summary>
+    /// <summary>Id(s) of EquipmentSeedData entries already seeded from Equipment.json (this
+    /// runs after SeedEquipmentAsync) - resolved against _equipmentIdsByOfficialId, throws on an
+    /// unknown id (same fail-fast precedent as the other XxxIdsByOfficialId lookups).</summary>
     public List<string> StartingEquipmentIds { get; set; } = new();
 
     /// <summary>Same mechanism as EquipmentSeedData.RestrictedToWarbandIds - null/empty = hireable by
@@ -532,7 +532,7 @@ public class DramatisPersonaSeedData
     /// Ulli &amp; Marquand only.</summary>
     public bool RequiresCooldownBeforeResearch { get; set; }
 
-    /// <summary>English Name of another DramatisPersonaSeedData entry in the SAME file - see
+    /// <summary>Id of another DramatisPersonaSeedData entry in the SAME file - see
     /// Models.Library.DramatisPersona.PairedWithDramatisPersonaId. Resolved AFTER the whole file is seeded
     /// (deferred, see AppDatabase.SeedDramatisPersonaeAsync's pendingPairings) since the referenced entry
     /// may appear later in the array. Null for every persona except Ulli/Marquand.</summary>
@@ -550,23 +550,23 @@ public class DramatisPersonaSeedData
     /// stay free text in Description instead (see DramatisPersona's own doc).</summary>
     public List<SpecialRuleSeedData> SpecialRules { get; set; } = new();
 
-    /// <summary>English Name(s) of EquipmentSeedData entries - same resolution as
+    /// <summary>Id(s) of EquipmentSeedData entries - same resolution as
     /// HiredSwordSeedData.StartingEquipmentIds (runs after SeedEquipmentAsync, resolved against
-    /// _equipmentIdsByEnglishName, throws on an unknown name).</summary>
+    /// _equipmentIdsByOfficialId, throws on an unknown id).</summary>
     public List<string> StartingEquipmentIds { get; set; } = new();
 
-    /// <summary>English Name(s) of SkillSeedData entries this character already knows (e.g. Aenur:
-    /// "Strike to Injure") - resolved against _skillIdsByEnglishName (runs after SeedSkillsAsync, throws
-    /// on an unknown name, same fail-fast precedent as StartingEquipmentIds).</summary>
+    /// <summary>Id(s) of SkillSeedData entries this character already knows (e.g. Aenur:
+    /// "Strike to Injure") - resolved against _skillIdsByOfficialId (runs after SeedSkillsAsync, throws
+    /// on an unknown id, same fail-fast precedent as StartingEquipmentIds).</summary>
     public List<string> SkillIds { get; set; } = new();
 
     /// <summary>See Models.Library.DramatisPersona.MagicSchoolId - same name-only stub idiom as
     /// HiredSwordSeedData.MagicSchoolName.</summary>
     public string? MagicSchoolId { get; set; }
 
-    /// <summary>English Name of an EquipmentSeedData/Equipment.json entry - see Models.Library.
+    /// <summary>Id of an EquipmentSeedData/Equipment.json entry - see Models.Library.
     /// DramatisPersona.AlternativePaymentItemId. Same resolution as StartingEquipmentIds (runs after
-    /// SeedEquipmentAsync, resolved against _equipmentIdsByEnglishName, throws on an unknown name). Null
+    /// SeedEquipmentAsync, resolved against _equipmentIdsByOfficialId, throws on an unknown id). Null
     /// for almost every character - only meaningful when FeeKind is Gold.</summary>
     public string? AlternativePaymentItemId { get; set; }
 }
@@ -593,7 +593,7 @@ public class InjurySeedData
     public LocalizedText? Description { get; set; }
 
     /// <summary>Rules permanently granted to whoever carries this Injury (e.g. Stupidity/Frenzy from
-    /// Madness, 24) - find-or-created by English Name, same convention/shared cache as
+    /// Madness, 24) - find-or-created by id, same convention/shared cache as
     /// EquipmentSeedData.SpecialRules. Resolved into a real WarriorRow SpecialRules chip via
     /// Injury.SpecialRules once attached (see WarbandDetailViewModel.ToRow), not a separate mechanized
     /// effect - the chip/rule reminder IS the effect for this kind of result.</summary>

@@ -517,6 +517,13 @@ fusion par `OfficialId` depuis la `seed.db3`) s'appuie sur la carte `Core/Data/O
 (tables du catalogue, colonnes de référence, propriétaire de chaque table de jointure) : **toute nouvelle
 table ou colonne de référence du catalogue doit y être ajoutée**, sinon ses id seraient recopiés tels
 quels depuis la seed au lieu d'être traduits vers les id locaux.
+Elle tourne au lancement dès que la base est en retard sur `contentVersion` (+ bouton « Synchroniser » des
+Paramètres) ; une entrée Modifiée dont l'officiel a changé attend le choix du joueur (dialog « Versions à
+départager », `Features/Settings/ContentConflicts/`). **Elle a remplacé les anciens `Backfill*` du
+catalogue** (race des bandes, profil racial, nouveaux objets, Dramatis Personae...) : pour faire arriver
+une correction du contenu officiel sur les bases installées, modifier le JSON et incrémenter
+`contentVersion` suffit - ne plus écrire de `Backfill*` pour ça. Seules restent les réparations des
+parties jouées (`RepairPlayedDataAsync`, guerriers déjà recrutés), que la synchro ne touche jamais.
 
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
 `get_page_text`) fonctionne.

@@ -33,7 +33,7 @@
 		<ApplicationTitle>Mordheim Ledger</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.cyrilbezard.mordheimledger</ApplicationId>
+		<ApplicationId>com.narfedome.mordheimledger</ApplicationId>
 
 		<!-- Versions — patch auto-incremented via git at build time, major/minor set by hand -->
 		<AppVersionMajor>0</AppVersionMajor>
@@ -52,39 +52,7 @@
 		<PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-maccatalyst|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-maccatalyst|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-windows10.0.19041.0|AnyCPU'">
-	  <ApplicationId>com.narfedome.mordheimledgerapp</ApplicationId>
-	</PropertyGroup>
-
-	<ItemGroup>
+<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#0D0B0A" />
 
@@ -187,10 +155,17 @@
 		<PropertyGroup Condition="'$(_AppPatch)' == ''">
 			<_AppPatch>0</_AppPatch>
 		</PropertyGroup>
+		<!-- ApplicationVersion (versionCode Android) suit le meme compteur : le Play Store refuse tout
+		     upload dont le versionCode n'est pas strictement superieur au precedent. Plancher a 1, un
+		     versionCode a 0 etant invalide. -->
 		<PropertyGroup>
 			<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).$(_AppPatch)</ApplicationDisplayVersion>
+			<ApplicationVersion>$(_AppPatch)</ApplicationVersion>
 		</PropertyGroup>
-		<Message Text="Version: $(ApplicationDisplayVersion)" Importance="high" />
+		<PropertyGroup Condition="'$(_AppPatch)' == '0'">
+			<ApplicationVersion>1</ApplicationVersion>
+		</PropertyGroup>
+		<Message Text="Version: $(ApplicationDisplayVersion) (versionCode $(ApplicationVersion))" Importance="high" />
 
 		<ItemGroup Condition="Exists('$(_AndroidStampDirectory)_GenerateJavaStubs.stamp')">
 			<_StampToDelete Include="$(_AndroidStampDirectory)_GenerateJavaStubs.stamp" />

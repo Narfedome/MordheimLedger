@@ -132,7 +132,7 @@ try {
 
         # Copie sous un nom fixe (sans version) a cote de l'installeur Windows : meme raison que
         # pour l'exe, le lien de telechargement public n'a jamais besoin de changer.
-        $publishedApk = Join-Path $repoRoot "MordheimLedgerApp\bin\Release\net10.0-android\publish\com.narfedome.mordheimledgerapp-Signed.apk"
+        $publishedApk = Join-Path $repoRoot "MordheimLedgerApp\bin\Release\net10.0-android\publish\com.narfedome.mordheimledger-Signed.apk"
         if (-not (Test-Path $publishedApk)) { throw "APK signe introuvable a '$publishedApk'." }
         $apkPath = Join-Path $outputDirAndroid "MordheimLedger.apk"
         Copy-Item -Path $publishedApk -Destination $apkPath -Force

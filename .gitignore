@@ -366,6 +366,9 @@ FodyWeavers.xsd
 # Build-Release.local.ps1.example for the template to fill in locally instead)
 Deploy/Build-Release.local.ps1
 Deploy/*.keystore
+
+# Android App Bundles built by Build-Release.ps1, uploaded to the Play Console (never committed)
+Deploy/PlayStore/
 /Website/downloads
 
 # Scraper output - regenerable analysis data, not source content (see Tools/*.mjs)

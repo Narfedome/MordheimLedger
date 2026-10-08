@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--
+  Image de présentation de la fiche Google Play (1024x500), même charte que
+  Website/assets/og-image.html. ?lang=en pour la variante anglaise.
+  Régénérée par Deploy/StoreListing/Build-StoreListing.ps1 (Chrome headless).
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Play Store - Mordheim Ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg: #0d0b0a; --accent: #c9a66b; --accent-2: #5c1a1e; --text: #ede0c0; --text-muted: #9c8f72; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1024px; height: 500px; overflow: hidden; background: var(--bg); }
+  .stage {
+    width: 1024px; height: 500px;
+    background: radial-gradient(ellipse 70% 75% at 50% 45%, #3a1a17 0%, #1a1210 40%, var(--bg) 72%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Open Sans', sans-serif;
+  }
+  .icon { width: 108px; height: 108px; border-radius: 22px; box-shadow: 0 8px 24px rgba(0,0,0,.45); margin-bottom: 20px; }
+  h1 { font-family: 'Pirata One', serif; font-size: 62px; font-weight: 400; line-height: 1; color: var(--accent); margin-bottom: 18px; }
+  .rule { width: 200px; height: 2px; margin-bottom: 22px; background: linear-gradient(90deg, transparent, var(--accent-2), var(--accent), var(--accent-2), transparent); }
+  .tagline { font-size: 24px; line-height: 1.4; color: var(--text); text-align: center; }
+  .subtitle { margin-top: 16px; font-size: 16px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <img class="icon" src="../../Website/assets/logo.svg" alt="" />
+    <h1>Mordheim Ledger</h1>
+    <div class="rule"></div>
+    <div class="tagline" data-en="The ledger for your warbands across the ruins of Mordheim.">Le carnet de bord de tes bandes à travers les ruines de Mordheim.</div>
+    <div class="subtitle" data-en="Unofficial community app · 100% offline">Application communautaire non officielle · 100% hors-ligne</div>
+  </div>
+  <script>
+    if (new URLSearchParams(location.search).get("lang") === "en") {
+      document.documentElement.lang = "en";
+      document.querySelectorAll("[data-en]").forEach(el => el.textContent = el.dataset.en);
+    }
+  </script>
+</body>
+</html>

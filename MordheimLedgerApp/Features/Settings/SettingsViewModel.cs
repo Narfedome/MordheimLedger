@@ -14,7 +14,7 @@ namespace MordheimLedgerApp.Features.Settings
         private readonly AppDatabase _db;
 
         // Windows exige 4 segments (Major.Minor.Build.Revision) pour l'identité de package - le 4e
-        // (Revision) reprend le versionCode Android, sans intérêt pour l'utilisateur, on l'aligne sur
+        // (Revision) vaut toujours 0 (exigence du Microsoft Store), sans intérêt pour l'utilisateur, on l'aligne sur
         // le format 3 segments affiché nativement sur les autres plateformes.
         public string AppVersion
         {

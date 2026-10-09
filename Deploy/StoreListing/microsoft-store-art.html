@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--
+  Images de la fiche Microsoft Store, même charte que feature-graphic.html :
+  ?format=poster -> image d'affiche 9:16 (1440x2160), ?format=box -> image de zone 1:1 (2160x2160).
+  ?lang=en pour la variante anglaise. Régénérées par Build-StoreListing.ps1 (Chrome headless).
+-->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Microsoft Store - Mordheim Ledger</title>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg: #0d0b0a; --accent: #c9a66b; --accent-2: #5c1a1e; --text: #ede0c0; --text-muted: #9c8f72; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; background: var(--bg); }
+  .stage {
+    background: radial-gradient(ellipse 70% 75% at 50% 45%, #3a1a17 0%, #1a1210 40%, var(--bg) 72%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Open Sans', sans-serif; text-align: center;
+  }
+  .icon { border-radius: 20%; box-shadow: 0 16px 48px rgba(0,0,0,.45); }
+  h1 { font-family: 'Pirata One', serif; font-weight: 400; line-height: 1.05; color: var(--accent); }
+  .rule { background: linear-gradient(90deg, transparent, var(--accent-2), var(--accent), var(--accent-2), transparent); }
+  .tagline { color: var(--text); line-height: 1.35; }
+  .subtitle { color: var(--text-muted); }
+  /* Image d'affiche 9:16 */
+  .poster { width: 1440px; height: 2160px; padding: 0 130px; }
+  .poster .icon { width: 500px; height: 500px; margin-bottom: 90px; }
+  .poster h1 { font-size: 190px; }
+  .poster .rule { width: 520px; height: 5px; margin: 50px 0 80px; }
+  .poster .tagline { font-size: 72px; }
+  .poster .subtitle { font-size: 38px; margin-top: 70px; white-space: nowrap; }
+  /* Image de zone 1:1 */
+  .box { width: 2160px; height: 2160px; }
+  .box .icon { width: 880px; height: 880px; margin-bottom: 100px; }
+  .box h1 { font-size: 250px; }
+  .box .rule { width: 760px; height: 7px; margin-top: 60px; }
+  .box .tagline, .box .subtitle { display: none; }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <img class="icon" src="../../Website/assets/logo.svg" alt="" />
+    <h1>Mordheim Ledger</h1>
+    <div class="rule"></div>
+    <div class="tagline" data-en="The ledger for your warbands across the ruins of Mordheim.">Le carnet de bord de tes bandes à travers les ruines de Mordheim.</div>
+    <div class="subtitle" data-en="Unofficial community app · 100% offline">Application communautaire non officielle · 100% hors-ligne</div>
+  </div>
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById("stage").classList.add(params.get("format") === "box" ? "box" : "poster");
+    if (params.get("lang") === "en") {
+      document.documentElement.lang = "en";
+      document.querySelectorAll("[data-en]").forEach(el => el.textContent = el.dataset.en);
+    }
+  </script>
+</body>
+</html>

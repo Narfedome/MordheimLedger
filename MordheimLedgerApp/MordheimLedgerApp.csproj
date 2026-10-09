@@ -1,5 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- R8 en Release Android : reduit et obscurcit le code Java (bindings AndroidX/MAUI) que le
+	     Play Store mesure (« optimisation du code DEX », seuil de 25 % d'obscurcissement). Les regles
+	     de conservation des bindings .NET sont generees automatiquement par le SDK. -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidLinkTool>r8</AndroidLinkTool>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
@@ -214,6 +221,25 @@
 
 	<Target Name="GenerateSeedDatabase" BeforeTargets="BeforeBuild" Inputs="@(CoreSeedJsonFiles)" Outputs="$(MSBuildProjectDirectory)\Resources\Raw\seed.db3">
 		<Exec Command="dotnet run --project &quot;$(MSBuildProjectDirectory)\..\Tools\DbSeedGenerator\DbSeedGenerator.csproj&quot; -- &quot;$(MSBuildProjectDirectory)\Resources\Raw\seed.db3&quot;" />
+	</Target>
+
+	<!-- Le SDK .NET Android impose -dontobfuscate dans le proguard_xamarin.cfg qu'il genere : R8 reduit
+	     alors le code sans l'obscurcir, et le Play Store continue de signaler un obscurcissement < 25 %.
+	     On lui substitue une copie identique sans cette directive (Platforms/Android/
+	     proguard_xamarin_obfuscate.cfg). Les types Java appeles depuis le code .NET restent conserves
+	     tels quels par les regles generees (proguard_project_references.cfg / _primary.cfg), seul le
+	     code Java interne (AndroidX, Material...) est renomme. Le mapping.txt produit a cote de l'AAB
+	     sert a desobscurcir les traces de plantage dans la Play Console. -->
+	<Target Name="EnableR8Obfuscation" AfterTargets="_CalculateProguardConfigurationFiles" Condition="'$(AndroidLinkTool)' == 'r8' and '$(SkipR8Obfuscation)' != 'true'">
+		<PropertyGroup>
+			<_R8MappingConfig>$(IntermediateOutputPath)proguard\proguard_mapping.cfg</_R8MappingConfig>
+		</PropertyGroup>
+		<WriteLinesToFile File="$(_R8MappingConfig)" Lines="-printmapping &quot;$(MSBuildProjectDirectory)\$(OutputPath)mapping.txt&quot;" Overwrite="true" />
+		<ItemGroup>
+			<_ProguardConfiguration Remove="$(IntermediateOutputPath)proguard\proguard_xamarin.cfg" />
+			<_ProguardConfiguration Include="$(MSBuildProjectDirectory)\Platforms\Android\proguard_xamarin_obfuscate.cfg" />
+			<_ProguardConfiguration Include="$(_R8MappingConfig)" />
+		</ItemGroup>
 	</Target>
 
 </Project>

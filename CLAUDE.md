@@ -529,6 +529,38 @@ parties jouées (`RepairPlayedDataAsync`, guerriers déjà recrutés), que la sy
 mordheimer.net bloque WebFetch direct (403) — passer par le Browser pane (`preview_start` +
 `get_page_text`) fonctionne.
 
+## Build Android / Play Store
+
+**Obscurcissement R8 (branche `r8`, 2026-10-10)** : la Play Console signalait « optimisation du code DEX »
+avec 1 % d'obscurcissement (seuil 25 %, échéance févr. 2027). Le SDK .NET Android impose `-dontobfuscate`
+dans le `proguard_xamarin.cfg` qu'il génère ; la cible `EnableR8Obfuscation` du csproj lui substitue
+`Platforms/Android/proguard_xamarin_obfuscate.cfg` (copie sans cette directive, à resynchroniser si le SDK
+change ses règles). Mêmes changements portés à l'identique sur **Resonance** (`D:\Dev\DmTools`, branche
+`r8`), qui partage ce problème. `-p:SkipR8Obfuscation=true` désactive l'obscurcissement (R8 réduit quand même).
+
+Le SDK n'ayant jamais été pensé pour obscurcir, ses règles de conservation sont incomplètes - deux trous
+trouvés, chacun faisant planter l'appli au démarrage en Release :
+- classes Java générées par le build et retrouvées par leur nom via JNI (`net.dot.android.ApplicationRegistration`,
+  `mono.TypeManager`) → `ClassNotFoundException` ; corrigé par `-keep class net.dot.android.**` /
+  `mono.**` en fin de `proguard_xamarin_obfuscate.cfg` (section « Ajouts »).
+- `proguard_project_references.cfg` (généré depuis les bindings conservés après ILLink) garde classes et
+  méthodes mais **jamais les champs** → `NoSuchFieldError` (`Lifecycle$State.DESTROYED`) ; la cible génère
+  `proguard_binding_fields.cfg` (`-keep class X { <fields>; }` pour chaque classe de ce fichier).
+
+Résultat mesuré via `mapping.txt` : ~63 % des classes et ~53 % des méthodes renommées (les deux applis).
+Le `mapping.txt` est embarqué automatiquement dans l'AAB (désobscurcissement des plantages côté Play Console).
+Le `.cfg` est déclaré en `<ProguardConfiguration>` (item public) et non ajouté seulement à
+`_ProguardConfiguration` dans la cible : sinon le modifier ne relance pas R8 en build incrémental.
+
+**Si un nouveau plantage Release apparaît** (`ClassNotFoundException`/`NoSuchFieldError`/`NoSuchMethodError`
+sur une classe androidx/material/etc.) : c'est un nom Java lu par JNI que R8 a renommé - ajouter la règle
+`-keep` correspondante dans la section « Ajouts ». Pour voir l'exception interne (masquée par la
+`TypeInitializationException`/`JavaProxyThrowable`), entourer temporairement `CreateMauiApp()` de
+`MainApplication` d'un `try/catch` qui fait `Android.Util.Log.Error(..., ex.ToString())`. Test local :
+`dotnet build -f net10.0-android -c Release -p:AndroidPackageFormat=apk -p:RuntimeIdentifier=android-x64`
+puis `adb install` sur l'AVD `r8test` (API 35 ; `pixel_7_-_api_31_0` pointe vers une image système absente).
+Parcours vérifié à la mise en place : démarrage + onglets principaux + wizard de création, pas exhaustif.
+
 ## Règles de collaboration
 
 - **Ne jamais committer sans relecture explicite de l'utilisateur** — toujours demander avant,

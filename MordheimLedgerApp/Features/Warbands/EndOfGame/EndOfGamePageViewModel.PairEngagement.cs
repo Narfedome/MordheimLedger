@@ -74,7 +74,7 @@ public partial class EndOfGamePageViewModel
     /// règle Une Poignée d'Or") - n'importe quel futur Dramatis Persona (seul ou en paire, voir
     /// PairedWithDramatisPersonaId) portant cette même SpecialRule hérite automatiquement de tout ce
     /// fichier sans plus dépendre de FeeKind.Pair, qui reste par ailleurs le mécanisme de recrutement
-    /// combiné (Ulli & Marquand, 30 CO à deux) - un sujet distinct de la SpecialRule elle-même. Résolue
+    /// combiné (Ulli et Marquand, 30 CO à deux) - un sujet distinct de la SpecialRule elle-même. Résolue
     /// une seule fois (catalogue figé à l'ouverture du wizard, comme _dramatisPersonaCatalog lui-même) -
     /// vide si la règle n'existe pas dans le catalogue courant. Limite connue, inchangée : le mécanisme
     /// reste pensé pour UN SEUL personnage/groupe "corruptible" actif par bande à la fois

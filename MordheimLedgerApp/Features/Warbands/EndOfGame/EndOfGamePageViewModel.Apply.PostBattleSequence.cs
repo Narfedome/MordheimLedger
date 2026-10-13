@@ -118,7 +118,7 @@ public partial class EndOfGamePageViewModel
     /// <summary>Étape Achat/Recrutement (EndOfGamePageViewModel.IsRareItemPurchaseStep) - traite les
     /// deux modes (RareItemSearchEntry.IsSearchingForCharacter) : objets achetés (IsPurchased, inchangé)
     /// ET personnages recrutés (IsRecruited). Un personnage à frais en or (RareItemSearchEntry.
-    /// HasHireCost - Johann/Veskit/Marianna, PAS Bertha/None ni Nicodemus/Wyrdstone ni Ulli & Marquand/
+    /// HasHireCost - Johann/Veskit/Marianna, PAS Bertha/None ni Nicodemus/Wyrdstone ni Ulli et Marquand/
     /// Pair) prélève désormais réellement son HireCost sur la trésorerie (2026-09-01, user request),
     /// SAUF s'il a un objet de paiement alternatif ET que le joueur a coché cette option
     /// (IsPayingWithAlternativeItem, ex. Johann/Ombre Cramoisie) - dans ce cas un exemplaire de l'objet

@@ -6,7 +6,6 @@ namespace MordheimLedgerApp.Features.Warbands;
 public partial class WarbandListPage : ContentPage
 {
     private readonly WarbandListViewModel _vm;
-    private bool _initialized;
 
     public WarbandListPage(WarbandListViewModel viewModel)
     {

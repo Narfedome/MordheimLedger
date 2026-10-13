@@ -23,7 +23,7 @@ public partial class ChipView : ContentView
 
     /// <summary>Non renseigné (défaut, null/vide) : le Label affiche Item.Name comme toujours. Renseigné :
     /// prend le dessus (voir FirstNonEmptyMultiConverter) - 2026-09-01, Une Poignée d'Or : Marquand Volker
-    /// seul porte le chip d'Ulli & Marquand dans les écrans de recrutement (le picker/la carte "Personnage
+    /// seul porte le chip d'Ulli et Marquand dans les écrans de recrutement (le picker/la carte "Personnage
     /// spécial"), donc affiché "Marquand Volker &amp; Ulli Leitpold" via cette override plutôt que son
     /// Item.Name brut - jamais de mutation de l'objet catalogue lui-même.</summary>
     public string? NameOverride

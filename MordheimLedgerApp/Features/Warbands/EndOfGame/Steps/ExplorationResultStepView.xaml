@@ -455,14 +455,14 @@
                                                           RadioButtonGroup.GroupName="ExplorationItemChoice"
                                                           RadioButtonGroup.SelectedValue="{Binding SelectedExplorationItemName, Mode=TwoWay}">
                                         <HorizontalStackLayout Spacing="6">
-                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.EquipmentItemName}"/>
+                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.EquipmentItemOfficialId}"/>
                                             <components:ChipView Item="{Binding ExplorationItemChoicePrimaryItem}"
                                                                   IconGlyph="{Binding ExplorationItemChoicePrimaryItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                   IconFontFamily="RpgAwesome"
                                                                   Command="{Binding ShowExplorationItemDetailCommand}"/>
                                         </HorizontalStackLayout>
                                         <HorizontalStackLayout Spacing="6">
-                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.AlternativeEquipmentItemName}"/>
+                                            <RadioButton Value="{Binding ResolvedExplorationOutcome.AlternativeEquipmentItemOfficialId}"/>
                                             <components:ChipView Item="{Binding ExplorationItemChoiceAlternativeItem}"
                                                                   IconGlyph="{Binding ExplorationItemChoiceAlternativeItem.Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
                                                                   IconFontFamily="RpgAwesome"

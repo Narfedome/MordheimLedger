@@ -1,6 +1,6 @@
 # Config locale pour Build-Release.ps1 - propre a chaque machine, jamais commitee.
 #
-# 1. Recuperer "dmtools-release.keystore" depuis le Drive partage et le deposer dans ce meme
+# 1. Recuperer "mordheimledger-release.keystore" depuis le Drive partage et le deposer dans ce meme
 #    dossier Deploy\ (a cote de Build-Release.ps1). Le nom de fichier est fixe, rien a configurer
 #    pour le chemin.
 # 2. Copier ce fichier en "Build-Release.local.ps1" (a cote de Build-Release.ps1, toujours dans
@@ -10,13 +10,27 @@
 # 3. C'est tout : Build-Release.ps1 charge ce fichier automatiquement s'il existe.
 #
 # Keystore generee une seule fois avec keytool, puis copiee sur le Drive partage :
-#   keytool -genkeypair -v -keystore dmtools-release.keystore -alias dmtools -keyalg RSA -keysize 2048 -validity 10000
+#   keytool -genkeypair -v -keystore mordheimledger-release.keystore -alias mordheimledger -keyalg RSA -keysize 2048 -validity 10000
 
-$env:DMTOOLS_KEYSTORE_ALIAS     = "dmtools"
-$env:DMTOOLS_KEYSTORE_STOREPASS = "mot-de-passe-keystore"
-$env:DMTOOLS_KEYSTORE_KEYPASS   = "mot-de-passe-cle"
+$env:MORDHEIMLEDGER_KEYSTORE_ALIAS     = "mordheimledger"
+$env:MORDHEIMLEDGER_KEYSTORE_STOREPASS = "mot-de-passe-keystore"
+$env:MORDHEIMLEDGER_KEYSTORE_KEYPASS   = "mot-de-passe-cle"
 
 # Optionnel : Build Hook Netlify (Site settings > Build & deploy > Build hooks sur netlify.com).
 # Avec ca, Build-Release.ps1 redeploie le site automatiquement juste apres avoir publie la
 # GitHub Release - sans, le site attend le prochain push sur master pour se mettre a jour.
-$env:DMTOOLS_NETLIFY_BUILD_HOOK = "https://api.netlify.com/build_hooks/xxxxxxxxxxxxxxxxxxxxxxxx"
+$env:MORDHEIMLEDGER_NETLIFY_BUILD_HOOK ="https://api.netlify.com/build_hooks/xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Optionnel : soumission automatique du MSIX au Microsoft Store (necessite le Microsoft Store
+# Developer CLI : winget install "Microsoft Store Developer CLI"). Sans PRODUCT_ID, le MSIX reste
+# sous Deploy\MicrosoftStore\ pour un upload manuel.
+# - PRODUCT_ID : Partner Center > l'appli > Gestion des produits > Identite du produit (Store ID, 9N...).
+# - SELLER_ID  : Partner Center > Parametres du compte > Informations legales > Developpeur (Seller ID).
+# - TENANT_ID / CLIENT_ID / CLIENT_SECRET : Partner Center > Parametres du compte > Gestion des
+#   utilisateurs > Applications Microsoft Entra : creer une appli avec le role Manager, puis
+#   "Ajouter une cle" pour obtenir le secret.
+$env:MORDHEIMLEDGER_MSSTORE_PRODUCT_ID    = "9NXXXXXXXXXX"
+$env:MORDHEIMLEDGER_MSSTORE_SELLER_ID     = "00000000"
+$env:MORDHEIMLEDGER_MSSTORE_TENANT_ID     = "00000000-0000-0000-0000-000000000000"
+$env:MORDHEIMLEDGER_MSSTORE_CLIENT_ID     = "00000000-0000-0000-0000-000000000000"
+$env:MORDHEIMLEDGER_MSSTORE_CLIENT_SECRET = "secret-de-l-appli-entra"

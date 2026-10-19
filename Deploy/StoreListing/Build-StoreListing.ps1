@@ -6,7 +6,8 @@
     image d'affiche 9:16, image de zone 1:1, icones de vignette 300/150/71).
 
 .DESCRIPTION
-    - Icone : export PNG de MordheimLedgerApp\Resources\AppIcon\appicon.svg via Inkscape.
+    - Icone : export PNG de icon.svg (icone complete fond + symbole ; dans l'appli, appicon.svg n'est
+      plus que le fond uni de l'icone adaptative) via Inkscape.
     - Image de presentation : rendu de feature-graphic.html (meme charte que l'image Open Graph
       du site) via Chrome headless.
     - Captures : les captures du site (Website\assets\screenshots\, 1080x2400, soit du 20:9 que
@@ -23,7 +24,7 @@ try {
     $outputDir  = Join-Path $listingDir "output"
     $inkscape   = "C:\Program Files\Inkscape\bin\inkscape.exe"
     $chrome     = "C:\Program Files\Google\Chrome\Application\chrome.exe"
-    $iconSvg    = Join-Path $repoRoot "MordheimLedgerApp\Resources\AppIcon\appicon.svg"
+    $iconSvg    = Join-Path $listingDir "icon.svg"
     $shotsDir   = Join-Path $repoRoot "Website\assets\screenshots"
     $background = "0d0b0a"
 

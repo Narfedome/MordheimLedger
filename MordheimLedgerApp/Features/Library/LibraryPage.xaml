@@ -13,6 +13,8 @@
              xmlns:dramatisPersonae="clr-namespace:MordheimLedgerApp.Features.Library.DramatisPersonae"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:services="clr-namespace:MordheimLedgerApp.Services"
+             xmlns:onboarding="clr-namespace:Plugin.Maui.Onboarding"
              x:Class="MordheimLedgerApp.Features.Library.LibraryPage"
              x:DataType="local:LibraryViewModel">
 
@@ -31,7 +33,11 @@
                     FontAttributes="Bold"
                     FontSize="{DynamicResource AppFontSizeSectionTitle}"
                     HorizontalOptions="Center"
-                         Padding="8,4"/>
+                         Padding="8,4">
+                <Button.Behaviors>
+                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.CodexSectionKey}"/>
+                </Button.Behaviors>
+            </Button>
         </Grid>
 
         <!-- Chaque section garde son ViewModel/*View existant tel quel (BindingContext explicite,

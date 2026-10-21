@@ -6,6 +6,8 @@
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:services="clr-namespace:MordheimLedgerApp.Services"
+             xmlns:onboarding="clr-namespace:Plugin.Maui.Onboarding"
              x:Name="root">
 
     <Grid>
@@ -27,7 +29,11 @@
                     TextColor="{DynamicResource AppAccent}"
                     FontSize="{OnIdiom Default=15, Desktop=13}"
                     HorizontalOptions="Start"
-                    Padding="8,4"/>
+                    Padding="8,4">
+                <Button.Behaviors>
+                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.CodexFilterKey}"/>
+                </Button.Behaviors>
+            </Button>
             <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.PersonRays}"
                                          Command="{Binding ManageRacesCommand}"
                                          Tooltip="{loc:Loc LibManageRaces}"/>
@@ -74,6 +80,9 @@
                      empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
                      le DataTrigger sur IsSelected. -->
                     <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey">
+                        <Border.Behaviors>
+                            <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.CodexTileKey}"/>
+                        </Border.Behaviors>
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>
@@ -106,7 +115,11 @@
                                                       IconSize="12" ButtonWidthRequest="20" ButtonHeightRequest="20"
                                                       HorizontalOptions="End" VerticalOptions="Start"
                                                       Command="{Binding Source={x:Reference root}, Path=BindingContext.ShowDetailsCommand}"
-                                                      CommandParameter="{Binding .}"/>
+                                                      CommandParameter="{Binding .}">
+                                <components:FaIconButtonView.Behaviors>
+                                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.CodexTileInfoKey}"/>
+                                </components:FaIconButtonView.Behaviors>
+                            </components:FaIconButtonView>
                         </Grid>
                     </Border>
                 </DataTemplate>
@@ -116,6 +129,9 @@
 
         <HorizontalStackLayout Grid.Row="2" Spacing="10" HorizontalOptions="Center" Margin="0,8"
                                IsVisible="{Binding Source={x:Reference root}, Path=IsCrud}">
+            <HorizontalStackLayout.Behaviors>
+                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.CodexActionsKey}"/>
+            </HorizontalStackLayout.Behaviors>
             <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}"
                                          Command="{Binding CreateCommand}"
                                          Tooltip="{loc:Loc BtnAdd}"/>

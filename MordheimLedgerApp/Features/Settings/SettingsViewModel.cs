@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Features.Onboarding;
 using MordheimLedgerApp.Features.Settings.ContentConflicts;
 using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
@@ -118,6 +119,40 @@ namespace MordheimLedgerApp.Features.Settings
             await RefreshOfficialContentStatusAsync();
         }
 
+        [RelayCommand]
+        public async Task LoadSampleWarband()
+        {
+            // Le chargement crée toujours une nouvelle bande : un second chargement en ferait une copie.
+            if (_sampleWarbandService.HasImportedSample &&
+                !await ConfirmAsync(Loc["OnboardingLoadSample"], Loc["SettingsSampleAlreadyImported"]))
+                return;
+
+            try
+            {
+                await Loading.RunAsync(() => _sampleWarbandService.ImportAsync());
+                await ShowInfoAsync(Loc["OnboardingLoadSample"], Loc["SampleImportDone"]);
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync(ex);
+            }
+        }
+
+        // Fait revenir les visites de chaque écran ; celle des Bandes démarre tout de suite (cf.
+        // WarbandListPage), les autres à la prochaine arrivée sur leur écran.
+        [RelayCommand]
+        public async Task StartTour()
+        {
+            _tourService.ResetAll();
+            await Shell.Current.GoToAsync("//WarbandListPage");
+        }
+
+        // Nouvelle instance de l'accueil (Transient) : repart de la première étape. Son dernier bouton
+        // ramène sur l'AppShell (singleton), resté tel quel entre-temps.
+        [RelayCommand]
+        public void ReplayWelcome() =>
+            Application.Current!.Windows[0].Page = IPlatformApplication.Current!.Services.GetRequiredService<OnboardingPage>();
+
         [ObservableProperty]
         private string officialContentStatus = string.Empty;
 
@@ -150,11 +185,16 @@ namespace MordheimLedgerApp.Features.Settings
         private AppPalette selectedPalette;
 
         private readonly OfficialContentService _officialContent;
+        private readonly SampleWarbandService _sampleWarbandService;
+        private readonly AppTourService _tourService;
 
-        public SettingsViewModel(AppDatabase db, OfficialContentService officialContent)
+        public SettingsViewModel(AppDatabase db, OfficialContentService officialContent,
+            SampleWarbandService sampleWarbandService, AppTourService tourService)
         {
             _db = db;
             _officialContent = officialContent;
+            _sampleWarbandService = sampleWarbandService;
+            _tourService = tourService;
             _ = RefreshOfficialContentStatusAsync();
             selectedLanguage = Loc.Language;
             selectedPalette = _theme.Palette;

@@ -169,7 +169,11 @@ public partial class WarbandDetailViewModel : BaseViewModel
         });
     }
 
-    partial void OnWarbandIdChanged(int value) => _ = LoadAsync(value);
+    /// <summary>Chargement lancé par le paramètre de navigation (OnWarbandIdChanged) - attendu par
+    /// WarbandDetailPage avant sa visite guidée, pour que le roster soit à l'écran.</summary>
+    public Task InitialLoad { get; private set; } = Task.CompletedTask;
+
+    partial void OnWarbandIdChanged(int value) => InitialLoad = LoadAsync(value);
 
     [RelayCommand]
     private void ToggleHeroes() => HeroesExpanded = !HeroesExpanded;

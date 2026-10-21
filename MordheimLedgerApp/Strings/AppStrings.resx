@@ -431,9 +431,6 @@
   <data name="OnboardingLanguage" xml:space="preserve">
     <value>Langue</value>
   </data>
-  <data name="OnboardingStart" xml:space="preserve">
-    <value>Commencer</value>
-  </data>
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Trésorerie :</value>
   </data>
@@ -2364,5 +2361,281 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameExperienceHint" xml:space="preserve">
     <value>Toute l'XP de la partie : survie, ennemis mis hors de combat, victoire et bonus du scénario.</value>
+  </data>
+  <data name="OnboardingWarbandTitle" xml:space="preserve">
+    <value>Créez votre bande</value>
+  </data>
+  <data name="OnboardingWarbandBody" xml:space="preserve">
+    <value>Choisissez un type de bande parmi les bandes officielles, recrutez vos héros et vos hommes de main dans la limite de votre trésorerie, puis équipez-les. L'assistant vous guide étape par étape et vérifie les règles de recrutement.</value>
+  </data>
+  <data name="OnboardingPlayTitle" xml:space="preserve">
+    <value>Jouez vos parties</value>
+  </data>
+  <data name="OnboardingPlayBody" xml:space="preserve">
+    <value>Lancez la partie depuis la fiche de votre bande. À la fin, l'assistant Fin de partie vous accompagne : blessures, expérience et progressions, exploration, vente de pierre magique et nouvelles recrues. Tout est consigné dans l'historique de la bande.</value>
+  </data>
+  <data name="OnboardingCodexTitle" xml:space="preserve">
+    <value>Le Codex</value>
+  </data>
+  <data name="OnboardingCodexBody" xml:space="preserve">
+    <value>Toutes les bandes officielles, la Place du Marché, les compétences, les sorts, les blessures et les règles spéciales, consultables à tout moment. Corrigez une entrée officielle (elle devient Modifiée) ou ajoutez votre propre contenu.</value>
+  </data>
+  <data name="OnboardingReadyTitle" xml:space="preserve">
+    <value>À vous de jouer</value>
+  </data>
+  <data name="OnboardingLoadSample" xml:space="preserve">
+    <value>Charger la bande d'exemple</value>
+  </data>
+  <data name="OnboardingLoadSampleDesc" xml:space="preserve">
+    <value>Des Mercenaires Reiklander déjà recrutés et équipés, pour découvrir la fiche de bande tout de suite.</value>
+  </data>
+  <data name="OnboardingStartEmpty" xml:space="preserve">
+    <value>Partir de zéro</value>
+  </data>
+  <data name="OnboardingPrevious" xml:space="preserve">
+    <value>Précédent</value>
+  </data>
+  <data name="OnboardingNext" xml:space="preserve">
+    <value>Suivant</value>
+  </data>
+  <data name="SampleWarbandName" xml:space="preserve">
+    <value>Les Roses Sanglantes</value>
+  </data>
+  <data name="SampleWarbandWarriors" xml:space="preserve">
+    <value>Les Lames du Reik</value>
+  </data>
+  <data name="SampleWarbandMarksmen" xml:space="preserve">
+    <value>Les Arcs de l'Aube</value>
+  </data>
+  <data name="SampleWarbandMissingContent" xml:space="preserve">
+    <value>La bande d'exemple utilise les Mercenaires Reiklander officiels du Codex, introuvables ici. Synchronisez le contenu officiel depuis les Paramètres, puis réessayez.</value>
+  </data>
+  <data name="SampleImportDone" xml:space="preserve">
+    <value>La bande d'exemple a été ajoutée à vos bandes.</value>
+  </data>
+  <data name="SettingsHelpTitle" xml:space="preserve">
+    <value>Découvrir Mordheim Ledger</value>
+  </data>
+  <data name="SettingsSampleDesc" xml:space="preserve">
+    <value>Une bande prête à jouer</value>
+  </data>
+  <data name="SettingsSampleButton" xml:space="preserve">
+    <value>Charger</value>
+  </data>
+  <data name="SettingsSampleAlreadyImported" xml:space="preserve">
+    <value>La bande d'exemple a déjà été chargée. En ajouter une seconde copie ?</value>
+  </data>
+  <data name="SettingsTourDesc" xml:space="preserve">
+    <value>Visites guidées</value>
+  </data>
+  <data name="SettingsTourButton" xml:space="preserve">
+    <value>Revoir</value>
+  </data>
+  <data name="SettingsWelcomeDesc" xml:space="preserve">
+    <value>Écran d'accueil</value>
+  </data>
+  <data name="SettingsWelcomeButton" xml:space="preserve">
+    <value>Revoir</value>
+  </data>
+  <data name="TourNext" xml:space="preserve">
+    <value>Suivant</value>
+  </data>
+  <data name="TourDone" xml:space="preserve">
+    <value>Terminer</value>
+  </data>
+  <data name="TourSkip" xml:space="preserve">
+    <value>Passer</value>
+  </data>
+  <data name="TourWarbandsIntroTitle" xml:space="preserve">
+    <value>Vos bandes</value>
+  </data>
+  <data name="TourWarbandsIntroBody" xml:space="preserve">
+    <value>Chaque bande que vous suivez apparaît ici, avec son type et sa valeur de bande. Voyons comment la gérer.</value>
+  </data>
+  <data name="TourWarbandRowTitle" xml:space="preserve">
+    <value>Une bande</value>
+  </data>
+  <data name="TourWarbandRowBody" xml:space="preserve">
+    <value>Touchez la ligne pour sélectionner la bande : les boutons du bas agissent alors sur elle.</value>
+  </data>
+  <data name="TourWarbandPlayTitle" xml:space="preserve">
+    <value>Ouvrir la fiche</value>
+  </data>
+  <data name="TourWarbandPlayBody" xml:space="preserve">
+    <value>Jouer ouvre la fiche de la bande : son effectif, sa trésorerie et le lancement d'une partie.</value>
+  </data>
+  <data name="TourWarbandCreateTitle" xml:space="preserve">
+    <value>Nouvelle bande</value>
+  </data>
+  <data name="TourWarbandCreateBody" xml:space="preserve">
+    <value>Crée une bande pas à pas : type de bande, recrues, équipement et noms.</value>
+  </data>
+  <data name="TourWarbandEditTitle" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="TourWarbandEditBody" xml:space="preserve">
+    <value>Rouvre la bande sélectionnée dans le même assistant, pour renommer, recruter ou rééquiper.</value>
+  </data>
+  <data name="TourWarbandDeleteTitle" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="TourWarbandDeleteBody" xml:space="preserve">
+    <value>Supprime la bande sélectionnée et tous ses guerriers, après confirmation.</value>
+  </data>
+  <data name="TourDetailIntroTitle" xml:space="preserve">
+    <value>La fiche de bande</value>
+  </data>
+  <data name="TourDetailIntroBody" xml:space="preserve">
+    <value>L'équivalent de la feuille de bande papier : vos guerriers, leur profil, leur équipement et leur expérience, mis à jour partie après partie.</value>
+  </data>
+  <data name="TourDetailSummaryTitle" xml:space="preserve">
+    <value>Trésorerie et valeur</value>
+  </data>
+  <data name="TourDetailSummaryBody" xml:space="preserve">
+    <value>Couronnes en caisse, pierres magiques en réserve et valeur de bande, toujours à jour.</value>
+  </data>
+  <data name="TourDetailGameTitle" xml:space="preserve">
+    <value>Lancer la partie</value>
+  </data>
+  <data name="TourDetailGameBody" xml:space="preserve">
+    <value>Démarre une partie. Le bouton devient ensuite Fin de partie : l'assistant qui applique blessures, expérience, exploration et recrutements.</value>
+  </data>
+  <data name="TourDetailInventoryTitle" xml:space="preserve">
+    <value>Inventaire</value>
+  </data>
+  <data name="TourDetailInventoryBody" xml:space="preserve">
+    <value>La réserve de la bande : les objets trouvés ou achetés qui n'équipent encore personne, à attribuer ou revendre.</value>
+  </data>
+  <data name="TourDetailTabsTitle" xml:space="preserve">
+    <value>Effectif et historique</value>
+  </data>
+  <data name="TourDetailTabsBody" xml:space="preserve">
+    <value>Basculez entre les guerriers de la bande et son historique : chaque partie y laisse une trace, et vous pouvez ajouter vos propres notes.</value>
+  </data>
+  <data name="TourDetailGroupTitle" xml:space="preserve">
+    <value>Héros et hommes de main</value>
+  </data>
+  <data name="TourDetailGroupBody" xml:space="preserve">
+    <value>Les guerriers sont rangés par groupe, comme sur la feuille papier. Touchez un en-tête pour le replier ou le déplier.</value>
+  </data>
+  <data name="TourDetailCardTitle" xml:space="preserve">
+    <value>Un guerrier</value>
+  </data>
+  <data name="TourDetailCardBody" xml:space="preserve">
+    <value>Sa carte reprend tout ce que dit sa fiche : nom, rôle, profil, règles spéciales, équipement et expérience.</value>
+  </data>
+  <data name="TourDetailCardEditTitle" xml:space="preserve">
+    <value>Modifier le guerrier</value>
+  </data>
+  <data name="TourDetailCardEditBody" xml:space="preserve">
+    <value>Ouvre l'édition du guerrier : équipement, compétences, sorts, blessures, expérience.</value>
+  </data>
+  <data name="TourDetailCardStatsTitle" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="TourDetailCardStatsBody" xml:space="preserve">
+    <value>Ses caractéristiques actuelles, progressions et blessures comprises.</value>
+  </data>
+  <data name="TourDetailCardChipsTitle" xml:space="preserve">
+    <value>Puces</value>
+  </data>
+  <data name="TourDetailCardChipsBody" xml:space="preserve">
+    <value>Équipement, compétences, règles spéciales, blessures... Touchez une puce pour lire la règle complète.</value>
+  </data>
+  <data name="TourDetailCardXpTitle" xml:space="preserve">
+    <value>Expérience</value>
+  </data>
+  <data name="TourDetailCardXpBody" xml:space="preserve">
+    <value>La piste d'expérience de la feuille papier : les cases à bordure dorée marquent les paliers de progression.</value>
+  </data>
+  <data name="TourCodexIntroTitle" xml:space="preserve">
+    <value>Le Codex</value>
+  </data>
+  <data name="TourCodexIntroBody" xml:space="preserve">
+    <value>Tout le contenu de règles de l'appli. Une entrée officielle modifiée passe en Modifiée, et vous pouvez créer votre propre contenu.</value>
+  </data>
+  <data name="TourCodexSectionTitle" xml:space="preserve">
+    <value>Sections</value>
+  </data>
+  <data name="TourCodexSectionBody" xml:space="preserve">
+    <value>Changez de section : bandes, Place du Marché, compétences, blessures, sorts, règles spéciales, mutations, Francs-Tireurs et Dramatis Personae.</value>
+  </data>
+  <data name="TourCodexFilterTitle" xml:space="preserve">
+    <value>Filtre</value>
+  </data>
+  <data name="TourCodexFilterBody" xml:space="preserve">
+    <value>Filtre les bandes par grade. Les icônes voisines gèrent les races et les profils raciaux.</value>
+  </data>
+  <data name="TourCodexTileTitle" xml:space="preserve">
+    <value>Une entrée</value>
+  </data>
+  <data name="TourCodexTileBody" xml:space="preserve">
+    <value>Touchez une tuile pour la sélectionner, avant de la modifier ou de la supprimer.</value>
+  </data>
+  <data name="TourCodexTileInfoTitle" xml:space="preserve">
+    <value>Fiche détaillée</value>
+  </data>
+  <data name="TourCodexTileInfoBody" xml:space="preserve">
+    <value>Le bouton d'information ouvre la fiche complète en lecture seule : guerriers, règles, équipement...</value>
+  </data>
+  <data name="TourCodexActionsTitle" xml:space="preserve">
+    <value>Ajouter, modifier, supprimer</value>
+  </data>
+  <data name="TourCodexActionsBody" xml:space="preserve">
+    <value>Créez votre propre entrée, ou modifiez et supprimez celle sélectionnée.</value>
+  </data>
+  <data name="TourWizardIntroTitle" xml:space="preserve">
+    <value>Création de bande</value>
+  </data>
+  <data name="TourWizardIntroBody" xml:space="preserve">
+    <value>L'assistant avance étape par étape : général, guerriers, équipement, noms, Francs-Tireurs, puis un récapitulatif avant d'enregistrer.</value>
+  </data>
+  <data name="TourWizardStepTitle" xml:space="preserve">
+    <value>Étape en cours</value>
+  </data>
+  <data name="TourWizardStepBody" xml:space="preserve">
+    <value>Indique où vous en êtes dans l'assistant.</value>
+  </data>
+  <data name="TourWizardNameTitle" xml:space="preserve">
+    <value>Nom de la bande</value>
+  </data>
+  <data name="TourWizardNameBody" xml:space="preserve">
+    <value>Le nom de votre bande, obligatoire.</value>
+  </data>
+  <data name="TourWizardArchetypeTitle" xml:space="preserve">
+    <value>Type de bande</value>
+  </data>
+  <data name="TourWizardArchetypeBody" xml:space="preserve">
+    <value>Choisissez la bande officielle (ou la vôtre) : elle fixe la trésorerie de départ, les guerriers recrutables et leurs listes d'équipement. Touchez-la pour lire sa fiche.</value>
+  </data>
+  <data name="TourWizardFreeModeTitle" xml:space="preserve">
+    <value>Mode libre</value>
+  </data>
+  <data name="TourWizardFreeModeBody" xml:space="preserve">
+    <value>Pour reprendre une bande déjà jouée sur papier : aucun coût n'est appliqué et la trésorerie se saisit librement.</value>
+  </data>
+  <data name="TourWizardNavTitle" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="TourWizardNavBody" xml:space="preserve">
+    <value>Suivant vérifie l'étape avant d'avancer ; Précédent revient en arrière sans rien perdre.</value>
+  </data>
+  <data name="TourWizardBudgetTitle" xml:space="preserve">
+    <value>Effectif et trésorerie</value>
+  </data>
+  <data name="TourWizardBudgetBody" xml:space="preserve">
+    <value>Le nombre de guerriers recrutés face au maximum de la bande, et les couronnes qu'il vous reste.</value>
+  </data>
+  <data name="TourWizardRecruitsTitle" xml:space="preserve">
+    <value>Recrues</value>
+  </data>
+  <data name="TourWizardRecruitsBody" xml:space="preserve">
+    <value>Les + et − ajoutent ou retirent un guerrier de chaque type, dans la limite de son maximum ; touchez un nom pour lire son profil.</value>
+  </data>
+  <data name="TourWizardEquipmentTitle" xml:space="preserve">
+    <value>Équipement</value>
+  </data>
+  <data name="TourWizardEquipmentBody" xml:space="preserve">
+    <value>Équipez chaque héros, et chaque groupe d'hommes de main d'un seul achat pour tout le groupe. La première dague est gratuite ; divisez un groupe pour l'équiper différemment.</value>
   </data>
 </root>

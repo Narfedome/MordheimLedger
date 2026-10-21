@@ -689,6 +689,24 @@ public class WarbandMutationTests : IDisposable
         Assert.True(grantedSkills > 0);
     }
 
+    /// <summary>Bande d'exemple de l'accueil : 3 héros + 2 groupes de 2, équipés, trésorerie diminuée du
+    /// coût des recrues et de l'équipement (dague gratuite comprise, groupes payés par tête).</summary>
+    [Fact]
+    public async Task SampleWarband_RecruitsEquippedRosterAndSpendsTreasury()
+    {
+        var warband = await SampleWarband.CreateAsync(_warbands, _library, "en", "The Bleeding Roses", ["Warriors", "Marksmen"]);
+
+        Assert.NotNull(warband);
+        var archetype = await GetReiklandersAsync();
+        var warriors = await _warbands.GetWarriorsAsync(warband!.Id, "en");
+        Assert.Equal(5, warriors.Count);
+        Assert.Equal(7, warriors.Sum(w => w.HeadCount));
+        Assert.Contains(warriors, w => w.Name == "Warriors" && w.HeadCount == 2);
+        Assert.All(warriors, w => Assert.NotEmpty(w.Equipment));
+        // 90 + 50 + 25 + 2×35 + 2×35 = 305 couronnes dépensées.
+        Assert.Equal(archetype.StartingTreasury - 305, (await _warbands.GetWarbandAsync(warband.Id))!.Treasury);
+    }
+
     private class ColumnInfo { public string name { get; set; } = ""; }
     private class IdRow { public int Id { get; set; } public string OfficialId { get; set; } = ""; }
 }

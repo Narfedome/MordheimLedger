@@ -131,6 +131,8 @@ namespace MordheimLedgerApp
             builder.Services.AddSingleton<ILibraryService, LibraryService>();
             builder.Services.AddSingleton<IWarbandService, WarbandService>();
             builder.Services.AddSingleton<IDetailDialogService, DetailDialogService>();
+            builder.Services.AddSingleton<SampleWarbandService>();
+            builder.Services.AddSingleton<AppTourService>();
             builder.Services.AddTransient<WarbandListViewModel>();
             builder.Services.AddTransient<WarbandListPage>();
             builder.Services.AddTransient<WarbandDetailViewModel>();

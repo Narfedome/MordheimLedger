@@ -1,11 +1,16 @@
+using MordheimLedgerApp.Services;
+
 namespace MordheimLedgerApp.Features.Warbands;
 
 public partial class WarbandDetailPage : ContentPage
 {
-    public WarbandDetailPage(WarbandDetailViewModel viewModel)
+    private readonly AppTourService _tourService;
+
+    public WarbandDetailPage(WarbandDetailViewModel viewModel, AppTourService tourService)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        _tourService = tourService;
 
         // Cf. SettingsPage.xaml.cs / CategoryListPage de DmTools : plafonne/centre sur Desktop
         // uniquement, en code plutôt qu'en XAML (MaximumWidthRequest n'a pas de valeur sentinelle
@@ -19,6 +24,30 @@ public partial class WarbandDetailPage : ContentPage
             Header.HorizontalOptions = LayoutOptions.Center;
             RosterScroll.WidthRequest = 560;
             RosterScroll.HorizontalOptions = LayoutOptions.Center;
+        }
+    }
+
+    // Visite de cet écran, la première fois qu'une fiche de bande s'ouvre (cf. AppTourService), une fois
+    // le roster chargé par le paramètre de navigation. Remonte d'abord en haut du roster : les étapes sur
+    // la carte d'un guerrier visent la première du roster, et le plugin ne fait pas défiler.
+    protected override async void OnNavigatedTo(NavigatedToEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+
+        if (!_tourService.IsDetailTourPending || BindingContext is not WarbandDetailViewModel vm) return;
+        if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
+
+        try
+        {
+            await vm.InitialLoad;
+            if (vm.Warband is null) return;
+            await RosterScroll.ScrollToAsync(0, 0, false);
+            await _tourService.StartDetailTourAsync(vm.Heroes.Count > 0, vm.HasInventory);
+        }
+        catch (Exception ex)
+        {
+            // Une visite qui échoue ne doit jamais bloquer l'appli : on la perd, sans plus.
+            System.Diagnostics.Debug.WriteLine($"[Tour] {ex}");
         }
     }
 

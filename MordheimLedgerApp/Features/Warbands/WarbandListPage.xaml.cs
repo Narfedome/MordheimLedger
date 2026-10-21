@@ -1,17 +1,20 @@
 using CommunityToolkit.Maui.Extensions;
 using MordheimLedgerApp.Features.Library;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands;
 
 public partial class WarbandListPage : ContentPage
 {
     private readonly WarbandListViewModel _vm;
+    private readonly AppTourService _tourService;
     private bool _initialized;
 
-    public WarbandListPage(WarbandListViewModel viewModel)
+    public WarbandListPage(WarbandListViewModel viewModel, AppTourService tourService)
     {
         InitializeComponent();
         _vm = viewModel;
+        _tourService = tourService;
         BindingContext = viewModel;
 
         // Cf. SettingsPage.xaml.cs / CategoryListPage de DmTools : plafonne/centre la liste sur
@@ -42,5 +45,20 @@ public partial class WarbandListPage : ContentPage
             await vm.LoadWarbandsCommand.ExecuteAsync(null);
         else
             await vm.InitializeAsync();
+
+        // Visite de cet écran, la première fois qu'on y arrive avec au moins une bande (cf.
+        // AppTourService) - la bande d'exemple quand elle vient d'être chargée depuis l'accueil.
+        if (_tourService.IsWarbandsTourPending && vm.HasWarbands)
+        {
+            try
+            {
+                await _tourService.StartWarbandsTourAsync();
+            }
+            catch (Exception ex)
+            {
+                // Une visite qui échoue ne doit jamais bloquer l'appli : on la perd, sans plus.
+                System.Diagnostics.Debug.WriteLine($"[Tour] {ex}");
+            }
+        }
     }
 }

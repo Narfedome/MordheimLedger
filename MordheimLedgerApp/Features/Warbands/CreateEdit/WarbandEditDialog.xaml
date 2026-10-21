@@ -7,6 +7,8 @@
                xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
                xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
                xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:services="clr-namespace:MordheimLedgerApp.Services"
+               xmlns:onboarding="clr-namespace:Plugin.Maui.Onboarding"
                xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
                x:TypeArguments="system:Boolean"
                x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.WarbandEditDialog"
@@ -36,7 +38,11 @@
                  ScrollableTabStripView (générique, ne connaît pas IsWizardMode) factorise juste le
                  conteneur scrollable, même composant que WarbandArchetypeEditDialog.xaml. -->
                     <Label Text="{Binding StepLabel}" TextColor="{DynamicResource AppTextMuted}"
-                   IsVisible="{Binding IsWizardMode}"/>
+                   IsVisible="{Binding IsWizardMode}">
+                        <Label.Behaviors>
+                            <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardStepKey}"/>
+                        </Label.Behaviors>
+                    </Label>
                     <components:ScrollableTabStripView IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}">
                         <HorizontalStackLayout Spacing="16">
                             <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
@@ -69,7 +75,11 @@
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>
-                            <Entry Text="{Binding Item.Name}"/>
+                            <Entry Text="{Binding Item.Name}">
+                                <Entry.Behaviors>
+                                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardNameKey}"/>
+                                </Entry.Behaviors>
+                            </Entry>
                             <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
@@ -78,6 +88,9 @@
                              mais désormais pertinent aussi en édition d'une bande déjà sauvegardée (plus
                              seulement à la création), d'où le libellé reformulé. -->
                         <HorizontalStackLayout Spacing="10">
+                            <HorizontalStackLayout.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardFreeModeKey}"/>
+                            </HorizontalStackLayout.Behaviors>
                             <CheckBox IsChecked="{Binding IsExistingWarband}" VerticalOptions="Center"/>
                             <Label Text="{loc:Loc WarbandsFreeModeLabel}" VerticalOptions="Center"/>
                         </HorizontalStackLayout>
@@ -91,7 +104,11 @@
                                         Command="{Binding ShowArchetypeDetailCommand}"
                                         AddCommand="{Binding ArchetypeAddCommandOrNull}"
                                         RemoveCommand="{Binding ArchetypeRemoveCommandOrNull}"
-                                                 IsMandatory="True" />
+                                                 IsMandatory="True">
+                            <components:ChipItemView.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardArchetypeKey}"/>
+                            </components:ChipItemView.Behaviors>
+                        </components:ChipItemView>
                         <Label Text="{Binding ArchetypeError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                            IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding Archetype, Converter={StaticResource IsNotNullConverter}}">
@@ -125,6 +142,9 @@
                                    HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
 
                         <Grid ColumnDefinitions="*,Auto">
+                            <Grid.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardBudgetKey}"/>
+                            </Grid.Behaviors>
                             <Label Grid.Column="0" Text="{Binding RosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                             <Label Grid.Column="1" Text="{Binding RemainingTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                         </Grid>
@@ -132,7 +152,11 @@
                                           HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
                                           DetailCommand="{Binding ShowWarriorDetailCommand}"
                                           IncrementCommand="{Binding IncrementWarriorCommand}"
-                                          DecrementCommand="{Binding DecrementWarriorCommand}"/>
+                                          DecrementCommand="{Binding DecrementWarriorCommand}">
+                            <components:WarriorRecruitListView.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardRecruitsKey}"/>
+                            </components:WarriorRecruitListView.Behaviors>
+                        </components:WarriorRecruitListView>
                         <Label Text="{Binding WarriorsError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                        IsVisible="{Binding WarriorsError, Converter={StaticResource IsNotNullConverter}}"/>
                     </VerticalStackLayout>
@@ -151,6 +175,9 @@
                                IsVisible="{Binding EquipmentError, Converter={StaticResource IsNotNullConverter}}"/>
 
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="4">
+                            <VerticalStackLayout.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardEquipmentKey}"/>
+                            </VerticalStackLayout.Behaviors>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="local:WarriorRecruitRow">
                                     <VerticalStackLayout Spacing="8">
@@ -392,6 +419,9 @@
             <!-- Boutons toujours ancrés en bas du dialog (ligne Auto de la Grid englobante, hors ScrollView) -
              plutôt que collés au contenu de l'onglet/étape courante, dont la hauteur varie. -->
             <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding IsWizardMode}">
+                <Grid.Behaviors>
+                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardNavKey}"/>
+                </Grid.Behaviors>
                 <Button Grid.Column="0"
                     Text="{loc:Loc BtnCancel}"
                     Style="{StaticResource DialogSecondaryButtonStyle}"

@@ -9,6 +9,8 @@
              xmlns:xp="clr-namespace:MordheimLedgerApp.Components.ExperienceTrack"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:services="clr-namespace:MordheimLedgerApp.Services"
+             xmlns:onboarding="clr-namespace:Plugin.Maui.Onboarding"
              x:Class="MordheimLedgerApp.Features.Warbands.WarbandDetailPage"
              x:DataType="vm:WarbandDetailViewModel"
              Shell.NavBarIsVisible="False">
@@ -24,6 +26,9 @@
                  l'affiche. -->
             <DataTemplate x:Key="WarriorCardTemplate" x:DataType="vm:WarriorRow">
                 <Border Style="{StaticResource SectionCardBorderStyle}" Margin="6,6">
+                    <Border.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardKey}"/>
+                    </Border.Behaviors>
                     <VerticalStackLayout Spacing="2">
                         <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Start"  >
                             <HorizontalStackLayout Grid.Column="0" Spacing="6">
@@ -47,7 +52,11 @@
                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                           IsVisible="{Binding IsEditable}"
                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=EditWarriorCommand}"
-                                                          CommandParameter="{Binding .}"/>
+                                                          CommandParameter="{Binding .}">
+                                <components:FaIconButtonView.Behaviors>
+                                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardEditKey}"/>
+                                </components:FaIconButtonView.Behaviors>
+                            </components:FaIconButtonView>
                         </Grid>
 
                         <!-- Une Poignée d'Or (2026-09-01) : Ulli & Marquand uniquement
@@ -86,7 +95,11 @@
                              du défaut 12/14) pour rester dense sur un roster qui peut afficher beaucoup
                              de cartes guerrier d'affilée. -->
                         <components:StatRowView Item="{Binding Warrior}" MovementText="{Binding Warrior.MovementDisplay}" Margin="0,8,0,8"
-                                                 AbbrFontSize="10" ValueFontSize="13"/>
+                                                 AbbrFontSize="10" ValueFontSize="13">
+                            <components:StatRowView.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardStatsKey}"/>
+                            </components:StatRowView.Behaviors>
+                        </components:StatRowView>
 
                         <!-- Règles spéciales : lecture seule, non éditable ici du tout - résolues par le
                              ViewModel depuis WarriorArchetype.SpecialRules + WarbandArchetype.
@@ -174,6 +187,9 @@
                         <!-- Équipement/Compétences : lecture seule ici, même traitement que Blessures -
                              gérées depuis le dialog d'édition (voir WarriorEditDialog, onglets dédiés). -->
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding HasEquipment}">
+                            <VerticalStackLayout.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardChipsKey}"/>
+                            </VerticalStackLayout.Behaviors>
                             <Label Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
                             <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
                                 <BindableLayout.ItemTemplate>
@@ -207,6 +223,9 @@
                              eux, à la différence d'un groupe d'Hommes de main tout juste recruté (encore
                              à 0 PX mais capable d'en gagner), qui garde la piste normalement. -->
                         <VerticalStackLayout Spacing="2" IsVisible="{Binding Warrior.GainsExperience}">
+                            <VerticalStackLayout.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardXpKey}"/>
+                            </VerticalStackLayout.Behaviors>
                             <Label Text="{loc:Loc WarriorsExperienceHeading}" FontSize="10" TextColor="{DynamicResource AppTextMuted}"/>
                             <!-- Pas de HorizontalOptions="Center" ici : ExperienceTrackView a besoin de sa
                                  largeur réellement disponible (voir CalculateRowSize) pour choisir combien
@@ -234,7 +253,11 @@
                                             Icon="{x:Static icons:SolidFont.BoxOpen}"
                                             Text="{loc:Loc InventoryHeading}"
                                             TextColor="{DynamicResource AppAccent}"
-                                            Command="{Binding ShowInventoryCommand}"/>
+                                            Command="{Binding ShowInventoryCommand}">
+                    <components:IconTextButton.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailInventoryKey}"/>
+                    </components:IconTextButton.Behaviors>
+                </components:IconTextButton>
                 <!-- Un seul des deux boutons à la fois (voir Warband.GameInProgress/HasGameInProgress) -
                      "Lancer la partie" remplace "Fin de partie" tant qu'aucune partie n'est en cours,
                      demande explicite de l'utilisateur (2026-08-26) : "Start a game" -> "End of game". -->
@@ -242,12 +265,20 @@
                                             Icon="{x:Static icons:SolidFont.Play}"
                                             Text="{loc:Loc StartGameButtonText}"
                                             TextColor="{DynamicResource AppAccent}"
-                                            Command="{Binding StartGameCommand}"/>
+                                            Command="{Binding StartGameCommand}">
+                    <components:IconTextButton.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailGameKey}"/>
+                    </components:IconTextButton.Behaviors>
+                </components:IconTextButton>
                 <components:IconTextButton IsVisible="{Binding HasGameInProgress}"
                                             Icon="{x:Static icons:SolidFont.FlagCheckered}"
                                             Text="{loc:Loc EndOfGameTitle}"
                                             TextColor="{DynamicResource AppAccent}"
-                                            Command="{Binding EndOfGameCommand}"/>
+                                            Command="{Binding EndOfGameCommand}">
+                    <components:IconTextButton.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailGameKey}"/>
+                    </components:IconTextButton.Behaviors>
+                </components:IconTextButton>
             </HorizontalStackLayout>
         </Grid>
 
@@ -257,6 +288,9 @@
         <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*" IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
         <VerticalStackLayout Grid.Row="0" Spacing="6" Margin="16,0,16,8">
             <Label TextColor="{DynamicResource AppTextMuted}">
+                <Label.Behaviors>
+                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailSummaryKey}"/>
+                </Label.Behaviors>
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
@@ -290,6 +324,9 @@
              (l'étape "entre deux parties" du livre des règles), pas en action libre à tout moment. -->
         <Grid Grid.Row="1" Margin="16,0,16,8">
             <components:ScrollableTabStripView>
+                <components:ScrollableTabStripView.Behaviors>
+                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailTabsKey}"/>
+                </components:ScrollableTabStripView.Behaviors>
                 <HorizontalStackLayout Spacing="16">
                     <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
                                                  IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
@@ -307,6 +344,9 @@
             <VerticalStackLayout Spacing="0" Margin="0,8">
 
                 <Grid Padding="16,10,16,4" ColumnDefinitions="*,Auto">
+                    <Grid.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailGroupKey}"/>
+                    </Grid.Behaviors>
                     <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding ToggleHeroesCommand}"/>
                     </Grid.GestureRecognizers>

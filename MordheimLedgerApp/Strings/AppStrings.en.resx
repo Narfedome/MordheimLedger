@@ -431,9 +431,6 @@
   <data name="OnboardingLanguage" xml:space="preserve">
     <value>Language</value>
   </data>
-  <data name="OnboardingStart" xml:space="preserve">
-    <value>Get started</value>
-  </data>
   <data name="WarbandsTreasuryLabel" xml:space="preserve">
     <value>Treasury:</value>
   </data>
@@ -2364,5 +2361,281 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameExperienceHint" xml:space="preserve">
     <value>All XP from this game: survival, enemies taken out of action, victory and scenario bonuses.</value>
+  </data>
+  <data name="OnboardingWarbandTitle" xml:space="preserve">
+    <value>Build your warband</value>
+  </data>
+  <data name="OnboardingWarbandBody" xml:space="preserve">
+    <value>Pick a warband type from the official lists, recruit your heroes and henchmen within your treasury, then equip them. The wizard walks you through each step and checks the recruitment rules.</value>
+  </data>
+  <data name="OnboardingPlayTitle" xml:space="preserve">
+    <value>Play your games</value>
+  </data>
+  <data name="OnboardingPlayBody" xml:space="preserve">
+    <value>Start the game from your warband's sheet. Afterwards, the End of Game wizard takes you through injuries, experience and advances, exploration, selling wyrdstone and new recruits. Everything is logged in the warband's history.</value>
+  </data>
+  <data name="OnboardingCodexTitle" xml:space="preserve">
+    <value>The Codex</value>
+  </data>
+  <data name="OnboardingCodexBody" xml:space="preserve">
+    <value>Every official warband, the Trading Post, skills, spells, injuries and special rules, available at any time. Fix an official entry (it becomes Modified) or add your own content.</value>
+  </data>
+  <data name="OnboardingReadyTitle" xml:space="preserve">
+    <value>Your turn</value>
+  </data>
+  <data name="OnboardingLoadSample" xml:space="preserve">
+    <value>Load the sample warband</value>
+  </data>
+  <data name="OnboardingLoadSampleDesc" xml:space="preserve">
+    <value>Reiklander Mercenaries already recruited and equipped, to explore the warband sheet right away.</value>
+  </data>
+  <data name="OnboardingStartEmpty" xml:space="preserve">
+    <value>Start from scratch</value>
+  </data>
+  <data name="OnboardingPrevious" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="OnboardingNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="SampleWarbandName" xml:space="preserve">
+    <value>The Bleeding Roses</value>
+  </data>
+  <data name="SampleWarbandWarriors" xml:space="preserve">
+    <value>Reik Blades</value>
+  </data>
+  <data name="SampleWarbandMarksmen" xml:space="preserve">
+    <value>Dawn Bows</value>
+  </data>
+  <data name="SampleWarbandMissingContent" xml:space="preserve">
+    <value>The sample warband uses the official Reiklander Mercenaries from the Codex, which can't be found. Sync the official content from Settings, then try again.</value>
+  </data>
+  <data name="SampleImportDone" xml:space="preserve">
+    <value>The sample warband was added to your warbands.</value>
+  </data>
+  <data name="SettingsHelpTitle" xml:space="preserve">
+    <value>Discover Mordheim Ledger</value>
+  </data>
+  <data name="SettingsSampleDesc" xml:space="preserve">
+    <value>A ready-to-play warband</value>
+  </data>
+  <data name="SettingsSampleButton" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="SettingsSampleAlreadyImported" xml:space="preserve">
+    <value>The sample warband is already loaded. Add a second copy?</value>
+  </data>
+  <data name="SettingsTourDesc" xml:space="preserve">
+    <value>Guided tours</value>
+  </data>
+  <data name="SettingsTourButton" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="SettingsWelcomeDesc" xml:space="preserve">
+    <value>Welcome screen</value>
+  </data>
+  <data name="SettingsWelcomeButton" xml:space="preserve">
+    <value>Replay</value>
+  </data>
+  <data name="TourNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="TourDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="TourSkip" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="TourWarbandsIntroTitle" xml:space="preserve">
+    <value>Your warbands</value>
+  </data>
+  <data name="TourWarbandsIntroBody" xml:space="preserve">
+    <value>Every warband you track shows up here, with its type and warband rating. Let's see how to manage it.</value>
+  </data>
+  <data name="TourWarbandRowTitle" xml:space="preserve">
+    <value>A warband</value>
+  </data>
+  <data name="TourWarbandRowBody" xml:space="preserve">
+    <value>Tap the row to select the warband: the buttons at the bottom then act on it.</value>
+  </data>
+  <data name="TourWarbandPlayTitle" xml:space="preserve">
+    <value>Open the sheet</value>
+  </data>
+  <data name="TourWarbandPlayBody" xml:space="preserve">
+    <value>Play opens the warband's sheet: its roster, its treasury, and starting a game.</value>
+  </data>
+  <data name="TourWarbandCreateTitle" xml:space="preserve">
+    <value>New warband</value>
+  </data>
+  <data name="TourWarbandCreateBody" xml:space="preserve">
+    <value>Builds a warband step by step: warband type, recruits, equipment and names.</value>
+  </data>
+  <data name="TourWarbandEditTitle" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="TourWarbandEditBody" xml:space="preserve">
+    <value>Reopens the selected warband in the same wizard, to rename, recruit or re-equip.</value>
+  </data>
+  <data name="TourWarbandDeleteTitle" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="TourWarbandDeleteBody" xml:space="preserve">
+    <value>Deletes the selected warband and all its warriors, after confirmation.</value>
+  </data>
+  <data name="TourDetailIntroTitle" xml:space="preserve">
+    <value>The warband sheet</value>
+  </data>
+  <data name="TourDetailIntroBody" xml:space="preserve">
+    <value>The app's take on the paper roster sheet: your warriors, their profiles, equipment and experience, updated game after game.</value>
+  </data>
+  <data name="TourDetailSummaryTitle" xml:space="preserve">
+    <value>Treasury and rating</value>
+  </data>
+  <data name="TourDetailSummaryBody" xml:space="preserve">
+    <value>Gold crowns in the coffers, wyrdstone shards in store and warband rating, always up to date.</value>
+  </data>
+  <data name="TourDetailGameTitle" xml:space="preserve">
+    <value>Start the game</value>
+  </data>
+  <data name="TourDetailGameBody" xml:space="preserve">
+    <value>Starts a game. The button then becomes End of Game: the wizard that applies injuries, experience, exploration and recruitment.</value>
+  </data>
+  <data name="TourDetailInventoryTitle" xml:space="preserve">
+    <value>Inventory</value>
+  </data>
+  <data name="TourDetailInventoryBody" xml:space="preserve">
+    <value>The warband's stash: items found or bought that nobody carries yet, to hand out or sell.</value>
+  </data>
+  <data name="TourDetailTabsTitle" xml:space="preserve">
+    <value>Roster and history</value>
+  </data>
+  <data name="TourDetailTabsBody" xml:space="preserve">
+    <value>Switch between the warband's warriors and its history: each game leaves an entry there, and you can add your own notes.</value>
+  </data>
+  <data name="TourDetailGroupTitle" xml:space="preserve">
+    <value>Heroes and henchmen</value>
+  </data>
+  <data name="TourDetailGroupBody" xml:space="preserve">
+    <value>Warriors are grouped like on the paper sheet. Tap a header to fold or unfold it.</value>
+  </data>
+  <data name="TourDetailCardTitle" xml:space="preserve">
+    <value>A warrior</value>
+  </data>
+  <data name="TourDetailCardBody" xml:space="preserve">
+    <value>Its card holds everything its roster entry says: name, role, profile, special rules, equipment and experience.</value>
+  </data>
+  <data name="TourDetailCardEditTitle" xml:space="preserve">
+    <value>Edit the warrior</value>
+  </data>
+  <data name="TourDetailCardEditBody" xml:space="preserve">
+    <value>Opens the warrior's editor: equipment, skills, spells, injuries, experience.</value>
+  </data>
+  <data name="TourDetailCardStatsTitle" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="TourDetailCardStatsBody" xml:space="preserve">
+    <value>Its current characteristics, advances and injuries included.</value>
+  </data>
+  <data name="TourDetailCardChipsTitle" xml:space="preserve">
+    <value>Chips</value>
+  </data>
+  <data name="TourDetailCardChipsBody" xml:space="preserve">
+    <value>Equipment, skills, special rules, injuries... Tap a chip to read the full rule.</value>
+  </data>
+  <data name="TourDetailCardXpTitle" xml:space="preserve">
+    <value>Experience</value>
+  </data>
+  <data name="TourDetailCardXpBody" xml:space="preserve">
+    <value>The paper sheet's experience track: gold-bordered boxes mark the advance thresholds.</value>
+  </data>
+  <data name="TourCodexIntroTitle" xml:space="preserve">
+    <value>The Codex</value>
+  </data>
+  <data name="TourCodexIntroBody" xml:space="preserve">
+    <value>All the rules content in the app. An official entry you change becomes Modified, and you can create your own content.</value>
+  </data>
+  <data name="TourCodexSectionTitle" xml:space="preserve">
+    <value>Sections</value>
+  </data>
+  <data name="TourCodexSectionBody" xml:space="preserve">
+    <value>Switch section: warbands, Trading Post, skills, injuries, spells, special rules, mutations, Hired Swords and Dramatis Personae.</value>
+  </data>
+  <data name="TourCodexFilterTitle" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="TourCodexFilterBody" xml:space="preserve">
+    <value>Filters warbands by grade. The icons next to it manage races and racial profiles.</value>
+  </data>
+  <data name="TourCodexTileTitle" xml:space="preserve">
+    <value>An entry</value>
+  </data>
+  <data name="TourCodexTileBody" xml:space="preserve">
+    <value>Tap a tile to select it, before editing or deleting it.</value>
+  </data>
+  <data name="TourCodexTileInfoTitle" xml:space="preserve">
+    <value>Full details</value>
+  </data>
+  <data name="TourCodexTileInfoBody" xml:space="preserve">
+    <value>The info button opens the full read-only sheet: warriors, rules, equipment...</value>
+  </data>
+  <data name="TourCodexActionsTitle" xml:space="preserve">
+    <value>Add, edit, delete</value>
+  </data>
+  <data name="TourCodexActionsBody" xml:space="preserve">
+    <value>Create your own entry, or edit and delete the selected one.</value>
+  </data>
+  <data name="TourWizardIntroTitle" xml:space="preserve">
+    <value>Building a warband</value>
+  </data>
+  <data name="TourWizardIntroBody" xml:space="preserve">
+    <value>The wizard goes step by step: general, warriors, equipment, names, Hired Swords, then a summary before saving.</value>
+  </data>
+  <data name="TourWizardStepTitle" xml:space="preserve">
+    <value>Current step</value>
+  </data>
+  <data name="TourWizardStepBody" xml:space="preserve">
+    <value>Shows where you are in the wizard.</value>
+  </data>
+  <data name="TourWizardNameTitle" xml:space="preserve">
+    <value>Warband name</value>
+  </data>
+  <data name="TourWizardNameBody" xml:space="preserve">
+    <value>Your warband's name, required.</value>
+  </data>
+  <data name="TourWizardArchetypeTitle" xml:space="preserve">
+    <value>Warband type</value>
+  </data>
+  <data name="TourWizardArchetypeBody" xml:space="preserve">
+    <value>Pick the official warband (or your own): it sets the starting treasury, which warriors can be recruited and their equipment lists. Tap it to read its sheet.</value>
+  </data>
+  <data name="TourWizardFreeModeTitle" xml:space="preserve">
+    <value>Free mode</value>
+  </data>
+  <data name="TourWizardFreeModeBody" xml:space="preserve">
+    <value>To bring in a warband already played on paper: no costs are applied and you type the treasury yourself.</value>
+  </data>
+  <data name="TourWizardNavTitle" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="TourWizardNavBody" xml:space="preserve">
+    <value>Next checks the step before moving on; Back returns without losing anything.</value>
+  </data>
+  <data name="TourWizardBudgetTitle" xml:space="preserve">
+    <value>Roster and treasury</value>
+  </data>
+  <data name="TourWizardBudgetBody" xml:space="preserve">
+    <value>How many warriors you've recruited against the warband's maximum, and the gold crowns you have left.</value>
+  </data>
+  <data name="TourWizardRecruitsTitle" xml:space="preserve">
+    <value>Recruits</value>
+  </data>
+  <data name="TourWizardRecruitsBody" xml:space="preserve">
+    <value>The + and − buttons add or remove a warrior of each type, up to its maximum; tap a name to read its profile.</value>
+  </data>
+  <data name="TourWizardEquipmentTitle" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="TourWizardEquipmentBody" xml:space="preserve">
+    <value>Equip each hero, and each group of henchmen with a single purchase for the whole group. The first dagger is free; split a group to equip part of it differently.</value>
   </data>
 </root>

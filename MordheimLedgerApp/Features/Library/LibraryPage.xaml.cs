@@ -1,13 +1,17 @@
 using CommunityToolkit.Maui.Extensions;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library;
 
 public partial class LibraryPage : ContentPage
 {
-    public LibraryPage(LibraryViewModel viewModel)
+    private readonly AppTourService _tourService;
+
+    public LibraryPage(LibraryViewModel viewModel, AppTourService tourService)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        _tourService = tourService;
     }
 
     protected override async void OnNavigatedTo(NavigatedToEventArgs args)
@@ -19,7 +23,21 @@ public partial class LibraryPage : ContentPage
         if (args.WasPreviousPageACommunityToolkitPopupPage())
             return;
 
-        if (BindingContext is LibraryViewModel vm)
-            await vm.InitializeAsync();
+        if (BindingContext is not LibraryViewModel vm) return;
+        await vm.InitializeAsync();
+
+        // Visite de cet écran, la première fois qu'on y arrive (cf. AppTourService) - seulement sur la
+        // section Bandes, celle que montrent ses étapes.
+        if (_tourService.IsCodexTourPending && vm.IsWarbandsTab)
+        {
+            try
+            {
+                await _tourService.StartCodexTourAsync(vm.WarbandArchetypes.WarbandArchetypeGroups.Count > 0);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Tour] {ex}");
+            }
+        }
     }
 }

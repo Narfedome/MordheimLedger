@@ -134,6 +134,16 @@ de chargeur" plutôt que carquois).
   n'ont jamais eu ce problème) - corrige les 10 usages de `LibraryItemImageView` d'un coup, pas
   seulement Compétences.
 
+**Accueil et visites guidées (branche `feature/onboarding-tours`, 2026-10-21)** : repris de Resonance
+(DmTools, PR #36) tel quel. Carrousel d'accueil à 5 diapos (`Features/Onboarding/`), bande d'exemple
+proposée à la fin (`Core/Services/SampleWarband.cs` : Reiklanders recrutés et équipés via les ids
+officiels, + `Services/SampleWarbandService.cs` côté appli), visites « projecteur » par écran
+(`Services/AppTourService.cs`, plugin intégré en source dans `ThirdParty/PluginMauiOnboarding/`, voir son
+README pour les écarts avec l'original) : liste des bandes, fiche de bande, Codex (section Bandes) et
+assistant de création (une visite par étape Général/Guerriers/Équipement). Cibles posées en XAML via
+`OnboardingTargetBehavior` + clés `AppTourService.XxxKey`. Section « Découvrir » des Paramètres pour
+recharger l'exemple, revoir les visites ou l'accueil.
+
 **Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
 d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
 système de favoris à 2 groupes "Favoris"/"My Warbands", finalement abandonné le même jour : pas assez

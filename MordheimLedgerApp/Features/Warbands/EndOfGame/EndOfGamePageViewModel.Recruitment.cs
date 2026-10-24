@@ -101,14 +101,15 @@ public partial class EndOfGamePageViewModel
     /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place. Part de l'effectif SURVIVANT
     /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.</summary>
     private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount) + RecruitRows.Sum(r => r.Count)
-        + ExistingHenchmanTopUps.Sum(t => t.AddCount);
+        + ExistingHenchmanTopUps.Sum(t => t.AddCount) + ExplorationJoinedHeadCount;
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
     /// WarriorArchetype.MaxCount. Compte tous les guerriers vivants (WarriorRows exclut déjà les morts/
     /// retraités - voir WarbandDetailViewModel.EndOfGame's activeWarriorRows), pas seulement les Héros.
     /// Retranche DismissCount, même raison que TotalWarriorCountAfterRecruitment.</summary>
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
-        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount);
+        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount)
+        + ExplorationJoinedCountForArchetype(warriorArchetypeId);
 
     /// <summary>Chip tapable sur chaque ligne de WarriorRecruitListView (Steps/RecruitHeroesCountStepView.
     /// xaml/RecruitHenchmenCountStepView.xaml's DetailCommand) - 2026-09-23, retour utilisateur "plutôt

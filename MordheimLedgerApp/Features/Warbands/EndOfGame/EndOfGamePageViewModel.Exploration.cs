@@ -5,6 +5,7 @@ using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -305,17 +306,117 @@ public partial class EndOfGamePageViewModel
     /// ResolveWarbandOutcome) : la description complète du livre énumère TOUTES les branches par bande,
     /// alors qu'une seule s'applique à la bande jouée - retour utilisateur 2026-08-20, ne montrer que
     /// cette branche plutôt que le paragraphe entier.</summary>
-    public bool IsWarbandConditionedResult => TriggeredExplorationResult?.Outcomes.Any(o => o.RestrictedToWarbandArchetypeOfficialIds.Count > 0) == true;
+    public bool IsWarbandConditionedResult => TriggeredExplorationResult is { } result && ExplorationOutcomeResolver.IsWarbandConditionedResult(result);
 
     /// <summary>Texte affiché en haut de l'étape Résultat - la description complète du livre, sauf pour
     /// un résultat conditionné par la bande où seule la phrase d'intro partagée (ExplorationResult.
-    /// ShortDescription) est montrée, suivie de la vraie phrase de la branche résolue
-    /// (ExplorationOutcome.BranchText, correctement traduite) plutôt que le paragraphe entier énumérant
-    /// les 4 branches - retour utilisateur 2026-08-20 : la première version de ce correctif réutilisait
-    /// Note (jamais traduit, un simple tag interne) et perdait la phrase d'intro.</summary>
+    /// ShortDescription) est montrée : chaque branche y a son propre bouton radio (WarbandBranchOptions)
+    /// portant sa phrase traduite (ExplorationOutcome.BranchText), inutile de répéter le paragraphe entier
+    /// qui les énumère toutes.</summary>
     public string ExplorationResultDescriptionText => IsWarbandConditionedResult
-        ? string.Join(" ", new[] { TriggeredExplorationResult?.ShortDescription, ResolvedExplorationOutcome?.BranchText }.Where(s => !string.IsNullOrEmpty(s)))
+        ? TriggeredExplorationResult?.ShortDescription ?? string.Empty
         : TriggeredExplorationResult?.Description ?? string.Empty;
+
+    // --- Branche au choix d'un résultat conditionné par la bande (Traînard, Prisonniers, Sanctuaire,
+    // Cimetière) ------------------------------------------------------------------------------------
+    //
+    // Le livre dit « une bande Skaven PEUT le vendre... » : jusqu'au 2026-10-24 l'appli retenait d'office
+    // la branche de la bande jouée et masquait les autres. Désormais toutes les branches sont proposées,
+    // celle de la bande pré-cochée (ExplorationOutcomeResolver.ResolveWarbandOutcome) ; en choisir une
+    // autre reste possible, signalé par un simple message sous la liste (WarbandBranchWarning) - jamais
+    // bloquant, même esprit que la limite d'armes (WeaponLimits). Demande explicite de l'utilisateur,
+    // validée sur maquette (pas de puce par branche, message seulement quand on s'écarte du livre).
+
+    public sealed record ExplorationBranchOption(ExplorationOutcome Outcome, string Text);
+
+    [ObservableProperty]
+    private List<ExplorationBranchOption> warbandBranchOptions = new();
+
+    private ExplorationBranchOption? selectedWarbandBranch;
+
+    /// <summary>Même garde que SelectedSentHeroOption (null transitoire d'un contrôle TwoWay au
+    /// réattachement de la vue mise en cache) : toute valeur absente de WarbandBranchOptions est ignorée.
+    /// Changer de branche repart d'une saisie vierge pour tout ce qui en dépend (montant, quantité,
+    /// répartition d'XP, groupe ou arme choisis) avant d'appliquer la nouvelle - un jet d'or tapé pour la
+    /// branche Skaven n'a aucun sens pour la branche Morts-Vivants.</summary>
+    public ExplorationBranchOption? SelectedWarbandBranch
+    {
+        get => selectedWarbandBranch;
+        set
+        {
+            if (value is null || !WarbandBranchOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedWarbandBranch, value)) return;
+
+            ResetBranchDependentInput();
+            ApplyResolvedOutcome(value.Outcome);
+            OnPropertyChanged(nameof(WarbandBranchWarning));
+            OnPropertyChanged(nameof(HasWarbandBranchWarning));
+            if (value.Outcome.GrantsFreeHenchmanArchetypeOfficialId is { } henchmanId && ResolvedFreeHenchman is null)
+                _ = LoadFreeHenchmanFromOtherWarbandAsync(henchmanId);
+        }
+    }
+
+    /// <summary>Null tant que la branche cochée est celle que le livre donne à cette bande. Sinon : les
+    /// bandes à qui le livre la réserve, ou - pour la branche « toutes les autres bandes » - le simple
+    /// rappel que cette bande a sa propre option.</summary>
+    public string? WarbandBranchWarning
+    {
+        get
+        {
+            if (TriggeredExplorationResult is not { } result || SelectedWarbandBranch is not { } branch) return null;
+            if (!ExplorationOutcomeResolver.IsOutsideWarbandRestriction(result, branch.Outcome, _warbandArchetypeOfficialId)) return null;
+
+            var reservedTo = branch.Outcome.RestrictedToWarbandArchetypeOfficialIds;
+            if (reservedTo.Count == 0) return Loc["EndOfGameBranchOtherWarbandsWarning"];
+            var names = reservedTo.Select(id => _warbandArchetypeNamesByOfficialId.GetValueOrDefault(id, id));
+            return string.Format(Loc["EndOfGameBranchReservedWarning"], string.Join(", ", names));
+        }
+    }
+
+    public bool HasWarbandBranchWarning => WarbandBranchWarning is not null;
+
+    /// <summary>Tap sur le texte d'une branche (Label frère du RadioButton, voir ExplorationResultStepView).</summary>
+    [RelayCommand]
+    private void SelectWarbandBranch(ExplorationBranchOption option) => SelectedWarbandBranch = option;
+
+    /// <summary>Remet à zéro tout ce que le joueur a pu saisir pour la branche précédente - sous-ensemble
+    /// de la remise à zéro de ResolveExplorationResult, limité à ce qui dépend de la branche (les dés,
+    /// le résultat déclenché et le Héros envoyé ne changent pas).</summary>
+    private void ResetBranchDependentInput()
+    {
+        ExplorationGoldAmount = string.Empty;
+        ExplorationItemQuantity = string.Empty;
+        ExplorationItemFoundValue = string.Empty;
+        ExplorationWyrdstoneAmount = string.Empty;
+        ExplorationAmountError = null;
+        DistributedExperienceTotal = string.Empty;
+        DistributedExperienceError = null;
+        foreach (var hero in WarriorRows)
+        {
+            hero.DistributedExplorationExperience = 0;
+            hero.LeaderExplorationExperience = 0;
+        }
+        SelectedEquippedHenchmanGroupOption = EquippedHenchmanGroupOptions[0];
+        EquippedHenchmanError = null;
+        SelectedWeaponBlessingOption = WeaponBlessingOptions[0];
+    }
+
+    /// <summary>Le Zombie offert (Traînard/Prisonniers) appartient aux Morts-Vivants : une autre bande qui
+    /// choisit cette branche ne l'a pas dans _warriorArchetypesByOfficialId (limité à ses propres types).
+    /// Chargé à la demande plutôt qu'à l'ouverture du wizard - tout le catalogue de guerriers pour un cas
+    /// rare ralentirait chaque Fin de Partie.</summary>
+    private async Task LoadFreeHenchmanFromOtherWarbandAsync(string henchmanOfficialId)
+    {
+        if (_otherWarbandHenchmenByOfficialId.ContainsKey(henchmanOfficialId)) return;
+        var allWarbandIds = (await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language)).Select(w => w.Id);
+        var archetype = (await _libraryService.GetWarriorArchetypesAsync(allWarbandIds, LocalizationService.Instance.Language))
+            .FirstOrDefault(a => a.OfficialId == henchmanOfficialId);
+        if (archetype is null) return;
+        _otherWarbandHenchmenByOfficialId[henchmanOfficialId] = archetype;
+        OnPropertyChanged(nameof(ResolvedFreeHenchman));
+    }
+
+    private readonly Dictionary<string, WarriorArchetype> _otherWarbandHenchmenByOfficialId = new();
 
     /// <summary>Le bloc Note de la branche résolue (plus bas, sous Or/Objet/Pierre magique) ne doit pas
     /// répéter ce que ExplorationResultDescriptionText affiche déjà en haut pour un résultat conditionné
@@ -325,8 +426,28 @@ public partial class EndOfGamePageViewModel
     /// <summary>ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId résolu (ex. "Zombie", Traînard) -
     /// affiché en ChipView tapable (même langage d'interaction que tout objet trouvé) plutôt qu'en
     /// simple texte, pour que le joueur voie ce qui rejoint sa bande avant même de valider le wizard.</summary>
-    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeOfficialId is { } name
-        ? _warriorArchetypesByOfficialId.GetValueOrDefault(name) : null;
+    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeOfficialId is { } id
+        ? _warriorArchetypesByOfficialId.GetValueOrDefault(id) ?? _otherWarbandHenchmenByOfficialId.GetValueOrDefault(id) : null;
+
+    /// <summary>Nombre d'Hommes de main gratuits qui rejoignent la bande via l'Exploration (ex. Zombies du
+    /// Traînard/des Prisonniers) - 0 tant que la branche n'en donne pas ou que le jet de quantité (D3) n'est
+    /// pas saisi. Repris partout où le wizard compte l'effectif d'après-partie (récap, Valeur de Bande
+    /// projetée, plafonds de recrutement), comme le fait ApplyExplorationAsync à l'enregistrement.</summary>
+    public int ExplorationFreeHenchmanCount =>
+        ResolvedFreeHenchman is not null && int.TryParse(ExplorationItemQuantity, out var quantity) && quantity > 0 ? quantity : 0;
+
+    /// <summary>Groupe d'Hommes de main existant qu'un prisonnier équipé rejoint (+1, Prisonniers « autres
+    /// bandes ») - null si aucun n'est choisi ou si la branche retenue n'offre pas ce recrutement.</summary>
+    public WarriorOutcomeRow? ExplorationEquippedHenchmanGroup =>
+        HasOptionalEquippedHenchmanGrant ? SelectedEquippedHenchmanGroupOption?.Group : null;
+
+    /// <summary>Têtes ajoutées à un type de guerrier précis par l'Exploration - même décompte que
+    /// ExistingCountForArchetype pour les plafonds MaxCount.</summary>
+    private int ExplorationJoinedCountForArchetype(int warriorArchetypeId) =>
+        (ResolvedFreeHenchman?.Id == warriorArchetypeId ? ExplorationFreeHenchmanCount : 0)
+        + (ExplorationEquippedHenchmanGroup?.Warrior.WarriorArchetypeId == warriorArchetypeId ? 1 : 0);
+
+    private int ExplorationJoinedHeadCount => ExplorationFreeHenchmanCount + (ExplorationEquippedHenchmanGroup is null ? 0 : 1);
 
     [RelayCommand]
     private Task ShowFreeHenchmanDetail(WarriorArchetype archetype) => _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(archetype, Array.Empty<NamedRef>());
@@ -994,6 +1115,11 @@ public partial class EndOfGamePageViewModel
         // déclenche même plus cette branche.
         SelectedFreeHiredSword = null;
         FreeHiredSwordError = null;
+        WarbandBranchOptions = new();
+        selectedWarbandBranch = null;
+        OnPropertyChanged(nameof(SelectedWarbandBranch));
+        OnPropertyChanged(nameof(WarbandBranchWarning));
+        OnPropertyChanged(nameof(HasWarbandBranchWarning));
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -1026,10 +1152,14 @@ public partial class EndOfGamePageViewModel
         var autoOutcome = ExplorationOutcomeResolver.ResolveAutoOutcome(TriggeredExplorationResult);
         if (autoOutcome is not null) ApplyResolvedOutcome(autoOutcome);
         else if (ExplorationOutcomeResolver.ResolveWarbandOutcome(TriggeredExplorationResult, _warbandArchetypeOfficialId) is { } warbandOutcome)
-            // Groupe B "conditionné par la bande" (Traînard, Prisonniers, Cimetière, bénédiction du
-            // Sanctuaire) : la branche applicable se résout d'elle-même depuis l'archétype de la bande
-            // jouée, aucune saisie du joueur ne la départage (voir ResolveWarbandOutcome).
-            ApplyResolvedOutcome(warbandOutcome);
+        {
+            // Groupe B "conditionné par la bande" (Traînard, Prisonniers, Cimetière, Sanctuaire) : toutes
+            // les branches sont proposées, celle que le livre donne à cette bande pré-cochée (voir
+            // SelectedWarbandBranch) - le joueur peut en choisir une autre.
+            WarbandBranchOptions = TriggeredExplorationResult.Outcomes
+                .Select(o => new ExplorationBranchOption(o, o.BranchText ?? o.Note ?? string.Empty)).ToList();
+            SelectedWarbandBranch = WarbandBranchOptions.First(b => ReferenceEquals(b.Outcome, warbandOutcome));
+        }
 
         // Trésor Caché/Bande Massacrée : "roll for every item on the list separately" - sans effet (liste
         // vide) pour toute autre forme, voir EndOfGamePageViewModel.IndependentOutcomes.cs.

@@ -1393,6 +1393,38 @@ public class RulesTests
     }
 
     [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_FalseForSuggestedBranch()
+    {
+        var straggler = Straggler();
+        var suggested = ExplorationOutcomeResolver.ResolveWarbandOutcome(straggler, "Skaven of Clan Eshin")!;
+        Assert.False(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(straggler, suggested, "Skaven of Clan Eshin"));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_TrueForAnotherWarbandsBranch()
+    {
+        var straggler = Straggler();
+        var undeadBranch = ExplorationOutcomeResolver.ResolveWarbandOutcome(straggler, "Undead")!;
+        Assert.True(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(straggler, undeadBranch, "Witch Hunters"));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_TrueForCatchAllWhenWarbandHasItsOwn()
+    {
+        // A Skaven warband picking the "any other warband" branch is outside the rulebook too.
+        var straggler = Straggler();
+        var catchAll = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
+        Assert.True(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(straggler, catchAll, "Skaven of Clan Eshin"));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_FalseWhenResultNotThisShape()
+    {
+        var corpse = Corpse();
+        Assert.False(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(corpse, corpse.Outcomes[0], "Skaven of Clan Eshin"));
+    }
+
+    [Fact]
     public void ExplorationOutcomeResolver_ResolveDoubleRollOutcome_NoDouble_ReturnsGold()
     {
         Assert.Equal(ExplorationOutcomeKind.Gold, ExplorationOutcomeResolver.ResolveDoubleRollOutcome(MerchantsHouse(), 2, 5)?.Kind);

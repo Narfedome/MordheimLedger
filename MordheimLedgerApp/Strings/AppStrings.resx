@@ -1117,6 +1117,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
     <value>Réussi automatiquement pour cette bande.</value>
   </data>
+  <data name="EndOfGameBranchReservedWarning" xml:space="preserve">
+    <value>Le livre réserve ce choix à : {0}. Vous pouvez quand même le retenir.</value>
+  </data>
+  <data name="EndOfGameBranchOtherWarbandsWarning" xml:space="preserve">
+    <value>Le livre prévoit une autre option pour votre bande. Vous pouvez quand même retenir celle-ci.</value>
+  </data>
   <data name="EndOfGameSentHeroPh" xml:space="preserve">
     <value>Envoyer un Héros (optionnel)</value>
   </data>
@@ -1425,6 +1431,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameRecapVeteranTopUpFormat" xml:space="preserve">
     <value>{0} : +{1}</value>
+  </data>
+  <data name="EndOfGameRecapExplorationJoinFormat" xml:space="preserve">
+    <value>{0} ×{1} (Exploration)</value>
   </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0} : aucun changement</value>

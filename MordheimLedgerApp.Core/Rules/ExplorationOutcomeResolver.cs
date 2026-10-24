@@ -31,23 +31,33 @@ public static class ExplorationOutcomeResolver
         result.RollsIndependently || result.StatTestField is not null || result.RequiresDoubleRoll
             ? null : result.Outcomes.FirstOrDefault(o => o.SubRollMin is null);
 
-    /// <summary>The branch a RollsIndependently result resolves to based on which warband is playing
-    /// (Groupe B "conditional on warband type" shape - Straggler, Prisoners, Graveyard, Shrine's
-    /// blessing - confirmed with the user 2026-08-20: the rulebook's "a Skaven warband CAN..." phrasing
-    /// means the branch is strictly determined by warband identity, never a free choice among all of
-    /// them). Prefers an Outcome specifically restricted to warbandArchetypeOfficialId (see ExplorationOutcome.
+    /// <summary>The branch the rulebook gives the playing warband on a RollsIndependently result (Groupe B
+    /// "conditional on warband type" shape - Straggler, Prisoners, Graveyard, Shrine's blessing). Was the
+    /// only branch offered until 2026-10-24; now merely the pre-selected one, see
+    /// IsWarbandConditionedResult. Prefers an Outcome specifically restricted to warbandArchetypeOfficialId (see ExplorationOutcome.
     /// RestrictedToWarbandArchetypeOfficialIds); falls back to the one unrestricted "catch-all" Outcome for
     /// every other warband. Null if the result isn't actually this shape (no Outcome carries a
     /// restriction at all - Tavern/Hidden Treasure/Slaughtered Warband are RollsIndependently too but
     /// resolved by ResolveStatTestOutcome/a per-item threshold roll instead, not this).</summary>
     public static ExplorationOutcome? ResolveWarbandOutcome(ExplorationResult result, string warbandArchetypeOfficialId)
     {
-        if (!result.RollsIndependently || !result.Outcomes.Any(o => o.RestrictedToWarbandArchetypeOfficialIds.Count > 0))
-            return null;
+        if (!IsWarbandConditionedResult(result)) return null;
 
         return result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeOfficialIds.Contains(warbandArchetypeOfficialId))
             ?? result.Outcomes.FirstOrDefault(o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
     }
+
+    /// <summary>The "conditional on warband type" shape ResolveWarbandOutcome handles (Straggler,
+    /// Prisoners, Graveyard, Shrine). Since 2026-10-24 the player picks any of its branches (user request
+    /// - "l'appli propose au lieu d'imposer"): ResolveWarbandOutcome only gives the pre-selected one, every
+    /// other branch stays selectable with a non-blocking warning (see IsOutsideWarbandRestriction).</summary>
+    public static bool IsWarbandConditionedResult(ExplorationResult result) =>
+        result.RollsIndependently && result.Outcomes.Any(o => o.RestrictedToWarbandArchetypeOfficialIds.Count > 0);
+
+    /// <summary>True when the player picked a branch other than the one the rulebook gives this warband
+    /// (ResolveWarbandOutcome) - drives the warning only, never blocks the choice.</summary>
+    public static bool IsOutsideWarbandRestriction(ExplorationResult result, ExplorationOutcome chosen, string warbandArchetypeOfficialId) =>
+        IsWarbandConditionedResult(result) && !ReferenceEquals(chosen, ResolveWarbandOutcome(result, warbandArchetypeOfficialId));
 
     /// <summary>The mutually-exclusive branch a single sub-roll picks (e.g. Corpse: 1-2 gold, 3 dagger,
     /// 4 axe...) - null if no branch's range contains the roll (shouldn't happen for a well-formed sub-

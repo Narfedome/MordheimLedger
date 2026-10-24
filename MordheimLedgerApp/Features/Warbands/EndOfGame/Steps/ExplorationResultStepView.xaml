@@ -15,12 +15,41 @@
                 <Label Text="{Binding TriggeredExplorationResult.Name}" FontAttributes="Bold"/>
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="8">
-                        <!-- Groupe B "conditionné par la bande" (ex. Traînard) : la description complète
-                             du livre énumère TOUTES les branches (Skavens/Possédés/Morts-Vivants/
-                             autres), alors qu'une seule s'applique à la bande jouée - affiche seulement
-                             le texte de cette branche plutôt que le paragraphe entier. Voir
+                        <!-- Groupe B "conditionné par la bande" (ex. Traînard) : seule la phrase d'intro
+                             ici, chaque branche ayant son propre bouton radio juste en dessous. Voir
                              ExplorationResultDescriptionText. -->
                         <Label Text="{Binding ExplorationResultDescriptionText}" FontSize="12"/>
+
+                        <!-- Branches au choix (Traînard, Prisonniers, Sanctuaire, Cimetière) : celle de la
+                             bande pré-cochée, les autres sélectionnables - message ambre sous la liste
+                             seulement quand on s'écarte du livre, jamais bloquant (voir
+                             EndOfGamePageViewModel.SelectedWarbandBranch/WarbandBranchWarning). Texte en
+                             Label FRÈRE du RadioButton, pas en Content : même raison que le choix d'objet
+                             plus bas (Content mal rendu sous WinUI) et pour que le texte long s'enroule ;
+                             le tap sur le texte coche aussi la branche. -->
+                        <VerticalStackLayout Spacing="0"
+                                             BindableLayout.ItemsSource="{Binding WarbandBranchOptions}"
+                                             RadioButtonGroup.GroupName="ExplorationWarbandBranch"
+                                             RadioButtonGroup.SelectedValue="{Binding SelectedWarbandBranch, Mode=TwoWay}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:EndOfGamePageViewModel+ExplorationBranchOption">
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4">
+                                        <RadioButton Grid.Column="0" Value="{Binding .}" VerticalOptions="Start"/>
+                                        <Label Grid.Column="1" Text="{Binding Text}" VerticalOptions="Center" Padding="0,4">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer CommandParameter="{Binding .}"
+                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SelectWarbandBranchCommand}"/>
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasWarbandBranchWarning}">
+                            <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                   FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                            <Label Grid.Column="1" Text="{Binding WarbandBranchWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                        </Grid>
 
                         <!-- Héros envoyé (La Fosse) : optionnel ("si vous le souhaitez") - "Passer son
                              chemin" apparaît comme une vraie option du Picker, sélectionnée par défaut,

@@ -77,6 +77,10 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// conditionnée ne s'applique alors, seule la branche générique.</summary>
     private string _warbandArchetypeOfficialId = string.Empty;
 
+    /// <summary>Nom localisé de chaque bande par id officiel - pour nommer dans WarbandBranchWarning les
+    /// bandes à qui le livre réserve une branche d'Exploration choisie hors restriction.</summary>
+    private IReadOnlyDictionary<string, string> _warbandArchetypeNamesByOfficialId = new Dictionary<string, string>();
+
     /// <summary>Captured once at dialog construction (see Warband.PendingExplorationBonusDie) - read by
     /// ExplorationDiceCount, never reassigned mid-wizard: the flag itself is only cleared on the Warband
     /// once this Fin de Partie is actually saved (WarbandDetailViewModel.EndOfGame).</summary>
@@ -679,6 +683,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // laquelle, voir WarriorRosterBuilder.BuildSpecialRuleChips.
             var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(language);
             var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
+            _warbandArchetypeNamesByOfficialId = allWarbandArchetypes.Where(a => a.OfficialId is not null)
+                .GroupBy(a => a.OfficialId!).ToDictionary(g => g.Key, g => g.First().Name);
 
             // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId (ex. le Zombie, Traînard) - limité
             // aux archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).

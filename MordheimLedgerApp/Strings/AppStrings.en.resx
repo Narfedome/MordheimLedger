@@ -1117,6 +1117,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
     <value>Automatically passed for this warband.</value>
   </data>
+  <data name="EndOfGameBranchReservedWarning" xml:space="preserve">
+    <value>The rulebook reserves this choice for: {0}. You can still keep it.</value>
+  </data>
+  <data name="EndOfGameBranchOtherWarbandsWarning" xml:space="preserve">
+    <value>The rulebook gives your warband another option. You can still keep this one.</value>
+  </data>
   <data name="EndOfGameSentHeroPh" xml:space="preserve">
     <value>Send a Hero (optional)</value>
   </data>
@@ -1425,6 +1431,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameRecapVeteranTopUpFormat" xml:space="preserve">
     <value>{0}: +{1}</value>
+  </data>
+  <data name="EndOfGameRecapExplorationJoinFormat" xml:space="preserve">
+    <value>{0} ×{1} (Exploration)</value>
   </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0}: no change</value>

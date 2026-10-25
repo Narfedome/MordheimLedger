@@ -89,6 +89,30 @@ public sealed record BinaryChoiceResolution
 /// one of these shapes.</summary>
 public static class CharacteristicIncreaseRules
 {
+    /// <summary>Racial maximums raised by one for each carried item's RaisesCharacteristicMax (e.g. the
+    /// Training Manual: Weapon Skill may advance one point beyond the normal maximum). A null maximum stays
+    /// null - "no known ceiling" is never turned into a number.</summary>
+    public static CharacteristicMaxes WithEquipmentBonuses(CharacteristicMaxes maxes, IEnumerable<Models.Library.EquipmentItem> carried)
+    {
+        foreach (var field in carried.Where(i => i.RaisesCharacteristicMax.HasValue).Select(i => i.RaisesCharacteristicMax!.Value))
+        {
+            maxes = field switch
+            {
+                CharacteristicField.Movement => maxes with { Movement = maxes.Movement + 1 },
+                CharacteristicField.WeaponSkill => maxes with { WeaponSkill = maxes.WeaponSkill + 1 },
+                CharacteristicField.BallisticSkill => maxes with { BallisticSkill = maxes.BallisticSkill + 1 },
+                CharacteristicField.Strength => maxes with { Strength = maxes.Strength + 1 },
+                CharacteristicField.Toughness => maxes with { Toughness = maxes.Toughness + 1 },
+                CharacteristicField.Wounds => maxes with { Wounds = maxes.Wounds + 1 },
+                CharacteristicField.Initiative => maxes with { Initiative = maxes.Initiative + 1 },
+                CharacteristicField.Attacks => maxes with { Attacks = maxes.Attacks + 1 },
+                CharacteristicField.Leadership => maxes with { Leadership = maxes.Leadership + 1 },
+                _ => maxes
+            };
+        }
+        return maxes;
+    }
+
     public static bool IsAtMax(CharacteristicField field, CharacteristicValues current, CharacteristicMaxes maxes)
     {
         var max = maxes.Get(field);

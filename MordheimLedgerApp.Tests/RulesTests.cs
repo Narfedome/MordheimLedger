@@ -1393,6 +1393,35 @@ public class RulesTests
     }
 
     [Fact]
+    public void CharacteristicIncreaseRules_WithEquipmentBonuses_RaisesOnlyTheGrantedMax()
+    {
+        var maxes = new CharacteristicMaxes(4, 6, 6, 4, 4, 3, 6, 4, 9);
+        var manual = new EquipmentItem { Id = 1, RaisesCharacteristicMax = CharacteristicField.WeaponSkill };
+        var raised = CharacteristicIncreaseRules.WithEquipmentBonuses(maxes, new[] { manual, new EquipmentItem { Id = 2 } });
+        Assert.Equal(7, raised.WeaponSkill);
+        Assert.Equal(6, raised.BallisticSkill);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_WithEquipmentBonuses_UnknownMaxStaysUnknown()
+    {
+        var maxes = new CharacteristicMaxes(null, null, null, null, null, null, null, null, null);
+        var manual = new EquipmentItem { Id = 1, RaisesCharacteristicMax = CharacteristicField.WeaponSkill };
+        Assert.Null(CharacteristicIncreaseRules.WithEquipmentBonuses(maxes, new[] { manual }).WeaponSkill);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_TrainingManual_LetsWeaponSkillPassRacialMax()
+    {
+        var current = new CharacteristicValues(4, 6, 3, 3, 3, 1, 3, 1, 7);
+        var maxes = new CharacteristicMaxes(4, 6, 6, 4, 4, 3, 6, 4, 9);
+        var manual = new EquipmentItem { Id = 1, RaisesCharacteristicMax = CharacteristicField.WeaponSkill };
+        Assert.True(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.WeaponSkill, current, maxes));
+        Assert.False(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.WeaponSkill, current,
+            CharacteristicIncreaseRules.WithEquipmentBonuses(maxes, new[] { manual })));
+    }
+
+    [Fact]
     public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_FalseForSuggestedBranch()
     {
         var straggler = Straggler();

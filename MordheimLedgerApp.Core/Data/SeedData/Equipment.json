@@ -2237,6 +2237,7 @@
     "isSellable": true,
     "isExplorationOnly": true,
     "grantsSkillCategory": "Combat",
+    "raisesCharacteristicMax": "WeaponSkill",
     "description": {
       "en": "You find a training manual, which you can sell for 100 gc or give to one of your Heroes. When a progress roll grants him a new skill, the knowledge he finds within lets him choose from the list of Combat skills, in addition to his usual lists, and his Weapon Skill may now advance one point beyond the normal maximum.",
       "fr": "Vous trouvez un manuel d'entraînement, que vous pouvez vendre pour 100CO ou donner à l'un de vos Héros. Lorsqu'un jet de progression lui fait gagner une nouvelle compétence, le savoir qu'il y trouve lui permet de choisir dans la liste de compétences de Combat, en plus de ses listes habituelles, et sa CC peut dorénavant progresser d'un point de plus que le maximum normal."

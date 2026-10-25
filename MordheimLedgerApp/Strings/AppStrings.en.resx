@@ -1072,6 +1072,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameExplorationDiceHint" xml:space="preserve">
     <value>Roll one dice per surviving Hero who didn't go out of action, plus one if you won the battle (maximum 6 dice).</value>
   </data>
+  <data name="EndOfGameExplorationDiceCountLabel" xml:space="preserve">
+    <value>Dice:</value>
+  </data>
+  <data name="EndOfGameExplorationDiceCountWarning" xml:space="preserve">
+    <value>The rulebook gives {0} dice here. You can still roll a different number.</value>
+  </data>
   <data name="EndOfGamePendingBonusDieReminder" xml:space="preserve">
     <value>Thanks to your last exploration: roll one dice more than usual and discard any one dice before entering your rolls.</value>
   </data>
@@ -1116,6 +1122,15 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
     <value>Automatically passed for this warband.</value>
+  </data>
+  <data name="EndOfGameFreeHiredSwordOutsideWarning" xml:space="preserve">
+    <value>The rulebook doesn't offer this Hired Sword to your warband. You can still keep it.</value>
+  </data>
+  <data name="EndOfGameStatTestAutoPassOption" xml:space="preserve">
+    <value>Automatic success (no roll)</value>
+  </data>
+  <data name="EndOfGameStatTestNotLeaderWarning" xml:space="preserve">
+    <value>The rulebook has the warband leader take this test. You can still keep this Hero.</value>
   </data>
   <data name="EndOfGameBranchReservedWarning" xml:space="preserve">
     <value>The rulebook reserves this choice for: {0}. You can still keep it.</value>

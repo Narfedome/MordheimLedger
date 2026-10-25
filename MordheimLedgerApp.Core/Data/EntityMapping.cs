@@ -779,6 +779,7 @@ public static class EntityMapping
         GrantsRareItemSearchBonus = e.GrantsRareItemSearchBonus,
         IsSellable = e.IsSellable,
         GrantsBonusExplorationDice = e.GrantsBonusExplorationDice,
+        RaisesCharacteristicMax = e.RaisesCharacteristicMax,
         IsUniqueArtefact = e.IsUniqueArtefact,
         IsExplorationOnly = e.IsExplorationOnly
     };
@@ -943,6 +944,7 @@ public static class EntityMapping
         GrantsRareItemSearchBonus = m.GrantsRareItemSearchBonus,
         IsSellable = m.IsSellable,
         GrantsBonusExplorationDice = m.GrantsBonusExplorationDice,
+        RaisesCharacteristicMax = m.RaisesCharacteristicMax,
         IsUniqueArtefact = m.IsUniqueArtefact,
         IsExplorationOnly = m.IsExplorationOnly
     };

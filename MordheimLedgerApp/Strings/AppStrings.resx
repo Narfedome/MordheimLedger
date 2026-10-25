@@ -1072,6 +1072,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameExplorationDiceHint" xml:space="preserve">
     <value>Lancez un dé par Héros survivant sans être hors de combat, plus un si vous avez gagné la bataille (maximum 6 dés).</value>
   </data>
+  <data name="EndOfGameExplorationDiceCountLabel" xml:space="preserve">
+    <value>Dés :</value>
+  </data>
+  <data name="EndOfGameExplorationDiceCountWarning" xml:space="preserve">
+    <value>Le livre prévoit {0} dé(s) ici. Vous pouvez quand même en lancer un autre nombre.</value>
+  </data>
   <data name="EndOfGamePendingBonusDieReminder" xml:space="preserve">
     <value>Grâce à votre exploration précédente : lancez un dé de plus que d'habitude et écartez-en un à votre convenance avant de saisir vos jets.</value>
   </data>
@@ -1116,6 +1122,15 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="EndOfGameStatTestAutoPass" xml:space="preserve">
     <value>Réussi automatiquement pour cette bande.</value>
+  </data>
+  <data name="EndOfGameFreeHiredSwordOutsideWarning" xml:space="preserve">
+    <value>Le livre ne propose pas ce Franc-Tireur à votre bande. Vous pouvez quand même le retenir.</value>
+  </data>
+  <data name="EndOfGameStatTestAutoPassOption" xml:space="preserve">
+    <value>Réussite automatique (sans jet)</value>
+  </data>
+  <data name="EndOfGameStatTestNotLeaderWarning" xml:space="preserve">
+    <value>Le livre fait passer ce test au chef de bande. Vous pouvez quand même retenir ce Héros.</value>
   </data>
   <data name="EndOfGameBranchReservedWarning" xml:space="preserve">
     <value>Le livre réserve ce choix à : {0}. Vous pouvez quand même le retenir.</value>

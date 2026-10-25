@@ -82,15 +82,30 @@
                              des valeurs déjà connues, pas une décision aléatoire) et bascule vers la
                              branche correspondante ci-dessous. Bâtiment Éventré/Commandement n'utilise
                              PAS ce bloc : son test est additionnel (voir plus bas, ShowBonusStatTest),
-                             pas une branche exclusive comme celui-ci. Taverne cible toujours le chef
-                             (pas de Picker, voir ShowStatTestHeroPicker) et certaines bandes du livre
-                             réussissent automatiquement (voir StatTestAutoPasses). -->
+                             pas une branche exclusive comme celui-ci. Taverne : chef pré-choisi mais
+                             modifiable (StatTestTesterWarning) et réussite automatique en case à cocher
+                             (StatTestUseAutoPass). -->
                         <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
                             <Picker IsVisible="{Binding ShowStatTestHeroPicker}" Title="{loc:Loc EndOfGameStatTestHeroPh}"
                                     ItemsSource="{Binding StatTestHeroOptions}" ItemDisplayBinding="{Binding DisplayName}"
                                     SelectedItem="{Binding SelectedStatTestHeroOption}"/>
-                            <Label Text="{loc:Loc EndOfGameStatTestAutoPass}" FontSize="12" FontAttributes="Italic"
-                                   TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding StatTestAutoPasses}"/>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasStatTestTesterWarning}">
+                                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                       FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                <Label Grid.Column="1" Text="{Binding StatTestTesterWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                            </Grid>
+                            <!-- Réussite automatique (Taverne) : cochée d'office pour les bandes du livre,
+                                 décochable pour lancer quand même, cochable pour une autre bande avec un
+                                 message ambre - voir StatTestUseAutoPass. -->
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="4" IsVisible="{Binding HasStatTestAutoPassOption}">
+                                <CheckBox Grid.Column="0" IsChecked="{Binding StatTestUseAutoPass}" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{loc:Loc EndOfGameStatTestAutoPassOption}" VerticalOptions="Center"/>
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasStatTestAutoPassWarning}">
+                                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                       FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                <Label Grid.Column="1" Text="{Binding StatTestAutoPassWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                            </Grid>
                             <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10" IsVisible="{Binding ShowStatTestRoll}">
                                 <Entry Grid.Column="0" Text="{Binding StatTestRoll}" Keyboard="Numeric"
                                        Placeholder="{Binding StatTestRollPlaceholder}" WidthRequest="70">
@@ -436,6 +451,11 @@
                                                           Command="{Binding ShowFreeHiredSwordDetailCommand}"
                                                           AddCommand="{Binding AddFreeHiredSwordCommand}"
                                                           RemoveCommand="{Binding RemoveFreeHiredSwordCommand}"/>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasFreeHiredSwordWarning}">
+                                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                           FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                    <Label Grid.Column="1" Text="{Binding FreeHiredSwordWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                                </Grid>
                                 <Label Text="{Binding FreeHiredSwordError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                        IsVisible="{Binding FreeHiredSwordError, Converter={StaticResource IsNotNullConverter}}"/>
                             </VerticalStackLayout>

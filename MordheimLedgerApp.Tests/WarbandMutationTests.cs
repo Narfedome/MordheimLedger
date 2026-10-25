@@ -15,19 +15,24 @@ public class WarbandMutationTests : IDisposable
     private readonly AppDatabase _db;
     private readonly ILibraryService _library;
     private readonly IWarbandService _warbands;
+    private readonly string _photoRoot;
+    private readonly WarriorPhotoStore _photos;
 
     public WarbandMutationTests()
     {
         _dbPath = Path.Combine(Path.GetTempPath(), $"mordheimledger-tests-{Guid.NewGuid()}.db3");
         _db = new AppDatabase(_dbPath);
         _library = new LibraryService(_db);
-        _warbands = new WarbandService(_db, _library);
+        _photoRoot = Path.Combine(Path.GetTempPath(), $"mordheimledger-photos-{Guid.NewGuid()}");
+        _photos = new WarriorPhotoStore(_photoRoot);
+        _warbands = new WarbandService(_db, _library, _photos);
     }
 
     public void Dispose()
     {
         _db.Connection.CloseAsync().GetAwaiter().GetResult();
         if (File.Exists(_dbPath)) File.Delete(_dbPath);
+        if (Directory.Exists(_photoRoot)) Directory.Delete(_photoRoot, recursive: true);
     }
 
     private async Task<WarbandArchetype> GetReiklandersAsync(string languageCode = "en") =>
@@ -155,6 +160,48 @@ public class WarbandMutationTests : IDisposable
         var warrior = Assert.Single(roster);
         var carried = Assert.Single(warrior.Equipment);
         Assert.NotEmpty(carried.Item.SpecialRules);
+    }
+
+    /// <summary>Photo de la figurine (Warrior.PhotoPath) : le chemin relatif renvoyé par WarriorPhotoStore
+    /// est persisté par SaveWarriorAsync et relu tel quel par GetWarriorsAsync, et supprimer le guerrier
+    /// supprime aussi son fichier - toutes les suppressions (fiche, Fin de Partie, bande entière) passent
+    /// par DeleteWarriorAsync.</summary>
+    [Fact]
+    public async Task WarriorPhoto_IsPersisted_AndDeletedWithWarrior()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
+        var recruited = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
+
+        using var image = new MemoryStream([0xFF, 0xD8, 0xFF, 0xD9]);
+        recruited.PhotoPath = await _photos.SaveAsync(image, ".JPG");
+        await _warbands.SaveWarriorAsync(recruited);
+
+        var reloaded = Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en"));
+        Assert.Equal(recruited.PhotoPath, reloaded.PhotoPath);
+        Assert.StartsWith(WarriorPhotoStore.FolderName + "/", reloaded.PhotoPath);
+        Assert.EndsWith(".jpg", reloaded.PhotoPath);
+        var file = _photos.GetExistingFullPath(reloaded.PhotoPath);
+        Assert.NotNull(file);
+
+        await _warbands.DeleteWarbandAsync(warband.Id);
+
+        Assert.False(File.Exists(file));
+    }
+
+    /// <summary>Garde-fou de WarriorPhotoStore.Delete : un PhotoPath qui sortirait du dossier des photos
+    /// (base modifiée à la main) ne doit jamais effacer un autre fichier.</summary>
+    [Fact]
+    public void WarriorPhotoStore_Delete_IgnoresPathsOutsidePhotoFolder()
+    {
+        Directory.CreateDirectory(_photoRoot);
+        var outside = Path.Combine(_photoRoot, "keep.txt");
+        File.WriteAllText(outside, "x");
+
+        _photos.Delete("warrior-photos/../keep.txt");
+
+        Assert.True(File.Exists(outside));
     }
 
     /// <summary>Bertha's own catalogue entry lists "Sigmarite Warhammer" twice in

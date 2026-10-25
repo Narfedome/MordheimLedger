@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Onboarding;
 using MordheimLedgerApp.Features.Settings.ContentConflicts;
 using MordheimLedgerApp.Services;
@@ -78,6 +79,8 @@ namespace MordheimLedgerApp.Features.Settings
             if (!await ConfirmAsync(Loc["SettingsResetTitle"], Loc["SettingsResetConfirmAgain"])) return;
 
             await Loading.RunAsync(() => _db.ResetAsync());
+            // Plus aucun guerrier après la réinitialisation : leurs photos (Warrior.PhotoPath) non plus.
+            _warriorPhotos.DeleteAll();
 
             await ShowInfoAsync(Loc["SettingsResetTitle"], Loc["SettingsResetDone"]);
         }
@@ -187,11 +190,13 @@ namespace MordheimLedgerApp.Features.Settings
         private readonly OfficialContentService _officialContent;
         private readonly SampleWarbandService _sampleWarbandService;
         private readonly AppTourService _tourService;
+        private readonly WarriorPhotoStore _warriorPhotos;
 
         public SettingsViewModel(AppDatabase db, OfficialContentService officialContent,
-            SampleWarbandService sampleWarbandService, AppTourService tourService)
+            SampleWarbandService sampleWarbandService, AppTourService tourService, WarriorPhotoStore warriorPhotos)
         {
             _db = db;
+            _warriorPhotos = warriorPhotos;
             _officialContent = officialContent;
             _sampleWarbandService = sampleWarbandService;
             _tourService = tourService;

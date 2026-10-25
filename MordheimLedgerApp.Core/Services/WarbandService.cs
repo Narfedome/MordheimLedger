@@ -11,11 +11,15 @@ public class WarbandService : IWarbandService
 {
     private readonly AppDatabase _db;
     private readonly ILibraryService _library;
+    private readonly WarriorPhotoStore? _photos;
 
-    public WarbandService(AppDatabase db, ILibraryService library)
+    /// <summary>photos is optional only so tests that don't care about Warrior.PhotoPath can skip it -
+    /// the app always registers one (MauiProgram), so deleting a warrior also deletes its photo file.</summary>
+    public WarbandService(AppDatabase db, ILibraryService library, WarriorPhotoStore? photos = null)
     {
         _db = db;
         _library = library;
+        _photos = photos;
     }
 
     public async Task<List<Warband>> GetWarbandsAsync()
@@ -303,6 +307,7 @@ public class WarbandService : IWarbandService
     public async Task DeleteWarriorAsync(int warriorId)
     {
         await _db.Initialization;
+        var photoPath = (await _db.Connection.FindAsync<WarriorEntity>(warriorId))?.PhotoPath;
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorEquipmentEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSkillEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE WarriorId = ?", warriorId);
@@ -310,6 +315,7 @@ public class WarbandService : IWarbandService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSpellEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorMutationEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
+        _photos?.Delete(photoPath);
     }
 
     public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null)

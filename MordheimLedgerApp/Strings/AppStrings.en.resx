@@ -961,6 +961,27 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="WarriorAnimalHeading" xml:space="preserve">
     <value>Animal</value>
   </data>
+  <data name="WarriorPhotoHeading" xml:space="preserve">
+    <value>Miniature photo</value>
+  </data>
+  <data name="WarriorPhotoTake" xml:space="preserve">
+    <value>Take a photo</value>
+  </data>
+  <data name="WarriorPhotoRetake" xml:space="preserve">
+    <value>Retake the photo</value>
+  </data>
+  <data name="WarriorPhotoPick" xml:space="preserve">
+    <value>Choose from gallery</value>
+  </data>
+  <data name="WarriorPhotoPickFile" xml:space="preserve">
+    <value>Choose an image</value>
+  </data>
+  <data name="WarriorPhotoRemove" xml:space="preserve">
+    <value>Remove the photo</value>
+  </data>
+  <data name="WarriorPhotoError" xml:space="preserve">
+    <value>The camera or photo gallery isn't available on this device.</value>
+  </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Magic schools</value>
   </data>

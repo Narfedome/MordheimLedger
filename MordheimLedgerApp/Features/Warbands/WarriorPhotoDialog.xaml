@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.WarriorPhotoDialog"
+               x:DataType="local:WarriorPhotoDialogViewModel"
+               BackgroundColor="Transparent"
+               Padding="0"
+               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
+               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+    <!-- Même carte que ChipDetailDialog (titre + croix), la photo à la place de la description. -->
+    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+        <VerticalStackLayout Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="{Binding Title}"
+                       Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
+                <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                              Icon="{x:Static icons:SolidFont.Xmark}"
+                                              IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
+                                              Command="{Binding CancelCommand}"/>
+            </Grid>
+            <Border StrokeShape="RoundRectangle 8" StrokeThickness="0">
+                <Image Source="{Binding PhotoSource}" Aspect="AspectFit" MaximumHeightRequest="480">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CancelCommand}"/>
+                    </Image.GestureRecognizers>
+                </Image>
+            </Border>
+        </VerticalStackLayout>
+    </Border>
+</dialogs:DialogContent>

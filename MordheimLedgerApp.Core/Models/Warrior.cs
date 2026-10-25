@@ -80,6 +80,14 @@ public class Warrior
     public bool IsHostileThisBattle { get; set; }
 
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Photo of the player's own miniature (a Hero, or the whole Henchman group) - a path
+    /// RELATIVE to the app data directory (see Services.WarriorPhotoStore), never the image itself: the
+    /// file lives on disk next to the database, not in it. Null = no photo. Deleted along with the
+    /// warrior (WarbandService.DeleteWarriorAsync) and not carried over by CloneAsPromotedHero (the
+    /// promoted Hero is a different miniature from the group it leaves).</summary>
+    public string? PhotoPath { get; set; }
+
     public bool IsHero { get; set; }
     public int Cost { get; set; }
     public int Experience { get; set; }

@@ -144,6 +144,15 @@ assistant de création (une visite par étape Général/Guerriers/Équipement). 
 `OnboardingTargetBehavior` + clés `AppTourService.XxxKey`. Section « Découvrir » des Paramètres pour
 recharger l'exemple, revoir les visites ou l'accueil.
 
+**Photo de la figurine (branche `feature/warrior-photo`, 1.3, 2026-10-26)** : `Warrior.PhotoPath` ne garde
+qu'un chemin **relatif** (`warrior-photos/<guid>.jpg`) ; le fichier vit dans `FileSystem.AppDataDirectory`, géré par
+`Core/Services/WarriorPhotoStore` (sans dépendance MAUI, racine passée au constructeur) et exposé côté appli par
+`Services/WarriorPhotos` (MediaPicker, redimensionné à 1280 px + redressé EXIF). Suppression du fichier centralisée dans
+`WarbandService.DeleteWarriorAsync` (toutes les suppressions de guerrier y passent) + réinitialisation de la base ;
+dans `WarriorEditDialog`, la photo suit Enregistrer/Annuler (`WarriorEditDialogViewModel.FinalizePhoto`). Non reprise
+par `CloneAsPromotedHero`. **Windows : choix de fichier uniquement, pas de webcam** (décision de l'utilisateur,
+`WarriorPhotos.IsCaptureSupported` forcé à false, aucune capacité `webcam` dans le manifest). Miniature carrée + silhouette quand pas de photo (maquette `mockups/warrior-photo.html`).
+
 **Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
 d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
 système de favoris à 2 groupes "Favoris"/"My Warbands", finalement abandonné le même jour : pas assez

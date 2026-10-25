@@ -30,8 +30,24 @@
                         <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardKey}"/>
                     </Border.Behaviors>
                     <VerticalStackLayout Spacing="2">
-                        <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Start"  >
-                            <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" VerticalOptions="Start"  >
+                            <!-- Miniature de la figurine (Warrior.PhotoPath, voir WarriorRow.PhotoSource) -
+                                 silhouette grisée tant qu'il n'y a pas de photo. Tap : photo en grand, ou fiche
+                                 guerrier pour en ajouter une (WarbandDetailViewModel.ShowWarriorPhoto). -->
+                            <Border Grid.Column="0" WidthRequest="{OnIdiom Default=56, Desktop=48}" HeightRequest="{OnIdiom Default=56, Desktop=48}"
+                                    StrokeShape="RoundRectangle 6" StrokeThickness="1" VerticalOptions="Center"
+                                    Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppSurface}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowWarriorPhotoCommand}"
+                                                          CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+                                <Grid>
+                                    <Label Text="{x:Static icons:SolidFont.User}" FontFamily="FontSolid" FontSize="{OnIdiom Default=20, Desktop=17}" Opacity="0.6"
+                                           TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}"/>
+                                </Grid>
+                            </Border>
+                            <HorizontalStackLayout Grid.Column="1" Spacing="6">
                                 <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
                                 <!-- Effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1) - vide donc
                                      invisible pour un Héros ou un groupe à 1 seul survivant. -->
@@ -46,8 +62,8 @@
                                            TextColor="{DynamicResource AppDanger}"/>
                                 </Border>
                             </HorizontalStackLayout>
-                            <Label Grid.Column="1" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
-                            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                            <Label Grid.Column="2" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="3" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Pen}"
                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                           IsVisible="{Binding IsEditable}"

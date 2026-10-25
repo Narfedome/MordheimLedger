@@ -129,6 +129,7 @@ namespace MordheimLedgerApp
             builder.Services.AddTransient<OnboardingPage>();
             builder.Services.AddTransient<LoadingService>();
             builder.Services.AddSingleton<ILibraryService, LibraryService>();
+            builder.Services.AddSingleton(WarriorPhotos.Store);
             builder.Services.AddSingleton<IWarbandService, WarbandService>();
             builder.Services.AddSingleton<IDetailDialogService, DetailDialogService>();
             builder.Services.AddSingleton<SampleWarbandService>();

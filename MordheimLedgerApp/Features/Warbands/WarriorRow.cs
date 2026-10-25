@@ -75,6 +75,12 @@ public partial class WarriorRow : ObservableObject
         .Select(g => new InjuryChipGroup { Representative = g.First(), Count = g.Count() })
         .ToList();
 
+    /// <summary>Chemin absolu de la photo de la figurine (Warrior.PhotoPath) pour la miniature de la carte,
+    /// null = silhouette (pas de photo, ou fichier disparu). Résolu une fois : WarriorRow est reconstruit à
+    /// chaque LoadAsync, comme SickChipText.</summary>
+    public string? PhotoSource { get; }
+    public bool HasPhoto => PhotoSource is not null;
+
     public bool HasEquipment => Equipment.Count > 0;
     public bool HasSkills => Skills.Count > 0;
     public bool HasInjuries => Injuries.Count > 0;
@@ -157,5 +163,6 @@ public partial class WarriorRow : ObservableObject
         MagicSchools = new ObservableCollection<MagicSchool>(magicSchools ?? Enumerable.Empty<MagicSchool>());
         Persona = persona;
         isHostileThisBattle = warrior.IsHostileThisBattle;
+        PhotoSource = WarriorPhotos.Store.GetExistingFullPath(warrior.PhotoPath);
     }
 }

@@ -333,6 +333,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             DramatisPersonaRatingBonus = w.DramatisPersonaRatingBonus,
             IsHostileThisBattle = w.IsHostileThisBattle,
             Name = w.Name,
+            PhotoPath = w.PhotoPath,
             IsHero = w.IsHero,
             Cost = w.Cost,
             Experience = w.Experience,
@@ -432,6 +433,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             {
                 await _warbandService.SaveWarriorAsync(warrior);
             }
+            dialogViewModel.FinalizePhoto(saved == true && !dialogViewModel.WasDeleted);
 
             await LoadAsync(Warband.Id);
         });
@@ -452,6 +454,17 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private Task ShowHatredDetail(WarriorHatredChip chip) =>
         ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(chip.Name, Loc["HatredRuleDescription"])));
+
+    /// <summary>Tap sur la miniature de la carte guerrier : la photo en grand s'il y en a une, sinon (silhouette)
+    /// raccourci vers la fiche guerrier pour en ajouter une - sauf carte figée (mort/retraité), où la
+    /// silhouette ne mène nulle part.</summary>
+    [RelayCommand]
+    private Task ShowWarriorPhoto(WarriorRow row)
+    {
+        if (row.PhotoSource is { } photo)
+            return ShowDialogAsync(new WarriorPhotoDialog(new WarriorPhotoDialogViewModel(row.Warrior.Name, photo)));
+        return row.IsEditable ? EditWarrior(row) : Task.CompletedTask;
+    }
 
     [RelayCommand]
     private Task ShowInjuryDetail(InjuryChipGroup group) => _detailDialogs.ShowInjuryDetailDialogAsync(group.Representative.Item);

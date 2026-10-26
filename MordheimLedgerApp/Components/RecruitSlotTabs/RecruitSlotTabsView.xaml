@@ -47,6 +47,11 @@
                 </components:TabToggleButton>
                 <!-- Onglet Blessures : Héros en mode Bande existante uniquement (RecruitSlot.ShowInjuriesTab) -
                      import d'une bande déjà jouée, malus permanents appliqués au Save. -->
+                <!-- Profil : mode Bande existante uniquement - recopier un profil déjà progressé de la
+                     fiche papier (voir RecruitProfile). -->
+                <components:TabToggleButton Text="{loc:Loc WarbandCreateTabProfile}" FontSize="11"
+                                             IsActive="{Binding Item.IsProfileSection}" Command="{Binding Item.ShowProfileSectionCommand}"
+                                             IsVisible="{Binding Item.IsExistingWarband}"/>
                 <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" FontSize="11"
                                              IsActive="{Binding Item.IsInjuriesSection}" Command="{Binding Item.ShowInjuriesSectionCommand}"
                                              IsVisible="{Binding Item.ShowInjuriesTab}"/>
@@ -55,6 +60,23 @@
                                              IsVisible="{Binding Item.IsExistingWarband}"/>
             </HorizontalStackLayout>
         </components:ScrollableTabStripView>
+        <VerticalStackLayout Spacing="6" Margin="0,0,0,10" IsVisible="{Binding Item.IsProfileSection}">
+            <components:StatRowView Item="{Binding Item.Profile}" MovementText="{Binding Item.Profile.MovementInput, Mode=TwoWay}" IsEditable="True"/>
+            <VerticalStackLayout Spacing="2" IsVisible="{Binding Item.Profile.IsModified}">
+                <Label FontSize="11" TextColor="{DynamicResource AppTextMuted}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="{loc:Loc WarbandCreateProfileBasePrefix}"/>
+                            <Span Text="{Binding Item.Profile.BaseDisplay}"/>
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <components:IconTextButton Icon="{x:Static icons:SolidFont.RotateLeft}" Text="{loc:Loc WarbandCreateProfileReset}"
+                                           TextColor="{DynamicResource AppAccent}" IconSize="11" FontSize="11"
+                                           Command="{Binding Item.Profile.ResetToBaseCommand}" HorizontalOptions="Start"/>
+            </VerticalStackLayout>
+            <Label Text="{loc:Loc WarbandCreateProfileHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+        </VerticalStackLayout>
         <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Item.IsEquipmentSection}">
             <FlexLayout Grid.Column="0" Wrap="Wrap" BindableLayout.ItemsSource="{Binding Item.Equipment}">
                 <BindableLayout.ItemTemplate>

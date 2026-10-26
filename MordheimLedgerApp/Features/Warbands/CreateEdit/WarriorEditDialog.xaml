@@ -54,6 +54,37 @@
             </components:ScrollableTabStripView>
 
             <VerticalStackLayout Spacing="16" IsVisible="{Binding IsProfilTab}">
+                <!-- Photo de la figurine (Warrior.PhotoPath) : aperçu + appareil photo/galerie/retrait,
+                     soumis à Enregistrer/Annuler comme le reste du profil (voir
+                     WarriorEditDialogViewModel.FinalizePhoto). Silhouette tant qu'il n'y a pas de photo,
+                     comme la miniature de la carte guerrier. -->
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc WarriorPhotoHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Grid.Column="0" WidthRequest="96" HeightRequest="96" StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppBackground}">
+                            <Grid>
+                                <Label Text="{x:Static icons:SolidFont.User}" FontFamily="FontSolid" FontSize="34" Opacity="0.5"
+                                       TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}"/>
+                            </Grid>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                            <components:IconTextButton Icon="{x:Static icons:SolidFont.Camera}" IconSize="12" FontSize="12"
+                                                        Text="{Binding CapturePhotoLabel}" TextColor="{DynamicResource AppAccent}"
+                                                        IsVisible="{Binding IsCaptureSupported}"
+                                                        Command="{Binding CapturePhotoCommand}"/>
+                            <components:IconTextButton Icon="{x:Static icons:SolidFont.Image}" IconSize="12" FontSize="12"
+                                                        Text="{Binding PickPhotoLabel}" TextColor="{DynamicResource AppAccent}"
+                                                        Command="{Binding PickPhotoCommand}"/>
+                            <components:IconTextButton Icon="{x:Static icons:SolidFont.Trash}" IconSize="12" FontSize="12"
+                                                        Text="{loc:Loc WarriorPhotoRemove}" TextColor="{DynamicResource AppDanger}"
+                                                        IsVisible="{Binding HasPhoto}"
+                                                        Command="{Binding RemovePhotoCommand}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+
                 <VerticalStackLayout Spacing="2">
                     <Label Text="{loc:Loc PromptName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                     <Entry Text="{Binding Item.Name}"/>

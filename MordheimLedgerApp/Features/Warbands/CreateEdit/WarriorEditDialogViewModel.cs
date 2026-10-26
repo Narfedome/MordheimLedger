@@ -104,6 +104,68 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     /// hidden entirely for ordinary (non-Mutant/Possessed) archetypes.</summary>
     public bool IsMutant { get; }
 
+    // --- Photo de la figurine (Warrior.PhotoPath) -------------------------------------------------------
+
+    /// <summary>Photo enregistrée en base à l'ouverture - Item.PhotoPath, lui, suit les choix en cours et
+    /// n'est persisté qu'à Enregistrer, comme le reste du profil. Les fichiers ne sont réconciliés qu'à la
+    /// fermeture (voir FinalizePhoto) : celui-ci n'est supprimé que si l'édition est enregistrée.</summary>
+    private readonly string? _savedPhotoPath;
+
+    /// <summary>Chemin absolu de la photo courante pour l'aperçu, null = silhouette.</summary>
+    public string? PhotoSource => WarriorPhotos.Store.GetExistingFullPath(Item.PhotoPath);
+    public bool HasPhoto => PhotoSource is not null;
+    public bool IsCaptureSupported => WarriorPhotos.IsCaptureSupported;
+    public string CapturePhotoLabel => Loc[HasPhoto ? "WarriorPhotoRetake" : "WarriorPhotoTake"];
+
+    /// <summary>Pas de "galerie" sur PC : sous Windows, c'est un simple choix de fichier image.</summary>
+    public string PickPhotoLabel => Loc[DeviceInfo.Platform == DevicePlatform.WinUI ? "WarriorPhotoPickFile" : "WarriorPhotoPick"];
+
+    [RelayCommand]
+    private Task CapturePhoto() => PickPhotoAsync(capture: true);
+
+    [RelayCommand]
+    private Task PickPhoto() => PickPhotoAsync(capture: false);
+
+    private async Task PickPhotoAsync(bool capture)
+    {
+        string? picked;
+        try
+        {
+            picked = await WarriorPhotos.PickAsync(capture);
+        }
+        catch (Exception ex) when (ex is FeatureNotSupportedException or PermissionException or IOException)
+        {
+            await ShowInfoAsync(Loc["WarriorPhotoHeading"], Loc["WarriorPhotoError"]);
+            return;
+        }
+        if (picked is null) return;
+        SetPhoto(picked);
+    }
+
+    [RelayCommand]
+    private void RemovePhoto() => SetPhoto(null);
+
+    private void SetPhoto(string? photoPath)
+    {
+        // Une photo choisie pendant CETTE édition et déjà remplacée n'est plus référencée nulle part : on
+        // l'efface tout de suite. Celle d'avant l'ouverture attend Enregistrer (voir FinalizePhoto).
+        if (Item.PhotoPath != _savedPhotoPath) WarriorPhotos.Store.Delete(Item.PhotoPath);
+        Item.PhotoPath = photoPath;
+        OnPropertyChanged(nameof(PhotoSource));
+        OnPropertyChanged(nameof(HasPhoto));
+        OnPropertyChanged(nameof(CapturePhotoLabel));
+    }
+
+    /// <summary>Appelé par l'appelant une fois le dialog fermé (et le guerrier enregistré s'il y a lieu) :
+    /// enregistré = l'ancienne photo est remplacée ou retirée, son fichier part ; annulé ou supprimé = la
+    /// nouvelle photo choisie entre-temps n'est référencée par rien, son fichier part (pour une suppression,
+    /// WarbandService.DeleteWarriorAsync a déjà effacé celle d'origine).</summary>
+    public void FinalizePhoto(bool saved)
+    {
+        if (Item.PhotoPath == _savedPhotoPath) return;
+        WarriorPhotos.Store.Delete(saved ? _savedPhotoPath : Item.PhotoPath);
+    }
+
     [RelayCommand]
     private void ShowProfilTab() => SelectedTab = 0;
 
@@ -154,6 +216,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         SpecialRules = specialRules;
         _skipCosts = skipCosts;
         movementInput = item.MovementOverride ?? item.Movement.ToString();
+        _savedPhotoPath = item.PhotoPath;
 
         Equipment = new ObservableCollection<WarriorEquipment>(item.Equipment);
         Skills = new ObservableCollection<WarriorSkill>(item.Skills);

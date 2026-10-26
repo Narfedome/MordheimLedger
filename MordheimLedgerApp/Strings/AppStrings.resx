@@ -973,6 +973,27 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarriorAnimalHeading" xml:space="preserve">
     <value>Animal</value>
   </data>
+  <data name="WarriorPhotoHeading" xml:space="preserve">
+    <value>Photo de la figurine</value>
+  </data>
+  <data name="WarriorPhotoTake" xml:space="preserve">
+    <value>Prendre une photo</value>
+  </data>
+  <data name="WarriorPhotoRetake" xml:space="preserve">
+    <value>Reprendre une photo</value>
+  </data>
+  <data name="WarriorPhotoPick" xml:space="preserve">
+    <value>Choisir dans la galerie</value>
+  </data>
+  <data name="WarriorPhotoPickFile" xml:space="preserve">
+    <value>Choisir une image</value>
+  </data>
+  <data name="WarriorPhotoRemove" xml:space="preserve">
+    <value>Retirer la photo</value>
+  </data>
+  <data name="WarriorPhotoError" xml:space="preserve">
+    <value>Impossible d'accéder à l'appareil photo ou à la galerie sur cet appareil.</value>
+  </data>
   <data name="LibTabMagicSchools" xml:space="preserve">
     <value>Écoles de magie</value>
   </data>

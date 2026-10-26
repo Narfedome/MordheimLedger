@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo de figurine</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap">
+<style>
+@font-face { font-family: "OpenSansRegular"; src: url("../MordheimLedgerApp/Resources/Fonts/OpenSans-Regular.ttf"), local("Open Sans"); }
+@font-face { font-family: "OpenSansSemibold"; src: url("../MordheimLedgerApp/Resources/Fonts/OpenSans-Semibold.ttf"), local("Open Sans SemiBold"); }
+@font-face { font-family: "FontSolid"; src: url("../MordheimLedgerApp/Resources/Fonts/Font%20Awesome%207%20Free-Solid-900.otf"), url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2") format("woff2"); }
+
+/* Tokens repris de ThemeService.GetPaletteTokens (+ AppDanger fixe). */
+:root, [data-palette="gold"][data-mode="dark"] {
+  --AppBackground:#0D0B0A; --AppSurface:#1A1512; --AppSurfaceTranslucent:rgba(26,21,18,.85);
+  --AppAccent:#C9A66B; --AppText:#EDE0C0; --AppTextMuted:#9C8F72; --AppBorder:#332B22; --AppMilestone:#8B2331;
+}
+[data-palette="gold"][data-mode="light"] {
+  --AppBackground:#E8DBB8; --AppSurface:#F2E8CC; --AppSurfaceTranslucent:rgba(242,232,204,.85);
+  --AppAccent:#8B6F1F; --AppText:#241F16; --AppTextMuted:#6B5D42; --AppBorder:#D4C79E; --AppMilestone:#8B2331;
+}
+[data-palette="green"][data-mode="dark"] {
+  --AppBackground:#17151A; --AppSurface:#241F26; --AppSurfaceTranslucent:rgba(36,31,38,.85);
+  --AppAccent:#7FA34F; --AppText:#E8E4D8; --AppTextMuted:#948C7E; --AppBorder:#35303A; --AppMilestone:#C9A227;
+}
+[data-palette="green"][data-mode="light"] {
+  --AppBackground:#EDE7D9; --AppSurface:#F5F1E6; --AppSurfaceTranslucent:rgba(245,241,230,.85);
+  --AppAccent:#4F7A34; --AppText:#201C1F; --AppTextMuted:#6B6258; --AppBorder:#D8D0BC; --AppMilestone:#C9A227;
+}
+:root { --AppDanger:#8B3A3A; }
+
+/* Tailles OnIdiom (Sizes.xaml) */
+[data-idiom="phone"]   { --FontBase:14px; --FontTitle:16px; --CardPad:16px; --DialogPad:20px; --BtnPad:10px 14px; --Touch:44px; --FrameW:390px; --Thumb:56px; }
+[data-idiom="desktop"] { --FontBase:12px; --FontTitle:14px; --CardPad:12px; --DialogPad:16px; --BtnPad:7px 12px;  --Touch:32px; --FrameW:520px; --Thumb:48px; }
+
+* { box-sizing:border-box; }
+body { margin:0; padding:16px; background:#3a3a3a; font-family:"OpenSansRegular", "Open Sans", sans-serif; color:#eee; }
+.mock-controls { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; max-width:900px; margin:0 auto 12px; font-size:13px; }
+.mock-controls label { display:flex; gap:6px; align-items:center; }
+.mock-controls select { font:inherit; padding:3px 6px; }
+.mock-note { max-width:900px; margin:0 auto 16px; font-size:12px; color:#bbb; line-height:1.5; }
+.screens { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; align-items:flex-start; }
+.screen-title { font-size:12px; color:#bbb; margin:0 0 6px; text-align:center; }
+
+.app { width:var(--FrameW); max-width:100%; background:var(--AppBackground); color:var(--AppText);
+       font-size:var(--FontBase); border-radius:12px; overflow:hidden; padding:10px; }
+.fa { font-family:"FontSolid"; font-weight:900; font-style:normal; }
+.muted { color:var(--AppTextMuted); }
+
+/* SectionCardBorderStyle + carte guerrier (WarbandDetailPage.WarriorCardTemplate) */
+.card { background:var(--AppSurfaceTranslucent); border:1px solid var(--AppBorder); border-radius:8px; padding:var(--CardPad);
+        margin:6px; display:flex; flex-direction:column; gap:2px; }
+.card-head { display:grid; grid-template-columns:auto 1fr auto auto; gap:10px; align-items:center; }
+.name { font-weight:700; font-size:var(--FontTitle); }
+.role { color:var(--AppAccent); font-size:12px; }
+.ghost { width:22px; height:22px; display:flex; align-items:center; justify-content:center; color:var(--AppTextMuted); font-size:12px; cursor:pointer; }
+
+/* NOUVEAU : miniature (Border StrokeShape RoundRectangle 6 / Ellipse + Image AspectFill) */
+.thumb { width:var(--Thumb); height:var(--Thumb); border:1px solid var(--AppBorder); background:var(--AppSurface);
+         overflow:hidden; flex:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.thumb.round { border-radius:50%; border:2px solid var(--AppAccent); }
+.thumb.square { border-radius:6px; }
+.thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+.thumb .ph { color:var(--AppTextMuted); font-size:calc(var(--Thumb) * .36); opacity:.6; }
+.thumb[hidden] { display:none; }
+
+/* StatRowView lecture seule (grille tabulaire) */
+.stats { display:grid; grid-template-columns:repeat(9,1fr); margin:8px 0; text-align:center; }
+.stats div { padding:2px 0; }
+.stats .abbr { font-size:10px; color:var(--AppTextMuted); border-bottom:1px solid var(--AppBorder); }
+.stats div:not(:nth-child(9n)) { border-right:1px solid var(--AppBorder); }
+.stats .val { font-size:13px; font-weight:700; }
+.section-h { font-size:10px; color:var(--AppTextMuted); margin-top:4px; }
+.chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:2px; }
+.chip { display:inline-flex; gap:6px; align-items:center; border:1px solid var(--AppBorder); background:var(--AppSurfaceTranslucent);
+        border-radius:8px; padding:4px 8px; font-size:12px; }
+.chip .fa { color:var(--AppAccent); font-size:11px; }
+.xp { display:grid; grid-template-columns:repeat(30, 10px); gap:2px; margin-top:4px; }
+.xp span { width:10px; height:10px; border:1px solid var(--AppTextMuted); }
+.xp span.on { background:var(--AppAccent); border-color:var(--AppAccent); }
+.xp span.ms { border:2px solid var(--AppMilestone); }
+
+/* DialogCardBorderStyle + WarriorEditDialog */
+.dialog { width:340px; max-width:100%; background:var(--AppSurface); border:1px solid var(--AppBorder); border-radius:8px; padding:var(--DialogPad);
+          display:flex; flex-direction:column; gap:16px; color:var(--AppText); font-size:var(--FontBase); }
+.dlg-title { font-family:"OpenSansSemibold","Open Sans",sans-serif; font-weight:600; font-size:var(--FontTitle); display:flex; justify-content:space-between; align-items:center; }
+.tabs { display:flex; gap:16px; font-size:12px; border-bottom:1px solid var(--AppBorder); padding-bottom:4px; white-space:nowrap; overflow:hidden; }
+.tabs .on { color:var(--AppAccent); border-bottom:2px solid var(--AppAccent); padding-bottom:2px; }
+.field { display:flex; flex-direction:column; gap:2px; }
+.field label { font-size:12px; color:var(--AppTextMuted); }
+.entry { height:var(--Touch); border-bottom:1px solid var(--AppTextMuted); display:flex; align-items:center; padding:0 4px; }
+
+.photo-block { display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:center; }
+.photo-big { width:96px; height:96px; border-radius:8px; border:1px solid var(--AppBorder); background:var(--AppBackground);
+             overflow:hidden; display:flex; align-items:center; justify-content:center; }
+.photo-big img { width:100%; height:100%; object-fit:cover; }
+.photo-big .ph { color:var(--AppTextMuted); font-size:34px; opacity:.5; }
+.photo-actions { display:flex; flex-direction:column; gap:6px; }
+/* IconTextButton (icône + texte, fond transparent) */
+.itb { display:flex; gap:8px; align-items:center; color:var(--AppAccent); cursor:pointer; min-height:28px; font-size:12px; }
+.itb .fa { width:16px; text-align:center; }
+.itb.danger { color:var(--AppDanger); }
+.itb[hidden] { display:none; }
+
+.btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.btn { min-height:var(--Touch); padding:var(--BtnPad); border-radius:8px; font:inherit; font-size:var(--FontBase); text-align:center; }
+.btn.secondary { background:transparent; color:var(--AppAccent); border:1px solid var(--AppAccent); }
+.btn.primary { background:var(--AppAccent); color:var(--AppBackground); border:0; }
+
+/* Visionneuse plein écran (tap sur la miniature) */
+.viewer { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px; z-index:10; }
+.viewer.open { display:flex; }
+.viewer img { max-width:90vw; max-height:80vh; border-radius:8px; }
+.viewer .cap { color:#eee; font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="mock-controls">
+  <label>Miniature <select id="shape"><option value="square">Carrée 56 px, à gauche du nom</option><option value="round">Ronde 56 px, bord accent</option></select></label>
+  <label>Sans photo <select id="empty"><option value="hide">Rien (en-tête inchangé)</option><option value="ph">Silhouette grisée</option></select></label>
+  <label>Palette <select id="palette"><option value="gold">Ombre et Or</option><option value="green">Cendre et Malepierre</option></select></label>
+  <label>Thème <select id="mode"><option value="dark">Sombre</option><option value="light">Clair</option></select></label>
+  <label>Appareil <select id="idiom"><option value="phone">Téléphone</option><option value="desktop">Windows</option></select></label>
+</div>
+<p class="mock-note">Maquette (hors appli) : couleurs, tailles et polices de ThemeService / Sizes.xaml / Styles.xaml.
+À gauche, deux cartes du roster (WarbandDetailPage) : un Héros avec photo, un groupe d'Hommes de main sans photo.
+Tap sur une miniature = photo en grand. À droite, l'onglet Profil de la fiche guerrier (WarriorEditDialog) avec le nouveau bloc Photo
+— cliquer « Prendre une photo » / « Galerie » / « Retirer » pour voir les deux états.</p>
+
+<div class="screens" id="root" data-palette="gold" data-mode="dark" data-idiom="phone">
+  <div>
+    <p class="screen-title">Fiche de bande — roster</p>
+    <div class="app">
+      <div class="card" id="cardHero"></div>
+      <div class="card" id="cardHench"></div>
+    </div>
+  </div>
+  <div>
+    <p class="screen-title">Fiche guerrier — onglet Profil</p>
+    <div class="dialog">
+      <div class="dlg-title"><span>Modifier le guerrier</span><span class="fa muted" style="font-size:14px">&#xf1f8;</span></div>
+      <div class="tabs"><span class="on">Profil</span><span>Équipement</span><span>Compétences</span><span>Blessures</span></div>
+
+      <div class="field">
+        <label>Photo de la figurine</label>
+        <div class="photo-block">
+          <div class="photo-big" id="dlgPhoto"></div>
+          <div class="photo-actions">
+            <div class="itb" id="actCamera"><span class="fa">&#xf030;</span><span id="actCameraTxt">Prendre une photo</span></div>
+            <div class="itb" id="actGallery"><span class="fa">&#xf03e;</span><span>Choisir dans la galerie</span></div>
+            <div class="itb danger" id="actRemove"><span class="fa">&#xf1f8;</span><span>Retirer la photo</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field"><label>Nom</label><div class="entry">Gottfried le Borgne</div></div>
+      <div class="field"><label>Expérience</label><div class="entry">23</div></div>
+      <div class="btns"><div class="btn secondary">Annuler</div><div class="btn primary">Enregistrer</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="viewer" id="viewer"><img id="viewerImg" alt=""><div class="cap">Gottfried le Borgne — tap pour fermer</div></div>
+
+<script>
+// Figurine fictive dessinée en SVG (pas de vraie photo dans la maquette).
+const MINI = "data:image/svg+xml;utf8," + encodeURIComponent(`
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>
+ <defs><radialGradient id='g' cx='50%' cy='40%' r='70%'><stop offset='0' stop-color='#6b6a63'/><stop offset='1' stop-color='#26241f'/></radialGradient></defs>
+ <rect width='120' height='120' fill='url(#g)'/>
+ <ellipse cx='60' cy='108' rx='34' ry='8' fill='#1a1916'/>
+ <path d='M44 104 L48 70 L40 52 L50 40 L70 40 L80 52 L72 70 L76 104 Z' fill='#7a2a2a'/>
+ <circle cx='60' cy='31' r='10' fill='#c9a27a'/>
+ <path d='M48 26 Q60 12 72 26 L72 22 Q60 8 48 22 Z' fill='#3a3a3a'/>
+ <rect x='79' y='30' width='4' height='60' fill='#b8b8b8' transform='rotate(12 81 60)'/>
+ <rect x='74' y='60' width='14' height='4' fill='#8a6a2a' transform='rotate(12 81 62)'/>
+</svg>`);
+
+let heroPhoto = true;
+const $ = id => document.getElementById(id);
+
+function thumbHtml(hasPhoto, clickable) {
+  const shape = $("shape").value, empty = $("empty").value;
+  if (!hasPhoto && empty === "hide") return "";
+  const inner = hasPhoto ? `<img src="${MINI}" alt="">` : `<span class="fa ph">&#xf007;</span>`;
+  return `<div class="thumb ${shape}" ${hasPhoto && clickable ? 'data-view="1"' : ''}>${inner}</div>`;
+}
+
+function stats(v) {
+  const ab = ["M","CC","CT","F","E","PV","I","A","Cd"];
+  return `<div class="stats">${ab.map(a=>`<div class="abbr">${a}</div>`).join("")}${v.map(x=>`<div class="val">${x}</div>`).join("")}</div>`;
+}
+function xp(n, ms) {
+  let s = ""; for (let i=1;i<=30;i++) s += `<span class="${i<=n?'on':''} ${ms.includes(i)?'ms':''}"></span>`;
+  return `<div class="xp">${s}</div>`;
+}
+
+function card(o) {
+  const t = thumbHtml(o.photo, true);
+  return `
+  <div class="card-head" style="grid-template-columns:${t ? 'auto ' : ''}1fr auto auto">
+    ${t}
+    <div><span class="name">${o.name}</span> <span class="muted" style="font-size:var(--FontTitle)">${o.count||""}</span></div>
+    <span class="role">${o.role}</span>
+    <span class="ghost fa">&#xf304;</span>
+  </div>
+  ${stats(o.stats)}
+  <div class="section-h">Équipement</div>
+  <div class="chips">${o.equip.map(e=>`<span class="chip"><span class="fa">&#xf6e3;</span>${e}</span>`).join("")}</div>
+  <div class="section-h">Expérience</div>
+  ${xp(o.xp, o.ms)}`;
+}
+
+function render() {
+  const root = $("root");
+  root.dataset.palette = $("palette").value; root.dataset.mode = $("mode").value; root.dataset.idiom = $("idiom").value;
+  $("cardHero").innerHTML = card({ name:"Gottfried le Borgne", role:"Capitaine", photo:heroPhoto,
+    stats:[4,4,4,3,3,1,4,1,8], equip:["Épée","Pistolet","Armure légère"], xp:23, ms:[2,4,6,8,11,14,17,20,24,28] });
+  $("cardHench").innerHTML = card({ name:"Les Tireurs", count:"(3)", role:"Tireur", photo:false,
+    stats:[4,3,4,3,3,1,3,1,7], equip:["Arc long","Dague"], xp:2, ms:[2,5,9,14,20,27] });
+  $("dlgPhoto").innerHTML = heroPhoto ? `<img src="${MINI}" alt="">` : `<span class="fa ph">&#xf007;</span>`;
+  $("actRemove").hidden = !heroPhoto;
+  $("actCameraTxt").textContent = heroPhoto ? "Reprendre une photo" : "Prendre une photo";
+  document.querySelectorAll("[data-view]").forEach(el => el.onclick = () => { $("viewerImg").src = MINI; $("viewer").classList.add("open"); });
+}
+$("viewer").onclick = () => $("viewer").classList.remove("open");
+$("actCamera").onclick = $("actGallery").onclick = () => { heroPhoto = true; render(); };
+$("actRemove").onclick = () => { heroPhoto = false; render(); };
+["shape","empty","palette","mode","idiom"].forEach(id => $(id).onchange = render);
+render();
+</script>
+</body>
+</html>

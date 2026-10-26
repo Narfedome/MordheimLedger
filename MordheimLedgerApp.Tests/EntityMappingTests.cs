@@ -299,6 +299,31 @@ public class EntityMappingTests
         Assert.Equal(hiredSword.Leadership, recruited.Leadership);
     }
 
+    /// <summary>Photo de la figurine : seul le chemin relatif vit en base (Warrior.PhotoPath), null =
+    /// pas de photo - les deux cas doivent survivre à l'aller-retour.</summary>
+    [Theory]
+    [InlineData("warrior-photos/abc.jpg")]
+    [InlineData(null)]
+    public void WarriorPhotoPath_RoundTrips_ThroughEntity(string? photoPath)
+    {
+        var warrior = new Warrior { Id = 3, WarbandId = 7, Name = "Otto", PhotoPath = photoPath };
+
+        var roundTripped = warrior.ToEntity().ToModel();
+
+        Assert.Equal(photoPath, roundTripped.PhotoPath);
+    }
+
+    /// <summary>Le Héros promu quitte son groupe d'Hommes de main : autre figurine, donc pas la photo du groupe.</summary>
+    [Fact]
+    public void CloneAsPromotedHero_DoesNotInheritGroupPhoto()
+    {
+        var group = new Warrior { Id = 4, WarbandId = 7, Name = "Swordsmen", HeadCount = 3, PhotoPath = "warrior-photos/group.jpg" };
+
+        var promoted = group.CloneAsPromotedHero("Kurt");
+
+        Assert.Null(promoted.PhotoPath);
+    }
+
     [Fact]
     public void HiredSwordWarrior_RoundTrips_ThroughEntity()
     {

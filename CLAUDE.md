@@ -144,6 +144,15 @@ assistant de création (une visite par étape Général/Guerriers/Équipement). 
 `OnboardingTargetBehavior` + clés `AppTourService.XxxKey`. Section « Découvrir » des Paramètres pour
 recharger l'exemple, revoir les visites ou l'accueil.
 
+**Photo de la figurine (branche `feature/warrior-photo`, 1.3, 2026-10-26)** : `Warrior.PhotoPath` ne garde
+qu'un chemin **relatif** (`warrior-photos/<guid>.jpg`) ; le fichier vit dans `FileSystem.AppDataDirectory`, géré par
+`Core/Services/WarriorPhotoStore` (sans dépendance MAUI, racine passée au constructeur) et exposé côté appli par
+`Services/WarriorPhotos` (MediaPicker, redimensionné à 1280 px + redressé EXIF). Suppression du fichier centralisée dans
+`WarbandService.DeleteWarriorAsync` (toutes les suppressions de guerrier y passent) + réinitialisation de la base ;
+dans `WarriorEditDialog`, la photo suit Enregistrer/Annuler (`WarriorEditDialogViewModel.FinalizePhoto`). Non reprise
+par `CloneAsPromotedHero`. **Windows : choix de fichier uniquement, pas de webcam** (décision de l'utilisateur,
+`WarriorPhotos.IsCaptureSupported` forcé à false, aucune capacité `webcam` dans le manifest). Miniature carrée + silhouette quand pas de photo (maquette `mockups/warrior-photo.html`).
+
 **Branches d'Exploration au choix (branche `feature/exploration-branch-choice`, 2026-10-24)** : les
 restrictions de règles de base (recrutement, progression, pickers) restent strictes, décision explicite de
 l'utilisateur ; seule l'Exploration est assouplie. Traînard/Prisonniers/Sanctuaire/Cimetière proposent

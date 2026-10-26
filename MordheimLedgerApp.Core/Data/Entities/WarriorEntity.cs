@@ -41,6 +41,10 @@ public class WarriorEntity
     public bool IsHostileThisBattle { get; set; }
 
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>See Models.Warrior.PhotoPath.</summary>
+    public string? PhotoPath { get; set; }
+
     public bool IsHero { get; set; }
     public int Cost { get; set; }
     public int Experience { get; set; }

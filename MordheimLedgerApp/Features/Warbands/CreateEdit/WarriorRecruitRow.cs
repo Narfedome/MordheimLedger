@@ -142,6 +142,10 @@ public abstract partial class RecruitSlot : ObservableObject
     [ObservableProperty]
     private int experience;
 
+    /// <summary>Profil recopié de la fiche papier - onglet Profil, mode Bande existante uniquement (voir
+    /// RecruitProfile, écrit au Save() seulement s'il diffère du profil de référence).</summary>
+    public RecruitProfile Profile { get; }
+
     /// <summary>Sous-onglet actif (0=Équipement, 1=Compétences, 2=Sorts, 3=XP) - même composant
     /// TabToggleButton que WarriorEditDialog's Équipement/Compétences/Blessures, mais local à CE
     /// slot/groupe plutôt qu'à tout le dialog (chacun a le sien). Équipement reste l'onglet par défaut
@@ -155,6 +159,7 @@ public abstract partial class RecruitSlot : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsXpSection))]
     [NotifyPropertyChangedFor(nameof(IsMutationsSection))]
     [NotifyPropertyChangedFor(nameof(IsInjuriesSection))]
+    [NotifyPropertyChangedFor(nameof(IsProfileSection))]
     private int selectedSection;
 
     public bool IsEquipmentSection => SelectedSection == 0;
@@ -163,6 +168,7 @@ public abstract partial class RecruitSlot : ObservableObject
     public bool IsXpSection => SelectedSection == 3;
     public bool IsMutationsSection => SelectedSection == 4;
     public bool IsInjuriesSection => SelectedSection == 5;
+    public bool IsProfileSection => SelectedSection == 6;
 
     /// <summary>Onglet ouvert par défaut pour le mode courant - le PREMIER onglet visible, dans l'ordre
     /// d'affichage de RecruitSlotTabsView (Équipement, Compétences, Sorts, Mutations, Blessures, XP).
@@ -195,11 +201,20 @@ public abstract partial class RecruitSlot : ObservableObject
     [RelayCommand]
     private void ShowInjuriesSection() => SelectedSection = 5;
 
+    [RelayCommand]
+    private void ShowProfileSection() => SelectedSection = 6;
+
     protected RecruitSlot(WarriorRecruitRow row, bool isExistingWarband, Warrior? existingWarrior = null)
     {
         Row = row;
         this.isExistingWarband = isExistingWarband;
         ExistingWarrior = existingWarrior;
+
+        Profile = existingWarrior is null
+            ? new RecruitProfile(row.Archetype.MovementDisplay, row.Archetype.WeaponSkill, row.Archetype.BallisticSkill, row.Archetype.Strength,
+                row.Archetype.Toughness, row.Archetype.Wounds, row.Archetype.Initiative, row.Archetype.Attacks, row.Archetype.Leadership)
+            : new RecruitProfile(existingWarrior.MovementDisplay, existingWarrior.WeaponSkill, existingWarrior.BallisticSkill, existingWarrior.Strength,
+                existingWarrior.Toughness, existingWarrior.Wounds, existingWarrior.Initiative, existingWarrior.Attacks, existingWarrior.Leadership);
 
         if (existingWarrior is null)
         {

@@ -641,6 +641,18 @@
   <data name="WarbandCreateTabEquipment" xml:space="preserve">
     <value>Équipement</value>
   </data>
+  <data name="WarbandCreateTabProfile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="WarbandCreateProfileBasePrefix" xml:space="preserve">
+    <value>Profil de référence : </value>
+  </data>
+  <data name="WarbandCreateProfileReset" xml:space="preserve">
+    <value>Revenir au profil de référence</value>
+  </data>
+  <data name="WarbandCreateProfileHint" xml:space="preserve">
+    <value>Saisissez le profil actuel de la fiche papier. S'il est modifié ici, les malus des blessures saisies ne lui sont pas appliqués une seconde fois.</value>
+  </data>
   <data name="WarbandCreateTabNames" xml:space="preserve">
     <value>Noms</value>
   </data>

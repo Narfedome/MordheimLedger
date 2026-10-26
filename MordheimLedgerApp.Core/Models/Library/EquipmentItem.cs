@@ -139,4 +139,11 @@ public class EquipmentItem
     /// ExplorationDiceBonus, fed into Core.Rules.ExplorationChart.ComputeDiceCount's bonusDice
     /// parameter.</summary>
     public int? GrantsBonusExplorationDice { get; set; }
+
+    /// <summary>Characteristic whose racial maximum rises by one while a warrior carries this item - e.g.
+    /// the Training Manual (Manuel d'Entraînement, Fighting Arena find): "his Weapon Skill may advance one
+    /// point beyond the normal maximum". Null for almost every item. Computed live from carried equipment,
+    /// same idiom as GrantsSkillCategory - see Core.Rules.CharacteristicIncreaseRules.
+    /// WithEquipmentBonuses.</summary>
+    public Rules.CharacteristicField? RaisesCharacteristicMax { get; set; }
 }

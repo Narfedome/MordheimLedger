@@ -5,6 +5,7 @@ using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -43,6 +44,39 @@ public partial class EndOfGamePageViewModel
     /// un rappel textuel a du sens ici (voir ShowPendingExplorationBonusDieReminder plus bas).</summary>
     public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame,
         ExplorationDiceBonus.EffectiveBonusDice(WarriorRows.Where(r => !r.IsOutOfAction).Select(r => r.Warrior)));
+
+    /// <summary>Nombre de dés choisi par le joueur avec les boutons -/+ (null = celui du livre,
+    /// ExplorationDiceCount). Depuis le 2026-10-26 le calcul du livre n'est plus qu'une suggestion : une
+    /// compétence, un objet ou une règle maison non modélisés peuvent changer le nombre de dés - écart
+    /// signalé par ExplorationDiceCountWarning, jamais bloquant.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveExplorationDiceCount))]
+    [NotifyPropertyChangedFor(nameof(ExplorationDiceCountWarning))]
+    [NotifyPropertyChangedFor(nameof(HasExplorationDiceCountWarning))]
+    private int? chosenExplorationDiceCount;
+
+    public int EffectiveExplorationDiceCount => ChosenExplorationDiceCount ?? ExplorationDiceCount;
+
+    private const int MaxExplorationDice = 12;
+
+    [RelayCommand]
+    private void IncrementExplorationDice() => SetExplorationDiceCount(EffectiveExplorationDiceCount + 1);
+
+    [RelayCommand]
+    private void DecrementExplorationDice() => SetExplorationDiceCount(EffectiveExplorationDiceCount - 1);
+
+    private void SetExplorationDiceCount(int count)
+    {
+        count = Math.Clamp(count, 1, MaxExplorationDice);
+        ChosenExplorationDiceCount = count == ExplorationDiceCount ? null : count;
+        SyncExplorationDice();
+        ResolveExplorationResult();
+    }
+
+    public string? ExplorationDiceCountWarning => EffectiveExplorationDiceCount == ExplorationDiceCount ? null
+        : string.Format(Loc["EndOfGameExplorationDiceCountWarning"], ExplorationDiceCount);
+
+    public bool HasExplorationDiceCountWarning => ExplorationDiceCountWarning is not null;
 
     /// <summary>Rappel purement textuel (voir ExplorationDiceCount pour pourquoi ça ne change PAS le
     /// nombre de dés affichés) - affiché une fois à l'étape du jet d'Exploration.</summary>
@@ -88,6 +122,9 @@ public partial class EndOfGamePageViewModel
     [NotifyPropertyChangedFor(nameof(ShowStatTestHeroPicker))]
     [NotifyPropertyChangedFor(nameof(StatTestLeaderUnavailable))]
     [NotifyPropertyChangedFor(nameof(StatTestAutoPasses))]
+    [NotifyPropertyChangedFor(nameof(HasStatTestAutoPassOption))]
+    [NotifyPropertyChangedFor(nameof(StatTestTesterWarning))]
+    [NotifyPropertyChangedFor(nameof(HasStatTestTesterWarning))]
     [NotifyPropertyChangedFor(nameof(ShowStatTestRoll))]
     [NotifyPropertyChangedFor(nameof(StatTestHeroDisplayPrefix))]
     [NotifyPropertyChangedFor(nameof(StatTestFieldLabel))]
@@ -305,17 +342,117 @@ public partial class EndOfGamePageViewModel
     /// ResolveWarbandOutcome) : la description complète du livre énumère TOUTES les branches par bande,
     /// alors qu'une seule s'applique à la bande jouée - retour utilisateur 2026-08-20, ne montrer que
     /// cette branche plutôt que le paragraphe entier.</summary>
-    public bool IsWarbandConditionedResult => TriggeredExplorationResult?.Outcomes.Any(o => o.RestrictedToWarbandArchetypeOfficialIds.Count > 0) == true;
+    public bool IsWarbandConditionedResult => TriggeredExplorationResult is { } result && ExplorationOutcomeResolver.IsWarbandConditionedResult(result);
 
     /// <summary>Texte affiché en haut de l'étape Résultat - la description complète du livre, sauf pour
     /// un résultat conditionné par la bande où seule la phrase d'intro partagée (ExplorationResult.
-    /// ShortDescription) est montrée, suivie de la vraie phrase de la branche résolue
-    /// (ExplorationOutcome.BranchText, correctement traduite) plutôt que le paragraphe entier énumérant
-    /// les 4 branches - retour utilisateur 2026-08-20 : la première version de ce correctif réutilisait
-    /// Note (jamais traduit, un simple tag interne) et perdait la phrase d'intro.</summary>
+    /// ShortDescription) est montrée : chaque branche y a son propre bouton radio (WarbandBranchOptions)
+    /// portant sa phrase traduite (ExplorationOutcome.BranchText), inutile de répéter le paragraphe entier
+    /// qui les énumère toutes.</summary>
     public string ExplorationResultDescriptionText => IsWarbandConditionedResult
-        ? string.Join(" ", new[] { TriggeredExplorationResult?.ShortDescription, ResolvedExplorationOutcome?.BranchText }.Where(s => !string.IsNullOrEmpty(s)))
+        ? TriggeredExplorationResult?.ShortDescription ?? string.Empty
         : TriggeredExplorationResult?.Description ?? string.Empty;
+
+    // --- Branche au choix d'un résultat conditionné par la bande (Traînard, Prisonniers, Sanctuaire,
+    // Cimetière) ------------------------------------------------------------------------------------
+    //
+    // Le livre dit « une bande Skaven PEUT le vendre... » : jusqu'au 2026-10-24 l'appli retenait d'office
+    // la branche de la bande jouée et masquait les autres. Désormais toutes les branches sont proposées,
+    // celle de la bande pré-cochée (ExplorationOutcomeResolver.ResolveWarbandOutcome) ; en choisir une
+    // autre reste possible, signalé par un simple message sous la liste (WarbandBranchWarning) - jamais
+    // bloquant, même esprit que la limite d'armes (WeaponLimits). Demande explicite de l'utilisateur,
+    // validée sur maquette (pas de puce par branche, message seulement quand on s'écarte du livre).
+
+    public sealed record ExplorationBranchOption(ExplorationOutcome Outcome, string Text);
+
+    [ObservableProperty]
+    private List<ExplorationBranchOption> warbandBranchOptions = new();
+
+    private ExplorationBranchOption? selectedWarbandBranch;
+
+    /// <summary>Même garde que SelectedSentHeroOption (null transitoire d'un contrôle TwoWay au
+    /// réattachement de la vue mise en cache) : toute valeur absente de WarbandBranchOptions est ignorée.
+    /// Changer de branche repart d'une saisie vierge pour tout ce qui en dépend (montant, quantité,
+    /// répartition d'XP, groupe ou arme choisis) avant d'appliquer la nouvelle - un jet d'or tapé pour la
+    /// branche Skaven n'a aucun sens pour la branche Morts-Vivants.</summary>
+    public ExplorationBranchOption? SelectedWarbandBranch
+    {
+        get => selectedWarbandBranch;
+        set
+        {
+            if (value is null || !WarbandBranchOptions.Contains(value)) return;
+            if (!SetProperty(ref selectedWarbandBranch, value)) return;
+
+            ResetBranchDependentInput();
+            ApplyResolvedOutcome(value.Outcome);
+            OnPropertyChanged(nameof(WarbandBranchWarning));
+            OnPropertyChanged(nameof(HasWarbandBranchWarning));
+            if (value.Outcome.GrantsFreeHenchmanArchetypeOfficialId is { } henchmanId && ResolvedFreeHenchman is null)
+                _ = LoadFreeHenchmanFromOtherWarbandAsync(henchmanId);
+        }
+    }
+
+    /// <summary>Null tant que la branche cochée est celle que le livre donne à cette bande. Sinon : les
+    /// bandes à qui le livre la réserve, ou - pour la branche « toutes les autres bandes » - le simple
+    /// rappel que cette bande a sa propre option.</summary>
+    public string? WarbandBranchWarning
+    {
+        get
+        {
+            if (TriggeredExplorationResult is not { } result || SelectedWarbandBranch is not { } branch) return null;
+            if (!ExplorationOutcomeResolver.IsOutsideWarbandRestriction(result, branch.Outcome, _warbandArchetypeOfficialId)) return null;
+
+            var reservedTo = branch.Outcome.RestrictedToWarbandArchetypeOfficialIds;
+            if (reservedTo.Count == 0) return Loc["EndOfGameBranchOtherWarbandsWarning"];
+            var names = reservedTo.Select(id => _warbandArchetypeNamesByOfficialId.GetValueOrDefault(id, id));
+            return string.Format(Loc["EndOfGameBranchReservedWarning"], string.Join(", ", names));
+        }
+    }
+
+    public bool HasWarbandBranchWarning => WarbandBranchWarning is not null;
+
+    /// <summary>Tap sur le texte d'une branche (Label frère du RadioButton, voir ExplorationResultStepView).</summary>
+    [RelayCommand]
+    private void SelectWarbandBranch(ExplorationBranchOption option) => SelectedWarbandBranch = option;
+
+    /// <summary>Remet à zéro tout ce que le joueur a pu saisir pour la branche précédente - sous-ensemble
+    /// de la remise à zéro de ResolveExplorationResult, limité à ce qui dépend de la branche (les dés,
+    /// le résultat déclenché et le Héros envoyé ne changent pas).</summary>
+    private void ResetBranchDependentInput()
+    {
+        ExplorationGoldAmount = string.Empty;
+        ExplorationItemQuantity = string.Empty;
+        ExplorationItemFoundValue = string.Empty;
+        ExplorationWyrdstoneAmount = string.Empty;
+        ExplorationAmountError = null;
+        DistributedExperienceTotal = string.Empty;
+        DistributedExperienceError = null;
+        foreach (var hero in WarriorRows)
+        {
+            hero.DistributedExplorationExperience = 0;
+            hero.LeaderExplorationExperience = 0;
+        }
+        SelectedEquippedHenchmanGroupOption = EquippedHenchmanGroupOptions[0];
+        EquippedHenchmanError = null;
+        SelectedWeaponBlessingOption = WeaponBlessingOptions[0];
+    }
+
+    /// <summary>Le Zombie offert (Traînard/Prisonniers) appartient aux Morts-Vivants : une autre bande qui
+    /// choisit cette branche ne l'a pas dans _warriorArchetypesByOfficialId (limité à ses propres types).
+    /// Chargé à la demande plutôt qu'à l'ouverture du wizard - tout le catalogue de guerriers pour un cas
+    /// rare ralentirait chaque Fin de Partie.</summary>
+    private async Task LoadFreeHenchmanFromOtherWarbandAsync(string henchmanOfficialId)
+    {
+        if (_otherWarbandHenchmenByOfficialId.ContainsKey(henchmanOfficialId)) return;
+        var allWarbandIds = (await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language)).Select(w => w.Id);
+        var archetype = (await _libraryService.GetWarriorArchetypesAsync(allWarbandIds, LocalizationService.Instance.Language))
+            .FirstOrDefault(a => a.OfficialId == henchmanOfficialId);
+        if (archetype is null) return;
+        _otherWarbandHenchmenByOfficialId[henchmanOfficialId] = archetype;
+        OnPropertyChanged(nameof(ResolvedFreeHenchman));
+    }
+
+    private readonly Dictionary<string, WarriorArchetype> _otherWarbandHenchmenByOfficialId = new();
 
     /// <summary>Le bloc Note de la branche résolue (plus bas, sous Or/Objet/Pierre magique) ne doit pas
     /// répéter ce que ExplorationResultDescriptionText affiche déjà en haut pour un résultat conditionné
@@ -325,8 +462,28 @@ public partial class EndOfGamePageViewModel
     /// <summary>ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId résolu (ex. "Zombie", Traînard) -
     /// affiché en ChipView tapable (même langage d'interaction que tout objet trouvé) plutôt qu'en
     /// simple texte, pour que le joueur voie ce qui rejoint sa bande avant même de valider le wizard.</summary>
-    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeOfficialId is { } name
-        ? _warriorArchetypesByOfficialId.GetValueOrDefault(name) : null;
+    public WarriorArchetype? ResolvedFreeHenchman => ResolvedExplorationOutcome?.GrantsFreeHenchmanArchetypeOfficialId is { } id
+        ? _warriorArchetypesByOfficialId.GetValueOrDefault(id) ?? _otherWarbandHenchmenByOfficialId.GetValueOrDefault(id) : null;
+
+    /// <summary>Nombre d'Hommes de main gratuits qui rejoignent la bande via l'Exploration (ex. Zombies du
+    /// Traînard/des Prisonniers) - 0 tant que la branche n'en donne pas ou que le jet de quantité (D3) n'est
+    /// pas saisi. Repris partout où le wizard compte l'effectif d'après-partie (récap, Valeur de Bande
+    /// projetée, plafonds de recrutement), comme le fait ApplyExplorationAsync à l'enregistrement.</summary>
+    public int ExplorationFreeHenchmanCount =>
+        ResolvedFreeHenchman is not null && int.TryParse(ExplorationItemQuantity, out var quantity) && quantity > 0 ? quantity : 0;
+
+    /// <summary>Groupe d'Hommes de main existant qu'un prisonnier équipé rejoint (+1, Prisonniers « autres
+    /// bandes ») - null si aucun n'est choisi ou si la branche retenue n'offre pas ce recrutement.</summary>
+    public WarriorOutcomeRow? ExplorationEquippedHenchmanGroup =>
+        HasOptionalEquippedHenchmanGrant ? SelectedEquippedHenchmanGroupOption?.Group : null;
+
+    /// <summary>Têtes ajoutées à un type de guerrier précis par l'Exploration - même décompte que
+    /// ExistingCountForArchetype pour les plafonds MaxCount.</summary>
+    private int ExplorationJoinedCountForArchetype(int warriorArchetypeId) =>
+        (ResolvedFreeHenchman?.Id == warriorArchetypeId ? ExplorationFreeHenchmanCount : 0)
+        + (ExplorationEquippedHenchmanGroup?.Warrior.WarriorArchetypeId == warriorArchetypeId ? 1 : 0);
+
+    private int ExplorationJoinedHeadCount => ExplorationFreeHenchmanCount + (ExplorationEquippedHenchmanGroup is null ? 0 : 1);
 
     [RelayCommand]
     private Task ShowFreeHenchmanDetail(WarriorArchetype archetype) => _detailDialogs.ShowWarriorArchetypeDetailDialogAsync(archetype, Array.Empty<NamedRef>());
@@ -664,20 +821,57 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    /// <summary>Faux pour un test ciblant toujours le chef (ex. Taverne) - StatTestHero est alors
-    /// renseigné automatiquement (voir ResolveExplorationResult), aucun choix du joueur nécessaire, donc
-    /// aucun Picker à afficher. Vrai pour Puits (le joueur choisit qui envoyer).</summary>
-    public bool ShowStatTestHeroPicker => ShowStatTest && TriggeredExplorationResult?.StatTestTargetsLeader != true;
+    /// <summary>Toujours affiché depuis le 2026-10-24 (« l'appli propose au lieu d'imposer ») : pour un
+    /// test que le livre fait passer au chef (Taverne), le chef est pré-choisi (voir
+    /// ResolveExplorationResult) mais un autre Héros reste sélectionnable, avec StatTestTesterWarning.</summary>
+    public bool ShowStatTestHeroPicker => ShowStatTest;
+
+    /// <summary>Message ambre quand un test réservé au chef par le livre est confié à un autre Héros -
+    /// jamais bloquant, même esprit que WarbandBranchWarning.</summary>
+    public string? StatTestTesterWarning =>
+        ShowStatTest && TriggeredExplorationResult?.StatTestTargetsLeader == true && StatTestHero is { } tester && !tester.Warrior.IsLeader
+            ? Loc["EndOfGameStatTestNotLeaderWarning"] : null;
+
+    public bool HasStatTestTesterWarning => StatTestTesterWarning is not null;
+
+    /// <summary>Le résultat prévoit une réussite automatique pour certaines bandes (Taverne : Morts-Vivants,
+    /// Chasseurs de Sorcières, Sœurs de Sigmar) - la case « Réussite automatique » est alors proposée à
+    /// toutes les bandes, cochée d'office pour celles du livre (StatTestAutoPassAllowedByBook).</summary>
+    public bool HasStatTestAutoPassOption => TriggeredExplorationResult?.AutoPassStatTestWarbandArchetypeOfficialIds.Count > 0;
+
+    private bool StatTestAutoPassAllowedByBook =>
+        TriggeredExplorationResult?.AutoPassStatTestWarbandArchetypeOfficialIds.Contains(_warbandArchetypeOfficialId) == true;
+
+    /// <summary>Case « Réussite automatique » : décocher fait lancer le test malgré tout, cocher pour une
+    /// bande que le livre n'autorise pas affiche StatTestAutoPassWarning.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(StatTestAutoPasses))]
+    [NotifyPropertyChangedFor(nameof(ShowStatTestRoll))]
+    [NotifyPropertyChangedFor(nameof(StatTestAutoPassWarning))]
+    [NotifyPropertyChangedFor(nameof(HasStatTestAutoPassWarning))]
+    private bool statTestUseAutoPass;
+
+    partial void OnStatTestUseAutoPassChanged(bool value)
+    {
+        StatTestError = null;
+        ResolveStatTest();
+    }
+
+    public string? StatTestAutoPassWarning => StatTestAutoPasses && !StatTestAutoPassAllowedByBook
+        ? string.Format(Loc["EndOfGameBranchReservedWarning"], string.Join(", ", TriggeredExplorationResult!.AutoPassStatTestWarbandArchetypeOfficialIds
+            .Select(id => _warbandArchetypeNamesByOfficialId.GetValueOrDefault(id, id))))
+        : null;
+
+    public bool HasStatTestAutoPassWarning => StatTestAutoPassWarning is not null;
 
     /// <summary>Vrai pour un test ciblant le chef (voir ShowStatTestHeroPicker) dont le chef n'est pas
     /// disponible cette partie (mort/malade/hors de combat) - même idiome que BonusStatTestLeader :
     /// personne ne peut commander à sa place, rien à valider, ni erreur bloquante ni jet à saisir.</summary>
     public bool StatTestLeaderUnavailable => ShowStatTest && TriggeredExplorationResult?.StatTestTargetsLeader == true && StatTestHero is null;
 
-    /// <summary>Vrai pour un test de Commandement gating (Taverne) auto-réussi pour certaines bandes du
-    /// livre (Morts-Vivants/Chasseurs de Sorcières/Sœurs de Sigmar) - aucun jet à saisir, la branche
-    /// Réussite se résout directement dès que le résultat se déclenche (voir ResolveExplorationResult).</summary>
-    public bool StatTestAutoPasses => TriggeredExplorationResult?.AutoPassStatTestWarbandArchetypeOfficialIds.Contains(_warbandArchetypeOfficialId) == true;
+    /// <summary>Réussite automatique retenue (case cochée, voir StatTestUseAutoPass) - aucun jet à saisir,
+    /// la branche Réussite se résout directement (voir ResolveStatTest).</summary>
+    public bool StatTestAutoPasses => HasStatTestAutoPassOption && StatTestUseAutoPass;
 
     /// <summary>Le bloc jet+dé (voir ShowStatTest) ne s'affiche que si un Héros/chef est effectivement
     /// désigné ET que la bande ne réussit pas ce test automatiquement.</summary>
@@ -689,6 +883,8 @@ public partial class EndOfGamePageViewModel
     [NotifyPropertyChangedFor(nameof(StatTestLeaderUnavailable))]
     [NotifyPropertyChangedFor(nameof(ShowStatTestRoll))]
     [NotifyPropertyChangedFor(nameof(StatTestHeroDisplayPrefix))]
+    [NotifyPropertyChangedFor(nameof(StatTestTesterWarning))]
+    [NotifyPropertyChangedFor(nameof(HasStatTestTesterWarning))]
     private WarriorOutcomeRow? statTestHero;
 
     /// <summary>"{Nom} - " devant le champ de jet pour un test ciblant le chef (aucun Picker qui montre
@@ -742,6 +938,13 @@ public partial class EndOfGamePageViewModel
         ExplorationItemFoundValue = string.Empty;
         ExplorationWyrdstoneAmount = string.Empty;
         ExplorationAmountError = null;
+
+        if (StatTestAutoPasses)
+        {
+            if (TriggeredExplorationResult!.Outcomes.FirstOrDefault(o => o.StatTestPass == true) is { } passOutcome)
+                ApplyResolvedOutcome(passOutcome);
+            return;
+        }
 
         if (TriggeredExplorationResult?.StatTestField is null || StatTestHero is null
             || StatTestStatValue is not { } statValue || !int.TryParse(StatTestRoll, out var roll))
@@ -933,7 +1136,10 @@ public partial class EndOfGamePageViewModel
 
     private void SyncExplorationDice()
     {
-        var count = ExplorationDiceCount;
+        var count = EffectiveExplorationDiceCount;
+        OnPropertyChanged(nameof(EffectiveExplorationDiceCount));
+        OnPropertyChanged(nameof(ExplorationDiceCountWarning));
+        OnPropertyChanged(nameof(HasExplorationDiceCountWarning));
         while (ExplorationDice.Count < count)
         {
             var entry = new ExplorationDieEntry(ExplorationDice.Count + 1);
@@ -994,6 +1200,11 @@ public partial class EndOfGamePageViewModel
         // déclenche même plus cette branche.
         SelectedFreeHiredSword = null;
         FreeHiredSwordError = null;
+        WarbandBranchOptions = new();
+        selectedWarbandBranch = null;
+        OnPropertyChanged(nameof(SelectedWarbandBranch));
+        OnPropertyChanged(nameof(WarbandBranchWarning));
+        OnPropertyChanged(nameof(HasWarbandBranchWarning));
 
         if (ExplorationDice.Any(d => d.Value is null)) return;
 
@@ -1004,17 +1215,15 @@ public partial class EndOfGamePageViewModel
             .FirstOrDefault(r => r.DiceCount == multiple.Value.DiceCount && r.Value == multiple.Value.Value);
         if (TriggeredExplorationResult is null) return;
 
-        // Test de caractéristique ciblant toujours le chef (Taverne/Commandement, voir
-        // ShowStatTestHeroPicker) : renseigne StatTestHero automatiquement (déclenche ResolveStatTest via
-        // OnStatTestHeroChanged, sans effet tant qu'aucun jet n'est saisi) - aucun choix du joueur. Si en
-        // plus la bande jouée réussit ce test automatiquement (StatTestAutoPasses), résout directement la
-        // branche Réussite sans attendre de jet du tout.
-        if (TriggeredExplorationResult.StatTestTargetsLeader)
-        {
-            StatTestHero = WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
-            if (StatTestAutoPasses && TriggeredExplorationResult.Outcomes.FirstOrDefault(o => o.StatTestPass == true) is { } passOutcome)
-                ApplyResolvedOutcome(passOutcome);
-        }
+        // Test de caractéristique que le livre fait passer au chef (Taverne/Commandement) : le chef est
+        // pré-choisi dans le Picker (un autre Héros reste possible, voir StatTestTesterWarning), et la case
+        // « Réussite automatique » est pré-cochée pour les bandes du livre (voir StatTestUseAutoPass) -
+        // la branche Réussite se résout alors sans jet (ResolveStatTest).
+        StatTestUseAutoPass = HasStatTestAutoPassOption && StatTestAutoPassAllowedByBook;
+        if (TriggeredExplorationResult.StatTestTargetsLeader
+            && StatTestHeroOptions.FirstOrDefault(o => o.Hero?.Warrior.IsLeader == true) is { } leaderOption)
+            SelectedStatTestHeroOption = leaderOption;
+        ResolveStatTest();
 
         // Une branche Auto (sans sous-jet) se résout tout de suite, qu'elle soit seule (ex. Masures en
         // Ruine) ou accompagnée d'une branche à sous-jet optionnelle sur le MÊME dé (ex. Boutique - voir
@@ -1026,10 +1235,14 @@ public partial class EndOfGamePageViewModel
         var autoOutcome = ExplorationOutcomeResolver.ResolveAutoOutcome(TriggeredExplorationResult);
         if (autoOutcome is not null) ApplyResolvedOutcome(autoOutcome);
         else if (ExplorationOutcomeResolver.ResolveWarbandOutcome(TriggeredExplorationResult, _warbandArchetypeOfficialId) is { } warbandOutcome)
-            // Groupe B "conditionné par la bande" (Traînard, Prisonniers, Cimetière, bénédiction du
-            // Sanctuaire) : la branche applicable se résout d'elle-même depuis l'archétype de la bande
-            // jouée, aucune saisie du joueur ne la départage (voir ResolveWarbandOutcome).
-            ApplyResolvedOutcome(warbandOutcome);
+        {
+            // Groupe B "conditionné par la bande" (Traînard, Prisonniers, Cimetière, Sanctuaire) : toutes
+            // les branches sont proposées, celle que le livre donne à cette bande pré-cochée (voir
+            // SelectedWarbandBranch) - le joueur peut en choisir une autre.
+            WarbandBranchOptions = TriggeredExplorationResult.Outcomes
+                .Select(o => new ExplorationBranchOption(o, o.BranchText ?? o.Note ?? string.Empty)).ToList();
+            SelectedWarbandBranch = WarbandBranchOptions.First(b => ReferenceEquals(b.Outcome, warbandOutcome));
+        }
 
         // Trésor Caché/Bande Massacrée : "roll for every item on the list separately" - sans effet (liste
         // vide) pour toute autre forme, voir EndOfGamePageViewModel.IndependentOutcomes.cs.
@@ -1159,7 +1372,20 @@ public partial class EndOfGamePageViewModel
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FreeHiredSwordChipItems))]
+    [NotifyPropertyChangedFor(nameof(FreeHiredSwordWarning))]
+    [NotifyPropertyChangedFor(nameof(HasFreeHiredSwordWarning))]
     private HiredSword? selectedFreeHiredSword;
+
+    /// <summary>Le livre limite la Faveur aux Francs-Tireurs « disponibles pour votre bande » ; depuis le
+    /// 2026-10-26 le picker montre tout le catalogue et ce message ambre signale un choix réservé à
+    /// d'autres bandes - jamais bloquant, même esprit que WarbandBranchWarning.</summary>
+    public string? FreeHiredSwordWarning =>
+        SelectedFreeHiredSword is { RestrictedToWarbandArchetypeIds.Count: > 0 } hiredSword
+        && !hiredSword.RestrictedToWarbandArchetypeIds.Contains(_warbandArchetypeId)
+            ? Loc["EndOfGameFreeHiredSwordOutsideWarning"]
+            : null;
+
+    public bool HasFreeHiredSwordWarning => FreeHiredSwordWarning is not null;
 
     partial void OnSelectedFreeHiredSwordChanged(HiredSword? value) => FreeHiredSwordError = null;
 
@@ -1182,7 +1408,9 @@ public partial class EndOfGamePageViewModel
             .Select(r => r.Warrior.HiredSwordId!.Value).ToList();
         if (SelectedNewHiredSword is { } alreadyChosenElsewhere) excludedIds.Add(alreadyChosenElsewhere.Id);
 
-        var hiredSword = await _hiredSwordPicker.PickHiredSwordAsync(_warbandArchetypeId, excludedIds);
+        // Tout le catalogue (warbandArchetypeId null), pas seulement les Francs-Tireurs de la bande - voir
+        // FreeHiredSwordWarning.
+        var hiredSword = await _hiredSwordPicker.PickHiredSwordAsync(null, excludedIds);
         if (hiredSword is null) return;
 
         SelectedFreeHiredSword = hiredSword;

@@ -153,6 +153,15 @@ dans `WarriorEditDialog`, la photo suit Enregistrer/Annuler (`WarriorEditDialogV
 par `CloneAsPromotedHero`. **Windows : choix de fichier uniquement, pas de webcam** (décision de l'utilisateur,
 `WarriorPhotos.IsCaptureSupported` forcé à false, aucune capacité `webcam` dans le manifest). Miniature carrée + silhouette quand pas de photo (maquette `mockups/warrior-photo.html`).
 
+**Branches d'Exploration au choix (branche `feature/exploration-branch-choice`, 2026-10-24)** : les
+restrictions de règles de base (recrutement, progression, pickers) restent strictes, décision explicite de
+l'utilisateur ; seule l'Exploration est assouplie. Traînard/Prisonniers/Sanctuaire/Cimetière proposent
+toutes leurs branches (boutons radio), celle de la bande pré-cochée (`ExplorationOutcomeResolver.
+ResolveWarbandOutcome`) ; en choisir une autre affiche un message ambre sous la liste (`AppWarning`, token
+fixe par mode dans `ThemeService.Apply`), jamais un dialog ni un blocage, et pas de puce par branche
+(retenu sur maquette `mockups/exploration-branches.html`, hors dépôt). Les choix de Héros (Fosse, Puits,
+XP répartie, bénédiction) restent réservés aux Héros, voulu.
+
 **Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
 d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
 système de favoris à 2 groupes "Favoris"/"My Warbands", finalement abandonné le même jour : pas assez

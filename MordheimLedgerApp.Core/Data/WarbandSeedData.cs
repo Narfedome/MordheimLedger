@@ -249,6 +249,10 @@ public class EquipmentSeedData
     /// <summary>See EquipmentItem.GrantsBonusExplorationDice. Null for almost every item.</summary>
     public int? GrantsBonusExplorationDice { get; set; }
 
+    /// <summary>See EquipmentItem.RaisesCharacteristicMax (a CharacteristicField name, e.g. "WeaponSkill").
+    /// Null for almost every item.</summary>
+    public string? RaisesCharacteristicMax { get; set; }
+
     /// <summary>See EquipmentItem.IsUniqueArtefact. False/absent for almost every item - true only for a
     /// one-of-a-kind item permanently tied to a single owner (e.g. a Dramatis Persona's unique gear).</summary>
     public bool IsUniqueArtefact { get; set; }

@@ -149,7 +149,7 @@ public partial class EndOfGamePageViewModel
                     sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], ExplorationNoteText));
                 }
             }
-            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeOfficialId is { } henchmanName)
+            else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeOfficialId is not null)
             {
                 // Traînard/Prisonniers, branche Morts-Vivants ("Zombie") - fusionne dans un groupe
                 // d'Hommes de main déjà existant de ce même archétype plutôt que de créer une ligne
@@ -158,8 +158,11 @@ public partial class EndOfGamePageViewModel
                 // 1 fixe (Traînard) ou un jet du joueur (D3, Prisonniers - voir ExplorationOutcome.
                 // ItemQuantityFormula réutilisé tel quel, ExplorationItemQuantity) ; repli sur 1 si vide
                 // (jamais le cas en pratique - ValidateExplorationResultStep bloque déjà sinon).
-                var archetype = (await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, "en"))
-                    .FirstOrDefault(a => a.Name == henchmanName);
+                // ResolvedFreeHenchman (résolu par id officiel, y compris depuis une autre bande quand la
+                // branche Morts-Vivants a été choisie hors restriction - voir SelectedWarbandBranch). Comparait
+                // jusqu'ici le Name anglais à l'id officiel ("warrior.undead.zombie"), jamais égaux depuis le
+                // passage aux id stables : aucun Zombie n'était réellement ajouté.
+                var archetype = ResolvedFreeHenchman;
                 if (archetype is not null)
                 {
                     var henchmanQuantity = int.TryParse(ExplorationItemQuantity, out var parsedQuantity) ? parsedQuantity : 1;

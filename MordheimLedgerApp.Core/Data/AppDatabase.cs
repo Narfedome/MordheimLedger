@@ -285,6 +285,7 @@ public partial class AppDatabase
         GrantsRareItemSearchBonus = eq.GrantsRareItemSearchBonus,
         IsSellable = eq.IsSellable,
         GrantsBonusExplorationDice = eq.GrantsBonusExplorationDice,
+        RaisesCharacteristicMax = eq.RaisesCharacteristicMax is { } raisedMax ? Enum.Parse<Rules.CharacteristicField>(raisedMax) : null,
         IsUniqueArtefact = eq.IsUniqueArtefact,
         IsExplorationOnly = eq.IsExplorationOnly
     };

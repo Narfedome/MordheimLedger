@@ -20,6 +20,8 @@
     <!-- Fixed (not palette-dependent), like AppDanger — milestone boxes on an ExperienceTrackView
          (see WarbandDetailPage roster) need to read as "highlighted" regardless of theme. -->
     <Color x:Key="AppMilestone">#C9A227</Color>
+    <!-- Avertissement non bloquant (choix hors restriction du livre) - fixe par mode, voir ThemeService.Apply. -->
+    <Color x:Key="AppWarning">#D9A441</Color>
 
     <!-- Static neutrals -->
     <Color x:Key="White">White</Color>

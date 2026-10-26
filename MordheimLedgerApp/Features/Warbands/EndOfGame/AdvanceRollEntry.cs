@@ -342,8 +342,12 @@ public partial class AdvanceRollEntry : ObservableObject
 
     public string ResolvedFieldLabel => ResolvedField is { } f ? _loc[_fieldAbbrKeys[f]] : string.Empty;
 
-    private CharacteristicMaxes Maxes => new(_warrior.MaxMovement, _warrior.MaxWeaponSkill, _warrior.MaxBallisticSkill,
-        _warrior.MaxStrength, _warrior.MaxToughness, _warrior.MaxWounds, _warrior.MaxInitiative, _warrior.MaxAttacks, _warrior.MaxLeadership);
+    // WithEquipmentBonuses : un objet porté peut relever un maximum (Manuel d'Entraînement : CC +1 au-delà
+    // du maximum normal) - oublié jusqu'au 2026-10-26, la Progression bloquait la CC au maximum racial.
+    private CharacteristicMaxes Maxes => CharacteristicIncreaseRules.WithEquipmentBonuses(
+        new(_warrior.MaxMovement, _warrior.MaxWeaponSkill, _warrior.MaxBallisticSkill, _warrior.MaxStrength, _warrior.MaxToughness,
+            _warrior.MaxWounds, _warrior.MaxInitiative, _warrior.MaxAttacks, _warrior.MaxLeadership),
+        _warrior.Equipment.Select(e => e.Item));
 
     /// <summary>Stats de départ du Warrior + les résolutions déjà faites par les entrées PRÉCÉDENTES de
     /// _siblings (voir sa doc) - jamais Warrior.WeaponSkill etc. directement une fois qu'un palier plus

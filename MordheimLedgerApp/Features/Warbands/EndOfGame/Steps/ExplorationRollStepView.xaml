@@ -26,6 +26,22 @@
                 <Label Text="{loc:Loc EndOfGameCatacombRerollReminder}" FontSize="12" TextColor="{DynamicResource AppAccent}"
                        IsVisible="{Binding ShowCatacombRerollReminder}"/>
 
+                <!-- Nombre de dés : celui du livre par défaut, ajustable (voir ChosenExplorationDiceCount),
+                     message ambre quand on s'en écarte. -->
+                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="6">
+                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationDiceCountLabel}" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Command="{Binding DecrementExplorationDiceCommand}"/>
+                    <Label Grid.Column="2" Text="{Binding EffectiveExplorationDiceCount}" FontAttributes="Bold" VerticalOptions="Center"/>
+                    <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                  Command="{Binding IncrementExplorationDiceCommand}"/>
+                </Grid>
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasExplorationDiceCountWarning}">
+                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                           FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                    <Label Grid.Column="1" Text="{Binding ExplorationDiceCountWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                </Grid>
+
                 <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:ExplorationDieEntry">

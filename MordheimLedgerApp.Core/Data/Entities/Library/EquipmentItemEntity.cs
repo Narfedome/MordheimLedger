@@ -37,6 +37,7 @@ public class EquipmentItemEntity
     public int? GrantsRareItemSearchBonus { get; set; }
     public bool IsSellable { get; set; }
     public int? GrantsBonusExplorationDice { get; set; }
+    public Rules.CharacteristicField? RaisesCharacteristicMax { get; set; }
 
     /// <summary>See Models.Library.EquipmentItem.IsUniqueArtefact.</summary>
     public bool IsUniqueArtefact { get; set; }

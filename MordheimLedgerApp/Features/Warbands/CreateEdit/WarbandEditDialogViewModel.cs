@@ -214,6 +214,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             AddPart("WarriorsMutationsHeading", slot.Mutations.Select(m => m.Name));
             AddPart("WarriorsInjuriesHeading", slot.Injuries.Select(i => i.Name));
             if (IsExistingWarband && slot.Experience > 0) parts.Add($"{Loc["WarriorExperiencePh"]} : {slot.Experience}");
+            if (IsExistingWarband && slot.Profile.IsModified) parts.Add($"{Loc["WarbandCreateTabProfile"]} : {slot.Profile.CurrentDisplay}");
             return string.Join(" · ", parts);
         }
 
@@ -933,7 +934,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
             if (Archetype is null) return;
 
-            var skills = await _skillPicker.PickSkillAsync(Archetype.Id, row.Archetype.Id, row.Archetype.AllowedSkillCategories);
+            // Mode Bande existante : toutes les catégories (on recopie une fiche papier telle quelle, sans
+            // avertissement) - sinon les listes du type, comme avant.
+            var skills = await _skillPicker.PickSkillAsync(Archetype.Id, row.Archetype.Id, IsExistingWarband ? null : row.Archetype.AllowedSkillCategories);
             foreach (var skill in skills)
                 destination.Add(skill);
         }
@@ -1303,6 +1306,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (w.Name != name) { w.Name = name; dirty = true; }
             if (newHeadCount is { } headCount && w.HeadCount != headCount) { w.HeadCount = headCount; dirty = true; }
             if (IsExistingWarband && w.Experience != slot.Experience) { w.Experience = slot.Experience; dirty = true; }
+            var profileEdited = IsExistingWarband && slot.Profile.IsModified;
+            if (profileEdited) { slot.Profile.ApplyTo(w); dirty = true; }
             if (dirty) await _warbandService.SaveWarriorAsync(w);
 
             foreach (var pick in slot.Equipment.Where(p => p.ExistingId is null))
@@ -1332,6 +1337,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 await _warbandService.AddWarriorInjuryAsync(w.Id, injury);
             foreach (var baseline in removedInjuries)
                 await _warbandService.RemoveWarriorInjuryAsync(baseline.Id);
+            // Profil recopié à la main : il contient déjà les malus des blessures, ne pas les réappliquer.
+            if (profileEdited) return;
             var penaltiesChanged = ApplyInjuryPenalties(w, addedInjuries, direction: -1);
             penaltiesChanged |= ApplyInjuryPenalties(w, removedInjuries.Select(b => b.Item), direction: 1);
             if (penaltiesChanged) await _warbandService.SaveWarriorAsync(w);
@@ -1429,7 +1436,15 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
                             foreach (var injury in slot.Injuries)
                                 await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
-                            var profileChanged = ApplyInjuryPenalties(warrior, slot.Injuries, direction: -1);
+                            // Profil recopié à la main (mode Bande existante) : il contient déjà les malus des
+                            // blessures saisies, qui ne sont donc pas réappliqués par-dessus.
+                            bool profileChanged;
+                            if (IsExistingWarband && slot.Profile.IsModified)
+                            {
+                                slot.Profile.ApplyTo(warrior);
+                                profileChanged = true;
+                            }
+                            else profileChanged = ApplyInjuryPenalties(warrior, slot.Injuries, direction: -1);
                             if (IsExistingWarband && slot.Experience != warrior.Experience)
                             {
                                 warrior.Experience = slot.Experience;
@@ -1460,11 +1475,18 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                                 await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
                             foreach (var mutation in group.Mutations)
                                 await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
+                            var groupChanged = false;
                             if (IsExistingWarband && group.Experience != warrior.Experience)
                             {
                                 warrior.Experience = group.Experience;
-                                await _warbandService.SaveWarriorAsync(warrior);
+                                groupChanged = true;
                             }
+                            if (IsExistingWarband && group.Profile.IsModified)
+                            {
+                                group.Profile.ApplyTo(warrior);
+                                groupChanged = true;
+                            }
+                            if (groupChanged) await _warbandService.SaveWarriorAsync(warrior);
                         }
                     }
                 }

@@ -525,7 +525,8 @@ public partial class EquipmentItemViewModel : BaseViewModel
             GrantsSpecificSkillOfficialId = s.GrantsSpecificSkillOfficialId,
             GrantsRareItemSearchBonus = s.GrantsRareItemSearchBonus,
             IsSellable = s.IsSellable,
-            GrantsBonusExplorationDice = s.GrantsBonusExplorationDice
+            GrantsBonusExplorationDice = s.GrantsBonusExplorationDice,
+            RaisesCharacteristicMax = s.RaisesCharacteristicMax
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);

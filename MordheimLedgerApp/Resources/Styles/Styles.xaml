@@ -427,7 +427,13 @@
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="{DynamicResource AppFontSizeBase}"/>
         <Setter Property="MinimumHeightRequest" Value="{DynamicResource AppMinTouchTarget}"/>
-        <Setter Property="MinimumWidthRequest" Value="{DynamicResource AppMinTouchTarget}"/>
+        <!-- Largeur : le texte des RadioButton de l'app est toujours un Label FRÈRE (Content mal rendu sous
+             WinUI, voir ExplorationResultStepView), jamais le Content - mais Android réserve quand même la
+             place d'un libellé vide (~48dp), d'où un grand vide entre le rond et ce Label. Calé sur la
+             largeur du rond seul sous Android ; mêmes valeurs qu'AppMinTouchTarget ailleurs (OnPlatform ne
+             peut pas reprendre une DynamicResource). Le Label voisin reste tapable, la cible ne rétrécit pas. -->
+        <Setter Property="MinimumWidthRequest" Value="{OnPlatform Android=32, iOS=44, MacCatalyst=32, WinUI=32}"/>
+        <Setter Property="WidthRequest" Value="{OnPlatform Default=-1, Android=32}"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">

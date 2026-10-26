@@ -580,6 +580,8 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
                  })
             Assert.Equal(EquipmentCategory.MagicalArtefact, allEquipment.Single(i => i.Name == artefactName).Category);
         Assert.Equal(1, allEquipment.Single(i => i.Name == "All-seeing Eye of Numas").GrantsBonusExplorationDice);
+        // Fighting Arena's Training Manual: Weapon Skill may advance one point past the racial maximum.
+        Assert.Equal(CharacteristicField.WeaponSkill, allEquipment.Single(i => i.Name == "Training Manual").RaisesCharacteristicMax);
 
         // Catacombs (4 6, Group C): a single universal branch (no warband restriction), resolved via
         // ResolveAutoOutcome - its "next battle" special deployment rule is mechanized as a pense-bête

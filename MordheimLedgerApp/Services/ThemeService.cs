@@ -118,6 +118,9 @@ namespace MordheimLedgerApp.Services
             // "vert" quelle que soit la palette active, pas seulement dans AshAndWarpstone où AppAccent
             // est déjà vert (ShadowAndGold, par exemple, a un accent doré/brun).
             tokens["AppSuccess"] = Color.FromArgb("#3F9142");
+            // Ambre fixe pour un avertissement non bloquant (choix hors restriction du livre) - distinct
+            // d'AppDanger (erreur), une teinte par mode pour rester lisible sur fond clair comme sombre.
+            tokens["AppWarning"] = Color.FromArgb(IsDark() ? "#D9A441" : "#9A6A12");
             var res = Application.Current.Resources;
             foreach (var kv in tokens)
                 res[kv.Key] = kv.Value;

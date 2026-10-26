@@ -73,7 +73,21 @@ public partial class EndOfGamePageViewModel
 
     public IEnumerable<string> EquipmentTradingSoldRecapLines => PendingSales.Select(c => c.SoldLabel);
 
-    public bool HasRecruitmentRecap => RecruitedHeroRows.Any() || RecruitedHenchmanRows.Any() || ExistingHenchmanTopUps.Any(t => t.AddCount > 0);
+    public bool HasRecruitmentRecap => RecruitedHeroRows.Any() || RecruitedHenchmanRows.Any() || ExistingHenchmanTopUps.Any(t => t.AddCount > 0)
+        || ExplorationJoinedHeadCount > 0;
+
+    /// <summary>Hommes de main gagnés à l'Exploration (Zombies offerts, prisonnier équipé) - absents du récap
+    /// jusqu'au 2026-10-24 alors qu'ApplyExplorationAsync les ajoute bien à l'enregistrement.</summary>
+    public IEnumerable<string> ExplorationJoinRecapLines
+    {
+        get
+        {
+            if (ExplorationFreeHenchmanCount > 0)
+                yield return string.Format(Loc["EndOfGameRecapExplorationJoinFormat"], ResolvedFreeHenchman!.Name, ExplorationFreeHenchmanCount);
+            if (ExplorationEquippedHenchmanGroup is { } group)
+                yield return string.Format(Loc["EndOfGameRecapExplorationJoinFormat"], group.Name, 1);
+        }
+    }
 
     public IEnumerable<string> RecruitedHeroesRecapLines => RecruitedHeroRows.SelectMany(r => r.NameSlots).Select(s => s.DisplayLabel);
 
@@ -111,9 +125,23 @@ public partial class EndOfGamePageViewModel
                 total += WarbandRatingRules.WarriorContribution(false, 0, 1, hiredSword.BaseRating);
             foreach (var entry in RareItemsWithResults.Where(e => e.IsRecruited))
                 total += WarbandRatingRules.WarriorContribution(false, 0, 1, null, entry.SelectedCharacter!.RatingBonus);
+            // Exploration : un Zombie offert rejoint un groupe existant du même type s'il y en a un (et en prend
+            // l'expérience, voir ApplyExplorationAsync), sinon démarre à l'XP de départ de son archétype ; le
+            // prisonnier équipé prend celle du groupe qu'il rejoint.
+            if (ExplorationFreeHenchmanCount > 0 && ResolvedFreeHenchman is { } freeHenchman)
+            {
+                var joinedGroup = WarriorRows.FirstOrDefault(r => !r.Warrior.IsHero && r.Warrior.WarriorArchetypeId == freeHenchman.Id);
+                var experience = joinedGroup is null ? freeHenchman.StartingExperience : GroupExperienceAfterBattle(joinedGroup);
+                total += WarbandRatingRules.WarriorContribution(freeHenchman.IsLargeCreature, experience, ExplorationFreeHenchmanCount, null);
+            }
+            if (ExplorationEquippedHenchmanGroup is { } prisonerGroup)
+                total += WarbandRatingRules.WarriorContribution(prisonerGroup.Warrior.IsLargeCreature, GroupExperienceAfterBattle(prisonerGroup), 1, null);
             return total;
         }
     }
+
+    private static int GroupExperienceAfterBattle(WarriorOutcomeRow row) =>
+        row.Warrior.Experience + row.ExperienceGained + row.SeriousInjuryBonusExperience + row.ExplorationBonusExperience;
 
     public string ProjectedWarbandRatingDisplay => string.Format(Loc["EndOfGameRecapProjectedRatingFormat"], ProjectedWarbandRating);
 }

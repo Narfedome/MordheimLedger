@@ -1393,6 +1393,67 @@ public class RulesTests
     }
 
     [Fact]
+    public void CharacteristicIncreaseRules_WithEquipmentBonuses_RaisesOnlyTheGrantedMax()
+    {
+        var maxes = new CharacteristicMaxes(4, 6, 6, 4, 4, 3, 6, 4, 9);
+        var manual = new EquipmentItem { Id = 1, RaisesCharacteristicMax = CharacteristicField.WeaponSkill };
+        var raised = CharacteristicIncreaseRules.WithEquipmentBonuses(maxes, new[] { manual, new EquipmentItem { Id = 2 } });
+        Assert.Equal(7, raised.WeaponSkill);
+        Assert.Equal(6, raised.BallisticSkill);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_WithEquipmentBonuses_UnknownMaxStaysUnknown()
+    {
+        var maxes = new CharacteristicMaxes(null, null, null, null, null, null, null, null, null);
+        var manual = new EquipmentItem { Id = 1, RaisesCharacteristicMax = CharacteristicField.WeaponSkill };
+        Assert.Null(CharacteristicIncreaseRules.WithEquipmentBonuses(maxes, new[] { manual }).WeaponSkill);
+    }
+
+    [Fact]
+    public void CharacteristicIncreaseRules_TrainingManual_LetsWeaponSkillPassRacialMax()
+    {
+        var current = new CharacteristicValues(4, 6, 3, 3, 3, 1, 3, 1, 7);
+        var maxes = new CharacteristicMaxes(4, 6, 6, 4, 4, 3, 6, 4, 9);
+        var manual = new EquipmentItem { Id = 1, RaisesCharacteristicMax = CharacteristicField.WeaponSkill };
+        Assert.True(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.WeaponSkill, current, maxes));
+        Assert.False(CharacteristicIncreaseRules.IsAtMax(CharacteristicField.WeaponSkill, current,
+            CharacteristicIncreaseRules.WithEquipmentBonuses(maxes, new[] { manual })));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_FalseForSuggestedBranch()
+    {
+        var straggler = Straggler();
+        var suggested = ExplorationOutcomeResolver.ResolveWarbandOutcome(straggler, "Skaven of Clan Eshin")!;
+        Assert.False(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(straggler, suggested, "Skaven of Clan Eshin"));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_TrueForAnotherWarbandsBranch()
+    {
+        var straggler = Straggler();
+        var undeadBranch = ExplorationOutcomeResolver.ResolveWarbandOutcome(straggler, "Undead")!;
+        Assert.True(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(straggler, undeadBranch, "Witch Hunters"));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_TrueForCatchAllWhenWarbandHasItsOwn()
+    {
+        // A Skaven warband picking the "any other warband" branch is outside the rulebook too.
+        var straggler = Straggler();
+        var catchAll = straggler.Outcomes.Single(o => o.RestrictedToWarbandArchetypeOfficialIds.Count == 0);
+        Assert.True(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(straggler, catchAll, "Skaven of Clan Eshin"));
+    }
+
+    [Fact]
+    public void ExplorationOutcomeResolver_IsOutsideWarbandRestriction_FalseWhenResultNotThisShape()
+    {
+        var corpse = Corpse();
+        Assert.False(ExplorationOutcomeResolver.IsOutsideWarbandRestriction(corpse, corpse.Outcomes[0], "Skaven of Clan Eshin"));
+    }
+
+    [Fact]
     public void ExplorationOutcomeResolver_ResolveDoubleRollOutcome_NoDouble_ReturnsGold()
     {
         Assert.Equal(ExplorationOutcomeKind.Gold, ExplorationOutcomeResolver.ResolveDoubleRollOutcome(MerchantsHouse(), 2, 5)?.Kind);

@@ -2581,6 +2581,12 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="TourDetailCardBody" xml:space="preserve">
     <value>Its card holds everything its roster entry says: name, role, profile, special rules, equipment and experience.</value>
   </data>
+  <data name="TourDetailCardPhotoTitle" xml:space="preserve">
+    <value>Miniature photo</value>
+  </data>
+  <data name="TourDetailCardPhotoBody" xml:space="preserve">
+    <value>Tap the thumbnail to see the miniature's photo full size. Without a photo, it opens the warrior's editor so you can add one: camera or gallery on Android, file on Windows.</value>
+  </data>
   <data name="TourDetailCardEditTitle" xml:space="preserve">
     <value>Edit the warrior</value>
   </data>

@@ -2581,6 +2581,12 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="TourDetailCardBody" xml:space="preserve">
     <value>Sa carte reprend tout ce que dit sa fiche : nom, rôle, profil, règles spéciales, équipement et expérience.</value>
   </data>
+  <data name="TourDetailCardPhotoTitle" xml:space="preserve">
+    <value>Photo de la figurine</value>
+  </data>
+  <data name="TourDetailCardPhotoBody" xml:space="preserve">
+    <value>Touchez la miniature pour voir la photo de la figurine en grand. Sans photo, elle ouvre l'édition du guerrier pour en ajouter une : appareil photo ou galerie sur Android, fichier sur Windows.</value>
+  </data>
   <data name="TourDetailCardEditTitle" xml:space="preserve">
     <value>Modifier le guerrier</value>
   </data>

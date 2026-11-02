@@ -31,15 +31,38 @@ public partial class EndOfGamePageViewModel
             yield return (new ReserveInflow(entry.SelectedItem!, entry.SelectedMaterial, 1), ReserveLineOrigin.RarePurchase);
     }
 
-    /// <summary>Or rapporté par cette partie : Exploration, Récompenses du scénario, vente de pierres
-    /// magiques.</summary>
+    /// <summary>Or rapporté par cette partie : Exploration (y compris chaque ligne d'un Trésor Caché/Bande
+    /// Massacrée), Récompenses du scénario, vente de pierres magiques, prisonniers ennemis rançonnés ou
+    /// vendus.</summary>
     public int GainedGoldThisGame =>
         (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
+        + IndependentOutcomeGold
         + ScenarioGold
-        + WyrdstoneSaleValue;
+        + WyrdstoneSaleValue
+        + CapturedEnemiesGold;
 
-    /// <summary>Trésorerie avant cette Fin de Partie + ses gains - base de EndOfGameTreasuryRemaining, qui
+    /// <summary>Or des lignes Trésor Caché/Bande Massacrée passées - mêmes conditions qu'
+    /// ApplyExplorationOutcomeAsync. Absent du solde jusqu'au 2026-11-02 (retour utilisateur - la
+    /// trésorerie écrite à Terminer ne correspondait pas à celle affichée).</summary>
+    private int IndependentOutcomeGold => IndependentOutcomeEntries
+        .Where(e => e.ShowResult && e.IsGold)
+        .Sum(e => int.TryParse(e.AmountRoll, out var amount) ? amount : 0);
+
+    /// <summary>Pierres magiques des lignes Trésor Caché/Bande Massacrée passées - même principe
+    /// qu'IndependentOutcomeGold, rejoint FoundThisGameWyrdstoneShards (vendables dans la même séance).</summary>
+    private int IndependentOutcomeWyrdstoneShards => IndependentOutcomeEntries
+        .Where(e => e.ShowResult && e.IsWyrdstone)
+        .Sum(e => int.TryParse(e.AmountRoll, out var amount) ? amount : 0);
+
+    /// <summary>Prisonniers ennemis rançonnés/vendus aux esclavagistes - mêmes conditions
+    /// qu'ApplyCapturedEnemiesAsync.</summary>
+    private int CapturedEnemiesGold => !HasCapturedEnemies ? 0 : CapturedEnemies
+        .Where(e => e.SelectedFate is CapturedEnemyFate.Ransomed or CapturedEnemyFate.SoldToSlavers)
+        .Sum(e => int.TryParse(e.GoldAmount, out var amount) ? amount : 0);
+
+    /// <summary>Trésorerie avant cette Fin de Partie + ses gains + l'or des Blessures (rançons payées,
+    /// combats de gladiateur - WarriorOutcomeRow.TreasuryDelta) - base de EndOfGameTreasuryRemaining, qui
     /// retranche ensuite toutes les dépenses décidées dans le wizard. Pur aperçu, rien n'est écrit avant
     /// Terminer.</summary>
-    private int TreasuryWithGains => _currentTreasury + GainedGoldThisGame;
+    private int TreasuryWithGains => _currentTreasury + GainedGoldThisGame + WarriorRows.Sum(r => r.TreasuryDelta);
 }

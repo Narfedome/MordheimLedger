@@ -319,8 +319,10 @@ public partial class HenchmanGroupDraft : RecruitSlot
     private int count;
 
     /// <summary>Le bouton Diviser n'a de sens que s'il reste au moins 2 guerriers à répartir entre le
-    /// groupe existant et un nouveau.</summary>
-    public bool CanSplit => Count > 1 && Row.Archetype.CanUseEquipment;
+    /// groupe existant et un nouveau. Plus conditionné à CanUseEquipment (retour utilisateur 2026-11-03 -
+    /// les Goules, qui ne s'équipent pas, ne pouvaient pas être réparties en plusieurs groupes) : diviser
+    /// sert aussi à gérer des groupes distincts (XP, pertes), pas seulement à les équiper différemment.</summary>
+    public bool CanSplit => Count > 1;
 
     public HenchmanGroupDraft(WarriorRecruitRow row, string name, int count, bool isExistingWarband, Warrior? existingWarrior = null) : base(row, isExistingWarband, existingWarrior)
     {

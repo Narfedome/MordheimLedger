@@ -58,6 +58,12 @@ public partial class AnimatedHeightScrollView : ContentView
         });
     }
 
+    /// <summary>Vrai tant qu'un changement de hauteur est en attente ou en cours d'animation - la boîte de
+    /// dialogue se recentre pendant ce temps, donc rien de ce qu'elle contient n'est encore à sa place.
+    /// Lu par la visite guidée de l'assistant (WarbandEditDialog) pour ne mesurer ses cibles qu'une fois
+    /// la hauteur stabilisée : sinon le projecteur visait l'ancienne position, décalée vers le bas.</summary>
+    public bool IsResizing => _updatePending || _scrollView?.AnimationIsRunning(ResizeAnimationName) == true;
+
     private void UpdateHeight()
     {
         if (_scrollView is null || Content is not View content || content.Width <= 0) return;

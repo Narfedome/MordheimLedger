@@ -34,6 +34,9 @@ sont marquées « Ajout Mordheim Ledger ».
 - `OnboardingStep.cs`, `OnboardingCoordinator.cs`, `Views/OnboardingOverlayView.xaml.cs` : étapes de
   présentation sans cible (`TargetKey` vide : bulle centrée, sans trou), action `BeforeShow` lancée avant
   une étape (ouvre un segment, comme `RequiredRoute`) et évènement `TourEnded` pour défaire ces actions.
+- `Views/OnboardingTooltipCard.xaml` (Mordheim Ledger) : `SafeAreaEdges="None"` sur la bulle, sa bordure et
+  sa grille - sous Android, la bulle mise en page en (0,0) avant d'être déplacée gardait un rembourrage de
+  zone sûre en haut (bande vide au-dessus du titre).
 - `Internals/OnboardingTargetRegistry.cs` (Mordheim Ledger) : parmi les éléments d'une même clé affichés
   sur la page, `TryGet` retient le plus haut à l'écran plutôt que le plus récent - une carte de guerrier
   répétée par son gabarit désigne ainsi la première du roster, pas la dernière, souvent hors écran.

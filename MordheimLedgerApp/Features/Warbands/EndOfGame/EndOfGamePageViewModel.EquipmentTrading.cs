@@ -125,7 +125,9 @@ public partial class EndOfGamePageViewModel
         // ci-dessus) - le montrer aussi ici le compterait deux fois. Un renvoi PARTIEL (groupe d'Hommes de
         // main) laisse cette ligne intacte à dessein : les figurines restantes portent toujours la même
         // quantité PAR MODÈLE, encore vendable normalement.
-        foreach (var row in WarriorRows.Where(r => !r.IsFullyDismissed))
+        // Mort (Héros, ou groupe anéanti) ou LosesAllEquipment (Dépouillé, perdu aux Fosses) exclus aussi :
+        // cet équipement est perdu dès l'étape Blessure, bien avant la Vente (retour utilisateur 2026-11-02).
+        foreach (var row in WarriorRows.Where(r => !r.IsFullyDismissed && !r.IsDead && !r.LosesAllEquipment))
             foreach (var equipment in row.Warrior.Equipment)
             {
                 var remaining = equipment.Quantity - alreadyPendingQty.GetValueOrDefault(equipment.Id);

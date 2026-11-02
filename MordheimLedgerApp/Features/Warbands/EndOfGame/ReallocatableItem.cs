@@ -76,7 +76,11 @@ public sealed class ReallocationCarrier
 
     public IEnumerable<ReallocatableItem> Items => Kind switch
     {
-        ReallocationCarrierKind.ExistingHero => ExistingHeroRow!.Warrior.Equipment.Select(we => new ReallocatableItem(we, this)),
+        // Héros qui perd tout son équipement cette bataille (WarriorOutcomeRow.LosesAllEquipment) : son
+        // équipement d'origine (id réel positif) n'est plus là - seul ce qu'on lui a réalloué depuis reste.
+        ReallocationCarrierKind.ExistingHero => ExistingHeroRow!.Warrior.Equipment
+            .Where(we => we.Id < 0 || !ExistingHeroRow.LosesAllEquipment)
+            .Select(we => new ReallocatableItem(we, this)),
         ReallocationCarrierKind.NewRecruit => NewRecruitSlot!.Equipment.Select(p => new ReallocatableItem(p, this)),
         ReallocationCarrierKind.Reserve => _reserve!.Select(rl => new ReallocatableItem(rl, this)),
         _ => Enumerable.Empty<ReallocatableItem>()

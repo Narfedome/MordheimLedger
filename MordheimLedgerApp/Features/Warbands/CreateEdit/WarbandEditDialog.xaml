@@ -19,7 +19,7 @@
                Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
     <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
         <Grid RowDefinitions="*,Auto" RowSpacing="16">
-            <dialogs:AnimatedHeightScrollView Grid.Row="0">
+            <dialogs:AnimatedHeightScrollView x:Name="ContentScroll" Grid.Row="0">
                 <VerticalStackLayout Spacing="16">
                     <Grid ColumnDefinitions="*,Auto">
                         <Label Grid.Column="0" Text="{Binding Title}"

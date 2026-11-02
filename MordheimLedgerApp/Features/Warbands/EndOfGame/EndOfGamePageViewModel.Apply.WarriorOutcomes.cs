@@ -141,16 +141,12 @@ public partial class EndOfGamePageViewModel
                 else if (reroll.ShowCapturedChoice)
                 {
                     warrior.Status = WarriorStatus.Dead;
-                    foreach (var equipment in warrior.Equipment.ToList())
-                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                    warrior.Equipment.Clear();
+                    await StripWarriorEquipmentAsync(warrior);
                     sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                 }
                 else
                 {
-                    foreach (var equipment in warrior.Equipment.ToList())
-                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                    warrior.Equipment.Clear();
+                    await StripWarriorEquipmentAsync(warrior);
                     sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
                 }
 
@@ -305,9 +301,7 @@ public partial class EndOfGamePageViewModel
                 else
                 {
                     warrior.Status = WarriorStatus.Dead;
-                    foreach (var equipment in warrior.Equipment.ToList())
-                        await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                    warrior.Equipment.Clear();
+                    await StripWarriorEquipmentAsync(warrior);
                     sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                 }
                 changed = true;
@@ -361,16 +355,12 @@ public partial class EndOfGamePageViewModel
                     else if (reroll.ShowCapturedChoice)
                     {
                         warrior.Status = WarriorStatus.Dead;
-                        foreach (var equipment in warrior.Equipment.ToList())
-                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                        warrior.Equipment.Clear();
+                        await StripWarriorEquipmentAsync(warrior);
                         sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     else
                     {
-                        foreach (var equipment in warrior.Equipment.ToList())
-                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                        warrior.Equipment.Clear();
+                        await StripWarriorEquipmentAsync(warrior);
                         sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
                     }
                     changed = true;
@@ -415,9 +405,7 @@ public partial class EndOfGamePageViewModel
                     else
                     {
                         warrior.Status = WarriorStatus.Dead;
-                        foreach (var equipment in warrior.Equipment.ToList())
-                            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                        warrior.Equipment.Clear();
+                        await StripWarriorEquipmentAsync(warrior);
                         sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     changed = true;
@@ -488,9 +476,7 @@ public partial class EndOfGamePageViewModel
                 return true;
 
             case SeriousInjuryEffectKind.LoseAllEquipment:
-                foreach (var equipment in warrior.Equipment.ToList())
-                    await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                warrior.Equipment.Clear();
+                await StripWarriorEquipmentAsync(warrior);
                 return false;
 
             case SeriousInjuryEffectKind.GainExperience:
@@ -525,6 +511,21 @@ public partial class EndOfGamePageViewModel
 
             default:
                 return false;
+        }
+    }
+
+    /// <summary>Perte de tout l'équipement (Dépouillé, combat de gladiateur perdu, Capturé non racheté) -
+    /// seulement les lignes déjà en base (id positif). Un objet réalloué à ce Héros pendant cette même Fin
+    /// de Partie (id synthétique négatif, voir EndOfGamePageViewModel.Reallocation.cs) a été acheté ou
+    /// échangé APRÈS la blessure : il lui reste, et ApplyEquipmentReallocationAsync le crée plus loin.
+    /// Jusqu'au 2026-11-02, toute la liste était vidée ici, objets réalloués compris (retour utilisateur -
+    /// l'arbalète rachetée au Héros revenu des Fosses n'apparaissait pas).</summary>
+    private async Task StripWarriorEquipmentAsync(Warrior warrior)
+    {
+        foreach (var equipment in warrior.Equipment.Where(e => e.Id > 0).ToList())
+        {
+            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
+            warrior.Equipment.Remove(equipment);
         }
     }
 

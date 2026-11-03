@@ -41,7 +41,8 @@ public partial class EndOfGamePageViewModel
     /// Reserve.cs), créé en base à Terminer par ApplyReserveAsync. Quantity déjà multipliée par le nombre
     /// de figurines renvoyées (voir la doc de classe - Quantity par modèle).</summary>
     public IEnumerable<ReserveInflow> PendingDismissedEquipment() =>
-        WarriorRows.Where(r => r.EffectiveDismissCount > 0)
+        // LosesAllEquipment : équipement déjà perdu à l'étape Blessure, rien à rendre à la réserve.
+        WarriorRows.Where(r => r.EffectiveDismissCount > 0 && !r.LosesAllEquipment)
             .SelectMany(r => r.Warrior.Equipment.Select(e => new ReserveInflow(e.Item, e.MaterialRule, e.Quantity * r.EffectiveDismissCount, e.FoundValueOverride)));
 
     /// <summary>Récap "Équipement récupéré" affiché en direct sur cette étape (retour utilisateur

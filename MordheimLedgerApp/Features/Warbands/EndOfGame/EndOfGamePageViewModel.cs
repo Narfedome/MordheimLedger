@@ -199,12 +199,18 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     partial void OnStepIndexChanged(int value)
     {
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
+        // Vues d'étape mises en cache (StepViewConverter) : le solde et les pierres magiques dépendent de
+        // saisies faites sur d'autres étapes (Blessures, Exploration...) - les relire à chaque changement
+        // d'étape plutôt que de compter sur une notification par saisie.
+        NotifyTreasuryChanged();
+        NotifyWyrdstoneFoundThisGameChanged();
+        if (Current.Kind == StepKind.InjuryRecap) OnPropertyChanged(nameof(InjuryRecapLines));
     }
 
     /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)
     /// - le convertisseur, hors de cette classe, doit pouvoir lire cette valeur pour choisir la bonne
     /// vue.</summary>
-    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
+    public enum StepKind { Result, ScenarioRewards, OutOfAction, Injury, PitFight, InjuryRecap, Captives, Experience, Advance, ExplorationRoll, ExplorationResult, WyrdstoneSale, AvailableVeterans, RareItems, RareItemPurchase, HiredSwords, DramatisPersonae, PairEngagement, PairDuel, DismissWarriors, EquipmentTrading, RecruitHeroesCount, RecruitHeroDetail, RecruitVeteranTopUp, RecruitHenchmenCount, RecruitHenchmenEquipment, RecruitHenchmenNames, EquipmentReallocation, Recap }
 
     /// <summary>IsExplorationAdvance distingue les DEUX passages possibles par StepKind.Advance pour un
     /// même guerrier : le premier (false), juste après Expérience, pour les paliers franchis par l'XP de
@@ -322,6 +328,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
                 foreach (var sub in r.MultipleInjuryRolls)
                     if (sub.ShowSoldToThePits) steps.Add(new WizardStep(StepKind.PitFight, r, SubRoll: sub));
             }
+            // Bilan des blessures (2026-11-02) : seulement si au moins un guerrier a été mis hors de combat.
+            if (WarriorRows.Any(w => w.IsOutOfAction)) steps.Add(new(StepKind.InjuryRecap));
             // Prisonniers ennemis : une seule étape pour toute la bande (pas par guerrier, contrairement à
             // Blessure/Progression) - ce que CETTE bande a capturé sur l'adversaire, sans rapport avec les
             // guerriers propres mis hors de combat ci-dessus. Ajout demandé par l'utilisateur (2026-08-27),

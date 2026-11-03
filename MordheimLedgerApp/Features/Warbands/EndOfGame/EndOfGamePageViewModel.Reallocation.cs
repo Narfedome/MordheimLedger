@@ -86,7 +86,7 @@ public partial class EndOfGamePageViewModel
         get
         {
             yield return ReallocationCarrier.ForReserve(BuildReserve(ReserveStage.Final).Lines.ToList(), Loc["EndOfGameEquipmentTradingStashSource"]);
-            foreach (var row in WarriorRows.Where(r => r.IsHero && !r.IsFullyDismissed))
+            foreach (var row in WarriorRows.Where(r => r.IsHero && !r.IsFullyDismissed && !r.IsDead))
                 yield return ReallocationCarrier.ForHero(row);
             foreach (var slot in RecruitedHeroRows.SelectMany(r => r.NameSlots))
                 yield return ReallocationCarrier.ForRecruit(slot);
@@ -94,7 +94,7 @@ public partial class EndOfGamePageViewModel
     }
 
     /// <summary>Absente si aucun Héros existant NI recrue cette partie - rien à réallouer.</summary>
-    public bool HasEligibleReallocationCarriers => WarriorRows.Any(r => r.IsHero && !r.IsFullyDismissed) || RecruitedHeroRows.Any();
+    public bool HasEligibleReallocationCarriers => WarriorRows.Any(r => r.IsHero && !r.IsFullyDismissed && !r.IsDead) || RecruitedHeroRows.Any();
 
     [RelayCommand]
     private Task ShowReallocationItemDetail(ReallocatableItem item) =>

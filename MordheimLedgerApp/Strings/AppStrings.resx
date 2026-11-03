@@ -204,6 +204,30 @@
   <data name="WarbandsSplitGroupPrompt" xml:space="preserve">
     <value>Combien de guerriers dans le nouveau groupe ? (1-{0})</value>
   </data>
+  <data name="WarbandsRemoveFiguresTitle" xml:space="preserve">
+    <value>Retirer des figurines</value>
+  </data>
+  <data name="WarbandsRemoveFiguresPrompt" xml:space="preserve">
+    <value>Combien de figurines retirer de {0} ? (1-{1})</value>
+  </data>
+  <data name="EndOfGameInjuryRecapHeading" xml:space="preserve">
+    <value>Bilan des blessures</value>
+  </data>
+  <data name="EndOfGameInjuryRecapHint" xml:space="preserve">
+    <value>Ce qui sera appliqué à l'enregistrement - Précédent pour corriger un jet.</value>
+  </data>
+  <data name="EndOfGameInjuryRecapNoLoss" xml:space="preserve">
+    <value>Rétabli</value>
+  </data>
+  <data name="EndOfGameInjuryRecapWiped" xml:space="preserve">
+    <value>Groupe anéanti</value>
+  </data>
+  <data name="EndOfGameInjuryRecapFiguresLost" xml:space="preserve">
+    <value>{0} figurine(s) morte(s), {1} restante(s)</value>
+  </data>
+  <data name="EndOfGameInjuryRecapEquipmentLost" xml:space="preserve">
+    <value>Perd tout son équipement</value>
+  </data>
   <data name="WarbandsWeaponLimitWarningTitle" xml:space="preserve">
     <value>Limite d'armes dépassée</value>
   </data>

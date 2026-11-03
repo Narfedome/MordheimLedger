@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:internals="clr-namespace:Plugin.Maui.Onboarding.Internals"
              x:Class="Plugin.Maui.Onboarding.Views.OnboardingTooltipCard"
-             x:Name="this">
+             x:Name="this"
+             SafeAreaEdges="None">
 
     <ContentView.Resources>
         <internals:InvertedBoolConverter x:Key="InvertedBoolConverter" />
@@ -19,7 +20,11 @@
          property. StrokeThickness stays nonzero unconditionally — Transparent is invisible at any
          thickness, so the default look is unaffected, but it means a border color set later actually
          renders without also having to touch this. -->
-    <Border Padding="18,12" StrokeThickness="1"
+    <!-- Ajout Mordheim Ledger : SafeAreaEdges="None" sur la bulle elle-même (comme RootGrid dans
+         OnboardingOverlayView). Une bulle neuve est d'abord mise en page en (0,0), sous la barre d'état,
+         avant d'être déplacée par sa Margin : sous Android (.NET 10, bord à bord), la grille recevait alors
+         un rembourrage de zone sûre en haut, gardé ensuite - bande vide d'environ 33 dp au-dessus du titre. -->
+    <Border Padding="18,12" StrokeThickness="1" SafeAreaEdges="None"
             BackgroundColor="{Binding Source={x:Reference this}, Path=TooltipBackgroundColor}"
             Stroke="{Binding Source={x:Reference this}, Path=TooltipBorderColor}">
         <Border.StrokeShape>
@@ -32,7 +37,7 @@
             <Shadow Brush="#000000" Offset="0,4" Radius="14" Opacity="0.35" />
         </Border.Shadow>
 
-        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*" SafeAreaEdges="None">
             <Label Text="{Binding Source={x:Reference this}, Path=Title}"
                    FontSize="16" FontFamily="OpenSansSemibold"
                    TextColor="{DynamicResource AppText}"

@@ -47,7 +47,9 @@ public partial class EndOfGamePageViewModel
     public int FoundThisGameWyrdstoneShards => BaselineWyrdstoneShardsFound +
         (IsExplorationWyrdstone && int.TryParse(ExplorationWyrdstoneAmount, out var located) ? located : 0)
         // Éclats accordés par le scénario (étape Récompenses du scénario).
-        + ScenarioWyrdstoneShards;
+        + ScenarioWyrdstoneShards
+        // Trésor Caché/Bande Massacrée - appliqués à Terminer mais jusque-là ni vendables ni comptés ici.
+        + IndependentOutcomeWyrdstoneShards;
 
     public bool HasFoundThisGameWyrdstone => FoundThisGameWyrdstoneShards > 0;
 

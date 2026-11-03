@@ -204,6 +204,30 @@
   <data name="WarbandsSplitGroupPrompt" xml:space="preserve">
     <value>How many warriors in the new group? (1-{0})</value>
   </data>
+  <data name="WarbandsRemoveFiguresTitle" xml:space="preserve">
+    <value>Remove models</value>
+  </data>
+  <data name="WarbandsRemoveFiguresPrompt" xml:space="preserve">
+    <value>How many models to remove from {0}? (1-{1})</value>
+  </data>
+  <data name="EndOfGameInjuryRecapHeading" xml:space="preserve">
+    <value>Injury summary</value>
+  </data>
+  <data name="EndOfGameInjuryRecapHint" xml:space="preserve">
+    <value>What will be applied on save - use Back to fix a roll.</value>
+  </data>
+  <data name="EndOfGameInjuryRecapNoLoss" xml:space="preserve">
+    <value>Recovered</value>
+  </data>
+  <data name="EndOfGameInjuryRecapWiped" xml:space="preserve">
+    <value>Group wiped out</value>
+  </data>
+  <data name="EndOfGameInjuryRecapFiguresLost" xml:space="preserve">
+    <value>{0} model(s) dead, {1} remaining</value>
+  </data>
+  <data name="EndOfGameInjuryRecapEquipmentLost" xml:space="preserve">
+    <value>Loses all equipment</value>
+  </data>
   <data name="WarbandsWeaponLimitWarningTitle" xml:space="preserve">
     <value>Weapon limit exceeded</value>
   </data>

@@ -549,6 +549,13 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     public bool HasInjuryBranchSpecialRules => InjuryBranchSpecialRules.Count > 0;
 
+    /// <summary>Nom court du résultat (catalogue Injury, ex. "Vendu aux Fosses") - même résolution par jet
+    /// que l'enregistrement, pour l'étape Bilan des blessures ; repli sur le texte complet hors catalogue.</summary>
+    public string InjuryShortName => int.TryParse(ManualRoll, out var roll)
+        && InjuryCatalogLookup.Find(_injuryCatalog, Warrior.IsHero ? InjuryCategory.Hero : InjuryCategory.Henchman, roll,
+            ShowInjuryBranchSubRoll && int.TryParse(InjuryBranchSubRoll, out var subRoll) ? subRoll : null) is { } injury
+        ? injury.Name : ResolvedInjuryText;
+
     /// <summary>Résolu depuis ManualRoll+InjuryBranchSubRoll (voir Core.Rules.SeriousInjuryEffectTable.
     /// TryGetBranchSubRollOutcome) - null tant que le sous-jet n'est pas encore saisi/valide, ainsi que
     /// pour la branche grave (1) qui reste hors Palier 1 (aucun effet mécanisé, cf. la doc de la
@@ -761,6 +768,28 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     private bool MainRollEndsInDeath =>
         (ShowCapturedChoice && !(IsRansomed && int.TryParse(RansomAmount, out _)))
         || (ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.FirstOrDefault()?.EndsInDeath == true);
+
+    /// <summary>Le Héros perd-il tout son équipement cette bataille (Dépouillé 36, ou combat de gladiateur
+    /// perdu puis survécu - jet principal ou sous-jet "Blessures multiples"), tel que Terminer
+    /// l'appliquera. Connu dès l'étape Blessure, comme IsDead : la Vente et Réallouer ne proposent plus son
+    /// équipement d'origine, et ce qu'on lui réalloue ensuite (un objet racheté) lui reste bien (retour
+    /// utilisateur 2026-11-02 - l'arbalète rachetée disparaissait à Terminer).</summary>
+    public bool LosesAllEquipment => Warrior.IsHero && !IsDead
+        && ((!string.IsNullOrWhiteSpace(InjuryResultText) && int.TryParse(ManualRoll, out var roll)
+                && SeriousInjuryEffectTable.TryGetOutcome(roll, out var outcome) && outcome.Kind == SeriousInjuryEffectKind.LoseAllEquipment)
+            || (ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.FirstOrDefault() is { } reroll && !string.IsNullOrWhiteSpace(reroll.InjuryResultText))
+            || MultipleInjuryRolls.Any(s => s.LosesAllEquipment));
+
+    /// <summary>Or gagné ou payé par les Blessures de ce guerrier tel que Terminer l'appliquera
+    /// (ApplyWarriorOutcomesAsync) : rançon d'un Capturé (61), combat de gladiateur gagné (+50 CO) ou
+    /// perdu puis racheté sur sa relance, sur le jet principal comme sur chaque sous-jet. Jusqu'ici absent
+    /// du solde du wizard, qui affichait donc une trésorerie différente de celle écrite à Terminer.</summary>
+    public int TreasuryDelta =>
+        (ShowCapturedChoice && IsRansomed && int.TryParse(RansomAmount, out var ransom) ? -ransom : 0)
+        + (!ShowSoldToThePits ? 0
+            : WonPitFight ? InjurySubRollEntry.PitFightWinGold
+            : SoldToPitsRerollRoll.FirstOrDefault() is { } reroll && !string.IsNullOrWhiteSpace(reroll.InjuryResultText) ? reroll.RansomTreasuryDelta : 0)
+        + MultipleInjuryRolls.Sum(s => s.TreasuryDelta);
 
     /// <summary>Figurines d'un groupe d'Hommes de main mortes sur leur D6 de Blessure cette bataille.</summary>
     public int FigureDeathCount => FigureInjuryRolls.Count(f => f.IsDeath);

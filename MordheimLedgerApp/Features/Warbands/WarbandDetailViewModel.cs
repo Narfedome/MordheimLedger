@@ -535,6 +535,34 @@ public partial class WarbandDetailViewModel : BaseViewModel
         await ShowDialogAsync(new ChipDetailDialog(new ChipDetailDialogViewModel(school.Name, school.Description, spells)));
     }
 
+    /// <summary>Détache une partie d'un groupe d'Hommes de main existant dans un nouveau groupe (même
+    /// profil, XP et équipement par modèle), pour l'équiper ensuite différemment - retour utilisateur
+    /// 2026-11-02 ("impossible de séparer les goules pour faire des groupes différents"). Même invite que
+    /// SplitHenchmanGroupDraft du recrutement, ici sur un groupe déjà en base.</summary>
+    /// <summary>Retire des figurines d'un groupe d'Hommes de main sans supprimer le groupe (une figurine
+    /// perdue hors du wizard de Fin de Partie, qui gère déjà ses propres morts) - retour utilisateur
+    /// 2026-11-02 ("je vois pas où le supprimer sans supprimer le groupe entier"). Le groupe garde au moins
+    /// une figurine : pour le perdre en entier, passer par la fiche du guerrier.</summary>
+    // AllowConcurrentExecutions : une seule instance de commande pour tous les boutons du roster - sans
+    // ça, tous les autres se grisent tant que l'invite de l'un est ouverte.
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task RemoveHenchmanFigures(WarriorRow row)
+    {
+        if (Warband is null || !row.CanManageGroup) return;
+        var group = row.Warrior;
+
+        var input = await ShowPromptAsync(Loc["WarbandsRemoveFiguresTitle"], string.Format(Loc["WarbandsRemoveFiguresPrompt"], group.Name, group.HeadCount - 1), initialValue: "1");
+        if (!int.TryParse(input, out var removed) || removed <= 0 || removed >= group.HeadCount) return;
+
+        await Loading.RunAsync(async () =>
+        {
+            group.HeadCount -= removed;
+            await _warbandService.SaveWarriorAsync(group);
+            await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Format(Loc["HistoryHenchmanDeathSentence"], group.Name, removed, group.HeadCount));
+            await LoadAsync(Warband.Id);
+        });
+    }
+
     [RelayCommand]
     private async Task AddNote()
     {

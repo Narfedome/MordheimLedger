@@ -7,7 +7,6 @@ using MordheimLedgerApp.Features.Onboarding;
 using MordheimLedgerApp.Features.Settings.ContentConflicts;
 using MordheimLedgerApp.Services;
 using System.Collections.ObjectModel;
-using System.Reflection;
 
 namespace MordheimLedgerApp.Features.Settings
 {
@@ -16,17 +15,16 @@ namespace MordheimLedgerApp.Features.Settings
         private readonly ThemeService _theme = ThemeService.Instance;
         private readonly AppDatabase _db;
 
-        // Version complète Major.Minor.Build.<commits> (InformationalVersion, posée par SetVersionFromGit
-        // du csproj) plutôt qu'AppInfo.Current.VersionString : sous Windows, la version du package est
-        // forcément Major.Minor.Build.0 (MAUI + Microsoft Store), sans le compteur de commits. Le SDK
-        // .NET peut suffixer "+<sha du commit>", retiré ici.
+        // Windows exige 4 segments (Major.Minor.Build.Revision) pour l'identité de package - le 4e
+        // (Revision) vaut toujours 0 (exigence du Microsoft Store), sans intérêt pour l'utilisateur, on l'aligne sur
+        // le format 3 segments affiché nativement sur les autres plateformes.
         public string AppVersion
         {
             get
             {
-                var informational = typeof(SettingsViewModel).Assembly
-                    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-                return string.IsNullOrEmpty(informational) ? AppInfo.Current.VersionString : informational.Split('+')[0];
+                var raw = AppInfo.Current.VersionString;
+                var parts = raw.Split('.');
+                return parts.Length > 3 ? string.Join('.', parts.Take(3)) : raw;
             }
         }
 

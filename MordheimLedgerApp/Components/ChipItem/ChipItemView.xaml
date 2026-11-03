@@ -14,7 +14,7 @@
         IsVisible="{Binding ShowSection}">
 
         <!-- Header -->
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid x:Name="HeaderGrid" ColumnDefinitions="*,Auto">
 
 
             <Label FontSize="{Binding HeaderFontSize}" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
@@ -27,15 +27,7 @@
             </Label>
 
 
-            <components:FaIconButtonView
-                Grid.Column="1"
-                Style="{StaticResource GhostIconButtonStyle}"
-                Icon="{x:Static icons:SolidFont.Plus}"
-                IconSize="12"
-                ButtonWidthRequest="22"
-                ButtonHeightRequest="22"
-                IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
-                Command="{Binding AddCommand}" />
+            <!-- Bouton "+" (AddCommand) créé en code seulement si la commande est fournie - voir LazyIconButton. -->
 
         </Grid>
 

@@ -11,7 +11,21 @@ public partial class FaIconButtonView : ContentView
         InitializeComponent();
     }
     public static readonly BindableProperty BackgroundImageProperty =
-    BindableProperty.Create(nameof(BackgroundImage), typeof(ImageSource), typeof(FaIconButtonView), default(ImageSource));
+    BindableProperty.Create(nameof(BackgroundImage), typeof(ImageSource), typeof(FaIconButtonView), default(ImageSource),
+        propertyChanged: (b, _, n) => { if (n is not null) ((FaIconButtonView)b).EnsureBackgroundImage(); });
+
+    private bool _hasBackgroundImage;
+
+    // Créée à la première image fournie plutôt que dans le XAML (voir FaIconButtonView.xaml), derrière le
+    // Button comme avant.
+    private void EnsureBackgroundImage()
+    {
+        if (_hasBackgroundImage) return;
+        _hasBackgroundImage = true;
+        var image = new Image { Aspect = Aspect.AspectFit };
+        image.SetBinding(Image.SourceProperty, new Binding(nameof(BackgroundImage), source: this));
+        RootGrid.Insert(0, new Border { StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 8 }, StrokeThickness = 0, Content = image });
+    }
 
     public ImageSource BackgroundImage
     {

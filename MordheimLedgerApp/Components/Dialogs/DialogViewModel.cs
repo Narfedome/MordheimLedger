@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 
@@ -39,13 +38,6 @@ namespace MordheimLedgerApp.Components.Dialogs
 
         // --- Détection des modifications non enregistrées (2026-09-24, retour utilisateur) ---------------
 
-        private static readonly JsonSerializerOptions SnapshotOptions = new()
-        {
-            // DramatisPersona.PairedWithDramatisPersona est auto-référent, et les modèles se croisent
-            // (objet -> règles spéciales...) - on veut les valeurs, pas un graphe fidèle.
-            ReferenceHandler = ReferenceHandler.IgnoreCycles
-        };
-
         private string? _initialSnapshot;
 
         /// <summary>Ce que l'utilisateur édite dans ce dialog et qui sera perdu en annulant - null (défaut)
@@ -82,7 +74,7 @@ namespace MordheimLedgerApp.Components.Dialogs
             if (EditableState is not { } state) return null;
             try
             {
-                return JsonSerializer.Serialize(state, SnapshotOptions);
+                return JsonSerializer.Serialize(state, DialogSnapshot.Options);
             }
             catch (Exception)
             {

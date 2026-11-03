@@ -28,7 +28,7 @@
          (WarbandArchetypeEditDialog), sans impact sur les usages en lecture seule qui ne les renseignent
          pas. -->
     <VerticalStackLayout BindingContext="{x:Reference root}" IsVisible="{Binding ShowSection}" Spacing="4">
-        <Grid ColumnDefinitions="*,Auto">
+        <Grid x:Name="HeaderGrid" ColumnDefinitions="*,Auto">
             <!-- HeaderFontSize a toujours une valeur (12 par défaut) donc bindée directement ; gris
                  AppTextMuted par défaut comme les libellés de champ des dialogs - un DataTrigger applique
                  HeaderTextColor à la place si l'appelant l'a renseigné. -->
@@ -47,11 +47,7 @@
                     </DataTrigger>
                 </Label.Triggers>
             </Label>
-            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
-                                          Icon="{x:Static icons:SolidFont.Plus}"
-                                          IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                          IsVisible="{Binding AddCommand, Converter={StaticResource IsNotNullConverter}}"
-                                          Command="{Binding AddCommand}"/>
+            <!-- Bouton "+" (AddCommand) créé en code seulement si la commande est fournie - voir LazyIconButton. -->
         </Grid>
         <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ItemsSource}" IsVisible="{Binding HasItems}">
             <BindableLayout.ItemTemplate>

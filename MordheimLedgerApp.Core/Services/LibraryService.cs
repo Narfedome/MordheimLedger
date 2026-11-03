@@ -11,6 +11,8 @@ public class LibraryService : ILibraryService
 
     public LibraryService(AppDatabase db) => _db = db;
 
+    public int DataVersion => _db.DataVersion;
+
     private Task<Dictionary<string, string>> ResolveTranslationsAsync(IEnumerable<string?> keys, string languageCode) =>
         TranslationResolver.ResolveAsync(_db, keys, languageCode);
 

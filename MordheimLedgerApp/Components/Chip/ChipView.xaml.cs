@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using MordheimLedgerApp.Resources.Icons;
 
 namespace MordheimLedgerApp.Components;
 
@@ -63,7 +64,8 @@ public partial class ChipView : ContentView
     // Non renseignée (défaut) : pas de bouton Xmark. Renseignée : petit Xmark en bout de chip,
     // invoqué avec Item en CommandParameter.
     public static readonly BindableProperty RemoveCommandProperty =
-        BindableProperty.Create(nameof(RemoveCommand), typeof(ICommand), typeof(ChipView));
+        BindableProperty.Create(nameof(RemoveCommand), typeof(ICommand), typeof(ChipView),
+            propertyChanged: (b, _, n) => ((ChipView)b).SyncRemoveButton((ICommand?)n));
 
     public ICommand? RemoveCommand
     {
@@ -75,7 +77,8 @@ public partial class ChipView : ContentView
     // (avant le Xmark s'il est aussi présent), invoquée avec Item en CommandParameter - Réallouer
     // l'équipement (2026-09-22), même schéma exact que RemoveCommand.
     public static readonly BindableProperty MoveCommandProperty =
-        BindableProperty.Create(nameof(MoveCommand), typeof(ICommand), typeof(ChipView));
+        BindableProperty.Create(nameof(MoveCommand), typeof(ICommand), typeof(ChipView),
+            propertyChanged: (b, _, n) => ((ChipView)b).SyncMoveButton((ICommand?)n));
 
     public ICommand? MoveCommand
     {
@@ -83,8 +86,27 @@ public partial class ChipView : ContentView
         set => SetValue(MoveCommandProperty, value);
     }
 
+    private FaIconButtonView? _moveButton;
+    private FaIconButtonView? _removeButton;
+
     public ChipView()
     {
         InitializeComponent();
+    }
+
+    private void SyncMoveButton(ICommand? command) =>
+        LazyIconButton.Sync(ref _moveButton, command, () => AddActionButton(SolidFont.RightLeft, 2, nameof(MoveCommand)));
+
+    private void SyncRemoveButton(ICommand? command) =>
+        LazyIconButton.Sync(ref _removeButton, command, () => AddActionButton(SolidFont.Xmark, 3, nameof(RemoveCommand)));
+
+    private FaIconButtonView AddActionButton(string icon, int column, string commandPropertyName)
+    {
+        var button = LazyIconButton.CreateGhost(icon, 10);
+        button.Padding = new Thickness(0, 0, -8, 0);
+        button.SetBinding(FaIconButtonView.CommandProperty, new Binding(commandPropertyName, source: this));
+        button.SetBinding(FaIconButtonView.CommandParameterProperty, new Binding(nameof(Item), source: this));
+        ChipGrid.Add(button, column);
+        return button;
     }
 }

@@ -8,6 +8,9 @@ namespace MordheimLedgerApp.Core.Services;
 /// dependency while still being able to resolve/write per-language text.</summary>
 public interface ILibraryService
 {
+    /// <summary>Voir AppDatabase.DataVersion.</summary>
+    int DataVersion { get; }
+
     Task<List<WarbandArchetype>> GetWarbandArchetypesAsync(string languageCode);
     Task<WarbandArchetype?> GetWarbandArchetypeAsync(int id, string languageCode);
     Task<List<WarriorArchetype>> GetWarriorArchetypesAsync(int warbandArchetypeId, string languageCode);

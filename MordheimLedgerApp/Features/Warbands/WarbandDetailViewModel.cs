@@ -197,28 +197,23 @@ public partial class WarbandDetailViewModel : BaseViewModel
     {
         await Loading.RunAsync(async () =>
         {
-            Warband = await _warbandService.GetWarbandAsync(id);
-            if (Warband is null) return;
+            // Lectures + résolution du catalogue hors du thread UI (2026-11-03) : à la première ouverture
+            // d'une fiche, le mapping des catalogues (Francs-Tireurs, Dramatis Personae...) bloquait
+            // l'écran ~2,7 s sur Android. Les continuations des services repassaient toutes sur le thread
+            // UI (cache de tables déjà rempli = tâches déjà terminées). Seule l'affectation aux propriétés
+            // liées reste sur le thread UI, ci-dessous.
+            var data = await Task.Run(() => LoadRosterAsync(id, LocalizationService.Instance.Language));
+            Warband = data.Warband;
+            if (data.Warband is null) return;
 
-            _recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
-            // Pour la résolution du RoleName d'un guerrier recruté d'un Franc-Tireur (voir ToRow) - le
-            // catalogue complet, pas filtré par restriction de bande (un Franc-Tireur déjà recruté doit
-            // toujours afficher son nom, même si son entrée catalogue a depuis été restreinte à d'autres
-            // bandes).
-            _recruitableHiredSwords = await _libraryService.GetHiredSwordsAsync(LocalizationService.Instance.Language);
-            // Même besoin, pour la résolution du RoleName/SpecialRules/MagicSchool d'un guerrier recruté
-            // depuis le catalogue Dramatis Personae (voir ToRow) - catalogue complet, même raison.
-            _recruitableDramatisPersonae = await _libraryService.GetDramatisPersonaeAsync(LocalizationService.Instance.Language);
-            var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, LocalizationService.Instance.Language);
-            _bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
-            _bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
-            var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
-            _warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
+            _recruitableArchetypes = data.RecruitableArchetypes;
+            _recruitableHiredSwords = data.RecruitableHiredSwords;
+            _recruitableDramatisPersonae = data.RecruitableDramatisPersonae;
+            _bandWideSpecialRules = data.BandWideSpecialRules;
+            _bandMagicSchools = data.BandMagicSchools;
+            _warbandArchetypeNames = data.WarbandArchetypeNames;
 
-            var loaded = await _warbandService.GetWarriorsAsync(id, LocalizationService.Instance.Language);
-            var rosterBuilder = new WarriorRosterBuilder(_recruitableArchetypes, _recruitableHiredSwords, _recruitableDramatisPersonae,
-                _bandWideSpecialRules, _bandMagicSchools, _warbandArchetypeNames);
-            var rows = rosterBuilder.BuildRows(loaded);
+            var rows = data.Rows;
             var alive = rows.Where(r => !r.IsDead && !r.IsRetired).ToList();
             // Francs-Tireurs/Dramatis Personae : blocs à part depuis le 2026-09-01 (retour utilisateur) -
             // avant, un Franc-Tireur recruté tombait dans Henchmen (IsHero=false pour lui, voir sa propre
@@ -239,12 +234,56 @@ public partial class WarbandDetailViewModel : BaseViewModel
             Rating = alive.Where(r => !r.Warrior.IsHostileThisBattle).Sum(r => WarbandRatingRules.WarriorContribution(
                 r.Warrior.IsLargeCreature, r.Warrior.Experience, r.Warrior.HeadCount, r.Warrior.HiredSwordBaseRating, r.Warrior.DramatisPersonaRatingBonus));
 
-            var inventory = await _warbandService.GetWarbandEquipmentAsync(id, LocalizationService.Instance.Language);
-            Inventory = new ObservableCollection<WarbandEquipment>(inventory);
-
-            var history = await _warbandService.GetHistoryEntriesAsync(id);
-            HistoryEntries = new ObservableCollection<HistoryEntry>(history);
+            Inventory = new ObservableCollection<WarbandEquipment>(data.Inventory);
+            HistoryEntries = new ObservableCollection<HistoryEntry>(data.History);
         });
+    }
+
+    private sealed record RosterData(
+        Warband? Warband,
+        List<WarriorArchetype> RecruitableArchetypes,
+        List<HiredSword> RecruitableHiredSwords,
+        List<DramatisPersona> RecruitableDramatisPersonae,
+        List<SpecialRule> BandWideSpecialRules,
+        List<MagicSchool> BandMagicSchools,
+        Dictionary<int, string> WarbandArchetypeNames,
+        List<WarriorRow> Rows,
+        List<WarbandEquipment> Inventory,
+        List<HistoryEntry> History);
+
+    /// <summary>Tout ce que LoadAsync lit en base et résout depuis le catalogue, sans toucher à aucune
+    /// propriété liée - appelée hors du thread UI.</summary>
+    private async Task<RosterData> LoadRosterAsync(int id, string language)
+    {
+        var warband = await _warbandService.GetWarbandAsync(id);
+        if (warband is null)
+            return new RosterData(null, new(), new(), new(), new(), new(), new(), new(), new(), new());
+
+        var recruitableArchetypes = await _libraryService.GetWarriorArchetypesAsync(warband.WarbandArchetypeId, language);
+        // Pour la résolution du RoleName d'un guerrier recruté d'un Franc-Tireur (voir ToRow) - le
+        // catalogue complet, pas filtré par restriction de bande (un Franc-Tireur déjà recruté doit
+        // toujours afficher son nom, même si son entrée catalogue a depuis été restreinte à d'autres
+        // bandes).
+        var recruitableHiredSwords = await _libraryService.GetHiredSwordsAsync(language);
+        // Même besoin, pour la résolution du RoleName/SpecialRules/MagicSchool d'un guerrier recruté
+        // depuis le catalogue Dramatis Personae (voir ToRow) - catalogue complet, même raison.
+        var recruitableDramatisPersonae = await _libraryService.GetDramatisPersonaeAsync(language);
+        var warbandArchetype = await _libraryService.GetWarbandArchetypeAsync(warband.WarbandArchetypeId, language);
+        var bandWideSpecialRules = warbandArchetype?.SpecialRules ?? new List<SpecialRule>();
+        var bandMagicSchools = warbandArchetype?.MagicSchools ?? new List<MagicSchool>();
+        var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(language);
+        var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
+
+        var loaded = await _warbandService.GetWarriorsAsync(id, language);
+        var rosterBuilder = new WarriorRosterBuilder(recruitableArchetypes, recruitableHiredSwords, recruitableDramatisPersonae,
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames);
+        var rows = rosterBuilder.BuildRows(loaded);
+
+        var inventory = await _warbandService.GetWarbandEquipmentAsync(id, language);
+        var history = await _warbandService.GetHistoryEntriesAsync(id);
+
+        return new RosterData(warband, recruitableArchetypes, recruitableHiredSwords, recruitableDramatisPersonae,
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames, rows, inventory, history);
     }
 
     /// <summary>Ouvre l'inventaire de bande dans un dialog dédié (WarbandInventoryDialog) où chaque objet

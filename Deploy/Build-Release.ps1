@@ -13,7 +13,7 @@
     dans tous les cas.
 
     La version suit le meme schema que la cible SetVersionFromGit du csproj :
-    AppVersionMajor.AppVersionMinor.<nombre de commits git> - lu ici depuis le csproj pour
+    AppVersionMajor.AppVersionMinor.AppVersionBuild.<nombre de commits git> - lu ici depuis le csproj pour
     ne jamais s'en ecarter silencieusement.
     Android est distribue uniquement via le Play Store : la partie Android produit un AAB signe
     sous Deploy\PlayStore\MordheimLedger-<version>.aab, a uploader dans la Play Console, et n'apparait
@@ -92,8 +92,9 @@ try {
     [xml]$csproj = Get-Content $csprojPath
     $major = $csproj.Project.PropertyGroup.AppVersionMajor | Where-Object { $_ } | Select-Object -First 1
     $minor = $csproj.Project.PropertyGroup.AppVersionMinor | Where-Object { $_ } | Select-Object -First 1
+    $build = $csproj.Project.PropertyGroup.AppVersionBuild | Where-Object { $_ } | Select-Object -First 1
     $patch = (git -C $repoRoot rev-list --count HEAD).Trim()
-    $version = "$major.$minor.$patch"
+    $version = "$major.$minor.$build.$patch"
 
     Write-Host "Version : $version" -ForegroundColor Cyan
 

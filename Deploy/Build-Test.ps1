@@ -12,7 +12,7 @@
     consommer de credits de build Netlify.
 
     La version suit le meme schema que la cible SetVersionFromGit du csproj :
-    AppVersionMajor.AppVersionMinor.<nombre de commits git> - lu ici depuis le csproj pour
+    AppVersionMajor.AppVersionMinor.AppVersionBuild.<nombre de commits git> - lu ici depuis le csproj pour
     ne jamais s'en ecarter silencieusement.
     L'installeur finit sous Website\downloads\ (a la racine du depot), avec un nom de fichier fixe
     (MordheimLedgerInstaller.exe) - meme dossier que Build-Release.ps1, donc une vraie release ecrasera
@@ -89,8 +89,9 @@ try {
     [xml]$csproj = Get-Content $csprojPath
     $major = $csproj.Project.PropertyGroup.AppVersionMajor | Where-Object { $_ } | Select-Object -First 1
     $minor = $csproj.Project.PropertyGroup.AppVersionMinor | Where-Object { $_ } | Select-Object -First 1
+    $build = $csproj.Project.PropertyGroup.AppVersionBuild | Where-Object { $_ } | Select-Object -First 1
     $patch = (git -C $repoRoot rev-list --count HEAD).Trim()
-    $version = "$major.$minor.$patch"
+    $version = "$major.$minor.$build.$patch"
 
     Write-Host "Version (test) : $version" -ForegroundColor Cyan
 

@@ -42,10 +42,11 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.narfedome.mordheimledger</ApplicationId>
 
-		<!-- Versions — patch auto-incremented via git at build time, major/minor set by hand -->
+		<!-- Versions — last segment auto-incremented via git at build time, major/minor/build set by hand -->
 		<AppVersionMajor>1</AppVersionMajor>
-		<AppVersionMinor>3</AppVersionMinor>
-		<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).0</ApplicationDisplayVersion>
+		<AppVersionMinor>4</AppVersionMinor>
+		<AppVersionBuild>0</AppVersionBuild>
+		<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).$(AppVersionBuild)</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
@@ -171,16 +172,24 @@
 		<!-- ApplicationVersion (versionCode Android) suit le meme compteur : le Play Store refuse tout
 		     upload dont le versionCode n'est pas strictement superieur au precedent. Plancher a 1, un
 		     versionCode a 0 etant invalide. -->
+		<!-- InformationalVersion : la version complete affichee dans l'appli (Parametres), identique sur
+		     toutes les plateformes - voir SettingsViewModel.AppVersion. -->
 		<PropertyGroup>
-			<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).$(_AppPatch)</ApplicationDisplayVersion>
+			<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).$(AppVersionBuild).$(_AppPatch)</ApplicationDisplayVersion>
 			<ApplicationVersion>$(_AppPatch)</ApplicationVersion>
+			<InformationalVersion>$(AppVersionMajor).$(AppVersionMinor).$(AppVersionBuild).$(_AppPatch)</InformationalVersion>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(_AppPatch)' == '0'">
 			<ApplicationVersion>1</ApplicationVersion>
 		</PropertyGroup>
-		<!-- Windows : ApplicationVersion devient le 4e segment de la version du package
-		     (Major.Minor.Build.Revision), que le Microsoft Store exige a 0 dans un MSIX. -->
+		<!-- Windows : MAUI n'accepte qu'une ApplicationDisplayVersion a 3 segments, et ApplicationVersion
+		     devient le 4e segment de la version du package (Major.Minor.Build.Revision), que le Microsoft
+		     Store exige a 0 dans un MSIX. Le package Windows est donc Major.Minor.<commits>.0 (sans
+		     AppVersionBuild) : il croit tout seul a chaque build, comme l'exige toute nouvelle soumission
+		     Store. L'installeur Inno Setup et l'appli (InformationalVersion) affichent, eux, la version
+		     complete. -->
 		<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+			<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).$(_AppPatch)</ApplicationDisplayVersion>
 			<ApplicationVersion>0</ApplicationVersion>
 		</PropertyGroup>
 		<Message Text="Version: $(ApplicationDisplayVersion) (ApplicationVersion $(ApplicationVersion))" Importance="high" />

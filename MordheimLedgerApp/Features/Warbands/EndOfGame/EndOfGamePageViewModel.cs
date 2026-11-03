@@ -663,84 +663,22 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     {
         await Loading.RunAsync(async () =>
         {
-            Warband = await _warbandService.GetWarbandAsync(warbandId);
-            if (Warband is null) return;
+            // Lectures + résolution des catalogues hors du thread UI (2026-11-03) : ~0,7 s de blocage à
+            // l'ouverture sur Android, les continuations des services repassant toutes sur le thread UI.
+            // Seules les affectations ci-dessous (champs et propriétés liées) restent sur le thread UI.
+            var data = await Task.Run(() => LoadEndOfGameDataAsync(warbandId, LocalizationService.Instance.Language));
+            if (data is null) return;
+            Warband = data.Warband;
+            var (explorationResults, localizedEquipment, equipmentItemsByOfficialId, specialRulesByOfficialId, skillIdsByOfficialId) =
+                (data.ExplorationResults, data.LocalizedEquipment, data.EquipmentItemsByOfficialId, data.SpecialRulesByOfficialId, data.SkillIdsByOfficialId);
+            var (warbandArchetype, localizedWarriorArchetypes, warriorArchetypesByOfficialId, injuryCatalog, localizedHiredSwords) =
+                (data.WarbandArchetype, data.LocalizedWarriorArchetypes, data.WarriorArchetypesByOfficialId, data.InjuryCatalog, data.LocalizedHiredSwords);
+            var (pitFighterProfile, pitFighterEquipment, dramatisPersonaCatalog, dramatisPersonaStartingEquipmentById) =
+                (data.PitFighterProfile, data.PitFighterEquipment, data.DramatisPersonaCatalog, data.DramatisPersonaStartingEquipmentById);
+            var (warbandInventory, ownedEquipmentItemIds, cooldownDramatisPersonaIds, allRows) =
+                (data.WarbandInventory, data.OwnedEquipmentItemIds, data.CooldownDramatisPersonaIds, data.AllRows);
+            _warbandArchetypeNamesByOfficialId = data.WarbandArchetypeNamesByOfficialId;
 
-            var language = LocalizationService.Instance.Language;
-            var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
-
-            // La table d'Exploration, les constantes OfficialIds et les objets qui accordent une compétence
-            // désignent le catalogue par id officiel : index par OfficialId, dans la langue courante, pour
-            // afficher de vrais ChipView tapables (icône + popup détail). Une entrée personnalisée (sans
-            // OfficialId) n'est jamais citée par ces références.
-            var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(language);
-            var equipmentItemsByOfficialId = ByOfficialId(localizedEquipment, e => e.OfficialId);
-            var localizedSpecialRules = await _libraryService.GetSpecialRulesAsync(language);
-            var specialRulesByOfficialId = ByOfficialId(localizedSpecialRules, r => r.OfficialId);
-            var skillIdsByOfficialId = ByOfficialId(await _libraryService.GetSkillsAsync(language), s => s.OfficialId)
-                .ToDictionary(kv => kv.Key, kv => kv.Value.Id);
-
-            // Étape "Recrutement" (livre, étape 8) - MaxWarriors pour RecruitmentRules.CanRecruit, voir
-            // EndOfGamePageViewModel.Recruitment.cs. Null impossible en pratique (l'archétype de CETTE
-            // bande, résolu depuis Warband.WarbandArchetypeId).
-            var warbandArchetype = (await _libraryService.GetWarbandArchetypeAsync(Warband.WarbandArchetypeId, language))!;
-            var bandWideSpecialRules = warbandArchetype.SpecialRules ?? new List<SpecialRule>();
-            var bandMagicSchools = warbandArchetype.MagicSchools ?? new List<MagicSchool>();
-
-            // Toutes les bandes (pas seulement la nôtre) - une règle de Haine peut cibler n'importe
-            // laquelle, voir WarriorRosterBuilder.BuildSpecialRuleChips.
-            var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(language);
-            var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
-            _warbandArchetypeNamesByOfficialId = allWarbandArchetypes.Where(a => a.OfficialId is not null)
-                .GroupBy(a => a.OfficialId!).ToDictionary(g => g.Key, g => g.First().Name);
-
-            // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId (ex. le Zombie, Traînard) - limité
-            // aux archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
-            var localizedWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(Warband.WarbandArchetypeId, language);
-            var warriorArchetypesByOfficialId = ByOfficialId(localizedWarriorArchetypes, a => a.OfficialId);
-
-            // Pour l'aperçu en direct des SpecialRules attachées à une branche de Blessure Grave (ex.
-            // Folie 24 -> Stupidité/Frénésie) - déjà pleinement résolu (SpecialRules incluses, voir
-            // LibraryService.GetInjuriesAsync) donc réutilisable tel quel par WarriorOutcomeRow, via
-            // InjuryCatalogLookup (même logique de correspondance par jet que GetOrCreateInjuryAsync,
-            // partagée pour ne pas dupliquer le parseur de RollRange).
-            var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
-
-            // Catalogue complet localisé - à la fois pour le Gladiateur ci-dessous (Vendu aux Fosses, un
-            // adversaire éphémère jamais recruté, voir Models.Library.HiredSword) ET, sans rapport avec lui,
-            // pour l'étape "Francs-Tireurs" (upkeep/recrutement réel dans NOTRE bande - voir
-            // EndOfGamePageViewModel.HiredSwords.cs).
-            var localizedHiredSwords = await _libraryService.GetHiredSwordsAsync(language);
-            var pitFighterProfile = localizedHiredSwords.FirstOrDefault(h => h.OfficialId == OfficialIds.PitFighterHiredSword);
-
-            // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
-            // même carte comparative - même idiome que localizedEquipment ci-dessus.
-            var pitFighterEquipment = pitFighterProfile is null
-                ? new List<EquipmentItem>()
-                : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
-
-            // Étape "Dramatis Personae" (upkeep, voir EndOfGamePageViewModel.DramatisPersonae.cs) + choix
-            // "payer avec l'objet alternatif" de l'étape Achat (RareItemSearchEntry.
-            // HasAlternativePaymentOption) - même catalogue localisé que localizedHiredSwords ci-dessus.
-            var dramatisPersonaCatalog = await _libraryService.GetDramatisPersonaeAsync(language);
-            // Équipement de départ de chaque Dramatis Persona (Marquand & Ulli notamment) - même helper
-            // que DetailDialogService.ShowDramatisPersonaDetailDialogAsync (EquipmentQuantityChip.
-            // GroupFrom, gère les doublons).
-            var dramatisPersonaStartingEquipmentById = dramatisPersonaCatalog.ToDictionary(p => p.Id,
-                p => p.StartingEquipmentIds.Count == 0 ? new List<EquipmentQuantityChip>() : EquipmentQuantityChip.GroupFrom(p.StartingEquipmentIds, localizedEquipment));
-
-            var warbandInventory = await _warbandService.GetWarbandEquipmentAsync(warbandId, language);
-            var ownedEquipmentItemIds = warbandInventory.Select(w => w.Item.Id).ToHashSet();
-
-            // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - voir DramatisPersona.
-            // RequiresCooldownBeforeResearch) - exclut du picker "Personnage spécial" tout personnage
-            // encore en cooldown pour CETTE bande.
-            var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(Warband.Id);
-
-            var rosterBuilder = new WarriorRosterBuilder(localizedWarriorArchetypes, localizedHiredSwords, dramatisPersonaCatalog,
-                bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames);
-            var allWarriors = await _warbandService.GetWarriorsAsync(warbandId, language);
-            var allRows = rosterBuilder.BuildRows(allWarriors);
             // Même filtre que WarbandDetailViewModel.AllActiveWarriorRows (voir sa doc) : exclut
             // Mort/Retraité, garde Malade (voir _allActiveWarriorRows's own doc). Ordre forcé Chef
             // d'abord, puis autres Héros (Francs-Tireurs/Dramatis Personae inclus, IsHero vaut vrai pour
@@ -816,6 +754,115 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             OnPropertyChanged(string.Empty);
         });
     }
+
+    /// <summary>Tout ce qu'InitializeAsync lit en base et résout depuis le catalogue, sans toucher à aucun
+    /// champ ni propriété liée - appelée hors du thread UI. Null si la bande n'existe plus.</summary>
+    private async Task<EndOfGameData?> LoadEndOfGameDataAsync(int warbandId, string language)
+    {
+        var warband = await _warbandService.GetWarbandAsync(warbandId);
+        if (warband is null) return null;
+
+        var explorationResults = await _libraryService.GetExplorationResultsAsync(language);
+
+        // La table d'Exploration, les constantes OfficialIds et les objets qui accordent une compétence
+        // désignent le catalogue par id officiel : index par OfficialId, dans la langue courante, pour
+        // afficher de vrais ChipView tapables (icône + popup détail). Une entrée personnalisée (sans
+        // OfficialId) n'est jamais citée par ces références.
+        var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(language);
+        var equipmentItemsByOfficialId = ByOfficialId(localizedEquipment, e => e.OfficialId);
+        var localizedSpecialRules = await _libraryService.GetSpecialRulesAsync(language);
+        var specialRulesByOfficialId = ByOfficialId(localizedSpecialRules, r => r.OfficialId);
+        var skillIdsByOfficialId = ByOfficialId(await _libraryService.GetSkillsAsync(language), s => s.OfficialId)
+            .ToDictionary(kv => kv.Key, kv => kv.Value.Id);
+
+        // Étape "Recrutement" (livre, étape 8) - MaxWarriors pour RecruitmentRules.CanRecruit, voir
+        // EndOfGamePageViewModel.Recruitment.cs. Null impossible en pratique (l'archétype de CETTE
+        // bande, résolu depuis warband.WarbandArchetypeId).
+        var warbandArchetype = (await _libraryService.GetWarbandArchetypeAsync(warband.WarbandArchetypeId, language))!;
+        var bandWideSpecialRules = warbandArchetype.SpecialRules ?? new List<SpecialRule>();
+        var bandMagicSchools = warbandArchetype.MagicSchools ?? new List<MagicSchool>();
+
+        // Toutes les bandes (pas seulement la nôtre) - une règle de Haine peut cibler n'importe
+        // laquelle, voir WarriorRosterBuilder.BuildSpecialRuleChips.
+        var allWarbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(language);
+        var warbandArchetypeNames = allWarbandArchetypes.ToDictionary(a => a.Id, a => a.Name);
+        var warbandArchetypeNamesByOfficialId = allWarbandArchetypes.Where(a => a.OfficialId is not null)
+            .GroupBy(a => a.OfficialId!).ToDictionary(g => g.Key, g => g.First().Name);
+
+        // Pour ExplorationOutcome.GrantsFreeHenchmanArchetypeOfficialId (ex. le Zombie, Traînard) - limité
+        // aux archétypes de CETTE bande (jamais besoin d'un autre archétype pour ce genre de branche).
+        var localizedWarriorArchetypes = await _libraryService.GetWarriorArchetypesAsync(warband.WarbandArchetypeId, language);
+        var warriorArchetypesByOfficialId = ByOfficialId(localizedWarriorArchetypes, a => a.OfficialId);
+
+        // Pour l'aperçu en direct des SpecialRules attachées à une branche de Blessure Grave (ex.
+        // Folie 24 -> Stupidité/Frénésie) - déjà pleinement résolu (SpecialRules incluses, voir
+        // LibraryService.GetInjuriesAsync) donc réutilisable tel quel par WarriorOutcomeRow, via
+        // InjuryCatalogLookup (même logique de correspondance par jet que GetOrCreateInjuryAsync,
+        // partagée pour ne pas dupliquer le parseur de RollRange).
+        var injuryCatalog = await _libraryService.GetInjuriesAsync(language);
+
+        // Catalogue complet localisé - à la fois pour le Gladiateur ci-dessous (Vendu aux Fosses, un
+        // adversaire éphémère jamais recruté, voir Models.Library.HiredSword) ET, sans rapport avec lui,
+        // pour l'étape "Francs-Tireurs" (upkeep/recrutement réel dans NOTRE bande - voir
+        // EndOfGamePageViewModel.HiredSwords.cs).
+        var localizedHiredSwords = await _libraryService.GetHiredSwordsAsync(language);
+        var pitFighterProfile = localizedHiredSwords.FirstOrDefault(h => h.OfficialId == OfficialIds.PitFighterHiredSword);
+
+        // Équipement de départ du Gladiateur, déjà résolu en vrais EquipmentItem (localisés) pour la
+        // même carte comparative - même idiome que localizedEquipment ci-dessus.
+        var pitFighterEquipment = pitFighterProfile is null
+            ? new List<EquipmentItem>()
+            : localizedEquipment.Where(e => pitFighterProfile.StartingEquipmentIds.Contains(e.Id)).ToList();
+
+        // Étape "Dramatis Personae" (upkeep, voir EndOfGamePageViewModel.DramatisPersonae.cs) + choix
+        // "payer avec l'objet alternatif" de l'étape Achat (RareItemSearchEntry.
+        // HasAlternativePaymentOption) - même catalogue localisé que localizedHiredSwords ci-dessus.
+        var dramatisPersonaCatalog = await _libraryService.GetDramatisPersonaeAsync(language);
+        // Équipement de départ de chaque Dramatis Persona (Marquand & Ulli notamment) - même helper
+        // que DetailDialogService.ShowDramatisPersonaDetailDialogAsync (EquipmentQuantityChip.
+        // GroupFrom, gère les doublons).
+        var dramatisPersonaStartingEquipmentById = dramatisPersonaCatalog.ToDictionary(p => p.Id,
+            p => p.StartingEquipmentIds.Count == 0 ? new List<EquipmentQuantityChip>() : EquipmentQuantityChip.GroupFrom(p.StartingEquipmentIds, localizedEquipment));
+
+        var warbandInventory = await _warbandService.GetWarbandEquipmentAsync(warbandId, language);
+        var ownedEquipmentItemIds = warbandInventory.Select(w => w.Item.Id).ToHashSet();
+
+        // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - voir DramatisPersona.
+        // RequiresCooldownBeforeResearch) - exclut du picker "Personnage spécial" tout personnage
+        // encore en cooldown pour CETTE bande.
+        var cooldownDramatisPersonaIds = await _warbandService.GetDramatisPersonaCooldownIdsAsync(warband.Id);
+
+        var rosterBuilder = new WarriorRosterBuilder(localizedWarriorArchetypes, localizedHiredSwords, dramatisPersonaCatalog,
+            bandWideSpecialRules, bandMagicSchools, warbandArchetypeNames);
+        var allWarriors = await _warbandService.GetWarriorsAsync(warbandId, language);
+        var allRows = rosterBuilder.BuildRows(allWarriors);
+        return new EndOfGameData(warband, explorationResults, localizedEquipment, equipmentItemsByOfficialId, specialRulesByOfficialId,
+            skillIdsByOfficialId, warbandArchetype, warbandArchetypeNamesByOfficialId, localizedWarriorArchetypes, warriorArchetypesByOfficialId,
+            injuryCatalog, localizedHiredSwords, pitFighterProfile, pitFighterEquipment, dramatisPersonaCatalog,
+            dramatisPersonaStartingEquipmentById, warbandInventory, ownedEquipmentItemIds, cooldownDramatisPersonaIds, allRows);
+    }
+
+    private sealed record EndOfGameData(
+        Warband Warband,
+        List<ExplorationResult> ExplorationResults,
+        List<EquipmentItem> LocalizedEquipment,
+        Dictionary<string, EquipmentItem> EquipmentItemsByOfficialId,
+        Dictionary<string, SpecialRule> SpecialRulesByOfficialId,
+        Dictionary<string, int> SkillIdsByOfficialId,
+        WarbandArchetype WarbandArchetype,
+        Dictionary<string, string> WarbandArchetypeNamesByOfficialId,
+        List<WarriorArchetype> LocalizedWarriorArchetypes,
+        Dictionary<string, WarriorArchetype> WarriorArchetypesByOfficialId,
+        List<Injury> InjuryCatalog,
+        List<HiredSword> LocalizedHiredSwords,
+        HiredSword? PitFighterProfile,
+        List<EquipmentItem> PitFighterEquipment,
+        List<DramatisPersona> DramatisPersonaCatalog,
+        Dictionary<int, List<EquipmentQuantityChip>> DramatisPersonaStartingEquipmentById,
+        List<WarbandEquipment> WarbandInventory,
+        HashSet<int> OwnedEquipmentItemIds,
+        List<int> CooldownDramatisPersonaIds,
+        List<WarriorRow> AllRows);
 
     /// <summary>Tous les abonnements PropertyChanged posés jusque-là dans le constructeur (avant que
     /// InitializeAsync le remplace) - déplacés tels quels dans leur propre méthode plutôt que dans le

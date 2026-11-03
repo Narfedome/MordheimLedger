@@ -162,6 +162,15 @@ fixe par mode dans `ThemeService.Apply`), jamais un dialog ni un blocage, et pas
 (retenu sur maquette `mockups/exploration-branches.html`, hors dépôt). Les choix de Héros (Fosse, Puits,
 XP répartie, bénédiction) restent réservés aux Héros, voulu.
 
+**Perf de navigation (branche `feature/navigation-perf`, 2026-11-03)** : mesuré sur Android (Release), la fiche de
+bande passait ~4,9 s à construire des vues jamais affichées. Règles retenues : un composant ne crée pas ses éléments
+optionnels tant qu'ils ne servent pas (`LazyIconButton` pour les boutons ⇄/✕/« + » des puces, image de fond de
+`FaIconButtonView`, `StatRowView` construit en code sa seule variante lecture **ou** édition) ; les lectures + mapping
+du catalogue d'un écran passent par `Task.Run` (`WarbandDetailViewModel.LoadRosterAsync`,
+`EndOfGamePageViewModel.LoadEndOfGameDataAsync`), seules les affectations restent sur le thread UI ; l'instantané
+JSON des dialogs (`DialogSnapshot`) est préchauffé au démarrage ; un écran rappelé à chaque retour ne relit que si
+`ILibraryService.DataVersion` a changé (section Bandes du Codex).
+
 **Navigation** : pages Shell séparées (`Shell.GoToAsync`) pour la navigation entre écrans — pas
 d'accordéon façon `CampaignPage` de DmTools pour `WarbandListPage` (essayé le 2026-08-04 avec un
 système de favoris à 2 groupes "Favoris"/"My Warbands", finalement abandonné le même jour : pas assez

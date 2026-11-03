@@ -3,14 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MordheimLedgerApp.Components.FaIconButtonView"  x:Name="root">
 
-    <Grid>
+    <Grid x:Name="RootGrid">
 
-        <!-- Background image -->
-        <Border StrokeShape="RoundRectangle 8" StrokeThickness="0">
-        <Image
-            Source="{Binding Source={x:Reference root}, Path=BackgroundImage}"
-            Aspect="AspectFit" />
-        </Border>
+        <!-- Background image : Border + Image ajoutés en code seulement si BackgroundImage est renseignée
+             (voir FaIconButtonView.xaml.cs) - jamais le cas dans l'appli aujourd'hui, et ce bouton est
+             instancié des centaines de fois (puces, cartes guerrier, tuiles). -->
 
         <Button
         Text="{Binding Source={x:Reference root}, Path=Icon}"

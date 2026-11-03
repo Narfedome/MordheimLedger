@@ -38,6 +38,26 @@ public class WarbandMutationTests : IDisposable
     private async Task<WarbandArchetype> GetReiklandersAsync(string languageCode = "en") =>
         (await _library.GetWarbandArchetypesAsync(languageCode)).Single(a => a.Name is "Reiklander Mercenaries" or "Mercenaires Reiklander");
 
+    /// <summary>DataVersion (2026-11-03) : le Codex ne relit sa section Bandes au retour sur l'onglet que si
+    /// cette valeur a bougé - une lecture ne doit pas la changer, une écriture catalogue (sauvegarde Codex)
+    /// ou partie jouée (création de bande) si.</summary>
+    [Fact]
+    public async Task DataVersion_ChangesOnWritesOnly()
+    {
+        var archetype = await GetReiklandersAsync();
+        var afterRead = _library.DataVersion;
+        await _library.GetWarbandArchetypesAsync("en");
+        Assert.Equal(afterRead, _library.DataVersion);
+
+        archetype.Name = "Reiklander Mercenaries (house rules)";
+        await _library.SaveWarbandArchetypeAsync(archetype, "en");
+        var afterCatalogWrite = _library.DataVersion;
+        Assert.NotEqual(afterRead, afterCatalogWrite);
+
+        await _warbands.CreateWarbandAsync("The Bleeding Roses", archetype);
+        Assert.NotEqual(afterCatalogWrite, _library.DataVersion);
+    }
+
     [Fact]
     public async Task CreateWarband_PreFillsTreasuryFromArchetype()
     {

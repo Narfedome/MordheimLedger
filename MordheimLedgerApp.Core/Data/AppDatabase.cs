@@ -63,11 +63,27 @@ public partial class AppDatabase
 
     /// <summary>À appeler après tout DELETE/UPDATE en SQL brut (ExecuteAsync) sur une table cachée -
     /// seules les écritures ORM passent par TableChanged.</summary>
-    internal void InvalidateCachedTable(Type entityType) => _tableCache.TryRemove(entityType, out _);
+    internal void InvalidateCachedTable(Type entityType)
+    {
+        _tableCache.TryRemove(entityType, out _);
+        Interlocked.Increment(ref _dataVersion);
+    }
 
     internal void InvalidateCachedTable<T>() => InvalidateCachedTable(typeof(T));
 
-    private void InvalidateAllCachedTables() => _tableCache.Clear();
+    private void InvalidateAllCachedTables()
+    {
+        _tableCache.Clear();
+        Interlocked.Increment(ref _dataVersion);
+    }
+
+    private int _dataVersion;
+
+    /// <summary>Change à chaque écriture en base (toute table, voir InvalidateCachedTable) - un écran
+    /// qui note cette valeur à son chargement sait, en revenant dessus, si quelque chose a pu changer
+    /// depuis, sans tout relire (2026-11-03 : le Codex relisait et redessinait toute la section Bandes à
+    /// chaque retour sur l'onglet).</summary>
+    public int DataVersion => Volatile.Read(ref _dataVersion);
 
     private async Task InitializeAsync()
     {

@@ -47,6 +47,19 @@ public partial class ExperienceTrackView : ContentView
         set => SetValue(ExperienceProperty, value);
     }
 
+    /// <summary>PX gagnés cette partie, pas encore enregistrés (étape Expérience de Fin de Partie) - cases
+    /// à la suite d'Experience, dans une teinte plus claire (retour utilisateur 2026-11-02 - "rajouter
+    /// l'experience chart lors de l'ajout des xp pour que visuellement on sache où on en est"). 0 partout
+    /// ailleurs (fiche de bande).</summary>
+    public static readonly BindableProperty GainedExperienceProperty =
+        BindableProperty.Create(nameof(GainedExperience), typeof(int), typeof(ExperienceTrackView), 0, propertyChanged: OnTrackChanged);
+
+    public int GainedExperience
+    {
+        get => (int)GetValue(GainedExperienceProperty);
+        set => SetValue(GainedExperienceProperty, value);
+    }
+
     public static readonly BindableProperty IsHeroProperty =
         BindableProperty.Create(nameof(IsHero), typeof(bool), typeof(ExperienceTrackView), false, propertyChanged: OnTrackChanged);
 
@@ -99,9 +112,11 @@ public partial class ExperienceTrackView : ContentView
         _drawable.Total = total;
         _drawable.RowSize = rowSize;
         _drawable.Experience = Experience;
+        _drawable.GainedExperience = Math.Max(0, GainedExperience);
         _drawable.Milestones = IsHero ? ExperienceMilestones.HeroMilestones() : ExperienceMilestones.HenchmanMilestones(total);
         _drawable.BorderColor = BoxBorderColor;
         _drawable.FilledColor = FilledColor;
+        _drawable.GainedColor = FilledColor.WithAlpha(0.4f);
         _drawable.MilestoneColor = MilestoneColor;
         _drawable.Spacing = BoxSpacing;
 

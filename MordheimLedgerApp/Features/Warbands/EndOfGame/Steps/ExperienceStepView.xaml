@@ -5,6 +5,7 @@
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:xp="clr-namespace:MordheimLedgerApp.Components.ExperienceTrack"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ExperienceStepView"
              x:DataType="local:EndOfGamePageViewModel">
             <!-- Étape : Expérience (livre - saisie libre, pas de calcul assisté). Pas de Statut ici :
@@ -54,6 +55,10 @@
                                                                           CommandParameter="{Binding .}"/>
                                         </HorizontalStackLayout>
                                     </Grid>
+                                    <!-- Même piste que la fiche de bande, les PX saisis ci-dessus en teinte
+                                         claire à la suite des PX déjà acquis (paliers dorés visibles). -->
+                                    <xp:ExperienceTrackView Experience="{Binding Warrior.Experience}" IsHero="{Binding Warrior.IsHero}"
+                                                            GainedExperience="{Binding ExperienceGained}"/>
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>

@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using MordheimLedgerApp.Resources.Icons;
 
 namespace MordheimLedgerApp.Components;
 
@@ -102,7 +103,7 @@ public partial class ChipItemView : ContentView
             typeof(ChipItemView),
             null,
             propertyChanged: (bindable, _, _) =>
-                ((ChipItemView)bindable).Recompute());
+                ((ChipItemView)bindable).OnAddCommandChanged());
 
     public ICommand? AddCommand
     {
@@ -178,9 +179,25 @@ public partial class ChipItemView : ContentView
         private set => SetValue(ShowSectionProperty, value);
     }
 
+    private FaIconButtonView? _addButton;
+
     public ChipItemView()
     {
         InitializeComponent();
+    }
+
+    private void OnAddCommandChanged()
+    {
+        LazyIconButton.Sync(ref _addButton, AddCommand, () =>
+        {
+            var button = LazyIconButton.CreateGhost(SolidFont.Plus, 12);
+            button.ButtonWidthRequest = 22;
+            button.ButtonHeightRequest = 22;
+            button.SetBinding(FaIconButtonView.CommandProperty, new Binding(nameof(AddCommand), source: this));
+            HeaderGrid.Add(button, 1);
+            return button;
+        });
+        Recompute();
     }
 
     private void Recompute()

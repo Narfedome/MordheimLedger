@@ -78,7 +78,17 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
             (r, m) => _ = ((WarbandArchetypeViewModel)r).LoadData());
     }
 
-    public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
+    /// <summary>Rappelée à chaque retour sur le Codex (LibraryPage.OnNavigatedTo) pour refléter une bande
+    /// créée/modifiée ailleurs (assistant de création, synchro du contenu officiel...) - mais ne relit et ne
+    /// redessine la grille que si la base a changé depuis le dernier chargement (voir
+    /// ILibraryService.DataVersion) : sinon ~1 s de blocage sur Android à chaque changement d'onglet.</summary>
+    public async Task InitializeAsync()
+    {
+        if (_loadedDataVersion == _libraryService.DataVersion) return;
+        await Loading.RunAsync(LoadData);
+    }
+
+    private int? _loadedDataVersion;
 
     partial void OnSelectedGradeFilterChanged(string value)
     {
@@ -89,6 +99,8 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
 
     private async Task LoadData()
     {
+        // Notée AVANT la lecture : une écriture pendant le chargement fera relire au prochain retour.
+        _loadedDataVersion = _libraryService.DataVersion;
         _allItems = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
 
         var gradesPresent = _allItems.Select(i => i.Grade).Distinct().OrderBy(g => g);

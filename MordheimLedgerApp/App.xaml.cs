@@ -18,6 +18,7 @@ namespace MordheimLedgerApp
         protected override Window CreateWindow(IActivationState? activationState)
         {
             ThemeService.Instance.Initialize();
+            Components.Dialogs.DialogSnapshot.WarmUpInBackground();
 
             // Premier lancement (cf. DmTools App.xaml.cs) : onboarding (langue + palette) plutôt que le
             // Shell directement - "has_launched" est marqué par OnboardingViewModel.Start().

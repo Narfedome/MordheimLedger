@@ -49,14 +49,21 @@ public partial class WarbandEditDialog : DialogContent<bool>
             await RunTourAsync(tourService.StartWizardEquipmentTourAsync);
     }
 
-    // Laisse l'étape finir de charger ses recrues (Loading.IsLoading) avant de mettre ses contrôles en
-    // lumière ; plafonné pour qu'un chargement bloqué ne retienne pas la visite indéfiniment.
+    // Laisse l'étape finir de charger ses recrues (Loading.IsLoading), puis la boîte de dialogue finir
+    // d'ajuster sa hauteur (ContentScroll.IsResizing - elle se recentre en grandissant), avant de mettre
+    // ses contrôles en lumière : mesurées trop tôt, les cibles étaient décalées vers le bas sous Android
+    // (retour utilisateur 2026-11-02). Plafonné pour qu'un chargement bloqué ne retienne pas la visite
+    // indéfiniment.
     private async Task RunTourAsync(Func<Task> startTour)
     {
         try
         {
             for (var i = 0; i < 50 && _viewModel.Loading.IsLoading; i++)
                 await Task.Delay(100);
+            // Une frame d'abord : la mise à jour de hauteur n'est programmée qu'après la passe en cours.
+            await Task.Delay(50);
+            for (var i = 0; i < 40 && ContentScroll.IsResizing; i++)
+                await Task.Delay(50);
             await startTour();
         }
         catch (Exception ex)

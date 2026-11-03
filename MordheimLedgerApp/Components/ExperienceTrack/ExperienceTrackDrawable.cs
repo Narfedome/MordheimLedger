@@ -8,12 +8,16 @@ internal sealed class ExperienceTrackDrawable : IDrawable
     public int Total { get; set; }
     public int RowSize { get; set; } = 1;
     public int Experience { get; set; }
+    /// <summary>PX en cours de saisie (étape Expérience de Fin de Partie) - cases dessinées après Experience
+    /// en GainedColor, pour voir où l'on en sera une fois la partie enregistrée.</summary>
+    public int GainedExperience { get; set; }
     public IReadOnlyCollection<int> Milestones { get; set; } = Array.Empty<int>();
     public float BoxSize { get; set; } = 10;
     public float Spacing { get; set; } = 1;
     public Color BorderColor { get; set; } = Colors.Gray;
     public Color FilledColor { get; set; } = Colors.Green;
     public Color MilestoneColor { get; set; } = Colors.Goldenrod;
+    public Color GainedColor { get; set; } = Colors.LightGreen;
 
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
@@ -26,6 +30,11 @@ internal sealed class ExperienceTrackDrawable : IDrawable
             if (i <= Experience)
             {
                 canvas.FillColor = FilledColor;
+                canvas.FillRectangle(x, y, BoxSize, BoxSize);
+            }
+            else if (i <= Experience + GainedExperience)
+            {
+                canvas.FillColor = GainedColor;
                 canvas.FillRectangle(x, y, BoxSize, BoxSize);
             }
 

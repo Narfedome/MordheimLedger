@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.InjuryRecapStepView"
+             x:DataType="local:EndOfGamePageViewModel">
+            <!-- Étape : Bilan des blessures - lecture seule, voir EndOfGamePageViewModel.InjuryRecap.cs. -->
+            <VerticalStackLayout Spacing="8">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{loc:Loc EndOfGameInjuryRecapHeading}" FontAttributes="Bold"/>
+                    <Label Text="{loc:Loc EndOfGameInjuryRecapHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding InjuryRecapLines}" Spacing="6">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:InjuryRecapLine">
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                    <Label Grid.Column="0" Text="{Binding Name}" FontAttributes="Bold" FontSize="13"/>
+                                    <Label Grid.Column="1" Text="{Binding Text}" FontSize="13">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsLoss}" Value="True">
+                                                <Setter Property="TextColor" Value="{DynamicResource AppDanger}"/>
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+</ContentView>

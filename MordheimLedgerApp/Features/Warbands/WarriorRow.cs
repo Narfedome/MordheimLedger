@@ -116,6 +116,10 @@ public partial class WarriorRow : ObservableObject
     /// entièrement reconstruit à chaque LoadAsync, pas de notification de changement nécessaire ici.</summary>
     public string SickChipText => string.Format(LocalizationService.Instance["WarriorStatusSickCount"], Warrior.SickGamesRemaining);
 
+    /// <summary>Bouton Retirer des figurines de la carte - un groupe d'Hommes de main encore actif
+    /// d'au moins 2 figurines (jamais un Héros ni un Franc-Tireur).</summary>
+    public bool CanManageGroup => IsEditable && !Warrior.IsHero && !Warrior.IsHiredSword && Warrior.HeadCount > 1;
+
     /// <summary>"× 3" next to the name for a Henchman group with more than one living model - empty for
     /// a Hero (always HeadCount 1) or a lone Henchman, see Warrior.HeadCount.</summary>
     public string HeadCountDisplay => !Warrior.IsHero && Warrior.HeadCount > 1 ? $"× {Warrior.HeadCount}" : string.Empty;

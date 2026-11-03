@@ -44,7 +44,7 @@
 
 		<!-- Versions — patch auto-incremented via git at build time, major/minor set by hand -->
 		<AppVersionMajor>1</AppVersionMajor>
-		<AppVersionMinor>3</AppVersionMinor>
+		<AppVersionMinor>4</AppVersionMinor>
 		<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 

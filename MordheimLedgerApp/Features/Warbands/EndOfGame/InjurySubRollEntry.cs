@@ -294,6 +294,12 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
 
     public bool HasInjuryBranchSpecialRules => InjuryBranchSpecialRules.Count > 0;
 
+    /// <summary>Même principe que WarriorOutcomeRow.InjuryShortName.</summary>
+    public string InjuryShortName => int.TryParse(ManualRoll, out var roll)
+        && InjuryCatalogLookup.Find(_injuryCatalog, IsHero ? InjuryCategory.Hero : InjuryCategory.Henchman, roll,
+            ShowInjuryBranchSubRoll && int.TryParse(InjuryBranchSubRoll, out var subRoll) ? subRoll : null) is { } injury
+        ? injury.Name : ResolvedInjuryText;
+
     public SeriousInjuryOutcome? InjuryBranchOutcome =>
         int.TryParse(ManualRoll, out var roll) && int.TryParse(InjuryBranchSubRoll, out var subRoll) &&
         SeriousInjuryEffectTable.TryGetBranchSubRollOutcome(roll, subRoll, out var outcome) ? outcome : null;
@@ -350,6 +356,40 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
     public bool EndsInDeath => IsDeath
         || (ShowCapturedChoice && !(IsRansomed && int.TryParse(RansomAmount, out _)))
         || (ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.FirstOrDefault()?.EndsInDeath == true);
+
+    /// <summary>Ce jet fait-il perdre tout son équipement au guerrier, tel que Terminer l'appliquera :
+    /// Dépouillé (36) ou combat de gladiateur perdu une fois sa relance saisie. Connu dès l'étape
+    /// Blessure pour que les étapes suivantes (Vente, Réallouer) ne proposent plus cet équipement - le
+    /// joueur peut en racheter dans la même Fin de Partie (retour utilisateur 2026-11-02).</summary>
+    public bool LosesAllEquipment =>
+        (int.TryParse(ManualRoll, out var roll) && IsHero && !string.IsNullOrWhiteSpace(InjuryResultText)
+            && SeriousInjuryEffectTable.TryGetOutcome(roll, alreadyBlindedInOneEye: false, out var outcome)
+            && outcome.Kind == SeriousInjuryEffectKind.LoseAllEquipment)
+        || (ShowSoldToThePits && !WonPitFight && SoldToPitsRerollRoll.FirstOrDefault() is { } reroll
+            && !string.IsNullOrWhiteSpace(reroll.InjuryResultText));
+
+    /// <summary>Rançon payée pour récupérer le guerrier capturé (61) par ce jet - 0 si non racheté ou pas
+    /// Capturé. Négatif : c'est une dépense.</summary>
+    public int RansomTreasuryDelta => !IsDeath && ShowCapturedChoice && IsRansomed && int.TryParse(RansomAmount, out var ransom) ? -ransom : 0;
+
+    /// <summary>Or gagné ou payé par ce jet tel que Terminer l'appliquera (ApplyWarriorOutcomesAsync) :
+    /// rançon d'un Capturé, ou combat de gladiateur gagné (+50) / perdu puis racheté sur la relance. Repris
+    /// dans le solde du wizard (EndOfGameTreasuryRemaining) pour qu'il affiche ce que Terminer écrira.</summary>
+    public int TreasuryDelta
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(InjuryResultText) || IsDeath) return 0;
+            if (ShowCapturedChoice) return RansomTreasuryDelta;
+            if (!ShowSoldToThePits) return 0;
+            if (WonPitFight) return PitFightWinGold;
+            return SoldToPitsRerollRoll.FirstOrDefault() is { } reroll && !string.IsNullOrWhiteSpace(reroll.InjuryResultText)
+                ? reroll.RansomTreasuryDelta : 0;
+        }
+    }
+
+    /// <summary>"If he wins, he gains 50 gc" - Vendu aux Fosses (65).</summary>
+    public const int PitFightWinGold = 50;
 
     /// <summary>True si le jet actuellement saisi est un résultat de mort (Héros 11-15, Homme de main
     /// 1-2) - utilisé par WarbandDetailViewModel.EndOfGame pour compter les figurines perdues dans un

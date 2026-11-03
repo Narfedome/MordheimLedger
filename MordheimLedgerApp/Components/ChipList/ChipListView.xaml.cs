@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Windows.Input;
+using MordheimLedgerApp.Resources.Icons;
 
 namespace MordheimLedgerApp.Components;
 
@@ -100,7 +101,7 @@ public partial class ChipListView : ContentView
     // Grid+FaIconButtonView dupliqué manuellement par chaque dialog Edit.
     public static readonly BindableProperty AddCommandProperty =
         BindableProperty.Create(nameof(AddCommand), typeof(ICommand), typeof(ChipListView),
-            propertyChanged: (bindable, _, _) => ((ChipListView)bindable).Recompute());
+            propertyChanged: (bindable, _, _) => ((ChipListView)bindable).OnAddCommandChanged());
 
     public ICommand? AddCommand
     {
@@ -180,9 +181,25 @@ public partial class ChipListView : ContentView
         private set => SetValue(ShowSectionProperty, value);
     }
 
+    private FaIconButtonView? _addButton;
+
     public ChipListView()
     {
         InitializeComponent();
+    }
+
+    private void OnAddCommandChanged()
+    {
+        LazyIconButton.Sync(ref _addButton, AddCommand, () =>
+        {
+            var button = LazyIconButton.CreateGhost(SolidFont.Plus, 12);
+            button.ButtonWidthRequest = 22;
+            button.ButtonHeightRequest = 22;
+            button.SetBinding(FaIconButtonView.CommandProperty, new Binding(nameof(AddCommand), source: this));
+            HeaderGrid.Add(button, 1);
+            return button;
+        });
+        Recompute();
     }
 
     private void Recompute()

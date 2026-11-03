@@ -12,7 +12,7 @@
                 Command="{Binding Command, Source={x:Reference root}}"
                 CommandParameter="{Binding Item, Source={x:Reference root}}"/>
         </Border.GestureRecognizers>
-        <Grid BindingContext="{Binding Item, Source={x:Reference root}}"
+        <Grid x:Name="ChipGrid" BindingContext="{Binding Item, Source={x:Reference root}}"
               ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="4" HeightRequest="36" Margin="8,0">
             <Label Grid.Column="0" Text="{Binding IconGlyph, Source={x:Reference root}}"
                    FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
@@ -25,18 +25,8 @@
                     </MultiBinding>
                 </Label.Text>
             </Label>
-            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
-                                          Icon="{x:Static icons:SolidFont.RightLeft}"
-                                          IconSize="10" Padding="0,0,-8,0"
-                                          IsVisible="{Binding MoveCommand, Source={x:Reference root}, Converter={StaticResource IsNotNullConverter}}"
-                                          Command="{Binding MoveCommand, Source={x:Reference root}}"
-                                          CommandParameter="{Binding Item, Source={x:Reference root}}"/>
-            <components:FaIconButtonView Grid.Column="3" Style="{StaticResource GhostIconButtonStyle}"
-                                          Icon="{x:Static icons:SolidFont.Xmark}"
-                                          IconSize="10" Padding="0,0,-8,0"
-                                          IsVisible="{Binding RemoveCommand, Source={x:Reference root}, Converter={StaticResource IsNotNullConverter}}"
-                                          Command="{Binding RemoveCommand, Source={x:Reference root}}"
-                                          CommandParameter="{Binding Item, Source={x:Reference root}}"/>
+            <!-- Colonnes 2/3 : boutons ⇄ (MoveCommand) et ✕ (RemoveCommand), créés en code seulement si
+                 la commande est fournie - voir LazyIconButton. -->
         </Grid>
     </Border>
 </ContentView>

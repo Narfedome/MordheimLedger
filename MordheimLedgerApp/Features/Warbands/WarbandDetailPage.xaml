@@ -37,6 +37,9 @@
                             <Border Grid.Column="0" WidthRequest="{OnIdiom Default=56, Desktop=48}" HeightRequest="{OnIdiom Default=56, Desktop=48}"
                                     StrokeShape="RoundRectangle 6" StrokeThickness="1" VerticalOptions="Center"
                                     Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppSurface}">
+                                <Border.Behaviors>
+                                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardPhotoKey}"/>
+                                </Border.Behaviors>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=ShowWarriorPhotoCommand}"
                                                           CommandParameter="{Binding .}"/>

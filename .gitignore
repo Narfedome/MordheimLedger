@@ -367,6 +367,9 @@ FodyWeavers.xsd
 Deploy/Build-Release.local.ps1
 Deploy/*.keystore
 
+# Google Play service account key (AAB publishing) - fetched from the shared Drive, never committed
+Deploy/*.json
+
 # Android App Bundles built by Build-Release.ps1, uploaded to the Play Console (never committed)
 Deploy/PlayStore/
 /Website/downloads

@@ -32,6 +32,7 @@ namespace MordheimLedgerApp.Services
         public const string DetailTabsKey = "Tour.DetailTabs";
         public const string DetailGroupKey = "Tour.DetailGroup";
         public const string DetailCardKey = "Tour.DetailCard";
+        public const string DetailCardPhotoKey = "Tour.DetailCardPhoto";
         public const string DetailCardEditKey = "Tour.DetailCardEdit";
         public const string DetailCardStatsKey = "Tour.DetailCardStats";
         public const string DetailCardChipsKey = "Tour.DetailCardChips";
@@ -54,13 +55,16 @@ namespace MordheimLedgerApp.Services
 
         private const string WarbandsTourKey = "mordheim-warbands";
         private const string DetailTourKey = "mordheim-warband-detail";
+        // Étape photo de la fiche (1.3) livrée à part : qui avait déjà terminé la visite de la fiche ne la
+        // reverrait jamais, d'où une mini-visite de rattrapage avec cette seule étape (cf. StartDetailTourAsync).
+        private const string DetailPhotoTourKey = "mordheim-warband-detail-photo";
         private const string CodexTourKey = "mordheim-codex";
         private const string WizardGeneralTourKey = "mordheim-wizard-general";
         private const string WizardWarriorsTourKey = "mordheim-wizard-warriors";
         private const string WizardEquipmentTourKey = "mordheim-wizard-equipment";
 
         private static readonly string[] AllTourKeys =
-            [WarbandsTourKey, DetailTourKey, CodexTourKey, WizardGeneralTourKey, WizardWarriorsTourKey, WizardEquipmentTourKey];
+            [WarbandsTourKey, DetailTourKey, DetailPhotoTourKey, CodexTourKey, WizardGeneralTourKey, WizardWarriorsTourKey, WizardEquipmentTourKey];
 
         // Seules plateformes où le plugin sait lire la position d'un contrôle à l'écran (cf.
         // OnboardingBoundsExtensions) : ailleurs, chaque étape attendrait 10 s pour rien.
@@ -76,6 +80,7 @@ namespace MordheimLedgerApp.Services
 
         public bool IsWarbandsTourPending => IsPending(WarbandsTourKey);
         public bool IsDetailTourPending => IsPending(DetailTourKey);
+        public bool IsDetailPhotoTourPending => IsPending(DetailPhotoTourKey);
         public bool IsCodexTourPending => IsPending(CodexTourKey);
         public bool IsWizardGeneralTourPending => IsPending(WizardGeneralTourKey);
         public bool IsWizardWarriorsTourPending => IsPending(WizardWarriorsTourKey);
@@ -115,14 +120,25 @@ namespace MordheimLedgerApp.Services
             if (hasHeroes)
             {
                 builder.AddStep(Step(DetailCardKey, "TourDetailCardTitle", "TourDetailCardBody"))
+                    .AddStep(PhotoStep())
                     .AddStep(Step(DetailCardEditKey, "TourDetailCardEditTitle", "TourDetailCardEditBody"))
                     .AddStep(Step(DetailCardStatsKey, "TourDetailCardStatsTitle", "TourDetailCardStatsBody"))
                     .AddStep(Step(DetailCardChipsKey, "TourDetailCardChipsTitle", "TourDetailCardChipsBody"))
                     .AddStep(Step(DetailCardXpKey, "TourDetailCardXpTitle", "TourDetailCardXpBody"));
+                // L'étape photo est vue ici : pas de visite de rattrapage ensuite.
+                OnboardingCompletionStore.SetCompleted(DetailPhotoTourKey, true);
             }
 
             return StartAsync(builder.Build());
         }
+
+        /// <summary>Rattrapage pour qui a terminé la visite de la fiche avant l'arrivée de l'étape photo
+        /// (à lancer seulement sur une bande avec au moins un héros, la miniature visée étant sur sa carte).</summary>
+        public Task StartDetailPhotoTourAsync() => StartAsync(OnboardingTourBuilder.Create(DetailPhotoTourKey)
+            .AddStep(PhotoStep())
+            .Build());
+
+        private static OnboardingStep PhotoStep() => Step(DetailCardPhotoKey, "TourDetailCardPhotoTitle", "TourDetailCardPhotoBody");
 
         /// <param name="hasTiles">Faux tant que les types de bande ne sont pas chargés : les étapes sur
         /// une tuile sont alors sautées.</param>

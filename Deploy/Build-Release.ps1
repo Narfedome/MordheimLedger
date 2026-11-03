@@ -16,7 +16,8 @@
     AppVersionMajor.AppVersionMinor.<nombre de commits git> - lu ici depuis le csproj pour
     ne jamais s'en ecarter silencieusement.
     Android est distribue uniquement via le Play Store : la partie Android produit un AAB signe
-    sous Deploy\PlayStore\MordheimLedger-<version>.aab, a uploader dans la Play Console, et n'apparait
+    sous Deploy\PlayStore\MordheimLedger-<version>.aab, publie automatiquement sur Google Play si la
+    cle du compte de service est configuree (sinon a uploader dans la Play Console), et n'apparait
     ni dans la GitHub Release ni sur le site.
     L'installeur Windows finit sous Website\downloads\ (a la racine du depot), avec un nom de
     fichier fixe (MordheimLedgerInstaller.exe) : pas de numero de version dans le nom, pour
@@ -213,15 +214,73 @@ try {
             Write-Warning "Deploy\mordheimledger-release.keystore absent (ou identifiants manquants dans Build-Release.local.ps1) : signature avec le debug.keystore local (differente d'un PC a l'autre, a eviter pour une release distribuee)."
         }
 
+        # Build Android toujours reparti de zero : un obj\ laisse par un build precedent (Debug deploye
+        # sur telephone, build incremental interrompu...) a deja produit un AAB publie sans les polices
+        # d'icones (Font Awesome / RPG Awesome), alors qu'un build propre du meme commit les embarque.
+        Remove-Item (Join-Path $repoRoot "MordheimLedgerApp\obj\Release\net10.0-android"), (Join-Path $repoRoot "MordheimLedgerApp\bin\Release\net10.0-android") -Recurse -Force -ErrorAction SilentlyContinue
+
         dotnet publish $csprojPath -f net10.0-android -c Release -p:AndroidPackageFormat=aab @signingArgs
         if ($LASTEXITCODE -ne 0) { throw "dotnet publish (Android) a echoue (code $LASTEXITCODE)." }
 
         $publishedAab = Join-Path $repoRoot "MordheimLedgerApp\bin\Release\net10.0-android\publish\com.narfedome.mordheimledger-Signed.aab"
         if (-not (Test-Path $publishedAab)) { throw "AAB signe introuvable a '$publishedAab'." }
+
+        # Garde-fou bloquant : chaque police de Resources\Fonts doit etre dans l'AAB (base/assets/), non
+        # vide. Sans elles l'appli demarre normalement mais toutes les icones s'affichent vides - rien
+        # ne le signale au build, d'ou ce controle avant de laisser l'AAB partir vers la Play Console.
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $aabZip = [System.IO.Compression.ZipFile]::OpenRead($publishedAab)
+        try {
+            $aabAssets = @{}
+            foreach ($entry in $aabZip.Entries) { $aabAssets[$entry.FullName] = $entry.Length }
+        } finally {
+            $aabZip.Dispose()
+        }
+        $missingFonts = Get-ChildItem (Join-Path $repoRoot "MordheimLedgerApp\Resources\Fonts") -File |
+            Where-Object { -not $aabAssets["base/assets/$($_.Name)"] } |
+            ForEach-Object Name
+        if ($missingFonts) {
+            throw "Polices absentes (ou vides) dans l'AAB : $($missingFonts -join ', '). AAB non publie - relancer le script."
+        }
+        Write-Host "Polices verifiees dans l'AAB." -ForegroundColor DarkGray
         $aabPath = Join-Path $outputDirPlayStore "MordheimLedger-$version.aab"
         Copy-Item -Path $publishedAab -Destination $aabPath -Force
 
-        Write-Host "AAB : $aabPath (a uploader dans la Play Console)" -ForegroundColor Green
+        Write-Host "AAB : $aabPath" -ForegroundColor Green
+
+        # --- Publication Google Play via Deploy\PlayPublisher.cs (Google Play Developer API) : upload de
+        #     l'AAB et du mapping.txt R8, version affectee a la piste MORDHEIMLEDGER_PLAY_TRACK (production
+        #     par defaut), avec en notes de version (« Nouveautes ») la section $major.$minor du changelog
+        #     du site (FR + EN), puis envoi en examen. Identifiants : cle JSON d'un compte de service
+        #     invite dans la Play Console, deposee dans ce dossier Deploy\ (gitignoree, comme la keystore)
+        #     ou designee par MORDHEIMLEDGER_PLAY_SERVICE_ACCOUNT_JSON. Non bloquant comme le Microsoft
+        #     Store : en cas d'echec, l'AAB reste sous Deploy\PlayStore\ pour un upload manuel. ---
+        $playKey = $env:MORDHEIMLEDGER_PLAY_SERVICE_ACCOUNT_JSON
+        if (-not $playKey) {
+            $playKey = Get-ChildItem $releaseDir -Filter *.json |
+                Where-Object { try { (Get-Content $_.FullName -Raw | ConvertFrom-Json).type -eq "service_account" } catch { $false } } |
+                Select-Object -First 1 -ExpandProperty FullName
+        }
+        if (-not $playKey) {
+            Write-Warning "Aucune cle de compte de service Google Play (.json) dans Deploy\ : AAB a uploader a la main dans la Play Console."
+        } elseif (-not (Test-Path $playKey)) {
+            Write-Warning "Cle Google Play introuvable ('$playKey') : AAB a uploader a la main dans la Play Console."
+        } else {
+            Write-Host "=== Android : publication Google Play ===" -ForegroundColor Cyan
+            $playTrack = if ($env:MORDHEIMLEDGER_PLAY_TRACK) { $env:MORDHEIMLEDGER_PLAY_TRACK } else { "production" }
+            dotnet run (Join-Path $releaseDir "PlayPublisher.cs") -- `
+                --key $playKey `
+                --package "com.narfedome.mordheimledger" `
+                --aab $aabPath `
+                --track $playTrack `
+                --name $version `
+                --mapping (Join-Path $repoRoot "MordheimLedgerApp\bin\Release\net10.0-android\mapping.txt") `
+                --changelog (Join-Path $repoRoot "Website") `
+                --changelog-version "$major.$minor"
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warning "Echec de la publication Google Play (code $LASTEXITCODE) : AAB a uploader a la main dans la Play Console."
+            }
+        }
     }
 
     # --- Publication GitHub Release : seule source des binaires pour le site (jamais commites,
@@ -235,9 +294,11 @@ try {
         throw "GitHub CLI (gh) introuvable. Installe-le et authentifie-toi (gh auth login) pour publier une release."
     }
 
-    $assets = @(
+    # @() exterieur indispensable : avec un seul fichier, le filtre renvoie une chaine et non un
+    # tableau, et @assets la passerait alors caractere par caractere a gh ("no matches found for D").
+    $assets = @(@(
         Join-Path $outputDirWindows "MordheimLedgerInstaller.exe"
-    ) | Where-Object { Test-Path $_ }
+    ) | Where-Object { Test-Path $_ })
 
     if ($SkipWindows -or $assets.Count -eq 0) {
         Write-Host "Pas d'installeur Windows : ni GitHub Release ni redeploiement du site (l'AAB passe par la Play Console)." -ForegroundColor Yellow

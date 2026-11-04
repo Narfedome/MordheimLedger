@@ -726,7 +726,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     private void PopulateSoldToPitsRerollRoll()
     {
-        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel", injuryCatalog: _injuryCatalog);
+        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: InjurySubRollEntry.PitFightRerollLabelKey, injuryCatalog: _injuryCatalog);
         entry.PropertyChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(SummaryText));

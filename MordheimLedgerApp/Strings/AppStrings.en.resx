@@ -1306,6 +1306,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} was taken out of action: {1}</value>
   </data>
+  <data name="HistorySoldToPitsRerollSentence" xml:space="preserve">
+    <value>{0}, reroll after losing in the Pits: {1}</value>
+  </data>
   <data name="HistoryHenchmanDeathSentence" xml:space="preserve">
     <value>{0} loses {1} model(s), {2} remaining.</value>
   </data>
@@ -1652,7 +1655,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Loss: reroll on the same chart</value>
   </data>
   <data name="EndOfGameSoldToPitsRerollHint" xml:space="preserve">
-    <value>The rulebook only keeps 11-35 for this reroll - free entry, not enforced.</value>
+    <value>The usual rule only keeps 11-35 for this reroll, but any result is accepted.</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollOutOfRangeWarning" xml:space="preserve">
+    <value>Outside the usual rule's 11-35 range - result accepted anyway.</value>
   </data>
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>New roll</value>
@@ -2725,4 +2731,4 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="TourWizardEquipmentBody" xml:space="preserve">
     <value>Equip each hero, and each group of henchmen with a single purchase for the whole group. The first dagger is free; split a group to equip part of it differently.</value>
   </data>
-</root>
+</root>

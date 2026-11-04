@@ -88,7 +88,9 @@ public partial class EndOfGamePageViewModel
                 var entryIsTemporary = entryOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
                 var entryInjury = await GetOrCreateInjuryAsync(hasRoll ? roll : -1, warrior.IsHero, entry.ResolvedInjuryText, entryBranchSubRoll);
                 await _warbandService.AddWarriorInjuryAsync(warrior.Id, entryInjury, entryIsTemporary);
-                sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, entry.ResolvedInjuryText));
+                // Relance d'un combat de gladiateur perdu : pas une nouvelle mise hors de combat, phrase dédiée.
+                sentences.Add(string.Format(Loc[entry.IsPitFightReroll ? "HistorySoldToPitsRerollSentence" : "HistoryInjurySentence"],
+                    warrior.Name, entry.ResolvedInjuryText));
 
                 if (entryOutcome is not null)
                 {

@@ -62,7 +62,7 @@ public partial class EndOfGamePageViewModel
                     break;
 
                 case CapturedEnemyFate.SacrificedForXp:
-                    var leader = _allActiveWarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+                    var leader = SurvivingLeader;
                     if (leader is not null)
                     {
                         leader.Warrior.Experience += 1;
@@ -232,7 +232,7 @@ public partial class EndOfGamePageViewModel
         foreach (var row in WarriorRows)
         {
             var warrior = row.Warrior;
-            if (!warrior.IsDramatisPersona || warrior.Status is WarriorStatus.Dead or WarriorStatus.Retired) continue;
+            if (!warrior.IsDramatisPersona || row.IsDead || warrior.Status is WarriorStatus.Dead or WarriorStatus.Retired) continue;
 
             var persona = _dramatisPersonaCatalog.FirstOrDefault(p => p.Id == warrior.DramatisPersonaId);
             if (persona is not { IsWanderer: true }) continue;
@@ -270,7 +270,7 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        foreach (var entry in DramatisPersonaUpkeepEntries)
+        foreach (var entry in LivingDramatisPersonaUpkeepEntries)
         {
             var warrior = entry.Warrior;
 
@@ -310,7 +310,7 @@ public partial class EndOfGamePageViewModel
         // saisie d'équipement/du duel appliqués séparément (ApplyPairEquipmentSeizureIfNeededAsync/
         // ApplyPairDuelIfNeededAsync juste en dessous) : double paiement (or perdu ET objets/meneur
         // perdus pour la même dette).
-        if (WantsToRecordPairCorruption && !IsPairCorruptionUnaffordable
+        if (ShowPairCorruptionOption && WantsToRecordPairCorruption && !IsPairCorruptionUnaffordable
             && int.TryParse(PairCorruptionAmount, out var corruptionAmount))
         {
             Warband.Treasury -= corruptionAmount;
@@ -326,7 +326,7 @@ public partial class EndOfGamePageViewModel
         // boucle Payer/Renvoyer ci-dessus) - "à la fin de tous les décomptes", retour utilisateur. Même
         // garde-fou !IsPairRetentionUnaffordable que la Corruption ci-dessus (2026-09-04) - double
         // paiement sinon.
-        if (!IsPairRetentionUnaffordable
+        if (ShowPairRetentionOption && !IsPairRetentionUnaffordable
             && int.TryParse(PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
         {
             Warband.Treasury -= retentionAmount;
@@ -366,7 +366,7 @@ public partial class EndOfGamePageViewModel
         var isUnaffordable = IsPairCorruptionUnaffordable || IsPairRetentionUnaffordable;
         if (Warband is null || !isUnaffordable || !WantsDuel) return;
 
-        var leaderRow = WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+        var leaderRow = DuelLeaderRow;
         if (leaderRow is null) return;
         var warrior = leaderRow.Warrior;
 
@@ -390,7 +390,7 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        foreach (var entry in HiredSwordUpkeepEntries)
+        foreach (var entry in LivingHiredSwordUpkeepEntries)
         {
             var warrior = entry.Warrior;
 

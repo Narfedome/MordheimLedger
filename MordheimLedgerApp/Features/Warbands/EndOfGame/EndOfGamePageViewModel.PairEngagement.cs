@@ -66,7 +66,11 @@ public partial class EndOfGamePageViewModel
     // et ApplyWandererDeparturesAsync produit tout seul une phrase d'historique différenciée avant le
     // départ Vagabond habituel - aucun paiement de leur côté (voir Warrior.IsHostileThisBattle).
     private DramatisPersona? _pairPersona;
-    private bool _pairAlreadyOwnedInRoster;
+    /// <summary>Lignes du roster portant "A Fistful of Crowns" - la bande ne "possède" la paire que tant
+    /// qu'une d'elles survit à cette bataille (voir EndOfGamePageViewModel.Roster.cs).</summary>
+    private List<WarriorOutcomeRow> _pairOwnedRows = new();
+
+    private bool PairAlreadyOwnedInRoster => _pairOwnedRows.Any(r => !r.IsDead);
 
     /// <summary>Ids du catalogue portant la SpecialRule "A Fistful of Crowns"/"Une Poignée d'Or" - c'est
     /// CETTE règle, plutôt que FeeKind.Pair, qui déclenche tout le mécanisme Corruption/Rétention/Où est
@@ -99,7 +103,7 @@ public partial class EndOfGamePageViewModel
     /// décision est déjà connue au moment d'afficher cette carte - reste quand même réévaluée en direct
     /// (notifiée depuis le handler WantsToRecruit de RareItemSearchEntries, voir
     /// EndOfGamePageViewModel.cs) au cas où le joueur reviendrait en arrière.</summary>
-    public bool ShowPairCorruptionOption => _pairPersona is not null && !_pairAlreadyOwnedInRoster && !IsPairBeingRecruitedThisWizard;
+    public bool ShowPairCorruptionOption => _pairPersona is not null && !PairAlreadyOwnedInRoster && !IsPairBeingRecruitedThisWizard;
 
     /// <summary>Voir la doc de ShowPairCorruptionOption - vrai dès qu'une recherche "Personnage spécial"
     /// visant un personnage portant "A Fistful of Crowns" a RÉUSSI (IsRecruited = IsCharacterFound &amp;&amp;
@@ -173,7 +177,7 @@ public partial class EndOfGamePageViewModel
         _pairPersona = _dramatisPersonaCatalog.FirstOrDefault(p => _fistfulOfCrownsPersonaIds.Contains(p.Id) && !p.IsHiddenFromSearchPicker);
         if (_pairPersona is null) return;
 
-        _pairAlreadyOwnedInRoster = WarriorRows.Any(r => r.Warrior.IsDramatisPersona && r.Warrior.DramatisPersonaId is { } id && _fistfulOfCrownsPersonaIds.Contains(id));
+        _pairOwnedRows = WarriorRows.Where(r => r.Warrior.IsDramatisPersona && r.Warrior.DramatisPersonaId is { } id && _fistfulOfCrownsPersonaIds.Contains(id)).ToList();
     }
 
     // --- "C'est l'heure de payer !" : bande qui possède DÉJÀ Ulli & Marquand ----------------------------
@@ -186,7 +190,11 @@ public partial class EndOfGamePageViewModel
 
     private DramatisPersona? _ownedPairPersona;
 
-    public bool ShowPairRetentionOption { get; private set; }
+    /// <summary>Lignes non hostiles de la paire possédée (voir BuildPairRetentionOption) - "payer pour les
+    /// garder" n'a de sens que si l'une d'elles a survécu à cette bataille.</summary>
+    private List<WarriorOutcomeRow> _pairRetentionRows = new();
+
+    public bool ShowPairRetentionOption => _ownedPairPersona is not null && _pairRetentionRows.Any(r => !r.IsDead);
 
     /// <summary>Nom complet de la paire, même construction que PairCorruptionLabel ci-dessus.</summary>
     public string PairRetentionLabel => _ownedPairPersona is { } p
@@ -217,23 +225,18 @@ public partial class EndOfGamePageViewModel
         // CETTE bataille, donc quitte de toute façon à la Fin de Partie (ApplyWandererDeparturesAsync,
         // Vagabond) sans paiement de son côté - "payer pour les GARDER" n'a plus de sens dans ce cas,
         // seul quelqu'un resté loyal (ou jamais approché) peut avoir coûté une contre-offre.
-        var ownedRow = WarriorRows.FirstOrDefault(r => r.Warrior.IsDramatisPersona && r.Warrior.DramatisPersonaId is { } id
-            && _fistfulOfCrownsPersonaIds.Contains(id) && !r.Warrior.IsHostileThisBattle);
-        if (ownedRow is null)
-        {
-            ShowPairRetentionOption = false;
-            return;
-        }
+        _pairRetentionRows = WarriorRows.Where(r => r.Warrior.IsDramatisPersona && r.Warrior.DramatisPersonaId is { } id
+            && _fistfulOfCrownsPersonaIds.Contains(id) && !r.Warrior.IsHostileThisBattle).ToList();
+        if (_pairRetentionRows.FirstOrDefault() is not { } ownedRow) return;
 
         _ownedPairPersona = _dramatisPersonaCatalog.FirstOrDefault(p => p.Id == ownedRow.Warrior.DramatisPersonaId);
-        ShowPairRetentionOption = _ownedPairPersona is not null;
     }
 
     /// <summary>"C'est l'heure de payer !" - true si le montant saisi dépasserait le solde prévisionnel
     /// (même DramatisPersonaeBaselineTreasury que le cas symétrique - cette bande n'a jamais les deux
     /// entrées à la fois, aucun risque de double-compte). Pilote le même bloc "Où est l'Argent ?" que la
     /// Corruption ci-dessus (WantsEquipmentSeizure/WantsDuel/WonDuel), affiché ici à la place.</summary>
-    public bool IsPairRetentionUnaffordable => int.TryParse(PairRetentionAmount, out var amount) && amount > 0 && amount > DramatisPersonaeBaselineTreasury;
+    public bool IsPairRetentionUnaffordable => ShowPairRetentionOption && int.TryParse(PairRetentionAmount, out var amount) && amount > 0 && amount > DramatisPersonaeBaselineTreasury;
 
     // --- Où est l'Argent ? : repli si le montant (Corruption OU Rétention) dépasserait ce que la bande
     // peut payer - "C'est l'heure de payer ! ... Si c'est le cas, Ulli et Marquand se payeront en armes et
@@ -243,8 +246,8 @@ public partial class EndOfGamePageViewModel
     /// Rétention (jamais les deux à la fois pour une même bande - voir la doc de classe) - 0 si aucune
     /// des deux n'est active/valide. Consommé par EndOfGameTreasuryRemaining lui-même.</summary>
     private int PairPaymentAmountCommitted =>
-        (WantsToRecordPairCorruption && int.TryParse(PairCorruptionAmount, out var corruptionAmount) ? corruptionAmount : 0)
-        + (int.TryParse(PairRetentionAmount, out var retentionAmount) && retentionAmount > 0 ? retentionAmount : 0);
+        (ShowPairCorruptionOption && WantsToRecordPairCorruption && int.TryParse(PairCorruptionAmount, out var corruptionAmount) ? corruptionAmount : 0)
+        + (ShowPairRetentionOption && int.TryParse(PairRetentionAmount, out var retentionAmount) && retentionAmount > 0 ? retentionAmount : 0);
 
     /// <summary>Solde disponible AVANT ce paiement précis de Corruption/Rétention - "remet en
     /// circulation" le montant que EndOfGameTreasuryRemaining a déjà retranché via
@@ -261,7 +264,7 @@ public partial class EndOfGamePageViewModel
 
     /// <summary>"C'est l'heure de payer !" - true si le montant de corruption saisi dépasserait ce solde
     /// prévisionnel. Pilote la visibilité du bloc Où est l'Argent.</summary>
-    public bool IsPairCorruptionUnaffordable => WantsToRecordPairCorruption
+    public bool IsPairCorruptionUnaffordable => ShowPairCorruptionOption && WantsToRecordPairCorruption
         && int.TryParse(PairCorruptionAmount, out var amount) && amount > DramatisPersonaeBaselineTreasury;
 
     /// <summary>Valeur totale de la réserve de bande, toutes lignes confondues - seule mesure qui tranche

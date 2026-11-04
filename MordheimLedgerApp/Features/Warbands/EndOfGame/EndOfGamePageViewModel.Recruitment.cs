@@ -101,7 +101,7 @@ public partial class EndOfGamePageViewModel
     /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place. Part de l'effectif SURVIVANT
     /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.</summary>
     private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount) + RecruitRows.Sum(r => r.Count)
-        + ExistingHenchmanTopUps.Sum(t => t.AddCount) + ExplorationJoinedHeadCount;
+        + LivingHenchmanTopUps.Sum(t => t.AddCount) + ExplorationJoinedHeadCount;
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
     /// WarriorArchetype.MaxCount. Compte tous les guerriers vivants (WarriorRows exclut déjà les morts/
@@ -269,15 +269,16 @@ public partial class EndOfGamePageViewModel
     /// concerne que les groupes déjà là (StartingExperience 0 pour un type jamais recruté).</summary>
     public int RemainingVeteranBudget =>
         (int.TryParse(VeteranExperienceRoll, out var roll) ? roll : 0)
-        - ExistingHenchmanTopUps.Sum(t => t.AddCount * t.GroupExperience);
+        - LivingHenchmanTopUps.Sum(t => t.AddCount * t.GroupExperience);
 
-    public bool HasExistingHenchmanGroups => ExistingHenchmanTopUps.Count > 0;
+    public bool HasExistingHenchmanGroups => LivingHenchmanTopUps.Any();
 
     public string RecruitHenchmenExistingHintDisplay => string.Format(Loc["EndOfGameRecruitHenchmenExistingHint"], RemainingVeteranBudget);
 
     [RelayCommand]
     private void IncrementHenchmanTopUp(ExistingHenchmanTopUp topUp)
     {
+        if (topUp.Row.IsDead) return;
         if (topUp.GroupExperience > RemainingVeteranBudget) return;
         // WarriorArchetype.MaxCount et WarbandArchetype.MaxWarriors - jusqu'ici seul le budget XP
         // bloquait l'incrément, retour utilisateur 2026-09-22. isExistingWarband: true réutilise
@@ -401,7 +402,7 @@ public partial class EndOfGamePageViewModel
     private int HenchmanRecruitmentTotalCost()
     {
         var served = ServedReservePicks();
-        return ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
+        return LivingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
             + HenchmanRecruitRows.Sum(r => r.HenchmanGroupDrafts.Sum(g => g.Count) * r.Cost)
             + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => RecruitPickCost(e, served)) * g.Count)
             + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Mutations.Sum(m => m.Cost) * g.Count);
@@ -514,7 +515,8 @@ public partial class EndOfGamePageViewModel
         // list from your warband", confirmée pour Héros ET Hommes de main. RestrictedToWarriorArchetypeIds
         // (row.Archetype.Id) continue de s'appliquer par-dessus, comme avant.
         var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
-            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities, allowCreate: false);
+            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities, allowCreate: false,
+            allowQuantity: target is not HenchmanGroupDraft);
 
         // Jamais de CHOIX interactif de matériau ici (retour utilisateur 2026-09-21 - même raison que
         // AddReserveEquipment/EquipmentTrading.cs) : Gromril/Ithilmar sont des améliorations RARES

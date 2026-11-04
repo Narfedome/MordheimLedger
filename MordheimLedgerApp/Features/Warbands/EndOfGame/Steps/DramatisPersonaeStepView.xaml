@@ -13,7 +13,7 @@
                  lisible ("1 pierre magique" plutôt qu'un "1" ambigu). -->
             <VerticalStackLayout Spacing="12">
                 <Label Text="{loc:Loc EndOfGameDramatisPersonaeHeading}" FontAttributes="Bold"/>
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding DramatisPersonaUpkeepEntries}" Spacing="8">
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding LivingDramatisPersonaUpkeepEntries}" Spacing="8">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:DramatisPersonaUpkeepEntry">
                             <Border Style="{StaticResource SectionCardBorderStyle}">

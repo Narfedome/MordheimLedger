@@ -35,7 +35,7 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:RareItemSearchEntry">
                             <Border Style="{StaticResource SectionCardBorderStyle}"
-                                    IsVisible="{Binding Hero.IsOutOfAction, Converter={StaticResource InverseBoolConverter}}">
+                                    IsVisible="{Binding Hero.CanSearchRareItems}">
                                 <VerticalStackLayout Spacing="8">
                                     <Label Text="{Binding HeroName}" FontAttributes="Bold"/>
 

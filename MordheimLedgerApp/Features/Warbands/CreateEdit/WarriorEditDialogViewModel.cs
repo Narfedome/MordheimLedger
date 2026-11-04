@@ -229,7 +229,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private async Task AddEquipment()
     {
         var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury,
-            alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger));
+            alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger), allowQuantity: Item.IsHero);
 
         // Même dialog que la création libre du wizard (MaterialPickerDialogViewModel) : matériau exclusif
         // (corps à corps) + bénédiction cumulable (toute arme), un seul écran. Tout normal / tap à

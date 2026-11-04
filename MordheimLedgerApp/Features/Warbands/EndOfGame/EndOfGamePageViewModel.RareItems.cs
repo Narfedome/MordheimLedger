@@ -42,7 +42,7 @@ public partial class EndOfGamePageViewModel
     /// héros") - same exclusion as RareItemSearchEntries itself (main constructor); kept as a separate
     /// check on WarriorRows rather than derived from RareItemSearchEntries so both conditions stay
     /// obviously in sync.</summary>
-    public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona);
+    public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && r.CanSearchRareItems && !r.Warrior.IsDramatisPersona);
 
     /// <summary>Opens the Trading Post picker via PickRareEquipmentAsync (IEquipmentPickerService) - the
     /// player is nominating exactly ONE item to attempt this Hero's single roll against ("You may also
@@ -133,7 +133,7 @@ public partial class EndOfGamePageViewModel
     private bool ValidateRareItemsStep()
     {
         var valid = true;
-        foreach (var entry in RareItemSearchEntries.Where(e => !e.Hero.IsOutOfAction))
+        foreach (var entry in RareItemSearchEntries.Where(e => e.Hero.CanSearchRareItems))
         {
             if (entry.IsSearchingForCharacter && entry.HasSelectedCharacter)
                 valid &= CheckRoll(entry.CharacterTotalRoll is null, () => entry.CharacterRollError = Loc["EndOfGameRollRequired"]);

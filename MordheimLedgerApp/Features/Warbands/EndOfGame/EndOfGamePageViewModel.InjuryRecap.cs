@@ -30,7 +30,7 @@ public partial class EndOfGamePageViewModel
                     continue;
                 }
 
-                if (row.IsDead)
+                if (row.IsDeadFromInjuries)
                 {
                     yield return new(row.Name, Loc["EndOfGameDeadLabel"], true);
                     continue;

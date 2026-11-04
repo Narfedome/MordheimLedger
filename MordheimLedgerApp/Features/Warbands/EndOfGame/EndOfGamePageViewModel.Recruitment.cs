@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Models;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -99,16 +100,34 @@ public partial class EndOfGamePageViewModel
     /// additionner ici même avant d'atteindre cette étape. Retranche WarriorRows.DismissCount (même jour,
     /// retour utilisateur - "dans les recrutement, il faut soustraire les effectifs") : un guerrier renvoyé
     /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place. Part de l'effectif SURVIVANT
-    /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.</summary>
-    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount) + RecruitRows.Sum(r => r.Count)
+    /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.
+    ///
+    /// Bug corrigé le 2026-11-04 (retour joueur - "l'appli me dit que je suis à 12/12... alors que le récap
+    /// est correct : 5 héros, 1 chien, 1 séide, 4 flagellants") : partait de WarriorRows, qui compte aussi
+    /// les Francs-Tireurs et Dramatis Personae - hors décompte du maximum (livre, voir
+    /// RulesReference/FrancsTireurs.md ; le wizard de création les excluait déjà) - et oublie les guerriers
+    /// Malades cette partie (absents de WarriorRows mais toujours dans la bande). Voir
+    /// RosterHeadCountForLimits.</summary>
+    private int TotalWarriorCountAfterRecruitment => RosterHeadCountForLimits(_ => true) + RecruitRows.Sum(r => r.Count)
         + LivingHenchmanTopUps.Sum(t => t.AddCount) + ExplorationJoinedHeadCount;
+
+    /// <summary>Figurines déjà dans la bande qui comptent pour MaxWarriors/MaxCount, après les Blessures et
+    /// les renvois de cette Fin de Partie : tout le roster vivant (_allActiveWarriorRows, Malades compris),
+    /// sauf Francs-Tireurs et Dramatis Personae. Un guerrier engagé dans la bataille compte son effectif
+    /// survivant moins ses renvois ; un Malade (pas engagé) son effectif tel quel.</summary>
+    private int RosterHeadCountForLimits(Func<Warrior, bool> filter) =>
+        _allActiveWarriorRows
+            .Where(r => !r.Warrior.IsHiredSword && !r.Warrior.IsDramatisPersona && filter(r.Warrior))
+            .Sum(r => WarriorRows.FirstOrDefault(o => ReferenceEquals(o.Warrior, r.Warrior)) is { } outcome
+                ? outcome.SurvivingHeadCount - outcome.EffectiveDismissCount
+                : r.Warrior.HeadCount);
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
     /// WarriorArchetype.MaxCount. Compte tous les guerriers vivants (WarriorRows exclut déjà les morts/
     /// retraités - voir WarbandDetailViewModel.EndOfGame's activeWarriorRows), pas seulement les Héros.
     /// Retranche DismissCount, même raison que TotalWarriorCountAfterRecruitment.</summary>
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
-        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount)
+        RosterHeadCountForLimits(w => w.WarriorArchetypeId == warriorArchetypeId)
         + ExplorationJoinedCountForArchetype(warriorArchetypeId);
 
     /// <summary>Chip tapable sur chaque ligne de WarriorRecruitListView (Steps/RecruitHeroesCountStepView.

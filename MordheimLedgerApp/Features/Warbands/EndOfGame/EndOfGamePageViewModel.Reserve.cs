@@ -171,7 +171,7 @@ public partial class EndOfGamePageViewModel
     {
         var pool = BuildReserve(ReserveStage.AfterSales).ToPool();
         var plans = new Dictionary<ExistingHenchmanTopUp, List<TopUpEquipmentPlan>>();
-        foreach (var topUp in ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
+        foreach (var topUp in LivingHenchmanTopUps.Where(t => t.AddCount > 0))
         {
             var lines = new List<TopUpEquipmentPlan>();
             foreach (var equipment in topUp.CurrentEquipment)

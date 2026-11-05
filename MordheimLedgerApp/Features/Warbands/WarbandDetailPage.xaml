@@ -323,7 +323,8 @@
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
-                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0} gc'}"/>
+                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0} '}"/>
+                        <Span Text="{loc:Loc LibGoldCrownsAbbr}"/>
                         <Span Text=" · "/>
                         <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
                         <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>

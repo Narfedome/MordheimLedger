@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Models;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -99,16 +100,34 @@ public partial class EndOfGamePageViewModel
     /// additionner ici même avant d'atteindre cette étape. Retranche WarriorRows.DismissCount (même jour,
     /// retour utilisateur - "dans les recrutement, il faut soustraire les effectifs") : un guerrier renvoyé
     /// à l'étape Renvoyer (juste avant, dans Steps) libère de la place. Part de l'effectif SURVIVANT
-    /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.</summary>
-    private int TotalWarriorCountAfterRecruitment => WarriorRows.Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount) + RecruitRows.Sum(r => r.Count)
-        + ExistingHenchmanTopUps.Sum(t => t.AddCount) + ExplorationJoinedHeadCount;
+    /// (SurvivingHeadCount, 2026-09-28) : les morts de cette bataille libèrent leur place eux aussi.
+    ///
+    /// Bug corrigé le 2026-11-04 (retour joueur - "l'appli me dit que je suis à 12/12... alors que le récap
+    /// est correct : 5 héros, 1 chien, 1 séide, 4 flagellants") : partait de WarriorRows, qui compte aussi
+    /// les Francs-Tireurs et Dramatis Personae - hors décompte du maximum (livre, voir
+    /// RulesReference/FrancsTireurs.md ; le wizard de création les excluait déjà) - et oublie les guerriers
+    /// Malades cette partie (absents de WarriorRows mais toujours dans la bande). Voir
+    /// RosterHeadCountForLimits.</summary>
+    private int TotalWarriorCountAfterRecruitment => RosterHeadCountForLimits(_ => true) + RecruitRows.Sum(r => r.Count)
+        + LivingHenchmanTopUps.Sum(t => t.AddCount) + ExplorationJoinedHeadCount;
+
+    /// <summary>Figurines déjà dans la bande qui comptent pour MaxWarriors/MaxCount, après les Blessures et
+    /// les renvois de cette Fin de Partie : tout le roster vivant (_allActiveWarriorRows, Malades compris),
+    /// sauf Francs-Tireurs et Dramatis Personae. Un guerrier engagé dans la bataille compte son effectif
+    /// survivant moins ses renvois ; un Malade (pas engagé) son effectif tel quel.</summary>
+    private int RosterHeadCountForLimits(Func<Warrior, bool> filter) =>
+        _allActiveWarriorRows
+            .Where(r => !r.Warrior.IsHiredSword && !r.Warrior.IsDramatisPersona && filter(r.Warrior))
+            .Sum(r => WarriorRows.FirstOrDefault(o => ReferenceEquals(o.Warrior, r.Warrior)) is { } outcome
+                ? outcome.SurvivingHeadCount - outcome.EffectiveDismissCount
+                : r.Warrior.HeadCount);
 
     /// <summary>Effectif déjà recruté de CE type précis, avant même d'ouvrir cette étape - comparé à
     /// WarriorArchetype.MaxCount. Compte tous les guerriers vivants (WarriorRows exclut déjà les morts/
     /// retraités - voir WarbandDetailViewModel.EndOfGame's activeWarriorRows), pas seulement les Héros.
     /// Retranche DismissCount, même raison que TotalWarriorCountAfterRecruitment.</summary>
     private int ExistingCountForArchetype(int warriorArchetypeId) =>
-        WarriorRows.Where(r => r.Warrior.WarriorArchetypeId == warriorArchetypeId).Sum(r => r.SurvivingHeadCount - r.EffectiveDismissCount)
+        RosterHeadCountForLimits(w => w.WarriorArchetypeId == warriorArchetypeId)
         + ExplorationJoinedCountForArchetype(warriorArchetypeId);
 
     /// <summary>Chip tapable sur chaque ligne de WarriorRecruitListView (Steps/RecruitHeroesCountStepView.
@@ -269,15 +288,16 @@ public partial class EndOfGamePageViewModel
     /// concerne que les groupes déjà là (StartingExperience 0 pour un type jamais recruté).</summary>
     public int RemainingVeteranBudget =>
         (int.TryParse(VeteranExperienceRoll, out var roll) ? roll : 0)
-        - ExistingHenchmanTopUps.Sum(t => t.AddCount * t.GroupExperience);
+        - LivingHenchmanTopUps.Sum(t => t.AddCount * t.GroupExperience);
 
-    public bool HasExistingHenchmanGroups => ExistingHenchmanTopUps.Count > 0;
+    public bool HasExistingHenchmanGroups => LivingHenchmanTopUps.Any();
 
     public string RecruitHenchmenExistingHintDisplay => string.Format(Loc["EndOfGameRecruitHenchmenExistingHint"], RemainingVeteranBudget);
 
     [RelayCommand]
     private void IncrementHenchmanTopUp(ExistingHenchmanTopUp topUp)
     {
+        if (topUp.Row.IsDead) return;
         if (topUp.GroupExperience > RemainingVeteranBudget) return;
         // WarriorArchetype.MaxCount et WarbandArchetype.MaxWarriors - jusqu'ici seul le budget XP
         // bloquait l'incrément, retour utilisateur 2026-09-22. isExistingWarband: true réutilise
@@ -401,7 +421,7 @@ public partial class EndOfGamePageViewModel
     private int HenchmanRecruitmentTotalCost()
     {
         var served = ServedReservePicks();
-        return ExistingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
+        return LivingHenchmanTopUps.Where(t => t.AddCount > 0).Sum(t => GetTopUpBreakdown(t).Total)
             + HenchmanRecruitRows.Sum(r => r.HenchmanGroupDrafts.Sum(g => g.Count) * r.Cost)
             + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => RecruitPickCost(e, served)) * g.Count)
             + HenchmanRecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Mutations.Sum(m => m.Cost) * g.Count);
@@ -514,7 +534,8 @@ public partial class EndOfGamePageViewModel
         // list from your warband", confirmée pour Héros ET Hommes de main. RestrictedToWarriorArchetypeIds
         // (row.Archetype.Id) continue de s'appliquer par-dessus, comme avant.
         var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
-            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities, allowCreate: false);
+            EndOfGameTreasuryRemaining, perUnitCost, destination.Any(p => p.Item.IsFreeDagger), commonOnly: true, reserveQuantities: reserveQuantities, allowCreate: false,
+            allowQuantity: target is not HenchmanGroupDraft);
 
         // Jamais de CHOIX interactif de matériau ici (retour utilisateur 2026-09-21 - même raison que
         // AddReserveEquipment/EquipmentTrading.cs) : Gromril/Ithilmar sont des améliorations RARES

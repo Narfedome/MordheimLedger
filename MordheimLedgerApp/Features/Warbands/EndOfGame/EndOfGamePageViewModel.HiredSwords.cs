@@ -22,7 +22,7 @@ public partial class EndOfGamePageViewModel
 
     public ObservableCollection<HiredSwordUpkeepEntry> HiredSwordUpkeepEntries { get; } = new();
 
-    public bool HasHiredSwordUpkeep => HiredSwordUpkeepEntries.Count > 0;
+    public bool HasHiredSwordUpkeep => LivingHiredSwordUpkeepEntries.Any();
 
     /// <summary>Éligibles à CETTE bande (RestrictedToWarbandArchetypeIds vide ou la contenant) moins les
     /// types déjà activement engagés (WarriorRows ne contient que les guerriers Actifs cette partie - un
@@ -33,7 +33,7 @@ public partial class EndOfGamePageViewModel
     /// ItemsSource, ça la déselectionnerait).</summary>
     private List<HiredSword> EligibleHiredSwordsForBand => _hiredSwordCatalog
         .Where(h => h.RestrictedToWarbandArchetypeIds.Count == 0 || h.RestrictedToWarbandArchetypeIds.Contains(_warbandArchetypeId))
-        .Where(h => !WarriorRows.Any(r => r.Warrior.HiredSwordId == h.Id))
+        .Where(h => !LivingWarriorRows.Any(r => r.Warrior.HiredSwordId == h.Id))
         .ToList();
 
     /// <summary>Picker de recrutement payant (étape "Francs-Tireurs") - exclut le type déjà choisi
@@ -70,7 +70,7 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    private bool HasAnyHiredSwordRelevance => HiredSwordUpkeepEntries.Count > 0 || AvailableHiredSwordsToRecruit.Count > 0;
+    private bool HasAnyHiredSwordRelevance => LivingHiredSwordUpkeepEntries.Any() || AvailableHiredSwordsToRecruit.Count > 0;
 
     /// <summary>Pilote la visibilité du bloc recrutement dans le XAML - AvailableHiredSwordsToRecruit
     /// n'est pas directement bindable à IsVisible (une liste, pas un bool).</summary>
@@ -133,7 +133,7 @@ public partial class EndOfGamePageViewModel
     private bool ValidateHiredSwordsStep()
     {
         var valid = true;
-        foreach (var entry in HiredSwordUpkeepEntries.Where(e => e.HasChoice))
+        foreach (var entry in LivingHiredSwordUpkeepEntries.Where(e => e.HasChoice))
             valid &= CheckRoll(entry.WillPay is null, () => entry.ChoiceError = Loc["EndOfGameRollRequired"]);
 
         if (SelectedNewHiredSword is not null)

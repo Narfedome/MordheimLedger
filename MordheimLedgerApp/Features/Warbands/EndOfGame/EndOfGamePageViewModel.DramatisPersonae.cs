@@ -24,7 +24,7 @@ public partial class EndOfGamePageViewModel
 
     public ObservableCollection<DramatisPersonaUpkeepEntry> DramatisPersonaUpkeepEntries { get; } = new();
 
-    public bool HasDramatisPersonaeUpkeep => DramatisPersonaUpkeepEntries.Count > 0;
+    public bool HasDramatisPersonaeUpkeep => LivingDramatisPersonaUpkeepEntries.Any();
 
     /// <summary>Peuplée une seule fois à la construction du dialog (voir EndOfGamePageViewModel ctor) -
     /// mêmes vrais guerriers déjà recrutés que BuildHiredSwordUpkeepEntries, filtrés à FeeKind.Gold avec
@@ -48,7 +48,7 @@ public partial class EndOfGamePageViewModel
     private bool ValidateDramatisPersonaeStep()
     {
         var valid = true;
-        foreach (var entry in DramatisPersonaUpkeepEntries)
+        foreach (var entry in LivingDramatisPersonaUpkeepEntries)
             valid &= CheckRoll(entry.WillPay is null, () => entry.ChoiceError = Loc["EndOfGameRollRequired"]);
 
         return valid;

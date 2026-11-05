@@ -215,7 +215,9 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        foreach (var row in WarriorRows.Where(r => r.IsHero))
+        // Un Héros mort cette bataille n'a jamais été porteur à l'étape Réallouer (voir ReallocationCarriers) :
+        // rien à synchroniser pour lui.
+        foreach (var row in WarriorRows.Where(r => r.IsHero && !r.IsDead))
         {
             foreach (var id in row.OriginalEquipmentIds)
             {

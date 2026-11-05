@@ -32,7 +32,7 @@ public partial class EndOfGamePageViewModel
     /// <summary>Le meneur de CETTE bande (Warrior.IsLeader) - null si mort/retraité/malade cette partie
     /// (absent de WarriorRows), auquel cas la carte reste simplement vide plutôt qu'une erreur bloquante,
     /// même idiome que BonusStatTestLeader (Exploration, Bâtiment Éventré).</summary>
-    public WarriorOutcomeRow? DuelLeaderRow => WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+    public WarriorOutcomeRow? DuelLeaderRow => WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader && !r.IsDeadBeforeDuel);
 
     /// <summary>Le Dramatis Persona "A Fistful of Crowns" concerné par CETTE bande, quel que soit le sens
     /// (Corruption via _pairPersona si non possédé, Rétention via _ownedPairPersona si déjà possédé -

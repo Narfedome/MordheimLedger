@@ -159,7 +159,13 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// seul objet recherché par Héros), où "+" contournait en plus la sélection unique (IncrementQuantity
     /// ajoute la tuile sans désélectionner les autres, contrairement à Select) - retour utilisateur
     /// 2026-09-24.</summary>
-    public bool ShowQuantityStepper => ShowBudget && !SingleSelectMode;
+    public bool ShowQuantityStepper => ShowBudget && !SingleSelectMode && AllowQuantity;
+
+    /// <summary>Set by EquipmentPickerService (before LoadData) - false hides the -/+ stepper even when a
+    /// budget applies: equipping a Henchman group (creation wizard, End of Game recruitment, warrior edit
+    /// dialog) buys one kit per model, a tile is simply picked or not (user request 2026-11-04). True
+    /// (default) everywhere else.</summary>
+    public bool AllowQuantity { get; set; } = true;
 
     /// <summary>Live "spent this session / remaining" line, recomputed on every Select/quantity change -
     /// ignores any material-rule cost multiplier (Gromril...), only decided by the caller after the
@@ -378,6 +384,12 @@ public partial class EquipmentItemViewModel : BaseViewModel
             return;
         }
 
+        // Filet de sécurité derrière le calque de tap de EquipmentItemView.xaml : un tap de la tuile qui
+        // suit immédiatement un -/+ sur CETTE tuile est le même geste remonté jusqu'à elle, pas un
+        // second tap - l'ignorer plutôt que d'annuler ce que le -/+ vient de faire.
+        if (ReferenceEquals(row, _lastStepperRow) && Environment.TickCount64 - _lastStepperTick < StepperTapGuardMs)
+            return;
+
         if (row.Quantity > 0)
         {
             row.Quantity = 0;
@@ -412,10 +424,21 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// WarriorEditDialogViewModel.AddEquipment), qui s'arrête au premier objet trop cher. Une tuile Réserve
     /// (row.IsReserveRow), en revanche, EST plafonnée à ReserveAvailable (row.CanIncrement) - stock déjà
     /// possédé et limité, retour utilisateur 2026-09-21.</summary>
+    private const long StepperTapGuardMs = 400;
+    private EquipmentItemRow? _lastStepperRow;
+    private long _lastStepperTick;
+
+    private void MarkStepperTap(EquipmentItemRow row)
+    {
+        _lastStepperRow = row;
+        _lastStepperTick = Environment.TickCount64;
+    }
+
     [RelayCommand]
     private void IncrementQuantity(EquipmentItemRow row)
     {
         if (!row.CanIncrement) return;
+        MarkStepperTap(row);
         row.Quantity++;
         if (row.Quantity == 1)
         {
@@ -433,6 +456,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     private void DecrementQuantity(EquipmentItemRow row)
     {
         if (row.Quantity <= 0) return;
+        MarkStepperTap(row);
 
         if (row.Quantity == 1)
         {

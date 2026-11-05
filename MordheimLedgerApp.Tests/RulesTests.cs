@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -1743,5 +1744,243 @@ public class RulesTests
     public void RatingGapAidTable_GetRequiredRoll_MatchesBerthasTable(int ratingDifference, int? expectedRoll)
     {
         Assert.Equal(expectedRoll, RatingGapAidTable.GetRequiredRoll(ratingDifference));
+    }
+
+    private static Skill SkillWith(string name, params SkillEffect[] effects) =>
+        new() { Id = name.GetHashCode() & 0xFFFF, Name = name, OfficialId = $"skill.test.{name}", Effects = effects.ToList() };
+
+    private static Warrior WarriorWith(int id, params Skill[] skills) => new()
+    {
+        Id = id,
+        Name = $"W{id}",
+        IsHero = true,
+        Skills = skills.Select(s => new WarriorSkill { WarriorId = id, Item = s }).ToList(),
+    };
+
+    private static readonly SkillEffect Streetwise = new() { Moment = EffectMoment.RareItemSearch, Kind = EffectKind.Modifier, Value = "+2" };
+
+    // --- Effets de compétences (RuleEffectResolver) -------------------------------------------------------------------------
+
+    [Fact]
+    public void Resolver_ReturnsOnlyEffectsOfTheRequestedMoment()
+    {
+        var haggle = new SkillEffect { Moment = EffectMoment.Purchase, Kind = EffectKind.Discount, Value = "2D6", MinimumPrice = 1 };
+        var warrior = WarriorWith(1, SkillWith("Streetwise", Streetwise), SkillWith("Haggle", haggle));
+
+        var rare = RuleEffectResolver.For(EffectMoment.RareItemSearch, new EffectSubject(warrior));
+
+        var effect = Assert.Single(rare);
+        Assert.Equal("Streetwise", effect.SourceName);
+        Assert.Equal(EffectSourceKind.Skill, effect.SourceKind);
+        Assert.True(effect.ConditionMet);
+    }
+
+    [Fact]
+    public void Resolver_KeepsAnUnmetConditionInsteadOfHidingIt()
+    {
+        var hunter = new SkillEffect { Moment = EffectMoment.ExplorationRoll, Kind = EffectKind.Reroll, Condition = EffectCondition.NotOutOfAction };
+        var warrior = WarriorWith(1, SkillWith("Wyrdstone Hunter", hunter));
+
+        var effect = Assert.Single(RuleEffectResolver.For(EffectMoment.ExplorationRoll, new EffectSubject(warrior, IsOutOfAction: true)));
+
+        Assert.False(effect.ConditionMet);
+    }
+
+    [Fact]
+    public void Resolver_NeverReturnsPrerequisites()
+    {
+        var prerequisite = new SkillEffect { Moment = EffectMoment.SkillChoice, Kind = EffectKind.Prerequisite, Condition = EffectCondition.Spellcaster };
+        var warrior = WarriorWith(1, SkillWith("Sorcery", prerequisite));
+
+        Assert.Empty(RuleEffectResolver.For(EffectMoment.SkillChoice, new EffectSubject(warrior)));
+    }
+
+    /// <summary>Les colonnes Grants* d'un objet porté apparaissent comme des effets, à côté des compétences
+    /// (Rubis +1 et Débrouillard +2 sur la même recherche).</summary>
+    [Fact]
+    public void Resolver_PresentsCarriedEquipmentGrantsAsEffects()
+    {
+        var ruby = new EquipmentItem { Id = 7, Name = "Ruby", OfficialId = "equipment.ruby", GrantsRareItemSearchBonus = 1 };
+        var warrior = WarriorWith(1, SkillWith("Streetwise", Streetwise));
+        warrior.Equipment.Add(new WarriorEquipment { WarriorId = 1, Item = ruby });
+
+        var effects = RuleEffectResolver.For(EffectMoment.RareItemSearch, new EffectSubject(warrior));
+
+        Assert.Equal(2, effects.Count);
+        var fromRuby = Assert.Single(effects, e => e.SourceKind == EffectSourceKind.Equipment);
+        Assert.Equal("Ruby", fromRuby.SourceName);
+        Assert.Equal(1, EffectValues.ParseAmount(fromRuby.Effect.Value));
+        Assert.Equal(3, effects.Sum(e => EffectValues.ParseAmount(e.Effect.Value)));
+    }
+
+    [Fact]
+    public void EquipmentEffects_MapsEveryGrantColumn()
+    {
+        var item = new EquipmentItem
+        {
+            GrantsRareItemSearchBonus = 1,
+            GrantsBonusExplorationDice = 1,
+            GrantsSkillCategory = SkillCategory.Academic,
+            GrantsSpecificSkillOfficialId = "skill.academic.haggle",
+            RaisesCharacteristicMax = CharacteristicField.WeaponSkill,
+        };
+
+        var effects = RuleEffectResolver.EquipmentEffects(item);
+
+        Assert.Contains(effects, e => e is { Moment: EffectMoment.RareItemSearch, Kind: EffectKind.Modifier, Value: "+1" });
+        Assert.Contains(effects, e => e is { Moment: EffectMoment.ExplorationRoll, Kind: EffectKind.ExtraDie, Value: "1" });
+        Assert.Contains(effects, e => e.Kind == EffectKind.Allow && e.Targets.SequenceEqual(new[] { "Academic" }));
+        Assert.Contains(effects, e => e.Kind == EffectKind.Allow && e.Targets.SequenceEqual(new[] { "skill.academic.haggle" }));
+        Assert.Contains(effects, e => e.Moment == EffectMoment.CharacteristicIncrease && e.Targets.SequenceEqual(new[] { "WeaponSkill" }));
+        Assert.Empty(RuleEffectResolver.EquipmentEffects(new EquipmentItem()));
+    }
+
+    /// <summary>Chercheur de Ressources : valable même hors de combat, pas si le Héros est tué (FAQ).</summary>
+    [Fact]
+    public void Conditions_NotDead_IgnoresOutOfAction()
+    {
+        var notDead = new SkillEffect { Condition = EffectCondition.NotDead };
+        var warrior = WarriorWith(1);
+
+        Assert.True(RuleEffectResolver.IsConditionMet(notDead, new EffectSubject(warrior, IsOutOfAction: true)));
+        Assert.False(RuleEffectResolver.IsConditionMet(notDead, new EffectSubject(warrior, IsOutOfAction: true, IsDead: true)));
+    }
+
+    [Fact]
+    public void Conditions_Leader_Spellcaster_CarriesItem()
+    {
+        var warrior = WarriorWith(1);
+        var subject = new EffectSubject(warrior, IsSpellcaster: true);
+
+        Assert.False(RuleEffectResolver.IsConditionMet(new SkillEffect { Condition = EffectCondition.Leader }, subject));
+        warrior.IsLeader = true;
+        Assert.True(RuleEffectResolver.IsConditionMet(new SkillEffect { Condition = EffectCondition.Leader }, subject));
+        Assert.True(RuleEffectResolver.IsConditionMet(new SkillEffect { Condition = EffectCondition.Spellcaster }, subject));
+
+        var needsTome = new SkillEffect { Condition = EffectCondition.CarriesItem, ConditionTargets = ["equipment.tome-of-magic"] };
+        Assert.False(RuleEffectResolver.IsConditionMet(needsTome, subject));
+        warrior.Equipment.Add(new WarriorEquipment { Item = new EquipmentItem { OfficialId = "equipment.tome-of-magic" } });
+        Assert.True(RuleEffectResolver.IsConditionMet(needsTome, subject));
+    }
+
+    // --- SkillPrerequisites -------------------------------------------------------------------------
+
+    [Fact]
+    public void Prerequisites_ReportOnlyTheUnmetOnes()
+    {
+        var sorcery = SkillWith("Sorcery",
+            new SkillEffect { Moment = EffectMoment.SkillChoice, Kind = EffectKind.Prerequisite, Condition = EffectCondition.Spellcaster },
+            new SkillEffect
+            {
+                Moment = EffectMoment.SkillChoice, Kind = EffectKind.Prerequisite, Condition = EffectCondition.NotInWarbandOrArchetype,
+                ConditionTargets = ["warband.sisters-of-sigmar", "warrior.witch-hunters.warrior-priest"],
+            });
+        var warrior = WarriorWith(1);
+
+        var notCaster = SkillPrerequisites.Unmet(sorcery, new EffectSubject(warrior, WarbandOfficialId: "warband.reiklanders"));
+        Assert.Equal(EffectCondition.Spellcaster, Assert.Single(notCaster).Condition);
+
+        var priest = SkillPrerequisites.Unmet(sorcery, new EffectSubject(warrior, IsSpellcaster: true,
+            WarbandOfficialId: "warband.witch-hunters", WarriorArchetypeOfficialId: "warrior.witch-hunters.warrior-priest"));
+        Assert.Equal(EffectCondition.NotInWarbandOrArchetype, Assert.Single(priest).Condition);
+
+        Assert.Empty(SkillPrerequisites.Unmet(sorcery, new EffectSubject(warrior, IsSpellcaster: true, WarbandOfficialId: "warband.undead")));
+    }
+
+    // --- EquipmentEligibility -----------------------------------------------------------------------
+
+    [Fact]
+    public void Eligibility_ListThenSkillThenOutOfList()
+    {
+        var sword = new EquipmentItem { Id = 1, Category = EquipmentCategory.MeleeWeapon };
+        var rapier = new EquipmentItem { Id = 2, Category = EquipmentCategory.MeleeWeapon };
+        var longBow = new EquipmentItem { Id = 3, Category = EquipmentCategory.MissileWeapon };
+        var rope = new EquipmentItem { Id = 4, Category = EquipmentCategory.MiscellaneousEquipment };
+        var list = new HashSet<int> { 1 };
+        var weaponsTraining = SkillWith("Weapons Training",
+            new SkillEffect { Moment = EffectMoment.EquipmentChoice, Kind = EffectKind.Allow, Targets = ["MeleeWeapon"] });
+        var ludwig = WarriorWith(1, weaponsTraining);
+        var hans = WarriorWith(2);
+
+        Assert.Equal(EquipmentAccessKind.InList, EquipmentEligibility.AccessFor(sword, ludwig, list).Kind);
+        var opened = EquipmentEligibility.AccessFor(rapier, ludwig, list);
+        Assert.Equal(EquipmentAccessKind.OpenedBySkill, opened.Kind);
+        Assert.Equal("Weapons Training", opened.SkillName);
+        Assert.Equal(EquipmentAccessKind.OutOfList, EquipmentEligibility.AccessFor(rapier, hans, list).Kind);
+        Assert.Equal(EquipmentAccessKind.OutOfList, EquipmentEligibility.AccessFor(longBow, ludwig, list).Kind);
+        Assert.Equal(EquipmentAccessKind.NotListScoped, EquipmentEligibility.AccessFor(rope, hans, null).Kind);
+    }
+
+    [Fact]
+    public void Eligibility_ItemReservedToAnotherArchetype_IsOutOfListEvenIfListed()
+    {
+        var holyTome = new EquipmentItem { Id = 1, Category = EquipmentCategory.Armour, RestrictedToWarriorArchetypeIds = [99] };
+        var warrior = WarriorWith(1);
+        warrior.WarriorArchetypeId = 5;
+
+        Assert.Equal(EquipmentAccessKind.OutOfList, EquipmentEligibility.AccessFor(holyTome, warrior, new HashSet<int> { 1 }).Kind);
+        warrior.WarriorArchetypeId = 99;
+        Assert.Equal(EquipmentAccessKind.InList, EquipmentEligibility.AccessFor(holyTome, warrior, new HashSet<int> { 1 }).Kind);
+    }
+
+    // --- OncePerPostBattleLedger --------------------------------------------------------------------
+
+    /// <summary>Marchandage réutilisé ailleurs : déplacé, l'ancien emplacement est renvoyé pour être décoché.</summary>
+    [Fact]
+    public void Ledger_UsingElsewhereMovesTheEffect()
+    {
+        var ledger = new OncePerPostBattleLedger();
+
+        Assert.Null(ledger.Use("haggle", "rare:1"));
+        Assert.Null(ledger.Use("haggle", "rare:1"));
+        Assert.Equal("rare:1", ledger.Use("haggle", "purchase:2"));
+        Assert.Equal("purchase:2", ledger.UsedAt("haggle"));
+
+        ledger.Release("haggle", "rare:1");
+        Assert.Equal("purchase:2", ledger.UsedAt("haggle"));
+        ledger.ReleaseLocation("purchase:2");
+        Assert.Null(ledger.UsedAt("haggle"));
+    }
+
+    // --- EffectValues -------------------------------------------------------------------------------
+
+    [Theory]
+    [InlineData(200, 7, 1, 193)]
+    [InlineData(5, 10, 1, 1)]
+    [InlineData(1, 6, 1, 1)]
+    [InlineData(0, 6, 1, 0)]
+    [InlineData(10, 3, null, 7)]
+    public void ApplyDiscount_NeverGoesBelowTheFloor(int price, int discount, int? minimum, int expected) =>
+        Assert.Equal(expected, EffectValues.ApplyDiscount(price, discount, minimum));
+
+    [Theory]
+    [InlineData("+2", 2)]
+    [InlineData("-1", -1)]
+    [InlineData("3", 3)]
+    [InlineData(null, 0)]
+    [InlineData("2D6", 0)]
+    public void ParseAmount(string? value, int expected) => Assert.Equal(expected, EffectValues.ParseAmount(value));
+
+    // --- Sérialisation ------------------------------------------------------------------------------
+
+    [Fact]
+    public void Json_RoundTripsAndStaysEmptyForNoEffect()
+    {
+        var effects = new List<SkillEffect>
+        {
+            new() { Moment = EffectMoment.Purchase, Kind = EffectKind.Discount, Value = "2D6", MinimumPrice = 1, Frequency = EffectFrequency.OncePerPostBattle },
+        };
+
+        var json = SkillEffectJson.Serialize(effects);
+        Assert.Contains("\"Purchase\"", json);
+        var back = Assert.Single(SkillEffectJson.Deserialize(json));
+        Assert.Equal(EffectKind.Discount, back.Kind);
+        Assert.Equal(1, back.MinimumPrice);
+        Assert.Equal(EffectFrequency.OncePerPostBattle, back.Frequency);
+        Assert.Equal(json, SkillEffectJson.Serialize(SkillEffectJson.Deserialize(json)));
+
+        Assert.Null(SkillEffectJson.Serialize([]));
+        Assert.Empty(SkillEffectJson.Deserialize(null));
+        Assert.Empty(SkillEffectJson.Deserialize("not json"));
     }
 }

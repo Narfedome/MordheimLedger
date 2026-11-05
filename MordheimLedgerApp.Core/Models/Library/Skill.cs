@@ -46,4 +46,10 @@ public class Skill
     /// BuildSkillHatredChips, the Hatred section's dedicated (not shared with "Règles spéciales") source
     /// for skill-granted Hatred.</summary>
     public List<int> HatredTargetWarbandArchetypeIds { get; set; } = new();
+
+    /// <summary>Effets de règle de la compétence (bonus, relance, ouverture d'un sélecteur, prérequis,
+    /// rappel...) - vide = compétence purement descriptive. Modifiables dans le Codex comme le reste
+    /// (SkillEditDialog, section Effets) ; stockés en JSON dans SkillEntity.EffectsJson. Voir
+    /// Core.Rules.RuleEffectResolver.</summary>
+    public List<SkillEffect> Effects { get; set; } = new();
 }

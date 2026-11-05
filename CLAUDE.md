@@ -162,6 +162,26 @@ fixe par mode dans `ThemeService.Apply`), jamais un dialog ni un blocage, et pas
 (retenu sur maquette `mockups/exploration-branches.html`, hors dépôt). Les choix de Héros (Fosse, Puits,
 XP répartie, bénédiction) restent réservés aux Héros, voulu.
 
+**Effets de compétences (branche `claude/kind-goldberg-wgnvyq`, 2026-11-05, socle Core seulement)** : conception
+validée sur maquettes (canevas « Effets de compétences » sur claude.ai). Principe : **l'app détecte et propose, le joueur
+décide** - bonus permanent pré-coché/décochable, usage unique derrière un bouton « Utiliser » (réutilisé ailleurs = déplacé,
+avec un message ambre qui dit où il était), modificateur libre sur chaque jet, prérequis/hors règles en ambre, jamais
+bloquant ; messages factuels et sobres (pas de « c'est votre choix »). `Skill.Effects` (`Models/Library/SkillEffect.cs` :
+Moment/Kind/Value/Targets/Condition/ConditionTargets/Frequency/MinimumPrice/Note), stocké en JSON dans
+`SkillEntity.EffectsJson` (`Data/SkillEffectJson.cs`) plutôt qu'en table enfant : la synchro du contenu officiel le recopie
+et l'empreinte comme une colonne simple, sans toucher `OfficialContentSchema` (références par OfficialId/nom d'enum, jamais
+par Id local). Déclaré dans les JSON de seed (`"effects"` d'une entrée de compétence). Règles : `Rules/RuleEffectResolver`
+(effets d'un moment pour des `EffectSubject`, compétences + colonnes `Grants*` des objets portés via un adaptateur - les
+`Grants*` ne sont **pas** migrées, décision de l'utilisateur), `SkillPrerequisites`, `EquipmentEligibility` (qui peut équiper
+quoi : liste d'équipement + compétences qui ouvrent une catégorie), `OncePerPostBattleLedger`, `EffectValues`. Tests :
+règles pures dans `RulesTests.cs`, seed dans `DataServiceTests.cs`. Règles tranchées par l'utilisateur : Expert en Armes
+n'ouvre que le tir (la poudre noire est une catégorie distincte, modifiable dans le Codex) ; Chercheur de Ressources vaut
+même hors de combat, pas si le Héros est tué (condition `NotDead`, FAQ). Les effets d'objets magiques/règles spéciales
+suivront le même modèle plus tard (migration des `Grants*` à ce moment-là). Pas de fusion Achat/Réallouer (décidé). Reste à faire : section « Effets » du Codex
+(`SkillEditDialog`/`SkillDetailDialog` + popup d'un effet), branchement étape par étape du wizard Fin de partie, porteurs
+dans le sélecteur d'achat pour la Réserve, message « hors liste » dans Réallouer, libellé de la colonne `EffectsJson`
+dans l'écran des conflits de synchro.
+
 **Perf de navigation (branche `feature/navigation-perf`, 2026-11-03)** : mesuré sur Android (Release), la fiche de
 bande passait ~4,9 s à construire des vues jamais affichées. Règles retenues : un composant ne crée pas ses éléments
 optionnels tant qu'ils ne servent pas (`LazyIconButton` pour les boutons ⇄/✕/« + » des puces, image de fond de

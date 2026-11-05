@@ -413,7 +413,8 @@ public static class EntityMapping
         RestrictedToWarriorArchetypeIds = warriorRestrictions?.GetValueOrDefault(e.Id) ?? new List<int>(),
         HatredTargetWarbandArchetypeIds = string.IsNullOrEmpty(e.HatredTargetWarbandArchetypeIds)
             ? new List<int>()
-            : e.HatredTargetWarbandArchetypeIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList()
+            : e.HatredTargetWarbandArchetypeIds.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList(),
+        Effects = SkillEffectJson.Deserialize(e.EffectsJson)
     };
 
     public static SkillEntity ToEntity(this Skill m) => new()
@@ -425,7 +426,8 @@ public static class EntityMapping
         Source = m.Source,
         OfficialId = m.OfficialId,
         ImagePath = m.ImagePath,
-        HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds)
+        HatredTargetWarbandArchetypeIds = m.HatredTargetWarbandArchetypeIds.Count == 0 ? null : string.Join(',', m.HatredTargetWarbandArchetypeIds),
+        EffectsJson = SkillEffectJson.Serialize(m.Effects)
     };
 
     public static HiredSword ToModel(this HiredSwordEntity e, IReadOnlyDictionary<string, string> translations,

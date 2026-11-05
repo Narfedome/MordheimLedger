@@ -432,6 +432,10 @@ public class SkillSeedData
     /// restricted warband(s) can pick it. Only meaningful alongside RestrictedToThisWarband.</summary>
     public List<string>? RestrictedToWarriorIds { get; set; }
 
+    /// <summary>Effets de règle (voir Models.Library.SkillEffect) - recopiés tels quels dans Skill.Effects.
+    /// Null/absent = compétence purement descriptive.</summary>
+    public List<Models.Library.SkillEffect>? Effects { get; set; }
+
     /// <summary>Warband file stems this skill grants Hatred against (e.g. Sisters of Sigmar's "Righteous
     /// Fury" -&gt; Skaven of Clan Eshin/Undead/Cult of the Possessed/Beastmen Raiders) - see
     /// Skill.HatredTargetWarbandArchetypeIds, same deferred-resolution mechanism as

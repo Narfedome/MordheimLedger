@@ -1109,7 +1109,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Abandonner les modifications ?</value>
   </data>
   <data name="DialogDiscardChangesMessage" xml:space="preserve">
-    <value>Les modifications de ce dialog n'ont pas été enregistrées et seront perdues.</value>
+    <value>Les modifications de cette fenêtre n'ont pas été enregistrées et seront perdues.</value>
   </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Résultat</value>
@@ -2384,7 +2384,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Ténèbre &amp; Or</value>
   </data>
   <data name="WarbandArchetype" xml:space="preserve">
-    <value>Archetype</value>
+    <value>Type de bande</value>
   </data>
   <data name="WarbandCreateTitle" xml:space="preserve">
     <value>Nouvelle bande</value>
@@ -2633,7 +2633,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Expérience</value>
   </data>
   <data name="TourDetailCardXpBody" xml:space="preserve">
-    <value>La piste d'expérience de la feuille papier : les cases à bordure dorée marquent les paliers de progression.</value>
+    <value>La piste d'expérience de la feuille papier : les cases à bordure épaisse marquent les paliers de progression.</value>
   </data>
   <data name="TourCodexIntroTitle" xml:space="preserve">
     <value>Le Codex</value>
@@ -2724,5 +2724,11 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="TourWizardEquipmentBody" xml:space="preserve">
     <value>Équipez chaque héros, et chaque groupe d'hommes de main d'un seul achat pour tout le groupe. La première dague est gratuite ; divisez un groupe pour l'équiper différemment.</value>
+  </data>
+  <data name="WarbandArchetypeSelectSingleTitle" xml:space="preserve">
+    <value>Choisir une bande</value>
+  </data>
+  <data name="WarbandsGoldUnit" xml:space="preserve">
+    <value>CO</value>
   </data>
 </root>

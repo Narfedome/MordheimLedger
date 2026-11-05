@@ -417,25 +417,30 @@
             </dialogs:AnimatedHeightScrollView>
 
             <!-- Boutons toujours ancrés en bas du dialog (ligne Auto de la Grid englobante, hors ScrollView) -
-             plutôt que collés au contenu de l'onglet/étape courante, dont la hauteur varie. -->
+             plutôt que collés au contenu de l'onglet/étape courante, dont la hauteur varie. Padding
+             horizontal réduit sur téléphone : avec AppButtonPadding, "Précédent" était tronqué. -->
             <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding IsWizardMode}">
                 <Grid.Behaviors>
                     <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardNavKey}"/>
                 </Grid.Behaviors>
                 <Button Grid.Column="0"
+                    Padding="{OnIdiom Phone='4,10', Tablet='4,10', Default='12,7'}"
                     Text="{loc:Loc BtnCancel}"
                     Style="{StaticResource DialogSecondaryButtonStyle}"
                     Command="{Binding CancelCommand}"/>
                 <Button Grid.Column="1"
+                    Padding="{OnIdiom Phone='4,10', Tablet='4,10', Default='12,7'}"
                     Text="{loc:Loc LibBack}"
                     Style="{StaticResource DialogSecondaryButtonStyle}"
                     Command="{Binding BackCommand}"
                     IsEnabled="{Binding CanGoBack}"/>
                 <Button Grid.Column="2"
+                    Padding="{OnIdiom Phone='4,10', Tablet='4,10', Default='12,7'}"
                     Text="{loc:Loc LibNext}"
                     Command="{Binding NextCommand}"
                     IsVisible="{Binding IsLastStep, Converter={StaticResource InverseBoolConverter}}"/>
                 <Button Grid.Column="2"
+                    Padding="{OnIdiom Phone='4,10', Tablet='4,10', Default='12,7'}"
                     Text="{loc:Loc BtnSave}"
                     Command="{Binding SaveCommand}"
                     IsVisible="{Binding IsLastStep}"/>

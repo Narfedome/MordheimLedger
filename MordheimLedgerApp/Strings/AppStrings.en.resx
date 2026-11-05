@@ -1109,7 +1109,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Discard changes?</value>
   </data>
   <data name="DialogDiscardChangesMessage" xml:space="preserve">
-    <value>Your changes in this dialog have not been saved and will be lost.</value>
+    <value>Your changes in this window have not been saved and will be lost.</value>
   </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Result</value>
@@ -2384,7 +2384,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Shadow &amp; Gold</value>
   </data>
   <data name="WarbandArchetype" xml:space="preserve">
-    <value>Archetype</value>
+    <value>Warband type</value>
   </data>
   <data name="WarbandCreateTitle" xml:space="preserve">
     <value>New warband</value>
@@ -2633,7 +2633,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Experience</value>
   </data>
   <data name="TourDetailCardXpBody" xml:space="preserve">
-    <value>The paper sheet's experience track: gold-bordered boxes mark the advance thresholds.</value>
+    <value>The paper sheet's experience track: thick-bordered boxes mark the advance thresholds.</value>
   </data>
   <data name="TourCodexIntroTitle" xml:space="preserve">
     <value>The Codex</value>
@@ -2724,5 +2724,11 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="TourWizardEquipmentBody" xml:space="preserve">
     <value>Equip each hero, and each group of henchmen with a single purchase for the whole group. The first dagger is free; split a group to equip part of it differently.</value>
+  </data>
+  <data name="WarbandArchetypeSelectSingleTitle" xml:space="preserve">
+    <value>Select a warband</value>
+  </data>
+  <data name="WarbandsGoldUnit" xml:space="preserve">
+    <value>gc</value>
   </data>
 </root>

@@ -30,6 +30,13 @@
                                                           IconGlyph="{x:Static icons:SolidFont.BoxOpen}"
                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowReallocationItemDetailCommand}"
                                                           MoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=MoveReallocationItemCommand}"/>
+                                <!-- Hors de la liste d'équipement du Héros (compétences comprises) : ambre, jamais bloquant,
+                                     à côté de la vérification des limites d'armes déjà faite au déplacement. -->
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasOutOfListWarning}">
+                                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                           FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                    <Label Grid.Column="1" Text="{Binding OutOfListWarning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                                </Grid>
                             </VerticalStackLayout>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>

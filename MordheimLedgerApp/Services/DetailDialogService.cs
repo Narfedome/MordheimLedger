@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Features.Library.Skills.Effects;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
@@ -133,7 +134,12 @@ public class DetailDialogService : IDetailDialogService
             : (await _libraryService.GetWarriorArchetypesAsync(item.RestrictedToWarbandArchetypeIds, language))
                 .Where(w => item.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
 
-        await ShowAsync(new SkillDetailDialog(new SkillDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors)));
+        // Noms des cibles d'effets : lus seulement s'il y a des effets à afficher.
+        var effectNames = item.Effects.Count == 0
+            ? SkillEffectNames.Empty
+            : await SkillEffectNames.LoadAsync(_libraryService, language);
+
+        await ShowAsync(new SkillDetailDialog(new SkillDetailDialogViewModel(item, categoryLabel, restrictedWarbands, allWarbands, restrictedWarriors, effectNames)));
     }
 
     public Task ShowSpecialRuleDetailDialogAsync(SpecialRule item) =>

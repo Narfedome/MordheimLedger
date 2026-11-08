@@ -18,5 +18,9 @@ public class EquipmentItemGroup : ObservableCollection<EquipmentItemRow>
     /// rebuild already happens on every filter change.</summary>
     public bool ShowHeader { get; init; } = true;
 
+    /// <summary>Groupe « Ouvert par … » (EquipmentItemViewModel.ForWarrior) : titre en couleur d'accent avec
+    /// le glyphe des effets, comme sur la maquette du sélecteur d'équipement.</summary>
+    public bool IsOpenedBySkill { get; init; }
+
     public EquipmentItemGroup(string name) => Name = name;
 }

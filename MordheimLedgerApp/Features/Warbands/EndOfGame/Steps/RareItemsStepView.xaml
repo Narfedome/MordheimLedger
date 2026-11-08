@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
@@ -135,9 +136,6 @@
                                                                           CommandParameter="{Binding .}"/>
                                         </Grid>
 
-                                        <Label Text="{Binding BonusDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
-                                               IsVisible="{Binding HasBonus}"/>
-
                                         <VerticalStackLayout Spacing="8" IsVisible="{Binding HasRarity}">
                                             <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                                                 <Entry Grid.Column="0" Text="{Binding Roll}" Keyboard="Numeric"
@@ -153,6 +151,34 @@
                                             </Grid>
                                             <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                    IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                                            <!-- Bonus détectés (maquette « Recherche d'objet rare ») : compétences et objets
+                                                 portés, pré-cochés ; modificateur libre pour le reste. -->
+                                            <VerticalStackLayout Spacing="0">
+                                                <Label Text="{loc:Loc EffectDetectedBonuses}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                                       IsVisible="{Binding HasBonusToggles}"/>
+                                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding BonusToggles}">
+                                                    <BindableLayout.ItemTemplate>
+                                                        <DataTemplate x:DataType="effects:EffectToggle">
+                                                            <effects:EffectToggleView/>
+                                                        </DataTemplate>
+                                                    </BindableLayout.ItemTemplate>
+                                                </VerticalStackLayout>
+                                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6" MinimumHeightRequest="44">
+                                                    <VerticalStackLayout Grid.Column="0" Spacing="0" VerticalOptions="Center">
+                                                        <Label Text="{loc:Loc EffectFreeModifier}" FontAttributes="Bold"/>
+                                                        <Label Text="{loc:Loc EffectFreeModifierHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                                    </VerticalStackLayout>
+                                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding DecrementFreeModifierCommand}"/>
+                                                    <Label Grid.Column="2" Text="{Binding FreeModifierDisplay}" FontAttributes="Bold" WidthRequest="32"
+                                                           HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                                                    <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Command="{Binding IncrementFreeModifierCommand}"/>
+                                                </Grid>
+                                            </VerticalStackLayout>
+                                            <Label Text="{Binding RollBreakdown}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                                   IsVisible="{Binding HasRollBreakdown}"/>
                                             <Label Text="{Binding ResultDisplay}" FontAttributes="Bold" IsVisible="{Binding HasResult}">
                                                 <Label.Triggers>
                                                     <DataTrigger TargetType="Label" Binding="{Binding IsSuccess}" Value="True">

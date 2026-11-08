@@ -71,6 +71,30 @@ public partial class EquipmentItemRow : ObservableObject
     /// le stock a un matériau (ex. "Épée (Ornée)") OU une tuile de variante matériau (ex. "Épée
     /// (Gromril)"), comme WarbandEquipment/WarriorEquipment.NameDisplay ailleurs dans l'app. Jamais
     /// suffixé pour une tuile de catégorie normale (achat neuf sans matériau).</summary>
+    /// <summary>Ligne « qui peut l'équiper » (achat pour la Réserve) : « Tous », « Sauf … », les noms, ou
+    /// « Personne » (tuile grisée, toujours achetable). Le classement vient de Core.Rules.EquipmentEligibility ;
+    /// ici, seulement le texte. Null hors de ce sélecteur ou pour un objet sans liste (Divers...).</summary>
+    public string? CarriersText { get; private set; }
+    public bool HasCarriers => CarriersText is not null;
+    public bool CarriersNobody { get; private set; }
+    public bool CarriersOpenedBySkill { get; private set; }
+
+    public void SetCarriers(IReadOnlyList<CarrierAccess>? carriers)
+    {
+        if (carriers is not { Count: > 0 }) return;
+        var loc = LocalizationService.Instance;
+        var can = carriers.Where(c => c.Access.CanEquip).ToList();
+        var cannot = carriers.Where(c => !c.Access.CanEquip).ToList();
+        static string Names(IEnumerable<CarrierAccess> list) => string.Join(", ", list.Select(c => c.Warrior.Name));
+
+        CarriersNobody = can.Count == 0;
+        CarriersOpenedBySkill = can.Any(c => c.Access.Kind == EquipmentAccessKind.OpenedBySkill);
+        CarriersText = can.Count == 0 ? loc["EquipmentCarriersNobody"]
+            : cannot.Count == 0 ? loc["EquipmentCarriersEveryone"]
+            : cannot.Count < can.Count ? string.Format(loc["EquipmentCarriersExcept"], Names(cannot))
+            : Names(can);
+    }
+
     public string NameDisplay => (ReserveMaterialRule ?? MaterialRule)?.Abbreviation is { Length: > 0 } abbr ? $"{Item.Name} ({abbr})" : Item.Name;
 
     /// <summary>Le stepper +/- reste affiché en permanence en mode picker (même à Quantity == 0, "+"

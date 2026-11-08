@@ -1,7 +1,9 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Features.Warbands.EndOfGame.Effects;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -107,6 +109,8 @@ public partial class RareItemSearchEntry : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsSuccess))]
     [NotifyPropertyChangedFor(nameof(IsPurchased))]
     [NotifyPropertyChangedFor(nameof(ResultDisplay))]
+    [NotifyPropertyChangedFor(nameof(RollBreakdown))]
+    [NotifyPropertyChangedFor(nameof(HasRollBreakdown))]
     private string roll = string.Empty;
 
     [ObservableProperty]
@@ -114,12 +118,80 @@ public partial class RareItemSearchEntry : ObservableObject
 
     partial void OnRollChanged(string value) { if (!string.IsNullOrWhiteSpace(value)) RollError = null; }
 
-    /// <summary>From whatever this Hero currently carries (e.g. the Jewelsmith's kept gems) - see
-    /// Core.Rules.RareItemSearchBonus. Live (not cached): equipment can't actually change mid-wizard, but
-    /// reading it fresh costs nothing and avoids a staleness trap.</summary>
-    public int Bonus => RareItemSearchBonus.EffectiveBonus(Hero.Warrior);
+    /// <summary>Bonus détectés (maquette « Recherche d'objet rare ») : compétences (Débrouillard) et objets
+    /// portés (gemmes du Bijoutier), lus par Core.Rules.RuleEffectResolver à l'ouverture de l'étape - pré-cochés,
+    /// décochables. Avant cette ouverture, ce que les objets portés accordent (Core.Rules.RareItemSearchBonus).</summary>
+    public ObservableCollection<EffectToggle> BonusToggles { get; } = new();
+    public bool HasBonusEffects { get; private set; }
+    public bool HasBonusToggles => BonusToggles.Count > 0;
+
+    /// <summary>Appelée à chaque ouverture de l'étape (l'état du Héros a pu changer entre-temps) : un bonus déjà
+    /// vu garde la case que le joueur lui avait laissée.</summary>
+    public void SetBonusEffects(IEnumerable<ActiveEffect> effects)
+    {
+        HasBonusEffects = true;
+        var previousOn = BonusToggles.ToDictionary(t => t.Effect.Key, t => t.IsOn);
+        foreach (var old in BonusToggles) old.Changed -= NotifyBonusChanged;
+        BonusToggles.Clear();
+        foreach (var effect in effects)
+        {
+            var amount = EffectValues.ParseAmount(effect.Effect.Value);
+            var toggle = new EffectToggle(effect, amount, EffectValues.FormatModifier(amount), _loc);
+            if (previousOn.TryGetValue(effect.Key, out var wasOn)) toggle.IsOn = wasOn;
+            toggle.Changed += NotifyBonusChanged;
+            BonusToggles.Add(toggle);
+        }
+        OnPropertyChanged(nameof(HasBonusToggles));
+        NotifyBonusChanged();
+    }
+
+    /// <summary>Modificateur libre (situation, règle maison...) : ce que les effets ne modélisent pas.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FreeModifierDisplay))]
+    private int freeModifier;
+
+    partial void OnFreeModifierChanged(int value) => NotifyBonusChanged();
+
+    public string FreeModifierDisplay => EffectValues.FormatModifier(FreeModifier);
+
+    [RelayCommand]
+    private void IncrementFreeModifier() => FreeModifier = Math.Min(FreeModifier + 1, 12);
+
+    [RelayCommand]
+    private void DecrementFreeModifier() => FreeModifier = Math.Max(FreeModifier - 1, -12);
+
+    public int Bonus => HasBonusEffects
+        ? BonusToggles.Where(t => t.IsOn).Sum(t => t.Amount) + FreeModifier
+        : RareItemSearchBonus.EffectiveBonus(Hero.Warrior);
 
     public bool HasBonus => Bonus != 0;
+
+    /// <summary>« 8 + 3 = 11 » sous le jet quand un bonus s'y ajoute.</summary>
+    public string? RollBreakdown => int.TryParse(Roll, out var roll) && Bonus != 0
+        ? $"{roll} {(Bonus > 0 ? "+" : "−")} {Math.Abs(Bonus)} = {roll + Bonus}"
+        : null;
+
+    public bool HasRollBreakdown => RollBreakdown is not null;
+
+    private void NotifyBonusChanged()
+    {
+        OnPropertyChanged(nameof(Bonus));
+        OnPropertyChanged(nameof(HasBonus));
+        OnPropertyChanged(nameof(BonusDisplay));
+        OnPropertyChanged(nameof(TotalRoll));
+        OnPropertyChanged(nameof(HasResult));
+        OnPropertyChanged(nameof(IsSuccess));
+        OnPropertyChanged(nameof(IsFound));
+        OnPropertyChanged(nameof(IsPurchased));
+        OnPropertyChanged(nameof(ResultDisplay));
+        OnPropertyChanged(nameof(RollBreakdown));
+        OnPropertyChanged(nameof(HasRollBreakdown));
+    }
+
+    /// <summary>Lignes Marchandage de la carte d'achat (une par Héros qui l'a), posées par le wizard.</summary>
+    public ObservableCollection<HaggleRow> HaggleRows { get; } = new();
+    public bool HasHaggleRows => HaggleRows.Count > 0;
+    public void NotifyHaggleRowsChanged() => OnPropertyChanged(nameof(HasHaggleRows));
 
     public string BonusDisplay => string.Format(_loc["EndOfGameRareItemBonusFormat"], Bonus);
 

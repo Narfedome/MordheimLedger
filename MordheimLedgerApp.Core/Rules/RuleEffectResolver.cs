@@ -57,8 +57,10 @@ public static class RuleEffectResolver
         var effects = new List<SkillEffect>();
         if (item.GrantsRareItemSearchBonus is { } searchBonus and not 0)
             effects.Add(new SkillEffect { Moment = EffectMoment.RareItemSearch, Kind = EffectKind.Modifier, Value = EffectValues.FormatModifier(searchBonus) });
+        // Le porteur doit être resté debout : c'était déjà la règle de l'ancien ExplorationDiceBonus (objets des
+        // guerriers non hors de combat), gardée telle quelle sous forme de condition.
         if (item.GrantsBonusExplorationDice is { } extraDice and not 0)
-            effects.Add(new SkillEffect { Moment = EffectMoment.ExplorationRoll, Kind = EffectKind.ExtraDie, Value = extraDice.ToString() });
+            effects.Add(new SkillEffect { Moment = EffectMoment.ExplorationRoll, Kind = EffectKind.ExtraDie, Value = extraDice.ToString(), Condition = EffectCondition.NotOutOfAction });
         if (item.GrantsSkillCategory is { } category)
             effects.Add(new SkillEffect { Moment = EffectMoment.SkillChoice, Kind = EffectKind.Allow, Targets = [category.ToString()] });
         if (item.GrantsSpecificSkillOfficialId is { } skillOfficialId)

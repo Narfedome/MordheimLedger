@@ -1,6 +1,7 @@
-using MordheimLedgerApp.Core.Models.Library;
-using MordheimLedgerApp.Features.Library.Skills;
 using MordheimLedgerApp.Components.Dialogs;
+using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Features.Library.Skills;
 
 namespace MordheimLedgerApp.Services;
 
@@ -18,9 +19,12 @@ public interface ISkillPickerService
     /// unlocking Haggle alone, not its whole Academic category. singleSelect: restricts the picker to at
     /// most one Skill at a time (see SkillViewModel.SingleSelectMode) - an Advance roll never grants more
     /// than one Skill, unlike adding several to a Warrior's roster (default false, the other call sites'
-    /// behavior).</summary>
+    /// behavior). forWarrior/forWarriorIsSpellcaster: the warrior the skill is for - a picked skill whose
+    /// prerequisite he doesn't meet (Sorcery for a non-caster...) shows an amber message under the list, never
+    /// blocking (see SkillViewModel.PrerequisiteWarning and Core.Rules.SkillPrerequisites).</summary>
     Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
-        IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null, bool singleSelect = false);
+        IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null, bool singleSelect = false,
+        Warrior? forWarrior = null, bool forWarriorIsSpellcaster = false);
 }
 
 public class SkillPickerService : ISkillPickerService
@@ -30,7 +34,8 @@ public class SkillPickerService : ISkillPickerService
     public SkillPickerService(IServiceProvider provider) => _provider = provider;
 
     public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
-        IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null, bool singleSelect = false)
+        IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null, bool singleSelect = false,
+        Warrior? forWarrior = null, bool forWarriorIsSpellcaster = false)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
 
@@ -45,6 +50,8 @@ public class SkillPickerService : ISkillPickerService
         viewModel.AllowedCategories = allowedCategories is { Count: > 0 } ? allowedCategories : null;
         viewModel.AllowedExtraSkillIds = extraAllowedSkillIds is { Count: > 0 } ? extraAllowedSkillIds : null;
         viewModel.SingleSelectMode = singleSelect;
+        viewModel.ForWarrior = forWarrior;
+        viewModel.ForWarriorIsSpellcaster = forWarriorIsSpellcaster;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi.
         var page = new SkillSelectorPage(viewModel);
 

@@ -1828,7 +1828,7 @@ public class RulesTests
         var effects = RuleEffectResolver.EquipmentEffects(item);
 
         Assert.Contains(effects, e => e is { Moment: EffectMoment.RareItemSearch, Kind: EffectKind.Modifier, Value: "+1" });
-        Assert.Contains(effects, e => e is { Moment: EffectMoment.ExplorationRoll, Kind: EffectKind.ExtraDie, Value: "1" });
+        Assert.Contains(effects, e => e is { Moment: EffectMoment.ExplorationRoll, Kind: EffectKind.ExtraDie, Value: "1", Condition: EffectCondition.NotOutOfAction });
         Assert.Contains(effects, e => e.Kind == EffectKind.Allow && e.Targets.SequenceEqual(new[] { "Academic" }));
         Assert.Contains(effects, e => e.Kind == EffectKind.Allow && e.Targets.SequenceEqual(new[] { "skill.academic.haggle" }));
         Assert.Contains(effects, e => e.Moment == EffectMoment.CharacteristicIncrease && e.Targets.SequenceEqual(new[] { "WeaponSkill" }));
@@ -1953,6 +1953,60 @@ public class RulesTests
     public void ApplyDiscount_NeverGoesBelowTheFloor(int price, int discount, int? minimum, int expected) =>
         Assert.Equal(expected, EffectValues.ApplyDiscount(price, discount, minimum));
 
+    /// <summary>Ligne « qui peut l'équiper » du sélecteur d'achat : liste, ouverture par compétence, hors liste.</summary>
+    [Fact]
+    public void CarriersOf_ListsEachWarriorsAccess()
+    {
+        var rapier = new EquipmentItem { Id = 7, Category = EquipmentCategory.MeleeWeapon };
+        var training = new Skill { Id = 1, Name = "Weapons Training", Effects = [new SkillEffect { Moment = EffectMoment.EquipmentChoice, Kind = EffectKind.Allow, Targets = ["MeleeWeapon"] }] };
+        var inList = WarriorWith(1);
+        var opened = WarriorWith(2, training);
+        var outOfList = WarriorWith(3);
+
+        var carriers = EquipmentEligibility.CarriersOf(rapier, [
+            new EquipmentCarrier(inList, new HashSet<int> { 7 }),
+            new EquipmentCarrier(opened, new HashSet<int>()),
+            new EquipmentCarrier(outOfList, null)])!;
+
+        Assert.Equal(EquipmentAccessKind.InList, carriers[0].Access.Kind);
+        Assert.Equal(EquipmentAccessKind.OpenedBySkill, carriers[1].Access.Kind);
+        Assert.Equal("Weapons Training", carriers[1].Access.SkillName);
+        Assert.Equal(EquipmentAccessKind.OutOfList, carriers[2].Access.Kind);
+        Assert.Null(EquipmentEligibility.CarriersOf(new EquipmentItem { Category = EquipmentCategory.MiscellaneousEquipment }, [new EquipmentCarrier(inList, null)]));
+    }
+
+    [Theory]
+    [InlineData(1, -1, 1)]
+    [InlineData(1, 1, 2)]
+    [InlineData(6, 1, 6)]
+    [InlineData(4, -1, 3)]
+    public void AdjustDie_StaysBetweenOneAndSix(int die, int delta, int expected) =>
+        Assert.Equal(expected, EffectValues.AdjustDie(die, delta));
+
+    [Theory]
+    [InlineData("2D6", 2, 12)]
+    [InlineData("D6", 1, 6)]
+    [InlineData("d3", 1, 3)]
+    public void DiceRange_ReadsSimpleFormulas(string formula, int min, int max) =>
+        Assert.Equal((min, max), EffectValues.DiceRange(formula));
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("+2")]
+    [InlineData("2D")]
+    public void DiceRange_NullWhenNotADiceFormula(string? formula) => Assert.Null(EffectValues.DiceRange(formula));
+
+    /// <summary>L'Œil de Numas ne compte que si son porteur est resté debout (comme l'ancien ExplorationDiceBonus).</summary>
+    [Fact]
+    public void ExplorationExtraDie_FromItem_RequiresBearerNotOutOfAction()
+    {
+        var bearer = WarriorWith(1);
+        bearer.Equipment.Add(new WarriorEquipment { Item = new EquipmentItem { Id = 9, Name = "Eye", GrantsBonusExplorationDice = 1 } });
+
+        Assert.True(Assert.Single(RuleEffectResolver.For(EffectMoment.ExplorationRoll, new EffectSubject(bearer))).ConditionMet);
+        Assert.False(Assert.Single(RuleEffectResolver.For(EffectMoment.ExplorationRoll, new EffectSubject(bearer, IsOutOfAction: true))).ConditionMet);
+    }
+
     [Theory]
     [InlineData("+2", 2)]
     [InlineData("-1", -1)]
@@ -1982,5 +2036,70 @@ public class RulesTests
         Assert.Null(SkillEffectJson.Serialize([]));
         Assert.Empty(SkillEffectJson.Deserialize(null));
         Assert.Empty(SkillEffectJson.Deserialize("not json"));
+    }
+
+    // --- Effets : prise en charge affichée dans le Codex (EffectHandling) ---------------------------------------------------
+
+    [Theory]
+    [InlineData(EffectMoment.Purchase, EffectKind.Discount, EffectHandlingKind.Applied)]
+    [InlineData(EffectMoment.EquipmentChoice, EffectKind.Allow, EffectHandlingKind.Applied)]
+    [InlineData(EffectMoment.SkillChoice, EffectKind.Prerequisite, EffectHandlingKind.Info)]
+    [InlineData(EffectMoment.RareItemSearch, EffectKind.Reminder, EffectHandlingKind.Reminder)]
+    [InlineData(EffectMoment.InGame, EffectKind.Modifier, EffectHandlingKind.Reminder)]
+    public void EffectHandling_Classify(EffectMoment moment, EffectKind kind, EffectHandlingKind expected)
+    {
+        Assert.Equal(expected, EffectHandling.Classify(new SkillEffect { Moment = moment, Kind = kind }));
+    }
+
+    [Fact]
+    public void EffectHandling_ClearUnusedFields_KeepsOnlyFieldsTheKindReads()
+    {
+        var effect = new SkillEffect
+        {
+            Moment = EffectMoment.SkillChoice,
+            Kind = EffectKind.Prerequisite,
+            Value = "2D6",
+            MinimumPrice = 1,
+            Targets = ["MeleeWeapon"],
+            Condition = EffectCondition.Leader,
+            ConditionTargets = ["equipment.tome-of-magic"],
+            Note = "  ",
+        };
+
+        EffectHandling.ClearUnusedFields(effect);
+
+        Assert.Null(effect.Value);
+        Assert.Null(effect.MinimumPrice);
+        Assert.Empty(effect.Targets);
+        Assert.Empty(effect.ConditionTargets);
+        Assert.Null(effect.Note);
+        Assert.Equal(EffectCondition.Leader, effect.Condition);
+    }
+
+    [Fact]
+    public void EffectHandling_ClearUnusedFields_KeepsDiscountFields()
+    {
+        var haggle = new SkillEffect { Moment = EffectMoment.Purchase, Kind = EffectKind.Discount, Value = "2D6", MinimumPrice = 1,
+            Condition = EffectCondition.CarriesItem, ConditionTargets = ["equipment.x"] };
+
+        EffectHandling.ClearUnusedFields(haggle);
+
+        Assert.Equal("2D6", haggle.Value);
+        Assert.Equal(1, haggle.MinimumPrice);
+        Assert.Equal(["equipment.x"], haggle.ConditionTargets);
+    }
+    [Theory]
+    [InlineData(EffectKind.Reroll, null, 0, "1")]
+    [InlineData(EffectKind.Reroll, "2D6", 0, "1")]
+    [InlineData(EffectKind.ExtraDie, "1", 1, "2")]
+    [InlineData(EffectKind.AdjustDie, "1", -1, "1")]
+    [InlineData(EffectKind.ExtraDie, "6", 1, "6")]
+    [InlineData(EffectKind.Modifier, null, 0, "+1")]
+    [InlineData(EffectKind.Modifier, "+2", 1, "+3")]
+    [InlineData(EffectKind.Modifier, "0", -1, "-1")]
+    [InlineData(EffectKind.Modifier, "-6", -1, "-6")]
+    public void EffectHandling_StepNumericValue_StaysInRange(EffectKind kind, string? value, int delta, string expected)
+    {
+        Assert.Equal(expected, EffectHandling.StepNumericValue(kind, value, delta));
     }
 }

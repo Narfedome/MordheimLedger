@@ -4,8 +4,11 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.Skills.CreateEdit;
+using MordheimLedgerApp.Features.Library.Skills.Effects;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.Skills;
@@ -64,6 +67,24 @@ public partial class SkillViewModel : BaseViewModel
     /// automatiquement la précédente plutôt que de les cumuler.</summary>
     public bool SingleSelectMode { get; set; }
 
+    /// <summary>Guerrier qui recevra la compétence (fiche guerrier, Progression du wizard) - null ailleurs.
+    /// Sert seulement au message ambre des prérequis (PrerequisiteWarning) : toutes les compétences restent
+    /// visibles et choisissables, comme les branches d'Exploration.</summary>
+    public Warrior? ForWarrior { get; set; }
+    public bool ForWarriorIsSpellcaster { get; set; }
+
+    /// <summary>ForWarrior vu par les règles (bande et type résolus en OfficialId au chargement).</summary>
+    private EffectSubject? _prerequisiteSubject;
+    private SkillEffectNames _prerequisiteNames = SkillEffectNames.Empty;
+
+    /// <summary>Message ambre sous la liste : un paragraphe par prérequis non rempli parmi les compétences
+    /// cochées (Core.Rules.SkillPrerequisites.Unmet) - vide si rien à signaler.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPrerequisiteWarning))]
+    private string prerequisiteWarning = string.Empty;
+
+    public bool HasPrerequisiteWarning => PrerequisiteWarning.Length > 0;
+
     /// <summary>Null (Library CRUD tab) = no filter. Non-null (picker mode, set by SkillPickerService
     /// before construction) = only skills whose RestrictedToWarbandArchetypeIds is empty (common) or
     /// contains this id are shown - see WarriorEditDialogViewModel.AddSkill/EndOfGamePageViewModel.</summary>
@@ -109,8 +130,55 @@ public partial class SkillViewModel : BaseViewModel
     {
         _allItems = await _libraryService.GetSkillsAsync(LocalizationService.Instance.Language);
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
+        await LoadPrerequisiteSubjectAsync();
         RefreshSelectedCategoryLabel();
         ApplyFilter();
+    }
+
+    private async Task LoadPrerequisiteSubjectAsync()
+    {
+        if (ForWarrior is not { } warrior)
+        {
+            _prerequisiteSubject = null;
+            return;
+        }
+        var language = LocalizationService.Instance.Language;
+        var warband = _warbandArchetypes.FirstOrDefault(w => w.Id == AllowedWarbandArchetypeId);
+        var warriorArchetype = warband is null || warrior.WarriorArchetypeId is not { } archetypeId
+            ? null
+            : (await _libraryService.GetWarriorArchetypesAsync(warband.Id, language)).FirstOrDefault(a => a.Id == archetypeId);
+        _prerequisiteSubject = new EffectSubject(warrior, IsSpellcaster: ForWarriorIsSpellcaster,
+            WarbandOfficialId: warband?.OfficialId, WarriorArchetypeOfficialId: warriorArchetype?.OfficialId);
+        _prerequisiteNames = await SkillEffectNames.LoadAsync(_libraryService, language);
+    }
+
+    /// <summary>Texte de chaque prérequis non rempli par ForWarrior parmi les compétences cochées.</summary>
+    private void RefreshPrerequisiteWarning()
+    {
+        if (_prerequisiteSubject is not { } subject)
+        {
+            PrerequisiteWarning = string.Empty;
+            return;
+        }
+        var warriorName = string.IsNullOrWhiteSpace(subject.Warrior.Name) ? Loc["SkillPrereqThisWarrior"] : subject.Warrior.Name;
+        var lines = SelectedRows
+            .SelectMany(row => SkillPrerequisites.Unmet(row.Item, subject).Select(effect => (row.Item.Name, effect)))
+            .Select(p => PrerequisiteText(p.Name, warriorName, p.effect));
+        PrerequisiteWarning = string.Join(Environment.NewLine, lines);
+    }
+
+    private string PrerequisiteText(string skillName, string warriorName, SkillEffect effect)
+    {
+        if (!string.IsNullOrWhiteSpace(effect.Note)) return $"{skillName} : {effect.Note.Trim()}";
+        var targets = string.Join(", ", effect.ConditionTargets.Select(t => _prerequisiteNames.NameOf(t)));
+        return effect.Condition switch
+        {
+            EffectCondition.Leader => string.Format(Loc["SkillPrereqLeader"], skillName, warriorName),
+            EffectCondition.Spellcaster => string.Format(Loc["SkillPrereqSpellcaster"], skillName, warriorName),
+            EffectCondition.NotInWarbandOrArchetype => string.Format(Loc["SkillPrereqExcluded"], skillName, warriorName, targets),
+            EffectCondition.CarriesItem => string.Format(Loc["SkillPrereqCarries"], skillName, warriorName, targets),
+            _ => string.Format(Loc["SkillPrereqOther"], skillName, warriorName, Loc[$"EffectCondition{effect.Condition}"]),
+        };
     }
 
     /// <summary>Recompute le libellé affiché depuis SelectedCategory (le vrai critère) - à refaire à
@@ -149,6 +217,7 @@ public partial class SkillViewModel : BaseViewModel
         SelectedRow = null;
         SelectedRows.Clear();
         OnPropertyChanged(nameof(HasSelectedRows));
+        RefreshPrerequisiteWarning();
     }
 
     private string CategoryLabel(SkillCategory category) => Loc[$"SkillCategory{category}"];
@@ -182,6 +251,7 @@ public partial class SkillViewModel : BaseViewModel
         if (row.IsSelected) SelectedRows.Add(row);
         else SelectedRows.Remove(row);
         OnPropertyChanged(nameof(HasSelectedRows));
+        RefreshPrerequisiteWarning();
     }
 
     [RelayCommand]
@@ -202,8 +272,9 @@ public partial class SkillViewModel : BaseViewModel
     private async Task Create()
     {
         var newItem = new Skill();
+        var effectNames = await SkillEffectNames.LoadAsync(_libraryService, LocalizationService.Instance.Language);
         var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"], _warbandPicker,
-            _warriorPicker, _warbandArchetypes, Array.Empty<WarriorArchetype>());
+            _warriorPicker, _warbandArchetypes, Array.Empty<WarriorArchetype>(), effectNames);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(newItem, LocalizationService.Instance.Language);
@@ -229,7 +300,11 @@ public partial class SkillViewModel : BaseViewModel
             OfficialId = s.OfficialId,
             ImagePath = s.ImagePath,
             RestrictedToWarbandArchetypeIds = new List<int>(s.RestrictedToWarbandArchetypeIds),
-            RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds)
+            RestrictedToWarriorArchetypeIds = new List<int>(s.RestrictedToWarriorArchetypeIds),
+            // Recopiés eux aussi : la sauvegarde réécrit la ligne entière, une copie sans eux effaçait la
+            // Haine accordée par la compétence (et désormais ses effets) à la première édition.
+            HatredTargetWarbandArchetypeIds = new List<int>(s.HatredTargetWarbandArchetypeIds),
+            Effects = s.Effects.Select(e => e.Clone()).ToList()
         };
 
         var initialWarriors = copy.RestrictedToWarbandArchetypeIds.Count == 0
@@ -237,8 +312,9 @@ public partial class SkillViewModel : BaseViewModel
             : (await _libraryService.GetWarriorArchetypesAsync(copy.RestrictedToWarbandArchetypeIds, LocalizationService.Instance.Language))
                 .Where(w => copy.RestrictedToWarriorArchetypeIds.Contains(w.Id)).ToList();
 
+        var effectNames = await SkillEffectNames.LoadAsync(_libraryService, LocalizationService.Instance.Language);
         var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"], _warbandPicker,
-            _warriorPicker, _warbandArchetypes, initialWarriors);
+            _warriorPicker, _warbandArchetypes, initialWarriors, effectNames);
         if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(copy, LocalizationService.Instance.Language);

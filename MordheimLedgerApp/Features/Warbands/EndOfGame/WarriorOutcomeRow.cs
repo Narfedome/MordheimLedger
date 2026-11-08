@@ -741,6 +741,13 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// changement d'OutOfActionCount.</summary>
     public ObservableCollection<InjurySubRollEntry> FigureInjuryRolls { get; } = new();
 
+    /// <summary>Relances proposées sur le jet de Blessure grave (Increvable) - construites une fois à l'entrée de
+    /// l'étape par EndOfGamePageViewModel.Effects.cs.</summary>
+    public ObservableCollection<Effects.EffectActionRow> InjuryEffectActions { get; } = new();
+    public bool HasInjuryEffectActions => InjuryEffectActions.Count > 0;
+    public bool HasPreparedInjuryEffects { get; set; }
+    public void NotifyInjuryEffectsChanged() => OnPropertyChanged(nameof(HasInjuryEffectActions));
+
     /// <summary>Plus de saisie manuelle : uniquement modifié par ApplyInjuryRoll, qui synchronise dans
     /// les deux sens (Mort pour un résultat de mort sans équivoque, Actif sinon - y compris quand le
     /// jet est effacé/changé après coup, voir sa doc), ou remis à l'état d'origine par

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Features.Library.Skills.Effects;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Library.Skills.CreateEdit;
@@ -12,12 +13,19 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
 {
     private readonly Dictionary<string, SkillCategory> _categoryByLabel = new();
     private readonly IWarriorArchetypePickerService _warriorPicker;
+    private readonly SkillEffectNames _effectNames;
 
     protected override bool CancelResult => false;
 
     protected override object? EditableState => new object?[] { Item, WarbandRestriction.SelectedIds, RestrictedWarriors.Select(w => w.Id) };
 
     public ObservableCollection<string> CategoryOptions { get; } = new();
+
+    /// <summary>Lignes affichées de Item.Effects (même ordre), reconstruites après chaque ajout/modification/
+    /// suppression - Item.Effects reste la seule donnée éditée (et sérialisée par EditableState via Item).</summary>
+    public ObservableCollection<SkillEffectRow> EffectRows { get; } = new();
+
+    public string EffectsHint => Item.Effects.Count == 0 ? Loc["EffectsEditEmpty"] : Loc["EffectsEditHint"];
 
     [ObservableProperty]
     private Skill item;
@@ -58,7 +66,7 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
 
     public SkillEditDialogViewModel(Skill item, string title, IWarbandArchetypePickerService warbandPicker,
         IWarriorArchetypePickerService warriorPicker, IReadOnlyList<WarbandArchetype> allWarbandArchetypes,
-        IReadOnlyList<WarriorArchetype> initialRestrictedWarriors)
+        IReadOnlyList<WarriorArchetype> initialRestrictedWarriors, SkillEffectNames effectNames)
     {
         this.item = item;
         this.title = title;
@@ -75,6 +83,48 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
         WarbandRestriction = new WarbandRestrictionEditor(item.RestrictedToWarbandArchetypeIds, allWarbandArchetypes, warbandPicker);
         WarbandRestriction.Changed += OnWarbandRestrictionChanged;
         RestrictedWarriors = new ObservableCollection<WarriorArchetype>(initialRestrictedWarriors);
+        _effectNames = effectNames;
+        RefreshEffectRows();
+    }
+
+    private void RefreshEffectRows()
+    {
+        EffectRows.Clear();
+        foreach (var effect in Item.Effects)
+            EffectRows.Add(new SkillEffectRow(effect, _effectNames));
+        OnPropertyChanged(nameof(EffectsHint));
+    }
+
+    [RelayCommand]
+    private async Task AddEffect()
+    {
+        var draft = new SkillEffect();
+        var result = await ShowDialogAsync(new SkillEffectEditDialog(new SkillEffectEditDialogViewModel(draft, Item.Name, isNew: true, _effectNames)));
+        if (result != SkillEffectEditResult.Saved) return;
+        Item.Effects.Add(draft);
+        RefreshEffectRows();
+    }
+
+    /// <summary>Le popup édite une copie : Annuler ne touche à rien, Supprimer retire l'effet d'origine.</summary>
+    [RelayCommand]
+    private async Task EditEffect(SkillEffectRow row)
+    {
+        var index = Item.Effects.IndexOf(row.Effect);
+        if (index < 0) return;
+        var draft = row.Effect.Clone();
+        var result = await ShowDialogAsync(new SkillEffectEditDialog(new SkillEffectEditDialogViewModel(draft, Item.Name, isNew: false, _effectNames)));
+        switch (result)
+        {
+            case SkillEffectEditResult.Saved:
+                Item.Effects[index] = draft;
+                break;
+            case SkillEffectEditResult.Deleted:
+                Item.Effects.RemoveAt(index);
+                break;
+            default:
+                return;
+        }
+        RefreshEffectRows();
     }
 
     partial void OnSelectedCategoryLabelChanged(string value)

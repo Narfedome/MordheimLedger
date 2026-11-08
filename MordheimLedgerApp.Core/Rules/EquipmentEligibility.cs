@@ -21,6 +21,13 @@ public sealed record EquipmentAccess(EquipmentAccessKind Kind, string? SkillName
     public bool CanEquip => Kind != EquipmentAccessKind.OutOfList;
 }
 
+/// <summary>Un guerrier de la bande vu par EquipmentEligibility.CarriersOf, avec les objets de sa liste
+/// d'équipement (résolus par l'appelant, null = aucune liste).</summary>
+public sealed record EquipmentCarrier(Warrior Warrior, IReadOnlySet<int>? EquipmentListItemIds);
+
+/// <summary>L'accès d'un guerrier de la bande à un objet - une ligne de EquipmentEligibility.CarriersOf.</summary>
+public sealed record CarrierAccess(Warrior Warrior, EquipmentAccess Access);
+
 /// <summary>Qui peut équiper quoi, d'après les listes d'équipement et les compétences qui ouvrent des
 /// catégories (EffectMoment.EquipmentChoice + EffectKind.Allow). Sert au sélecteur d'achat pour la Réserve
 /// (ligne « qui peut l'équiper » par tuile), au récap d'un objet et au message ambre de Réallouer. Les
@@ -48,6 +55,13 @@ public static class EquipmentEligibility
             }
         return opened;
     }
+
+    /// <summary>Qui, dans la bande, peut porter cet objet (sélecteur d'achat pour la Réserve) - null pour un objet
+    /// qui ne dépend d'aucune liste (Divers...), que tout le monde peut porter.</summary>
+    public static IReadOnlyList<CarrierAccess>? CarriersOf(EquipmentItem item, IEnumerable<EquipmentCarrier> roster) =>
+        IsListScoped(item.Category)
+            ? roster.Select(c => new CarrierAccess(c.Warrior, AccessFor(item, c.Warrior, c.EquipmentListItemIds))).ToList()
+            : null;
 
     /// <param name="equipmentListItemIds">Objets de la liste d'équipement du guerrier (Warrior.EquipmentListId,
     /// résolue par l'appelant) - null = aucune liste.</param>

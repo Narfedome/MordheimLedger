@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:createEdit="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
@@ -43,6 +44,14 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </FlexLayout>
+                    <!-- Marchandage : « Utiliser ici » demande sur quel achat quand il y en a plusieurs. -->
+                    <VerticalStackLayout Spacing="6" IsVisible="{Binding HasReserveHaggleRows}" BindableLayout.ItemsSource="{Binding ReserveHaggleRows}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="effects:HaggleRow">
+                                <effects:HaggleRowView/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
 
                 <!-- Vente : réserve pré-partie + trouvailles d'Exploration + équipement DÉJÀ porté (livre

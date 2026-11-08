@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Library.Skills.Effects"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             x:Class="MordheimLedgerApp.Features.Library.Skills.Effects.SkillEffectRowView"
+             x:DataType="effects:SkillEffectRow">
+    <!-- Une ligne d'effet (maquettes « Modifier Marchandage » / « Récap Sorcellerie ») : glyphe de prise en
+         charge (Bolt = appliqué par l'app, TriangleExclamation = prérequis, Clock = rappel), titre, détail,
+         puce Appliqué/Info/Rappel sous le texte (à droite, elle forçait le titre sur deux lignes). Le tap (édition) est posé par l'hôte via TapGestureRecognizer. -->
+    <Border Style="{StaticResource ChipBorderStyle}" Padding="12,10">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Label Grid.Column="0" FontFamily="FontSolid" FontSize="14" Margin="0,2,0,0"
+                   VerticalOptions="Start" Text="{x:Static icons:SolidFont.Bolt}"
+                   TextColor="{DynamicResource AppAccent}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsInfo}" Value="True">
+                        <Setter Property="Text" Value="{x:Static icons:SolidFont.TriangleExclamation}"/>
+                        <Setter Property="TextColor" Value="{DynamicResource AppWarning}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsReminder}" Value="True">
+                        <Setter Property="Text" Value="{x:Static icons:SolidFont.Clock}"/>
+                        <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{DynamicResource AppText}"/>
+                <Label Text="{Binding Details}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                       IsVisible="{Binding HasDetails}"/>
+            <Border HorizontalOptions="Start" Margin="0,4,0,0" Padding="6,1" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 6" BackgroundColor="Transparent"
+                    Stroke="{DynamicResource AppAccent}">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsInfo}" Value="True">
+                        <Setter Property="Stroke" Value="{DynamicResource AppWarning}"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsReminder}" Value="True">
+                        <Setter Property="Stroke" Value="{DynamicResource AppTextMuted}"/>
+                    </DataTrigger>
+                </Border.Triggers>
+                <Label Text="{Binding HandlingLabel}" FontSize="11" TextColor="{DynamicResource AppAccent}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsInfo}" Value="True">
+                            <Setter Property="TextColor" Value="{DynamicResource AppWarning}"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsReminder}" Value="True">
+                            <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </Border>
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+</ContentView>

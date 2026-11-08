@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Effects.EffectReminderView"
+             x:DataType="effects:EffectReminder">
+    <!-- Rappel d'une compétence à ce moment (maquette « Jet d'Exploration » : « Rappel · Hans »), rien de calculé. -->
+    <Border Style="{StaticResource ChipBorderStyle}" Padding="12,8">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Label Grid.Column="0" Text="{x:Static icons:SolidFont.Clock}" FontFamily="FontSolid" FontSize="14"
+                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Start" Margin="0,2,0,0"/>
+            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{DynamicResource AppText}"/>
+                <Label Text="{Binding Text}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+</ContentView>

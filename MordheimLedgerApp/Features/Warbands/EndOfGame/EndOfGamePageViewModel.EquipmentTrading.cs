@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
@@ -52,8 +52,8 @@ public partial class EndOfGamePageViewModel
 
     /// <summary>Coût total de l'Achat en cours - affiché sous la section (retour utilisateur 2026-09-05 -
     /// "il faudrait en dessous un libellé indiquant combien d'or ça coûte, combien d'or on gagne, et le
-    /// total").</summary>
-    public int PurchasedReserveItemsCost => PurchasedReserveItems.Sum(p => p.Cost);
+    /// total"). Net des réductions de Marchandage placées sur ces achats, comme la trésorerie restante.</summary>
+    public int PurchasedReserveItemsCost => PurchasedReserveItems.Sum(p => p.Cost) - ReserveHaggleSavings;
 
     [RelayCommand]
     private async Task AddReserveEquipment()
@@ -64,7 +64,11 @@ public partial class EndOfGamePageViewModel
         // CostMultiplier), jamais proposées par un marchand qui ne vend QUE des Objets Communs
         // (commonOnly: true) - contrairement à AddRecruitEquipment (choix libre pour un guerrier précis,
         // pas limité au commerce ordinaire) où le choix de matériau reste légitime.
-        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, availableGold: EndOfGameTreasuryRemaining, commonOnly: true, allowCreate: false);
+        // Chaque tuile d'arme ou d'armure dit qui, dans la bande, peut la porter (Core.Rules.EquipmentEligibility).
+        await EnsureEquipmentListsAsync();
+        var items = await _equipmentPicker.PickEquipmentAsync(_recruitableWarbandArchetype.Id, availableGold: EndOfGameTreasuryRemaining, commonOnly: true, allowCreate: false,
+            // La dague gratuite ne vaut qu'à l'équipement de départ : achetée en après-bataille, elle coûte son prix.
+            alreadyHasFreeDagger: true, carriers: RosterCarriers());
 
         foreach (var equipmentItem in items)
         {

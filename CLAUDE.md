@@ -177,10 +177,18 @@ quoi : liste d'équipement + compétences qui ouvrent une catégorie), `OncePerP
 règles pures dans `RulesTests.cs`, seed dans `DataServiceTests.cs`. Règles tranchées par l'utilisateur : Expert en Armes
 n'ouvre que le tir (la poudre noire est une catégorie distincte, modifiable dans le Codex) ; Chercheur de Ressources vaut
 même hors de combat, pas si le Héros est tué (condition `NotDead`, FAQ). Les effets d'objets magiques/règles spéciales
-suivront le même modèle plus tard (migration des `Grants*` à ce moment-là). Pas de fusion Achat/Réallouer (décidé). Reste à faire : section « Effets » du Codex
-(`SkillEditDialog`/`SkillDetailDialog` + popup d'un effet), branchement étape par étape du wizard Fin de partie, porteurs
-dans le sélecteur d'achat pour la Réserve, message « hors liste » dans Réallouer, libellé de la colonne `EffectsJson`
-dans l'écran des conflits de synchro.
+suivront le même modèle plus tard (migration des `Grants*` à ce moment-là). Pas de fusion Achat/Réallouer (décidé). Fait depuis : section « Effets » du Codex (popup d'un effet,
+`Core/Rules/EffectHandling`), groupe « Ouvert par … » et prérequis ambre dans les sélecteurs, wizard Fin de partie
+(`EndOfGamePageViewModel.Effects.cs` + `Features/Warbands/EndOfGame/Effects/`) : bonus d'Objets rares cochables +
+modificateur libre, Marchandage sur tout achat (objet rare, Achat, équipement de recrue ; réduction rendue à Terminer,
+`HaggleSavings`), dés en plus / relance / ajustement d'Exploration, relance de Blessure grave. Les lignes se reconstruisent
+si l'état hors de combat/tué change en revenant en arrière. Case à cocher plutôt qu'interrupteur pour les bonus (contrôle du
+reste du wizard). Achat pour la Réserve : ligne « qui peut l'équiper » sur chaque tuile d'arme/armure (Tous / Sauf … /
+noms, ⚡ si ouverte par une compétence, « Personne » grisé mais achetable - `EquipmentEligibility.CarriersOf`, paramètre
+`carriers` du sélecteur) ; Réallouer : message ambre « hors de la liste d'équipement » sous le Héros (pas de bordure
+ambre par puce, `ChipListView` ne la gère pas). Pas fait : filtre « Équipable par la bande » et section « Peut
+l'équiper » du récap d'objet (maquettes, non demandés). Reste à faire : libellé de la colonne `EffectsJson` dans l'écran
+des conflits de synchro.
 
 **Perf de navigation (branche `feature/navigation-perf`, 2026-11-03)** : mesuré sur Android (Release), la fiche de
 bande passait ~4,9 s à construire des vues jamais affichées. Règles retenues : un composant ne crée pas ses éléments

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Effects.EffectToggleView"
+             x:DataType="effects:EffectToggle">
+    <!-- Bonus permanent détecté (maquette « Recherche d'objet rare ») : case pré-cochée si la condition est
+         remplie, décochable ; la valeur passe en couleur d'accent quand elle compte. Case plutôt qu'un
+         interrupteur : c'est le contrôle « appliquer / ne pas appliquer » du reste du wizard. -->
+    <VerticalStackLayout Spacing="2">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" MinimumHeightRequest="44">
+            <CheckBox Grid.Column="0" IsChecked="{Binding IsOn}" VerticalOptions="Center"/>
+            <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{DynamicResource AppText}"/>
+                <Label Text="{Binding Subtitle}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+            </VerticalStackLayout>
+            <Label Grid.Column="2" Text="{Binding ValueText}" FontAttributes="Bold" VerticalOptions="Center"
+                   TextColor="{DynamicResource AppTextMuted}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding IsOn}" Value="True">
+                        <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </Grid>
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasWarning}">
+            <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                   FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+            <Label Grid.Column="1" Text="{Binding Warning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

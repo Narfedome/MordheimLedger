@@ -106,6 +106,10 @@ public sealed class ReallocationCarrier
     /// <summary>Deux instances désignent le même porteur RÉEL si elles pointent la même référence
     /// stable (ExistingHeroRow/NewRecruitSlot) ou sont toutes deux la Réserve - jamais une égalité
     /// d'instance sur ReallocationCarrier lui-même, recréé à chaque accès.</summary>
+    /// <summary>Objets portés hors de la liste d'équipement (message ambre, jamais bloquant) - posé par le wizard.</summary>
+    public string? OutOfListWarning { get; set; }
+    public bool HasOutOfListWarning => OutOfListWarning is not null;
+
     public bool IsSameCarrierAs(ReallocationCarrier other) => Kind == other.Kind
         && ReferenceEquals(ExistingHeroRow, other.ExistingHeroRow)
         && ReferenceEquals(NewRecruitSlot, other.NewRecruitSlot);

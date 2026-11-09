@@ -774,6 +774,25 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal(archetype.StartingTreasury - 305, (await _warbands.GetWarbandAsync(warband.Id))!.Treasury);
     }
 
+    /// <summary>Effets d'une compétence modifiés dans le Codex : enregistrés tels quels, et la compétence
+    /// officielle passe en Modifiée comme pour tout autre champ.</summary>
+    [Fact]
+    public async Task SaveSkill_PersistsEditedEffects_AndMarksOfficialSkillModified()
+    {
+        var streetwise = (await _library.GetSkillsAsync("en")).Single(s => s.OfficialId == "skill.academic.streetwise");
+        Assert.Equal(ContentSource.Official, streetwise.Source);
+
+        streetwise.Effects[0].Value = "+3";
+        streetwise.Effects.Add(new SkillEffect { Moment = EffectMoment.Purchase, Kind = EffectKind.Reminder, Note = "House rule" });
+        await _library.SaveSkillAsync(streetwise, "en");
+
+        var reloaded = (await _library.GetSkillsAsync("en")).Single(s => s.OfficialId == "skill.academic.streetwise");
+        Assert.Equal(ContentSource.Modified, reloaded.Source);
+        Assert.Equal(2, reloaded.Effects.Count);
+        Assert.Equal("+3", reloaded.Effects[0].Value);
+        Assert.Equal("House rule", reloaded.Effects[1].Note);
+    }
+
     private class ColumnInfo { public string name { get; set; } = ""; }
     private class IdRow { public int Id { get; set; } public string OfficialId { get; set; } = ""; }
 }

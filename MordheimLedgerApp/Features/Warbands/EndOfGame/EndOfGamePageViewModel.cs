@@ -198,6 +198,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     partial void OnStepIndexChanged(int value)
     {
+        PrepareEffectsForCurrentStep();
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
         // Vues d'étape mises en cache (StepViewConverter) : le solde et les pierres magiques dépendent de
         // saisies faites sur d'autres étapes (Blessures, Exploration...) - les relire à chaque changement
@@ -265,7 +266,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         - HeroEquipmentTotalCost()
         - HenchmanRecruitmentTotalCost()
         - PurchasedReserveItems.Sum(p => p.Cost)
-        + PendingSales.Sum(c => c.SellPrice);
+        + PendingSales.Sum(c => c.SellPrice)
+        + HaggleSavings;
 
     /// <summary>Alias générique d'IsRareItemPurchaseBlocked (même flag, EndOfGameTreasuryRemaining &lt; 0)
     /// - nom neutre pour être réutilisé par le bandeau "Suivant bloqué" de plusieurs étapes distinctes
@@ -282,6 +284,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// point du wizard qui modifie un poste de dépense.</summary>
     private void NotifyTreasuryChanged()
     {
+        // Les lignes Marchandage dépendent des achats (prix, achat retiré) autant que du solde.
+        RefreshHaggleRows();
         OnPropertyChanged(nameof(EndOfGameTreasuryRemaining));
         OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasury));
         OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
@@ -1229,6 +1233,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var finalReserve = BuildReserve(ReserveStage.Final);
             var topUpPlans = PlanTopUps().ToDictionary(kv => kv.Key, kv => (Plan: kv.Value, Breakdown: GetTopUpBreakdown(kv.Key)));
             var servedReservePicks = ServedReservePicks();
+            // Réductions de Marchandage figées comme la réserve : les Apply*Async ci-dessous modifient les
+            // achats dont elles dépendent.
+            var haggleSavings = CurrentHaggleSavings();
 
             await ApplyScenarioRewardsAsync(sentences);
             await ApplyExplorationOutcomeAsync(sentences);
@@ -1255,6 +1262,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             await ApplyEquipmentTradingAsync(sentences);
             await ApplyRecruitmentAsync(servedReservePicks, sentences);
             await ApplyHenchmanRecruitmentAsync(topUpPlans, servedReservePicks, sentences);
+            ApplyHaggleSavings(haggleSavings, sentences);
             // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
             // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
             // 2026-08-18) - invariant explicite ici plutôt qu'implicite dans l'ordre du code.

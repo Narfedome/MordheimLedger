@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Effects.HaggleRowView"
+             x:DataType="effects:HaggleRow">
+    <!-- Marchandage (maquette « Achat avec Marchandage ») : « Utiliser ici » tant qu'il n'est pas utilisé ici ;
+         utilisé ici, jet de dés + prix réduit + « Retirer » ; utilisé ailleurs, message ambre qui dit où. -->
+    <Border Style="{StaticResource ChipBorderStyle}" Padding="12,8">
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsUsedHere}" Value="True">
+                <Setter Property="Stroke" Value="{DynamicResource AppAccent}"/>
+            </DataTrigger>
+        </Border.Triggers>
+        <VerticalStackLayout Spacing="6">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.Bolt}" FontFamily="FontSolid" FontSize="14"
+                       TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsUsedHere}" Value="True">
+                            <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                    <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{DynamicResource AppText}"/>
+                    <Label Text="{Binding Subtitle}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Text="{loc:Loc HaggleUseHere}" Command="{Binding UseCommand}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}" VerticalOptions="Center"
+                        IsVisible="{Binding CanUseHere}"/>
+                <Label Grid.Column="2" Text="{loc:Loc HaggleRelease}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       TextDecorations="Underline" VerticalOptions="Center" IsVisible="{Binding IsUsedHere}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ReleaseCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding IsUsedHere}">
+                <Entry Grid.Column="0" Text="{Binding Usage.Roll}" Keyboard="Numeric"
+                       Placeholder="{Binding RollPlaceholder}" WidthRequest="90">
+                    <Entry.Behaviors>
+                        <components:DigitsOnlyBehavior/>
+                    </Entry.Behaviors>
+                </Entry>
+                <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                              Command="{Binding RollDiceCommand}" Tooltip="{loc:Loc EndOfGameRoll}"/>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasWarning}">
+                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                       FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                <Label Grid.Column="1" Text="{Binding Warning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

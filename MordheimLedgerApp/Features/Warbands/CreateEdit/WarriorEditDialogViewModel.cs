@@ -225,11 +225,24 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         Mutations = new ObservableCollection<WarriorMutation>(item.Mutations);
     }
 
+    /// <summary>Le guerrier tel qu'il est en cours d'édition (compétences de la fiche comprises, même pas encore
+    /// enregistrées) pour les règles qui en dépendent : ouvertures d'équipement, prérequis de compétence.</summary>
+    private Warrior CurrentWarriorForRules() => new()
+    {
+        Id = Item.Id,
+        Name = Item.Name,
+        IsHero = Item.IsHero,
+        IsLeader = Item.IsLeader,
+        WarriorArchetypeId = Item.WarriorArchetypeId,
+        Skills = Skills.ToList(),
+        Equipment = Equipment.ToList(),
+    };
+
     [RelayCommand]
     private async Task AddEquipment()
     {
         var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury,
-            alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger), allowQuantity: Item.IsHero);
+            alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger), allowQuantity: Item.IsHero, forWarrior: CurrentWarriorForRules());
 
         // Même dialog que la création libre du wizard (MaterialPickerDialogViewModel) : matériau exclusif
         // (corps à corps) + bénédiction cumulable (toute arme), un seul écran. Tout normal / tap à
@@ -313,7 +326,8 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             .Where(s => s.OfficialId is not null && extraSkillOfficialIds.Contains(s.OfficialId)).Select(s => s.Id).ToList();
 
         var skills = await _skillPicker.PickSkillAsync(_warband.WarbandArchetypeId, Item.WarriorArchetypeId,
-            SkillEligibility.EffectiveAllowedCategories(Item), extraSkillIds);
+            SkillEligibility.EffectiveAllowedCategories(Item), extraSkillIds,
+            forWarrior: CurrentWarriorForRules(), forWarriorIsSpellcaster: IsSpellcaster);
         foreach (var skill in skills)
         {
             var learned = await _warbandService.AddWarriorSkillAsync(Item.Id, skill);

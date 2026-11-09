@@ -21,7 +21,10 @@
     "description": {
       "en": "A warrior with this skill is adept at using many different weapons. He may use any hand-to-hand combat weapon he comes across, not just those in his equipment options.",
       "fr": "Ce guerrier maîtrise de nombreuses armes différentes. Il peut utiliser n'importe quelle arme de Corps à Corps qu'il trouve, pas seulement celles de sa liste d'équipement."
-    }
+    },
+    "effects": [
+      { "moment": "EquipmentChoice", "kind": "Allow", "targets": ["MeleeWeapon"] }
+    ]
   },
   {
     "id": "skill.combat.web-of-steel",
@@ -77,7 +80,10 @@
     "description": {
       "en": "The warrior has been trained to use some of the more unusual weapons of the known world. He may use any missile weapon he comes across, not just the weapons available from his warband's list.",
       "fr": "Ce guerrier a été formé à l'usage des armes les plus inhabituelles du Monde Connu. Il peut utiliser n'importe quelle arme de tir qu'il trouve, pas seulement celles de la liste de sa bande."
-    }
+    },
+    "effects": [
+      { "moment": "EquipmentChoice", "kind": "Allow", "targets": ["MissileWeapon"] }
+    ]
   },
   {
     "id": "skill.shooting.nimble",
@@ -117,7 +123,11 @@
     "description": {
       "en": "Only for leaders, Undead leaders cannot use. This skill may only be chosen by a leader. The warrior has drilled his warband to follow short barked commands, increasing the range of his Leader ability by 6\".",
       "fr": "Réservée aux chefs, inutilisable par les chefs Morts-Vivants. Cette compétence ne peut être choisie que par un chef. Le guerrier a entraîné sa bande à suivre des ordres brefs et incisifs, ce qui augmente de 6ps la portée de sa capacité de Chef."
-    }
+    },
+    "effects": [
+      { "moment": "SkillChoice", "kind": "Prerequisite", "condition": "Leader" },
+      { "moment": "SkillChoice", "kind": "Prerequisite", "condition": "NotInWarbandOrArchetype", "conditionTargets": ["warband.undead"] }
+    ]
   },
   {
     "id": "skill.academic.sorcery",
@@ -125,7 +135,11 @@
     "description": {
       "en": "Only for spellcasting Heroes, Sisters of Sigmar and Warrior-Priests cannot use. This skill may only be taken by Heroes capable of casting spells. It grants +1 to the roll to see whether a spell is cast successfully.",
       "fr": "Réservée aux Héros jeteurs de sorts, inutilisable par les Sœurs de Sigmar et les Prêtres-Guerriers. Cette compétence ne peut être choisie que par un Héros capable de lancer des sorts. Elle donne +1 au jet déterminant si le sort est lancé avec succès."
-    }
+    },
+    "effects": [
+      { "moment": "SkillChoice", "kind": "Prerequisite", "condition": "Spellcaster" },
+      { "moment": "SkillChoice", "kind": "Prerequisite", "condition": "NotInWarbandOrArchetype", "conditionTargets": ["warband.sisters-of-sigmar", "warrior.witch-hunters.warrior-priest"] }
+    ]
   },
   {
     "id": "skill.academic.streetwise",
@@ -133,7 +147,10 @@
     "description": {
       "en": "A warrior with this skill has good contacts and knows where to purchase rare items. He may add +2 to the roll that determines his chances of finding such items.",
       "fr": "Ce guerrier a de bons contacts et sait où se procurer des objets rares. Il peut ajouter +2 au jet déterminant ses chances de trouver un tel objet."
-    }
+    },
+    "effects": [
+      { "moment": "RareItemSearch", "kind": "Modifier", "value": "+2" }
+    ]
   },
   {
     "id": "skill.academic.haggle",
@@ -141,7 +158,10 @@
     "description": {
       "en": "Once per post-battle sequence, minimum cost 1gc. The warrior knows all the tricks of bargaining. He may deduct 2D6 gold crowns from the price of any single item (to a minimum of 1gc), once per post-battle sequence.",
       "fr": "Une fois par séquence d'après-bataille, coût minimum 1 CO. Ce guerrier connaît toutes les ficelles du marchandage. Il peut déduire 2D6 Couronnes d'Or du prix d'un objet (jusqu'à un coût minimum de 1 CO), une fois par séquence d'après-bataille."
-    }
+    },
+    "effects": [
+      { "moment": "Purchase", "kind": "Discount", "value": "2D6", "minimumPrice": 1, "frequency": "OncePerPostBattle" }
+    ]
   },
   {
     "id": "skill.academic.arcane-lore",
@@ -149,7 +169,11 @@
     "description": {
       "en": "Cannot be taken by Witch Hunters, Sisters of Sigmar or Warrior-Priests. Any warrior with this skill may learn Lesser Magic if he owns a Tome of Magic.",
       "fr": "Ne peut pas être choisie par les Répurgateurs, Sœurs de Sigmar ou Prêtres-Guerriers. Tout guerrier possédant cette compétence peut apprendre la Magie Mineure s'il possède un Grimoire."
-    }
+    },
+    "effects": [
+      { "moment": "SpellChoice", "kind": "Allow", "targets": ["school.lesser-magic"], "condition": "CarriesItem", "conditionTargets": ["equipment.tome-of-magic"] },
+      { "moment": "SkillChoice", "kind": "Prerequisite", "condition": "NotInWarbandOrArchetype", "conditionTargets": ["warband.witch-hunters", "warband.sisters-of-sigmar", "warrior.witch-hunters.warrior-priest"] }
+    ]
   },
   {
     "id": "skill.academic.wyrdstone-hunter",
@@ -157,7 +181,10 @@
     "description": {
       "en": "The warrior has an uncanny ability to find hidden shards of wyrdstone. If searching the ruins in the exploration phase, re-roll one dice when rolling on the Exploration chart - the second result stands.",
       "fr": "Ce guerrier a un don étrange pour dénicher les éclats cachés de pierre magique. S'il explore les ruines lors de la phase d'Exploration, relancez un dé sur le tableau d'Exploration - le second résultat est définitif."
-    }
+    },
+    "effects": [
+      { "moment": "ExplorationRoll", "kind": "Reroll", "value": "1", "condition": "NotOutOfAction", "frequency": "OncePerPostBattle" }
+    ]
   },
   {
     "id": "skill.academic.warrior-wizard",
@@ -165,7 +192,10 @@
     "description": {
       "en": "Only for spellcasters. The mental powers of the wizard allow him to wear armour and still cast spells.",
       "fr": "Réservée aux jeteurs de sorts. Les pouvoirs mentaux du sorcier lui permettent de porter une armure tout en lançant des sorts."
-    }
+    },
+    "effects": [
+      { "moment": "SkillChoice", "kind": "Prerequisite", "condition": "Spellcaster" }
+    ]
   },
   {
     "id": "skill.strength.mighty-blow",

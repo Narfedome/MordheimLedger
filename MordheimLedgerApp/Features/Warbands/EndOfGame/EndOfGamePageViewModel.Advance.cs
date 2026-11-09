@@ -67,7 +67,8 @@ public partial class EndOfGamePageViewModel
         // passer en sélection unique") : un jet de Progression n'accorde jamais plus d'une compétence,
         // contrairement au picker générique de la Bibliothèque.
         var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
-            SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds, singleSelect: true);
+            SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds, singleSelect: true,
+            forWarrior: row.Warrior, forWarriorIsSpellcaster: row.IsSpellcaster);
         if (skills.Count == 0) return;
 
         entry.SelectedSpell = null;

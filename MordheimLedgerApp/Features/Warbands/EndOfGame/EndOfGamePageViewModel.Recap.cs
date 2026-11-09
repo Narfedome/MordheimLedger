@@ -25,7 +25,8 @@ public partial class EndOfGamePageViewModel
 
     public IEnumerable<string> RareItemsRecapLines => RareItemsWithResults.Select(e => e.IsSearchingForCharacter
         ? string.Format(Loc["EndOfGameRecapRareCharacterFormat"], e.HeroName, e.SelectedCharacterDisplayName)
-        : string.Format(Loc["EndOfGameRecapRareItemFormat"], e.HeroName, e.SelectedItem?.Name, e.EffectiveCost ?? 0));
+        : string.Format(Loc["EndOfGameRecapRareItemFormat"], e.HeroName, e.SelectedItem?.Name,
+            (e.EffectiveCost ?? 0) - HaggleSavingsAt(RareSpotId(RareItemSearchEntries.IndexOf(e)))));
 
     public bool HasDramatisPersonaeRecap => LivingDramatisPersonaUpkeepEntries.Any(e => e.WillPay.HasValue);
 

@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit;
 using MordheimLedgerApp.Services;
@@ -152,6 +154,22 @@ public partial class EquipmentItemViewModel : BaseViewModel
     /// (every other picker) omits the section entirely.</summary>
     public IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? ReserveQuantities { get; set; }
 
+    /// <summary>Guerrier pour qui on achète (fiche guerrier, WarriorEditDialogViewModel.AddEquipment) - null
+    /// partout ailleurs. Avec une liste d'équipement (AllowedEquipmentListItemIds), une arme ou armure hors
+    /// liste qu'une de ses compétences ouvre (Entraînement aux Armes, Expert en Armes...) reste proposée,
+    /// dans un groupe « Ouvert par … » à part, au lieu d'être masquée. Qui ouvre quoi est décidé par
+    /// Core.Rules.EquipmentEligibility.AccessFor, pas ici. C'est la règle : pas de message ambre.</summary>
+    public Warrior? ForWarrior { get; set; }
+
+    /// <summary>Achat pour la Réserve (maquette « Achat vers la Réserve ») : la bande, pour afficher sur chaque
+    /// tuile d'arme ou d'armure qui peut la porter (Core.Rules.EquipmentEligibility.CarriersOf). Rien n'est
+    /// filtré : « Personne » reste achetable, juste grisé.</summary>
+    public IReadOnlyList<EquipmentCarrier>? Carriers { get; set; }
+
+    /// <summary>Objets admis par ApplyFilter seulement parce qu'une compétence de ForWarrior les ouvre, avec
+    /// le nom de cette compétence (titre de leur groupe).</summary>
+    private readonly Dictionary<int, string> _openedBySkill = new();
+
     public bool ShowBudget => AvailableGold.HasValue;
 
     /// <summary>Stepper -/+ par tuile : seulement là où un budget s'applique (ShowBudget) ET où plusieurs
@@ -284,9 +302,21 @@ public partial class EquipmentItemViewModel : BaseViewModel
                 // listes.
                 var listScopedCategories = new[]
                     { EquipmentCategory.MeleeWeapon, EquipmentCategory.MissileWeapon, EquipmentCategory.BlackPowderWeapon, EquipmentCategory.Armour };
+                _openedBySkill.Clear();
+                bool OpenedForWarrior(EquipmentItem i)
+                {
+                    // Une ouverture par compétence ne lève que la liste d'équipement : un objet réservé à une
+                    // autre bande ou à un autre type de guerrier reste masqué (maquette « Sélecteur
+                    // d'équipement »).
+                    if (ForWarrior is null || !BroadBandScoped(i) || !WarriorOk(i)) return false;
+                    var access = EquipmentEligibility.AccessFor(i, ForWarrior, listIds);
+                    if (access.Kind != EquipmentAccessKind.OpenedBySkill) return false;
+                    _openedBySkill[i.Id] = access.SkillName ?? string.Empty;
+                    return true;
+                }
                 filtered = filtered.Where(i => listScopedCategories.Contains(i.Category)
-                    ? listIds.Contains(i.Id) && WarriorOk(i)
-                    : BroadBandScoped(i));
+                    ? (listIds.Contains(i.Id) && WarriorOk(i)) || OpenedForWarrior(i)
+                    : BroadBandScoped(i)).ToList();
             }
             else
             {
@@ -312,14 +342,31 @@ public partial class EquipmentItemViewModel : BaseViewModel
 
         var groups = new ObservableCollection<EquipmentItemGroup>();
         var reserveGroup = ReserveQuantities is { Count: > 0 } ? new EquipmentItemGroup(LocalizationService.Instance["EndOfGameEquipmentTradingStashSource"]) : null;
+        var openedGroups = new List<EquipmentItemGroup>();
         foreach (var item in filtered)
         {
-            var groupName = CategoryLabel(item.Category);
-            var group = groups.FirstOrDefault(g => g.Name == groupName);
-            if (group is null)
+            EquipmentItemGroup? group;
+            if (_openedBySkill.TryGetValue(item.Id, out var skillName))
             {
-                group = new EquipmentItemGroup(groupName) { ShowHeader = ShowGroupHeaders };
-                groups.Add(group);
+                // Groupe « Ouvert par … » après les catégories de la liste, titre toujours visible (même
+                // filtré sur une catégorie : il dit pourquoi ces objets sont là).
+                var openedName = string.Format(LocalizationService.Instance["EquipmentOpenedByGroup"], skillName);
+                group = openedGroups.FirstOrDefault(g => g.Name == openedName);
+                if (group is null)
+                {
+                    group = new EquipmentItemGroup(openedName) { ShowHeader = true, IsOpenedBySkill = true };
+                    openedGroups.Add(group);
+                }
+            }
+            else
+            {
+                var groupName = CategoryLabel(item.Category);
+                group = groups.FirstOrDefault(g => g.Name == groupName);
+                if (group is null)
+                {
+                    group = new EquipmentItemGroup(groupName) { ShowHeader = ShowGroupHeaders };
+                    groups.Add(group);
+                }
             }
             // Tuile nue omise en RareSearchMode pour une arme de corps à corps COMMUNE (pas de Rarity) -
             // 2026-09-23, retour utilisateur "vu que c'est que pour les armes rare on peut enlever les
@@ -332,7 +379,9 @@ public partial class EquipmentItemViewModel : BaseViewModel
             if (!skipPlainTile)
             {
                 var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
-                group.Add(new EquipmentItemRow(item, isFreeForThisPurchase));
+                var row = new EquipmentItemRow(item, isFreeForThisPurchase);
+                if (Carriers is { } carriers) row.SetCarriers(EquipmentEligibility.CarriersOf(item, carriers));
+                group.Add(row);
             }
 
             // Variantes matériau (RareSearchMode uniquement, 2026-09-23) - une tuile de plus par matériau
@@ -354,8 +403,9 @@ public partial class EquipmentItemViewModel : BaseViewModel
             if (reserveGroup is not null && ReserveQuantities!.TryGetValue(item.Id, out var reserveStock) && reserveStock.Quantity > 0)
                 reserveGroup.Add(new EquipmentItemRow(item, reserveStock.Quantity, reserveStock.MaterialRule));
         }
+        foreach (var opened in openedGroups) groups.Add(opened);
         if (reserveGroup is { Count: > 0 }) groups.Insert(0, reserveGroup);
-        EquipmentItemGroups = new PagedGroupCollection<EquipmentItemGroup, EquipmentItemRow>(groups, g => new EquipmentItemGroup(g.Name) { ShowHeader = g.ShowHeader });
+        EquipmentItemGroups = new PagedGroupCollection<EquipmentItemGroup, EquipmentItemRow>(groups, g => new EquipmentItemGroup(g.Name) { ShowHeader = g.ShowHeader, IsOpenedBySkill = g.IsOpenedBySkill });
 
         SelectedRow = null;
         SelectedRows.Clear();

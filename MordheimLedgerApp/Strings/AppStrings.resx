@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2730,5 +2730,356 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   </data>
   <data name="TourWizardEquipmentBody" xml:space="preserve">
     <value>Équipez chaque héros, et chaque groupe d'hommes de main d'un seul achat pour tout le groupe. La première dague est gratuite ; divisez un groupe pour l'équiper différemment.</value>
+  </data>
+  <data name="EffectsHeading" xml:space="preserve">
+    <value>Effets</value>
+  </data>
+  <data name="EffectsEditHint" xml:space="preserve">
+    <value>Touchez un effet pour le modifier. Le reste de la description reste du texte libre.</value>
+  </data>
+  <data name="EffectsEditEmpty" xml:space="preserve">
+    <value>Aucun effet : la compétence reste du texte libre, appliqué par le joueur.</value>
+  </data>
+  <data name="EffectsLegend" xml:space="preserve">
+    <value>« Appliqué » : l'app calcule ou propose. « Info » et « Rappel » : l'app affiche, le joueur décide.</value>
+  </data>
+  <data name="EffectsAdd" xml:space="preserve">
+    <value>Ajouter un effet</value>
+  </data>
+  <data name="EffectHandlingApplied" xml:space="preserve">
+    <value>Appliqué</value>
+  </data>
+  <data name="EffectHandlingInfo" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="EffectHandlingReminder" xml:space="preserve">
+    <value>Rappel</value>
+  </data>
+  <data name="EffectDialogTitle" xml:space="preserve">
+    <value>Effet : {0}</value>
+  </data>
+  <data name="EffectDialogSubtitle" xml:space="preserve">
+    <value>Ce que l'app proposera, et à quel moment</value>
+  </data>
+  <data name="EffectMomentPh" xml:space="preserve">
+    <value>Moment</value>
+  </data>
+  <data name="EffectKindPh" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="EffectValuePh" xml:space="preserve">
+    <value>Valeur</value>
+  </data>
+  <data name="EffectValueHint" xml:space="preserve">
+    <value>Ex. +2, 1, 2D6</value>
+  </data>
+  <data name="EffectMinimumPricePh" xml:space="preserve">
+    <value>Prix minimum (CO)</value>
+  </data>
+  <data name="EffectConditionPh" xml:space="preserve">
+    <value>Condition</value>
+  </data>
+  <data name="EffectFrequencyPh" xml:space="preserve">
+    <value>Fréquence</value>
+  </data>
+  <data name="EffectNotePh" xml:space="preserve">
+    <value>Texte du rappel (facultatif)</value>
+  </data>
+  <data name="EffectNotePlaceholder" xml:space="preserve">
+    <value>Affiché à côté de l'effet dans le wizard</value>
+  </data>
+  <data name="EffectTargetsPh" xml:space="preserve">
+    <value>Ouvre</value>
+  </data>
+  <data name="EffectTargetsEmpty" xml:space="preserve">
+    <value>Rien d'ouvert pour l'instant : touchez + pour choisir.</value>
+  </data>
+  <data name="EffectTargetsNoChoice" xml:space="preserve">
+    <value>Pas de choix proposé pour ce moment : les cibles existantes sont gardées telles quelles.</value>
+  </data>
+  <data name="EffectConditionTargetsCarriesPh" xml:space="preserve">
+    <value>Objets portés</value>
+  </data>
+  <data name="EffectConditionTargetsExceptPh" xml:space="preserve">
+    <value>Bandes exclues</value>
+  </data>
+  <data name="EffectAddTargetTitle" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="EffectMomentRareItemSearch" xml:space="preserve">
+    <value>Recherche d'objet rare</value>
+  </data>
+  <data name="EffectMomentPurchase" xml:space="preserve">
+    <value>Achat</value>
+  </data>
+  <data name="EffectMomentExplorationRoll" xml:space="preserve">
+    <value>Exploration</value>
+  </data>
+  <data name="EffectMomentSeriousInjuryRoll" xml:space="preserve">
+    <value>Blessure grave</value>
+  </data>
+  <data name="EffectMomentSkillChoice" xml:space="preserve">
+    <value>Choix de compétence</value>
+  </data>
+  <data name="EffectMomentEquipmentChoice" xml:space="preserve">
+    <value>Choix d'équipement</value>
+  </data>
+  <data name="EffectMomentSpellChoice" xml:space="preserve">
+    <value>Choix de sort</value>
+  </data>
+  <data name="EffectMomentCharacteristicIncrease" xml:space="preserve">
+    <value>Augmentation de caractéristique</value>
+  </data>
+  <data name="EffectMomentInGame" xml:space="preserve">
+    <value>En partie</value>
+  </data>
+  <data name="EffectKindModifier" xml:space="preserve">
+    <value>Bonus au jet</value>
+  </data>
+  <data name="EffectKindReroll" xml:space="preserve">
+    <value>Relance (le second résultat reste)</value>
+  </data>
+  <data name="EffectKindAdjustDie" xml:space="preserve">
+    <value>Ajuster un dé (±n)</value>
+  </data>
+  <data name="EffectKindExtraDie" xml:space="preserve">
+    <value>Dé supplémentaire</value>
+  </data>
+  <data name="EffectKindDiscount" xml:space="preserve">
+    <value>Réduction de prix</value>
+  </data>
+  <data name="EffectKindAllow" xml:space="preserve">
+    <value>Ouvre un sélecteur</value>
+  </data>
+  <data name="EffectKindPrerequisite" xml:space="preserve">
+    <value>Prérequis</value>
+  </data>
+  <data name="EffectKindReminder" xml:space="preserve">
+    <value>Rappel seul</value>
+  </data>
+  <data name="EffectSummaryModifier" xml:space="preserve">
+    <value>Bonus {0}</value>
+  </data>
+  <data name="EffectSummaryReroll" xml:space="preserve">
+    <value>Relance</value>
+  </data>
+  <data name="EffectSummaryRerollMany" xml:space="preserve">
+    <value>Relance de {0} dés</value>
+  </data>
+  <data name="EffectSummaryAdjustDie" xml:space="preserve">
+    <value>Ajuster un dé ±{0}</value>
+  </data>
+  <data name="EffectSummaryExtraDie" xml:space="preserve">
+    <value>+{0} dé</value>
+  </data>
+  <data name="EffectSummaryDiscount" xml:space="preserve">
+    <value>Réduction −{0} CO</value>
+  </data>
+  <data name="EffectSummaryAllow" xml:space="preserve">
+    <value>Ouvre {0}</value>
+  </data>
+  <data name="EffectSummaryPrerequisite" xml:space="preserve">
+    <value>Prérequis</value>
+  </data>
+  <data name="EffectSummaryReminder" xml:space="preserve">
+    <value>Rappel</value>
+  </data>
+  <data name="EffectConditionNone" xml:space="preserve">
+    <value>Aucune</value>
+  </data>
+  <data name="EffectConditionNotOutOfAction" xml:space="preserve">
+    <value>Pas hors de combat</value>
+  </data>
+  <data name="EffectConditionNotDead" xml:space="preserve">
+    <value>Pas tué</value>
+  </data>
+  <data name="EffectConditionLeader" xml:space="preserve">
+    <value>Chef de la bande</value>
+  </data>
+  <data name="EffectConditionSpellcaster" xml:space="preserve">
+    <value>Jeteur de sorts</value>
+  </data>
+  <data name="EffectConditionCarriesItem" xml:space="preserve">
+    <value>Porte un objet</value>
+  </data>
+  <data name="EffectConditionNotInWarbandOrArchetype" xml:space="preserve">
+    <value>Hors de certaines bandes</value>
+  </data>
+  <data name="EffectConditionCarriesItemFormat" xml:space="preserve">
+    <value>porte {0}</value>
+  </data>
+  <data name="EffectConditionExceptFormat" xml:space="preserve">
+    <value>sauf {0}</value>
+  </data>
+  <data name="EffectFrequencyPermanent" xml:space="preserve">
+    <value>Permanent</value>
+  </data>
+  <data name="EffectFrequencyOncePerPostBattle" xml:space="preserve">
+    <value>1× / après-bataille</value>
+  </data>
+  <data name="EffectFrequencyOnceDetail" xml:space="preserve">
+    <value>1 fois par après-bataille</value>
+  </data>
+  <data name="EffectMinimumPriceDetail" xml:space="preserve">
+    <value>prix min. {0} CO</value>
+  </data>
+  <data name="EquipmentOpenedByGroup" xml:space="preserve">
+    <value>Ouvert par {0}</value>
+  </data>
+  <data name="SkillPrereqThisWarrior" xml:space="preserve">
+    <value>Ce guerrier</value>
+  </data>
+  <data name="SkillPrereqLeader" xml:space="preserve">
+    <value>{0} est réservée au chef de la bande. {1} ne l'est pas.</value>
+  </data>
+  <data name="SkillPrereqSpellcaster" xml:space="preserve">
+    <value>{0} est réservée aux jeteurs de sorts. {1} n'en est pas un.</value>
+  </data>
+  <data name="SkillPrereqExcluded" xml:space="preserve">
+    <value>{0} est interdite à : {2}. {1} en fait partie.</value>
+  </data>
+  <data name="SkillPrereqCarries" xml:space="preserve">
+    <value>{0} demande de porter : {2}.</value>
+  </data>
+  <data name="SkillPrereqOther" xml:space="preserve">
+    <value>{0} : prérequis non rempli par {1} ({2}).</value>
+  </data>
+  <data name="EffectSourceSkillOf" xml:space="preserve">
+    <value>compétence de {0}</value>
+  </data>
+  <data name="EffectSourceItemOf" xml:space="preserve">
+    <value>objet porté par {0}</value>
+  </data>
+  <data name="EffectSourceTitle" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="EffectUnmetNone" xml:space="preserve">
+    <value></value>
+  </data>
+  <data name="EffectUnmetNotOutOfAction" xml:space="preserve">
+    <value>{0} a été mis hors de combat : la condition n'est pas remplie.</value>
+  </data>
+  <data name="EffectUnmetNotDead" xml:space="preserve">
+    <value>{0} a été tué : la condition n'est pas remplie.</value>
+  </data>
+  <data name="EffectUnmetLeader" xml:space="preserve">
+    <value>{0} n'est pas le chef de la bande.</value>
+  </data>
+  <data name="EffectUnmetSpellcaster" xml:space="preserve">
+    <value>{0} ne lance pas de sorts.</value>
+  </data>
+  <data name="EffectUnmetCarriesItem" xml:space="preserve">
+    <value>{0} ne porte pas l'objet requis.</value>
+  </data>
+  <data name="EffectUnmetNotInWarbandOrArchetype" xml:space="preserve">
+    <value>Exclu pour la bande ou le type de {0}.</value>
+  </data>
+  <data name="EffectDetectedBonuses" xml:space="preserve">
+    <value>Bonus détectés</value>
+  </data>
+  <data name="EffectFreeModifier" xml:space="preserve">
+    <value>Modificateur libre</value>
+  </data>
+  <data name="EffectFreeModifierHint" xml:space="preserve">
+    <value>situation, règle maison…</value>
+  </data>
+  <data name="EffectExtraDieOne" xml:space="preserve">
+    <value>+1 dé</value>
+  </data>
+  <data name="EffectExtraDieMany" xml:space="preserve">
+    <value>+{0} dés</value>
+  </data>
+  <data name="EffectRerollAction" xml:space="preserve">
+    <value>Relancer</value>
+  </data>
+  <data name="EffectRerollRollDescription" xml:space="preserve">
+    <value>relancer ce jet une fois, le second résultat reste</value>
+  </data>
+  <data name="EffectRerollDieDescription" xml:space="preserve">
+    <value>relancer un dé, le second résultat reste</value>
+  </data>
+  <data name="EffectAdjustAction" xml:space="preserve">
+    <value>Ajuster</value>
+  </data>
+  <data name="EffectAdjustDieDescription" xml:space="preserve">
+    <value>modifier un dé de ±{0}</value>
+  </data>
+  <data name="EffectUndoReroll" xml:space="preserve">
+    <value>Annuler la relance</value>
+  </data>
+  <data name="EffectUndo" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="EffectRerollDoneFormat" xml:space="preserve">
+    <value>Relancé : {0} → {1}</value>
+  </data>
+  <data name="EffectDieOption" xml:space="preserve">
+    <value>Dé {0} : {1}</value>
+  </data>
+  <data name="EffectDieChangeFormat" xml:space="preserve">
+    <value>Dé {0} : {1} → {2}</value>
+  </data>
+  <data name="EffectPickDieTitle" xml:space="preserve">
+    <value>Quel dé ?</value>
+  </data>
+  <data name="EffectRollFirst" xml:space="preserve">
+    <value>Lancez d'abord le jet.</value>
+  </data>
+  <data name="EffectRollDiceFirst" xml:space="preserve">
+    <value>Lancez d'abord tous les dés.</value>
+  </data>
+  <data name="EffectReminderTitle" xml:space="preserve">
+    <value>Rappel · {0} · {1}</value>
+  </data>
+  <data name="HaggleUseHere" xml:space="preserve">
+    <value>Utiliser ici</value>
+  </data>
+  <data name="HaggleRelease" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="HaggleFreeSubtitle" xml:space="preserve">
+    <value>−{0} CO sur un achat, min. {1} CO</value>
+  </data>
+  <data name="HaggleUsedElsewhereSubtitle" xml:space="preserve">
+    <value>en cours d'utilisation ailleurs</value>
+  </data>
+  <data name="HaggleUsedElsewhereWarning" xml:space="preserve">
+    <value>Déjà utilisé à l'étape {0}, sur {1}. L'utiliser ici le retire de {1}, qui repasse à {2} CO.</value>
+  </data>
+  <data name="HaggleRollPending" xml:space="preserve">
+    <value>{0} : {1} CO, lancez la réduction</value>
+  </data>
+  <data name="HaggleAppliedFormat" xml:space="preserve">
+    <value>{0} : {1} → {2} CO</value>
+  </data>
+  <data name="HagglePickPurchaseTitle" xml:space="preserve">
+    <value>Sur quel achat ?</value>
+  </data>
+  <data name="HagglePurchaseOption" xml:space="preserve">
+    <value>{0} · {1} CO</value>
+  </data>
+  <data name="HaggleStepRareItems" xml:space="preserve">
+    <value>Objets rares</value>
+  </data>
+  <data name="HaggleStepTrading" xml:space="preserve">
+    <value>Achat/Vente</value>
+  </data>
+  <data name="HaggleStepRecruitment" xml:space="preserve">
+    <value>Recrutement</value>
+  </data>
+  <data name="HistoryHaggleSentence" xml:space="preserve">
+    <value>Marchandage : {0} CO économisées sur {1}.</value>
+  </data>
+  <data name="EquipmentCarriersEveryone" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="EquipmentCarriersNobody" xml:space="preserve">
+    <value>Personne</value>
+  </data>
+  <data name="EquipmentCarriersExcept" xml:space="preserve">
+    <value>Sauf {0}</value>
+  </data>
+  <data name="EquipmentOutOfListWarning" xml:space="preserve">
+    <value>{0} : hors de la liste d'équipement de {1}.</value>
   </data>
 </root>

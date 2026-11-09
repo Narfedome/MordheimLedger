@@ -42,8 +42,7 @@ public partial class EndOfGamePageViewModel
     /// écartez-en un au choix" - un dé physique en trop que le joueur écarte lui-même avant de saisir ses
     /// valeurs finales, donc le nombre de dés GARDÉS (ExplorationDiceCount) ne change pas du tout ; seul
     /// un rappel textuel a du sens ici (voir ShowPendingExplorationBonusDieReminder plus bas).</summary>
-    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame,
-        ExplorationDiceBonus.EffectiveBonusDice(WarriorRows.Where(r => !r.IsOutOfAction).Select(r => r.Warrior)));
+    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame, ExplorationBonusDice);
 
     /// <summary>Nombre de dés choisi par le joueur avec les boutons -/+ (null = celui du livre,
     /// ExplorationDiceCount). Depuis le 2026-10-26 le calcul du livre n'est plus qu'une suggestion : une

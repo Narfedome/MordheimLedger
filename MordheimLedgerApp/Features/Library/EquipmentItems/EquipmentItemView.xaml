@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemView"
@@ -57,9 +57,20 @@
                          reste toujours visible même quand un filtre de catégorie masque les en-têtes
                          ordinaires (déjà nommées par le bouton de filtre) - "Réserve" ne l'est nulle part
                          ailleurs à l'écran. -->
-                    <Label Text="{Binding Name}"
-                    IsVisible="{Binding ShowHeader}"
-                    Style="{StaticResource CodexGroupHeaderStyle}"/>
+                    <!-- Groupe « Ouvert par … » (EquipmentItemGroup.IsOpenedBySkill) : glyphe des effets et
+                         couleur d'accent, comme sur la maquette du sélecteur d'équipement. -->
+                    <HorizontalStackLayout IsVisible="{Binding ShowHeader}" Spacing="6">
+                        <Label IsVisible="{Binding IsOpenedBySkill}" FontFamily="FontSolid" FontSize="12"
+                               Text="{x:Static icons:SolidFont.Bolt}" TextColor="{DynamicResource AppAccent}" Margin="4,12,0,2"
+                               VerticalOptions="Center"/>
+                        <Label Text="{Binding Name}" Style="{StaticResource CodexGroupHeaderStyle}">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsOpenedBySkill}" Value="True">
+                                    <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </HorizontalStackLayout>
                 </DataTemplate>
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
@@ -78,6 +89,10 @@
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
                                 <Setter Property="Stroke" Value="LightSkyBlue"/>
+                            </DataTrigger>
+                            <!-- Personne dans la bande ne peut la porter : grisée, toujours achetable. -->
+                            <DataTrigger TargetType="Border" Binding="{Binding CarriersNobody}" Value="True">
+                                <Setter Property="Opacity" Value="0.5"/>
                             </DataTrigger>
                         </Border.Triggers>
                         <Grid Style="{StaticResource CodexTileFrameStyle}">
@@ -98,6 +113,13 @@
                             </Grid>
                             <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center"
                                                  InputTransparent="True" CascadeInputTransparent="False">
+                                <!-- Une ligne de plus (porteurs) : espacement resserré pour que le compteur tienne encore
+                                     dans la tuile quand le nom passe sur deux lignes. -->
+                                <VerticalStackLayout.Triggers>
+                                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding HasCarriers}" Value="True">
+                                        <Setter Property="Spacing" Value="1"/>
+                                    </DataTrigger>
+                                </VerticalStackLayout.Triggers>
                                 <components:LibraryItemImageView InputTransparent="True"
                              ImagePath="{Binding Item.ImagePath}"
                              DefaultGlyph="{Binding CategoryIcon}"
@@ -114,6 +136,15 @@
                                 Margin="5,0"/>
                                 <Label Text="{Binding CostDisplay}" InputTransparent="True"
                                 Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
+                                <!-- Qui peut la porter (achat pour la Réserve, armes et armures seulement) ; éclair =
+                                     ouverte par une compétence (Entraînement aux Armes...). -->
+                                <HorizontalStackLayout Spacing="3" HorizontalOptions="Center" IsVisible="{Binding HasCarriers}" Margin="4,0" InputTransparent="True">
+                                    <Label Text="{x:Static icons:SolidFont.Bolt}" FontFamily="FontSolid" FontSize="9"
+                                           TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"
+                                           IsVisible="{Binding CarriersOpenedBySkill}"/>
+                                    <Label Text="{Binding CarriersText}" FontSize="10" MaxLines="1" LineBreakMode="TailTruncation"
+                                           MaximumWidthRequest="110" TextColor="{DynamicResource AppText}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
                                 <!-- Stepper de quantité (ShowQuantityStepper - jamais en sélection unique, ex. Objets
                                      rares ; picker de recrutement/achat uniquement, où un
                                      budget d'or s'applique - voir EquipmentItemViewModel.ShowBudget/

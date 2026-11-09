@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
@@ -36,6 +37,15 @@
                     <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
                                                   Command="{Binding IncrementExplorationDiceCommand}"/>
                 </Grid>
+                <!-- Dés supplémentaires détectés (maquette « Jet d'Exploration ») : pré-cochés, décochables ; ils
+                     changent le nombre de dés suggéré ci-dessus. -->
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExplorationDiceToggles}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="effects:EffectToggle">
+                            <effects:EffectToggleView/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasExplorationDiceCountWarning}">
                     <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
                            FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
@@ -69,6 +79,23 @@
                      ADDITIF du jet, indépendant du résultat éventuel des doublons/triplets ci-dessous
                      (IsExplorationResultStep) - toujours appliqué, même sans aucun résultat spécial. -->
                 <Label Text="{Binding BaselineWyrdstoneShardsFoundDisplay}" FontAttributes="Bold"/>
+
+                <!-- Relance ou ajustement d'un dé (Chasseur de Pierre Magique, Chercheur de Ressources) : le
+                     joueur choisit le dé, le second résultat reste ; « Annuler » rend l'ancien dé. -->
+                <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding ExplorationDieActions}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="effects:EffectActionRow">
+                            <effects:EffectActionRowView/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding ExplorationReminders}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="effects:EffectReminder">
+                            <effects:EffectReminderView/>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
             </VerticalStackLayout>
 
 </ContentView>

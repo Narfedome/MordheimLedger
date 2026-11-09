@@ -807,7 +807,8 @@ public partial class AppDatabase
             {
                 OfficialId = sk.Id,
                 Category = Enum.Parse<SkillCategory>(sk.Category),
-                Source = ContentSource.Official
+                Source = ContentSource.Official,
+                Effects = sk.Effects ?? new List<SkillEffect>()
             };
             skill.NameKey = await SeedTranslationAsync(sk.Name.En, sk.Name.Fr);
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);
@@ -905,7 +906,8 @@ public partial class AppDatabase
             {
                 OfficialId = sk.Id,
                 Category = Enum.Parse<SkillCategory>(sk.Category),
-                Source = ContentSource.Official
+                Source = ContentSource.Official,
+                Effects = sk.Effects ?? new List<SkillEffect>()
             };
             skill.NameKey = await SeedTranslationAsync(sk.Name.En, sk.Name.Fr);
             skill.DescriptionKey = sk.Description is null ? null : await SeedTranslationAsync(sk.Description.En, sk.Description.Fr);

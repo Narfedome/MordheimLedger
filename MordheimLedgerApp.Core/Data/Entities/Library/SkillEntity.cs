@@ -20,4 +20,9 @@ public class SkillEntity
 
     /// <summary>Comma-separated WarbandArchetype ids - see Skill.HatredTargetWarbandArchetypeIds.</summary>
     public string? HatredTargetWarbandArchetypeIds { get; set; }
+
+    /// <summary>Skill.Effects sérialisés (voir SkillEffectJson) - null = aucun effet. Une simple colonne
+    /// plutôt qu'une table enfant : la synchro du contenu officiel la recopie et l'empreinte telle quelle,
+    /// ses références passant déjà par OfficialId.</summary>
+    public string? EffectsJson { get; set; }
 }

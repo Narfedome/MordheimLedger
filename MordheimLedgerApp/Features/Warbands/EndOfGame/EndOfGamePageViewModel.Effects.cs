@@ -328,7 +328,9 @@ public partial class EndOfGamePageViewModel : IHaggleHost
 
     private void AddHaggleRow(ObservableCollection<HaggleRow> into, HaggleUsage usage, Func<IReadOnlyList<PurchaseSpot>> candidates)
     {
-        var row = new HaggleRow(usage, this, candidates, Loc);
+        // Un achat qui porte déjà le Marchandage d'un autre Héros n'est pas proposé (Core.Rules.OncePerPostBattleLedger).
+        var row = new HaggleRow(usage, this,
+            () => candidates().Where(spot => !_effectLedger.IsTakenByOther(spot.Id, usage.Effect.Key)).ToList(), Loc);
         into.Add(row);
         _haggleRows.Add(row);
     }

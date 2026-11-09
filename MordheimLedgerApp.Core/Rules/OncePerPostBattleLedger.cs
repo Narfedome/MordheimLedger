@@ -20,6 +20,12 @@ public sealed class OncePerPostBattleLedger
         return previous == location ? null : previous;
     }
 
+    /// <summary>Un emplacement ne reçoit qu'un seul effet de ce registre : deux Marchandages ne se cumulent pas sur
+    /// le même achat (chacun vaut pour « un objet », et le cumul ferait passer le prix sous son minimum). Vrai si
+    /// un autre effet que key occupe déjà location.</summary>
+    public bool IsTakenByOther(string location, string key) =>
+        _locationByKey.Any(p => p.Value == location && p.Key != key);
+
     /// <summary>Libère l'effet s'il est utilisé à location (annulation) - sans effet sinon.</summary>
     public void Release(string key, string location)
     {

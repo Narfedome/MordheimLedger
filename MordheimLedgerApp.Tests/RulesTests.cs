@@ -1942,6 +1942,18 @@ public class RulesTests
         Assert.Null(ledger.UsedAt("haggle"));
     }
 
+    /// <summary>Deux Marchandages (deux Héros) ne se cumulent pas sur le même achat.</summary>
+    [Fact]
+    public void Ledger_LocationHoldsASingleEffect()
+    {
+        var ledger = new OncePerPostBattleLedger();
+        ledger.Use("haggle:gunther", "pick:1");
+
+        Assert.True(ledger.IsTakenByOther("pick:1", "haggle:ulrike"));
+        Assert.False(ledger.IsTakenByOther("pick:1", "haggle:gunther"));
+        Assert.False(ledger.IsTakenByOther("pick:2", "haggle:ulrike"));
+    }
+
     // --- EffectValues -------------------------------------------------------------------------------
 
     [Theory]

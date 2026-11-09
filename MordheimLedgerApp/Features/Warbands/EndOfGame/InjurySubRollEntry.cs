@@ -71,7 +71,18 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
     [NotifyPropertyChangedFor(nameof(InjuryBranchSpecialRules))]
     [NotifyPropertyChangedFor(nameof(HasInjuryBranchSpecialRules))]
     [NotifyPropertyChangedFor(nameof(ShowSoldToThePits))]
+    [NotifyPropertyChangedFor(nameof(IsOutsidePitRerollRange))]
     private string manualRoll = string.Empty;
+
+    /// <summary>Relance d'un combat de gladiateur perdu (voir WarriorOutcomeRow/PopulateSoldToPitsRerollRoll,
+    /// seuls créateurs de cette clé de libellé) plutôt qu'un sous-jet "Blessures multiples"/une figurine.</summary>
+    public bool IsPitFightReroll => _labelKey == PitFightRerollLabelKey;
+
+    public const string PitFightRerollLabelKey = "EndOfGameSoldToPitsRerollLabel";
+
+    /// <summary>La règle habituelle ne garde que 11-35 pour cette relance ; tout résultat reste accepté
+    /// (décision utilisateur 2026-11-04 - simple avertissement, jamais un blocage).</summary>
+    public bool IsOutsidePitRerollRange => IsPitFightReroll && int.TryParse(ManualRoll, out var roll) && (roll < 11 || roll > 35);
 
     /// <summary>Même principe que WarriorOutcomeRow.RollError, posé uniquement par
     /// EndOfGamePageViewModel.Next si ce jet est encore vide/invalide à ce moment-là.</summary>
@@ -342,7 +353,7 @@ public partial class InjurySubRollEntry : ObservableObject, IPitFightOutcome
 
     private void PopulateSoldToPitsRerollRoll()
     {
-        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel", injuryCatalog: _injuryCatalog);
+        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: PitFightRerollLabelKey, injuryCatalog: _injuryCatalog);
         entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(EndsInDeath));
         SoldToPitsRerollRoll.Add(entry);
         OnPropertyChanged(nameof(HasSoldToPitsRerollRoll));

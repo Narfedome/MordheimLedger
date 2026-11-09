@@ -30,7 +30,7 @@
                                  ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe
                                  perd des figurines (HeadCount) plutôt que de passer Mort d'un coup. -->
                             <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
-                                   IsVisible="{Binding CurrentInjuryWarrior.IsDead}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.IsDeadFromInjuries}"
                                    TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
                         </Grid>
 

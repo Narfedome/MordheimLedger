@@ -28,9 +28,9 @@ public partial class EndOfGamePageViewModel
         : string.Format(Loc["EndOfGameRecapRareItemFormat"], e.HeroName, e.SelectedItem?.Name,
             (e.EffectiveCost ?? 0) - HaggleSavingsAt(RareSpotId(RareItemSearchEntries.IndexOf(e)))));
 
-    public bool HasDramatisPersonaeRecap => DramatisPersonaUpkeepEntries.Any(e => e.WillPay.HasValue);
+    public bool HasDramatisPersonaeRecap => LivingDramatisPersonaUpkeepEntries.Any(e => e.WillPay.HasValue);
 
-    public IEnumerable<string> DramatisPersonaeRecapLines => DramatisPersonaUpkeepEntries.Where(e => e.WillPay.HasValue)
+    public IEnumerable<string> DramatisPersonaeRecapLines => LivingDramatisPersonaUpkeepEntries.Where(e => e.WillPay.HasValue)
         .Select(e => string.Format(e.WillPay == true ? Loc["EndOfGameRecapPaidFormat"] : Loc["EndOfGameRecapDismissedFormat"], e.DisplayName, e.UpkeepCostDisplay));
 
     /// <summary>Corruption/Rétention/Duel sont mutuellement exclusifs (voir EndOfGamePageViewModel.
@@ -48,13 +48,13 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    public bool HasHiredSwordsRecap => HiredSwordUpkeepEntries.Any(e => e.WillPay.HasValue || e.IsPrepaidFree) || SelectedNewHiredSword is not null;
+    public bool HasHiredSwordsRecap => LivingHiredSwordUpkeepEntries.Any(e => e.WillPay.HasValue || e.IsPrepaidFree) || SelectedNewHiredSword is not null;
 
     public IEnumerable<string> HiredSwordsRecapLines
     {
         get
         {
-            foreach (var entry in HiredSwordUpkeepEntries.Where(e => e.WillPay.HasValue || e.IsPrepaidFree))
+            foreach (var entry in LivingHiredSwordUpkeepEntries.Where(e => e.WillPay.HasValue || e.IsPrepaidFree))
                 yield return entry.IsPrepaidFree
                     ? string.Format(Loc["EndOfGameRecapHiredSwordPrepaidFormat"], entry.DisplayName)
                     : string.Format(entry.WillPay == true ? Loc["EndOfGameRecapPaidFormat"] : Loc["EndOfGameRecapDismissedFormat"], entry.DisplayName, entry.UpkeepCost);
@@ -74,7 +74,7 @@ public partial class EndOfGamePageViewModel
 
     public IEnumerable<string> EquipmentTradingSoldRecapLines => PendingSales.Select(c => c.SoldLabel);
 
-    public bool HasRecruitmentRecap => RecruitedHeroRows.Any() || RecruitedHenchmanRows.Any() || ExistingHenchmanTopUps.Any(t => t.AddCount > 0)
+    public bool HasRecruitmentRecap => RecruitedHeroRows.Any() || RecruitedHenchmanRows.Any() || LivingHenchmanTopUps.Any(t => t.AddCount > 0)
         || ExplorationJoinedHeadCount > 0;
 
     /// <summary>Hommes de main gagnés à l'Exploration (Zombies offerts, prisonnier équipé) - absents du récap
@@ -95,7 +95,7 @@ public partial class EndOfGamePageViewModel
     public IEnumerable<string> RecruitedHenchmenRecapLines => RecruitedHenchmanRows.SelectMany(r => r.HenchmanGroupDrafts)
         .Select(g => string.Format(Loc["EndOfGameRecapHenchmanGroupFormat"], g.Name, g.Count));
 
-    public IEnumerable<string> VeteranTopUpsRecapLines => ExistingHenchmanTopUps.Where(t => t.AddCount > 0)
+    public IEnumerable<string> VeteranTopUpsRecapLines => LivingHenchmanTopUps.Where(t => t.AddCount > 0)
         .Select(t => string.Format(Loc["EndOfGameRecapVeteranTopUpFormat"], t.Name, t.AddCount));
 
     /// <summary>Aperçu de la Valeur de Bande APRÈS cette Fin de Partie (livre, étape 10 - "Update your
@@ -116,7 +116,7 @@ public partial class EndOfGamePageViewModel
                 var experience = row.Warrior.Experience + row.ExperienceGained + row.SeriousInjuryBonusExperience + row.ExplorationBonusExperience;
                 total += WarbandRatingRules.WarriorContribution(row.Warrior.IsLargeCreature, experience, headCount, row.Warrior.HiredSwordBaseRating, row.Warrior.DramatisPersonaRatingBonus);
             }
-            foreach (var topUp in ExistingHenchmanTopUps.Where(t => t.AddCount > 0))
+            foreach (var topUp in LivingHenchmanTopUps.Where(t => t.AddCount > 0))
                 total += WarbandRatingRules.WarriorContribution(false, topUp.GroupExperience, topUp.AddCount, null);
             foreach (var slot in RecruitedHeroRows.SelectMany(r => r.NameSlots))
                 total += WarbandRatingRules.WarriorContribution(slot.Row.Archetype.IsLargeCreature, slot.Row.Archetype.StartingExperience, 1, null);
@@ -131,7 +131,7 @@ public partial class EndOfGamePageViewModel
             // prisonnier équipé prend celle du groupe qu'il rejoint.
             if (ExplorationFreeHenchmanCount > 0 && ResolvedFreeHenchman is { } freeHenchman)
             {
-                var joinedGroup = WarriorRows.FirstOrDefault(r => !r.Warrior.IsHero && r.Warrior.WarriorArchetypeId == freeHenchman.Id);
+                var joinedGroup = LivingWarriorRows.FirstOrDefault(r => !r.Warrior.IsHero && r.Warrior.WarriorArchetypeId == freeHenchman.Id);
                 var experience = joinedGroup is null ? freeHenchman.StartingExperience : GroupExperienceAfterBattle(joinedGroup);
                 total += WarbandRatingRules.WarriorContribution(freeHenchman.IsLargeCreature, experience, ExplorationFreeHenchmanCount, null);
             }

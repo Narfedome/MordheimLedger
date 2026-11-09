@@ -230,7 +230,7 @@ public partial class RareItemSearchEntry : ObservableObject
     /// Purchase step (WantsToBuy) rather than automatically here. False (not null) once HasResult is true
     /// and the roll falls short - IsVisible bindings in XAML key off HasResult, not this, to tell "no
     /// result yet" apart from "found nothing".</summary>
-    public bool IsSuccess => HasResult && TotalRoll >= EffectiveRarity;
+    public bool IsSuccess => Hero.CanSearchRareItems && HasResult && TotalRoll >= EffectiveRarity;
 
     public string ResultDisplay => !HasResult
         ? string.Empty
@@ -373,7 +373,7 @@ public partial class RareItemSearchEntry : ObservableObject
     /// ICI : ce jet compare l'écart de Valeur avec le PROCHAIN adversaire, qui n'est pas encore connu à la
     /// fin de la partie courante (voir DramatisPersona.RequiresRatingDisadvantage) - un futur flux "Début
     /// de partie" en sera responsable, pas ce wizard de Fin de Partie.</summary>
-    public bool IsCharacterFound => HasCharacterResult && CharacterTotalRoll < CharacterInitiative;
+    public bool IsCharacterFound => Hero.CanSearchRareItems && HasCharacterResult && CharacterTotalRoll < CharacterInitiative;
 
     /// <summary>Same generic "Trouvé !"/"Introuvable" wording as ResultDisplay (Rare Item search) - the
     /// phrasing doesn't name what was being searched for either way, so it reads correctly for both.</summary>

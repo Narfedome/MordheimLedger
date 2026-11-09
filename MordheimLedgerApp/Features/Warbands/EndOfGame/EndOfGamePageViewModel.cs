@@ -205,6 +205,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // d'étape plutôt que de compter sur une notification par saisie.
         NotifyTreasuryChanged();
         NotifyWyrdstoneFoundThisGameChanged();
+        SyncPostInjuryDeaths();
+        NotifyRosterChanged();
         if (Current.Kind == StepKind.InjuryRecap) OnPropertyChanged(nameof(InjuryRecapLines));
     }
 
@@ -257,8 +259,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         - (SelectedEquippedHenchmanGroupOption?.EquipmentCost ?? 0)
         - RareItemPurchaseTotalCost
         - (SelectedNewHiredSword?.HireCost ?? 0)
-        - HiredSwordUpkeepEntries.Where(e => e.WillPay == true).Sum(e => e.UpkeepCost)
-        - DramatisPersonaUpkeepEntries.Where(e => e.WillPay == true && !e.IsWyrdstoneFee).Sum(e => e.UpkeepCost)
+        - LivingHiredSwordUpkeepEntries.Where(e => e.WillPay == true).Sum(e => e.UpkeepCost)
+        - LivingDramatisPersonaUpkeepEntries.Where(e => e.WillPay == true && !e.IsWyrdstoneFee).Sum(e => e.UpkeepCost)
         - PairPaymentAmountCommitted
         - HeroRecruitRows.Sum(r => r.Count * r.Cost)
         - HeroEquipmentTotalCost()
@@ -614,8 +616,12 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// WarbandDetailViewModel.Henchmen (voir sa doc), nécessaire au pipeline Apply*Async (ex. fusionner
     /// une trouvaille de Traînard/Prisonniers/"Tué et transformé en Zombie" dans un groupe déjà existant
     /// plutôt que d'en créer un nouveau) - même instantané figé pré-bataille que Henchmen l'était côté
-    /// WarbandDetailViewModel avant ce refactor (chargé une fois, jamais republié en cours de wizard).</summary>
-    private IEnumerable<WarriorRow> Henchmen => _allActiveWarriorRows.Where(r => !r.Warrior.IsHero && !r.Warrior.IsHiredSword && !r.Warrior.IsDramatisPersona);
+    /// WarbandDetailViewModel avant ce refactor (chargé une fois, jamais republié en cours de wizard).
+    /// Exclut un groupe entièrement mort cette bataille (supprimé à Terminer) : une recrue gratuite crée
+    /// alors un nouveau groupe plutôt que de rejoindre - et hériter de l'XP/l'équipement - d'un groupe
+    /// disparu (voir EndOfGamePageViewModel.Roster.cs).</summary>
+    private IEnumerable<WarriorRow> Henchmen => _allActiveWarriorRows.Where(r => !r.Warrior.IsHero && !r.Warrior.IsHiredSword && !r.Warrior.IsDramatisPersona
+        && !IsDeadThisBattle(r.Warrior));
 
     partial void OnWarbandIdChanged(int value) => _ = InitializeAsync(value);
 
@@ -647,6 +653,13 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         ResultOptions.Add(Loc["EndOfGameResultDefeat"]);
         ResultOptions.Add(Loc["EndOfGameResultDraw"]);
         SelectedResult = ResultOptions[0];
+
+        // Morts décidées après l'étape Blessure (Fosse, duel) - voir EndOfGamePageViewModel.Roster.cs.
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(PitDevouredHero) or nameof(WantsDuel) or nameof(WonDuel))
+                SyncPostInjuryDeaths();
+        };
     }
 
     /// <summary>Reconstruit tout l'état du wizard depuis WarbandId seul (Shell [QueryProperty], voir
@@ -991,6 +1004,11 @@ public partial class EndOfGamePageViewModel : BaseViewModel
                     OnPropertyChanged(nameof(StepLabel));
                     OnPropertyChanged(nameof(IsLastStep));
                 }
+
+                // Roster d'après-bataille (EndOfGamePageViewModel.Roster.cs) : une mort (ou un retour en
+                // arrière qui l'annule) se répercute sur toutes les étapes suivantes.
+                if (e.PropertyName == nameof(WarriorOutcomeRow.IsDead))
+                    OnWarriorDeathStateChanged(row);
 
                 // Répartition d'Expérience entre Héros (Prisonniers, Possédés) : DistributedExperienceRemaining
                 // s'appuie sur la somme des DistributedExplorationExperience de chaque Héros, un objet

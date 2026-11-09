@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.EquipmentItemView"
@@ -95,13 +95,24 @@
                                 <Setter Property="Opacity" Value="0.5"/>
                             </DataTrigger>
                         </Border.Triggers>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                         Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
-                         CommandParameter="{Binding .}"/>
-                        </Border.GestureRecognizers>
                         <Grid Style="{StaticResource CodexTileFrameStyle}">
-                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                            <!-- Zone de tap de la tuile : un calque de fond FRÈRE du contenu, plus un
+                                 TapGestureRecognizer posé sur le Border parent. Posé sur le parent, il
+                                 recevait aussi les taps des boutons -/+/info de la tuile (le tap remonte
+                                 aux ancêtres) : "-" à 1 exemplaire passait la tuile à 0 puis le tap de la
+                                 tuile la resélectionnait aussitôt (retour utilisateur 2026-11-04). Un frère
+                                 n'est jamais un ancêtre des boutons, donc ne reçoit plus que les taps hors
+                                 boutons ; icône et libellés sont InputTransparent pour laisser passer
+                                 les leurs jusqu'à ce calque. -->
+                            <Grid BackgroundColor="Transparent">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                 Command="{Binding Source={x:Reference root}, Path=BindingContext.SelectCommand}"
+                                 CommandParameter="{Binding .}"/>
+                                </Grid.GestureRecognizers>
+                            </Grid>
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center" VerticalOptions="Center"
+                                                 InputTransparent="True" CascadeInputTransparent="False">
                                 <!-- Une ligne de plus (porteurs) : espacement resserré pour que le compteur tienne encore
                                      dans la tuile quand le nom passe sur deux lignes. -->
                                 <VerticalStackLayout.Triggers>
@@ -109,7 +120,7 @@
                                         <Setter Property="Spacing" Value="1"/>
                                     </DataTrigger>
                                 </VerticalStackLayout.Triggers>
-                                <components:LibraryItemImageView
+                                <components:LibraryItemImageView InputTransparent="True"
                              ImagePath="{Binding Item.ImagePath}"
                              DefaultGlyph="{Binding CategoryIcon}"
                              FontFamily="{Binding CategoryIconFont}"
@@ -118,16 +129,16 @@
                                 <!-- NameDisplay (pas Item.Name) : suffixé du matériau pour une tuile
                                      Réserve dont le stock en a un (ex. "Épée (Ornée)") - retour
                                      utilisateur 2026-09-21. -->
-                                <Label Text="{Binding NameDisplay}"
+                                <Label Text="{Binding NameDisplay}" InputTransparent="True"
                                 Style="{StaticResource CodexTileNameLabelStyle}"
                                 HorizontalOptions="Center"
                                 HorizontalTextAlignment="Center"
                                 Margin="5,0"/>
-                                <Label Text="{Binding CostDisplay}"
+                                <Label Text="{Binding CostDisplay}" InputTransparent="True"
                                 Style="{StaticResource CodexTileSecondaryLabelStyle}"/>
                                 <!-- Qui peut la porter (achat pour la Réserve, armes et armures seulement) ; éclair =
                                      ouverte par une compétence (Entraînement aux Armes...). -->
-                                <HorizontalStackLayout Spacing="3" HorizontalOptions="Center" IsVisible="{Binding HasCarriers}" Margin="4,0">
+                                <HorizontalStackLayout Spacing="3" HorizontalOptions="Center" IsVisible="{Binding HasCarriers}" Margin="4,0" InputTransparent="True">
                                     <Label Text="{x:Static icons:SolidFont.Bolt}" FontFamily="FontSolid" FontSize="9"
                                            TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"
                                            IsVisible="{Binding CarriersOpenedBySkill}"/>
@@ -149,6 +160,7 @@
                                      CanDecrement pour l'effectif des Hommes de main à l'étape Guerriers,
                                      voir BoolToOpacityConverter. -->
                                 <HorizontalStackLayout Spacing="2" HorizontalOptions="Center"
+                                        InputTransparent="True" CascadeInputTransparent="False"
                                         IsVisible="{Binding Source={x:Reference root}, Path=BindingContext.ShowQuantityStepper}">
                                     <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
                                                  Icon="{x:Static icons:SolidFont.Minus}"
@@ -157,7 +169,7 @@
                                                  InputTransparent="{Binding CanDecrement, Converter={StaticResource InverseBoolConverter}}"
                                                  Command="{Binding Source={x:Reference root}, Path=BindingContext.DecrementQuantityCommand}"
                                                  CommandParameter="{Binding .}"/>
-                                    <Label Text="{Binding Quantity}" FontSize="10" VerticalOptions="Center"
+                                    <Label Text="{Binding Quantity}" FontSize="10" VerticalOptions="Center" InputTransparent="True"
                                            WidthRequest="12" HorizontalTextAlignment="Center"/>
                                     <!-- "+" grisé une fois ReserveAvailable atteint pour une tuile Réserve
                                          (row.CanIncrement) - jamais de plafond pour un achat normal, où

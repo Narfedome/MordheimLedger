@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1306,6 +1306,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="HistoryInjurySentence" xml:space="preserve">
     <value>{0} a été mis hors de combat : {1}</value>
   </data>
+  <data name="HistorySoldToPitsRerollSentence" xml:space="preserve">
+    <value>{0}, relance après sa défaite aux Fosses : {1}</value>
+  </data>
   <data name="HistoryHenchmanDeathSentence" xml:space="preserve">
     <value>{0} perd {1} figurine(s), {2} restante(s).</value>
   </data>
@@ -1652,7 +1655,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Défaite : relance sur la même table</value>
   </data>
   <data name="EndOfGameSoldToPitsRerollHint" xml:space="preserve">
-    <value>Le livre ne garde que 11-35 pour cette relance - saisie libre, non vérifiée.</value>
+    <value>La règle habituelle ne garde que 11-35 pour cette relance, mais tout résultat est accepté.</value>
+  </data>
+  <data name="EndOfGameSoldToPitsRerollOutOfRangeWarning" xml:space="preserve">
+    <value>Hors de la plage 11-35 de la règle habituelle - résultat accepté quand même.</value>
   </data>
   <data name="EndOfGameSoldToPitsRerollLabel" xml:space="preserve">
     <value>Nouveau jet</value>
@@ -3076,4 +3082,4 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EquipmentOutOfListWarning" xml:space="preserve">
     <value>{0} : hors de la liste d'équipement de {1}.</value>
   </data>
-</root>
+</root>

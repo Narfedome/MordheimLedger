@@ -822,7 +822,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             // n'achète que dans sa liste, rien du Trading Post hors liste). Mode Libre (bande déjà jouée
             // sur papier) : tout le catalogue, objets rares/artefacts trouvés en campagne compris.
             var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost,
-                destination.Any(p => p.Item.IsFreeDagger), equipmentListOnly: !IsExistingWarband, unrestricted: IsExistingWarband);
+                destination.Any(p => p.Item.IsFreeDagger), equipmentListOnly: !IsExistingWarband, unrestricted: IsExistingWarband,
+                allowQuantity: target is not HenchmanGroupDraft);
             if (items.Count == 0) return;
 
             // Matériau (corps à corps) et bénédiction (toute arme) - Tout normal / tap à l'extérieur du

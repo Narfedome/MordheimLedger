@@ -54,7 +54,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     /// <summary>Un guerrier mort (étape Blessure) ou qui ne gagne jamais d'XP n'a rien à faire à
     /// l'étape Expérience - retiré de la liste plutôt que juste grisé/désactivé.</summary>
-    public bool ShowsInExperienceStep => !IsDead && GainsExperience;
+    public bool ShowsInExperienceStep => !IsDeadFromInjuries && GainsExperience;
 
     /// <summary>Saisie libre du PX gagné cette partie (scénario + survie + bonus outsider - non calculé,
     /// voir la doc de classe d'EndOfGamePageViewModel) - texte plutôt qu'int pour que le champ parte
@@ -128,6 +128,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// à cocher IsOutOfAction pour un Héros.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsOutOfAction))]
+    [NotifyPropertyChangedFor(nameof(CanSearchRareItems))]
     [NotifyPropertyChangedFor(nameof(OutOfActionLabel))]
     private int outOfActionCount;
 
@@ -725,7 +726,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     private void PopulateSoldToPitsRerollRoll()
     {
-        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: "EndOfGameSoldToPitsRerollLabel", injuryCatalog: _injuryCatalog);
+        var entry = new InjurySubRollEntry(1, 1, isHero: true, labelKey: InjurySubRollEntry.PitFightRerollLabelKey, injuryCatalog: _injuryCatalog);
         entry.PropertyChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(SummaryText));
@@ -755,6 +756,8 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SummaryText))]
     [NotifyPropertyChangedFor(nameof(IsDead))]
+    [NotifyPropertyChangedFor(nameof(IsDeadFromInjuries))]
+    [NotifyPropertyChangedFor(nameof(IsDeadBeforeDuel))]
     [NotifyPropertyChangedFor(nameof(ShowsInExperienceStep))]
     private string selectedStatusLabel = string.Empty;
 
@@ -765,10 +768,43 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// combat de gladiateur perdu dont la relance est mortelle (InjurySubRollEntry.EndsInDeath), et pour un
     /// groupe d'Hommes de main, toutes ses figurines mortes sur leur D6. Bug corrigé le 2026-09-28 (retour
     /// utilisateur) : ces morts-là n'étaient constatées qu'à Terminer, le guerrier restait donc éligible à
-    /// l'XP, au renvoi, au recrutement... pendant tout le wizard.</summary>
-    public bool IsDead => Status == WarriorStatus.Dead
+    /// l'XP, au renvoi, au recrutement... pendant tout le wizard.
+    ///
+    /// Depuis le 2026-11-04 (retour utilisateur - roster d'après-bataille unique, voir
+    /// EndOfGamePageViewModel.Roster.cs) : aussi les deux morts décidées APRÈS l'étape Blessure, Héros
+    /// dévoré dans la Fosse (IsKilledByExploration) et chef de bande vaincu en duel par Ulli &amp; Marquand
+    /// (IsKilledInDuel) - jusque-là constatées seulement à Terminer, le guerrier restait renvoyable,
+    /// rééquipable, vendable... Une étape PLACÉE AVANT la cause de la mort lit IsDeadFromInjuries (ou
+    /// IsDeadBeforeDuel) plutôt que IsDead : sa présence dans Steps ne doit pas changer après coup (StepIndex
+    /// est un simple entier, une étape antérieure qui disparaît décalerait l'étape courante).</summary>
+    public bool IsDead => IsDeadFromInjuries || IsKilledByExploration || IsKilledInDuel;
+
+    /// <summary>Mort décidée à l'étape Blessure seule (jet principal, sous-jets, Capturé, Fosses aux
+    /// gladiateurs, figurines d'un groupe) - voir IsDead pour la mort tous motifs confondus.</summary>
+    public bool IsDeadFromInjuries => Status == WarriorStatus.Dead
         || (Warrior.IsHero && (MainRollEndsInDeath || MultipleInjuryRolls.Any(s => s.EndsInDeath)))
         || (!Warrior.IsHero && HeadCount > 0 && FigureDeathCount >= HeadCount);
+
+    /// <summary>Mort avant l'étape Une Poignée d'Or/Duel : Blessures puis Exploration.</summary>
+    public bool IsDeadBeforeDuel => IsDeadFromInjuries || IsKilledByExploration;
+
+    /// <summary>Héros envoyé dans la Fosse et dévoré (Exploration, voir EndOfGamePageViewModel.
+    /// PitDevouredHero) - posé/retiré en direct par EndOfGamePageViewModel.SyncPostInjuryDeaths.</summary>
+    [ObservableProperty]
+    private bool isKilledByExploration;
+
+    /// <summary>Chef de bande vaincu en duel par Ulli &amp; Marquand (EndOfGamePageViewModel.WantsDuel sans
+    /// WonDuel) - posé/retiré en direct par EndOfGamePageViewModel.SyncPostInjuryDeaths.</summary>
+    [ObservableProperty]
+    private bool isKilledInDuel;
+
+    partial void OnIsKilledByExplorationChanged(bool value) => NotifyDeathStateChanged();
+
+    /// <summary>Héros pouvant chercher un objet rare : ni Hors de combat cette bataille (livre), ni dévoré
+    /// dans la Fosse à l'Exploration, qui précède les Objets rares.</summary>
+    public bool CanSearchRareItems => !IsOutOfAction && !IsKilledByExploration;
+
+    partial void OnIsKilledInDuelChanged(bool value) => NotifyDeathStateChanged();
 
     /// <summary>Capturé non racheté ou défaite aux Fosses avec relance mortelle, sur le jet principal - même
     /// conditions que ApplyWarriorOutcomesAsync. La Mort pure du jet principal passe, elle, par Status.</summary>
@@ -814,6 +850,11 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     private void NotifyDeathStateChanged()
     {
         OnPropertyChanged(nameof(IsDead));
+        OnPropertyChanged(nameof(IsDeadFromInjuries));
+        OnPropertyChanged(nameof(IsDeadBeforeDuel));
+        OnPropertyChanged(nameof(CanSearchRareItems));
+        OnPropertyChanged(nameof(SummaryText));
+        OnPropertyChanged(nameof(LosesAllEquipment));
         OnPropertyChanged(nameof(ShowsInExperienceStep));
         OnPropertyChanged(nameof(CanBeDismissed));
         OnPropertyChanged(nameof(FigureDeathCount));
@@ -852,7 +893,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// SeriousInjuryBonusExperience depuis le 2026-09-04 (voir sa doc) en plus d'ExperienceGained.</summary>
     public int MilestoneCount => ExperienceMilestones.MilestonesCrossedCount(Warrior.IsHero, Warrior.Experience,
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience);
-    public bool HasMilestone => GainsExperience && !IsDead && MilestoneCount > 0;
+    public bool HasMilestone => GainsExperience && !IsDeadFromInjuries && MilestoneCount > 0;
 
     /// <summary>Paliers franchis UNIQUEMENT par l'XP accordée en Exploration (ExplorationBonusExperience),
     /// comptés à partir du point où l'étape Progression normale s'est déjà arrêtée (Warrior.Experience +
@@ -869,7 +910,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience,
         Warrior.Experience + ExperienceGained + SeriousInjuryBonusExperience + ExplorationBonusExperience);
 
-    public bool HasExplorationMilestone => GainsExperience && !IsDead && ExplorationMilestoneCount > 0;
+    public bool HasExplorationMilestone => GainsExperience && !IsDeadBeforeDuel && ExplorationMilestoneCount > 0;
 
     /// <summary>Héros et Hommes de main utilisent deux tables de Blessures Graves totalement
     /// différentes (D66 vs D6, voir SeriousInjuryTable/HenchmanInjuryTable) - ce placeholder garde la
@@ -883,15 +924,18 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         get
         {
             var parts = new List<string>();
-            if (ExperienceGained != 0) parts.Add($"+{ExperienceGained} PX");
+            // Un mort de cette bataille ne gagne ni XP ni Progression (voir ApplyWarriorOutcomesAsync) - ne
+            // pas les annoncer dans le récap.
+            if (ExperienceGained != 0 && !IsDead) parts.Add($"+{ExperienceGained} PX");
             if (Status != Warrior.Status) parts.Add(SelectedStatusLabel);
+            else if (IsKilledByExploration || IsKilledInDuel) parts.Add(_loc["EndOfGameDeadLabel"]);
             if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(ResolvedInjuryText);
             foreach (var sub in MultipleInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(sub.InjuryResultText)) parts.Add(sub.InjuryResultText);
             foreach (var figure in FigureInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(figure.InjuryResultText)) parts.Add(figure.InjuryResultText);
             if (HasHatredTarget) parts.Add(string.Format(_loc["WarriorsHatredChipFormat"], HatredTargetDisplayName));
-            foreach (var advance in AdvanceRolls.Concat(ExplorationAdvanceRolls))
+            foreach (var advance in IsDead ? [] : AdvanceRolls.Concat(ExplorationAdvanceRolls))
             {
                 if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
                 else if (advance.HasSpellSelected) parts.Add(advance.SelectedSpell!.Name);

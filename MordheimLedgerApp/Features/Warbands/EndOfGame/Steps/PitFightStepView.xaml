@@ -143,6 +143,13 @@
                                     <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                            IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
                                     <Label Text="{Binding InjuryResultText}" FontSize="12"/>
+                                    <!-- Hors 11-35 : avertissement ambre, jamais un blocage (même rendu que
+                                         les avertissements d'Exploration). -->
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding IsOutsidePitRerollRange}">
+                                        <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                               FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                                        <Label Grid.Column="1" Text="{loc:Loc EndOfGameSoldToPitsRerollOutOfRangeWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                                    </Grid>
 
                                     <!-- Sous-jet imbriqué : cette relance tombe elle-même sur 35
                                          (Blessure profonde). -->

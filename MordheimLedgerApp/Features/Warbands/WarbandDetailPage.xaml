@@ -278,9 +278,12 @@
                 <!-- Masqué entièrement si vide, comme l'était l'ancienne section dépliable du roster
                      (voir Models.WarbandEquipment) - rien à réattribuer tant qu'aucun objet n'a été
                      trouvé (ex. étape Exploration du wizard Fin de Partie). -->
+                <!-- Icône seule sur téléphone : avec "Lancer la partie" à côté, le libellé laissait si peu
+                     de place au titre qu'un nom de bande ordinaire se coupait en plein mot. -->
                 <components:IconTextButton IsVisible="{Binding HasInventory}"
                                             Icon="{x:Static icons:SolidFont.BoxOpen}"
                                             Text="{loc:Loc InventoryHeading}"
+                                            ShowText="{OnIdiom Phone=False, Default=True}"
                                             TextColor="{DynamicResource AppAccent}"
                                             Command="{Binding ShowInventoryCommand}">
                     <components:IconTextButton.Behaviors>
@@ -323,7 +326,9 @@
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
-                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0} '}"/>
+                        <!-- Espace dans son propre Span : une espace finale dans StringFormat est perdue ("138CO"). -->
+                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0}'}"/>
+                        <Span Text=" "/>
                         <Span Text="{loc:Loc LibGoldCrownsAbbr}"/>
                         <Span Text=" · "/>
                         <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>

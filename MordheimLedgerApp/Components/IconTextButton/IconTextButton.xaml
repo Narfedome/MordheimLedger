@@ -45,6 +45,7 @@
                FontSize="{Binding Source={x:Reference root}, Path=FontSize}"
                TextColor="{Binding Source={x:Reference root}, Path=TextColor}"
                LineBreakMode="TailTruncation"
+               IsVisible="{Binding Source={x:Reference root}, Path=ShowText}"
                MaximumWidthRequest="{Binding Source={x:Reference root}, Path=TextMaximumWidth}"
                VerticalOptions="Center"/>
     </HorizontalStackLayout>

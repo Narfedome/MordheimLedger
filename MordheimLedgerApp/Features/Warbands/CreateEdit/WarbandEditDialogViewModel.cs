@@ -97,6 +97,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(RosterCountDisplay))]
         [NotifyPropertyChangedFor(nameof(RemainingTreasuryDisplay))]
+        [NotifyPropertyChangedFor(nameof(RosterStartingTreasury))]
         private WarbandArchetype? archetype;
 
         [ObservableProperty]
@@ -157,6 +158,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// est engagé : lecture seule de toute la bande avant Enregistrer (RecapLines).</summary>
         public bool IsRecapTab => IsWizardMode && SelectedTab == StepCount - 1;
 
+        /// <summary>"Nom — Rôle", ou le nom seul quand le guerrier n'a pas été nommé et porte donc déjà
+        /// le nom de son rôle (évite "Noble Nain — Noble Nain" dans le récapitulatif).</summary>
+        private static string WithRole(string name, string role, string suffix = "")
+            => string.Equals(name, role, StringComparison.CurrentCultureIgnoreCase)
+                ? $"{name}{suffix}"
+                : $"{name}{suffix} — {role}";
+
         public string RecapTitle => Archetype is null ? Item.Name : $"{Item.Name} — {Archetype.Name}";
 
         /// <summary>Mode Libre uniquement - Warband n'est pas observable, d'où une propriété du ViewModel
@@ -188,13 +196,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                     foreach (var slot in row.NameSlots)
                     {
                         var name = string.IsNullOrWhiteSpace(slot.Name) ? slot.DisplayLabel : slot.Name.Trim();
-                        lines.Add(new WarbandRecapLine($"{name} — {row.Archetype.Name}", RecapSlotDetails(slot)));
+                        lines.Add(new WarbandRecapLine(WithRole(name, row.Archetype.Name), RecapSlotDetails(slot)));
                     }
                     foreach (var group in row.HenchmanGroupDrafts)
-                        lines.Add(new WarbandRecapLine($"{group.Name.Trim()} ({group.Count}×) — {row.Archetype.Name}", RecapSlotDetails(group)));
+                        lines.Add(new WarbandRecapLine(WithRole(group.Name.Trim(), row.Archetype.Name, $" ({group.Count}×)"), RecapSlotDetails(group)));
                 }
                 foreach (var hiredSword in RecruitedHiredSwordRows)
-                    lines.Add(new WarbandRecapLine($"{hiredSword.Name.Trim()} — {hiredSword.HiredSword.Name}", string.Empty));
+                    lines.Add(new WarbandRecapLine(WithRole(hiredSword.Name.Trim(), hiredSword.HiredSword.Name), string.Empty));
                 return lines;
             }
         }

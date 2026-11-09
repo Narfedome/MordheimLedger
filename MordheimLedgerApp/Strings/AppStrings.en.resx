@@ -1109,7 +1109,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Discard changes?</value>
   </data>
   <data name="DialogDiscardChangesMessage" xml:space="preserve">
-    <value>Your changes in this dialog have not been saved and will be lost.</value>
+    <value>Your changes in this window have not been saved and will be lost.</value>
   </data>
   <data name="EndOfGameResultPh" xml:space="preserve">
     <value>Result</value>
@@ -2390,7 +2390,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Shadow &amp; Gold</value>
   </data>
   <data name="WarbandArchetype" xml:space="preserve">
-    <value>Archetype</value>
+    <value>Warband type</value>
   </data>
   <data name="WarbandCreateTitle" xml:space="preserve">
     <value>New warband</value>
@@ -2639,7 +2639,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Experience</value>
   </data>
   <data name="TourDetailCardXpBody" xml:space="preserve">
-    <value>The paper sheet's experience track: gold-bordered boxes mark the advance thresholds.</value>
+    <value>The paper sheet's experience track: thick-bordered boxes mark the advance thresholds.</value>
   </data>
   <data name="TourCodexIntroTitle" xml:space="preserve">
     <value>The Codex</value>
@@ -3081,5 +3081,8 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   </data>
   <data name="EquipmentOutOfListWarning" xml:space="preserve">
     <value>{0}: outside {1}'s equipment list.</value>
+  </data>
+  <data name="WarbandArchetypeSelectSingleTitle" xml:space="preserve">
+    <value>Select a warband</value>
   </data>
 </root>

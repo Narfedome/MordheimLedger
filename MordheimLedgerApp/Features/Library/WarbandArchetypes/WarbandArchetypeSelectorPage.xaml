@@ -12,7 +12,8 @@
 
     <!-- Poussée nue (pas de NavigationPage, voir WarbandArchetypePickerService) - voir
          PickerSelectorLayout pour le pourquoi. -->
-    <picker:PickerSelectorLayout Title="{loc:Loc WarbandArchetypeSelectTitle}" BackCommand="{Binding CancelCommand}">
+    <!-- Titre posé par le code-behind selon SelectionMode (une bande / plusieurs bandes). -->
+    <picker:PickerSelectorLayout x:Name="PickerLayout" Title="{loc:Loc WarbandArchetypeSelectTitle}" BackCommand="{Binding CancelCommand}">
         <local:WarbandArchetypeView IsCrud="False"/>
     </picker:PickerSelectorLayout>
 </ContentPage>

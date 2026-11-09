@@ -70,6 +70,16 @@ public partial class IconTextButton : ContentView
         set => SetValue(TextMaximumWidthProperty, value);
     }
 
+    /// <summary>False = icône seule (le texte n'est pas affiché et ne prend aucune place), ex. bouton
+    /// Inventaire de l'en-tête de fiche de bande sur téléphone, pour laisser la largeur au titre.</summary>
+    public static readonly BindableProperty ShowTextProperty =
+        BindableProperty.Create(nameof(ShowText), typeof(bool), typeof(IconTextButton), true);
+    public bool ShowText
+    {
+        get => (bool)GetValue(ShowTextProperty);
+        set => SetValue(ShowTextProperty, value);
+    }
+
     public static readonly BindableProperty FontSizeProperty =
         // Cf. ChannelVolumeSliderView.xaml.cs : Resources["AppFontSizeBase"] renverrait l'objet
         // OnIdiom<double> brut (pas resolu) via un simple acces dictionnaire C#.

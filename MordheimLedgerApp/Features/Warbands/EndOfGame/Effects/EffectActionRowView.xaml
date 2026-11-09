@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Effects.EffectActionRowView"
+             x:DataType="effects:EffectActionRow">
+    <!-- Usage unique sur un jet (maquettes « Blessure grave », « Jet d'Exploration ») : bouton « Relancer » /
+         « Ajuster » ; une fois utilisé, ce qui a changé et un lien d'annulation. -->
+    <Border Style="{StaticResource ChipBorderStyle}" Padding="12,8" Stroke="{DynamicResource AppAccent}">
+        <VerticalStackLayout Spacing="4">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.Bolt}" FontFamily="FontSolid" FontSize="14"
+                       TextColor="{DynamicResource AppAccent}" VerticalOptions="Center"/>
+                <VerticalStackLayout Grid.Column="1" Spacing="0" VerticalOptions="Center">
+                    <Label Text="{Binding Title}" FontAttributes="Bold" TextColor="{DynamicResource AppText}"/>
+                    <Label Text="{Binding Description}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                           IsVisible="{Binding IsAvailable}"/>
+                    <Label Text="{Binding DoneText}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                           IsVisible="{Binding IsDone}"/>
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Text="{Binding ActionText}" Command="{Binding ActCommand}"
+                        Style="{StaticResource DialogSecondaryButtonStyle}" VerticalOptions="Center"
+                        IsVisible="{Binding IsAvailable}"/>
+                <Label Grid.Column="2" Text="{Binding UndoText}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                       TextDecorations="Underline" VerticalOptions="Center" IsVisible="{Binding IsDone}">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding UndoCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasWarning}">
+                <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                       FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                <Label Grid.Column="1" Text="{Binding Warning}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

@@ -1028,4 +1028,47 @@ public class DataServiceTests : IClassFixture<SeededDatabaseFixture>
         var trollSlayer = (await _library.GetWarriorArchetypesAsync(dwarfs.Id, "en")).Single(w => w.Name == "Troll Slayer");
         Assert.Equal([SkillCategory.Combat, SkillCategory.Strength, SkillCategory.Special], trollSlayer.AllowedSkillCategories);
     }
+
+    // --- Effets de compétences (Skill.Effects) du seed ---
+
+    [Fact]
+    public async Task Seed_LoadsSkillEffects()
+    {
+        var skills = (await _library.GetSkillsAsync("en")).Where(s => s.OfficialId is not null).ToDictionary(s => s.OfficialId!);
+
+        var streetwise = Assert.Single(skills["skill.academic.streetwise"].Effects);
+        Assert.Equal(EffectMoment.RareItemSearch, streetwise.Moment);
+        Assert.Equal(2, EffectValues.ParseAmount(streetwise.Value));
+
+        var haggle = Assert.Single(skills["skill.academic.haggle"].Effects);
+        Assert.Equal((EffectKind.Discount, "2D6", 1, EffectFrequency.OncePerPostBattle), (haggle.Kind, haggle.Value, haggle.MinimumPrice, haggle.Frequency));
+
+        Assert.Equal(["MissileWeapon"], Assert.Single(skills["skill.shooting.weapons-expert"].Effects).Targets);
+        Assert.Equal(EffectKind.Reroll, Assert.Single(skills["skill.special.extra-tough"].Effects).Kind);
+        Assert.Equal(2, skills["skill.academic.arcane-lore"].Effects.Count);
+        Assert.Empty(skills["skill.combat.step-aside"].Effects);
+    }
+
+    /// <summary>Toute cible d'effet (OfficialId ou nom d'enum) doit désigner quelque chose qui existe :
+    /// une coquille dans un JSON de seed ne serait sinon jamais détectée.</summary>
+    [Fact]
+    public async Task Seed_EffectTargetsAllResolve()
+    {
+        var known = new HashSet<string>();
+        known.UnionWith((await _library.GetWarbandArchetypesAsync("en")).Select(a => a.OfficialId!).Where(id => id is not null));
+        known.UnionWith((await _library.GetEquipmentItemsAsync("en")).Select(i => i.OfficialId!).Where(id => id is not null));
+        known.UnionWith((await _library.GetMagicSchoolsAsync("en")).Select(s => s.OfficialId!).Where(id => id is not null));
+        var skills = await _library.GetSkillsAsync("en");
+        known.UnionWith(skills.Select(s => s.OfficialId!).Where(id => id is not null));
+        foreach (var warband in await _library.GetWarbandArchetypesAsync("en"))
+            known.UnionWith((await _library.GetWarriorArchetypesAsync(warband.Id, "en")).Select(w => w.OfficialId!).Where(id => id is not null));
+        known.UnionWith(Enum.GetNames<EquipmentCategory>());
+        known.UnionWith(Enum.GetNames<SkillCategory>());
+        known.UnionWith(Enum.GetNames<CharacteristicField>());
+
+        var unknown = skills.SelectMany(s => s.Effects.SelectMany(e => e.Targets.Concat(e.ConditionTargets)).Select(t => $"{s.OfficialId}: {t}"))
+            .Where(t => !known.Contains(t[(t.IndexOf(": ", StringComparison.Ordinal) + 2)..]))
+            .ToList();
+        Assert.Empty(unknown);
+    }
 }

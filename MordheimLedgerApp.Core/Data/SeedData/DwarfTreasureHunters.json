@@ -105,7 +105,10 @@
         "en": "May re-roll the Heroes Serious Injury roll once, the second result stands.",
         "fr": "Peut relancer une fois son jet de Blessure Grave, le second résultat est définitif."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "effects": [
+        { "moment": "SeriousInjuryRoll", "kind": "Reroll", "value": "1", "frequency": "OncePerPostBattle" }
+      ]
     },
     {
       "id": "skill.special.resource-hunter",
@@ -118,7 +121,10 @@
         "en": "+1 or -1 to one Exploration roll.",
         "fr": "+1 ou -1 sur un jet d'Exploration."
       },
-      "restrictedToThisWarband": true
+      "restrictedToThisWarband": true,
+      "effects": [
+        { "moment": "ExplorationRoll", "kind": "AdjustDie", "value": "1", "condition": "NotDead", "frequency": "OncePerPostBattle" }
+      ]
     },
     {
       "id": "skill.special.true-grit",

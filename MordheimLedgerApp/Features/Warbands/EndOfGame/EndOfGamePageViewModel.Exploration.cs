@@ -42,8 +42,7 @@ public partial class EndOfGamePageViewModel
     /// écartez-en un au choix" - un dé physique en trop que le joueur écarte lui-même avant de saisir ses
     /// valeurs finales, donc le nombre de dés GARDÉS (ExplorationDiceCount) ne change pas du tout ; seul
     /// un rappel textuel a du sens ici (voir ShowPendingExplorationBonusDieReminder plus bas).</summary>
-    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame,
-        ExplorationDiceBonus.EffectiveBonusDice(WarriorRows.Where(r => !r.IsOutOfAction).Select(r => r.Warrior)));
+    public int ExplorationDiceCount => ExplorationChart.ComputeDiceCount(SurvivingHeroCount, WonLastGame, ExplorationBonusDice);
 
     /// <summary>Nombre de dés choisi par le joueur avec les boutons -/+ (null = celui du livre,
     /// ExplorationDiceCount). Depuis le 2026-10-26 le calcul du livre n'est plus qu'une suggestion : une
@@ -164,7 +163,7 @@ public partial class EndOfGamePageViewModel
 
     public bool ShowSentHeroPicker => TriggeredExplorationResult?.RequiresSentHero == true;
 
-    public List<WarriorOutcomeRow> SentHeroEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+    public List<WarriorOutcomeRow> SentHeroEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries).ToList();
 
     /// <summary>Wraps the Picker's actual items - a leading "Passer son chemin" pseudo-option (Hero
     /// null) followed by every eligible Hero. Retour explicite de l'utilisateur : un Picker vide/placeholder
@@ -514,7 +513,7 @@ public partial class EndOfGamePageViewModel
     /// Equipment), répliqué tel quel pour le nouveau membre.</summary>
     public List<EquippedHenchmanGroupOption> EquippedHenchmanGroupOptions =>
         new List<EquippedHenchmanGroupOption> { new(Loc["EndOfGameDoNotRecruitOption"], null, 0) }
-            .Concat(WarriorRows.Where(r => !r.IsHero && !r.IsDead).Select(r =>
+            .Concat(WarriorRows.Where(r => !r.IsHero && !r.IsDeadFromInjuries).Select(r =>
                 new EquippedHenchmanGroupOption($"{r.ArchetypeName} (x{r.HeadCount}) — {EquippedHenchmanGroupCost(r)} CO", r, EquippedHenchmanGroupCost(r))))
             .ToList();
 
@@ -585,7 +584,7 @@ public partial class EndOfGamePageViewModel
     /// bénir ici.</summary>
     public List<WeaponBlessingOption> WeaponBlessingOptions =>
         new List<WeaponBlessingOption> { new(Loc["EndOfGameDoNotBlessOption"], null, null) }
-            .Concat(WarriorRows.Where(r => r.IsHero && !r.IsDead)
+            .Concat(WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries)
                 .SelectMany(hero => hero.Warrior.Equipment
                     .Where(e => e.Item.Category is EquipmentCategory.MeleeWeapon or EquipmentCategory.MissileWeapon or EquipmentCategory.BlackPowderWeapon)
                     .Select(e => new WeaponBlessingOption($"{hero.Name} — {e.NameDisplay}", hero, e))))
@@ -637,7 +636,7 @@ public partial class EndOfGamePageViewModel
 
     public bool HasDistributedHeroExperienceGrant => ResolvedExplorationOutcome?.GrantsDistributedHeroExperienceFormula is not null;
 
-    public List<WarriorOutcomeRow> DistributedExperienceEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+    public List<WarriorOutcomeRow> DistributedExperienceEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries).ToList();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DistributedExperienceRemaining))]
@@ -792,7 +791,7 @@ public partial class EndOfGamePageViewModel
     // (AutoPassStatTestWarbandArchetypeOfficialIds, voir StatTestAutoPasses).
     public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
 
-    public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDead).ToList();
+    public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries).ToList();
 
     /// <summary>Wraps the Picker's actual items - même idiome que SentHeroOptions (voir sa doc) : un
     /// "Aucun" pseudo-choix en premier (Hero null) plutôt qu'un Picker vide/placeholder, retour
@@ -972,7 +971,7 @@ public partial class EndOfGamePageViewModel
     /// <summary>Null si le chef n'est pas dans WarriorRows (mort/malade cette partie, voir
     /// activeWarriorRows côté WarbandDetailViewModel.EndOfGame) - le test est alors simplement
     /// indisponible plutôt qu'une erreur bloquante, personne ne peut commander à sa place.</summary>
-    public WarriorOutcomeRow? BonusStatTestLeader => WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+    public WarriorOutcomeRow? BonusStatTestLeader => WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader && !r.IsDeadFromInjuries);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(BonusStatTestOutcome))]
@@ -1293,7 +1292,7 @@ public partial class EndOfGamePageViewModel
         // n'est pas disponible cette partie (mort/malade/hors de combat), même idiome que
         // BonusStatTestLeader/GrantsLeaderExperience côté sauvegarde (WarbandDetailViewModel.EndOfGame).
         if (outcome.GrantsLeaderExperience is { } leaderXp
-            && WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader) is { } leaderRow)
+            && WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader && !r.IsDeadFromInjuries) is { } leaderRow)
             leaderRow.LeaderExplorationExperience = leaderXp;
     }
 

@@ -1,7 +1,9 @@
+using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
+using MordheimLedgerApp.Core.Models;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Library.EquipmentItems;
-using MordheimLedgerApp.Components.Dialogs;
 
 namespace MordheimLedgerApp.Services;
 
@@ -49,11 +51,17 @@ public interface IEquipmentPickerService
     /// used by WarbandEditDialogViewModel's rules-applied mode (warband creation buys from the equipment
     /// list only, user request 2026-09-24). unrestricted: true ignores every warband/list/warrior filter
     /// (the whole catalog, artefacts included) - used by the same dialog's free "existing warband" mode, to
-    /// record a warband already played on paper whatever it found along the way.</summary>
+    /// record a warband already played on paper whatever it found along the way. allowQuantity: false hides
+    /// the per-tile -/+ quantity stepper (see EquipmentItemViewModel.AllowQuantity) - a Henchman group buys
+    /// one kit per model, never several copies of the same item (user request 2026-11-04). forWarrior: the warrior
+    /// the items are bought for (WarriorEditDialogViewModel.AddEquipment) - list-scoped items his skills open
+    /// beyond his equipment list (Weapons Training...) then show in their own "Opened by ..." group, see
+    /// EquipmentItemViewModel.ForWarrior and Core.Rules.EquipmentEligibility.</summary>
     Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true, bool equipmentListOnly = false, bool unrestricted = false);
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true, bool equipmentListOnly = false, bool unrestricted = false, bool allowQuantity = true,
+        Warrior? forWarrior = null, IReadOnlyList<EquipmentCarrier>? carriers = null);
 
     /// <summary>Dédié à l'étape "Objets rares" (EndOfGamePageViewModel.RareItems.cs) - contrairement à
     /// PickEquipmentAsync, renvoie aussi le MaterialRule choisi (2026-09-23, retour utilisateur - "on
@@ -82,7 +90,8 @@ public class EquipmentPickerService : IEquipmentPickerService
     public async Task<IReadOnlyList<EquipmentItem>> PickEquipmentAsync(int warbandArchetypeId, int? equipmentListId = null, int? warriorArchetypeId = null,
         int? availableGold = null, int unitCount = 1, bool alreadyHasFreeDagger = false, EquipmentCategory? lockedCategory = null, bool singleSelect = false,
         bool rareSearchMode = false, HashSet<int>? allowedEquipmentListItemIds = null, bool commonOnly = false,
-        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true, bool equipmentListOnly = false, bool unrestricted = false)
+        IReadOnlyDictionary<int, (int Quantity, SpecialRule? MaterialRule)>? reserveQuantities = null, bool allowCreate = true, bool equipmentListOnly = false, bool unrestricted = false, bool allowQuantity = true,
+        Warrior? forWarrior = null, IReadOnlyList<EquipmentCarrier>? carriers = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<EquipmentItem>>();
 
@@ -111,6 +120,9 @@ public class EquipmentPickerService : IEquipmentPickerService
         viewModel.CommonOnly = commonOnly;
         viewModel.ReserveQuantities = reserveQuantities;
         viewModel.AllowCreate = allowCreate;
+        viewModel.AllowQuantity = allowQuantity;
+        viewModel.ForWarrior = forWarrior;
+        viewModel.Carriers = carriers;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi (un
         // NavigationPage déjà au sommet de la pile modale absorbait le push modal suivant, ex. une
         // dialog imbriquée depuis ce sélecteur, au lieu de l'empiler correctement).

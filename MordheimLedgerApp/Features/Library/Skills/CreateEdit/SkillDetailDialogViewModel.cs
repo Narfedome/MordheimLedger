@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Features.Library.Skills.Effects;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components;
 using MordheimLedgerApp.Components.Dialogs;
@@ -21,8 +22,13 @@ public partial class SkillDetailDialogViewModel : ReadOnlyDialogViewModel
     /// WarbandRestrictionDisplay.HeaderTextFor.</summary>
     public string RestrictedWarbandsHeaderText { get; }
 
+    /// <summary>Section Effets en lecture seule (maquette « Récap Sorcellerie ») - masquée sans effet.</summary>
+    public List<SkillEffectRow> EffectRows { get; }
+    public bool HasEffects => EffectRows.Count > 0;
+
     public SkillDetailDialogViewModel(Skill item, string categoryLabel,
-        List<WarbandArchetype> restrictedWarbands, List<WarbandArchetype> allWarbandArchetypes, List<WarriorArchetype> restrictedWarriors)
+        List<WarbandArchetype> restrictedWarbands, List<WarbandArchetype> allWarbandArchetypes, List<WarriorArchetype> restrictedWarriors,
+        SkillEffectNames effectNames)
     {
         Item = item;
         Title = item.Name;
@@ -30,6 +36,7 @@ public partial class SkillDetailDialogViewModel : ReadOnlyDialogViewModel
         RestrictedWarbands = WarbandRestrictionDisplay.DisplayedFor(restrictedWarbands, allWarbandArchetypes);
         RestrictedWarbandsHeaderText = WarbandRestrictionDisplay.HeaderTextFor(restrictedWarbands, allWarbandArchetypes);
         RestrictedWarriors = restrictedWarriors;
+        EffectRows = item.Effects.Select(e => new SkillEffectRow(e, effectNames)).ToList();
     }
 
     [RelayCommand]

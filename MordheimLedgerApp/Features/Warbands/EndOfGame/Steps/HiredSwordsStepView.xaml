@@ -14,7 +14,7 @@
             <VerticalStackLayout Spacing="12">
                 <Label Text="{loc:Loc EndOfGameHiredSwordsHeading}" FontAttributes="Bold"/>
 
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding HiredSwordUpkeepEntries}" Spacing="8"
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding LivingHiredSwordUpkeepEntries}" Spacing="8"
                                       IsVisible="{Binding HasHiredSwordUpkeep}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="local:HiredSwordUpkeepEntry">

@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
@@ -29,7 +30,7 @@
                                  ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe
                                  perd des figurines (HeadCount) plutôt que de passer Mort d'un coup. -->
                             <Label Grid.Column="2" Text="{loc:Loc EndOfGameDeadLabel}"
-                                   IsVisible="{Binding CurrentInjuryWarrior.IsDead}"
+                                   IsVisible="{Binding CurrentInjuryWarrior.IsDeadFromInjuries}"
                                    TextColor="{DynamicResource AppDanger}" FontAttributes="Bold"/>
                         </Grid>
 
@@ -54,6 +55,15 @@
                             <Label Text="{Binding CurrentInjuryWarrior.RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                    IsVisible="{Binding CurrentInjuryWarrior.RollError, Converter={StaticResource IsNotNullConverter}}"/>
                             <Label Text="{Binding CurrentInjuryWarrior.InjuryResultText}" FontSize="12"/>
+                            <!-- Relance du jet (maquette « Blessure grave » : Increvable) ; « Annuler la relance » rend
+                                 le premier jet. -->
+                            <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding CurrentInjuryWarrior.InjuryEffectActions}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="effects:EffectActionRow">
+                                        <effects:EffectActionRowView/>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
 
                             <!-- Résultat "Blessures multiples" (16/21) : 1D6 pour savoir combien de
                                  sous-jets faire sur cette même table, puis un jet D66 par sous-jet. -->

@@ -137,7 +137,7 @@ public partial class EndOfGamePageViewModel
                 // Traînard, branche Possédés - même idiome que BonusStatTestLeader (Bâtiment Éventré) :
                 // pas d'erreur bloquante si le chef n'est pas disponible cette partie (mort/malade/hors
                 // de combat), le bonus est simplement indisponible.
-                var leader = _allActiveWarriorRows.FirstOrDefault(r => r.Warrior.IsLeader);
+                var leader = SurvivingLeader;
                 if (leader is not null)
                 {
                     leader.Warrior.Experience += leaderXp;

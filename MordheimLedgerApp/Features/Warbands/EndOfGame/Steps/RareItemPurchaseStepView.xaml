@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
+             xmlns:effects="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame.Effects"
              xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
@@ -92,6 +93,16 @@
                                         </Grid>
                                         <Label Text="{Binding PriceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                IsVisible="{Binding PriceRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                        <!-- Marchandage (maquette « Achat avec Marchandage ») : seulement si l'objet est acheté. -->
+                                        <VerticalStackLayout Spacing="6" IsVisible="{Binding WantsToBuy}">
+                                            <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding HaggleRows}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="effects:HaggleRow">
+                                                        <effects:HaggleRowView/>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </Border>

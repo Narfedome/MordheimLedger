@@ -326,9 +326,10 @@
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
+                        <!-- Espace dans son propre Span : une espace finale dans StringFormat est perdue ("138CO"). -->
                         <Span Text="{Binding Warband.Treasury, StringFormat=' {0}'}"/>
                         <Span Text=" "/>
-                        <Span Text="{loc:Loc WarbandsGoldUnit}"/>
+                        <Span Text="{loc:Loc LibGoldCrownsAbbr}"/>
                         <Span Text=" · "/>
                         <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
                         <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>

@@ -130,14 +130,15 @@ public partial class RareItemSearchEntry : ObservableObject
     public void SetBonusEffects(IEnumerable<ActiveEffect> effects)
     {
         HasBonusEffects = true;
-        var previousOn = BonusToggles.ToDictionary(t => t.Effect.Key, t => t.IsOn);
+        // Garde la case du joueur, sauf si la condition de l'effet a changé depuis (état par défaut alors).
+        var previousOn = BonusToggles.ToDictionary(t => t.Effect.Key, t => (t.IsOn, t.Effect.ConditionMet));
         foreach (var old in BonusToggles) old.Changed -= NotifyBonusChanged;
         BonusToggles.Clear();
         foreach (var effect in effects)
         {
             var amount = EffectValues.ParseAmount(effect.Effect.Value);
             var toggle = new EffectToggle(effect, amount, EffectValues.FormatModifier(amount), _loc);
-            if (previousOn.TryGetValue(effect.Key, out var wasOn)) toggle.IsOn = wasOn;
+            if (previousOn.TryGetValue(effect.Key, out var was) && was.ConditionMet == effect.ConditionMet) toggle.IsOn = was.IsOn;
             toggle.Changed += NotifyBonusChanged;
             BonusToggles.Add(toggle);
         }

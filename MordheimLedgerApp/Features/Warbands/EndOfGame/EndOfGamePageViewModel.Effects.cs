@@ -179,8 +179,9 @@ public partial class EndOfGamePageViewModel : IHaggleHost
         if (_explorationEffectsPrepared && signature == _explorationEffectsSignature) return;
         _explorationEffectsPrepared = true;
         _explorationEffectsSignature = signature;
-        // Reconstruction : un bonus déjà vu garde la case que le joueur lui avait laissée.
-        var previousOn = ExplorationDiceToggles.ToDictionary(t => t.Effect.Key, t => t.IsOn);
+        // Reconstruction : un bonus déjà vu garde la case que le joueur lui avait laissée, sauf si sa condition a
+        // changé entre-temps (porteur mis hors de combat...) - la case reprend alors l'état par défaut.
+        var previousOn = ExplorationDiceToggles.ToDictionary(t => t.Effect.Key, t => (t.IsOn, t.Effect.ConditionMet));
         ExplorationDiceToggles.Clear();
         ExplorationDieActions.Clear();
         ExplorationReminders.Clear();
@@ -190,7 +191,7 @@ public partial class EndOfGamePageViewModel : IHaggleHost
         {
             var count = EffectValues.ParseCount(effect.Effect.Value);
             var toggle = new EffectToggle(effect, count, ExtraDieText(count, Loc), Loc);
-            if (previousOn.TryGetValue(effect.Key, out var wasOn)) toggle.IsOn = wasOn;
+            if (previousOn.TryGetValue(effect.Key, out var was) && was.ConditionMet == effect.ConditionMet) toggle.IsOn = was.IsOn;
             toggle.Changed += () =>
             {
                 OnPropertyChanged(nameof(ExplorationDiceCount));
@@ -313,7 +314,7 @@ public partial class EndOfGamePageViewModel : IHaggleHost
             {
                 var spotId = RareSpotId(i);
                 AddHaggleRow(RareItemSearchEntries[i].HaggleRows, usage,
-                    () => ResolvePurchaseSpot(spotId) is { } spot ? [spot] : []);
+                    () => ResolvePurchaseSpot(spotId) is { } spot ? new[] { spot } : Array.Empty<PurchaseSpot>());
             }
             AddHaggleRow(ReserveHaggleRows, usage, () => SpotsFor(PurchasedReserveItems));
             AddHaggleRow(RecruitHaggleRows, usage, () => SpotsFor(RecruitPicks()));

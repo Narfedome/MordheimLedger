@@ -190,6 +190,8 @@ ambre par puce, `ChipListView` ne la gère pas). Pas fait : filtre « Équipable
 l'équiper » du récap d'objet (maquettes, non demandés). Reste à faire : libellé de la colonne `EffectsJson` dans l'écran
 des conflits de synchro.
 
+**Formulaires en pages (branche `feature/form-pages`, 2026-11-10)** : revient sur le choix d'août (éditions en dialogs) - décision de l'utilisateur sur le canevas « Refonte dialogs et Fin de partie » (claude.ai) : tout formulaire de création/modification devient une page Shell plein écran, les dialogs (centrés) ne gardent que questions, choix et consultations. Gabarit `Components/FormPage/` : `FormPageLayout` (en-tête ✕/titre/sous-titre/étape + barre de progression, zone fixe `TopContent` pour des onglets, contenu seul à défiler, pied à 2 boutons ; `Content` assigné explicitement dans son XAML, sinon son `[ContentProperty(Body)]` imbrique la grille dans elle-même - boucle de mise en page, appli figée), `FormContent<T>` (pendant de `DialogContent`), `FormPage` + `FormNavigator` (`ShowFormAsync`, même contrat que `ShowDialogAsync`, le ViewModel reste un `DialogViewModel` : Annuler/✕/retour Android ne confirment que s'il y a des modifications). Barre d'onglets laissée visible (décision). Convertis : création/modification de bande (`WarbandEditForm`) et guerrier (`WarriorEditForm`) ; restent à convertir les éditions du Codex. Maquettes : pied Précédent/Suivant, abandon par ✕.
+
 **Perf de navigation (branche `feature/navigation-perf`, 2026-11-03)** : mesuré sur Android (Release), la fiche de
 bande passait ~4,9 s à construire des vues jamais affichées. Règles retenues : un composant ne crée pas ses éléments
 optionnels tant qu'ils ne servent pas (`LazyIconButton` pour les boutons ⇄/✕/« + » des puces, image de fond de

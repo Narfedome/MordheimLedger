@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+             x:Class="MordheimLedgerApp.Components.FormPage.FormPageLayout"
+             x:Name="root">
+    <!-- Gabarit commun des formulaires plein écran (création/modification, maquette « Refonte dialogs et Fin
+         de partie ») : en-tête fixe (✕, titre, sous-titre, étape, actions), barre de progression facultative,
+         contenu seul à défiler, pied fixe à 2 boutons. Largeur plafonnée sur Windows, centrée par le Fill par
+         défaut (voir la mémoire « MaximumWidthRequest+Center ») plutôt qu'un HorizontalOptions explicite. -->
+    <!-- Content explicite : [ContentProperty(Body)] de la classe s'appliquerait sinon à cette grille racine
+         elle-même, qui se retrouverait imbriquée dans sa propre zone de contenu (boucle de mise en page). -->
+    <ContentView.Content>
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto" MaximumWidthRequest="{OnIdiom Desktop=720, Default=100000}">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="4" Padding="4,8,12,0">
+            <components:FaIconButtonView Grid.Column="0" Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Xmark}"
+                                          IconSize="16" ButtonWidthRequest="44" ButtonHeightRequest="44"
+                                          Command="{Binding Source={x:Reference root}, Path=CloseCommand}"/>
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                <Label Text="{Binding Source={x:Reference root}, Path=Title}" Style="{StaticResource DialogTitleLabelStyle}"
+                       LineBreakMode="TailTruncation" MaxLines="1"/>
+                <Label Text="{Binding Source={x:Reference root}, Path=Subtitle}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                       LineBreakMode="TailTruncation" MaxLines="1"
+                       IsVisible="{Binding Source={x:Reference root}, Path=Subtitle, Converter={StaticResource StringNotEmptyConverter}}"/>
+            </VerticalStackLayout>
+            <ContentView Grid.Column="2" x:Name="HeaderActionsHost" VerticalOptions="Center"/>
+            <Label Grid.Column="3" x:Name="StepTextLabel" Text="{Binding Source={x:Reference root}, Path=StepText}" FontSize="12"
+                   TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"
+                   IsVisible="{Binding Source={x:Reference root}, Path=StepText, Converter={StaticResource StringNotEmptyConverter}}"/>
+        </Grid>
+
+        <ProgressBar Grid.Row="1" Margin="12,8,12,0" HeightRequest="4"
+                     Progress="{Binding Source={x:Reference root}, Path=Progress}"
+                     ProgressColor="{DynamicResource AppAccent}"
+                     IsVisible="{Binding Source={x:Reference root}, Path=HasProgress}"/>
+
+        <!-- Zone fixe sous l'en-tête (barre d'onglets d'un formulaire à onglets) : ne défile pas avec le contenu. -->
+        <ContentView Grid.Row="2" x:Name="TopContentHost" Padding="16,8,16,0"
+                     IsVisible="{Binding Source={x:Reference root}, Path=HasTopContent}"/>
+
+        <ScrollView Grid.Row="3" x:Name="BodyScroll">
+            <ContentView x:Name="BodyHost" Padding="16,12,16,16"/>
+        </ScrollView>
+
+        <Grid Grid.Row="4" RowDefinitions="Auto,Auto" BackgroundColor="{DynamicResource AppBackground}">
+            <BoxView Grid.Row="0" Style="{StaticResource ChapterDividerStyle}"/>
+            <Grid Grid.Row="1" x:Name="Footer" ColumnDefinitions="*,*" ColumnSpacing="10" Padding="16,10,16,12">
+                <Button Grid.Column="0" Style="{StaticResource DialogSecondaryButtonStyle}"
+                        Text="{Binding Source={x:Reference root}, Path=SecondaryText}"
+                        Command="{Binding Source={x:Reference root}, Path=SecondaryCommand}"
+                        IsEnabled="{Binding Source={x:Reference root}, Path=SecondaryEnabled}"/>
+                <Button Grid.Column="1"
+                        Text="{Binding Source={x:Reference root}, Path=PrimaryText}"
+                        Command="{Binding Source={x:Reference root}, Path=PrimaryCommand}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+    </ContentView.Content>
+</ContentView>

@@ -123,6 +123,23 @@
         <Setter Property="Padding" Value="{DynamicResource AppButtonPadding}"/>
         <Setter Property="MinimumHeightRequest" Value="{DynamicResource AppMinTouchTarget}"/>
         <Setter Property="MinimumWidthRequest" Value="{DynamicResource AppMinTouchTarget}"/>
+        <!-- Désactivé (Précédent à la première étape d'un assistant) : contour et texte estompés plutôt que le
+             fond gris plein natif, qui jurait avec le thème. -->
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal"/>
+                    <VisualState x:Name="Disabled">
+                        <VisualState.Setters>
+                            <Setter Property="BackgroundColor" Value="Transparent"/>
+                            <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
+                            <Setter Property="BorderColor" Value="{DynamicResource AppBorder}"/>
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
     </Style>
 
     <!-- Option button (choice list) for ActionSheetDialog -->

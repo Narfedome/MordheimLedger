@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:services="clr-namespace:MordheimLedgerApp.Services"
+               xmlns:onboarding="clr-namespace:Plugin.Maui.Onboarding"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.WarbandEditForm"
+               x:DataType="local:WarbandEditDialogViewModel">
+    <!-- Création (IsWizardMode) : pas à pas, Général→Guerriers→Équipement→Noms→Francs-Tireurs(→Noms des
+         Francs-Tireurs)→Récapitulatif, nom de l'étape en sous-titre et « Étape n/N » + barre de progression
+         dans l'en-tête, Précédent / Suivant dans le pied, ✕ pour abandonner. Modification d'une bande déjà
+         enregistrée : onglets libres en haut du contenu, Annuler / Enregistrer. Une Warband (instance jouée)
+         n'a pas sa propre copie des catalogues Règles/Magie/Équipement : elle référence ceux de son
+         WarbandArchetype (ShowArchetypeDetail ouvre sa fiche récap complète). -->
+    <form:FormPageLayout x:Name="FormLayout"
+                         Title="{Binding Title}"
+                         Subtitle="{Binding HeaderSubtitle}"
+                         StepText="{Binding HeaderStepText}"
+                         Progress="{Binding StepProgress}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{Binding SecondaryButtonText}"
+                         SecondaryCommand="{Binding SecondaryButtonCommand}"
+                         SecondaryEnabled="{Binding SecondaryButtonEnabled}"
+                         PrimaryText="{Binding PrimaryButtonText}"
+                         PrimaryCommand="{Binding PrimaryButtonCommand}">
+        <VerticalStackLayout Spacing="12">
+            <components:ScrollableTabStripView IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}">
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                         IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabWarriors}" Command="{Binding ShowWarriorsTabCommand}"
+                                         IsActive="{Binding IsWarriorsTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandCreateTabEquipment}" Command="{Binding ShowEquipmentTabCommand}"
+                                         IsActive="{Binding IsEquipmentTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandCreateTabNames}" Command="{Binding ShowWarriorNamesTabCommand}"
+                                         IsActive="{Binding IsWarriorNamesTab}" FontSize="12"/>
+                    <!-- Francs-Tireurs : disponible dès la toute première création de bande, pas seulement en
+                         Mode Libre. Leur nommage suit dans sa propre étape (IsHiredSwordNamesTab). -->
+                    <components:TabToggleButton Text="{loc:Loc LibTabHiredSwords}" Command="{Binding ShowMercenariesTabCommand}"
+                                         IsActive="{Binding IsMercenariesTab}" FontSize="12"/>
+                    <components:TabToggleButton Text="{loc:Loc WarbandCreateTabHiredSwordNames}" Command="{Binding ShowHiredSwordNamesTabCommand}"
+                                         IsActive="{Binding IsHiredSwordNamesTab}" FontSize="12"
+                                         IsVisible="{Binding HasRecruitedHiredSwords}"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
+
+            <!-- Général -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsGeneralTab}">
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{loc:Loc WarbandArchetypeNamePh}"/>
+                                        <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Entry Text="{Binding Item.Name}">
+                                <Entry.Behaviors>
+                                    <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardNameKey}"/>
+                                </Entry.Behaviors>
+                            </Entry>
+                            <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
+                        <!-- Mode Libre : trésorerie en saisie libre, aucun coût appliqué (recrutement, achats,
+                             édition du roster actuel) - pertinent aussi en édition d'une bande déjà sauvegardée. -->
+                        <HorizontalStackLayout Spacing="10">
+                            <HorizontalStackLayout.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardFreeModeKey}"/>
+                            </HorizontalStackLayout.Behaviors>
+                            <CheckBox IsChecked="{Binding IsExistingWarband}" VerticalOptions="Center"/>
+                            <Label Text="{loc:Loc WarbandsFreeModeLabel}" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="12">
+                        <!-- Ajouter/Retirer l'archétype masqués hors création (ArchetypeAddCommandOrNull/
+                             ArchetypeRemoveCommandOrNull renvoient null si !IsWizardMode) - en changer
+                             invaliderait les WarriorArchetypeId déjà liés aux guerriers recrutés. La puce reste
+                             tapable (récap complet) dans les deux cas. -->
+                        <components:ChipItemView Item="{Binding Archetype}"
+                                        HeaderText="{loc:Loc WarbandArchetype}"
+                                        IconGlyph="{x:Static icons:SolidFont.Users}"
+                                        Command="{Binding ShowArchetypeDetailCommand}"
+                                        AddCommand="{Binding ArchetypeAddCommandOrNull}"
+                                        RemoveCommand="{Binding ArchetypeRemoveCommandOrNull}"
+                                        IsMandatory="True">
+                            <components:ChipItemView.Behaviors>
+                                <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardArchetypeKey}"/>
+                            </components:ChipItemView.Behaviors>
+                        </components:ChipItemView>
+                        <Label Text="{Binding ArchetypeError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding Archetype, Converter={StaticResource IsNotNullConverter}}">
+                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <!-- RosterStartingTreasury : trésor de départ théorique de l'archétype à la
+                                     création, trésorerie RÉELLE actuelle de la bande en édition (Item.Treasury). -->
+                                <Label Text="{Binding RosterStartingTreasury}" FontAttributes="Bold"
+                                       IsVisible="{Binding IsExistingWarband, Converter={StaticResource InverseBoolConverter}}"/>
+                                <Entry Text="{Binding TreasuryOverride}" Keyboard="Numeric" IsVisible="{Binding IsExistingWarband}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="{loc:Loc WarbandArchetypeMinWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{Binding Archetype.MinWarriors}" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                <Label Text="{loc:Loc WarbandArchetypeMaxWarriorsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Label Text="{Binding Archetype.MaxWarriors}" FontAttributes="Bold"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                        <!-- Mode Libre : stock de pierres magiques déjà détenu par une bande jouée sur papier. -->
+                        <VerticalStackLayout Spacing="4" IsVisible="{Binding IsExistingWarband}">
+                            <Label Text="{loc:Loc WarbandWyrdstoneShardsPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Entry Text="{Binding Item.WyrdstoneShards}" Keyboard="Numeric" WidthRequest="100" HorizontalOptions="Start"/>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Guerriers -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsWarriorsTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <Grid ColumnDefinitions="*,Auto">
+                    <Grid.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardBudgetKey}"/>
+                    </Grid.Behaviors>
+                    <Label Grid.Column="0" Text="{Binding RosterCountDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Label Grid.Column="1" Text="{Binding RemainingTreasuryDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <components:WarriorRecruitListView ItemsSource="{Binding RecruitRows}"
+                                      HeaderText="{loc:Loc WarbandArchetypeTabWarriors}"
+                                      DetailCommand="{Binding ShowWarriorDetailCommand}"
+                                      IncrementCommand="{Binding IncrementWarriorCommand}"
+                                      DecrementCommand="{Binding DecrementWarriorCommand}">
+                        <components:WarriorRecruitListView.Behaviors>
+                            <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardRecruitsKey}"/>
+                        </components:WarriorRecruitListView.Behaviors>
+                    </components:WarriorRecruitListView>
+                </Border>
+                <Label Text="{Binding WarriorsError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding WarriorsError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <!-- Équipement : par sous-groupe nommé pour les Hommes de main (HenchmanGroupDraft, même
+                 équipement au sein d'un groupe - livre des règles), par individu pour les Héros (une carte par
+                 WarriorNameSlot). Les commandes remontent au ViewModel de la page via RelativeSource
+                 AncestorType puisque le BindingContext local est la ligne/le groupe/le slot. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEquipmentTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                <Label Text="{Binding EquipmentError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding EquipmentError, Converter={StaticResource IsNotNullConverter}}"/>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="12">
+                    <VerticalStackLayout.Behaviors>
+                        <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardEquipmentKey}"/>
+                    </VerticalStackLayout.Behaviors>
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:WarriorRecruitRow">
+                            <VerticalStackLayout Spacing="12">
+                                <!-- Hommes de main : un ou plusieurs HenchmanGroupDraft nommés - un seul par défaut
+                                     couvrant tout le Count de la ligne, « Diviser » en détache un second. -->
+                                <VerticalStackLayout Spacing="12" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}"
+                                                      BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:HenchmanGroupDraft">
+                                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                                <VerticalStackLayout Spacing="4">
+                                                    <!-- Nom en lecture seule ici (édité à l'étape Noms). -->
+                                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                                        <Label Grid.Column="0" Text="{Binding Name}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                                                        <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
+                                                               TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                                        <!-- Font Awesome n'a qu'un seul glyphe « split » (haut+gauche) - Rotation="-90"
+                                                             le tourne en « gauche+bas ». -->
+                                                        <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                      Icon="{x:Static icons:SolidFont.ArrowsSplitUpAndLeft}"
+                                                                                      Rotation="-90"
+                                                                                      Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
+                                                                                      IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                      IsVisible="{Binding CanSplit}"
+                                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
+                                                                                      CommandParameter="{Binding .}"/>
+                                                    </Grid>
+                                                    <components:RecruitSlotTabsView Item="{Binding .}"
+                                                          IsVisible="{Binding ShowTabsView}"
+                                                          AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                          RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
+                                                          ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                          AddSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
+                                                          RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"
+                                                          ShowSkillDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                          AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
+                                                          RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
+                                                          ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                          ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"
+                                                          AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddMutationCommand}"
+                                                          RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveMutationCommand}"
+                                                          ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowMutationDetailCommand}"
+                                                          AddInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddInjuryCommand}"
+                                                          RemoveInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveInjuryCommand}"
+                                                          ShowInjuryDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowInjuryDetailCommand}"/>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
+                                <!-- Héros : une carte par recrue nommée (DisplayLabel : type tant que l'étape Noms
+                                     n'est pas atteinte, ou nom personnel pour un héros déjà recruté). -->
+                                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding NameSlots}"
+                                                      IsVisible="{Binding IsHero}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="local:WarriorNameSlot">
+                                            <Border Style="{StaticResource SectionCardBorderStyle}">
+                                                <VerticalStackLayout Spacing="4">
+                                                    <Label Text="{Binding DisplayLabel}" FontSize="14" FontAttributes="Bold"/>
+                                                    <components:RecruitSlotTabsView Item="{Binding .}"
+                                                          IsVisible="{Binding ShowTabsView}"
+                                                          AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddEquipmentCommand}"
+                                                          RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveEquipmentCommand}"
+                                                          ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                          AddSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSkillCommand}"
+                                                          RemoveSkillCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSkillCommand}"
+                                                          ShowSkillDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                          AddSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddSpellCommand}"
+                                                          RemoveSpellCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveSpellCommand}"
+                                                          ShowSpellDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellDetailCommand}"
+                                                          ShowSpellRollDialogCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowSpellRollDialogCommand}"
+                                                          AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddMutationCommand}"
+                                                          RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveMutationCommand}"
+                                                          ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowMutationDetailCommand}"
+                                                          AddInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=AddInjuryCommand}"
+                                                          RemoveInjuryCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=RemoveInjuryCommand}"
+                                                          ShowInjuryDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarbandEditDialogViewModel}}, Path=ShowInjuryDetailCommand}"/>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Noms (Héros/Hommes de main) : une fois l'équipement connu. Pré-rempli par
+                 PopulateSuggestedNames, toujours éditable ici. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsWarriorNamesTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{loc:Loc WarriorsGroupHeroes}" FontSize="14" FontAttributes="Bold"/>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:WarriorRecruitRow">
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsHero}"
+                                                          BindableLayout.ItemsSource="{Binding NameSlots}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:WarriorNameSlot">
+                                                <VerticalStackLayout Spacing="2">
+                                                    <Entry Text="{Binding Name}" FontSize="14"/>
+                                                    <Label Text="{Binding EquipmentSummary}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                                           IsVisible="{Binding EquipmentSummary, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{loc:Loc WarriorsGroupHenchmen}" FontSize="14" FontAttributes="Bold"/>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedRows}" Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:WarriorRecruitRow">
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}"
+                                                          BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="local:HenchmanGroupDraft">
+                                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                                        <Entry Text="{Binding Name}" FontSize="14"/>
+                                                        <Label Text="{Binding EquipmentSummary}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"
+                                                               IsVisible="{Binding EquipmentSummary, Converter={StaticResource StringNotEmptyConverter}}"/>
+                                                    </VerticalStackLayout>
+                                                    <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
+                                                           TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="{Binding NamesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding NamesError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <!-- Francs-Tireurs : ne comptent jamais dans l'effectif/le plafond de la bande - juste une sélection
+                 via ChipListView + picker (« un seul de chaque type » garanti par le picker). Le nom se saisit à
+                 l'étape suivante. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsMercenariesTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <components:ChipListView HeaderText="{loc:Loc LibTabHiredSwords}"
+                                              ItemsSource="{Binding RecruitedHiredSwordRows}"
+                                              IconGlyph="{x:Static icons:SolidFont.UserGroup}"
+                                              Command="{Binding ShowHiredSwordDetailCommand}"
+                                              AddCommand="{Binding AddHiredSwordCommand}"
+                                              RemoveCommand="{Binding RemoveHiredSwordCommand}"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Noms (Francs-Tireurs) -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsHiredSwordNamesTab}">
+                <ActivityIndicator IsRunning="{Binding Loading.IsLoading}" IsVisible="{Binding Loading.IsLoading}"
+                                   HorizontalOptions="Center" WidthRequest="60" HeightRequest="60"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{loc:Loc LibTabHiredSwords}" FontSize="14" FontAttributes="Bold"/>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecruitedHiredSwordRows}" Spacing="8">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:HiredSwordRecruitRow">
+                                    <Entry Text="{Binding Name}" FontSize="14"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+                <Label Text="{Binding HiredSwordNamesError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                       IsVisible="{Binding HiredSwordNamesError, Converter={StaticResource IsNotNullConverter}}"/>
+            </VerticalStackLayout>
+
+            <!-- Récapitulatif (création pas à pas uniquement, dernière étape) : relecture de toute la bande avant
+                 Enregistrer, même esprit que le récap de la Fin de Partie. Lecture seule - Précédent pour corriger. -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsRecapTab}">
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding RecapTitle}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
+                        <Label Text="{Binding RemainingTreasuryDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding RosterCountDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding RecapRatingDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding RecapWyrdstoneDisplay}" FontSize="13" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsExistingWarband}"/>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecapLines}" Spacing="10">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="local:WarbandRecapLine">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding Title}" FontSize="14" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Details}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                           IsVisible="{Binding HasDetails}"/>
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

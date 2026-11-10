@@ -554,6 +554,24 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     public bool IsLastStep => StepIndex >= Steps.Count - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], StepIndex + 1, Steps.Count);
 
+    // --- En-tête et pied de la page (FormPageLayout, maquette « Refonte dialogs et Fin de partie ») ---------
+    // Pas de « Étape n/N » ni de barre de progression : le total varie selon les jets et les recrutements
+    // (retiré à la demande de l'utilisateur le 2026-09-22). ✕ = Exit (confirmation), pied Précédent / Suivant,
+    // Enregistrer à la dernière étape.
+    public string HeaderSubtitle => Warband?.Name ?? string.Empty;
+    public string PrimaryButtonText => IsLastStep ? Loc["BtnSave"] : Loc["LibNext"];
+    public System.Windows.Input.ICommand PrimaryButtonCommand => IsLastStep ? FinishCommand : NextCommand;
+
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(IsLastStep))
+        {
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(PrimaryButtonText)));
+            base.OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(PrimaryButtonCommand)));
+        }
+    }
+
     /// <summary>Coché "Sacrifié" seulement pour le Culte des Possédés (bande précise, pas la race
     /// "Humain du Chaos" qu'elle partage avec la Kermesse du Chaos) et "Tué (Zombie)" seulement pour les
     /// Morts-Vivants - comparé à l'id officiel de la bande jouée (_warbandArchetypeOfficialId).</summary>
@@ -686,6 +704,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             var data = await Task.Run(() => LoadEndOfGameDataAsync(warbandId, LocalizationService.Instance.Language));
             if (data is null) return;
             Warband = data.Warband;
+            OnPropertyChanged(nameof(HeaderSubtitle));
             var (explorationResults, localizedEquipment, equipmentItemsByOfficialId, specialRulesByOfficialId, skillIdsByOfficialId) =
                 (data.ExplorationResults, data.LocalizedEquipment, data.EquipmentItemsByOfficialId, data.SpecialRulesByOfficialId, data.SkillIdsByOfficialId);
             var (warbandArchetype, localizedWarriorArchetypes, warriorArchetypesByOfficialId, injuryCatalog, localizedHiredSwords) =

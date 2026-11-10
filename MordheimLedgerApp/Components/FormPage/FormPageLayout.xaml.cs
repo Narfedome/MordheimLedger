@@ -1,4 +1,5 @@
 using System.Windows.Input;
+using MordheimLedgerApp.Components;
 
 namespace MordheimLedgerApp.Components.FormPage;
 
@@ -12,7 +13,13 @@ public partial class FormPageLayout : ContentView
     public FormPageLayout()
     {
         InitializeComponent();
+        VerticalScrollHint.Attach(BodyScroll, DownHint);
     }
+
+    /// <summary>Voile + spinner par-dessus le contenu (chargement, changement d'étape).</summary>
+    public static readonly BindableProperty IsBusyProperty =
+        BindableProperty.Create(nameof(IsBusy), typeof(bool), typeof(FormPageLayout), false);
+    public bool IsBusy { get => (bool)GetValue(IsBusyProperty); set => SetValue(IsBusyProperty, value); }
 
     public static readonly BindableProperty TitleProperty =
         BindableProperty.Create(nameof(Title), typeof(string), typeof(FormPageLayout), string.Empty);

@@ -19,12 +19,16 @@
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitmentHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
-                <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <components:WarriorRecruitListView ItemsSource="{Binding HeroRecruitRows}"
-                                                    HeaderText="{loc:Loc EndOfGameRecruitmentHeroesHeading}"
-                                                    IncrementCommand="{Binding IncrementRecruitCommand}"
-                                                    DecrementCommand="{Binding DecrementRecruitCommand}"
-                                                    DetailCommand="{Binding ShowWarriorDetailCommand}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:WarriorRecruitListView ItemsSource="{Binding HeroRecruitRows}"
+                                                            HeaderText="{loc:Loc EndOfGameRecruitmentHeroesHeading}"
+                                                            IncrementCommand="{Binding IncrementRecruitCommand}"
+                                                            DecrementCommand="{Binding DecrementRecruitCommand}"
+                                                            DetailCommand="{Binding ShowWarriorDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
 </ContentView>

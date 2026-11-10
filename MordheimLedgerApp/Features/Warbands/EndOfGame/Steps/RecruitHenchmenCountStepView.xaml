@@ -13,12 +13,16 @@
                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameRecruitHenchmenNewHeading}" FontAttributes="Bold"/>
                     <Label Grid.Column="1" Text="{Binding RecruitmentTreasuryDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
                 </Grid>
-                <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <components:WarriorRecruitListView ItemsSource="{Binding HenchmanRecruitRows}"
-                                                    HeaderText="{loc:Loc EndOfGameRecruitHenchmenNewHeading}"
-                                                    IncrementCommand="{Binding IncrementHenchmanGroupCommand}"
-                                                    DecrementCommand="{Binding DecrementHenchmanGroupCommand}"
-                                                    DetailCommand="{Binding ShowWarriorDetailCommand}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding RecruitmentRosterCountDisplay}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:WarriorRecruitListView ItemsSource="{Binding HenchmanRecruitRows}"
+                                                            HeaderText="{loc:Loc EndOfGameRecruitHenchmenNewHeading}"
+                                                            IncrementCommand="{Binding IncrementHenchmanGroupCommand}"
+                                                            DecrementCommand="{Binding DecrementHenchmanGroupCommand}"
+                                                            DetailCommand="{Binding ShowWarriorDetailCommand}"/>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
 </ContentView>

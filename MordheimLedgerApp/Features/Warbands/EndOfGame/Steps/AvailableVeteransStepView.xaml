@@ -13,20 +13,24 @@
                  WarbandDetailPage. Toujours présente (aucune condition, voir Steps). -->
             <VerticalStackLayout Spacing="12">
                 <Label Text="{loc:Loc EndOfGameAvailableVeteransHeading}" FontAttributes="Bold"/>
-                <Label Text="{loc:Loc EndOfGameAvailableVeteransIntro}" TextColor="{DynamicResource AppTextMuted}"/>
-                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
-                    <Entry Grid.Column="0" Text="{Binding VeteranExperienceRoll}" Keyboard="Numeric"
-                           Placeholder="{loc:Loc EndOfGameXpPh}" WidthRequest="90">
-                        <Entry.Behaviors>
-                            <components:DigitsOnlyBehavior/>
-                        </Entry.Behaviors>
-                    </Entry>
-                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Command="{Binding AutoRollVeteranExperienceCommand}"
-                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
-                </Grid>
-                <Label Text="{Binding VeteranExperienceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                       IsVisible="{Binding VeteranExperienceRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{loc:Loc EndOfGameAvailableVeteransIntro}" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
+                            <Entry Grid.Column="0" Text="{Binding VeteranExperienceRoll}" Keyboard="Numeric"
+                                   Placeholder="{loc:Loc EndOfGameXpPh}" WidthRequest="90">
+                                <Entry.Behaviors>
+                                    <components:DigitsOnlyBehavior/>
+                                </Entry.Behaviors>
+                            </Entry>
+                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding AutoRollVeteranExperienceCommand}"
+                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                        </Grid>
+                        <Label Text="{Binding VeteranExperienceRollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding VeteranExperienceRollError, Converter={StaticResource IsNotNullConverter}}"/>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
 </ContentView>

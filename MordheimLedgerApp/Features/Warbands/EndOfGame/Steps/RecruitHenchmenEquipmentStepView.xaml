@@ -24,29 +24,31 @@
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding HenchmanGroupDrafts}" Spacing="8">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="createEdit:HenchmanGroupDraft">
-                                        <VerticalStackLayout Spacing="2">
-                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
-                                                <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalOptions="Center"/>
-                                                <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
-                                                       TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
-                                                <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
-                                                                              Icon="{x:Static icons:SolidFont.ArrowsSplitUpAndLeft}"
-                                                                              Rotation="-90"
-                                                                              Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
-                                                                              IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
-                                                                              IsVisible="{Binding CanSplit}"
-                                                                              Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
-                                                                              CommandParameter="{Binding .}"/>
-                                            </Grid>
-                                            <components:RecruitSlotTabsView Item="{Binding .}"
-                                                  IsVisible="{Binding ShowTabsView}"
-                                                  AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitEquipmentCommand}"
-                                                  RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitEquipmentCommand}"
-                                                  ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"
-                                                  AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitMutationCommand}"
-                                                  RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitMutationCommand}"
-                                                  ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitMutationDetailCommand}"/>
-                                        </VerticalStackLayout>
+                                        <Border Style="{StaticResource SectionCardBorderStyle}">
+                                            <VerticalStackLayout Spacing="2">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                                    <Label Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalOptions="Center"/>
+                                                    <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
+                                                           TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
+                                                    <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
+                                                                                  Icon="{x:Static icons:SolidFont.ArrowsSplitUpAndLeft}"
+                                                                                  Rotation="-90"
+                                                                                  Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
+                                                                                  IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
+                                                                                  IsVisible="{Binding CanSplit}"
+                                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=SplitHenchmanGroupDraftCommand}"
+                                                                                  CommandParameter="{Binding .}"/>
+                                                </Grid>
+                                                <components:RecruitSlotTabsView Item="{Binding .}"
+                                                      IsVisible="{Binding ShowTabsView}"
+                                                      AddEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitEquipmentCommand}"
+                                                      RemoveEquipmentCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitEquipmentCommand}"
+                                                      ShowEquipmentDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitEquipmentDetailCommand}"
+                                                      AddMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AddRecruitMutationCommand}"
+                                                      RemoveMutationCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=RemoveRecruitMutationCommand}"
+                                                      ShowMutationDetailCommand="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowRecruitMutationDetailCommand}"/>
+                                            </VerticalStackLayout>
+                                        </Border>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>

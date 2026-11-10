@@ -22,20 +22,24 @@
                      bornée et ne peut donc jamais retourner à la ligne, quel que soit son
                      LineBreakMode - la colonne * borne sa largeur disponible et laisse le retour à la
                      ligne par défaut faire son travail. -->
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                    <CheckBox Grid.Column="0" IsChecked="{Binding HasCapturedEnemies}" VerticalOptions="Center"/>
-                    <Label Grid.Column="1" Text="{loc:Loc EndOfGameCapturedEnemiesToggle}" VerticalOptions="Center"/>
-                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <CheckBox Grid.Column="0" IsChecked="{Binding HasCapturedEnemies}" VerticalOptions="Center"/>
+                        <Label Grid.Column="1" Text="{loc:Loc EndOfGameCapturedEnemiesToggle}" VerticalOptions="Center"/>
+                    </Grid>
+                </Border>
 
                 <VerticalStackLayout Spacing="12" IsVisible="{Binding HasCapturedEnemies}">
-                    <HorizontalStackLayout Spacing="8">
-                        <Label Text="{loc:Loc EndOfGameCapturedEnemyCountLabel}" VerticalOptions="Center"/>
-                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                      Command="{Binding DecrementCapturedEnemyCountCommand}"/>
-                        <Label Text="{Binding CapturedEnemyCount}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
-                        <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                      Command="{Binding IncrementCapturedEnemyCountCommand}"/>
-                    </HorizontalStackLayout>
+                    <Border Style="{StaticResource SectionCardBorderStyle}">
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="{loc:Loc EndOfGameCapturedEnemyCountLabel}" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding DecrementCapturedEnemyCountCommand}"/>
+                            <Label Text="{Binding CapturedEnemyCount}" WidthRequest="24" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding IncrementCapturedEnemyCountCommand}"/>
+                        </HorizontalStackLayout>
+                    </Border>
 
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding CapturedEnemies}" Spacing="8">
                         <BindableLayout.ItemTemplate>

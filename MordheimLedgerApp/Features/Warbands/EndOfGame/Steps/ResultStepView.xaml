@@ -8,8 +8,10 @@
     <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
     <VerticalStackLayout Spacing="12">
         <Label Text="{loc:Loc EndOfGameResultPh}" FontAttributes="Bold"/>
-        <Picker x:Name="ResultPicker"
-                ItemsSource="{Binding ResultOptions}"
-                SelectedItem="{Binding SelectedResult}"/>
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <Picker x:Name="ResultPicker"
+                    ItemsSource="{Binding ResultOptions}"
+                    SelectedItem="{Binding SelectedResult}"/>
+        </Border>
     </VerticalStackLayout>
 </ContentView>

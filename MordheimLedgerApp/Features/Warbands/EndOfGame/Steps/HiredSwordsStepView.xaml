@@ -43,23 +43,25 @@
                      SentHeroOptions/WeaponBlessingOptions ci-dessus), pas de bouton "Engager" dédié : le
                      "Suivant" du wizard bloque déjà si le nom manque ou si la trésorerie ne suit pas (voir
                      ValidateHiredSwordsStep). -->
-                <VerticalStackLayout Spacing="6" IsVisible="{Binding HasHiredSwordsToRecruit}">
-                    <Label Text="{loc:Loc EndOfGameHiredSwordRecruitHeading}" FontAttributes="Bold"/>
-                    <Picker Title="{loc:Loc EndOfGameHiredSwordRecruitPh}"
-                            ItemsSource="{Binding AvailableHiredSwordRecruitOptions}" ItemDisplayBinding="{Binding DisplayName}"
-                            SelectedItem="{Binding SelectedNewHiredSwordOption}"/>
-                    <VerticalStackLayout Spacing="4" IsVisible="{Binding SelectedNewHiredSword, Converter={StaticResource IsNotNullConverter}}">
-                        <Entry Text="{Binding NewHiredSwordName}" Placeholder="{loc:Loc EndOfGameHiredSwordNamePh}"/>
-                        <Label Text="{Binding NewHiredSwordNameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                               IsVisible="{Binding NewHiredSwordNameError, Converter={StaticResource IsNotNullConverter}}"/>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{loc:Loc HiredSwordHireCostPh}" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="{Binding SelectedNewHiredSword.HireCost}" VerticalOptions="Center"/>
-                        </Grid>
-                        <Label Text="{Binding NewHiredSwordAffordError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                               IsVisible="{Binding NewHiredSwordAffordError, Converter={StaticResource IsNotNullConverter}}"/>
+                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasHiredSwordsToRecruit}">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{loc:Loc EndOfGameHiredSwordRecruitHeading}" FontAttributes="Bold"/>
+                        <Picker Title="{loc:Loc EndOfGameHiredSwordRecruitPh}"
+                                ItemsSource="{Binding AvailableHiredSwordRecruitOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                SelectedItem="{Binding SelectedNewHiredSwordOption}"/>
+                        <VerticalStackLayout Spacing="4" IsVisible="{Binding SelectedNewHiredSword, Converter={StaticResource IsNotNullConverter}}">
+                            <Entry Text="{Binding NewHiredSwordName}" Placeholder="{loc:Loc EndOfGameHiredSwordNamePh}"/>
+                            <Label Text="{Binding NewHiredSwordNameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding NewHiredSwordNameError, Converter={StaticResource IsNotNullConverter}}"/>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Grid.Column="0" Text="{loc:Loc HiredSwordHireCostPh}" VerticalOptions="Center"/>
+                                <Label Grid.Column="1" Text="{Binding SelectedNewHiredSword.HireCost}" VerticalOptions="Center"/>
+                            </Grid>
+                            <Label Text="{Binding NewHiredSwordAffordError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                   IsVisible="{Binding NewHiredSwordAffordError, Converter={StaticResource IsNotNullConverter}}"/>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
-                </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
 
 </ContentView>

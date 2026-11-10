@@ -29,56 +29,60 @@
 
                 <!-- Nombre de dés : celui du livre par défaut, ajustable (voir ChosenExplorationDiceCount),
                      message ambre quand on s'en écarte. -->
-                <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="6">
-                    <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationDiceCountLabel}" VerticalOptions="Center"/>
-                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Command="{Binding DecrementExplorationDiceCommand}"/>
-                    <Label Grid.Column="2" Text="{Binding EffectiveExplorationDiceCount}" FontAttributes="Bold" VerticalOptions="Center"/>
-                    <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
-                                                  Command="{Binding IncrementExplorationDiceCommand}"/>
-                </Grid>
-                <!-- Dés supplémentaires détectés (maquette « Jet d'Exploration ») : pré-cochés, décochables ; ils
-                     changent le nombre de dés suggéré ci-dessus. -->
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExplorationDiceToggles}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="effects:EffectToggle">
-                            <effects:EffectToggleView/>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasExplorationDiceCountWarning}">
-                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
-                           FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
-                    <Label Grid.Column="1" Text="{Binding ExplorationDiceCountWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
-                </Grid>
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="6">
+                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameExplorationDiceCountLabel}" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Minus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding DecrementExplorationDiceCommand}"/>
+                            <Label Grid.Column="2" Text="{Binding EffectiveExplorationDiceCount}" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="3" Icon="{x:Static icons:SolidFont.Plus}" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Command="{Binding IncrementExplorationDiceCommand}"/>
+                        </Grid>
+                        <!-- Dés supplémentaires détectés (maquette « Jet d'Exploration ») : pré-cochés, décochables ; ils
+                             changent le nombre de dés suggéré ci-dessus. -->
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExplorationDiceToggles}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="effects:EffectToggle">
+                                    <effects:EffectToggleView/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasExplorationDiceCountWarning}">
+                            <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                                   FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                            <Label Grid.Column="1" Text="{Binding ExplorationDiceCountWarning}" FontSize="11" TextColor="{DynamicResource AppWarning}"/>
+                        </Grid>
 
-                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="local:ExplorationDieEntry">
-                            <VerticalStackLayout Spacing="4" Margin="0,0,10,10">
-                                <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6">
-                                    <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
-                                           Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60">
-                                        <Entry.Behaviors>
-                                            <components:DigitsOnlyBehavior/>
-                                        </Entry.Behaviors>
-                                    </Entry>
-                                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
-                                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollExplorationDieCommand}"
-                                                                  CommandParameter="{Binding .}"
-                                                                  Tooltip="{loc:Loc EndOfGameRoll}"/>
-                                </Grid>
-                                <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                                       IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
-                            </VerticalStackLayout>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
+                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding ExplorationDice}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="local:ExplorationDieEntry">
+                                    <VerticalStackLayout Spacing="4" Margin="0,0,10,10">
+                                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6">
+                                            <Entry Grid.Column="0" Text="{Binding ManualRoll}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGameHenchmanRollPh}" WidthRequest="60">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollExplorationDieCommand}"
+                                                                          CommandParameter="{Binding .}"
+                                                                          Tooltip="{loc:Loc EndOfGameRoll}"/>
+                                        </Grid>
+                                        <Label Text="{Binding RollError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                               IsVisible="{Binding RollError, Converter={StaticResource IsNotNullConverter}}"/>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
 
-                <!-- "Add the results together..." (Core.Rules.WyrdstoneShardsTable) - effet SÉPARÉ et
-                     ADDITIF du jet, indépendant du résultat éventuel des doublons/triplets ci-dessous
-                     (IsExplorationResultStep) - toujours appliqué, même sans aucun résultat spécial. -->
-                <Label Text="{Binding BaselineWyrdstoneShardsFoundDisplay}" FontAttributes="Bold"/>
+                        <!-- "Add the results together..." (Core.Rules.WyrdstoneShardsTable) - effet SÉPARÉ et
+                             ADDITIF du jet, indépendant du résultat éventuel des doublons/triplets ci-dessous
+                             (IsExplorationResultStep) - toujours appliqué, même sans aucun résultat spécial. -->
+                        <Label Text="{Binding BaselineWyrdstoneShardsFoundDisplay}" FontAttributes="Bold"/>
+                    </VerticalStackLayout>
+                </Border>
 
                 <!-- Relance ou ajustement d'un dé (Chasseur de Pierre Magique, Chercheur de Ressources) : le
                      joueur choisit le dé, le second résultat reste ; « Annuler » rend l'ancien dé. -->

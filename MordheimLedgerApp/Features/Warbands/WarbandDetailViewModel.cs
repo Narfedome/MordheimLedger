@@ -450,7 +450,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
         var dialogViewModel = new WarriorEditDialogViewModel(warrior, Loc["WarriorEditTitle"], Warband, _warbandService,
             _libraryService, _detailDialogs, _equipmentPicker, _skillPicker, _injuryPicker, _spellPicker, isSpellcaster, magicSchools,
             _mutationPicker, isMutant, specialRules);
-        var saved = await ShowDialogAsync(new WarriorEditDialog(dialogViewModel));
+        var saved = await ShowFormAsync(new WarriorEditForm(dialogViewModel));
 
         // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
         // (AddInjury/RemoveInjury) persiste immédiatement dans le dialog, indépendamment du bouton

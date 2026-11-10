@@ -111,7 +111,7 @@ public partial class WarbandListViewModel : BaseViewModel
         var dialogViewModel = new WarbandEditDialogViewModel(newItem, Loc["WarbandCreateTitle"],
              _warbandArchetypePickerService, _warbandService, _libraryService, _detailDialogs, _equipmentPickerService, _skillPickerService,
              _spellPickerService, _injuryPickerService, _mutationPickerService, _hiredSwordPickerService);
-        if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new WarbandEditForm(dialogViewModel)) != true) return;
 
         await LoadWarbandsAsync();
     }
@@ -151,7 +151,7 @@ public partial class WarbandListViewModel : BaseViewModel
         {
             Archetype = archetype
         };
-        if (await ShowDialogAsync(new WarbandEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new WarbandEditForm(dialogViewModel)) != true) return;
 
         await LoadWarbandsAsync();
     }

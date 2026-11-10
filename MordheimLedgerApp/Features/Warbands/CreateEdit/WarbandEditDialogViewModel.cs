@@ -127,6 +127,12 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         [NotifyPropertyChangedFor(nameof(CanGoBack))]
         [NotifyPropertyChangedFor(nameof(IsLastStep))]
         [NotifyPropertyChangedFor(nameof(StepLabel))]
+        [NotifyPropertyChangedFor(nameof(HeaderSubtitle))]
+        [NotifyPropertyChangedFor(nameof(HeaderStepText))]
+        [NotifyPropertyChangedFor(nameof(StepProgress))]
+        [NotifyPropertyChangedFor(nameof(PrimaryButtonText))]
+        [NotifyPropertyChangedFor(nameof(PrimaryButtonCommand))]
+        [NotifyPropertyChangedFor(nameof(SecondaryButtonEnabled))]
         private int selectedTab;
         public bool IsGeneralTab => SelectedTab == 0;
         public bool IsWarriorsTab => SelectedTab == 1;
@@ -230,6 +236,29 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         public bool CanGoBack => SelectedTab > 0;
         public bool IsLastStep => SelectedTab == StepCount - 1;
         public string StepLabel => string.Format(Loc["LibStepLabel"], SelectedTab + 1, StepCount);
+
+        // --- En-tête et pied de la page plein écran (FormPageLayout, voir WarbandEditForm) ----------------
+        // Assistant : ✕ abandonne, Précédent / Suivant (Enregistrer à la dernière étape) dans le pied, nom de
+        // l'étape en sous-titre. Modification d'une bande existante : Annuler / Enregistrer, nom de la bande.
+
+        private string StepName => SelectedTab switch
+        {
+            0 => Loc["WarbandArchetypeTabGeneral"],
+            1 => Loc["WarbandArchetypeTabWarriors"],
+            2 => Loc["WarbandCreateTabEquipment"],
+            WarriorNamesTabIndex => Loc["WarbandCreateTabNames"],
+            4 => Loc["LibTabHiredSwords"],
+            _ => IsRecapTab ? Loc["EndOfGameRecapHeading"] : Loc["WarbandCreateTabHiredSwordNames"],
+        };
+
+        public string HeaderSubtitle => IsWizardMode ? StepName : Item.Name;
+        public string HeaderStepText => IsWizardMode ? StepLabel : string.Empty;
+        public double StepProgress => IsWizardMode ? (SelectedTab + 1d) / StepCount : -1;
+        public string PrimaryButtonText => !IsWizardMode || IsLastStep ? Loc["BtnSave"] : Loc["LibNext"];
+        public ICommand PrimaryButtonCommand => !IsWizardMode || IsLastStep ? SaveCommand : NextCommand;
+        public string SecondaryButtonText => IsWizardMode ? Loc["LibBack"] : Loc["BtnCancel"];
+        public ICommand SecondaryButtonCommand => IsWizardMode ? BackCommand : CancelCommand;
+        public bool SecondaryButtonEnabled => !IsWizardMode || CanGoBack;
 
         /// <summary>Une ligne par WarriorArchetype recrutable pour l'Archetype choisi - voir
         /// WarriorRecruitRow. Peuplée une fois par EnsureRecruitableArchetypesLoadedAsync, vidée/
@@ -783,6 +812,11 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             if (SelectedTab >= StepCount) SelectedTab = StepCount - 1;
             OnPropertyChanged(nameof(IsLastStep));
             OnPropertyChanged(nameof(StepLabel));
+            OnPropertyChanged(nameof(HeaderSubtitle));
+            OnPropertyChanged(nameof(HeaderStepText));
+            OnPropertyChanged(nameof(StepProgress));
+            OnPropertyChanged(nameof(PrimaryButtonText));
+            OnPropertyChanged(nameof(PrimaryButtonCommand));
             OnPropertyChanged(nameof(IsHiredSwordNamesTab));
             OnPropertyChanged(nameof(IsRecapTab));
             // Une erreur de l'étape Équipement (fonds, mutation) se réévalue dès que les achats changent.

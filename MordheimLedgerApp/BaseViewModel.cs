@@ -61,6 +61,11 @@ public abstract partial class BaseViewModel : ObservableObject
     protected Task<TResult?> ShowDialogAsync<TResult>(DialogContent<TResult> content) =>
         DialogStack.Instance.PushAsync(content, CurrentPage);
 
+    /// <summary>Ouvre un formulaire de création/modification en page plein écran (voir FormNavigator) -
+    /// même contrat que ShowDialogAsync.</summary>
+    protected Task<TResult?> ShowFormAsync<TResult>(Components.FormPage.FormContent<TResult> content) =>
+        Components.FormPage.FormNavigator.PushAsync(content);
+
     protected async Task<string?> ShowActionSheetAsync(string title, params string[] options)
     {
         var index = await ShowActionSheetIndexAsync(title, options);

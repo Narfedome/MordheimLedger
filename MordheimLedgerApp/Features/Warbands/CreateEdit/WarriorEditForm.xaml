@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.CreateEdit"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               xmlns:models="clr-namespace:MordheimLedgerApp.Core.Models;assembly=MordheimLedgerApp.Core"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Warbands.CreateEdit.WarriorEditForm"
+               x:DataType="local:WarriorEditDialogViewModel">
+    <!-- Page plein écran de modification d'un guerrier (autrefois WarriorEditDialog) : onglets fixes sous
+         l'en-tête, contenu en cartes qui seul défile, Annuler / Enregistrer dans le pied, Supprimer en icône
+         dans l'en-tête. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         Subtitle="{Binding Item.Name}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <form:FormPageLayout.HeaderActions>
+            <components:FaIconButtonView Style="{StaticResource GhostIconButtonStyle}"
+                                          Icon="{x:Static icons:SolidFont.Trash}"
+                                          IconSize="16" ButtonWidthRequest="44" ButtonHeightRequest="44"
+                                          Command="{Binding DeleteCommand}"/>
+        </form:FormPageLayout.HeaderActions>
+
+        <!-- Onglets Profil/Équipement/Compétences/Blessures/Sorts/Mutations. -->
+        <form:FormPageLayout.TopContent>
+            <components:ScrollableTabStripView>
+                <HorizontalStackLayout Spacing="16">
+                    <components:TabToggleButton Text="{loc:Loc LibTabProfile}" Command="{Binding ShowProfilTabCommand}"
+                                                 IsActive="{Binding IsProfilTab}" FontSize="13"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsEquipmentHeading}" Command="{Binding ShowEquipmentTabCommand}"
+                                                 IsActive="{Binding IsEquipmentTab}" FontSize="13"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsSkillsHeading}" Command="{Binding ShowSkillsTabCommand}"
+                                                 IsActive="{Binding IsSkillsTab}" FontSize="13"/>
+                    <components:TabToggleButton Text="{loc:Loc WarriorsInjuriesHeading}" Command="{Binding ShowInjuriesTabCommand}"
+                                                 IsActive="{Binding IsInjuriesTab}" FontSize="13"/>
+                    <!-- Sorts : seulement pour un lanceur de sorts (WarriorArchetype.IsSpellcaster). -->
+                    <components:TabToggleButton Text="{loc:Loc WarriorsSpellsHeading}" Command="{Binding ShowSpellsTabCommand}"
+                                                 IsActive="{Binding IsSpellsTab}" FontSize="13"
+                                                 IsVisible="{Binding IsSpellcaster}"/>
+                    <!-- Mutations : seulement si l'archétype a CanBuyMutations (Mutants/Possédés). -->
+                    <components:TabToggleButton Text="{loc:Loc WarriorsMutationsHeading}" Command="{Binding ShowMutationsTabCommand}"
+                                                 IsActive="{Binding IsMutationsTab}" FontSize="13"
+                                                 IsVisible="{Binding IsMutant}"/>
+                </HorizontalStackLayout>
+            </components:ScrollableTabStripView>
+        </form:FormPageLayout.TopContent>
+
+        <VerticalStackLayout Spacing="12">
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsProfilTab}">
+                <!-- Photo de la figurine (Warrior.PhotoPath) : aperçu + appareil photo/galerie/retrait, soumis à
+                     Enregistrer/Annuler comme le reste du profil (WarriorEditDialogViewModel.FinalizePhoto). -->
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Grid.Column="0" WidthRequest="96" HeightRequest="96" StrokeShape="RoundRectangle 8" StrokeThickness="1"
+                                Stroke="{DynamicResource AppBorder}" BackgroundColor="{DynamicResource AppBackground}">
+                            <Grid>
+                                <Label Text="{x:Static icons:SolidFont.User}" FontFamily="FontSolid" FontSize="34" Opacity="0.5"
+                                       TextColor="{DynamicResource AppTextMuted}" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}"/>
+                            </Grid>
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                            <Label Text="{loc:Loc WarriorPhotoHeading}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <components:IconTextButton Icon="{x:Static icons:SolidFont.Camera}" IconSize="13" FontSize="13"
+                                                        Text="{Binding CapturePhotoLabel}" TextColor="{DynamicResource AppAccent}"
+                                                        IsVisible="{Binding IsCaptureSupported}"
+                                                        Command="{Binding CapturePhotoCommand}"/>
+                            <components:IconTextButton Icon="{x:Static icons:SolidFont.Image}" IconSize="13" FontSize="13"
+                                                        Text="{Binding PickPhotoLabel}" TextColor="{DynamicResource AppAccent}"
+                                                        Command="{Binding PickPhotoCommand}"/>
+                            <components:IconTextButton Icon="{x:Static icons:SolidFont.Trash}" IconSize="13" FontSize="13"
+                                                        Text="{loc:Loc WarriorPhotoRemove}" TextColor="{DynamicResource AppDanger}"
+                                                        IsVisible="{Binding HasPhoto}"
+                                                        Command="{Binding RemovePhotoCommand}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="2*,*" ColumnSpacing="12">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="{loc:Loc PromptName}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Entry Text="{Binding Item.Name}"/>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{loc:Loc WarriorExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <Entry Text="{Binding Item.Experience}" Keyboard="Numeric"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                        <!-- Abréviations officielles du livre de règles - StatRowView en mode édition. MovementText
+                             lié à MovementInput : un nombre ou une surcharge libre (« 2D6 »), résolu au Save. -->
+                        <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Règles spéciales : lecture seule - se changent depuis le Codex, pas ici. -->
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <components:ChipListView HeaderText="{loc:Loc WarriorsSpecialRulesHeading}"
+                                              ItemsSource="{Binding SpecialRules}"
+                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                              HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                              Command="{Binding ShowSpecialRuleDetailCommand}"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsEquipmentTab}">
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="{loc:Loc WarriorsEquipmentHeading}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                          Icon="{x:Static icons:SolidFont.Plus}"
+                                                          IconSize="14" ButtonWidthRequest="36" ButtonHeightRequest="36"
+                                                          IsVisible="{Binding Item.CanUseEquipment}"
+                                                          Command="{Binding AddEquipmentCommand}"/>
+                        </Grid>
+                        <!-- ChipView (pas ChipListView) : l'icône varie par item (EquipmentCategoryIconConverter). -->
+                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Equipment}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:WarriorEquipment">
+                                    <components:ChipView Item="{Binding .}"
+                                                          IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                          IconFontFamily="RpgAwesome"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowEquipmentDetailCommand}"
+                                                          RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveEquipmentCommandOrNull}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Monture : un EquipmentItem de catégorie Animal, Warrior.Animal reste un champ 0..1 dédié. -->
+                <Border Style="{StaticResource SectionCardBorderStyle}">
+                    <components:ChipItemView HeaderText="{loc:Loc WarriorAnimalHeading}"
+                                              Item="{Binding Item.Animal}"
+                                              IconGlyph="{x:Static icons:RpgFont.RaPawprint}"
+                                              IconFontFamily="RpgAwesome"
+                                              HeaderFontSize="12"
+                                              Command="{Binding ShowAnimalDetailCommand}"
+                                              AddCommand="{Binding SelectAnimalCommand}"
+                                              RemoveCommand="{Binding ClearAnimalCommand}"/>
+                </Border>
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsSkillsTab}">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="{loc:Loc WarriorsSkillsHeading}" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"/>
+                        <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
+                                                      Icon="{x:Static icons:SolidFont.Plus}"
+                                                      IconSize="14" ButtonWidthRequest="36" ButtonHeightRequest="36"
+                                                      Command="{Binding AddSkillCommand}"/>
+                    </Grid>
+                    <!-- ChipView (pas ChipListView) : l'icône varie par item (SkillCategoryIconConverter). -->
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding Skills}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:WarriorSkill">
+                                <components:ChipView Item="{Binding .}"
+                                                      IconGlyph="{Binding Item.Category, Converter={StaticResource SkillCategoryIconConverter}}"
+                                                      IconFontFamily="RpgAwesome"
+                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=ShowSkillDetailCommand}"
+                                                      RemoveCommand="{Binding Source={RelativeSource AncestorType={x:Type local:WarriorEditDialogViewModel}}, Path=RemoveSkillCommand}"/>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Blessures/Sorts/Mutations : un seul glyphe pour toute la liste - ChipListView directement. -->
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsInjuriesTab}">
+                <components:ChipListView HeaderText="{loc:Loc WarriorsInjuriesHeading}"
+                                          ItemsSource="{Binding Injuries}"
+                                          IconGlyph="{x:Static icons:RpgFont.RaBrokenBone}"
+                                          IconFontFamily="RpgAwesome"
+                                          HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                          Command="{Binding ShowInjuryDetailCommand}"
+                                          AddCommand="{Binding AddInjuryCommand}"
+                                          RemoveCommand="{Binding RemoveInjuryCommand}"/>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsSpellsTab}">
+                <components:ChipListView HeaderText="{loc:Loc WarriorsSpellsHeading}"
+                                          ItemsSource="{Binding Spells}"
+                                          IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                          IconFontFamily="RpgAwesome"
+                                          HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                          Command="{Binding ShowSpellDetailCommand}"
+                                          AddCommand="{Binding AddSpellCommand}"
+                                          RemoveCommand="{Binding RemoveSpellCommand}"/>
+            </Border>
+
+            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsMutationsTab}">
+                <components:ChipListView HeaderText="{loc:Loc WarriorsMutationsHeading}"
+                                          ItemsSource="{Binding Mutations}"
+                                          IconGlyph="{x:Static icons:RpgFont.RaBiohazard}"
+                                          IconFontFamily="RpgAwesome"
+                                          HeaderFontSize="12" HeaderTextColor="{DynamicResource AppTextMuted}"
+                                          Command="{Binding ShowMutationDetailCommand}"
+                                          AddCommand="{Binding AddMutationCommand}"
+                                          RemoveCommand="{Binding RemoveMutationCommand}"/>
+            </Border>
+        </VerticalStackLayout>
+    </form:FormPageLayout>
+</form:FormContent>

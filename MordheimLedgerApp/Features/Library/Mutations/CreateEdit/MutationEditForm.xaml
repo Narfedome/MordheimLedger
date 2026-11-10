@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.Mutations.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.Mutations.CreateEdit.MutationEditForm"
+               x:DataType="local:MutationEditDialogViewModel">
+    <!-- Page plein écran (autrefois MutationEditDialog, voir Components/FormPage) : titre et
+         ✕ dans l'en-tête, Annuler / Enregistrer dans le pied, contenu en carte. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc MutationNamePh}"/>
+                                <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Entry Text="{Binding Item.Name}"/>
+                    <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                           IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc MutationCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+                </VerticalStackLayout>
+
+                <!-- Réservé à ces bandes : vide = commun à toutes les bandes qui peuvent acheter des
+                     mutations (voir Mutation.RestrictedToWarbandArchetypeIds). Contrôle unique factorisant
+                     chips + bascule Inclure/Exclure. -->
+                <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
+
+            </VerticalStackLayout>
+        </Border>
+    </form:FormPageLayout>
+</form:FormContent>

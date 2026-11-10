@@ -122,7 +122,7 @@ public partial class HiredSwordViewModel : BaseViewModel
         var newItem = new HiredSword();
         var dialogViewModel = new HiredSwordEditDialogViewModel(newItem, Loc["HiredSwordCreateTitle"],
             _warbandPicker, _equipmentPicker, _specialRulePicker, _magicSchoolPicker, _detailDialogs, _libraryService, _warbandArchetypes, Array.Empty<EquipmentItem>());
-        if (await ShowDialogAsync(new HiredSwordEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new HiredSwordEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveHiredSwordAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
@@ -175,7 +175,7 @@ public partial class HiredSwordViewModel : BaseViewModel
         var initialEquipment = _equipmentItems.Where(e => s.StartingEquipmentIds.Contains(e.Id)).ToList();
         var dialogViewModel = new HiredSwordEditDialogViewModel(copy, Loc["HiredSwordEditTitle"],
             _warbandPicker, _equipmentPicker, _specialRulePicker, _magicSchoolPicker, _detailDialogs, _libraryService, _warbandArchetypes, initialEquipment);
-        if (await ShowDialogAsync(new HiredSwordEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new HiredSwordEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveHiredSwordAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit.WarriorArchetypeEditForm"
+               x:DataType="local:WarriorArchetypeEditDialogViewModel">
+    <!-- Page plein écran (autrefois WarriorArchetypeEditDialog, voir Components/FormPage) : titre et
+         ✕ dans l'en-tête, Annuler / Enregistrer dans le pied, contenu en carte. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="16">
+
+                                 <components:ScrollableTabStripView>
+                                     <HorizontalStackLayout Spacing="16">
+                                         <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                              IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                                         <components:TabToggleButton Text="{loc:Loc LibTabProfile}" Command="{Binding ShowProfileTabCommand}"
+                                                              IsActive="{Binding IsProfileTab}" FontSize="12"/>
+                                         <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                                              IsActive="{Binding IsRulesTab}" FontSize="12"/>
+                                     </HorizontalStackLayout>
+                                 </components:ScrollableTabStripView>
+
+                                 <VerticalStackLayout Spacing="12" IsVisible="{Binding IsGeneralTab}">
+                                     <VerticalStackLayout Spacing="4">
+                                         <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                                             <Label.FormattedText>
+                                                 <FormattedString>
+                                                     <Span Text="{loc:Loc WarriorArchetypeNamePh}"/>
+                                                     <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                                                 </FormattedString>
+                                             </Label.FormattedText>
+                                         </Label>
+                                         <Entry Text="{Binding Item.Name}"/>
+                                         <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                        IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                                     </VerticalStackLayout>
+                                     <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                                         <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                             <Label Text="{loc:Loc WarriorArchetypeCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                             <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                                         </VerticalStackLayout>
+                                         <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                             <Label Text="{loc:Loc WarriorArchetypeMinCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                             <Entry Text="{Binding Item.MinCount}" Keyboard="Numeric"/>
+                                         </VerticalStackLayout>
+                                         <VerticalStackLayout Grid.Column="2" Spacing="4">
+                                             <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                             <Entry Text="{Binding Item.MaxCount}" Keyboard="Numeric"/>
+                                         </VerticalStackLayout>
+                                     </Grid>
+                                     <!-- Quelle liste d'équipement de la bande ce type de guerrier utilise pour son
+                                  Armement/Armure - "Aucune" pour les archétypes qui n'utilisent jamais d'équipement
+                                  (Zombies, Squigs des cavernes...). Voir EquipmentList/WarriorArchetype.EquipmentListId. -->
+                                     <VerticalStackLayout Spacing="4">
+                                         <Label Text="{loc:Loc WarriorArchetypeEquipmentListPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                         <Picker ItemsSource="{Binding EquipmentListOptions}"
+                                         SelectedItem="{Binding SelectedEquipmentListLabel}"/>
+                                     </VerticalStackLayout>
+
+                                     <VerticalStackLayout Spacing="4">
+                                         <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                         <Editor Text="{Binding Item.Description}" HeightRequest="90"/>
+                                     </VerticalStackLayout>
+                                 </VerticalStackLayout>
+
+                                 <!-- Type (Héros/Homme de main) + Profil regroupés dans le même onglet (vont de pair) - la
+                              bascule Héros/Homme de main détermine quelles infos suivantes ont du sens (un lanceur de
+                              sorts est toujours un Héros, une Grande créature toujours un Homme de main dans les
+                              règles officielles). IsHero est un proxy observable côté ViewModel (voir
+                              WarriorArchetypeEditDialogViewModel.IsHero) pour que ces sections réagissent
+                              immédiatement au clic, Item n'ayant pas d'INotifyPropertyChanged. -->
+                                 <VerticalStackLayout Spacing="12" IsVisible="{Binding IsProfileTab}">
+
+                                     <!-- Type de créature (voir Models.Library.RacialProfile) - gouverne les maximums de
+                                          caractéristiques atteignables via la Progression (Core.Rules.
+                                          CharacteristicIncreaseRules), catalogue éditable via l'icône "gérer" de l'onglet
+                                          Bandes (WarbandArchetypeViewModel.ManageRacialProfiles). -->
+                                     <VerticalStackLayout Spacing="4">
+                                         <Label Text="{loc:Loc WarriorArchetypeRacialProfilePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                         <Picker ItemsSource="{Binding RacialProfileOptions}"
+                                                 SelectedItem="{Binding SelectedRacialProfileLabel}"/>
+                                     </VerticalStackLayout>
+
+                                     <!-- Profil - StatRowView en mode édition (IsEditable="True" bascule chaque Label en
+                                  Entry), même composant que WarriorArchetypeDetailDialog/WarbandDetailPage en lecture
+                                  seule. Mouvement bindé sur MovementInput (accepte "4" ou une surcharge "2D6" pour les
+                                  Squigs des cavernes, résolu vers Item.Movement/Item.MovementOverride au Save - voir
+                                  WarriorArchetypeEditDialogViewModel.Save). -->
+                                     <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
+
+                                     <HorizontalStackLayout Spacing="10">
+                                         <CheckBox IsChecked="{Binding IsHero}" VerticalOptions="Center"/>
+                                         <Label Text="{loc:Loc WarriorArchetypeIsHero}" VerticalOptions="Center"/>
+                                     </HorizontalStackLayout>
+
+                                     <VerticalStackLayout Spacing="12" IsVisible="{Binding IsHero}">
+                                         <!-- Chef : ajoute/retire "Chef"/"Leader" comme les autres cases ci-dessous - reste
+                                      éditable ensuite via le "+"/"x" habituel de l'onglet Règles si une bande a une
+                                      variante (ex. "Discipline Militaire" pour le Capitaine Reiklander à la place). -->
+                                         <HorizontalStackLayout Spacing="10">
+                                             <CheckBox IsChecked="{Binding IsChief}" VerticalOptions="Center"/>
+                                             <Label Text="{loc:Loc WarriorArchetypeIsChief}" VerticalOptions="Center"/>
+                                         </HorizontalStackLayout>
+                                         <!-- L'école de magie elle-même est liée à la bande (WarbandArchetype.MagicSchools, voir
+                                      WarbandArchetypeEditDialog) - ici on marque juste ce type de guerrier comme lanceur
+                                      de sorts. La sélection de sorts (WarriorEditDialog) ne propose alors que les sorts
+                                      des écoles accordées à la bande. -->
+                                         <HorizontalStackLayout Spacing="10">
+                                             <CheckBox IsChecked="{Binding IsSpellcaster}" VerticalOptions="Center"/>
+                                             <Label Text="{loc:Loc WarriorArchetypeIsSpellcaster}" VerticalOptions="Center"/>
+                                         </HorizontalStackLayout>
+                                         <VerticalStackLayout Spacing="4">
+                                             <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                             <Entry Text="{Binding Item.StartingExperience}" Keyboard="Numeric"/>
+                                         </VerticalStackLayout>
+                                     </VerticalStackLayout>
+
+                                     <VerticalStackLayout Spacing="12" IsVisible="{Binding IsHero, Converter={StaticResource InverseBoolConverter}}">
+                                         <!-- Rat-ogre/Ogre/Troll/Minotaure : compte 20 points fixes (au lieu de effectif×5) dans le
+                                      calcul de la Valeur de Bande - voir WarriorArchetype.IsLargeCreature. -->
+                                         <HorizontalStackLayout Spacing="10">
+                                             <CheckBox IsChecked="{Binding IsLargeCreature}" VerticalOptions="Center"/>
+                                             <Label Text="{loc:Loc WarriorArchetypeIsLargeCreature}" VerticalOptions="Center"/>
+                                         </HorizontalStackLayout>
+                                         <!-- Zombie/Goule/Loup Funeste/Possédé/Rat-ogre/Rats géants : masque le bouton "+" équipement
+                                      partout (wizard, WarriorEditDialog) - voir WarriorArchetype.CanUseEquipment. -->
+                                         <HorizontalStackLayout Spacing="10">
+                                             <CheckBox IsChecked="{Binding CanUseEquipment}" VerticalOptions="Center"/>
+                                             <Label Text="{loc:Loc WarriorArchetypeCanUseEquipment}" VerticalOptions="Center"/>
+                                         </HorizontalStackLayout>
+                                         <!-- Ne gagne jamais d'Expérience - voir WarriorArchetypeEditDialogViewModel.NeverGainsExperience. -->
+                                         <HorizontalStackLayout Spacing="10">
+                                             <CheckBox IsChecked="{Binding NeverGainsExperience}" VerticalOptions="Center"/>
+                                             <Label Text="{loc:Loc WarriorArchetypeNeverGainsExperience}" VerticalOptions="Center"/>
+                                         </HorizontalStackLayout>
+                                     </VerticalStackLayout>
+
+                                     <!-- Mutant/Possédé : commun aux deux types (Héros Magister comme Homme de main Possédé
+                peuvent muter) - ouvre l'onglet Mutations sur la fiche du guerrier recruté (voir
+                WarriorEditDialog.IsMutant). -->
+                                     <HorizontalStackLayout Spacing="10">
+                                         <CheckBox IsChecked="{Binding Item.CanBuyMutations}" VerticalOptions="Center"/>
+                                         <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" VerticalOptions="Center"/>
+                                     </HorizontalStackLayout>
+                                     <!-- Mutation obligatoire au recrutement (Mutant - "must start the game with one or more
+                                          mutations", contrairement au Possédé qui "may") - voir WarriorArchetype.
+                                          MustStartWithMutation. Sans effet si la case ci-dessus est décochée. -->
+                                     <HorizontalStackLayout Spacing="10" IsVisible="{Binding Item.CanBuyMutations}">
+                                         <CheckBox IsChecked="{Binding Item.MustStartWithMutation}" VerticalOptions="Center"/>
+                                         <Label Text="{loc:Loc WarriorArchetypeMustStartWithMutation}" VerticalOptions="Center"/>
+                                     </HorizontalStackLayout>
+
+                                 </VerticalStackLayout>
+
+                                 <!-- Règles spéciales propres à ce type de guerrier - distinctes des règles spéciales de
+                              bande entière, portées par WarbandArchetype.SpecialRules. Chaque règle est une entrée du
+                              catalogue partagé SpecialRule (ex. "Chef"), ajoutée/retirée via picker. -->
+                                 <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
+                                     <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                                       ItemsSource="{Binding SpecialRules}"
+                                                       IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                                   Command="{Binding ShowSpecialRuleDetailCommand}"
+                                                       AddCommand="{Binding AddSpecialRuleCommand}"
+                                                       RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+                                 </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </Border>
+    </form:FormPageLayout>
+</form:FormContent>

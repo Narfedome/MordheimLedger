@@ -99,7 +99,7 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
     private async Task AddEffect()
     {
         var draft = new SkillEffect();
-        var result = await ShowDialogAsync(new SkillEffectEditDialog(new SkillEffectEditDialogViewModel(draft, Item.Name, isNew: true, _effectNames)));
+        var result = await ShowFormAsync(new SkillEffectEditForm(new SkillEffectEditDialogViewModel(draft, Item.Name, isNew: true, _effectNames)));
         if (result != SkillEffectEditResult.Saved) return;
         Item.Effects.Add(draft);
         RefreshEffectRows();
@@ -112,7 +112,7 @@ public partial class SkillEditDialogViewModel : DialogViewModel<bool>
         var index = Item.Effects.IndexOf(row.Effect);
         if (index < 0) return;
         var draft = row.Effect.Clone();
-        var result = await ShowDialogAsync(new SkillEffectEditDialog(new SkillEffectEditDialogViewModel(draft, Item.Name, isNew: false, _effectNames)));
+        var result = await ShowFormAsync(new SkillEffectEditForm(new SkillEffectEditDialogViewModel(draft, Item.Name, isNew: false, _effectNames)));
         switch (result)
         {
             case SkillEffectEditResult.Saved:

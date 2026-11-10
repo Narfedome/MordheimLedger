@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit"
+               xmlns:library="clr-namespace:MordheimLedgerApp.Core.Models.Library;assembly=MordheimLedgerApp.Core"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit.EquipmentItemEditForm"
+               x:DataType="local:EquipmentItemEditDialogViewModel">
+    <!-- Page plein écran (autrefois EquipmentItemEditDialog, voir Components/FormPage) : titre et
+         ✕ dans l'en-tête, Annuler / Enregistrer dans le pied, contenu en carte. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="16">
+
+                <components:ScrollableTabStripView>
+                    <HorizontalStackLayout Spacing="16">
+                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                     IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabRules}" Command="{Binding ShowRulesTabCommand}"
+                                                     IsActive="{Binding IsRulesTab}" FontSize="12"/>
+                    </HorizontalStackLayout>
+                </components:ScrollableTabStripView>
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{loc:Loc EquipmentItemNamePh}"/>
+                                    <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Entry Text="{Binding Item.Name}"/>
+                        <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc EquipmentItemCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Picker ItemsSource="{Binding CategoryOptions}"
+                                SelectedItem="{Binding SelectedCategoryLabel}"/>
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc EquipmentItemCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Entry Text="{Binding Item.Cost}" Keyboard="Numeric"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc EquipmentItemCostRandomMaxPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.CostRandomMax}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+                    </VerticalStackLayout>
+
+                    <!-- Profil (Mouvement/CC/CT/F/E/PV/I/A/Cd) - uniquement pour la catégorie Animal (une
+                         monture, ex. Cheval de guerre) : ces 9 champs n'ont pas de sens pour les autres
+                         catégories. Même composant StatRowView que WarriorArchetypeEditDialog. -->
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAnimalCategory}">
+                        <Label Text="{loc:Loc LibTabProfile}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}" IsEditable="True"/>
+                    </VerticalStackLayout>
+
+                    <!-- Réservé à ces bandes : vide = commun à toutes les bandes (voir EquipmentItem.
+                         RestrictedToWarbandArchetypeIds). Contrôle unique factorisant chips + bascule
+                         Inclure/Exclure (ex. Chien de guerre "toutes sauf Skavens"). -->
+                    <components:WarbandRestrictionEditorView Editor="{Binding WarbandRestriction}"/>
+                </VerticalStackLayout>
+
+                <!-- Règles spéciales propres à l'objet (ex. "Parry", "Cutting Edge"). -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsRulesTab}">
+                    <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                              ItemsSource="{Binding SpecialRules}"
+                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                              AddCommand="{Binding AddSpecialRuleCommand}"
+                                              RemoveCommand="{Binding RemoveSpecialRuleCommand}"/>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </Border>
+    </form:FormPageLayout>
+</form:FormContent>

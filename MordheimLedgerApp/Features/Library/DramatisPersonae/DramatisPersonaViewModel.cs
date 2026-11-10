@@ -139,7 +139,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         var dialogViewModel = new DramatisPersonaEditDialogViewModel(newItem, Loc["DramatisPersonaCreateTitle"],
             _warbandPicker, _equipmentPicker, _skillPicker, _specialRulePicker, _magicSchoolPicker, _detailDialogs,
             _libraryService, _warbandArchetypes, Array.Empty<EquipmentItem>());
-        if (await ShowDialogAsync(new DramatisPersonaEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new DramatisPersonaEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveDramatisPersonaAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
@@ -213,7 +213,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         var dialogViewModel = new DramatisPersonaEditDialogViewModel(copy, Loc["DramatisPersonaEditTitle"],
             _warbandPicker, _equipmentPicker, _skillPicker, _specialRulePicker, _magicSchoolPicker, _detailDialogs,
             _libraryService, _warbandArchetypes, initialEquipment);
-        if (await ShowDialogAsync(new DramatisPersonaEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new DramatisPersonaEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveDramatisPersonaAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

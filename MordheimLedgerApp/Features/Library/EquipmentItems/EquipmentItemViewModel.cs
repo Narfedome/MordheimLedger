@@ -541,7 +541,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
     {
         var newItem = new EquipmentItem();
         var dialogViewModel = new EquipmentItemEditDialogViewModel(newItem, Loc["EquipmentItemCreateTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
-        if (await ShowDialogAsync(new EquipmentItemEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new EquipmentItemEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveEquipmentItemAsync(newItem, LocalizationService.Instance.Language);
         _allItems.Add(newItem);
@@ -604,7 +604,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
         };
 
         var dialogViewModel = new EquipmentItemEditDialogViewModel(copy, Loc["EquipmentItemEditTitle"], _warbandPicker, _warbandArchetypes, _specialRulePicker);
-        if (await ShowDialogAsync(new EquipmentItemEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new EquipmentItemEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveEquipmentItemAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

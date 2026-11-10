@@ -195,7 +195,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         var allRaces = await _libraryService.GetRacesAsync(LocalizationService.Instance.Language);
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(newItem, Loc["WarbandArchetypeCreateTitle"],
             _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker, allRaces);
-        if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new WarbandArchetypeEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }
@@ -227,7 +227,7 @@ public partial class WarbandArchetypeViewModel : BaseViewModel
         var allRaces = await _libraryService.GetRacesAsync(LocalizationService.Instance.Language);
         var dialogViewModel = new WarbandArchetypeEditDialogViewModel(copy, Loc["WarbandArchetypeEditTitle"],
             _specialRulePicker, _magicSchoolPicker, _libraryService, _detailDialogs, _equipmentPicker, allRaces);
-        if (await ShowDialogAsync(new WarbandArchetypeEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new WarbandArchetypeEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }

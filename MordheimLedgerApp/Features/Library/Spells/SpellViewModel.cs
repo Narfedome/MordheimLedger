@@ -174,7 +174,7 @@ public partial class SpellViewModel : BaseViewModel
     {
         var newItem = new Spell();
         var dialogViewModel = new SpellEditDialogViewModel(newItem, Loc["SpellCreateTitle"], _magicSchools);
-        if (await ShowDialogAsync(new SpellEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SpellEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSpellAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
@@ -202,7 +202,7 @@ public partial class SpellViewModel : BaseViewModel
         };
 
         var dialogViewModel = new SpellEditDialogViewModel(copy, Loc["SpellEditTitle"], _magicSchools);
-        if (await ShowDialogAsync(new SpellEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SpellEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSpellAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

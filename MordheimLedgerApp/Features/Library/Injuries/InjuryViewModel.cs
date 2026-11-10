@@ -144,7 +144,7 @@ public partial class InjuryViewModel : BaseViewModel
     {
         var newItem = new Injury();
         var dialogViewModel = new InjuryEditDialogViewModel(newItem, Loc["InjuryCreateTitle"]);
-        if (await ShowDialogAsync(new InjuryEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new InjuryEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveInjuryAsync(newItem, LocalizationService.Instance.Language);
         _allItems.Add(newItem);
@@ -172,7 +172,7 @@ public partial class InjuryViewModel : BaseViewModel
         };
 
         var dialogViewModel = new InjuryEditDialogViewModel(copy, Loc["InjuryEditTitle"]);
-        if (await ShowDialogAsync(new InjuryEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new InjuryEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveInjuryAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

@@ -54,7 +54,7 @@ public partial class RacialProfileViewModel : BaseViewModel
     {
         var newItem = new RacialProfile();
         var dialogViewModel = new RacialProfileEditDialogViewModel(newItem, Loc["RacialProfileCreateTitle"], _libraryService);
-        if (await ShowDialogAsync(new RacialProfileEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new RacialProfileEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }
@@ -95,7 +95,7 @@ public partial class RacialProfileViewModel : BaseViewModel
         };
 
         var dialogViewModel = new RacialProfileEditDialogViewModel(copy, Loc["RacialProfileEditTitle"], _libraryService);
-        if (await ShowDialogAsync(new RacialProfileEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new RacialProfileEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }

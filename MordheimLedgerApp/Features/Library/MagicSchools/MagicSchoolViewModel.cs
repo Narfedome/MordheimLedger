@@ -81,7 +81,7 @@ public partial class MagicSchoolViewModel : BaseViewModel
         var newItem = new MagicSchool();
         var dialogViewModel = new MagicSchoolEditDialogViewModel(newItem, Loc["MagicSchoolCreateTitle"],
             _libraryService, Array.Empty<Spell>());
-        if (await ShowDialogAsync(new MagicSchoolEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new MagicSchoolEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
 
@@ -130,7 +130,7 @@ public partial class MagicSchoolViewModel : BaseViewModel
         var initialSpells = (await _libraryService.GetSpellsAsync(language)).Where(sp => sp.MagicSchoolId == s.Id).ToList();
         var dialogViewModel = new MagicSchoolEditDialogViewModel(copy, Loc["MagicSchoolEditTitle"],
             _libraryService, initialSpells);
-        if (await ShowDialogAsync(new MagicSchoolEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new MagicSchoolEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }

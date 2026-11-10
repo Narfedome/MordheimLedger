@@ -194,7 +194,7 @@ public partial class MutationViewModel : BaseViewModel
     {
         var newItem = new Mutation();
         var dialogViewModel = new MutationEditDialogViewModel(newItem, Loc["MutationCreateTitle"], _warbandPicker, _warbandArchetypes);
-        if (await ShowDialogAsync(new MutationEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new MutationEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveMutationAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
@@ -221,7 +221,7 @@ public partial class MutationViewModel : BaseViewModel
         };
 
         var dialogViewModel = new MutationEditDialogViewModel(copy, Loc["MutationEditTitle"], _warbandPicker, _warbandArchetypes);
-        if (await ShowDialogAsync(new MutationEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new MutationEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveMutationAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

@@ -59,7 +59,7 @@ public partial class RaceViewModel : BaseViewModel
     {
         var newItem = new Race();
         var dialogViewModel = new RaceEditDialogViewModel(newItem, Loc["RaceCreateTitle"], _libraryService);
-        if (await ShowDialogAsync(new RaceEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new RaceEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }
@@ -91,7 +91,7 @@ public partial class RaceViewModel : BaseViewModel
         };
 
         var dialogViewModel = new RaceEditDialogViewModel(copy, Loc["RaceEditTitle"], _libraryService);
-        if (await ShowDialogAsync(new RaceEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new RaceEditForm(dialogViewModel)) != true) return;
 
         await LoadData();
     }

@@ -108,6 +108,11 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     [NotifyPropertyChangedFor(nameof(CanGoBack))]
     [NotifyPropertyChangedFor(nameof(IsLastStep))]
     [NotifyPropertyChangedFor(nameof(StepLabel))]
+    [NotifyPropertyChangedFor(nameof(HeaderStepText))]
+    [NotifyPropertyChangedFor(nameof(StepProgress))]
+    [NotifyPropertyChangedFor(nameof(PrimaryButtonText))]
+    [NotifyPropertyChangedFor(nameof(PrimaryButtonCommand))]
+    [NotifyPropertyChangedFor(nameof(SecondaryButtonEnabled))]
     private int selectedTab;
 
     public bool IsGeneralTab => SelectedTab == 0;
@@ -120,6 +125,17 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
     public bool CanGoBack => SelectedTab > 0;
     public bool IsLastStep => SelectedTab == StepCount - 1;
     public string StepLabel => string.Format(Loc["LibStepLabel"], SelectedTab + 1, StepCount);
+
+    // --- En-tête et pied de la page plein écran (FormPageLayout, voir WarbandArchetypeEditForm) -----------
+    // Création pas à pas : « Étape n/N » + barre de progression, Précédent / Suivant (Enregistrer à la
+    // dernière étape), ✕ pour abandonner. Modification : onglets libres, Annuler / Enregistrer.
+    public string HeaderStepText => IsWizardMode ? StepLabel : string.Empty;
+    public double StepProgress => IsWizardMode ? (SelectedTab + 1d) / StepCount : -1;
+    public string PrimaryButtonText => !IsWizardMode || IsLastStep ? Loc["BtnSave"] : Loc["LibNext"];
+    public System.Windows.Input.ICommand PrimaryButtonCommand => !IsWizardMode || IsLastStep ? SaveCommand : NextCommand;
+    public string SecondaryButtonText => IsWizardMode ? Loc["LibBack"] : Loc["BtnCancel"];
+    public System.Windows.Input.ICommand SecondaryButtonCommand => IsWizardMode ? BackCommand : CancelCommand;
+    public bool SecondaryButtonEnabled => !IsWizardMode || CanGoBack;
 
     public WarbandArchetypeEditDialogViewModel(WarbandArchetype item, string title, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, ILibraryService libraryService, IDetailDialogService detailDialogs,
@@ -307,7 +323,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         var newItem = new WarriorArchetype();
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(newItem, Loc["WarriorArchetypeCreateTitle"],
             _specialRulePicker, EquipmentLists.ToList(), _libraryService, allRacialProfiles);
-        if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new WarriorArchetypeEditForm(dialogViewModel)) != true) return;
 
         Warriors.Add(newItem);
     }
@@ -359,7 +375,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
 
         var dialogViewModel = new WarriorArchetypeEditDialogViewModel(copy, Loc["WarriorArchetypeEditTitle"],
             _specialRulePicker, EquipmentLists.ToList(), _libraryService, allRacialProfiles);
-        if (await ShowDialogAsync(new WarriorArchetypeEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new WarriorArchetypeEditForm(dialogViewModel)) != true) return;
 
         var index = Warriors.IndexOf(warrior);
         if (index >= 0) Warriors[index] = copy;
@@ -378,7 +394,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         var newItem = new EquipmentList();
         var dialogViewModel = new EquipmentListEditDialogViewModel(newItem, Loc["EquipmentListCreateTitle"],
             _equipmentPicker, Array.Empty<EquipmentItem>(), _libraryService, _detailDialogs);
-        if (await ShowDialogAsync(new EquipmentListEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new EquipmentListEditForm(dialogViewModel)) != true) return;
 
         EquipmentLists.Add(newItem);
     }
@@ -401,7 +417,7 @@ public partial class WarbandArchetypeEditDialogViewModel : DialogViewModel<bool>
         var initialItems = await _libraryService.GetEquipmentItemsAsync(copy.ItemIds, language);
         var dialogViewModel = new EquipmentListEditDialogViewModel(copy, Loc["EquipmentListEditTitle"],
             _equipmentPicker, initialItems, _libraryService, _detailDialogs);
-        if (await ShowDialogAsync(new EquipmentListEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new EquipmentListEditForm(dialogViewModel)) != true) return;
 
         var index = EquipmentLists.IndexOf(list);
         if (index >= 0) EquipmentLists[index] = copy;

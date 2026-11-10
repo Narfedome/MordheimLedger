@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.SpecialRules.CreateEdit.SpecialRuleEditForm"
+               x:DataType="local:SpecialRuleEditDialogViewModel">
+    <!-- Page plein écran (autrefois SpecialRuleEditDialog, voir Components/FormPage) : titre et
+         ✕ dans l'en-tête, Annuler / Enregistrer dans le pied, contenu en carte. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{loc:Loc SpecialRuleNamePh}"/>
+                                <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                    <Entry Text="{Binding Item.Name}"/>
+                    <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                           IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                </VerticalStackLayout>
+
+                <components:ScrollableTabStripView>
+                    <HorizontalStackLayout Spacing="16">
+                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                     IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                        <components:TabToggleButton Text="{loc:Loc SpecialRuleTabMaterials}" Command="{Binding ShowMaterialsTabCommand}"
+                                                     IsActive="{Binding IsMaterialsTab}" FontSize="12"
+                                                     IsVisible="{Binding IsMaterialRule}"/>
+                    </HorizontalStackLayout>
+                </components:ScrollableTabStripView>
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Editor Text="{Binding Item.Description}" HeightRequest="100"/>
+                    </VerticalStackLayout>
+                    <HorizontalStackLayout Spacing="10">
+                        <CheckBox IsChecked="{Binding IsMaterialRule}" VerticalOptions="Center"/>
+                        <Label Text="{loc:Loc SpecialRuleIsMaterialRule}" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Multiplicateur/Abréviation/Rareté ne sont significatifs que pour une règle "matériau"
+                     (voir SpecialRule.CostMultiplier) - regroupés dans leur propre onglet plutôt que mêlés
+                     aux champs génériques d'une règle spéciale ordinaire. -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsMaterialsTab}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc SpecialRuleCostMultiplierPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.CostMultiplier}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc SpecialRuleAbbreviationPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Abbreviation}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Entry Text="{Binding Item.Rarity}" Keyboard="Numeric"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </form:FormPageLayout>
+</form:FormContent>

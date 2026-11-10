@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<form:FormContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:form="clr-namespace:MordheimLedgerApp.Components.FormPage"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
+               xmlns:system="clr-namespace:System;assembly=mscorlib"
+               xmlns:local="clr-namespace:MordheimLedgerApp.Features.Library.MagicSchools.CreateEdit"
+               xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
+               xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+               xmlns:components="clr-namespace:MordheimLedgerApp.Components"
+               x:TypeArguments="system:Boolean"
+               x:Class="MordheimLedgerApp.Features.Library.MagicSchools.CreateEdit.MagicSchoolEditForm"
+               x:DataType="local:MagicSchoolEditDialogViewModel">
+    <!-- Page plein écran (autrefois MagicSchoolEditDialog, voir Components/FormPage) : titre et
+         ✕ dans l'en-tête, Annuler / Enregistrer dans le pied, contenu en carte. -->
+    <form:FormPageLayout Title="{Binding Title}"
+                         CloseCommand="{Binding CancelCommand}"
+                         SecondaryText="{loc:Loc BtnCancel}"
+                         SecondaryCommand="{Binding CancelCommand}"
+                         PrimaryText="{loc:Loc BtnSave}"
+                         PrimaryCommand="{Binding SaveCommand}">
+        <Border Style="{StaticResource SectionCardBorderStyle}">
+            <VerticalStackLayout Spacing="16">
+
+                <components:ScrollableTabStripView>
+                    <HorizontalStackLayout Spacing="16">
+                        <components:TabToggleButton Text="{loc:Loc WarbandArchetypeTabGeneral}" Command="{Binding ShowGeneralTabCommand}"
+                                                     IsActive="{Binding IsGeneralTab}" FontSize="12"/>
+                        <components:TabToggleButton Text="{loc:Loc LibTabSpells}" Command="{Binding ShowSpellsTabCommand}"
+                                                     IsActive="{Binding IsSpellsTab}" FontSize="12"/>
+                    </HorizontalStackLayout>
+                </components:ScrollableTabStripView>
+
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsGeneralTab}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label FontSize="12" TextColor="{DynamicResource AppTextMuted}">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{loc:Loc MagicSchoolNamePh}"/>
+                                    <Span Text=" *" TextColor="{StaticResource AppDanger}"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                        <Entry Text="{Binding Item.Name}"/>
+                        <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                               IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
+                    </VerticalStackLayout>
+                    <Editor Text="{Binding Item.Description}" Placeholder="{loc:Loc LibDescriptionPh}" HeightRequest="100"/>
+                </VerticalStackLayout>
+
+                <!-- Sorts de cette école, édités en mémoire (voir MagicSchoolEditDialogViewModel) -
+                     sauvegardés en bloc avec l'école au Save, pas d'appel service avant. -->
+                <VerticalStackLayout Spacing="16" IsVisible="{Binding IsSpellsTab}">
+                    <components:ChipListView HeaderText="{loc:Loc LibSpellsPh}"
+                                              ItemsSource="{Binding Spells}"
+                                              IconFontFamily="RpgAwesome"
+                                              IconGlyph="{x:Static icons:RpgFont.RaBurningBook}"
+                                              Command="{Binding EditSpellCommand}"
+                                              AddCommand="{Binding AddSpellCommand}"
+                                              RemoveCommand="{Binding RemoveSpellCommand}"/>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </form:FormPageLayout>
+</form:FormContent>

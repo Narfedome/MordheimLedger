@@ -67,7 +67,7 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
     {
         var newSpell = new Spell { MagicSchoolId = Item.Id };
         var dialogViewModel = new SpellEditDialogViewModel(newSpell, Loc["SpellCreateTitle"], new[] { Item });
-        if (await ShowDialogAsync(new SpellEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SpellEditForm(dialogViewModel)) != true) return;
 
         Spells.Add(newSpell);
     }
@@ -91,7 +91,7 @@ public partial class MagicSchoolEditDialogViewModel : DialogViewModel<bool>
         };
 
         var dialogViewModel = new SpellEditDialogViewModel(copy, Loc["SpellEditTitle"], new[] { Item });
-        if (await ShowDialogAsync(new SpellEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SpellEditForm(dialogViewModel)) != true) return;
 
         var index = Spells.IndexOf(spell);
         if (index >= 0) Spells[index] = copy;

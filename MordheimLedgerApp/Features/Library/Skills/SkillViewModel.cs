@@ -275,7 +275,7 @@ public partial class SkillViewModel : BaseViewModel
         var effectNames = await SkillEffectNames.LoadAsync(_libraryService, LocalizationService.Instance.Language);
         var dialogViewModel = new SkillEditDialogViewModel(newItem, Loc["SkillCreateTitle"], _warbandPicker,
             _warriorPicker, _warbandArchetypes, Array.Empty<WarriorArchetype>(), effectNames);
-        if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SkillEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(newItem, LocalizationService.Instance.Language);
         _allItems.Add(newItem);
@@ -315,7 +315,7 @@ public partial class SkillViewModel : BaseViewModel
         var effectNames = await SkillEffectNames.LoadAsync(_libraryService, LocalizationService.Instance.Language);
         var dialogViewModel = new SkillEditDialogViewModel(copy, Loc["SkillEditTitle"], _warbandPicker,
             _warriorPicker, _warbandArchetypes, initialWarriors, effectNames);
-        if (await ShowDialogAsync(new SkillEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SkillEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSkillAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

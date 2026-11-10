@@ -188,7 +188,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
     {
         var newItem = new SpecialRule();
         var dialogViewModel = new SpecialRuleEditDialogViewModel(newItem, Loc["SpecialRuleCreateTitle"]);
-        if (await ShowDialogAsync(new SpecialRuleEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SpecialRuleEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSpecialRuleAsync(newItem, LocalizationService.Instance.Language);
         await LoadData();
@@ -230,7 +230,7 @@ public partial class SpecialRuleViewModel : BaseViewModel
         };
 
         var dialogViewModel = new SpecialRuleEditDialogViewModel(copy, Loc["SpecialRuleEditTitle"]);
-        if (await ShowDialogAsync(new SpecialRuleEditDialog(dialogViewModel)) != true) return;
+        if (await ShowFormAsync(new SpecialRuleEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveSpecialRuleAsync(copy, LocalizationService.Instance.Language);
         await LoadData();

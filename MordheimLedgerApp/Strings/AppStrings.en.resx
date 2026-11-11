@@ -3100,4 +3100,13 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRecapLootGoldFormat" xml:space="preserve">
     <value>Gold: {0} gc</value>
   </data>
+  <data name="EndOfGameRecapPromotionFormat" xml:space="preserve">
+    <value>{0} promoted to Hero</value>
+  </data>
+  <data name="EndOfGameRecapPromotionWithResultFormat" xml:space="preserve">
+    <value>{0} promoted to Hero ({1})</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordFreeFormat" xml:space="preserve">
+    <value>{0}: free for the next battle</value>
+  </data>
 </root>

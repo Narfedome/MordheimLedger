@@ -3100,4 +3100,13 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRecapLootGoldFormat" xml:space="preserve">
     <value>Or : {0} CO</value>
   </data>
+  <data name="EndOfGameRecapPromotionFormat" xml:space="preserve">
+    <value>{0} promu Héros</value>
+  </data>
+  <data name="EndOfGameRecapPromotionWithResultFormat" xml:space="preserve">
+    <value>{0} promu Héros ({1})</value>
+  </data>
+  <data name="EndOfGameRecapHiredSwordFreeFormat" xml:space="preserve">
+    <value>{0} : offert pour la prochaine bataille</value>
+  </data>
 </root>

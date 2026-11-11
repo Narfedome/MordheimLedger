@@ -937,10 +937,18 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
             if (HasHatredTarget) parts.Add(string.Format(_loc["WarriorsHatredChipFormat"], HatredTargetDisplayName));
             foreach (var advance in IsDead ? [] : AdvanceRolls.Concat(ExplorationAdvanceRolls))
             {
-                if (advance.SelectedSkills.Count > 0) parts.Add(advance.SelectedSkillsText);
-                else if (advance.HasSpellSelected) parts.Add(advance.SelectedSpell!.Name);
-                else if (advance.ResolvedField is not null) parts.Add($"{advance.ResolvedFieldLabel} +1");
-                else if (!string.IsNullOrWhiteSpace(advance.ResultText)) parts.Add(advance.ResultText);
+                // Promotion : le nom du nouveau Héros et le résultat de son jet, puis celui du reste du groupe -
+                // plutôt que la description complète de la table (récap illisible, recette du 2026-11-11).
+                if (advance.IsPromotionResult && advance.PromotedWarriorPreview is { } promoted)
+                {
+                    var heroResult = advance.NestedHeroRoll?.ShortSummary;
+                    parts.Add(string.IsNullOrWhiteSpace(heroResult)
+                        ? string.Format(_loc["EndOfGameRecapPromotionFormat"], promoted.Name)
+                        : string.Format(_loc["EndOfGameRecapPromotionWithResultFormat"], promoted.Name, heroResult));
+                    if (advance.NestedHenchmanRoll?.ShortSummary is { Length: > 0 } remainder) parts.Add(remainder);
+                    continue;
+                }
+                if (advance.ShortSummary is { Length: > 0 } summary) parts.Add(summary);
             }
 
             return parts.Count > 0

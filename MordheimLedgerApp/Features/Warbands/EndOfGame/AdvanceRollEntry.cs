@@ -178,6 +178,14 @@ public partial class AdvanceRollEntry : ObservableObject
     public ObservableCollection<Skill> SelectedSkills { get; } = new();
     public string SelectedSkillsText => string.Join(", ", SelectedSkills.Select(s => s.Name));
 
+    /// <summary>Résultat de ce jet en quelques mots pour le récap (compétence, sort, caractéristique +1, sinon
+    /// le texte de la table) - vide tant que rien n'est résolu.</summary>
+    public string ShortSummary =>
+        SelectedSkills.Count > 0 ? SelectedSkillsText
+        : HasSpellSelected ? SelectedSpell!.Name
+        : ResolvedField is not null ? $"{ResolvedFieldLabel} +1"
+        : ResultText ?? string.Empty;
+
     /// <summary>Pilote l'affichage exclusif bouton "Choisir une compétence" / nom(s) choisi(s) dans le
     /// XAML - une fois une compétence sélectionnée, son nom remplace le bouton plutôt que de
     /// s'afficher à côté.</summary>

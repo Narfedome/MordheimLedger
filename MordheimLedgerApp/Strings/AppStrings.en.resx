@@ -1249,6 +1249,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGamePairCorruptionOptionFormat" xml:space="preserve">
     <value>Corruption of {0} (A Fistful of Crowns)</value>
   </data>
+  <data name="EndOfGamePairCorruptionHint" xml:space="preserve">
+    <value>Only if your opponent had them in their warband and you bribed them during the game: your warband pays the agreed amount. Otherwise, leave unchecked and move on.</value>
+  </data>
   <data name="EndOfGamePairRetentionHint" xml:space="preserve">
     <value>A Fistful of Crowns: amount paid to keep them after an enemy bribery attempt - leave at 0 if no attempt happened.</value>
   </data>

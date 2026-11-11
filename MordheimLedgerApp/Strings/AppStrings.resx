@@ -1249,6 +1249,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGamePairCorruptionOptionFormat" xml:space="preserve">
     <value>Corruption de {0} (Une Poignée d'Or)</value>
   </data>
+  <data name="EndOfGamePairCorruptionHint" xml:space="preserve">
+    <value>Seulement si l'adversaire les avait dans sa bande et que vous les avez soudoyés pendant la partie : votre bande paie le montant convenu. Sinon, laissez décoché et passez.</value>
+  </data>
   <data name="EndOfGamePairRetentionHint" xml:space="preserve">
     <value>Une Poignée d'Or : montant payé pour les garder après une tentative de corruption adverse - laissez à 0 si aucune tentative n'a eu lieu.</value>
   </data>

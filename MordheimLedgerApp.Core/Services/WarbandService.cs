@@ -1,3 +1,4 @@
+// Stryker disable all : requêtes sqlite-net (arbres d'expression) - un mutant y empêche la traduction SQL et fausse les tests de mutation (voir MordheimLedgerApp.Tests/stryker-config.json).
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;

@@ -172,4 +172,48 @@ public class RosterChangeServiceTests : IDisposable
 
         Assert.Equal(treasury - 25, (await _warbands.GetWarbandAsync(warband.Id))!.Treasury);
     }
+
+    // --- Ajouts après le passage Stryker du 2026-11-11 (mutants survivants) ---
+
+    [Fact]
+    public async Task DismissingNobody_ChangesNothing()
+    {
+        var (warband, archetypes) = await WarbandAsync();
+        var group = await _service.RecruitAsync(warband.Id, new RecruitDraft(archetypes.First(a => !a.IsHero), "Reik Blades", 3, [], []));
+        group = await ReloadAsync(warband, group.Id);
+
+        Assert.False(await _service.DismissAsync(group, 0));
+        Assert.Equal(3, (await ReloadAsync(warband, group.Id)).HeadCount);
+    }
+
+    [Fact]
+    public async Task SellingAWholeStack_LeavesNoLine()
+    {
+        var (warband, archetypes) = await WarbandAsync();
+        var hero = await _warbands.RecruitWarriorAsync(warband.Id, archetypes.First(a => a.IsHero), "Gunther");
+        await _warbands.AddWarriorEquipmentAsync(hero.Id, await ItemAsync("Dagger"), quantity: 2);
+        var line = Assert.Single((await ReloadAsync(warband, hero.Id)).Equipment);
+
+        await _service.SellCarriedAsync(line, 2);
+
+        Assert.Empty((await ReloadAsync(warband, hero.Id)).Equipment);
+    }
+
+    [Fact]
+    public async Task Reallocation_UnchangedLine_KeepsItsRow_AndALineReducedToZeroDisappears()
+    {
+        var (warband, archetypes) = await WarbandAsync();
+        var hero = await _warbands.RecruitWarriorAsync(warband.Id, archetypes.First(a => a.IsHero), "Gunther");
+        await _warbands.AddWarriorEquipmentAsync(hero.Id, await ItemAsync("Dagger"));
+        await _warbands.AddWarriorEquipmentAsync(hero.Id, await ItemAsync("Axe"));
+        hero = await ReloadAsync(warband, hero.Id);
+        var original = hero.Equipment.ToDictionary(e => e.Id, e => e.Quantity);
+        var daggerId = hero.Equipment.Single(e => e.Item.Name == "Dagger").Id;
+        hero.Equipment.Single(e => e.Item.Name == "Axe").Quantity = 0;
+
+        await _service.ApplyEquipmentChangesAsync(hero, original);
+
+        var reloaded = (await ReloadAsync(warband, hero.Id)).Equipment;
+        Assert.Equal(daggerId, Assert.Single(reloaded).Id);
+    }
 }

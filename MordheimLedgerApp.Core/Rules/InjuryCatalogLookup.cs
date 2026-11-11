@@ -1,13 +1,13 @@
 using MordheimLedgerApp.Core.Models.Library;
 
-namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
+namespace MordheimLedgerApp.Core.Rules;
 
 /// <summary>Find-or-create-by-roll matching against the Injury catalog (Injuries.json), shared between
 /// WarbandDetailViewModel.EndOfGame (resolving which catalog Injury to actually attach at Save) and
 /// WarriorOutcomeRow (previewing the same resolution live in the wizard, e.g. to show a tappable
 /// SpecialRule chip for Madness/24 before the player even hits Save). Extracted 2026-08-25 rather than
 /// duplicated - the roll-range parsing is a real small algorithm, not "three similar lines".</summary>
-internal static class InjuryCatalogLookup
+public static class InjuryCatalogLookup
 {
     /// <summary>Does <paramref name="roll"/> fall within <paramref name="rollRange"/>, the catalog's
     /// free-text display field (Injury.RollRange/BranchRange - see Injuries.json, ex. "22", "16, 21",

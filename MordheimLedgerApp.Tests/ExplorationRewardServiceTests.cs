@@ -179,4 +179,28 @@ public class ExplorationRewardServiceTests : IDisposable
         Assert.Equal(hiredSword.Name, recruited.Name);
         Assert.Equal(treasury, (await ReloadWarbandAsync(warband.Id)).Treasury); // offert
     }
+
+    // --- Ajouts après le passage Stryker du 2026-11-11 (mutants survivants) ---
+
+    [Fact]
+    public async Task NoCatacombReward_LeavesTheRerollOff()
+    {
+        var (warband, _) = await WarbandAsync();
+
+        await _service.ApplyAsync(warband, [], new ExplorationRewards { GrantsCatacombReroll = false });
+
+        Assert.False((await ReloadWarbandAsync(warband.Id)).HasCatacombReroll);
+    }
+
+    [Fact]
+    public async Task LeaderExperience_Alone_IsPersisted()
+    {
+        var (warband, archetypes) = await WarbandAsync();
+        var captain = await _warbands.RecruitWarriorAsync(warband.Id, archetypes.First(a => a.IsHero), "Gunther");
+        var xp = captain.Experience;
+
+        await _service.ApplyAsync(warband, [captain], new ExplorationRewards { LeaderExperience = (captain, 1) });
+
+        Assert.Equal(xp + 1, (await _warbands.GetWarriorsAsync(warband.Id, "en")).Single(w => w.Id == captain.Id).Experience);
+    }
 }

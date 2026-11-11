@@ -1,6 +1,7 @@
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
+using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -202,24 +203,9 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        foreach (var original in _originalReserveSnapshot)
-        {
-            var current = finalReserve.Lines.FirstOrDefault(l => l.SourceId == original.SourceId);
-            var finalQuantity = current?.Quantity ?? 0;
-            if (finalQuantity == original.Quantity) continue;
-
-            await _warbandService.RemoveWarbandEquipmentAsync(original.SourceId!.Value);
-            if (finalQuantity > 0)
-                await _warbandService.AddWarbandEquipmentAsync(Warband.Id, original.Item, finalQuantity, original.MaterialRule, original.FoundValueOverride);
-        }
-
-        // Fusionnées par (Item, Matériau, valeur trouvée) quelle que soit l'origine - l'origine ne sert
-        // que pendant le wizard, une ligne WarbandEquipment ne la retient pas.
-        foreach (var group in finalReserve.Lines.Where(l => l.SourceId is null)
-                     .GroupBy(l => (l.Item.Id, MaterialRuleId: l.MaterialRule?.Id, l.FoundValueOverride)))
-        {
-            var first = group.First();
-            await _warbandService.AddWarbandEquipmentAsync(Warband.Id, first.Item, group.Sum(l => l.Quantity), first.MaterialRule, first.FoundValueOverride);
-        }
+        // Calcul d'écart et fusion des apports : PostBattleTradingService (Core, testé).
+        static StashLine ToStashLine(ReserveLine l) => new(l.SourceId, l.Item, l.MaterialRule, l.Quantity, l.FoundValueOverride);
+        await new PostBattleTradingService(_warbandService).ApplyReserveAsync(Warband.Id,
+            _originalReserveSnapshot.Select(ToStashLine).ToList(), finalReserve.Lines.Select(ToStashLine).ToList());
     }
 }

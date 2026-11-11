@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -28,51 +28,36 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null || !HasCapturedEnemies) return;
 
+        // Les écritures (or, Zombie, XP du chef) : PostBattleSequenceService (Core, testé) ; ici les phrases.
+        var outcomes = new List<CaptiveOutcome>();
         foreach (var entry in CapturedEnemies)
         {
+            var hasGold = int.TryParse(entry.GoldAmount, out var gold);
             switch (entry.SelectedFate)
             {
-                case CapturedEnemyFate.Ransomed when int.TryParse(entry.GoldAmount, out var ransom):
-                    Warband.Treasury += ransom;
-                    sentences.Add(string.Format(Loc["HistoryCapturedEnemyRansomedSentence"], ransom));
+                case CapturedEnemyFate.Ransomed when hasGold:
+                    outcomes.Add(new CaptiveOutcome(CaptiveFate.Ransomed, gold));
+                    sentences.Add(string.Format(Loc["HistoryCapturedEnemyRansomedSentence"], gold));
                     break;
-
-                case CapturedEnemyFate.SoldToSlavers when int.TryParse(entry.GoldAmount, out var sold):
-                    Warband.Treasury += sold;
-                    sentences.Add(string.Format(Loc["HistoryCapturedEnemySoldSentence"], sold));
+                case CapturedEnemyFate.SoldToSlavers when hasGold:
+                    outcomes.Add(new CaptiveOutcome(CaptiveFate.SoldToSlavers, gold));
+                    sentences.Add(string.Format(Loc["HistoryCapturedEnemySoldSentence"], gold));
                     break;
-
-                // Fusionne dans un groupe de Zombies déjà existant plutôt que de créer une ligne
-                // séparée - même principe que GrantsFreeHenchmanArchetypeOfficialId (Traînard/Prisonniers) plus
-                // haut dans ce fichier, un Zombie ne pouvant de toute façon porter aucun équipement.
                 case CapturedEnemyFate.KilledForZombie:
-                    if (warriorArchetypesByOfficialId.TryGetValue(OfficialIds.ZombieWarrior, out var zombieArchetype))
-                    {
-                        var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == zombieArchetype.Id);
-                        if (existingGroup is not null)
-                        {
-                            existingGroup.Warrior.HeadCount += 1;
-                            await _warbandService.SaveWarriorAsync(existingGroup.Warrior);
-                        }
-                        else
-                        {
-                            await _warbandService.RecruitWarriorAsync(Warband.Id, zombieArchetype, zombieArchetype.Name, headCount: 1);
-                        }
-                    }
+                    outcomes.Add(new CaptiveOutcome(CaptiveFate.KilledForZombie));
                     sentences.Add(Loc["HistoryCapturedEnemyKilledSentence"]);
                     break;
-
                 case CapturedEnemyFate.SacrificedForXp:
-                    var leader = SurvivingLeader;
-                    if (leader is not null)
-                    {
-                        leader.Warrior.Experience += 1;
-                        await _warbandService.SaveWarriorAsync(leader.Warrior);
-                        sentences.Add(string.Format(Loc["HistoryCapturedEnemySacrificedSentence"], leader.Warrior.Name));
-                    }
+                    outcomes.Add(new CaptiveOutcome(CaptiveFate.SacrificedForXp));
                     break;
             }
         }
+
+        var leader = SurvivingLeader?.Warrior;
+        var sacrifices = await new PostBattleSequenceService(_warbandService).ApplyCaptivesAsync(Warband, outcomes,
+            Henchmen.Select(r => r.Warrior), warriorArchetypesByOfficialId.GetValueOrDefault(OfficialIds.ZombieWarrior), leader);
+        for (var i = 0; i < sacrifices; i++)
+            sentences.Add(string.Format(Loc["HistoryCapturedEnemySacrificedSentence"], leader!.Name));
     }
 
     /// <summary>Étape "Vente de pierre magique" (livre, étape 4 - EndOfGamePageViewModel.
@@ -83,10 +68,8 @@ public partial class EndOfGamePageViewModel
         if (Warband is null || ShardsToSell <= 0) return;
 
         var gold = WyrdstoneSaleValue;
-        Warband.WyrdstoneShards -= ShardsToSell;
-        Warband.Treasury += gold;
-        await _warbandService.SaveWarbandAsync(Warband);
-        sentences.Add(string.Format(Loc["HistoryWyrdstoneSaleSentence"], ShardsToSell, gold));
+        var sold = await new PostBattleSequenceService(_warbandService).SellWyrdstoneAsync(Warband, ShardsToSell, gold);
+        if (sold > 0) sentences.Add(string.Format(Loc["HistoryWyrdstoneSaleSentence"], sold, gold));
     }
 
     /// <summary>Étape "Disponibilité des Vétérans" (livre, étape 5 - EndOfGamePageViewModel.
@@ -212,6 +195,7 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
+        var departures = new List<WandererDeparture>();
         foreach (var row in WarriorRows)
         {
             var warrior = row.Warrior;
@@ -220,12 +204,10 @@ public partial class EndOfGamePageViewModel
             var persona = _dramatisPersonaCatalog.FirstOrDefault(p => p.Id == warrior.DramatisPersonaId);
             if (persona is not { IsWanderer: true }) continue;
 
-            await _warbandService.DeleteWarriorAsync(warrior.Id);
             // Délai de re-recherche (2026-09-01, Aenur/Ulli & Marquand - PAS Bertha, voir
             // RequiresCooldownBeforeResearch's own doc) - posé APRÈS le nettoyage global juste avant cet
             // appel (voir EndOfGame()), donc jamais effacé par lui.
-            if (persona.RequiresCooldownBeforeResearch)
-                await _warbandService.AddDramatisPersonaCooldownAsync(Warband.Id, persona.Id);
+            departures.Add(new WandererDeparture(warrior, persona.RequiresCooldownBeforeResearch ? persona.Id : null));
             // Une Poignée d'Or (2026-09-01) : un guerrier basculé "hostile" sur sa carte (voir
             // WarbandDetailViewModel.ToggleHostile) part de toute façon comme tout Vagabond, mais avec
             // une phrase d'historique distincte - il quitte parce que l'adversaire l'a corrompu, pas
@@ -234,6 +216,8 @@ public partial class EndOfGamePageViewModel
             // paie, jamais celui qui les a recrutés).
             sentences.Add(string.Format(warrior.IsHostileThisBattle ? Loc["HistoryDramatisPersonaCorruptedSentence"] : Loc["HistoryDramatisPersonaDepartedSentence"], warrior.Name));
         }
+        // Suppressions et délais : PostBattleSequenceService (Core, testé).
+        await new PostBattleSequenceService(_warbandService).DepartWanderersAsync(Warband.Id, departures);
     }
 
     /// <summary>Étape "Dramatis Personae" (EndOfGamePageViewModel.IsDramatisPersonaeStep) - règle la
@@ -253,28 +237,30 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
+        // Écritures (soldes, départs, paiements de la paire) : PostBattleSequenceService (Core, testé) ; ici les phrases.
+        var sequence = new PostBattleSequenceService(_warbandService);
+        var decisions = new List<UpkeepDecision>();
         foreach (var entry in LivingDramatisPersonaUpkeepEntries)
         {
             var warrior = entry.Warrior;
 
             if (entry.WillPay == true && entry.IsWyrdstoneFee)
             {
-                Warband.WyrdstoneShards -= entry.UpkeepCost;
-                await _warbandService.SaveWarbandAsync(Warband);
+                decisions.Add(new UpkeepDecision(warrior, UpkeepChoice.PayWyrdstone, entry.UpkeepCost));
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaWyrdstoneUpkeepPaidSentence"], warrior.Name));
             }
             else if (entry.WillPay == true)
             {
-                Warband.Treasury -= entry.UpkeepCost;
-                await _warbandService.SaveWarbandAsync(Warband);
+                decisions.Add(new UpkeepDecision(warrior, UpkeepChoice.PayGold, entry.UpkeepCost));
                 sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPaidSentence"], warrior.Name, entry.UpkeepCost));
             }
             else
             {
-                await _warbandService.DeleteWarriorAsync(warrior.Id);
+                decisions.Add(new UpkeepDecision(warrior, UpkeepChoice.Refuse, entry.UpkeepCost));
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaUpkeepRefusedSentence"], warrior.Name));
             }
         }
+        await sequence.ApplyUpkeepAsync(Warband, decisions);
 
         // Une Poignée d'Or (2026-09-01) : case optionnelle pour une bande qui n'a PAS déjà Ulli &
         // Marquand (voir EndOfGamePageViewModel.ShowPairCorruptionOption) - elle vient de gagner leur
@@ -296,8 +282,7 @@ public partial class EndOfGamePageViewModel
         if (ShowPairCorruptionOption && WantsToRecordPairCorruption && !IsPairCorruptionUnaffordable
             && int.TryParse(PairCorruptionAmount, out var corruptionAmount))
         {
-            Warband.Treasury -= corruptionAmount;
-            await _warbandService.SaveWarbandAsync(Warband);
+            await sequence.PayPairAsync(Warband, corruptionAmount);
             sentences.Add(string.Format(Loc["HistoryPairCorruptionPaidSentence"], corruptionAmount));
         }
 
@@ -312,8 +297,7 @@ public partial class EndOfGamePageViewModel
         if (ShowPairRetentionOption && !IsPairRetentionUnaffordable
             && int.TryParse(PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
         {
-            Warband.Treasury -= retentionAmount;
-            await _warbandService.SaveWarbandAsync(Warband);
+            await sequence.PayPairAsync(Warband, retentionAmount);
             sentences.Add(string.Format(Loc["HistoryPairRetentionPaidSentence"], PairRetentionLabel, retentionAmount));
         }
     }
@@ -359,9 +343,8 @@ public partial class EndOfGamePageViewModel
             return;
         }
 
-        warrior.Status = WarriorStatus.Dead;
         sentences.Add(string.Format(Loc["HistoryPairDuelLostSentence"], warrior.Name));
-        await _warbandService.SaveWarriorAsync(warrior);
+        await new PostBattleSequenceService(_warbandService).LoseDuelAsync(warrior);
     }
 
     /// <summary>Étape "Francs-Tireurs" (EndOfGamePageViewModel.IsHiredSwordsStep) - règle la solde de
@@ -373,6 +356,9 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
+        // Écritures (soldes, embauche) : PostBattleSequenceService (Core, testé) ; ici les phrases.
+        var sequence = new PostBattleSequenceService(_warbandService);
+        var decisions = new List<UpkeepDecision>();
         foreach (var entry in LivingHiredSwordUpkeepEntries)
         {
             var warrior = entry.Warrior;
@@ -381,16 +367,14 @@ public partial class EndOfGamePageViewModel
             {
                 // "Une Faveur Rendue" ne couvre que la toute prochaine solde - consommée ici, qu'elle
                 // qu'ait été la partie jouée entre-temps (voir Models.Warrior.HiredSwordUpkeepPrepaid).
-                warrior.HiredSwordUpkeepPrepaid = false;
-                await _warbandService.SaveWarriorAsync(warrior);
+                decisions.Add(new UpkeepDecision(warrior, UpkeepChoice.Prepaid, 0));
                 sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPrepaidSentence"], warrior.Name));
                 continue;
             }
 
             if (entry.WillPay == true)
             {
-                Warband.Treasury -= entry.UpkeepCost;
-                await _warbandService.SaveWarbandAsync(Warband);
+                decisions.Add(new UpkeepDecision(warrior, UpkeepChoice.PayGold, entry.UpkeepCost));
                 sentences.Add(string.Format(Loc["HistoryHiredSwordUpkeepPaidSentence"], warrior.Name, entry.UpkeepCost));
             }
             else
@@ -398,10 +382,11 @@ public partial class EndOfGamePageViewModel
                 // Solde refusée/impayée - il quitte la bande pour de bon, perd toute son XP (livre des
                 // règles) - même s'il est réengagé plus tard, ce sera une toute nouvelle ligne (voir
                 // Models.Warrior.HiredSwordId).
-                await _warbandService.DeleteWarriorAsync(warrior.Id);
+                decisions.Add(new UpkeepDecision(warrior, UpkeepChoice.Refuse, entry.UpkeepCost));
                 sentences.Add(string.Format(Loc["HistoryHiredSwordLeftSentence"], warrior.Name));
             }
         }
+        await sequence.ApplyUpkeepAsync(Warband, decisions);
 
         if (SelectedNewHiredSword is { } hiredSword)
         {
@@ -409,9 +394,7 @@ public partial class EndOfGamePageViewModel
             var startingEquipment = localizedEquipment.Where(e => hiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
             var name = NewHiredSwordName.Trim();
 
-            await _warbandService.RecruitHiredSwordAsync(Warband.Id, hiredSword, name, startingEquipment);
-            Warband.Treasury -= hiredSword.HireCost;
-            await _warbandService.SaveWarbandAsync(Warband);
+            await sequence.HireAsync(Warband, hiredSword, name, startingEquipment);
             sentences.Add(string.Format(Loc["HistoryHiredSwordHiredSentence"], name, hiredSword.Name));
         }
     }

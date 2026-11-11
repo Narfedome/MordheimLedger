@@ -3,13 +3,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.ResultStepView"
              x:DataType="local:EndOfGamePageViewModel">
     <!-- Étape : Résultat (contexte pour la phrase d'Historique - pas une étape du livre) -->
     <VerticalStackLayout Spacing="12">
         <Label Text="{loc:Loc EndOfGameResultPh}" FontAttributes="Bold"/>
         <Border Style="{StaticResource SectionCardBorderStyle}">
-            <Picker x:Name="ResultPicker"
+            <components:SelectFieldView Title="{loc:Loc EndOfGameResultPh}" x:Name="ResultPicker"
                     ItemsSource="{Binding ResultOptions}"
                     SelectedItem="{Binding SelectedResult}"/>
         </Border>

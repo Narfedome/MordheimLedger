@@ -38,7 +38,7 @@
 
                 <VerticalStackLayout Spacing="4">
                     <Label Text="{loc:Loc DramatisPersonaFeeKindPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Picker ItemsSource="{Binding FeeKindOptions}"
+                    <components:SelectFieldView Title="{loc:Loc DramatisPersonaFeeKindPh}" ItemsSource="{Binding FeeKindOptions}"
                             SelectedItem="{Binding SelectedFeeKindLabel}"/>
                 </VerticalStackLayout>
 

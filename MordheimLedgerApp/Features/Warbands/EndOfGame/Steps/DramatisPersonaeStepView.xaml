@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.DramatisPersonaeStepView"
              x:DataType="local:EndOfGamePageViewModel">
             <!-- Étape : Dramatis Personae (solde des personnages à frais récurrents déjà engagés - en or
@@ -23,7 +24,7 @@
                                         <Label Grid.Column="1" Text="{Binding UpkeepCostDisplay}" TextColor="{DynamicResource AppTextMuted}"/>
                                     </Grid>
                                     <VerticalStackLayout Spacing="4">
-                                        <Picker ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
+                                        <components:SelectFieldView Title="{Binding DisplayName}" ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
                                         <Label Text="{Binding ChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                IsVisible="{Binding ChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
                                     </VerticalStackLayout>

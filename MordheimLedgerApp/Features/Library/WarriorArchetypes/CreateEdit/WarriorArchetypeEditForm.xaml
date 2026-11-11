@@ -67,7 +67,7 @@
                                   (Zombies, Squigs des cavernes...). Voir EquipmentList/WarriorArchetype.EquipmentListId. -->
                                      <VerticalStackLayout Spacing="4">
                                          <Label Text="{loc:Loc WarriorArchetypeEquipmentListPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                                         <Picker ItemsSource="{Binding EquipmentListOptions}"
+                                         <components:SelectFieldView Title="{loc:Loc WarriorArchetypeEquipmentListPh}" ItemsSource="{Binding EquipmentListOptions}"
                                          SelectedItem="{Binding SelectedEquipmentListLabel}"/>
                                      </VerticalStackLayout>
 
@@ -91,7 +91,7 @@
                                           Bandes (WarbandArchetypeViewModel.ManageRacialProfiles). -->
                                      <VerticalStackLayout Spacing="4">
                                          <Label Text="{loc:Loc WarriorArchetypeRacialProfilePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                                         <Picker ItemsSource="{Binding RacialProfileOptions}"
+                                         <components:SelectFieldView Title="{loc:Loc WarriorArchetypeRacialProfilePh}" ItemsSource="{Binding RacialProfileOptions}"
                                                  SelectedItem="{Binding SelectedRacialProfileLabel}"/>
                                      </VerticalStackLayout>
 

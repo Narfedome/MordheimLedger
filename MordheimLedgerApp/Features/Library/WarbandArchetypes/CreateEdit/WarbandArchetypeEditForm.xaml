@@ -68,7 +68,7 @@
                            <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                           IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                        </VerticalStackLayout>
-                       <Picker Title="{loc:Loc WarbandGradePh}"
+                       <components:SelectFieldView Title="{loc:Loc WarbandGradePh}"
                        ItemsSource="{Binding GradeOptions}"
                        SelectedItem="{Binding SelectedGradeLabel}"/>
                        <!-- Race/espèce (Humain, Skaven, Orque...) - catalogue éditable (voir
@@ -76,7 +76,7 @@
                             Bandes), pas un enum comme Grade ci-dessus. Un simple Picker suffit : une
                             bande n'a jamais qu'UNE race, contrairement aux Écoles de Magie (multi-
                             sélection, voir plus bas). -->
-                       <Picker Title="{loc:Loc RaceNamePh}"
+                       <components:SelectFieldView Title="{loc:Loc RaceNamePh}"
                        ItemsSource="{Binding RaceOptions}"
                        SelectedItem="{Binding SelectedRaceLabel}"/>
                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">

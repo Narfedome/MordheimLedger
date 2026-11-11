@@ -5,6 +5,7 @@
              xmlns:local="clr-namespace:MordheimLedgerApp.Components.AdvanceRollEntry"
              xmlns:eog="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Name="root">
 
     <!-- Le jet + résultat lui-même vit dans AdvanceRollEntryBaseView (voir sa doc pour le
@@ -26,10 +27,10 @@
                    IsVisible="{Binding CanPromote, Converter={StaticResource InverseBoolConverter}}"/>
             <VerticalStackLayout Spacing="8" IsVisible="{Binding CanPromote}">
                 <Entry Text="{Binding PromotedWarriorName}" Placeholder="{loc:Loc EndOfGamePromotionNamePh}"/>
-                <Picker Title="{loc:Loc EndOfGamePromotionCategoryPh1}"
+                <components:SelectFieldView Title="{loc:Loc EndOfGamePromotionCategoryPh1}"
                         ItemsSource="{Binding SkillCategoryOptions}"
                         SelectedItem="{Binding SelectedPromotionCategoryLabel1}"/>
-                <Picker Title="{loc:Loc EndOfGamePromotionCategoryPh2}"
+                <components:SelectFieldView Title="{loc:Loc EndOfGamePromotionCategoryPh2}"
                         ItemsSource="{Binding SkillCategoryOptions}"
                         SelectedItem="{Binding SelectedPromotionCategoryLabel2}"/>
                 <VerticalStackLayout Spacing="4" IsVisible="{Binding NestedHeroRoll, Converter={StaticResource IsNotNullConverter}}">

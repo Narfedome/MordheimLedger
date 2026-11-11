@@ -91,7 +91,7 @@
                                               CommandParameter="{Binding .}"
                                               Tooltip="{loc:Loc EndOfGameRoll}"/>
             </Grid>
-            <Picker Title="{loc:Loc EndOfGameAdvanceChoicePh}"
+            <components:SelectFieldView Title="{loc:Loc EndOfGameAdvanceChoicePh}"
                     ItemsSource="{Binding ChoiceOptions}"
                     SelectedItem="{Binding SelectedChoiceLabel}"
                     IsVisible="{Binding NeedsChoice}"/>

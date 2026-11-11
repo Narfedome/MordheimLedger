@@ -173,6 +173,19 @@ public partial class EndOfGamePageViewModel
                 var experience = row.Warrior.Experience + row.ExperienceGained + row.SeriousInjuryBonusExperience + row.ExplorationBonusExperience;
                 total += WarbandRatingRules.WarriorContribution(row.Warrior.IsLargeCreature, experience, headCount, row.Warrior.HiredSwordBaseRating, row.Warrior.DramatisPersonaRatingBonus);
             }
+            // Guerriers absents de cette bataille (Indisponibles) : ils restent dans la bande, à leur valeur
+            // actuelle - oubliés jusqu'à la recette du 2026-11-11 (68 projetés pour 75 réels).
+            var inBattle = WarriorRows.Select(r => r.Warrior.Id).ToHashSet();
+            foreach (var absent in _allActiveWarriorRows.Select(r => r.Warrior).Where(w => !inBattle.Contains(w.Id) && !w.IsHostileThisBattle))
+                total += WarbandRatingRules.WarriorContribution(absent.IsLargeCreature, absent.Experience, Math.Max(1, absent.HeadCount),
+                    absent.HiredSwordBaseRating, absent.DramatisPersonaRatingBonus);
+            // Héros promu : son modèle est déjà compté dans le groupe (même XP) ; seule l'XP que l'Exploration lui a
+            // donnée en plus manque (1 point par point d'XP).
+            // Dévoré dans la Fosse : son modèle sort du groupe.
+            foreach (var promoted in PromotedHeroRows)
+                total += promoted.IsDead
+                    ? -WarbandRatingRules.WarriorContribution(promoted.Warrior.IsLargeCreature, promoted.Warrior.Experience + promoted.ExperienceGained, 1, null)
+                    : promoted.ExplorationBonusExperience;
             foreach (var topUp in LivingHenchmanTopUps.Where(t => t.AddCount > 0))
                 total += WarbandRatingRules.WarriorContribution(false, topUp.GroupExperience, topUp.AddCount, null);
             foreach (var slot in RecruitedHeroRows.SelectMany(r => r.NameSlots))

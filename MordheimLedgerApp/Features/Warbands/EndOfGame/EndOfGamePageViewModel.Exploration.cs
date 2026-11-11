@@ -1483,7 +1483,7 @@ public partial class EndOfGamePageViewModel
         // guerrier recruté garde le nom du Franc-Tireur (ex. "Gladiateur"), même idiome que
         // ResolvedFreeHenchman (Zombie).
         if (HasFreeHiredSwordGrant && HasEligibleFreeHiredSwords
-            && !CheckRoll(SelectedFreeHiredSword is null, () => FreeHiredSwordError = Loc["EndOfGameRollRequired"]))
+            && !CheckRoll(SelectedFreeHiredSword is null, () => FreeHiredSwordError = Loc["EndOfGameChoiceRequired"]))
             return false;
 
         var amountMissing = ResolvedExplorationOutcome?.Kind switch

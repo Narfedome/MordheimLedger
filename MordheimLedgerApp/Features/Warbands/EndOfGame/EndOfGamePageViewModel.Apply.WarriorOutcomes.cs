@@ -381,15 +381,8 @@ public partial class EndOfGamePageViewModel
             var headCountWiped = false;
             if (row.FigureInjuryRolls.Count > 0)
             {
-                var figures = new List<(Injury, bool)>();
-                foreach (var figure in row.FigureInjuryRolls)
-                {
-                    if (string.IsNullOrWhiteSpace(figure.InjuryResultText)) continue;
-                    var hasFigureRoll = int.TryParse(figure.ManualRoll, out var figureRoll);
-                    figures.Add((await GetOrCreateInjuryAsync(hasFigureRoll ? figureRoll : -1, warrior.IsHero, figure.InjuryResultText), figure.IsDeath));
-                }
-                var deaths = figures.Count(f => f.Item2);
-                headCountWiped = await injuries.RecordHenchmanInjuriesAsync(warrior, figures);
+                var deaths = row.FigureInjuryRolls.Count(f => !string.IsNullOrWhiteSpace(f.InjuryResultText) && f.IsDeath);
+                headCountWiped = InjuryService.RemoveDeadFigures(warrior, deaths);
 
                 if (deaths > 0)
                 {

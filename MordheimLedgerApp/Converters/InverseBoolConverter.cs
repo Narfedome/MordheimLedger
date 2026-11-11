@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Resources.Icons;
+﻿using MordheimLedgerApp.Resources.Icons;
 using System.Globalization;
 
 namespace MordheimLedgerApp.Converters
@@ -10,6 +10,18 @@ namespace MordheimLedgerApp.Converters
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
             => value is bool b ? !b : value!;
+    }
+
+    /// <summary>Date et heure courtes dans la langue de l'appli (LocalizationService.Culture) : un StringFormat
+    /// de binding suit la culture de l'appareil, d'où une heure « 8:49 PM » dans l'Historique d'une appli en
+    /// français sur un téléphone en anglais (recette du 2026-11-11).</summary>
+    public class LocalizedDateConverter : IValueConverter
+    {
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => value is DateTime date ? date.ToString(parameter as string ?? "g", Services.LocalizationService.Instance.Culture) : value;
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+            => throw new NotImplementedException();
     }
 
     public class IsNotNullConverter : IValueConverter

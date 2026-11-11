@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -49,7 +49,7 @@ public partial class EndOfGamePageViewModel
     {
         var valid = true;
         foreach (var entry in LivingDramatisPersonaUpkeepEntries)
-            valid &= CheckRoll(entry.WillPay is null, () => entry.ChoiceError = Loc["EndOfGameRollRequired"]);
+            valid &= CheckRoll(entry.WillPay is null, () => entry.ChoiceError = Loc["EndOfGameChoiceRequired"]);
 
         return valid;
     }

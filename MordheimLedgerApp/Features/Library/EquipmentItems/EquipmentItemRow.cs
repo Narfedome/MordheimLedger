@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Resources.Icons;
@@ -129,6 +129,11 @@ public partial class EquipmentItemRow : ObservableObject
     /// (= Common) n'ajoute rien, pas de "R0" trompeur. Toujours "Gratuit" pour une tuile Réserve. Pour un
     /// objet éligible à la dague gratuite, affiche le coût TOTAL de la tuile (pas un prix unitaire) une
     /// fois Quantity ≥ 2, puisque seul le premier exemplaire est gratuit - "Gratuit" tant que Quantity ≤ 1.</summary>
+    /// <summary>Effectif du groupe d'Hommes de main qui achète (EquipmentItemViewModel.UnitCount) : la tuile
+    /// affiche « 3 × 5 CO », le prix réellement payé pour équiper tout le groupe, plutôt que le prix d'un seul
+    /// modèle (recette du 2026-11-11). 1 partout ailleurs.</summary>
+    public int UnitCount { get; set; } = 1;
+
     public string CostDisplay
     {
         get
@@ -150,6 +155,7 @@ public partial class EquipmentItemRow : ObservableObject
             // domaines distincts (tuile de picker générique vs entrée de recherche du wizard).
             var unitCost = EquipmentPricing.CalculateCost(Item.Cost, MaterialRule?.CostMultiplier, isFree: false);
             var cost = Item.CostRandomMax is { } max ? $"{unitCost}-{unitCost + max}" : unitCost.ToString();
+            if (UnitCount > 1) cost = $"{UnitCount} × {cost}";
             var effectiveRarity = (Item.Rarity, MaterialRule?.Rarity) switch
             {
                 ({ } itemRarity, { } materialRarity) => Math.Max(itemRarity, materialRarity),

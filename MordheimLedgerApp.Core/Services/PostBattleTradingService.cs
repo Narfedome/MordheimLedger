@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Models;
+﻿using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 
 namespace MordheimLedgerApp.Core.Services;
@@ -28,23 +28,30 @@ public sealed class PostBattleTradingService
 
     /// <summary>Seule écriture de la réserve de la Fin de partie. Ligne d'origine : inchangée = rien, réduite =
     /// recréée au reliquat, disparue = supprimée. Apports de la partie : fusionnés par (objet, matériau, valeur
-    /// trouvée) - l'origine ne sert que pendant le wizard.</summary>
+    /// trouvée) entre eux ET avec une ligne d'origine identique restée dans la réserve (une seule ligne
+    /// « Épée ×2 » plutôt que deux lignes « Épée », recette du 2026-11-11) - l'origine ne sert que pendant le
+    /// wizard.</summary>
     public async Task ApplyReserveAsync(int warbandId, IReadOnlyList<StashLine> original, IReadOnlyList<StashLine> final)
     {
+        static (int, int?, int?) KeyOf(StashLine l) => (l.Item.Id, l.MaterialRule?.Id, l.FoundValueOverride);
+
+        var added = final.Where(l => l.SourceId is null).GroupBy(KeyOf).ToDictionary(g => g.Key, g => g.ToList());
+
         foreach (var line in original)
         {
             var finalQuantity = final.FirstOrDefault(l => l.SourceId == line.SourceId)?.Quantity ?? 0;
-            if (finalQuantity == line.Quantity) continue;
+            var mergeWith = finalQuantity > 0 && added.Remove(KeyOf(line), out var gained) ? gained : null;
+            if (mergeWith is null && finalQuantity == line.Quantity) continue;
 
+            var total = finalQuantity + (mergeWith?.Sum(l => l.Quantity) ?? 0);
             await _warbands.RemoveWarbandEquipmentAsync(line.SourceId!.Value);
-            if (finalQuantity > 0)
-                await _warbands.AddWarbandEquipmentAsync(warbandId, line.Item, finalQuantity, line.MaterialRule, line.FoundValueOverride);
+            if (total > 0)
+                await _warbands.AddWarbandEquipmentAsync(warbandId, line.Item, total, line.MaterialRule, line.FoundValueOverride);
         }
 
-        foreach (var group in final.Where(l => l.SourceId is null)
-                     .GroupBy(l => (l.Item.Id, MaterialRuleId: l.MaterialRule?.Id, l.FoundValueOverride)))
+        foreach (var group in added.Values)
         {
-            var first = group.First();
+            var first = group[0];
             await _warbands.AddWarbandEquipmentAsync(warbandId, first.Item, group.Sum(l => l.Quantity), first.MaterialRule, first.FoundValueOverride);
         }
     }

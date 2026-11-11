@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
@@ -79,6 +79,41 @@ public class PostBattleTradingServiceTests : IDisposable
 
         var stash = await StashAsync(warband);
         Assert.Equal(3, stash.Single(s => s.MaterialRule is null).Quantity);
+        Assert.Equal(1, stash.Single(s => s.MaterialRule is not null).Quantity);
+    }
+
+    [Fact]
+    public async Task Reserve_NewLine_IsMergedWithAnIdenticalLineAlreadyInTheStash()
+    {
+        var warband = await WarbandAsync();
+        var sword = await ItemAsync("Sword");
+        var axe = await ItemAsync("Axe");
+        var swords = await _warbands.AddWarbandEquipmentAsync(warband.Id, sword, quantity: 1);
+        var axes = await _warbands.AddWarbandEquipmentAsync(warband.Id, axe, quantity: 3);
+
+        await _service.ApplyReserveAsync(warband.Id, [new(swords.Id, sword, null, 1), new(axes.Id, axe, null, 3)],
+            [new(swords.Id, sword, null, 1), new(axes.Id, axe, null, 2), new(null, sword, null, 2), new(null, axe, null, 1)]);
+
+        var stash = await StashAsync(warband);
+        Assert.Equal(3, stash.Single(s => s.Item.Id == sword.Id).Quantity);
+        Assert.Equal(3, stash.Single(s => s.Item.Id == axe.Id).Quantity); // réduite à 2 puis +1
+    }
+
+    [Fact]
+    public async Task Reserve_NewLine_IsNotMergedWithADifferentMaterialOrAnEmptiedLine()
+    {
+        var warband = await WarbandAsync();
+        var sword = await ItemAsync("Sword");
+        var gromril = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Gromril Weapon");
+        var plain = await _warbands.AddWarbandEquipmentAsync(warband.Id, sword, quantity: 1);
+
+        // La ligne d'origine est entièrement sortie de la réserve : l'apport en recrée une, sans la ressusciter.
+        await _service.ApplyReserveAsync(warband.Id, [new(plain.Id, sword, null, 1)],
+            [new(null, sword, gromril, 1), new(null, sword, null, 2)]);
+
+        var stash = await StashAsync(warband);
+        Assert.Equal(2, stash.Count);
+        Assert.Equal(2, stash.Single(s => s.MaterialRule is null).Quantity);
         Assert.Equal(1, stash.Single(s => s.MaterialRule is not null).Quantity);
     }
 

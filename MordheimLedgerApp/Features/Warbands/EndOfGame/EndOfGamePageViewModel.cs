@@ -1258,7 +1258,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             Warband.GameInProgress = false;
             await _warbandService.SaveWarbandAsync(Warband);
 
-            await _warbandService.AddHistoryEntryAsync(Warband.Id, string.Join(" ", sentences));
+            await _warbandService.AddHistoryEntryAsync(Warband.Id, Core.Rules.HistoryText.Join(sentences));
         });
 
         await Shell.Current.GoToAsync("..");

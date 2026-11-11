@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Models;
+﻿using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
@@ -119,13 +119,13 @@ public sealed class InjuryService
     /// <summary>Mort sur un jet.</summary>
     public static void Kill(Warrior warrior) => warrior.Status = WarriorStatus.Dead;
 
-    /// <summary>Hommes de main : une blessure par figurine hors de combat, les morts retirées de l'effectif.
-    /// Renvoie true si le groupe est anéanti.</summary>
-    public async Task<bool> RecordHenchmanInjuriesAsync(Warrior group, IReadOnlyList<(Injury Injury, bool IsDeath)> figures)
+    /// <summary>Hommes de main : les figurines mortes sont retirées de l'effectif. Aucune blessure n'est
+    /// enregistrée sur le groupe - la table des Hommes de main ne laisse rien de durable (mort ou rétablissement
+    /// complet), une puce « Perdu » ou « Rétablissement complet » par figurine n'avait pas de sens (recette du
+    /// 2026-11-11). Renvoie true si le groupe est anéanti.</summary>
+    public static bool RemoveDeadFigures(Warrior group, int deaths)
     {
-        foreach (var (injury, _) in figures)
-            await _warbands.AddWarriorInjuryAsync(group.Id, injury);
-        group.HeadCount -= figures.Count(f => f.IsDeath);
+        group.HeadCount -= Math.Max(0, deaths);
         return group.HeadCount <= 0;
     }
 

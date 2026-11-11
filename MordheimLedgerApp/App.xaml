@@ -7,6 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
+            <converters:LocalizedDateConverter x:Key="LocalizedDateConverter" />
             <converters:IsNotNullConverter x:Key="IsNotNullConverter" />
             <converters:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
             <converters:BoolToChevronConverter x:Key="BoolToChevronConverter" />

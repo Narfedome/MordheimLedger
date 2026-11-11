@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MordheimLedgerApp.Features.Warbands"
@@ -50,21 +50,29 @@
                                     <Image Source="{Binding PhotoSource}" Aspect="AspectFill" IsVisible="{Binding HasPhoto}"/>
                                 </Grid>
                             </Border>
-                            <HorizontalStackLayout Grid.Column="1" Spacing="6">
-                                <Label Text="{Binding Warrior.Name}" FontAttributes="Bold" FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
-                                <!-- Effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1) - vide donc
-                                     invisible pour un Héros ou un groupe à 1 seul survivant. -->
-                                <Label Text="{Binding HeadCountDisplay}" TextColor="{DynamicResource AppTextMuted}"
-                                       FontSize="{DynamicResource AppFontSizeSectionTitle}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <!-- Nom + effectif d'un groupe d'Hommes de main (Warrior.HeadCount > 1, vide pour un
+                                     Héros ou un groupe à 1 seul survivant) en un seul texte qui passe à la ligne dans
+                                     sa colonne : une HorizontalStackLayout ne se limitait pas à la colonne et le
+                                     « × 2 » d'un nom long débordait sur le rôle (recette du 2026-11-11). -->
+                                <Label FontSize="{DynamicResource AppFontSizeSectionTitle}" LineBreakMode="WordWrap" VerticalOptions="Center">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Warrior.Name}" FontAttributes="Bold"/>
+                                            <Span Text=" "/>
+                                            <Span Text="{Binding HeadCountDisplay}" TextColor="{DynamicResource AppTextMuted}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
                                 <!-- Pense-bête visuel seulement (voir WarriorRow.IsSick) - masqué tant
                                      qu'il est Actif, s'efface tout seul à la fin de partie suivante,
                                      rien à cliquer ici (contrairement à un ChipView catalogue). -->
-                                <Border Style="{StaticResource ChipBorderStyle}" IsVisible="{Binding IsSick}"
-                                        Padding="6,2" Stroke="{DynamicResource AppDanger}" VerticalOptions="Center">
+                                <Border Style="{StaticResource ChipBorderStyle}" IsVisible="{Binding IsSick}" HorizontalOptions="Start"
+                                        Padding="6,2" Stroke="{DynamicResource AppDanger}">
                                     <Label Text="{Binding SickChipText}" FontSize="11" FontAttributes="Bold"
                                            TextColor="{DynamicResource AppDanger}"/>
                                 </Border>
-                            </HorizontalStackLayout>
+                            </VerticalStackLayout>
                             <Label Grid.Column="2" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
                             <!-- Groupe d'Hommes de main (WarriorRow.CanManageGroup) : retirer une ou plusieurs
                                  figurines perdues sans supprimer le groupe. Diviser un groupe se fait dans le
@@ -535,7 +543,7 @@
                     <DataTemplate x:DataType="models:HistoryEntry">
                         <Border Style="{StaticResource SectionCardBorderStyle}" Margin="12,6">
                             <VerticalStackLayout Spacing="4">
-                                <Label Text="{Binding Date, StringFormat='{0:g}'}" FontSize="12"
+                                <Label Text="{Binding Date, Converter={StaticResource LocalizedDateConverter}}" FontSize="12"
                                        TextColor="{DynamicResource AppTextMuted}"/>
                                 <Label Text="{Binding Text}" LineBreakMode="WordWrap"/>
                             </VerticalStackLayout>

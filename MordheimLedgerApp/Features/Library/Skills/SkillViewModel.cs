@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -108,6 +108,11 @@ public partial class SkillViewModel : BaseViewModel
     /// too, regardless of Category - an "OR" alongside AllowedCategories, not a further narrowing.</summary>
     public IReadOnlyList<int>? AllowedExtraSkillIds { get; set; }
 
+    /// <summary>Compétences à ne pas proposer : celles que le guerrier a déjà, ou déjà choisies sur un autre jet
+    /// de la même Fin de partie (recette du 2026-11-11 : le sélecteur d'une progression les proposait). Null
+    /// ailleurs.</summary>
+    public IReadOnlyCollection<int>? ExcludedSkillIds { get; set; }
+
     public SkillViewModel(ILibraryService libraryService, IDetailDialogService detailDialogs, ISkillPickerNavigationService pickerNavigation,
         IWarbandArchetypePickerService warbandPicker, IWarriorArchetypePickerService warriorPicker)
     {
@@ -199,6 +204,8 @@ public partial class SkillViewModel : BaseViewModel
             filtered = filtered.Where(i => i.RestrictedToWarriorArchetypeIds.Count == 0 || i.RestrictedToWarriorArchetypeIds.Contains(warriorId));
         if (AllowedCategories is { } categories)
             filtered = filtered.Where(i => categories.Contains(i.Category) || (AllowedExtraSkillIds?.Contains(i.Id) ?? false));
+        if (ExcludedSkillIds is { Count: > 0 } excluded)
+            filtered = filtered.Where(i => !excluded.Contains(i.Id));
 
         var groups = new ObservableCollection<SkillGroup>();
         foreach (var item in filtered)

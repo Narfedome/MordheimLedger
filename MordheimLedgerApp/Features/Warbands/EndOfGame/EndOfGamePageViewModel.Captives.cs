@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -24,7 +24,7 @@ public partial class EndOfGamePageViewModel
         {
             foreach (var entry in CapturedEnemies)
             {
-                valid &= CheckRoll(entry.SelectedFate is null, () => entry.FateError = Loc["EndOfGameRollRequired"]);
+                valid &= CheckRoll(entry.SelectedFate is null, () => entry.FateError = Loc["EndOfGameChoiceRequired"]);
                 if (entry.ShowGoldAmount)
                     valid &= CheckRoll(!entry.HasValidGoldAmount, () => entry.FateError = Loc["EndOfGameRollRequired"]);
             }

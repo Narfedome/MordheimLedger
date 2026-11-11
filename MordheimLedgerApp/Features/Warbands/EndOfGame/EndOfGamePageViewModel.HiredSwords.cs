@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
@@ -134,7 +134,7 @@ public partial class EndOfGamePageViewModel
     {
         var valid = true;
         foreach (var entry in LivingHiredSwordUpkeepEntries.Where(e => e.HasChoice))
-            valid &= CheckRoll(entry.WillPay is null, () => entry.ChoiceError = Loc["EndOfGameRollRequired"]);
+            valid &= CheckRoll(entry.WillPay is null, () => entry.ChoiceError = Loc["EndOfGameChoiceRequired"]);
 
         if (SelectedNewHiredSword is not null)
         {

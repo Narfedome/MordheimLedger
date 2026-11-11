@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Services;
+using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.Inventory;
 
@@ -37,8 +38,22 @@ public partial class WarbandInventoryDialogViewModel : ReadOnlyDialogViewModel
         var index = await ShowActionSheetIndexAsync(Loc["InventoryEquipTitle"], _candidates.Select(r => r.Warrior.Name).ToArray());
         if (index < 0 || index >= _candidates.Count) return;
 
-        await _warbandService.EquipWarbandItemToWarriorAsync(item.Id, _candidates[index].Warrior.Id);
-        Inventory.Remove(item);
+        var target = _candidates[index].Warrior;
+        var carried = await _warbandService.EquipWarbandItemToWarriorAsync(item.Id, target.Id);
+        if (carried is null)
+        {
+            // Groupe d'Hommes de main : un exemplaire par modèle (voir IWarbandService.EquipWarbandItemToWarriorAsync).
+            var available = Inventory.Where(i => i.Item.Id == item.Item.Id && i.MaterialRule?.Id == item.MaterialRule?.Id
+                && i.FoundValueOverride == item.FoundValueOverride).Sum(i => i.Quantity);
+            await ShowInfoAsync(Loc["InventoryNotEnoughTitle"],
+                string.Format(Loc["InventoryNotEnoughMessage"], target.HeadCount, item.NameDisplay, target.Name, available));
+            return;
+        }
+
+        // Plusieurs lignes ont pu être entamées (un exemplaire par modèle d'un groupe) : relire la réserve.
+        var refreshed = await _warbandService.GetWarbandEquipmentAsync(item.WarbandId, LocalizationService.Instance.Language);
+        Inventory.Clear();
+        foreach (var row in refreshed) Inventory.Add(row);
 
         if (Inventory.Count == 0) Close(true);
     }

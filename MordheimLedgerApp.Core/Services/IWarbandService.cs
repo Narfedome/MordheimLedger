@@ -89,9 +89,12 @@ public interface IWarbandService
     Task<WarbandEquipment> AddWarbandEquipmentAsync(int warbandId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null);
     Task RemoveWarbandEquipmentAsync(int warbandEquipmentId);
 
-    /// <summary>Moves an entire WarbandEquipment row (its full Quantity, never a partial split) onto a
-    /// warrior - deletes the stash row, creates the equivalent WarriorEquipment row.</summary>
-    Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId);
+    /// <summary>Hero: moves an entire WarbandEquipment row (its full Quantity) onto him - deletes the stash
+    /// row, creates the equivalent WarriorEquipment row. Henchman group: takes ONE identical item (same
+    /// item, material and found value) PER MODEL from the stash, across rows if needed, and creates a
+    /// quantity-1 (per model) WarriorEquipment row; returns null and changes nothing when the stash holds
+    /// fewer than HeadCount (decision 2026-11-11: three swords to equip a group of three).</summary>
+    Task<WarriorEquipment?> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId);
 
     /// <summary>Sells an entire WarbandEquipment row (its full Quantity) back for FoundValueOverride, or
     /// Core.Rules.EquipmentPricing.CalculateCost(Item.Cost, MaterialRule.CostMultiplier) * Quantity gc

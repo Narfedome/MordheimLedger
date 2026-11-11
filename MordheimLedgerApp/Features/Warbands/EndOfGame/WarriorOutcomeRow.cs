@@ -957,11 +957,9 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         }
     }
 
-    /// <summary>Nombre de Héros de la bande à l'ouverture du wizard (voir EndOfGamePageViewModel) -
-    /// transmis tel quel à chaque AdvanceRollEntry créé par ce row pour AdvanceRollEntry.CanPromote,
-    /// voir sa doc pour la limite acceptée (ne suit pas les promotions résolues plus tôt dans la même
-    /// Fin de Partie).</summary>
-    private readonly int _startingHeroCount;
+    /// <summary>Contexte de promotion de la Fin de partie (voir PromotionContext), transmis à chaque
+    /// AdvanceRollEntry créé par ce row.</summary>
+    private readonly PromotionContext? _promotion;
 
     /// <summary>Catalogue Injury complet (SpecialRules déjà résolues, voir LibraryService.
     /// GetInjuriesAsync), chargé une seule fois à l'ouverture du wizard - permet à
@@ -972,7 +970,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     private readonly IReadOnlyList<Injury> _injuryCatalog;
 
     public WarriorOutcomeRow(Warrior warrior, string archetypeName, bool gainsExperience, IEnumerable<MagicSchool>? magicSchools = null,
-        int startingHeroCount = 0, IReadOnlyList<Injury>? injuryCatalog = null, HiredSword? pitFighterProfile = null,
+        PromotionContext? promotion = null, IReadOnlyList<Injury>? injuryCatalog = null, HiredSword? pitFighterProfile = null,
         IReadOnlyList<EquipmentItem>? pitFighterEquipment = null, IEnumerable<SpecialRuleChip>? specialRules = null)
     {
         Warrior = warrior;
@@ -981,7 +979,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
         OriginalEquipmentQuantities = warrior.Equipment.ToDictionary(we => we.Id, we => we.Quantity);
         ArchetypeName = archetypeName;
         GainsExperience = gainsExperience;
-        _startingHeroCount = startingHeroCount;
+        _promotion = promotion;
         _injuryCatalog = injuryCatalog ?? new List<Injury>();
         MagicSchools = magicSchools?.ToList() ?? new List<MagicSchool>();
         PitFighterProfile = pitFighterProfile;
@@ -1085,7 +1083,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
             // bon espacement de paliers Homme de main) mais progresse sur la table Héros ("roll on the
             // Heroes Advancement table as opposed to Henchmen") - le seul endroit où ces deux notions se
             // découplent, voir Warrior.IsHiredSword.
-            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, AdvanceRolls, IsSpellcaster, _startingHeroCount);
+            var entry = new AdvanceRollEntry(AdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, AdvanceRolls, IsSpellcaster, _promotion);
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             AdvanceRolls.Add(entry);
         }
@@ -1100,7 +1098,7 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     {
         while (ExplorationAdvanceRolls.Count < ExplorationMilestoneCount)
         {
-            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _startingHeroCount);
+            var entry = new AdvanceRollEntry(ExplorationAdvanceRolls.Count + 1, Warrior.IsHero || Warrior.IsHiredSword, Warrior, ExplorationAdvanceRolls, IsSpellcaster, _promotion);
             entry.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SummaryText));
             ExplorationAdvanceRolls.Add(entry);
         }

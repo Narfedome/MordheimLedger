@@ -3109,4 +3109,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRecapHiredSwordFreeFormat" xml:space="preserve">
     <value>{0}: free for the next battle</value>
   </data>
+  <data name="InventoryNotEnoughTitle" xml:space="preserve">
+    <value>Not enough copies</value>
+  </data>
+  <data name="InventoryNotEnoughMessage" xml:space="preserve">
+    <value>{2} needs {0} × {1} (one per model): {3} in the stash.</value>
+  </data>
 </root>

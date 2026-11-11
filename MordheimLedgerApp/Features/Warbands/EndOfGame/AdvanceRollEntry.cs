@@ -34,12 +34,10 @@ public partial class AdvanceRollEntry : ObservableObject
     /// pass) rather than expanding a third level of nesting.</summary>
     private readonly bool _suppressPromotion;
 
-    /// <summary>Snapshot of the warband's Hero count at wizard-open time (EndOfGamePageViewModel
-    /// construction) - compared against PromotionRules.MaxHeroes for CanPromote. Does NOT account for
-    /// another Henchman group promoting earlier in this SAME End of Game pass - a documented,
-    /// deliberately accepted simplification (crossing the 6-Hero cap via two separate promotions in one
-    /// battle is a rare edge case), see CanPromote.</summary>
-    private readonly int _startingHeroCount;
+    /// <summary>Contexte partagé par toutes les promotions de cette Fin de partie (voir PromotionContext) :
+    /// plafond de Héros qui compte les promotions déjà obtenues, listes de compétences des Héros de la bande.
+    /// Null pour les jets imbriqués, qui ne promeuvent jamais.</summary>
+    private readonly PromotionContext? _promotion;
 
     /// <summary>Every AdvanceRollEntry sharing the same WarriorOutcomeRow.AdvanceRolls/
     /// ExplorationAdvanceRolls collection - a warrior crossing several milestones at once rolls several
@@ -141,6 +139,10 @@ public partial class AdvanceRollEntry : ObservableObject
         // descriptif générique, pas la confirmation résolue). Portée volontairement limitée à
         // CharacteristicIncrease - Promotion/Compétence ne sont pas concernés par ce bug et gardent
         // leur remise à zéro inconditionnelle ci-dessus.
+        // Promotion acceptée ou retirée : tient le compte des Héros de cette Fin de partie à jour.
+        _promotion?.SetPromotion(this, Outcome?.Kind == AdvanceKind.Promotion && _promotion.CanPromote(this));
+        OnPropertyChanged(nameof(CanPromote));
+
         if (Outcome is not null && Outcome == previousOutcome && Outcome.Kind == AdvanceKind.CharacteristicIncrease)
             return;
 
@@ -211,9 +213,9 @@ public partial class AdvanceRollEntry : ObservableObject
     public bool IsPromotionResult => Outcome?.Kind == AdvanceKind.Promotion;
 
     /// <summary>6 Héros maximum par bande (règle fixe du jeu, PAS dérivée du catalogue - voir
-    /// Core.Rules.PromotionRules) comparé au compte figé à l'ouverture du wizard (_startingHeroCount).
-    /// Faux = bannière + aucun choix proposé, le joueur doit changer ManualRoll (voir XAML).</summary>
-    public bool CanPromote => _startingHeroCount < PromotionRules.MaxHeroes;
+    /// Core.Rules.PromotionRules), en comptant les promotions déjà obtenues dans cette Fin de partie (voir
+    /// PromotionContext). Faux = bannière + aucun choix proposé, le joueur doit changer ManualRoll (voir XAML).</summary>
+    public bool CanPromote => _promotion?.CanPromote(this) ?? true;
 
     /// <summary>Libellés localisés des 6 SkillCategory (mêmes clés resx que le reste de l'app,
     /// SkillCategoryXxx) - deux Pickers indépendants plutôt qu'une liste à cocher plafonnée à 2, même
@@ -456,15 +458,22 @@ public partial class AdvanceRollEntry : ObservableObject
     }
 
     public AdvanceRollEntry(int index, bool isHero, Warrior warrior, ObservableCollection<AdvanceRollEntry> siblings,
-        bool isSpellcaster = false, int startingHeroCount = 0, bool suppressPromotion = false)
+        bool isSpellcaster = false, PromotionContext? promotion = null, bool suppressPromotion = false)
     {
         Index = index;
         IsHero = isHero;
         _warrior = warrior;
         _siblings = siblings;
         IsSpellcaster = isSpellcaster;
-        _startingHeroCount = startingHeroCount;
+        _promotion = promotion;
         _suppressPromotion = suppressPromotion;
+        if (promotion is not null)
+            promotion.Changed += () =>
+            {
+                // Une place libérée (autre promotion retirée) peut rendre la sienne possible, et inversement.
+                if (IsPromotionResult) promotion.SetPromotion(this, promotion.CanPromote(this));
+                OnPropertyChanged(nameof(CanPromote));
+            };
         SelectedSkills.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(SelectedSkillsText));
@@ -474,7 +483,8 @@ public partial class AdvanceRollEntry : ObservableObject
 
         if (!IsHero)
         {
-            foreach (var category in Enum.GetValues<SkillCategory>())
+            // Listes « disponibles pour les Héros de la bande » (liste spéciale comprise), voir PromotionContext.
+            foreach (var category in promotion?.HeroSkillCategories ?? Enum.GetValues<SkillCategory>())
             {
                 var label = _loc[$"SkillCategory{category}"];
                 _skillCategoryByLabel[label] = category;

@@ -265,7 +265,10 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
             // au-delà de cette déduction ponctuelle - contrairement au wizard (EquipmentPick.IsFree), le
             // trésor est débité immédiatement et définitivement ici.
             var isFreeDagger = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, Equipment.Any(e => e.Item.IsFreeDagger)) && materialRule is null;
-            var cost = EquipmentPricing.CalculateCost(equipmentItem.Cost, materialRule?.CostMultiplier, isFreeDagger);
+            // Groupe d'Hommes de main : chaque modèle paie son exemplaire (décision du 2026-11-11, comme
+            // l'assistant de création et le recrutement en Fin de partie) - prix unitaire × effectif.
+            var cost = EquipmentPricing.CalculateCost(equipmentItem.Cost, materialRule?.CostMultiplier, isFreeDagger)
+                * (Item.IsHero ? 1 : Math.Max(1, Item.HeadCount));
 
             // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
             // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.

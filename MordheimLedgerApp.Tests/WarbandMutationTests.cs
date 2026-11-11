@@ -470,6 +470,64 @@ public class WarbandMutationTests : IDisposable
         Assert.Equal("Axe (G, B)", reloaded.NameDisplay);
     }
 
+    /// <summary>Équiper un groupe d'Hommes de main depuis la réserve (décision du 2026-11-11) : un exemplaire
+    /// identique par modèle, pris sur plusieurs lignes si besoin ; un Héros garde la ligne entière.</summary>
+    private async Task<(Core.Models.Warband Warband, Core.Models.Warrior Group, EquipmentItem Axe)> GroupWithStashAsync(int headCount)
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var henchmanArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First(a => !a.IsHero);
+        var group = await _warbands.RecruitWarriorAsync(warband.Id, henchmanArchetype, "Reik Blades", headCount);
+        var axe = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Name == "Axe");
+        return (warband, group, axe);
+    }
+
+    [Fact]
+    public async Task EquipStashItem_HenchmanGroup_TakesOneCopyPerModelAcrossRows()
+    {
+        var (warband, group, axe) = await GroupWithStashAsync(3);
+        var first = await _warbands.AddWarbandEquipmentAsync(warband.Id, axe, quantity: 2);
+        await _warbands.AddWarbandEquipmentAsync(warband.Id, axe);
+
+        var carried = await _warbands.EquipWarbandItemToWarriorAsync(first.Id, group.Id);
+
+        Assert.NotNull(carried);
+        Assert.Empty(await _warbands.GetWarbandEquipmentAsync(warband.Id, "en"));
+        var row = Assert.Single(Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en")).Equipment);
+        Assert.Equal(1, row.Quantity); // quantité PAR MODÈLE
+    }
+
+    [Fact]
+    public async Task EquipStashItem_HenchmanGroup_NotEnoughCopies_ChangesNothing()
+    {
+        var (warband, group, axe) = await GroupWithStashAsync(3);
+        var gromril = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Gromril Weapon");
+        var first = await _warbands.AddWarbandEquipmentAsync(warband.Id, axe, quantity: 2);
+        await _warbands.AddWarbandEquipmentAsync(warband.Id, axe, materialRule: gromril); // pas identique : ne compte pas
+
+        var carried = await _warbands.EquipWarbandItemToWarriorAsync(first.Id, group.Id);
+
+        Assert.Null(carried);
+        Assert.Equal(3, (await _warbands.GetWarbandEquipmentAsync(warband.Id, "en")).Sum(e => e.Quantity));
+        Assert.Empty(Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en")).Equipment);
+    }
+
+    [Fact]
+    public async Task EquipStashItem_Hero_MovesTheWholeRow()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First(a => a.IsHero);
+        var captain = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
+        var axe = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Name == "Axe");
+        var stash = await _warbands.AddWarbandEquipmentAsync(warband.Id, axe, quantity: 2);
+
+        var carried = await _warbands.EquipWarbandItemToWarriorAsync(stash.Id, captain.Id);
+
+        Assert.Equal(2, carried!.Quantity);
+        Assert.Empty(await _warbands.GetWarbandEquipmentAsync(warband.Id, "en"));
+    }
+
     [Fact]
     public async Task EditingOfficialArchetype_FlipsSourceToModified()
     {

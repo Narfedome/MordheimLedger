@@ -3109,4 +3109,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameRecapHiredSwordFreeFormat" xml:space="preserve">
     <value>{0} : offert pour la prochaine bataille</value>
   </data>
+  <data name="InventoryNotEnoughTitle" xml:space="preserve">
+    <value>Pas assez d'exemplaires</value>
+  </data>
+  <data name="InventoryNotEnoughMessage" xml:space="preserve">
+    <value>Il faut {0} × {1} pour équiper {2} (un par modèle) : {3} dans l'inventaire.</value>
+  </data>
 </root>

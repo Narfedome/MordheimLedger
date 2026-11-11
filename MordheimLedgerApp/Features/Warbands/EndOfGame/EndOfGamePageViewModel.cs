@@ -198,6 +198,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     partial void OnStepIndexChanged(int value)
     {
+        // Avant PrepareEffectsForCurrentStep : les recherches des Héros promus doivent exister pour recevoir
+        // leurs lignes d'effets (voir EndOfGamePageViewModel.Promotion).
+        if (Current.Kind == StepKind.RareItems) SyncPromotedRareItemSearches();
         PrepareEffectsForCurrentStep();
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
         // Vues d'étape mises en cache (StepViewConverter) : le solde et les pierres magiques dépendent de
@@ -759,8 +762,11 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // absent d'activeWarriorRows, n'est pas compté ici, sous-estimation mineure du plafond de 6
             // acceptée plutôt que de faire remonter le roster complet de la bande jusqu'à ce ViewModel).
             var startingHeroCount = activeWarriorRows.Count(r => r.Warrior.IsHero);
+            // Listes de compétences proposées à un promu : celles des Héros de la bande (voir PromotionContext).
+            _promotionContext = new PromotionContext(startingHeroCount,
+                localizedWarriorArchetypes.Where(a => a.IsHero).SelectMany(a => a.AllowedSkillCategories));
             WarriorRows = new ObservableCollection<WarriorOutcomeRow>(activeWarriorRows.Select(r =>
-                new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, startingHeroCount, injuryCatalog, pitFighterProfile, pitFighterEquipment, r.SpecialRules)));
+                new WarriorOutcomeRow(r.Warrior, r.RoleName, r.Warrior.GainsExperience, r.MagicSchools, _promotionContext, injuryCatalog, pitFighterProfile, pitFighterEquipment, r.SpecialRules)));
 
             // Effectif déjà recruté de chaque type, poussé sur CountDisplay (voir WarriorRecruitRow.
             // ExternalHeadCount) - doit suivre WarriorRows (ExistingCountForArchetype s'appuie dessus), pas
@@ -952,58 +958,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // StepLabel/IsLastStep (l'étape peut apparaître/disparaître) et le total à chaque changement,
         // même idiome que la subscription WarriorRows ci-dessus.
         foreach (var entry in RareItemSearchEntries)
-        {
-            entry.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName is nameof(RareItemSearchEntry.IsSuccess) or nameof(RareItemSearchEntry.IsCharacterFound))
-                {
-                    OnPropertyChanged(nameof(StepLabel));
-                    OnPropertyChanged(nameof(IsLastStep));
-                    // Bug trouvé par test utilisateur : RareItemsWithResults n'est jamais notifiée sans
-                    // cette ligne, donc le BindableLayout de l'étape Achat (bound dessus) ne se rafraîchit
-                    // jamais après le chargement initial - la carte de l'étape reste vide même quand une
-                    // recherche vient de réussir. Même bug possible côté Personnage depuis que
-                    // RareItemsWithResults couvre IsCharacterFound aussi (voir RareItemSearchEntry.IsFound).
-                    OnPropertyChanged(nameof(RareItemsWithResults));
-                }
-                // WantsToRecruit/IsCharacterFound/WantsToPayWithAlternativeItem ajoutés 2026-09-01 - un
-                // personnage à frais en or (RareItemSearchEntry.HasHireCost) participe maintenant à ce
-                // même total (EffectiveHireCostForTreasury), même bug potentiel que RareItemsWithResults
-                // ci-dessus s'il manquait ici : la trésorerie restante affichée resterait périmée dès que
-                // le joueur coche/décoche "Recruter" ou bascule le paiement alternatif.
-                if (e.PropertyName is nameof(RareItemSearchEntry.WantsToBuy) or nameof(RareItemSearchEntry.PriceRoll) or nameof(RareItemSearchEntry.IsSuccess)
-                    or nameof(RareItemSearchEntry.WantsToRecruit) or nameof(RareItemSearchEntry.IsCharacterFound) or nameof(RareItemSearchEntry.WantsToPayWithAlternativeItem))
-                {
-                    OnPropertyChanged(nameof(RareItemPurchaseTotalCost));
-                    // Un seul solde de trésorerie pour tout le wizard (2026-09-03, retour utilisateur - voir
-                    // EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc) : cocher/décocher un achat
-                    // ou un recrutement à frais en or ici doit se répercuter partout ailleurs (Francs-Tireurs,
-                    // Corruption/Rétention, Homme de main équipé), pas seulement sur cette étape.
-                    NotifyTreasuryChanged();
-                    // Nicodemus (FeeKind.Wyrdstone) - devise séparée, ne dispute jamais EndOfGameTreasuryRemaining
-                    // (2026-09-01, "on a qu'a brancher la wyrstone à son paiement").
-                    OnPropertyChanged(nameof(HasWyrdstoneCostEntries));
-                    OnPropertyChanged(nameof(RareItemPurchaseTotalWyrdstoneCost));
-                    OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShards));
-                    OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShardsDisplay));
-                    OnPropertyChanged(nameof(IsRareItemPurchaseWyrdstoneBlocked));
-                    // Retour utilisateur (2026-09-02) : "si on a engager la paire, on ne doit pas voir la
-                    // case de corruption" - l'étape "Une Poignée d'Or" (case Corruption) suit l'étape
-                    // Achat/Recrutement dans l'ordre du wizard (Steps), donc cocher "Recruter" sur un
-                    // Marquand/Ulli trouvé ici doit se répercuter dessus - reste notifiée en direct (voir
-                    // ShowPairCorruptionOption, calculée plutôt que figée) au cas où le joueur reviendrait
-                    // en arrière après l'avoir déjà vue.
-                    OnPropertyChanged(nameof(ShowPairCorruptionOption));
-                }
-                // Basculer Objet/Personnage change quels résultats existent (voir IsFound) - StepLabel
-                // seul suffit ici, RareItemsWithResults est déjà notifiée par la branche IsSuccess/
-                // IsCharacterFound ci-dessus dès que le nouveau mode produit un résultat.
-                if (e.PropertyName is nameof(RareItemSearchEntry.IsSearchingForCharacter))
-                {
-                    OnPropertyChanged(nameof(StepLabel));
-                }
-            };
-        }
+            entry.PropertyChanged += OnRareItemSearchEntryChanged;
 
         // Le nombre d'étapes dépend de IsOutOfAction (étapes Blessure) et de HasMilestone (étapes
         // Progression) - Steps recalcule ça à chaque accès, mais on rafraîchit quand même StepLabel/
@@ -1307,5 +1262,58 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         });
 
         await Shell.Current.GoToAsync("..");
+    }
+
+    /// <summary>Suivi d'une recherche d'objet rare (étapes Objets rares/Achat) - méthode nommée pour être aussi
+    /// abonnée aux recherches des Héros promus pendant cette Fin de partie (voir EndOfGamePageViewModel.Promotion).</summary>
+    private void OnRareItemSearchEntryChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(RareItemSearchEntry.IsSuccess) or nameof(RareItemSearchEntry.IsCharacterFound))
+        {
+            OnPropertyChanged(nameof(StepLabel));
+            OnPropertyChanged(nameof(IsLastStep));
+            // Bug trouvé par test utilisateur : RareItemsWithResults n'est jamais notifiée sans
+            // cette ligne, donc le BindableLayout de l'étape Achat (bound dessus) ne se rafraîchit
+            // jamais après le chargement initial - la carte de l'étape reste vide même quand une
+            // recherche vient de réussir. Même bug possible côté Personnage depuis que
+            // RareItemsWithResults couvre IsCharacterFound aussi (voir RareItemSearchEntry.IsFound).
+            OnPropertyChanged(nameof(RareItemsWithResults));
+        }
+        // WantsToRecruit/IsCharacterFound/WantsToPayWithAlternativeItem ajoutés 2026-09-01 - un
+        // personnage à frais en or (RareItemSearchEntry.HasHireCost) participe maintenant à ce
+        // même total (EffectiveHireCostForTreasury), même bug potentiel que RareItemsWithResults
+        // ci-dessus s'il manquait ici : la trésorerie restante affichée resterait périmée dès que
+        // le joueur coche/décoche "Recruter" ou bascule le paiement alternatif.
+        if (e.PropertyName is nameof(RareItemSearchEntry.WantsToBuy) or nameof(RareItemSearchEntry.PriceRoll) or nameof(RareItemSearchEntry.IsSuccess)
+            or nameof(RareItemSearchEntry.WantsToRecruit) or nameof(RareItemSearchEntry.IsCharacterFound) or nameof(RareItemSearchEntry.WantsToPayWithAlternativeItem))
+        {
+            OnPropertyChanged(nameof(RareItemPurchaseTotalCost));
+            // Un seul solde de trésorerie pour tout le wizard (2026-09-03, retour utilisateur - voir
+            // EndOfGameTreasuryRemaining/NotifyTreasuryChanged's own doc) : cocher/décocher un achat
+            // ou un recrutement à frais en or ici doit se répercuter partout ailleurs (Francs-Tireurs,
+            // Corruption/Rétention, Homme de main équipé), pas seulement sur cette étape.
+            NotifyTreasuryChanged();
+            // Nicodemus (FeeKind.Wyrdstone) - devise séparée, ne dispute jamais EndOfGameTreasuryRemaining
+            // (2026-09-01, "on a qu'a brancher la wyrstone à son paiement").
+            OnPropertyChanged(nameof(HasWyrdstoneCostEntries));
+            OnPropertyChanged(nameof(RareItemPurchaseTotalWyrdstoneCost));
+            OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShards));
+            OnPropertyChanged(nameof(RareItemPurchaseRemainingWyrdstoneShardsDisplay));
+            OnPropertyChanged(nameof(IsRareItemPurchaseWyrdstoneBlocked));
+            // Retour utilisateur (2026-09-02) : "si on a engager la paire, on ne doit pas voir la
+            // case de corruption" - l'étape "Une Poignée d'Or" (case Corruption) suit l'étape
+            // Achat/Recrutement dans l'ordre du wizard (Steps), donc cocher "Recruter" sur un
+            // Marquand/Ulli trouvé ici doit se répercuter dessus - reste notifiée en direct (voir
+            // ShowPairCorruptionOption, calculée plutôt que figée) au cas où le joueur reviendrait
+            // en arrière après l'avoir déjà vue.
+            OnPropertyChanged(nameof(ShowPairCorruptionOption));
+        }
+        // Basculer Objet/Personnage change quels résultats existent (voir IsFound) - StepLabel
+        // seul suffit ici, RareItemsWithResults est déjà notifiée par la branche IsSuccess/
+        // IsCharacterFound ci-dessus dès que le nouveau mode produit un résultat.
+        if (e.PropertyName is nameof(RareItemSearchEntry.IsSearchingForCharacter))
+        {
+            OnPropertyChanged(nameof(StepLabel));
+        }
     }
 }

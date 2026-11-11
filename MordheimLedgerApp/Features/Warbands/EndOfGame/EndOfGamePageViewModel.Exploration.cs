@@ -31,7 +31,8 @@ public partial class EndOfGamePageViewModel
     // sont des figurines à part, pas des Héros au sens de cette règle du livre - même limite déjà
     // connue/documentée pour le décompte de tête à la vente de pierre magique (voir
     // DRAMATIS_PERSONAE_STATUS.md), corrigée ici pour l'Exploration.
-    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona);
+    // + les Héros promus pendant cette Fin de partie (voir EndOfGamePageViewModel.Promotion).
+    public int SurvivingHeroCount => WarriorRows.Count(r => r.IsHero && !r.IsOutOfAction && !r.Warrior.IsDramatisPersona) + PromotedHeroCount;
     public bool WonLastGame => ResultOptions.Count > 0 && SelectedResult == ResultOptions[0];
 
     /// <summary>Dés bonus depuis l'équipement porté par les guerriers encore debout (ex. l'Œil

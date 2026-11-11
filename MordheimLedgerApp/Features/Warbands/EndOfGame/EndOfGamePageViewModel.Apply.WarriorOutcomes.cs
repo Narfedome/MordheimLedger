@@ -1,6 +1,7 @@
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 
@@ -174,20 +175,9 @@ public partial class EndOfGamePageViewModel
             // explicitement dans le bloc Promotion).
             async Task ApplyResolvedAdvanceAsync(Warrior target, AdvanceRollEntry advance)
             {
-                var text = advance.SelectedSkills.Count > 0 ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
-                    : advance.HasSpellSelected ? string.Format(Loc["EndOfGameAdvanceSpellResultText"], advance.SelectedSpell!.Name)
-                    : advance.ResolvedField is not null ? $"{advance.ResolvedFieldLabel} +1"
-                    : advance.ResultText;
+                var text = AdvanceText(advance);
                 sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], target.Name, text));
-
-                foreach (var skill in advance.SelectedSkills)
-                    await _warbandService.AddWarriorSkillAsync(target.Id, skill);
-
-                if (advance.HasSpellSelected)
-                    await _warbandService.AddWarriorSpellAsync(target.Id, advance.SelectedSpell!);
-
-                if (advance.ResolvedField is { } field)
-                    ApplyCharacteristicIncrease(target, field);
+                await Advancement.ApplyAdvanceAsync(target, ToAdvanceResult(advance));
             }
 
             // AdvanceRolls (palier franchi par l'XP de bataille normale) + ExplorationAdvanceRolls
@@ -208,31 +198,16 @@ public partial class EndOfGamePageViewModel
                 // groupe (NestedHenchmanRoll).
                 if (advance.IsPromotionResult && advance.PromotedWarriorPreview is { } promoted && advance.NestedHeroRoll is { } heroRoll)
                 {
-                    // Le clone (PromotedWarriorPreview) date du choix des 2 listes, AVANT que l'XP de cette
-                    // partie soit ajoutée au groupe ci-dessus : sans ça, le Héros promu perdait l'XP gagnée à
-                    // cette bataille (bug trouvé le 2026-11-11, Héros promu à 0 XP).
-                    promoted.Experience = warrior.Experience;
-                    await _warbandService.InsertWarriorAsync(promoted);
-                    // Les membres d'un groupe d'Hommes de main sont équipés à l'identique : le promu part avec
-                    // une copie de l'équipement du groupe (quantités par modèle). Avant (recette du 2026-11-11),
-                    // il n'avait rien, et l'équipement était perdu quand la promotion vidait le groupe.
-                    foreach (var carried in warrior.Equipment.Where(e => e.Id > 0))
-                    {
-                        var copy = await _warbandService.AddWarriorEquipmentAsync(promoted.Id, carried.Item, carried.Quantity, carried.MaterialRule, carried.FoundValueOverride);
-                        if (carried.BlessingRule is { } blessing)
-                            await _warbandService.SetWarriorEquipmentBlessingRuleAsync(copy.Id, blessing.Id);
-                    }
+                    // XP de la partie, copie de l'équipement du groupe, jet immédiat du Héros, modèle retiré du
+                    // groupe et jet du reste du groupe : AdvancementService (Core, couvert par des tests).
+                    var remainderRoll = advance.NestedHenchmanRoll;
+                    await Advancement.PromoteHenchmanAsync(warrior, promoted, ToAdvanceResult(heroRoll),
+                        remainderRoll is null ? null : ToAdvanceResult(remainderRoll));
                     sentences.Add(string.Format(Loc["HistoryPromotionSentence"], warrior.Name, promoted.Name));
-
-                    await ApplyResolvedAdvanceAsync(promoted, heroRoll);
-                    await _warbandService.SaveWarriorAsync(promoted);
-
-                    warrior.HeadCount -= 1;
+                    sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], promoted.Name, AdvanceText(heroRoll)));
+                    if (remainderRoll is not null)
+                        sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], warrior.Name, AdvanceText(remainderRoll)));
                     changed = true;
-
-                    if (advance.NestedHenchmanRoll is { } remainderRoll)
-                        await ApplyResolvedAdvanceAsync(warrior, remainderRoll);
-
                     continue;
                 }
 
@@ -558,24 +533,18 @@ public partial class EndOfGamePageViewModel
     /// explicite sur les 9 champs plutôt que de la réflexion, même style que le reste d'EntityMapping/
     /// ce fichier. Pour un Homme de main, la caractéristique rejoint aussi Warrior.
     /// IncreasedCharacteristics (jamais pour un Héros, qui n'a pas cette restriction).</summary>
-    private static void ApplyCharacteristicIncrease(Warrior warrior, CharacteristicField field)
-    {
-        switch (field)
-        {
-            case CharacteristicField.Movement: warrior.Movement += 1; break;
-            case CharacteristicField.WeaponSkill: warrior.WeaponSkill += 1; break;
-            case CharacteristicField.BallisticSkill: warrior.BallisticSkill += 1; break;
-            case CharacteristicField.Strength: warrior.Strength += 1; break;
-            case CharacteristicField.Toughness: warrior.Toughness += 1; break;
-            case CharacteristicField.Wounds: warrior.Wounds += 1; break;
-            case CharacteristicField.Initiative: warrior.Initiative += 1; break;
-            case CharacteristicField.Attacks: warrior.Attacks += 1; break;
-            case CharacteristicField.Leadership: warrior.Leadership += 1; break;
-        }
+    /// <summary>Application des progressions en base (Core, testée) - sans état, recréée à la demande.</summary>
+    private AdvancementService Advancement => new(_warbandService);
 
-        if (!warrior.IsHero && !warrior.IncreasedCharacteristics.Contains(field))
-            warrior.IncreasedCharacteristics.Add(field);
-    }
+    private static AdvanceResult ToAdvanceResult(AdvanceRollEntry advance) =>
+        new(advance.SelectedSkills.ToList(), advance.HasSpellSelected ? advance.SelectedSpell : null, advance.ResolvedField);
+
+    /// <summary>Résultat d'un jet pour l'Historique (compétence, sort, caractéristique +1, sinon texte de la table).</summary>
+    private string AdvanceText(AdvanceRollEntry advance) =>
+        advance.SelectedSkills.Count > 0 ? string.Format(Loc["EndOfGameAdvanceSkillResultText"], advance.SelectedSkillsText)
+        : advance.HasSpellSelected ? string.Format(Loc["EndOfGameAdvanceSpellResultText"], advance.SelectedSpell!.Name)
+        : advance.ResolvedField is not null ? $"{advance.ResolvedFieldLabel} +1"
+        : advance.ResultText;
 
     /// <summary>Doit être appelée APRÈS ApplyWarriorOutcomesAsync (voir l'invariant documenté à
     /// l'appel dans EndOfGame ci-dessus) - celle-ci resynchronise warrior.Status depuis row.Status

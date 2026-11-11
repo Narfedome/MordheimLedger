@@ -208,6 +208,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         SyncPostInjuryDeaths();
         NotifyRosterChanged();
         if (Current.Kind == StepKind.InjuryRecap) OnPropertyChanged(nameof(InjuryRecapLines));
+        if (Current.Kind == StepKind.Recap) NotifyRecapChanged();
     }
 
     /// <summary>Public depuis le passage à une vue par étape (2026-09-22, voir Steps/StepViewConverter.cs)

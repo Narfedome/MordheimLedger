@@ -10,8 +10,10 @@
              la pile modale native (voir DialogStack) plutôt qu'un Popup du toolkit - contrôle total sur
              la mise en page/le hit-testing, plus de bug d'empilement WinUI. Le tap route vers
              _onBackdropTapped, pas vers un dismiss natif : ferme CE dialog précis (comme le bouton X),
-             pas toute la pile. -->
-        <BoxView Color="{StaticResource AppSurfaceTranslucent}" Opacity="0.4"
+             pas toute la pile. Voile AppScrim (novembre 2026, ThemeService.Apply) : noir à 45 % en clair,
+             70 % en sombre - la surface translucide du thème, beige en clair, délavait le fond au lieu de
+             l'assombrir et le dialog se détachait mal du texte derrière. -->
+        <BoxView Color="{DynamicResource AppScrim}"
                  HorizontalOptions="Fill" VerticalOptions="Fill">
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnBackdropTapped"/>

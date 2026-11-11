@@ -3091,4 +3091,13 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="DialogKeepEditingAction" xml:space="preserve">
     <value>Continuer</value>
   </data>
+  <data name="EndOfGameRecapExplorationLootHeading" xml:space="preserve">
+    <value>Butin de l'Exploration</value>
+  </data>
+  <data name="EndOfGameRecapLootWyrdstoneFormat" xml:space="preserve">
+    <value>Pierre magique : {0} éclat(s)</value>
+  </data>
+  <data name="EndOfGameRecapLootGoldFormat" xml:space="preserve">
+    <value>Or : {0} CO</value>
+  </data>
 </root>

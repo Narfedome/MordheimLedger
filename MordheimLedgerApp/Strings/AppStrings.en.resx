@@ -1510,6 +1510,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameRecapExplorationJoinFormat" xml:space="preserve">
     <value>{0} ×{1} (Exploration)</value>
   </data>
+  <data name="EndOfGameRecapExplorationExperienceFormat" xml:space="preserve">
+    <value>+{0} XP from Exploration</value>
+  </data>
   <data name="EndOfGameNoChange" xml:space="preserve">
     <value>{0}: no change</value>
   </data>

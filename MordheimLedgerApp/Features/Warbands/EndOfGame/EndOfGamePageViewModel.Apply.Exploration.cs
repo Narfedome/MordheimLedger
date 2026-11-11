@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -117,8 +117,10 @@ public partial class EndOfGamePageViewModel
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsDistributedHeroExperienceFormula is not null)
             {
                 // Prisonniers, Possédés : le total a déjà été réparti par le joueur entre ses Héros.
-                var recipients = WarriorRows.Where(r => r.DistributedExplorationExperience > 0).ToList();
-                distributed.AddRange(recipients.Select(r => (r.Warrior, r.DistributedExplorationExperience)));
+                // Un Héros promu n'existe pas encore en base : son XP est ajoutée avec la promotion
+                // (Apply.WarriorOutcomes), seule sa part de l'Historique est écrite ici.
+                var recipients = AllOutcomeRows.Where(r => r.DistributedExplorationExperience > 0).ToList();
+                distributed.AddRange(recipients.Where(r => !PromotedHeroRows.Contains(r)).Select(r => (r.Warrior, r.DistributedExplorationExperience)));
                 if (recipients.Count > 0)
                 {
                     var breakdown = string.Join(", ", recipients.Select(r => $"{r.Warrior.Name} (+{r.DistributedExplorationExperience})"));

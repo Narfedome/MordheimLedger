@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
@@ -128,7 +128,7 @@ public partial class EndOfGamePageViewModel
     /// compétence du Héros promu et l'appli plantait.</summary>
     private (WarriorOutcomeRow Row, Core.Models.Warrior Warrior, bool IsSpellcaster) FindAdvanceOwner(AdvanceRollEntry entry)
     {
-        foreach (var row in WarriorRows)
+        foreach (var row in AllOutcomeRows)
         {
             foreach (var top in row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
             {
@@ -146,7 +146,7 @@ public partial class EndOfGamePageViewModel
     /// agir.</summary>
     private IEnumerable<AdvanceRollEntry> AllAdvanceEntries()
     {
-        foreach (var row in WarriorRows)
+        foreach (var row in AllOutcomeRows)
         {
             foreach (var entry in row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
             {

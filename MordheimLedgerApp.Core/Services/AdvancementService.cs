@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -36,14 +36,16 @@ public sealed class AdvancementService
 
     /// <summary>« The lad's got talent » : un modèle du groupe devient Héros.
     /// - Le Héros est créé depuis promotedDraft (clone du groupe, voir EntityMapping.CloneAsPromotedHero, nom et
-    ///   2 listes déjà choisis) avec l'XP ACTUELLE du groupe (XP de la partie comprise) ;
+    ///   2 listes déjà choisis) avec l'XP ACTUELLE du groupe (XP de la partie comprise), plus l'XP que l'Exploration
+    ///   lui a donnée en tant que Héros (explorationExperience : XP répartie entre les Héros) ;
     /// - il part avec une copie de l'équipement du groupe (quantités par modèle, matériau, bénédiction) ;
     /// - son jet de Progression immédiat est appliqué et il est sauvegardé ;
     /// - le groupe perd un modèle et applique le jet du reste du groupe s'il y en a un - le groupe n'est PAS
     ///   sauvegardé ici (ni supprimé s'il tombe à 0) : c'est le flux normal de l'appelant.</summary>
-    public async Task<Warrior> PromoteHenchmanAsync(Warrior group, Warrior promotedDraft, AdvanceResult heroAdvance, AdvanceResult? remainderAdvance)
+    public async Task<Warrior> PromoteHenchmanAsync(Warrior group, Warrior promotedDraft, AdvanceResult heroAdvance, AdvanceResult? remainderAdvance,
+        int explorationExperience = 0)
     {
-        promotedDraft.Experience = group.Experience;
+        promotedDraft.Experience = group.Experience + Math.Max(0, explorationExperience);
         await _warbands.InsertWarriorAsync(promotedDraft);
 
         foreach (var carried in group.Equipment.Where(e => e.Id > 0))

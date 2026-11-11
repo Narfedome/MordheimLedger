@@ -77,6 +77,31 @@ public class AdvancementServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Promotion_HeroAddsTheExplorationExperienceItWasGivenAsAHero()
+    {
+        var (warband, group) = await GroupAsync();
+        group.Experience = 8;
+
+        var hero = await _advancement.PromoteHenchmanAsync(group, Draft(group, "Otto", SkillCategory.Combat, SkillCategory.Strength),
+            AdvanceResult.None, null, explorationExperience: 3);
+
+        Assert.Equal(11, (await ReloadAsync(warband, hero.Id)).Experience);
+        Assert.Equal(8, group.Experience); // l'XP répartie va au seul Héros, pas au groupe
+    }
+
+    [Fact]
+    public async Task Promotion_NegativeExplorationExperienceIsIgnored()
+    {
+        var (warband, group) = await GroupAsync();
+        group.Experience = 8;
+
+        var hero = await _advancement.PromoteHenchmanAsync(group, Draft(group, "Otto", SkillCategory.Combat, SkillCategory.Strength),
+            AdvanceResult.None, null, explorationExperience: -2);
+
+        Assert.Equal(8, (await ReloadAsync(warband, hero.Id)).Experience);
+    }
+
+    [Fact]
     public async Task Promotion_HeroIsAHeroWithTheTwoChosenListsAndTheSameType()
     {
         var (warband, group) = await GroupAsync();

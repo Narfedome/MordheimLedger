@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Data;
@@ -821,6 +821,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             OnPropertyChanged(nameof(IsRecapTab));
             // Une erreur de l'étape Équipement (fonds, mutation) se réévalue dès que les achats changent.
             if (EquipmentError is not null) ValidateEquipmentStep();
+            // Idem pour l'étape Guerriers : « Recrutez au moins 3 guerriers » restait affiché une fois le
+            // compte atteint, jusqu'au prochain Suivant (vu après la visite guidée, recette du 2026-11-05).
+            if (WarriorsError is not null) ValidateWarriorsStep();
 
             if (Archetype is null) return;
             var total = TotalWarriorCount;
@@ -1158,6 +1161,23 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 {
                     if (slot.Spells.Remove(spell)) return;
                 }
+            }
+        }
+
+        /// <summary>Nom de la bande, lié au champ de l'étape Général (Item.Name n'avertit pas de ses changements) :
+        /// une erreur « Ce champ est obligatoire » déjà affichée s'efface dès que le nom est saisi, au lieu de rester
+        /// jusqu'au prochain Suivant (vu après la visite guidée, recette du 2026-11-05).</summary>
+        public string WarbandName
+        {
+            get => Item.Name;
+            set
+            {
+                if (Item.Name == value) return;
+                Item.Name = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HeaderSubtitle));
+                OnPropertyChanged(nameof(RecapTitle));
+                if (NameError is not null) ValidateGeneralStep();
             }
         }
 

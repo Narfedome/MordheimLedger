@@ -30,6 +30,9 @@ public class WarbandMutationTests : IDisposable
 
     public void Dispose()
     {
+        // Le seed démarre dès la création de la base : un test qui n'y touche pas (ex. photos) fermerait sinon
+        // le fichier en plein seed (« utilisé par un autre processus » au moment de le supprimer).
+        try { _db.Initialization.GetAwaiter().GetResult(); } catch { /* le test l'a déjà signalé */ }
         _db.Connection.CloseAsync().GetAwaiter().GetResult();
         if (File.Exists(_dbPath)) File.Delete(_dbPath);
         if (Directory.Exists(_photoRoot)) Directory.Delete(_photoRoot, recursive: true);

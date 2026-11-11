@@ -2,6 +2,7 @@ using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
 
@@ -16,132 +17,86 @@ public partial class EndOfGamePageViewModel
 {
     /// <summary>Étape Exploration : au plus une Outcome "principale" résolue par jet (ExplorationChart.
     /// DetectMultiples ne déclenche jamais plusieurs entrées de la table à la fois, voir Core.Rules),
-    /// plus un éventuel objet bonus sur ce même jet (Boutique - voir BonusItemOutcome). L'or/objet/
-    /// pierre magique trouvé de cette façon s'ajoute à la trésorerie/à l'inventaire exactement comme
-    /// n'importe quel autre gain de la partie.</summary>
+    /// plus un éventuel objet bonus sur ce même jet (Boutique - voir BonusItemOutcome). Le wizard décrit ici
+    /// les récompenses (ExplorationRewards) et écrit l'Historique ; ExplorationRewardService (Core, testé)
+    /// les applique en base. Les objets trouvés n'y figurent qu'en phrase d'Historique : ils entrent dans la
+    /// réserve via PendingExplorationItems/ApplyReserveAsync.</summary>
     private async Task ApplyExplorationOutcomeAsync(List<string> sentences)
     {
         if (Warband is null) return;
 
-        // Le dé bonus en attente (Traînard, voir Warband.PendingExplorationBonusDie) a été montré comme
-        // rappel textuel à cette étape (ShowPendingExplorationBonusDieReminder) - une
-        // fois cette Fin de Partie sauvegardée, il est consommé qu'il ait servi ou non (même logique que
-        // n'importe quelle ressource trouvée-mais-pas-utilisée).
-        if (Warband.PendingExplorationBonusDie)
-        {
-            Warband.PendingExplorationBonusDie = false;
-            await _warbandService.SaveWarbandAsync(Warband);
-        }
+        var gold = 0;
+        var shards = 0;
+        string? nextGameNote = null;
+        var grantsBonusDie = false;
+        var grantsCatacomb = false;
+        (Warrior, int)? leaderExperience = null;
+        var distributed = new List<(Warrior, int)>();
+        (WarriorArchetype, int)? freeHenchmen = null;
+        (Warrior, int)? equippedHenchman = null;
+        (int, int)? weaponBlessing = null;
+        (HiredSword, IReadOnlyList<EquipmentItem>)? freeHiredSword = null;
 
-        // Même idiome pour le pense-bête "prochaine partie" (Cimetière, catch-all : "Chasseurs de
-        // Sorcières/Sœurs de Sigmar vous haïssent" - voir Warband.NextGameNote/ExplorationOutcome.
-        // NextGameNoteText) - affiché en bannière sur la fiche de bande (WarbandDetailPage) depuis LA
-        // partie précédente, consommé qu'il ait servi ou non maintenant que cette nouvelle partie a lieu.
-        // Reposé plus bas si CETTE partie déclenche elle-même un nouveau pense-bête.
-        if (Warband.NextGameNote is not null)
-        {
-            Warband.NextGameNote = null;
-            await _warbandService.SaveWarbandAsync(Warband);
-        }
-
-        // "Add the results together and consult the chart..." (Core.Rules.WyrdstoneShardsTable) - un
-        // SECOND effet du même jet, entièrement additif à l'éventuel résultat de doublons/triplets
-        // ci-dessous (TriggeredExplorationResult) : s'applique TOUJOURS, même sans aucun résultat
-        // spécial déclenché. BaselineWyrdstoneShardsFound vaut 0 si aucun Héros n'a
-        // survécu (aucun dé lancé), donc rien à faire dans ce cas.
+        // "Add the results together and consult the chart..." (Core.Rules.WyrdstoneShardsTable) - s'applique
+        // TOUJOURS, en plus de l'éventuel résultat de doublons/triplets ci-dessous.
         if (BaselineWyrdstoneShardsFound > 0)
         {
-            Warband.WyrdstoneShards += BaselineWyrdstoneShardsFound;
-            await _warbandService.SaveWarbandAsync(Warband);
+            shards += BaselineWyrdstoneShardsFound;
             sentences.Add(string.Format(Loc["HistoryBaselineWyrdstoneSentence"], BaselineWyrdstoneShardsFound));
         }
 
-        // Phrase d'Historique seulement : l'objet lui-même entre dans la réserve via PendingExplorationItems
-        // (même résolution, déjà faite pendant le wizard), créée en base une seule fois par
-        // ApplyReserveAsync - plus aucune écriture de WarbandEquipment ici depuis le 2026-09-25.
-        // _equipmentItemsByOfficialId donne directement l'item résolu dans la langue courante. Les
-        // paramètres matériau/valeur trouvée restent pour garder les appels ci-dessous inchangés.
-        Task AddOneItemToInventoryAsync(string itemOfficialId, int quantity, string? materialRuleOfficialId, int? foundValueOverride = null)
+        void AddOneItemToHistory(string itemOfficialId, int quantity)
         {
             if (quantity > 0 && _equipmentItemsByOfficialId.TryGetValue(itemOfficialId, out var item))
                 sentences.Add(string.Format(Loc["HistoryExplorationItemSentence"], quantity, item.Name));
-            return Task.CompletedTask;
         }
 
         if (ResolvedExplorationOutcome is { } outcome)
         {
             if (outcome.Kind == ExplorationOutcomeKind.Gold
-                && int.TryParse(ExplorationGoldAmount, out var gold) && gold != 0)
+                && int.TryParse(ExplorationGoldAmount, out var foundGold) && foundGold != 0)
             {
-                Warband.Treasury += gold;
-                await _warbandService.SaveWarbandAsync(Warband);
-                sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
+                gold += foundGold;
+                sentences.Add(string.Format(Loc["HistoryTreasurySentence"], foundGold));
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Item
                 && ChosenExplorationItemName is { } primaryName
                 && int.TryParse(ExplorationItemQuantity, out var quantity))
             {
-                // ChosenExplorationItemName plutôt que outcome.EquipmentItemOfficialId brut : tient compte d'un
-                // éventuel choix du joueur entre deux objets (ex. Armurerie 1-2 : Bouclier OU Rondache,
-                // voir ExplorationOutcome.AlternativeEquipmentItemOfficialId). foundValueOverride : seulement
-                // pour une branche dont la valeur trouvée n'est pas le Cost fixe du catalogue (ex.
-                // Bijoutier - Pierres de Quartz/Rubis, voir ExplorationOutcome.FoundValueFormula/
-                // WarbandEquipment.FoundValueOverride) - null pour toute autre branche Item.
-                int? foundValueOverride = outcome.FoundValueFormula is not null
-                    && int.TryParse(ExplorationItemFoundValue, out var foundValue) ? foundValue : null;
-                await AddOneItemToInventoryAsync(primaryName, quantity, outcome.MaterialRuleOfficialId, foundValueOverride);
+                AddOneItemToHistory(primaryName, quantity);
             }
             else if (outcome.TriggersArtefactRoll && ResolvedArtefactItemName is { } artefactName)
             {
-                // Villa d'un Noble, sous-jet 5-6 : l'objet précis vient du second D6 sur la table des
-                // Artefacts Magiques (voir Core.Rules.MagicalArtefactTable), jamais de
-                // ChosenExplorationItemName - c'est pourquoi ce cas ne tombe pas dans le "else if"
-                // Kind.Item ci-dessus (EquipmentItemOfficialId reste null sur cette branche).
-                await AddOneItemToInventoryAsync(artefactName, 1, null);
+                AddOneItemToHistory(artefactName, 1);
             }
             else if (outcome.Kind == ExplorationOutcomeKind.Wyrdstone
-                && int.TryParse(ExplorationWyrdstoneAmount, out var shards) && shards != 0)
+                && int.TryParse(ExplorationWyrdstoneAmount, out var foundShards) && foundShards != 0)
             {
-                Warband.WyrdstoneShards += shards;
-                await _warbandService.SaveWarbandAsync(Warband);
-                sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], shards));
+                shards += foundShards;
+                sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], foundShards));
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.CausesSickness && StatTestSickHero is { } sickHero)
             {
-                // Puits en échec (test d'Endurance) - voir WarriorStatus.Sick. Le statut lui-même n'est
-                // PAS posé ici : ApplySicknessLifecycleAsync le pose plus tard, APRÈS
-                // ApplyWarriorOutcomesAsync qui resynchronise sinon warrior.Status depuis row.Status
-                // (Actif/Mort uniquement) et écraserait silencieusement Sick en Actif (bug trouvé le
-                // 2026-08-18 : le statut Malade ne "prenait" jamais).
+                // Puits en échec : le statut Malade est posé plus tard par ApplySicknessLifecycleAsync (après
+                // ApplyWarriorOutcomesAsync, qui écraserait sinon le statut).
                 sentences.Add(string.Format(Loc["HistorySicknessSentence"], sickHero.Name));
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.CausesDeath && PitDevouredHero is { } devouredHero)
             {
-                // La Fosse, sous-jet 1 (Héros dévoré) - même principe que la Maladie du Puits ci-dessus :
-                // le statut Mort n'est PAS posé ici, ApplyPitDeathAsync le pose plus tard, APRÈS
-                // ApplyWarriorOutcomesAsync pour la même raison (celle-ci resynchronise sinon
-                // warrior.Status depuis row.Status et écraserait silencieusement Mort en Actif).
+                // La Fosse, Héros dévoré : même principe, statut Mort posé plus tard.
                 sentences.Add(string.Format(Loc["HistoryPitDevouredSentence"], devouredHero.Name));
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsNextExplorationBonusDie)
             {
-                // Traînard, branche "autres bandes" - voir Warband.PendingExplorationBonusDie, consommé
-                // (et son rappel affiché) au tout début de cette méthode lors de la PROCHAINE Fin de
-                // Partie, pas celle-ci.
-                Warband.PendingExplorationBonusDie = true;
-                await _warbandService.SaveWarbandAsync(Warband);
+                grantsBonusDie = true;
                 sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], ExplorationNoteText));
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsLeaderExperience is { } leaderXp)
             {
-                // Traînard, branche Possédés - même idiome que BonusStatTestLeader (Bâtiment Éventré) :
-                // pas d'erreur bloquante si le chef n'est pas disponible cette partie (mort/malade/hors
-                // de combat), le bonus est simplement indisponible.
-                var leader = SurvivingLeader;
-                if (leader is not null)
+                // Traînard, Possédés : bonus simplement perdu si le chef n'est pas disponible cette partie.
+                if (SurvivingLeader is { } leader)
                 {
-                    leader.Warrior.Experience += leaderXp;
-                    await _warbandService.SaveWarriorAsync(leader.Warrior);
+                    leaderExperience = (leader.Warrior, leaderXp);
                     sentences.Add(string.Format(Loc["HistoryLeaderExperienceSentence"], leader.Warrior.Name, leaderXp));
                 }
                 else
@@ -151,45 +106,19 @@ public partial class EndOfGamePageViewModel
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsFreeHenchmanArchetypeOfficialId is not null)
             {
-                // Traînard/Prisonniers, branche Morts-Vivants ("Zombie") - fusionne dans un groupe
-                // d'Hommes de main déjà existant de ce même archétype plutôt que de créer une ligne
-                // séparée : un Zombie ne peut porter aucun équipement (CanUseEquipment false), donc deux
-                // groupes du même archétype seraient de toute façon rigoureusement identiques. Quantité :
-                // 1 fixe (Traînard) ou un jet du joueur (D3, Prisonniers - voir ExplorationOutcome.
-                // ItemQuantityFormula réutilisé tel quel, ExplorationItemQuantity) ; repli sur 1 si vide
-                // (jamais le cas en pratique - ValidateExplorationResultStep bloque déjà sinon).
-                // ResolvedFreeHenchman (résolu par id officiel, y compris depuis une autre bande quand la
-                // branche Morts-Vivants a été choisie hors restriction - voir SelectedWarbandBranch). Comparait
-                // jusqu'ici le Name anglais à l'id officiel ("warrior.undead.zombie"), jamais égaux depuis le
-                // passage aux id stables : aucun Zombie n'était réellement ajouté.
-                var archetype = ResolvedFreeHenchman;
-                if (archetype is not null)
+                // Traînard/Prisonniers, Morts-Vivants (Zombies) : quantité fixe ou jet D3 (ExplorationItemQuantity).
+                if (ResolvedFreeHenchman is { } archetype)
                 {
                     var henchmanQuantity = int.TryParse(ExplorationItemQuantity, out var parsedQuantity) ? parsedQuantity : 1;
-                    var existingGroup = Henchmen.FirstOrDefault(r => r.Warrior.WarriorArchetypeId == archetype.Id);
-                    if (existingGroup is not null)
-                    {
-                        existingGroup.Warrior.HeadCount += henchmanQuantity;
-                        await _warbandService.SaveWarriorAsync(existingGroup.Warrior);
-                    }
-                    else
-                    {
-                        await _warbandService.RecruitWarriorAsync(Warband.Id, archetype, archetype.Name, headCount: henchmanQuantity);
-                    }
+                    freeHenchmen = (archetype, henchmanQuantity);
                     sentences.Add(string.Format(Loc["HistoryFreeHenchmanSentence"], henchmanQuantity, archetype.Name));
                 }
             }
             else if (outcome.Kind == ExplorationOutcomeKind.None && outcome.GrantsDistributedHeroExperienceFormula is not null)
             {
-                // Prisonniers, branche Possédés - le total (D3) a déjà été réparti par le joueur via le
-                // steppeur +/- de chaque Héros (DistributedExperienceRemaining vérifié à
-                // 0 par ValidateExplorationResultStep) ; ici on ne fait qu'appliquer chaque allocation.
+                // Prisonniers, Possédés : le total a déjà été réparti par le joueur entre ses Héros.
                 var recipients = WarriorRows.Where(r => r.DistributedExplorationExperience > 0).ToList();
-                foreach (var recipient in recipients)
-                {
-                    recipient.Warrior.Experience += recipient.DistributedExplorationExperience;
-                    await _warbandService.SaveWarriorAsync(recipient.Warrior);
-                }
+                distributed.AddRange(recipients.Select(r => (r.Warrior, r.DistributedExplorationExperience)));
                 if (recipients.Count > 0)
                 {
                     var breakdown = string.Join(", ", recipients.Select(r => $"{r.Warrior.Name} (+{r.DistributedExplorationExperience})"));
@@ -201,127 +130,90 @@ public partial class EndOfGamePageViewModel
                 sentences.Add(string.Format(Loc["HistoryExplorationNoteSentence"], ExplorationNoteText));
             }
 
-            // Second objet du même branch, INDÉPENDANT du Kind ci-dessus (ex. Charrette Renversée, Kind
-            // Item : Épée + Dague ornées ; Laboratoire de l'Alchimiste, Kind Gold : Or + Carnet de
-            // l'Alchimiste) - toujours en un seul exemplaire, jamais soumis à un choix du joueur
-            // (SecondaryEquipmentItemOfficialId est toujours un "ET", jamais un "OU" - contrairement à
-            // EquipmentItemOfficialId/AlternativeEquipmentItemOfficialId ci-dessus). Le Carnet de l'Alchimiste n'a
-            // besoin d'aucune autre logique ici : c'est un objet du catalogue comme un autre
-            // (EquipmentItem.GrantsSkillCategory, voir Core.Rules.SkillEligibility) - une fois porté par
-            // un guerrier, l'étape Progression existante (PickAdvanceSkill) en tient compte
-            // automatiquement, rien à mémoriser côté Warrior/Warband à la sauvegarde de CE wizard.
+            // Second objet du même résultat (« ET », jamais un choix) - indépendant du Kind ci-dessus.
             if (outcome.SecondaryEquipmentItemOfficialId is { } secondaryName)
-                await AddOneItemToInventoryAsync(secondaryName, 1, outcome.MaterialRuleOfficialId);
+                AddOneItemToHistory(secondaryName, 1);
 
-            // Prisonniers, branche "autres bandes" - le prisonnier rejoint gratuitement le groupe
-            // d'Hommes de main choisi par le joueur (+1 HeadCount, voir EndOfGamePageViewModel.
-            // SelectedEquippedHenchmanGroupOption) ; seul le coût de l'équipement répliqué (déjà validé
-            // affordable, voir CanAffordEquippedHenchman) est déduit de la trésorerie - jamais de Cost
-            // d'archétype, contrairement à un recrutement normal. Indépendant du Kind ci-dessus (coexiste
-            // avec l'or de l'escorte, Kind.Gold), même principe que SecondaryEquipmentItemOfficialId.
+            // Prisonniers, autres bandes : le prisonnier rejoint le groupe choisi, seul son équipement est payé.
             if (outcome.GrantsOptionalEquippedHenchman && SelectedEquippedHenchmanGroupOption?.Group is { } recruitGroup)
             {
-                recruitGroup.Warrior.HeadCount += 1;
-                await _warbandService.SaveWarriorAsync(recruitGroup.Warrior);
-
                 var equipmentCost = SelectedEquippedHenchmanGroupOption.EquipmentCost;
-                if (equipmentCost > 0)
-                {
-                    Warband.Treasury -= equipmentCost;
-                    await _warbandService.SaveWarbandAsync(Warband);
-                }
+                equippedHenchman = (recruitGroup.Warrior, equipmentCost);
                 sentences.Add(string.Format(Loc["HistoryEquippedHenchmanSentence"], recruitGroup.ArchetypeName, equipmentCost));
             }
 
-            // Sanctuaire, branche Sœurs de Sigmar/Chasseurs de Sorcières - attache la SpecialRule
-            // "Blessed Weapon" sur l'arme choisie (déjà portée par un Héros, voir EndOfGamePageViewModel.
-            // WeaponBlessingOptions), même mécanisme qu'un achat en Gromril/Ithilmar plutôt qu'un nouveau
-            // champ - indépendant du Kind ci-dessus (coexiste avec l'or des reliques, Kind.Gold).
+            // Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières : « Arme bénie » sur l'arme choisie.
             if (outcome.GrantsWeaponBlessing && SelectedWeaponBlessingOption?.Equipment is { } blessedEquipment
                 && _specialRulesByOfficialId.GetValueOrDefault(OfficialIds.BlessedWeaponRule) is { } blessedRule)
             {
-                await _warbandService.SetWarriorEquipmentBlessingRuleAsync(blessedEquipment.Id, blessedRule.Id);
+                weaponBlessing = (blessedEquipment.Id, blessedRule.Id);
                 sentences.Add(string.Format(Loc["HistoryWeaponBlessingSentence"],
                     SelectedWeaponBlessingOption.Hero!.Name, blessedEquipment.Item.Name));
             }
 
-            // Entrée des Catacombes - relance permanente (voir Warband.HasCatacombReroll), acquise une
-            // seule fois : une 2e entrée trouvée ne fait rien de plus (le bool est déjà vrai), aucune
-            // phrase d'Historique redondante dans ce cas.
+            // Entrée des Catacombes : acquise une seule fois, pas de phrase redondante ensuite.
             if (outcome.GrantsCatacombReroll && !Warband.HasCatacombReroll)
             {
-                Warband.HasCatacombReroll = true;
-                await _warbandService.SaveWarbandAsync(Warband);
+                grantsCatacomb = true;
                 sentences.Add(Loc["HistoryCatacombRerollSentence"]);
             }
 
-            // Rappel "prochaine partie" (Cimetière catch-all) - indépendant du Kind ci-dessus, même
-            // principe que SecondaryEquipmentItemOfficialId/GrantsOptionalEquippedHenchman.
-            if (outcome.NextGameNoteText is { } nextGameNote)
-            {
-                Warband.NextGameNote = nextGameNote;
-                await _warbandService.SaveWarbandAsync(Warband);
-            }
+            nextGameNote = outcome.NextGameNoteText;
 
-            // Une Faveur Rendue (3,6) - Franc-Tireur gratuit pour la prochaine bataille (voir
-            // EndOfGamePageViewModel.Exploration.cs) - indépendant du Kind ci-dessus, même principe que
-            // GrantsCatacombReroll/NextGameNoteText. Gratuit (HireCost jamais déduit) ; HiredSwordUpkeepPrepaid
-            // couvre déjà sa toute prochaine solde (voir ApplyHiredSwordUpkeepAsync).
-            if (outcome.GrantsFreeHiredSword && SelectedFreeHiredSword is { } freeHiredSword)
+            // Une Faveur Rendue : Franc-Tireur offert, garde son nom (ex. « Gladiateur »), solde prépayée.
+            if (outcome.GrantsFreeHiredSword && SelectedFreeHiredSword is { } hiredSword)
             {
                 var localizedEquipment = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
-                var startingEquipment = localizedEquipment.Where(e => freeHiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
-                // Pas de nom saisi par le joueur - garde le nom du Franc-Tireur (ex. "Gladiateur"), même
-                // idiome que GrantsFreeHenchmanArchetypeOfficialId (Zombie).
-                var name = freeHiredSword.Name;
-
-                var recruited = await _warbandService.RecruitHiredSwordAsync(Warband.Id, freeHiredSword, name, startingEquipment);
-                recruited.HiredSwordUpkeepPrepaid = true;
-                await _warbandService.SaveWarriorAsync(recruited);
-                sentences.Add(string.Format(Loc["HistoryHiredSwordFreeGrantSentence"], name));
+                freeHiredSword = (hiredSword, localizedEquipment.Where(e => hiredSword.StartingEquipmentIds.Contains(e.Id)).ToList());
+                sentences.Add(string.Format(Loc["HistoryHiredSwordFreeGrantSentence"], hiredSword.Name));
             }
         }
 
-        // Trésor Caché/Bande Massacrée - "roll for every item on the list separately" (voir
-        // EndOfGamePageViewModel.IsIndependentThresholdResult) : plusieurs lignes peuvent avoir
-        // franchi leur propre seuil à la fois, contrairement au Kind unique ci-dessus (jamais résolu
-        // pour cette forme, les deux blocs sont mutuellement exclusifs en pratique).
+        // Trésor Caché/Bande Massacrée : chaque ligne qui a franchi son propre seuil.
         if (IsIndependentThresholdResult)
         {
             foreach (var entry in IndependentOutcomeEntries.Where(e => e.ShowResult))
             {
-                if (entry.IsGold && int.TryParse(entry.AmountRoll, out var gold) && gold != 0)
+                if (entry.IsGold && int.TryParse(entry.AmountRoll, out var lineGold) && lineGold != 0)
                 {
-                    Warband.Treasury += gold;
-                    await _warbandService.SaveWarbandAsync(Warband);
-                    sentences.Add(string.Format(Loc["HistoryTreasurySentence"], gold));
+                    gold += lineGold;
+                    sentences.Add(string.Format(Loc["HistoryTreasurySentence"], lineGold));
                 }
-                else if (entry.IsWyrdstone && int.TryParse(entry.AmountRoll, out var shards) && shards != 0)
+                else if (entry.IsWyrdstone && int.TryParse(entry.AmountRoll, out var lineShards) && lineShards != 0)
                 {
-                    Warband.WyrdstoneShards += shards;
-                    await _warbandService.SaveWarbandAsync(Warband);
-                    sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], shards));
+                    shards += lineShards;
+                    sentences.Add(string.Format(Loc["HistoryExplorationWyrdstoneSentence"], lineShards));
                 }
                 else if (entry.IsArtefact && entry.ResolvedArtefactItemName is { } artefactName)
                 {
-                    await AddOneItemToInventoryAsync(artefactName, 1, null);
+                    AddOneItemToHistory(artefactName, 1);
                 }
                 else if (entry.IsItem && entry.Outcome.EquipmentItemOfficialId is { } itemName
                     && int.TryParse(entry.ItemQuantity, out var quantity))
                 {
-                    await AddOneItemToInventoryAsync(itemName, quantity, entry.Outcome.MaterialRuleOfficialId);
+                    AddOneItemToHistory(itemName, quantity);
                 }
             }
         }
 
         if (BonusItemOutcome is { } bonusOutcome && bonusOutcome.EquipmentItemOfficialId is { } bonusItemName)
-            await AddOneItemToInventoryAsync(bonusItemName, 1, bonusOutcome.MaterialRuleOfficialId);
-
-        // Test de Commandement additionnel du chef (ex. Bâtiment Éventré : Chien de guerre si réussi) -
-        // voir ExplorationResult.BonusStatTestField/EndOfGamePageViewModel.BonusStatTestOutcome,
-        // indépendant du Kind principal ci-dessus (coexiste avec les pierres magiques, ne les remplace
-        // pas).
+            AddOneItemToHistory(bonusItemName, 1);
         if (BonusStatTestOutcome is { } bonusStatOutcome && bonusStatOutcome.EquipmentItemOfficialId is { } bonusStatItemName)
-            await AddOneItemToInventoryAsync(bonusStatItemName, 1, bonusStatOutcome.MaterialRuleOfficialId);
+            AddOneItemToHistory(bonusStatItemName, 1);
+
+        await new ExplorationRewardService(_warbandService).ApplyAsync(Warband, WarriorRows.Select(r => r.Warrior), new ExplorationRewards
+        {
+            WyrdstoneShards = shards,
+            Gold = gold,
+            GrantsNextExplorationBonusDie = grantsBonusDie,
+            NextGameNote = nextGameNote,
+            GrantsCatacombReroll = grantsCatacomb,
+            LeaderExperience = leaderExperience,
+            DistributedExperience = distributed,
+            FreeHenchmen = freeHenchmen,
+            EquippedHenchman = equippedHenchman,
+            WeaponBlessing = weaponBlessing,
+            FreeHiredSword = freeHiredSword,
+        });
     }
 }

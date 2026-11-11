@@ -4,6 +4,7 @@ using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Services;
+using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -129,12 +130,15 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
+        // Écritures (prix débités, recrutements, partenaire d'une paire) : PostBattleTradingService (Core, testé) -
+        // ici seulement les décisions et l'Historique.
+        var itemCosts = new List<int>();
+        var recruitments = new List<PersonaRecruitment>();
         foreach (var entry in RareItemSearchEntries.Where(e => e.IsPurchased))
         {
             // L'objet entre dans la réserve via ReserveGains (voir BuildReserve), écrite par ApplyReserveAsync.
             var item = entry.SelectedItem!;
-            Warband.Treasury -= entry.EffectiveCost!.Value;
-            await _warbandService.SaveWarbandAsync(Warband);
+            itemCosts.Add(entry.EffectiveCost!.Value);
             var displayName = entry.SelectedMaterial is { } material ? $"{item.Name} ({material.Abbreviation})" : item.Name;
             sentences.Add(string.Format(Loc["HistoryRareItemFoundSentence"], entry.HeroName, displayName));
         }
@@ -146,40 +150,23 @@ public partial class EndOfGamePageViewModel
         {
             var persona = entry.SelectedCharacter!;
 
-            // Recrute UN personnage (persona ou son partenaire de paire) - factorisé car Ulli & Marquand
-            // (2026-09-01, "vous devez les recruter tous les deux pour une bataille") appellent ceci deux
-            // fois pour un seul frais (voir plus bas), tous les autres personnages une seule fois.
-            // "id => catalog.First(...)" plutôt que "catalog.Where(id contains)" - ce dernier itère le
-            // CATALOGUE (jamais deux fois le même EquipmentItem), donc perdrait silencieusement un doublon
-            // (ex. Bertha : StartingEquipmentIds contient deux fois l'id du Marteau de Guerre Sigmarite,
-            // voir DramatisPersonae.json - retour utilisateur 2026-09-01, "j'ai pas réussi à le gérer").
-            // RecruitDramatisPersonaAsync regroupe ensuite ces doublons en une seule WarriorEquipment row
-            // à Quantity=2 plutôt que deux rows identiques.
-            async Task RecruitOneAsync(DramatisPersona toRecruit)
-            {
-                var recruitEquipment = toRecruit.StartingEquipmentIds
-                    .Select(itemId => localizedEquipment.FirstOrDefault(e => e.Id == itemId))
-                    .Where(item => item is not null)
-                    .Select(item => item!)
-                    .ToList();
-                await _warbandService.RecruitDramatisPersonaAsync(Warband.Id, toRecruit, toRecruit.Name, recruitEquipment, toRecruit.Skills);
-            }
-
             if (entry.HasWyrdstoneCost)
             {
                 // Nicodemus - "he has no interest in gold... must be paid a wyrdstone shard when he
                 // joins the warband" (2026-09-01, "on a qu'a brancher la wyrstone à son paiement"). Pas
                 // de repli sur l'or : il n'a aucune option de paiement en or, contrairement à Johann.
-                Warband.WyrdstoneShards -= entry.EffectiveWyrdstoneCostForShards;
-                await _warbandService.SaveWarbandAsync(Warband);
+                recruitments.Add(new PersonaRecruitment(persona, PersonaPayment.Wyrdstone, entry.EffectiveWyrdstoneCostForShards));
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWyrdstoneSentence"], entry.HeroName, persona.Name));
             }
             else if (!entry.HasHireCost)
             {
+                recruitments.Add(new PersonaRecruitment(persona, PersonaPayment.None, 0));
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedSentence"], entry.HeroName, persona.Name));
             }
             else if (alternativePaymentLines.TryGetValue(entry, out var paymentStash))
             {
+                // L'objet remis est déjà retiré de la réserve (BuildReserve).
+                recruitments.Add(new PersonaRecruitment(persona, PersonaPayment.None, 0));
                 sentences.Add(string.Format(Loc["HistoryDramatisPersonaRecruitedWithItemSentence"], entry.HeroName, persona.Name, paymentStash.Item.Name));
             }
             else
@@ -190,20 +177,16 @@ public partial class EndOfGamePageViewModel
                 // jamais été cochée. Couvre aussi Ulli & Marquand (FeeKind.Pair, "30 Couronnes d'Or pour
                 // les deux" - un seul HireCost partagé, jamais doublé) : sentence dédiée nommant les deux
                 // quand persona.PairedWithDramatisPersona est renseigné.
-                Warband.Treasury -= persona.HireCost!.Value;
-                await _warbandService.SaveWarbandAsync(Warband);
+                recruitments.Add(new PersonaRecruitment(persona, PersonaPayment.Gold, persona.HireCost!.Value));
                 sentences.Add(persona.PairedWithDramatisPersona is { } pairPartner
                     ? string.Format(Loc["HistoryDramatisPersonaPairRecruitedGoldSentence"], entry.HeroName, persona.Name, pairPartner.Name, persona.HireCost!.Value)
                     : string.Format(Loc["HistoryDramatisPersonaRecruitedGoldSentence"], entry.HeroName, persona.Name, persona.HireCost!.Value));
             }
 
-            await RecruitOneAsync(persona);
-            // "Ulli et Marquand ne se séparent jamais et vous devez les recruter tous les deux pour une
-            // bataille" - recrute automatiquement le partenaire caché du picker (voir
-            // DramatisPersona.IsHiddenFromSearchPicker), sans frais supplémentaire (déjà couvert ci-dessus).
-            if (persona.PairedWithDramatisPersona is { } partner)
-                await RecruitOneAsync(partner);
         }
+
+        // "Ulli et Marquand ne se séparent jamais" : le service recrute aussi le partenaire, sans frais de plus.
+        await new PostBattleTradingService(_warbandService).ApplyRareItemSearchAsync(Warband, itemCosts, recruitments, localizedEquipment);
     }
 
     /// <summary>"Vagabond" departure (voir DramatisPersona.IsWanderer) - retour utilisateur 2026-09-01 :

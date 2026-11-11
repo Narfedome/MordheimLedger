@@ -1,6 +1,7 @@
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
+using MordheimLedgerApp.Core.Services;
 using MordheimLedgerApp.Features.Warbands;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Services;
@@ -19,6 +20,9 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 /// l'état de la base, pour que Terminer débite exactement ce que le wizard a affiché.</summary>
 public partial class EndOfGamePageViewModel
 {
+    /// <summary>Écritures du recrutement, des renvois, des ventes et de la réallocation (Core, testé).</summary>
+    private RosterChangeService Roster => new(_warbandService);
+
     /// <summary>Étape "Recrutement" (livre, étape 8) - transforme WarriorRecruitRow/WarriorNameSlot
     /// (EndOfGamePageViewModel.Recruitment.cs, de simples brouillons en mémoire jusqu'ici) en vrais
     /// Warrior, au même moment que tout le reste de ce wizard (Terminer) - jamais avant, voir la doc de
@@ -36,31 +40,16 @@ public partial class EndOfGamePageViewModel
             foreach (var slot in row.NameSlots)
             {
                 var name = slot.Name.Trim();
-                var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name);
-                totalCost += row.Cost;
-
-                foreach (var pick in slot.Equipment)
-                {
-                    await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, materialRule: pick.MaterialRule);
-                    totalCost += RecruitPickCost(pick, servedReservePicks);
-                }
-
+                await Roster.RecruitAsync(Warband.Id, new RecruitDraft(row.Archetype, name, 1,
+                    slot.Equipment.Select(p => (p.Item, p.MaterialRule)).ToList(), slot.Mutations.ToList()));
                 // Mutations achetées au recrutement (Possédés/Mutants - livre, "+ the cost of mutations").
-                foreach (var mutation in slot.Mutations)
-                {
-                    await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
-                    totalCost += mutation.Cost;
-                }
+                totalCost += row.Cost + slot.Equipment.Sum(p => RecruitPickCost(p, servedReservePicks)) + slot.Mutations.Sum(m => m.Cost);
 
                 sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
             }
         }
 
-        if (totalCost > 0)
-        {
-            Warband.Treasury -= totalCost;
-            await _warbandService.SaveWarbandAsync(Warband);
-        }
+        await Roster.AdjustTreasuryAsync(Warband, -totalCost);
     }
 
     /// <summary>Étape "Renvoyer" (livre des règles - "Disbanding a Warband" + FAQ officielle - "you are
@@ -77,28 +66,9 @@ public partial class EndOfGamePageViewModel
 
         foreach (var row in WarriorRows.Where(r => r.EffectiveDismissCount > 0))
         {
-            var warrior = row.Warrior;
-            // EffectiveDismissCount raisonne déjà sur l'effectif SURVIVANT de cette bataille (jamais un
-            // guerrier mort - un Héros mort ne repasse pas Retraité). Reclamper en plus contre le HeadCount
-            // RÉEL couvre ce que le wizard ne prévoit pas (ex. une promotion, appliquée juste avant, qui
-            // retire elle aussi une figurine du groupe).
-            var dismissCount = Math.Min(row.EffectiveDismissCount, warrior.HeadCount);
-            if (dismissCount <= 0) continue;
-
-            var fullyDismissed = dismissCount >= warrior.HeadCount;
-
-            if (fullyDismissed)
-            {
-                foreach (var equipment in warrior.Equipment.ToList())
-                    await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-                warrior.Status = WarriorStatus.Retired;
-            }
-            else
-            {
-                warrior.HeadCount -= dismissCount;
-            }
-
-            await _warbandService.SaveWarriorAsync(warrior);
+            // EffectiveDismissCount raisonne déjà sur l'effectif SURVIVANT de cette bataille ; le service
+            // reclampe contre le HeadCount RÉEL (ex. une promotion appliquée juste avant retire une figurine).
+            if (!await Roster.DismissAsync(row.Warrior, row.EffectiveDismissCount)) continue;
             sentences.Add(string.Format(Loc["HistoryWarriorDismissedSentence"], row.Name));
         }
     }
@@ -125,22 +95,13 @@ public partial class EndOfGamePageViewModel
         foreach (var candidate in PendingSales)
         {
             if (candidate.CarriedItem is { } carriedItem)
-            {
-                await _warbandService.RemoveWarriorEquipmentAsync(carriedItem.Id);
-                var leftover = carriedItem.Quantity - candidate.SelectedQuantity;
-                if (leftover > 0)
-                    await _warbandService.AddWarriorEquipmentAsync(carriedItem.WarriorId, carriedItem.Item, quantity: leftover, materialRule: carriedItem.MaterialRule, foundValueOverride: carriedItem.FoundValueOverride);
-            }
+                await Roster.SellCarriedAsync(carriedItem, candidate.SelectedQuantity);
 
             netGold += candidate.SellPrice;
             sentences.Add(string.Format(Loc["HistoryEquipmentSoldSentence"], candidate.SoldLabel, candidate.SellPrice));
         }
 
-        if (netGold != 0)
-        {
-            Warband.Treasury += netGold;
-            await _warbandService.SaveWarbandAsync(Warband);
-        }
+        await Roster.AdjustTreasuryAsync(Warband, netGold);
     }
 
     /// <summary>Étape "Recrutement" (livre, étape 8, suite) - même principe qu'ApplyRecruitmentAsync
@@ -158,13 +119,10 @@ public partial class EndOfGamePageViewModel
 
         foreach (var (topUp, (plan, breakdown)) in topUpPlans)
         {
+            // Les vétérans portent l'équipement du groupe (quantités par modèle) : payé ou pris dans la réserve
+            // (breakdown/plan), aucune ligne d'équipement à ajouter - seul l'effectif change.
             var warrior = topUp.Row.Warrior;
-            warrior.HeadCount += topUp.AddCount;
-            await _warbandService.SaveWarriorAsync(warrior);
-
-            foreach (var line in plan.Where(l => l.NeededQty > 0))
-                await _warbandService.AddWarriorEquipmentAsync(warrior.Id, line.Equipment.Item, quantity: line.NeededQty, materialRule: line.Equipment.MaterialRule);
-
+            await Roster.TopUpAsync(warrior, topUp.AddCount);
             totalCost += breakdown.Total;
             sentences.Add(string.Format(Loc["HistoryHenchmanTopUpSentence"], topUp.AddCount, warrior.Name));
         }
@@ -174,33 +132,16 @@ public partial class EndOfGamePageViewModel
             foreach (var group in row.HenchmanGroupDrafts)
             {
                 var name = group.Name.Trim();
-                var warrior = await _warbandService.RecruitWarriorAsync(Warband.Id, row.Archetype, name, headCount: group.Count);
-                totalCost += group.Count * row.Cost;
-
-                // Quantity = group.Count : un groupe est UN SEUL Warrior (HeadCount = l'effectif), même
-                // convention que le reste du recrutement (bug 2026-09-05, "l'épée coute 30, hors l'épée
-                // coute 10").
-                foreach (var pick in group.Equipment)
-                {
-                    await _warbandService.AddWarriorEquipmentAsync(warrior.Id, pick.Item, quantity: group.Count, materialRule: pick.MaterialRule);
-                    totalCost += RecruitPickCost(pick, servedReservePicks) * group.Count;
-                }
-
-                foreach (var mutation in group.Mutations)
-                {
-                    await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
-                    totalCost += mutation.Cost * group.Count;
-                }
+                // Équipement enregistré PAR MODÈLE (« Épée x1 » pour un groupe de 3), payé pour chaque modèle.
+                await Roster.RecruitAsync(Warband.Id, new RecruitDraft(row.Archetype, name, group.Count,
+                    group.Equipment.Select(p => (p.Item, p.MaterialRule)).ToList(), group.Mutations.ToList()));
+                totalCost += group.Count * (row.Cost + group.Equipment.Sum(p => RecruitPickCost(p, servedReservePicks)) + group.Mutations.Sum(m => m.Cost));
 
                 sentences.Add(string.Format(Loc["HistoryRecruitedSentence"], name, row.Archetype.Name));
             }
         }
 
-        if (totalCost > 0)
-        {
-            Warband.Treasury -= totalCost;
-            await _warbandService.SaveWarbandAsync(Warband);
-        }
+        await Roster.AdjustTreasuryAsync(Warband, -totalCost);
     }
 
     /// <summary>Étape "Réallouer l'équipement" (livre, étape 9) - côté Héros uniquement : leur
@@ -219,25 +160,10 @@ public partial class EndOfGamePageViewModel
         // rien à synchroniser pour lui.
         foreach (var row in WarriorRows.Where(r => r.IsHero && !r.IsDead))
         {
-            foreach (var id in row.OriginalEquipmentIds)
+            var arrivedLines = await Roster.ApplyEquipmentChangesAsync(row.Warrior,
+                row.OriginalEquipmentIds.ToDictionary(id => id, id => row.OriginalEquipmentQuantities[id]));
+            foreach (var arrived in arrivedLines)
             {
-                var current = row.Warrior.Equipment.FirstOrDefault(we => we.Id == id);
-                if (current is not null && current.Quantity == row.OriginalEquipmentQuantities[id]) continue;
-
-                await _warbandService.RemoveWarriorEquipmentAsync(id);
-                if (current is { Quantity: > 0 })
-                {
-                    var recreated = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, current.Item, current.Quantity, current.MaterialRule, current.FoundValueOverride);
-                    if (current.BlessingRule is { } keptBlessing)
-                        await _warbandService.SetWarriorEquipmentBlessingRuleAsync(recreated.Id, keptBlessing.Id);
-                }
-            }
-
-            foreach (var arrived in row.Warrior.Equipment.Where(we => we.Id < 0).ToList())
-            {
-                var created = await _warbandService.AddWarriorEquipmentAsync(row.Warrior.Id, arrived.Item, arrived.Quantity, arrived.MaterialRule, arrived.FoundValueOverride);
-                if (arrived.BlessingRule is { } blessing)
-                    await _warbandService.SetWarriorEquipmentBlessingRuleAsync(created.Id, blessing.Id);
                 sentences.Add(string.Format(Loc["HistoryEquipmentReallocatedSentence"], arrived.NameDisplay, row.Name));
             }
         }

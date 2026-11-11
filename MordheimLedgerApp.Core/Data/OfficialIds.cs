@@ -1,4 +1,4 @@
-namespace MordheimLedgerApp.Core.Data;
+﻿namespace MordheimLedgerApp.Core.Data;
 
 /// <summary>Ids stables (voir WarbandSeedData's Id / OfficialId des entités du catalogue) des quelques
 /// entrées officielles que le code doit reconnaître nommément - à comparer à l'OfficialId d'une entrée,
@@ -9,6 +9,11 @@ public static class OfficialIds
     /// <summary>Bénédiction d'une arme (Sanctuaire, Sœurs de Sigmar/Chasseurs de Sorcières), cumulable
     /// avec un matériau - voir WarriorEquipment.BlessingRule.</summary>
     public const string BlessedWeaponRule = "rule.blessed-weapon";
+
+    /// <summary>Les deux issues de la table de Blessures des Hommes de main (D6) - aucune ne laisse de trace
+    /// durable sur le groupe (voir AppDatabase.RemoveHenchmanInjuryChipsAsync).</summary>
+    public const string HenchmanLostInjury = "injury.henchman.lost";
+    public const string HenchmanFullRecoveryInjury = "injury.henchman.full-recovery";
 
     /// <summary>"Une Poignée d'Or" (Ulli &amp; Marquand) - voir EndOfGamePageViewModel.PairEngagement.</summary>
     public const string FistfulOfCrownsRule = "rule.a-fistful-of-crowns";

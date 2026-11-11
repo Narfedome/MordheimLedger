@@ -228,6 +228,23 @@ public class InjuryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Repair_RemovesOldHenchmanChips_AndKeepsHeroInjuries()
+    {
+        var (warband, hero, group) = await WarbandAsync();
+        var lost = await _service.ResolveInjuryAsync(1, isHero: false, "Dead");
+        var recovered = await _service.ResolveInjuryAsync(4, isHero: false, "Full recovery");
+        var heroInjury = await _service.ResolveInjuryAsync(41, isHero: true, "Leg Wound");
+        await _warbands.AddWarriorInjuryAsync(group.Id, lost);       // puces posées avant le correctif
+        await _warbands.AddWarriorInjuryAsync(group.Id, recovered);
+        await _warbands.AddWarriorInjuryAsync(hero.Id, heroInjury);
+
+        await _db.RemoveHenchmanInjuryChipsAsync();
+
+        Assert.Empty((await ReloadAsync(warband, group.Id)).Injuries);
+        Assert.Single((await ReloadAsync(warband, hero.Id)).Injuries);
+    }
+
+    [Fact]
     public void HenchmanDeaths_NegativeCountIsIgnored()
     {
         var group = new Warrior { HeadCount = 2 };

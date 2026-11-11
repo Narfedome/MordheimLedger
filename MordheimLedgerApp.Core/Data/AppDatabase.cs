@@ -1,4 +1,4 @@
-// Stryker disable all : requêtes sqlite-net (arbres d'expression) - un mutant y empêche la traduction SQL et fausse les tests de mutation (voir MordheimLedgerApp.Tests/stryker-config.json).
+﻿// Stryker disable all : requêtes sqlite-net (arbres d'expression) - un mutant y empêche la traduction SQL et fausse les tests de mutation (voir MordheimLedgerApp.Tests/stryker-config.json).
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.Json;
@@ -149,10 +149,24 @@ public partial class AppDatabase
         await BackfillNeverGainsExperienceAsync();
         await BackfillWarriorRacialMaxesAsync();
         await BackfillWarriorStartingStatsAsync();
+        await RemoveHenchmanInjuryChipsAsync();
 
         // Contrairement au reste du catalogue, reconstruite à chaque lancement (voir sa doc) - n'a pas de
         // meilleur endroit que celui-ci depuis que la synchro a remplacé les Backfill* du catalogue.
         await ResyncExplorationResultsAsync();
+    }
+
+    /// <summary>Jusqu'au 2026-11-11, chaque figurine d'un groupe d'Hommes de main hors de combat laissait une
+    /// puce « Perdu » ou « Rétablissement complet » sur le groupe (InjuryService.RemoveDeadFigures n'en pose
+    /// plus) : sans effet de jeu, elles encombraient la fiche. Retirées ici ; no-op ensuite.</summary>
+    internal async Task RemoveHenchmanInjuryChipsAsync()
+    {
+        var injuryIds = (await _db.Table<InjuryEntity>().Where(i => i.Category == InjuryCategory.Henchman).ToListAsync())
+            .Where(i => i.OfficialId is OfficialIds.HenchmanLostInjury or OfficialIds.HenchmanFullRecoveryInjury)
+            .Select(i => i.Id)
+            .ToList();
+        foreach (var injuryId in injuryIds)
+            await _db.ExecuteAsync("DELETE FROM WarriorInjuryEntity WHERE InjuryId = ?", injuryId);
     }
 
     /// <summary>One-time-per-row data fix for campaigns that started before WarriorArchetype/

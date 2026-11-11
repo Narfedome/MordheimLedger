@@ -46,6 +46,19 @@
                      qu'on a fait") : chacune réutilise telle quelle une donnée déjà exposée par l'étape
                      correspondante, voir EndOfGamePageViewModel.Recap.cs. Réallouer l'équipement reste
                      hors de ce récap (aucune trace de ses déplacements gardée pour l'instant). -->
+                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasExplorationLootRecap}">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="{loc:Loc EndOfGameRecapExplorationLootHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding ExplorationLootRecapLines}" Spacing="2">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" FontSize="13"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
                 <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasWyrdstoneSaleRecap}">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{loc:Loc EndOfGameRecapWyrdstoneHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>

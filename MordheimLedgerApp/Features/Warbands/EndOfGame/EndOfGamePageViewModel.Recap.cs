@@ -1,3 +1,4 @@
+using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -16,6 +17,54 @@ namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 public partial class EndOfGamePageViewModel
 {
     public bool HasWyrdstoneSaleRecap => ShardsToSell > 0;
+
+    /// <summary>Butin de l'Exploration (recette Android du 2026-11-05 : pierres magiques et objets trouvés
+    /// absents du récap) - mêmes sources que ce qu'ApplyExplorationOutcomeAsync/ApplyReserveAsync écrivent
+    /// à Terminer : barème des dés + pierre localisée + lignes Trésor Caché/Bande Massacrée, or du résultat
+    /// + de ces lignes, objets de PendingExplorationItems. Le scénario a sa propre section.</summary>
+    private int ExplorationLootWyrdstone => BaselineWyrdstoneShardsFound
+        + (IsExplorationWyrdstone && int.TryParse(ExplorationWyrdstoneAmount, out var located) ? located : 0)
+        + IndependentOutcomeWyrdstoneShards;
+
+    private int ExplorationLootGold =>
+        (ResolvedExplorationOutcome?.Kind == ExplorationOutcomeKind.Gold && int.TryParse(ExplorationGoldAmount, out var gold) ? gold : 0)
+        + IndependentOutcomeGold;
+
+    public bool HasExplorationLootRecap => ExplorationLootWyrdstone > 0 || ExplorationLootGold != 0 || PendingExplorationItems().Any();
+
+    public IEnumerable<string> ExplorationLootRecapLines
+    {
+        get
+        {
+            if (ExplorationLootWyrdstone > 0)
+                yield return string.Format(Loc["EndOfGameRecapLootWyrdstoneFormat"], ExplorationLootWyrdstone);
+            if (ExplorationLootGold != 0)
+                yield return string.Format(Loc["EndOfGameRecapLootGoldFormat"], ExplorationLootGold);
+            foreach (var found in PendingExplorationItems())
+            {
+                var name = found.MaterialRule?.Abbreviation is { Length: > 0 } abbr ? $"{found.Item.Name} ({abbr})" : found.Item.Name;
+                yield return string.Format(Loc["EndOfGameRecapHenchmanGroupFormat"], name, found.Quantity);
+            }
+        }
+    }
+
+    /// <summary>La vue d'étape est mise en cache : relue à chaque arrivée sur le récap, les saisies des
+    /// autres étapes ont pu changer depuis.</summary>
+    private void NotifyRecapChanged()
+    {
+        foreach (var name in new[]
+        {
+            nameof(HasExplorationLootRecap), nameof(ExplorationLootRecapLines), nameof(HasWyrdstoneSaleRecap),
+            nameof(AvailableVeteransRecapDisplay), nameof(HasRareItemsRecap), nameof(RareItemsRecapLines),
+            nameof(HasDramatisPersonaeRecap), nameof(DramatisPersonaeRecapLines), nameof(PairEngagementRecapDisplay),
+            nameof(HasHiredSwordsRecap), nameof(HiredSwordsRecapLines), nameof(HasDismissedWarriorsRecap),
+            nameof(DismissedWarriorsRecapLines), nameof(HasEquipmentTradingRecap), nameof(EquipmentTradingPurchasedRecapLines),
+            nameof(EquipmentTradingSoldRecapLines), nameof(HasRecruitmentRecap), nameof(RecruitedHeroesRecapLines),
+            nameof(RecruitedHenchmenRecapLines), nameof(VeteranTopUpsRecapLines), nameof(ExplorationJoinRecapLines),
+            nameof(ProjectedWarbandRatingDisplay),
+        })
+            OnPropertyChanged(name);
+    }
 
     /// <summary>Toujours affiché (le jet a lieu à chaque Fin de Partie, que la bande recrute ou non des
     /// vétérans - voir EndOfGamePageViewModel.Recruitment.cs's RemainingVeteranBudget's own doc).</summary>

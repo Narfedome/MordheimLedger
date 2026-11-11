@@ -54,21 +54,21 @@ public partial class EndOfGamePageViewModel
     [RelayCommand]
     private async Task PickAdvanceSkill(AdvanceRollEntry entry)
     {
-        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry) || r.ExplorationAdvanceRolls.Contains(entry));
+        var (_, warrior, isSpellcaster) = FindAdvanceOwner(entry);
         // EffectiveExtraSkillOfficialIds -> ids via _skillIdsByOfficialId : mêmes objets (ex. le symbole de
         // l'Ordre des Libres Marchands) que la Charrette/le Carnet de l'Alchimiste - une compétence
         // précise débloquée hors catégorie plutôt qu'une liste entière, voir EquipmentItem.
         // GrantsSpecificSkillOfficialId.
-        var extraSkillIds = SkillEligibility.EffectiveExtraSkillOfficialIds(row.Warrior)
+        var extraSkillIds = SkillEligibility.EffectiveExtraSkillOfficialIds(warrior)
             .Select(name => _skillIdsByOfficialId.GetValueOrDefault(name))
             .Where(id => id != 0)
             .ToList();
         // singleSelect: true (2026-09-04, retour utilisateur - "dans la section des advance, il faut
         // passer en sélection unique") : un jet de Progression n'accorde jamais plus d'une compétence,
         // contrairement au picker générique de la Bibliothèque.
-        var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, row.Warrior.WarriorArchetypeId,
-            SkillEligibility.EffectiveAllowedCategories(row.Warrior), extraSkillIds, singleSelect: true,
-            forWarrior: row.Warrior, forWarriorIsSpellcaster: row.IsSpellcaster);
+        var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, warrior.WarriorArchetypeId,
+            SkillEligibility.EffectiveAllowedCategories(warrior), extraSkillIds, singleSelect: true,
+            forWarrior: warrior, forWarriorIsSpellcaster: isSpellcaster);
         if (skills.Count == 0) return;
 
         entry.SelectedSpell = null;
@@ -83,7 +83,7 @@ public partial class EndOfGamePageViewModel
     [RelayCommand]
     private async Task PickAdvanceSpell(AdvanceRollEntry entry)
     {
-        var row = WarriorRows.First(r => r.AdvanceRolls.Contains(entry) || r.ExplorationAdvanceRolls.Contains(entry));
+        var (row, _, _) = FindAdvanceOwner(entry);
         var knownSpellIds = row.Warrior.Spells.Select(s => s.Item.Id).ToList();
         var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(row.MagicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
         if (rolled is null) return;
@@ -119,6 +119,25 @@ public partial class EndOfGamePageViewModel
     {
         foreach (var entry in AllAdvanceEntries().Where(e => e.SelectedSpell == spell))
             entry.SelectedSpell = null;
+    }
+
+    /// <summary>Guerrier à qui appartient un jet de Progression, jets imbriqués d'une Promotion compris : le
+    /// jet Héros imbriqué appartient au Héros promu (PromotedWarriorPreview, avec les 2 listes de compétences
+    /// choisies), pas à l'Homme de main de la ligne. Avant (bug remonté le 2026-11-11, Goule promue), seul
+    /// row.AdvanceRolls/ExplorationAdvanceRolls était parcouru : First levait une exception sur le choix de
+    /// compétence du Héros promu et l'appli plantait.</summary>
+    private (WarriorOutcomeRow Row, Core.Models.Warrior Warrior, bool IsSpellcaster) FindAdvanceOwner(AdvanceRollEntry entry)
+    {
+        foreach (var row in WarriorRows)
+        {
+            foreach (var top in row.AdvanceRolls.Concat(row.ExplorationAdvanceRolls))
+            {
+                if (top == entry || top.NestedHenchmanRoll == entry) return (row, row.Warrior, row.IsSpellcaster);
+                // Pas de magie pour un Homme de main promu (voir AdvanceRollEntry.TryBuildPromotionNestedRolls).
+                if (top.NestedHeroRoll == entry && top.PromotedWarriorPreview is { } promoted) return (row, promoted, false);
+            }
+        }
+        throw new InvalidOperationException("Jet de Progression sans guerrier propriétaire.");
     }
 
     /// <summary>Tous les AdvanceRollEntry de ce wizard, y compris les jets imbriqués d'une Promotion

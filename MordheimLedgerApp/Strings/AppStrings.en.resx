@@ -3091,4 +3091,13 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="DialogKeepEditingAction" xml:space="preserve">
     <value>Keep editing</value>
   </data>
+  <data name="EndOfGameRecapExplorationLootHeading" xml:space="preserve">
+    <value>Exploration loot</value>
+  </data>
+  <data name="EndOfGameRecapLootWyrdstoneFormat" xml:space="preserve">
+    <value>Wyrdstone: {0} shard(s)</value>
+  </data>
+  <data name="EndOfGameRecapLootGoldFormat" xml:space="preserve">
+    <value>Gold: {0} gc</value>
+  </data>
 </root>

@@ -121,6 +121,9 @@ namespace MordheimLedgerApp.Services
             // Ambre fixe pour un avertissement non bloquant (choix hors restriction du livre) - distinct
             // d'AppDanger (erreur), une teinte par mode pour rester lisible sur fond clair comme sombre.
             tokens["AppWarning"] = Color.FromArgb(IsDark() ? "#D9A441" : "#9A6A12");
+            // Voile derrière les dialogs (DialogPage) : noir dans les deux modes, plus opaque en sombre - à 45 %
+            // sur un fond déjà sombre, la page ne s'assombrissait presque pas et la carte se détachait mal.
+            tokens["AppScrim"] = Colors.Black.WithAlpha(IsDark() ? 0.70f : 0.45f);
             var res = Application.Current.Resources;
             foreach (var kv in tokens)
                 res[kv.Key] = kv.Value;

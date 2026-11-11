@@ -42,7 +42,8 @@ public partial class EndOfGamePageViewModel
     /// héros") - same exclusion as RareItemSearchEntries itself (main constructor); kept as a separate
     /// check on WarriorRows rather than derived from RareItemSearchEntries so both conditions stay
     /// obviously in sync.</summary>
-    public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && r.CanSearchRareItems && !r.Warrior.IsDramatisPersona);
+    public bool HasEligibleHeroesForRareItems => WarriorRows.Any(r => r.Warrior.IsHero && r.CanSearchRareItems && !r.Warrior.IsDramatisPersona)
+        || PromotedHeroes.Any();
 
     /// <summary>Opens the Trading Post picker via PickRareEquipmentAsync (IEquipmentPickerService) - the
     /// player is nominating exactly ONE item to attempt this Hero's single roll against ("You may also

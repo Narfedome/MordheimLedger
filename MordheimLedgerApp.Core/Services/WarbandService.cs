@@ -420,7 +420,7 @@ public class WarbandService : IWarbandService
         return gold;
     }
 
-    public async Task<WarriorEquipment> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId)
+    public async Task<WarriorEquipment?> EquipWarbandItemToWarriorAsync(int warbandEquipmentId, int warriorId)
     {
         await _db.Initialization;
         var stashRow = await _db.Connection.FindAsync<WarbandEquipmentEntity>(warbandEquipmentId)
@@ -431,9 +431,35 @@ public class WarbandService : IWarbandService
         var item = (await _library.GetEquipmentItemsAsync("en")).First(i => i.Id == stashRow.EquipmentItemId);
         var materialRule = await ResolveSpecialRuleAsync(stashRow.MaterialSpecialRuleId, "en");
 
-        var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule, stashRow.FoundValueOverride);
-        await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
-        return carried;
+        var warrior = await _db.Connection.FindAsync<WarriorEntity>(warriorId)
+            ?? throw new InvalidOperationException($"Warrior {warriorId} introuvable.");
+        if (warrior.IsHero || warrior.HeadCount <= 1)
+        {
+            var carried = await AddWarriorEquipmentAsync(warriorId, item, stashRow.Quantity, materialRule, stashRow.FoundValueOverride);
+            await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(warbandEquipmentId);
+            return carried;
+        }
+
+        // Groupe d'Hommes de main : un exemplaire identique par modèle (décision du 2026-11-11), pris d'abord
+        // dans la ligne choisie puis dans les autres lignes équivalentes de la réserve.
+        var matching = (await _db.Connection.Table<WarbandEquipmentEntity>()
+                .Where(r => r.WarbandId == stashRow.WarbandId && r.EquipmentItemId == stashRow.EquipmentItemId).ToListAsync())
+            .Where(r => r.MaterialSpecialRuleId == stashRow.MaterialSpecialRuleId && r.FoundValueOverride == stashRow.FoundValueOverride)
+            .OrderBy(r => r.Id == stashRow.Id ? 0 : 1)
+            .ToList();
+        if (matching.Sum(r => r.Quantity) < warrior.HeadCount) return null;
+
+        var remaining = warrior.HeadCount;
+        foreach (var row in matching)
+        {
+            if (remaining == 0) break;
+            var taken = Math.Min(row.Quantity, remaining);
+            remaining -= taken;
+            row.Quantity -= taken;
+            if (row.Quantity == 0) await _db.Connection.DeleteAsync<WarbandEquipmentEntity>(row.Id);
+            else await _db.Connection.UpdateAsync(row);
+        }
+        return await AddWarriorEquipmentAsync(warriorId, item, 1, materialRule, stashRow.FoundValueOverride);
     }
 
     public async Task<WarriorSkill> AddWarriorSkillAsync(int warriorId, Skill skill)

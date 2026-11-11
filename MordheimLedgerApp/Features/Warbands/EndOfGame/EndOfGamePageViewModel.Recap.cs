@@ -97,7 +97,12 @@ public partial class EndOfGamePageViewModel
         }
     }
 
-    public bool HasHiredSwordsRecap => LivingHiredSwordUpkeepEntries.Any(e => e.WillPay.HasValue || e.IsPrepaidFree) || SelectedNewHiredSword is not null;
+    public bool HasHiredSwordsRecap => LivingHiredSwordUpkeepEntries.Any(e => e.WillPay.HasValue || e.IsPrepaidFree) || SelectedNewHiredSword is not null
+        || FreeHiredSword is not null;
+
+    /// <summary>Franc-Tireur offert par l'Exploration (Une Faveur Rendue) - recruté à Terminer par
+    /// ApplyExplorationOutcomeAsync, absent du récap et de la Valeur projetée jusqu'à la recette du 2026-11-11.</summary>
+    private HiredSword? FreeHiredSword => ResolvedExplorationOutcome?.GrantsFreeHiredSword == true ? SelectedFreeHiredSword : null;
 
     public IEnumerable<string> HiredSwordsRecapLines
     {
@@ -109,6 +114,8 @@ public partial class EndOfGamePageViewModel
                     : string.Format(entry.WillPay == true ? Loc["EndOfGameRecapPaidFormat"] : Loc["EndOfGameRecapDismissedFormat"], entry.DisplayName, entry.UpkeepCost);
             if (SelectedNewHiredSword is { } hiredSword)
                 yield return string.Format(Loc["EndOfGameRecapHiredSwordHiredFormat"], hiredSword.Name, hiredSword.HireCost);
+            if (FreeHiredSword is { } freeHiredSword)
+                yield return string.Format(Loc["EndOfGameRecapHiredSwordFreeFormat"], freeHiredSword.Name);
         }
     }
 
@@ -173,6 +180,8 @@ public partial class EndOfGamePageViewModel
                 total += WarbandRatingRules.WarriorContribution(group.Row.Archetype.IsLargeCreature, group.Row.Archetype.StartingExperience, group.Count, null);
             if (SelectedNewHiredSword is { } hiredSword)
                 total += WarbandRatingRules.WarriorContribution(false, 0, 1, hiredSword.BaseRating);
+            if (FreeHiredSword is { } freeHiredSword)
+                total += WarbandRatingRules.WarriorContribution(false, 0, 1, freeHiredSword.BaseRating);
             foreach (var entry in RareItemsWithResults.Where(e => e.IsRecruited))
                 total += WarbandRatingRules.WarriorContribution(false, 0, 1, null, entry.SelectedCharacter!.RatingBonus);
             // Exploration : un Zombie offert rejoint un groupe existant du même type s'il y en a un (et en prend

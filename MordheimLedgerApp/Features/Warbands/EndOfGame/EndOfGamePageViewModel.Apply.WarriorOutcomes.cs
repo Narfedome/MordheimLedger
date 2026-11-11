@@ -208,7 +208,20 @@ public partial class EndOfGamePageViewModel
                 // groupe (NestedHenchmanRoll).
                 if (advance.IsPromotionResult && advance.PromotedWarriorPreview is { } promoted && advance.NestedHeroRoll is { } heroRoll)
                 {
+                    // Le clone (PromotedWarriorPreview) date du choix des 2 listes, AVANT que l'XP de cette
+                    // partie soit ajoutée au groupe ci-dessus : sans ça, le Héros promu perdait l'XP gagnée à
+                    // cette bataille (bug trouvé le 2026-11-11, Héros promu à 0 XP).
+                    promoted.Experience = warrior.Experience;
                     await _warbandService.InsertWarriorAsync(promoted);
+                    // Les membres d'un groupe d'Hommes de main sont équipés à l'identique : le promu part avec
+                    // une copie de l'équipement du groupe (quantités par modèle). Avant (recette du 2026-11-11),
+                    // il n'avait rien, et l'équipement était perdu quand la promotion vidait le groupe.
+                    foreach (var carried in warrior.Equipment.Where(e => e.Id > 0))
+                    {
+                        var copy = await _warbandService.AddWarriorEquipmentAsync(promoted.Id, carried.Item, carried.Quantity, carried.MaterialRule, carried.FoundValueOverride);
+                        if (carried.BlessingRule is { } blessing)
+                            await _warbandService.SetWarriorEquipmentBlessingRuleAsync(copy.Id, blessing.Id);
+                    }
                     sentences.Add(string.Format(Loc["HistoryPromotionSentence"], warrior.Name, promoted.Name));
 
                     await ApplyResolvedAdvanceAsync(promoted, heroRoll);

@@ -252,4 +252,92 @@ public class InjuryServiceTests : IDisposable
 
         Assert.NotEqual(hero.Experience, (await ReloadAsync(warband, hero.Id)).Experience);
     }
+
+    // --- Ajouts après le passage Stryker du 2026-11-11 (mutants survivants) ---
+
+    [Theory]
+    [InlineData("11-15", 11, true)]
+    [InlineData("11-15", 15, true)]
+    [InlineData("11-15", 10, false)]
+    public void RollRangeMatches_IncludesBothBounds(string range, int roll, bool expected) =>
+        Assert.Equal(expected, InjuryCatalogLookup.RollRangeMatches(range, roll));
+
+    private static Injury Row(string name, string roll, string? branch = null) =>
+        new() { Name = name, Category = InjuryCategory.Hero, RollRange = roll, BranchRange = branch };
+
+    [Fact]
+    public void Find_WithoutSubRoll_PrefersTheGenericRow()
+    {
+        List<Injury> catalog = [Row("Light", "23", "2-6"), Row("Generic", "23"), Row("Severe", "23", "1")];
+        Assert.Equal("Generic", InjuryCatalogLookup.Find(catalog, InjuryCategory.Hero, 23, null)?.Name);
+    }
+
+    [Fact]
+    public void Find_WithoutSubRoll_FallsBackToABranchRow()
+    {
+        List<Injury> catalog = [Row("Light", "23", "2-6"), Row("Severe", "23", "1")];
+        Assert.Equal("Light", InjuryCatalogLookup.Find(catalog, InjuryCategory.Hero, 23, null)?.Name);
+    }
+
+    [Fact]
+    public void Find_SubRollMatchingNoBranch_ReturnsNull()
+    {
+        List<Injury> catalog = [Row("Light", "23", "2-6")];
+        Assert.Null(InjuryCatalogLookup.Find(catalog, InjuryCategory.Hero, 23, 1));
+    }
+
+    [Fact]
+    public async Task Resolve_HenchmanRoll_UsesTheHenchmanTable()
+    {
+        var injury = await _service.ResolveInjuryAsync(1, isHero: false, "x");
+        Assert.Equal(InjuryCategory.Henchman, injury.Category);
+    }
+
+    [Fact]
+    public async Task Resolve_OfficialRollWins_OverAFallbackNameThatExistsElsewhere()
+    {
+        var other = (await _library.GetInjuriesAsync("en")).First(i => i.Category == InjuryCategory.Hero && !InjuryCatalogLookup.RollRangeMatches(i.RollRange, 22));
+
+        var injury = await _service.ResolveInjuryAsync(22, isHero: true, other.Name);
+
+        Assert.True(InjuryCatalogLookup.RollRangeMatches(injury.RollRange, 22));
+    }
+
+    [Fact]
+    public async Task Resolve_UnknownRoll_PersistsTheFallbackInTheCatalog()
+    {
+        await _service.ResolveInjuryAsync(-1, isHero: true, "Blessure maison");
+        Assert.Contains(await _library.GetInjuriesAsync("en"), i => i.Name == "Blessure maison");
+    }
+
+    [Theory]
+    [InlineData(SeriousInjuryEffectKind.LoseAllEquipment, false)]
+    [InlineData(SeriousInjuryEffectKind.GainExperience, true)]
+    [InlineData(SeriousInjuryEffectKind.MissNextGame, true)]
+    [InlineData(SeriousInjuryEffectKind.MissGamesRollD3, true)]
+    [InlineData(SeriousInjuryEffectKind.ForcedRetirement, true)]
+    public async Task ApplyEffect_SaysWhetherTheWarriorMustBeSaved(SeriousInjuryEffectKind kind, bool expected)
+    {
+        var (_, hero, _) = await WarbandAsync();
+        Assert.Equal(expected, await _service.ApplyEffectAsync(hero, new SeriousInjuryOutcome { Kind = kind, Value = 2 }));
+    }
+
+    [Fact]
+    public async Task ApplyEffect_UnhandledKind_ChangesNothing()
+    {
+        var (_, hero, _) = await WarbandAsync();
+        var kinds = Enum.GetValues<SeriousInjuryEffectKind>().Where(k => k is not (SeriousInjuryEffectKind.CharacteristicPenalty
+            or SeriousInjuryEffectKind.LoseAllEquipment or SeriousInjuryEffectKind.GainExperience or SeriousInjuryEffectKind.MissNextGame
+            or SeriousInjuryEffectKind.MissGamesRollD3 or SeriousInjuryEffectKind.ForcedRetirement)).ToList();
+        foreach (var kind in kinds)
+            Assert.False(await _service.ApplyEffectAsync(hero, new SeriousInjuryOutcome { Kind = kind }));
+    }
+
+    [Fact]
+    public async Task DeepWound_UsesTheEnteredRoll_NotARandomOne()
+    {
+        var (_, hero, _) = await WarbandAsync();
+        await _service.ApplyEffectAsync(hero, new SeriousInjuryOutcome { Kind = SeriousInjuryEffectKind.MissGamesRollD3, Value = 5 });
+        Assert.Equal(5, hero.SickGamesRemaining);
+    }
 }

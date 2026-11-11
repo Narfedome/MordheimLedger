@@ -385,3 +385,6 @@ Deploy/PlayStore/
 
 # APK de test generes par Build-Test.ps1, a installer sur un telephone (jamais commites).
 /Deploy/Telephone/
+
+# Rapports de Stryker.NET (tests de mutation, lancés à la main - jamais commités).
+StrykerOutput/

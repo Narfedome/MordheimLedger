@@ -139,4 +139,29 @@ public class PostBattleTradingServiceTests : IDisposable
         var recruited = Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en"));
         Assert.Contains(recruited.Equipment, e => e.Quantity == 2);
     }
+
+    // --- Ajouts après le passage Stryker du 2026-11-11 (mutants survivants) ---
+
+    [Fact]
+    public async Task Reserve_UnchangedLine_KeepsItsRow()
+    {
+        var warband = await WarbandAsync();
+        var axe = await ItemAsync("Axe");
+        var line = await _warbands.AddWarbandEquipmentAsync(warband.Id, axe, quantity: 2);
+
+        await _service.ApplyReserveAsync(warband.Id, [new(line.Id, axe, null, 2)], [new(line.Id, axe, null, 2)]);
+
+        Assert.Equal(line.Id, Assert.Single(await StashAsync(warband)).Id);
+    }
+
+    [Fact]
+    public async Task RarePersona_StartingEquipmentMissingFromTheCatalog_IsSkipped()
+    {
+        var warband = await WarbandAsync();
+        var persona = (await _library.GetDramatisPersonaeAsync("en")).First(p => p.StartingEquipmentIds.Count > 0 && p.PairedWithDramatisPersona is null);
+
+        await _service.ApplyRareItemSearchAsync(warband, [], [new(persona, PersonaPayment.None, 0)], []);
+
+        Assert.Empty(Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en")).Equipment);
+    }
 }

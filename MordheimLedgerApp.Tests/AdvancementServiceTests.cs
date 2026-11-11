@@ -162,4 +162,52 @@ public class AdvancementServiceTests : IDisposable
         var reloaded = await ReloadAsync(warband, group.Id);
         Assert.Contains(CharacteristicField.Initiative, reloaded.IncreasedCharacteristics);
     }
+
+    // --- Ajouts après le passage Stryker du 2026-11-11 (mutants survivants) ---
+
+    [Theory]
+    [InlineData(CharacteristicField.Movement)]
+    [InlineData(CharacteristicField.WeaponSkill)]
+    [InlineData(CharacteristicField.BallisticSkill)]
+    [InlineData(CharacteristicField.Strength)]
+    [InlineData(CharacteristicField.Toughness)]
+    [InlineData(CharacteristicField.Wounds)]
+    [InlineData(CharacteristicField.Initiative)]
+    [InlineData(CharacteristicField.Attacks)]
+    [InlineData(CharacteristicField.Leadership)]
+    public void CharacteristicIncrease_AddsOneToTheRightField(CharacteristicField field)
+    {
+        var warrior = new Warrior { Movement = 4, WeaponSkill = 3, BallisticSkill = 3, Strength = 3, Toughness = 3, Wounds = 1, Initiative = 3, Attacks = 1, Leadership = 7 };
+        int Read(Warrior w) => field switch
+        {
+            CharacteristicField.Movement => w.Movement, CharacteristicField.WeaponSkill => w.WeaponSkill,
+            CharacteristicField.BallisticSkill => w.BallisticSkill, CharacteristicField.Strength => w.Strength,
+            CharacteristicField.Toughness => w.Toughness, CharacteristicField.Wounds => w.Wounds,
+            CharacteristicField.Initiative => w.Initiative, CharacteristicField.Attacks => w.Attacks,
+            _ => w.Leadership,
+        };
+        var before = Read(warrior);
+        var totalBefore = warrior.Movement + warrior.WeaponSkill + warrior.BallisticSkill + warrior.Strength + warrior.Toughness
+            + warrior.Wounds + warrior.Initiative + warrior.Attacks + warrior.Leadership;
+
+        AdvancementService.ApplyCharacteristicIncrease(warrior, field);
+
+        Assert.Equal(before + 1, Read(warrior));
+        Assert.Equal(totalBefore + 1, warrior.Movement + warrior.WeaponSkill + warrior.BallisticSkill + warrior.Strength + warrior.Toughness
+            + warrior.Wounds + warrior.Initiative + warrior.Attacks + warrior.Leadership); // et rien d'autre ne bouge
+    }
+
+    [Fact]
+    public async Task Promotion_CopiesTheBlessingOfTheGroupsWeapon()
+    {
+        var (warband, group) = await GroupAsync();
+        var blessed = (await _library.GetSpecialRulesAsync("en")).Single(r => r.Name == "Blessed Weapon");
+        await _warbands.SetWarriorEquipmentBlessingRuleAsync(group.Equipment.First(e => e.Item.Name == "Axe").Id, blessed.Id);
+        group = await ReloadAsync(warband, group.Id);
+
+        var hero = await _advancement.PromoteHenchmanAsync(group, Draft(group, "Otto", SkillCategory.Combat, SkillCategory.Strength), AdvanceResult.None, null);
+
+        var axe = (await ReloadAsync(warband, hero.Id)).Equipment.Single(e => e.Item.Name == "Axe");
+        Assert.Equal("Blessed Weapon", axe.BlessingRule?.Name);
+    }
 }

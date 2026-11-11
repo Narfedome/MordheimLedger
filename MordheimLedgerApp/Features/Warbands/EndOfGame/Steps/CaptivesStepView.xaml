@@ -47,7 +47,7 @@
                                 <Border Style="{StaticResource SectionCardBorderStyle}">
                                     <VerticalStackLayout Spacing="6">
                                         <Label Text="{Binding Index, StringFormat='{0}'}" FontAttributes="Bold"/>
-                                        <Picker Title="{loc:Loc EndOfGameCapturedEnemyFatePh}"
+                                        <components:SelectFieldView Title="{loc:Loc EndOfGameCapturedEnemyFatePh}"
                                                 ItemsSource="{Binding FateLabels}"
                                                 SelectedItem="{Binding SelectedFateLabel}"/>
                                         <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10" IsVisible="{Binding ShowGoldAmount}">

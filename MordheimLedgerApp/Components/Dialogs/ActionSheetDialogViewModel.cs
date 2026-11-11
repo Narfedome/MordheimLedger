@@ -6,8 +6,9 @@ namespace MordheimLedgerApp.Components.Dialogs
     /// <summary>An option in the list, with its original index: needed to disambiguate two options
     /// with the same label once bound (e.g. two homonymous warbands) — list position alone isn't
     /// enough once data binding is in play. IsHeader: a non-selectable section label (e.g. "Héros")
-    /// rendered as plain text instead of a button - Index is unused (kept at -1) on those.</summary>
-    public record ActionSheetOption(int Index, string Label, bool IsHeader = false);
+    /// rendered as plain text instead of a button - Index is unused (kept at -1) on those. IsSelected: the
+    /// current value of a SelectFieldView, drawn in the accent colour.</summary>
+    public record ActionSheetOption(int Index, string Label, bool IsHeader = false, bool IsSelected = false);
 
     /// <summary>
     /// Logic for the generic choice list (ActionSheetDialog is just a XAML wrapper bound to it).

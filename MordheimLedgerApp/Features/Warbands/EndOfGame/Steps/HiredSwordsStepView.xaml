@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
+             xmlns:components="clr-namespace:MordheimLedgerApp.Components"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.HiredSwordsStepView"
              x:DataType="local:EndOfGamePageViewModel">
             <!-- Étape : Francs-Tireurs - solde des Francs-Tireurs déjà engagés (Picker Payer/Renvoyer,
@@ -29,7 +30,7 @@
                                     <Label Text="{loc:Loc EndOfGameHiredSwordPrepaidLabel}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
                                            IsVisible="{Binding IsPrepaidFree}"/>
                                     <VerticalStackLayout Spacing="4" IsVisible="{Binding HasChoice}">
-                                        <Picker ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
+                                        <components:SelectFieldView Title="{Binding DisplayName}" ItemsSource="{Binding ChoiceLabels}" SelectedItem="{Binding SelectedChoiceLabel}"/>
                                         <Label Text="{Binding ChoiceError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                                IsVisible="{Binding ChoiceError, Converter={StaticResource IsNotNullConverter}}"/>
                                     </VerticalStackLayout>
@@ -46,8 +47,8 @@
                 <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasHiredSwordsToRecruit}">
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{loc:Loc EndOfGameHiredSwordRecruitHeading}" FontAttributes="Bold"/>
-                        <Picker Title="{loc:Loc EndOfGameHiredSwordRecruitPh}"
-                                ItemsSource="{Binding AvailableHiredSwordRecruitOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                        <components:SelectFieldView Title="{loc:Loc EndOfGameHiredSwordRecruitPh}"
+                                ItemsSource="{Binding AvailableHiredSwordRecruitOptions}" ItemDisplayBinding="{Binding DisplayName, x:DataType=local:EndOfGamePageViewModel+HiredSwordRecruitOption}"
                                 SelectedItem="{Binding SelectedNewHiredSwordOption}"/>
                         <VerticalStackLayout Spacing="4" IsVisible="{Binding SelectedNewHiredSword, Converter={StaticResource IsNotNullConverter}}">
                             <Entry Text="{Binding NewHiredSwordName}" Placeholder="{loc:Loc EndOfGameHiredSwordNamePh}"/>

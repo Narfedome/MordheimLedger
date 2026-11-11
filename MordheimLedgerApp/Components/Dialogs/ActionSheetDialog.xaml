@@ -34,7 +34,15 @@
                                         IsVisible="{Binding IsHeader, Converter={StaticResource InverseBoolConverter}}"
                                         Style="{StaticResource DialogOptionButtonStyle}"
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type dialogs:ActionSheetDialogViewModel}}, Path=SelectCommand}"
-                                        CommandParameter="{Binding .}"/>
+                                        CommandParameter="{Binding .}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding IsSelected}" Value="True">
+                                            <Setter Property="TextColor" Value="{DynamicResource AppAccent}"/>
+                                            <Setter Property="BorderColor" Value="{DynamicResource AppAccent}"/>
+                                            <Setter Property="FontAttributes" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
                             </Grid>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>

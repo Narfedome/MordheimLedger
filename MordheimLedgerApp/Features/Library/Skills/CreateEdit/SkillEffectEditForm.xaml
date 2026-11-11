@@ -29,12 +29,12 @@
 
                 <VerticalStackLayout Spacing="4">
                     <Label Text="{loc:Loc EffectMomentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Picker ItemsSource="{Binding MomentOptions}" SelectedIndex="{Binding SelectedMoment}"/>
+                    <components:SelectFieldView Title="{loc:Loc EffectMomentPh}" ItemsSource="{Binding MomentOptions}" SelectedIndex="{Binding SelectedMoment}"/>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="4">
                     <Label Text="{loc:Loc EffectKindPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Picker ItemsSource="{Binding KindOptions}" SelectedIndex="{Binding SelectedKind}"/>
+                    <components:SelectFieldView Title="{loc:Loc EffectKindPh}" ItemsSource="{Binding KindOptions}" SelectedIndex="{Binding SelectedKind}"/>
                 </VerticalStackLayout>
 
                 <!-- Compteur −/+ pour un bonus ou un nombre de dés (même contrôle que les PX de l'étape Expérience
@@ -76,11 +76,11 @@
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <VerticalStackLayout Grid.Column="0" Spacing="4">
                         <Label Text="{loc:Loc EffectConditionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                        <Picker ItemsSource="{Binding ConditionOptions}" SelectedIndex="{Binding SelectedCondition}"/>
+                        <components:SelectFieldView Title="{loc:Loc EffectConditionPh}" ItemsSource="{Binding ConditionOptions}" SelectedIndex="{Binding SelectedCondition}"/>
                     </VerticalStackLayout>
                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                         <Label Text="{loc:Loc EffectFrequencyPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                        <Picker ItemsSource="{Binding FrequencyOptions}" SelectedIndex="{Binding SelectedFrequency}"/>
+                        <components:SelectFieldView Title="{loc:Loc EffectFrequencyPh}" ItemsSource="{Binding FrequencyOptions}" SelectedIndex="{Binding SelectedFrequency}"/>
                     </VerticalStackLayout>
                 </Grid>
 

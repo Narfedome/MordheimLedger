@@ -120,6 +120,9 @@
   <data name="AppTitle" xml:space="preserve">
     <value>Mordheim Ledger</value>
   </data>
+  <data name="SelectFieldDefaultTitle" xml:space="preserve">
+    <value>Choose</value>
+  </data>
   <data name="BtnCancel" xml:space="preserve">
     <value>Cancel</value>
   </data>

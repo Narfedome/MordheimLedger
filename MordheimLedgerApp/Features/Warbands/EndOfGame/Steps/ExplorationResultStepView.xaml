@@ -55,8 +55,8 @@
                              chemin" apparaît comme une vraie option du Picker, sélectionnée par défaut,
                              plutôt qu'un champ vide ambigu. Ne rien changer laisse simplement le sous-jet
                              caché, aucune erreur bloquante. Voir ShowSentHeroPicker/SentHeroOptions. -->
-                        <Picker IsVisible="{Binding ShowSentHeroPicker}" Title="{loc:Loc EndOfGameSentHeroPh}"
-                                ItemsSource="{Binding SentHeroOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                        <components:SelectFieldView IsVisible="{Binding ShowSentHeroPicker}" Title="{loc:Loc EndOfGameSentHeroPh}"
+                                ItemsSource="{Binding SentHeroOptions}" ItemDisplayBinding="{Binding DisplayName, x:DataType=local:EndOfGamePageViewModel+SentHeroOption}"
                                 SelectedItem="{Binding SelectedSentHeroOption}"/>
 
                         <!-- Sous-jet D6 départageant les branches à choix exclusif (Groupe A, ex.
@@ -86,8 +86,8 @@
                              modifiable (StatTestTesterWarning) et réussite automatique en case à cocher
                              (StatTestUseAutoPass). -->
                         <VerticalStackLayout IsVisible="{Binding ShowStatTest}" Spacing="6">
-                            <Picker IsVisible="{Binding ShowStatTestHeroPicker}" Title="{loc:Loc EndOfGameStatTestHeroPh}"
-                                    ItemsSource="{Binding StatTestHeroOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                            <components:SelectFieldView IsVisible="{Binding ShowStatTestHeroPicker}" Title="{loc:Loc EndOfGameStatTestHeroPh}"
+                                    ItemsSource="{Binding StatTestHeroOptions}" ItemDisplayBinding="{Binding DisplayName, x:DataType=local:EndOfGamePageViewModel+StatTestHeroOption}"
                                     SelectedItem="{Binding SelectedStatTestHeroOption}"/>
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" IsVisible="{Binding HasStatTestTesterWarning}">
                                 <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
@@ -426,8 +426,8 @@
                                  pas de bouton dédié, seul le "Suivant" du wizard bloque si le solde
                                  passerait négatif (voir CanAffordEquippedHenchman). -->
                             <VerticalStackLayout IsVisible="{Binding HasOptionalEquippedHenchmanGrant}" Spacing="6">
-                                <Picker Title="{loc:Loc EndOfGameEquippedHenchmanGroupPh}"
-                                        ItemsSource="{Binding EquippedHenchmanGroupOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                <components:SelectFieldView Title="{loc:Loc EndOfGameEquippedHenchmanGroupPh}"
+                                        ItemsSource="{Binding EquippedHenchmanGroupOptions}" ItemDisplayBinding="{Binding DisplayName, x:DataType=local:EndOfGamePageViewModel+EquippedHenchmanGroupOption}"
                                         SelectedItem="{Binding SelectedEquippedHenchmanGroupOption}"/>
                                 <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding ShowEquippedHenchmanTreasury}">
                                     <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquippedHenchmanTreasuryAfterLabel}" VerticalOptions="Center"/>
@@ -466,8 +466,8 @@
                                  aucune validation nécessaire ("Ne pas bénir d'arme" est une réponse
                                  complète, même idiome que SentHeroOptions). -->
                             <VerticalStackLayout IsVisible="{Binding HasWeaponBlessingGrant}" Spacing="6">
-                                <Picker Title="{loc:Loc EndOfGameWeaponBlessingPh}"
-                                        ItemsSource="{Binding WeaponBlessingOptions}" ItemDisplayBinding="{Binding DisplayName}"
+                                <components:SelectFieldView Title="{loc:Loc EndOfGameWeaponBlessingPh}"
+                                        ItemsSource="{Binding WeaponBlessingOptions}" ItemDisplayBinding="{Binding DisplayName, x:DataType=local:EndOfGamePageViewModel+WeaponBlessingOption}"
                                         SelectedItem="{Binding SelectedWeaponBlessingOption}"/>
                                 <!-- Aperçu du chip une fois béni ("Épée (G, B)") - voir BlessedWeaponPreview,
                                      jamais persisté tel quel, juste pour que le joueur voie le résultat tout

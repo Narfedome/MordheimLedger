@@ -1,8 +1,10 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
+
+using MordheimLedgerApp.Core.Services;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -86,20 +88,12 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        var changed = false;
+        // Écriture : PostBattleSequenceService (Core, testé) ; ici les phrases.
         if (ScenarioGold != 0)
-        {
-            Warband.Treasury += ScenarioGold;
             sentences.Add(string.Format(Loc["HistoryScenarioGoldSentence"], ScenarioGold));
-            changed = true;
-        }
         if (ScenarioWyrdstoneShards > 0)
-        {
-            Warband.WyrdstoneShards += ScenarioWyrdstoneShards;
             sentences.Add(string.Format(Loc["HistoryScenarioWyrdstoneSentence"], ScenarioWyrdstoneShards));
-            changed = true;
-        }
-        if (changed) await _warbandService.SaveWarbandAsync(Warband);
+        await new PostBattleSequenceService(_warbandService).ApplyScenarioRewardsAsync(Warband, ScenarioGold, ScenarioWyrdstoneShards);
 
         // Les objets eux-mêmes entrent dans la réserve via ReserveGains (voir BuildReserve), écrite par
         // ApplyReserveAsync - ici, seulement l'historique.

@@ -417,41 +417,10 @@ public partial class EndOfGamePageViewModel
     /// Mort posé avant elle par un mécanisme d'Exploration (bug trouvé le 2026-08-18 pour Sick ; même
     /// principe appliqué à La Fosse). Regroupe tous les statuts posés hors du flux Blessure normal, pas
     /// seulement la Maladie malgré le nom.</summary>
-    private async Task ApplySicknessLifecycleAsync(List<WarriorRow> previouslySickWarriors)
-    {
-        // La partie qu'ils manquaient (voir previouslySickWarriors dans EndOfGame) vient d'être
-        // enregistrée par CE wizard - décrémente le compteur de parties restantes (voir
-        // Warrior.SickGamesRemaining), ne redevient Actif qu'une fois ce compteur à 0 (Blessure
-        // profonde impose D3 parties, pas juste celle-ci).
-        foreach (var row in previouslySickWarriors)
-        {
-            row.Warrior.SickGamesRemaining = Math.Max(0, row.Warrior.SickGamesRemaining - 1);
-            if (row.Warrior.SickGamesRemaining == 0)
-            {
-                row.Warrior.Status = WarriorStatus.Active;
-                // La chip temporaire qui explique la Maladie (Blessure au bras/Jambe écrasée légère,
-                // Blessure profonde - voir Models.WarriorInjury.IsTemporary) n'a plus lieu d'être une
-                // fois le guerrier de nouveau Actif ; les injuries permanentes (bras amputé, etc.) ne
-                // sont jamais IsTemporary et restent donc intactes.
-                await _warbandService.RemoveTemporaryInjuriesAsync(row.Warrior.Id);
-            }
-            await _warbandService.SaveWarriorAsync(row.Warrior);
-        }
-
-        // Puits en échec (test d'Endurance, voir EndOfGame/ApplyExplorationOutcomeAsync).
-        if (StatTestSickHero is { } newlySickHero)
-        {
-            newlySickHero.Warrior.Status = WarriorStatus.Sick;
-            newlySickHero.Warrior.SickGamesRemaining = 1;
-            await _warbandService.SaveWarriorAsync(newlySickHero.Warrior);
-        }
-
-        // La Fosse, sous-jet 1 (Héros envoyé dévoré, voir EndOfGame/ApplyExplorationOutcomeAsync).
-        if (PitDevouredHero is { } devouredHero)
-        {
-            devouredHero.Warrior.Status = WarriorStatus.Dead;
-            await _warbandService.SaveWarriorAsync(devouredHero.Warrior);
-        }
-    }
+    private Task ApplySicknessLifecycleAsync(List<WarriorRow> previouslySickWarriors) =>
+        // Décompte des Indisponibles, Puits raté (Indisponible) et Fosse (mort) : PostBattleSequenceService
+        // (Core, testé). Les Héros promus désignés y arrivent avec leur fiche déjà créée (voir Promotion).
+        new PostBattleSequenceService(_warbandService).ApplySicknessAsync(previouslySickWarriors.Select(r => r.Warrior),
+            StatTestSickHero?.Warrior, PitDevouredHero?.Warrior);
 
 }

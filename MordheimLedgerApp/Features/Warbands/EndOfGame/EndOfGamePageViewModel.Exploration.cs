@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Core.Data;
@@ -164,7 +164,7 @@ public partial class EndOfGamePageViewModel
 
     public bool ShowSentHeroPicker => TriggeredExplorationResult?.RequiresSentHero == true;
 
-    public List<WarriorOutcomeRow> SentHeroEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries).ToList();
+    public List<WarriorOutcomeRow> SentHeroEligibleHeroes => ExplorationEligibleHeroes;
 
     /// <summary>Wraps the Picker's actual items - a leading "Passer son chemin" pseudo-option (Hero
     /// null) followed by every eligible Hero. Retour explicite de l'utilisateur : un Picker vide/placeholder
@@ -427,7 +427,7 @@ public partial class EndOfGamePageViewModel
         ExplorationAmountError = null;
         DistributedExperienceTotal = string.Empty;
         DistributedExperienceError = null;
-        foreach (var hero in WarriorRows)
+        foreach (var hero in AllOutcomeRows)
         {
             hero.DistributedExplorationExperience = 0;
             hero.LeaderExplorationExperience = 0;
@@ -637,7 +637,7 @@ public partial class EndOfGamePageViewModel
 
     public bool HasDistributedHeroExperienceGrant => ResolvedExplorationOutcome?.GrantsDistributedHeroExperienceFormula is not null;
 
-    public List<WarriorOutcomeRow> DistributedExperienceEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries).ToList();
+    public List<WarriorOutcomeRow> DistributedExperienceEligibleHeroes => ExplorationEligibleHeroes;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DistributedExperienceRemaining))]
@@ -792,7 +792,7 @@ public partial class EndOfGamePageViewModel
     // (AutoPassStatTestWarbandArchetypeOfficialIds, voir StatTestAutoPasses).
     public bool ShowStatTest => TriggeredExplorationResult?.StatTestField is not null;
 
-    public List<WarriorOutcomeRow> StatTestEligibleHeroes => WarriorRows.Where(r => r.IsHero && !r.IsDeadFromInjuries).ToList();
+    public List<WarriorOutcomeRow> StatTestEligibleHeroes => ExplorationEligibleHeroes;
 
     /// <summary>Wraps the Picker's actual items - même idiome que SentHeroOptions (voir sa doc) : un
     /// "Aucun" pseudo-choix en premier (Hero null) plutôt qu'un Picker vide/placeholder, retour
@@ -1187,7 +1187,7 @@ public partial class EndOfGamePageViewModel
         ArtefactRollError = null;
         DistributedExperienceTotal = string.Empty;
         DistributedExperienceError = null;
-        foreach (var hero in WarriorRows)
+        foreach (var hero in AllOutcomeRows)
         {
             hero.DistributedExplorationExperience = 0;
             hero.LeaderExplorationExperience = 0;

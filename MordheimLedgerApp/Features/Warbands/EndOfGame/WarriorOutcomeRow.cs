@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
@@ -800,6 +800,12 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
 
     partial void OnIsKilledByExplorationChanged(bool value) => NotifyDeathStateChanged();
 
+    /// <summary>Héros qui a raté le test d'Endurance du Puits (Exploration) : Malade à Terminer
+    /// (ApplySicknessLifecycleAsync) - posé/retiré par EndOfGamePageViewModel.SyncPostInjuryDeaths, pour le récap.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaryText))]
+    private bool isSickenedByExploration;
+
     /// <summary>Héros pouvant chercher un objet rare : ni Hors de combat cette bataille (livre), ni dévoré
     /// dans la Fosse à l'Exploration, qui précède les Objets rares.</summary>
     public bool CanSearchRareItems => !IsOutOfAction && !IsKilledByExploration;
@@ -918,6 +924,14 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
     /// n'en dit rien explicitement).</summary>
     public string RollPlaceholder => _loc[Warrior.IsHero ? "EndOfGameRollPh" : "EndOfGameHenchmanRollPh"];
 
+    /// <summary>Ligne d'un Héros promu pendant cette Fin de partie (voir EndOfGamePageViewModel.Promotion) : son
+    /// XP de bataille et sa promotion sont déjà annoncées sur la ligne du groupe, la sienne ne montre que ce que
+    /// l'Exploration lui apporte.</summary>
+    public bool IsPromotedHero { get; init; }
+
+    /// <summary>Le récap est une vue mise en cache : relu à chaque arrivée sur l'étape.</summary>
+    public void NotifySummaryChanged() => OnPropertyChanged(nameof(SummaryText));
+
     /// <summary>Ligne affichée à l'étape Récapitulatif - ne liste que ce qui a réellement changé.</summary>
     public string SummaryText
     {
@@ -926,16 +940,19 @@ public partial class WarriorOutcomeRow : ObservableObject, IPitFightOutcome
             var parts = new List<string>();
             // Un mort de cette bataille ne gagne ni XP ni Progression (voir ApplyWarriorOutcomesAsync) - ne
             // pas les annoncer dans le récap.
-            if (ExperienceGained != 0 && !IsDead) parts.Add($"+{ExperienceGained} PX");
+            if (ExperienceGained != 0 && !IsDead && !IsPromotedHero) parts.Add($"+{ExperienceGained} PX");
+            if (ExplorationBonusExperience > 0 && !IsDead)
+                parts.Add(string.Format(_loc["EndOfGameRecapExplorationExperienceFormat"], ExplorationBonusExperience));
             if (Status != Warrior.Status) parts.Add(SelectedStatusLabel);
             else if (IsKilledByExploration || IsKilledInDuel) parts.Add(_loc["EndOfGameDeadLabel"]);
+            else if (IsSickenedByExploration) parts.Add(_loc["WarriorStatusSick"]);
             if (!string.IsNullOrWhiteSpace(InjuryResultText)) parts.Add(ResolvedInjuryText);
             foreach (var sub in MultipleInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(sub.InjuryResultText)) parts.Add(sub.InjuryResultText);
             foreach (var figure in FigureInjuryRolls)
                 if (!string.IsNullOrWhiteSpace(figure.InjuryResultText)) parts.Add(figure.InjuryResultText);
             if (HasHatredTarget) parts.Add(string.Format(_loc["WarriorsHatredChipFormat"], HatredTargetDisplayName));
-            foreach (var advance in IsDead ? [] : AdvanceRolls.Concat(ExplorationAdvanceRolls))
+            foreach (var advance in IsDead ? [] : IsPromotedHero ? ExplorationAdvanceRolls : AdvanceRolls.Concat(ExplorationAdvanceRolls))
             {
                 // Promotion : le nom du nouveau Héros et le résultat de son jet, puis celui du reste du groupe -
                 // plutôt que la description complète de la table (récap illisible, recette du 2026-11-11).

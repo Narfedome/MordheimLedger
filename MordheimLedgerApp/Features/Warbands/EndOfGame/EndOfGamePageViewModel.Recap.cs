@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Models.Library;
+﻿using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
@@ -61,9 +61,10 @@ public partial class EndOfGamePageViewModel
             nameof(DismissedWarriorsRecapLines), nameof(HasEquipmentTradingRecap), nameof(EquipmentTradingPurchasedRecapLines),
             nameof(EquipmentTradingSoldRecapLines), nameof(HasRecruitmentRecap), nameof(RecruitedHeroesRecapLines),
             nameof(RecruitedHenchmenRecapLines), nameof(VeteranTopUpsRecapLines), nameof(ExplorationJoinRecapLines),
-            nameof(ProjectedWarbandRatingDisplay),
+            nameof(ProjectedWarbandRatingDisplay), nameof(RecapWarriorRows),
         })
             OnPropertyChanged(name);
+        foreach (var row in AllOutcomeRows) row.NotifySummaryChanged();
     }
 
     /// <summary>Toujours affiché (le jet a lieu à chaque Fin de Partie, que la bande recrute ou non des

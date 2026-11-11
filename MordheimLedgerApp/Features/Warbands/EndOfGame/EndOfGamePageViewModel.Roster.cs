@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Models;
+﻿using MordheimLedgerApp.Core.Models;
 
 namespace MordheimLedgerApp.Features.Warbands.EndOfGame;
 
@@ -47,10 +47,13 @@ public partial class EndOfGamePageViewModel
         if (WarriorRows.Count == 0) return;
 
         var devoured = PitDevouredHero;
+        var sick = StatTestSickHero;
         var duelLoser = WantsDuel && !WonDuel ? DuelLeaderRow : null;
-        foreach (var row in WarriorRows)
+        // Héros promus compris : désignables pour la Fosse et le Puits (voir EndOfGamePageViewModel.Promotion).
+        foreach (var row in AllOutcomeRows)
         {
             row.IsKilledByExploration = ReferenceEquals(row, devoured);
+            row.IsSickenedByExploration = ReferenceEquals(row, sick);
             row.IsKilledInDuel = ReferenceEquals(row, duelLoser);
         }
     }

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components;
@@ -198,9 +198,9 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
     partial void OnStepIndexChanged(int value)
     {
-        // Avant PrepareEffectsForCurrentStep : les recherches des Héros promus doivent exister pour recevoir
-        // leurs lignes d'effets (voir EndOfGamePageViewModel.Promotion).
-        if (Current.Kind == StepKind.RareItems) SyncPromotedRareItemSearches();
+        // Avant PrepareEffectsForCurrentStep : les lignes des Héros promus (Exploration, recherches d'objet rare)
+        // doivent exister pour recevoir leurs lignes d'effets (voir EndOfGamePageViewModel.Promotion).
+        SyncPromotedHeroRows();
         PrepareEffectsForCurrentStep();
         if (Current.Kind == StepKind.ExplorationRoll) SyncExplorationDice();
         // Vues d'étape mises en cache (StepViewConverter) : le solde et les pierres magiques dépendent de
@@ -356,7 +356,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // silencieusement tous les StepIndex suivants (StepIndex est un simple entier, sans identité
             // de step stable). Toujours ajouté après ExplorationResult, jamais avant : ce guerrier a donc
             // déjà quitté cette position au moment où le palier apparaît, aucun décalage rétroactif possible.
-            steps.AddRange(WarriorRows.Where(r => r.HasExplorationMilestone).Select(r => new WizardStep(StepKind.Advance, r, IsExplorationAdvance: true)));
+            steps.AddRange(AllOutcomeRows.Where(r => r.HasExplorationMilestone).Select(r => new WizardStep(StepKind.Advance, r, IsExplorationAdvance: true)));
             // Vente de pierre magique (séquence livre, étape 4) : rien à vendre si le stock est vide, en
             // comptant l'ancien stock ET ce que CETTE partie vient de trouver (voir MaxShardsToSell) -
             // même principe que HiredSwords ci-dessous (étape entièrement absente plutôt que montrée
@@ -547,7 +547,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             if (warrior is null) return string.Empty;
 
             var withMilestone = (Current.IsExplorationAdvance
-                ? WarriorRows.Where(r => r.HasExplorationMilestone)
+                ? AllOutcomeRows.Where(r => r.HasExplorationMilestone)
                 : WarriorRows.Where(r => r.HasMilestone)).ToList();
             var index = withMilestone.IndexOf(warrior);
             return index < 0 ? string.Empty : string.Format(Loc["EndOfGameAdvanceProgressLabel"], index + 1, withMilestone.Count);
@@ -679,7 +679,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // Morts décidées après l'étape Blessure (Fosse, duel) - voir EndOfGamePageViewModel.Roster.cs.
         PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName is nameof(PitDevouredHero) or nameof(WantsDuel) or nameof(WonDuel))
+            if (e.PropertyName is nameof(PitDevouredHero) or nameof(StatTestSickHero) or nameof(WantsDuel) or nameof(WonDuel))
                 SyncPostInjuryDeaths();
         };
     }

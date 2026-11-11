@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Models;
+﻿using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Services;
@@ -167,13 +167,24 @@ public partial class EndOfGamePageViewModel
                 {
                     // XP de la partie, copie de l'équipement du groupe, jet immédiat du Héros, modèle retiré du
                     // groupe et jet du reste du groupe : AdvancementService (Core, couvert par des tests).
+                    // XP répartie par l'Exploration et paliers de Héros qu'elle lui fait franchir (ligne du promu,
+                    // voir EndOfGamePageViewModel.Promotion) : appliqués ici, le Héros n'existant en base qu'à partir
+                    // de maintenant.
                     var remainderRoll = advance.NestedHenchmanRoll;
+                    var promotedRow = PromotedHeroRowFor(advance, promoted);
                     await Advancement.PromoteHenchmanAsync(warrior, promoted, ToAdvanceResult(heroRoll),
-                        remainderRoll is null ? null : ToAdvanceResult(remainderRoll));
+                        remainderRoll is null ? null : ToAdvanceResult(remainderRoll),
+                        promotedRow?.DistributedExplorationExperience ?? 0);
                     sentences.Add(string.Format(Loc["HistoryPromotionSentence"], warrior.Name, promoted.Name));
                     sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], promoted.Name, AdvanceText(heroRoll)));
                     if (remainderRoll is not null)
                         sentences.Add(string.Format(Loc["HistoryAdvanceSentence"], warrior.Name, AdvanceText(remainderRoll)));
+                    if (promotedRow is not null && promotedRow.HasExplorationMilestone)
+                    {
+                        foreach (var explorationAdvance in promotedRow.ExplorationAdvanceRolls.Where(a => !string.IsNullOrWhiteSpace(a.ResultText)))
+                            await ApplyResolvedAdvanceAsync(promoted, explorationAdvance);
+                        await _warbandService.SaveWarriorAsync(promoted);
+                    }
                     changed = true;
                     continue;
                 }

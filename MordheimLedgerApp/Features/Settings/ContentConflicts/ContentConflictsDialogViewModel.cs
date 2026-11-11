@@ -1,9 +1,10 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Features.Library.Skills.Effects;
 using MordheimLedgerApp.Services;
 
 namespace MordheimLedgerApp.Features.Settings.ContentConflicts;
@@ -36,7 +37,7 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
         _db = db;
         Conflicts = new ObservableCollection<ContentConflictRow>(conflicts.Select(c => new ContentConflictRow(
             c.OfficialId, c.Name, TypeLabel(c.TableName),
-            c.Differences.Select(d => new ContentDifferenceRow(FieldLabel(d.Field), Blank(d.Official), Blank(d.Mine))).ToList())));
+            c.Differences.Select(d => new ContentDifferenceRow(FieldLabel(d.Field), Blank(ValueText(d.Field, d.Official)), Blank(ValueText(d.Field, d.Mine)))).ToList())));
     }
 
     private bool CanResolve => !IsBusy;
@@ -69,6 +70,23 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
 
     private string Blank(string value) => string.IsNullOrWhiteSpace(value) ? "—" : value;
 
+    /// <summary>Valeur lisible d'un champ : les effets d'une compétence sont stockés en JSON (SkillEntity.EffectsJson)
+    /// et s'affichent comme dans le Codex, un effet par ligne (« Achat · Réduction 2D6 CO (1 fois par après-bataille) »).</summary>
+    private static string ValueText(string field, string value)
+    {
+        if (field != "EffectsJson" || string.IsNullOrWhiteSpace(value)) return value;
+        try
+        {
+            return string.Join(Environment.NewLine, SkillEffectJson.Deserialize(value)
+                .Select(e => new SkillEffectRow(e, SkillEffectNames.Empty))
+                .Select(r => r.HasDetails ? $"{r.Title} ({r.Details})" : r.Title));
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return value;
+        }
+    }
+
     private string TypeLabel(string tableName) => LocOrNull("ContentType" + tableName) ?? Humanize(tableName.Replace("Entity", ""));
 
     /// <summary>Libellé lisible d'un champ (colonne ou table de jointure, voir ContentFieldDifference) - réutilise
@@ -92,6 +110,8 @@ public partial class ContentConflictsDialogViewModel : DialogViewModel<bool>
             "HireCost" => Loc["HiredSwordHireCostPh"],
             "RollValue" => Loc["LibRollAbbr"],
             "Difficulty" => Loc["LibDifficultyAbbr"],
+            // Effets d'une compétence, stockés en JSON (SkillEntity.EffectsJson) - « Effects json » sinon.
+            "EffectsJson" => Loc["EffectsHeading"],
             "Movement" or "WeaponSkill" or "BallisticSkill" or "Strength" or "Toughness" or "Wounds" or "Initiative" or "Attacks" or "Leadership"
                 => Loc[$"Stat{field}Abbr"],
             "RaceId" or "RacialProfileId" or "WarbandArchetypeId" or "EquipmentListId" or "MagicSchoolId"

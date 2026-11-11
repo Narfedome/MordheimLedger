@@ -29,11 +29,13 @@ public abstract partial class BaseViewModel : ObservableObject
     private static Page CurrentPage => (Page?)Shell.Current ?? Application.Current!.Windows[0].Page!;
 
     protected Task<bool> ConfirmDeleteAsync(string itemName) =>
-        ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["DialogDeleteConfirm"], itemName));
+        ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["DialogDeleteConfirm"], itemName), Loc["BtnDelete"], Loc["BtnCancel"], destructive: true);
 
-    protected async Task<bool> ConfirmAsync(string title, string message)
+    /// <summary>Confirmation à 2 boutons, action à droite. Libellés d'action (« Supprimer », « Abandonner »...)
+    /// de préférence à Oui / Non, qui restent le défaut ; destructive = bouton d'action en rouge.</summary>
+    protected async Task<bool> ConfirmAsync(string title, string message, string? confirmLabel = null, string? cancelLabel = null, bool destructive = false)
     {
-        var popup = new ConfirmDialog(new ConfirmDialogViewModel(title, message, Loc["DialogYes"], Loc["DialogNo"]));
+        var popup = new ConfirmDialog(new ConfirmDialogViewModel(title, message, confirmLabel ?? Loc["DialogYes"], cancelLabel ?? Loc["DialogNo"], destructive));
         return await ShowDialogAsync(popup) is true;
     }
 

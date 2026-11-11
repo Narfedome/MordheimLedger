@@ -10,6 +10,8 @@ namespace MordheimLedgerApp.Core.Services;
 public class WarbandService : IWarbandService
 {
     private readonly AppDatabase _db;
+
+    public int DataVersion => _db.DataVersion;
     private readonly ILibraryService _library;
     private readonly WarriorPhotoStore? _photos;
 

@@ -13,13 +13,10 @@
                x:Class="MordheimLedgerApp.Features.Library.Skills.CreateEdit.SkillDetailDialog"
                x:DataType="local:SkillDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -27,44 +24,47 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc SkillCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc SkillCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
 
-            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
-                                      AlwaysShowSection="True"
-                                      ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Users}"
-                                      Command="{Binding ShowWarbandDetailCommand}"/>
+                    <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                              AlwaysShowSection="True"
+                                              ItemsSource="{Binding RestrictedWarbands}"
+                                              IconGlyph="{x:Static icons:SolidFont.Users}"
+                                              Command="{Binding ShowWarbandDetailCommand}"/>
 
-            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarriorsPh}"
-                                      ItemsSource="{Binding RestrictedWarriors}"
-                                      IconGlyph="{x:Static icons:SolidFont.User}"
-                                      Command="{Binding ShowWarriorDetailCommand}"/>
+                    <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarriorsPh}"
+                                              ItemsSource="{Binding RestrictedWarriors}"
+                                              IconGlyph="{x:Static icons:SolidFont.User}"
+                                              Command="{Binding ShowWarriorDetailCommand}"/>
 
-            <!-- Effets en lecture seule (maquette « Récap Sorcellerie ») + légende des puces. -->
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEffects}">
-                <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}"/>
-                <HorizontalStackLayout Spacing="8">
-                    <Label FontFamily="FontSolid" FontSize="14" VerticalOptions="Center"
-                           Text="{x:Static icons:SolidFont.Bolt}" TextColor="{DynamicResource AppAccent}"/>
-                    <Label Text="{loc:Loc EffectsHeading}" FontAttributes="Bold" VerticalOptions="Center"/>
-                </HorizontalStackLayout>
-                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding EffectRows}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="effects:SkillEffectRow">
-                            <effects:SkillEffectRowView/>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+                    <!-- Effets en lecture seule (maquette « Récap Sorcellerie ») + légende des puces. -->
+                    <VerticalStackLayout Spacing="8" IsVisible="{Binding HasEffects}">
+                        <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}"/>
+                        <HorizontalStackLayout Spacing="8">
+                            <Label FontFamily="FontSolid" FontSize="14" VerticalOptions="Center"
+                                   Text="{x:Static icons:SolidFont.Bolt}" TextColor="{DynamicResource AppAccent}"/>
+                            <Label Text="{loc:Loc EffectsHeading}" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </HorizontalStackLayout>
+                        <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding EffectRows}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="effects:SkillEffectRow">
+                                    <effects:SkillEffectRowView/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Label Text="{loc:Loc EffectsLegend}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-                <Label Text="{loc:Loc EffectsLegend}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

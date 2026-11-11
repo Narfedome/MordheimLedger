@@ -11,13 +11,10 @@
                x:Class="MordheimLedgerApp.Features.Library.Injuries.CreateEdit.InjuryDetailDialog"
                x:DataType="local:InjuryDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -25,26 +22,29 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc InjuryCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="{loc:Loc InjuryRollRangePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.RollRange}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-            </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc InjuryCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Loc InjuryRollRangePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.RollRange}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
 
-            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
-                                      ItemsSource="{Binding Item.SpecialRules}"
-                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+                    <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                              ItemsSource="{Binding Item.SpecialRules}"
+                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                              Command="{Binding ShowSpecialRuleDetailCommand}"/>
+                </VerticalStackLayout>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

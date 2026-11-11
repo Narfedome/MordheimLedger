@@ -1222,7 +1222,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     [RelayCommand]
     private async Task Exit()
     {
-        if (StepIndex > 0 && !await ConfirmAsync(Loc["EndOfGameExitConfirmTitle"], Loc["EndOfGameExitConfirmMessage"]))
+        if (StepIndex > 0 && !await ConfirmAsync(Loc["EndOfGameExitConfirmTitle"], Loc["EndOfGameExitConfirmMessage"],
+                Loc["DialogDiscardAction"], Loc["DialogKeepEditingAction"], destructive: true))
             return;
 
         await Shell.Current.GoToAsync("..");

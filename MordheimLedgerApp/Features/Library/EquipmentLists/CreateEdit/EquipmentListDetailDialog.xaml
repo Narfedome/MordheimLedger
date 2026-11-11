@@ -11,13 +11,10 @@
                x:Class="MordheimLedgerApp.Features.Library.EquipmentLists.CreateEdit.EquipmentListDetailDialog"
                x:DataType="local:EquipmentListDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -25,12 +22,15 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
 
-            <components:ChipListView HeaderText="{loc:Loc EquipmentListItemsPh}"
-                                      ItemsSource="{Binding Items}"
-                                      IconGlyph="{x:Static icons:SolidFont.Coins}"
-                                      Command="{Binding ShowItemDetailCommand}"/>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+                    <components:ChipListView HeaderText="{loc:Loc EquipmentListItemsPh}"
+                                              ItemsSource="{Binding Items}"
+                                              IconGlyph="{x:Static icons:SolidFont.Coins}"
+                                              Command="{Binding ShowItemDetailCommand}"/>
+                </VerticalStackLayout>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

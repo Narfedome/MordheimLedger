@@ -87,8 +87,15 @@ public partial class WarbandListViewModel : BaseViewModel
             await ShowInfoAsync(Loc["OfficialContentTitle"], message);
     }
 
+    private int _loadedDataVersion = -1;
+
+    /// <summary>Rien n'a été écrit en base depuis le dernier chargement : inutile de relire la liste en
+    /// revenant dessus (consultation, édition annulée...) - refonte de novembre 2026.</summary>
+    public bool IsUpToDate => IsInitialized && _loadedDataVersion == _warbandService.DataVersion;
+
     public async Task InitializeAsync()
     {
+        var version = _warbandService.DataVersion;
         var warbands = await _warbandService.GetWarbandsAsync();
         var archetypeNames = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandArchetypeNameAsync(b.WarbandArchetypeId, LocalizationService.Instance.Language)));
         var ratings = await Task.WhenAll(warbands.Select(b => _warbandService.GetWarbandRatingAsync(b.Id)));
@@ -96,6 +103,7 @@ public partial class WarbandListViewModel : BaseViewModel
         SelectedRow = null;
         HasWarbands = warbands.Count > 0;
         IsInitialized = true;
+        _loadedDataVersion = version;
     }
 
 

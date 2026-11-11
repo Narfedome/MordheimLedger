@@ -12,13 +12,10 @@
                x:Class="MordheimLedgerApp.Features.Library.EquipmentItems.CreateEdit.EquipmentItemDetailDialog"
                x:DataType="local:EquipmentItemDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="8">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -26,48 +23,51 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc EquipmentItemCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc EquipmentItemCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding CostDisplay}" TextColor="{DynamicResource AppText}"/>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="8">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc EquipmentItemCategoryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding CategoryLabel}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc EquipmentItemCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding CostDisplay}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding RarityDisplay}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+
+                    <!-- Profil - uniquement pour la catégorie Animal (une monture), voir
+                         EquipmentItemEditDialog pour le même principe en édition. -->
+                    <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAnimalCategory}">
+                        <Label Text="{loc:Loc LibTabProfile}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}"/>
+                    </VerticalStackLayout>
+
+                    <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                              AlwaysShowSection="True"
+                                              ItemsSource="{Binding RestrictedWarbands}"
+                                              IconGlyph="{x:Static icons:SolidFont.Users}"
+                                              Command="{Binding ShowWarbandDetailCommand}"/>
+
+                    <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarriorsPh}"
+                                              ItemsSource="{Binding RestrictedWarriors}"
+                                              IconGlyph="{x:Static icons:SolidFont.User}"
+                                              Command="{Binding ShowWarriorDetailCommand}"/>
+
+                    <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                              ItemsSource="{Binding DisplayedSpecialRules}"
+                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                              Command="{Binding ShowSpecialRuleDetailCommand}"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="{loc:Loc EquipmentItemRarityPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding RarityDisplay}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-            </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-
-            <!-- Profil - uniquement pour la catégorie Animal (une monture), voir
-                 EquipmentItemEditDialog pour le même principe en édition. -->
-            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsAnimalCategory}">
-                <Label Text="{loc:Loc LibTabProfile}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.Movement}"/>
-            </VerticalStackLayout>
-
-            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
-                                      AlwaysShowSection="True"
-                                      ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Users}"
-                                      Command="{Binding ShowWarbandDetailCommand}"/>
-
-            <components:ChipListView HeaderText="{loc:Loc LibRestrictedToWarriorsPh}"
-                                      ItemsSource="{Binding RestrictedWarriors}"
-                                      IconGlyph="{x:Static icons:SolidFont.User}"
-                                      Command="{Binding ShowWarriorDetailCommand}"/>
-
-            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
-                                      ItemsSource="{Binding DisplayedSpecialRules}"
-                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

@@ -19,12 +19,33 @@ public partial class DialogPage : ContentPage
         // que le tap "en dehors" (à gauche/droite d'une carte étroite) retombe bien sur le scrim au lieu
         // d'être avalé par la racine du dialog.
         content.HorizontalOptions = LayoutOptions.Center;
+        // Placement commun à tous les dialogs (refonte de novembre 2026, maquette « Refonte dialogs et Fin de
+        // partie ») : centrés verticalement sur toutes les plateformes - avant, collés à 80 px du haut sur
+        // Android et centrés sur Windows - et largeur adaptée à l'écran plutôt que 320/340/360 fixes.
+        content.VerticalOptions = LayoutOptions.Center;
+        // Centré dans la zone au-dessus de la barre d'onglets du Shell (mobile) plutôt que sur tout l'écran :
+        // marge basse = hauteur de la barre (DialogSizing.BottomBarInset).
+        content.Margin = new Thickness(0, 16, 0, 16 + DialogSizing.BottomBarInset());
+        _card = (content as ContentView)?.Content as View;
+        // Largeur posée dès la construction (taille de la fenêtre) pour éviter un premier rendu à la largeur
+        // naturelle du contenu, puis ajustée à chaque redimensionnement de la page.
+        var windowWidth = Application.Current?.Windows.FirstOrDefault()?.Width ?? 0;
+        if (_card is not null && windowWidth > 0) _card.WidthRequest = DialogSizing.CardWidth(windowWidth);
         Presenter.Content = content;
+        SizeChanged += (_, _) => ApplyCardWidth();
 
         // Recognizer vide : rend la racine du dialog (content) hit-test opaque sur toute sa surface
         // mesurée (y compris le texte non interactif dedans), pour qu'un tap dessus ne retombe pas sur
         // le BoxView en dessous - centralisé ici plutôt que dupliqué dans les 27 dialogs.
         content.GestureRecognizers.Add(new TapGestureRecognizer());
+    }
+
+    private readonly View? _card;
+
+    private void ApplyCardWidth()
+    {
+        if (_card is null || Width <= 0) return;
+        _card.WidthRequest = DialogSizing.CardWidth(Width);
     }
 
     private void OnBackdropTapped(object? sender, TappedEventArgs e) => _onBackdropTapped();

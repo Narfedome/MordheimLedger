@@ -3085,4 +3085,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="WarbandArchetypeSelectSingleTitle" xml:space="preserve">
     <value>Select a warband</value>
   </data>
+  <data name="DialogDiscardAction" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="DialogKeepEditingAction" xml:space="preserve">
+    <value>Keep editing</value>
+  </data>
 </root>

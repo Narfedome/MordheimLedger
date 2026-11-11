@@ -3085,4 +3085,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="WarbandArchetypeSelectSingleTitle" xml:space="preserve">
     <value>Choisir une bande</value>
   </data>
+  <data name="DialogDiscardAction" xml:space="preserve">
+    <value>Abandonner</value>
+  </data>
+  <data name="DialogKeepEditingAction" xml:space="preserve">
+    <value>Continuer</value>
+  </data>
 </root>

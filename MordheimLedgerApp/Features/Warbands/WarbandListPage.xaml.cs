@@ -43,7 +43,9 @@ public partial class WarbandListPage : ContentPage
         // l'onglet en silencieux, pour ne pas le faire clignoter à chaque changement d'onglet.
         if (!vm.IsInitialized)
             await vm.LoadWarbandsCommand.ExecuteAsync(null);
-        else
+        else if (!vm.IsUpToDate)
+            // Seulement si une écriture a eu lieu depuis le dernier chargement : sinon la liste (et la ligne
+            // sélectionnée) restent telles quelles au retour (refonte de novembre 2026).
             await vm.InitializeAsync();
 
         // Visite de cet écran, la première fois qu'on y arrive avec au moins une bande (cf.

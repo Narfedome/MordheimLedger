@@ -27,7 +27,8 @@ namespace MordheimLedgerApp.Components.Dialogs
         [RelayCommand]
         public async Task Cancel()
         {
-            if (HasUnsavedChanges() && !await ConfirmAsync(Loc["DialogDiscardChangesTitle"], Loc["DialogDiscardChangesMessage"]))
+            if (HasUnsavedChanges() && !await ConfirmAsync(Loc["DialogDiscardChangesTitle"], Loc["DialogDiscardChangesMessage"],
+                    Loc["DialogDiscardAction"], Loc["DialogKeepEditingAction"], destructive: true))
                 return;
             Close(CancelResult);
         }

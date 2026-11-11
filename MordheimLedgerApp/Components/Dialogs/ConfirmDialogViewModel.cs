@@ -25,10 +25,15 @@ namespace MordheimLedgerApp.Components.Dialogs
         private string? cancelLabel;
 
         public bool HasCancel => CancelLabel != null;
+
+        /// <summary>L'action détruit quelque chose (supprimer, abandonner une saisie) : bouton principal en
+        /// rouge (refonte de novembre 2026).</summary>
+        public bool IsDestructive { get; }
         public int ConfirmButtonColumnSpan => HasCancel ? 1 : 2;
 
-        public ConfirmDialogViewModel(string title, string message, string confirmLabel, string? cancelLabel)
+        public ConfirmDialogViewModel(string title, string message, string confirmLabel, string? cancelLabel, bool isDestructive = false)
         {
+            IsDestructive = isDestructive;
             Title = title;
             Message = message;
             ConfirmLabel = confirmLabel;

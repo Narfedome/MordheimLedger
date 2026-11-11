@@ -80,7 +80,10 @@ public partial class WarbandDetailPage : ContentPage
 
         if (Components.Dialogs.DialogStack.Instance.IsClosingReadOnlyDialog) return;
 
-        if (BindingContext is WarbandDetailViewModel vm)
+        // Seulement si quelque chose a été écrit en base depuis le dernier chargement (Fin de partie
+        // enregistrée...) : un formulaire annulé, une Fin de partie abandonnée ou une simple consultation ne
+        // relisent plus toute la fiche (refonte de novembre 2026).
+        if (BindingContext is WarbandDetailViewModel vm && !vm.IsUpToDate)
             await vm.LoadAsync(vm.WarbandId);
     }
 }

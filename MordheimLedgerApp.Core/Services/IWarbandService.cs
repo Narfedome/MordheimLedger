@@ -6,6 +6,10 @@ namespace MordheimLedgerApp.Core.Services;
 /// <summary>The campaign side: a player's warbands and their rosters, as opposed to the editable Library catalogs.</summary>
 public interface IWarbandService
 {
+    /// <summary>Voir AppDatabase.DataVersion : change à chaque écriture en base. Un écran qui note cette valeur
+    /// à son chargement sait, en revenant dessus, s'il doit relire.</summary>
+    int DataVersion { get; }
+
     Task<List<Warband>> GetWarbandsAsync();
     Task<Warband?> GetWarbandAsync(int id);
     Task<string> GetWarbandArchetypeNameAsync(int id, string languageCode);

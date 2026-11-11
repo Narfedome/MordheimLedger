@@ -18,37 +18,11 @@ public partial class EndOfGamePageViewModel
     {
         if (Warband is null) return;
 
-        List<Injury>? injuryCatalog = null;
-
-        // Find-or-create par jet (roll) contre le catalogue Injury seedé depuis Injuries.json (RollRange
-        // par entrée, ex. "22", "16, 21", "11-15" - voir InjuryCatalogLookup, partagé avec
-        // WarriorOutcomeRow pour l'aperçu en direct dans le wizard) plutôt que par égalité de
-        // texte : corrige un bug où la chip de blessure affichait la phrase descriptive complète
-        // (row.InjuryResultText, résolue via la clé resx InjurySeriousXX, ex. "Blessure à la jambe :
-        // Mouvement -1 de façon permanente.") au lieu du nom court du catalogue ("Blessure à la jambe") -
-        // l'ancienne comparaison par nom ne matchait jamais contre le catalogue (Name y est déjà le nom
-        // court), donc créait systématiquement un doublon avec la phrase entière comme Name. fallbackText
-        // ne sert plus que si le jet ne matche aucune entrée du catalogue officiel (roll invalide).
-        //
-        // branchSubRoll : pour Blessure au bras/Jambe écrasée (23/25), le catalogue a 2 entrées par roll
-        // (légère "2-6"/grave "1", voir Injury.BranchRange) - non-null sélectionne la bonne, null retombe
-        // sur l'entrée générique (BranchRange vide) si elle existe, sinon une entrée arbitraire. Un
-        // sous-jet "Blessures multiples" tombant sur 23/25 a bien son propre sous-jet de branche depuis
-        // le 2026-09-04 (retour utilisateur - voir ApplyInjuryRollCoreAsync plus bas), donc branchSubRoll
-        // n'est plus réservé au seul jet principal.
-        async Task<Injury> GetOrCreateInjuryAsync(int roll, bool isHero, string fallbackText, int? branchSubRoll = null)
-        {
-            injuryCatalog ??= await _libraryService.GetInjuriesAsync(language);
-            var category = isHero ? InjuryCategory.Hero : InjuryCategory.Henchman;
-            var injury = InjuryCatalogLookup.Find(injuryCatalog, category, roll, branchSubRoll);
-            if (injury is null)
-            {
-                injury = new Injury { Name = fallbackText, Category = category, Source = ContentSource.Official };
-                await _libraryService.SaveInjuryAsync(injury, language);
-                injuryCatalog.Add(injury);
-            }
-            return injury;
-        }
+        // Écritures des blessures (catalogue, effets, capture, combats de gladiateur, morts, suppression d'un
+        // groupe vide) : InjuryService (Core, testé). Le wizard garde l'ordre des jets et l'Historique.
+        var injuries = new InjuryService(_warbandService, _libraryService, language);
+        Task<Injury> GetOrCreateInjuryAsync(int roll, bool isHero, string fallbackText, int? branchSubRoll = null) =>
+            injuries.ResolveInjuryAsync(roll, isHero, fallbackText, branchSubRoll);
 
         foreach (var row in WarriorRows)
         {
@@ -86,24 +60,19 @@ public partial class EndOfGamePageViewModel
                 if (entryOutcome?.Kind == SeriousInjuryEffectKind.MissGamesRollD3)
                     entryOutcome = entryOutcome with { Value = int.TryParse(entry.DeepWoundSubRoll, out var d3) ? d3 : SeriousInjuryEffectTable.RollD3() };
 
-                var entryIsTemporary = entryOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
                 var entryInjury = await GetOrCreateInjuryAsync(hasRoll ? roll : -1, warrior.IsHero, entry.ResolvedInjuryText, entryBranchSubRoll);
-                await _warbandService.AddWarriorInjuryAsync(warrior.Id, entryInjury, entryIsTemporary);
+                entryChanged |= await injuries.RecordInjuryAsync(warrior, entryInjury, entryOutcome);
                 // Relance d'un combat de gladiateur perdu : pas une nouvelle mise hors de combat, phrase dédiée.
                 sentences.Add(string.Format(Loc[entry.IsPitFightReroll ? "HistorySoldToPitsRerollSentence" : "HistoryInjurySentence"],
                     warrior.Name, entry.ResolvedInjuryText));
 
-                if (entryOutcome is not null)
-                {
-                    entryChanged |= await ApplySeriousInjuryEffectAsync(warrior, entryOutcome);
-                    if (entryOutcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
-                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
-                }
+                if (entryOutcome?.Kind == SeriousInjuryEffectKind.ForcedRetirement)
+                    sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
                 if (hasRoll && roll == 31) alreadyBlindedInOneEye = true;
 
                 if (entry.HasHatredTarget)
                 {
-                    await _warbandService.AddWarriorHatredAsync(warrior.Id, entry.HatredTargetWarbandArchetypeId, entry.HatredTargetFreeText);
+                    await injuries.AddHatredAsync(warrior, entry.HatredTargetWarbandArchetypeId, entry.HatredTargetFreeText);
                     var hatredLabel = string.Format(Loc["WarriorsHatredChipFormat"], entry.HatredTargetDisplayName);
                     sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
                 }
@@ -120,8 +89,7 @@ public partial class EndOfGamePageViewModel
             {
                 if (entry.WonPitFight)
                 {
-                    Warband.Treasury += 50;
-                    warrior.Experience += 2;
+                    injuries.WinPitFight(Warband, warrior);
                     sentences.Add(string.Format(Loc["HistorySoldToPitsWonSentence"], warrior.Name));
                     return true;
                 }
@@ -138,18 +106,17 @@ public partial class EndOfGamePageViewModel
                 }
                 else if (reroll.ShowCapturedChoice && reroll.IsRansomed && int.TryParse(reroll.RansomAmount, out var rerollRansom))
                 {
-                    Warband.Treasury -= rerollRansom;
+                    await injuries.CaptureAsync(Warband, warrior, rerollRansom);
                     sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, rerollRansom));
                 }
                 else if (reroll.ShowCapturedChoice)
                 {
-                    warrior.Status = WarriorStatus.Dead;
-                    await StripWarriorEquipmentAsync(warrior);
+                    await injuries.CaptureAsync(Warband, warrior, null);
                     sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                 }
                 else
                 {
-                    await StripWarriorEquipmentAsync(warrior);
+                    await injuries.LosePitFightAsync(warrior);
                     sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
                 }
 
@@ -249,18 +216,11 @@ public partial class EndOfGamePageViewModel
                 // Puce temporaire (voir Models.WarriorInjury.IsTemporary) uniquement pour les effets qui
                 // se résorbent d'eux-mêmes une fois la Maladie levée - la branche grave permanente de
                 // 23/25 (aucun outcome ici) et tout le reste du Palier 1 restent des puces permanentes.
-                var isTemporary = outcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3;
-
                 var injury = await GetOrCreateInjuryAsync(hasMainRoll ? mainRoll : -1, warrior.IsHero, row.ResolvedInjuryText, branchSubRoll);
-                await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury, isTemporary);
+                changed |= await injuries.RecordInjuryAsync(warrior, injury, outcome);
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, row.ResolvedInjuryText));
-
-                if (outcome is not null)
-                {
-                    changed |= await ApplySeriousInjuryEffectAsync(warrior, outcome);
-                    if (outcome.Kind == SeriousInjuryEffectKind.ForcedRetirement)
-                        sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
-                }
+                if (outcome?.Kind == SeriousInjuryEffectKind.ForcedRetirement)
+                    sentences.Add(string.Format(Loc["HistoryForcedRetirementSentence"], warrior.Name));
                 if (hasMainRoll && mainRoll == 31) alreadyBlindedInOneEye = true;
             }
 
@@ -269,7 +229,7 @@ public partial class EndOfGamePageViewModel
             // sortes de cible possibles, pas un simple texte catalogue).
             if (row.HasHatredTarget)
             {
-                await _warbandService.AddWarriorHatredAsync(warrior.Id, row.HatredTargetWarbandArchetypeId, row.HatredTargetFreeText);
+                await injuries.AddHatredAsync(warrior, row.HatredTargetWarbandArchetypeId, row.HatredTargetFreeText);
                 var hatredLabel = string.Format(Loc["WarriorsHatredChipFormat"], row.HatredTargetDisplayName);
                 sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, hatredLabel));
             }
@@ -285,13 +245,12 @@ public partial class EndOfGamePageViewModel
             {
                 if (row.IsRansomed && int.TryParse(row.RansomAmount, out var ransomAmount))
                 {
-                    Warband.Treasury -= ransomAmount;
+                    await injuries.CaptureAsync(Warband, warrior, ransomAmount);
                     sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, ransomAmount));
                 }
                 else
                 {
-                    warrior.Status = WarriorStatus.Dead;
-                    await StripWarriorEquipmentAsync(warrior);
+                    await injuries.CaptureAsync(Warband, warrior, null);
                     sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                 }
                 changed = true;
@@ -308,8 +267,7 @@ public partial class EndOfGamePageViewModel
             {
                 if (row.WonPitFight)
                 {
-                    Warband.Treasury += 50;
-                    warrior.Experience += 2;
+                    injuries.WinPitFight(Warband, warrior);
                     sentences.Add(string.Format(Loc["HistorySoldToPitsWonSentence"], warrior.Name));
                     changed = true;
                 }
@@ -321,12 +279,8 @@ public partial class EndOfGamePageViewModel
                         rerollOutcome = rerollOutcome with { Value = int.TryParse(reroll.DeepWoundSubRoll, out var rerollD3) ? rerollD3 : SeriousInjuryEffectTable.RollD3() };
 
                     var rerollInjury = await GetOrCreateInjuryAsync(hasRerollRoll ? rerollRoll : -1, warrior.IsHero, reroll.InjuryResultText);
-                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, rerollInjury,
-                        rerollOutcome?.Kind is SeriousInjuryEffectKind.MissNextGame or SeriousInjuryEffectKind.MissGamesRollD3);
+                    changed |= await injuries.RecordInjuryAsync(warrior, rerollInjury, rerollOutcome);
                     sentences.Add(string.Format(Loc["HistoryInjurySentence"], warrior.Name, reroll.InjuryResultText));
-
-                    if (rerollOutcome is not null)
-                        changed |= await ApplySeriousInjuryEffectAsync(warrior, rerollOutcome);
                     if (hasRerollRoll && rerollRoll == 31) alreadyBlindedInOneEye = true;
 
                     if (reroll.IsDeath)
@@ -339,18 +293,17 @@ public partial class EndOfGamePageViewModel
                         // Sous-jet retombé sur Capturé (61), racheté - le guerrier revient avec son
                         // équipement (pas de perte "sans armure ni armes" dans ce cas précis, même
                         // exception que le traitement normal de Capturé).
-                        Warband.Treasury -= rerollRansom;
+                        await injuries.CaptureAsync(Warband, warrior, rerollRansom);
                         sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, rerollRansom));
                     }
                     else if (reroll.ShowCapturedChoice)
                     {
-                        warrior.Status = WarriorStatus.Dead;
-                        await StripWarriorEquipmentAsync(warrior);
+                        await injuries.CaptureAsync(Warband, warrior, null);
                         sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     else
                     {
-                        await StripWarriorEquipmentAsync(warrior);
+                        await injuries.LosePitFightAsync(warrior);
                         sentences.Add(string.Format(Loc["HistorySoldToPitsLostSentence"], warrior.Name));
                     }
                     changed = true;
@@ -389,13 +342,12 @@ public partial class EndOfGamePageViewModel
                 {
                     if (sub.IsRansomed && int.TryParse(sub.RansomAmount, out var subRansomAmount))
                     {
-                        Warband.Treasury -= subRansomAmount;
+                        await injuries.CaptureAsync(Warband, warrior, subRansomAmount);
                         sentences.Add(string.Format(Loc["HistoryCapturedRansomedSentence"], warrior.Name, subRansomAmount));
                     }
                     else
                     {
-                        warrior.Status = WarriorStatus.Dead;
-                        await StripWarriorEquipmentAsync(warrior);
+                        await injuries.CaptureAsync(Warband, warrior, null);
                         sentences.Add(string.Format(Loc["HistoryCapturedLostSentence"], warrior.Name));
                     }
                     changed = true;
@@ -418,121 +370,30 @@ public partial class EndOfGamePageViewModel
             var headCountWiped = false;
             if (row.FigureInjuryRolls.Count > 0)
             {
-                var deaths = 0;
+                var figures = new List<(Injury, bool)>();
                 foreach (var figure in row.FigureInjuryRolls)
                 {
                     if (string.IsNullOrWhiteSpace(figure.InjuryResultText)) continue;
-
                     var hasFigureRoll = int.TryParse(figure.ManualRoll, out var figureRoll);
-                    var figureInjury = await GetOrCreateInjuryAsync(hasFigureRoll ? figureRoll : -1, warrior.IsHero, figure.InjuryResultText);
-                    await _warbandService.AddWarriorInjuryAsync(warrior.Id, figureInjury);
-                    if (figure.IsDeath) deaths++;
+                    figures.Add((await GetOrCreateInjuryAsync(hasFigureRoll ? figureRoll : -1, warrior.IsHero, figure.InjuryResultText), figure.IsDeath));
                 }
+                var deaths = figures.Count(f => f.Item2);
+                headCountWiped = await injuries.RecordHenchmanInjuriesAsync(warrior, figures);
 
                 if (deaths > 0)
                 {
-                    warrior.HeadCount -= deaths;
                     changed = true;
-                    headCountWiped = warrior.HeadCount <= 0;
                     sentences.Add(headCountWiped
                         ? string.Format(Loc["HistoryHenchmanWipedSentence"], warrior.Name)
                         : string.Format(Loc["HistoryHenchmanDeathSentence"], warrior.Name, deaths, warrior.HeadCount));
                 }
             }
 
-            // Couvre aussi le cas "dernier membre du groupe promu Héros" (voir le bloc Promotion
-            // ci-dessus, qui décrémente HeadCount lui aussi) - pas seulement les morts par figurine.
-            headCountWiped |= warrior.HeadCount <= 0;
-
-            if (headCountWiped)
-                await _warbandService.DeleteWarriorAsync(warrior.Id);
-            else if (changed)
-                await _warbandService.SaveWarriorAsync(warrior);
+            // Groupe vide supprimé (morts par figurine, ou dernier membre promu Héros), sinon sauvegardé s'il a changé.
+            await injuries.FinishWarriorAsync(warrior, changed);
         }
     }
 
-    /// <summary>Applique la mutation réelle d'un résultat de Blessure Grave Palier 1 (voir Core.Rules.
-    /// SeriousInjuryEffectTable) - appelée pour le jet principal (branche 23/25 comprise) et pour
-    /// chaque sous-jet "Blessures multiples". Retourne true si warrior a été modifié (pour que
-    /// l'appelant sache qu'il doit le sauvegarder, même convention que `changed` dans
-    /// ApplyWarriorOutcomesAsync) - LoseAllEquipment se sauvegarde lui-même via RemoveWarriorEquipmentAsync
-    /// (une ligne de jointure à la fois) donc ne fait pas remonter `changed` à true pour autant.</summary>
-    private async Task<bool> ApplySeriousInjuryEffectAsync(Warrior warrior, SeriousInjuryOutcome outcome)
-    {
-        switch (outcome.Kind)
-        {
-            case SeriousInjuryEffectKind.CharacteristicPenalty when outcome.Field is { } field:
-                ApplyCharacteristicPenalty(warrior, field);
-                return true;
-
-            case SeriousInjuryEffectKind.LoseAllEquipment:
-                await StripWarriorEquipmentAsync(warrior);
-                return false;
-
-            case SeriousInjuryEffectKind.GainExperience:
-                warrior.Experience += 1;
-                return true;
-
-            // Cumulatif (+=), pas un simple remplacement : "Blessures multiples" (16/21) peut produire
-            // PLUSIEURS sous-résultats qui accordent chacun du temps Malade pour le même guerrier (ex.
-            // deux Blessures profondes, ou Blessure au bras légère + Blessure profonde) - le texte du
-            // livre est explicite ("cumulez tous les effets obtenus"), un remplacement perdrait
-            // silencieusement les parties déjà accumulées par un sous-résultat précédent dans la même
-            // résolution. Repéré par analogie avec le correctif Vieille blessure (2026-08-26, un jet par
-            // instance portée plutôt qu'un seul par guerrier) - même famille de bug ("plusieurs
-            // occurrences du même effet doivent se cumuler, pas s'écraser").
-            case SeriousInjuryEffectKind.MissNextGame:
-                warrior.Status = WarriorStatus.Sick;
-                warrior.SickGamesRemaining += 1;
-                return true;
-
-            case SeriousInjuryEffectKind.MissGamesRollD3:
-                // outcome.Value porte le 1D3 saisi par le joueur dans le wizard (voir
-                // WarriorOutcomeRow.DeepWoundSubRoll/InjurySubRollEntry.DeepWoundSubRoll, injecté par
-                // ApplyWarriorOutcomesAsync ci-dessus) - repli défensif sur un jet auto si jamais absent,
-                // ne devrait plus arriver depuis que ce sous-jet est visible/validé dans le wizard.
-                warrior.Status = WarriorStatus.Sick;
-                warrior.SickGamesRemaining += outcome.Value ?? SeriousInjuryEffectTable.RollD3();
-                return true;
-
-            case SeriousInjuryEffectKind.ForcedRetirement:
-                warrior.Status = WarriorStatus.Retired;
-                return true;
-
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>Perte de tout l'équipement (Dépouillé, combat de gladiateur perdu, Capturé non racheté) -
-    /// seulement les lignes déjà en base (id positif). Un objet réalloué à ce Héros pendant cette même Fin
-    /// de Partie (id synthétique négatif, voir EndOfGamePageViewModel.Reallocation.cs) a été acheté ou
-    /// échangé APRÈS la blessure : il lui reste, et ApplyEquipmentReallocationAsync le crée plus loin.
-    /// Jusqu'au 2026-11-02, toute la liste était vidée ici, objets réalloués compris (retour utilisateur -
-    /// l'arbalète rachetée au Héros revenu des Fosses n'apparaissait pas).</summary>
-    private async Task StripWarriorEquipmentAsync(Warrior warrior)
-    {
-        foreach (var equipment in warrior.Equipment.Where(e => e.Id > 0).ToList())
-        {
-            await _warbandService.RemoveWarriorEquipmentAsync(equipment.Id);
-            warrior.Equipment.Remove(equipment);
-        }
-    }
-
-    /// <summary>Contrepartie en soustraction d'ApplyCharacteristicIncrease, pour les résultats de
-    /// Blessure Grave Palier 1 qui infligent un -1 permanent - pas de vérification de plancher (la
-    /// caractéristique peut descendre en dessous de 0, comme sur une vraie feuille de bande) ni de
-    /// suivi IncreasedCharacteristics (celui-ci ne suit que les gains d'un Homme de main, sans objet
-    /// pour une perte).</summary>
-    private static void ApplyCharacteristicPenalty(Warrior warrior, CharacteristicField field) =>
-        CharacteristicModifier.Apply(warrior, field, -1);
-
-    /// <summary>Applique le +1 d'un résultat de Progression "Caractéristique" (voir AdvanceRollEntry.
-    /// ResolvedField, déjà validé éligible - maximum racial respecté, et pour un Homme de main jamais
-    /// deux fois la même caractéristique - au moment où le joueur l'a résolu dans le wizard) - switch
-    /// explicite sur les 9 champs plutôt que de la réflexion, même style que le reste d'EntityMapping/
-    /// ce fichier. Pour un Homme de main, la caractéristique rejoint aussi Warrior.
-    /// IncreasedCharacteristics (jamais pour un Héros, qui n'a pas cette restriction).</summary>
     /// <summary>Application des progressions en base (Core, testée) - sans état, recréée à la demande.</summary>
     private AdvancementService Advancement => new(_warbandService);
 

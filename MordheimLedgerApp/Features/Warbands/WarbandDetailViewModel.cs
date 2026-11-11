@@ -193,8 +193,16 @@ public partial class WarbandDetailViewModel : BaseViewModel
     [RelayCommand]
     private void ToggleRetired() => RetiredExpanded = !RetiredExpanded;
 
+    private int _loadedDataVersion = -1;
+
+    /// <summary>Rien n'a été écrit en base depuis le dernier chargement de cette fiche : le retour sur la page
+    /// (dialog ou formulaire annulé, consultation, Fin de partie abandonnée) ne relit rien - refonte de
+    /// novembre 2026.</summary>
+    internal bool IsUpToDate => _loadedDataVersion == _warbandService.DataVersion;
+
     internal async Task LoadAsync(int id)
     {
+        _loadedDataVersion = _warbandService.DataVersion;
         await Loading.RunAsync(async () =>
         {
             // Lectures + résolution du catalogue hors du thread UI (2026-11-03) : à la première ouverture
@@ -452,9 +460,9 @@ public partial class WarbandDetailViewModel : BaseViewModel
             _mutationPicker, isMutant, specialRules);
         var saved = await ShowFormAsync(new WarriorEditForm(dialogViewModel));
 
-        // Toujours recharger, même si le dialog a été annulé : l'ajout/retrait de blessure suivie
-        // (AddInjury/RemoveInjury) persiste immédiatement dans le dialog, indépendamment du bouton
-        // Enregistrer/Annuler (même logique que l'Équipement/les Compétences sur la carte guerrier).
+        // Recharger dès que quelque chose a été écrit, même si le formulaire a été annulé : l'ajout/retrait de
+        // blessure suivie (AddInjury/RemoveInjury) persiste immédiatement, indépendamment du bouton
+        // Enregistrer/Annuler. Rien d'écrit (consultation, annulation sans effet) : pas de rechargement.
         await Loading.RunAsync(async () =>
         {
             // WasDeleted : le guerrier n'existe plus en base (supprimé depuis le dialog) - le
@@ -474,7 +482,7 @@ public partial class WarbandDetailViewModel : BaseViewModel
             }
             dialogViewModel.FinalizePhoto(saved == true && !dialogViewModel.WasDeleted);
 
-            await LoadAsync(Warband.Id);
+            if (!IsUpToDate) await LoadAsync(Warband.Id);
         });
     }
 

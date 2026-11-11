@@ -11,13 +11,10 @@
                x:Class="MordheimLedgerApp.Features.Library.Spells.CreateEdit.SpellDetailDialog"
                x:DataType="local:SpellDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -25,25 +22,28 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc SpellMagicSchoolPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.MagicSchool.Name}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc SpellRollValuePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.RollValue}" TextColor="{DynamicResource AppText}"/>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc SpellMagicSchoolPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.MagicSchool.Name}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc SpellRollValuePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.RollValue}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding HasDifficulty}">
+                            <Label Text="{loc:Loc SpellDifficultyPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.Difficulty}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4" IsVisible="{Binding HasDifficulty}">
-                    <Label Text="{loc:Loc SpellDifficultyPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.Difficulty}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-            </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

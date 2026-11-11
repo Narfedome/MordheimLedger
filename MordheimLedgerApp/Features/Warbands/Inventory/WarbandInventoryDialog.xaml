@@ -12,13 +12,10 @@
                x:Class="MordheimLedgerApp.Features.Warbands.Inventory.WarbandInventoryDialog"
                x:DataType="local:WarbandInventoryDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*,Auto" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -26,8 +23,12 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
 
-            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Inventory}">
+                </VerticalStackLayout>
+            </dialogs:AnimatedHeightScrollView>
+            <VerticalStackLayout Grid.Row="2" Spacing="8" BindableLayout.ItemsSource="{Binding Inventory}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:WarbandEquipment">
                         <Border Style="{StaticResource SectionCardBorderStyle}">
@@ -63,7 +64,6 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

@@ -11,13 +11,10 @@
                x:Class="MordheimLedgerApp.Features.Library.WarriorArchetypes.CreateEdit.WarriorArchetypeDetailDialog"
                x:DataType="local:WarriorArchetypeDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -25,61 +22,64 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc WarriorArchetypeRolePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding RoleDisplay}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="{loc:Loc WarriorArchetypeCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-            </Grid>
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc WarriorArchetypeMinCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding MinCountDisplay}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding MaxCountDisplay}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="2" Spacing="4">
-                    <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.StartingExperience}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-            </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc WarriorArchetypeEquipmentListPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding EquipmentListDisplay}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc WarriorArchetypeRolePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding RoleDisplay}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Loc WarriorArchetypeCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc WarriorArchetypeMinCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding MinCountDisplay}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Loc WarriorArchetypeMaxCountPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding MaxCountDisplay}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="{loc:Loc WarriorArchetypeStartingExperiencePh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.StartingExperience}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc WarriorArchetypeEquipmentListPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding EquipmentListDisplay}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
 
-            <!-- Lanceur de sorts/Mutant-Possédé : juste des drapeaux informatifs (pas de champ propre à
-                 afficher), masqués quand faux plutôt qu'un "Non" peu utile. -->
-            <Label Text="{loc:Loc WarriorArchetypeIsSpellcaster}" FontSize="12" TextColor="{DynamicResource AppAccent}"
-                   IsVisible="{Binding Item.IsSpellcaster}"/>
-            <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" FontSize="12" TextColor="{DynamicResource AppAccent}"
-                   IsVisible="{Binding Item.CanBuyMutations}"/>
-            <Label Text="{loc:Loc WarriorArchetypeMustStartWithMutation}" FontSize="12" TextColor="{DynamicResource AppAccent}"
-                   IsVisible="{Binding Item.MustStartWithMutation}"/>
-            <Label Text="{loc:Loc WarriorArchetypeIsLargeCreature}" FontSize="12" TextColor="{DynamicResource AppAccent}"
-                   IsVisible="{Binding Item.IsLargeCreature}"/>
+                    <!-- Lanceur de sorts/Mutant-Possédé : juste des drapeaux informatifs (pas de champ propre à
+                         afficher), masqués quand faux plutôt qu'un "Non" peu utile. -->
+                    <Label Text="{loc:Loc WarriorArchetypeIsSpellcaster}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                           IsVisible="{Binding Item.IsSpellcaster}"/>
+                    <Label Text="{loc:Loc WarriorArchetypeCanBuyMutations}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                           IsVisible="{Binding Item.CanBuyMutations}"/>
+                    <Label Text="{loc:Loc WarriorArchetypeMustStartWithMutation}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                           IsVisible="{Binding Item.MustStartWithMutation}"/>
+                    <Label Text="{loc:Loc WarriorArchetypeIsLargeCreature}" FontSize="12" TextColor="{DynamicResource AppAccent}"
+                           IsVisible="{Binding Item.IsLargeCreature}"/>
 
-            <!-- Profil sur une seule ligne (abréviations françaises officielles) - StatRowView partagé
-                 avec AnimalDetailDialog/WarbandDetailPage. -->
-            <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.MovementDisplay}"/>
+                    <!-- Profil sur une seule ligne (abréviations françaises officielles) - StatRowView partagé
+                         avec AnimalDetailDialog/WarbandDetailPage. -->
+                    <components:StatRowView Item="{Binding Item}" MovementText="{Binding Item.MovementDisplay}"/>
 
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
 
-            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
-                                      ItemsSource="{Binding Item.SpecialRules}"
-                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+                    <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                              ItemsSource="{Binding Item.SpecialRules}"
+                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                              Command="{Binding ShowSpecialRuleDetailCommand}"/>
+                </VerticalStackLayout>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

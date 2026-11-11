@@ -12,10 +12,8 @@
                x:DataType="local:MaterialPickerDialogViewModel"
                x:Name="root"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
         <VerticalStackLayout Spacing="12">
             <Label Text="{loc:Loc WarriorsMaterialHeading}" Style="{StaticResource DialogTitleLabelStyle}"/>
 

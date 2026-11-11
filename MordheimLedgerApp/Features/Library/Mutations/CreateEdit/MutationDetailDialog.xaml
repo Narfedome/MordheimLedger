@@ -12,13 +12,10 @@
                x:Class="MordheimLedgerApp.Features.Library.Mutations.CreateEdit.MutationDetailDialog"
                x:DataType="local:MutationDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -26,21 +23,24 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc MutationCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc MutationCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Cost}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
 
-            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
-                                      AlwaysShowSection="True"
-                                      ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Users}"
-                                      Command="{Binding ShowWarbandDetailCommand}"/>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+                    <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                              AlwaysShowSection="True"
+                                              ItemsSource="{Binding RestrictedWarbands}"
+                                              IconGlyph="{x:Static icons:SolidFont.Users}"
+                                              Command="{Binding ShowWarbandDetailCommand}"/>
+                </VerticalStackLayout>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

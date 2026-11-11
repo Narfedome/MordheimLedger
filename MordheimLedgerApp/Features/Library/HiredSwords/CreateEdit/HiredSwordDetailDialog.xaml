@@ -12,13 +12,10 @@
                x:Class="MordheimLedgerApp.Features.Library.HiredSwords.CreateEdit.HiredSwordDetailDialog"
                x:DataType="local:HiredSwordDetailDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="360">
-        <dialogs:AnimatedHeightScrollView>
-        <VerticalStackLayout Spacing="16">
-            <Grid ColumnDefinitions="*,Auto">
+               Padding="0">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
+        <Grid RowDefinitions="Auto,*" RowSpacing="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"
                        Style="{StaticResource DialogTitleLabelStyle}" VerticalOptions="Center"/>
                 <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
@@ -26,67 +23,70 @@
                                               IconSize="14" ButtonWidthRequest="24" ButtonHeightRequest="24"
                                               Command="{Binding CancelCommand}"/>
             </Grid>
+            <dialogs:AnimatedHeightScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="16">
 
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <VerticalStackLayout Grid.Column="0" Spacing="4">
-                    <Label Text="{loc:Loc HiredSwordHireCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.HireCost}" TextColor="{DynamicResource AppText}"/>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="{loc:Loc HiredSwordHireCostPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.HireCost}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="{loc:Loc HiredSwordUpkeepPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.Upkeep}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="{loc:Loc HiredSwordBaseRatingPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Text="{Binding Item.BaseRating}" TextColor="{DynamicResource AppText}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+
+                    <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementDisplay}"/>
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc HiredSwordAllowedSkillCategoriesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <Label Text="{Binding AllowedSkillCategoriesText}" TextColor="{DynamicResource AppText}"/>
+                    </VerticalStackLayout>
+
+                    <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
+                                              ItemsSource="{Binding Item.SpecialRules}"
+                                              IconGlyph="{x:Static icons:SolidFont.Scroll}"
+                                              Command="{Binding ShowSpecialRuleDetailCommand}"/>
+
+                    <components:ChipListView HeaderText="{loc:Loc HiredSwordMagicSchoolPh}"
+                                              ItemsSource="{Binding MagicSchools}"
+                                              IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
+                                              IconFontFamily="RpgAwesome"
+                                              Command="{Binding ShowMagicSchoolDetailCommand}"/>
+
+                    <!-- ChipView (pas ChipListView) : l'icône varie par item (EquipmentCategoryIconConverter),
+                         même motif que HiredSwordEditDialog/l'Équipement de WarriorEditDialog/la carte guerrier. -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                        <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="components:EquipmentQuantityChip">
+                                    <components:ChipView Item="{Binding .}"
+                                                          IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                          IconFontFamily="RpgAwesome"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type local:HiredSwordDetailDialogViewModel}}, Path=ShowStartingEquipmentDetailCommand}"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+
+                    <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
+                                              AlwaysShowSection="True"
+                                              ItemsSource="{Binding RestrictedWarbands}"
+                                              IconGlyph="{x:Static icons:SolidFont.Users}"
+                                              Command="{Binding ShowWarbandDetailCommand}"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="4">
-                    <Label Text="{loc:Loc HiredSwordUpkeepPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.Upkeep}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="2" Spacing="4">
-                    <Label Text="{loc:Loc HiredSwordBaseRatingPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                    <Label Text="{Binding Item.BaseRating}" TextColor="{DynamicResource AppText}"/>
-                </VerticalStackLayout>
-            </Grid>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc LibDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding Item.Description}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-
-            <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementDisplay}"/>
-
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc HiredSwordAllowedSkillCategoriesPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <Label Text="{Binding AllowedSkillCategoriesText}" TextColor="{DynamicResource AppText}"/>
-            </VerticalStackLayout>
-
-            <components:ChipListView HeaderText="{loc:Loc LibSpecialRulesPh}"
-                                      ItemsSource="{Binding Item.SpecialRules}"
-                                      IconGlyph="{x:Static icons:SolidFont.Scroll}"
-                                      Command="{Binding ShowSpecialRuleDetailCommand}"/>
-
-            <components:ChipListView HeaderText="{loc:Loc HiredSwordMagicSchoolPh}"
-                                      ItemsSource="{Binding MagicSchools}"
-                                      IconGlyph="{x:Static icons:RpgFont.RaCrystalBall}"
-                                      IconFontFamily="RpgAwesome"
-                                      Command="{Binding ShowMagicSchoolDetailCommand}"/>
-
-            <!-- ChipView (pas ChipListView) : l'icône varie par item (EquipmentCategoryIconConverter),
-                 même motif que HiredSwordEditDialog/l'Équipement de WarriorEditDialog/la carte guerrier. -->
-            <VerticalStackLayout Spacing="4">
-                <Label Text="{loc:Loc HiredSwordStartingEquipmentPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
-                <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding StartingEquipment}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="components:EquipmentQuantityChip">
-                            <components:ChipView Item="{Binding .}"
-                                                  IconGlyph="{Binding Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                  IconFontFamily="RpgAwesome"
-                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type local:HiredSwordDetailDialogViewModel}}, Path=ShowStartingEquipmentDetailCommand}"/>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
-            </VerticalStackLayout>
-
-            <components:ChipListView HeaderText="{Binding RestrictedWarbandsHeaderText}"
-                                      AlwaysShowSection="True"
-                                      ItemsSource="{Binding RestrictedWarbands}"
-                                      IconGlyph="{x:Static icons:SolidFont.Users}"
-                                      Command="{Binding ShowWarbandDetailCommand}"/>
-        </VerticalStackLayout>
-        </dialogs:AnimatedHeightScrollView>
+            </dialogs:AnimatedHeightScrollView>
+        </Grid>
     </Border>
 </dialogs:DialogContent>

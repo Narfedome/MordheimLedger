@@ -7,13 +7,10 @@
                x:Class="MordheimLedgerApp.Components.Dialogs.ConfirmDialog"
                x:DataType="dialogs:ConfirmDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="Center">
-    <!-- Centré sur toutes les plateformes, contrairement aux autres dialogs (Start + marge haute sur
-         mobile pour laisser la place au clavier) : aucun champ de saisie ici, donc pas de clavier à
-         éviter - et une confirmation ouverte par-dessus un autre dialog (abandon des modifications,
-         DialogViewModel.Cancel) se retrouvait collée en haut, sur le dialog parent. -->
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="320">
+               Padding="0">
+    <!-- Centré comme tous les dialogs (DialogPage). Action à droite, libellé d'action plutôt que Oui / Non
+         quand l'appelant en fournit un, en rouge si elle détruit quelque chose (IsDestructive). -->
+    <Border Style="{StaticResource DialogCardBorderStyle}">
         <VerticalStackLayout Spacing="16">
             <Label Text="{Binding Title}"
                    Style="{StaticResource DialogTitleLabelStyle}"/>
@@ -28,7 +25,14 @@
                 <Button Grid.Column="1"
                         Grid.ColumnSpan="{Binding ConfirmButtonColumnSpan}"
                         Text="{Binding ConfirmLabel}"
-                        Command="{Binding ConfirmCommand}"/>
+                        Command="{Binding ConfirmCommand}">
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding IsDestructive}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource AppDanger}"/>
+                            <Setter Property="TextColor" Value="White"/>
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
             </Grid>
         </VerticalStackLayout>
     </Border>

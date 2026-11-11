@@ -10,11 +10,9 @@
                x:Class="MordheimLedgerApp.Features.Warbands.WarriorPhotoDialog"
                x:DataType="local:WarriorPhotoDialogViewModel"
                BackgroundColor="Transparent"
-               Padding="0"
-               VerticalOptions="{OnPlatform Default=Start, WinUI=Center}"
-               Margin="{OnPlatform Default='0,80,0,0', WinUI='0'}">
+               Padding="0">
     <!-- Même carte que ChipDetailDialog (titre + croix), la photo à la place de la description. -->
-    <Border Style="{StaticResource DialogCardBorderStyle}" WidthRequest="340">
+    <Border Style="{StaticResource DialogCardBorderStyle}">
         <VerticalStackLayout Spacing="12">
             <Grid ColumnDefinitions="*,Auto">
                 <Label Grid.Column="0" Text="{Binding Title}"

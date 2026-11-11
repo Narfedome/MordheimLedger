@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -241,7 +241,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
+        // Groupe d'Hommes de main : prix × effectif, comme à l'enregistrement plus bas (sauf mode Libre, sans coût).
         var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury,
+            unitCount: _skipCosts || Item.IsHero ? 1 : Math.Max(1, Item.HeadCount),
             alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger), allowQuantity: Item.IsHero, forWarrior: CurrentWarriorForRules());
 
         // Même dialog que la création libre du wizard (MaterialPickerDialogViewModel) : matériau exclusif

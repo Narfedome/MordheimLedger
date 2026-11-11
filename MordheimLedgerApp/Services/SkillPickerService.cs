@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Components.Dialogs;
+﻿using MordheimLedgerApp.Components.Dialogs;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Features.Library.Skills;
@@ -24,7 +24,7 @@ public interface ISkillPickerService
     /// blocking (see SkillViewModel.PrerequisiteWarning and Core.Rules.SkillPrerequisites).</summary>
     Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
         IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null, bool singleSelect = false,
-        Warrior? forWarrior = null, bool forWarriorIsSpellcaster = false);
+        Warrior? forWarrior = null, bool forWarriorIsSpellcaster = false, IReadOnlyCollection<int>? excludedSkillIds = null);
 }
 
 public class SkillPickerService : ISkillPickerService
@@ -35,7 +35,7 @@ public class SkillPickerService : ISkillPickerService
 
     public async Task<IReadOnlyList<Skill>> PickSkillAsync(int warbandArchetypeId, int? warriorArchetypeId = null,
         IReadOnlyList<SkillCategory>? allowedCategories = null, IReadOnlyList<int>? extraAllowedSkillIds = null, bool singleSelect = false,
-        Warrior? forWarrior = null, bool forWarriorIsSpellcaster = false)
+        Warrior? forWarrior = null, bool forWarriorIsSpellcaster = false, IReadOnlyCollection<int>? excludedSkillIds = null)
     {
         var tcs = new TaskCompletionSource<IReadOnlyList<Skill>>();
 
@@ -52,6 +52,7 @@ public class SkillPickerService : ISkillPickerService
         viewModel.SingleSelectMode = singleSelect;
         viewModel.ForWarrior = forWarrior;
         viewModel.ForWarriorIsSpellcaster = forWarriorIsSpellcaster;
+        viewModel.ExcludedSkillIds = excludedSkillIds;
         // Poussée nue (pas de NavigationPage) - voir PickerSelectorLayout pour le pourquoi.
         var page = new SkillSelectorPage(viewModel);
 

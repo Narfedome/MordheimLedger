@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -379,7 +379,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
             if (!skipPlainTile)
             {
                 var isFreeForThisPurchase = item.IsFreeDagger && AvailableGold.HasValue && !AlreadyHasFreeDagger;
-                var row = new EquipmentItemRow(item, isFreeForThisPurchase);
+                var row = new EquipmentItemRow(item, isFreeForThisPurchase) { UnitCount = UnitCount };
                 if (Carriers is { } carriers) row.SetCarriers(EquipmentEligibility.CarriersOf(item, carriers));
                 group.Add(row);
             }
@@ -392,7 +392,7 @@ public partial class EquipmentItemViewModel : BaseViewModel
             // MaterialRule, lu par EquipmentPickerService.PickRareEquipmentAsync à la confirmation).
             if (RareSearchMode && isMeleeWeapon)
                 foreach (var material in _rareMaterialOptions)
-                    group.Add(new EquipmentItemRow(item, material));
+                    group.Add(new EquipmentItemRow(item, material) { UnitCount = UnitCount });
 
             // Une tuile "Réserve" SÉPARÉE (jamais la même instance que celle de la catégorie ci-dessus,
             // voir EquipmentItemRow.IsReserveRow's own doc) - retour utilisateur 2026-09-21 : "aujourd'hui

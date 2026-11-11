@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -214,28 +214,33 @@ public class InjuryServiceTests : IDisposable
     // --- Hommes de main -----------------------------------------------------------------------------
 
     [Fact]
-    public async Task HenchmanDeaths_LowerTheHeadCount_OneInjuryPerFigure()
+    public async Task HenchmanDeaths_LowerTheHeadCount_AndLeaveNoInjuryOnTheGroup()
     {
         var (warband, _, group) = await WarbandAsync(groupSize: 3);
-        var dead = await _service.ResolveInjuryAsync(1, isHero: false, "Dead");
-        var fine = await _service.ResolveInjuryAsync(4, isHero: false, "Full recovery");
 
-        var wiped = await _service.RecordHenchmanInjuriesAsync(group, [(dead, true), (fine, false)]);
+        var wiped = InjuryService.RemoveDeadFigures(group, 1);
         await _service.FinishWarriorAsync(group, true);
 
         Assert.False(wiped);
         var reloaded = await ReloadAsync(warband, group.Id);
         Assert.Equal(2, reloaded.HeadCount);
-        Assert.Equal(2, reloaded.Injuries.Count);
+        Assert.Empty(reloaded.Injuries); // ni « Perdu » ni « Rétablissement complet »
+    }
+
+    [Fact]
+    public void HenchmanDeaths_NegativeCountIsIgnored()
+    {
+        var group = new Warrior { HeadCount = 2 };
+
+        Assert.False(InjuryService.RemoveDeadFigures(group, -1));
+        Assert.Equal(2, group.HeadCount);
     }
 
     [Fact]
     public async Task HenchmanGroup_Wiped_IsDeleted()
     {
         var (warband, _, group) = await WarbandAsync(groupSize: 2);
-        var dead = await _service.ResolveInjuryAsync(1, isHero: false, "Dead");
-
-        var wiped = await _service.RecordHenchmanInjuriesAsync(group, [(dead, true), (dead, true)]);
+        var wiped = InjuryService.RemoveDeadFigures(group, 2);
         await _service.FinishWarriorAsync(group, true);
 
         Assert.True(wiped);

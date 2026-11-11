@@ -1234,6 +1234,9 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="EndOfGameArtefactTableLabel" xml:space="preserve">
     <value>Table des Artefacts Magiques (1-6)</value>
   </data>
+  <data name="EndOfGameChoiceRequired" xml:space="preserve">
+    <value>Choix requis avant de continuer.</value>
+  </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Jet requis avant de continuer.</value>
   </data>

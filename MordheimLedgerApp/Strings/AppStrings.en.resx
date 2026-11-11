@@ -1234,6 +1234,9 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="EndOfGameArtefactTableLabel" xml:space="preserve">
     <value>Magical Artefacts table (1-6)</value>
   </data>
+  <data name="EndOfGameChoiceRequired" xml:space="preserve">
+    <value>Choice required before continuing.</value>
+  </data>
   <data name="EndOfGameRollRequired" xml:space="preserve">
     <value>Roll required before continuing.</value>
   </data>

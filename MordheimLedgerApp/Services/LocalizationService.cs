@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using System.ComponentModel;
 using System.Globalization;
 using System.Resources;
@@ -29,6 +29,10 @@ namespace MordheimLedgerApp.Services
         }
 
         public string this[string key] => _rm.GetString(key, _culture) ?? key;
+
+        /// <summary>Culture de la langue choisie dans l'appli (pas celle de l'appareil) - pour formater dates et
+        /// heures comme le reste des textes (LocalizedDateConverter).</summary>
+        public CultureInfo Culture => _culture;
 
         public static string GetString(string key, string languageCode) =>
             _rm.GetString(key, new CultureInfo(languageCode)) ?? key;

@@ -66,9 +66,15 @@ public partial class EndOfGamePageViewModel
         // singleSelect: true (2026-09-04, retour utilisateur - "dans la section des advance, il faut
         // passer en sélection unique") : un jet de Progression n'accorde jamais plus d'une compétence,
         // contrairement au picker générique de la Bibliothèque.
+        // Pas deux fois la même compétence : ni une déjà acquise, ni une déjà choisie sur un autre jet du même
+        // guerrier dans cette Fin de partie.
+        var excludedSkillIds = warrior.Skills.Select(s => s.Item.Id)
+            .Concat(AllAdvanceEntries().Where(e => e != entry && FindAdvanceOwner(e).Warrior == warrior)
+                .SelectMany(e => e.SelectedSkills.Select(s => s.Id)))
+            .ToHashSet();
         var skills = await _skillPicker.PickSkillAsync(_warbandArchetypeId, warrior.WarriorArchetypeId,
             SkillEligibility.EffectiveAllowedCategories(warrior), extraSkillIds, singleSelect: true,
-            forWarrior: warrior, forWarriorIsSpellcaster: isSpellcaster);
+            forWarrior: warrior, forWarriorIsSpellcaster: isSpellcaster, excludedSkillIds: excludedSkillIds);
         if (skills.Count == 0) return;
 
         entry.SelectedSpell = null;

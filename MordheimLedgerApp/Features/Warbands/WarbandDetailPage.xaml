@@ -301,7 +301,7 @@
                 <!-- Un seul des deux boutons à la fois (voir Warband.GameInProgress/HasGameInProgress) -
                      "Lancer la partie" remplace "Fin de partie" tant qu'aucune partie n'est en cours,
                      demande explicite de l'utilisateur (2026-08-26) : "Start a game" -> "End of game". -->
-                <components:IconTextButton IsVisible="{Binding HasGameInProgress, Converter={StaticResource InverseBoolConverter}}"
+                <components:IconTextButton AutomationId="StartGameButton" IsVisible="{Binding HasGameInProgress, Converter={StaticResource InverseBoolConverter}}"
                                             Icon="{x:Static icons:SolidFont.Play}"
                                             Text="{loc:Loc StartGameButtonText}"
                                             TextColor="{DynamicResource AppAccent}"
@@ -310,7 +310,7 @@
                         <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailGameKey}"/>
                     </components:IconTextButton.Behaviors>
                 </components:IconTextButton>
-                <components:IconTextButton IsVisible="{Binding HasGameInProgress}"
+                <components:IconTextButton AutomationId="EndOfGameButton" IsVisible="{Binding HasGameInProgress}"
                                             Icon="{x:Static icons:SolidFont.FlagCheckered}"
                                             Text="{loc:Loc EndOfGameTitle}"
                                             TextColor="{DynamicResource AppAccent}"
@@ -373,7 +373,7 @@
                 <HorizontalStackLayout Spacing="16">
                     <components:TabToggleButton Text="{loc:Loc TabRoster}" Command="{Binding ShowRosterCommand}"
                                                  IsActive="{Binding ShowHistory, Converter={StaticResource InverseBoolConverter}}"/>
-                    <components:TabToggleButton Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
+                    <components:TabToggleButton AutomationId="HistoryTabButton" Text="{loc:Loc TabHistory}" Command="{Binding ShowHistoryTabCommand}"
                                                  IsActive="{Binding ShowHistory}"/>
                 </HorizontalStackLayout>
             </components:ScrollableTabStripView>

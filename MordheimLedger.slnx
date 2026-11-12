@@ -1,8 +1,9 @@
-<Solution>
+﻿<Solution>
   <Project Path="MordheimLedgerApp/MordheimLedgerApp.csproj">
     <Deploy />
   </Project>
   <Project Path="MordheimLedgerApp.Core/MordheimLedgerApp.Core.csproj" />
   <Project Path="MordheimLedgerApp.Tests/MordheimLedgerApp.Tests.csproj" />
+  <Project Path="MordheimLedgerApp.UITests/MordheimLedgerApp.UITests.csproj" />
   <Project Path="Tools/DbSeedGenerator/DbSeedGenerator.csproj" />
 </Solution>

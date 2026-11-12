@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Onboarding"
@@ -148,13 +148,13 @@
                             SelectedPalette="{Binding SelectedPalette, Mode=TwoWay}"/>
                     </VerticalStackLayout>
                     <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
-                        <Button Text="{loc:Loc OnboardingLoadSample}"
+                        <Button AutomationId="OnboardingLoadSampleButton" Text="{loc:Loc OnboardingLoadSample}"
                                 Command="{Binding LoadSampleCommand}"
                                 FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
                         <Label Text="{loc:Loc OnboardingLoadSampleDesc}" Style="{StaticResource StepBodyStyle}"
                                FontSize="{OnIdiom Default=13, Desktop=11}"/>
                     </VerticalStackLayout>
-                    <Button Text="{loc:Loc OnboardingStartEmpty}"
+                    <Button AutomationId="OnboardingStartEmptyButton" Text="{loc:Loc OnboardingStartEmpty}"
                             Command="{Binding StartEmptyCommand}"
                             Style="{StaticResource DialogSecondaryButtonStyle}"
                             FontSize="{DynamicResource AppFontSizeSectionTitle}"/>
@@ -208,7 +208,7 @@
                     </BoxView.Triggers>
                 </BoxView>
             </HorizontalStackLayout>
-            <Button Grid.Column="2" Text="{loc:Loc OnboardingNext}"
+            <Button AutomationId="OnboardingNextButton" Grid.Column="2" Text="{loc:Loc OnboardingNext}"
                     Command="{Binding NextCommand}" Style="{StaticResource StepNavButtonStyle}"
                     HorizontalOptions="End"
                     IsVisible="{Binding IsReadyStep, Converter={StaticResource InverseBoolConverter}}"/>

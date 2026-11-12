@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
@@ -85,7 +85,7 @@
                                                                     <components:DigitsOnlyBehavior/>
                                                                 </Entry.Behaviors>
                                                             </Entry>
-                                                            <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                            <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
                                                                                           Style="{StaticResource GhostIconButtonStyle}"
                                                                                           VerticalOptions="Center"
                                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollCommand}"
@@ -140,7 +140,7 @@
                                                         <components:DigitsOnlyBehavior/>
                                                     </Entry.Behaviors>
                                                 </Entry>
-                                                <components:FaIconButtonView Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
+                                                <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="2" Icon="{x:Static icons:SolidFont.Dice}"
                                                                               Style="{StaticResource GhostIconButtonStyle}"
                                                                               VerticalOptions="Center"
                                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:StartGameDialogViewModel}}, Path=AutoRollAidCommand}"
@@ -171,7 +171,7 @@
 
                 </VerticalStackLayout>
             </dialogs:AnimatedHeightScrollView>
-            <Button Grid.Row="2" Text="{loc:Loc StartGameConfirm}" Command="{Binding ConfirmCommand}"/>
+            <Button AutomationId="StartGameConfirmButton" Grid.Row="2" Text="{loc:Loc StartGameConfirm}" Command="{Binding ConfirmCommand}"/>
         </Grid>
     </Border>
 </dialogs:DialogContent>

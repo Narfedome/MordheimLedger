@@ -223,7 +223,7 @@
                                          Command="{Binding CreateCommand}"
                                          Tooltip="{loc:Loc BtnAdd}"
                                          IsVisible="{Binding AllowCreate}"/>
-            <components:FaIconButtonView Icon="{x:Static icons:SolidFont.CircleCheck}"
+            <components:FaIconButtonView AutomationId="PickerConfirmButton" Icon="{x:Static icons:SolidFont.CircleCheck}"
                                          Command="{Binding ConfirmSelectionCommand}"
                                          Tooltip="{loc:Loc LibConfirm}"
                                          IsEnabled="{Binding HasSelectedRows}"/>

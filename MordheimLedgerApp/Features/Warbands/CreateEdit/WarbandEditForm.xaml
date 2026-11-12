@@ -63,7 +63,7 @@
                                     </FormattedString>
                                 </Label.FormattedText>
                             </Label>
-                            <Entry Text="{Binding WarbandName}">
+                            <Entry AutomationId="WarbandNameEntry" Text="{Binding WarbandName}">
                                 <Entry.Behaviors>
                                     <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardNameKey}"/>
                                 </Entry.Behaviors>
@@ -89,7 +89,7 @@
                              ArchetypeRemoveCommandOrNull renvoient null si !IsWizardMode) - en changer
                              invaliderait les WarriorArchetypeId déjà liés aux guerriers recrutés. La puce reste
                              tapable (récap complet) dans les deux cas. -->
-                        <components:ChipItemView Item="{Binding Archetype}"
+                        <components:ChipItemView AutomationId="WarbandTypeChip" Item="{Binding Archetype}"
                                         HeaderText="{loc:Loc WarbandArchetype}"
                                         IconGlyph="{x:Static icons:SolidFont.Users}"
                                         Command="{Binding ShowArchetypeDetailCommand}"

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:MordheimLedgerApp.Features.Warbands.EndOfGame"
@@ -135,7 +135,7 @@
                                                 <components:DigitsOnlyBehavior/>
                                             </Entry.Behaviors>
                                         </Entry>
-                                        <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                        <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                                       Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubInjuryCommand}"
                                                                       CommandParameter="{Binding .}"
                                                                       Tooltip="{loc:Loc EndOfGameRoll}"/>
@@ -161,7 +161,7 @@
                                                     <components:DigitsOnlyBehavior/>
                                                 </Entry.Behaviors>
                                             </Entry>
-                                            <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
+                                            <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}" Style="{StaticResource GhostIconButtonStyle}"
                                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=AutoRollSubDeepWoundCommand}"
                                                                           CommandParameter="{Binding .}"
                                                                           Tooltip="{loc:Loc EndOfGameRoll}"/>

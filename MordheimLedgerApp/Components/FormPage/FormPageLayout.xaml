@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:icons="clr-namespace:MordheimLedgerApp.Resources.Icons"
@@ -64,11 +64,12 @@
         <Grid Grid.Row="4" RowDefinitions="Auto,Auto" BackgroundColor="{DynamicResource AppBackground}">
             <BoxView Grid.Row="0" Style="{StaticResource ChapterDividerStyle}"/>
             <Grid Grid.Row="1" x:Name="Footer" ColumnDefinitions="*,*" ColumnSpacing="10" Padding="16,10,16,12">
-                <Button Grid.Column="0" Style="{StaticResource DialogSecondaryButtonStyle}"
+                <!-- AutomationId : repères des tests de bout en bout (MordheimLedgerApp.UITests). -->
+                <Button Grid.Column="0" Style="{StaticResource DialogSecondaryButtonStyle}" AutomationId="FormSecondaryButton"
                         Text="{Binding Source={x:Reference root}, Path=SecondaryText}"
                         Command="{Binding Source={x:Reference root}, Path=SecondaryCommand}"
                         IsEnabled="{Binding Source={x:Reference root}, Path=SecondaryEnabled}"/>
-                <Button Grid.Column="1"
+                <Button Grid.Column="1" AutomationId="FormPrimaryButton"
                         Text="{Binding Source={x:Reference root}, Path=PrimaryText}"
                         Command="{Binding Source={x:Reference root}, Path=PrimaryCommand}"/>
             </Grid>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <dialogs:DialogContent xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:dialogs="clr-namespace:MordheimLedgerApp.Components.Dialogs"
@@ -38,7 +38,7 @@
                 <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="10">
                     <Entry Grid.Column="0" Text="{Binding SpellRoll}" Keyboard="Numeric"
                            Placeholder="{loc:Loc WarbandsSpellRollPh}" WidthRequest="70"/>
-                    <components:FaIconButtonView Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
+                    <components:FaIconButtonView AutomationId="AutoRollButton" Grid.Column="1" Icon="{x:Static icons:SolidFont.Dice}"
                                                   Command="{Binding AutoRollCommand}"
                                                   Tooltip="{loc:Loc EndOfGameRoll}"/>
                 </Grid>

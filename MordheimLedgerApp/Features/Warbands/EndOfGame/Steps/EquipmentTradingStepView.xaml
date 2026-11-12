@@ -27,7 +27,7 @@
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="6">
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingBuyHeading}" FontSize="12"
+                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingBuyHeading}" FontSize="12" VerticalOptions="Center"
                                    FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
                             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Plus}"
@@ -66,7 +66,7 @@
                 <Border Style="{StaticResource SectionCardBorderStyle}">
                     <VerticalStackLayout Spacing="6">
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellHeading}" FontSize="12"
+                            <Label Grid.Column="0" Text="{loc:Loc EndOfGameEquipmentTradingSellHeading}" FontSize="12" VerticalOptions="Center"
                                    FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
                             <components:FaIconButtonView Grid.Column="1" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Plus}"

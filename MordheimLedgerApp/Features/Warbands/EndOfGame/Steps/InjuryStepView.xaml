@@ -25,7 +25,7 @@
                                                   IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
                                                   IconFontFamily="RpgAwesome"
                                                   Command="{Binding ShowWarriorRecapCommand}"/>
-                            <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentInjuryWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                             <!-- Statut auto-géré : passe à Mort tout seul sur un résultat de mort (voir
                                  ApplyInjuryRoll), pas de saisie manuelle. Héros uniquement - un groupe
                                  perd des figurines (HeadCount) plutôt que de passer Mort d'un coup. -->

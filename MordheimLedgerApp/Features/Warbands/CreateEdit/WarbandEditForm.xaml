@@ -187,10 +187,11 @@
                                                         <Label Grid.Column="1" Text="{Binding Count, StringFormat='× {0}'}" FontSize="12"
                                                                TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                                                         <!-- Font Awesome n'a qu'un seul glyphe « split » (haut+gauche) - Rotation="-90"
-                                                             le tourne en « gauche+bas ». -->
+                                                             le tourne en « gauche+bas ». Marge négative : la zone tactile (44 points)
+                                                             n'agrandit pas l'en-tête, même hauteur que celui d'un Héros. -->
                                                         <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                                                       Icon="{x:Static icons:SolidFont.ArrowsSplitUpAndLeft}"
-                                                                                      Rotation="-90"
+                                                                                      Rotation="-90" Margin="0,-11"
                                                                                       Tooltip="{loc:Loc WarbandsSplitGroupTitle}"
                                                                                       IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                                                       IsVisible="{Binding CanSplit}"

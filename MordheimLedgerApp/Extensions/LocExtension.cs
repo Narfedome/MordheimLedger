@@ -9,16 +9,32 @@ namespace MordheimLedgerApp.Extensions
     {
         public string Key { get; set; } = string.Empty;
 
+        /// <summary>Espaces remplacées par des insécables : le libellé ne se coupe jamais en deux (ex.
+        /// « Valeur de Bande » suivi de sa valeur dans une ligne qui passe à la ligne).</summary>
+        public bool NoBreak { get; set; }
+
         public BindingBase ProvideValue(IServiceProvider serviceProvider)
             => new Binding
             {
                 Mode = BindingMode.OneWay,
                 Path = nameof(LocalizedString.Value),
-                Source = new LocalizedString(Key)
+                Source = new LocalizedString(Key),
+                Converter = NoBreak ? NoBreakSpaceConverter.Instance : null
             };
 
         object IMarkupExtension.ProvideValue(IServiceProvider serviceProvider)
             => ProvideValue(serviceProvider);
+    }
+
+    internal sealed class NoBreakSpaceConverter : IValueConverter
+    {
+        public static readonly NoBreakSpaceConverter Instance = new();
+
+        public object? Convert(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
+            => (value as string)?.Replace(' ', ' ');
+
+        public object? ConvertBack(object? value, Type targetType, object? parameter, System.Globalization.CultureInfo culture)
+            => throw new NotSupportedException();
     }
 
     public class LocalizedString : INotifyPropertyChanged

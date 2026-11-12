@@ -15,12 +15,25 @@
                 <!-- Badge ⌄ "encore du contenu plus bas" - piloté par VerticalScrollHint (visible seulement
                      tant qu'on n'est pas en fin de course). AngleDown plutôt que ChevronDown (déjà l'icône
                      des sections repliables - un glyphe = un concept). -->
-                <Border x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
-                        BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
-                        StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,4">
-                    <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
-                           TextColor="{DynamicResource AppAccent}"/>
-                </Border>
+                <!-- Fondu du fond sous le badge : le texte qui passe dessous s'efface au lieu d'être coupé par le
+                     badge (« Ave⌄lers », recette du 2026-11-12). Le fondu laisse passer les doigts, le badge garde son tap. -->
+                <Grid VerticalOptions="End" InputTransparent="True" CascadeInputTransparent="False">
+                    <Border x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
+                            BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,4">
+                        <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
+                               TextColor="{DynamicResource AppAccent}"/>
+                    </Border>
+                    <BoxView HeightRequest="56" VerticalOptions="End" InputTransparent="True" ZIndex="-1"
+                             IsVisible="{Binding Source={x:Reference DownHint}, Path=IsVisible}">
+                        <BoxView.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Offset="0" Color="Transparent"/>
+                                <GradientStop Offset="1" Color="{DynamicResource AppSurface}"/>
+                            </LinearGradientBrush>
+                        </BoxView.Background>
+                    </BoxView>
+                </Grid>
             </Grid>
         </ControlTemplate>
     </ContentView.ControlTemplate>

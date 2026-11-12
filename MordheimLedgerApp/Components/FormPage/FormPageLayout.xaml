@@ -46,12 +46,25 @@
 
         <!-- Badge ⌄ « encore du contenu plus bas » (VerticalScrollHint) - la barre de défilement native est à
              peine visible sur mobile. -->
-        <Border Grid.Row="3" x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
-                BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
-                StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,6">
-            <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
-                   TextColor="{DynamicResource AppAccent}"/>
-        </Border>
+        <!-- Fondu du fond sous le badge : le texte qui passe dessous s'efface au lieu d'être coupé par le
+             badge (« Ave⌄lers », recette du 2026-11-12). Le fondu laisse passer les doigts, le badge garde son tap. -->
+        <Grid Grid.Row="3" VerticalOptions="End" InputTransparent="True" CascadeInputTransparent="False">
+            <Border x:Name="DownHint" IsVisible="False" HorizontalOptions="Center" VerticalOptions="End"
+                    BackgroundColor="{DynamicResource AppSurface}" Stroke="{DynamicResource AppBorder}" StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10" Padding="10,0" Margin="0,0,0,6">
+                <Label Text="{x:Static icons:SolidFont.AngleDown}" FontFamily="FontSolid" FontSize="16"
+                       TextColor="{DynamicResource AppAccent}"/>
+            </Border>
+            <BoxView HeightRequest="56" VerticalOptions="End" InputTransparent="True" ZIndex="-1"
+                             IsVisible="{Binding Source={x:Reference DownHint}, Path=IsVisible}">
+                <BoxView.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Offset="0" Color="Transparent"/>
+                        <GradientStop Offset="1" Color="{DynamicResource AppBackground}"/>
+                    </LinearGradientBrush>
+                </BoxView.Background>
+            </BoxView>
+        </Grid>
 
         <!-- Voile de chargement par-dessus le contenu (chargement initial, changement d'étape) : absorbe les
              taps pendant la transition. -->

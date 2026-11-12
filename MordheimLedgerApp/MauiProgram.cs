@@ -118,6 +118,19 @@ namespace MordheimLedgerApp
                     });
                 })
 #endif
+#if ANDROID
+                // Soulignement et curseur des champs : Android les teinte avec l'accent du thème natif
+                // (colorAccent, bleu ciel dans colors.xml), hors palette. Teintés ici avec l'accent de la
+                // palette quand le champ a le focus, la couleur du texte sinon. colors.xml n'est pas modifié :
+                // son accent ressort aussi dans les listes natives (voir SelectionMode="None" partout).
+                .ConfigureMauiHandlers(handlers =>
+                {
+                    // Après le mapping Background de MAUI : il recrée le fond (calque de couleur + soulignement
+                    // natif) à chaque changement de BackgroundColor, ce qui effacerait la teinte.
+                    Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => TintTextField(handler.PlatformView));
+                    Microsoft.Maui.Handlers.EditorHandler.Mapper.AppendToMapping(nameof(IView.Background), (handler, _) => TintTextField(handler.PlatformView));
+                })
+#endif
                 ;
 
             // officialSeed : synchro du contenu officiel au lancement dès que les JSON embarqués (empreinte,
@@ -224,5 +237,32 @@ namespace MordheimLedgerApp
             using var destination = File.Create(dbPath);
             source.CopyTo(destination);
         }
+
+#if ANDROID
+        private static void TintTextField(Android.Widget.EditText field)
+        {
+            var accent = Services.ThemeService.Instance.CurrentAccent;
+            var rest = Application.Current?.Resources.TryGetValue("AppText", out var text) == true && text is Color c ? c : accent;
+            var accentNative = Microsoft.Maui.Platform.ColorExtensions.ToPlatform(accent);
+            var tint = new Android.Content.Res.ColorStateList(
+                [[Android.Resource.Attribute.StateFocused], []],
+                [accentNative, Microsoft.Maui.Platform.ColorExtensions.ToPlatform(rest)]);
+
+            // MAUI pose BackgroundColor (Transparent, voir le style Entry) en calque de couleur par-dessus le
+            // soulignement natif : teinter tout le fond remplirait le champ. Seuls les calques qui ne sont pas
+            // une couleur unie (le soulignement) reçoivent la teinte.
+            if (field.Background is Android.Graphics.Drawables.LayerDrawable layers)
+            {
+                for (var i = 0; i < layers.NumberOfLayers; i++)
+                    if (layers.GetDrawable(i) is { } layer and not Android.Graphics.Drawables.ColorDrawable)
+                        layer.SetTintList(tint);
+            }
+            else if (field.Background is not Android.Graphics.Drawables.ColorDrawable)
+                field.Background?.SetTintList(tint);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(29))
+                field.TextCursorDrawable?.SetTint(accentNative);
+        }
+#endif
     }
 }

@@ -29,7 +29,7 @@
                                                   IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
                                                   IconFontFamily="RpgAwesome"
                                                   Command="{Binding ShowWarriorRecapCommand}"/>
-                            <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                            <Label Grid.Column="1" Text="{Binding CurrentAdvanceWarrior.ArchetypeName}" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                         </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding CurrentAdvanceRolls}" Spacing="10">
                             <BindableLayout.ItemTemplate>

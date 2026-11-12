@@ -33,7 +33,7 @@
                                                               IconGlyph="{x:Static icons:RpgFont.RaKnightHelmet}"
                                                               IconFontFamily="RpgAwesome"
                                                               Command="{Binding Source={RelativeSource AncestorType={x:Type local:EndOfGamePageViewModel}}, Path=ShowWarriorRecapCommand}"/>
-                                        <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Label Grid.Column="1" Text="{Binding ArchetypeName}" TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                                     </Grid>
                                     <!-- Steppeur −/+ plutôt qu'une saisie clavier (retour utilisateur 2026-09-25,
                                          même contrôle que la répartition d'Exploration), champ texte gardé au centre pour saisir directement. -->

@@ -22,7 +22,8 @@ public sealed class AppSession : IDisposable
 
     public AndroidDriver Driver { get; }
 
-    public AppSession()
+    /// <param name="clearData">false : garde les données déjà déposées sur l'appareil (captures des stores).</param>
+    public AppSession(bool clearData = true)
     {
         EnsureServer();
         var options = new AppiumOptions
@@ -33,7 +34,7 @@ public sealed class AppSession : IDisposable
         };
         options.AddAdditionalAppiumOption("appPackage", Package);
         options.AddAdditionalAppiumOption("appActivity", Activity);
-        options.AddAdditionalAppiumOption("noReset", false); // données effacées : appli comme neuve
+        options.AddAdditionalAppiumOption("noReset", !clearData); // données effacées : appli comme neuve
         options.AddAdditionalAppiumOption("optionalIntentArguments", "--ez mordheim_e2e true");
         options.AddAdditionalAppiumOption("newCommandTimeout", 300);
         options.AddAdditionalAppiumOption("appWaitDuration", 60000);

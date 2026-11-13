@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MordheimLedgerApp.Features.Library.WarbandArchetypes.WarbandArchetypeView"
@@ -61,10 +61,12 @@
                 <components:LoadMoreOnScrollBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
-                <!-- Espacement vertical en marge basse de la tuile, pas dans la grille : sur Android l'espacement
-                     se calcule par position, en-tête de groupe compris, et décalait la 3e tuile de la première
-                     ligne (même réglage sur toutes les grilles groupées). -->
-                <GridItemsLayout Span="3" VerticalItemSpacing="0" HorizontalItemSpacing="5" Orientation="Vertical"/>
+                <!-- Android : espacement vertical en marge basse de la tuile, pas dans la grille - l'espacement s'y
+                     calcule par position, en-tête de groupe compris, et décalait la 3e tuile de la première ligne.
+                     Windows garde l'espacement de la grille : la marge basse n'y est pas réservée dans la cellule,
+                     les lignes se touchaient et les bordures se faisaient rogner selon la largeur de la fenêtre
+                     (vérifié de 560 à 1000 px). Même réglage sur toutes les grilles groupées. -->
+                <GridItemsLayout Span="3" VerticalItemSpacing="{OnPlatform Default=5, Android=0}" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
@@ -82,7 +84,7 @@
                      neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
                      empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
                      le DataTrigger sur IsSelected. -->
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="0,0,0,5">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="{OnPlatform Default='0', Android='0,0,0,5'}">
                         <Border.Behaviors>
                             <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.CodexTileKey}"/>
                         </Border.Behaviors>

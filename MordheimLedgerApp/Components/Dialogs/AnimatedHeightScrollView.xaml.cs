@@ -19,6 +19,11 @@ public partial class AnimatedHeightScrollView : ContentView
     private bool _hasMeasured;
     private bool _updatePending;
 
+    /// <summary>Part du plafond commun (DialogSizing.MaxContentHeight) que cette zone peut prendre : à baisser
+    /// pour un dialog dont le pied est plus haut que d'habitude (WhatsNewDialog : lien + bouton), sinon titre +
+    /// liste + pied dépassent l'écran et la liste passe sous le pied.</summary>
+    public double MaxHeightFactor { get; set; } = 1;
+
     public AnimatedHeightScrollView()
     {
         InitializeComponent();
@@ -73,7 +78,7 @@ public partial class AnimatedHeightScrollView : ContentView
         var desired = content.Measure(content.Width, double.PositiveInfinity).Height;
         if (desired <= 0) return;
 
-        var target = Math.Min(desired, DialogSizing.MaxContentHeight());
+        var target = Math.Min(desired, DialogSizing.MaxContentHeight() * MaxHeightFactor);
         // Sous le demi-pixel : arrondis de mesure, pas un vrai changement - évite de relancer une
         // animation pour rien.
         if (_hasMeasured && Math.Abs(target - _targetHeight) < 0.5) return;

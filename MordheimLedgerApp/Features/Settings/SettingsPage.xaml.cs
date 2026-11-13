@@ -21,4 +21,11 @@ public partial class SettingsPage : ContentPage
             ContentStack.MaximumWidthRequest = 560;
         }
     }
+
+    // Nouveautés relues à chaque affichage : suit un changement de langue fait sur cet écran.
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await ((SettingsViewModel)BindingContext).LoadWhatsNewAsync();
+    }
 }

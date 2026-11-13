@@ -29,7 +29,6 @@ namespace MordheimLedgerApp.Components.Dialogs
         /// <summary>L'action détruit quelque chose (supprimer, abandonner une saisie) : bouton principal en
         /// rouge (refonte de novembre 2026).</summary>
         public bool IsDestructive { get; }
-        public int ConfirmButtonColumnSpan => HasCancel ? 1 : 2;
 
         public ConfirmDialogViewModel(string title, string message, string confirmLabel, string? cancelLabel, bool isDestructive = false)
         {

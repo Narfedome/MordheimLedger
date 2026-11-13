@@ -43,6 +43,17 @@
     traite le MSIX envoye qu'a la validation (commit), donc le brouillon affiche encore l'ancien
     paquet - le supprimer ensuite plutot que l'envoyer depuis Partner Center.
 
+.PARAMETER Screenshots
+    Refait d'abord les captures du site et des stores (StoreListing\Capture-Screenshots.ps1 : emulateur
+    demarre, Appium, Mordheim Ledger ferme sur ce PC, ~5 min de plus). Le site et les fiches les prennent
+    dans git : si une capture a change, la release s'arrete avant de construire quoi que ce soit, pour
+    les faire passer par une PR (le commit change aussi le numero de version), puis la relancer. Si rien
+    n'a change, la release continue normalement. L'envoi des images aux stores reste manuel.
+
+.EXAMPLE
+    .\Build-Release.ps1 -Screenshots
+    Verifie que les captures sont a jour avant de publier.
+
 .EXAMPLE
     .\Build-Release.ps1
     Genere l'installeur Windows ET l'AAB Android, publie une GitHub Release et redeploie le site.
@@ -56,7 +67,8 @@
 param(
     [switch]$SkipWindows,
     [switch]$SkipAndroid,
-    [switch]$StoreDraft
+    [switch]$StoreDraft,
+    [switch]$Screenshots
 )
 
 $ErrorActionPreference = "Stop"
@@ -93,6 +105,21 @@ try {
     $localConfigPath = Join-Path $releaseDir "Build-Release.local.ps1"
     if (Test-Path $localConfigPath) {
         . $localConfigPath
+    }
+
+    # --- Captures du site et des stores (-Screenshots) : avant tout build et avant le calcul de la
+    #     version, car des captures modifiees doivent d'abord etre commitees (PR), ce qui change le
+    #     nombre de commits donc la version. ---
+    if ($Screenshots) {
+        Write-Host "`n=== Captures du site et des stores ===" -ForegroundColor Cyan
+        & (Join-Path $releaseDir "StoreListing\Capture-Screenshots.ps1") -NoPause
+        if ($LASTEXITCODE -ne 0) { throw "Capture-Screenshots.ps1 a echoue (code $LASTEXITCODE)." }
+        $changedShots = @(git -C $repoRoot status --porcelain -- "Website/assets/screenshots" "Deploy/StoreListing/windows-screenshots" "Deploy/StoreListing/output")
+        if ($changedShots.Count -gt 0) {
+            $changedShots | ForEach-Object { Write-Host "  $_" }
+            throw "captures mises a jour ($($changedShots.Count) fichiers) : les commiter par une PR, puis relancer la release. Rien n'a ete construit ni publie."
+        }
+        Write-Host "Captures deja a jour." -ForegroundColor Green
     }
 
     # --- Version : major.minor du csproj + patch = nombre de commits git (identique a la cible

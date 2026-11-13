@@ -18,6 +18,11 @@ namespace MordheimLedgerApp.WinUI
         {
             this.InitializeComponent();
 
+            // Captures du Microsoft Store (Deploy/StoreListing/Capture-WindowsScreenshots.ps1) : argument
+            // « --mordheim-e2e », pendant Windows de l'extra d'Intent Android, voir Services.E2EMode.
+            if (Environment.GetCommandLineArgs().Contains("--" + MordheimLedgerApp.Services.E2EMode.IntentExtra.Replace('_', '-')))
+                MordheimLedgerApp.Services.E2EMode.IsEnabled = true;
+
             // Diagnostic du crash natif intermittent au sélecteur de règles spéciales (voir
             // Services/CrashLogger) - spécifique WinUI : capte les exceptions du dispatcher UI qui
             // échappent à AppDomain.UnhandledException/au débogueur managé. e.Handled=true pour ne PAS

@@ -125,6 +125,25 @@
                                 MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
                                 MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
                     </Grid>
+
+                    <!-- Nouveautés de la version installée, à relire après le dialog du lancement (masqué si le
+                         changelog n'a pas de section pour cette version). -->
+                    <BoxView HeightRequest="1" Color="{DynamicResource AppBorder}" IsVisible="{Binding HasWhatsNew}"/>
+
+                    <Grid ColumnDefinitions="*,auto" IsVisible="{Binding HasWhatsNew}">
+                        <Label Grid.Column="0" Text="{Binding WhatsNewDescription}"
+                               VerticalOptions="Center" FontSize="{OnIdiom Default=13, Desktop=11}"
+                               TextColor="{DynamicResource AppTextMuted}"/>
+                        <Button Grid.Column="1"
+                                Text="{loc:Loc SettingsWhatsNewButton}"
+                                Command="{Binding ShowWhatsNewCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource AppAccent}"
+                                FontSize="{OnIdiom Default=15, Desktop=13}"
+                                Padding="8,4"
+                                MinimumHeightRequest="{DynamicResource AppInlineButtonMinSize}"
+                                MinimumWidthRequest="{DynamicResource AppInlineButtonMinSize}"/>
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 

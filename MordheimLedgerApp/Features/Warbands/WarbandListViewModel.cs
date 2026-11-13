@@ -85,6 +85,11 @@ public partial class WarbandListViewModel : BaseViewModel
         // officiel faite pendant le démarrage.
         if (await _officialContent.TakeStartupMessageAsync() is { } message)
             await ShowInfoAsync(Loc["OfficialContentTitle"], message);
+
+        // Puis, une seule fois par version, ses nouveautés (jamais à la première installation : l'accueil
+        // marque la version comme vue).
+        if (await WhatsNewService.TakePendingItemsAsync() is { Count: > 0 } news)
+            await ShowWhatsNewAsync(news);
     }
 
     private int _loadedDataVersion = -1;

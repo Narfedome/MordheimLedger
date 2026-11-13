@@ -44,7 +44,7 @@
 
 		<!-- Versions — patch auto-incremented via git at build time, major/minor set by hand -->
 		<AppVersionMajor>1</AppVersionMajor>
-		<AppVersionMinor>4</AppVersionMinor>
+		<AppVersionMinor>5</AppVersionMinor>
 		<ApplicationDisplayVersion>$(AppVersionMajor).$(AppVersionMinor).0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
@@ -80,6 +80,10 @@
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+		<!-- Changelog du site embarqué tel quel : l'appli en montre la section de sa version après une mise à jour
+		     (WhatsNewService) - même texte que les notes Google Play de Build-Release.ps1. -->
+		<MauiAsset Include="..\Website\changelog.html" LogicalName="changelog/fr.html" Link="Resources\Raw\changelog\fr.html" />
+		<MauiAsset Include="..\Website\en\changelog.html" LogicalName="changelog/en.html" Link="Resources\Raw\changelog\en.html" />
 	</ItemGroup>
 
 	<ItemGroup>

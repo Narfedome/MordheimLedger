@@ -152,6 +152,24 @@ namespace MordheimLedgerApp.Features.Settings
 
         // Nouvelle instance de l'accueil (Transient) : repart de la première étape. Son dernier bouton
         // ramène sur l'AppShell (singleton), resté tel quel entre-temps.
+        /// <summary>Puces de la version installée (Découvrir › Nouveautés), chargées à l'ouverture des Paramètres.</summary>
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasWhatsNew))]
+        private IReadOnlyList<string> whatsNewItems = [];
+
+        public bool HasWhatsNew => WhatsNewItems.Count > 0;
+
+        public string WhatsNewDescription => string.Format(Loc["SettingsWhatsNewDesc"], WhatsNewService.CurrentVersion);
+
+        public async Task LoadWhatsNewAsync()
+        {
+            WhatsNewItems = await WhatsNewService.LoadCurrentItemsAsync();
+            OnPropertyChanged(nameof(WhatsNewDescription));
+        }
+
+        [RelayCommand]
+        public Task ShowWhatsNew() => ShowWhatsNewAsync(WhatsNewItems);
+
         [RelayCommand]
         public void ReplayWelcome() =>
             Application.Current!.Windows[0].Page = IPlatformApplication.Current!.Services.GetRequiredService<OnboardingPage>();

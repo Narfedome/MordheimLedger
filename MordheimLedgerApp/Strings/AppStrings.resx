@@ -3127,4 +3127,19 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
   <data name="InventoryNotEnoughMessage" xml:space="preserve">
     <value>Il faut {0} × {1} pour équiper {2} (un par modèle) : {3} dans l'inventaire.</value>
   </data>
+  <data name="WhatsNewTitle" xml:space="preserve">
+    <value>Nouveautés</value>
+  </data>
+  <data name="WhatsNewVersion" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="WhatsNewAllVersions" xml:space="preserve">
+    <value>Toutes les versions</value>
+  </data>
+  <data name="SettingsWhatsNewDesc" xml:space="preserve">
+    <value>Nouveautés de la {0}</value>
+  </data>
+  <data name="SettingsWhatsNewButton" xml:space="preserve">
+    <value>Voir</value>
+  </data>
 </root>

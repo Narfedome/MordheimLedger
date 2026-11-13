@@ -3127,4 +3127,19 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
   <data name="InventoryNotEnoughMessage" xml:space="preserve">
     <value>{2} needs {0} × {1} (one per model): {3} in the stash.</value>
   </data>
+  <data name="WhatsNewTitle" xml:space="preserve">
+    <value>What's new</value>
+  </data>
+  <data name="WhatsNewVersion" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="WhatsNewAllVersions" xml:space="preserve">
+    <value>All versions</value>
+  </data>
+  <data name="SettingsWhatsNewDesc" xml:space="preserve">
+    <value>What's new in {0}</value>
+  </data>
+  <data name="SettingsWhatsNewButton" xml:space="preserve">
+    <value>View</value>
+  </data>
 </root>

@@ -51,6 +51,10 @@ public abstract partial class BaseViewModel : ObservableObject
         return ShowDialogAsync(popup);
     }
 
+    /// <summary>Nouveautés de la version installée (puces du changelog, voir WhatsNewService).</summary>
+    protected Task ShowWhatsNewAsync(IReadOnlyList<string> items) =>
+        ShowDialogAsync(new WhatsNewDialog(new WhatsNewDialogViewModel(WhatsNewService.CurrentVersion ?? string.Empty, items)));
+
     protected async Task<string?> ShowPromptAsync(string title, string message, string placeholder = "", string initialValue = "")
     {
         var popup = new PromptDialog(new PromptDialogViewModel(title, message, placeholder, initialValue, Loc["DialogYes"], Loc["DialogNo"]));

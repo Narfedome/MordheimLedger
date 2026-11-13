@@ -116,6 +116,8 @@ namespace MordheimLedgerApp.Features.Onboarding
         private async Task FinishAsync()
         {
             Preferences.Default.Set("has_launched", true);
+            // Première installation : la version installée n'a rien de « nouveau » à annoncer.
+            WhatsNewService.MarkSeen();
             Application.Current!.Windows[0].Page = _shell;
 
             // Accueil revu depuis les Réglages : l'AppShell reprend sur l'onglet Réglages, alors que la

@@ -30,7 +30,7 @@
                         <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.DetailCardKey}"/>
                     </Border.Behaviors>
                     <VerticalStackLayout Spacing="2">
-                        <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10" VerticalOptions="Start"  >
+                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" VerticalOptions="Start">
                             <!-- Miniature de la figurine (Warrior.PhotoPath, voir WarriorRow.PhotoSource) -
                                  silhouette grisée tant qu'il n'y a pas de photo. Tap : photo en grand, ou fiche
                                  guerrier pour en ajouter une (WarbandDetailViewModel.ShowWarriorPhoto). -->
@@ -64,6 +64,10 @@
                                         </FormattedString>
                                     </Label.FormattedText>
                                 </Label>
+                                <!-- Rôle sous le nom, pas dans une colonne à droite : la colonne du rôle prenait la
+                                     largeur dont le nom avait besoin, qui passait sur deux lignes (recette du
+                                     2026-11-12). -->
+                                <Label Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12"/>
                                 <!-- Pense-bête visuel seulement (voir WarriorRow.IsSick) - masqué tant
                                      qu'il est Actif, s'efface tout seul à la fin de partie suivante,
                                      rien à cliquer ici (contrairement à un ChipView catalogue). -->
@@ -73,18 +77,17 @@
                                            TextColor="{DynamicResource AppDanger}"/>
                                 </Border>
                             </VerticalStackLayout>
-                            <Label Grid.Column="2" Text="{Binding RoleName}" TextColor="{DynamicResource AppAccent}" FontSize="12" VerticalOptions="Center"/>
                             <!-- Groupe d'Hommes de main (WarriorRow.CanManageGroup) : retirer une ou plusieurs
                                  figurines perdues sans supprimer le groupe. Diviser un groupe se fait dans le
                                  formulaire de la bande (WarbandEditDialog), pas ici. -->
-                            <components:FaIconButtonView Grid.Column="3" Style="{StaticResource GhostIconButtonStyle}"
+                            <components:FaIconButtonView Grid.Column="2" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.UserMinus}"
                                                           Tooltip="{loc:Loc WarbandsRemoveFiguresTitle}"
                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                           IsVisible="{Binding CanManageGroup}"
                                                           Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandDetailViewModel}}, Path=RemoveHenchmanFiguresCommand}"
                                                           CommandParameter="{Binding .}"/>
-                            <components:FaIconButtonView Grid.Column="4" Style="{StaticResource GhostIconButtonStyle}"
+                            <components:FaIconButtonView Grid.Column="3" Style="{StaticResource GhostIconButtonStyle}"
                                                           Icon="{x:Static icons:SolidFont.Pen}"
                                                           IconSize="12" ButtonWidthRequest="22" ButtonHeightRequest="22"
                                                           IsVisible="{Binding IsEditable}"
@@ -281,7 +284,9 @@
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" x:Name="Header" ColumnDefinitions="*,Auto">
             <header:DetailPageHeaderView Grid.Column="0" Title="{Binding Warband.Name}" BackCommand="{Binding BackCommand}"/>
-            <HorizontalStackLayout Grid.Column="1" Spacing="16" Margin="0,0,16,0"
+            <!-- Centrés, pas étirés : un bouton étiré à la hauteur de la barre agrandissait d'autant le
+                 projecteur de la visite guidée (« Lancer la partie »). -->
+            <HorizontalStackLayout Grid.Column="1" Spacing="16" Margin="0,0,16,0" VerticalOptions="Center"
                                     IsVisible="{Binding Loading.IsLoading, Converter={StaticResource InverseBoolConverter}}">
                 <!-- Masqué entièrement si vide, comme l'était l'ancienne section dépliable du roster
                      (voir Models.WarbandEquipment) - rien à réattribuer tant qu'aucun objet n'a été
@@ -333,17 +338,19 @@
                 </Label.Behaviors>
                 <Label.FormattedText>
                     <FormattedString>
-                        <Span Text="{loc:Loc WarbandsTreasuryLabel}"/>
+                        <!-- Insécables (NoBreak, &#160;) dans chaque morceau : la ligne ne se coupe qu'aux
+                             « · », jamais entre un libellé et sa valeur (« 63 » seul sur sa ligne). -->
+                        <Span Text="{loc:Loc Key=WarbandsTreasuryLabel, NoBreak=True}"/>
                         <!-- Espace dans son propre Span : une espace finale dans StringFormat est perdue ("138CO"). -->
-                        <Span Text="{Binding Warband.Treasury, StringFormat=' {0}'}"/>
-                        <Span Text=" "/>
+                        <Span Text="{Binding Warband.Treasury, StringFormat='&#160;{0}'}"/>
+                        <Span Text="&#160;"/>
                         <Span Text="{loc:Loc LibGoldCrownsAbbr}"/>
                         <Span Text=" · "/>
-                        <Span Text="{loc:Loc WarbandsWyrdstoneLabel}"/>
-                        <Span Text="{Binding Warband.WyrdstoneShards, StringFormat=' {0}'}"/>
+                        <Span Text="{loc:Loc Key=WarbandsWyrdstoneLabel, NoBreak=True}"/>
+                        <Span Text="{Binding Warband.WyrdstoneShards, StringFormat='&#160;{0}'}"/>
                         <Span Text=" · "/>
-                        <Span Text="{loc:Loc WarbandRatingPh}"/>
-                        <Span Text="{Binding Rating, StringFormat=' {0}'}"/>
+                        <Span Text="{loc:Loc Key=WarbandRatingPh, NoBreak=True}"/>
+                        <Span Text="{Binding Rating, StringFormat='&#160;{0}'}"/>
                     </FormattedString>
                 </Label.FormattedText>
             </Label>

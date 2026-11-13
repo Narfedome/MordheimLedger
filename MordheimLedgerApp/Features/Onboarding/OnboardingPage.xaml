@@ -25,7 +25,9 @@
                 <Setter Property="FontSize" Value="{OnIdiom Default=15, Desktop=13}"/>
                 <Setter Property="TextColor" Value="{DynamicResource AppTextMuted}"/>
                 <Setter Property="HorizontalTextAlignment" Value="Center"/>
-                <Setter Property="LineHeight" Value="1.5"/>
+                <!-- Android multiplie la hauteur de ligne de la police, déjà large (≈ 1,36) : 1,5 y donnait presque un
+                     double interligne. Windows applique le facteur à la taille du texte. -->
+                <Setter Property="LineHeight" Value="{OnPlatform Default=1.5, Android=1.15}"/>
             </Style>
 
             <!-- Illustrations composées d'icônes de la police (pas d'images) : suivent la palette

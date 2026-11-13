@@ -151,7 +151,13 @@ namespace MordheimLedgerApp.Services
             if (hasTiles)
             {
                 builder.AddStep(Step(CodexTileKey, "TourCodexTileTitle", "TourCodexTileBody"))
-                    .AddStep(Step(CodexTileInfoKey, "TourCodexTileInfoTitle", "TourCodexTileInfoBody"));
+                    .AddStep(Step(CodexTileInfoKey, "TourCodexTileInfoTitle", "TourCodexTileInfoBody") with
+                    {
+                        // Cercle serré sur l'icône : la zone tactile du bouton (44 points) débordait sur l'image
+                        // de la tuile.
+                        Shape = OnboardingSpotlightShape.Circle,
+                        SpotlightPadding = -6
+                    });
             }
 
             return StartAsync(builder

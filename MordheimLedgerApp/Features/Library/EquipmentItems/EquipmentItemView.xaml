@@ -48,7 +48,7 @@
                 <components:LoadMoreOnScrollBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="3" VerticalItemSpacing="5" HorizontalItemSpacing="5" Orientation="Vertical"/>
+                <GridItemsLayout Span="3" VerticalItemSpacing="0" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
@@ -82,7 +82,7 @@
                   neutraliser le VSM du style partagé (prioritaire sur un Trigger en MAUI, ce qui
                   empêchait tout affichage du liseré), Border.Triggers (pas Style.Triggers) pour
                   le DataTrigger sur IsSelected. -->
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="0,0,0,5">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>

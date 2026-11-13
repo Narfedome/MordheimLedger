@@ -17,7 +17,8 @@
         <Grid x:Name="HeaderGrid" ColumnDefinitions="*,Auto">
 
 
-            <Label FontSize="{Binding HeaderFontSize}" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}">
+            <!-- Centré sur la hauteur du « + » (44 points) au lieu d'être écrit en haut de la ligne. -->
+            <Label FontSize="{Binding HeaderFontSize}" TextColor="{DynamicResource AppTextMuted}" IsVisible="{Binding IsMandatory}" VerticalOptions="Center">
                 <Label.FormattedText>
                     <FormattedString>
                         <Span Text="{Binding HeaderText}"/>

@@ -52,7 +52,7 @@
                 <components:LoadMoreOnScrollBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="3" VerticalItemSpacing="0" HorizontalItemSpacing="5" Orientation="Vertical"/>
+                <GridItemsLayout Span="3" VerticalItemSpacing="{OnPlatform Default=5, Android=0}" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <!-- Toujours groupé en interne (cf. SpellViewModel.ShowGroupHeaders) : seul l'en-tête est
               masqué hors du filtre "Toutes les écoles", où il serait redondant avec le bouton de
@@ -66,7 +66,7 @@
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:SpellRow">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="0,0,0,5">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="{OnPlatform Default='0', Android='0,0,0,5'}">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>

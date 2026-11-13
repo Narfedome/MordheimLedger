@@ -48,7 +48,7 @@
                 <components:LoadMoreOnScrollBehavior/>
             </CollectionView.Behaviors>
             <CollectionView.ItemsLayout>
-                <GridItemsLayout Span="3" VerticalItemSpacing="0" HorizontalItemSpacing="5" Orientation="Vertical"/>
+                <GridItemsLayout Span="3" VerticalItemSpacing="{OnPlatform Default=5, Android=0}" HorizontalItemSpacing="5" Orientation="Vertical"/>
             </CollectionView.ItemsLayout>
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate>
@@ -59,7 +59,7 @@
             </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="local:MutationRow">
-                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="0,0,0,5">
+                    <Border Style="{StaticResource SelectableGridItemBorderStyle}" Stroke="Grey" Margin="{OnPlatform Default='0', Android='0,0,0,5'}">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroupList/>
                         </VisualStateManager.VisualStateGroups>

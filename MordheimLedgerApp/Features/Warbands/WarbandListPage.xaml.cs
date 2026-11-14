@@ -8,7 +8,6 @@ public partial class WarbandListPage : ContentPage
 {
     private readonly WarbandListViewModel _vm;
     private readonly AppTourService _tourService;
-    private bool _initialized;
 
     public WarbandListPage(WarbandListViewModel viewModel, AppTourService tourService)
     {

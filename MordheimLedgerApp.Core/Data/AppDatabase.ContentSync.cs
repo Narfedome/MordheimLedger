@@ -384,7 +384,7 @@ public partial class AppDatabase
 
     /// <summary>Tout le catalogue d'une base, en mémoire (quelques milliers de lignes) : lignes par table,
     /// traductions, jointures.</summary>
-    private sealed class ContentSnapshot
+    internal sealed class ContentSnapshot
     {
         public Dictionary<Type, TableMapping> Mappings { get; } = new();
         public Dictionary<Type, Dictionary<int, object>> Rows { get; } = new();

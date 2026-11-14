@@ -974,6 +974,43 @@ public class RulesTests
         Assert.Equal(22 + 6, WarbandRatingRules.WarriorContribution(isLargeCreature: false, experience: 6, headCount: 1, hiredSwordBaseRating: 22));
     }
 
+    // --- PairDebtRules (« Où est l'Argent ? ») ----------------------------------------------------
+
+    [Theory]
+    [InlineData(0, 100, PairDebtSettlement.None)]
+    [InlineData(50, 60, PairDebtSettlement.SeizeEquipment)]
+    [InlineData(50, 50, PairDebtSettlement.SeizeEquipment)]
+    [InlineData(50, 49, PairDebtSettlement.Duel)]
+    [InlineData(50, 0, PairDebtSettlement.Duel)]
+    public void PairDebt_Settle_ReserveCoversTheDebtOrItIsADuel(int due, int reserveValue, PairDebtSettlement expected) =>
+        Assert.Equal(expected, PairDebtRules.Settle(due, reserveValue));
+
+    [Fact]
+    public void PairDebt_Seizure_TakesTheMostValuableFirst_AndStopsOnceCovered()
+    {
+        // Rançon de 50 CO : l'Épée en Gromril (60) suffit, les trois épées à 10 CO restent.
+        var reserve = new[] { ("Épée", 10), ("Épée", 10), ("Épée en Gromril", 60), ("Épée", 10) };
+
+        var seized = PairDebtRules.SelectSeizedLines(reserve, l => l.Item2, 50);
+
+        Assert.Equal(new[] { ("Épée en Gromril", 60) }, seized);
+    }
+
+    [Fact]
+    public void PairDebt_Seizure_KeepsAddingWholeLinesUntilReached()
+    {
+        var reserve = new[] { ("Hache", 5), ("Arc", 10), ("Bouclier", 5), ("Épée", 10) };
+
+        var seized = PairDebtRules.SelectSeizedLines(reserve, l => l.Item2, 22);
+
+        // 10 + 10 = 20 < 22 : une ligne de plus, la première à 5 dans l'ordre de la réserve.
+        Assert.Equal(new[] { ("Arc", 10), ("Épée", 10), ("Hache", 5) }, seized);
+    }
+
+    [Fact]
+    public void PairDebt_Seizure_NothingDue_TakesNothing() =>
+        Assert.Empty(PairDebtRules.SelectSeizedLines(new[] { 10, 20 }, v => v, 0));
+
     // --- EquipmentPricing -----------------------------------------------------------------------
 
     [Fact]

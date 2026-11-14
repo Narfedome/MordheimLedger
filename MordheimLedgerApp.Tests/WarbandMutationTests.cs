@@ -1,6 +1,7 @@
 using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
+using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Services;
 
@@ -211,6 +212,57 @@ public class WarbandMutationTests : IDisposable
         await _warbands.DeleteWarbandAsync(warband.Id);
 
         Assert.False(File.Exists(file));
+    }
+
+    /// <summary>Une bande et ses données (Historique, Réserve, délais de Dramatis Personae), une autre bande
+    /// remplie pareil pour vérifier qu'on ne touche qu'à la bonne.</summary>
+    private async Task<(Warband Warband, Warrior Warrior)> WarbandWithDataAsync(string name)
+    {
+        var archetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync(name, archetype);
+        var warrior = await _warbands.RecruitWarriorAsync(warband.Id, (await _library.GetWarriorArchetypesAsync(archetype.Id, "en")).First(), "Otto");
+        var sword = (await _library.GetEquipmentItemsAsync("en")).First();
+        await _warbands.AddWarbandEquipmentAsync(warband.Id, sword);
+        await _warbands.AddWarriorEquipmentAsync(warrior.Id, sword);
+        await _warbands.AddHistoryEntryAsync(warband.Id, "Victory.");
+        await _warbands.AddDramatisPersonaCooldownAsync(warband.Id, 1);
+        return (warband, warrior);
+    }
+
+    private async Task<int> PlayedRowsAsync(int warbandId, int warriorId) =>
+        await _db.Connection.Table<HistoryEntryEntity>().Where(r => r.WarbandId == warbandId).CountAsync()
+        + await _db.Connection.Table<WarbandEquipmentEntity>().Where(r => r.WarbandId == warbandId).CountAsync()
+        + await _db.Connection.Table<WarbandDramatisPersonaCooldownEntity>().Where(r => r.WarbandId == warbandId).CountAsync()
+        + await _db.Connection.Table<WarriorEntity>().Where(r => r.WarbandId == warbandId).CountAsync()
+        + await _db.Connection.Table<WarriorEquipmentEntity>().Where(r => r.WarriorId == warriorId).CountAsync();
+
+    [Fact]
+    public async Task DeleteWarband_RemovesItsHistoryReserveAndCooldowns_Only()
+    {
+        var (deleted, deletedWarrior) = await WarbandWithDataAsync("The Bleeding Roses");
+        var (kept, keptWarrior) = await WarbandWithDataAsync("The Grey Wolves");
+        var keptRows = await PlayedRowsAsync(kept.Id, keptWarrior.Id);
+
+        await _warbands.DeleteWarbandAsync(deleted.Id);
+
+        Assert.Equal(0, await PlayedRowsAsync(deleted.Id, deletedWarrior.Id));
+        Assert.Equal(keptRows, await PlayedRowsAsync(kept.Id, keptWarrior.Id));
+    }
+
+    /// <summary>Bases d'avant le correctif : la bande supprimée avait laissé ses lignes, retirées au lancement.</summary>
+    [Fact]
+    public async Task Repair_RemovesRowsOfAlreadyDeletedWarbands_Only()
+    {
+        var (deleted, deletedWarrior) = await WarbandWithDataAsync("The Bleeding Roses");
+        var (kept, keptWarrior) = await WarbandWithDataAsync("The Grey Wolves");
+        var keptRows = await PlayedRowsAsync(kept.Id, keptWarrior.Id);
+        await _db.Connection.DeleteAsync<WarbandEntity>(deleted.Id);      // l'ancienne suppression,
+        await _db.Connection.DeleteAsync<WarriorEntity>(deletedWarrior.Id); // sans les lignes rattachées
+
+        await _db.RemoveOrphanedPlayedDataAsync();
+
+        Assert.Equal(0, await PlayedRowsAsync(deleted.Id, deletedWarrior.Id));
+        Assert.Equal(keptRows, await PlayedRowsAsync(kept.Id, keptWarrior.Id));
     }
 
     /// <summary>Enregistrement de la Fin de partie (RunInTransactionAsync) : une exception au milieu annule

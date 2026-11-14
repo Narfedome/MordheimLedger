@@ -142,7 +142,9 @@
     <value>Supprimer "{0}" ?</value>
   </data>
   <data name="WarriorDeleteConfirm" xml:space="preserve">
-    <value>Supprimer {0} du roster ? Ce n'est pas une mort du personnage (voir Fin de partie pour ça) — son coût de recrutement et son équipement seront remboursés au trésor de la bande.</value>
+    <value>Retirer {0} de la bande ?
+
+C'est une correction : la trésorerie n'est pas modifiée. Pour un guerrier mort au combat, passez par la Fin de partie.</value>
   </data>
   <data name="WarbandSaveFailed" xml:space="preserve">
     <value>La bande n'a pas pu être enregistrée. Rien n'a été modifié : elle est telle qu'avant, vous pouvez recommencer.
@@ -153,6 +155,30 @@ Détail : {0}</value>
     <value>Une erreur inattendue est survenue : l'écran n'a peut-être pas fini de se charger. Quittez cet écran puis revenez pour réessayer.
 
 Détail : {0}</value>
+  </data>
+  <data name="WarriorCorrectTitle" xml:space="preserve">
+    <value>Corriger la fiche</value>
+  </data>
+  <data name="WarriorCorrectHint" xml:space="preserve">
+    <value>Profil, expérience, équipement, compétences, blessures… Pour rectifier une erreur, sans effet sur la trésorerie.</value>
+  </data>
+  <data name="WarriorQuickEditPlayHint" xml:space="preserve">
+    <value>Achats, ventes, progressions et blessures se jouent en Fin de partie.</value>
+  </data>
+  <data name="WarriorCorrectionBanner" xml:space="preserve">
+    <value>Corrections : la trésorerie n'est pas modifiée. Les achats et ventes se font en Fin de partie.</value>
+  </data>
+  <data name="WarbandCorrectionBanner" xml:space="preserve">
+    <value>Corrections : recruter, équiper ou retirer ici ne coûte et ne rend rien. Ajustez la trésorerie vous-même si besoin ; le recrutement se fait en Fin de partie.</value>
+  </data>
+  <data name="WarriorRemoveTitle" xml:space="preserve">
+    <value>Retirer de la bande</value>
+  </data>
+  <data name="WarriorRemoveAction" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="WarbandCurrentTreasuryPh" xml:space="preserve">
+    <value>Trésorerie</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
@@ -2648,7 +2674,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Modifier le guerrier</value>
   </data>
   <data name="TourDetailCardEditBody" xml:space="preserve">
-    <value>Ouvre l'édition du guerrier : équipement, compétences, sorts, blessures, expérience.</value>
+    <value>Le nom et la photo de la figurine. « Corriger la fiche » rectifie une erreur ; achats, ventes et progressions se font en Fin de partie.</value>
   </data>
   <data name="TourDetailCardStatsTitle" xml:space="preserve">
     <value>Profil</value>

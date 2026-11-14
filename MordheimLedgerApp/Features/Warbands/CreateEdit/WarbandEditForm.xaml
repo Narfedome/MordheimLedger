@@ -50,6 +50,17 @@
                 </HorizontalStackLayout>
             </components:ScrollableTabStripView>
 
+            <!-- Bande déjà créée = correction (2026-11-14) : mode libre imposé, rien n'y coûte ni n'y rapporte. -->
+            <Border StrokeShape="RoundRectangle 8" StrokeThickness="1" Stroke="{DynamicResource AppWarning}"
+                    BackgroundColor="Transparent" Padding="12,10"
+                    IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="{x:Static icons:SolidFont.TriangleExclamation}" FontFamily="FontSolid"
+                           FontSize="11" TextColor="{DynamicResource AppWarning}" VerticalOptions="Start" Margin="0,2,0,0"/>
+                    <Label Grid.Column="1" Text="{loc:Loc WarbandCorrectionBanner}" FontSize="12" TextColor="{DynamicResource AppWarning}"/>
+                </Grid>
+            </Border>
+
             <!-- Général -->
             <VerticalStackLayout Spacing="12" IsVisible="{Binding IsGeneralTab}">
                 <Border Style="{StaticResource SectionCardBorderStyle}">
@@ -71,9 +82,9 @@
                             <Label Text="{Binding NameError}" FontSize="11" TextColor="{StaticResource AppDanger}"
                                    IsVisible="{Binding NameError, Converter={StaticResource IsNotNullConverter}}"/>
                         </VerticalStackLayout>
-                        <!-- Mode Libre : trésorerie en saisie libre, aucun coût appliqué (recrutement, achats,
-                             édition du roster actuel) - pertinent aussi en édition d'une bande déjà sauvegardée. -->
-                        <HorizontalStackLayout Spacing="10">
+                        <!-- Mode Libre : trésorerie en saisie libre, aucun coût appliqué. Choix offert à la création
+                             seulement : une bande déjà créée se modifie toujours en mode libre (correction). -->
+                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding IsWizardMode}">
                             <HorizontalStackLayout.Behaviors>
                                 <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WizardFreeModeKey}"/>
                             </HorizontalStackLayout.Behaviors>
@@ -104,7 +115,11 @@
                                IsVisible="{Binding ArchetypeError, Converter={StaticResource IsNotNullConverter}}"/>
                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10" IsVisible="{Binding Archetype, Converter={StaticResource IsNotNullConverter}}">
                             <VerticalStackLayout Grid.Column="0" Spacing="4">
-                                <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                                <!-- Trésorerie de départ à la création, trésorerie actuelle (saisie libre) en modification. -->
+                                <Label Text="{loc:Loc WarbandArchetypeTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding IsWizardMode}"/>
+                                <Label Text="{loc:Loc WarbandCurrentTreasuryPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                                       IsVisible="{Binding IsWizardMode, Converter={StaticResource InverseBoolConverter}}"/>
                                 <!-- RosterStartingTreasury : trésor de départ théorique de l'archétype à la
                                      création, trésorerie RÉELLE actuelle de la bande en édition (Item.Treasury). -->
                                 <Label Text="{Binding RosterStartingTreasury}" FontAttributes="Bold"

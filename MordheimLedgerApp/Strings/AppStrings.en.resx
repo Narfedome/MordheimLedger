@@ -142,7 +142,9 @@
     <value>Delete "{0}"?</value>
   </data>
   <data name="WarriorDeleteConfirm" xml:space="preserve">
-    <value>Remove {0} from the roster? This isn't a character death (see End of Game for that) — their recruitment cost and equipment will be refunded to the warband's treasury.</value>
+    <value>Remove {0} from the warband?
+
+This is a correction: the treasury is not changed. For a warrior killed in battle, use the End of Game.</value>
   </data>
   <data name="WarbandSaveFailed" xml:space="preserve">
     <value>The warband could not be saved. Nothing was changed: it is as it was, you can start again.
@@ -153,6 +155,30 @@ Details: {0}</value>
     <value>An unexpected error occurred: the screen may not have finished loading. Leave this screen and come back to try again.
 
 Details: {0}</value>
+  </data>
+  <data name="WarriorCorrectTitle" xml:space="preserve">
+    <value>Correct the sheet</value>
+  </data>
+  <data name="WarriorCorrectHint" xml:space="preserve">
+    <value>Profile, experience, equipment, skills, injuries… To fix a mistake, without touching the treasury.</value>
+  </data>
+  <data name="WarriorQuickEditPlayHint" xml:space="preserve">
+    <value>Purchases, sales, advances and injuries are played out in the End of Game.</value>
+  </data>
+  <data name="WarriorCorrectionBanner" xml:space="preserve">
+    <value>Corrections: the treasury is not changed. Purchases and sales happen in the End of Game.</value>
+  </data>
+  <data name="WarbandCorrectionBanner" xml:space="preserve">
+    <value>Corrections: recruiting, equipping or removing here costs and refunds nothing. Adjust the treasury yourself if needed; recruiting happens in the End of Game.</value>
+  </data>
+  <data name="WarriorRemoveTitle" xml:space="preserve">
+    <value>Remove from the warband</value>
+  </data>
+  <data name="WarriorRemoveAction" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="WarbandCurrentTreasuryPh" xml:space="preserve">
+    <value>Treasury</value>
   </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Error</value>
@@ -2648,7 +2674,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>Edit the warrior</value>
   </data>
   <data name="TourDetailCardEditBody" xml:space="preserve">
-    <value>Opens the warrior's editor: equipment, skills, spells, injuries, experience.</value>
+    <value>The miniature's name and photo. “Correct the sheet” fixes a mistake; purchases, sales and advances happen in the End of Game.</value>
   </data>
   <data name="TourDetailCardStatsTitle" xml:space="preserve">
     <value>Profile</value>

@@ -24,14 +24,23 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     private readonly IReadOnlyList<MagicSchool> _magicSchools;
     private readonly IMutationPickerService _mutationPicker;
 
-    /// <summary>Mode Libre (voir WarbandEditDialogViewModel.IsExistingWarband, transmis tel quel par
-    /// l'appelant) : AddEquipment n'impacte plus la trésorerie (aucune vérification, aucune déduction) et
-    /// AddSpell repasse en choix libre au lieu du tirage 1D6 - même esprit "on enregistre un historique
-    /// déjà déterminé" déjà appliqué ailleurs dans l'app pour ce mode. False = comportement d'origine
-    /// (coûts réels), inchangé pour l'appelant existant (WarbandDetailViewModel.EditWarrior).</summary>
-    private readonly bool _skipCosts;
+    // Formulaire de CORRECTION (décision de l'utilisateur, 2026-11-14, maquette « Fiche guerrier : modifier ou
+    // corriger ») : hors assistant de création et Fin de partie, rien ne coûte ni ne rapporte d'or. Ajouter un
+    // objet ne débite pas la trésorerie, en retirer un ou supprimer le guerrier ne rembourse rien, un sort se
+    // choisit librement (pas de jet). Les achats, ventes et progressions se jouent en Fin de partie.
 
     protected override bool CancelResult => false;
+
+    /// <summary>Page légère (WarriorQuickEditForm) : le joueur a demandé « Corriger la fiche ». Nom et photo sont
+    /// enregistrés comme par Enregistrer, puis l'appelant ouvre la correction complète (WarriorEditForm).</summary>
+    public bool WantsCorrection { get; private set; }
+
+    [RelayCommand]
+    private void OpenCorrection()
+    {
+        WantsCorrection = true;
+        SaveCommand.Execute(null);
+    }
 
     /// <summary>Voir DialogViewModel.EditableState - seulement le profil (Item, Animal compris) et la
     /// saisie du Mouvement : Équipement/Compétences/Blessures/Sorts/Mutations sont déjà persistés au fil
@@ -196,8 +205,7 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     public WarriorEditDialogViewModel(Warrior item, string title, Warband warband, IWarbandService warbandService,
         ILibraryService libraryService, IDetailDialogService detailDialogs, IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker,
         IInjuryPickerService injuryPicker, ISpellPickerService spellPicker, bool isSpellcaster, IReadOnlyList<MagicSchool> magicSchools,
-        IMutationPickerService mutationPicker, bool isMutant, IReadOnlyList<SpecialRule> specialRules,
-        bool skipCosts = false)
+        IMutationPickerService mutationPicker, bool isMutant, IReadOnlyList<SpecialRule> specialRules)
     {
         this.item = item;
         this.title = title;
@@ -214,7 +222,6 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         _mutationPicker = mutationPicker;
         IsMutant = isMutant;
         SpecialRules = specialRules;
-        _skipCosts = skipCosts;
         movementInput = item.MovementOverride ?? item.Movement.ToString();
         _savedPhotoPath = item.PhotoPath;
 
@@ -241,9 +248,9 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task AddEquipment()
     {
-        // Groupe d'Hommes de main : prix × effectif, comme à l'enregistrement plus bas (sauf mode Libre, sans coût).
-        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, _warband.Treasury,
-            unitCount: _skipCosts || Item.IsHero ? 1 : Math.Max(1, Item.HeadCount),
+        // Correction : rien n'est débité, donc pas de budget dans le sélecteur (availableGold null le masque).
+        var items = await _equipmentPicker.PickEquipmentAsync(_warband.WarbandArchetypeId, Item.EquipmentListId, Item.WarriorArchetypeId, availableGold: null,
+            unitCount: 1,
             alreadyHasFreeDagger: Equipment.Any(e => e.Item.IsFreeDagger), allowQuantity: Item.IsHero, forWarrior: CurrentWarriorForRules());
 
         // Même dialog que la création libre du wizard (MaterialPickerDialogViewModel) : matériau exclusif
@@ -259,35 +266,6 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
         {
             var equipmentItem = items[i];
             var (materialRule, blessingRule) = resolved[i];
-
-            // La première dague est gratuite, uniquement en "Normal" (livre des règles : "in addition to
-            // his free dagger") - une deuxième dague, ou un matériau délibérément choisi sur celle-ci,
-            // coûte le prix normal (voir EquipmentItem.IsFreeDagger/WarbandEditDialogViewModel.
-            // AddEquipment pour la même logique côté wizard). Pas besoin de mémoriser "était-ce gratuit"
-            // au-delà de cette déduction ponctuelle - contrairement au wizard (EquipmentPick.IsFree), le
-            // trésor est débité immédiatement et définitivement ici.
-            var isFreeDagger = EquipmentPricing.IsFreeDaggerEligible(equipmentItem.IsFreeDagger, Equipment.Any(e => e.Item.IsFreeDagger)) && materialRule is null;
-            // Groupe d'Hommes de main : chaque modèle paie son exemplaire (décision du 2026-11-11, comme
-            // l'assistant de création et le recrutement en Fin de partie) - prix unitaire × effectif.
-            var cost = EquipmentPricing.CalculateCost(equipmentItem.Cost, materialRule?.CostMultiplier, isFreeDagger)
-                * (Item.IsHero ? 1 : Math.Max(1, Item.HeadCount));
-
-            // Sélection multiple : on paye/ajoute un par un, et on s'arrête au premier objet trop cher
-            // plutôt que de tout annuler - même logique que l'ancien AddEquipment de WarbandDetailViewModel.
-            // Mode Libre (_skipCosts) : aucune vérification ni déduction, même esprit que WarbandEditDialogViewModel
-            // en mode Bande existante - on enregistre un historique déjà déterminé, pas un nouvel achat.
-            if (!_skipCosts)
-            {
-                if (_warband.Treasury < cost)
-                {
-                    await ShowInfoAsync(Loc["WarbandsInsufficientFundsTitle"], Loc["WarbandsInsufficientFundsMessage"]);
-                    break;
-                }
-
-                _warband.Treasury -= cost;
-                await _warbandService.SaveWarbandAsync(_warband);
-            }
-
             var carried = await _warbandService.AddWarriorEquipmentAsync(Item.Id, equipmentItem, materialRule: materialRule);
             if (blessingRule is not null)
             {
@@ -371,32 +349,17 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private Task ShowInjuryDetail(WarriorInjury tracked) => _detailDialogs.ShowInjuryDetailDialogAsync(tracked.Item);
 
-    /// <summary>Mode Libre (_skipCosts) : choix libre parmi les écoles de la bande (on enregistre un
-    /// historique déjà déterminé). Sinon : tirage 1D6 via SpellRollDialog, même mécanisme que le sort de
-    /// départ des recrues fraîches (WarbandEditDialogViewModel.ShowSpellRollDialog) - livre des règles,
-    /// un lanceur de sorts obtient toujours un sort au hasard, jamais un choix libre. Pas de plafond ici
-    /// (contrairement au sort de départ) : un guerrier déjà en jeu peut apprendre plusieurs sorts au fil
-    /// des parties (Avancement).</summary>
+    /// <summary>Correction : choix libre parmi les écoles de la bande (on recopie un sort déjà obtenu, le jet
+    /// 1D6 de l'apprentissage se fait en Fin de partie ou à la création).</summary>
     [RelayCommand]
     private async Task AddSpell()
     {
-        if (_skipCosts)
+        var spells = await _spellPicker.PickSpellsAsync(_magicSchools.Select(s => s.Id).ToList());
+        foreach (var spell in spells)
         {
-            var freeSpells = await _spellPicker.PickSpellsAsync(_magicSchools.Select(s => s.Id).ToList());
-            foreach (var spell in freeSpells)
-            {
-                var learned = await _warbandService.AddWarriorSpellAsync(Item.Id, spell);
-                Spells.Add(learned);
-            }
-            return;
+            var learned = await _warbandService.AddWarriorSpellAsync(Item.Id, spell);
+            Spells.Add(learned);
         }
-
-        var knownSpellIds = Spells.Select(s => s.Item.Id).ToList();
-        var rolled = await ShowDialogAsync(new SpellRollDialog(new SpellRollDialogViewModel(_magicSchools.ToList(), _libraryService, _detailDialogs, knownSpellIds)));
-        if (rolled is null) return;
-
-        var rolledLearned = await _warbandService.AddWarriorSpellAsync(Item.Id, rolled);
-        Spells.Add(rolledLearned);
     }
 
     [RelayCommand]
@@ -463,9 +426,11 @@ public partial class WarriorEditDialogViewModel : DialogViewModel<bool>
     [RelayCommand]
     private async Task Delete()
     {
-        // Message dédié (pas ConfirmDeleteAsync générique) : précise que ce n'est pas une mort du
-        // personnage (ça se joue via Fin de partie) et que le coût est remboursé au trésor.
-        if (!await ConfirmAsync(Loc["DialogDelete"], string.Format(Loc["WarriorDeleteConfirm"], Item.Name)))
+        // Message dédié (pas ConfirmDeleteAsync générique) : c'est une correction, sans remboursement - la mort d'un
+        // guerrier se joue en Fin de partie.
+        var name = Item.IsHero ? Item.Name : $"{Item.Name} (× {Math.Max(1, Item.HeadCount)})";
+        if (!await ConfirmAsync(Loc["WarriorRemoveTitle"], string.Format(Loc["WarriorDeleteConfirm"], name),
+                Loc["WarriorRemoveAction"], Loc["BtnCancel"], destructive: true))
             return;
 
         await _warbandService.DeleteWarriorAsync(Item.Id);

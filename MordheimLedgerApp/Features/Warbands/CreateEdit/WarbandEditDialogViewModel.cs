@@ -304,85 +304,27 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             }
         }
 
-        /// <summary>Coût de recrutement de chaque ligne (seulement les têtes ajoutées cette session -
-        /// Count - ExistingCount, le roster déjà en base est déjà payé) + équipement de chaque
-        /// sous-groupe d'Hommes de main (coût × effectif de CE sous-groupe, pas de la ligne entière - deux
-        /// sous-groupes du même type peuvent avoir des équipements différents) + équipement individuel
-        /// (chaque slot Héros) - dans les deux cas, seuls les EquipmentPick sans ExistingId comptent (un
-        /// pick avec ExistingId représente un WarriorEquipment déjà payé, voir RecruitSlot constructeur).
-        /// Limite acceptée : si un groupe déjà existant grossit (nouvelle tête ajoutée à un groupe déjà
-        /// équipé), un nouvel achat d'équipement pour "tout le groupe" est facturé au Count actuel
-        /// (l'effectif après ajout), pas seulement pour la tête ajoutée - pas de rescaling plus fin tenté.</summary>
-        /// <summary>Inclut la prime d'engagement (HireCost) de chaque nouveau Franc-Tireur coché cette
-        /// session (ExistingWarrior null - un déjà recruté est déjà payé) - son équipement de départ est
-        /// fixe et déjà compris dans HireCost, pas de terme séparé comme pour un Héros/groupe.</summary>
-        private int TotalSpent => RecruitRows.Sum(r => NewlyRecruitedCount(r) * r.Cost)
-            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost) * g.Count)
-            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost))
-            // Mutations achetées cette session (livre : "+ the cost of mutations" au recrutement) - celles
-            // déjà en base (BaselineMutations) sont déjà payées.
-            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => NewMutationsCost(g) * g.Count)
-            + RecruitRows.SelectMany(r => r.NameSlots).Sum(NewMutationsCost)
-            + HiredSwordRows.Where(r => r.IsRecruited && r.ExistingWarrior is null).Sum(r => r.Cost);
+        /// <summary>Dépenses de l'assistant de CRÉATION (coûts appliqués) : recrutement de chaque ligne, équipement de
+        /// chaque sous-groupe d'Hommes de main (coût × effectif de CE sous-groupe) et de chaque Héros, mutations
+        /// achetées, prime des Francs-Tireurs. Une bande déjà créée se modifie toujours en mode libre (correction, voir
+        /// le constructeur) : rien n'y coûte ni n'y rapporte, la trésorerie y est une saisie libre (TreasuryOverride) -
+        /// d'où plus aucun calcul de remboursement ici (supprimé le 2026-11-14 avec RefundRules).</summary>
+        private int TotalSpent => RecruitRows.Sum(r => r.Count * r.Cost)
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Sum(e => e.Cost) * g.Count)
+            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Sum(e => e.Cost))
+            // Livre : "+ the cost of mutations" au recrutement.
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Mutations.Sum(m => m.Cost) * g.Count)
+            + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Mutations.Sum(m => m.Cost))
+            + HiredSwordRows.Where(r => r.IsRecruited).Sum(r => r.Cost);
 
-        /// <summary>Modèles recrutés cette session, à payer. Count - ExistingCount devenait négatif quand on réduisait
-        /// un groupe déjà en base (ExistingCount garde l'effectif d'origine tant que le groupe n'est pas supprimé) :
-        /// la dépense négative rendait le modèle retiré une deuxième fois, en plus de TotalRefunds - les réductions
-        /// sont remises ici et ne passent plus que par TotalRefunds.</summary>
-        private static int NewlyRecruitedCount(WarriorRecruitRow row) => row.Count - row.ExistingCount
-            + row.HenchmanGroupDrafts.Where(g => g.ExistingWarrior != null).Sum(g => Math.Max(0, g.BaselineHeadCount - g.Count));
-
-        private static int NewMutationsCost(RecruitSlot slot) =>
-            slot.Mutations.Where(m => slot.BaselineMutations.All(b => b.Item != m)).Sum(m => m.Cost);
-
-        /// <summary>Ce qui doit revenir à la trésorerie suite à des actions sur le roster déjà existant -
-        /// suppression complète confirmée (Cost du guerrier + son équipement d'origine, voir
-        /// DecrementWarrior/_pendingFullDeletions), réduction partielle d'un groupe d'Hommes de main (Cost
-        /// du type × têtes retirées) et retrait d'un objet d'équipement déjà payé (bouton "x" sur une puce
-        /// d'un guerrier existant - RemoveEquipment, retiré de la collection mais jusqu'ici jamais
-        /// remboursé). Les deux premiers termes ne regardent que les guerriers/groupes concernés ; le
-        /// troisième parcourt tout le roster restant (les slots pleinement supprimés n'y figurent plus,
-        /// déjà couverts par le premier terme via l'équipement d'origine complet du Warrior).</summary>
-        // Un groupe paie chaque achat une fois par modèle (voir Core.Rules.RefundRules) : un modèle retiré rend
-        // tout ce qu'il a payé (recrutement, équipement et mutations d'origine), un achat retiré rend sa part
-        // pour chaque modèle d'origine encore là - sans compter deux fois la part des modèles retirés.
-        private int TotalRefunds => _pendingFullDeletions.Sum(w => RefundRules.DeletionRefund(w, w.Equipment, w.Mutations.Select(m => m.Item)))
-            // Mutation déjà payée retirée d'un guerrier existant - même traitement que l'équipement.
-            + ExistingSlots.Sum(s => s.BaselineMutations.Where(b => !s.Mutations.Contains(b.Item)).Sum(b => b.Item.Cost) * RemainingPayingModels(s))
-            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts)
-                .Where(g => g.ExistingWarrior != null && g.Count < g.BaselineHeadCount)
-                .Sum(g => RefundRules.CostPerModel(g.ExistingWarrior!, g.BaselineEquipment, g.BaselineMutations.Select(m => m.Item))
-                          * (g.BaselineHeadCount - g.Count))
-            + ExistingSlots.Sum(s => RefundRules.EquipmentCostPerModel(s.BaselineEquipment, b => s.Equipment.All(p => p.ExistingId != b.Id))
-                                     * RemainingPayingModels(s))
-            // Franc-Tireur déjà engagé décoché cette session - remboursement intégral de sa prime, pas de
-            // confirmation (voir HiredSwordRecruitRow, point d'entrée secondaire, plus simple que
-            // DecrementWarrior/_pendingFullDeletions à dessein).
-            + HiredSwordRows.Where(r => !r.IsRecruited && r.ExistingWarrior != null).Sum(r => r.Cost);
-
-        /// <summary>Héros et groupes déjà en base (les nouvelles recrues n'ont rien payé avant Enregistrer).</summary>
-        private IEnumerable<RecruitSlot> ExistingSlots => RecruitRows
-            .SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
-            .Where(s => s.ExistingWarrior != null);
-
-        /// <summary>Modèles d'origine encore présents, qui ont chacun payé les achats d'origine du slot : 1 pour un
-        /// Héros ; pour un groupe, l'effectif d'origine moins les modèles retirés (remboursés à part, achats compris).
-        /// Les modèles ajoutés cette session ne paient qu'à l'enregistrement, sur l'équipement restant.</summary>
-        private static int RemainingPayingModels(RecruitSlot slot) =>
-            slot is HenchmanGroupDraft group ? Math.Max(0, Math.Min(group.Count, group.BaselineHeadCount)) : 1;
-
-        /// <summary>Trésorerie de départ pour le calcul du "restant" ci-dessous : la trésorerie RÉELLE
-        /// actuelle de la bande (Item.Treasury) quand on édite une bande déjà sauvegardée (Item.Id != 0),
-        /// pas le trésor de départ théorique de l'archétype - une bande déjà jouée a presque toujours une
-        /// trésorerie différente de son StartingTreasury d'origine (dépenses/revenus passés).</summary>
+        /// <summary>Trésorerie de départ pour le calcul du "restant" : le trésor de départ de l'archétype (création ;
+        /// en modification, le mode libre prime - voir RemainingTreasury).</summary>
         public int RosterStartingTreasury => Item.Id != 0 ? Item.Treasury : Archetype?.StartingTreasury ?? 0;
 
         /// <summary>En mode Libre, la trésorerie affichée reste fixée à ce que l'utilisateur a saisi
         /// (TreasuryOverride) - jamais décrémentée par les recrues/achats, contrairement au mode Coûts
-        /// appliqués. TotalRefunds vient en déduction de TotalSpent (donc s'ajoute au restant affiché) -
-        /// même calcul que Save() applique réellement à Item.Treasury, pour que le montant affiché en
-        /// direct pendant la session corresponde exactement à ce qui sera écrit en base.</summary>
-        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(RosterStartingTreasury, TotalSpent - TotalRefunds, IsExistingWarband, TreasuryOverride);
+        /// appliqués. Même calcul que Save() applique réellement à Item.Treasury.</summary>
+        private int RemainingTreasury => RecruitmentRules.CalculateRemainingTreasury(RosterStartingTreasury, TotalSpent, IsExistingWarband, TreasuryOverride);
 
         [ObservableProperty]
         private string? warriorsError;
@@ -473,6 +415,16 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             _mutationPicker = mutationPicker;
             _hiredSwordPicker = hiredSwordPicker;
             IsWizardMode = item.Id == 0;
+
+            // Bande déjà créée (décision de l'utilisateur, 2026-11-14) : modifier = corriger. Le mode libre est imposé
+            // (sa case est masquée) : recruter, équiper ou retirer ne coûte ni ne rend rien, et la trésorerie se saisit
+            // librement. Les coûts ne s'appliquent qu'à la création et en Fin de partie. Champs générés renseignés
+            // directement : OnIsExistingWarbandChanged afficherait l'aide du mode libre à l'ouverture.
+            if (!IsWizardMode)
+            {
+                isExistingWarband = true;
+                treasuryOverride = item.Treasury;
+            }
         }
 
         [RelayCommand]
@@ -739,8 +691,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         }
 
         /// <summary>Décocher un Franc-Tireur déjà en base (ChipListView.RemoveCommand) ne fait rien
-        /// d'autre que marquer la ligne - le remboursement (TotalRefunds) et la suppression réelle
-        /// (DeleteWarriorAsync) n'ont lieu qu'au Save(), sans confirmation (voir HiredSwordRecruitRow).</summary>
+        /// d'autre que marquer la ligne - la suppression réelle (DeleteWarriorAsync, sans remboursement : bande
+        /// déjà créée = correction) n'a lieu qu'au Save(), sans confirmation (voir HiredSwordRecruitRow).</summary>
         [RelayCommand]
         private void RemoveHiredSword(HiredSwordRecruitRow row)
         {
@@ -862,7 +814,9 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             // Coûts appliqués : liste d'équipement du guerrier uniquement (livre - une bande en création
             // n'achète que dans sa liste, rien du Trading Post hors liste). Mode Libre (bande déjà jouée
             // sur papier) : tout le catalogue, objets rares/artefacts trouvés en campagne compris.
-            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id, RemainingTreasury, perUnitCost,
+            // Mode libre : rien n'est débité, pas de budget dans le sélecteur (null le masque).
+            var items = await _equipmentPicker.PickEquipmentAsync(Archetype.Id, row.Archetype.EquipmentListId, row.Archetype.Id,
+                IsExistingWarband ? null : RemainingTreasury, perUnitCost,
                 destination.Any(p => p.Item.IsFreeDagger), equipmentListOnly: !IsExistingWarband, unrestricted: IsExistingWarband,
                 allowQuantity: target is not HenchmanGroupDraft);
             if (items.Count == 0) return;
@@ -1469,11 +1423,6 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Toutes les écritures de Save(), dans la transaction ouverte par lui.</summary>
         private async Task SaveToDatabaseAsync()
         {
-            // TotalRefunds capturé avant que la boucle ci-dessous ne synchronise le roster existant -
-            // même valeur affichée en direct pendant la session (RemainingTreasury), seulement
-            // pertinent en mode Coûts appliqués (ignoré en mode Libre où TreasuryOverride prime).
-            var refunds = TotalRefunds;
-
             int warbandId;
             if (Item.Id == 0)
             {
@@ -1487,7 +1436,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             else
             {
                 warbandId = Item.Id;
-                Item.Treasury = IsExistingWarband ? TreasuryOverride : RosterStartingTreasury - TotalSpent + refunds;
+                // Bande déjà créée : toujours en mode libre (voir le constructeur), la trésorerie est celle saisie.
+                Item.Treasury = TreasuryOverride;
                 Item.WyrdstoneShards = Math.Max(0, Item.WyrdstoneShards);
                 await _warbandService.SaveWarbandAsync(Item);
             }

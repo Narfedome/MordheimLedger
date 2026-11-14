@@ -1074,7 +1074,7 @@ public partial class EndOfGamePageViewModel
         // les mêmes dés, ce que le livre ne prévoit pas ici (un seul 2D6, contrairement à Boutique où
         // le bonus partage le dé de l'Or sans que l'un dérive de l'autre).
         if (outcome.Kind == ExplorationOutcomeKind.Gold && outcome.GoldFormula is { } formula)
-            ExplorationGoldAmount = DiceFormula.Apply(formula, [die1, die2]).ToString();
+            ExplorationGoldAmount = DiceFormula.Apply(formula, new[] { die1, die2 }).ToString();
     }
 
     [RelayCommand]

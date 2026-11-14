@@ -29,7 +29,7 @@ namespace MordheimLedgerApp.Services
         {
             var loc = LocalizationService.Instance;
             var warband = await SampleWarband.CreateAsync(_warbandService, _libraryService, loc.Language,
-                loc["SampleWarbandName"], [loc["SampleWarbandWarriors"], loc["SampleWarbandMarksmen"]])
+                loc["SampleWarbandName"], new[] { loc["SampleWarbandWarriors"], loc["SampleWarbandMarksmen"] })
                 ?? throw new InvalidOperationException(loc["SampleWarbandMissingContent"]);
 
             Preferences.Default.Set(ImportedKey, true);

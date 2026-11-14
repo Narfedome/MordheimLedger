@@ -180,6 +180,57 @@ Détail : {0}</value>
   <data name="WarbandCurrentTreasuryPh" xml:space="preserve">
     <value>Trésorerie</value>
   </data>
+  <data name="A11yAdd" xml:space="preserve">
+    <value>Ajouter</value>
+  </data>
+  <data name="A11yRemoveOne" xml:space="preserve">
+    <value>Retirer un</value>
+  </data>
+  <data name="A11yDelete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="A11yEdit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="A11yClose" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="A11yCancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="A11yConfirm" xml:space="preserve">
+    <value>Valider</value>
+  </data>
+  <data name="A11yRollDie" xml:space="preserve">
+    <value>Lancer le dé</value>
+  </data>
+  <data name="A11yDetails" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="A11ySearch" xml:space="preserve">
+    <value>Rechercher</value>
+  </data>
+  <data name="A11yBack" xml:space="preserve">
+    <value>Retour</value>
+  </data>
+  <data name="A11yMove" xml:space="preserve">
+    <value>Déplacer</value>
+  </data>
+  <data name="A11yRemoveNamed" xml:space="preserve">
+    <value>Retirer {0}</value>
+  </data>
+  <data name="A11yMoveNamed" xml:space="preserve">
+    <value>Déplacer {0}</value>
+  </data>
+  <data name="A11yPlayWarband" xml:space="preserve">
+    <value>Jouer, {0}</value>
+  </data>
+  <data name="A11yCollapse" xml:space="preserve">
+    <value>Replier</value>
+  </data>
+  <data name="A11yExpand" xml:space="preserve">
+    <value>Déplier</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
   </data>

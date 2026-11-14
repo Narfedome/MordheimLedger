@@ -10,6 +10,7 @@
              instancié des centaines de fois (puces, cartes guerrier, tuiles). -->
 
         <Button
+        x:Name="IconButton"
         Text="{Binding Source={x:Reference root}, Path=Icon}"
         FontFamily="{Binding Source={x:Reference root}, Path=IconFont}"
         FontSize="{Binding Source={x:Reference root}, Path=IconSize}"

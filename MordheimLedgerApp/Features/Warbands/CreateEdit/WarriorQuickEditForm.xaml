@@ -59,10 +59,10 @@
 
             <!-- « Corriger la fiche » : enregistre nom et photo, puis ouvre la correction complète (voir
                  WarriorEditDialogViewModel.OpenCorrection / WarbandDetailViewModel.OpenWarriorEditDialogAsync). -->
-            <Border Style="{StaticResource SectionCardBorderStyle}" AutomationId="WarriorCorrectButton">
-                <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding OpenCorrectionCommand}"/>
-                </Border.GestureRecognizers>
+            <!-- Bouton transparent par-dessus la carte (accessibilité) : un cadre tapable n'est actionnable ni au clavier
+                 ni par Narrateur/TalkBack ; le bouton porte l'action et le nom, la carte reste le dessin. -->
+            <Grid>
+            <Border Style="{StaticResource SectionCardBorderStyle}" AutomationProperties.IsInAccessibleTree="False" InputTransparent="True">
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
                     <Border Grid.Column="0" WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 20" StrokeThickness="0"
                             BackgroundColor="{DynamicResource AppBackground}" VerticalOptions="Center">
@@ -77,6 +77,11 @@
                            TextColor="{DynamicResource AppTextMuted}" VerticalOptions="Center"/>
                 </Grid>
             </Border>
+            <Button AutomationId="WarriorCorrectButton" BackgroundColor="Transparent" BorderWidth="0" CornerRadius="8" Padding="0"
+                    SemanticProperties.Description="{loc:Loc WarriorCorrectTitle}"
+                    SemanticProperties.Hint="{loc:Loc WarriorCorrectHint}"
+                    Command="{Binding OpenCorrectionCommand}"/>
+            </Grid>
 
             <Label Text="{loc:Loc WarriorQuickEditPlayHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}" Margin="4,0"/>
         </VerticalStackLayout>

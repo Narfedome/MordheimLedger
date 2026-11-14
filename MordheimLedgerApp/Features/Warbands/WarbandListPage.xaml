@@ -49,20 +49,20 @@
                         </Label.FormattedText>
                     </Label>
                     </Grid>
-                    <Grid Grid.Column="2">
-                        <Grid.Behaviors>
+                    <!-- Vrai bouton plutôt qu'un texte tapable (2026-11-14, accessibilité) : actionnable au clavier
+                         sous Windows et par Narrateur/TalkBack, annoncé « Jouer, <nom de la bande> ». Même aspect
+                         qu'avant : texte accent en gras, sans fond. -->
+                    <Button Grid.Column="2" Text="{loc:Loc BtnPlay}" FontAttributes="Bold"
+                            FontSize="{OnIdiom Default=15, Desktop=13}"
+                            TextColor="{DynamicResource AppAccent}" BackgroundColor="Transparent"
+                            BorderWidth="0" Padding="0" CornerRadius="0"
+                            SemanticProperties.Description="{Binding PlayAccessibleName}"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=OpenWarbandCommand}"
+                            CommandParameter="{Binding .}">
+                        <Button.Behaviors>
                             <onboarding:OnboardingTargetBehavior Key="{x:Static services:AppTourService.WarbandPlayKey}"/>
-                        </Grid.Behaviors>
-                        <Grid.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WarbandListViewModel}}, Path=OpenWarbandCommand}"
-                                CommandParameter="{Binding .}"/>
-                        </Grid.GestureRecognizers>
-                        <Label Text="{loc:Loc BtnPlay}" FontAttributes="Bold"
-                               FontSize="{OnIdiom Default=15, Desktop=13}"
-                               HorizontalOptions="Center" VerticalOptions="Center"
-                               TextColor="{DynamicResource AppAccent}"/>
-                    </Grid>
+                        </Button.Behaviors>
+                    </Button>
                 </Grid>
             </DataTemplate>
         </ResourceDictionary>

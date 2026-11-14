@@ -180,6 +180,57 @@ Details: {0}</value>
   <data name="WarbandCurrentTreasuryPh" xml:space="preserve">
     <value>Treasury</value>
   </data>
+  <data name="A11yAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="A11yRemoveOne" xml:space="preserve">
+    <value>Remove one</value>
+  </data>
+  <data name="A11yDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="A11yEdit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="A11yClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="A11yCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="A11yConfirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="A11yRollDie" xml:space="preserve">
+    <value>Roll the die</value>
+  </data>
+  <data name="A11yDetails" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="A11ySearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="A11yBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="A11yMove" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="A11yRemoveNamed" xml:space="preserve">
+    <value>Remove {0}</value>
+  </data>
+  <data name="A11yMoveNamed" xml:space="preserve">
+    <value>Move {0}</value>
+  </data>
+  <data name="A11yPlayWarband" xml:space="preserve">
+    <value>Play, {0}</value>
+  </data>
+  <data name="A11yCollapse" xml:space="preserve">
+    <value>Collapse</value>
+  </data>
+  <data name="A11yExpand" xml:space="preserve">
+    <value>Expand</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Error</value>
   </data>

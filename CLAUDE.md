@@ -207,6 +207,17 @@ dans le sélecteur (`availableGold: null`). Le formulaire de bande d'une bande d
 trésorerie et pierre en saisie libre, même bandeau). `RefundRules` et tout le calcul de remboursement ont été supprimés avec ;
 les coûts ne vivent plus que dans l'assistant de création et la Fin de partie.
 
+**Accessibilité (branche `feature/dialog-accessibility`, 2026-11-14)** : recette UI Automation sous Windows (le contenu des
+dialogs était déjà exposé depuis la refonte des dialogs). Boutons icône (`FaIconButtonView`) : nom accessible via
+`SemanticProperties.Description` = `AccessibleName` > `Tooltip` > nom par défaut du glyphe (`DefaultAccessibleName`, clés
+`A11y*` ; un nouveau glyphe sans nom par défaut doit porter un `Tooltip`) ; ✕ des puces « Retirer <nom> ». **Contrôles
+tapables (`IconTextButton`, `TabToggleButton`, ligne « Corriger la fiche ») = mise en page `InputTransparent` + `Button`
+transparent par-dessus** qui porte action et nom (un geste sur une mise en page n'est actionnable ni au clavier ni par
+Narrateur/TalkBack) ; **jamais de geste (PointerGestureRecognizer compris) sur ce Button : sous Android il avale le clic** - le
+survol va sur la grille parente. Bouton Jouer de la liste des bandes = vrai `Button`. Limites connues : la page sous un dialog
+reste lisible par Narrateur (MAUI n'applique pas `ExcludedWithChildren` sous WinUI, essayé) ; la sélection d'une ligne de
+liste (corps de ligne) reste un geste.
+
 **Nouveautés après une mise à jour (branche `feature/whats-new`, 1.5, 2026-11-13)** : dialog `Components/Dialogs/WhatsNewDialog`
 affiché une fois par version (majeure.mineure) sur la liste des bandes, après le message de synchro du contenu ; jamais à la
 première installation (`OnboardingViewModel.FinishAsync` marque la version vue), ni en mode E2E. Le texte est la section

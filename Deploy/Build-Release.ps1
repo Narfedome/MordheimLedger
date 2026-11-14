@@ -180,7 +180,9 @@ function Update-StoreListingImages {
     Write-Host "Images de la fiche Microsoft Store ajoutees au brouillon $submissionId." -ForegroundColor Green
 
     if ($Commit) {
-        Invoke-RestMethod -Method Post -Uri "$submissionUri/commit" -Headers $headers | Out-Null
+        # Sans ContentType JSON, l'API refuse la validation (400 "Only JSON content is accepted") :
+        # la soumission restait en brouillon a chaque release avec -UploadListingImages.
+        Invoke-RestMethod -Method Post -Uri "$submissionUri/commit" -Headers $headers -ContentType "application/json" | Out-Null
         Write-Host "Soumission Microsoft Store envoyee en certification, avec les nouvelles images." -ForegroundColor Green
     }
 }

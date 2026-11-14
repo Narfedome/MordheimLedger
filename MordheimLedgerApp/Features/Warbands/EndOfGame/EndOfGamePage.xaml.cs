@@ -16,7 +16,7 @@ public partial class EndOfGamePage : ContentPage
     private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(EndOfGamePageViewModel.StepIndex))
-            await FormLayout.ScrollToTopAsync();
+            await Services.UiErrors.RunAsync(FormLayout.ScrollToTopAsync, GetType().Name, showMessage: false);
     }
 
     /// <summary>Geste retour OS/matériel (ex. Android) - route vers la même commande que le ✕ de l'en-tête

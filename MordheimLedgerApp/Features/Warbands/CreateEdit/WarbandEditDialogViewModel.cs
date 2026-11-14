@@ -456,7 +456,8 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// imposée par le générateur ObservableProperty).</summary>
         private async void ShowExistingWarbandHint()
         {
-            await ShowInfoAsync(Loc["WarbandsExistingWarbandTitle"], Loc["WarbandsExistingWarbandHint"]);
+            await Services.UiErrors.RunAsync(() => ShowInfoAsync(Loc["WarbandsExistingWarbandTitle"], Loc["WarbandsExistingWarbandHint"]),
+                nameof(WarbandEditDialogViewModel), showMessage: false);
         }
 
         public WarbandEditDialogViewModel(Warband item, string title, IWarbandArchetypePickerService warbandArchetypePicker,

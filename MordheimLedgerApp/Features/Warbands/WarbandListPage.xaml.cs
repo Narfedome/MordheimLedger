@@ -40,12 +40,12 @@ public partial class WarbandListPage : ContentPage
         // Premier chargement (démarrage de l'appli, qui attend aussi l'init de la base) : via
         // LoadWarbandsCommand pour afficher le spinner (Loading.IsLoading) - retours suivants sur
         // l'onglet en silencieux, pour ne pas le faire clignoter à chaque changement d'onglet.
+        // Seulement si une écriture a eu lieu depuis le dernier chargement : sinon la liste (et la ligne
+        // sélectionnée) restent telles quelles au retour (refonte de novembre 2026).
         if (!vm.IsInitialized)
-            await vm.LoadWarbandsCommand.ExecuteAsync(null);
+            await Services.UiErrors.RunAsync(() => vm.LoadWarbandsCommand.ExecuteAsync(null), GetType().Name);
         else if (!vm.IsUpToDate)
-            // Seulement si une écriture a eu lieu depuis le dernier chargement : sinon la liste (et la ligne
-            // sélectionnée) restent telles quelles au retour (refonte de novembre 2026).
-            await vm.InitializeAsync();
+            await Services.UiErrors.RunAsync(() => vm.InitializeAsync(), GetType().Name);
 
         // Visite de cet écran, la première fois qu'on y arrive avec au moins une bande (cf.
         // AppTourService) - la bande d'exemple quand elle vient d'être chargée depuis l'accueil.

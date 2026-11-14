@@ -42,7 +42,8 @@ $env:MORDHEIMLEDGER_MSSTORE_CLIENT_SECRET = "secret-de-l-appli-entra"
 # majeure.mineure du changelog du site (Website\changelog.html et en\changelog.html).
 # Cle : compte de service Google Cloud (projet avec l'API "Google Play Android Developer API"
 # activee), invite dans Play Console > Utilisateurs et autorisations avec "Afficher les informations
-# sur l'application" et "Mettre les applications a disposition de tous les utilisateurs". La meme
+# sur l'application" et "Mettre les applications a disposition de tous les utilisateurs" (+ le droit
+# de modifier la fiche Play Store pour -UploadListingImages, sinon probablement 403 a la validation). La meme
 # cle sert pour toutes les applis du compte Play.
 # Optionnel :
 # - SERVICE_ACCOUNT_JSON : chemin d'une cle rangee ailleurs que dans Deploy\.

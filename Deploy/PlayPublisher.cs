@@ -5,7 +5,10 @@
 //
 // Deroulement d'un « edit » (transaction de la Play Console) : ouverture, upload de l'AAB, upload du
 // mapping.txt R8 (desobscurcissement des plantages), affectation de la version a la piste avec ses
-// notes de version, puis validation. Tant que l'edit n'est pas valide, rien n'est visible cote Play ;
+// notes de version, puis validation. Notes et images vont a chaque langue de fiche existante (lues
+// dans l'edit, langue par defaut comprise) : contenu francais pour fr-*, anglais pour toutes les autres.
+// Le script ne cree jamais de langue : la fiche Play est en en-GB + fr-FR, pas en en-US.
+// Tant que l'edit n'est pas valide, rien n'est visible cote Play ;
 // avec --dry-run il est supprime au lieu d'etre valide, pour tester sans rien publier.
 //
 // Arguments :
@@ -17,12 +20,13 @@
 //   --mapping <fichier> mapping.txt R8, optionnel
 //   --changelog <dossier Website> + --changelog-version <majeure.mineure> : notes de version
 //                       (« Nouveautes » de la fiche Play) reprises du changelog du site, section
-//                       <h2>majeure.mineure</h2> de changelog.html (fr-FR) et en/changelog.html (en-US)
-//   --listing-images <dossier> : remplace dans le meme edit les images de la fiche (fr-FR et en-US),
+//                       <h2>majeure.mineure</h2> de changelog.html (fiches fr-*) et en/changelog.html (les autres)
+//   --listing-images <dossier> : remplace dans le meme edit les images de chaque fiche existante,
 //                       depuis la sortie de StoreListing\Build-StoreListing.ps1 : captures telephone
-//                       phone-*.png (memes images pour les deux langues) et image de presentation
-//                       feature-graphic-fr.png / feature-graphic-en.png. Les images existantes du meme
-//                       type sont supprimees d'abord (deleteall), sinon elles s'ajouteraient aux nouvelles.
+//                       phone-*.png (memes images pour toutes les langues) et image de presentation
+//                       feature-graphic-fr.png (fiches fr-*) / feature-graphic-en.png (les autres).
+//                       Les images existantes du meme type sont supprimees d'abord (deleteall),
+//                       sinon elles s'ajouteraient aux nouvelles.
 //   --aab est facultatif avec --listing-images : sans AAB, l'edit ne touche que les images (avec
 //                       --dry-run, pour tester l'envoi sans rien publier).
 //   --dry-run           tout faire sauf valider l'edit
@@ -50,20 +54,21 @@ try
     var websiteDir = options.GetValueOrDefault("changelog");
     var dryRun = options.ContainsKey("dry-run");
 
-    var releaseNotes = new List<LocalizedText>();
+    // Notes par contenu ("fr" / "en"), affectees aux langues de la fiche une fois l'edit ouvert.
+    var notesByContent = new Dictionary<string, string>();
     if (websiteDir != null)
     {
         var changelogVersion = Required("changelog-version");
-        foreach (var (language, page) in new[] { ("fr-FR", "changelog.html"), ("en-US", Path.Combine("en", "changelog.html")) })
+        foreach (var (content, page) in new[] { ("fr", "changelog.html"), ("en", Path.Combine("en", "changelog.html")) })
         {
             var text = ReleaseNotesFromChangelog(Path.Combine(websiteDir, page), changelogVersion);
             if (text != null)
-                releaseNotes.Add(new LocalizedText { Language = language, Text = text });
+                notesByContent[content] = text;
             else
-                Console.WriteLine($"Pas de section {changelogVersion} dans {page} : pas de notes {language}.");
+                Console.WriteLine($"Pas de section {changelogVersion} dans {page} : pas de notes {content}.");
         }
-        foreach (var note in releaseNotes)
-            Console.WriteLine($"--- Notes {note.Language} ({note.Text.Length} caracteres) ---{Environment.NewLine}{note.Text}");
+        foreach (var (content, text) in notesByContent)
+            Console.WriteLine($"--- Notes {content} ({text.Length} caracteres) ---{Environment.NewLine}{text}");
     }
     if (options.ContainsKey("notes-only"))
         return 0;
@@ -88,8 +93,18 @@ try
     var committed = false;
     try
     {
+        var languages = (await service.Edits.Listings.List(package, edit.Id).ExecuteAsync()).Listings?
+            .Select(l => l.Language).ToList() ?? [];
+        if (languages.Count == 0)
+            throw new InvalidOperationException("Aucune fiche Play Store dans l'edit.");
+        Console.WriteLine($"Langues de la fiche : {string.Join(", ", languages)}.");
+        var releaseNotes = languages
+            .Where(l => notesByContent.ContainsKey(ContentFor(l)))
+            .Select(l => new LocalizedText { Language = l, Text = notesByContent[ContentFor(l)] })
+            .ToList();
+
         if (listingImages.Count > 0)
-            await UploadListingImagesAsync(service, package, edit.Id, listingImages);
+            await UploadListingImagesAsync(service, package, edit.Id, languages, listingImages);
 
         if (aabPath == null)
         {
@@ -173,9 +188,12 @@ catch (Exception e)
     return 1;
 }
 
-// Images a envoyer par langue de fiche : (langue, type, fichiers dans l'ordre d'affichage).
+// Contenu ("fr" ou "en") d'une langue de fiche Play.
+static string ContentFor(string language) => language.StartsWith("fr", StringComparison.OrdinalIgnoreCase) ? "fr" : "en";
+
+// Images a envoyer par contenu ("fr" / "en") : (contenu, type, fichiers dans l'ordre d'affichage).
 // Verifie tout avant d'ouvrir l'edit : un dossier incomplet ne doit pas vider la fiche a moitie.
-static List<(string Language, ImageType Type, string[] Files)> ListingImages(string dir)
+static List<(string Content, ImageType Type, string[] Files)> ListingImages(string dir)
 {
     var phones = Directory.Exists(dir)
         ? Directory.GetFiles(dir, "phone-*.png").OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToArray()
@@ -184,21 +202,22 @@ static List<(string Language, ImageType Type, string[] Files)> ListingImages(str
     if (phones.Length is < 2 or > 8)
         throw new ArgumentException($"{phones.Length} capture(s) phone-*.png dans {dir} : Google Play en demande de 2 a 8.");
     var result = new List<(string, ImageType, string[])>();
-    foreach (var (language, suffix) in new[] { ("fr-FR", "fr"), ("en-US", "en") })
+    foreach (var content in new[] { "fr", "en" })
     {
-        var feature = Path.Combine(dir, $"feature-graphic-{suffix}.png");
+        var feature = Path.Combine(dir, $"feature-graphic-{content}.png");
         if (!File.Exists(feature))
             throw new ArgumentException($"{feature} introuvable.");
-        result.Add((language, ImageType.PhoneScreenshots, phones));
-        result.Add((language, ImageType.FeatureGraphic, [feature]));
+        result.Add((content, ImageType.PhoneScreenshots, phones));
+        result.Add((content, ImageType.FeatureGraphic, [feature]));
     }
     return result;
 }
 
 static async Task UploadListingImagesAsync(AndroidPublisherService service, string package, string editId,
-    List<(string Language, ImageType Type, string[] Files)> images)
+    List<string> languages, List<(string Content, ImageType Type, string[] Files)> images)
 {
-    foreach (var (language, type, files) in images)
+    foreach (var language in languages)
+    foreach (var (_, type, files) in images.Where(i => i.Content == ContentFor(language)))
     {
         await service.Edits.Images.Deleteall(package, editId, language,
             Enum.Parse<EditsResource.ImagesResource.DeleteallRequest.ImageTypeEnum>(type.ToString())).ExecuteAsync();

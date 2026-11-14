@@ -158,7 +158,9 @@ Fichier C# unique lancé par `dotnet run` (application « fichier unique » de .
 Google.Apis.AndroidPublisher se restaure au premier lancement). Appelé par `Build-Release.ps1`, il ouvre un
 « edit » de la Play Console, envoie l'AAB et `mapping.txt`, affecte la version à la piste avec les notes
 extraites des changelogs, puis valide l'edit (envoi en examen). Avec `--listing-images`, il remplace aussi
-les captures téléphone et l'image de présentation, en français et en anglais.
+les captures téléphone et l'image de présentation. Notes et images vont à chaque langue qui existe déjà
+sur la fiche (aujourd'hui en-GB, la langue par défaut, et fr-FR) : contenu français pour `fr-*`, anglais
+pour les autres. Le script ne crée jamais de nouvelle langue.
 
 Lancement à la main, depuis la racine du dépôt :
 
@@ -171,7 +173,8 @@ Options utiles hors release : `--notes-only` (affiche les notes extraites, n'env
 
 Compte de service : un compte Google Cloud dont le projet a l'API « Google Play Android Developer API »,
 invité dans Play Console > Utilisateurs et autorisations avec « Afficher les informations sur
-l'application » et « Mettre les applications à disposition de tous les utilisateurs ». La même clé sert pour
+l'application » et « Mettre les applications à disposition de tous les utilisateurs », plus le droit de
+modifier la fiche Play Store pour `--listing-images` (sans lui, la validation de l'edit renvoie probablement un 403). La même clé sert pour
 toutes les applis du compte.
 
 ### `Build-Test.ps1`
@@ -213,6 +216,7 @@ l'API de Partner Center, puis la valide. En cas d'échec, la soumission reste en
 | « signature avec le debug.keystore local » | keystore ou `Build-Release.local.ps1` absent de `Deploy\` |
 | Microsoft Store : identifiants refusés | `CLIENT_SECRET` expiré, ou ID du secret copié à la place de sa valeur |
 | Microsoft Store : 403 | appli Entra sans rôle Manager dans Partner Center (voir plus haut) |
+| Google Play : 403 « The caller does not have permission » à la validation | cause probable : droit de modifier la fiche manquant au compte de service (avec `-UploadListingImages`) |
 | Google Play : version refusée | versionCode déjà utilisé : la release a été lancée sans nouveau commit |
 | Google Play : pas de notes de version | section `<h2>majeure.mineure</h2>` absente d'un des changelogs |
 | « Polices absentes dans l'AAB » | relancer : le build repart de zéro |

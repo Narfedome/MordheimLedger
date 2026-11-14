@@ -231,6 +231,21 @@ Détail : {0}</value>
   <data name="A11yExpand" xml:space="preserve">
     <value>Déplier</value>
   </data>
+  <data name="DramatisPersonaPartnerPh" xml:space="preserve">
+    <value>Partenaire (duo)</value>
+  </data>
+  <data name="DramatisPersonaNoPartner" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="DramatisPersonaPartnerHint" xml:space="preserve">
+    <value>Recruté avec {0}, qui n'apparaît plus seul à la recherche de personnages.</value>
+  </data>
+  <data name="DramatisPersonaPartnerHiddenHint" xml:space="preserve">
+    <value>Recruté avec {0}, qui représente le duo à la recherche et porte sa description.</value>
+  </data>
+  <data name="DramatisPersonaPairDescriptionPh" xml:space="preserve">
+    <value>Description du duo</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Erreur</value>
   </data>
@@ -1573,7 +1588,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>Une Poignée d'Or</value>
   </data>
   <data name="EndOfGameRecapPairDuelFormat" xml:space="preserve">
-    <value>Duel : {0}</value>
+    <value>{0} : duel - {1}</value>
   </data>
   <data name="EndOfGameRecapPairCorruptionFormat" xml:space="preserve">
     <value>{0} : corruption de {1} CO</value>
@@ -2104,7 +2119,7 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>{0} a combattu pour l'adversaire cette bataille (corrompu·e via Une Poignée d'Or) - une nouvelle recherche sera nécessaire pour la prochaine bataille.</value>
   </data>
   <data name="HistoryPairCorruptionPaidSentence" xml:space="preserve">
-    <value>La bande a corrompu Ulli &amp; Marquand pour {0} CO (Une Poignée d'Or).</value>
+    <value>La bande a corrompu {0} pour {1} CO (Une Poignée d'Or).</value>
   </data>
   <data name="HistoryPairRetentionPaidSentence" xml:space="preserve">
     <value>La bande a payé {1} CO pour garder {0} face à une tentative de corruption (Une Poignée d'Or).</value>
@@ -2113,10 +2128,10 @@ Un guerrier qui affronte au corps à corps un ennemi qu'il hait peut relancer se
     <value>{0} a saisi du matériel de la bande pour {1} CO, faute de paiement (Où est l'Argent ?).</value>
   </data>
   <data name="HistoryPairDuelWonSentence" xml:space="preserve">
-    <value>{0} a affronté Ulli &amp; Marquand en duel et a survécu (Où est l'Argent ?).</value>
+    <value>{0} a affronté {1} en duel et a survécu (Où est l'Argent ?).</value>
   </data>
   <data name="HistoryPairDuelLostSentence" xml:space="preserve">
-    <value>{0} a affronté Ulli &amp; Marquand en duel et en est mort (Où est l'Argent ?).</value>
+    <value>{0} a affronté {1} en duel et en est mort (Où est l'Argent ?).</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} a été capturé puis libéré contre rançon ({1} CO).</value>

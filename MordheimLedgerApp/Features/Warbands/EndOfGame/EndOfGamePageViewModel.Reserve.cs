@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Models;
+﻿using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Features.Warbands.CreateEdit;
 using MordheimLedgerApp.Core.Services;
@@ -132,9 +132,7 @@ public partial class EndOfGamePageViewModel
         _resolvingSeizure = true;
         try
         {
-            return (IsPairCorruptionUnaffordable || IsPairRetentionUnaffordable) && WantsEquipmentSeizure
-                ? SeizedEquipmentItems.Select(l => l.SourceId!.Value).ToList()
-                : new List<int>();
+            return AllSeizedEquipmentItems.Select(l => l.SourceId!.Value).ToList();
         }
         finally
         {

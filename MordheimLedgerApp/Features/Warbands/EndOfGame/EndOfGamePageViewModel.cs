@@ -258,14 +258,18 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     /// or. Unique consommateur direct des propriétés "Afford"/"Unaffordable" de chaque étape (voir leurs
     /// propres docs) - chacune compare ce solde APRÈS sa propre dépense (déjà incluse dans la somme
     /// ci-dessous) à zéro, jamais un solde partiel isolé.</summary>
-    public int EndOfGameTreasuryRemaining =>
+    public int EndOfGameTreasuryRemaining => TreasuryBeforeFistfulOfCrowns - PairPaymentAmountCommitted;
+
+    /// <summary>Le même solde sans les paiements « Une Poignée d'Or » : c'est lui qui décide ce qu'ils peuvent payer en or
+    /// (voir SettleFistfulOfCrowns). Séparé pour ne retrancher ensuite que l'or réellement payé - une dette réglée par
+    /// saisie ou duel ne coûte pas d'or (« instead »), elle ne doit pas bloquer les étapes suivantes.</summary>
+    private int TreasuryBeforeFistfulOfCrowns =>
         TreasuryWithGains
         - (SelectedEquippedHenchmanGroupOption?.EquipmentCost ?? 0)
         - RareItemPurchaseTotalCost
         - (SelectedNewHiredSword?.HireCost ?? 0)
         - LivingHiredSwordUpkeepEntries.Where(e => e.WillPay == true).Sum(e => e.UpkeepCost)
         - LivingDramatisPersonaUpkeepEntries.Where(e => e.WillPay == true && !e.IsWyrdstoneFee).Sum(e => e.UpkeepCost)
-        - PairPaymentAmountCommitted
         - HeroRecruitRows.Sum(r => r.Count * r.Cost)
         - HeroEquipmentTotalCost()
         - HenchmanRecruitmentTotalCost()
@@ -290,6 +294,8 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     {
         // Les lignes Marchandage dépendent des achats (prix, achat retiré) autant que du solde.
         RefreshHaggleRows();
+        // Règlement « Une Poignée d'Or » (or, saisie, duel) : dépend du solde et de la réserve.
+        SettleFistfulOfCrowns();
         OnPropertyChanged(nameof(EndOfGameTreasuryRemaining));
         OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasury));
         OnPropertyChanged(nameof(RareItemPurchaseRemainingTreasuryDisplay));
@@ -298,14 +304,6 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         OnPropertyChanged(nameof(CanAffordNewHiredSword));
         OnPropertyChanged(nameof(CanAffordEquippedHenchman));
         OnPropertyChanged(nameof(EquippedHenchmanTreasuryAfter));
-        OnPropertyChanged(nameof(IsPairCorruptionUnaffordable));
-        OnPropertyChanged(nameof(IsPairRetentionUnaffordable));
-        OnPropertyChanged(nameof(DramatisPersonaeBaselineTreasuryDisplay));
-        OnPropertyChanged(nameof(WantsEquipmentSeizure));
-        OnPropertyChanged(nameof(WantsDuel));
-        OnPropertyChanged(nameof(SeizedEquipmentItems));
-        OnPropertyChanged(nameof(SeizedEquipmentTotalValue));
-        OnPropertyChanged(nameof(SeizedEquipmentTotalDisplay));
         OnPropertyChanged(nameof(RecruitmentTreasuryDisplay));
         OnPropertyChanged(nameof(PurchasedReserveItemsCost));
         OnPropertyChanged(nameof(PendingSalesTotal));
@@ -392,7 +390,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // Rétention/"C'est l'heure de payer !" (ShowPairRetentionOption - bande qui la possède DÉJÀ),
             // mutuellement exclusives par bande - voir EndOfGamePageViewModel.PairEngagement.cs. Vivait
             // avant ça scindée entre l'étape Prisonniers (Corruption) et Dramatis Personae (Rétention).
-            if (ShowPairCorruptionOption || ShowPairRetentionOption) steps.Add(new(StepKind.PairEngagement));
+            if (HasFistfulOfCrownsStep) steps.Add(new(StepKind.PairEngagement));
             // Duel avec le meneur : sa propre étape juste après (2026-09-03, retour utilisateur - "le duel
             // n'a pas une position fixe, on l'insère là où on en a besoin") - un seul point d'ancrage
             // possible désormais que Corruption/Rétention partagent la même étape juste au-dessus (avant
@@ -679,7 +677,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
         // Morts décidées après l'étape Blessure (Fosse, duel) - voir EndOfGamePageViewModel.Roster.cs.
         PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName is nameof(PitDevouredHero) or nameof(StatTestSickHero) or nameof(WantsDuel) or nameof(WonDuel))
+            if (e.PropertyName is nameof(PitDevouredHero) or nameof(StatTestSickHero) or nameof(WantsDuel) or nameof(LostAnyDuel))
                 SyncPostInjuryDeaths();
         };
     }
@@ -776,8 +774,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
 
             BuildHiredSwordUpkeepEntries();
             BuildDramatisPersonaUpkeepEntries();
-            BuildPairCorruptionOption();
-            BuildPairRetentionOption();
+            BuildFistfulOfCrownsEntries();
             BuildExistingHenchmanTopUps();
 
             WireUpChangeNotifications();
@@ -1323,7 +1320,7 @@ public partial class EndOfGamePageViewModel : BaseViewModel
             // Marquand/Ulli trouvé ici doit se répercuter dessus - reste notifiée en direct (voir
             // ShowPairCorruptionOption, calculée plutôt que figée) au cas où le joueur reviendrait
             // en arrière après l'avoir déjà vue.
-            OnPropertyChanged(nameof(ShowPairCorruptionOption));
+            RefreshFistfulOfCrownsEntries();
         }
         // Basculer Objet/Personnage change quels résultats existent (voir IsFound) - StepLabel
         // seul suffit ici, RareItemsWithResults est déjà notifiée par la branche IsSuccess/

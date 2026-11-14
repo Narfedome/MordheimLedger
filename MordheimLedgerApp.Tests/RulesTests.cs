@@ -1,4 +1,4 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
 using MordheimLedgerApp.Core.Models;
 using MordheimLedgerApp.Core.Models.Library;
 using MordheimLedgerApp.Core.Rules;
@@ -972,6 +972,123 @@ public class RulesTests
     public void WarbandRatingRules_WarriorContribution_HiredSwordUsesBaseRatingInsteadOfFlatFive()
     {
         Assert.Equal(22 + 6, WarbandRatingRules.WarriorContribution(isLargeCreature: false, experience: 6, headCount: 1, hiredSwordBaseRating: 22));
+    }
+
+    // --- FistfulOfCrownsRules (qui porte « Une Poignée d'Or ») ---------------------------------------------
+
+    private static DramatisPersona Persona(int id, string name, bool carriesRule, int? partnerId = null, bool hidden = false) => new()
+    {
+        Id = id,
+        Name = name,
+        PairedWithDramatisPersonaId = partnerId,
+        IsHiddenFromSearchPicker = hidden,
+        SpecialRules = carriesRule ? new List<SpecialRule> { new() { Id = 99, Name = "A Fistful of Crowns" } } : new(),
+    };
+
+    [Fact]
+    public void FistfulOfCrowns_Groups_DuoIsListedOnce_VisibleHalfFirst()
+    {
+        // Ulli (moitié masquée) avant Marquand dans le catalogue : le duo reste mené par Marquand.
+        var catalog = new[] { Persona(2, "Ulli", true, partnerId: 1, hidden: true), Persona(1, "Marquand", true, partnerId: 2) };
+
+        var group = Assert.Single(FistfulOfCrownsRules.Groups(catalog, 99));
+
+        Assert.Equal(1, group.Primary.Id);
+        Assert.Equal(2, group.Partner?.Id);
+        Assert.Equal("Marquand & Ulli", group.DisplayName);
+    }
+
+    [Fact]
+    public void FistfulOfCrowns_Groups_DuoWhereOnlyOneHalfCarriesTheRule_StillHasBoth()
+    {
+        var catalog = new[] { Persona(1, "Marquand", false, partnerId: 2), Persona(2, "Ulli", true, partnerId: 1, hidden: true) };
+
+        var group = Assert.Single(FistfulOfCrownsRules.Groups(catalog, 99));
+
+        Assert.Equal(1, group.Primary.Id);
+        Assert.Equal(2, group.Partner?.Id);
+    }
+
+    [Fact]
+    public void FistfulOfCrowns_Groups_LonePersonae_AreEachTheirOwnGroup_OthersIgnored()
+    {
+        var catalog = new[]
+        {
+            Persona(1, "Marquand", true, partnerId: 2), Persona(2, "Ulli", true, partnerId: 1, hidden: true),
+            Persona(3, "Johann", false), Persona(4, "Bertha", true), Persona(5, "Aenur", true),
+        };
+
+        var groups = FistfulOfCrownsRules.Groups(catalog, 99);
+
+        Assert.Equal(new[] { 1, 4, 5 }, groups.Select(g => g.Primary.Id));
+        Assert.All(groups.Skip(1), g => Assert.Null(g.Partner));
+        Assert.Equal("Bertha", groups[1].DisplayName);
+        Assert.True(groups[0].Contains(2));
+        Assert.False(groups[1].Contains(3));
+    }
+
+    [Fact]
+    public void FistfulOfCrowns_Groups_RuleMissingFromCatalog_NoGroup() =>
+        Assert.Empty(FistfulOfCrownsRules.Groups(new[] { Persona(1, "Marquand", true) }, null));
+
+    // --- PairDebtRules.SettleInOrder (plusieurs paiements la même partie) ------------------------------------
+
+    [Fact]
+    public void PairDebt_SettleInOrder_LonePayment_PaidInGoldWhenAffordable()
+    {
+        var outcome = Assert.Single(PairDebtRules.SettleInOrder(new[] { 40 }, 40, new[] { ("Épée", 10) }, l => l.Item2));
+
+        Assert.Equal(PairDebtPayment.Gold, outcome.Payment);
+        Assert.Empty(outcome.SeizedLines);
+    }
+
+    [Fact]
+    public void PairDebt_SettleInOrder_GoldPaidFirst_LeavesLessForTheNext()
+    {
+        // 100 CO : 70 payés en or pour le premier, il en reste 30 pour les 50 du second -> la réserve (60) paie.
+        var outcomes = PairDebtRules.SettleInOrder(new[] { 70, 50 }, 100, new[] { ("Épée en Gromril", 60) }, l => l.Item2);
+
+        Assert.Equal(PairDebtPayment.Gold, outcomes[0].Payment);
+        Assert.Equal(PairDebtPayment.SeizeEquipment, outcomes[1].Payment);
+        Assert.Equal(new[] { ("Épée en Gromril", 60) }, outcomes[1].SeizedLines);
+    }
+
+    [Fact]
+    public void PairDebt_SettleInOrder_TwoSeizures_NeverTakeTheSameLine()
+    {
+        var reserve = new[] { ("Arc", 30), ("Épée", 30), ("Hache", 10) };
+
+        var outcomes = PairDebtRules.SettleInOrder(new[] { 30, 30 }, 0, reserve, l => l.Item2);
+
+        Assert.Equal(new[] { ("Arc", 30) }, outcomes[0].SeizedLines);
+        Assert.Equal(new[] { ("Épée", 30) }, outcomes[1].SeizedLines);
+    }
+
+    [Fact]
+    public void PairDebt_SettleInOrder_ReserveEmptiedByTheFirst_SecondIsADuel()
+    {
+        var outcomes = PairDebtRules.SettleInOrder(new[] { 30, 20 }, 0, new[] { ("Arc", 30), ("Hache", 10) }, l => l.Item2);
+
+        Assert.Equal(PairDebtPayment.SeizeEquipment, outcomes[0].Payment);
+        Assert.Equal(PairDebtPayment.Duel, outcomes[1].Payment);
+        Assert.Empty(outcomes[1].SeizedLines);
+    }
+
+    [Fact]
+    public void PairDebt_SettleInOrder_NothingDue_TouchesNeitherGoldNorReserve()
+    {
+        var outcomes = PairDebtRules.SettleInOrder(new[] { 0, 50 }, 50, new[] { ("Arc", 30) }, l => l.Item2);
+
+        Assert.Equal(PairDebtPayment.None, outcomes[0].Payment);
+        Assert.Equal(PairDebtPayment.Gold, outcomes[1].Payment);
+    }
+
+    [Fact]
+    public void PairDebt_SettleInOrder_LonePersonaTooExpensive_DuelWhenNoReserve()
+    {
+        var outcome = Assert.Single(PairDebtRules.SettleInOrder(new[] { 80 }, 20, Array.Empty<(string, int)>(), l => l.Item2));
+
+        Assert.Equal(PairDebtPayment.Duel, outcome.Payment);
     }
 
     // --- PairDebtRules (« Où est l'Argent ? ») ----------------------------------------------------

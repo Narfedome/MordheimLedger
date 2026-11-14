@@ -231,6 +231,21 @@ Details: {0}</value>
   <data name="A11yExpand" xml:space="preserve">
     <value>Expand</value>
   </data>
+  <data name="DramatisPersonaPartnerPh" xml:space="preserve">
+    <value>Partner (duo)</value>
+  </data>
+  <data name="DramatisPersonaNoPartner" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="DramatisPersonaPartnerHint" xml:space="preserve">
+    <value>Hired together with {0}, who no longer shows up alone in the character search.</value>
+  </data>
+  <data name="DramatisPersonaPartnerHiddenHint" xml:space="preserve">
+    <value>Hired together with {0}, who stands for the duo in the search and holds its description.</value>
+  </data>
+  <data name="DramatisPersonaPairDescriptionPh" xml:space="preserve">
+    <value>Duo description</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Error</value>
   </data>
@@ -1570,10 +1585,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>{0}: dismissed</value>
   </data>
   <data name="EndOfGameRecapPairHeading" xml:space="preserve">
-    <value>A Handful of Gold</value>
+    <value>A Fistful of Crowns</value>
   </data>
   <data name="EndOfGameRecapPairDuelFormat" xml:space="preserve">
-    <value>Duel: {0}</value>
+    <value>{0}: duel - {1}</value>
   </data>
   <data name="EndOfGameRecapPairCorruptionFormat" xml:space="preserve">
     <value>{0}: corruption of {1} gc</value>
@@ -2104,7 +2119,7 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>{0} fought for the enemy this battle (bribed via A Fistful of Crowns) - a new search will be needed before the next battle.</value>
   </data>
   <data name="HistoryPairCorruptionPaidSentence" xml:space="preserve">
-    <value>The warband bribed Ulli &amp; Marquand for {0} gc (A Fistful of Crowns).</value>
+    <value>The warband bribed {0} for {1} gc (A Fistful of Crowns).</value>
   </data>
   <data name="HistoryPairRetentionPaidSentence" xml:space="preserve">
     <value>The warband paid {1} gc to keep {0} against a bribery attempt (A Fistful of Crowns).</value>
@@ -2113,10 +2128,10 @@ Warriors who fight enemies they hate in hand-to-hand combat may re-roll any miss
     <value>{0} seized {1} gc worth of the warband's equipment for lack of payment (Where's the Money?).</value>
   </data>
   <data name="HistoryPairDuelWonSentence" xml:space="preserve">
-    <value>{0} fought Ulli &amp; Marquand in a duel and survived (Where's the Money?).</value>
+    <value>{0} fought {1} in a duel and survived (Where's the Money?).</value>
   </data>
   <data name="HistoryPairDuelLostSentence" xml:space="preserve">
-    <value>{0} fought Ulli &amp; Marquand in a duel and died (Where's the Money?).</value>
+    <value>{0} fought {1} in a duel and died (Where's the Money?).</value>
   </data>
   <data name="HistoryCapturedRansomedSentence" xml:space="preserve">
     <value>{0} was captured and ransomed back for {1} gc.</value>

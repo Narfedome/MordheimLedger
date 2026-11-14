@@ -262,43 +262,16 @@ public partial class EndOfGamePageViewModel
         }
         await sequence.ApplyUpkeepAsync(Warband, decisions);
 
-        // Une Poignée d'Or (2026-09-01) : case optionnelle pour une bande qui n'a PAS déjà Ulli &
-        // Marquand (voir EndOfGamePageViewModel.ShowPairCorruptionOption) - elle vient de gagner leur
-        // contrôle par corruption réussie, donc paie SA PROPRE trésorerie (jamais celle qui les a
-        // recrutés à l'origine, voir la SpecialRule "A Fistful of Crowns"). Ne recrute PAS réellement la
-        // paire ici (aucune ligne Warrior créée) - purement le paiement, cohérent avec "sur un autre
-        // appareil pas celle présente en local" (retour utilisateur) : cette bande n'a pas forcément
-        // accès aux fiches Marquand/Ulli elles-mêmes.
-        //
-        // !IsPairCorruptionUnaffordable (2026-09-04, retour utilisateur - vrai bug trouvé en creusant un
-        // signalement sur les valeurs de la réserve) : payer en or ne se fait QUE si la bande peut réellement
-        // payer - "instead" dans "if the controlling warband can't pay a successful bribe... the pair
-        // INSTEAD seizes an equal value of equipment" est une lecture stricte confirmée par l'utilisateur
-        // (aucun or ne sort du tout dans le cas impayable, Céder du matériel/Duel couvre l'INTÉGRALITÉ du
-        // montant) - sans ce garde-fou, la trésorerie était débitée du montant COMPLET ICI, EN PLUS de la
-        // saisie d'équipement/du duel appliqués séparément (ApplyPairEquipmentSeizureIfNeededAsync/
-        // ApplyPairDuelIfNeededAsync juste en dessous) : double paiement (or perdu ET objets/meneur
-        // perdus pour la même dette).
-        if (ShowPairCorruptionOption && WantsToRecordPairCorruption && !IsPairCorruptionUnaffordable
-            && int.TryParse(PairCorruptionAmount, out var corruptionAmount))
+        // Une Poignée d'Or : corruption (la bande gagne le contrôle d'un personnage qu'elle n'avait pas, sans fiche créée
+        // ici - il peut être sur l'appareil d'un autre joueur) ou rétention (ce qu'elle a payé pour garder le sien).
+        // Seulement les paiements réglés en or : saisie et duel couvrent toute la dette (« instead », lecture stricte
+        // confirmée par l'utilisateur - sinon double paiement).
+        foreach (var entry in ActiveFistfulOfCrownsEntries.Where(e => e.Payment == PairDebtPayment.Gold))
         {
-            await sequence.PayPairAsync(Warband, corruptionAmount);
-            sentences.Add(string.Format(Loc["HistoryPairCorruptionPaidSentence"], corruptionAmount));
-        }
-
-        // "C'est l'heure de payer !" (2026-09-01) - cas symétrique pour une bande qui possède DÉJÀ Ulli &
-        // Marquand (EndOfGamePageViewModel.ShowPairRetentionOption) : ce qu'elle a dû payer pour les
-        // GARDER après une tentative adverse ("seul le camp qui obtient OU GARDE le contrôle paie", voir
-        // la SpecialRule "A Fistful of Crowns"). 0/vide (pas de tentative) ne fait rien - PairRetentionAmount
-        // reste alors vide, int.TryParse échoue, ce bloc est un no-op. Appliqué en tout dernier (après la
-        // boucle Payer/Renvoyer ci-dessus) - "à la fin de tous les décomptes", retour utilisateur. Même
-        // garde-fou !IsPairRetentionUnaffordable que la Corruption ci-dessus (2026-09-04) - double
-        // paiement sinon.
-        if (ShowPairRetentionOption && !IsPairRetentionUnaffordable
-            && int.TryParse(PairRetentionAmount, out var retentionAmount) && retentionAmount > 0)
-        {
-            await sequence.PayPairAsync(Warband, retentionAmount);
-            sentences.Add(string.Format(Loc["HistoryPairRetentionPaidSentence"], PairRetentionLabel, retentionAmount));
+            await sequence.PayPairAsync(Warband, entry.AmountDue);
+            sentences.Add(entry.IsCorruptionPaid
+                ? string.Format(Loc["HistoryPairCorruptionPaidSentence"], entry.Name, entry.AmountDue)
+                : string.Format(Loc["HistoryPairRetentionPaidSentence"], entry.Name, entry.AmountDue));
         }
     }
 
@@ -309,12 +282,9 @@ public partial class EndOfGamePageViewModel
     /// ApplyReserveAsync ; ici, seulement la phrase d'historique.</summary>
     private Task ApplyPairEquipmentSeizureIfNeededAsync(List<string> sentences)
     {
-        var isUnaffordable = IsPairCorruptionUnaffordable || IsPairRetentionUnaffordable;
-        if (Warband is null || !isUnaffordable || !WantsEquipmentSeizure || SeizedEquipmentItems.Count == 0)
-            return Task.CompletedTask;
-
-        var pairLabel = IsPairCorruptionUnaffordable ? PairCorruptionLabel : PairRetentionLabel;
-        sentences.Add(string.Format(Loc["HistoryPairEquipmentSeizedSentence"], pairLabel, SeizedEquipmentTotalValue));
+        if (Warband is null) return Task.CompletedTask;
+        foreach (var entry in ActiveFistfulOfCrownsEntries.Where(e => e.WantsEquipmentSeizure && e.SeizedEquipmentItems.Count > 0))
+            sentences.Add(string.Format(Loc["HistoryPairEquipmentSeizedSentence"], entry.Name, entry.SeizedEquipmentTotalValue));
         return Task.CompletedTask;
     }
 
@@ -330,21 +300,22 @@ public partial class EndOfGamePageViewModel
     /// Vendu aux Fosses (WonPitFight/SoldToPitsRerollRoll) - absent du texte de cette règle-ci.</summary>
     private async Task ApplyPairDuelIfNeededAsync(List<string> sentences)
     {
-        var isUnaffordable = IsPairCorruptionUnaffordable || IsPairRetentionUnaffordable;
-        if (Warband is null || !isUnaffordable || !WantsDuel) return;
-
-        var leaderRow = DuelLeaderRow;
-        if (leaderRow is null) return;
+        if (Warband is null || !WantsDuel || DuelLeaderRow is not { } leaderRow) return;
         var warrior = leaderRow.Warrior;
 
-        if (WonDuel)
+        // Duels dans l'ordre des cartes : le premier perdu tue le meneur, les suivants n'ont pas lieu.
+        foreach (var entry in DuelEntries)
         {
-            sentences.Add(string.Format(Loc["HistoryPairDuelWonSentence"], warrior.Name));
+            if (entry.WonDuel)
+            {
+                sentences.Add(string.Format(Loc["HistoryPairDuelWonSentence"], warrior.Name, entry.Name));
+                continue;
+            }
+
+            sentences.Add(string.Format(Loc["HistoryPairDuelLostSentence"], warrior.Name, entry.Name));
+            await new PostBattleSequenceService(_warbandService).LoseDuelAsync(warrior);
             return;
         }
-
-        sentences.Add(string.Format(Loc["HistoryPairDuelLostSentence"], warrior.Name));
-        await new PostBattleSequenceService(_warbandService).LoseDuelAsync(warrior);
     }
 
     /// <summary>Étape "Francs-Tireurs" (EndOfGamePageViewModel.IsHiredSwordsStep) - règle la solde de

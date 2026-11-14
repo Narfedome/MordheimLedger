@@ -78,11 +78,15 @@ public partial class DramatisPersonaViewModel : BaseViewModel
             (r, m) => _ = ((DramatisPersonaViewModel)r).LoadData());
     }
 
+    /// <summary>Tous les Dramatis Personae (non filtrés) : choix du partenaire dans le formulaire.</summary>
+    private List<DramatisPersona> _allPersonae = new();
+
     public async Task InitializeAsync() => await Loading.RunAsync(LoadData);
 
     private async Task LoadData()
     {
         var items = await _libraryService.GetDramatisPersonaeAsync(LocalizationService.Instance.Language);
+        _allPersonae = items;
         _warbandArchetypes = await _libraryService.GetWarbandArchetypesAsync(LocalizationService.Instance.Language);
         _equipmentItems = await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language);
 
@@ -138,7 +142,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         var newItem = new DramatisPersona();
         var dialogViewModel = new DramatisPersonaEditDialogViewModel(newItem, Loc["DramatisPersonaCreateTitle"],
             _warbandPicker, _equipmentPicker, _skillPicker, _specialRulePicker, _magicSchoolPicker, _detailDialogs,
-            _libraryService, _warbandArchetypes, Array.Empty<EquipmentItem>());
+            _libraryService, _warbandArchetypes, Array.Empty<EquipmentItem>(), _allPersonae);
         if (await ShowFormAsync(new DramatisPersonaEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveDramatisPersonaAsync(newItem, LocalizationService.Instance.Language);
@@ -212,7 +216,7 @@ public partial class DramatisPersonaViewModel : BaseViewModel
         var initialEquipment = _equipmentItems.Where(e => s.StartingEquipmentIds.Contains(e.Id)).ToList();
         var dialogViewModel = new DramatisPersonaEditDialogViewModel(copy, Loc["DramatisPersonaEditTitle"],
             _warbandPicker, _equipmentPicker, _skillPicker, _specialRulePicker, _magicSchoolPicker, _detailDialogs,
-            _libraryService, _warbandArchetypes, initialEquipment);
+            _libraryService, _warbandArchetypes, initialEquipment, _allPersonae);
         if (await ShowFormAsync(new DramatisPersonaEditForm(dialogViewModel)) != true) return;
 
         await _libraryService.SaveDramatisPersonaAsync(copy, LocalizationService.Instance.Language);

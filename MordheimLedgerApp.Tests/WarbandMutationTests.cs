@@ -1,4 +1,5 @@
-using MordheimLedgerApp.Core.Data;
+﻿using MordheimLedgerApp.Core.Data;
+using MordheimLedgerApp.Core.Rules;
 using MordheimLedgerApp.Core.Data.Entities;
 using MordheimLedgerApp.Core.Data.Entities.Library;
 using MordheimLedgerApp.Core.Models;
@@ -301,6 +302,121 @@ public class WarbandMutationTests : IDisposable
         await _warbands.RunInTransactionAsync(() => _warbands.DeleteWarriorAsync(otto.Id));
         Assert.Empty(await _warbands.GetWarriorsAsync(warband.Id, "en"));
         Assert.False(File.Exists(photo));
+    }
+
+    // --- Duo de Dramatis Personae (partenaire choisi dans le Codex, 2026-11-14) ---------------------------------
+
+    private async Task<(DramatisPersona Marquand, DramatisPersona Ulli, DramatisPersona Other)> PersonaeAsync()
+    {
+        var all = await _library.GetDramatisPersonaeAsync("en");
+        var marquand = all.Single(p => p.OfficialId == "persona.marquand-volker");
+        var ulli = all.Single(p => p.OfficialId == "persona.ulli-leitpold");
+        var other = all.First(p => p.PairedWithDramatisPersonaId is null && p.Id != marquand.Id && p.Id != ulli.Id);
+        return (marquand, ulli, other);
+    }
+
+    private async Task<DramatisPersona> PersonaAsync(int id) => (await _library.GetDramatisPersonaeAsync("en")).Single(p => p.Id == id);
+
+    // --- « Une Poignée d'Or » portée par d'autres personnages (2026-11-14) ---------------------------------------
+
+    private async Task<int> FistfulOfCrownsRuleIdAsync() =>
+        (await _library.GetSpecialRulesAsync("en")).Single(r => r.OfficialId == OfficialIds.FistfulOfCrownsRule).Id;
+
+    [Fact]
+    public async Task FistfulOfCrowns_OfficialCatalog_IsOneDuo_MarquandFirst()
+    {
+        var (marquand, ulli, _) = await PersonaeAsync();
+
+        var groups = FistfulOfCrownsRules.Groups(await _library.GetDramatisPersonaeAsync("en"), await FistfulOfCrownsRuleIdAsync());
+
+        var group = Assert.Single(groups);
+        Assert.Equal(marquand.Id, group.Primary.Id);
+        Assert.Equal(ulli.Id, group.Partner?.Id);
+    }
+
+    [Fact]
+    public async Task FistfulOfCrowns_RuleGivenToALonePersona_AddsASoloGroup()
+    {
+        var (marquand, _, other) = await PersonaeAsync();
+        var ruleId = await FistfulOfCrownsRuleIdAsync();
+        other.SpecialRules.Add((await _library.GetSpecialRulesAsync("en")).Single(r => r.Id == ruleId));
+        await _library.SaveDramatisPersonaAsync(other, "en");
+
+        var groups = FistfulOfCrownsRules.Groups(await _library.GetDramatisPersonaeAsync("en"), ruleId);
+
+        Assert.Equal(2, groups.Count);
+        Assert.Contains(groups, g => g.Primary.Id == marquand.Id && g.Partner is not null);
+        var solo = Assert.Single(groups, g => g.Primary.Id == other.Id);
+        Assert.Null(solo.Partner);
+        Assert.Equal(other.Name, solo.DisplayName);
+    }
+
+    [Fact]
+    public async Task DramatisPersonaPartner_OfficialDuo_IsSymmetric_WithUlliHidden()
+    {
+        var (marquand, ulli, _) = await PersonaeAsync();
+
+        Assert.Equal(ulli.Id, marquand.PairedWithDramatisPersonaId);
+        Assert.Equal(marquand.Id, ulli.PairedWithDramatisPersonaId);
+        Assert.False(marquand.IsHiddenFromSearchPicker);
+        Assert.True(ulli.IsHiddenFromSearchPicker);
+    }
+
+    [Fact]
+    public async Task DramatisPersonaPartner_NewPartner_LinksBothWays_AndUnlinksTheOldOne()
+    {
+        var (marquand, ulli, other) = await PersonaeAsync();
+
+        marquand.PairedWithDramatisPersonaId = other.Id;
+        marquand.PairDescription = "A new duo.";
+        await _library.SaveDramatisPersonaAsync(marquand, "en");
+
+        var newPartner = await PersonaAsync(other.Id);
+        Assert.Equal(marquand.Id, newPartner.PairedWithDramatisPersonaId);
+        Assert.True(newPartner.IsHiddenFromSearchPicker);
+        Assert.Equal(ContentSource.Modified, newPartner.Source);
+
+        var formerPartner = await PersonaAsync(ulli.Id);
+        Assert.Null(formerPartner.PairedWithDramatisPersonaId);
+        Assert.False(formerPartner.IsHiddenFromSearchPicker);
+
+        var reloaded = await PersonaAsync(marquand.Id);
+        Assert.False(reloaded.IsHiddenFromSearchPicker);
+        Assert.Equal("A new duo.", reloaded.PairDescription);
+    }
+
+    [Fact]
+    public async Task DramatisPersonaPartner_Removed_BothBecomeVisibleSingles()
+    {
+        var (marquand, ulli, _) = await PersonaeAsync();
+
+        ulli.PairedWithDramatisPersonaId = null;
+        await _library.SaveDramatisPersonaAsync(ulli, "en");
+
+        var u = await PersonaAsync(ulli.Id);
+        var m = await PersonaAsync(marquand.Id);
+        Assert.Null(u.PairedWithDramatisPersonaId);
+        Assert.False(u.IsHiddenFromSearchPicker);
+        Assert.Null(m.PairedWithDramatisPersonaId);
+        Assert.False(m.IsHiddenFromSearchPicker);
+        Assert.Null(m.PairDescription);
+    }
+
+    [Fact]
+    public async Task DramatisPersonaPartner_EditingTheHiddenHalf_KeepsTheRoles()
+    {
+        var (marquand, ulli, _) = await PersonaeAsync();
+
+        ulli.Name = "Ulli the Bold";
+        await _library.SaveDramatisPersonaAsync(ulli, "en");
+
+        var u = await PersonaAsync(ulli.Id);
+        var m = await PersonaAsync(marquand.Id);
+        Assert.True(u.IsHiddenFromSearchPicker);
+        Assert.False(m.IsHiddenFromSearchPicker);
+        Assert.Equal(marquand.Id, u.PairedWithDramatisPersonaId);
+        Assert.Equal(ulli.Id, m.PairedWithDramatisPersonaId);
+        Assert.False(string.IsNullOrWhiteSpace(m.PairDescription));
     }
 
     /// <summary>Garde-fou de WarriorPhotoStore.Delete : un PhotoPath qui sortirait du dossier des photos

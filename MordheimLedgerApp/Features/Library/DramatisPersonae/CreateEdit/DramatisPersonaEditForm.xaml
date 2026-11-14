@@ -88,6 +88,22 @@
                     <Editor Text="{Binding Item.Description}" HeightRequest="160"/>
                 </VerticalStackLayout>
 
+                <!-- Duo (2026-11-14) : partenaire recruté avec ce personnage, comme Ulli et Marquand. Le lien est rendu
+                     symétrique à l'enregistrement (LibraryService.SyncDramatisPersonaPartnerAsync) ; la moitié qui
+                     choisit le partenaire porte la description du duo, l'autre est masquée de la recherche. -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Loc DramatisPersonaPartnerPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <components:SelectFieldView Title="{loc:Loc DramatisPersonaPartnerPh}" ItemsSource="{Binding PartnerOptions}"
+                            SelectedItem="{Binding SelectedPartnerLabel}"/>
+                    <Label Text="{Binding PartnerHint}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"
+                           IsVisible="{Binding HasPartner}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="4" IsVisible="{Binding ShowPairDescription}">
+                    <Label Text="{loc:Loc DramatisPersonaPairDescriptionPh}" FontSize="12" TextColor="{DynamicResource AppTextMuted}"/>
+                    <Editor Text="{Binding Item.PairDescription}" HeightRequest="120"/>
+                </VerticalStackLayout>
+
                 <!-- Profil - même composant/mode édition que HiredSwordEditDialog. -->
                 <components:StatRowView Item="{Binding Item}" MovementText="{Binding MovementInput}" IsEditable="True"/>
 

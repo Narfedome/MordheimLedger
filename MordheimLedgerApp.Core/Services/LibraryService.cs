@@ -700,6 +700,15 @@ public class LibraryService : ILibraryService
         await _db.Initialization;
         await ApplyTranslationsAsync(dramatisPersona, languageCode);
 
+        var previousPartnerId = dramatisPersona.Id == 0 ? null
+            : (await _db.Connection.FindAsync<DramatisPersonaEntity>(dramatisPersona.Id))?.PairedWithDramatisPersonaId;
+        var partnerChanged = dramatisPersona.PairedWithDramatisPersonaId != previousPartnerId;
+        // Nouveau partenaire choisi ici : ce personnage devient la moitié principale (visible à la recherche) ; plus de
+        // partenaire : il redevient un personnage seul, visible. Partenaire inchangé : rôles intacts (modifier la
+        // moitié masquée ne doit pas inverser la paire).
+        if (partnerChanged) dramatisPersona.IsHiddenFromSearchPicker = false;
+        if (dramatisPersona.PairedWithDramatisPersonaId is null) dramatisPersona.PairDescription = null;
+
         if (dramatisPersona.Id == 0)
         {
             var entity = dramatisPersona.ToEntity();
@@ -713,10 +722,45 @@ public class LibraryService : ILibraryService
             await _db.Connection.UpdateAsync(dramatisPersona.ToEntity());
         }
 
+        await SyncDramatisPersonaPartnerAsync(dramatisPersona.Id, dramatisPersona.PairedWithDramatisPersonaId, partnerChanged);
         await SaveDramatisPersonaRestrictionsAsync(dramatisPersona.Id, dramatisPersona.RestrictedToWarbandArchetypeIds);
         await SaveDramatisPersonaSpecialRulesAsync(dramatisPersona.Id, dramatisPersona.SpecialRules);
         await SaveDramatisPersonaEquipmentAsync(dramatisPersona.Id, dramatisPersona.StartingEquipmentIds);
         await SaveDramatisPersonaSkillsAsync(dramatisPersona.Id, dramatisPersona.Skills);
+    }
+
+    /// <summary>Lien de paire toujours symétrique (Ulli pointe vers Marquand et inversement) : le partenaire choisi pointe
+    /// en retour vers ce personnage, et tout autre lien vers l'un ou l'autre est défait (un ancien partenaire redevient un
+    /// personnage seul, visible à la recherche). Un nouveau partenaire est masqué de la recherche : il est recruté avec la
+    /// moitié principale. Une ligne officielle touchée passe en Modifiée, comme toute édition.</summary>
+    private async Task SyncDramatisPersonaPartnerAsync(int personaId, int? partnerId, bool partnerChanged)
+    {
+        var all = await _db.Connection.Table<DramatisPersonaEntity>().ToListAsync();
+        foreach (var other in all.Where(o => o.Id != personaId))
+        {
+            var isPartner = other.Id == partnerId;
+            var pointsHere = other.PairedWithDramatisPersonaId == personaId;
+            var pointsToPartner = partnerId is not null && other.PairedWithDramatisPersonaId == partnerId;
+            var changed = false;
+
+            if (isPartner)
+            {
+                if (other.PairedWithDramatisPersonaId != personaId) { other.PairedWithDramatisPersonaId = personaId; changed = true; }
+                if (partnerChanged && !other.IsHiddenFromSearchPicker) { other.IsHiddenFromSearchPicker = true; changed = true; }
+                if (partnerChanged && other.PairDescriptionKey is not null) { other.PairDescriptionKey = null; changed = true; }
+            }
+            else if (pointsHere || pointsToPartner)
+            {
+                other.PairedWithDramatisPersonaId = null;
+                other.IsHiddenFromSearchPicker = false;
+                other.PairDescriptionKey = null;
+                changed = true;
+            }
+
+            if (!changed) continue;
+            if (other.Source == ContentSource.Official) other.Source = ContentSource.Modified;
+            await _db.Connection.UpdateAsync(other);
+        }
     }
 
     public async Task SaveInjuryAsync(Injury injury, string languageCode)
@@ -900,6 +944,10 @@ public class LibraryService : ILibraryService
         m.DescriptionKey = string.IsNullOrWhiteSpace(m.Description)
             ? null
             : await SetTranslationAsync(m.DescriptionKey, languageCode, m.Description);
+        // Description du duo (2026-11-14, éditable depuis le Codex) : portée par la moitié principale d'une paire.
+        m.PairDescriptionKey = string.IsNullOrWhiteSpace(m.PairDescription)
+            ? null
+            : await SetTranslationAsync(m.PairDescriptionKey, languageCode, m.PairDescription);
     }
 
     private async Task ApplyTranslationsAsync(Injury m, string languageCode)

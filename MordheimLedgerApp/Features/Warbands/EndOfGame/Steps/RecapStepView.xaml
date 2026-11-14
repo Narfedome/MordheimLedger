@@ -99,10 +99,16 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding PairEngagementRecapDisplay, Converter={StaticResource IsNotNullConverter}}">
+                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding HasPairEngagementRecap}">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{loc:Loc EndOfGameRecapPairHeading}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource AppTextMuted}"/>
-                        <Label Text="{Binding PairEngagementRecapDisplay}" FontSize="13"/>
+                        <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding PairEngagementRecapLines}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Label Text="{Binding .}" FontSize="13"/>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 

@@ -974,6 +974,61 @@ public class RulesTests
         Assert.Equal(22 + 6, WarbandRatingRules.WarriorContribution(isLargeCreature: false, experience: 6, headCount: 1, hiredSwordBaseRating: 22));
     }
 
+    // --- RefundRules ---------------------------------------------------------------------------
+
+    private static WarriorEquipment Carried(int id, int cost, bool isFreeDagger = false, int? materialMultiplier = null, int quantity = 1) => new()
+    {
+        Id = id,
+        Item = new EquipmentItem { Id = id, Cost = cost, IsFreeDagger = isFreeDagger },
+        MaterialRule = materialMultiplier is { } m ? new SpecialRule { CostMultiplier = m } : null,
+        Quantity = quantity,
+    };
+
+    [Fact]
+    public void RefundRules_HenchmanGroupDeletion_RefundsEveryModel()
+    {
+        // 3 Guerriers à 25 CO, épée (10) et dague gratuite : 3 × (25 + 10) payés.
+        var group = new Warrior { IsHero = false, HeadCount = 3, Cost = 25 };
+        var equipment = new[] { Carried(1, 2, isFreeDagger: true), Carried(2, 10) };
+
+        Assert.Equal(105, RefundRules.DeletionRefund(group, equipment, []));
+    }
+
+    [Fact]
+    public void RefundRules_HeroDeletion_RefundsOnce_IncludingMaterialAndMutations()
+    {
+        var hero = new Warrior { IsHero = true, HeadCount = 1, Cost = 60 };
+        var equipment = new[] { Carried(1, 5, quantity: 2), Carried(2, 15, materialMultiplier: 3) };
+
+        Assert.Equal(60 + 10 + 45 + 20, RefundRules.DeletionRefund(hero, equipment, [new Mutation { Cost = 20 }]));
+    }
+
+    [Fact]
+    public void RefundRules_FreeDagger_ReplaysPurchaseOrder()
+    {
+        // 1re dague gratuite, 2e payée ; une dague en Gromril n'est jamais gratuite mais compte comme dague
+        // portée (même règle qu'à l'achat) : la dague normale achetée ensuite était payée.
+        Assert.Equal(2, RefundRules.EquipmentCostPerModel([Carried(1, 2, isFreeDagger: true), Carried(2, 2, isFreeDagger: true)]));
+        Assert.Equal(6 + 2, RefundRules.EquipmentCostPerModel([Carried(1, 2, isFreeDagger: true, materialMultiplier: 3), Carried(2, 2, isFreeDagger: true)]));
+    }
+
+    [Fact]
+    public void RefundRules_PartialRefund_KeepsFreeDaggerEligibilityOfTheWholeBaseline()
+    {
+        var baseline = new[] { Carried(1, 2, isFreeDagger: true), Carried(2, 2, isFreeDagger: true), Carried(3, 10) };
+
+        // Seule la 2e dague (payée) est retirée : 2, pas 0.
+        Assert.Equal(2, RefundRules.EquipmentCostPerModel(baseline, e => e.Id == 2));
+    }
+
+    [Fact]
+    public void RefundRules_PayingModels_GroupCountsHeads_HeroAlwaysOne()
+    {
+        Assert.Equal(4, RefundRules.PayingModels(new Warrior { IsHero = false, HeadCount = 4 }));
+        Assert.Equal(1, RefundRules.PayingModels(new Warrior { IsHero = true, HeadCount = 4 }));
+        Assert.Equal(1, RefundRules.PayingModels(new Warrior { IsHero = false, HeadCount = 0 }));
+    }
+
     // --- EquipmentPricing -----------------------------------------------------------------------
 
     [Fact]

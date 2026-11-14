@@ -73,7 +73,8 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
     public DramatisPersonaEditDialogViewModel(DramatisPersona item, string title, IWarbandArchetypePickerService warbandPicker,
         IEquipmentPickerService equipmentPicker, ISkillPickerService skillPicker, ISpecialRulePickerService specialRulePicker,
         IMagicSchoolPickerService magicSchoolPicker, IDetailDialogService detailDialogs, ILibraryService libraryService,
-        IReadOnlyList<WarbandArchetype> allWarbandArchetypes, IReadOnlyList<EquipmentItem> initialStartingEquipment)
+        IReadOnlyList<WarbandArchetype> allWarbandArchetypes, IReadOnlyList<EquipmentItem> initialStartingEquipment,
+        IReadOnlyList<DramatisPersona>? allPersonae = null)
     {
         this.item = item;
         this.title = title;
@@ -99,12 +100,61 @@ public partial class DramatisPersonaEditDialogViewModel : DialogViewModel<bool>
         Skills = new ObservableCollection<Skill>(item.Skills);
         MagicSchools = new ObservableCollection<MagicSchool>(item.MagicSchool is { } school ? new[] { school } : Array.Empty<MagicSchool>());
         AlternativePaymentItems = new ObservableCollection<EquipmentItem>(item.AlternativePaymentItem is { } altItem ? new[] { altItem } : Array.Empty<EquipmentItem>());
+
+        _originalPartnerId = item.PairedWithDramatisPersonaId;
+        selectedPartnerLabel = InitializePartners(allPersonae ?? Array.Empty<DramatisPersona>());
     }
 
     partial void OnSelectedFeeKindLabelChanged(string value)
     {
         if (_feeKindByLabel.TryGetValue(value, out var kind))
             Item.FeeKind = kind;
+    }
+
+    // --- Duo (2026-11-14) : partenaire recruté avec ce personnage, comme Ulli et Marquand ----------------------------
+
+    private readonly Dictionary<string, DramatisPersona?> _partnerByLabel = new();
+    private readonly int? _originalPartnerId;
+
+    /// <summary>« Aucun » puis les autres Dramatis Personae, par nom.</summary>
+    public ObservableCollection<string> PartnerOptions { get; } = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPartner))]
+    [NotifyPropertyChangedFor(nameof(PartnerHint))]
+    [NotifyPropertyChangedFor(nameof(ShowPairDescription))]
+    private string selectedPartnerLabel = string.Empty;
+
+    partial void OnSelectedPartnerLabelChanged(string value)
+    {
+        if (_partnerByLabel.TryGetValue(value, out var partner))
+            Item.PairedWithDramatisPersonaId = partner?.Id;
+    }
+
+    private DramatisPersona? SelectedPartner => _partnerByLabel.GetValueOrDefault(SelectedPartnerLabel);
+    public bool HasPartner => SelectedPartner is not null;
+
+    /// <summary>Moitié masquée d'un duo existant (Ulli) : la description du duo est portée par l'autre moitié.</summary>
+    private bool IsHiddenHalf => Item.IsHiddenFromSearchPicker && Item.PairedWithDramatisPersonaId == _originalPartnerId;
+
+    public bool ShowPairDescription => HasPartner && !IsHiddenHalf;
+
+    public string PartnerHint => SelectedPartner is not { } partner ? string.Empty
+        : string.Format(Loc[IsHiddenHalf ? "DramatisPersonaPartnerHiddenHint" : "DramatisPersonaPartnerHint"], partner.Name);
+
+    /// <summary>Remplit PartnerOptions et renvoie le libellé du partenaire actuel (« Aucun » sinon).</summary>
+    private string InitializePartners(IReadOnlyList<DramatisPersona> allPersonae)
+    {
+        var none = Loc["DramatisPersonaNoPartner"];
+        _partnerByLabel[none] = null;
+        PartnerOptions.Add(none);
+        foreach (var persona in allPersonae.Where(p => p.Id != Item.Id).OrderBy(p => p.Name))
+        {
+            if (_partnerByLabel.ContainsKey(persona.Name)) continue;
+            _partnerByLabel[persona.Name] = persona;
+            PartnerOptions.Add(persona.Name);
+        }
+        return allPersonae.FirstOrDefault(p => p.Id == Item.PairedWithDramatisPersonaId)?.Name ?? none;
     }
 
     // Catalogue non filtré (null) - même choix que HiredSwordEditDialogViewModel.AddSpecialRule : une

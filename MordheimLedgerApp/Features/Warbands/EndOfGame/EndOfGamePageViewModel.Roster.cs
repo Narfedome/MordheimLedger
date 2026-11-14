@@ -48,7 +48,7 @@ public partial class EndOfGamePageViewModel
 
         var devoured = PitDevouredHero;
         var sick = StatTestSickHero;
-        var duelLoser = WantsDuel && !WonDuel ? DuelLeaderRow : null;
+        var duelLoser = WantsDuel && LostAnyDuel ? DuelLeaderRow : null;
         // Héros promus compris : désignables pour la Fosse et le Puits (voir EndOfGamePageViewModel.Promotion).
         foreach (var row in AllOutcomeRows)
         {
@@ -100,8 +100,7 @@ public partial class EndOfGamePageViewModel
         OnPropertyChanged(nameof(HasHiredSwordUpkeep));
         OnPropertyChanged(nameof(HasExistingHenchmanGroups));
         OnPropertyChanged(nameof(DuelLeaderRow));
-        OnPropertyChanged(nameof(ShowPairCorruptionOption));
-        OnPropertyChanged(nameof(ShowPairRetentionOption));
+        RefreshFistfulOfCrownsEntries();
         OnPropertyChanged(nameof(BonusStatTestLeader));
         OnPropertyChanged(nameof(ReallocationCarriers));
         OnPropertyChanged(nameof(DismissibleWarriorRows));

@@ -56,7 +56,7 @@ public partial class EndOfGamePageViewModel
         {
             nameof(HasExplorationLootRecap), nameof(ExplorationLootRecapLines), nameof(HasWyrdstoneSaleRecap),
             nameof(AvailableVeteransRecapDisplay), nameof(HasRareItemsRecap), nameof(RareItemsRecapLines),
-            nameof(HasDramatisPersonaeRecap), nameof(DramatisPersonaeRecapLines), nameof(PairEngagementRecapDisplay),
+            nameof(HasDramatisPersonaeRecap), nameof(DramatisPersonaeRecapLines), nameof(PairEngagementRecapLines), nameof(HasPairEngagementRecap),
             nameof(HasHiredSwordsRecap), nameof(HiredSwordsRecapLines), nameof(HasDismissedWarriorsRecap),
             nameof(DismissedWarriorsRecapLines), nameof(HasEquipmentTradingRecap), nameof(EquipmentTradingPurchasedRecapLines),
             nameof(EquipmentTradingSoldRecapLines), nameof(HasRecruitmentRecap), nameof(RecruitedHeroesRecapLines),
@@ -83,20 +83,13 @@ public partial class EndOfGamePageViewModel
     public IEnumerable<string> DramatisPersonaeRecapLines => LivingDramatisPersonaUpkeepEntries.Where(e => e.WillPay.HasValue)
         .Select(e => string.Format(e.WillPay == true ? Loc["EndOfGameRecapPaidFormat"] : Loc["EndOfGameRecapDismissedFormat"], e.DisplayName, e.UpkeepCostDisplay));
 
-    /// <summary>Corruption/Rétention/Duel sont mutuellement exclusifs (voir EndOfGamePageViewModel.
-    /// PairEngagement.cs/.PairDuel.cs) - au plus une des trois branches produit une ligne.</summary>
-    public string? PairEngagementRecapDisplay
-    {
-        get
-        {
-            if (WantsDuel) return string.Format(Loc["EndOfGameRecapPairDuelFormat"], WonDuel ? Loc["EndOfGamePairDuelWonLabel"] : Loc["EndOfGameDeadLabel"]);
-            if (ShowPairCorruptionOption && WantsToRecordPairCorruption && !string.IsNullOrEmpty(PairCorruptionAmount))
-                return string.Format(Loc["EndOfGameRecapPairCorruptionFormat"], PairCorruptionLabel, PairCorruptionAmount);
-            if (ShowPairRetentionOption && !string.IsNullOrEmpty(PairRetentionAmount) && PairRetentionAmount != "0")
-                return string.Format(Loc["EndOfGameRecapPairRetentionFormat"], PairRetentionLabel, PairRetentionAmount);
-            return null;
-        }
-    }
+    /// <summary>Une ligne par carte « Une Poignée d'Or » qui a donné lieu à quelque chose (paiement, saisie ou duel).</summary>
+    public List<string> PairEngagementRecapLines => ActiveFistfulOfCrownsEntries.Where(e => e.AmountDue > 0).Select(e =>
+        e.WantsDuel ? string.Format(Loc["EndOfGameRecapPairDuelFormat"], e.Name, e.WonDuel ? Loc["EndOfGamePairDuelWonLabel"] : Loc["EndOfGameDeadLabel"])
+        : e.IsCorruptionPaid ? string.Format(Loc["EndOfGameRecapPairCorruptionFormat"], e.Name, e.AmountDue)
+        : string.Format(Loc["EndOfGameRecapPairRetentionFormat"], e.Name, e.AmountDue)).ToList();
+
+    public bool HasPairEngagementRecap => PairEngagementRecapLines.Count > 0;
 
     public bool HasHiredSwordsRecap => LivingHiredSwordUpkeepEntries.Any(e => e.WillPay.HasValue || e.IsPrepaidFree) || SelectedNewHiredSword is not null
         || FreeHiredSword is not null;

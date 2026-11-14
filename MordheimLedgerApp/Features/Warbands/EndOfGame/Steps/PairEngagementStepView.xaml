@@ -6,123 +6,75 @@
              xmlns:loc="clr-namespace:MordheimLedgerApp.Extensions"
              x:Class="MordheimLedgerApp.Features.Warbands.EndOfGame.Steps.PairEngagementStepView"
              x:DataType="local:EndOfGamePageViewModel">
-            <!-- Étape : Une Poignée d'Or (2026-09-04, retour utilisateur - "il faut la mettre au moment du
-                 paiement de recrutement... je me tate sur l'écran de corruption à le faire après dans un
-                 autre step pour éviter de mélanger et de surcharger") : regroupe les deux moitiés
-                 mutuellement exclusives - "Corruption de Marquand Volker & Ulli Leitpold" (bande qui NE
-                 possède PAS la paire, ShowPairCorruptionOption) et "C'est l'heure de payer !" (bande qui
-                 la possède DÉJÀ, ShowPairRetentionOption) - voir EndOfGamePageViewModel.
-                 PairEngagement.cs. Vivait avant ce regroupement scindée entre l'étape Prisonniers
-                 (Corruption) et Dramatis Personae (Rétention). -->
+            <!-- Étape : Une Poignée d'Or - une carte par personnage ou duo portant la règle (FistfulOfCrownsEntry,
+                 2026-11-14). Corruption si la bande ne l'a pas, Rétention si elle l'a ; « Où est l'Argent ? » sous la
+                 carte quand elle ne peut pas payer en or (réglé automatiquement, dans l'ordre des cartes). -->
             <VerticalStackLayout Spacing="12">
                 <Label Text="{loc:Loc EndOfGamePairEngagementHeading}" FontAttributes="Bold"/>
+                <Label Text="{Binding DramatisPersonaeBaselineTreasuryDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
 
-                <!-- Corruption : visible seulement pour une bande qui n'a PAS déjà Ulli & Marquand - la
-                     bande qui les possède déjà n'a rien ici, elle bascule "Rendre hostile" directement sur
-                     la carte du guerrier concerné (WarbandDetailPage). -->
-                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding ShowPairCorruptionOption}">
-                    <VerticalStackLayout Spacing="6">
-                        <!-- Grid Auto,* plutôt que HorizontalStackLayout (2026-09-01, retour utilisateur -
-                             "Corruption de Marquand Volker & Ulli Leitpold" coupé net par le bord du dialog) :
-                             dans un HorizontalStackLayout, le Label reçoit une largeur non bornée et ne peut
-                             donc jamais retourner à la ligne. -->
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <CheckBox Grid.Column="0" IsChecked="{Binding WantsToRecordPairCorruption}" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="{Binding PairCorruptionLabel}" VerticalOptions="Center"/>
-                        </Grid>
-                        <!-- Proposée à toute bande qui n'a pas la paire (n'importe qui peut la soudoyer chez
-                             l'adversaire) : sans ce rappel, la case semblait concerner toutes les parties
-                             (recette du 2026-11-05). -->
-                        <Label Text="{loc:Loc EndOfGamePairCorruptionHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                        <VerticalStackLayout Spacing="4" IsVisible="{Binding WantsToRecordPairCorruption}">
-                            <Label Text="{Binding DramatisPersonaeBaselineTreasuryDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                            <Entry Text="{Binding PairCorruptionAmount}" Keyboard="Numeric"
-                                   Placeholder="{loc:Loc EndOfGamePairCorruptionAmountPh}" WidthRequest="120">
-                                <Entry.Behaviors>
-                                    <components:DigitsOnlyBehavior/>
-                                </Entry.Behaviors>
-                            </Entry>
-                            <Label Text="{Binding PairCorruptionError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                                   IsVisible="{Binding PairCorruptionError, Converter={StaticResource IsNotNullConverter}}"/>
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
+                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding FistfulOfCrownsEntries}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="local:FistfulOfCrownsEntry">
+                            <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsActive}">
+                                <VerticalStackLayout Spacing="6">
+                                    <!-- Corruption : Grid Auto,* (un HorizontalStackLayout ne laisse jamais le libellé
+                                         passer à la ligne). -->
+                                    <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowCorruption}">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <CheckBox Grid.Column="0" IsChecked="{Binding WantsToRecordCorruption}" VerticalOptions="Center"/>
+                                            <Label Grid.Column="1" Text="{Binding CorruptionLabel}" VerticalOptions="Center"/>
+                                        </Grid>
+                                        <Label Text="{loc:Loc EndOfGamePairCorruptionHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <VerticalStackLayout Spacing="4" IsVisible="{Binding WantsToRecordCorruption}">
+                                            <Entry Text="{Binding CorruptionAmount}" Keyboard="Numeric"
+                                                   Placeholder="{loc:Loc EndOfGamePairCorruptionAmountPh}" WidthRequest="120" HorizontalOptions="Start">
+                                                <Entry.Behaviors>
+                                                    <components:DigitsOnlyBehavior/>
+                                                </Entry.Behaviors>
+                                            </Entry>
+                                            <Label Text="{Binding CorruptionError}" FontSize="11" TextColor="{StaticResource AppDanger}"
+                                                   IsVisible="{Binding CorruptionError, Converter={StaticResource IsNotNullConverter}}"/>
+                                        </VerticalStackLayout>
+                                    </VerticalStackLayout>
 
-                <!-- Rétention : visible seulement pour une bande qui possède DÉJÀ Ulli & Marquand. Champ
-                     libre plutôt qu'une case à cocher : 0/vide = aucune tentative adverse cette partie, un
-                     montant renseigné = ce qui a été payé pour les garder. -->
-                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding ShowPairRetentionOption}">
-                    <VerticalStackLayout Spacing="6">
-                        <Label Text="{Binding PairRetentionLabel}" FontAttributes="Bold"/>
-                        <Label Text="{loc:Loc EndOfGamePairRetentionHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                        <Label Text="{Binding DramatisPersonaeBaselineTreasuryDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                        <Entry Text="{Binding PairRetentionAmount}" Keyboard="Numeric"
-                               Placeholder="{loc:Loc EndOfGamePairCorruptionAmountPh}" WidthRequest="120">
-                            <Entry.Behaviors>
-                                <components:DigitsOnlyBehavior/>
-                            </Entry.Behaviors>
-                        </Entry>
-                        <Label Text="{Binding PairRetentionError}" FontSize="11" TextColor="{StaticResource AppDanger}"
-                               IsVisible="{Binding PairRetentionError, Converter={StaticResource IsNotNullConverter}}"/>
-                    </VerticalStackLayout>
-                </Border>
+                                    <!-- Rétention : champ libre, 0/vide = aucune tentative adverse cette partie. -->
+                                    <VerticalStackLayout Spacing="6" IsVisible="{Binding ShowRetention}">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold"/>
+                                        <Label Text="{loc:Loc EndOfGamePairRetentionHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <Entry Text="{Binding RetentionAmount}" Keyboard="Numeric"
+                                               Placeholder="{loc:Loc EndOfGamePairCorruptionAmountPh}" WidthRequest="120" HorizontalOptions="Start">
+                                            <Entry.Behaviors>
+                                                <components:DigitsOnlyBehavior/>
+                                            </Entry.Behaviors>
+                                        </Entry>
+                                    </VerticalStackLayout>
 
-                <!-- Où est l'Argent ? : partagée entre les deux cas ci-dessus (WantsEquipmentSeizure/
-                     WantsDuel/SeizedEquipmentItems, voir EndOfGamePageViewModel.PairEngagement.cs) - une
-                     bande ne déclenche jamais les deux à la fois (elle possède la paire ou non), aucun
-                     conflit à partager le même état. Déterminé AUTOMATIQUEMENT (retour utilisateur "pas de
-                     choix dans le picker") - "Duel avec le meneur" a sa propre étape juste après
-                     (StepKind.PairDuel), pas ici. IsPairCorruptionUnaffordable OU IsPairRetentionUnaffordable
-                     - jamais les deux vraies en même temps, une seule condition suffit à afficher le bloc. -->
-                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsPairCorruptionUnaffordable}">
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="{loc:Loc EndOfGameWheresMoneyHeading}" FontSize="12" FontAttributes="Bold"
-                               TextColor="{StaticResource AppDanger}"/>
-                        <Label Text="{loc:Loc EndOfGameWheresMoneyHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-
-                        <VerticalStackLayout Spacing="4" IsVisible="{Binding WantsEquipmentSeizure}">
-                            <Label Text="{Binding SeizedEquipmentTotalDisplay}"
-                                   FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SeizedEquipmentItems}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="local:ReserveLine">
-                                        <components:ChipView Item="{Binding .}"
-                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                              IconFontFamily="RpgAwesome"/>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </VerticalStackLayout>
-
-                        <Label Text="{loc:Loc EndOfGameWheresMoneyDuelNote}" FontSize="11" FontAttributes="Bold"
-                               TextColor="{StaticResource AppDanger}" IsVisible="{Binding WantsDuel}"/>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Style="{StaticResource SectionCardBorderStyle}" IsVisible="{Binding IsPairRetentionUnaffordable}">
-                    <VerticalStackLayout Spacing="8">
-                        <Label Text="{loc:Loc EndOfGameWheresMoneyHeading}" FontSize="12" FontAttributes="Bold"
-                               TextColor="{StaticResource AppDanger}"/>
-                        <Label Text="{loc:Loc EndOfGameWheresMoneyHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-
-                        <VerticalStackLayout Spacing="4" IsVisible="{Binding WantsEquipmentSeizure}">
-                            <Label Text="{Binding SeizedEquipmentTotalDisplay}"
-                                   FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
-                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SeizedEquipmentItems}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="local:ReserveLine">
-                                        <components:ChipView Item="{Binding .}"
-                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
-                                                              IconFontFamily="RpgAwesome"/>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </VerticalStackLayout>
-
-                        <Label Text="{loc:Loc EndOfGameWheresMoneyDuelNote}" FontSize="11" FontAttributes="Bold"
-                               TextColor="{StaticResource AppDanger}" IsVisible="{Binding WantsDuel}"/>
-                    </VerticalStackLayout>
-                </Border>
+                                    <!-- Où est l'Argent ? -->
+                                    <VerticalStackLayout Spacing="8" IsVisible="{Binding IsUnaffordable}">
+                                        <Label Text="{loc:Loc EndOfGameWheresMoneyHeading}" FontSize="12" FontAttributes="Bold"
+                                               TextColor="{StaticResource AppDanger}"/>
+                                        <Label Text="{loc:Loc EndOfGameWheresMoneyHint}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                        <VerticalStackLayout Spacing="4" IsVisible="{Binding WantsEquipmentSeizure}">
+                                            <Label Text="{Binding SeizedEquipmentTotalDisplay}" FontSize="11" TextColor="{DynamicResource AppTextMuted}"/>
+                                            <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding SeizedEquipmentItems}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="local:ReserveLine">
+                                                        <components:ChipView Item="{Binding .}"
+                                                                              IconGlyph="{Binding Item.Category, Converter={StaticResource EquipmentCategoryIconConverter}}"
+                                                                              IconFontFamily="RpgAwesome"/>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </FlexLayout>
+                                        </VerticalStackLayout>
+                                        <Label Text="{loc:Loc EndOfGameWheresMoneyDuelNote}" FontSize="11" FontAttributes="Bold"
+                                               TextColor="{StaticResource AppDanger}" IsVisible="{Binding WantsDuel}"/>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
             </VerticalStackLayout>
 
 </ContentView>

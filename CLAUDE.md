@@ -1,4 +1,4 @@
-# Mordheim Ledger — Notes de contexte pour Claude
+﻿# Mordheim Ledger — Notes de contexte pour Claude
 
 Application MAUI (.NET 10) de suivi de bandes et de campagnes Mordheim. Contexte produit et
 avancement détaillé : [ROADMAP.md](ROADMAP.md). Ce fichier est là pour reprendre le fil d'une
@@ -217,6 +217,19 @@ Narrateur/TalkBack) ; **jamais de geste (PointerGestureRecognizer compris) sur c
 survol va sur la grille parente. Bouton Jouer de la liste des bandes = vrai `Button`. Limites connues : la page sous un dialog
 reste lisible par Narrateur (MAUI n'applique pas `ExcludedWithChildren` sous WinUI, essayé) ; la sélection d'une ligne de
 liste (corps de ligne) reste un geste.
+
+**Duos de Dramatis Personae (branche `feature/dp-partner-codex`, 2026-11-14)** : le jumelage (Ulli et Marquand) est une donnée,
+pas du code dédié - `PairedWithDramatisPersonaId` (lien symétrique), `IsHiddenFromSearchPicker` (moitié masquée, recrutée avec
+l'autre), `PairDescription` (portée par la moitié principale). Désormais éditable dans le Codex (champ « Partenaire (duo) » et
+« Description du duo ») : `LibraryService.SyncDramatisPersonaPartnerAsync` garde le lien symétrique et défait les anciens liens ;
+celui qui choisit un nouveau partenaire devient la moitié principale, ré-enregistrer sans changer de partenaire ne touche pas aux
+rôles (tests `DramatisPersonaPartner_*`). Indépendant : corruption/rétention/« Où est l'Argent ? »/duel se déclenchent sur la
+règle spéciale « Une Poignée d'Or » (n'importe quel Dramatis Persona qui la porte, seul ou en duo). Plusieurs à la fois : l'étape
+« Une Poignée d'Or » a une carte par personnage ou duo (`FistfulOfCrownsEntry`, groupes par `Core/Rules/FistfulOfCrownsRules`) - sans
+multijoueur, l'appli propose la corruption de tous ceux que la bande n'a pas (à terme, le lobby saura qui est chez l'adversaire) ;
+les paiements se règlent dans l'ordre des cartes (`PairDebtRules.SettleInOrder` : or tant qu'il y en a, sinon saisie dans ce qui
+reste de la réserve, sinon duel), un duel par carte impayée, le premier perdu tue le meneur. Seul l'or réellement payé sort du
+solde du wizard (une dette réglée par saisie/duel bloquait à tort les étapes suivantes).
 
 **Nouveautés après une mise à jour (branche `feature/whats-new`, 1.5, 2026-11-13)** : dialog `Components/Dialogs/WhatsNewDialog`
 affiché une fois par version (majeure.mineure) sur la liste des bandes, après le message de synchro du contenu ; jamais à la

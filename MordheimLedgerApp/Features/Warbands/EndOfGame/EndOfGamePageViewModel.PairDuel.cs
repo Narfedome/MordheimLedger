@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MordheimLedgerApp.Components;
@@ -34,29 +34,13 @@ public partial class EndOfGamePageViewModel
     /// même idiome que BonusStatTestLeader (Exploration, Bâtiment Éventré).</summary>
     public WarriorOutcomeRow? DuelLeaderRow => WarriorRows.FirstOrDefault(r => r.Warrior.IsLeader && !r.IsDeadBeforeDuel);
 
-    /// <summary>Le Dramatis Persona "A Fistful of Crowns" concerné par CETTE bande, quel que soit le sens
-    /// (Corruption via _pairPersona si non possédé, Rétention via _ownedPairPersona si déjà possédé -
-    /// mutuellement exclusifs par bande, voir EndOfGamePageViewModel.PairEngagement.cs) - toujours le
-    /// représentant "visible" du groupe (IsHiddenFromSearchPicker exclut un éventuel partenaire caché du
-    /// picker de recherche, ex. Ulli).</summary>
-    private DramatisPersona? DuelPrimaryPersona => _ownedPairPersona ?? _pairPersona;
+    /// <summary>Cartes « Une Poignée d'Or » qui finissent en duel (2026-11-14 : un duel par personnage ou duo impayé).</summary>
+    public List<FistfulOfCrownsEntry> DuelEntries => ActiveFistfulOfCrownsEntries.Where(e => e.WantsDuel).ToList();
 
-    /// <summary>1 ou 2 cartes selon que DuelPrimaryPersona a un partenaire (PairedWithDramatisPersona) ou
-    /// non - Marquand + Ulli aujourd'hui (2 cartes, "Une Poignée d'Or" les corrompt/les garde toujours
-    /// ensemble), mais généralise sans changement à un futur Dramatis Persona solo portant la même
-    /// SpecialRule (1 carte). Vide si DuelPrimaryPersona est null (ex. carte encore vide avant résolution
-    /// du catalogue - ne devrait pas arriver en pratique, cette étape n'existe que si ShowPairCorruptionOption/
-    /// ShowPairRetentionOption est vrai).</summary>
-    public List<DuelOpponentDisplay> DuelOpponents
-    {
-        get
-        {
-            if (DuelPrimaryPersona is not { } primary) return new List<DuelOpponentDisplay>();
-            var list = new List<DuelOpponentDisplay> { new(primary, ResolveDuelOpponentEquipment(primary)) };
-            if (primary.PairedWithDramatisPersona is { } partner) list.Add(new(partner, ResolveDuelOpponentEquipment(partner)));
-            return list;
-        }
-    }
+    public bool WantsDuel => DuelEntries.Count > 0;
+
+    /// <summary>Le meneur meurt s'il perd un seul de ses duels.</summary>
+    public bool LostAnyDuel => DuelEntries.Any(e => !e.WonDuel);
 
     /// <summary>Équipement de départ d'un adversaire du duel, résolu en amont (voir
     /// WarbandDetailViewModel.EndOfGame - EquipmentQuantityChip.GroupFrom, même helper que
@@ -91,19 +75,6 @@ public partial class EndOfGamePageViewModel
     /// des Blessures Graves (PairDuelRoll, retiré) - pas dans le texte de cette règle-ci, contrairement à
     /// Vendu aux Fosses dont elle s'inspirait par erreur.</summary>
     private bool ValidatePairDuelStep() => true;
-
-    /// <summary>Même principe que WonPitFight (Vendu aux Fosses, EndOfGamePageViewModel.Injury.cs) mais
-    /// appliqué au chef de bande de CETTE session plutôt qu'à un guerrier hors de combat - décoché par
-    /// défaut (défaite). Défaite = mort automatique du meneur (2026-09-03, retour utilisateur), pas de
-    /// jet à résoudre - voir EndOfGamePageViewModel.Apply.ApplyPairDuelIfNeededAsync.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDuelLost))]
-    private bool wonDuel;
-
-    /// <summary>Simple négation de WonDuel, exposée à part pour piloter IsVisible côté XAML (pas de
-    /// convertisseur "inverse un bool" dans cette appli - même idiome que le reste du code, calculer en
-    /// C# plutôt qu'ajouter un converter dédié pour un seul usage).</summary>
-    public bool IsDuelLost => !WonDuel;
 }
 
 /// <summary>Un profil de duel (nom/stats/compétences via Persona, équipement déjà résolu à part - voir

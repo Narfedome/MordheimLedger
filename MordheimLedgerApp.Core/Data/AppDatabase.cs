@@ -86,6 +86,16 @@ public partial class AppDatabase
     /// chaque retour sur l'onglet).</summary>
     public int DataVersion => Volatile.Read(ref _dataVersion);
 
+    private List<Action>? _afterCommit;
+
+    /// <summary>Effet hors base (ex. suppression d'un fichier photo) : tout de suite hors transaction, sinon
+    /// seulement si la transaction en cours est validée - un ROLLBACK ne peut pas ramener un fichier effacé.</summary>
+    internal void RunAfterCommit(Action action)
+    {
+        if (_afterCommit is { } pending) pending.Add(action);
+        else action();
+    }
+
     private async Task InitializeAsync()
     {
         await CreateAllTablesAsync();
@@ -110,17 +120,24 @@ public partial class AppDatabase
     /// async contre _db. Sûr ici : SQLiteAsyncConnection sérialise tout sur une seule connexion par
     /// chemin, et aucun appelant n'écrit en parallèle (tous les services attendent Initialization,
     /// ResetAsync aussi). Ne pas appeler d'InsertAllAsync/RunInTransactionAsync à l'intérieur : sqlite-
-    /// net ouvrirait son propre BEGIN, refusé dans une transaction déjà ouverte.</summary>
-    private async Task RunInTransactionAsync(Func<Task> work)
+    /// net ouvrirait son propre BEGIN, refusé dans une transaction déjà ouverte.
+    /// Public pour l'enregistrement de la Fin de partie (IWarbandService.RunInTransactionAsync) : une
+    /// vingtaine d'écritures qui doivent passer toutes ou pas du tout.</summary>
+    public async Task RunInTransactionAsync(Func<Task> work)
     {
         await _db.ExecuteAsync("BEGIN TRANSACTION");
+        _afterCommit = [];
         try
         {
             await work();
             await _db.ExecuteAsync("COMMIT");
+            var actions = _afterCommit;
+            _afterCommit = null;
+            foreach (var action in actions) action();
         }
         catch
         {
+            _afterCommit = null;
             await _db.ExecuteAsync("ROLLBACK");
             throw;
         }

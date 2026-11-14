@@ -213,6 +213,44 @@ public class WarbandMutationTests : IDisposable
         Assert.False(File.Exists(file));
     }
 
+    /// <summary>Enregistrement de la Fin de partie (RunInTransactionAsync) : une exception au milieu annule
+    /// toutes les écritures déjà faites, y compris un guerrier supprimé dont la photo doit rester sur le disque.</summary>
+    [Fact]
+    public async Task RunInTransaction_Failure_RollsBackEveryWrite_AndKeepsPhoto()
+    {
+        var warbandArchetype = await GetReiklandersAsync();
+        var warband = await _warbands.CreateWarbandAsync("The Bleeding Roses", warbandArchetype);
+        var captainArchetype = (await _library.GetWarriorArchetypesAsync(warbandArchetype.Id, "en")).First();
+        var otto = await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Otto");
+        using var image = new MemoryStream([0xFF, 0xD8, 0xFF, 0xD9]);
+        otto.PhotoPath = await _photos.SaveAsync(image, ".jpg");
+        await _warbands.SaveWarriorAsync(otto);
+        var photo = _photos.GetExistingFullPath(otto.PhotoPath);
+        var treasury = warband.Treasury;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _warbands.RunInTransactionAsync(async () =>
+        {
+            warband.Treasury += 50;
+            warband.GameInProgress = false;
+            await _warbands.SaveWarbandAsync(warband);
+            await _warbands.AddHistoryEntryAsync(warband.Id, "Victory.");
+            await _warbands.DeleteWarriorAsync(otto.Id);
+            await _warbands.RecruitWarriorAsync(warband.Id, captainArchetype, "Ulrich");
+            throw new InvalidOperationException("boom");
+        }));
+
+        var reloaded = await _warbands.GetWarbandAsync(warband.Id);
+        Assert.Equal(treasury, reloaded!.Treasury);
+        Assert.Equal("Otto", Assert.Single(await _warbands.GetWarriorsAsync(warband.Id, "en")).Name);
+        Assert.Empty(await _warbands.GetHistoryEntriesAsync(warband.Id));
+        Assert.True(File.Exists(photo));
+
+        // Validée, la même suppression efface bien la photo, après le COMMIT.
+        await _warbands.RunInTransactionAsync(() => _warbands.DeleteWarriorAsync(otto.Id));
+        Assert.Empty(await _warbands.GetWarriorsAsync(warband.Id, "en"));
+        Assert.False(File.Exists(photo));
+    }
+
     /// <summary>Garde-fou de WarriorPhotoStore.Delete : un PhotoPath qui sortirait du dossier des photos
     /// (base modifiée à la main) ne doit jamais effacer un autre fichier.</summary>
     [Fact]

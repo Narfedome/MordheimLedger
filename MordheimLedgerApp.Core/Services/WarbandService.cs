@@ -13,6 +13,12 @@ public class WarbandService : IWarbandService
     private readonly AppDatabase _db;
 
     public int DataVersion => _db.DataVersion;
+
+    public async Task RunInTransactionAsync(Func<Task> work)
+    {
+        await _db.Initialization;
+        await _db.RunInTransactionAsync(work);
+    }
     private readonly ILibraryService _library;
     private readonly WarriorPhotoStore? _photos;
 
@@ -318,7 +324,7 @@ public class WarbandService : IWarbandService
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorSpellEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.ExecuteAsync("DELETE FROM WarriorMutationEntity WHERE WarriorId = ?", warriorId);
         await _db.Connection.DeleteAsync<WarriorEntity>(warriorId);
-        _photos?.Delete(photoPath);
+        if (_photos is { } photos) _db.RunAfterCommit(() => photos.Delete(photoPath));
     }
 
     public async Task<WarriorEquipment> AddWarriorEquipmentAsync(int warriorId, EquipmentItem item, int quantity = 1, SpecialRule? materialRule = null, int? foundValueOverride = null)

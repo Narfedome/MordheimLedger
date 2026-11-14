@@ -1197,71 +1197,88 @@ public partial class EndOfGamePageViewModel : BaseViewModel
     {
         if (Warband is null) return;
 
-        await Loading.RunAsync(async () =>
+        // Une seule transaction pour toute la séquence : sans elle, une exception au milieu laissait la bande à
+        // moitié mise à jour et toujours « partie en cours », et refaire la Fin de partie rejouait les écritures
+        // déjà passées (or, XP...). En cas d'échec rien n'est écrit ; l'état en mémoire du wizard, lui, a pu être
+        // modifié par les Apply*Async, donc on ne le réutilise pas : retour à la fiche, qui relit la base
+        // (le ROLLBACK change DataVersion).
+        try
         {
-            var language = LocalizationService.Instance.Language;
-            var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], SelectedResult) };
-
-            // Réserve finale et consommation des vétérans figées AVANT le pipeline : les Apply*Async
-            // mutent des guerriers (équipement, effectif, XP) dont ces deux calculs dépendent. La réserve
-            // n'est écrite en base qu'une fois, tout à la fin (ApplyReserveAsync) - aucune étape ci-dessous
-            // ne touche plus WarbandEquipment, d'où la fin des contraintes d'ordre liées à la réserve.
-            var finalReserve = BuildReserve(ReserveStage.Final);
-            var topUpPlans = PlanTopUps().ToDictionary(kv => kv.Key, kv => (Plan: kv.Value, Breakdown: GetTopUpBreakdown(kv.Key)));
-            var servedReservePicks = ServedReservePicks();
-            // Réductions de Marchandage figées comme la réserve : les Apply*Async ci-dessous modifient les
-            // achats dont elles dépendent.
-            var haggleSavings = CurrentHaggleSavings();
-
-            await ApplyScenarioRewardsAsync(sentences);
-            await ApplyExplorationOutcomeAsync(sentences);
-            await ApplyWarriorOutcomesAsync(language, sentences);
-            await ApplyCapturedEnemiesAsync(_warriorArchetypesByOfficialId, sentences);
-            await ApplyWyrdstoneSaleAsync(sentences);
-            ApplyAvailableVeterans(sentences);
-            await ApplyRareItemSearchAsync(_localizedEquipmentCatalog, sentences);
-            // Délai de re-recherche (Aenur/Ulli & Marquand) : reste d'abord toute trace de cooldown
-            // PRÉEXISTANTE (posée à une Fin de Partie antérieure) - le picker de CETTE Fin de Partie les
-            // a déjà exclus, donc atteindre ce point veut dire "une bataille a été jouée sans eux",
-            // satisfaisant la condition. Doit rester AVANT ApplyWandererDeparturesAsync, qui peut poser
-            // un NOUVEAU cooldown pour un départ de CETTE Fin de Partie.
-            await _warbandService.ClearAllDramatisPersonaCooldownsAsync(Warband.Id);
-            await ApplyWandererDeparturesAsync(sentences);
-            await ApplyDramatisPersonaUpkeepAsync(sentences);
-            await ApplyPairEquipmentSeizureIfNeededAsync(sentences);
-            await ApplyPairDuelIfNeededAsync(sentences);
-            await ApplyHiredSwordUpkeepAsync(sentences);
-            // Doit rester APRÈS ApplyWarriorOutcomesAsync (plus haut) : les morts de CETTE bataille
-            // réduisent déjà Warrior.HeadCount avant qu'on reclampe DismissCount contre l'effectif RÉEL
-            // (voir ApplyDismissalsAsync's own doc).
-            await ApplyDismissalsAsync(sentences);
-            await ApplyEquipmentTradingAsync(sentences);
-            await ApplyRecruitmentAsync(servedReservePicks, sentences);
-            await ApplyHenchmanRecruitmentAsync(topUpPlans, servedReservePicks, sentences);
-            ApplyHaggleSavings(haggleSavings, sentences);
-            // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
-            // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
-            // 2026-08-18) - invariant explicite ici plutôt qu'implicite dans l'ordre du code.
-            // previouslySickWarriors vient de _allActiveWarriorRows, un instantané figé pris dans
-            // InitializeAsync avant toute interaction du joueur avec ce wizard (même snapshot que
-            // l'ancien previouslySickWarriors, capturé au tout début de WarbandDetailViewModel.
-            // EndOfGame() avant ce refactor) - son contenu ne change jamais en cours de wizard, donc le
-            // recalculer ici plutôt qu'au tout début produit exactement le même résultat.
-            var previouslySickWarriors = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
-            await ApplySicknessLifecycleAsync(previouslySickWarriors);
-            // Réallouer l'équipement : côté Héros seulement (la Réserve est couverte par ApplyReserveAsync).
-            await ApplyEquipmentReallocationAsync(sentences);
-            await ApplyReserveAsync(finalReserve);
-
-            // La partie est terminée : redonne la main à "Lancer la partie" sur la fiche de bande (voir
-            // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée.
-            Warband.GameInProgress = false;
-            await _warbandService.SaveWarbandAsync(Warband);
-
-            await _warbandService.AddHistoryEntryAsync(Warband.Id, Core.Rules.HistoryText.Join(sentences));
-        });
+            await Loading.RunAsync(() => _warbandService.RunInTransactionAsync(ApplyEndOfGameAsync));
+        }
+        catch (Exception ex)
+        {
+            Services.CrashLogger.LogException("EndOfGame.Finish", ex);
+            await ShowInfoAsync(Loc["ErrorTitle"], string.Format(Loc["EndOfGameSaveFailed"], ex.Message));
+        }
 
         await Shell.Current.GoToAsync("..");
+    }
+
+    private async Task ApplyEndOfGameAsync()
+    {
+        if (Warband is null) return;
+
+        var language = LocalizationService.Instance.Language;
+        var sentences = new List<string> { string.Format(Loc["HistoryResultSentence"], SelectedResult) };
+
+        // Réserve finale et consommation des vétérans figées AVANT le pipeline : les Apply*Async
+        // mutent des guerriers (équipement, effectif, XP) dont ces deux calculs dépendent. La réserve
+        // n'est écrite en base qu'une fois, tout à la fin (ApplyReserveAsync) - aucune étape ci-dessous
+        // ne touche plus WarbandEquipment, d'où la fin des contraintes d'ordre liées à la réserve.
+        var finalReserve = BuildReserve(ReserveStage.Final);
+        var topUpPlans = PlanTopUps().ToDictionary(kv => kv.Key, kv => (Plan: kv.Value, Breakdown: GetTopUpBreakdown(kv.Key)));
+        var servedReservePicks = ServedReservePicks();
+        // Réductions de Marchandage figées comme la réserve : les Apply*Async ci-dessous modifient les
+        // achats dont elles dépendent.
+        var haggleSavings = CurrentHaggleSavings();
+
+        await ApplyScenarioRewardsAsync(sentences);
+        await ApplyExplorationOutcomeAsync(sentences);
+        await ApplyWarriorOutcomesAsync(language, sentences);
+        await ApplyCapturedEnemiesAsync(_warriorArchetypesByOfficialId, sentences);
+        await ApplyWyrdstoneSaleAsync(sentences);
+        ApplyAvailableVeterans(sentences);
+        await ApplyRareItemSearchAsync(_localizedEquipmentCatalog, sentences);
+        // Délai de re-recherche (Aenur/Ulli & Marquand) : reste d'abord toute trace de cooldown
+        // PRÉEXISTANTE (posée à une Fin de Partie antérieure) - le picker de CETTE Fin de Partie les
+        // a déjà exclus, donc atteindre ce point veut dire "une bataille a été jouée sans eux",
+        // satisfaisant la condition. Doit rester AVANT ApplyWandererDeparturesAsync, qui peut poser
+        // un NOUVEAU cooldown pour un départ de CETTE Fin de Partie.
+        await _warbandService.ClearAllDramatisPersonaCooldownsAsync(Warband.Id);
+        await ApplyWandererDeparturesAsync(sentences);
+        await ApplyDramatisPersonaUpkeepAsync(sentences);
+        await ApplyPairEquipmentSeizureIfNeededAsync(sentences);
+        await ApplyPairDuelIfNeededAsync(sentences);
+        await ApplyHiredSwordUpkeepAsync(sentences);
+        // Doit rester APRÈS ApplyWarriorOutcomesAsync (plus haut) : les morts de CETTE bataille
+        // réduisent déjà Warrior.HeadCount avant qu'on reclampe DismissCount contre l'effectif RÉEL
+        // (voir ApplyDismissalsAsync's own doc).
+        await ApplyDismissalsAsync(sentences);
+        await ApplyEquipmentTradingAsync(sentences);
+        await ApplyRecruitmentAsync(servedReservePicks, sentences);
+        await ApplyHenchmanRecruitmentAsync(topUpPlans, servedReservePicks, sentences);
+        ApplyHaggleSavings(haggleSavings, sentences);
+        // Doit rester APRÈS ApplyWarriorOutcomesAsync : cette dernière resynchronise Warrior.Status
+        // depuis l'étape Blessure (Actif/Mort) et écraserait Sick si elle passait avant (bug du
+        // 2026-08-18) - invariant explicite ici plutôt qu'implicite dans l'ordre du code.
+        // previouslySickWarriors vient de _allActiveWarriorRows, un instantané figé pris dans
+        // InitializeAsync avant toute interaction du joueur avec ce wizard (même snapshot que
+        // l'ancien previouslySickWarriors, capturé au tout début de WarbandDetailViewModel.
+        // EndOfGame() avant ce refactor) - son contenu ne change jamais en cours de wizard, donc le
+        // recalculer ici plutôt qu'au tout début produit exactement le même résultat.
+        var previouslySickWarriors = _allActiveWarriorRows.Where(r => r.Warrior.Status == WarriorStatus.Sick).ToList();
+        await ApplySicknessLifecycleAsync(previouslySickWarriors);
+        // Réallouer l'équipement : côté Héros seulement (la Réserve est couverte par ApplyReserveAsync).
+        await ApplyEquipmentReallocationAsync(sentences);
+        await ApplyReserveAsync(finalReserve);
+
+        // La partie est terminée : redonne la main à "Lancer la partie" sur la fiche de bande (voir
+        // Warband.GameInProgress) - sans effet si elle n'avait jamais été lancée.
+        Warband.GameInProgress = false;
+        await _warbandService.SaveWarbandAsync(Warband);
+
+        await _warbandService.AddHistoryEntryAsync(Warband.Id, Core.Rules.HistoryText.Join(sentences));
     }
 
     /// <summary>Suivi d'une recherche d'objet rare (étapes Objets rares/Achat) - méthode nommée pour être aussi

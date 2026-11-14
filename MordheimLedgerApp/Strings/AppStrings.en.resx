@@ -147,6 +147,11 @@
   <data name="ErrorTitle" xml:space="preserve">
     <value>Error</value>
   </data>
+  <data name="EndOfGameSaveFailed" xml:space="preserve">
+    <value>The end of game could not be saved. Nothing was changed: the warband is as it was, you can play the end of game again.
+
+Details: {0}</value>
+  </data>
   <data name="TabWarbands" xml:space="preserve">
     <value>Warbands</value>
   </data>

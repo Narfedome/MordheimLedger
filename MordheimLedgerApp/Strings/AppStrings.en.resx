@@ -144,6 +144,11 @@
   <data name="WarriorDeleteConfirm" xml:space="preserve">
     <value>Remove {0} from the roster? This isn't a character death (see End of Game for that) — their recruitment cost and equipment will be refunded to the warband's treasury.</value>
   </data>
+  <data name="WarbandSaveFailed" xml:space="preserve">
+    <value>The warband could not be saved. Nothing was changed: it is as it was, you can start again.
+
+Details: {0}</value>
+  </data>
   <data name="ErrorTitle" xml:space="preserve">
     <value>Error</value>
   </data>

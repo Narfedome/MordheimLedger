@@ -433,16 +433,16 @@ public partial class WarbandDetailViewModel : BaseViewModel
 
         var archetype = _recruitableArchetypes.FirstOrDefault(a => a.Id == w.WarriorArchetypeId);
         var hiredSword = _recruitableHiredSwords.FirstOrDefault(h => h.Id == w.HiredSwordId);
-        await OpenWarriorEditDialogAsync(copy, archetype, hiredSword, row.Equipment);
+        await OpenWarriorEditDialogAsync(copy, archetype, hiredSword);
     }
 
     /// <summary>Ouvre WarriorEditDialog sur warrior (déjà en base - un guerrier fraîchement recruté ou
     /// une copie défensive d'un guerrier existant, voir RecruitWarriorAsync/EditWarrior) et applique le
-    /// résultat - factorisé ici, les deux appelants ne différaient que par la provenance du Warrior et
-    /// l'équipement à rembourser en cas de suppression. hiredSword non-null seulement pour un guerrier
+    /// résultat - factorisé ici, les deux appelants ne différaient que par la provenance du Warrior.
+    /// hiredSword non-null seulement pour un guerrier
     /// recruté d'un Franc-Tireur (archetype reste alors null, voir Warrior.IsHiredSword) - son école de
     /// magie propre (HiredSword.MagicSchool, ex. le Sorcier) prime sur celle de la bande.</summary>
-    private async Task OpenWarriorEditDialogAsync(Warrior warrior, WarriorArchetype? archetype, HiredSword? hiredSword, IEnumerable<WarriorEquipment> equipmentForRefund)
+    private async Task OpenWarriorEditDialogAsync(Warrior warrior, WarriorArchetype? archetype, HiredSword? hiredSword)
     {
         if (Warband is null) return;
 
@@ -466,13 +466,14 @@ public partial class WarbandDetailViewModel : BaseViewModel
         await Loading.RunAsync(async () =>
         {
             // WasDeleted : le guerrier n'existe plus en base (supprimé depuis le dialog) - le
-            // ré-enregistrer écraserait rien puisqu'il n'y a plus de ligne à mettre à jour. Rembourse
-            // son coût de recrutement + son équipement d'ORIGINE (equipmentForRefund, snapshot avant
-            // ouverture du dialog - vide pour un recrutement fraîchement créé) ; pas les compétences/
-            // blessures, qui n'ont pas de coût.
+            // ré-enregistrer écraserait rien puisqu'il n'y a plus de ligne à mettre à jour. Rembourse ce
+            // qu'il a payé, pour chaque modèle d'un groupe (RefundRules) : recrutement + équipement porté au
+            // moment de la suppression (achats faits dans ce même formulaire compris, débités à l'ajout ; un
+            // objet retiré avant n'est pas remboursé, comme son retrait). Pas les mutations : ce formulaire les
+            // ajoute sans les faire payer, on ne sait plus lesquelles l'ont été à la création de la bande.
             if (dialogViewModel.WasDeleted)
             {
-                var refund = warrior.Cost + equipmentForRefund.Sum(e => e.Item.Cost * e.Quantity);
+                var refund = RefundRules.DeletionRefund(warrior, dialogViewModel.Equipment, []);
                 Warband.Treasury += refund;
                 await _warbandService.SaveWarbandAsync(Warband);
             }

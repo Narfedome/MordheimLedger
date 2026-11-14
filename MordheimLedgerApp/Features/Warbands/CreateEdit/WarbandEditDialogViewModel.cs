@@ -316,7 +316,7 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// <summary>Inclut la prime d'engagement (HireCost) de chaque nouveau Franc-Tireur coché cette
         /// session (ExistingWarrior null - un déjà recruté est déjà payé) - son équipement de départ est
         /// fixe et déjà compris dans HireCost, pas de terme séparé comme pour un Héros/groupe.</summary>
-        private int TotalSpent => RecruitRows.Sum(r => (r.Count - r.ExistingCount) * r.Cost)
+        private int TotalSpent => RecruitRows.Sum(r => NewlyRecruitedCount(r) * r.Cost)
             + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => g.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost) * g.Count)
             + RecruitRows.SelectMany(r => r.NameSlots).Sum(s => s.Equipment.Where(e => e.ExistingId is null).Sum(e => e.Cost))
             // Mutations achetées cette session (livre : "+ the cost of mutations" au recrutement) - celles
@@ -324,6 +324,13 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
             + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts).Sum(g => NewMutationsCost(g) * g.Count)
             + RecruitRows.SelectMany(r => r.NameSlots).Sum(NewMutationsCost)
             + HiredSwordRows.Where(r => r.IsRecruited && r.ExistingWarrior is null).Sum(r => r.Cost);
+
+        /// <summary>Modèles recrutés cette session, à payer. Count - ExistingCount devenait négatif quand on réduisait
+        /// un groupe déjà en base (ExistingCount garde l'effectif d'origine tant que le groupe n'est pas supprimé) :
+        /// la dépense négative rendait le modèle retiré une deuxième fois, en plus de TotalRefunds - les réductions
+        /// sont remises ici et ne passent plus que par TotalRefunds.</summary>
+        private static int NewlyRecruitedCount(WarriorRecruitRow row) => row.Count - row.ExistingCount
+            + row.HenchmanGroupDrafts.Where(g => g.ExistingWarrior != null).Sum(g => Math.Max(0, g.BaselineHeadCount - g.Count));
 
         private static int NewMutationsCost(RecruitSlot slot) =>
             slot.Mutations.Where(m => slot.BaselineMutations.All(b => b.Item != m)).Sum(m => m.Cost);
@@ -336,45 +343,33 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
         /// remboursé). Les deux premiers termes ne regardent que les guerriers/groupes concernés ; le
         /// troisième parcourt tout le roster restant (les slots pleinement supprimés n'y figurent plus,
         /// déjà couverts par le premier terme via l'équipement d'origine complet du Warrior).</summary>
-        private int TotalRefunds => _pendingFullDeletions.Sum(w => w.Cost + RefundableEquipmentCost(w.Equipment, _ => true) + w.Mutations.Sum(m => m.Item.Cost))
+        // Un groupe paie chaque achat une fois par modèle (voir Core.Rules.RefundRules) : un modèle retiré rend
+        // tout ce qu'il a payé (recrutement, équipement et mutations d'origine), un achat retiré rend sa part
+        // pour chaque modèle d'origine encore là - sans compter deux fois la part des modèles retirés.
+        private int TotalRefunds => _pendingFullDeletions.Sum(w => RefundRules.DeletionRefund(w, w.Equipment, w.Mutations.Select(m => m.Item)))
             // Mutation déjà payée retirée d'un guerrier existant - même traitement que l'équipement.
-            + RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
-                .Where(s => s.ExistingWarrior != null)
-                .Sum(s => s.BaselineMutations.Where(b => !s.Mutations.Contains(b.Item)).Sum(b => b.Item.Cost))
-            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts.Select(g => (Row: r, Group: g)))
-                .Where(t => t.Group.ExistingWarrior != null && t.Group.Count < t.Group.BaselineHeadCount)
-                .Sum(t => t.Row.Cost * (t.Group.BaselineHeadCount - t.Group.Count))
-            + RecruitRows.SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
-                .Where(s => s.ExistingWarrior != null)
-                .Sum(s => RefundableEquipmentCost(s.BaselineEquipment, b => s.Equipment.All(p => p.ExistingId != b.Id)))
+            + ExistingSlots.Sum(s => s.BaselineMutations.Where(b => !s.Mutations.Contains(b.Item)).Sum(b => b.Item.Cost) * RemainingPayingModels(s))
+            + RecruitRows.SelectMany(r => r.HenchmanGroupDrafts)
+                .Where(g => g.ExistingWarrior != null && g.Count < g.BaselineHeadCount)
+                .Sum(g => RefundRules.CostPerModel(g.ExistingWarrior!, g.BaselineEquipment, g.BaselineMutations.Select(m => m.Item))
+                          * (g.BaselineHeadCount - g.Count))
+            + ExistingSlots.Sum(s => RefundRules.EquipmentCostPerModel(s.BaselineEquipment, b => s.Equipment.All(p => p.ExistingId != b.Id))
+                                     * RemainingPayingModels(s))
             // Franc-Tireur déjà engagé décoché cette session - remboursement intégral de sa prime, pas de
             // confirmation (voir HiredSwordRecruitRow, point d'entrée secondaire, plus simple que
             // DecrementWarrior/_pendingFullDeletions à dessein).
             + HiredSwordRows.Where(r => !r.IsRecruited && r.ExistingWarrior != null).Sum(r => r.Cost);
 
-        /// <summary>Combien de la baseline fournie (l'équipement d'ORIGINE d'un guerrier, avant toute
-        /// modification cette session) rembourser réellement - la dague gratuite (livre des règles : "in
-        /// addition to his free dagger") ne doit jamais générer de remboursement, alors que
-        /// WarriorEquipment ne retient aucune trace d'avoir été gratuite à l'achat (EquipmentPick.IsFree,
-        /// qui le sait, n'est jamais persisté). Reconstruit donc l'éligibilité "première dague, sans
-        /// matériau" en rejouant la baseline complète dans l'ordre d'achat (Id croissant, seul ordre
-        /// disponible) avec la même règle qu'à l'achat (EquipmentPricing.IsFreeDaggerEligible), puis ne
-        /// somme que les entrées retenues par shouldRefund - fullBaseline doit toujours être la liste
-        /// COMPLÈTE d'origine (pas déjà filtrée), sans quoi la reconstruction de l'ordre/éligibilité serait
-        /// faussée.</summary>
-        private static int RefundableEquipmentCost(IEnumerable<WarriorEquipment> fullBaseline, Func<WarriorEquipment, bool> shouldRefund)
-        {
-            var total = 0;
-            var hasFreeDagger = false;
-            foreach (var we in fullBaseline.OrderBy(e => e.Id))
-            {
-                var isFree = we.MaterialRule is null && EquipmentPricing.IsFreeDaggerEligible(we.Item.IsFreeDagger, hasFreeDagger);
-                if (isFree) hasFreeDagger = true;
-                if (shouldRefund(we))
-                    total += EquipmentPricing.CalculateCost(we.Item.Cost, we.MaterialRule?.CostMultiplier, isFree) * we.Quantity;
-            }
-            return total;
-        }
+        /// <summary>Héros et groupes déjà en base (les nouvelles recrues n'ont rien payé avant Enregistrer).</summary>
+        private IEnumerable<RecruitSlot> ExistingSlots => RecruitRows
+            .SelectMany(r => r.NameSlots.Cast<RecruitSlot>().Concat(r.HenchmanGroupDrafts))
+            .Where(s => s.ExistingWarrior != null);
+
+        /// <summary>Modèles d'origine encore présents, qui ont chacun payé les achats d'origine du slot : 1 pour un
+        /// Héros ; pour un groupe, l'effectif d'origine moins les modèles retirés (remboursés à part, achats compris).
+        /// Les modèles ajoutés cette session ne paient qu'à l'enregistrement, sur l'équipement restant.</summary>
+        private static int RemainingPayingModels(RecruitSlot slot) =>
+            slot is HenchmanGroupDraft group ? Math.Max(0, Math.Min(group.Count, group.BaselineHeadCount)) : 1;
 
         /// <summary>Trésorerie de départ pour le calcul du "restant" ci-dessous : la trésorerie RÉELLE
         /// actuelle de la bande (Item.Treasury) quand on édite une bande déjà sauvegardée (Item.Id != 0),
@@ -1451,145 +1446,162 @@ namespace MordheimLedgerApp.Features.Warbands.CreateEdit
                 return;
             }
 
-            await Loading.RunAsync(async () =>
+            // Une seule transaction : une erreur au milieu laissait une bande à moitié créée ou une trésorerie
+            // fausse. En cas d'échec rien n'est écrit ; l'état en mémoire du formulaire (trésorerie, recrues) a
+            // pu être modifié par SaveToDatabaseAsync, donc on ne le réenregistre pas : le formulaire se ferme
+            // comme annulé et la fiche relit la base.
+            try
             {
-                // TotalRefunds capturé avant que la boucle ci-dessous ne synchronise le roster existant -
-                // même valeur affichée en direct pendant la session (RemainingTreasury), seulement
-                // pertinent en mode Coûts appliqués (ignoré en mode Libre où TreasuryOverride prime).
-                var refunds = TotalRefunds;
+                await Loading.RunAsync(() => _warbandService.RunInTransactionAsync(SaveToDatabaseAsync));
+            }
+            catch (Exception ex)
+            {
+                Services.CrashLogger.LogException(nameof(WarbandEditDialogViewModel), ex);
+                await ShowInfoAsync(Loc["ErrorTitle"], string.Format(Loc["WarbandSaveFailed"], ex.Message));
+                Close(false);
+                return;
+            }
 
-                int warbandId;
-                if (Item.Id == 0)
+            Close(true);
+        }
+
+        /// <summary>Toutes les écritures de Save(), dans la transaction ouverte par lui.</summary>
+        private async Task SaveToDatabaseAsync()
+        {
+            // TotalRefunds capturé avant que la boucle ci-dessous ne synchronise le roster existant -
+            // même valeur affichée en direct pendant la session (RemainingTreasury), seulement
+            // pertinent en mode Coûts appliqués (ignoré en mode Libre où TreasuryOverride prime).
+            var refunds = TotalRefunds;
+
+            int warbandId;
+            if (Item.Id == 0)
+            {
+                var created = await _warbandService.CreateWarbandAsync(Item.Name, Archetype!);
+                warbandId = created.Id;
+                created.Treasury = IsExistingWarband ? TreasuryOverride : Archetype!.StartingTreasury - TotalSpent;
+                // Mode Libre uniquement (saisie de l'étape Général) - une bande neuve démarre sans pierre.
+                created.WyrdstoneShards = IsExistingWarband ? Math.Max(0, Item.WyrdstoneShards) : 0;
+                await _warbandService.SaveWarbandAsync(created);
+            }
+            else
+            {
+                warbandId = Item.Id;
+                Item.Treasury = IsExistingWarband ? TreasuryOverride : RosterStartingTreasury - TotalSpent + refunds;
+                Item.WyrdstoneShards = Math.Max(0, Item.WyrdstoneShards);
+                await _warbandService.SaveWarbandAsync(Item);
+            }
+
+            foreach (var row in RecruitRows.Where(r => r.Count > 0))
+            {
+                if (row.IsHero)
                 {
-                    var created = await _warbandService.CreateWarbandAsync(Item.Name, Archetype!);
-                    warbandId = created.Id;
-                    created.Treasury = IsExistingWarband ? TreasuryOverride : Archetype!.StartingTreasury - TotalSpent;
-                    // Mode Libre uniquement (saisie de l'étape Général) - une bande neuve démarre sans pierre.
-                    created.WyrdstoneShards = IsExistingWarband ? Math.Max(0, Item.WyrdstoneShards) : 0;
-                    await _warbandService.SaveWarbandAsync(created);
+                    foreach (var slot in row.NameSlots)
+                    {
+                        if (slot.ExistingWarrior is { } existingHero)
+                        {
+                            await SyncExistingSlotAsync(existingHero, slot, slot.Name.Trim(), newHeadCount: null);
+                            continue;
+                        }
+
+                        var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, slot.Name.Trim());
+                        foreach (var pick in slot.Equipment)
+                            await AddPickAsync(warrior.Id, pick);
+                        foreach (var skill in slot.Skills)
+                            await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                        foreach (var spell in slot.Spells)
+                            await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
+                        foreach (var mutation in slot.Mutations)
+                            await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
+                        foreach (var injury in slot.Injuries)
+                            await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
+                        // Profil recopié à la main (mode Bande existante) : il contient déjà les malus des
+                        // blessures saisies, qui ne sont donc pas réappliqués par-dessus.
+                        bool profileChanged;
+                        if (IsExistingWarband && slot.Profile.IsModified)
+                        {
+                            slot.Profile.ApplyTo(warrior);
+                            profileChanged = true;
+                        }
+                        else profileChanged = ApplyInjuryPenalties(warrior, slot.Injuries, direction: -1);
+                        if (IsExistingWarband && slot.Experience != warrior.Experience)
+                        {
+                            warrior.Experience = slot.Experience;
+                            profileChanged = true;
+                        }
+                        if (profileChanged) await _warbandService.SaveWarriorAsync(warrior);
+                    }
                 }
                 else
                 {
-                    warbandId = Item.Id;
-                    Item.Treasury = IsExistingWarband ? TreasuryOverride : RosterStartingTreasury - TotalSpent + refunds;
-                    Item.WyrdstoneShards = Math.Max(0, Item.WyrdstoneShards);
-                    await _warbandService.SaveWarbandAsync(Item);
-                }
-
-                foreach (var row in RecruitRows.Where(r => r.Count > 0))
-                {
-                    if (row.IsHero)
+                    // Un seul Warrior par groupe (HeadCount = l'effectif) plutôt qu'une ligne par
+                    // individu - le groupe est mécaniquement une seule entité (livre des règles :
+                    // XP/équipement/compétences partagés par tout le groupe), voir Warrior.HeadCount.
+                    foreach (var group in row.HenchmanGroupDrafts)
                     {
-                        foreach (var slot in row.NameSlots)
+                        if (group.ExistingWarrior is { } existingGroup)
                         {
-                            if (slot.ExistingWarrior is { } existingHero)
-                            {
-                                await SyncExistingSlotAsync(existingHero, slot, slot.Name.Trim(), newHeadCount: null);
-                                continue;
-                            }
+                            await SyncExistingSlotAsync(existingGroup, group, group.Name.Trim(), newHeadCount: group.Count);
+                            continue;
+                        }
 
-                            var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, slot.Name.Trim());
-                            foreach (var pick in slot.Equipment)
-                                await AddPickAsync(warrior.Id, pick);
-                            foreach (var skill in slot.Skills)
-                                await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
-                            foreach (var spell in slot.Spells)
-                                await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
-                            foreach (var mutation in slot.Mutations)
-                                await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
-                            foreach (var injury in slot.Injuries)
-                                await _warbandService.AddWarriorInjuryAsync(warrior.Id, injury);
-                            // Profil recopié à la main (mode Bande existante) : il contient déjà les malus des
-                            // blessures saisies, qui ne sont donc pas réappliqués par-dessus.
-                            bool profileChanged;
-                            if (IsExistingWarband && slot.Profile.IsModified)
-                            {
-                                slot.Profile.ApplyTo(warrior);
-                                profileChanged = true;
-                            }
-                            else profileChanged = ApplyInjuryPenalties(warrior, slot.Injuries, direction: -1);
-                            if (IsExistingWarband && slot.Experience != warrior.Experience)
-                            {
-                                warrior.Experience = slot.Experience;
-                                profileChanged = true;
-                            }
-                            if (profileChanged) await _warbandService.SaveWarriorAsync(warrior);
+                        var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim(), headCount: group.Count);
+                        foreach (var pick in group.Equipment)
+                            await AddPickAsync(warrior.Id, pick);
+                        foreach (var skill in group.Skills)
+                            await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
+                        foreach (var spell in group.Spells)
+                            await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
+                        foreach (var mutation in group.Mutations)
+                            await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
+                        var groupChanged = false;
+                        if (IsExistingWarband && group.Experience != warrior.Experience)
+                        {
+                            warrior.Experience = group.Experience;
+                            groupChanged = true;
+                        }
+                        if (IsExistingWarband && group.Profile.IsModified)
+                        {
+                            group.Profile.ApplyTo(warrior);
+                            groupChanged = true;
+                        }
+                        if (groupChanged) await _warbandService.SaveWarriorAsync(warrior);
+                    }
+                }
+            }
+
+            foreach (var warrior in _pendingFullDeletions)
+                await _warbandService.DeleteWarriorAsync(warrior.Id);
+
+            // Francs-Tireurs : équipement de départ résolu une seule fois (fixe, voir HiredSword.
+            // StartingEquipmentIds) - seulement si au moins une NOUVELLE recrue en a besoin.
+            var hiredSwordEquipmentCatalog = HiredSwordRows.Any(r => r.IsRecruited && r.ExistingWarrior is null)
+                ? await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language)
+                : new List<EquipmentItem>();
+
+            foreach (var row in HiredSwordRows)
+            {
+                if (row.IsRecruited)
+                {
+                    if (row.ExistingWarrior is { } existing)
+                    {
+                        var trimmedName = row.Name.Trim();
+                        if (existing.Name != trimmedName)
+                        {
+                            existing.Name = trimmedName;
+                            await _warbandService.SaveWarriorAsync(existing);
                         }
                     }
                     else
                     {
-                        // Un seul Warrior par groupe (HeadCount = l'effectif) plutôt qu'une ligne par
-                        // individu - le groupe est mécaniquement une seule entité (livre des règles :
-                        // XP/équipement/compétences partagés par tout le groupe), voir Warrior.HeadCount.
-                        foreach (var group in row.HenchmanGroupDrafts)
-                        {
-                            if (group.ExistingWarrior is { } existingGroup)
-                            {
-                                await SyncExistingSlotAsync(existingGroup, group, group.Name.Trim(), newHeadCount: group.Count);
-                                continue;
-                            }
-
-                            var warrior = await _warbandService.RecruitWarriorAsync(warbandId, row.Archetype, group.Name.Trim(), headCount: group.Count);
-                            foreach (var pick in group.Equipment)
-                                await AddPickAsync(warrior.Id, pick);
-                            foreach (var skill in group.Skills)
-                                await _warbandService.AddWarriorSkillAsync(warrior.Id, skill);
-                            foreach (var spell in group.Spells)
-                                await _warbandService.AddWarriorSpellAsync(warrior.Id, spell);
-                            foreach (var mutation in group.Mutations)
-                                await _warbandService.AddWarriorMutationAsync(warrior.Id, mutation);
-                            var groupChanged = false;
-                            if (IsExistingWarband && group.Experience != warrior.Experience)
-                            {
-                                warrior.Experience = group.Experience;
-                                groupChanged = true;
-                            }
-                            if (IsExistingWarband && group.Profile.IsModified)
-                            {
-                                group.Profile.ApplyTo(warrior);
-                                groupChanged = true;
-                            }
-                            if (groupChanged) await _warbandService.SaveWarriorAsync(warrior);
-                        }
+                        var startingEquipment = hiredSwordEquipmentCatalog.Where(e => row.HiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
+                        await _warbandService.RecruitHiredSwordAsync(warbandId, row.HiredSword, row.Name.Trim(), startingEquipment);
                     }
                 }
-
-                foreach (var warrior in _pendingFullDeletions)
-                    await _warbandService.DeleteWarriorAsync(warrior.Id);
-
-                // Francs-Tireurs : équipement de départ résolu une seule fois (fixe, voir HiredSword.
-                // StartingEquipmentIds) - seulement si au moins une NOUVELLE recrue en a besoin.
-                var hiredSwordEquipmentCatalog = HiredSwordRows.Any(r => r.IsRecruited && r.ExistingWarrior is null)
-                    ? await _libraryService.GetEquipmentItemsAsync(LocalizationService.Instance.Language)
-                    : new List<EquipmentItem>();
-
-                foreach (var row in HiredSwordRows)
+                else if (row.ExistingWarrior is { } departed)
                 {
-                    if (row.IsRecruited)
-                    {
-                        if (row.ExistingWarrior is { } existing)
-                        {
-                            var trimmedName = row.Name.Trim();
-                            if (existing.Name != trimmedName)
-                            {
-                                existing.Name = trimmedName;
-                                await _warbandService.SaveWarriorAsync(existing);
-                            }
-                        }
-                        else
-                        {
-                            var startingEquipment = hiredSwordEquipmentCatalog.Where(e => row.HiredSword.StartingEquipmentIds.Contains(e.Id)).ToList();
-                            await _warbandService.RecruitHiredSwordAsync(warbandId, row.HiredSword, row.Name.Trim(), startingEquipment);
-                        }
-                    }
-                    else if (row.ExistingWarrior is { } departed)
-                    {
-                        await _warbandService.DeleteWarriorAsync(departed.Id);
-                    }
+                    await _warbandService.DeleteWarriorAsync(departed.Id);
                 }
-            });
-
-            Close(true);
+            }
         }
     }
 }
